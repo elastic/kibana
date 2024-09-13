@@ -3,26 +3,10 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-saved-objects-browser",
-        "id": "def-common.SavedObjectsStart",
+        "id": "def-public.SavedObjectsStart",
         "type": "Interface",
         "tags": [
           "deprecated"
@@ -33,6 +17,10 @@
         "deprecated": true,
         "trackAdoption": false,
         "references": [
+          {
+            "plugin": "@kbn/core-lifecycle-browser",
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
+          },
           {
             "plugin": "@kbn/core-lifecycle-browser",
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
@@ -58,14 +46,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
-          },
-          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/services.ts"
           },
@@ -74,44 +54,12 @@
             "path": "src/plugins/visualizations/public/services.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/types.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/types.ts"
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/types.ts"
           },
           {
             "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/platform.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/platform.ts"
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/types.ts"
           },
           {
             "plugin": "transform",
@@ -120,22 +68,6 @@
           {
             "plugin": "transform",
             "path": "x-pack/plugins/transform/public/app/app_dependencies.tsx"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.test.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.test.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-mocks",
@@ -153,7 +85,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-browser",
-            "id": "def-common.SavedObjectsStart.client",
+            "id": "def-public.SavedObjectsStart.client",
             "type": "Object",
             "tags": [],
             "label": "client",
@@ -163,9 +95,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
+                "section": "def-public.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               }
             ],
@@ -177,6 +109,22 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 export const COLUMN_SESSION_START = i18n.translate(
   'xpack.securitySolution.kubernetes.columnSessionStart',
   {
-    defaultMessage: 'Date connected',
+    defaultMessage: 'Date started',
   }
 );
 
 export const COLUMN_EXECUTABLE = i18n.translate(
   'xpack.securitySolution.kubernetes.columnExecutable',
   {
-    defaultMessage: 'Session leader',
+    defaultMessage: 'Executable',
   }
 );
 
@@ -28,21 +28,14 @@ export const COLUMN_NODE = i18n.translate('xpack.securitySolution.kubernetes.col
 export const COLUMN_ENTRY_USER = i18n.translate(
   'xpack.securitySolution.kubernetes.columnEntryUser',
   {
-    defaultMessage: 'Session entry user',
+    defaultMessage: 'User ID',
   }
 );
 
 export const COLUMN_INTERACTIVE = i18n.translate(
   'xpack.securitySolution.kubernetes.columnInteractive',
   {
-    defaultMessage: 'Interactivity',
-  }
-);
-
-export const COLUMN_ENTRY_TYPE = i18n.translate(
-  'xpack.securitySolution.kubernetes.columnEntryType',
-  {
-    defaultMessage: 'Entry type',
+    defaultMessage: 'Interactive',
   }
 );
 

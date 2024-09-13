@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { MonitorSummary } from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus } from './helper/make_checks';
 
@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  describe('monitor state scoping', async () => {
+  describe('monitor state scoping', () => {
     const numIps = 4; // Must be > 2 for IP uniqueness checks
 
     let dateRangeStart: string;
@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
     // was available and the query code assumed at least one
     // event would be a summary for each monitor.
     // See https://github.com/elastic/kibana/issues/81950
-    describe('checks with no summaries', async () => {
+    describe('checks with no summaries', () => {
       const testMonitorId = 'scope-test-id';
       before(async () => {
         const es = getService('es');
@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('query document scoping with mismatched check statuses', async () => {
+    describe('query document scoping with mismatched check statuses', () => {
       let checks: any[] = [];
       let nonSummaryIp: string | null = null;
       const testMonitorId = 'scope-test-id';
@@ -104,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(nonSummaryRes.summaries.length).to.eql(0);
       });
 
-      describe('matching outside of the date range', async () => {
+      describe('matching outside of the date range', () => {
         before('set date range to future', () => {
           const futureDate = new Date();
 
@@ -129,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('test status filter', async () => {
+    describe('test status filter', () => {
       const upMonitorId = 'up-test-id';
       const downMonitorId = 'down-test-id';
       const mixMonitorId = 'mix-test-id';

@@ -6,16 +6,16 @@
  */
 
 import { EuiForm, EuiSpacer } from '@elastic/eui';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TransformHealthRuleParams } from '../../../common/types/alerting';
 import { TestsSelectionControl } from './tests_selection_control';
 import { TransformSelectorControl } from './transform_selector_control';
-import { useApi } from '../../app/hooks';
+import { useGetTransforms } from '../../app/hooks';
 import { useToastNotifications } from '../../app/app_dependencies';
-import { GetTransformsResponseSchema } from '../../../common/api_schemas/transforms';
 import { ALL_TRANSFORMS_SELECTION } from '../../../common/constants';
 
 export type TransformHealthRuleTriggerProps =
@@ -29,9 +29,12 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
   const formErrors = Object.values(errors).flat();
   const isFormInvalid = formErrors.length > 0;
 
-  const api = useApi();
   const toast = useToastNotifications();
-  const [transformOptions, setTransformOptions] = useState<string[]>([]);
+  const { error, data } = useGetTransforms();
+  const transformOptions = useMemo(
+    () => data?.transforms.filter((v) => v.config.sync).map((v) => v.id) ?? [],
+    [data]
+  );
 
   const onAlertParamChange = useCallback(
     <T extends keyof TransformHealthRuleParams>(param: T) =>
@@ -41,34 +44,18 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
     [setRuleParams]
   );
 
-  useEffect(
-    function fetchTransforms() {
-      let unmounted = false;
-      api
-        .getTransforms()
-        .then((r) => {
-          if (!unmounted) {
-            setTransformOptions(
-              (r as GetTransformsResponseSchema).transforms.filter((v) => v.sync).map((v) => v.id)
-            );
+  useEffect(() => {
+    if (error !== null) {
+      toast.addError(error, {
+        title: i18n.translate(
+          'xpack.transform.alertingRuleTypes.transformHealth.fetchErrorMessage',
+          {
+            defaultMessage: 'Unable to fetch transforms',
           }
-        })
-        .catch((e) => {
-          toast.addError(e, {
-            title: i18n.translate(
-              'xpack.transform.alertingRuleTypes.transformHealth.fetchErrorMessage',
-              {
-                defaultMessage: 'Unable to fetch transforms',
-              }
-            ),
-          });
-        });
-      return () => {
-        unmounted = true;
-      };
-    },
-    [api, toast]
-  );
+        ),
+      });
+    }
+  }, [error, toast]);
 
   const excludeTransformOptions = useMemo(() => {
     if (ruleParams.includeTransforms?.some((v) => v === ALL_TRANSFORMS_SELECTION)) {
@@ -81,7 +68,7 @@ const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
     <EuiForm
       data-test-subj={'transformHealthAlertingRuleForm'}
       invalidCallout={'none'}
-      error={formErrors}
+      error={formErrors as string[]}
       isInvalid={isFormInvalid}
     >
       <TransformSelectorControl

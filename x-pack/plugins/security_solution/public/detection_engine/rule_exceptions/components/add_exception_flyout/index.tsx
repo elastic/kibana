@@ -5,43 +5,44 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useCallback, useMemo, useReducer } from 'react';
+import React, { memo, useEffect, useCallback, useMemo, useReducer, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 
 import {
   EuiFlyout,
-  EuiFlyoutHeader,
   EuiTitle,
-  EuiFlyoutFooter,
   EuiFlyoutBody,
   EuiButton,
-  EuiButtonEmpty,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiFlexGroup,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiCallOut,
   EuiText,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { OsTypeArray, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { hasWrongOperatorWithWildcard } from '@kbn/securitysolution-list-utils';
 import type {
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 
+import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
 import type { Moment } from 'moment';
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 import { ExceptionItemComments } from '../item_comments';
 import {
   defaultEndpointExceptionItems,
   retrieveAlertOsTypes,
-  filterIndexPatterns,
+  getPrepopulatedRuleExceptionWithHighlightFields,
 } from '../../utils/helpers';
+import { RULE_EXCEPTION, ENDPOINT_EXCEPTION } from '../../utils/translations';
 import type { AlertData } from '../../utils/types';
 import { initialState, createExceptionItemsReducer } from './reducer';
 import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
@@ -51,11 +52,15 @@ import type { Rule } from '../../../rule_management/logic/types';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
 import { ExceptionsAddToRulesOrLists } from '../flyout_components/add_exception_to_rule_or_list';
 import { useAddNewExceptionItems } from './use_add_new_exceptions';
-import { enrichNewExceptionItems } from '../flyout_components/utils';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
 import { useInvalidateFetchRuleByIdQuery } from '../../../rule_management/api/hooks/use_fetch_rule_by_id_query';
 import { ExceptionsExpireTime } from '../flyout_components/expire_time';
+import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../management/common/translations';
+import { ArtifactConfirmModal } from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
+import { ExceptionFlyoutFooter } from '../flyout_components/footer';
+import { ExceptionFlyoutHeader } from '../flyout_components/header';
+import { isSubmitDisabled, prepareNewItemsForSubmission, prepareToCloseAlerts } from './helpers';
 
 const SectionHeader = styled(EuiTitle)`
   ${() => css`
@@ -80,7 +85,6 @@ export interface AddExceptionFlyoutProps {
   sharedListToAddTo?: ExceptionListSchema[];
   onCancel: (didRuleChange: boolean) => void;
   onConfirm: (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
-  isNonTimeline?: boolean;
 }
 
 const FlyoutBodySection = styled(EuiFlyoutBody)`
@@ -88,18 +92,6 @@ const FlyoutBodySection = styled(EuiFlyoutBody)`
     &.builder-section {
       overflow-y: scroll;
     }
-  `}
-`;
-
-const FlyoutHeader = styled(EuiFlyoutHeader)`
-  ${({ theme }) => css`
-    border-bottom: 1px solid ${theme.eui.euiColorLightShade};
-  `}
-`;
-
-const FlyoutFooterGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    padding: ${theme.eui.euiSizeS};
   `}
 `;
 
@@ -114,9 +106,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   sharedListToAddTo,
   onCancel,
   onConfirm,
-  isNonTimeline = false,
 }: AddExceptionFlyoutProps) {
-  const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
+  const { euiTheme } = useEuiTheme();
+  const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+  const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
@@ -131,6 +124,12 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       return true;
     }
   }, [rules]);
+
+  const addExceptionToRuleOrListSelection = useMemo(() => {
+    if (isBulkAction) return 'add_to_rules';
+    if (rules?.length === 1 || isAlertDataLoading !== undefined) return 'add_to_rule';
+    return 'select_rules_to_add_to';
+  }, [isAlertDataLoading, isBulkAction, rules]);
 
   const getListType = useMemo(() => {
     if (isEndpointItem) return ExceptionListTypeEnum.ENDPOINT;
@@ -153,22 +152,21 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       selectedRulesToAddTo,
       exceptionListsToAddTo,
       newComment,
+      commentErrorExists,
       itemConditionValidationErrorExists,
       errorSubmitting,
       expireTime,
       expireErrorExists,
+      wildcardWarningExists,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
     ...initialState,
-    addExceptionToRadioSelection: isBulkAction
-      ? 'add_to_rules'
-      : rules != null && rules.length === 1
-      ? 'add_to_rule'
-      : 'select_rules_to_add_to',
+    addExceptionToRadioSelection: addExceptionToRuleOrListSelection,
     listType: getListType,
     selectedRulesToAddTo: rules != null ? rules : [],
   });
+
   const hasAlertData = useMemo((): boolean => {
     return alertData != null;
   }, [alertData]);
@@ -188,6 +186,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
 
   const setExceptionItemsToAdd = useCallback(
     (items: ExceptionsBuilderReturnExceptionItem[]): void => {
+      dispatch({
+        type: 'setWildcardWithWrongOperator',
+        warningExists: hasWrongOperatorWithWildcard(items),
+      });
       dispatch({
         type: 'setExceptionItems',
         items,
@@ -266,6 +268,16 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     [dispatch]
   );
 
+  const setCommentError = useCallback(
+    (errorExists: boolean): void => {
+      dispatch({
+        type: 'setCommentError',
+        errorExists,
+      });
+    },
+    [dispatch]
+  );
+
   const setBulkCloseIndex = useCallback(
     (index: string[] | undefined): void => {
       dispatch({
@@ -337,38 +349,48 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   );
 
   useEffect((): void => {
-    if (listType === ExceptionListTypeEnum.ENDPOINT && alertData != null) {
-      setInitialExceptionItems(
-        defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
-      );
+    if (alertData) {
+      switch (listType) {
+        case ExceptionListTypeEnum.ENDPOINT: {
+          return setInitialExceptionItems(
+            defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
+          );
+        }
+        case ExceptionListTypeEnum.RULE_DEFAULT: {
+          const populatedException = getPrepopulatedRuleExceptionWithHighlightFields({
+            alertData,
+            exceptionItemName,
+            // With "rule_default" type, there is only ever one rule associated.
+            // That is why it's ok to pull just the first item from rules array here.
+            ruleCustomHighlightedFields: rules?.[0]?.investigation_fields?.field_names ?? [],
+          });
+          if (populatedException) {
+            setComment(i18n.ADD_RULE_EXCEPTION_FROM_ALERT_COMMENT(alertData._id));
+            return setInitialExceptionItems([populatedException]);
+          }
+        }
+      }
     }
-  }, [listType, exceptionItemName, alertData, setInitialExceptionItems]);
+  }, [listType, exceptionItemName, alertData, rules, setInitialExceptionItems, setComment]);
 
   const osTypesSelection = useMemo((): OsTypeArray => {
     return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [...selectedOs] : [];
   }, [hasAlertData, alertData, selectedOs]);
 
-  const handleOnSubmit = useCallback(async (): Promise<void> => {
+  const submitException = useCallback(async (): Promise<void> => {
     if (submitNewExceptionItems == null) return;
 
     try {
-      const ruleDefaultOptions = ['add_to_rule', 'add_to_rules', 'select_rules_to_add_to'];
-      const addToRules = ruleDefaultOptions.includes(addExceptionToRadioSelection);
-      const addToSharedLists =
-        !!sharedListToAddTo?.length ||
-        (addExceptionToRadioSelection === 'add_to_lists' && !isEmpty(exceptionListsToAddTo));
-      const sharedLists = sharedListToAddTo?.length ? sharedListToAddTo : exceptionListsToAddTo;
-
-      const items = enrichNewExceptionItems({
-        itemName: exceptionItemName,
-        commentToAdd: newComment,
-        addToRules,
-        addToSharedLists,
-        sharedLists,
+      const { listsToAddTo, addToLists, addToRules, items } = prepareNewItemsForSubmission({
+        sharedListToAddTo,
+        addExceptionToRadioSelection,
+        exceptionListsToAddTo,
+        exceptionItemName,
+        newComment,
         listType,
-        selectedOs: osTypesSelection,
+        osTypesSelection,
         expireTime,
-        items: exceptionItems,
+        exceptionItems,
       });
 
       const addedItems = await submitNewExceptionItems({
@@ -376,16 +398,20 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         selectedRulesToAddTo,
         listType,
         addToRules: addToRules && !isEmpty(selectedRulesToAddTo),
-        addToSharedLists,
-        sharedLists,
+        addToSharedLists: addToLists,
+        sharedLists: listsToAddTo,
       });
 
-      const alertIdToClose = closeSingleAlert && alertData ? alertData._id : undefined;
-      const ruleStaticIds = addToRules
-        ? selectedRulesToAddTo.map(({ rule_id: ruleId }) => ruleId)
-        : (rules ?? []).map(({ rule_id: ruleId }) => ruleId);
+      const { shouldCloseAlerts, alertIdToClose, ruleStaticIds } = prepareToCloseAlerts({
+        alertData,
+        closeSingleAlert,
+        addToRules,
+        rules,
+        bulkCloseAlerts,
+        selectedRulesToAddTo,
+      });
 
-      if (closeAlerts != null && !isEmpty(ruleStaticIds) && (bulkCloseAlerts || closeSingleAlert)) {
+      if (closeAlerts != null && shouldCloseAlerts) {
         await closeAlerts(ruleStaticIds, addedItems, alertIdToClose, bulkCloseIndex);
       }
 
@@ -419,33 +445,28 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     expireTime,
   ]);
 
-  const isSubmitButtonDisabled = useMemo(
-    (): boolean =>
-      isSubmitting ||
-      isClosingAlerts ||
-      errorSubmitting != null ||
-      exceptionItemName.trim() === '' ||
-      exceptionItems.every((item) => item.entries.length === 0) ||
-      itemConditionValidationErrorExists ||
-      expireErrorExists ||
-      (addExceptionToRadioSelection === 'add_to_lists' && isEmpty(exceptionListsToAddTo)) ||
-      (addExceptionToRadioSelection === 'select_rules_to_add_to' &&
-        isEmpty(selectedRulesToAddTo) &&
-        listType === ExceptionListTypeEnum.RULE_DEFAULT),
-    [
-      isSubmitting,
-      isClosingAlerts,
-      errorSubmitting,
-      exceptionItemName,
-      exceptionItems,
-      itemConditionValidationErrorExists,
-      addExceptionToRadioSelection,
-      exceptionListsToAddTo,
-      expireErrorExists,
-      selectedRulesToAddTo,
-      listType,
-    ]
-  );
+  const handleOnSubmit = useCallback(() => {
+    if (wildcardWarningExists) {
+      setShowConfirmModal(true);
+    } else {
+      return submitException();
+    }
+  }, [wildcardWarningExists, submitException]);
+
+  const isSubmitButtonDisabled = isSubmitDisabled({
+    isSubmitting,
+    isClosingAlerts,
+    errorSubmitting,
+    exceptionItemName,
+    exceptionItems,
+    itemConditionValidationErrorExists,
+    commentErrorExists,
+    expireErrorExists,
+    addExceptionToRadioSelection,
+    selectedRulesToAddTo,
+    listType,
+    exceptionListsToAddTo,
+  });
 
   const handleDismissError = useCallback((): void => {
     setErrorSubmitting(null);
@@ -455,133 +476,158 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     onCancel(false);
   }, [onCancel]);
 
-  const addExceptionMessage = useMemo(() => {
-    return listType === ExceptionListTypeEnum.ENDPOINT
-      ? i18n.ADD_ENDPOINT_EXCEPTION
-      : i18n.CREATE_RULE_EXCEPTION;
-  }, [listType]);
+  const exceptionFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'exceptionFlyoutTitle',
+  });
+
+  const confirmModal = useMemo(() => {
+    const { title, body, confirmButton, cancelButton } = CONFIRM_WARNING_MODAL_LABELS(
+      listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION
+    );
+
+    return (
+      <ArtifactConfirmModal
+        title={title}
+        body={body}
+        confirmButton={confirmButton}
+        cancelButton={cancelButton}
+        onSuccess={submitException}
+        onCancel={() => setShowConfirmModal(false)}
+        data-test-subj="artifactConfirmModal"
+      />
+    );
+  }, [listType, submitException]);
 
   return (
     <EuiFlyout
-      ownFocus
-      maskProps={{ style: isNonTimeline === false ? 'z-index: 5000' : 'z-index: 1000' }} // For an edge case to display above the timeline flyout
       size="l"
       onClose={handleCloseFlyout}
       data-test-subj="addExceptionFlyout"
+      aria-labelledby={exceptionFlyoutTitleId}
+      // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+      maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
     >
-      <FlyoutHeader>
-        <EuiTitle>
-          <h2 data-test-subj="exceptionFlyoutTitle">{addExceptionMessage}</h2>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-      </FlyoutHeader>
-
-      {isLoading && <EuiLoadingContent data-test-subj="loadingAddExceptionFlyout" lines={4} />}
-      {!isLoading && (
-        <FlyoutBodySection className="builder-section">
-          {errorSubmitting != null && (
-            <>
-              <EuiCallOut title={i18n.SUBMIT_ERROR_TITLE} color="danger" iconType="warning">
-                <EuiText>{i18n.SUBMIT_ERROR_DISMISS_MESSAGE}</EuiText>
-                <EuiSpacer size="s" />
-                <EuiButton color="danger" onClick={handleDismissError}>
-                  {i18n.SUBMIT_ERROR_DISMISS_BUTTON}
-                </EuiButton>
-              </EuiCallOut>
+      <ExceptionFlyoutHeader
+        listType={listType}
+        titleId={exceptionFlyoutTitleId}
+        dataTestSubjId={'exceptionFlyoutTitle'}
+      />
+      <FlyoutBodySection className="builder-section">
+        {
+          // TODO: This is a quick fix to make sure that we do not lose conditions state on refetching index patterns via `useFetchIndexPatterns`
+          // which happens due to data being stale after 5 minutes (in `useFetchJobsSummaryQuery`, `useFetchModulesQuery` and `useFetchRecognizerQuery`)
+          // which makes useQuery triggering data refetch.
+          // To fix the issue properly, we will need to do refactoring and store conditions state in the parent component (`AddExceptionFlyout`)
+          // instead of keeping it in `ExceptionsConditions` which can be removed and recreated due to fetching steps described above.
+          // Refactoring ticket: https://github.com/elastic/security-team/issues/8197
+        }
+        {isLoading && <EuiSkeletonText data-test-subj="loadingAddExceptionFlyout" lines={4} />}
+        {errorSubmitting != null && (
+          <>
+            <EuiCallOut
+              data-test-subj="addExceptionErrorCallOut"
+              title={i18n.SUBMIT_ERROR_TITLE}
+              color="danger"
+              iconType="warning"
+            >
+              <EuiText>{i18n.SUBMIT_ERROR_DISMISS_MESSAGE}</EuiText>
               <EuiSpacer size="s" />
-            </>
-          )}
-          <ExceptionsFlyoutMeta
-            exceptionItemName={exceptionItemName}
-            onChange={setExceptionItemMeta}
-          />
-          <EuiHorizontalRule />
-          <ExceptionsConditions
-            exceptionItemName={exceptionItemName}
-            allowLargeValueLists={allowLargeValueLists}
-            exceptionListItems={initialItems}
-            exceptionListType={listType}
-            indexPatterns={indexPatterns}
-            rules={rules}
-            selectedOs={selectedOs}
-            showOsTypeOptions={listType === ExceptionListTypeEnum.ENDPOINT && !hasAlertData}
-            isEdit={false}
-            onOsChange={setSelectedOs}
-            onExceptionItemAdd={setExceptionItemsToAdd}
-            onSetErrorExists={setConditionsValidationError}
-            onFilterIndexPatterns={filterIndexPatterns}
-          />
-
-          {listType !== ExceptionListTypeEnum.ENDPOINT && !sharedListToAddTo?.length && (
-            <>
-              <EuiHorizontalRule />
-              <ExceptionsAddToRulesOrLists
-                rules={rules}
-                isBulkAction={isBulkAction}
-                selectedRadioOption={addExceptionToRadioSelection}
-                onListSelectionChange={setListsToAddExceptionTo}
-                onRuleSelectionChange={setSelectedRules}
-                onRadioChange={setRadioOption}
-              />
-            </>
-          )}
-          <EuiHorizontalRule />
-          <ExceptionItemComments
-            accordionTitle={
-              <SectionHeader size="xs">
-                <h3>{i18n.COMMENTS_SECTION_TITLE(0)}</h3>
-              </SectionHeader>
-            }
-            newCommentValue={newComment}
-            newCommentOnChange={setComment}
-          />
-          {listType !== ExceptionListTypeEnum.ENDPOINT && (
-            <>
-              <EuiHorizontalRule />
-              <ExceptionsExpireTime
-                expireTime={expireTime}
-                setExpireTime={setExpireTime}
-                setExpireError={setExpireError}
-              />
-            </>
-          )}
-          {showAlertCloseOptions && (
-            <>
-              <EuiHorizontalRule />
-              <ExceptionItemsFlyoutAlertsActions
-                exceptionListType={listType}
-                shouldCloseSingleAlert={closeSingleAlert}
-                shouldBulkCloseAlert={bulkCloseAlerts}
-                disableBulkClose={disableBulkClose}
-                exceptionListItems={exceptionItems}
-                alertData={alertData}
-                alertStatus={alertStatus}
-                isAlertDataLoading={isAlertDataLoading ?? false}
-                onDisableBulkClose={setDisableBulkCloseAlerts}
-                onUpdateBulkCloseIndex={setBulkCloseIndex}
-                onBulkCloseCheckboxChange={setBulkCloseAlerts}
-                onSingleAlertCloseCheckboxChange={setCloseSingleAlert}
-              />
-            </>
-          )}
-        </FlyoutBodySection>
-      )}
-      <EuiFlyoutFooter>
-        <FlyoutFooterGroup justifyContent="spaceBetween">
-          <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleCloseFlyout}>
-            {i18n.CANCEL}
-          </EuiButtonEmpty>
-
-          <EuiButton
-            data-test-subj="addExceptionConfirmButton"
-            onClick={handleOnSubmit}
-            isDisabled={isSubmitButtonDisabled}
-            fill
-          >
-            {addExceptionMessage}
-          </EuiButton>
-        </FlyoutFooterGroup>
-      </EuiFlyoutFooter>
+              <EuiButton
+                data-test-subj="addExceptionErrorDismissButton"
+                color="danger"
+                onClick={handleDismissError}
+              >
+                {i18n.SUBMIT_ERROR_DISMISS_BUTTON}
+              </EuiButton>
+            </EuiCallOut>
+            <EuiSpacer size="s" />
+          </>
+        )}
+        <ExceptionsFlyoutMeta
+          exceptionItemName={exceptionItemName}
+          onChange={setExceptionItemMeta}
+        />
+        <EuiHorizontalRule />
+        <ExceptionsConditions
+          exceptionItemName={exceptionItemName}
+          allowLargeValueLists={allowLargeValueLists}
+          exceptionListItems={initialItems}
+          exceptionListType={listType}
+          indexPatterns={indexPatterns}
+          rules={rules}
+          selectedOs={selectedOs}
+          showOsTypeOptions={listType === ExceptionListTypeEnum.ENDPOINT && !hasAlertData}
+          isEdit={false}
+          onOsChange={setSelectedOs}
+          onExceptionItemAdd={setExceptionItemsToAdd}
+          onSetErrorExists={setConditionsValidationError}
+          getExtendedFields={getExtendedFields}
+        />
+        {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+        {listType !== ExceptionListTypeEnum.ENDPOINT && !sharedListToAddTo?.length && (
+          <>
+            <EuiHorizontalRule />
+            <ExceptionsAddToRulesOrLists
+              rules={rules}
+              isBulkAction={isBulkAction}
+              selectedRadioOption={addExceptionToRadioSelection}
+              onListSelectionChange={setListsToAddExceptionTo}
+              onRuleSelectionChange={setSelectedRules}
+              onRadioChange={setRadioOption}
+            />
+          </>
+        )}
+        <EuiHorizontalRule />
+        <ExceptionItemComments
+          accordionTitle={
+            <SectionHeader size="xs">
+              <h3>{i18n.COMMENTS_SECTION_TITLE(newComment ? 1 : 0)}</h3>
+            </SectionHeader>
+          }
+          initialIsOpen={!!newComment}
+          newCommentValue={newComment}
+          newCommentOnChange={setComment}
+          setCommentError={setCommentError}
+        />
+        {listType !== ExceptionListTypeEnum.ENDPOINT && (
+          <>
+            <EuiHorizontalRule />
+            <ExceptionsExpireTime
+              expireTime={expireTime}
+              setExpireTime={setExpireTime}
+              setExpireError={setExpireError}
+            />
+          </>
+        )}
+        {showAlertCloseOptions && (
+          <>
+            <EuiHorizontalRule />
+            <ExceptionItemsFlyoutAlertsActions
+              exceptionListType={listType}
+              shouldCloseSingleAlert={closeSingleAlert}
+              shouldBulkCloseAlert={bulkCloseAlerts}
+              disableBulkClose={disableBulkClose}
+              exceptionListItems={exceptionItems}
+              alertData={alertData}
+              alertStatus={alertStatus}
+              isAlertDataLoading={isAlertDataLoading ?? false}
+              onDisableBulkClose={setDisableBulkCloseAlerts}
+              onUpdateBulkCloseIndex={setBulkCloseIndex}
+              onBulkCloseCheckboxChange={setBulkCloseAlerts}
+              onSingleAlertCloseCheckboxChange={setCloseSingleAlert}
+            />
+          </>
+        )}
+      </FlyoutBodySection>
+      <ExceptionFlyoutFooter
+        listType={listType}
+        isSubmitButtonDisabled={isSubmitButtonDisabled}
+        cancelButtonDataTestSubjId={'cancelExceptionAddButton'}
+        submitButtonDataTestSubjId={'addExceptionConfirmButton'}
+        handleOnSubmit={handleOnSubmit}
+        handleCloseFlyout={handleCloseFlyout}
+      />
+      {showConfirmModal && confirmModal}
     </EuiFlyout>
   );
 });

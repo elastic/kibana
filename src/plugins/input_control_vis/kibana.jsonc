@@ -5,17 +5,18 @@
   "description": "Adds Input Control visualization to Kibana",
   "plugin": {
     "id": "inputControlVis",
-    "server": false,
+    "server": true,
     "browser": true,
     "requiredPlugins": [
       "data",
       "expressions",
       "visDefaultEditor",
       "visualizations",
-      "unifiedSearch"
+      "unifiedSearch",
+      "uiActions"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact", "embeddable"
     ]
   }
 }

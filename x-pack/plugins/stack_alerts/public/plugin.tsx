@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { registerRuleTypes } from './rule_types';
@@ -19,13 +19,19 @@ export interface StackAlertsPublicSetupDeps {
 }
 
 export class StackAlertsPublicPlugin implements Plugin<Setup, Start, StackAlertsPublicSetupDeps> {
-  constructor() {}
+  private readonly isServerless: boolean;
+  constructor(initializerContext: PluginInitializerContext) {
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+  }
 
   public setup(core: CoreSetup, { triggersActionsUi, alerting }: StackAlertsPublicSetupDeps) {
-    registerRuleTypes({
-      ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
-      alerting,
-    });
+    registerRuleTypes(
+      {
+        ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
+        alerting,
+      },
+      this.isServerless
+    );
   }
 
   public start() {}

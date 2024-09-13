@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { Assign } from 'utility-types';
 import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
@@ -17,6 +19,7 @@ import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
   EsInterval,
+  getPreciseDurationDescription,
 } from './calc_es_interval';
 import { autoInterval } from '../../_interval_options';
 
@@ -272,22 +275,19 @@ export class TimeBuckets {
           ? convertDurationToNormalizedEsInterval(interval, originalUnit)
           : convertIntervalToEsInterval(this._originalInterval);
 
-      const prettyUnits = moment.normalizeUnits(esInterval.unit);
+      const prettyUnits = moment.normalizeUnits(esInterval.unit) as moment.unitOfTime.Base;
+      const durationDescription = getPreciseDurationDescription(esInterval.value, prettyUnits);
 
       return Object.assign(interval, {
-        description:
-          esInterval.value === 1 ? prettyUnits : esInterval.value + ' ' + prettyUnits + 's',
+        description: durationDescription,
         esValue: esInterval.value,
         esUnit: esInterval.unit,
         expression: esInterval.expression,
       });
     };
-
-    if (useNormalizedEsInterval) {
-      return decorateInterval(maybeScaleInterval(parsedInterval));
-    } else {
-      return decorateInterval(parsedInterval);
-    }
+    return decorateInterval(
+      useNormalizedEsInterval ? maybeScaleInterval(parsedInterval) : parsedInterval
+    );
   }
 
   /**

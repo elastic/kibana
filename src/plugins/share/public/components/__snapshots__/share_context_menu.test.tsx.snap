@@ -2,7 +2,7 @@
 
 exports[`shareContextMenuExtensions should render a custom panel title when provided 1`] = `
 <I18nProvider>
-  <EuiContextMenu
+  <EuiContextMenuClass
     data-test-subj="shareContextMenu"
     initialPanelId={5}
     panels={
@@ -27,18 +27,10 @@ exports[`shareContextMenuExtensions should render a custom panel title when prov
           "title": "Embed Code",
         },
         Object {
-          "content": <div>
-            panel content
-          </div>,
           "id": 3,
-          "title": "AAA panel",
         },
         Object {
-          "content": <div>
-            panel content
-          </div>,
           "id": 4,
-          "title": "ZZZ panel",
         },
         Object {
           "id": 5,
@@ -71,14 +63,13 @@ exports[`shareContextMenuExtensions should render a custom panel title when prov
         },
       ]
     }
-    size="m"
   />
 </I18nProvider>
 `;
 
 exports[`shareContextMenuExtensions should sort ascending on sort order first and then ascending on name 1`] = `
 <I18nProvider>
-  <EuiContextMenu
+  <EuiContextMenuClass
     data-test-subj="shareContextMenu"
     initialPanelId={4}
     panels={
@@ -93,18 +84,10 @@ exports[`shareContextMenuExtensions should sort ascending on sort order first an
           "title": "Get link",
         },
         Object {
-          "content": <div>
-            panel content
-          </div>,
           "id": 2,
-          "title": "AAA panel",
         },
         Object {
-          "content": <div>
-            panel content
-          </div>,
           "id": 3,
-          "title": "ZZZ panel",
         },
         Object {
           "id": 4,
@@ -131,14 +114,13 @@ exports[`shareContextMenuExtensions should sort ascending on sort order first an
         },
       ]
     }
-    size="m"
   />
 </I18nProvider>
 `;
 
 exports[`should disable the share URL when set 1`] = `
 <I18nProvider>
-  <EuiContextMenu
+  <EuiContextMenuClass
     data-test-subj="shareContextMenu"
     initialPanelId={3}
     panels={
@@ -183,14 +165,13 @@ exports[`should disable the share URL when set 1`] = `
         },
       ]
     }
-    size="m"
   />
 </I18nProvider>
 `;
 
 exports[`should only render permalink panel when there are no other panels 1`] = `
 <I18nProvider>
-  <EuiContextMenu
+  <EuiContextMenuClass
     data-test-subj="shareContextMenu"
     initialPanelId={1}
     panels={
@@ -206,14 +187,13 @@ exports[`should only render permalink panel when there are no other panels 1`] =
         },
       ]
     }
-    size="m"
   />
 </I18nProvider>
 `;
 
 exports[`should render context menu panel when there are more than one panel 1`] = `
 <I18nProvider>
-  <EuiContextMenu
+  <EuiContextMenuClass
     data-test-subj="shareContextMenu"
     initialPanelId={3}
     panels={
@@ -258,7 +238,6 @@ exports[`should render context menu panel when there are more than one panel 1`]
         },
       ]
     }
-    size="m"
   />
 </I18nProvider>
 `;

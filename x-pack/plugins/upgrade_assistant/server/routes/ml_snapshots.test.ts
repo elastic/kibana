@@ -9,7 +9,12 @@ import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { handleEsError } from '../shared_imports';
-import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
+import {
+  createMockRouter,
+  MockRouter,
+  routeHandlerContextMock,
+  savedObjectsClient,
+} from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
 
@@ -285,7 +290,7 @@ describe('ML snapshots APIs', () => {
         ],
       });
 
-      (routeHandlerContextMock.core.savedObjects.client.find as jest.Mock).mockResolvedValue({
+      (savedObjectsClient.find as jest.Mock).mockResolvedValue({
         total: 1,
         saved_objects: [
           {
@@ -356,7 +361,7 @@ describe('ML snapshots APIs', () => {
         ],
       });
 
-      (routeHandlerContextMock.core.savedObjects.client.find as jest.Mock).mockResolvedValue({
+      (savedObjectsClient.find as jest.Mock).mockResolvedValue({
         total: 1,
         saved_objects: [
           {
@@ -421,7 +426,7 @@ describe('ML snapshots APIs', () => {
         ],
       });
 
-      (routeHandlerContextMock.core.savedObjects.client.find as jest.Mock).mockResolvedValue({
+      (savedObjectsClient.find as jest.Mock).mockResolvedValue({
         total: 1,
         saved_objects: [
           {
@@ -449,7 +454,7 @@ describe('ML snapshots APIs', () => {
         index_settings: {},
       });
 
-      (routeHandlerContextMock.core.savedObjects.client.delete as jest.Mock).mockResolvedValue({});
+      (savedObjectsClient.delete as jest.Mock).mockResolvedValue({});
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',

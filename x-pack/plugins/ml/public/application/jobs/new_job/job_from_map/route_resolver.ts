@@ -5,88 +5,69 @@
  * 2.0.
  */
 
-import rison from '@kbn/rison';
-import type { Query } from '@kbn/es-query';
-import { Filter } from '@kbn/es-query';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { MlApi } from '../../../services/ml_api_service';
 import { QuickGeoJobCreator } from './quick_create_job';
-import { ml } from '../../../services/ml_api_service';
 
-import { getUiSettings, getTimefilter, getShare } from '../../../util/dependency_cache';
-import { getDefaultQuery } from '../utils/new_job_utils';
+import { getDefaultQuery, getRisonValue } from '../utils/new_job_utils';
 
+interface Dependencies {
+  dataViews: DataViewsContract;
+  kibanaConfig: IUiSettingsClient;
+  timeFilter: TimefilterContract;
+  dashboardService: DashboardStart;
+  mlApi: MlApi;
+}
 export async function resolver(
-  dashboard: string,
-  dataViewId: string,
-  embeddable: string,
-  geoField: string,
-  splitField: string,
+  deps: Dependencies,
+  dashboardRisonString: string,
+  dataViewIdRisonString: string,
+  embeddableRisonString: string,
+  geoFieldRisonString: string,
+  splitFieldRisonString: string,
   fromRisonString: string,
   toRisonString: string,
-  layer?: string
+  layerRisonString?: string
 ) {
-  let decodedDashboard;
-  let decodedEmbeddable;
-  let decodedLayer;
-  let splitFieldDecoded;
-  let dvId;
+  const { dataViews, kibanaConfig, timeFilter, dashboardService, mlApi } = deps;
+  const defaultLayer = { query: getDefaultQuery(), filters: [] };
 
-  try {
-    dvId = rison.decode(dataViewId) as string;
-  } catch (error) {
-    dvId = '';
-  }
+  const dashboard = getRisonValue<typeof defaultLayer>(dashboardRisonString, defaultLayer);
+  const embeddable = getRisonValue<typeof defaultLayer>(embeddableRisonString, defaultLayer);
 
-  try {
-    decodedDashboard = rison.decode(dashboard) as { query: Query; filters: Filter[] };
-  } catch (error) {
-    decodedDashboard = { query: getDefaultQuery(), filters: [] };
-  }
+  const layer =
+    layerRisonString !== undefined
+      ? getRisonValue<typeof defaultLayer>(layerRisonString, defaultLayer)
+      : defaultLayer;
 
-  try {
-    decodedEmbeddable = rison.decode(embeddable) as { query: Query; filters: Filter[] };
-  } catch (error) {
-    decodedEmbeddable = { query: getDefaultQuery(), filters: [] };
-  }
+  const geoField = getRisonValue<string>(geoFieldRisonString, '');
+  const splitField = getRisonValue<string | null>(splitFieldRisonString, null);
+  const dataViewId = getRisonValue<string>(dataViewIdRisonString, '');
 
-  if (layer) {
-    try {
-      decodedLayer = rison.decode(layer) as { query: Query };
-    } catch (error) {
-      decodedLayer = { query: getDefaultQuery(), filters: [] };
-    }
-  }
+  const from = getRisonValue<string>(fromRisonString, '');
+  const to = getRisonValue<string>(toRisonString, '');
 
-  try {
-    splitFieldDecoded = rison.decode(splitField) as string;
-  } catch (error) {
-    splitFieldDecoded = null;
-  }
-
-  let from: string;
-  let to: string;
-  try {
-    from = rison.decode(fromRisonString) as string;
-  } catch (error) {
-    from = '';
-  }
-  try {
-    to = rison.decode(toRisonString) as string;
-  } catch (error) {
-    to = '';
-  }
-
-  const jobCreator = new QuickGeoJobCreator(getUiSettings(), getTimefilter(), getShare(), ml);
+  const jobCreator = new QuickGeoJobCreator(
+    dataViews,
+    kibanaConfig,
+    timeFilter,
+    dashboardService,
+    mlApi
+  );
 
   await jobCreator.createAndStashGeoJob(
-    dvId,
+    dataViewId,
     from,
     to,
-    decodedDashboard.query,
-    decodedDashboard.filters,
-    decodedEmbeddable.query,
-    decodedEmbeddable.filters,
+    dashboard.query,
+    dashboard.filters,
+    embeddable.query,
+    embeddable.filters,
     geoField,
-    splitFieldDecoded,
-    decodedLayer?.query
+    splitField,
+    layer?.query
   );
 }

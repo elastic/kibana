@@ -20,9 +20,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<void, void, ",
@@ -91,9 +91,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-public.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
@@ -117,9 +117,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<",
@@ -154,9 +154,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<",
@@ -209,9 +209,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ", plugins: ",
@@ -238,9 +238,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-public.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -311,9 +311,7 @@
           },
           " extends ",
           "AbstractExploreDataAction",
-          "<",
-          "ExploreDataChartActionContext",
-          "> implements ",
+          " implements ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -463,7 +461,7 @@
           },
           " extends ",
           "AbstractExploreDataAction",
-          "<EmbeddableQueryContext> implements ",
+          " implements ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -471,7 +469,15 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<EmbeddableQueryContext>"
+          "<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          },
+          ">"
         ],
         "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
         "deprecated": false,
@@ -518,40 +524,6 @@
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "discoverEnhanced",
-            "id": "def-public.ExploreDataContextMenuAction.getLocation",
-            "type": "Function",
-            "tags": [],
-            "label": "getLocation",
-            "description": [],
-            "signature": [
-              "(context: EmbeddableQueryContext) => Promise<",
-              "KibanaLocation",
-              "<object>>"
-            ],
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "discoverEnhanced",
-                "id": "def-public.ExploreDataContextMenuAction.getLocation.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "EmbeddableQueryContext"
-                ],
-                "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -622,8 +594,8 @@
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.SharePluginSetup",
-                "text": "SharePluginSetup"
+                "section": "def-public.SharePublicSetup",
+                "text": "SharePublicSetup"
               },
               " | undefined"
             ],
@@ -639,15 +611,15 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly addTriggerAction: (triggerId: string, action: ",
+              "{ readonly registerTrigger: (trigger: ",
               {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.Trigger",
+                "text": "Trigger"
               },
-              "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
+              ") => void; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -663,15 +635,15 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerTrigger: (trigger: ",
+              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
                 "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Trigger",
-                "text": "Trigger"
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
               },
-              ") => void; readonly unregisterAction: (actionId: string) => void; }"
+              "<any>) => void; }"
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
             "deprecated": false,
@@ -743,8 +715,8 @@
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.SharePluginStart",
-                "text": "SharePluginStart"
+                "section": "def-public.SharePublicStart",
+                "text": "SharePublicStart"
               },
               " | undefined"
             ],
@@ -760,15 +732,17 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly addTriggerAction: (triggerId: string, action: ",
+              "{ readonly registerTrigger: (trigger: ",
               {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.Trigger",
+                "text": "Trigger"
               },
-              "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
+              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
+              "TriggerContract",
+              "<object>; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -784,17 +758,15 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerTrigger: (trigger: ",
+              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
                 "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Trigger",
-                "text": "Trigger"
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
               },
-              ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
-              "TriggerContract",
-              "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: (id: string) => ",
+              "<any>) => void; readonly getAction: (id: string) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -818,7 +790,15 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.FrequentCompatibilityChangeAction",
+                "text": "FrequentCompatibilityChangeAction"
+              },
+              "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",

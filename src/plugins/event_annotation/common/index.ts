@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export type {
@@ -24,13 +25,20 @@ export { eventAnnotationGroup } from './event_annotation_group';
 export type { EventAnnotationGroupArgs } from './event_annotation_group';
 
 export type { FetchEventAnnotationsArgs } from './fetch_event_annotations/types';
+export type { EventAnnotationOutput } from './types';
+
 export type {
-  EventAnnotationConfig,
-  EventAnnotationGroupConfig,
-  EventAnnotationArgs,
-  RangeEventAnnotationConfig,
-  PointInTimeEventAnnotationConfig,
-  QueryPointEventAnnotationConfig,
-  AvailableAnnotationIcon,
-  EventAnnotationOutput,
-} from './types';
+  EventAnnotationGroupGetIn,
+  EventAnnotationGroupGetOut,
+  EventAnnotationGroupSavedObjectAttributes,
+  EventAnnotationGroupCreateIn,
+  EventAnnotationGroupCreateOut,
+  EventAnnotationGroupUpdateIn,
+  EventAnnotationGroupSearchIn,
+  EventAnnotationGroupSearchOut,
+  EventAnnotationGroupDeleteIn,
+  EventAnnotationGroupDeleteOut,
+  EventAnnotationGroupCrudTypes,
+} from './content_management';
+export { CONTENT_ID } from './content_management';
+export { ANNOTATIONS_LISTING_VIEW_ID } from './constants';

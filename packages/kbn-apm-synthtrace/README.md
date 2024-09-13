@@ -21,6 +21,8 @@ This library can currently be used in two ways:
 - `Instance`: a single instance of a monitored service. E.g., the workload for a monitored service might be spread across multiple containers. An `Instance` object contains fields like `service.node.name` and `container.id`.
 - `Timerange`: an object that will return an array of timestamps based on an interval and a rate. These timestamps can be used to generate events/metricsets.
 - `Transaction`, `Span`, `APMError` and `Metricset`: events/metricsets that occur on an instance. For more background, see the [explanation of the APM data model](https://www.elastic.co/guide/en/apm/get-started/7.15/apm-data-model.html)
+- `Log`: An instance of Log generating Service which supports additional helpers to customise fields like `messages`, `logLevel`
+- `SyntheticsMonitor`: An instance of Synthetic monitor. For more information see [Synthetic monitoring](https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html).
 
 #### Example
 
@@ -109,12 +111,22 @@ node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost
 
 The script will try to automatically find bootstrapped APM indices. **If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.**
 
+### Understanding Scenario Files
+
+Scenario files accept 3 arguments, 2 of them optional and 1 mandatory
+
+| Arguments   | Type      | Description                                                                                                                                          |
+|-------------|:----------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `generate`  | mandatory | This is the main function responsible for returning the events which will be indexed                                                                 |
+| `bootstrap`  | optional  | In case some setup needs to be done, before the data is generated, this function provides access to all available ES Clients to play with            |
+| `setClient` | optional  | By default the apmEsClient used to generate data. If anyother client like logsEsClient needs to be used instead, this is where it should be returned |
+
 The following options are supported:
 
 ### Connection options
 
 | Option              | Type     | Default | Description                                                                                |
-| ------------------- | -------- | :------ | ------------------------------------------------------------------------------------------ |
+|---------------------|----------|:--------|--------------------------------------------------------------------------------------------|
 | `--target`          | [string] |         | Elasticsearch target                                                                       |
 | `--kibana`          | [string] |         | Kibana target, used to bootstrap datastreams/mappings/templates/settings                   |
 | `--versionOverride` | [string] |         | String to be used for `observer.version`. Defauls to the version of the installed package. |
@@ -129,12 +141,11 @@ Note:
 ### Scenario options
 
 | Option           | Type      | Default | Description                          |
-| ---------------- | --------- | :------ | ------------------------------------ |
+|------------------|-----------|:--------|--------------------------------------|
 | `--from`         | [date]    | `now()` | The start of the time window         |
 | `--to`           | [date]    |         | The end of the time window           |
 | `--live`         | [boolean] |         | Generate and index data continuously |
 | `--scenarioOpts` |           |         | Raw options specific to the scenario |
-
 Note:
 
 - The default `--to` is `15m`.
@@ -143,11 +154,12 @@ Note:
 
 ### Setup options
 
-| Option       | Type      | Default | Description                             |
-| ------------ | --------- | :------ | --------------------------------------- |
-| `--clean`    | [boolean] | `false` | Clean APM data before indexing new data |
-| `--workers`  | [number]  |         | Amount of Node.js worker threads        |
-| `--logLevel` | [enum]    | `info`  | Log level                               |
+| Option       | Type      | Default | Description                                                             |
+|--------------|-----------|:--------|-------------------------------------------------------------------------|
+| `--clean`    | [boolean] | `false` | Clean APM data before indexing new data                                 |
+| `--workers`  | [number]  |         | Amount of Node.js worker threads                                        |
+| `--logLevel` | [enum]    | `info`  | Log level                                                               |
+| `--type`     | [string]  | `apm`   | Type of data to be generated, `log` must be passed when generating logs |
 
 ## Testing
 

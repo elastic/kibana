@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState, useMemo } from 'react';
+import type { AggFieldPair } from '@kbn/ml-anomaly-utils';
 
+import { useUiSettings } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { MultiMetricJobCreator } from '../../../../../common/job_creator';
-import { LineChartData } from '../../../../../common/chart_loader';
-import { DropDownLabel, DropDownProps } from '../agg_select';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { AggFieldPair } from '../../../../../../../../../common/types/fields';
+import type { MultiMetricJobCreator } from '../../../../../common/job_creator';
+import type { LineChartData } from '../../../../../common/chart_loader';
+import type { DropDownLabel, DropDownProps } from '../agg_select';
+import { useNewJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
-import { MetricSelector } from './metric_selector';
+import { MetricSelector } from '../metric_selector';
 import { ChartGrid } from './chart_grid';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
+import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 interface Props {
   setIsValid: (na: boolean) => void;
 }
 
 export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
+  const uiSettings = useUiSettings();
   const {
     jobCreator: jc,
     jobCreatorUpdate,
@@ -31,8 +34,9 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     chartLoader,
     chartInterval,
   } = useContext(JobCreatorContext);
-
   const jobCreator = jc as MultiMetricJobCreator;
+  const toastNotificationService = useToastNotificationService();
+  const newJobCapsService = useNewJobCapsService();
 
   const fields = useMemo(
     () => sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]),
@@ -121,7 +125,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
         )
         .then(setFieldValues)
         .catch((error) => {
-          getToastNotificationService().displayErrorToast(error);
+          toastNotificationService.displayErrorToast(error);
         });
     } else {
       setFieldValues([]);
@@ -140,7 +144,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     if (allDataReady()) {
       setLoadingData(true);
       try {
-        const cs = getChartSettings(jobCreator, chartInterval);
+        const cs = getChartSettings(uiSettings, jobCreator, chartInterval);
         setChartSettings(cs);
         const resp: LineChartData = await chartLoader.loadLineCharts(
           jobCreator.start,
@@ -154,7 +158,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
         );
         setLineChartsData(resp);
       } catch (error) {
-        getToastNotificationService().displayErrorToast(error);
+        toastNotificationService.displayErrorToast(error);
         setLineChartsData([]);
       }
       setLoadingData(false);

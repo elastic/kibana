@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { useController, useFormContext, useWatch, useFieldArray } from 'react-hook-form';
 
+import { QUERY_TIMEOUT } from '../../../common/constants';
 import { PackQueriesTable } from '../pack_queries_table';
 import { QueryFlyout } from '../queries/query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
@@ -55,7 +56,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   const handleHideEditFlyout = useCallback(() => setShowEditQueryFlyout(-1), []);
 
   const handleDeleteClick = useCallback(
-    (query) => {
+    (query: any) => {
       const streamIndex = findIndex(fieldValue, ['id', query.id]);
 
       if (streamIndex > -1) {
@@ -66,7 +67,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   );
 
   const handleEditClick = useCallback(
-    (query) => {
+    (query: any) => {
       const streamIndex = findIndex(fieldValue, ['id', query.id]);
 
       setShowEditQueryFlyout(streamIndex);
@@ -75,7 +76,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   );
 
   const handleEditQuery = useCallback(
-    (updatedQuery) =>
+    (updatedQuery: any) =>
       new Promise<void>((resolve) => {
         if (showEditQueryFlyout >= 0) {
           update(
@@ -84,6 +85,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
               draft.id = updatedQuery.id;
               draft.interval = updatedQuery.interval;
               draft.query = updatedQuery.query;
+              draft.timeout = updatedQuery.timeout;
 
               if (updatedQuery.platform?.length) {
                 draft.platform = updatedQuery.platform;
@@ -112,7 +114,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   );
 
   const handleAddQuery = useCallback(
-    (newQuery) =>
+    (newQuery: any) =>
       new Promise<void>((resolve) => {
         append(newQuery);
         handleHideAddFlyout();
@@ -130,13 +132,14 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   }, [fieldValue, remove, tableSelectedItems]);
 
   const handlePackUpload = useCallback(
-    (parsedContent, uploadedPackName) => {
+    (parsedContent: any, uploadedPackName: any) => {
       replace(
         map(parsedContent.queries, (newQuery, newQueryId) =>
           pickBy(
             {
               id: newQueryId,
               interval: newQuery.interval ?? parsedContent.interval ?? '3600',
+              timeout: newQuery.timeout ?? parsedContent.timeout ?? QUERY_TIMEOUT.DEFAULT,
               query: newQuery.query,
               version: newQuery.version ?? parsedContent.version,
               snapshot: newQuery.snapshot ?? parsedContent.snapshot,
@@ -163,7 +166,12 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               {!tableSelectedItems.length ? (
-                <EuiButton fill onClick={handleShowAddFlyout} iconType="plusInCircle">
+                <EuiButton
+                  data-test-subj="add-query-button"
+                  fill
+                  onClick={handleShowAddFlyout}
+                  iconType="plusInCircle"
+                >
                   <FormattedMessage
                     id="xpack.osquery.pack.queriesForm.addQueryButtonLabel"
                     defaultMessage="Add query"

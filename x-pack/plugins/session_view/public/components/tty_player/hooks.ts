@@ -14,13 +14,13 @@ import { SearchAddon } from './xterm_search';
 import { useEuiTheme } from '../../hooks';
 import { renderTruncatedMsg } from './ansi_helpers';
 
-import {
+import type {
   IOLine,
   ProcessStartMarker,
   ProcessEvent,
   ProcessEventResults,
   ProcessEventsPage,
-} from '../../../common/types/process_tree';
+} from '../../../common';
 import {
   IO_EVENTS_ROUTE,
   IO_EVENTS_PER_PAGE,
@@ -31,9 +31,14 @@ import {
   DEFAULT_TTY_COLS,
   TTY_LINE_SPLITTER_REGEX,
   TTY_LINES_PRE_SEEK,
+  CURRENT_API_VERSION,
 } from '../../../common/constants';
 
-export const useFetchIOEvents = (sessionEntityId: string) => {
+export const useFetchIOEvents = (
+  index: string,
+  sessionEntityId: string,
+  sessionStartTime: string
+) => {
   const { http } = useKibana<CoreStart>().services;
   const cachingKeys = useMemo(() => [QUERY_KEY_IO_EVENTS, sessionEntityId], [sessionEntityId]);
 
@@ -42,8 +47,11 @@ export const useFetchIOEvents = (sessionEntityId: string) => {
     async ({ pageParam = {} }) => {
       const { cursor } = pageParam;
       const res = await http.get<ProcessEventResults>(IO_EVENTS_ROUTE, {
+        version: CURRENT_API_VERSION,
         query: {
+          index,
           sessionEntityId,
+          sessionStartTime,
           cursor,
         },
       });
@@ -327,7 +335,7 @@ export const useXtermPlayer = ({
   }, [lines, currentLine, isPlaying, playSpeed, render, hasNextPage, fetchNextPage, setIsPlaying]);
 
   const seekToLine = useCallback(
-    (index) => {
+    (index: any) => {
       setCurrentLine(index);
 
       render(index, true);

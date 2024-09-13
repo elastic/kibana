@@ -20,12 +20,10 @@
     "@kbn/embeddable-plugin",
     "@kbn/data-views-plugin",
     "@kbn/visualizations-plugin",
-    "@kbn/presentation-util-plugin",
     "@kbn/developer-examples-plugin",
-    "@kbn/embeddable-examples-plugin",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/shared-ux-utility",
     "@kbn/controls-plugin",
-    "@kbn/shared-ux-router"
+    "@kbn/shared-ux-router",
+    "@kbn/presentation-publishing"
   ]
 }

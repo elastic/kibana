@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -20,12 +21,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { euiFlyoutClassname } from '../constants';
 import type { Field } from '../types';
+import { PreviewState } from './preview/types';
 import { ModifiedFieldModal, SaveFieldTypeOrNameChangedModal } from './confirm_modals';
 
 import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
 import { useFieldEditorContext } from './field_editor_context';
 import { FlyoutPanels } from './flyout_panels';
 import { FieldPreview, useFieldPreviewContext } from './preview';
+import { useStateSelector } from '../state_utils';
 
 const i18nTexts = {
   cancelButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCancelButtonLabel', {
@@ -54,19 +57,20 @@ export interface Props {
   fieldToEdit?: Field;
   /** Optional preselected configuration for new field */
   fieldToCreate?: Field;
-  isSavingField: boolean;
   /** Handler to call when the component mounts.
    *  We will pass "up" data that the parent component might need
    */
   onMounted?: (args: { canCloseValidator: () => boolean }) => void;
 }
 
+const isPanelVisibleSelector = (state: PreviewState) => state.isPanelVisible;
+const isSavingSelector = (state: PreviewState) => state.isSaving;
+
 const FieldEditorFlyoutContentComponent = ({
   fieldToEdit,
   fieldToCreate,
   onSave,
   onCancel,
-  isSavingField,
   onMounted,
 }: Props) => {
   const isMounted = useRef(false);
@@ -75,9 +79,9 @@ const FieldEditorFlyoutContentComponent = ({
 
   const isMobile = useIsWithinMaxBreakpoint('s');
 
-  const {
-    panel: { isVisible: isPanelVisible },
-  } = useFieldPreviewContext();
+  const { controller } = useFieldPreviewContext();
+  const isPanelVisible = useStateSelector(controller.state$, isPanelVisibleSelector);
+  const isSavingField = useStateSelector(controller.state$, isSavingSelector);
 
   const [formState, setFormState] = useState<FieldEditorFormState>({
     isSubmitted: false,
@@ -214,7 +218,7 @@ const FieldEditorFlyoutContentComponent = ({
                   {fieldToEdit ? (
                     <FormattedMessage
                       id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
-                      defaultMessage="Edit field '{fieldName}'"
+                      defaultMessage="Edit field ''{fieldName}''"
                       values={{
                         fieldName: fieldToEdit.name,
                       }}

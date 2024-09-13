@@ -41,7 +41,7 @@ export const SubTypeParameter = ({
   }
 
   const typeDefinition = TYPE_DEFINITION[type as MainType];
-  const hasSubType = typeDefinition.subTypes !== undefined;
+  const hasSubType = typeDefinition?.subTypes !== undefined;
 
   if (!hasSubType) {
     return null;
@@ -67,8 +67,10 @@ export const SubTypeParameter = ({
         }}
       >
         {(subTypeField) => {
+          const error = subTypeField.getErrorsMessages();
+          const isInvalid = error ? Boolean(error.length) : false;
           return (
-            <EuiFormRow label={subTypeField.label}>
+            <EuiFormRow label={subTypeField.label} error={error} isInvalid={isInvalid}>
               <EuiComboBox
                 placeholder={i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.subTypeField.placeholderLabel',

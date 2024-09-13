@@ -23,6 +23,8 @@ const ES_TEST_INDEX_SOURCE = 'ml-alert:anomaly-detection';
 const ES_TEST_INDEX_REFERENCE = '-na-';
 const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-ad-alert-output`;
 
+const AAD_INDEX = '.alerts-ml.anomaly-detection.alerts-default';
+
 const ALERT_INTERVAL_SECONDS = 3;
 
 const AD_JOB_ID = 'rt-anomaly-mean-value';
@@ -73,7 +75,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
 
-  describe('alert', async () => {
+  describe('alert', () => {
     const objectRemover = new ObjectRemover(supertest);
     let actionId: string;
 
@@ -133,12 +135,28 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       const docs = await waitForDocs(1);
       for (const doc of docs) {
-        const { name, message } = doc._source.params;
+        const { name, message, anomalyExplorerUrl } = doc._source.params;
 
         expect(name).to.be('Test AD job');
         expect(message).to.be(
           'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.'
         );
+        // check only part of the URL as time bounds vary based on the anomaly
+        expect(anomalyExplorerUrl).to.contain(
+          '/s/space1/app/ml/explorer/?_g=(ml%3A(jobIds%3A!(rt-anomaly-mean-value))'
+        );
+      }
+
+      log.debug('Checking docs in the alerts-as-data index...');
+
+      const aadDocs = await waitForAAD(1);
+
+      for (const doc of aadDocs) {
+        expect(doc._source['kibana.alert.job_id']).to.be(AD_JOB_ID);
+        expect(doc._source['kibana.alert.url']).to.contain(
+          '/s/space1/app/ml/explorer/?_g=(ml%3A(jobIds%3A!(rt-anomaly-mean-value))'
+        );
+        expect(doc._source['kibana.alert.anomaly_score'][0]).to.be.above(0);
       }
     });
 
@@ -148,6 +166,20 @@ export default function alertTests({ getService }: FtrProviderContext) {
         ES_TEST_INDEX_REFERENCE,
         count
       );
+    }
+
+    async function waitForAAD(numDocs: number): Promise<any[]> {
+      return await retry.try(async () => {
+        const searchResult = await es.search({ index: AAD_INDEX, size: 1000 });
+
+        // @ts-expect-error doesn't handle total: number
+        const value = searchResult.hits.total.value?.value || searchResult.hits.total.value;
+        if (value < numDocs) {
+          // @ts-expect-error doesn't handle total: number
+          throw new Error(`Expected ${numDocs} but received ${searchResult.hits.total.value}.`);
+        }
+        return searchResult.hits.hits;
+      });
     }
 
     async function createAlert({
@@ -164,8 +196,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
               source: ES_TEST_INDEX_SOURCE,
               reference: ES_TEST_INDEX_REFERENCE,
               params: {
-                name: '{{{alertName}}}',
+                name: '{{{rule.name}}}',
                 message: '{{{context.message}}}',
+                anomalyExplorerUrl: '{{{context.anomalyExplorerUrl}}}',
               },
             },
           ],

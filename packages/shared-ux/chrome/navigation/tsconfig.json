@@ -1,0 +1,30 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@emotion/react/types/css-prop",
+      "@testing-library/jest-dom",
+      "@testing-library/react",
+      "@kbn/ambient-ui-types"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "kbn_references": [
+    "@kbn/core-chrome-browser",
+    "@kbn/core-application-browser",
+    "@kbn/i18n",
+    "@kbn/shared-ux-storybook-mock",
+    "@kbn/core-http-browser",
+    "@kbn/core-analytics-browser",
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

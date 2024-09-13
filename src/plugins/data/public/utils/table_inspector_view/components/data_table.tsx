@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
+import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -192,12 +193,25 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
 
     return (
       <EuiInMemoryTable
-        className="insDataTableFormat__table"
+        tableLayout="auto"
+        className="insDataTableFormat__table eui-xScroll"
         data-test-subj="inspectorTable"
         columns={columns}
         items={rows}
         sorting={true}
         pagination={pagination}
+        css={css`
+          // Set a min width on each column - you can use [data-test-subj] to target specific columns
+          .euiTableHeaderCell {
+            min-width: 100px;
+          }
+
+          // Make sure the pagination follows the scroll
+          > div:last-child {
+            position: sticky;
+            left: 0;
+          }
+        `}
       />
     );
   }

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { JOB_STATE } from '@kbn/ml-plugin/common/constants/states';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
@@ -22,12 +22,12 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runRequest(jobId: string, expectedStatusCode: number, space?: string) {
     const { body, status } = await supertest
-      .post(`${space ? `/s/${space}` : ''}/api/ml/anomaly_detectors/${jobId}/_open`)
+      .post(`${space ? `/s/${space}` : ''}/internal/ml/anomaly_detectors/${jobId}/_open`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('1'));
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await ml.api.closeAnomalyDetectionJob(jobIdSpace1);
       await ml.api.cleanMlIndices();
-      await ml.testResources.cleanMLSavedObjects();
+      await ml.testResources.cleanMLSavedObjects([idSpace1, idSpace2]);
     });
 
     after(async () => {

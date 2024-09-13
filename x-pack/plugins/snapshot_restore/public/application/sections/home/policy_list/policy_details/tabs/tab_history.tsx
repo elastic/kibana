@@ -19,11 +19,11 @@ import {
   EuiText,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiCodeBlock,
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SlmPolicy } from '../../../../../../../common/types';
-import { EuiCodeEditor } from '../../../../../../shared_imports';
 import { FormattedDateTime } from '../../../../../components';
 import { linkToSnapshot } from '../../../../../services/navigation';
 import { useServices } from '../../../../../app_context';
@@ -148,31 +148,20 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
               </EuiDescriptionListTitle>
               <EuiSpacer size="s" />
               <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-                <EuiCodeEditor
-                  mode="json"
-                  theme="textmate"
-                  width="100%"
-                  isReadOnly
-                  value={JSON.stringify(details, null, 2)}
-                  setOptions={{
-                    showLineNumbers: false,
-                    tabSize: 2,
-                  }}
-                  editorProps={{
-                    $blockScrolling: Infinity,
-                  }}
-                  minLines={6}
-                  maxLines={12}
-                  wrapEnabled={true}
-                  showGutter={false}
+                <EuiCodeBlock
+                  paddingSize="m"
+                  language="json"
+                  isCopyable
                   aria-label={i18n.translate(
                     'xpack.snapshotRestore.policyDetails.lastFailure.detailsAriaLabel',
                     {
-                      defaultMessage: `Last failure details for policy '{name}'`,
+                      defaultMessage: `Last failure details for policy ''{name}''`,
                       values: { name },
                     }
                   )}
-                />
+                >
+                  {JSON.stringify(details, null, 2)}
+                </EuiCodeBlock>
               </EuiDescriptionListDescription>
             </EuiFlexItem>
           </EuiFlexGroup>

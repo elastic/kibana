@@ -2,7 +2,7 @@
   "id": "metrics_ui_hosts",
   "title": "Metrics Hosts",
   "description": "Detect anomalous memory and network behavior on hosts.",
-  "type": "Metricbeat Data",
+  "type": "Infrastructure",
   "logoFile": "logo.json",
   "jobs": [
     {
@@ -34,5 +34,6 @@
       "file": "datafeed_hosts_network_out.json",
       "job_id": "hosts_network_out"
     }
-  ]
+  ],
+  "tags": ["observability"]
 }

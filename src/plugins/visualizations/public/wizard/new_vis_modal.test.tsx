@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -12,12 +13,13 @@ import { TypesStart, VisGroups, BaseVisType } from '../vis_types';
 import NewVisModal from './new_vis_modal';
 import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import { VisParams } from '../../common';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
-    hidden: false,
+    disableCreate: false,
+    disableEdit: false,
     requiresSearch: false,
   };
   const _visTypes = [
@@ -47,8 +49,10 @@ describe('NewVisModal', () => {
       title: 'Vis with alias Url',
       stage: 'production',
       group: VisGroups.PROMOTED,
-      aliasApp: 'otherApp',
-      aliasPath: '#/aliasUrl',
+      alias: {
+        app: 'otherApp',
+        path: '#/aliasUrl',
+      },
     },
     {
       name: 'visWithSearch',
@@ -59,7 +63,7 @@ describe('NewVisModal', () => {
     },
   ] as BaseVisType[];
   const visTypes: TypesStart = {
-    get<T>(id: string): BaseVisType<T> {
+    get<T extends VisParams>(id: string): BaseVisType<T> {
       return _visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
     },
     all: () => _visTypes,
@@ -77,8 +81,8 @@ describe('NewVisModal', () => {
       },
     },
   };
-  const http = httpServiceMock.createStartContract({ basePath: '' });
-  const savedObjectsManagement = savedObjectsManagementPluginMock.createStartContract();
+
+  const contentManagement = contentManagementMock.createStartContract();
 
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
@@ -102,8 +106,7 @@ describe('NewVisModal', () => {
         uiSettings={uiSettings}
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
-        http={http}
-        savedObjectsManagement={savedObjectsManagement}
+        contentClient={contentManagement.client}
       />
     );
     expect(wrapper.find('[data-test-subj="visGroup-aggbased"]').exists()).toBe(true);
@@ -120,8 +123,7 @@ describe('NewVisModal', () => {
         uiSettings={uiSettings}
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
-        http={http}
-        savedObjectsManagement={savedObjectsManagement}
+        contentClient={contentManagement.client}
       />
     );
     expect(wrapper.find('[data-test-subj="visGroup-tools"]').exists()).toBe(true);
@@ -137,8 +139,7 @@ describe('NewVisModal', () => {
         uiSettings={uiSettings}
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
-        http={http}
-        savedObjectsManagement={savedObjectsManagement}
+        contentClient={contentManagement.client}
       />
     );
     expect(wrapper.find('[data-test-subj="visType-vis2"]').exists()).toBe(true);
@@ -155,8 +156,7 @@ describe('NewVisModal', () => {
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          http={http}
-          savedObjectsManagement={savedObjectsManagement}
+          contentClient={contentManagement.client}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
@@ -175,8 +175,7 @@ describe('NewVisModal', () => {
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          http={http}
-          savedObjectsManagement={savedObjectsManagement}
+          contentClient={contentManagement.client}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
@@ -186,7 +185,7 @@ describe('NewVisModal', () => {
       );
     });
 
-    it('closes and redirects properly if visualization with aliasPath and originatingApp in props', () => {
+    it('closes and redirects properly if visualization with alias.path and originatingApp in props', () => {
       const onClose = jest.fn();
       const navigateToApp = jest.fn();
       const stateTransfer = embeddablePluginMock.createStartContract().getStateTransfer();
@@ -202,8 +201,7 @@ describe('NewVisModal', () => {
           application={{ navigateToApp } as unknown as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
           stateTransfer={stateTransfer}
-          http={http}
-          savedObjectsManagement={savedObjectsManagement}
+          contentClient={contentManagement.client}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
@@ -228,8 +226,7 @@ describe('NewVisModal', () => {
           uiSettings={uiSettings}
           application={{ navigateToApp } as unknown as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          http={http}
-          savedObjectsManagement={savedObjectsManagement}
+          contentClient={contentManagement.client}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
@@ -250,8 +247,7 @@ describe('NewVisModal', () => {
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          http={http}
-          savedObjectsManagement={savedObjectsManagement}
+          contentClient={contentManagement.client}
         />
       );
       const aggBasedGroupCard = wrapper

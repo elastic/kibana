@@ -7,16 +7,15 @@
 
 import { isEqual } from 'lodash';
 
-import { Dictionary } from '../../../../../../../common/types/common';
-import { PivotSupportedAggs } from '../../../../../../../common/types/pivot_aggs';
-import {
-  isLatestTransform,
-  isPivotTransform,
-  TransformBaseConfig,
-} from '../../../../../../../common/types/transform';
+import { getCombinedRuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { matchAllQuery } from '@kbn/ml-query-utils';
 
-import {
-  matchAllQuery,
+import type { Dictionary } from '../../../../../../../common/types/common';
+import type { PivotSupportedAggs } from '../../../../../../../common/types/pivot_aggs';
+import type { TransformBaseConfig } from '../../../../../../../common/types/transform';
+import { isLatestTransform, isPivotTransform } from '../../../../../../../common/types/transform';
+
+import type {
   PivotAggsConfig,
   PivotAggsConfigDict,
   PivotGroupByConfig,
@@ -24,13 +23,12 @@ import {
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../../common';
 
-import { StepDefineExposedState } from './types';
+import type { StepDefineExposedState } from './types';
 import { getAggConfigFromEsAgg } from '../../../../../common/pivot_aggs';
 import { TRANSFORM_FUNCTION } from '../../../../../../../common/constants';
-import { StepDefineFormProps } from '../step_define_form';
+import type { StepDefineFormProps } from '../step_define_form';
 import { validateLatestConfig } from '../hooks/use_latest_function_config';
 import { validatePivotConfig } from '../hooks/use_pivot_config';
-import { getCombinedRuntimeMappings } from '../../../../../common/request';
 
 export function applyTransformConfigToDefineState(
   state: StepDefineExposedState,

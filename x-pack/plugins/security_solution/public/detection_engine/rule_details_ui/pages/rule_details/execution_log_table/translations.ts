@@ -55,6 +55,13 @@ export const RULE_EXECUTION_LOG_SHOW_METRIC_COLUMNS_SWITCH = i18n.translate(
   }
 );
 
+export const RULE_EXECUTION_LOG_SHOW_SOURCE_EVENT_TIME_RANGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.showSourceEventTimeRangeSwitchTitle',
+  {
+    defaultMessage: 'Show source event time range',
+  }
+);
+
 export const COLUMN_STATUS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.statusColumn',
   {
@@ -66,6 +73,28 @@ export const COLUMN_STATUS_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.statusColumnTooltip',
   {
     defaultMessage: 'Overall status of execution.',
+  }
+);
+
+export const COLUMN_TYPE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.type',
+  {
+    defaultMessage: 'Type',
+  }
+);
+
+export const COLUMN_SOURCE_EVENT_TIME_RANGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.sourceEventTimeRange',
+  {
+    defaultMessage: 'Source event time range',
+  }
+);
+
+export const COLUMN_SOURCE_EVENT_TIME_RANGE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.sourceEventTimeRangeTooltip',
+  {
+    defaultMessage:
+      "Only applies to manual rule executions. If the rule has look-back time, it's included in the logged time range.",
   }
 );
 
@@ -227,5 +256,33 @@ export const GREATER_THAN_YEAR = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.durationGreaterThanYearDescription',
   {
     defaultMessage: '> 1 Year',
+  }
+);
+
+export const ROW_DETAILS_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.fullMessage',
+  {
+    defaultMessage: 'Full message',
+  }
+);
+
+export const EXPAND_ROW = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.expandRow',
+  {
+    defaultMessage: 'Expand rows',
+  }
+);
+
+export const EXPAND = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.expand',
+  {
+    defaultMessage: 'Expand',
+  }
+);
+
+export const COLLAPSE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.collapse',
+  {
+    defaultMessage: 'Collapse',
   }
 );

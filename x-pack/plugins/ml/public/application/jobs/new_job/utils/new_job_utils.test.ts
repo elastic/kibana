@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core/public';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { createSearchItems } from './new_job_utils';
+import { fromSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import type { ISearchSource } from '@kbn/data-plugin/public';
 
 describe('createSearchItems', () => {
   const kibanaConfig = {} as IUiSettingsClient;
@@ -16,45 +17,36 @@ describe('createSearchItems', () => {
     fields: [],
   } as unknown as DataView;
 
-  let savedSearch = {} as unknown as SavedSearchSavedObject;
-  beforeEach(() => {
-    savedSearch = {
-      client: {
-        http: {
-          basePath: {
-            basePath: '/abc',
-            serverBasePath: '/abc',
-          },
-          anonymousPaths: {},
-        },
-        batchQueue: [],
-      },
-      attributes: {
+  const getFieldMock = (searchSource: any) =>
+    jest.fn().mockImplementation((name: string) => {
+      if (name === 'query') {
+        return searchSource.query;
+      } else {
+        return searchSource.filter;
+      }
+    });
+
+  const getSavedSearchMock = (searchSource: any = {}) =>
+    fromSavedSearchAttributes(
+      '4b9b1010-c678-11ea-b6e6-e942978da29c',
+      {
         title: 'not test',
         description: '',
-        hits: 0,
         columns: ['_source'],
         sort: [],
-        version: 1,
         kibanaSavedObjectMeta: {
           searchSourceJSON: '',
         },
+        grid: {},
+        hideChart: false,
+        isTextBasedQuery: false,
       },
-      _version: 'WzI0OSw0XQ==',
-      id: '4b9b1010-c678-11ea-b6e6-e942978da29c',
-      type: 'search',
-      migrationVersion: {
-        search: '7.4.0',
-      },
-      references: [
-        {
-          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-          type: 'index-pattern',
-          id: '7e252840-bd27-11ea-8a6c-75d1a0bd08ab',
-        },
-      ],
-    } as unknown as SavedSearchSavedObject;
-  });
+      [],
+      {
+        getField: getFieldMock(searchSource),
+      } as unknown as ISearchSource,
+      false
+    );
 
   test('should match data view', () => {
     const resp = createSearchItems(kibanaConfig, indexPattern, null);
@@ -65,14 +57,13 @@ describe('createSearchItems', () => {
   });
 
   test('should match saved search with kuery and condition', () => {
-    const searchSource = {
+    const savedSearch = getSavedSearchMock({
       highlightAll: true,
       version: true,
       query: { query: 'airline : "AAL" ', language: 'kuery' },
       filter: [],
       indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-    };
-    savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
+    });
 
     const resp = createSearchItems(kibanaConfig, indexPattern, savedSearch);
     expect(resp).toStrictEqual({
@@ -92,14 +83,13 @@ describe('createSearchItems', () => {
   });
 
   test('should match saved search with kuery and not condition', () => {
-    const searchSource = {
+    const savedSearch = getSavedSearchMock({
       highlightAll: true,
       version: true,
       query: { query: 'NOT airline : "AAL" ', language: 'kuery' },
       filter: [],
       indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-    };
-    savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
+    });
 
     const resp = createSearchItems(kibanaConfig, indexPattern, savedSearch);
     expect(resp).toStrictEqual({
@@ -130,14 +120,13 @@ describe('createSearchItems', () => {
   });
 
   test('should match saved search with kuery and condition and not condition', () => {
-    const searchSource = {
+    const savedSearch = getSavedSearchMock({
       highlightAll: true,
       version: true,
       query: { query: 'airline : "AAL" and NOT airline : "AWE" ', language: 'kuery' },
       filter: [],
       indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-    };
-    savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
+    });
 
     const resp = createSearchItems(kibanaConfig, indexPattern, savedSearch);
     expect(resp).toStrictEqual({
@@ -161,7 +150,7 @@ describe('createSearchItems', () => {
   });
 
   test('should match saved search with kuery and filter', () => {
-    const searchSource = {
+    const savedSearch = getSavedSearchMock({
       highlightAll: true,
       version: true,
       query: {
@@ -192,8 +181,7 @@ describe('createSearchItems', () => {
         },
       ],
       indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-    };
-    savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
+    });
 
     const resp = createSearchItems(kibanaConfig, indexPattern, savedSearch);
     expect(resp).toStrictEqual({

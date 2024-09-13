@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Fields } from '../entity';
@@ -12,6 +13,8 @@ export type ApmApplicationMetricFields = Partial<{
   'system.process.memory.size': number;
   'system.memory.actual.free': number;
   'system.memory.total': number;
+  'system.process.cgroup.memory.mem.limit.bytes': number;
+  'system.process.cgroup.memory.mem.usage.bytes': number;
   'system.cpu.total.norm.pct': number;
   'system.process.memory.rss.bytes': number;
   'system.process.cpu.total.norm.pct': number;
@@ -22,6 +25,7 @@ export type ApmApplicationMetricFields = Partial<{
   'faas.timeout': number;
   'faas.coldstart_duration': number;
   'faas.duration': number;
+  'application.launch.time': number;
 }>;
 
 export type ApmUserAgentFields = Partial<{
@@ -35,6 +39,7 @@ export type ApmUserAgentFields = Partial<{
 export interface ApmException {
   message: string;
 }
+
 export interface Observer {
   type: string;
   version: string;
@@ -44,6 +49,35 @@ export interface Observer {
 export interface GeoLocation {
   coordinates: number[];
   type: string;
+}
+
+export interface APMStacktrace {
+  abs_path?: string;
+  classname?: string;
+  context?: {
+    post?: string[];
+    pre?: string[];
+  };
+  exclude_from_grouping?: boolean;
+  filename?: string;
+  function?: string;
+  module?: string;
+  library_frame?: boolean;
+  line?:
+    | {
+        column?: number;
+        number: number;
+      }
+    | {
+        context?: string;
+      };
+  sourcemap?: {
+    error?: string;
+    updated?: boolean;
+  };
+  vars?: {
+    [key: string]: unknown;
+  };
 }
 
 type ExperimentalFields = Partial<{
@@ -76,6 +110,8 @@ export type ApmFields = Fields<{
     'cloud.provider': string;
     'cloud.region': string;
     'cloud.service.name': string;
+    // otel
+    'code.stacktrace': string;
     'container.id': string;
     'destination.address': string;
     'destination.port': number;
@@ -88,8 +124,11 @@ export type ApmFields = Fields<{
     'error.grouping_key': string;
     'error.grouping_name': string;
     'error.id': string;
+    'error.type': string;
+    'error.culprit': string;
     'event.ingested': number;
     'event.name': string;
+    'event.action': string;
     'event.outcome': string;
     'event.outcome_numeric':
       | number
@@ -117,6 +156,7 @@ export type ApmFields = Fields<{
     'kubernetes.pod.uid': string;
     'labels.name': string;
     'labels.telemetry_auto_version': string;
+    'labels.lifecycle_state': string;
     'metricset.name': string;
     'network.carrier.icc': string;
     'network.carrier.mcc': string;
@@ -162,6 +202,7 @@ export type ApmFields = Fields<{
     'span.duration.us': number;
     'span.id': string;
     'span.name': string;
+    'span.stacktrace': APMStacktrace[];
     'span.self_time.count': number;
     'span.self_time.sum.us': number;
     'span.subtype': string;
@@ -171,6 +212,7 @@ export type ApmFields = Fields<{
       span: { id: string };
     }>;
     'url.original': string;
+    'url.domain': string;
   }> &
   ApmApplicationMetricFields &
   ExperimentalFields;

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -112,6 +113,18 @@ describe('uiSettings', () => {
         expect(() => setup.registerGlobal(defaults)).not.toThrow();
       });
     });
+
+    describe('#setAllowlist', () => {
+      // Skipped because we disabled this multi-call check temporarily
+      it.skip('throws if setAllowlist is called twice', async () => {
+        const { setAllowlist } = await service.setup(setupDeps);
+        setAllowlist(['mySetting']);
+
+        expect(() => setAllowlist(['newSetting'])).toThrowErrorMatchingInlineSnapshot(
+          `"The uiSettings allowlist has already been set up. Instead of calling setAllowlist(), add your settings to packages/serverless/settings"`
+        );
+      });
+    });
   });
 
   describe('#start', () => {
@@ -212,6 +225,59 @@ describe('uiSettings', () => {
         await customizedService.setup(setupDeps);
 
         await customizedService.start();
+      });
+
+      it('throws when the allowlist contains unregistered settings', async () => {
+        const { setAllowlist } = await service.setup(setupDeps);
+        setAllowlist(['mySetting']);
+
+        await expect(service.start()).rejects.toMatchInlineSnapshot(
+          `[Error: The uiSetting with key [mySetting] is in the allowlist but is not registered. Make sure to remove it from the allowlist in /packages/serverless/settings]`
+        );
+      });
+    });
+
+    describe('#applyAllowlist', () => {
+      const settingId = 'mySetting';
+      const testSetting = {
+        name: 'My setting',
+        value: 10,
+        readonly: true,
+        schema: schema.number(),
+      };
+
+      it('allowlisted readonly settings have "ui" readonly mode', async () => {
+        const { register, setAllowlist } = await service.setup(setupDeps);
+        register({ [settingId]: testSetting });
+        setAllowlist([settingId]);
+
+        const expectedSetting = {
+          ...testSetting,
+          readonlyMode: 'ui',
+        };
+
+        const start = await service.start();
+        start.asScopedToClient(savedObjectsClient);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toEqual({
+          [settingId]: expectedSetting,
+        });
+      });
+
+      it('non-allowlisted settings have "strict" readonly mode', async () => {
+        const { register, setAllowlist } = await service.setup(setupDeps);
+        register({ [settingId]: testSetting });
+        setAllowlist([]);
+
+        const expectedSetting = {
+          ...testSetting,
+          readonlyMode: 'strict',
+        };
+
+        const start = await service.start();
+        start.asScopedToClient(savedObjectsClient);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toEqual({
+          [settingId]: expectedSetting,
+        });
       });
     });
 

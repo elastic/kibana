@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import * as api from './api';
-import { TestProviders } from '../../common/mock';
+import { noConnectorsCasePermission, TestProviders } from '../../common/mock';
 import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';
 import { useGetSupportedActionConnectors } from './use_get_supported_action_connectors';
 
@@ -27,7 +27,9 @@ describe('useConnectors', () => {
   it('fetches connectors', async () => {
     const spy = jest.spyOn(api, 'getSupportedActionConnectors');
     const { waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     await waitForNextUpdate();
@@ -45,7 +47,9 @@ describe('useConnectors', () => {
     });
 
     const { waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
     await waitForNextUpdate();
 
@@ -57,7 +61,25 @@ describe('useConnectors', () => {
     useApplicationCapabilitiesMock().actions = { crud: false, read: false };
 
     const { result, waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
+    });
+
+    await waitForNextUpdate();
+
+    expect(spyOnFetchConnectors).not.toHaveBeenCalled();
+    expect(result.current.data).toEqual([]);
+  });
+
+  it('does not fetch connectors when the user does not has access to connectors', async () => {
+    const spyOnFetchConnectors = jest.spyOn(api, 'getSupportedActionConnectors');
+    useApplicationCapabilitiesMock().actions = { crud: true, read: true };
+
+    const { result, waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders permissions={noConnectorsCasePermission()}>{children}</TestProviders>
+      ),
     });
 
     await waitForNextUpdate();

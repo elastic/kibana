@@ -10,13 +10,13 @@ import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
   const pkgUpdateVersion = '0.2.0';
@@ -34,11 +34,11 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('updates all assets when updating a package to a different version', async () => {
+  describe('updates all assets when updating a package to a different version', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     before(async () => {
+      await fleetAndAgents.setup();
       await installPackage(pkgName, pkgVersion);
       await installPackage(pkgName, pkgUpdateVersion);
     });
@@ -136,6 +136,7 @@ export default function (providerContext: FtrProviderContext) {
         resPackage.body.component_templates[0].component_template.template.mappings.properties
       ).eql({
         '@timestamp': {
+          ignore_malformed: false,
           type: 'date',
         },
         test_logs2: {
@@ -216,18 +217,14 @@ export default function (providerContext: FtrProviderContext) {
       expect(resPackage.statusCode).equal(200);
       expect(resPackage.body.component_templates[0].component_template.template.settings).eql({
         index: {
-          codec: 'best_compression',
           default_pipeline: 'logs-all_assets.test_logs-0.2.0',
           lifecycle: {
             name: 'reference2',
           },
           mapping: {
             total_fields: {
-              limit: '10000',
+              limit: '1000',
             },
-          },
-          query: {
-            default_field: ['logs_test_name', 'new_field_name'],
           },
         },
       });
@@ -235,6 +232,7 @@ export default function (providerContext: FtrProviderContext) {
         dynamic: true,
         properties: {
           '@timestamp': {
+            ignore_malformed: false,
             type: 'date',
           },
           data_stream: {
@@ -259,34 +257,6 @@ export default function (providerContext: FtrProviderContext) {
           },
         },
       });
-
-      const resUserSettings = await es.transport.request<any>(
-        {
-          method: 'GET',
-          path: `/_component_template/${logsTemplateName}@custom`,
-        },
-        { meta: true }
-      );
-      expect(resUserSettings.statusCode).equal(200);
-      expect(resUserSettings.body).eql({
-        component_templates: [
-          {
-            name: 'logs-all_assets.test_logs@custom',
-            component_template: {
-              _meta: {
-                managed: true,
-                managed_by: 'fleet',
-                package: {
-                  name: 'all_assets',
-                },
-              },
-              template: {
-                settings: {},
-              },
-            },
-          },
-        ],
-      });
     });
     it('should have updated the metrics mapping component template', async function () {
       const resPackage = await es.transport.request<any>(
@@ -301,6 +271,7 @@ export default function (providerContext: FtrProviderContext) {
         resPackage.body.component_templates[0].component_template.template.mappings.properties
       ).eql({
         '@timestamp': {
+          ignore_malformed: false,
           type: 'date',
         },
         metrics_test_name2: {
@@ -373,6 +344,10 @@ export default function (providerContext: FtrProviderContext) {
             type: 'dashboard',
           },
           {
+            id: 'sample_lens',
+            type: 'lens',
+          },
+          {
             id: 'sample_visualization',
             type: 'visualization',
           },
@@ -381,8 +356,8 @@ export default function (providerContext: FtrProviderContext) {
             type: 'search',
           },
           {
-            id: 'sample_lens',
-            type: 'lens',
+            id: 'sample_ml_module',
+            type: 'ml-module',
           },
           {
             id: 'sample_security_rule',
@@ -393,20 +368,16 @@ export default function (providerContext: FtrProviderContext) {
             type: 'csp-rule-template',
           },
           {
-            id: 'sample_ml_module',
-            type: 'ml-module',
-          },
-          {
-            id: 'sample_tag',
-            type: 'tag',
-          },
-          {
             id: 'sample_osquery_pack_asset',
             type: 'osquery-pack-asset',
           },
           {
             id: 'sample_osquery_saved_query',
             type: 'osquery-saved-query',
+          },
+          {
+            id: 'sample_tag',
+            type: 'tag',
           },
         ],
         installed_es: [
@@ -514,6 +485,7 @@ export default function (providerContext: FtrProviderContext) {
         install_started_at: res.attributes.install_started_at,
         install_source: 'registry',
         install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
+        latest_install_failed_attempts: [],
         verification_status: 'unknown',
         verification_key_id: null,
       });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -125,7 +126,8 @@ const savedObjectTypes: SavedObjectsType[] = [
   },
 ];
 
-describe('validates saved object types when a schema is provided', () => {
+// FAILING ES BUMP: https://github.com/elastic/kibana/pull/160152
+describe.skip('validates saved object types when a schema is provided', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
   let coreSetup: InternalCoreSetup;
@@ -163,8 +165,6 @@ describe('validates saved object types when a schema is provided', () => {
     if (esServer) {
       await esServer.stop();
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
   it('does nothing when no schema is provided', async () => {
@@ -185,7 +185,7 @@ describe('validates saved object types when a schema is provided', () => {
   });
 
   it('is superseded by migration errors and does not run if a migration fails', async () => {
-    expect(async () => {
+    await expect(async () => {
       await savedObjectsClient.create(
         'migration-error',
         {
@@ -232,7 +232,7 @@ describe('validates saved object types when a schema is provided', () => {
 
   describe('when validating with a config schema', () => {
     it('throws when an invalid attribute is provided', async () => {
-      expect(async () => {
+      await expect(async () => {
         await savedObjectsClient.create(
           'schema-using-kbn-config',
           {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -51,16 +52,18 @@ export const getFilteredMetricAgg = ({ getConfig }: FiltersMetricAggDependencies
     hasNoDslParams: true,
     getSerializedFormat,
     createFilter: (agg, inputState) => {
+      const indexPattern = agg.getIndexPattern();
+      if (
+        agg.params.customMetric.type.name === 'top_hits' ||
+        agg.params.customMetric.type.name === 'top_metrics'
+      ) {
+        return agg.params.customMetric.createFilter(inputState);
+      }
       if (!agg.params.customBucket.params.filter) return;
       const esQueryConfigs = getEsQueryConfig({ get: getConfig });
       return buildQueryFilter(
-        buildEsQuery(
-          agg.getIndexPattern(),
-          [agg.params.customBucket.params.filter],
-          [],
-          esQueryConfigs
-        ),
-        agg.getIndexPattern().id!,
+        buildEsQuery(indexPattern, [agg.params.customBucket.params.filter], [], esQueryConfigs),
+        indexPattern.id!,
         agg.params.customBucket.params.filter.query
       );
     },
@@ -68,6 +71,14 @@ export const getFilteredMetricAgg = ({ getConfig }: FiltersMetricAggDependencies
       const customMetric = agg.getParam('customMetric');
       const customBucket = agg.getParam('customBucket');
       return bucket && bucket[customBucket.id] && customMetric.getValue(bucket[customBucket.id]);
+    },
+    getValueType(agg) {
+      const customMetric = agg.getParam('customMetric');
+      return (
+        customMetric.type.getValueType?.(customMetric) ||
+        customMetric.params.field?.type ||
+        'number'
+      );
     },
     getValueBucketPath(agg) {
       const customBucket = agg.getParam('customBucket');

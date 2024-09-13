@@ -7,32 +7,30 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorConfiguration } from '../../../../../common/types/connectors';
+import { ConnectorConfiguration } from '@kbn/search-connectors';
+
 import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface PostConnectorConfigurationArgs {
   configuration: Record<string, string | number | boolean | null>;
   connectorId: string;
-  indexName: string;
 }
 
 export interface PostConnectorConfigurationResponse {
   configuration: ConnectorConfiguration;
-  indexName: string;
 }
 
 export const postConnectorConfiguration = async ({
   configuration,
   connectorId,
-  indexName,
 }: PostConnectorConfigurationArgs) => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/configuration`;
 
   const responseConfig = await HttpLogic.values.http.post<ConnectorConfiguration>(route, {
     body: JSON.stringify(configuration),
   });
-  return { configuration: responseConfig, indexName };
+  return { configuration: responseConfig };
 };
 
 export const ConnectorConfigurationApiLogic = createApiLogic(

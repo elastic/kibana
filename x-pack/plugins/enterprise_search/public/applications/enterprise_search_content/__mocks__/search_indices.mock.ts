@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
-
 import {
   ConnectorStatus,
-  FilteringPolicy,
-  FilteringRuleRule,
+  DisplayType,
+  FieldType,
   FilteringValidationState,
   SyncStatus,
-} from '../../../../common/types/connectors';
+} from '@kbn/search-connectors';
+
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
+
 import { ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
 
 export const indices: ElasticsearchIndexWithIngestion[] = [
@@ -32,15 +33,21 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
+      api_key_secret_id: null,
       configuration: {
         foo: {
-          display: 'textbox',
-          key: 'foo',
+          default_value: '',
+          depends_on: [],
+          display: DisplayType.TEXTBOX,
           label: 'bar',
           options: [],
           order: 1,
           required: false,
           sensitive: false,
+          tooltip: '',
+          type: FieldType.STRING,
+          ui_restrictions: [],
+          validations: [],
           value: 'barbar',
         },
       },
@@ -70,8 +77,8 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
                 field: '_',
                 id: 'DEFAULT',
                 order: 0,
-                policy: FilteringPolicy.INCLUDE,
-                rule: FilteringRuleRule.REGEX,
+                policy: 'include',
+                rule: 'regex',
                 updated_at: expect.any(String),
                 value: '.*',
               },
@@ -94,8 +101,8 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
                 field: '_',
                 id: 'DEFAULT',
                 order: 0,
-                policy: FilteringPolicy.INCLUDE,
-                rule: FilteringRuleRule.REGEX,
+                policy: 'include',
+                rule: 'regex',
                 updated_at: expect.any(String),
                 value: '.*',
               },
@@ -111,6 +118,12 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       index_name: 'connector',
       is_native: false,
       language: 'en',
+      last_access_control_sync_error: null,
+      last_access_control_sync_scheduled_at: null,
+      last_access_control_sync_status: SyncStatus.COMPLETED,
+      last_deleted_document_count: null,
+      last_incremental_sync_scheduled_at: null,
+      last_indexed_document_count: null,
       last_seen: null,
       last_sync_error: null,
       last_sync_scheduled_at: null,
@@ -118,8 +131,18 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       last_synced: null,
       name: 'connector',
       scheduling: {
-        enabled: false,
-        interval: '',
+        access_control: {
+          enabled: false,
+          interval: '',
+        },
+        full: {
+          enabled: false,
+          interval: '',
+        },
+        incremental: {
+          enabled: false,
+          interval: '',
+        },
       },
       service_type: null,
       status: ConnectorStatus.CONFIGURED,
@@ -139,15 +162,21 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
+      api_key_secret_id: null,
       configuration: {
         foo: {
-          display: 'textbox',
-          key: 'foo',
+          default_value: '',
+          depends_on: [],
+          display: DisplayType.TEXTBOX,
           label: 'bar',
           options: [],
           order: 1,
           required: false,
           sensitive: false,
+          tooltip: '',
+          type: FieldType.STRING,
+          ui_restrictions: [],
+          validations: [],
           value: 'barbar',
         },
       },
@@ -177,8 +206,8 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
                 field: '_',
                 id: 'DEFAULT',
                 order: 0,
-                policy: FilteringPolicy.INCLUDE,
-                rule: FilteringRuleRule.REGEX,
+                policy: 'include',
+                rule: 'regex',
                 updated_at: expect.any(String),
                 value: '.*',
               },
@@ -201,8 +230,8 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
                 field: '_',
                 id: 'DEFAULT',
                 order: 0,
-                policy: FilteringPolicy.INCLUDE,
-                rule: FilteringRuleRule.REGEX,
+                policy: 'include',
+                rule: 'regex',
                 updated_at: expect.any(String),
                 value: '.*',
               },
@@ -218,6 +247,12 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       index_name: 'crawler',
       is_native: true,
       language: 'en',
+      last_access_control_sync_error: null,
+      last_access_control_sync_scheduled_at: null,
+      last_access_control_sync_status: SyncStatus.COMPLETED,
+      last_deleted_document_count: null,
+      last_incremental_sync_scheduled_at: null,
+      last_indexed_document_count: null,
       last_seen: null,
       last_sync_error: null,
       last_sync_scheduled_at: null,
@@ -225,8 +260,18 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       last_synced: null,
       name: 'crawler',
       scheduling: {
-        enabled: false,
-        interval: '',
+        access_control: {
+          enabled: false,
+          interval: '',
+        },
+        full: {
+          enabled: false,
+          interval: '',
+        },
+        incremental: {
+          enabled: false,
+          interval: '',
+        },
       },
       service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
       status: ConnectorStatus.CONFIGURED,

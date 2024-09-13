@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { reduce } from 'lodash';
@@ -21,6 +22,8 @@ import type { FileMetadata, FilesMetrics, FileStatus } from '../../../../common/
 import type {
   FileMetadataClient,
   UpdateArgs,
+  GetArg,
+  BulkGetArg,
   FileDescriptor,
   GetUsageMetricsArgs,
 } from '../file_metadata_client';
@@ -54,12 +57,31 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
       metadata: result.attributes as FileDescriptor['metadata'],
     };
   }
-  async get({ id }: { id: string }): Promise<FileDescriptor> {
+
+  async get({ id }: GetArg): Promise<FileDescriptor> {
     const result = await this.soClient.get(this.soType, id);
     return {
       id: result.id,
       metadata: result.attributes as FileDescriptor['metadata'],
     };
+  }
+
+  async bulkGet(arg: { ids: string[]; throwIfNotFound?: true }): Promise<FileDescriptor[]>;
+  async bulkGet({ ids, throwIfNotFound }: BulkGetArg): Promise<Array<FileDescriptor | null>> {
+    const result = await this.soClient.bulkGet(ids.map((id) => ({ id, type: this.soType })));
+    return result.saved_objects.map((so) => {
+      if (so.error) {
+        if (throwIfNotFound) {
+          throw new Error(`File [${so.id}] not found`);
+        }
+        return null;
+      }
+
+      return {
+        id: so.id,
+        metadata: so.attributes as FileDescriptor['metadata'],
+      };
+    });
   }
 
   async find({ page, perPage, ...filterArgs }: FindFileArgs = {}): Promise<{

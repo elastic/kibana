@@ -17,7 +17,7 @@ import {
   createKibanaReactContext,
   GlobalFlyout,
   useKibana as useKibanaReactPlugin,
-  KibanaThemeProvider,
+  KibanaRenderContextProvider,
 } from '../shared_imports';
 
 import { AppContextProvider, AppDependencies } from './app_context';
@@ -27,26 +27,40 @@ import { ComponentTemplatesProvider, MappingsEditorProvider } from './components
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
-export const renderApp = (
-  elem: HTMLElement | null,
-  { core, dependencies }: { core: CoreStart; dependencies: AppDependencies }
-) => {
-  if (!elem) {
-    return () => undefined;
-  }
+export interface IndexManagementAppContextProps {
+  core: CoreStart;
+  children: React.ReactNode;
+  dependencies: AppDependencies;
+}
 
-  const { i18n, docLinks, notifications, application, executionContext, overlays } = core;
-  const { Context: I18nContext } = i18n;
-  const { services, history, setBreadcrumbs, uiSettings, kibanaVersion, theme$ } = dependencies;
+export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps> = ({
+  children,
+  core,
+  dependencies,
+}) => {
+  const {
+    docLinks,
+    notifications,
+    application,
+    executionContext,
+    overlays,
+    analytics,
+    i18n,
+    theme,
+  } = core;
+  const startServices = { analytics, i18n, overlays, theme };
+  const { services, setBreadcrumbs, uiSettings, settings, kibanaVersion } = dependencies;
 
-  // uiSettings is required by the CodeEditor component used to edit runtime field Painless scripts.
+  // theme is required by the CodeEditor component used to edit runtime field Painless scripts.
   const { Provider: KibanaReactContextProvider } =
     createKibanaReactContext<KibanaReactContextServices>({
       application,
       uiSettings,
+      settings,
       kibanaVersion: {
         get: () => kibanaVersion,
       },
+      theme,
     });
 
   const componentTemplateProviderValues = {
@@ -59,26 +73,39 @@ export const renderApp = (
     setBreadcrumbs,
     getUrlForApp: application.getUrlForApp,
     executionContext,
+    startServices,
   };
 
+  return (
+    <KibanaRenderContextProvider {...core}>
+      <KibanaReactContextProvider>
+        <Provider store={indexManagementStore(services)}>
+          <AppContextProvider value={{ ...dependencies, overlays }}>
+            <MappingsEditorProvider>
+              <ComponentTemplatesProvider value={componentTemplateProviderValues}>
+                <GlobalFlyoutProvider>{children}</GlobalFlyoutProvider>
+              </ComponentTemplatesProvider>
+            </MappingsEditorProvider>
+          </AppContextProvider>
+        </Provider>
+      </KibanaReactContextProvider>
+    </KibanaRenderContextProvider>
+  );
+};
+
+export const renderApp = (
+  elem: HTMLElement | null,
+  { core, dependencies }: { core: CoreStart; dependencies: AppDependencies }
+) => {
+  if (!elem) {
+    return () => undefined;
+  }
+  const { history } = dependencies;
+
   render(
-    <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
-        <KibanaReactContextProvider>
-          <Provider store={indexManagementStore(services)}>
-            <AppContextProvider value={dependencies}>
-              <MappingsEditorProvider>
-                <ComponentTemplatesProvider value={componentTemplateProviderValues}>
-                  <GlobalFlyoutProvider>
-                    <App history={history} />
-                  </GlobalFlyoutProvider>
-                </ComponentTemplatesProvider>
-              </MappingsEditorProvider>
-            </AppContextProvider>
-          </Provider>
-        </KibanaReactContextProvider>
-      </KibanaThemeProvider>
-    </I18nContext>,
+    <IndexManagementAppContext core={core} dependencies={dependencies}>
+      <App history={history} />
+    </IndexManagementAppContext>,
     elem
   );
 
@@ -90,9 +117,11 @@ export const renderApp = (
 interface KibanaReactContextServices {
   application: ApplicationStart;
   uiSettings: CoreSetup['uiSettings'];
+  settings: CoreSetup['settings'];
   kibanaVersion: {
     get: () => SemVer;
   };
+  theme: CoreStart['theme'];
 }
 
 // We override useKibana() from the react plugin to return a typed version for this app

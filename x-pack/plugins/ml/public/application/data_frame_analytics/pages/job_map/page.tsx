@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,14 +16,11 @@ import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
 import { JobMap } from '.';
 import { HelpMenu } from '../../../components/help_menu';
-import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
+import { useMlKibana, useMlApi } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
-import {
-  AnalyticsIdSelector,
-  AnalyticsSelectorIds,
-  AnalyticsIdSelectorControls,
-} from '../components/analytics_selector';
+import type { AnalyticsSelectorIds } from '../components/analytics_selector';
+import { AnalyticsIdSelector, AnalyticsIdSelectorControls } from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 
 export const Page: FC = () => {
@@ -54,7 +52,7 @@ export const Page: FC = () => {
   } = useMlKibana();
   const {
     dataFrameAnalytics: { getDataFrameAnalytics },
-  } = useMlApiContext();
+  } = useMlApi();
   const helpLink = docLinks.links.ml.dataFrameAnalytics;
 
   const checkJobsExist = async () => {

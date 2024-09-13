@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, type Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { BehaviorSubject, type Observable, take } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory, MemoryHistory } from 'history';
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import type { AppMountParameters, AppUpdater } from '@kbn/core-application-browser';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
@@ -38,11 +39,13 @@ describe('ApplicationService', () => {
   beforeEach(() => {
     history = createMemoryHistory();
     const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+    const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
 
     http.post.mockResolvedValue({ navLinks: {} });
 
     setupDeps = {
       http,
+      analytics,
       history: history as any,
     };
     startDeps = {
@@ -50,6 +53,7 @@ describe('ApplicationService', () => {
       overlays: overlayServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
       customBranding: customBrandingServiceMock.createStartContract(),
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     };
     service = new ApplicationService();
   });
@@ -87,6 +91,45 @@ describe('ApplicationService', () => {
 
         expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('app1');
       });
+
+      it('updates the page_url analytics context', async () => {
+        const { register } = service.setup(setupDeps);
+
+        const context$ = setupDeps.analytics.registerContextProvider.mock.calls[0][0]
+          .context$ as Observable<{
+          page_url: string;
+        }>;
+        const locations: string[] = [];
+        context$.subscribe((context) => locations.push(context.page_url));
+
+        register(Symbol(), {
+          id: 'app1',
+          title: 'App1',
+          mount: async () => () => undefined,
+        });
+        register(Symbol(), {
+          id: 'app2',
+          title: 'App2',
+          mount: async () => () => undefined,
+        });
+
+        const { getComponent } = await service.start(startDeps);
+        update = createRenderer(getComponent());
+
+        await navigate('/app/app1/bar?hello=dolly');
+        await flushPromises();
+        await navigate('/app/app2#/foo');
+        await flushPromises();
+        await navigate('/app/app2#/another-path');
+        await flushPromises();
+
+        expect(locations).toEqual([
+          '/',
+          '/app/app1/bar',
+          '/app/app2#/foo',
+          '/app/app2#/another-path',
+        ]);
+      });
     });
 
     describe('using navigateToApp', () => {
@@ -117,7 +160,7 @@ describe('ApplicationService', () => {
 
         await act(async () => {
           await navigateToApp('app1');
-          update();
+          await update();
         });
 
         expect(currentAppIds).toEqual(['app1']);
@@ -125,6 +168,46 @@ describe('ApplicationService', () => {
         resolveMount!();
 
         expect(currentAppIds).toEqual(['app1']);
+      });
+
+      it('updates the page_url analytics context', async () => {
+        const { register } = service.setup(setupDeps);
+
+        const context$ = setupDeps.analytics.registerContextProvider.mock.calls[0][0]
+          .context$ as Observable<{
+          page_url: string;
+        }>;
+        const locations: string[] = [];
+        context$.subscribe((context) => locations.push(context.page_url));
+
+        register(Symbol(), {
+          id: 'app1',
+          title: 'App1',
+          mount: async () => () => undefined,
+        });
+        register(Symbol(), {
+          id: 'app2',
+          title: 'App2',
+          mount: async () => () => undefined,
+        });
+
+        const { navigateToApp, getComponent } = await service.start(startDeps);
+        update = createRenderer(getComponent());
+
+        await act(async () => {
+          await navigateToApp('app1');
+          await update();
+        });
+        await act(async () => {
+          await navigateToApp('app2', { path: '/nested' });
+          await update();
+        });
+        await act(async () => {
+          await navigateToApp('app2', { path: '/another-path' });
+          await update();
+        });
+
+        expect(locations).toEqual(['/', '/app/app1', '/app/app2/nested', '/app/app2/another-path']);
       });
 
       it('replaces the current history entry when the `replace` option is true', async () => {
@@ -543,9 +626,14 @@ describe('ApplicationService', () => {
         title: 'App1',
         mount: async ({ setHeaderActionMenu }: AppMountParameters) => {
           setHeaderActionMenu(mounter1);
-          promise.then(() => {
-            setHeaderActionMenu(mounter2);
-          });
+          promise
+            .then(() => {
+              setHeaderActionMenu(mounter2);
+            })
+            .catch((error) => {
+              // eslint-disable-next-line no-console
+              console.error('Error:', error);
+            });
           return () => undefined;
         },
       });
@@ -581,9 +669,14 @@ describe('ApplicationService', () => {
         title: 'App1',
         mount: async ({ setHeaderActionMenu }: AppMountParameters) => {
           setHeaderActionMenu(mounter1);
-          promise.then(() => {
-            setHeaderActionMenu(undefined);
-          });
+          promise
+            .then(() => {
+              setHeaderActionMenu(undefined);
+            })
+            .catch((error) => {
+              // eslint-disable-next-line no-console
+              console.error('Error:', error);
+            });
           return () => undefined;
         },
       });

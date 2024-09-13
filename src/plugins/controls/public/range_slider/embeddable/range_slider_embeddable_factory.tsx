@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import deepEqual from 'fast-deep-equal';
 
-import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 
 import {
   createRangeSliderExtract,
@@ -22,6 +23,7 @@ import {
   RANGE_SLIDER_CONTROL,
 } from '../../../common/range_slider/types';
 import { ControlEmbeddable, IEditableControlFactory } from '../../types';
+import { RangeSliderEditorOptions } from '../components/range_slider_editor_options';
 
 export class RangeSliderEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<RangeSliderEmbeddableInput>
@@ -44,8 +46,10 @@ export class RangeSliderEmbeddableFactory
 
   public isEditable = () => Promise.resolve(true);
 
+  public controlEditorOptionsComponent = RangeSliderEditorOptions;
+
   public async create(initialInput: RangeSliderEmbeddableInput, parent?: IContainer) {
-    const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
+    const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
     const { RangeSliderEmbeddable } = await import('./range_slider_embeddable');
 
     return Promise.resolve(

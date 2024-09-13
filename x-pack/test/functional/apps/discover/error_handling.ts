@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
 
   describe('errors', function describeIndexTests() {
     before(async function () {
@@ -20,8 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/invalid_scripted_field'
       );
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
     });
 
     after(async function () {
@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // this is the same test as in OSS but it catches different error message issue in different licences
     describe('invalid scripted field error', () => {
       it('is rendered', async () => {
-        expect(await PageObjects.discover.noResultsErrorVisible()).to.be(true);
+        await discover.showsErrorCallout();
         const painlessStackTrace = await testSubjects.find('painlessStackTrace');
         expect(painlessStackTrace).not.to.be(undefined);
       });

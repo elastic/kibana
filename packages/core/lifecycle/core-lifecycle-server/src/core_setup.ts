@@ -1,29 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { CapabilitiesSetup } from '@kbn/core-capabilities-server';
-import { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
-import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
-import { ElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server';
-import { ExecutionContextSetup } from '@kbn/core-execution-context-server';
-import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { HttpResources } from '@kbn/core-http-resources-server';
-import { HttpServiceSetup } from '@kbn/core-http-server';
-import { I18nServiceSetup } from '@kbn/core-i18n-server';
-import { LoggingServiceSetup } from '@kbn/core-logging-server';
-import { MetricsServiceSetup } from '@kbn/core-metrics-server';
-import { SavedObjectsServiceSetup } from '@kbn/core-saved-objects-server';
-import { StatusServiceSetup } from '@kbn/core-status-server';
-import { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
-import { CoreUsageDataSetup } from '@kbn/core-usage-data-server';
-import { CustomBrandingSetup } from '@kbn/core-custom-branding-server';
-import { CoreStart } from './core_start';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { CapabilitiesSetup } from '@kbn/core-capabilities-server';
+import type { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
+import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import type { ElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server';
+import type { ExecutionContextSetup } from '@kbn/core-execution-context-server';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { HttpResources } from '@kbn/core-http-resources-server';
+import type { HttpServiceSetup } from '@kbn/core-http-server';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
+import type { LoggingServiceSetup } from '@kbn/core-logging-server';
+import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
+import type { SavedObjectsServiceSetup } from '@kbn/core-saved-objects-server';
+import type { StatusServiceSetup } from '@kbn/core-status-server';
+import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
+import type { CoreUsageDataSetup } from '@kbn/core-usage-data-server';
+import type { CustomBrandingSetup } from '@kbn/core-custom-branding-server';
+import type { UserSettingsServiceSetup } from '@kbn/core-user-settings-server';
+import type { PluginsServiceSetup } from '@kbn/core-plugins-contracts-server';
+import type { SecurityServiceSetup } from '@kbn/core-security-server';
+import type { UserProfileServiceSetup } from '@kbn/core-user-profile-server';
+import type { CoreStart } from './core_start';
 
 /**
  * Context passed to the `setup` method of `standard` plugins.
@@ -64,12 +69,20 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
+  /** {@link UserSettingsServiceSetup} */
+  userSettings: UserSettingsServiceSetup;
   /** {@link DeprecationsServiceSetup} */
   deprecations: DeprecationsServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
   /** @internal {@link CoreUsageDataSetup} */
   coreUsageData: CoreUsageDataSetup;
+  /** {@link PluginsServiceSetup} */
+  plugins: PluginsServiceSetup;
+  /** {@link SecurityServiceSetup} */
+  security: SecurityServiceSetup;
+  /** {@link UserProfileServiceSetup} */
+  userProfile: UserProfileServiceSetup;
 }
 
 /**

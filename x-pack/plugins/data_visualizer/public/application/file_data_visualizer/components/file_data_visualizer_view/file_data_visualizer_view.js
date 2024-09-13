@@ -13,7 +13,6 @@ import { EuiSpacer } from '@elastic/eui';
 import { isEqual } from 'lodash';
 
 import { AboutPanel, LoadingPanel } from '../about_panel';
-import { BottomBar } from '../bottom_bar';
 import { ResultsView } from '../results_view';
 import {
   FileCouldNotBeRead,
@@ -29,10 +28,11 @@ import {
   createUrlOverrides,
   processResults,
 } from '../../../common/components/utils';
-
-import { Chat } from '@kbn/cloud-chat-plugin/public';
+import { analyzeTikaFile } from './tika_analyzer';
 
 import { MODE } from './constants';
+import { FileSizeChecker } from './file_size_check';
+import { isTikaType } from '../../../../../common/utils/tika_utils';
 
 export class FileDataVisualizerView extends Component {
   constructor(props) {
@@ -43,7 +43,7 @@ export class FileDataVisualizerView extends Component {
       fileName: '',
       fileContents: '',
       data: [],
-      fileSize: 0,
+      base64Data: '',
       fileTooLarge: false,
       fileCouldNotBeRead: false,
       serverError: null,
@@ -54,7 +54,6 @@ export class FileDataVisualizerView extends Component {
       mode: MODE.READ,
       isEditFlyoutVisible: false,
       isExplanationFlyoutVisible: false,
-      bottomBarVisible: false,
       hasPermissionToImport: false,
       fileCouldNotBeReadPermissionError: false,
     };
@@ -64,8 +63,6 @@ export class FileDataVisualizerView extends Component {
     this.originalSettings = {
       linesToSample: DEFAULT_LINES_TO_SAMPLE,
     };
-
-    this.maxFileUploadBytes = props.fileUpload.getMaxBytes();
   }
 
   async componentDidMount() {
@@ -85,12 +82,10 @@ export class FileDataVisualizerView extends Component {
     this.setState(
       {
         loading: files.length > 0,
-        bottomBarVisible: files.length > 0,
         loaded: false,
         fileName: '',
         fileContents: '',
         data: [],
-        fileSize: 0,
         fileTooLarge: false,
         fileCouldNotBeRead: false,
         fileCouldNotBeReadPermissionError: false,
@@ -107,17 +102,25 @@ export class FileDataVisualizerView extends Component {
   };
 
   async loadFile(file) {
-    if (file.size <= this.maxFileUploadBytes) {
+    this.fileSizeChecker = new FileSizeChecker(this.props.fileUpload, file);
+    if (this.fileSizeChecker.check()) {
       try {
         const { data, fileContents } = await readFile(file);
-        this.setState({
-          data,
-          fileContents,
-          fileName: file.name,
-          fileSize: file.size,
-        });
+        if (isTikaType(file.type)) {
+          this.setState({
+            data,
+            fileName: file.name,
+          });
 
-        await this.analyzeFile(fileContents);
+          await this.analyzeTika(data);
+        } else {
+          this.setState({
+            data,
+            fileContents,
+            fileName: file.name,
+          });
+          await this.analyzeFile(fileContents);
+        }
       } catch (error) {
         this.setState({
           loaded: false,
@@ -131,7 +134,6 @@ export class FileDataVisualizerView extends Component {
         loading: false,
         fileTooLarge: true,
         fileName: file.name,
-        fileSize: file.size,
       });
     }
   }
@@ -211,32 +213,35 @@ export class FileDataVisualizerView extends Component {
     }
   }
 
+  async analyzeTika(data, isRetry = false) {
+    const { tikaResults, standardResults } = await analyzeTikaFile(data, this.props.fileUpload);
+    const serverSettings = processResults(standardResults);
+    this.originalSettings = serverSettings;
+
+    this.setState({
+      fileContents: tikaResults.content,
+      results: standardResults.results,
+      explanation: standardResults.explanation,
+      loaded: true,
+      loading: false,
+      fileCouldNotBeRead: isRetry,
+    });
+  }
+
   closeEditFlyout = () => {
     this.setState({ isEditFlyoutVisible: false });
-    this.showBottomBar();
   };
 
   showEditFlyout = () => {
     this.setState({ isEditFlyoutVisible: true });
-    this.hideBottomBar();
   };
 
   closeExplanationFlyout = () => {
     this.setState({ isExplanationFlyoutVisible: false });
-    this.showBottomBar();
   };
 
   showExplanationFlyout = () => {
     this.setState({ isExplanationFlyoutVisible: true });
-    this.hideBottomBar();
-  };
-
-  showBottomBar = () => {
-    this.setState({ bottomBarVisible: true });
-  };
-
-  hideBottomBar = () => {
-    this.setState({ bottomBarVisible: false });
   };
 
   setOverrides = (overrides) => {
@@ -275,14 +280,12 @@ export class FileDataVisualizerView extends Component {
       fileContents,
       data,
       fileName,
-      fileSize,
       fileTooLarge,
       fileCouldNotBeRead,
       serverError,
       mode,
       isEditFlyoutVisible,
       isExplanationFlyoutVisible,
-      bottomBarVisible,
       hasPermissionToImport,
       fileCouldNotBeReadPermissionError,
     } = this.state;
@@ -305,9 +308,7 @@ export class FileDataVisualizerView extends Component {
 
             {loading && <LoadingPanel />}
 
-            {fileTooLarge && (
-              <FileTooLarge fileSize={fileSize} maxFileSize={this.maxFileUploadBytes} />
-            )}
+            {fileTooLarge && <FileTooLarge fileSizeChecker={this.fileSizeChecker} />}
 
             {fileCouldNotBeRead && loading === false && (
               <>
@@ -329,10 +330,13 @@ export class FileDataVisualizerView extends Component {
                 results={results}
                 explanation={explanation}
                 fileName={fileName}
-                data={fileContents}
+                fileContents={fileContents}
                 showEditFlyout={this.showEditFlyout}
                 showExplanationFlyout={this.showExplanationFlyout}
                 disableButtons={isEditFlyoutVisible || isExplanationFlyoutVisible}
+                onChangeMode={this.changeMode}
+                onCancel={this.onCancel}
+                disableImport={hasPermissionToImport === false}
               />
             )}
             <EditFlyout
@@ -347,18 +351,6 @@ export class FileDataVisualizerView extends Component {
             {isExplanationFlyoutVisible && (
               <ExplanationFlyout results={results} closeFlyout={this.closeExplanationFlyout} />
             )}
-
-            {bottomBarVisible && loaded && (
-              <>
-                <BottomBar
-                  mode={MODE.READ}
-                  onChangeMode={this.changeMode}
-                  onCancel={this.onCancel}
-                  disableImport={hasPermissionToImport === false}
-                />
-                <BottomPadding />
-              </>
-            )}
           </>
         )}
         {mode === MODE.IMPORT && (
@@ -369,38 +361,18 @@ export class FileDataVisualizerView extends Component {
               fileContents={fileContents}
               data={data}
               dataViewsContract={this.props.dataViewsContract}
-              showBottomBar={this.showBottomBar}
-              hideBottomBar={this.hideBottomBar}
+              dataStart={this.props.dataStart}
               fileUpload={this.props.fileUpload}
               getAdditionalLinks={this.props.getAdditionalLinks}
+              resultLinks={this.props.resultLinks}
               capabilities={this.props.capabilities}
+              mode={mode}
+              onChangeMode={this.changeMode}
+              onCancel={this.onCancel}
             />
-
-            {bottomBarVisible && (
-              <>
-                <BottomBar
-                  mode={MODE.IMPORT}
-                  onChangeMode={this.changeMode}
-                  onCancel={this.onCancel}
-                />
-                <BottomPadding />
-              </>
-            )}
           </>
         )}
-        <Chat />
       </div>
     );
   }
-}
-
-function BottomPadding() {
-  // padding for the BottomBar
-  return (
-    <>
-      <EuiSpacer size="m" />
-      <EuiSpacer size="l" />
-      <EuiSpacer size="l" />
-    </>
-  );
 }

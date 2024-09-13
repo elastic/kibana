@@ -36,28 +36,32 @@ describe('AnalyticsCollectionIntegrate', () => {
     const wrapper = shallow(
       <AnalyticsCollectionIntegrateView analyticsCollection={analyticsCollections} />
     );
-    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock)).toHaveLength(3);
+    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock)).toHaveLength(4);
     wrapper.find('[data-test-subj="searchuiEmbed"]').at(0).simulate('click');
     expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock)).toHaveLength(3);
     wrapper.find('[data-test-subj="javascriptClientEmbed"]').at(0).simulate('click');
-    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock)).toHaveLength(5);
+    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock)).toHaveLength(6);
   });
 
   it('check value of config & webClientSrc', () => {
     const wrapper = shallow(
       <AnalyticsCollectionIntegrateView analyticsCollection={analyticsCollections} />
     );
-    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock).at(0).dive().text()).toContain(
-      'https://cdn.jsdelivr.net/npm/@elastic/behavioral-analytics-browser-tracker@2/dist/umd/index.global.js'
+    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock).at(1).dive().text()).toContain(
+      'https://cdn.jsdelivr.net/npm/@elastic/behavioral-analytics-browser-tracker@2'
     );
 
-    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock).at(1).dive().text())
+    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock).at(2).dive().text())
       .toMatchInlineSnapshot(`
-      "<script type=\\"text/javascript\\">window.elasticAnalytics.createTracker({
-        endpoint: \\"http://localhost:3002\\",
+      "<script type=\\"text/javascript\\">
+      window.elasticAnalytics.createTracker({
+        endpoint: \\"elasticsearch-url\\",
         collectionName: \\"example\\",
-        apiKey: \\"########\\"
-      });</script>"
+        apiKey: \\"########\\",
+        // Optional: sampling rate percentage: 0-1, 0 = no events, 1 = all events
+        // sampling: 1,
+      });
+      </script>"
     `);
   });
 });

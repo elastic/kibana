@@ -1,17 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
+import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import React from 'react';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { HttpStart } from '@kbn/core-http-browser';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { SavedObjectFinderProps } from './saved_object_finder';
 
 const LazySavedObjectFinder = React.lazy(() => import('./saved_object_finder'));
@@ -19,7 +19,7 @@ const SavedObjectFinder = (props: SavedObjectFinderProps) => (
   <React.Suspense
     fallback={
       <EuiDelayRender delay={300}>
-        <EuiLoadingContent />
+        <EuiSkeletonText />
       </EuiDelayRender>
     }
   >
@@ -28,16 +28,12 @@ const SavedObjectFinder = (props: SavedObjectFinderProps) => (
 );
 
 export const getSavedObjectFinder = (
+  contentClient: ContentClient,
   uiSettings: IUiSettingsClient,
-  http: HttpStart,
-  savedObjectsManagement: SavedObjectsManagementPluginStart,
   savedObjectsTagging?: SavedObjectsTaggingApi
 ) => {
   return (props: SavedObjectFinderProps) => (
-    <SavedObjectFinder
-      {...props}
-      services={{ uiSettings, http, savedObjectsManagement, savedObjectsTagging }}
-    />
+    <SavedObjectFinder {...props} services={{ savedObjectsTagging, contentClient, uiSettings }} />
   );
 };
 

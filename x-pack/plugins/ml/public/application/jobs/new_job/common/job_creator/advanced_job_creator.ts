@@ -7,20 +7,22 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import type { Field, Aggregation, SplitField } from '@kbn/ml-anomaly-utils';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
+import type { MlApi } from '../../../../services/ml_api_service';
 import { JobCreator } from './job_creator';
-import { Field, Aggregation, SplitField } from '../../../../../../common/types/fields';
-import {
+import type {
   Job,
   Datafeed,
   Detector,
   CustomRule,
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { isValidJson } from '../../../../../../common/util/validation_utils';
+import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 
 export interface RichDetector {
   agg: Aggregation | null;
@@ -39,8 +41,15 @@ export class AdvancedJobCreator extends JobCreator {
   private _richDetectors: RichDetector[] = [];
   private _queryString: string;
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
-    super(indexPattern, savedSearch, query);
+  constructor(
+    mlApi: MlApi,
+    newJobCapsService: NewJobCapsService,
+    indexPattern: DataView,
+    savedSearch: SavedSearch | null,
+    query: object
+  ) {
+    super(mlApi, newJobCapsService, indexPattern, savedSearch, query);
+    this.createdBy = CREATED_BY_LABEL.ADVANCED;
 
     this._queryString = JSON.stringify(this._datafeed_config.query);
 
@@ -182,7 +191,14 @@ export class AdvancedJobCreator extends JobCreator {
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
-    const detectors = getRichDetectors(job, datafeed, this.additionalFields, true);
+    this.createdBy = CREATED_BY_LABEL.ADVANCED;
+    const detectors = getRichDetectors(
+      this.newJobCapsService,
+      job,
+      datafeed,
+      this.additionalFields,
+      true
+    );
 
     // keep track of the custom rules for each detector
     const customRules = this._detectors.map((d) => d.custom_rules);

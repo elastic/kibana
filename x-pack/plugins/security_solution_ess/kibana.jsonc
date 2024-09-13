@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/security-solution-ess",
+  "owner": "@elastic/security-solution",
+  "description": "ESS customizations for Security Solution.",
+  "plugin": {
+    "id": "securitySolutionEss",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "securitySolutionEss"],
+    "requiredPlugins": [
+      "securitySolution",
+      "management",
+      "navigation",
+      "licensing",
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": [ "kibanaReact"]
+  }
+}

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { connector } from '../mock';
-import type { UseGetIssueTypes } from './use_get_issue_types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import * as api from './api';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./api');
@@ -19,90 +20,92 @@ jest.mock('./api');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('useGetIssueTypes', () => {
-  const { http, notifications } = useKibanaMock().services;
-  const handleIssueType = jest.fn();
+  const { http } = useKibanaMock().services;
+  let appMockRender: AppMockRenderer;
 
-  beforeEach(() => jest.clearAllMocks());
-
-  test('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetIssueTypes>(() =>
-        useGetIssueTypes({ http, toastNotifications: notifications.toasts, handleIssueType })
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({ isLoading: true, issueTypes: [] });
-    });
+  beforeEach(() => {
+    appMockRender = createAppMockRenderer();
+    jest.clearAllMocks();
   });
 
-  test('fetch issue types', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetIssueTypes>(() =>
+  it('calls the api when invoked with the correct parameters', async () => {
+    const spy = jest.spyOn(api, 'getIssueTypes');
+    const { result, waitFor } = renderHook(
+      () =>
         useGetIssueTypes({
           http,
-          toastNotifications: notifications.toasts,
           connector,
-          handleIssueType,
-        })
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        issueTypes: [
-          {
-            id: '10006',
-            name: 'Task',
-          },
-          {
-            id: '10007',
-            name: 'Bug',
-          },
-        ],
-      });
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    await waitFor(() => result.current.isSuccess);
+
+    expect(spy).toHaveBeenCalledWith({
+      http,
+      signal: expect.anything(),
+      connectorId: connector.id,
     });
   });
 
-  test('handleIssueType is called', async () => {
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetIssueTypes>(() =>
+  it('does not call the api when the connector is missing', async () => {
+    const spy = jest.spyOn(api, 'getIssueTypes');
+    renderHook(
+      () =>
         useGetIssueTypes({
           http,
-          toastNotifications: notifications.toasts,
-          connector,
-          handleIssueType,
-        })
-      );
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(handleIssueType).toHaveBeenCalledWith([
-        { text: 'Task', value: '10006' },
-        { text: 'Bug', value: '10007' },
-      ]);
-    });
+    expect(spy).not.toHaveBeenCalledWith();
   });
 
-  test('unhappy path', async () => {
-    const spyOnGetCaseConfigure = jest.spyOn(api, 'getIssueTypes');
-    spyOnGetCaseConfigure.mockImplementation(() => {
+  it('calls addError when the getIssueTypes api throws an error', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getIssueTypes');
+    spyOnGetCases.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetIssueTypes>(() =>
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
+
+    const { waitFor } = renderHook(
+      () =>
         useGetIssueTypes({
           http,
-          toastNotifications: notifications.toasts,
           connector,
-          handleIssueType,
-        })
-      );
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
+  });
 
-      expect(result.current).toEqual({ isLoading: false, issueTypes: [] });
+  it('calls addError when the getIssueTypes api returns successfully but contains an error', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getIssueTypes');
+    spyOnGetCases.mockResolvedValue({
+      status: 'error',
+      message: 'Error message',
+      actionId: 'test',
+    });
+
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
+
+    const { waitFor } = renderHook(
+      () =>
+        useGetIssueTypes({
+          http,
+          connector,
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
     });
   });
 });

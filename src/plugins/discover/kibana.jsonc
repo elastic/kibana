@@ -17,33 +17,33 @@
       "urlForwarding",
       "navigation",
       "uiActions",
-      "savedObjects",
       "savedObjectsFinder",
       "savedObjectsManagement",
+      "savedSearch",
       "dataViewFieldEditor",
       "dataViewEditor",
       "expressions",
-      "unifiedFieldList",
+      "unifiedDocViewer",
       "unifiedSearch",
-      "unifiedHistogram"
+      "unifiedHistogram",
+      "contentManagement"
     ],
     "optionalPlugins": [
+      "dataVisualizer",
       "home",
       "share",
       "usageCollection",
       "spaces",
       "triggersActionsUi",
       "savedObjectsTaggingOss",
-      "lens"
+      "lens",
+      "noDataPage",
+      "globalSearch",
+      "observabilityAIAssistant",
+      "aiops",
+      "fieldsMetadata"
     ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact",
-      "unifiedSearch",
-      "savedSearch"
-    ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch", "savedObjects"],
+    "extraPublicDirs": ["common"]
   }
 }

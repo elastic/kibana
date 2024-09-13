@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint max-len: 0 */
@@ -18,6 +19,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     coreMigrationVersion: '8.8.0',
     typeMigrationVersion: '8.0.0',
+    managed: false,
     attributes: {
       title: i18n.translate('home.sampleData.logsSpec.visitorsMapTitle', {
         defaultMessage: '[Logs] Visitors Map',
@@ -47,6 +49,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     coreMigrationVersion: '8.8.0',
     typeMigrationVersion: '7.14.0',
+    managed: false,
     attributes: {
       title: i18n.translate('home.sampleData.logsSpec.heatmapTitle', {
         defaultMessage: '[Logs] Unique Destination Heatmap',
@@ -89,6 +92,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     coreMigrationVersion: '8.8.0',
     typeMigrationVersion: '7.14.0',
+    managed: false,
     attributes: {
       title: i18n.translate('home.sampleData.logsSpec.bytesDistributionTitle', {
         defaultMessage: '[Logs] Bytes distribution',
@@ -302,8 +306,8 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       description: "Analyze mock web traffic log data for Elastic's website",
       refreshInterval: {
-        pause: false,
-        value: 900000,
+        pause: true,
+        value: 60000,
       },
       timeRestore: true,
       optionsJSON:
@@ -399,6 +403,7 @@ export const getSavedObjects = (): SavedObject[] => [
     ],
     coreMigrationVersion: '8.8.0',
     typeMigrationVersion: '8.7.0',
+    managed: false,
   },
   {
     id: '2f360f30-ea74-11eb-b4c6-3d2afc1cb389',
@@ -407,6 +412,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     coreMigrationVersion: '8.8.0',
     typeMigrationVersion: '7.9.3',
+    managed: false,
     attributes: {
       title: i18n.translate('home.sampleData.logsSpec.discoverTitle', {
         defaultMessage: '[Logs] Visits',

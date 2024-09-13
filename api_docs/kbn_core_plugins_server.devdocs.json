@@ -11,18 +11,10 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-plugins-server",
-        "id": "def-common.AsyncPlugin",
+        "id": "def-server.AsyncPlugin",
         "type": "Interface",
         "tags": [
           "deprecated"
@@ -34,9 +26,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.AsyncPlugin",
+            "section": "def-server.AsyncPlugin",
             "text": "AsyncPlugin"
           },
           "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
@@ -62,7 +54,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.AsyncPlugin.setup",
+            "id": "def-server.AsyncPlugin.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -71,9 +63,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>, plugins: TPluginsSetup) => TSetup | Promise<TSetup>"
@@ -84,7 +76,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-plugins-server",
-                "id": "def-common.AsyncPlugin.setup.$1",
+                "id": "def-server.AsyncPlugin.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "core",
@@ -92,9 +84,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -106,7 +98,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-plugins-server",
-                "id": "def-common.AsyncPlugin.setup.$2",
+                "id": "def-server.AsyncPlugin.setup.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "plugins",
@@ -124,7 +116,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.AsyncPlugin.start",
+            "id": "def-server.AsyncPlugin.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -133,9 +125,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-server.CoreStart",
                 "text": "CoreStart"
               },
               ", plugins: TPluginsStart) => TStart | Promise<TStart>"
@@ -146,7 +138,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-plugins-server",
-                "id": "def-common.AsyncPlugin.start.$1",
+                "id": "def-server.AsyncPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "core",
@@ -154,9 +146,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-server.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -167,7 +159,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-plugins-server",
-                "id": "def-common.AsyncPlugin.start.$2",
+                "id": "def-server.AsyncPlugin.start.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "plugins",
@@ -185,13 +177,21 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.AsyncPlugin.stop",
+            "id": "def-server.AsyncPlugin.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
             "description": [],
             "signature": [
-              "(() => void) | undefined"
+              "(() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<void>) | undefined"
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
@@ -204,7 +204,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-server",
-        "id": "def-common.Plugin",
+        "id": "def-server.Plugin",
         "type": "Interface",
         "tags": [],
         "label": "Plugin",
@@ -214,9 +214,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-server.Plugin",
             "text": "Plugin"
           },
           "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
@@ -227,7 +227,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.Plugin.setup",
+            "id": "def-server.Plugin.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -236,9 +236,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>, plugins: TPluginsSetup) => TSetup"
@@ -249,7 +249,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-plugins-server",
-                "id": "def-common.Plugin.setup.$1",
+                "id": "def-server.Plugin.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "core",
@@ -257,9 +257,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -271,7 +271,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-plugins-server",
-                "id": "def-common.Plugin.setup.$2",
+                "id": "def-server.Plugin.setup.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "plugins",
@@ -289,7 +289,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.Plugin.start",
+            "id": "def-server.Plugin.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -298,9 +298,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-server.CoreStart",
                 "text": "CoreStart"
               },
               ", plugins: TPluginsStart) => TStart"
@@ -311,7 +311,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-plugins-server",
-                "id": "def-common.Plugin.start.$1",
+                "id": "def-server.Plugin.start.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "core",
@@ -319,9 +319,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-server.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -332,7 +332,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-plugins-server",
-                "id": "def-common.Plugin.start.$2",
+                "id": "def-server.Plugin.start.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "plugins",
@@ -350,13 +350,21 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.Plugin.stop",
+            "id": "def-server.Plugin.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
             "description": [],
             "signature": [
-              "(() => void) | undefined"
+              "(() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<void>) | undefined"
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
@@ -369,7 +377,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-server",
-        "id": "def-common.PluginConfigDescriptor",
+        "id": "def-server.PluginConfigDescriptor",
         "type": "Interface",
         "tags": [],
         "label": "PluginConfigDescriptor",
@@ -379,9 +387,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.PluginConfigDescriptor",
+            "section": "def-server.PluginConfigDescriptor",
             "text": "PluginConfigDescriptor"
           },
           "<T>"
@@ -392,7 +400,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginConfigDescriptor.deprecations",
+            "id": "def-server.PluginConfigDescriptor.deprecations",
             "type": "Function",
             "tags": [],
             "label": "deprecations",
@@ -402,9 +410,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-common.ConfigDeprecationProvider",
+                "section": "def-server.ConfigDeprecationProvider",
                 "text": "ConfigDeprecationProvider"
               },
               " | undefined"
@@ -415,7 +423,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginConfigDescriptor.exposeToBrowser",
+            "id": "def-server.PluginConfigDescriptor.exposeToBrowser",
             "type": "Object",
             "tags": [],
             "label": "exposeToBrowser",
@@ -425,9 +433,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-plugins-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCorePluginsServerPluginApi",
-                "section": "def-common.ExposedToBrowserDescriptor",
+                "section": "def-server.ExposedToBrowserDescriptor",
                 "text": "ExposedToBrowserDescriptor"
               },
               "<T> | undefined"
@@ -438,7 +446,30 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginConfigDescriptor.schema",
+            "id": "def-server.PluginConfigDescriptor.dynamicConfig",
+            "type": "Object",
+            "tags": [],
+            "label": "dynamicConfig",
+            "description": [
+              "\nList of configuration properties that can be dynamically changed via the PUT /_settings API."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "server",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-server.DynamicConfigDescriptor",
+                "text": "DynamicConfigDescriptor"
+              },
+              "<T> | undefined"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-server.PluginConfigDescriptor.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -461,7 +492,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginConfigDescriptor.exposeToUsage",
+            "id": "def-server.PluginConfigDescriptor.exposeToUsage",
             "type": "Object",
             "tags": [],
             "label": "exposeToUsage",
@@ -471,9 +502,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-plugins-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCorePluginsServerPluginApi",
-                "section": "def-common.MakeUsageFromSchema",
+                "section": "def-server.MakeUsageFromSchema",
                 "text": "MakeUsageFromSchema"
               },
               "<T> | undefined"
@@ -487,7 +518,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-server",
-        "id": "def-common.PluginInitializerContext",
+        "id": "def-server.PluginInitializerContext",
         "type": "Interface",
         "tags": [],
         "label": "PluginInitializerContext",
@@ -497,9 +528,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.PluginInitializerContext",
+            "section": "def-server.PluginInitializerContext",
             "text": "PluginInitializerContext"
           },
           "<ConfigSchema>"
@@ -510,7 +541,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginInitializerContext.opaqueId",
+            "id": "def-server.PluginInitializerContext.opaqueId",
             "type": "Uncategorized",
             "tags": [],
             "label": "opaqueId",
@@ -524,7 +555,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginInitializerContext.env",
+            "id": "def-server.PluginInitializerContext.env",
             "type": "Object",
             "tags": [],
             "label": "env",
@@ -533,17 +564,17 @@
               "{ mode: ",
               {
                 "pluginId": "@kbn/config",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-common.EnvironmentMode",
+                "section": "def-server.EnvironmentMode",
                 "text": "EnvironmentMode"
               },
               "; packageInfo: Readonly<",
               {
                 "pluginId": "@kbn/config",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-common.PackageInfo",
+                "section": "def-server.PackageInfo",
                 "text": "PackageInfo"
               },
               ">; instanceUuid: string; configs: readonly string[]; }"
@@ -554,7 +585,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginInitializerContext.node",
+            "id": "def-server.PluginInitializerContext.node",
             "type": "Object",
             "tags": [],
             "label": "node",
@@ -564,9 +595,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-node-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreNodeServerPluginApi",
-                "section": "def-common.NodeInfo",
+                "section": "def-server.NodeInfo",
                 "text": "NodeInfo"
               }
             ],
@@ -576,7 +607,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginInitializerContext.logger",
+            "id": "def-server.PluginInitializerContext.logger",
             "type": "Object",
             "tags": [],
             "label": "logger",
@@ -598,7 +629,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginInitializerContext.config",
+            "id": "def-server.PluginInitializerContext.config",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -608,7 +639,7 @@
             "signature": [
               "{ legacy: { globalConfig$: ",
               "Observable",
-              "<Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              "<Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -634,7 +665,7 @@
               },
               ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
               "ByteSizeValueUnit",
-              " | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              " | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -673,7 +704,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-server",
-        "id": "def-common.PluginManifest",
+        "id": "def-server.PluginManifest",
         "type": "Interface",
         "tags": [],
         "label": "PluginManifest",
@@ -686,7 +717,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginManifest.id",
+            "id": "def-server.PluginManifest.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -699,7 +730,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginManifest.version",
+            "id": "def-server.PluginManifest.version",
             "type": "string",
             "tags": [],
             "label": "version",
@@ -712,7 +743,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginManifest.kibanaVersion",
+            "id": "def-server.PluginManifest.kibanaVersion",
             "type": "string",
             "tags": [],
             "label": "kibanaVersion",
@@ -725,7 +756,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginManifest.type",
+            "id": "def-server.PluginManifest.type",
             "type": "Enum",
             "tags": [],
             "label": "type",
@@ -747,7 +778,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginManifest.configPath",
+            "id": "def-server.PluginManifest.configPath",
             "type": "CompoundType",
             "tags": [],
             "label": "configPath",
@@ -763,7 +794,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginManifest.requiredPlugins",
+            "id": "def-server.PluginManifest.requiredPlugins",
             "type": "Object",
             "tags": [],
             "label": "requiredPlugins",
@@ -779,7 +810,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginManifest.requiredBundles",
+            "id": "def-server.PluginManifest.requiredBundles",
             "type": "Object",
             "tags": [],
             "label": "requiredBundles",
@@ -795,7 +826,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginManifest.optionalPlugins",
+            "id": "def-server.PluginManifest.optionalPlugins",
             "type": "Object",
             "tags": [],
             "label": "optionalPlugins",
@@ -811,7 +842,23 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginManifest.ui",
+            "id": "def-server.PluginManifest.runtimePluginDependencies",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimePluginDependencies",
+            "description": [
+              "\nAn optional list of plugin dependencies that can be resolved dynamically at runtime\nusing the dynamic contract resolving capabilities from the plugin service."
+            ],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-server.PluginManifest.ui",
             "type": "boolean",
             "tags": [],
             "label": "ui",
@@ -824,7 +871,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginManifest.server",
+            "id": "def-server.PluginManifest.server",
             "type": "boolean",
             "tags": [],
             "label": "server",
@@ -837,7 +884,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginManifest.extraPublicDirs",
+            "id": "def-server.PluginManifest.extraPublicDirs",
             "type": "Array",
             "tags": [
               "deprecated"
@@ -881,7 +928,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginManifest.serviceFolders",
+            "id": "def-server.PluginManifest.serviceFolders",
             "type": "Object",
             "tags": [],
             "label": "serviceFolders",
@@ -897,7 +944,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginManifest.owner",
+            "id": "def-server.PluginManifest.owner",
             "type": "Object",
             "tags": [],
             "label": "owner",
@@ -911,7 +958,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginManifest.description",
+            "id": "def-server.PluginManifest.description",
             "type": "string",
             "tags": [],
             "label": "description",
@@ -927,7 +974,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginManifest.enabledOnAnonymousPages",
+            "id": "def-server.PluginManifest.enabledOnAnonymousPages",
             "type": "CompoundType",
             "tags": [],
             "label": "enabledOnAnonymousPages",
@@ -946,7 +993,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-server",
-        "id": "def-common.PrebootPlugin",
+        "id": "def-server.PrebootPlugin",
         "type": "Interface",
         "tags": [],
         "label": "PrebootPlugin",
@@ -956,9 +1003,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.PrebootPlugin",
+            "section": "def-server.PrebootPlugin",
             "text": "PrebootPlugin"
           },
           "<TSetup, TPluginsSetup>"
@@ -969,7 +1016,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PrebootPlugin.setup",
+            "id": "def-server.PrebootPlugin.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -978,9 +1025,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CorePreboot",
+                "section": "def-server.CorePreboot",
                 "text": "CorePreboot"
               },
               ", plugins: TPluginsSetup) => TSetup"
@@ -991,7 +1038,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-plugins-server",
-                "id": "def-common.PrebootPlugin.setup.$1",
+                "id": "def-server.PrebootPlugin.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "core",
@@ -999,9 +1046,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CorePreboot",
+                    "section": "def-server.CorePreboot",
                     "text": "CorePreboot"
                   }
                 ],
@@ -1012,7 +1059,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-plugins-server",
-                "id": "def-common.PrebootPlugin.setup.$2",
+                "id": "def-server.PrebootPlugin.setup.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "plugins",
@@ -1030,7 +1077,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PrebootPlugin.stop",
+            "id": "def-server.PrebootPlugin.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -1052,20 +1099,45 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-plugins-server",
-        "id": "def-common.ExposedToBrowserDescriptor",
+        "id": "def-server.DynamicConfigDescriptor",
         "type": "Type",
         "tags": [],
-        "label": "ExposedToBrowserDescriptor",
+        "label": "DynamicConfigDescriptor",
         "description": [
-          "\nType defining the list of configuration properties that will be exposed on the client-side\nObject properties can either be fully exposed\n"
+          "\nType defining the list of configuration properties that can be dynamically updated\nObject properties can either be fully exposed or narrowed down to specific keys.\n"
         ],
         "signature": [
           "{ [Key in keyof T]?: (T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? boolean | ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.ExposedToBrowserDescriptor",
+            "section": "def-server.DynamicConfigDescriptor",
+            "text": "DynamicConfigDescriptor"
+          },
+          "<T[Key]> : boolean) | undefined; }"
+        ],
+        "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-server",
+        "id": "def-server.ExposedToBrowserDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "ExposedToBrowserDescriptor",
+        "description": [
+          "\nType defining the list of configuration properties that will be exposed on the client-side\nObject properties can either be fully exposed or narrowed down to specific keys.\n"
+        ],
+        "signature": [
+          "{ [Key in keyof T]?: (T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? boolean | ",
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "server",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-server.ExposedToBrowserDescriptor",
             "text": "ExposedToBrowserDescriptor"
           },
           "<T[Key]> : boolean) | undefined; }"
@@ -1077,7 +1149,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-server",
-        "id": "def-common.MakeUsageFromSchema",
+        "id": "def-server.MakeUsageFromSchema",
         "type": "Type",
         "tags": [],
         "label": "MakeUsageFromSchema",
@@ -1088,9 +1160,9 @@
           "{ [Key in keyof T]?: (T[Key] extends Maybe<object[]> ? false : T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? boolean | ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.MakeUsageFromSchema",
+            "section": "def-server.MakeUsageFromSchema",
             "text": "MakeUsageFromSchema"
           },
           "<T[Key]> : boolean) | undefined; }"
@@ -1102,7 +1174,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-server",
-        "id": "def-common.PluginConfigSchema",
+        "id": "def-server.PluginConfigSchema",
         "type": "Type",
         "tags": [],
         "label": "PluginConfigSchema",
@@ -1126,7 +1198,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-server",
-        "id": "def-common.PluginInitializer",
+        "id": "def-server.PluginInitializer",
         "type": "Type",
         "tags": [],
         "label": "PluginInitializer",
@@ -1137,36 +1209,36 @@
           "(core: ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.PluginInitializerContext",
+            "section": "def-server.PluginInitializerContext",
             "text": "PluginInitializerContext"
           },
-          "<unknown>) => ",
+          "<unknown>) => Promise<",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-server.Plugin",
             "text": "Plugin"
           },
           "<TSetup, TStart, TPluginsSetup, TPluginsStart> | ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.PrebootPlugin",
+            "section": "def-server.PrebootPlugin",
             "text": "PrebootPlugin"
           },
           "<TSetup, TPluginsSetup> | ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.AsyncPlugin",
+            "section": "def-server.AsyncPlugin",
             "text": "AsyncPlugin"
           },
-          "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
+          "<TSetup, TStart, TPluginsSetup, TPluginsStart>>"
         ],
         "path": "packages/core/plugins/core-plugins-server/src/types.ts",
         "deprecated": false,
@@ -1175,7 +1247,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.PluginInitializer.$1",
+            "id": "def-server.PluginInitializer.$1",
             "type": "Object",
             "tags": [],
             "label": "core",
@@ -1183,9 +1255,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-plugins-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCorePluginsServerPluginApi",
-                "section": "def-common.PluginInitializerContext",
+                "section": "def-server.PluginInitializerContext",
                 "text": "PluginInitializerContext"
               },
               "<unknown>"
@@ -1199,13 +1271,13 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-server",
-        "id": "def-common.SharedGlobalConfig",
+        "id": "def-server.SharedGlobalConfig",
         "type": "Type",
         "tags": [],
         "label": "SharedGlobalConfig",
         "description": [],
         "signature": [
-          "{ readonly elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; readonly path: Readonly<{ readonly data: string; }>; readonly savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+          "{ readonly elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; readonly path: Readonly<{ readonly data: string; }>; readonly savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1242,7 +1314,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-plugins-server",
-        "id": "def-common.SharedGlobalConfigKeys",
+        "id": "def-server.SharedGlobalConfigKeys",
         "type": "Object",
         "tags": [],
         "label": "SharedGlobalConfigKeys",
@@ -1253,7 +1325,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.SharedGlobalConfigKeys.elasticsearch",
+            "id": "def-server.SharedGlobalConfigKeys.elasticsearch",
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
@@ -1269,7 +1341,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.SharedGlobalConfigKeys.path",
+            "id": "def-server.SharedGlobalConfigKeys.path",
             "type": "Object",
             "tags": [],
             "label": "path",
@@ -1283,7 +1355,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
-            "id": "def-common.SharedGlobalConfigKeys.savedObjects",
+            "id": "def-server.SharedGlobalConfigKeys.savedObjects",
             "type": "Object",
             "tags": [],
             "label": "savedObjects",
@@ -1299,5 +1371,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

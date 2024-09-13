@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/panel-loader",
+  "owner": "@elastic/kibana-presentation"
+}

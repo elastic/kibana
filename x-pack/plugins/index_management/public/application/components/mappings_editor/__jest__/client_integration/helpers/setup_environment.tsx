@@ -8,12 +8,12 @@
 import React, { ComponentType, MemoExoticComponent } from 'react';
 import SemVer from 'semver/classes/semver';
 
-import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 import { docLinksServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { MAJOR_VERSION } from '../../../../../../../common';
 import { MappingsEditorProvider } from '../../../mappings_editor_context';
 import { createKibanaReactContext } from '../../../shared_imports';
+import { AppContextProvider } from '../../../../../app_context';
 import { Props as MappingsEditorProps } from '../../../mappings_editor';
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
@@ -48,16 +48,16 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
 
   const CodeEditorMock = (props: any) => (
     <input
       data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-      data-value={props.value}
+      data-currentvalue={props.value}
       value={props.value}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-        props.onChange(e.target.value);
+        props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
       }}
     />
   );
@@ -84,14 +84,16 @@ const defaultProps: MappingsEditorProps = {
 };
 
 export const WithAppDependencies =
-  (Comp: MemoExoticComponent<ComponentType<MappingsEditorProps>>) =>
+  (Comp: MemoExoticComponent<ComponentType<MappingsEditorProps>>, appDependencies?: any) =>
   (props: Partial<MappingsEditorProps>) =>
     (
       <KibanaReactContextProvider>
-        <MappingsEditorProvider>
-          <GlobalFlyoutProvider>
-            <Comp {...defaultProps} {...props} />
-          </GlobalFlyoutProvider>
-        </MappingsEditorProvider>
+        <AppContextProvider value={appDependencies}>
+          <MappingsEditorProvider>
+            <GlobalFlyoutProvider>
+              <Comp {...defaultProps} {...props} />
+            </GlobalFlyoutProvider>
+          </MappingsEditorProvider>
+        </AppContextProvider>
       </KibanaReactContextProvider>
     );

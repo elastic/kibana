@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -35,6 +36,7 @@ interface VisTypeListEntry {
 }
 
 interface AggBasedSelectionProps {
+  openedAsRoot?: boolean;
   onVisTypeSelected: (visType: BaseVisType) => void;
   visTypesRegistry: TypesStart;
   toggleGroups: (flag: boolean) => void;
@@ -58,13 +60,15 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
-              id="visualizations.newVisWizard.title"
-              defaultMessage="New visualization"
+              id="visualizations.newAggVisWizard.title"
+              defaultMessage="New aggregation based visualization"
             />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <DialogNavigation goBack={() => this.props.toggleGroups(true)} />
+          {this.props.openedAsRoot ? null : (
+            <DialogNavigation goBack={() => this.props.toggleGroups(true)} />
+          )}
           <EuiFieldSearch
             placeholder="Filter"
             value={query}
@@ -100,7 +104,7 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
   private filteredVisTypes(visTypes: TypesStart, query: string): VisTypeListEntry[] {
     const types = visTypes.getByGroup(VisGroups.AGGBASED).filter((type) => {
       // Filter out hidden visualizations and visualizations that are only aggregations based
-      return !type.hidden;
+      return !type.disableCreate;
     });
 
     let entries: VisTypeListEntry[];

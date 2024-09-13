@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Fragment, memo, useCallback, useEffect, useRef, useState } from 'react';
 import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { SAMPLE_SIZE_SETTING } from '../../../common';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { SkipBottomButton } from '../../application/main/components/skip_bottom_button';
 import { shouldLoadNextDocPatch } from './utils/should_load_next_doc_patch';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
+import { useAppStateSelector } from '../../application/main/state_management/discover_app_state_container';
 
 const FOOTER_PADDING = { padding: 0 };
 
@@ -38,8 +40,9 @@ const DocTableInfiniteContent = ({
   onBackToTop,
 }: DocTableInfiniteContentProps) => {
   const { uiSettings } = useDiscoverServices();
-
-  const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING, 500), [uiSettings]);
+  const sampleSize = useAppStateSelector((state) =>
+    getAllowedSampleSize(state.sampleSize, uiSettings)
+  );
 
   const onSkipBottomButton = useCallback(() => {
     onSetMaxLimit();

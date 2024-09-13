@@ -63,7 +63,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
   }
 
   async getMetric(type: string) {
-    if (this.metrics.hasOwnProperty(type)) {
+    if (Object.hasOwn(this.metrics, type)) {
       return await this.metrics[type].fetch();
     }
     this.logger.warn(`Call to 'getMetric' failed because type '${type}' does not exist.`);
@@ -72,7 +72,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
 
   setup(core: CoreSetup) {
     const router = core.http.createRouter();
-    const kibanaIndex = core.savedObjects.getKibanaIndex();
+    const kibanaIndex = core.savedObjects.getDefaultIndex();
     const server = core.http.getServerInfo();
     const uuid = this.initializerContext.env.instanceUuid;
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
@@ -104,7 +104,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
 
     return {
       registerMetric: <T>(metric: Metric<T>) => {
-        if (this.metrics.hasOwnProperty(metric.type)) {
+        if (Object.hasOwn(this.metrics, metric.type)) {
           this.logger.warn(
             `Skipping registration of metric type '${metric.type}'. This type has already been registered.`
           );

@@ -79,10 +79,24 @@ post:
               - items
     '400':
       $ref: ../components/responses/error.yaml
+    '429':
+      $ref: ../components/responses/error.yaml
   operationId: install-package-by-upload
   description: ''
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+    - in: query
+      name: ignoreMappingUpdateErrors
+      schema:
+        type: boolean
+        default: false
+      description: avoid erroring out on unexpected mapping update errors
+    - in: query
+      name: skipDataStreamRollover
+      schema:
+        type: boolean
+        default: false
+      description: Skip data stream rollover during index template mapping or settings update
   requestBody:
     content:
       application/zip:

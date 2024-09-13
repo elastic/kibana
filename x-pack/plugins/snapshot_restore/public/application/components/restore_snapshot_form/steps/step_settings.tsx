@@ -21,8 +21,8 @@ import {
   EuiLink,
   EuiCallOut,
 } from '@elastic/eui';
+import { CodeEditor } from '@kbn/code-editor';
 import { RestoreSettings } from '../../../../../common/types';
-import { EuiCodeEditor } from '../../../../shared_imports';
 import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
 import { useCore, useServices } from '../../../app_context';
 import { StepProps } from '.';
@@ -143,7 +143,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         }
         fullWidth
       >
-        <EuiFormRow hasEmptyLabelSpace fullWidth>
+        <EuiFormRow fullWidth>
           <Fragment>
             <EuiSwitch
               data-test-subj="modifyIndexSettingsSwitch"
@@ -189,23 +189,17 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                       }}
                     />
                   }
+                  data-test-subj="indexSettingsEditor"
                 >
-                  <EuiCodeEditor
-                    mode="json"
-                    theme="textmate"
-                    width="100%"
-                    value={indexSettings}
-                    setOptions={{
-                      showLineNumbers: false,
+                  <CodeEditor
+                    languageId="json"
+                    value={indexSettings!}
+                    height={250}
+                    options={{
+                      lineNumbers: 'off',
                       tabSize: 2,
-                      maxLines: Infinity,
+                      automaticLayout: true,
                     }}
-                    editorProps={{
-                      $blockScrolling: Infinity,
-                    }}
-                    showGutter={false}
-                    minLines={6}
-                    maxLines={15}
                     aria-label={i18n.translate(
                       'xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsAriaLabel',
                       { defaultMessage: 'Index settings to modify' }
@@ -250,7 +244,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         }
         fullWidth
       >
-        <EuiFormRow hasEmptyLabelSpace fullWidth>
+        <EuiFormRow fullWidth>
           <Fragment>
             <EuiSwitch
               label={

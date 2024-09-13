@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { inspect } from 'util';
@@ -17,9 +18,6 @@ import Axios, { AxiosRequestConfig } from 'axios';
 import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
 import { parseConfig, Config, CiStatsMetadata } from '@kbn/ci-stats-core';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-
-// @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
-import httpAdapter from 'axios/lib/adapters/http';
 
 import type { CiStatsTestGroupInfo, CiStatsTestRun } from './ci_stats_test_group_types';
 
@@ -172,7 +170,7 @@ export class CiStatsReporter {
       const { stdout } = await execa('git', ['config', 'user.email']);
       email = stdout;
     } catch (e) {
-      this.log.debug(e.message);
+      // no-op - we're ok with email being undefined
     }
 
     try {
@@ -183,7 +181,7 @@ export class CiStatsReporter {
     }
 
     const memUsage = process.memoryUsage();
-    const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
+    const isElasticCommitter = email && email.endsWith('@elastic.co');
 
     const defaultMeta = {
       kibanaUuid,
@@ -202,14 +200,16 @@ export class CiStatsReporter {
       memoryUsageHeapUsed: memUsage.heapUsed,
       memoryUsageExternal: memUsage.external,
       memoryUsageArrayBuffers: memUsage.arrayBuffers,
-      nestedTiming: process.env.CI_STATS_NESTED_TIMING ? true : false,
+      nestedTiming: !!process.env.CI_STATS_NESTED_TIMING,
       osArch: Os.arch(),
       osPlatform: Os.platform(),
       osRelease: Os.release(),
       totalMem: Os.totalmem(),
     };
 
-    this.log.debug('CIStatsReporter committerHash: %s', defaultMeta.committerHash);
+    if (defaultMeta.committerHash) {
+      this.log.debug('CIStatsReporter committerHash: %s', defaultMeta.committerHash);
+    }
 
     return !!(await this.req({
       auth: !!buildId,
@@ -375,7 +375,7 @@ export class CiStatsReporter {
           headers,
           data: body,
           params: query,
-          adapter: httpAdapter,
+          adapter: 'http',
 
           // if it can be serialized into a string, send it
           maxBodyLength: Infinity,

@@ -1,0 +1,21 @@
+format_version: 1.0.0
+name: dynamic_datastream
+title: dynamic_datastream test
+description: This is a test package for testing that dynamic_dataset and dynamic_namespace generate the correct API key privileges
+version: 1.2.0
+categories: []
+release: ga
+type: integration
+license: basic
+owner:
+  github: elastic/fleet
+
+policy_templates:
+  - name: dynamic_datastream
+    title: Dynamic datastream
+    description: foo
+    inputs:
+      - type: logfile
+        title: Test dynamic logs
+      - type: system/metrics
+        title: Test dynamic metrics

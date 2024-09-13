@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -20,7 +21,6 @@ import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
-  EmbeddableFactoryNotFoundError,
   EmbeddableFactory,
 } from '..';
 
@@ -64,6 +64,8 @@ export class AttributeService<
   RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
   MetaInfo extends unknown = unknown
 > {
+  private embeddableFactory;
+
   constructor(
     private type: string,
     private toasts: NotificationsStart['toasts'],
@@ -72,9 +74,8 @@ export class AttributeService<
   ) {
     if (getEmbeddableFactory) {
       const factory = getEmbeddableFactory(this.type);
-      if (!factory) {
-        throw new EmbeddableFactoryNotFoundError(this.type);
-      }
+
+      this.embeddableFactory = factory;
     }
   }
 
@@ -137,14 +138,12 @@ export class AttributeService<
       return input as ValType;
     }
     const { attributes } = await this.unwrapAttributes(input);
-    const libraryTitle = attributes.title;
     const { savedObjectId, ...originalInputToPropagate } = input;
 
     return {
       ...originalInputToPropagate,
       // by value visualizations should not have default titles and/or descriptions
       ...{ attributes: omit(attributes, ['title', 'description']) },
-      title: libraryTitle,
     } as unknown as ValType;
   };
 
@@ -188,7 +187,9 @@ export class AttributeService<
               (input as ValType)[ATTRIBUTE_SERVICE_KEY].title
             )}
             showCopyOnSave={false}
-            objectType={this.type}
+            objectType={
+              this.embeddableFactory ? this.embeddableFactory.getDisplayName() : this.type
+            }
             showDescription={false}
           />
         );

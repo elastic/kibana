@@ -7,10 +7,9 @@ exports[`source editor geo_grid_source should not allow editing multiple metrics
       size="xs"
     >
       <h6>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Metrics"
           id="xpack.maps.source.esGrid.metricsLabel"
-          values={Object {}}
         />
       </h6>
     </EuiTitle>
@@ -19,7 +18,9 @@ exports[`source editor geo_grid_source should not allow editing multiple metrics
     />
     <MetricsEditor
       allowMultipleMetrics={false}
+      bucketsName="clusters"
       fields={Array []}
+      isJoin={false}
       key="12345"
       metrics={Array []}
       metricsFilter={[Function]}
@@ -65,10 +66,9 @@ exports[`source editor geo_grid_source should render editor 1`] = `
       size="xs"
     >
       <h6>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Metrics"
           id="xpack.maps.source.esGrid.metricsLabel"
-          values={Object {}}
         />
       </h6>
     </EuiTitle>
@@ -77,7 +77,9 @@ exports[`source editor geo_grid_source should render editor 1`] = `
     />
     <MetricsEditor
       allowMultipleMetrics={true}
+      bucketsName="clusters"
       fields={Array []}
+      isJoin={false}
       key="12345"
       metrics={Array []}
       metricsFilter={[Function]}

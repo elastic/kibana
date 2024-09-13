@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { mlServicesMock } from '../../../../../machine_learning/mocks';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import {
   getEmptyFindResult,
   getRuleMock,
@@ -16,41 +13,32 @@ import {
   typicalMlRulePayload,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { updateRuleRoute } from './route';
-import { getUpdateRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_schema/mocks';
+import {
+  getCreateRulesSchemaMock,
+  getUpdateRulesSchemaMock,
+} from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
-
-jest.mock('../../../../../machine_learning/authz');
-
-jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');
-  return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
+import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine';
+import { HttpAuthzError } from '../../../../../machine_learning/validation';
 
 describe('Update rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
+    clients.detectionRulesClient.updateRule.mockResolvedValue(getRulesSchemaMock());
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
-    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
-
-    updateRuleRoute(server.router, ml);
+    updateRuleRoute(server.router);
   });
 
   describe('status codes', () => {
@@ -64,7 +52,7 @@ describe('Update rule route', () => {
 
     test('returns 404 when updating a single rule that does not exist', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      (legacyMigrate as jest.Mock).mockResolvedValue(null);
+
       const response = await server.inject(
         getUpdateRequest(),
         requestContextMock.convertContext(context)
@@ -78,7 +66,6 @@ describe('Update rule route', () => {
     });
 
     test('returns error when updating non-rule', async () => {
-      (legacyMigrate as jest.Mock).mockResolvedValue(null);
       clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
       const response = await server.inject(
         getUpdateRequest(),
@@ -108,10 +95,8 @@ describe('Update rule route', () => {
     });
 
     it('returns a 403 if mlAuthz fails', async () => {
-      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
-        validateRuleType: jest
-          .fn()
-          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      clients.detectionRulesClient.updateRule.mockImplementationOnce(async () => {
+        throw new HttpAuthzError('mocked validation message');
       });
       const request = requestMock.create({
         method: 'put',
@@ -190,7 +175,125 @@ describe('Update rule route', () => {
         },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
+      expect(result.badRequest).toHaveBeenCalledWith('from: Failed to parse date-math expression');
+    });
+  });
+  describe('rule containing response actions', () => {
+    const getResponseAction = (command: string = 'isolate', config?: object) => ({
+      action_type_id: '.endpoint',
+      params: {
+        command,
+        comment: '',
+        ...(config ? { config } : {}),
+      },
+    });
+    const defaultAction = getResponseAction();
+
+    test('is successful', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [defaultAction],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(200);
+    });
+
+    test('fails when isolate rbac is set to false', async () => {
+      (context.securitySolution.getEndpointAuthz as jest.Mock).mockReturnValue(() => ({
+        canIsolateHost: jest.fn().mockReturnValue(false),
+      }));
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [defaultAction],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(403);
+      expect(response.body.message).toEqual(
+        'User is not authorized to change isolate response actions'
+      );
+    });
+    test('fails when isolate rbac and response action is being removed to finish as empty array', async () => {
+      (context.securitySolution.getEndpointAuthz as jest.Mock).mockReturnValue(() => ({
+        canIsolateHost: jest.fn().mockReturnValue(false),
+      }));
+      clients.rulesClient.find.mockResolvedValue({
+        page: 1,
+        perPage: 1,
+        total: 1,
+        data: [
+          getRuleMock({
+            ...getQueryRuleParams(),
+            responseActions: [
+              {
+                actionTypeId: ResponseActionTypesEnum['.endpoint'],
+                params: {
+                  command: 'isolate',
+                  comment: '',
+                  config: undefined,
+                },
+              },
+            ],
+          }),
+        ],
+      });
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(403);
+      expect(response.body.message).toEqual(
+        'User is not authorized to change isolate response actions'
+      );
+    });
+    test('fails when provided with an unsupported command', async () => {
+      const wrongAction = getResponseAction('execute');
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [wrongAction],
+        },
+      });
+      const result = await server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith(
+        `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\", response_actions.0.params.command: Invalid enum value. Expected 'kill-process' | 'suspend-process', received 'execute', response_actions.0.params.config: Required`
+      );
+    });
+    test('fails when provided with payload missing data', async () => {
+      const wrongAction = getResponseAction('kill-process', { overwrite: true });
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [wrongAction],
+        },
+      });
+      const result = await server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith(
+        `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\", response_actions.0.params.config.field: Required`
+      );
     });
   });
 });

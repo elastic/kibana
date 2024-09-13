@@ -8,16 +8,14 @@
 import type { GuideConfig, StepConfig } from '@kbn/guided-onboarding';
 import { i18n } from '@kbn/i18n';
 
-import { INGESTION_METHOD_IDS } from '../constants';
-
 export const appSearchGuideId = 'appSearch';
 export const websiteSearchGuideId = 'websiteSearch';
 export const databaseSearchGuideId = 'databaseSearch';
 
-const apiMethods = {
-  [appSearchGuideId]: INGESTION_METHOD_IDS.api,
-  [databaseSearchGuideId]: INGESTION_METHOD_IDS.native_connector,
-  [websiteSearchGuideId]: INGESTION_METHOD_IDS.crawler,
+const apiRoutes = {
+  [appSearchGuideId]: '/search_indices/new_index/api',
+  [databaseSearchGuideId]: '/connectors/select_connector',
+  [websiteSearchGuideId]: '/crawlers',
 };
 
 export type EnterpriseSearchGuideIds =
@@ -25,7 +23,7 @@ export type EnterpriseSearchGuideIds =
   | typeof websiteSearchGuideId
   | typeof databaseSearchGuideId;
 
-const getAddDataStep: (method?: INGESTION_METHOD_IDS) => StepConfig = (method) => {
+const getAddDataStep: (method?: EnterpriseSearchGuideIds) => StepConfig = (method) => {
   return {
     id: 'add_data',
     title: i18n.translate('xpack.enterpriseSearch.guideConfig.addDataStep.title', {
@@ -37,7 +35,7 @@ const getAddDataStep: (method?: INGESTION_METHOD_IDS) => StepConfig = (method) =
     }),
     location: {
       appID: 'enterpriseSearchContent',
-      path: `/search_indices/new_index?${method ? 'method=' + method : ''}`,
+      path: `${method ? apiRoutes[method] : '/search_indices/new_index'}`,
     },
   };
 };
@@ -86,7 +84,7 @@ const getGuideConfig: (telemetryId: EnterpriseSearchGuideIds) => GuideConfig = (
       defaultMessage: `We'll help you build a search experience with your data using Elastic's web crawler, connectors, and APIs.`,
     }),
     guideName: 'Enterprise Search',
-    steps: [getAddDataStep(apiMethods[telemetryId]), getSearchExperienceStep()],
+    steps: [getAddDataStep(telemetryId), getSearchExperienceStep()],
   };
 };
 

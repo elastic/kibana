@@ -1,16 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { nodeBuilder } from './node_builder';
 import { toElasticsearchQuery } from '..';
 import { buildNode } from './literal';
-
-jest.mock('../grammar');
 
 describe('nodeBuilder', () => {
   describe('is method', () => {
@@ -55,6 +54,25 @@ describe('nodeBuilder', () => {
   });
 
   describe('and method', () => {
+    test('no clauses', () => {
+      const node = nodeBuilder.and([]);
+      const query = toElasticsearchQuery(node);
+      expect(node).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [],
+          "function": "and",
+          "type": "function",
+        }
+      `);
+      expect(query).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [],
+          },
+        }
+      `);
+    });
+
     test('single clause', () => {
       const nodes = [nodeBuilder.is('foo', 'bar')];
       const query = toElasticsearchQuery(nodeBuilder.and(nodes));
@@ -166,6 +184,26 @@ describe('nodeBuilder', () => {
   });
 
   describe('or method', () => {
+    test('no clauses', () => {
+      const node = nodeBuilder.or([]);
+      const query = toElasticsearchQuery(node);
+      expect(node).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [],
+          "function": "or",
+          "type": "function",
+        }
+      `);
+      expect(query).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [],
+          },
+        }
+      `);
+    });
+
     test('single clause', () => {
       const nodes = [nodeBuilder.is('foo', 'bar')];
       const query = toElasticsearchQuery(nodeBuilder.or(nodes));

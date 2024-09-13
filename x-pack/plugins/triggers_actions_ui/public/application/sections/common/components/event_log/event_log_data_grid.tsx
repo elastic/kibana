@@ -22,8 +22,8 @@ import {
   EuiDataGridCellPopoverElementProps,
   useEuiTheme,
   EuiToolTip,
+  EuiIconTip,
   EuiText,
-  EuiIcon,
 } from '@elastic/eui';
 import {
   IExecutionLog,
@@ -55,7 +55,7 @@ type ExecutionLog = IExecutionLog | IConnectorsExecutionLog;
 export interface EventLogDataGrid {
   columns: EuiDataGridColumn[];
   logs: ExecutionLog[];
-  pagination: Pagination;
+  pagination: Pagination & { pageSize: number };
   sortingColumns: EuiDataGridSorting['columns'];
   visibleColumns: string[];
   dateFormat: string;
@@ -66,6 +66,7 @@ export interface EventLogDataGrid {
   onFlyoutOpen?: (runLog: IExecutionLog) => void;
   setVisibleColumns: (visibleColumns: string[]) => void;
   setSortingColumns: (sortingColumns: EuiDataGridSorting['columns']) => void;
+  getRuleDetailsRoute?: (ruleId: string) => string;
 }
 
 export const numTriggeredActionsDisplay = i18n.translate(
@@ -141,14 +142,18 @@ const columnsWithToolTipMap: Record<string, Record<string, string>> = {
 
 export const ColumnHeaderWithToolTip = ({ id }: { id: string }) => {
   return (
-    <EuiToolTip content={columnsWithToolTipMap[id].toolTip}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
-        <EuiFlexItem>{columnsWithToolTipMap[id].display}</EuiFlexItem>
-        <EuiFlexItem>
-          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexItem>{columnsWithToolTipMap[id].display}</EuiFlexItem>
+      <EuiFlexItem>
+        <EuiIconTip
+          content={columnsWithToolTipMap[id].toolTip}
+          size="s"
+          color="subdued"
+          type="questionInCircle"
+          className="eui-alignTop"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -167,6 +172,7 @@ export const EventLogDataGrid = (props: EventLogDataGrid) => {
     onChangeItemsPerPage,
     onChangePage,
     onFlyoutOpen,
+    getRuleDetailsRoute,
   } = props;
 
   const { euiTheme } = useEuiTheme();
@@ -343,6 +349,7 @@ export const EventLogDataGrid = (props: EventLogDataGrid) => {
             ruleId={ruleId}
             spaceIds={spaceIds}
             useExecutionStatus={isRuleUsingExecutionStatus}
+            getRuleDetailsRoute={getRuleDetailsRoute}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

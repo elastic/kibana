@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { CoreService, CoreContext } from '@kbn/core-base-browser-internal';
@@ -16,6 +17,7 @@ import {
   createPluginSetupContext,
   createPluginStartContext,
 } from './plugin_context';
+import { RuntimePluginContractResolver } from './plugin_contract_resolver';
 
 /** @internal */
 export type PluginsServiceSetupDeps = InternalCoreSetup;
@@ -23,12 +25,12 @@ export type PluginsServiceSetupDeps = InternalCoreSetup;
 export type PluginsServiceStartDeps = InternalCoreStart;
 
 /** @internal */
-export interface PluginsServiceSetup {
+export interface InternalPluginsServiceSetup {
   contracts: ReadonlyMap<string, unknown>;
 }
 
 /** @internal */
-export interface PluginsServiceStart {
+export interface InternalPluginsServiceStart {
   contracts: ReadonlyMap<string, unknown>;
 }
 
@@ -38,7 +40,10 @@ export interface PluginsServiceStart {
  *
  * @internal
  */
-export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
+export class PluginsService
+  implements CoreService<InternalPluginsServiceSetup, InternalPluginsServiceStart>
+{
+  private readonly runtimeResolver = new RuntimePluginContractResolver();
   /** Plugin wrappers in topological order. */
   private readonly plugins = new Map<PluginName, PluginWrapper<unknown, unknown>>();
   private readonly pluginDependencies = new Map<PluginName, PluginName[]>();
@@ -79,7 +84,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     );
   }
 
-  public async setup(deps: PluginsServiceSetupDeps): Promise<PluginsServiceSetup> {
+  public async setup(deps: PluginsServiceSetupDeps): Promise<InternalPluginsServiceSetup> {
+    const runtimeDependencies = buildPluginRuntimeDependencyMap(this.plugins);
+    this.runtimeResolver.setDependencyMap(runtimeDependencies);
+
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
@@ -97,7 +105,11 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       );
 
       const contract = plugin.setup(
-        createPluginSetupContext(this.coreContext, deps, plugin),
+        createPluginSetupContext({
+          deps,
+          plugin,
+          runtimeResolver: this.runtimeResolver,
+        }),
         pluginDepContracts
       );
 
@@ -105,11 +117,13 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       this.satupPlugins.push(pluginName);
     }
 
+    this.runtimeResolver.resolveSetupRequests(contracts);
+
     // Expose setup contracts
     return { contracts };
   }
 
-  public async start(deps: PluginsServiceStartDeps): Promise<PluginsServiceStart> {
+  public async start(deps: PluginsServiceStartDeps): Promise<InternalPluginsServiceStart> {
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
@@ -127,12 +141,18 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       );
 
       const contract = plugin.start(
-        createPluginStartContext(this.coreContext, deps, plugin),
+        createPluginStartContext({
+          deps,
+          plugin,
+          runtimeResolver: this.runtimeResolver,
+        }),
         pluginDepContracts
       );
 
       contracts.set(pluginName, contract);
     }
+
+    this.runtimeResolver.resolveStartRequests(contracts);
 
     // Expose start contracts
     return { contracts };
@@ -145,3 +165,18 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     }
   }
 }
+
+const buildPluginRuntimeDependencyMap = (
+  pluginMap: Map<PluginName, PluginWrapper>
+): Map<PluginName, Set<PluginName>> => {
+  const runtimeDependencies = new Map<PluginName, Set<PluginName>>();
+  for (const [pluginName, pluginWrapper] of pluginMap.entries()) {
+    const pluginRuntimeDeps = new Set([
+      ...pluginWrapper.optionalPlugins,
+      ...pluginWrapper.requiredPlugins,
+      ...pluginWrapper.runtimePluginDependencies,
+    ]);
+    runtimeDependencies.set(pluginName, pluginRuntimeDeps);
+  }
+  return runtimeDependencies;
+};

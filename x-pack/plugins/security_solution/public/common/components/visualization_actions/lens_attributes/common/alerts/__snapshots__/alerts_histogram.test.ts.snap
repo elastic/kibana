@@ -50,6 +50,7 @@ Object {
                 "label": "@timestamp",
                 "operationType": "date_histogram",
                 "params": Object {
+                  "includeEmptyRows": true,
                   "interval": "auto",
                 },
                 "scale": "interval",
@@ -60,6 +61,9 @@ Object {
                 "isBucketed": false,
                 "label": "Count of records",
                 "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
                 "scale": "ratio",
                 "sourceField": "___records___",
               },
@@ -164,12 +168,14 @@ Object {
       "legend": Object {
         "isVisible": true,
         "legendSize": "xlarge",
-        "position": "left",
+        "legendStats": Array [
+          "currentAndLastValue",
+        ],
+        "position": "right",
       },
       "preferredSeriesType": "bar_stacked",
       "title": "Empty XY chart",
       "valueLabels": "hide",
-      "valuesInLegend": true,
       "yLeftExtent": Object {
         "mode": "full",
       },
@@ -233,6 +239,7 @@ Object {
                 "label": "@timestamp",
                 "operationType": "date_histogram",
                 "params": Object {
+                  "includeEmptyRows": true,
                   "interval": "auto",
                 },
                 "scale": "interval",
@@ -243,6 +250,9 @@ Object {
                 "isBucketed": false,
                 "label": "Count of records",
                 "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
                 "scale": "ratio",
                 "sourceField": "___records___",
               },
@@ -323,12 +333,14 @@ Object {
       "legend": Object {
         "isVisible": true,
         "legendSize": "xlarge",
-        "position": "left",
+        "legendStats": Array [
+          "currentAndLastValue",
+        ],
+        "position": "right",
       },
       "preferredSeriesType": "bar_stacked",
       "title": "Empty XY chart",
       "valueLabels": "hide",
-      "valuesInLegend": true,
       "yLeftExtent": Object {
         "mode": "full",
       },

@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
-import { EuiCallOut, EuiFormRow, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
+import {
+  EuiCallOut,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  LEFT_ALIGNMENT,
+  SortableProperties,
+} from '@elastic/eui';
 import { isEqual } from 'lodash';
-// @ts-ignore no declaration
-import { LEFT_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { FieldSelectionItem } from '@kbn/ml-data-frame-analytics-utils';
 import { useFieldStatsTrigger } from '../../../../../components/field_stats_flyout/use_field_stats_trigger';
-import {
-  FieldForStats,
-  FieldStatsInfoButton,
-} from '../../../../../components/field_stats_flyout/field_stats_info_button';
-import { FieldSelectionItem } from '../../../../../../../common/types/data_frame_analytics';
+import type { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
+import { FieldStatsInfoButton } from '../../../../../components/field_stats_flyout/field_stats_info_button';
 // @ts-ignore could not find declaration file
 import { CustomSelectionTable } from '../../../../../components/custom_selection_table';
 
@@ -54,7 +59,7 @@ export const AnalysisFieldsTable: FC<{
     unsupportedFieldsError,
     setUnsupportedFieldsError,
   }) => {
-    const [sortableProperties, setSortableProperties] = useState();
+    const [sortableProperties, setSortableProperties] = useState<SortableProperties<any>>();
     const [currentPaginationData, setCurrentPaginationData] = useState<{
       pageIndex: number;
       itemsPerPage: number;

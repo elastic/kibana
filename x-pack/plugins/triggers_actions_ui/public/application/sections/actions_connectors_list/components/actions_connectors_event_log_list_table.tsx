@@ -15,7 +15,6 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiDataGridSorting,
-  Pagination,
   EuiSuperDatePicker,
   OnTimeChangeProps,
   EuiSwitch,
@@ -38,6 +37,7 @@ import { RefineSearchPrompt } from '../../common/components/refine_search_prompt
 import { ConnectorEventLogListKPIWithApi as ConnectorEventLogListKPI } from './actions_connectors_event_log_list_kpi';
 import {
   EventLogDataGrid,
+  type EventLogDataGrid as EventLogDataGridProps,
   EventLogListStatusFilter,
   getIsColumnSortable,
 } from '../../common/components/event_log';
@@ -136,7 +136,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
   const [filter, setFilter] = useState<string[]>([]);
   const [actualTotalItemCount, setActualTotalItemCount] = useState<number>(0);
-  const [pagination, setPagination] = useState<Pagination>({
+  const [pagination, setPagination] = useState<EventLogDataGridProps['pagination']>({
     pageIndex: 0,
     pageSize: initialPageSize,
     totalItemCount: 0,
@@ -262,7 +262,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
   );
 
   const onSearchChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.value === '') {
         setSearchText('');
       }
@@ -272,7 +272,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
   );
 
   const onKeyUp = useCallback(
-    (e) => {
+    (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
         setSearchText(search);
       }
@@ -522,9 +522,9 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={true}>
+        <EuiFlexGroup gutterSize="m" alignItems="center">
+          <EuiFlexItem grow={true}>
             <EuiFieldSearch
               fullWidth
               isClearable

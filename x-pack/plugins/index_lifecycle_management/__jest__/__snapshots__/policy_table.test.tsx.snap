@@ -4,14 +4,29 @@ exports[`policy table changes pages when a pagination link is clicked on 1`] = `
 Array [
   "testy0",
   "testy1",
-  "testy10",
-  "testy100",
   "testy101",
   "testy103",
-  "testy104",
   "testy11",
   "testy13",
-  "testy14",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy5",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
 ]
 `;
 
@@ -19,14 +34,29 @@ exports[`policy table changes pages when a pagination link is clicked on 2`] = `
 Array [
   "testy0",
   "testy1",
-  "testy10",
-  "testy100",
   "testy101",
   "testy103",
-  "testy104",
   "testy11",
   "testy13",
-  "testy14",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy5",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
 ]
 `;
 
@@ -37,29 +67,28 @@ Array [
 `;
 
 exports[`policy table shows empty state when there are no policies 1`] = `
-<div
-  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter emotion-euiPanel-grow-m-l-subdued"
-  role="main"
+<section
+  class="emotion-euiPageSection-grow-l-center-transparent"
 >
   <div
-    class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
+    class="emotion-euiPageSection__content-l-center"
   >
     <div
-      class="euiEmptyPrompt__main"
+      class="euiPanel euiPanel--plain euiEmptyPrompt emotion-euiPanel-m-plain-hasShadow-euiEmptyPrompt-vertical"
     >
       <div
-        class="euiEmptyPrompt__icon"
-      >
-        <span
-          color="subdued"
-          data-euiicon-type="managementApp"
-        />
-      </div>
-      <div
-        class="euiEmptyPrompt__content"
+        class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
       >
         <div
-          class="euiEmptyPrompt__contentInner"
+          class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
+        >
+          <span
+            color="subdued"
+            data-euiicon-type="managementApp"
+          />
+        </div>
+        <div
+          class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
         >
           <h1
             class="euiTitle emotion-euiTitle-m"
@@ -80,7 +109,7 @@ exports[`policy table shows empty state when there are no policies 1`] = `
             class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
           <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
             data-test-subj="createPolicyButton"
             type="button"
           >
@@ -98,7 +127,7 @@ exports[`policy table shows empty state when there are no policies 1`] = `
       </div>
     </div>
   </div>
-</div>
+</section>
 `;
 
 exports[`policy table sorts when linked index templates header is clicked 1`] = `
@@ -113,21 +142,51 @@ Array [
   "testy23",
   "testy25",
   "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
+  "testy73",
 ]
 `;
 
 exports[`policy table sorts when linked index templates header is clicked 2`] = `
 Array [
   "testy0",
-  "testy2",
-  "testy4",
-  "testy8",
-  "testy10",
-  "testy14",
-  "testy16",
-  "testy20",
-  "testy22",
-  "testy26",
+  "testy1",
+  "testy5",
+  "testy7",
+  "testy11",
+  "testy13",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
 ]
 `;
 
@@ -143,66 +202,141 @@ Array [
   "testy23",
   "testy25",
   "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
+  "testy73",
 ]
 `;
 
 exports[`policy table sorts when linked indices header is clicked 2`] = `
 Array [
   "testy0",
-  "testy2",
-  "testy4",
-  "testy8",
-  "testy10",
-  "testy14",
-  "testy16",
-  "testy20",
-  "testy22",
-  "testy26",
+  "testy1",
+  "testy5",
+  "testy7",
+  "testy11",
+  "testy13",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
 ]
 `;
 
 exports[`policy table sorts when modified date header is clicked 1`] = `
 Array [
   "testy0",
-  "testy104",
   "testy103",
   "testy101",
-  "testy100",
-  "testy98",
   "testy97",
   "testy95",
-  "testy94",
-  "testy92",
+  "testy91",
+  "testy89",
+  "testy85",
+  "testy83",
+  "testy79",
+  "testy77",
+  "testy73",
+  "testy71",
+  "testy67",
+  "testy65",
+  "testy61",
+  "testy59",
+  "testy55",
+  "testy53",
+  "testy49",
+  "testy47",
+  "testy43",
+  "testy41",
+  "testy37",
+  "testy35",
 ]
 `;
 
 exports[`policy table sorts when modified date header is clicked 2`] = `
 Array [
   "testy1",
-  "testy2",
-  "testy4",
   "testy5",
   "testy7",
-  "testy8",
-  "testy10",
   "testy11",
   "testy13",
-  "testy14",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
+  "testy73",
 ]
 `;
 
 exports[`policy table sorts when name header is clicked 1`] = `
 Array [
-  "testy98",
   "testy97",
   "testy95",
-  "testy94",
-  "testy92",
   "testy91",
   "testy89",
-  "testy88",
-  "testy86",
   "testy85",
+  "testy83",
+  "testy79",
+  "testy77",
+  "testy73",
+  "testy71",
+  "testy7",
+  "testy67",
+  "testy65",
+  "testy61",
+  "testy59",
+  "testy55",
+  "testy53",
+  "testy5",
+  "testy49",
+  "testy47",
+  "testy43",
+  "testy41",
+  "testy37",
+  "testy35",
+  "testy31",
 ]
 `;
 
@@ -210,13 +344,28 @@ exports[`policy table sorts when name header is clicked 2`] = `
 Array [
   "testy0",
   "testy1",
-  "testy2",
-  "testy4",
   "testy5",
   "testy7",
-  "testy8",
-  "testy10",
   "testy11",
   "testy13",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
 ]
 `;

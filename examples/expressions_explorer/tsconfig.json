@@ -21,5 +21,9 @@
     "@kbn/developer-examples-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-lifecycle-browser",
   ]
 }

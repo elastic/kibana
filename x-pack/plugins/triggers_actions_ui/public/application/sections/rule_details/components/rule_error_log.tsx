@@ -30,6 +30,7 @@ import {
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { EventLogListCellRenderer } from '../../common/components/event_log';
+import { RefreshToken } from './types';
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {
@@ -62,7 +63,7 @@ const MAX_RESULTS = 1000;
 export type RuleErrorLogProps = {
   ruleId: string;
   runId?: string;
-  refreshToken?: number;
+  refreshToken?: RefreshToken;
   spaceId?: string;
   logFromDifferentSpace?: boolean;
   requestRefresh?: () => Promise<void>;
@@ -111,7 +112,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
 
   const isOnLastPage = useMemo(() => {
     const { pageIndex, pageSize } = pagination;
-    return (pageIndex + 1) * pageSize >= MAX_RESULTS;
+    return (pageIndex + 1) * pageSize! >= MAX_RESULTS;
   }, [pagination]);
 
   const formattedSort = useMemo(() => {
@@ -170,7 +171,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
   );
 
   const onSearchChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.value === '') {
         setSearchText('');
       }
@@ -180,7 +181,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
   );
 
   const onKeyUp = useCallback(
-    (e) => {
+    (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
         setSearchText(search);
       }

@@ -29,7 +29,8 @@
     "requiredBundles": [
       "kibanaReact",
       "spaces",
-      "esUiShared"
+      "esUiShared",
+      "remoteClusters"
     ]
   }
 }

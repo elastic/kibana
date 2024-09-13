@@ -18,12 +18,12 @@ import {
 } from '@kbn/data-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { Document } from '../persistence/saved_object_store';
 import {
   Datasource,
@@ -46,10 +46,10 @@ export interface EditorFrameStartPlugins {
   uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   embeddable?: EmbeddableStart;
-  dashboard?: DashboardStart;
   expressions: ExpressionsStart;
   charts: ChartsPluginSetup;
   dataViews: DataViewsPublicPluginStart;
+  eventAnnotationService: EventAnnotationServiceType;
 }
 
 export interface EditorFramePlugins {
@@ -57,9 +57,11 @@ export interface EditorFramePlugins {
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
   timefilter: TimefilterContract;
+  nowProvider: DataPublicPluginStart['nowProvider'];
+  eventAnnotationService: EventAnnotationServiceType;
 }
 
-async function collectAsyncDefinitions<T extends { id: string }>(
+async function collectAsyncDefinitions<T extends { id: string; alias?: string[] }>(
   definitions: Array<T | (() => Promise<T>)>
 ) {
   const resolvedDefinitions = await Promise.all(
@@ -68,6 +70,11 @@ async function collectAsyncDefinitions<T extends { id: string }>(
   const definitionMap: Record<string, T> = {};
   resolvedDefinitions.forEach((definition) => {
     definitionMap[definition.id] = definition;
+    if (definition.alias) {
+      for (const aliasId of definition.alias) {
+        definitionMap[aliasId] = definition;
+      }
+    }
   });
 
   return definitionMap;

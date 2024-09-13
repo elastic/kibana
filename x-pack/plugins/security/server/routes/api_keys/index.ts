@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '..';
 import { defineCreateApiKeyRoutes } from './create';
 import { defineEnabledApiKeysRoutes } from './enabled';
-import { defineGetApiKeysRoutes } from './get';
+import { defineHasApiKeysRoutes } from './has_active';
 import { defineInvalidateApiKeysRoutes } from './invalidate';
-import { defineCheckPrivilegesRoutes } from './privileges';
+import { defineQueryApiKeysAndAggregationsRoute } from './query';
 import { defineUpdateApiKeyRoutes } from './update';
+import type { RouteDefinitionParams } from '..';
+
+export type {
+  UpdateAPIKeyParams,
+  UpdateAPIKeyResult,
+  UpdateRestAPIKeyParams,
+  UpdateCrossClusterAPIKeyParams,
+  UpdateRestAPIKeyWithKibanaPrivilegesParams,
+} from '@kbn/security-plugin-types-server';
 
 export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineEnabledApiKeysRoutes(params);
-  defineGetApiKeysRoutes(params);
+  defineHasApiKeysRoutes(params);
   defineCreateApiKeyRoutes(params);
   defineUpdateApiKeyRoutes(params);
-  defineCheckPrivilegesRoutes(params);
   defineInvalidateApiKeysRoutes(params);
+  defineQueryApiKeysAndAggregationsRoute(params);
 }

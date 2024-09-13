@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { UpdatableFileMetadata } from '../../../../common/types';
@@ -72,7 +73,7 @@ describe('File kind HTTP API', () => {
       .expect(200);
 
     expect(header['content-type']).toEqual('image/png');
-    expect(header['content-disposition']).toEqual('attachment; filename="test.png"');
+    expect(header['content-disposition']).toEqual('attachment; filename=test.png');
     expect(buffer.toString('utf8')).toEqual('what have you');
   });
 
@@ -130,6 +131,103 @@ describe('File kind HTTP API', () => {
       .send({})
       .expect(200);
     expect(files2).toHaveLength(5);
+  });
+
+  test('can filter by mime type', async () => {
+    await createFile({ name: 'test', mimeType: 'image/png' });
+    await createFile({ name: 'test 2', mimeType: 'text/html' });
+
+    const {
+      body: { files },
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        mimeType: 'image/png',
+      })
+      .expect(200);
+
+    expect(files.length).toBe(1);
+    expect(files[0]).toMatchObject({ name: 'test' });
+
+    const {
+      body: { files: files2 },
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        mimeType: 'text/html',
+      })
+      .expect(200);
+
+    expect(files2.length).toBe(1);
+    expect(files2[0]).toMatchObject({ name: 'test 2' });
+
+    const {
+      body: { files: files3 },
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        mimeType: ['text/html', 'image/png'],
+      })
+      .expect(200);
+
+    expect(files3.length).toBe(2);
+  });
+
+  test('can filter by mime type with special characters', async () => {
+    await createFile({ name: 'test', mimeType: 'image/x:123' });
+    await createFile({ name: 'test 2', mimeType: 'text/html' });
+
+    const {
+      body: { files },
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        mimeType: 'image/x:123',
+      })
+      .expect(200);
+
+    expect(files.length).toBe(1);
+    expect(files[0]).toMatchObject({ name: 'test' });
+  });
+
+  test('can filter by file extension', async () => {
+    await createFile({ name: 'test', mimeType: 'image/png' });
+    await createFile({ name: 'test 2', mimeType: 'text/html' });
+
+    const {
+      body: { files },
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        extension: 'png',
+      })
+      .expect(200);
+
+    expect(files.length).toBe(1);
+    expect(files[0]).toMatchObject({ name: 'test' });
+
+    const {
+      body: { files: files2 },
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        extension: 'html',
+      })
+      .expect(200);
+
+    expect(files2.length).toBe(1);
+    expect(files2[0]).toMatchObject({ name: 'test 2' });
+
+    const {
+      body: { files: files3 },
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        extension: ['html', 'png'],
+      })
+      .expect(200);
+
+    expect(files3.length).toBe(2);
   });
 
   const twoDaysFromNow = (): number => Date.now() + 2 * (1000 * 60 * 60 * 24);

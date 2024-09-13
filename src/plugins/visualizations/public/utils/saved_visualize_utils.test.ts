@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ISearchSource } from '@kbn/data-plugin/common';
@@ -11,7 +12,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { SavedObjectsClientContract } from '@kbn/core/public';
 import {
   findListItems,
   getSavedVisualization,
@@ -24,17 +24,64 @@ import type { VisSavedObject } from '../types';
 let visTypes = [] as VisTypeAlias[];
 const mockGetAliases = jest.fn(() => visTypes);
 const mockGetTypes = jest.fn((type: string) => type) as unknown as TypesStart['get'];
+const mockFindContent = jest.fn(() => ({
+  pagination: { total: 0 },
+  hits: [],
+}));
+const mockGetContent = jest.fn(() => ({
+  item: {
+    id: 'test',
+    references: [
+      {
+        id: 'test',
+        type: 'index-pattern',
+      },
+    ],
+    attributes: {
+      visState: JSON.stringify({ type: 'area' }),
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{filter: []}',
+      },
+    },
+    _version: '1',
+  },
+  meta: {
+    outcome: 'exact',
+    alias_target_id: null,
+  },
+}));
+const mockCreateContent = jest.fn(() => ({
+  item: {
+    id: 'test',
+  },
+}));
+
+const mockUpdateContent = jest.fn(() => ({
+  item: {
+    id: 'test',
+  },
+}));
+
 jest.mock('../services', () => ({
   getSpaces: jest.fn(() => ({
     getActiveSpace: () => ({
       id: 'test',
     }),
   })),
+  getContentManagement: jest.fn(() => ({
+    client: {
+      create: mockCreateContent,
+      update: mockUpdateContent,
+      get: mockGetContent,
+      search: mockFindContent,
+      mSearch: mockFindContent,
+    },
+  })),
 }));
 
 const mockParseSearchSourceJSON = jest.fn();
 const mockInjectSearchSourceReferences = jest.fn();
-const mockExtractSearchSourceReferences = jest.fn((...args) => [{}, []]);
+const mockExtractSearchSourceReferences = jest.fn((..._args) => [{}, []]);
 
 jest.mock('@kbn/data-plugin/public', () => ({
   extractSearchSourceReferences: jest.fn((...args) => mockExtractSearchSourceReferences(...args)),
@@ -55,7 +102,7 @@ const mockCheckForDuplicateTitle = jest.fn(() => {
     throw new Error();
   }
 });
-const mockSaveWithConfirmation = jest.fn(() => ({ id: 'test-after-confirm' }));
+const mockSaveWithConfirmation = jest.fn(() => ({ item: { id: 'test-after-confirm' } }));
 jest.mock('./saved_objects_utils/check_for_duplicate_title', () => ({
   checkForDuplicateTitle: jest.fn(() => mockCheckForDuplicateTitle()),
 }));
@@ -64,28 +111,7 @@ jest.mock('./saved_objects_utils/save_with_confirmation', () => ({
 }));
 
 describe('saved_visualize_utils', () => {
-  const { overlays, savedObjects } = coreMock.createStart();
-  const savedObjectsClient = savedObjects.client as jest.Mocked<SavedObjectsClientContract>;
-  (savedObjectsClient.resolve as jest.Mock).mockImplementation(() => ({
-    saved_object: {
-      references: [
-        {
-          id: 'test',
-          type: 'index-pattern',
-        },
-      ],
-      attributes: {
-        visState: JSON.stringify({ type: 'area' }),
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: '{filter: []}',
-        },
-      },
-      _version: '1',
-    },
-    outcome: 'exact',
-    alias_target_id: null,
-  }));
-  (savedObjectsClient.create as jest.Mock).mockImplementation(() => ({ id: 'test' }));
+  const coreStart = coreMock.createStart();
   const { dataViews, search } = dataPluginMock.createStartContract();
 
   describe('getSavedVisualization', () => {
@@ -96,7 +122,7 @@ describe('saved_visualize_utils', () => {
     });
     it('should return object with defaults if was not provided id', async () => {
       const savedVis = await getSavedVisualization({
-        savedObjectsClient,
+        ...coreStart,
         search,
         dataViews,
         spaces: Promise.resolve({
@@ -113,7 +139,7 @@ describe('saved_visualize_utils', () => {
     it('should create search source if saved object has searchSourceJSON', async () => {
       await getSavedVisualization(
         {
-          savedObjectsClient,
+          ...coreStart,
           search,
           dataViews,
           spaces: Promise.resolve({
@@ -132,7 +158,7 @@ describe('saved_visualize_utils', () => {
     it('should inject references if saved object has references', async () => {
       await getSavedVisualization(
         {
-          savedObjectsClient,
+          ...coreStart,
           search,
           dataViews,
           spaces: Promise.resolve({
@@ -155,7 +181,7 @@ describe('saved_visualize_utils', () => {
       const mockGetTagIdsFromReferences = jest.fn(() => ['test']);
       await getSavedVisualization(
         {
-          savedObjectsClient,
+          ...coreStart,
           search,
           dataViews,
           spaces: Promise.resolve({
@@ -181,7 +207,8 @@ describe('saved_visualize_utils', () => {
       mockExtractSearchSourceReferences.mockClear();
       mockExtractReferences.mockClear();
       mockSaveWithConfirmation.mockClear();
-      savedObjectsClient.create.mockClear();
+      mockCreateContent.mockClear();
+      mockUpdateContent.mockClear();
       vis = {
         visState: {
           type: 'area',
@@ -198,15 +225,15 @@ describe('saved_visualize_utils', () => {
     });
 
     it('should return id after save', async () => {
-      const savedVisId = await saveVisualization(vis, {}, { savedObjectsClient, overlays });
-      expect(savedObjectsClient.create).toHaveBeenCalled();
+      const savedVisId = await saveVisualization(vis, {}, coreStart);
+      expect(mockCreateContent).toHaveBeenCalled();
       expect(mockExtractReferences).toHaveBeenCalled();
       expect(savedVisId).toBe('test');
     });
 
     it('should call extractSearchSourceReferences if we new vis has searchSourceFields', async () => {
       vis.searchSourceFields = { fields: [] };
-      await saveVisualization(vis, {}, { savedObjectsClient, overlays });
+      await saveVisualization(vis, {}, coreStart);
       expect(mockExtractSearchSourceReferences).toHaveBeenCalledWith(vis.searchSourceFields);
     });
 
@@ -214,7 +241,7 @@ describe('saved_visualize_utils', () => {
       vis.searchSource = {
         serialize: jest.fn(() => ({ searchSourceJSON: '{}', references: [] })),
       } as unknown as ISearchSource;
-      await saveVisualization(vis, {}, { savedObjectsClient, overlays });
+      await saveVisualization(vis, {}, coreStart);
       expect(vis.searchSource?.serialize).toHaveBeenCalled();
     });
 
@@ -224,8 +251,7 @@ describe('saved_visualize_utils', () => {
         vis,
         {},
         {
-          savedObjectsClient,
-          overlays,
+          ...coreStart,
           savedObjectsTagging: {
             ui: {
               updateTagsReferences: mockUpdateTagsReferences,
@@ -238,24 +264,16 @@ describe('saved_visualize_utils', () => {
 
     describe('confirmOverwrite', () => {
       it('as false we should not call saveWithConfirmation and just do create', async () => {
-        const savedVisId = await saveVisualization(
-          vis,
-          { confirmOverwrite: false },
-          { savedObjectsClient, overlays }
-        );
-        expect(savedObjectsClient.create).toHaveBeenCalled();
+        const savedVisId = await saveVisualization(vis, { confirmOverwrite: false }, coreStart);
+        expect(mockCreateContent).toHaveBeenCalled();
         expect(mockExtractReferences).toHaveBeenCalled();
         expect(mockSaveWithConfirmation).not.toHaveBeenCalled();
         expect(savedVisId).toBe('test');
       });
 
       it('as true we should call saveWithConfirmation', async () => {
-        const savedVisId = await saveVisualization(
-          vis,
-          { confirmOverwrite: true },
-          { savedObjectsClient, overlays }
-        );
-        expect(savedObjectsClient.create).not.toHaveBeenCalled();
+        const savedVisId = await saveVisualization(vis, { confirmOverwrite: true }, coreStart);
+        expect(mockCreateContent).not.toHaveBeenCalled();
         expect(mockSaveWithConfirmation).toHaveBeenCalled();
         expect(savedVisId).toBe('test-after-confirm');
       });
@@ -265,16 +283,12 @@ describe('saved_visualize_utils', () => {
       it('as false we should not save vis with duplicated title', async () => {
         isTitleDuplicateConfirmed = false;
         try {
-          const savedVisId = await saveVisualization(
-            vis,
-            { isTitleDuplicateConfirmed },
-            { savedObjectsClient, overlays }
-          );
+          const savedVisId = await saveVisualization(vis, { isTitleDuplicateConfirmed }, coreStart);
           expect(savedVisId).toBe('');
         } catch {
           // ignore
         }
-        expect(savedObjectsClient.create).not.toHaveBeenCalled();
+        expect(mockCreateContent).not.toHaveBeenCalled();
         expect(mockSaveWithConfirmation).not.toHaveBeenCalled();
         expect(mockCheckForDuplicateTitle).toHaveBeenCalled();
         expect(vis.id).toBeUndefined();
@@ -282,13 +296,9 @@ describe('saved_visualize_utils', () => {
 
       it('as true we should save vis with duplicated title', async () => {
         isTitleDuplicateConfirmed = true;
-        const savedVisId = await saveVisualization(
-          vis,
-          { isTitleDuplicateConfirmed },
-          { savedObjectsClient, overlays }
-        );
+        const savedVisId = await saveVisualization(vis, { isTitleDuplicateConfirmed }, coreStart);
         expect(mockCheckForDuplicateTitle).toHaveBeenCalled();
-        expect(savedObjectsClient.create).toHaveBeenCalled();
+        expect(mockCreateContent).toHaveBeenCalled();
         expect(savedVisId).toBe('test');
         expect(vis.id).toBe('test');
       });
@@ -297,35 +307,30 @@ describe('saved_visualize_utils', () => {
 
   describe('findListItems', () => {
     function testProps() {
-      (savedObjectsClient.find as jest.Mock).mockImplementation(() => ({
-        total: 0,
-        savedObjects: [],
-      }));
       return {
-        savedObjectsClient,
         search: '',
         size: 10,
       };
     }
 
     beforeEach(() => {
-      savedObjectsClient.find.mockClear();
+      mockFindContent.mockClear();
     });
 
     it('searches visualization title and description', async () => {
       const props = testProps();
-      const { find } = props.savedObjectsClient;
       await findListItems(
-        props.savedObjectsClient,
         { get: mockGetTypes, getAliases: mockGetAliases },
         props.search,
         props.size
       );
-      expect(find.mock.calls).toMatchObject([
+      expect(mockFindContent.mock.calls).toMatchObject([
         [
           {
-            type: ['visualization'],
-            searchFields: ['title^3', 'description'],
+            options: {
+              types: ['visualization'],
+              searchFields: ['title^3', 'description'],
+            },
           },
         ],
       ]);
@@ -343,18 +348,19 @@ describe('saved_visualize_utils', () => {
           },
         } as VisTypeAlias,
       ];
-      const { find } = props.savedObjectsClient;
       await findListItems(
-        props.savedObjectsClient,
         { get: mockGetTypes, getAliases: mockGetAliases },
         props.search,
         props.size
       );
-      expect(find.mock.calls).toMatchObject([
+      expect(mockFindContent.mock.calls).toMatchObject([
         [
           {
-            type: ['bazdoc', 'etc', 'visualization'],
-            searchFields: ['baz', 'bing', 'title^3', 'description'],
+            contentTypes: [
+              { contentTypeId: 'bazdoc' },
+              { contentTypeId: 'etc' },
+              { contentTypeId: 'visualization' },
+            ],
           },
         ],
       ]);
@@ -380,18 +386,20 @@ describe('saved_visualize_utils', () => {
           },
         } as VisTypeAlias,
       ];
-      const { find } = props.savedObjectsClient;
       await findListItems(
-        props.savedObjectsClient,
         { get: mockGetTypes, getAliases: mockGetAliases },
         props.search,
         props.size
       );
-      expect(find.mock.calls).toMatchObject([
+      expect(mockFindContent.mock.calls).toMatchObject([
         [
           {
-            type: ['bazdoc', 'bar', 'visualization', 'foo'],
-            searchFields: ['baz', 'bing', 'barfield', 'foofield', 'title^3', 'description'],
+            contentTypes: [
+              { contentTypeId: 'bazdoc' },
+              { contentTypeId: 'bar' },
+              { contentTypeId: 'visualization' },
+              { contentTypeId: 'foo' },
+            ],
           },
         ],
       ]);
@@ -402,17 +410,15 @@ describe('saved_visualize_utils', () => {
         ...testProps(),
         search: 'ahoythere',
       };
-      const { find } = props.savedObjectsClient;
       await findListItems(
-        props.savedObjectsClient,
         { get: mockGetTypes, getAliases: mockGetAliases },
         props.search,
         props.size
       );
-      expect(find.mock.calls).toMatchObject([
+      expect(mockFindContent.mock.calls).toMatchObject([
         [
           {
-            search: 'ahoythere*',
+            query: { text: 'ahoythere*' },
           },
         ],
       ]);
@@ -422,25 +428,24 @@ describe('saved_visualize_utils', () => {
       const props = {
         ...testProps(),
         references: [
-          { type: 'foo', id: 'hello' },
-          { type: 'bar', id: 'dolly' },
+          { type: 'foo', id: 'hello', name: 'foo' },
+          { type: 'bar', id: 'dolly', name: 'bar' },
         ],
       };
-      const { find } = props.savedObjectsClient;
       await findListItems(
-        props.savedObjectsClient,
         { get: mockGetTypes, getAliases: mockGetAliases },
         props.search,
         props.size,
         props.references
       );
-      expect(find.mock.calls).toMatchObject([
+      expect(mockFindContent.mock.calls).toMatchObject([
         [
           {
-            hasReference: [
-              { type: 'foo', id: 'hello' },
-              { type: 'bar', id: 'dolly' },
-            ],
+            query: {
+              tags: {
+                included: ['hello', 'dolly'],
+              },
+            },
           },
         ],
       ]);
@@ -464,9 +469,9 @@ describe('saved_visualize_utils', () => {
           },
         } as VisTypeAlias,
       ];
-      (props.savedObjectsClient.find as jest.Mock).mockImplementationOnce(async () => ({
-        total: 2,
-        savedObjects: [
+      (mockFindContent as jest.Mock).mockImplementationOnce(async () => ({
+        pagination: { total: 2 },
+        hits: [
           {
             id: 'lotr',
             type: 'wizard',
@@ -481,7 +486,6 @@ describe('saved_visualize_utils', () => {
       }));
 
       const items = await findListItems(
-        props.savedObjectsClient,
         { get: mockGetTypes, getAliases: mockGetAliases },
         props.search,
         props.size
@@ -496,13 +500,18 @@ describe('saved_visualize_utils', () => {
           },
           {
             id: 'wat',
+            image: undefined,
+            editor: {
+              editUrl: '/edit/wat',
+            },
+            readOnly: false,
             references: undefined,
             icon: undefined,
             savedObjectType: 'visualization',
-            editUrl: '/edit/wat',
             type: 'test',
             typeName: 'test',
             typeTitle: undefined,
+            updatedAt: undefined,
             title: 'WATEVER',
             url: '#/edit/wat',
           },

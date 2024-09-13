@@ -42,13 +42,11 @@ const isNestedObject = (value: unknown): boolean => {
 export const convertToResultFormat = (document: CurationResult): SearchResult => {
   // Convert `key: 'value'` into `key: { raw: 'value' }`
   const result = Object.entries(document).reduce((acc, [key, value]) => {
-    return {
-      ...acc,
-      [key]:
-        isNestedObject(value) || Object.prototype.hasOwnProperty.call(value, 'raw')
-          ? value
-          : { raw: value },
-    };
+    acc[key] =
+      isNestedObject(value) || (typeof value === 'object' && Object.hasOwn(value, 'raw'))
+        ? value
+        : { raw: value };
+    return acc;
   }, {} as SearchResult);
 
   result._meta = mergeMetas(result._meta, convertIdToMeta(document.id));

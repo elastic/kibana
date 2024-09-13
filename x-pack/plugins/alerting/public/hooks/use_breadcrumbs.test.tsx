@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useBreadcrumbs } from './use_breadcrumbs';
-import { AlertingDeepLinkId } from '../config';
+import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../common';
 import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
 
 const mockSetBreadcrumbs = jest.fn();
@@ -48,7 +48,7 @@ describe('useBreadcrumbs', () => {
   });
 
   test('set maintenance windows breadcrumbs', () => {
-    renderHook(() => useBreadcrumbs(AlertingDeepLinkId.maintenanceWindows), {
+    renderHook(() => useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows), {
       wrapper: appMockRenderer.AppWrapper,
     });
     expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
@@ -58,17 +58,32 @@ describe('useBreadcrumbs', () => {
   });
 
   test('set create maintenance windows breadcrumbs', () => {
-    renderHook(() => useBreadcrumbs(AlertingDeepLinkId.maintenanceWindowsCreate), {
+    renderHook(() => useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsCreate), {
       wrapper: appMockRenderer.AppWrapper,
     });
     expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
       { href: '/test', onClick: expect.any(Function), text: 'Stack Management' },
       {
-        href: AlertingDeepLinkId.maintenanceWindows,
+        href: MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows,
         onClick: expect.any(Function),
         text: 'Maintenance Windows',
       },
       { text: 'Create' },
+    ]);
+  });
+
+  test('set edit maintenance windows breadcrumbs', () => {
+    renderHook(() => useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsEdit), {
+      wrapper: appMockRenderer.AppWrapper,
+    });
+    expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
+      { href: '/test', onClick: expect.any(Function), text: 'Stack Management' },
+      {
+        href: MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows,
+        onClick: expect.any(Function),
+        text: 'Maintenance Windows',
+      },
+      { text: 'Edit' },
     ]);
   });
 });

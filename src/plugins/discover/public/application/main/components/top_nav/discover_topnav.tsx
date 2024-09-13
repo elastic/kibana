@@ -1,95 +1,77 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
-import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
-import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
-import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { useInternalStateSelector } from '../../services/discover_internal_state_container';
-import { ENABLE_SQL } from '../../../../../common';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DiscoverLayoutProps } from '../layout/types';
-import { getTopNavLinks } from './get_top_nav_links';
-import { getHeaderActionMenuMounter } from '../../../../kibana_services';
-import { DiscoverStateContainer } from '../../services/discover_state';
-import { onSaveSearch } from './on_save_search';
 
-export type DiscoverTopNavProps = Pick<
-  DiscoverLayoutProps,
-  'navigateTo' | 'savedSearch' | 'searchSource'
-> & {
-  onOpenInspector: () => void;
-  query?: Query | AggregateQuery;
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { TextBasedLanguages } from '@kbn/esql-utils';
+import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
+import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import { onSaveSearch } from './on_save_search';
+import { useDiscoverCustomization } from '../../../../customizations';
+import { addLog } from '../../../../utils/add_log';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
+import { useDiscoverTopNav } from './use_discover_topnav';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
+
+export interface DiscoverTopNavProps {
   savedQuery?: string;
-  updateQuery: (
-    payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
-    isUpdate?: boolean
-  ) => void;
   stateContainer: DiscoverStateContainer;
-  resetSavedSearch: () => void;
-  onChangeDataView: (dataView: string) => void;
-  onDataViewCreated: (dataView: DataView) => void;
-  isPlainRecord: boolean;
-  textBasedLanguageModeErrors?: Error;
+  esqlModeErrors?: Error;
+  esqlModeWarning?: string;
   onFieldEdited: () => Promise<void>;
-  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
-  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
-  updateDataViewList: (newAdHocDataViews: DataView[]) => void;
-};
+  isLoading?: boolean;
+  onCancelClick?: () => void;
+}
 
 export const DiscoverTopNav = ({
-  onOpenInspector,
-  query,
   savedQuery,
   stateContainer,
-  updateQuery,
-  searchSource,
-  navigateTo,
-  savedSearch,
-  resetSavedSearch,
-  onChangeDataView,
-  onDataViewCreated,
-  isPlainRecord,
-  textBasedLanguageModeErrors,
+  esqlModeErrors,
+  esqlModeWarning,
   onFieldEdited,
-  persistDataView,
-  updateAdHocDataViewId,
-  updateDataViewList,
+  isLoading,
+  onCancelClick,
 }: DiscoverTopNavProps) => {
-  const history = useHistory();
+  const services = useDiscoverServices();
+  const {
+    dataViewEditor,
+    navigation,
+    dataViewFieldEditor,
+    data,
+    uiSettings,
+    dataViews,
+    setHeaderActionMenu,
+  } = services;
+  const query = useAppStateSelector((state) => state.query);
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
-  const showDatePicker = useMemo(
-    () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
-    [dataView]
+  const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
+    (state) => state.isESQLToDataViewTransitionModalVisible
   );
-  const services = useDiscoverServices();
-  const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, dataViews } = services;
-
-  const canEditDataView =
-    Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
+  const savedSearch = useSavedSearchInitial();
+  const isEsqlMode = useIsEsqlMode();
+  const showDatePicker = useMemo(() => {
+    // always show the timepicker for ES|QL mode
+    return (
+      isEsqlMode || (!isEsqlMode && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
+    );
+  }, [dataView, isEsqlMode]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
-
-  const { AggregateQueryTopNavMenu } = navigation.ui;
-
-  const onOpenSavedSearch = useCallback(
-    (newSavedSearchId: string) => {
-      if (savedSearch.id && savedSearch.id === newSavedSearchId) {
-        resetSavedSearch();
-      } else {
-        history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
-      }
-    },
-    [history, resetSavedSearch, savedSearch.id]
-  );
 
   useEffect(() => {
     return () => {
@@ -103,13 +85,16 @@ export const DiscoverTopNav = ({
     };
   }, []);
 
+  const canEditDataView =
+    Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
+
   const editField = useMemo(
     () =>
       canEditDataView
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             if (dataView?.id) {
               const dataViewInstance = await data.dataViews.get(dataView.id);
-              closeFieldEditor.current = dataViewFieldEditor.openEditor({
+              closeFieldEditor.current = await dataViewFieldEditor.openEditor({
                 ctx: {
                   dataView: dataViewInstance,
                 },
@@ -131,72 +116,27 @@ export const DiscoverTopNav = ({
 
   const createNewDataView = useCallback(() => {
     closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: onDataViewCreated,
+      onSave: stateContainer.actions.onDataViewCreated,
       allowAdHocDataView: true,
     });
-  }, [dataViewEditor, onDataViewCreated]);
+  }, [dataViewEditor, stateContainer]);
 
-  const onCreateDefaultAdHocDataView = useCallback(
-    async (pattern: string) => {
-      const newDataView = await dataViews.create({
-        title: pattern,
-      });
-      if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
-        newDataView.timeFieldName = '@timestamp';
+  const onEditDataView = useCallback(
+    async (editedDataView: DataView) => {
+      if (editedDataView.isPersisted()) {
+        // Clear the current data view from the cache and create a new instance
+        // of it, ensuring we have a new object reference to trigger a re-render
+        dataViews.clearInstanceCache(editedDataView.id);
+        stateContainer.actions.setDataView(await dataViews.create(editedDataView.toSpec(), true));
+      } else {
+        await stateContainer.actions.updateAdHocDataViewId();
       }
-
-      stateContainer.actions.appendAdHocDataViews(newDataView);
-      onChangeDataView(newDataView.id!);
+      stateContainer.actions.loadDataViewList();
+      addLog('[DiscoverTopNav] onEditDataView triggers data fetching');
+      stateContainer.dataState.fetch();
     },
-    [dataViews, onChangeDataView, stateContainer.actions]
+    [dataViews, stateContainer.actions, stateContainer.dataState]
   );
-
-  const topNavMenu = useMemo(
-    () =>
-      getTopNavLinks({
-        dataView,
-        navigateTo,
-        savedSearch,
-        services,
-        state: stateContainer,
-        onOpenInspector,
-        searchSource,
-        onOpenSavedSearch,
-        isPlainRecord,
-        adHocDataViews,
-        updateDataViewList,
-        persistDataView,
-        updateAdHocDataViewId,
-      }),
-    [
-      dataView,
-      navigateTo,
-      savedSearch,
-      services,
-      stateContainer,
-      onOpenInspector,
-      searchSource,
-      onOpenSavedSearch,
-      isPlainRecord,
-      adHocDataViews,
-      persistDataView,
-      updateAdHocDataViewId,
-      updateDataViewList,
-    ]
-  );
-
-  const onEditDataView = async (editedDataView: DataView) => {
-    if (editedDataView.isPersisted()) {
-      // Clear the current data view from the cache and create a new instance
-      // of it, ensuring we have a new object reference to trigger a re-render
-      dataViews.clearInstanceCache(editedDataView.id);
-      stateContainer.actions.setDataView(await dataViews.create(editedDataView.toSpec(), true));
-    } else {
-      await updateAdHocDataViewId(editedDataView);
-    }
-    stateContainer.actions.loadDataViewList();
-    stateContainer.dataState.fetch();
-  };
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     const { appState } = stateContainer;
@@ -211,68 +151,137 @@ export const DiscoverTopNav = ({
       appState.set(newState);
     }
   };
-  const setMenuMountPoint = useMemo(() => {
-    return getHeaderActionMenuMounter();
-  }, []);
-  const isSQLModeEnabled = uiSettings.get(ENABLE_SQL);
-  const supportedTextBasedLanguages = [];
-  if (isSQLModeEnabled) {
-    supportedTextBasedLanguages.push('SQL');
-  }
-  const dataViewPickerProps: DataViewPickerProps = {
-    trigger: {
-      label: dataView?.getName() || '',
-      'data-test-subj': 'discover-dataView-switch-link',
-      title: dataView?.getIndexPattern() || '',
-    },
-    currentDataViewId: dataView?.id,
-    onAddField: addField,
-    onDataViewCreated: createNewDataView,
-    onCreateDefaultAdHocDataView,
-    onChangeDataView,
-    textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
-    adHocDataViews,
-    savedDataViews,
-    onEditDataView,
-  };
 
-  const onTextBasedSavedAndExit = useCallback(
-    ({ onSave, onCancel }) => {
-      onSaveSearch({
-        savedSearch,
-        services,
-        dataView,
-        navigateTo,
-        state: stateContainer,
-        onClose: onCancel,
-        onSaveCb: onSave,
-        updateAdHocDataViewId,
-      });
+  const onESQLToDataViewTransitionModalClose = useCallback(
+    (shouldDismissModal?: boolean, needsSave?: boolean) => {
+      if (shouldDismissModal) {
+        services.storage.set(ESQL_TRANSITION_MODAL_KEY, true);
+      }
+      stateContainer.internalState.transitions.setIsESQLToDataViewTransitionModalVisible(false);
+      // the user dismissed the modal, we don't need to save the search or switch to the data view mode
+      if (needsSave == null) {
+        return;
+      }
+      if (needsSave) {
+        onSaveSearch({
+          savedSearch: stateContainer.savedSearchState.getState(),
+          services,
+          state: stateContainer,
+          onClose: () =>
+            stateContainer.internalState.transitions.setIsESQLToDataViewTransitionModalVisible(
+              false
+            ),
+          onSaveCb: () => {
+            stateContainer.actions.transitionFromESQLToDataView(dataView.id ?? '');
+          },
+        });
+      } else {
+        stateContainer.actions.transitionFromESQLToDataView(dataView.id ?? '');
+      }
     },
-    [dataView, navigateTo, savedSearch, services, stateContainer, updateAdHocDataViewId]
+    [dataView.id, services, stateContainer]
   );
 
+  const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
+  const topNavProps = useMemo(() => {
+    if (stateContainer.customizationContext.inlineTopNav.enabled) {
+      return undefined;
+    }
+
+    return {
+      badges: topNavBadges,
+      config: topNavMenu,
+      setMenuMountPoint: setHeaderActionMenu,
+    };
+  }, [
+    setHeaderActionMenu,
+    stateContainer.customizationContext.inlineTopNav.enabled,
+    topNavBadges,
+    topNavMenu,
+  ]);
+
+  const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
+    const isESQLModeEnabled = uiSettings.get(ENABLE_ESQL);
+    const supportedTextBasedLanguages: DataViewPickerProps['textBasedLanguages'] = isESQLModeEnabled
+      ? [TextBasedLanguages.ESQL]
+      : [];
+
+    return {
+      trigger: {
+        label: dataView?.getName() || '',
+        'data-test-subj': 'discover-dataView-switch-link',
+        title: dataView?.getIndexPattern() || '',
+      },
+      currentDataViewId: dataView?.id,
+      onAddField: addField,
+      onDataViewCreated: createNewDataView,
+      onCreateDefaultAdHocDataView: stateContainer.actions.createAndAppendAdHocDataView,
+      onChangeDataView: stateContainer.actions.onChangeDataView,
+      textBasedLanguages: supportedTextBasedLanguages,
+      adHocDataViews,
+      savedDataViews,
+      onEditDataView,
+    };
+  }, [
+    adHocDataViews,
+    addField,
+    createNewDataView,
+    dataView,
+    onEditDataView,
+    savedDataViews,
+    stateContainer,
+    uiSettings,
+  ]);
+
+  const searchBarCustomization = useDiscoverCustomization('search_bar');
+
+  const SearchBar = useMemo(
+    () => searchBarCustomization?.CustomSearchBar ?? navigation.ui.AggregateQueryTopNavMenu,
+    [searchBarCustomization?.CustomSearchBar, navigation.ui.AggregateQueryTopNavMenu]
+  );
+
+  const shouldHideDefaultDataviewPicker =
+    !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
+
   return (
-    <AggregateQueryTopNavMenu
-      appName="discover"
-      config={topNavMenu}
-      indexPatterns={[dataView]}
-      onQuerySubmit={updateQuery}
-      onSavedQueryIdChange={updateSavedQueryId}
-      query={query}
-      setMenuMountPoint={setMenuMountPoint}
-      savedQueryId={savedQuery}
-      screenTitle={savedSearch.title}
-      showDatePicker={showDatePicker}
-      showSaveQuery={!isPlainRecord && Boolean(services.capabilities.discover.saveQuery)}
-      showSearchBar={true}
-      useDefaultBehaviors={true}
-      dataViewPickerComponentProps={dataViewPickerProps}
-      displayStyle="detached"
-      textBasedLanguageModeErrors={
-        textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
-      }
-      onTextBasedSavedAndExit={onTextBasedSavedAndExit}
-    />
+    <>
+      <SearchBar
+        {...topNavProps}
+        appName="discover"
+        indexPatterns={[dataView]}
+        onQuerySubmit={stateContainer.actions.onUpdateQuery}
+        onCancel={onCancelClick}
+        isLoading={isLoading}
+        onSavedQueryIdChange={updateSavedQueryId}
+        query={query}
+        savedQueryId={savedQuery}
+        screenTitle={savedSearch.title}
+        showDatePicker={showDatePicker}
+        saveQueryMenuVisibility={
+          services.capabilities.discover.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
+        }
+        showSearchBar={true}
+        useDefaultBehaviors={true}
+        dataViewPickerOverride={
+          searchBarCustomization?.CustomDataViewPicker ? (
+            <searchBarCustomization.CustomDataViewPicker />
+          ) : undefined
+        }
+        dataViewPickerComponentProps={
+          shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
+        }
+        displayStyle="detached"
+        textBasedLanguageModeErrors={esqlModeErrors ? [esqlModeErrors] : undefined}
+        textBasedLanguageModeWarning={esqlModeWarning}
+        prependFilterBar={
+          searchBarCustomization?.PrependFilterBar ? (
+            <searchBarCustomization.PrependFilterBar />
+          ) : undefined
+        }
+      />
+      {isESQLToDataViewTransitionModalVisible && (
+        <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
+      )}
+    </>
   );
 };

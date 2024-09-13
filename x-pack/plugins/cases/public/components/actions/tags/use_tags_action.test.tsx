@@ -79,10 +79,9 @@ describe('useTagsAction', () => {
     await waitFor(() => {
       expect(result.current.isFlyoutOpen).toBe(false);
       expect(onActionSuccess).toHaveBeenCalled();
-      expect(updateSpy).toHaveBeenCalledWith(
-        [{ tags: ['coke', 'one'], id: basicCase.id, version: basicCase.version }],
-        expect.anything()
-      );
+      expect(updateSpy).toHaveBeenCalledWith({
+        cases: [{ tags: ['coke', 'one'], id: basicCase.id, version: basicCase.version }],
+      });
     });
   });
 

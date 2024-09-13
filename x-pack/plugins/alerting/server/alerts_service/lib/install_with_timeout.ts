@@ -18,6 +18,13 @@ interface InstallWithTimeoutOpts {
   timeoutMs?: number;
 }
 
+export class InstallShutdownError extends Error {
+  constructor() {
+    super('Server is stopping; must stop all async operations');
+    Object.setPrototypeOf(this, InstallShutdownError.prototype);
+  }
+}
+
 export const installWithTimeout = async ({
   description,
   installFn,
@@ -41,20 +48,26 @@ export const installWithTimeout = async ({
           reject(new Error(msg));
         }, timeoutMs);
 
-        firstValueFrom(pluginStop$).then(() => {
-          clearTimeout(timeoutId);
-          reject(new Error('Server is stopping; must stop all async operations'));
-        });
+        firstValueFrom(pluginStop$)
+          .then(() => {
+            clearTimeout(timeoutId);
+            reject(new InstallShutdownError());
+          })
+          .catch(() => reject(new InstallShutdownError()));
       });
     };
 
     await Promise.race([install(), throwTimeoutException()]);
   } catch (e) {
-    logger.error(e);
-
-    const reason = e?.message || 'Unknown reason';
-    throw new Error(
-      `Failure during installation${description ? ` of ${description}` : ''}. ${reason}`
-    );
+    if (e instanceof InstallShutdownError) {
+      logger.debug(e.message);
+      throw e;
+    } else {
+      logger.error(e);
+      const reason = e?.message || 'Unknown reason';
+      throw new Error(
+        `Failure during installation${description ? ` of ${description}` : ''}. ${reason}`
+      );
+    }
   }
 };

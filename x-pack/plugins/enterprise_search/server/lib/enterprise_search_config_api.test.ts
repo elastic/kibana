@@ -19,6 +19,8 @@ jest.mock('@kbn/repo-info', () => ({
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
+import { GlobalConfigService } from '../services/global_config_service';
+
 import {
   callEnterpriseSearchConfigAPI,
   warnMismatchedVersions,
@@ -37,6 +39,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
   };
   const mockDependencies = {
     config: mockConfig,
+    globalConfigService: new GlobalConfigService(),
     request: mockRequest,
     log: loggingSystemMock.create().get(),
   } as any;
@@ -77,6 +80,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
       app_search: {
         account: {
           id: 'some-id-string',
+          kibana_uis_enabled: true,
           onboarding_complete: true,
         },
         role: {
@@ -96,6 +100,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
         organization: {
           name: 'ACME Donuts',
           default_org_name: 'My Organization',
+          kibana_uis_enabled: false,
         },
         account: {
           id: 'some-id-string',
@@ -170,6 +175,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
       },
       appSearch: {
         accountId: undefined,
+        kibanaUIsEnabled: false,
         onboardingComplete: false,
         role: {
           id: undefined,
@@ -188,6 +194,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
         organization: {
           name: undefined,
           defaultOrgName: undefined,
+          kibanaUIsEnabled: false,
         },
         account: {
           id: undefined,
@@ -254,7 +261,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
 
     // Warning
-    callEnterpriseSearchConfigAPI(mockDependencies);
+    void callEnterpriseSearchConfigAPI(mockDependencies);
     jest.advanceTimersByTime(150);
     expect(mockDependencies.log.warn).toHaveBeenCalledWith(
       'Enterprise Search access check took over 100ms. Please ensure your Enterprise Search server is responding normally and not adversely impacting Kibana load speeds.'

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -24,6 +25,14 @@ import {
   CoreUiSettingsRouteHandlerContext,
   type InternalUiSettingsServiceStart,
 } from '@kbn/core-ui-settings-server-internal';
+import {
+  CoreSecurityRouteHandlerContext,
+  type InternalSecurityServiceStart,
+} from '@kbn/core-security-server-internal';
+import {
+  CoreUserProfileRouteHandlerContext,
+  type InternalUserProfileServiceStart,
+} from '@kbn/core-user-profile-server-internal';
 
 /**
  * Subset of `InternalCoreStart` used by {@link CoreRouteHandlerContext}
@@ -34,6 +43,8 @@ export interface CoreRouteHandlerContextParams {
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
   deprecations: InternalDeprecationsServiceStart;
+  security: InternalSecurityServiceStart;
+  userProfile: InternalUserProfileServiceStart;
 }
 
 /**
@@ -42,22 +53,73 @@ export interface CoreRouteHandlerContextParams {
  * @internal
  */
 export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
-  readonly elasticsearch: CoreElasticsearchRouteHandlerContext;
-  readonly savedObjects: CoreSavedObjectsRouteHandlerContext;
-  readonly uiSettings: CoreUiSettingsRouteHandlerContext;
-  readonly deprecations: CoreDeprecationsRouteHandlerContext;
+  #elasticsearch?: CoreElasticsearchRouteHandlerContext;
+  #savedObjects?: CoreSavedObjectsRouteHandlerContext;
+  #uiSettings?: CoreUiSettingsRouteHandlerContext;
+  #deprecations?: CoreDeprecationsRouteHandlerContext;
+  #security?: CoreSecurityRouteHandlerContext;
+  #userProfile?: CoreUserProfileRouteHandlerContext;
 
-  constructor(coreStart: CoreRouteHandlerContextParams, request: KibanaRequest) {
-    this.elasticsearch = new CoreElasticsearchRouteHandlerContext(coreStart.elasticsearch, request);
-    this.savedObjects = new CoreSavedObjectsRouteHandlerContext(coreStart.savedObjects, request);
-    this.uiSettings = new CoreUiSettingsRouteHandlerContext(
-      coreStart.uiSettings,
-      this.savedObjects
-    );
-    this.deprecations = new CoreDeprecationsRouteHandlerContext(
-      coreStart.deprecations,
-      this.elasticsearch,
-      this.savedObjects
-    );
+  constructor(
+    private readonly coreStart: CoreRouteHandlerContextParams,
+    private readonly request: KibanaRequest
+  ) {}
+
+  public get elasticsearch() {
+    if (!this.#elasticsearch) {
+      this.#elasticsearch = new CoreElasticsearchRouteHandlerContext(
+        this.coreStart.elasticsearch,
+        this.request
+      );
+    }
+    return this.#elasticsearch;
+  }
+
+  public get savedObjects() {
+    if (!this.#savedObjects) {
+      this.#savedObjects = new CoreSavedObjectsRouteHandlerContext(
+        this.coreStart.savedObjects,
+        this.request
+      );
+    }
+    return this.#savedObjects;
+  }
+
+  public get uiSettings() {
+    if (!this.#uiSettings) {
+      this.#uiSettings = new CoreUiSettingsRouteHandlerContext(
+        this.coreStart.uiSettings,
+        this.savedObjects
+      );
+    }
+    return this.#uiSettings;
+  }
+
+  public get deprecations() {
+    if (!this.#deprecations) {
+      this.#deprecations = new CoreDeprecationsRouteHandlerContext(
+        this.coreStart.deprecations,
+        this.elasticsearch,
+        this.savedObjects
+      );
+    }
+    return this.#deprecations;
+  }
+
+  public get security() {
+    if (!this.#security) {
+      this.#security = new CoreSecurityRouteHandlerContext(this.coreStart.security, this.request);
+    }
+    return this.#security;
+  }
+
+  public get userProfile() {
+    if (!this.#userProfile) {
+      this.#userProfile = new CoreUserProfileRouteHandlerContext(
+        this.coreStart.userProfile,
+        this.request
+      );
+    }
+    return this.#userProfile;
   }
 }

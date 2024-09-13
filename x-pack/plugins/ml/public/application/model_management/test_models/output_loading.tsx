@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { EuiLoadingContent, EuiLoadingContentProps } from '@elastic/eui';
+import type { FC } from 'react';
+import React from 'react';
+import type { EuiSkeletonTextProps } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 
 export const OutputLoadingContent: FC<{ text: string }> = ({ text }) => {
   const actualLines = text.split(/\r\n|\r|\n/).length + 1;
   const lines = actualLines > 4 && actualLines <= 10 ? actualLines : 4;
 
   return (
-    <EuiLoadingContent
+    <EuiSkeletonText
       data-test-subj={'mlTestModelLoadingContent'}
-      lines={lines as EuiLoadingContentProps['lines']}
+      lines={lines as EuiSkeletonTextProps['lines']}
     />
   );
 };

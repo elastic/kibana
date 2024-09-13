@@ -26,10 +26,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   describe('latency correlations', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/127431
-    describe.skip('space with no features disabled', () => {
+    describe('space with no features disabled', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
+        await spacesService.delete('custom_space');
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -65,7 +65,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const fromTime = 'Jul 29, 2019 @ 00:00:00.000';
         const toTime = 'Jul 30, 2019 @ 00:00:00.000';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime, true);
 
         await retry.try(async () => {
           const apmMainContainerText = await testSubjects.getVisibleTextAll('apmMainContainer');
@@ -121,7 +121,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           // The default tab 'Trace samples' should show the log log chart without the correlations analysis part.
           // First assert that the log log chart and its header are present
           const apmTransactionDistributionChartTitle = await testSubjects.getVisibleText(
-            'apmTransactionDistributionChartTitle'
+            'apmDurationDistributionChartWithScrubberTitle'
           );
           expect(apmTransactionDistributionChartTitle).to.be(testData.logLogChartTitle);
           await testSubjects.existOrFail('apmCorrelationsChart');
@@ -157,7 +157,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           // Assert that results for the given service didn't find any correlations
           const apmCorrelationsTable = await testSubjects.getVisibleText('apmCorrelationsTable');
           expect(apmCorrelationsTable).to.be(
-            'No significant correlations\nCorrelations will only be identified if they have significant impact.\nTry selecting another time range or remove any added filter.'
+            'No significant correlations\nCorrelations are only identified if they have significant impact.\nTry selecting another time range or removing any added filters.'
           );
         });
       });

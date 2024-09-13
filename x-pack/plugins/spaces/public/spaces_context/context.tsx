@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 
+import type { SpacesReactContext, SpacesReactContextValue } from './types';
 import type { SpacesManager } from '../spaces_manager';
 import type { SpacesData } from '../types';
-import type { SpacesReactContext, SpacesReactContextValue } from './types';
 
 const { useContext, createElement, createContext } = React;
 
@@ -32,7 +33,7 @@ export const createSpacesReactContext = <Services extends Partial<CoreStart>>(
     spacesDataPromise,
     services,
   };
-  const Provider: React.FC = ({ children }) =>
+  const Provider: FC<PropsWithChildren<unknown>> = ({ children }) =>
     createElement(context.Provider as React.ComponentType<any>, { value, children });
 
   return {

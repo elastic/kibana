@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createExtract, createInject } from './dashboard_container_references';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
-import { DashboardContainerStateWithType } from '../../types';
+import { ParsedDashboardAttributesWithType } from '../../types';
+import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/public';
 
 const persistableStateService = createEmbeddablePersistableStateServiceMock();
 
-const dashboardWithExtractedPanel: DashboardContainerStateWithType = {
+const dashboardWithExtractedPanel: ParsedDashboardAttributesWithType = {
   id: 'id',
   type: 'dashboard',
   panels: {
@@ -33,7 +35,7 @@ const extractedSavedObjectPanelRef = {
   id: 'object-id',
 };
 
-const unextractedDashboardState: DashboardContainerStateWithType = {
+const unextractedDashboardState: ParsedDashboardAttributesWithType = {
   id: 'id',
   type: 'dashboard',
   panels: {
@@ -56,7 +58,7 @@ describe('inject/extract by reference panel', () => {
     const injected = inject(
       dashboardWithExtractedPanel,
       references
-    ) as DashboardContainerStateWithType;
+    ) as ParsedDashboardAttributesWithType;
 
     expect(injected).toEqual(unextractedDashboardState);
   });
@@ -71,7 +73,7 @@ describe('inject/extract by reference panel', () => {
   });
 });
 
-const dashboardWithExtractedByValuePanel: DashboardContainerStateWithType = {
+const dashboardWithExtractedByValuePanel: ParsedDashboardAttributesWithType = {
   id: 'id',
   type: 'dashboard',
   panels: {
@@ -81,7 +83,7 @@ const dashboardWithExtractedByValuePanel: DashboardContainerStateWithType = {
       explicitInput: {
         id: 'panel_1',
         extracted_reference: 'ref',
-      },
+      } as Partial<SavedObjectEmbeddableInput> & { id: string; extracted_reference: string },
     },
   },
 };
@@ -92,7 +94,7 @@ const extractedByValueRef = {
   type: 'panel_type',
 };
 
-const unextractedDashboardByValueState: DashboardContainerStateWithType = {
+const unextractedDashboardByValueState: ParsedDashboardAttributesWithType = {
   id: 'id',
   type: 'dashboard',
   panels: {
@@ -102,7 +104,7 @@ const unextractedDashboardByValueState: DashboardContainerStateWithType = {
       explicitInput: {
         id: 'panel_1',
         value: 'id',
-      },
+      } as Partial<SavedObjectEmbeddableInput> & { id: string; value: string },
     },
   },
 };

@@ -5,39 +5,45 @@
  * 2.0.
  */
 
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
+import { decompressFromBase64 } from 'lz-string';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { getSavedQuerySecurityUtils } from '../../saved_query_management/utils/saved_query_security';
 
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function (ctx: FtrProviderContext) {
+  const { getPageObjects, getService } = ctx;
+  const savedQuerySecurityUtils = getSavedQuerySecurityUtils(ctx);
   const esArchiver = getService('esArchiver');
   const esSupertest = getService('esSupertest');
   const dataGrid = getService('dataGrid');
-  const find = getService('find');
   const indexPatterns = getService('indexPatterns');
   const retry = getService('retry');
   const monacoEditor = getService('monacoEditor');
-  const security = getService('security');
+  const securityService = getService('security');
   const globalNav = getService('globalNav');
-  const PageObjects = getPageObjects([
-    'common',
-    'error',
-    'discover',
-    'timePicker',
-    'security',
-    'share',
-    'spaceSelector',
-    'header',
-  ]);
+  const { common, error, discover, timePicker, security, share, header, unifiedFieldList } =
+    getPageObjects([
+      'common',
+      'error',
+      'discover',
+      'timePicker',
+      'security',
+      'share',
+      'header',
+      'unifiedFieldList',
+    ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
-  const queryBar = getService('queryBar');
-  const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const kibanaServer = getService('kibanaServer');
+  const deployment = getService('deployment');
   const logstashIndexName = 'logstash-2015.09.22';
 
   async function setDiscoverTimeRange() {
-    await PageObjects.timePicker.setDefaultAbsoluteRange();
+    await timePicker.setDefaultAbsoluteRange();
   }
+
+  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
 
   describe('discover feature controls security', () => {
     before(async () => {
@@ -47,13 +53,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await security.forceLogout();
     });
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await PageObjects.security.forceLogout();
+      await security.forceLogout();
 
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
@@ -63,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global discover all privileges', () => {
       before(async () => {
-        await security.role.create('global_discover_all_role', {
+        await securityService.role.create('global_discover_all_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -77,26 +83,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_discover_all_user', {
+        await securityService.user.create('global_discover_all_user', {
           password: 'global_discover_all_user-password',
           roles: ['global_discover_all_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_discover_all_user',
-          'global_discover_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await security.login('global_discover_all_user', 'global_discover_all_user-password', {
+          expectSpaceSelector: false,
+        });
+        await common.navigateToApp('discover');
+        await discover.selectIndexPattern('logstash-*');
       });
 
       after(async () => {
-        await security.role.delete('global_discover_all_role');
-        await security.user.delete('global_discover_all_user');
+        await securityService.role.delete('global_discover_all_role');
+        await securityService.user.delete('global_discover_all_user');
       });
 
       it('shows discover navlink', async () => {
@@ -115,71 +117,32 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await globalNav.badgeMissingOrFail();
       });
 
-      it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
-        // close the menu
-        await PageObjects.share.clickShareTopNavButton();
+      it('Shows short urls for users with the right privileges', async () => {
+        let actualUrl: string = '';
+        await share.clickShareTopNavButton();
+        const re = new RegExp(
+          deployment.getHostPort().replace(':80', '').replace(':443', '') + '/app/r.*$'
+        );
+        await retry.try(async () => {
+          actualUrl = await share.getSharedUrl();
+          expect(actualUrl).to.match(re);
+          await share.closeShareModal();
+        });
       });
 
       it('shows CSV reports', async () => {
-        await PageObjects.share.clickShareTopNavButton();
-        await testSubjects.existOrFail('sharePanel-CSVReports');
-        await PageObjects.share.clickShareTopNavButton();
+        await share.clickShareTopNavButton();
+        await share.clickTab('Export');
+        await testSubjects.existOrFail('generateReportButton');
+        await share.closeShareModal();
       });
 
-      it('allows saving via the saved query management component popover with no saved query loaded', async () => {
-        await queryBar.setQuery('response:200');
-        await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
-        await savedQueryManagementComponent.savedQueryExistOrFail('foo');
-        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
-
-        await savedQueryManagementComponent.deleteSavedQuery('foo');
-        await savedQueryManagementComponent.savedQueryMissingOrFail('foo');
-      });
-
-      it('allow saving changes to a currently loaded query via the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
-          'new description',
-          true,
-          false
-        );
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        const queryString = await queryBar.getQueryString();
-        expect(queryString).to.eql('response:404');
-
-        // Reset after changing
-        await queryBar.setQuery('response:200');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
-          'Ok responses for jpg files',
-          true,
-          false
-        );
-      });
-
-      it('allow saving currently loaded query as a copy', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
-          'ok2',
-          'description',
-          true,
-          false
-        );
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await savedQueryManagementComponent.savedQueryExistOrFail('ok2');
-        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
-        await testSubjects.click('showQueryBarMenu');
-        await savedQueryManagementComponent.deleteSavedQuery('ok2');
-      });
+      savedQuerySecurityUtils.shouldAllowSavingQueries();
     });
 
     describe('global discover read-only privileges', () => {
       before(async () => {
-        await security.role.create('global_discover_read_role', {
+        await securityService.role.create('global_discover_read_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -193,24 +156,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_discover_read_user', {
+        await securityService.user.create('global_discover_read_user', {
           password: 'global_discover_read_user-password',
           roles: ['global_discover_read_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_discover_read_user',
-          'global_discover_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.login('global_discover_read_user', 'global_discover_read_user-password', {
+          expectSpaceSelector: false,
+        });
       });
 
       after(async () => {
-        await security.role.delete('global_discover_read_role');
-        await security.user.delete('global_discover_read_user');
+        await securityService.role.delete('global_discover_read_role');
+        await securityService.user.delete('global_discover_read_user');
       });
 
       it('shows discover navlink', async () => {
@@ -219,8 +178,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show save button`, async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.common.waitForTopNavToBeVisible();
+        await common.navigateToApp('discover');
+        await common.waitForTopNavToBeVisible();
         await testSubjects.existOrFail('discoverNewButton', { timeout: 10000 });
         await testSubjects.missingOrFail('discoverSaveButton');
       });
@@ -230,49 +189,58 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show visualize button`, async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.common.waitForTopNavToBeVisible();
-        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await common.navigateToApp('discover');
+        await common.waitForTopNavToBeVisible();
+        await discover.selectIndexPattern('logstash-*');
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+        await unifiedFieldList.clickFieldListItem('bytes');
+        await unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
 
-      it(`Permalinks doesn't show create short-url button`, async () => {
-        await PageObjects.share.clickShareTopNavButton();
-        await PageObjects.share.createShortUrlMissingOrFail();
-        await PageObjects.share.clickShareTopNavButton();
+      it('should allow for copying the snapshot URL', async function () {
+        await share.clickShareTopNavButton();
+        const actualUrl = await share.getSharedUrl();
+        expect(actualUrl).to.contain(`?l=${DISCOVER_APP_LOCATOR}`);
+        const urlSearchParams = new URLSearchParams(actualUrl);
+        expect(JSON.parse(decompressFromBase64(urlSearchParams.get('lz')!)!)).to.eql({
+          query: {
+            language: 'kuery',
+            query: '',
+          },
+          sort: [['@timestamp', 'desc']],
+          columns: [],
+          interval: 'auto',
+          filters: [],
+          dataViewId: 'logstash-*',
+          timeRange: {
+            from: '2015-09-19T06:31:44.000Z',
+            to: '2015-09-23T18:31:44.000Z',
+          },
+          refreshInterval: {
+            value: 60000,
+            pause: true,
+          },
+        });
+        await share.closeShareModal();
       });
 
-      it('allows loading a saved query via the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        const queryString = await queryBar.getQueryString();
-        expect(queryString).to.eql('response:200');
-      });
+      it(`Doesn't show short urls for users without those privileges`, async () => {
+        await share.clickShareTopNavButton();
+        let actualUrl: string = '';
 
-      it('does not allow saving via the saved query management component popover with no query loaded', async () => {
-        await savedQueryManagementComponent.saveNewQueryMissingOrFail();
+        await retry.try(async () => {
+          actualUrl = await share.getSharedUrl();
+          // only shows in long urls
+          expect(actualUrl).to.contain(DISCOVER_APP_LOCATOR);
+          await share.closeShareModal();
+        });
       });
-
-      it('does not allow saving changes to saved query from the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
-      });
-
-      it('does not allow deleting a saved query from the saved query management component', async () => {
-        await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
-      });
-
-      it('allows clearing the currently loaded saved query', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-      });
+      savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
     });
 
-    describe('global discover read-only privileges with url_create', () => {
+    describe('discover read-only privileges with url_create', () => {
       before(async () => {
-        await security.role.create('global_discover_read_url_create_role', {
+        await securityService.role.create('global_discover_read_url_create_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -286,13 +254,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_discover_read_url_create_user', {
+        await securityService.user.create('global_discover_read_url_create_user', {
           password: 'global_discover_read_url_create_user-password',
           roles: ['global_discover_read_url_create_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        await security.login(
           'global_discover_read_url_create_user',
           'global_discover_read_url_create_user-password',
           {
@@ -302,8 +270,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await security.user.delete('global_discover_read_url_create_user');
-        await security.role.delete('global_discover_read_url_create_role');
+        await securityService.user.delete('global_discover_read_url_create_user');
+        await securityService.role.delete('global_discover_read_url_create_role');
       });
 
       it('shows discover navlink', async () => {
@@ -312,8 +280,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show save button`, async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.common.waitForTopNavToBeVisible();
+        await common.navigateToApp('discover');
+        await common.waitForTopNavToBeVisible();
         await testSubjects.existOrFail('discoverNewButton', { timeout: 10000 });
         await testSubjects.missingOrFail('discoverSaveButton');
       });
@@ -323,49 +291,32 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show visualize button`, async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.common.waitForTopNavToBeVisible();
+        await common.navigateToApp('discover');
+        await common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+        await unifiedFieldList.clickFieldListItem('bytes');
+        await unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
 
-      it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
-        // close the menu
-        await PageObjects.share.clickShareTopNavButton();
+      it('Shows short urls for users with the right privileges', async () => {
+        await share.clickShareTopNavButton();
+        let actualUrl: string = '';
+        const re = new RegExp(
+          deployment.getHostPort().replace(':80', '').replace(':443', '') + '/app/r.*$'
+        );
+        await retry.try(async () => {
+          actualUrl = await share.getSharedUrl();
+          expect(actualUrl).to.match(re);
+          await share.closeShareModal();
+        });
       });
 
-      it('allows loading a saved query via the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        const queryString = await queryBar.getQueryString();
-        expect(queryString).to.eql('response:200');
-      });
-
-      it('does not allow saving via the saved query management component popover with no query loaded', async () => {
-        await savedQueryManagementComponent.saveNewQueryMissingOrFail();
-      });
-
-      it('does not allow saving changes to saved query from the saved query management component', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
-      });
-
-      it('does not allow deleting a saved query from the saved query management component', async () => {
-        await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
-      });
-
-      it('allows clearing the currently loaded saved query', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-      });
+      savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
     });
 
     describe('discover and visualize privileges', () => {
       before(async () => {
-        await security.role.create('global_discover_visualize_read_role', {
+        await securityService.role.create('global_discover_visualize_read_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -380,13 +331,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_discover_visualize_read_user', {
+        await securityService.user.create('global_discover_visualize_read_user', {
           password: 'global_discover_visualize_read_user-password',
           roles: ['global_discover_visualize_read_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        await security.login(
           'global_discover_visualize_read_user',
           'global_discover_visualize_read_user-password',
           {
@@ -396,22 +347,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await security.role.delete('global_discover_visualize_read_role');
-        await security.user.delete('global_discover_visualize_read_user');
+        await securityService.role.delete('global_discover_visualize_read_role');
+        await securityService.user.delete('global_discover_visualize_read_user');
       });
 
       it(`shows the visualize button`, async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.common.waitForTopNavToBeVisible();
+        await common.navigateToApp('discover');
+        await common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectFieldListItemVisualize('bytes');
+        await unifiedFieldList.clickFieldListItem('bytes');
+        await unifiedFieldList.expectFieldListItemVisualize('bytes');
       });
     });
 
     describe('no discover privileges', () => {
       before(async () => {
-        await security.role.create('no_discover_privileges_role', {
+        await securityService.role.create('no_discover_privileges_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -425,13 +376,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('no_discover_privileges_user', {
+        await securityService.user.create('no_discover_privileges_user', {
           password: 'no_discover_privileges_user-password',
           roles: ['no_discover_privileges_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        // Navigate home before attempting to login or we may get redirected to
+        // Discover with a forbidden error, which hides the chrome and causes
+        // security.login to fail when checking for the logout button
+        await common.navigateToUrl('home', '', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+
+        await security.login(
           'no_discover_privileges_user',
           'no_discover_privileges_user-password',
           {
@@ -441,17 +400,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await security.role.delete('no_discover_privileges_role');
-        await security.user.delete('no_discover_privileges_user');
+        await securityService.role.delete('no_discover_privileges_role');
+        await securityService.user.delete('no_discover_privileges_user');
       });
 
       it('shows 403', async () => {
-        await PageObjects.common.navigateToUrl('discover', '', {
+        await common.navigateToUrl('discover', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
         await retry.try(async () => {
-          await PageObjects.error.expectForbidden();
+          await error.expectForbidden();
         });
       });
     });
@@ -474,7 +433,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           { override: true }
         );
 
-        await security.role.create('discover_only_data_views_role', {
+        await securityService.role.create('discover_only_data_views_role', {
           elasticsearch: {
             indices: [
               { names: ['alias-logstash-discover'], privileges: ['read', 'view_index_metadata'] },
@@ -490,13 +449,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('discover_only_data_views_user', {
+        await securityService.user.create('discover_only_data_views_user', {
           password: 'discover_only_data_views_user-password',
           roles: ['discover_only_data_views_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        await security.login(
           'discover_only_data_views_user',
           'discover_only_data_views_user-password',
           {
@@ -504,7 +463,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           }
         );
 
-        await PageObjects.common.navigateToApp('discover');
+        await common.navigateToApp('discover');
       });
 
       after(async () => {
@@ -520,25 +479,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        await security.role.delete('discover_only_data_views_role');
-        await security.user.delete('discover_only_data_views_user');
+        await securityService.role.delete('discover_only_data_views_role');
+        await securityService.user.delete('discover_only_data_views_user');
       });
 
       it('allows to access only via a permitted index alias', async () => {
         await globalNav.badgeExistsOrFail('Read only');
 
         // can't access logstash index directly
-        await PageObjects.discover.selectIndexPattern('logstash-*');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await discover.selectIndexPattern('logstash-*');
+        await header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('discoverNoResultsCheckIndices');
 
         // but can access via a permitted alias for the logstash index
-        await PageObjects.discover.selectIndexPattern('alias-logstash-discover');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await discover.selectIndexPattern('alias-logstash-discover');
+        await header.waitUntilLoadingHasFinished();
         await setDiscoverTimeRange();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await testSubjects.missingOrFail('discoverNoResultsCheckIndices');
-        await PageObjects.discover.waitForDocTableLoadingComplete();
+        await discover.waitForDocTableLoadingComplete();
 
         // expand a row
         await dataGrid.clickRowToggle();
@@ -556,7 +515,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         // check the JSON tab
-        await find.clickByCssSelectorWhenNotDisabledWithoutRetry('#kbn_doc_viewer_tab_1');
+        await dataGrid.clickDocViewerTab('doc_view_source');
         await retry.waitForWithTimeout(
           'index in flyout JSON tab is matching the logstash index',
           5000,

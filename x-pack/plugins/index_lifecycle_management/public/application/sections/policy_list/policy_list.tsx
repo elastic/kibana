@@ -8,13 +8,7 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiSpacer,
-  EuiPageHeader,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiPageHeader, EuiPageTemplate } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { PolicyFromES } from '../../../../common/types';
@@ -46,30 +40,28 @@ export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePol
 
   if (policies.length === 0) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <EuiEmptyPrompt
-          iconType="managementApp"
-          title={
-            <h1>
+      <EuiPageTemplate.EmptyPrompt
+        iconType="managementApp"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.policyTable.emptyPromptTitle"
+              defaultMessage="Create your first index lifecycle policy"
+            />
+          </h1>
+        }
+        body={
+          <Fragment>
+            <p>
               <FormattedMessage
-                id="xpack.indexLifecycleMgmt.policyTable.emptyPromptTitle"
-                defaultMessage="Create your first index lifecycle policy"
+                id="xpack.indexLifecycleMgmt.policyTable.emptyPromptDescription"
+                defaultMessage=" An index lifecycle policy helps you manage your indices as they age."
               />
-            </h1>
-          }
-          body={
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.policyTable.emptyPromptDescription"
-                  defaultMessage=" An index lifecycle policy helps you manage your indices as they age."
-                />
-              </p>
-            </Fragment>
-          }
-          actions={createPolicyButton}
-        />
-      </EuiPageContent>
+            </p>
+          </Fragment>
+        }
+        actions={createPolicyButton}
+      />
     );
   }
 

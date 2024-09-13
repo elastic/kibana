@@ -12,14 +12,15 @@ import { merge, set } from 'lodash';
 import { gte } from 'semver';
 import type { EndpointCapabilities } from '../service/response_actions/constants';
 import { BaseDataGenerator } from './base_data_generator';
-import type { HostMetadataInterface, OSFields } from '../types';
-import { EndpointStatus, HostPolicyResponseActionStatus } from '../types';
+import type { HostMetadataInterface, OSFields, HostInfoInterface } from '../types';
+import { EndpointStatus, HostPolicyResponseActionStatus, HostStatus } from '../types';
 
 export interface GetCustomEndpointMetadataGeneratorOptions {
   /** Version for agent/endpoint. Defaults to the stack version */
   version: string;
   /** OS type for the generated endpoint hosts */
   os: 'macOS' | 'windows' | 'linux';
+  isolation: boolean;
 }
 
 /**
@@ -33,6 +34,7 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
   static custom({
     version,
     os,
+    isolation,
   }: Partial<GetCustomEndpointMetadataGeneratorOptions> = {}): typeof EndpointMetadataGenerator {
     return class extends EndpointMetadataGenerator {
       generate(overrides: DeepPartial<HostMetadataInterface> = {}): HostMetadataInterface {
@@ -53,6 +55,9 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
             default:
               set(overrides, 'host.os', EndpointMetadataGenerator.windowsOSFields);
           }
+        }
+        if (isolation !== undefined) {
+          set(overrides, 'Endpoint.state.isolation', isolation);
         }
 
         return super.generate(overrides);
@@ -104,10 +109,10 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
   /** Generate an Endpoint host metadata document */
   generate(overrides: DeepPartial<HostMetadataInterface> = {}): HostMetadataInterface {
     const ts = overrides['@timestamp'] ?? new Date().getTime();
-    const hostName = this.randomHostname();
+    const hostName = overrides?.host?.hostname ?? this.randomHostname();
     const agentVersion = overrides?.agent?.version ?? this.randomVersion();
     const agentId = this.seededUUIDv4();
-    const isIsolated = this.randomBoolean(0.3);
+    const isIsolated = overrides?.Endpoint?.state?.isolation ?? this.randomBoolean(0.3);
     const capabilities: EndpointCapabilities[] = ['isolation'];
 
     // v8.4 introduced additional endpoint capabilities
@@ -122,6 +127,16 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
     // v8.8 introduced execute capability
     if (gte(agentVersion, '8.8.0')) {
       capabilities.push('execute');
+    }
+
+    // v8.9 introduced `upload` capability
+    if (gte(agentVersion, '8.9.0')) {
+      capabilities.push('upload_file');
+    }
+
+    // v8.15 introduced `scan` capability
+    if (gte(agentVersion, '8.15.0')) {
+      capabilities.push('scan');
     }
 
     const hostMetadataDoc: HostMetadataInterface = {
@@ -182,6 +197,32 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
     };
 
     return merge(hostMetadataDoc, overrides);
+  }
+
+  /** Generates the complete `HostInfo` as returned by a call to the Endpoint host details api */
+  generateHostInfo(overrides: DeepPartial<HostInfoInterface> = {}): HostInfoInterface {
+    const hostInfo: HostInfoInterface = {
+      metadata: this.generate(),
+      host_status: HostStatus.HEALTHY,
+      policy_info: {
+        endpoint: {
+          id: 'policy-123',
+          revision: 4,
+        },
+        agent: {
+          applied: {
+            id: 'policy-123',
+            revision: 4,
+          },
+          configured: {
+            id: 'policy-123',
+            revision: 4,
+          },
+        },
+      },
+      last_checkin: new Date().toISOString(),
+    };
+    return merge(hostInfo, overrides);
   }
 
   protected randomOsFields(): OSFields {

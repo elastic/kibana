@@ -6,11 +6,11 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import type { Case } from '../../../common/ui/types';
+import type { CaseUI } from '../../../common/ui/types';
 import { CreateCaseModal } from './create_case_modal';
 
 export interface UseCreateCaseModalProps {
-  onCaseCreated: (theCase: Case) => void;
+  onCaseCreated: (theCase: CaseUI) => void;
 }
 export interface UseCreateCaseModalReturnedValues {
   modal: JSX.Element;
@@ -24,7 +24,7 @@ export const useCreateCaseModal = ({ onCaseCreated }: UseCreateCaseModalProps) =
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
   const onSuccess = useCallback(
-    async (theCase) => {
+    async (theCase: CaseUI) => {
       onCaseCreated(theCase);
       closeModal();
     },

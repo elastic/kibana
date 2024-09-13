@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { GetInfoResponse, InstalledRegistry } from '@kbn/fleet-plugin/common/types';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -17,14 +16,29 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
-  describe('setup api', async () => {
+  const uninstallPackage = async (name: string, version: string) => {
+    await supertest
+      .delete(`/api/fleet/epm/packages/${name}/${version}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force: 'true' });
+  };
+
+  describe('setup api', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
-    // FLAKY: https://github.com/elastic/kibana/issues/118479
-    describe.skip('setup performs upgrades', async () => {
-      const oldEndpointVersion = '0.13.0';
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
+
+    after(async () => {
+      await uninstallPackage('deprecated', '0.1.0');
+      await uninstallPackage('multiple_versions', '0.3.0');
+    });
+
+    describe('setup performs upgrades', () => {
+      const oldEndpointVersion = '1.0.0';
       beforeEach(async () => {
         const url = '/api/fleet/epm/packages/endpoint';
         await supertest.delete(url).set('kbn-xsrf', 'xxxx').send({ force: true }).expect(200);
@@ -48,7 +62,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/epm/packages/endpoint/${latestEndpointVersion}`)
           .expect(200));
         expect(body.item).to.have.property('savedObject');
-        expect((body.item as InstalledRegistry).savedObject.attributes.install_version).to.eql(
+        expect((body.item as InstalledRegistry).savedObject?.attributes.install_version).to.eql(
           latestEndpointVersion
         );
       });

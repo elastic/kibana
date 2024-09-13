@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -19,8 +20,8 @@ import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
-  SavedDashboardPanel,
 } from '../../../common';
+import { SavedDashboardPanel } from '../../../common/content_management';
 
 type ValueOrReferenceInput = SavedObjectEmbeddableInput & {
   attributes?: Serializable;
@@ -74,15 +75,13 @@ export const migrateByValueDashboardPanels =
           type: originalPanelState.type,
         });
         // Convert the embeddable state back into the panel shape
-        newPanels.push(
-          convertPanelStateToSavedDashboardPanel(
-            {
-              ...originalPanelState,
-              explicitInput: { ...migratedInput, id: migratedInput.id as string },
-            },
-            version
-          )
-        );
+        newPanels.push({
+          ...convertPanelStateToSavedDashboardPanel({
+            ...originalPanelState,
+            explicitInput: { ...migratedInput, id: migratedInput.id as string },
+          }),
+          version,
+        });
       } else {
         newPanels.push(panel);
       }

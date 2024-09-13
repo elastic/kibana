@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInlineEditText,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
@@ -30,7 +31,6 @@ import { getProcessorDescriptor } from '../shared';
 
 import './pipeline_processors_editor_item.scss';
 
-import { InlineTextInput } from './inline_text_input';
 import { ContextMenu } from './context_menu';
 import { i18nTexts } from './i18n_texts';
 import { Handlers } from './types';
@@ -98,7 +98,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     );
 
     const onDescriptionChange = useCallback(
-      (nextDescription) => {
+      (nextDescription: any) => {
         let nextOptions: Record<string, any>;
         if (!nextDescription) {
           const { description: _description, ...restOptions } = processor.options;
@@ -213,12 +213,16 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 className={inlineTextInputContainerClasses}
                 grow={false}
               >
-                <InlineTextInput
-                  disabled={isEditorNotInIdleMode}
-                  onChange={onDescriptionChange}
-                  ariaLabel={i18nTexts.processorTypeLabel({ type: processor.type })}
-                  text={description}
+                <EuiInlineEditText
+                  size="s"
+                  defaultValue={description || ''}
+                  readModeProps={{ 'data-test-subj': 'inlineTextInputNonEditableText' }}
                   placeholder={defaultDescription ?? i18nTexts.descriptionPlaceholder}
+                  inputAriaLabel={i18nTexts.processorTypeLabel({ type: processor.type })}
+                  isReadOnly={isEditorNotInIdleMode}
+                  onSave={(newTextValue) => {
+                    onDescriptionChange(newTextValue);
+                  }}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

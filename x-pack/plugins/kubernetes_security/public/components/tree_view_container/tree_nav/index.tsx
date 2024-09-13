@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiButtonGroup,
   useGeneratedHtmlId,
@@ -31,7 +31,8 @@ import { useTreeViewContext } from '../contexts';
 export const TreeNav = () => {
   const styles = useStyles();
   const [tree, setTree] = useState(TREE_VIEW.logical);
-  const [selected, setSelected] = useState('');
+  const { filterQueryWithTimeRange, onTreeNavSelect, treeNavSelection, setTreeNavSelection } =
+    useTreeViewContext();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const treeNavTypePrefix = useGeneratedHtmlId({
     prefix: 'treeNavType',
@@ -39,7 +40,11 @@ export const TreeNav = () => {
   const logicalTreeViewPrefix = `${treeNavTypePrefix}${LOGICAL}`;
   const [toggleIdSelected, setToggleIdSelected] = useState(logicalTreeViewPrefix);
 
-  const { filterQueryWithTimeRange, onTreeNavSelect } = useTreeViewContext();
+  const selected = useMemo(() => {
+    return Object.entries(treeNavSelection)
+      .map(([k, v]) => `${k}.${v}`)
+      .join();
+  }, [treeNavSelection]);
 
   const handleToggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
@@ -61,14 +66,14 @@ export const TreeNav = () => {
     [logicalTreeViewPrefix, treeNavTypePrefix]
   );
 
-  const selectedLabel = useMemo(() => {
-    return options.find((opt) => opt.id === toggleIdSelected)!.label;
-  }, [options, toggleIdSelected]);
-
-  const handleTreeViewSwitch = (id: string, value: TreeViewKind) => {
-    setToggleIdSelected(id);
-    setTree(TREE_VIEW[value]);
-  };
+  const handleTreeViewSwitch = useCallback(
+    (id: string, value: TreeViewKind) => {
+      setToggleIdSelected(id);
+      setTree(TREE_VIEW[value]);
+      setTreeNavSelection({});
+    },
+    [setTreeNavSelection]
+  );
 
   return (
     <>
@@ -115,7 +120,6 @@ export const TreeNav = () => {
           <DynamicTreeView
             query={filterQueryWithTimeRange}
             tree={tree}
-            aria-label={selectedLabel}
             selected={selected}
             onSelect={(selectionDepth, type, key, clusterName) => {
               const newSelectionDepth = {
@@ -123,11 +127,6 @@ export const TreeNav = () => {
                 [type]: key,
                 ...(clusterName && { clusterName }),
               };
-              setSelected(
-                Object.entries(newSelectionDepth)
-                  .map(([k, v]) => `${k}.${v}`)
-                  .join()
-              );
               onTreeNavSelect(newSelectionDepth);
             }}
           />

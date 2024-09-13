@@ -8,12 +8,17 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import '../../../test/global_mocks';
 import * as fixtures from '../../../test/fixtures';
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, kibanaVersion } from '../helpers';
 
-import { TEMPLATE_NAME, SETTINGS, ALIASES, MAPPINGS as DEFAULT_MAPPING } from './constants';
+import {
+  TEMPLATE_NAME,
+  SETTINGS,
+  ALIASES,
+  MAPPINGS as DEFAULT_MAPPING,
+  INDEX_PATTERNS,
+} from './constants';
 import { setup } from './template_edit.helpers';
 import { TemplateFormTestBed } from './template_form.helpers';
 
@@ -27,6 +32,39 @@ const MAPPING = {
     },
   },
 };
+const NONEXISTENT_COMPONENT_TEMPLATE = {
+  name: 'component_template@custom',
+  hasMappings: false,
+  hasAliases: false,
+  hasSettings: false,
+  usedBy: [],
+};
+
+const EXISTING_COMPONENT_TEMPLATE = {
+  name: 'test_component_template',
+  hasMappings: true,
+  hasAliases: false,
+  hasSettings: false,
+  usedBy: [],
+  isManaged: false,
+};
+
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
+        }}
+      />
+    ),
+  };
+});
 
 jest.mock('@elastic/eui', () => {
   const origial = jest.requireActual('@elastic/eui');
@@ -54,6 +92,7 @@ describe('<TemplateEdit />', () => {
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
+    httpRequestsMockHelpers.setLoadComponentTemplatesResponse([EXISTING_COMPONENT_TEMPLATE]);
   });
 
   afterAll(() => {
@@ -103,6 +142,11 @@ describe('<TemplateEdit />', () => {
         name: 'test',
         indexPatterns: ['myPattern*'],
         version: 1,
+        lifecycle: {
+          enabled: true,
+          value: 1,
+          unit: 'd',
+        },
       });
       // Component templates
       await actions.completeStepTwo();
@@ -124,6 +168,7 @@ describe('<TemplateEdit />', () => {
             name: 'test',
             indexPatterns: ['myPattern*'],
             version: 1,
+            allowAutoCreate: 'NO_OVERWRITE',
             dataStream: {
               hidden: true,
               anyUnknownKey: 'should_be_kept',
@@ -132,6 +177,12 @@ describe('<TemplateEdit />', () => {
               type: 'default',
               hasDatastream: true,
               isLegacy: false,
+            },
+            template: {
+              lifecycle: {
+                enabled: true,
+                data_retention: '1d',
+              },
             },
           }),
         })
@@ -182,6 +233,7 @@ describe('<TemplateEdit />', () => {
         await actions.completeStepOne({
           indexPatterns: UPDATED_INDEX_PATTERN,
           priority: 3,
+          allowAutoCreate: 'TRUE',
         });
         // Component templates
         await actions.completeStepTwo();
@@ -236,6 +288,7 @@ describe('<TemplateEdit />', () => {
               indexPatterns: UPDATED_INDEX_PATTERN,
               priority: 3,
               version: templateToEdit.version,
+              allowAutoCreate: 'TRUE',
               _kbnMeta: {
                 type: 'default',
                 hasDatastream: false,
@@ -263,6 +316,84 @@ describe('<TemplateEdit />', () => {
           })
         );
       });
+    });
+  });
+
+  describe('when composed of a nonexistent component template', () => {
+    const templateToEdit = fixtures.getTemplate({
+      name: TEMPLATE_NAME,
+      indexPatterns: INDEX_PATTERNS,
+      composedOf: [NONEXISTENT_COMPONENT_TEMPLATE.name],
+      ignoreMissingComponentTemplates: [NONEXISTENT_COMPONENT_TEMPLATE.name],
+    });
+
+    beforeAll(() => {
+      httpRequestsMockHelpers.setLoadTemplateResponse('my_template', templateToEdit);
+    });
+
+    beforeEach(async () => {
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
+    });
+
+    it('the nonexistent component template should be selected in the Component templates selector', async () => {
+      const { actions, exists } = testBed;
+
+      // Complete step 1: Logistics
+      await actions.completeStepOne();
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+
+      // Should be at the Component templates step
+      expect(exists('stepComponents')).toBe(true);
+
+      const {
+        actions: {
+          componentTemplates: { getComponentTemplatesSelected },
+        },
+      } = testBed;
+
+      expect(exists('componentTemplatesSelection.emptyPrompt')).toBe(false);
+      expect(getComponentTemplatesSelected()).toEqual([NONEXISTENT_COMPONENT_TEMPLATE.name]);
+    });
+
+    it('the composedOf and ignoreMissingComponentTemplates fields should be included in the final payload', async () => {
+      const { component, actions, find } = testBed;
+
+      // Complete step 1: Logistics
+      await actions.completeStepOne();
+      // Complete step 2: Component templates
+      await actions.completeStepTwo();
+      // Complete step 3: Index settings
+      await actions.completeStepThree();
+      // Complete step 4: Mappings
+      await actions.completeStepFour();
+      // Complete step 5: Aliases
+      await actions.completeStepFive();
+
+      expect(find('stepTitle').text()).toEqual(`Review details for '${TEMPLATE_NAME}'`);
+
+      await act(async () => {
+        actions.clickNextButton();
+      });
+      component.update();
+
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/index_templates/${TEMPLATE_NAME}`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: TEMPLATE_NAME,
+            indexPatterns: INDEX_PATTERNS,
+            version: templateToEdit.version,
+            allowAutoCreate: templateToEdit.allowAutoCreate,
+            _kbnMeta: templateToEdit._kbnMeta,
+            composedOf: [NONEXISTENT_COMPONENT_TEMPLATE.name],
+            template: {},
+            ignoreMissingComponentTemplates: [NONEXISTENT_COMPONENT_TEMPLATE.name],
+          }),
+        })
+      );
     });
   });
 

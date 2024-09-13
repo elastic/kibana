@@ -34,9 +34,9 @@
           " | undefined; }) => ",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.Env",
+            "section": "def-server.Env",
             "text": "Env"
           }
         ],
@@ -203,9 +203,9 @@
         "signature": [
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.ConfigDeprecationContext",
+            "section": "def-server.ConfigDeprecationContext",
             "text": "ConfigDeprecationContext"
           }
         ],
@@ -225,28 +225,28 @@
           "{ has: jest.MockInstance<boolean, [configPath: ",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.ConfigPath",
+            "section": "def-server.ConfigPath",
             "text": "ConfigPath"
           },
-          "]>; get: jest.MockInstance<any, [configPath: ",
+          "], unknown>; get: jest.MockInstance<any, [configPath: ",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.ConfigPath",
+            "section": "def-server.ConfigPath",
             "text": "ConfigPath"
           },
-          "]>; set: jest.MockInstance<void, [configPath: ",
+          "], unknown>; set: jest.MockInstance<void, [configPath: ",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.ConfigPath",
+            "section": "def-server.ConfigPath",
             "text": "ConfigPath"
           },
-          ", value: any]>; getFlattenedPaths: jest.MockInstance<string[], []>; toRaw: jest.MockInstance<Record<string, any>, []>; } & ",
+          ", value: any], unknown>; getFlattenedPaths: jest.MockInstance<string[], [], unknown>; toRaw: jest.MockInstance<Record<string, any>, [], unknown>; } & ",
           "Config"
         ],
         "path": "packages/kbn-config-mocks/src/config.mock.ts",
@@ -264,16 +264,16 @@
         "signature": [
           "{ validate: jest.MockInstance<Promise<void>, [params?: ",
           "ConfigValidateParameters",
-          " | undefined]>; getConfig$: jest.MockInstance<",
+          " | undefined], unknown>; getConfig$: jest.MockInstance<",
           "Observable",
           "<",
           "Config",
-          ">, []>; setSchema: jest.MockInstance<void, [path: ",
+          ">, [], unknown>; setGlobalStripUnknownKeys: jest.MockInstance<void, [stripUnknownKeys: boolean], unknown>; setSchema: jest.MockInstance<void, [path: ",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.ConfigPath",
+            "section": "def-server.ConfigPath",
             "text": "ConfigPath"
           },
           ", schema: ",
@@ -284,67 +284,75 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<unknown>]>; addDeprecationProvider: jest.MockInstance<void, [path: ",
+          "<unknown>], unknown>; addDeprecationProvider: jest.MockInstance<void, [path: ",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.ConfigPath",
+            "section": "def-server.ConfigPath",
             "text": "ConfigPath"
           },
           ", provider: ",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.ConfigDeprecationProvider",
+            "section": "def-server.ConfigDeprecationProvider",
             "text": "ConfigDeprecationProvider"
           },
-          "]>; getHandledDeprecatedConfigs: jest.MockInstance<[string, ",
+          "], unknown>; getHandledDeprecatedConfigs: jest.MockInstance<[string, ",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.DeprecatedConfigDetails",
+            "section": "def-server.DeprecatedConfigDetails",
             "text": "DeprecatedConfigDetails"
           },
-          "[]][], []>; atPath: jest.MockInstance<",
+          "[]][], [], unknown>; atPath: jest.MockInstance<",
           "Observable",
-          "<unknown>, [path: ",
+          "<unknown>, [",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.ConfigPath",
+            "section": "def-server.ConfigPath",
             "text": "ConfigPath"
           },
-          "]>; atPathSync: jest.MockInstance<unknown, [path: ",
+          ", ({ ignoreUnchanged?: boolean | undefined; } | undefined)?], unknown>; atPathSync: jest.MockInstance<unknown, [path: ",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.ConfigPath",
+            "section": "def-server.ConfigPath",
             "text": "ConfigPath"
           },
-          "]>; isEnabledAtPath: jest.MockInstance<Promise<boolean>, [path: ",
+          "], unknown>; isEnabledAtPath: jest.MockInstance<Promise<boolean>, [path: ",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.ConfigPath",
+            "section": "def-server.ConfigPath",
             "text": "ConfigPath"
           },
-          "]>; getUnusedPaths: jest.MockInstance<Promise<string[]>, []>; getUsedPaths: jest.MockInstance<Promise<string[]>, []>; getDeprecatedConfigPath$: jest.MockInstance<",
+          "], unknown>; getUnusedPaths: jest.MockInstance<Promise<string[]>, [], unknown>; getUsedPaths: jest.MockInstance<Promise<string[]>, [], unknown>; getDeprecatedConfigPath$: jest.MockInstance<",
           "Observable",
           "<",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.ChangedDeprecatedPaths",
+            "section": "def-server.ChangedDeprecatedPaths",
             "text": "ChangedDeprecatedPaths"
           },
-          ">, []>; } & ",
+          ">, [], unknown>; addDynamicConfigPaths: jest.MockInstance<void, [configPath: ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.ConfigPath",
+            "text": "ConfigPath"
+          },
+          ", dynamicConfigPaths: string[]], unknown>; setDynamicConfigOverrides: jest.MockInstance<Record<string, unknown>, [newOverrides: Record<string, unknown>], unknown>; } & ",
           "IConfigService"
         ],
         "path": "packages/kbn-config-mocks/src/config_service.mock.ts",
@@ -360,9 +368,9 @@
         "label": "RawConfigServiceMock",
         "description": [],
         "signature": [
-          "{ stop: jest.MockInstance<void, []>; getConfig$: jest.MockInstance<",
+          "{ stop: jest.MockInstance<void, [], unknown>; getConfig$: jest.MockInstance<",
           "Observable",
-          "<Record<string, any>>, []>; loadConfig: jest.MockInstance<void, []>; reloadConfig: jest.MockInstance<void, []>; } & ",
+          "<Record<string, any>>, [], unknown>; loadConfig: jest.MockInstance<void, [], unknown>; reloadConfig: jest.MockInstance<void, [], unknown>; } & ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -403,9 +411,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/config",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-common.ConfigDeprecationContext",
+                "section": "def-server.ConfigDeprecationContext",
                 "text": "ConfigDeprecationContext"
               }
             ],

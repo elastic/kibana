@@ -83,7 +83,7 @@ export const GET_INCIDENT_URL_REQUIRED = i18n.translate(
 export const GET_RESPONSE_EXTERNAL_TITLE_KEY_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.error.requiredGetIncidentResponseExternalTitleKeyText',
   {
-    defaultMessage: 'Get case response external case title key is re quired.',
+    defaultMessage: 'Get case response external case title key is required.',
   }
 );
 export const GET_RESPONSE_EXTERNAL_CREATED_KEY_REQUIRED = i18n.translate(
@@ -112,13 +112,6 @@ export const MISSING_VARIABLES = (variables: string[]) =>
     values: { variableCount: variables.length, variables: variables.join(', ') },
   });
 
-export const USERNAME_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.error.requiredAuthUserNameText',
-  {
-    defaultMessage: 'Username is required.',
-  }
-);
-
 export const SUMMARY_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.error.requiredWebhookSummaryText',
   {
@@ -126,53 +119,24 @@ export const SUMMARY_REQUIRED = i18n.translate(
   }
 );
 
-export const KEY_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.keyTextFieldLabel',
-  {
-    defaultMessage: 'Key',
-  }
-);
-
-export const VALUE_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.valueTextFieldLabel',
-  {
-    defaultMessage: 'Value',
-  }
-);
-
-export const ADD_BUTTON = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.addHeaderButton',
-  {
-    defaultMessage: 'Add',
-  }
-);
-
-export const DELETE_BUTTON = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.deleteHeaderButton',
-  {
-    defaultMessage: 'Delete',
-    description: 'Delete HTTP header',
-  }
-);
-
 export const CREATE_INCIDENT_METHOD = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createIncidentMethodTextFieldLabel',
   {
-    defaultMessage: 'Create Case Method',
+    defaultMessage: 'Create case method',
   }
 );
 
 export const CREATE_INCIDENT_URL = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createIncidentUrlTextFieldLabel',
   {
-    defaultMessage: 'Create Case URL',
+    defaultMessage: 'Create case URL',
   }
 );
 
 export const CREATE_INCIDENT_JSON = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createIncidentJsonTextFieldLabel',
   {
-    defaultMessage: 'Create Case Object',
+    defaultMessage: 'Create case object',
   }
 );
 
@@ -180,7 +144,7 @@ export const CREATE_INCIDENT_JSON_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createIncidentJsonHelpText',
   {
     defaultMessage:
-      'JSON object to create case. Use the variable selector to add Cases data to the payload.',
+      'JSON object to create a case. Use the variable selector to add cases data to the payload.',
   }
 );
 
@@ -197,14 +161,14 @@ export const CODE_EDITOR = i18n.translate(
 export const CREATE_INCIDENT_RESPONSE_KEY = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createIncidentResponseKeyTextFieldLabel',
   {
-    defaultMessage: 'Create Case Response Case Key',
+    defaultMessage: 'Create case response external key',
   }
 );
 
 export const CREATE_INCIDENT_RESPONSE_KEY_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createIncidentResponseKeyHelpText',
   {
-    defaultMessage: 'JSON key in create case response that contains the external case id',
+    defaultMessage: 'JSON key in the create external case response that contains the case ID',
   }
 );
 
@@ -218,109 +182,109 @@ export const ADD_CASES_VARIABLE = i18n.translate(
 export const GET_INCIDENT_URL = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.getIncidentUrlTextFieldLabel',
   {
-    defaultMessage: 'Get Case URL',
+    defaultMessage: 'Get case URL',
   }
 );
 export const GET_INCIDENT_URL_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.getIncidentUrlHelp',
   {
     defaultMessage:
-      'API URL to GET case details JSON from external system. Use the variable selector to add external system id to the url.',
+      'API URL to get case details in JSON format from the external system. Use the variable selector to add the external system ID to the URL.',
   }
 );
 
 export const GET_INCIDENT_TITLE_KEY = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.getIncidentResponseExternalTitleKeyTextFieldLabel',
   {
-    defaultMessage: 'Get Case Response External Title Key',
+    defaultMessage: 'Get case response external title key',
   }
 );
 export const GET_INCIDENT_TITLE_KEY_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.getIncidentResponseExternalTitleKeyHelp',
   {
-    defaultMessage: 'JSON key in get case response that contains the external case title',
+    defaultMessage: 'JSON key in the get external case response that contains the case title',
   }
 );
 
 export const EXTERNAL_INCIDENT_VIEW_URL = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.viewIncidentUrlTextFieldLabel',
   {
-    defaultMessage: 'External Case View URL',
+    defaultMessage: 'External case view URL',
   }
 );
 export const EXTERNAL_INCIDENT_VIEW_URL_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.viewIncidentUrlHelp',
   {
     defaultMessage:
-      'URL to view case in external system. Use the variable selector to add external system id or external system title to the url.',
+      'URL to view a case in the external system. Use the variable selector to add external system ID or external system title to the URL.',
   }
 );
 
 export const UPDATE_INCIDENT_METHOD = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.updateIncidentMethodTextFieldLabel',
   {
-    defaultMessage: 'Update Case Method',
+    defaultMessage: 'Update case method',
   }
 );
 
 export const UPDATE_INCIDENT_URL = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.updateIncidentUrlTextFieldLabel',
   {
-    defaultMessage: 'Update Case URL',
+    defaultMessage: 'Update case URL',
   }
 );
 export const UPDATE_INCIDENT_URL_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.updateIncidentUrlHelp',
   {
-    defaultMessage: 'API URL to update case.',
+    defaultMessage: 'API URL to update a case.',
   }
 );
 
 export const UPDATE_INCIDENT_JSON = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.updateIncidentJsonTextFieldLabel',
   {
-    defaultMessage: 'Update Case Object',
+    defaultMessage: 'Update case object',
   }
 );
 export const UPDATE_INCIDENT_JSON_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.updateIncidentJsonHelpl',
   {
     defaultMessage:
-      'JSON object to update case. Use the variable selector to add Cases data to the payload.',
+      'JSON object to update a case. Use the variable selector to add cases data to the payload.',
   }
 );
 
 export const CREATE_COMMENT_METHOD = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createCommentMethodTextFieldLabel',
   {
-    defaultMessage: 'Create Comment Method',
+    defaultMessage: 'Create comment method',
   }
 );
 export const CREATE_COMMENT_URL = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createCommentUrlTextFieldLabel',
   {
-    defaultMessage: 'Create Comment URL',
+    defaultMessage: 'Create comment URL',
   }
 );
 
 export const CREATE_COMMENT_URL_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createCommentUrlHelp',
   {
-    defaultMessage: 'API URL to add comment to case.',
+    defaultMessage: 'API URL to add a comment to a case.',
   }
 );
 
 export const CREATE_COMMENT_JSON = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createCommentJsonTextFieldLabel',
   {
-    defaultMessage: 'Create Comment Object',
+    defaultMessage: 'Create comment object',
   }
 );
 export const CREATE_COMMENT_JSON_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createCommentJsonHelp',
   {
     defaultMessage:
-      'JSON object to create a comment. Use the variable selector to add Cases data to the payload.',
+      'JSON object to create a comment. Use the variable selector to add cases data to the payload.',
   }
 );
 
@@ -328,41 +292,6 @@ export const HAS_AUTH = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.hasAuthSwitchLabel',
   {
     defaultMessage: 'Require authentication for this webhook',
-  }
-);
-
-export const USERNAME = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.userTextFieldLabel',
-  {
-    defaultMessage: 'Username',
-  }
-);
-
-export const PASSWORD = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.passwordTextFieldLabel',
-  {
-    defaultMessage: 'Password',
-  }
-);
-
-export const HEADERS_SWITCH = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.viewHeadersSwitch',
-  {
-    defaultMessage: 'Add HTTP header',
-  }
-);
-
-export const HEADERS_TITLE = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.httpHeadersTitle',
-  {
-    defaultMessage: 'Headers in use',
-  }
-);
-
-export const AUTH_TITLE = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.authenticationLabel',
-  {
-    defaultMessage: 'Authentication',
   }
 );
 
@@ -378,7 +307,7 @@ export const STEP_2_DESCRIPTION = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.step2Description',
   {
     defaultMessage:
-      'Set fields to create the case in the external system. Check your service’s API documentation to understand what fields are required',
+      'Set fields to create a case in the external system. Check your service’s API documentation to understand what fields are required.',
   }
 );
 
@@ -390,7 +319,7 @@ export const STEP_3_DESCRIPTION = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.step3Description',
   {
     defaultMessage:
-      'Set fields to add comments to the case in external system. For some systems, this may be the same method as creating updates in cases. Check your service’s API documentation to understand what fields are required.',
+      'Set fields to add comments to a case in the external system. For some systems, this may be the same method as creating updates in cases. Check your service’s API documentation to understand what fields are required.',
   }
 );
 
@@ -406,19 +335,19 @@ export const STEP_4A_DESCRIPTION = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.step4aDescription',
   {
     defaultMessage:
-      'Set fields to create updates to the case in external system. For some systems, this may be the same method as adding comments to cases.',
+      'Set fields to update a case in the external system. For some systems, this may be the same method as adding comments to cases.',
   }
 );
 
 export const STEP_4B = i18n.translate('xpack.stackConnectors.components.casesWebhook.step4b', {
-  defaultMessage: 'Add comment in case',
+  defaultMessage: 'Add comment in case (optional)',
 });
 
 export const STEP_4B_DESCRIPTION = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.step4bDescription',
   {
     defaultMessage:
-      'Set fields to add comments to the case in external system. For some systems, this may be the same method as creating updates in cases.',
+      'Set fields to add comments to a case in the external system. For some systems, this may be the same method as creating updates in cases.',
   }
 );
 
@@ -451,6 +380,27 @@ export const CASE_TAGS_DESC = i18n.translate(
   }
 );
 
+export const CASE_ID_DESC = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.caseIdDesc',
+  {
+    defaultMessage: 'Kibana case ID',
+  }
+);
+
+export const CASE_SEVERITY_DESC = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.caseSeverityDesc',
+  {
+    defaultMessage: 'Kibana case severity',
+  }
+);
+
+export const CASE_STATUS_DESC = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.caseStatusDesc',
+  {
+    defaultMessage: 'Kibana case status',
+  }
+);
+
 export const CASE_COMMENT_DESC = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.caseCommentDesc',
   {
@@ -461,7 +411,7 @@ export const CASE_COMMENT_DESC = i18n.translate(
 export const EXTERNAL_ID_DESC = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.externalIdDesc',
   {
-    defaultMessage: 'External system id',
+    defaultMessage: 'External system ID',
   }
 );
 
@@ -475,3 +425,47 @@ export const EXTERNAL_TITLE_DESC = i18n.translate(
 export const DOC_LINK = i18n.translate('xpack.stackConnectors.components.casesWebhook.docLink', {
   defaultMessage: 'Configuring Webhook - Case Management connector.',
 });
+
+export const SEVERITY_CRITICAL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.criticalLabel',
+  {
+    defaultMessage: 'Critical',
+  }
+);
+export const SEVERITY_HIGH_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.highLabel',
+  {
+    defaultMessage: 'High',
+  }
+);
+export const SEVERITY_MEDIUM_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.mediumLabel',
+  {
+    defaultMessage: 'Medium',
+  }
+);
+export const SEVERITY_LOW_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.lowLabel',
+  {
+    defaultMessage: 'Low',
+  }
+);
+
+export const STATUS_OPEN = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.status.open',
+  {
+    defaultMessage: 'Open',
+  }
+);
+export const STATUS_CLOSED = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.status.closed',
+  {
+    defaultMessage: 'Closed',
+  }
+);
+export const STATUS_IN_PROGRESS = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.status.inProgress',
+  {
+    defaultMessage: 'In progress',
+  }
+);

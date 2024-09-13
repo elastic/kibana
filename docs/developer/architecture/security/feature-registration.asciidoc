@@ -39,7 +39,7 @@ Registering a feature consists of the following fields. For more information, co
 |A human readable name for your feature.
 
 |`category` (required)
-|{kib-repo}blob/{branch}/src/core/types/app_category.ts[`AppCategory`]
+|{kib-repo}blob/{branch}/packages/core/application/core-application-common/src/app_category.ts[`AppCategory`]
 |`DEFAULT_APP_CATEGORIES.kibana`
 |The `AppCategory` which best represents your feature. Used to organize the display
 of features within the management screens.
@@ -50,14 +50,19 @@ of features within the management screens.
 |An array of applications this feature enables. Typically, all of your plugin's apps (from `uiExports`) will be included here.
 
 |`privileges` (required)
-|{kib-repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`KibanaFeatureConfig`].
+|{kib-repo}blob/{branch}/x-pack/plugins/features/common/kibana_feature.ts[`KibanaFeatureConfig`].
 |See <<example-1-canvas,Example 1>> and <<example-2-dev-tools,Example 2>>
 |The set of privileges this feature requires to function.
 
 |`subFeatures` (optional)
-|{kib-repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`KibanaFeatureConfig`].
+|{kib-repo}blob/{branch}/x-pack/plugins/features/common/kibana_feature.ts[`KibanaFeatureConfig`].
 |See <<example-3-discover,Example 3>>
 |The set of subfeatures that enables finer access control than the `all` and `read` feature privileges. These options are only available in the Gold subscription level and higher.
+
+|`scope` (optional)
+|`string[]`
+|`["spaces", "security"]`
+| Default `security`. Scope identifies if feature should appear in both Spaces Visibility Toggles and Security Feature Privileges or only in Security Feature Privileges.
 
 |===
 

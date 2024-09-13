@@ -5,67 +5,67 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  FindExceptionListSchemaDecoded,
-  findExceptionListSchema,
-  foundExceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  FindExceptionListsRequestQuery,
+  FindExceptionListsResponse,
+} from '@kbn/securitysolution-exceptions-common/api';
 
 import type { ListsPluginRouter } from '../types';
 
-import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
+import { buildSiemResponse, getExceptionListClient } from './utils';
 
 export const findExceptionListRoute = (router: ListsPluginRouter): void => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       options: {
         tags: ['access:lists-read'],
       },
       path: `${EXCEPTION_LIST_URL}/_find`,
-      validate: {
-        query: buildRouteValidation<typeof findExceptionListSchema, FindExceptionListSchemaDecoded>(
-          findExceptionListSchema
-        ),
+    })
+    .addVersion(
+      {
+        validate: {
+          request: {
+            query: buildRouteValidationWithZod(FindExceptionListsRequestQuery),
+          },
+        },
+        version: '2023-10-31',
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      try {
-        const exceptionLists = await getExceptionListClient(context);
-        const {
-          filter,
-          page,
-          namespace_type: namespaceType,
-          per_page: perPage,
-          sort_field: sortField,
-          sort_order: sortOrder,
-        } = request.query;
-        const exceptionListItems = await exceptionLists.findExceptionList({
-          filter,
-          namespaceType,
-          page,
-          perPage,
-          pit: undefined,
-          searchAfter: undefined,
-          sortField,
-          sortOrder,
-        });
-        const [validated, errors] = validate(exceptionListItems, foundExceptionListSchema);
-        if (errors != null) {
-          return siemResponse.error({ body: errors, statusCode: 500 });
-        } else {
-          return response.ok({ body: validated ?? {} });
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        try {
+          const exceptionLists = await getExceptionListClient(context);
+          const {
+            filter,
+            page,
+            namespace_type: namespaceType,
+            per_page: perPage,
+            sort_field: sortField,
+            sort_order: sortOrder,
+          } = request.query;
+          const exceptionListItems = await exceptionLists.findExceptionList({
+            filter,
+            namespaceType,
+            page,
+            perPage,
+            pit: undefined,
+            searchAfter: undefined,
+            sortField,
+            sortOrder,
+          });
+
+          return response.ok({ body: FindExceptionListsResponse.parse(exceptionListItems) });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

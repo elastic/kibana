@@ -9,24 +9,18 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import '../../../../common/mock/match_media';
 import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
+  createMockStore,
   mockGlobalState,
   mockIndexPattern,
-  SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../../common/mock';
 import { HostDetailsTabs } from './details_tabs';
 import { hostDetailsPagePath } from '../types';
-import { type } from './utils';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
-import { HostsTableType } from '../../store/model';
+import { HostsType, HostsTableType } from '../../store/model';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import type { State } from '../../../../common/store';
-import { createStore } from '../../../../common/store';
 import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../../../../common/lib/kibana', () => {
@@ -74,21 +68,14 @@ mockUseResizeObserver.mockImplementation(() => ({}));
 jest.mock('../../../../common/components/visualization_actions/actions');
 jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
 
-const myState: State = mockGlobalState;
-const { storage } = createSecuritySolutionStorageMock();
-const myStore = createStore(
-  {
-    ...myState,
-    dataTable: {
-      tableById: {
-        [TableId.hostsPageEvents]: myState.dataTable.tableById['table-test'],
-      },
+const myStore = createMockStore({
+  ...mockGlobalState,
+  dataTable: {
+    tableById: {
+      [TableId.hostsPageEvents]: mockGlobalState.dataTable.tableById['table-test'],
     },
   },
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  storage
-);
+});
 
 describe('body', () => {
   const scenariosMap = {
@@ -123,7 +110,7 @@ describe('body', () => {
               hostDetailsPagePath={hostDetailsPagePath}
               indexNames={[]}
               indexPattern={mockIndexPattern}
-              type={type}
+              type={HostsType.details}
               hostDetailsFilter={mockHostDetailsPageFilters}
               filterQuery={filterQuery}
               from={'2020-07-07T08:20:18.966Z'}

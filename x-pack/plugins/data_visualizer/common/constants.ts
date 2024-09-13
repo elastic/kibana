@@ -28,7 +28,7 @@ export const FILE_FORMATS = {
   DELIMITED: 'delimited',
   NDJSON: 'ndjson',
   SEMI_STRUCTURED_TEXT: 'semi_structured_text',
-  // XML: 'xml',
+  TIKA: 'tika',
 };
 
 export const SUPPORTED_FIELD_TYPES = {
@@ -51,7 +51,16 @@ export const SUPPORTED_FIELD_TYPES = {
   UNKNOWN: 'unknown',
 } as const;
 
-export const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
+export const OMIT_FIELDS: string[] = [
+  '_source',
+  '_type',
+  '_index',
+  '_id',
+  '_version',
+  '_score',
+  '_tier',
+  '_ignored',
+];
 
 export const NON_AGGREGATABLE_FIELD_TYPES = new Set<string>([
   KBN_FIELD_TYPES.GEO_SHAPE,

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import { buildDataViewMock, shallowMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import * as api from './api';
 import { KibanaServices } from '../../common/lib/kibana';
-import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
-import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '../../../common/constants';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../common/api/timeline';
+import { TIMELINE_DRAFT_URL, TIMELINE_URL, TIMELINE_COPY_URL } from '../../../common/constants';
 import type { ImportDataProps } from '../../detection_engine/rule_management/logic/types';
 
 jest.mock('../../common/lib/kibana', () => {
@@ -18,6 +20,7 @@ jest.mock('../../common/lib/kibana', () => {
         http: {
           fetch: jest.fn(),
         },
+        savedSearch: jest.fn(),
       })),
     },
   };
@@ -67,7 +70,7 @@ const timelineData = {
     filterQuery: null,
   },
   title: '',
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   templateTimelineVersion: null,
   templateTimelineId: null,
   dateRange: {
@@ -81,7 +84,8 @@ const timelineData = {
       sortDirection: 'desc',
     },
   ],
-  status: TimelineStatus.active,
+  status: TimelineStatusEnum.active,
+  savedSearchId: null,
 };
 const mockPatchTimelineResponse = {
   data: {
@@ -101,7 +105,7 @@ describe('persistTimeline', () => {
     const timelineId = null;
     const initialDraftTimeline = {
       ...timelineData,
-      status: TimelineStatus.draft,
+      status: TimelineStatusEnum.draft,
     };
     const mockDraftResponse = {
       data: {
@@ -143,6 +147,7 @@ describe('persistTimeline', () => {
         body: JSON.stringify({
           timelineType: initialDraftTimeline.timelineType,
         }),
+        version: '2023-10-31',
       });
     });
 
@@ -172,7 +177,7 @@ describe('persistTimeline', () => {
     const timelineId = null;
     const initialDraftTimeline = {
       ...timelineData,
-      status: TimelineStatus.draft,
+      status: TimelineStatusEnum.draft,
     };
 
     const version = null;
@@ -345,6 +350,7 @@ describe('importTimelines', () => {
         headers: { 'Content-Type': undefined },
         body: new FormData(),
         signal: undefined,
+        version: '2023-10-31',
       })
     );
   });
@@ -376,12 +382,13 @@ describe('exportSelectedTimeline', () => {
       method: 'POST',
       query: { file_name: 'timelines_export.ndjson' },
       signal: {},
+      version: '2023-10-31',
     });
   });
 });
 
 describe('getDraftTimeline', () => {
-  const timelineType = { timelineType: TimelineType.default };
+  const timelineType = { timelineType: TimelineTypeEnum.default };
   const getMock = jest.fn();
 
   beforeAll(() => {
@@ -399,6 +406,7 @@ describe('getDraftTimeline', () => {
   test('should pass correct args to KibanaServices', () => {
     expect(getMock).toBeCalledWith('/api/timeline/_draft', {
       query: timelineType,
+      version: '2023-10-31',
     });
   });
 });
@@ -418,18 +426,19 @@ describe('cleanDraftTimeline', () => {
   });
 
   test('should pass correct args to KibanaServices - timeline', () => {
-    const args = { timelineType: TimelineType.default };
+    const args = { timelineType: TimelineTypeEnum.default };
 
     api.cleanDraftTimeline(args);
 
     expect(postMock).toBeCalledWith('/api/timeline/_draft', {
       body: JSON.stringify(args),
+      version: '2023-10-31',
     });
   });
 
   test('should pass correct args to KibanaServices - timeline template', () => {
     const args = {
-      timelineType: TimelineType.template,
+      timelineType: TimelineTypeEnum.template,
       templateTimelineId: 'test-123',
       templateTimelineVersion: 1,
     };
@@ -438,6 +447,124 @@ describe('cleanDraftTimeline', () => {
 
     expect(postMock).toBeCalledWith('/api/timeline/_draft', {
       body: JSON.stringify(args),
+      version: '2023-10-31',
     });
+  });
+});
+
+describe('copyTimeline', () => {
+  const mockPostTimelineResponse = {
+    data: {
+      persistTimeline: {
+        timeline: {
+          ...timelineData,
+          savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
+          version: 'WzMzMiwxXQ==',
+        },
+      },
+    },
+  };
+
+  const saveSavedSearchMock = jest.fn();
+  const postMock = jest.fn();
+  const initialSavedSearchId = 'initialId';
+  const newSavedSearchId = 'newId-230820349807209752';
+
+  const customQuery = {
+    language: 'kuery',
+    query: '_id: *',
+  };
+
+  const dataViewMock = buildDataViewMock({
+    name: 'first-data-view',
+    fields: shallowMockedFields,
+  });
+
+  const mockSavedSearch = {
+    id: initialSavedSearchId,
+    title: 'first title',
+    breakdownField: 'firstBreakdown Field',
+    searchSource: createSearchSourceMock({
+      index: dataViewMock,
+      query: customQuery,
+    }),
+    managed: false,
+  };
+
+  beforeAll(() => {
+    jest.resetAllMocks();
+    jest.resetModules();
+
+    (KibanaServices.get as jest.Mock).mockReturnValue({
+      http: {
+        post: postMock.mockReturnValue(mockPostTimelineResponse),
+      },
+      savedSearch: {
+        save: saveSavedSearchMock.mockImplementation(() => newSavedSearchId),
+      },
+    });
+  });
+
+  it('creates a new saved search when a saved search object is passed', async () => {
+    await api.copyTimeline({
+      timelineId: 'test',
+      timeline: {
+        ...timelineData,
+        savedSearchId: 'test',
+      },
+      savedSearch: mockSavedSearch,
+    });
+
+    // 'id' should be removed
+    expect(saveSavedSearchMock).toHaveBeenCalled();
+    expect(saveSavedSearchMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: initialSavedSearchId,
+      })
+    );
+
+    // The new saved search id is sent to the server
+    expect(postMock).toHaveBeenCalledWith(
+      TIMELINE_COPY_URL,
+      expect.objectContaining({
+        body: expect.stringContaining(newSavedSearchId),
+      })
+    );
+  });
+
+  it('applies the timeline changes before sending the POST request', async () => {
+    const ridiculousTimelineTitle = 'Wow, what a weirt timeline title';
+    await api.copyTimeline({
+      timelineId: 'test',
+      timeline: {
+        ...timelineData,
+        title: ridiculousTimelineTitle,
+        savedSearchId: 'test',
+      },
+      savedSearch: mockSavedSearch,
+    });
+
+    // The new saved search id is sent to the server
+    expect(postMock).toHaveBeenCalledWith(
+      TIMELINE_COPY_URL,
+      expect.objectContaining({
+        body: expect.stringContaining(ridiculousTimelineTitle),
+      })
+    );
+  });
+
+  it('does not save a saved search for timelines without `savedSearchId`', async () => {
+    jest.clearAllMocks();
+
+    await api.copyTimeline({
+      timelineId: 'test',
+      timeline: {
+        ...timelineData,
+        savedSearchId: null,
+      },
+      savedSearch: mockSavedSearch,
+    });
+
+    expect(saveSavedSearchMock).not.toHaveBeenCalled();
   });
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Dispatch, SetStateAction } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 
 import { APP_ID } from '../../../../common/constants';
@@ -23,7 +24,7 @@ export const useLocalStorage = <T,>({
   key,
   plugin = APP_ID,
   isInvalidDefault,
-}: Props<T>): [T, (value: T) => void] => {
+}: Props<T>): [T, Dispatch<SetStateAction<T>>, Dispatch<SetStateAction<boolean>>] => {
   const { storage } = useKibana().services;
   const [initialized, setInitialized] = useState<boolean>(false);
   const [_value, _setValue] = useState<T>(defaultValue);
@@ -37,10 +38,18 @@ export const useLocalStorage = <T,>({
   }, [defaultValue, isInvalidDefault, key, plugin, storage]);
 
   const setValue = useCallback(
-    (value: T) => {
-      storage.set(`${plugin}.${key}`, value);
-
-      _setValue(value);
+    (value: T | ((prev: T) => T)) => {
+      if (typeof value === 'function') {
+        const updater = value as (prev: T) => T;
+        _setValue((prevValue) => {
+          const newValue = updater(prevValue);
+          storage.set(`${plugin}.${key}`, newValue);
+          return newValue;
+        });
+      } else {
+        storage.set(`${plugin}.${key}`, value);
+        _setValue(value);
+      }
     },
     [key, plugin, storage]
   );
@@ -52,5 +61,5 @@ export const useLocalStorage = <T,>({
     }
   }, [initialized, readValueFromLocalStorage]);
 
-  return [_value, setValue];
+  return [_value, setValue, setInitialized];
 };

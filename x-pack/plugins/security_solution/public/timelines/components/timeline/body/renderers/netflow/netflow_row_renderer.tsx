@@ -10,7 +10,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import type { RowRenderer } from '../../../../../../../common/types/timeline';
-import { RowRendererId } from '../../../../../../../common/types/timeline';
+import { RowRendererIdEnum } from '../../../../../../../common/api/timeline';
 import { asArrayIfExists } from '../../../../../../common/lib/helpers';
 import {
   TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,
@@ -85,7 +85,7 @@ export const eventActionMatches = (eventAction: string | object | undefined | nu
 };
 
 export const netflowRowRenderer: RowRenderer = {
-  id: RowRendererId.netflow,
+  id: RowRendererIdEnum.netflow,
   isInstance: (ecs) =>
     eventCategoryMatches(get(EVENT_CATEGORY_FIELD, ecs)) ||
     eventActionMatches(get(EVENT_ACTION_FIELD, ecs)),

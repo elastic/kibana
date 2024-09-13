@@ -8,15 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
 
 import {
   SearchProfilerTabs,
@@ -54,7 +46,7 @@ export const App = () => {
   );
 
   const onHighlight = useCallback(
-    (value) => dispatch({ type: 'setHighlightDetails', value }),
+    (value: any) => dispatch({ type: 'setHighlightDetails', value }),
     [dispatch]
   );
 
@@ -95,39 +87,37 @@ export const App = () => {
       <EuiPage className="prfDevTool__page appRoot">
         <EuiPageBody className="prfDevTool__page__pageBody">
           {renderLicenseWarning()}
-          <EuiPageContent className="prfDevTool__page__pageBodyContent">
-            <EuiPageContentBody className="prfDevTool__page__pageBodyContentBody">
-              <EuiFlexGroup
-                responsive={false}
-                gutterSize="s"
-                direction="row"
-                className="prfDevTool__page__bodyGroup"
-              >
-                <EuiFlexItem>
-                  <ProfileQueryEditor />
-                </EuiFlexItem>
-                <EuiFlexItem grow={3}>
-                  <EuiFlexGroup className="prfDevTool__main" gutterSize="none" direction="column">
-                    <SearchProfilerTabs
-                      activeTab={activeTab}
-                      activateTab={setActiveTab}
-                      has={{
-                        aggregations: Boolean(currentResponse && hasAggregations(currentResponse)),
-                        searches: Boolean(currentResponse && hasSearch(currentResponse)),
-                      }}
-                    />
-                    {renderProfileTreeArea()}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              {highlightDetails ? (
-                <HighlightDetailsFlyout
-                  {...highlightDetails}
-                  onClose={() => dispatch({ type: 'setHighlightDetails', value: null })}
-                />
-              ) : null}
-            </EuiPageContentBody>
-          </EuiPageContent>
+          <EuiPanel className="prfDevTool__page__pageBodyContent">
+            <EuiFlexGroup
+              responsive={false}
+              gutterSize="s"
+              direction="row"
+              className="prfDevTool__page__bodyGroup"
+            >
+              <EuiFlexItem>
+                <ProfileQueryEditor />
+              </EuiFlexItem>
+              <EuiFlexItem grow={3}>
+                <EuiFlexGroup className="prfDevTool__main" gutterSize="none" direction="column">
+                  <SearchProfilerTabs
+                    activeTab={activeTab}
+                    activateTab={setActiveTab}
+                    has={{
+                      aggregations: Boolean(currentResponse && hasAggregations(currentResponse)),
+                      searches: Boolean(currentResponse && hasSearch(currentResponse)),
+                    }}
+                  />
+                  {renderProfileTreeArea()}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {highlightDetails ? (
+              <HighlightDetailsFlyout
+                {...highlightDetails}
+                onClose={() => dispatch({ type: 'setHighlightDetails', value: null })}
+              />
+            ) : null}
+          </EuiPanel>
         </EuiPageBody>
       </EuiPage>
     </>

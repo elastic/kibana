@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CommonPageObject } from './common_page';
@@ -31,22 +32,31 @@ import { SavedObjectsPageObject } from './management/saved_objects_page';
 import { LegacyDataTableVisPageObject } from './legacy/data_table_vis';
 import { IndexPatternFieldEditorPageObject } from './management/indexpattern_field_editor_page';
 import { DashboardPageControls } from './dashboard_page_controls';
+import { DashboardPageLinks } from './dashboard_page_links';
 import { UnifiedSearchPageObject } from './unified_search_page';
+import { UnifiedFieldListPageObject } from './unified_field_list';
 import { FilesManagementPageObject } from './files_management';
+import { AnnotationEditorPageObject } from './annotation_library_editor_page';
+import { SolutionNavigationProvider } from './solution_navigation';
+import { EmbeddedConsoleProvider } from './embedded_console';
 
 export const pageObjects = {
+  annotationEditor: AnnotationEditorPageObject,
   common: CommonPageObject,
   console: ConsolePageObject,
   context: ContextPageObject,
   dashboard: DashboardPageObject,
   dashboardControls: DashboardPageControls,
+  dashboardLinks: DashboardPageLinks,
   discover: DiscoverPageObject,
+  embeddedConsole: EmbeddedConsoleProvider,
   error: ErrorPageObject,
   header: HeaderPageObject,
   home: HomePageObject,
   newsfeed: NewsfeedPageObject,
   settings: SettingsPageObject,
   share: SharePageObject,
+  solutionNavigation: SolutionNavigationProvider,
   legacyDataTableVis: LegacyDataTableVisPageObject,
   login: LoginPageObject,
   timelion: TimelionPageObject,
@@ -61,5 +71,8 @@ export const pageObjects = {
   savedObjects: SavedObjectsPageObject,
   indexPatternFieldEditorObjects: IndexPatternFieldEditorPageObject,
   unifiedSearch: UnifiedSearchPageObject,
+  unifiedFieldList: UnifiedFieldListPageObject,
   filesManagement: FilesManagementPageObject,
 };
+
+export { SolutionNavigationProvider } from './solution_navigation';

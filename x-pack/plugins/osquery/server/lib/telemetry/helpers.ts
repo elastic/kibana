@@ -6,13 +6,9 @@
  */
 
 import { filter, find, isEmpty, pick, isString } from 'lodash';
-import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type {
-  PackSavedObjectAttributes,
-  SavedQuerySavedObjectAttributes,
-} from '../../common/types';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { PackSavedObject, SavedQuerySavedObject } from '../../common/types';
 
 /**
  * Constructs the configs telemetry schema from a collection of config saved objects
@@ -28,21 +24,19 @@ export const templateConfigs = (configsData: PackagePolicy[]) =>
 /**
  * Constructs the packs telemetry schema from a collection of packs saved objects
  */
-export const templatePacks = (
-  packsData: SavedObjectsFindResponse<PackSavedObjectAttributes>['saved_objects']
-) => {
-  const nonEmptyQueryPacks = filter(packsData, (pack) => !isEmpty(pack.attributes.queries));
+export const templatePacks = (packsData: PackSavedObject[]) => {
+  const nonEmptyQueryPacks = filter(packsData, (pack) => !isEmpty(pack.queries));
 
   return nonEmptyQueryPacks.map((item) =>
     pick(
       {
-        name: item.attributes.name,
-        enabled: item.attributes.enabled,
-        queries: item.attributes.queries,
-        policies: (filter(item.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]), 'id')?.length,
+        name: item.name,
+        enabled: item.enabled,
+        queries: item.queries,
+        policies: (filter(item.references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]), 'id')
+          ?.length,
         prebuilt:
-          !!filter(item.references, ['type', 'osquery-pack-asset']) &&
-          item.attributes.version !== undefined,
+          !!filter(item.references, ['type', 'osquery-pack-asset']) && item.version !== undefined,
       },
       ['name', 'queries', 'policies', 'prebuilt', 'enabled']
     )
@@ -53,18 +47,16 @@ export const templatePacks = (
  * Constructs the packs telemetry schema from a collection of packs saved objects
  */
 export const templateSavedQueries = (
-  savedQueriesData: SavedObjectsFindResponse<SavedQuerySavedObjectAttributes>['saved_objects'],
+  savedQueriesData: SavedQuerySavedObject[],
   prebuiltSavedQueryIds: string[]
 ) =>
   savedQueriesData.map((item) => ({
-    id: item.attributes.id,
-    query: item.attributes.query,
-    platform: item.attributes.platform,
-    interval: isString(item.attributes.interval)
-      ? parseInt(item.attributes.interval, 10)
-      : item.attributes.interval,
-    ...(!isEmpty(item.attributes.snapshot) ? { snapshot: item.attributes.snapshot } : {}),
-    ...(!isEmpty(item.attributes.removed) ? { snapshot: item.attributes.removed } : {}),
-    ...(!isEmpty(item.attributes.ecs_mapping) ? { ecs_mapping: item.attributes.ecs_mapping } : {}),
+    id: item.id,
+    query: item.query,
+    platform: item.platform,
+    interval: isString(item.interval) ? parseInt(item.interval, 10) : item.interval,
+    ...(!isEmpty(item.snapshot) ? { snapshot: item.snapshot } : {}),
+    ...(!isEmpty(item.removed) ? { snapshot: item.removed } : {}),
+    ...(!isEmpty(item.ecs_mapping) ? { ecs_mapping: item.ecs_mapping } : {}),
     prebuilt: prebuiltSavedQueryIds.includes(item.id),
   }));

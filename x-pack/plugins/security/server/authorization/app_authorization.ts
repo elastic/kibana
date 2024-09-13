@@ -6,9 +6,8 @@
  */
 
 import type { HttpServiceSetup, Logger } from '@kbn/core/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-
-import type { AuthorizationServiceSetup } from './authorization_service';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 
 class ProtectedApplications {
   private applications: Set<string> | null = null;
@@ -20,10 +19,11 @@ class ProtectedApplications {
     // we wait until we actually need to consume these before getting them
     if (this.applications == null) {
       this.applications = new Set(
-        this.featuresService
-          .getKibanaFeatures()
-          .map((feature) => feature.app)
-          .flat()
+        this.featuresService.getKibanaFeatures().flatMap((feature) => {
+          // If the feature has explicitly opted out of our RBAC by setting the `privileges` field to `null`, we
+          // shouldn't check permissions when the app defined by such feature is accessed.
+          return feature.privileges === null ? [] : feature.app;
+        })
       );
     }
 

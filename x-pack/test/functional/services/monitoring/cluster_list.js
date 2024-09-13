@@ -50,6 +50,10 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
       return testSubjects.click('alerts-modal-button');
     }
 
+    confirmWatcherMigrationDone() {
+      return testSubjects.click('alerts-modal-create-button');
+    }
+
     getClusterLink(clusterUuid) {
       return testSubjects.find(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > clusterLink`);
     }

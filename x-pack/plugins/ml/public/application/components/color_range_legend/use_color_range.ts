@@ -6,12 +6,10 @@
  */
 
 import d3 from 'd3';
-import { useMemo } from 'react';
-import { euiLightVars as euiThemeLight, euiDarkVars as euiThemeDark } from '@kbn/ui-theme';
+import type { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
-
-import { useUiSettings } from '../../contexts/kibana/use_ui_settings_context';
+import { useCurrentThemeVars } from '../../contexts/kibana';
 
 /**
  * Custom color scale factory that takes the amount of feature influencers
@@ -150,7 +148,7 @@ export const useColorRange = (
   colorRangeScale = COLOR_RANGE_SCALE.LINEAR,
   featureCount = 1
 ) => {
-  const { euiTheme } = useCurrentEuiTheme();
+  const { euiTheme } = useCurrentThemeVars();
 
   const colorRanges: Record<COLOR_RANGE, string[]> = {
     [COLOR_RANGE.BLUE]: [
@@ -188,11 +186,3 @@ export const useColorRange = (
 };
 
 export type EuiThemeType = typeof euiThemeLight | typeof euiThemeDark;
-
-export function useCurrentEuiTheme() {
-  const uiSettings = useUiSettings();
-  return useMemo(
-    () => ({ euiTheme: uiSettings.get('theme:darkMode') ? euiThemeDark : euiThemeLight }),
-    [uiSettings]
-  );
-}

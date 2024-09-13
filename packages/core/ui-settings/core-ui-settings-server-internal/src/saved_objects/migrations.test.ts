@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
@@ -371,6 +372,41 @@ describe('ui_settings 8.7.0 migrations', () => {
     expect(migration(doc)).toEqual({
       type: 'config',
       id: '8.7.0',
+      attributes: {
+        buildNum: 9007199254740991,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    });
+  });
+});
+
+describe('ui_settings 8.9.0 migrations', () => {
+  const migration = migrations['8.9.0'];
+
+  test('returns doc on empty object', () => {
+    expect(migration({} as SavedObjectUnsanitizedDoc)).toEqual({
+      references: [],
+    });
+  });
+
+  test('removes "visualize:enableLabs" setting', () => {
+    const doc = {
+      type: 'config',
+      id: '8.9.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'visualize:enableLabs': true,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+
+    expect(migration(doc)).toEqual({
+      type: 'config',
+      id: '8.9.0',
       attributes: {
         buildNum: 9007199254740991,
       },

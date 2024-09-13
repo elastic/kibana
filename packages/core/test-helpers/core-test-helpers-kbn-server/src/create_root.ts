@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { join } from 'path';
@@ -197,7 +198,7 @@ export interface TestKibanaUtils {
 
 export interface TestUtils {
   startES: () => Promise<TestElasticsearchUtils>;
-  startKibana: () => Promise<TestKibanaUtils>;
+  startKibana: (abortSignal?: AbortSignal) => Promise<TestKibanaUtils>;
 }
 
 /**
@@ -261,7 +262,7 @@ export function createTestServers({
   // Add time for KBN and adding users
   adjustTimeout(es.getStartTimeout() + 100000);
 
-  const kbnSettings = settings.kbn ?? {};
+  const { cliArgs = {}, customKibanaVersion, ...kbnSettings } = settings.kbn ?? {};
 
   return {
     startES: async () => {
@@ -284,8 +285,10 @@ export function createTestServers({
         password: kibanaServerTestUser.password,
       };
     },
-    startKibana: async () => {
-      const root = createRootWithCorePlugins(kbnSettings);
+    startKibana: async (abortSignal?: AbortSignal) => {
+      const root = createRootWithCorePlugins(kbnSettings, cliArgs, customKibanaVersion);
+
+      abortSignal?.addEventListener('abort', async () => await root.shutdown());
 
       await root.preboot();
       const coreSetup = await root.setup();

@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { savedObjectsTaggingFeature } from './features';
@@ -36,7 +36,7 @@ export class SavedObjectTaggingPlugin
   implements Plugin<{}, SavedObjectTaggingStart, SetupDeps, StartDeps>
 {
   public setup(
-    { savedObjects, http }: CoreSetup,
+    { savedObjects, http, getStartServices }: CoreSetup,
     { features, usageCollection, security }: SetupDeps
   ) {
     savedObjects.registerType(tagType);
@@ -54,10 +54,14 @@ export class SavedObjectTaggingPlugin
     features.registerKibanaFeature(savedObjectsTaggingFeature);
 
     if (usageCollection) {
+      const getKibanaIndices = () =>
+        getStartServices()
+          .then(([core]) => core.savedObjects.getAllIndices())
+          .catch(() => []);
       usageCollection.registerCollector(
         createTagUsageCollector({
           usageCollection,
-          kibanaIndex: savedObjects.getKibanaIndex(),
+          getKibanaIndices,
         })
       );
     }

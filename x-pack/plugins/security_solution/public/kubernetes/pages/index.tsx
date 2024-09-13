@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { ResponseActionButtonProps } from '@kbn/kubernetes-security-plugin/public/types';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -19,25 +18,19 @@ import { SiemSearchBar } from '../../common/components/search_bar';
 import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
 import { inputsSelectors } from '../../common/store';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { SessionsView } from '../../common/components/sessions_viewer';
 import { kubernetesSessionsHeaders } from './constants';
-import { useResponderActionData } from '../../detections/components/endpoint_responder/use_responder_action_data';
-import { useUserPrivileges } from '../../common/components/user_privileges';
 
 export const KubernetesContainer = React.memo(() => {
   const { kubernetesSecurity, uiSettings } = useKibana().services;
 
   const { globalFullScreen } = useGlobalFullScreen();
-  const {
-    indexPattern,
-    // runtimeMappings,
-    // loading: isLoadingIndexPattern,
-  } = useSourcererDataView();
+  const { indexPattern, sourcererDataView, dataViewId } = useSourcererDataView();
   const { from, to } = useGlobalTime();
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -47,9 +40,7 @@ export const KubernetesContainer = React.memo(() => {
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-  const canAccessResponseConsole = useUserPrivileges().endpointPrivileges.canAccessResponseConsole;
 
-  const [agentIdForResponder, setAgentIdForResponder] = useState<string>('');
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -85,30 +76,12 @@ export const KubernetesContainer = React.memo(() => {
     [from, to]
   );
 
-  const { handleResponseActionsClick, isDisabled, tooltip } = useResponderActionData({
-    endpointId: agentIdForResponder,
-  });
-
-  const handleTreeNavSelection = useCallback((agentId: string) => {
-    setAgentIdForResponder(agentId);
-  }, []);
-
-  const responseActionClick = useCallback(() => {
-    handleResponseActionsClick();
-  }, [handleResponseActionsClick]);
-
-  const responseActionButtonProps: ResponseActionButtonProps = {
-    isDisabled,
-    canAccessResponseConsole,
-    tooltip,
-  };
-
   return (
     <SecuritySolutionPageWrapper noPadding>
       {kubernetesSecurity.getKubernetesPage({
         filter: (
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId: undefined })}>
-            <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
+            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
           </FiltersGlobal>
         ),
         indexPattern,
@@ -118,9 +91,7 @@ export const KubernetesContainer = React.memo(() => {
           endDate: to,
         },
         renderSessionsView,
-        responseActionClick,
-        handleTreeNavSelection,
-        responseActionButtonProps,
+        dataViewId: dataViewId ?? undefined,
       })}
       <SpyRoute pageName={SecurityPageName.kubernetes} />
     </SecuritySolutionPageWrapper>

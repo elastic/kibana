@@ -25,23 +25,55 @@ const POLICY_KEYS_ORDER = [
   'meta',
   'input',
   'download',
+  'signed',
 ];
 
-export const fullAgentPolicyToYaml = (policy: FullAgentPolicy, toYaml: typeof safeDump): string => {
-  return toYaml(policy, {
+export const fullAgentPolicyToYaml = (
+  policy: FullAgentPolicy,
+  toYaml: typeof safeDump,
+  apiKey?: string
+): string => {
+  const yaml = toYaml(policy, {
     skipInvalid: true,
-    sortKeys: (keyA: string, keyB: string) => {
-      const indexA = POLICY_KEYS_ORDER.indexOf(keyA);
-      const indexB = POLICY_KEYS_ORDER.indexOf(keyB);
-      if (indexA >= 0 && indexB < 0) {
-        return -1;
-      }
-
-      if (indexA < 0 && indexB >= 0) {
-        return 1;
-      }
-
-      return indexA - indexB;
-    },
+    sortKeys: _sortYamlKeys,
   });
+  const formattedYml = apiKey ? replaceApiKey(yaml, apiKey) : yaml;
+
+  if (!policy?.secret_references?.length) return formattedYml;
+
+  return _formatSecrets(policy.secret_references, formattedYml);
 };
+
+export function _sortYamlKeys(keyA: string, keyB: string) {
+  const indexA = POLICY_KEYS_ORDER.indexOf(keyA);
+  const indexB = POLICY_KEYS_ORDER.indexOf(keyB);
+  if (indexA >= 0 && indexB < 0) {
+    return -1;
+  }
+
+  if (indexA < 0 && indexB >= 0) {
+    return 1;
+  }
+
+  return indexA - indexB;
+}
+
+function _formatSecrets(
+  secretRefs: NonNullable<FullAgentPolicy['secret_references']>,
+  ymlText: string
+) {
+  let formattedText = ymlText;
+  const secretIds = secretRefs.map((ref) => ref.id);
+
+  secretIds.forEach((secretId, idx) => {
+    const regex = new RegExp(`\\$co\\.elastic\\.secret\\{${secretId}\\}`, 'g');
+    formattedText = formattedText.replace(regex, `\${SECRET_${idx}}`);
+  });
+
+  return formattedText;
+}
+
+function replaceApiKey(ymlText: string, apiKey: string) {
+  const regex = new RegExp(/\'\${API_KEY}\'/, 'g');
+  return ymlText.replace(regex, `'${apiKey}'`);
+}

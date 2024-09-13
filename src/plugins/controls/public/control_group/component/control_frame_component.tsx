@@ -1,70 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
+import React, { useEffect, useMemo, useState } from 'react';
+
 import {
-  EuiButtonEmpty,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
   EuiLoadingChart,
-  EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
+import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { FloatingActions } from '@kbn/presentation-util-plugin/public';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
-import { useReduxEmbeddableContext, FloatingActions } from '@kbn/presentation-util-plugin/public';
-import { ControlGroupReduxState } from '../types';
-import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
-import { controlGroupReducers } from '../state/control_group_reducers';
-import { ControlGroupContainer } from '..';
-
-interface ControlFrameErrorProps {
-  error: Error;
-}
-
-const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
-  const [isPopoverOpen, setPopoverOpen] = useState(false);
-  const popoverButton = (
-    <EuiButtonEmpty
-      color="danger"
-      iconSize="m"
-      iconType="error"
-      onClick={() => setPopoverOpen((open) => !open)}
-      className={'errorEmbeddableCompact__button'}
-      textProps={{ className: 'errorEmbeddableCompact__text' }}
-    >
-      <FormattedMessage
-        id="controls.frame.error.message"
-        defaultMessage="An error occurred. View more"
-      />
-    </EuiButtonEmpty>
-  );
-
-  return (
-    <EuiPopover
-      button={popoverButton}
-      isOpen={isPopoverOpen}
-      className="errorEmbeddableCompact__popover"
-      anchorClassName="errorEmbeddableCompact__popoverAnchor"
-      closePopover={() => setPopoverOpen(false)}
-    >
-      <Markdown
-        markdown={error.message}
-        openLinksInNewTab={true}
-        data-test-subj="errorMessageMarkdown"
-      />
-    </EuiPopover>
-  );
-};
+import {
+  controlGroupSelector,
+  useControlGroupContainer,
+} from '../embeddable/control_group_container';
+import { ControlError } from './control_error_component';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
@@ -80,18 +41,12 @@ export const ControlFrame = ({
   embeddableType,
 }: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-  const [fatalError, setFatalError] = useState<Error>();
 
-  const { useEmbeddableSelector: select, embeddableInstance: controlGroup } =
-    useReduxEmbeddableContext<
-      ControlGroupReduxState,
-      typeof controlGroupReducers,
-      ControlGroupContainer
-    >();
+  const controlGroup = useControlGroupContainer();
 
-  const viewMode = select((state) => state.explicitInput.viewMode);
-  const controlStyle = select((state) => state.explicitInput.controlStyle);
-  const disabledActions = select((state) => state.explicitInput.disabledActions);
+  const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
+  const viewMode = controlGroupSelector((state) => state.explicitInput.viewMode);
+  const disabledActions = controlGroupSelector((state) => state.explicitInput.disabledActions);
 
   const embeddable = useChildEmbeddable({
     untilEmbeddableLoaded: controlGroup.untilEmbeddableLoaded.bind(controlGroup),
@@ -104,25 +59,22 @@ export const ControlFrame = ({
   const usingTwoLineLayout = controlStyle === 'twoLine';
 
   useEffect(() => {
+    let mounted = true;
     if (embeddableRoot.current) {
       embeddable?.render(embeddableRoot.current);
     }
-    const inputSubscription = embeddable
-      ?.getInput$()
-      .subscribe((newInput) => setTitle(newInput.title));
-    const errorSubscription = embeddable?.getOutput$().subscribe({
-      error: setFatalError,
+    const inputSubscription = embeddable?.getInput$().subscribe((newInput) => {
+      if (mounted) setTitle(newInput.title);
     });
     return () => {
+      mounted = false;
       inputSubscription?.unsubscribe();
-      errorSubscription?.unsubscribe();
     };
   }, [embeddable, embeddableRoot]);
 
   const embeddableParentClassNames = classNames('controlFrame__control', {
     'controlFrame--twoLine': controlStyle === 'twoLine',
     'controlFrame--oneLine': controlStyle === 'oneLine',
-    'controlFrame--fatalError': !!fatalError,
   });
 
   function renderEmbeddablePrepend() {
@@ -145,6 +97,7 @@ export const ControlFrame = ({
         'controlFrameFormControlLayout--twoLine': controlStyle === 'twoLine',
       })}
       fullWidth
+      compressed
       prepend={
         <>
           {(embeddable && customPrepend) ?? null}
@@ -152,18 +105,13 @@ export const ControlFrame = ({
         </>
       }
     >
-      {embeddable && !fatalError && (
+      {embeddable && (
         <div
           className={embeddableParentClassNames}
           id={`controlFrame--${embeddableId}`}
           ref={embeddableRoot}
         >
-          {fatalError && <ControlFrameError error={fatalError} />}
-        </div>
-      )}
-      {fatalError && (
-        <div className={embeddableParentClassNames} id={`controlFrame--${embeddableId}`}>
-          {<ControlFrameError error={fatalError} />}
+          {isErrorEmbeddable(embeddable) && <ControlError error={embeddable.error} />}
         </div>
       )}
       {!embeddable && (
@@ -183,18 +131,14 @@ export const ControlFrame = ({
         'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
       viewMode={viewMode}
-      embeddable={embeddable}
+      api={embeddable}
       disabledActions={disabledActions}
       isEnabled={embeddable && enableActions}
     >
       <EuiFormRow
         data-test-subj="control-frame-title"
         fullWidth
-        label={
-          usingTwoLineLayout
-            ? title || ControlGroupStrings.emptyState.getTwoLineLoadingTitle()
-            : undefined
-        }
+        label={usingTwoLineLayout ? title || '...' : undefined}
       >
         {form}
       </EuiFormRow>

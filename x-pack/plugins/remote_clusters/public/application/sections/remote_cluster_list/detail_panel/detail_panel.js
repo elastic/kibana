@@ -34,7 +34,7 @@ import {
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { PROXY_MODE } from '../../../../../common/constants';
 import { ConfiguredByNodeWarning } from '../../components';
-import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
+import { ConnectionStatus, RemoveClusterButtonProvider, SecurityModel } from '../components';
 import { getRouter } from '../../../services';
 import { proxyModeUrl } from '../../../services/documentation';
 
@@ -126,7 +126,7 @@ export class DetailPanel extends Component {
           title={
             <FormattedMessage
               id="xpack.remoteClusters.detailPanel.deprecatedSettingsTitle"
-              defaultMessage="'{remoteCluster}' has deprecated settings"
+              defaultMessage="''{remoteCluster}'' has deprecated settings"
               values={{
                 remoteCluster: clusterName,
               }}
@@ -181,6 +181,7 @@ export class DetailPanel extends Component {
     maxConnectionsPerCluster,
     initialConnectTimeout,
     mode,
+    securityModel,
   }) {
     return (
       <EuiFlexGroup data-test-subj="remoteClusterDetailPanelStatusValues">
@@ -196,6 +197,18 @@ export class DetailPanel extends Component {
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription data-test-subj="remoteClusterDetailIsConnected">
               <ConnectionStatus isConnected={isConnected} mode={mode} />
+            </EuiDescriptionListDescription>
+
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.securityModel"
+                  defaultMessage="Authentication type"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailAuthType">
+              <SecurityModel securityModel={securityModel} />
             </EuiDescriptionListDescription>
 
             <EuiDescriptionListTitle>
@@ -280,6 +293,7 @@ export class DetailPanel extends Component {
     connectedSocketsCount,
     mode,
     serverName,
+    securityModel,
   }) {
     return (
       <EuiFlexGroup>
@@ -295,6 +309,18 @@ export class DetailPanel extends Component {
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription data-test-subj="remoteClusterDetailIsConnected">
               <ConnectionStatus isConnected={isConnected} mode={mode} />
+            </EuiDescriptionListDescription>
+
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.securityModel"
+                  defaultMessage="Authentication type"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailAuthType">
+              <SecurityModel securityModel={securityModel} />
             </EuiDescriptionListDescription>
 
             <EuiDescriptionListTitle>

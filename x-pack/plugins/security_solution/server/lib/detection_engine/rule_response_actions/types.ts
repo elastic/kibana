@@ -6,15 +6,37 @@
  */
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { ResponseActionsRequestBody } from '../../../../common/api/endpoint';
+import type { CommonResponseActionMethodOptions } from '../../../endpoint/services';
 
-export type Alerts = Array<
-  ParsedTechnicalFields & { agent?: { id: string }; process?: { pid: string } }
->;
+export type Alert = ParsedTechnicalFields & {
+  _id: string;
+  _index: string;
+  agent?: AlertAgent;
+  host?: {
+    name: string;
+  };
+  process?: {
+    pid: string;
+  };
+};
 
-export interface AlertsWithAgentType {
-  alerts: Alerts;
-  agentIds: string[];
-  alertIds: string[];
-  ruleId?: string;
-  ruleName?: string;
+export interface AlertAgent {
+  id: string;
+  name: string;
+  type: string;
 }
+
+export interface AlertWithAgent extends Alert {
+  agent: AlertAgent;
+}
+
+export interface ResponseActionAlerts {
+  alerts: AlertWithAgent[];
+}
+
+export type AlertsAction = Pick<
+  ResponseActionsRequestBody,
+  'alert_ids' | 'endpoint_ids' | 'parameters'
+> &
+  Pick<CommonResponseActionMethodOptions, 'error' | 'hosts'>;

@@ -5,23 +5,29 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useEnabledFeatures } from '../../../../serverless_context';
 import { TRANSFORM_MODE, TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import { TransformListRow } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
 
-import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
+import { useDocumentationLinks, useRefreshTransformList } from '../../../../hooks';
 
-import { StatsBar, TransformStatsBarStats } from '../stats_bar';
+import type { TransformStatsBarStats } from '../stats_bar';
+import { StatsBar } from '../stats_bar';
 
-function createTranformStats(transformNodes: number, transformsList: TransformListRow[]) {
-  const transformStats = {
+function createTransformStats(
+  transformNodes: number,
+  transformsList: TransformListRow[],
+  showNodeInfo: boolean
+): TransformStatsBarStats {
+  const transformStats: TransformStatsBarStats = {
     total: {
       label: i18n.translate('xpack.transform.statsBar.totalTransformsLabel', {
         defaultMessage: 'Total transforms',
@@ -57,14 +63,17 @@ function createTranformStats(transformNodes: number, transformsList: TransformLi
       value: 0,
       show: true,
     },
-    nodes: {
+  };
+
+  if (showNodeInfo) {
+    transformStats.nodes = {
       label: i18n.translate('xpack.transform.statsBar.transformNodesLabel', {
         defaultMessage: 'Nodes',
       }),
       value: transformNodes,
       show: true,
-    },
-  };
+    };
+  }
 
   if (transformsList === undefined) {
     return transformStats;
@@ -74,16 +83,24 @@ function createTranformStats(transformNodes: number, transformsList: TransformLi
   let startedTransforms = 0;
 
   transformsList.forEach((transform) => {
-    if (transform.mode === TRANSFORM_MODE.CONTINUOUS) {
+    if (
+      transform.mode === TRANSFORM_MODE.CONTINUOUS &&
+      typeof transformStats.continuous.value === 'number'
+    ) {
       transformStats.continuous.value++;
-    } else if (transform.mode === TRANSFORM_MODE.BATCH) {
+    } else if (
+      transform.mode === TRANSFORM_MODE.BATCH &&
+      typeof transformStats.batch.value === 'number'
+    ) {
       transformStats.batch.value++;
     }
 
-    if (transform.stats.state === TRANSFORM_STATE.FAILED) {
-      failedTransforms++;
-    } else if (transform.stats.state === TRANSFORM_STATE.STARTED) {
-      startedTransforms++;
+    if (transform.stats) {
+      if (transform.stats.state === TRANSFORM_STATE.FAILED) {
+        failedTransforms++;
+      } else if (transform.stats.state === TRANSFORM_STATE.STARTED) {
+        startedTransforms++;
+      }
     }
   });
 
@@ -109,19 +126,20 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
   transformNodes,
   transformsList,
 }) => {
+  const { showNodeInfo } = useEnabledFeatures();
+  const refreshTransformList = useRefreshTransformList();
   const { esNodeRoles } = useDocumentationLinks();
 
-  const transformStats: TransformStatsBarStats = createTranformStats(
+  const transformStats: TransformStatsBarStats = createTransformStats(
     transformNodes,
-    transformsList
+    transformsList,
+    showNodeInfo
   );
 
   return (
     <>
-      <StatsBar stats={transformStats} dataTestSub={'transformStatsBar'} />
-      {transformNodes === 0 && (
+      {showNodeInfo && transformNodes === 0 && (
         <>
-          <EuiSpacer size="m" />
           <EuiCallOut
             title={
               <FormattedMessage
@@ -148,9 +166,17 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
                 }}
               />
             </p>
+            <EuiButton onClick={() => refreshTransformList()} size="s">
+              <FormattedMessage
+                id="xpack.transform.transformNodes.noTransformNodesRetryButtonText"
+                defaultMessage="Retry"
+              />
+            </EuiButton>
           </EuiCallOut>
+          <EuiSpacer size="s" />
         </>
       )}
+      <StatsBar stats={transformStats} dataTestSub={'transformStatsBar'} />
     </>
   );
 };

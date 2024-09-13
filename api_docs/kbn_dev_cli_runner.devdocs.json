@@ -910,7 +910,7 @@
             "section": "def-common.RunFn",
             "text": "RunFn"
           },
-          ", options: ",
+          "<T>, options: ",
           {
             "pluginId": "@kbn/dev-cli-runner",
             "scope": "common",
@@ -918,7 +918,7 @@
             "section": "def-common.RunOptions",
             "text": "RunOptions"
           },
-          ") => Promise<void>"
+          ") => Promise<T | undefined>"
         ],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,
@@ -938,7 +938,8 @@
                 "docId": "kibKbnDevCliRunnerPluginApi",
                 "section": "def-common.RunFn",
                 "text": "RunFn"
-              }
+              },
+              "<T>"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
             "deprecated": false,
@@ -1147,6 +1148,20 @@
             "type": "string",
             "tags": [],
             "label": "help",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-dev-cli-runner/src/flags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-runner",
+            "id": "def-common.FlagOptions.examples",
+            "type": "string",
+            "tags": [],
+            "label": "examples",
             "description": [],
             "signature": [
               "string | undefined"
@@ -1526,7 +1541,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              "{ defaultLevel?: \"error\" | \"info\" | \"warning\" | \"success\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
+              "{ defaultLevel?: \"error\" | \"info\" | \"warning\" | \"success\" | \"debug\" | \"silent\" | \"verbose\" | undefined; context?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
             "deprecated": false,
@@ -1585,7 +1600,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              "{ defaultLevel?: \"error\" | \"info\" | \"warning\" | \"success\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
+              "{ defaultLevel?: \"error\" | \"info\" | \"warning\" | \"success\" | \"debug\" | \"silent\" | \"verbose\" | undefined; context?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,
@@ -1774,7 +1789,7 @@
             "section": "def-common.RunContext",
             "text": "RunContext"
           },
-          ") => void | Promise<void>"
+          ") => void | Promise<T>"
         ],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,

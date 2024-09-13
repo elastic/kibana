@@ -6,22 +6,29 @@
  */
 
 import expect from '@kbn/expect';
+import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const superTestWithoutAuth = getService('supertestWithoutAuth');
-  const dockerServers = getService('dockerServers');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  const server = dockerServers.get('registry');
   // use function () {} and not () => {} here
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
+
+  const deleteEndpointPackage = async () => {
+    await supertest
+      .delete(`/api/fleet/epm/packages/endpoint/8.6.1`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force: true })
+      .expect(200);
+  };
 
   describe('Package Policy APIs', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -36,13 +43,13 @@ export default function (providerContext: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('get by id', async function () {
+    describe('get by id', function () {
       let agentPolicyId: string;
       let packagePolicyId: string;
       let endpointPackagePolicyId: string;
 
       before(async function () {
-        if (!server.enabled) {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
 
@@ -94,7 +101,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(async function () {
-        if (!server.enabled) {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
 
@@ -110,12 +117,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ packagePolicyIds: [packagePolicyId, endpointPackagePolicyId] })
           .expect(200);
 
-        // uninstall endpoint package
-        await supertest
-          .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ force: true })
-          .expect(200);
+        await deleteEndpointPackage();
       });
 
       it('should succeed with a valid id', async function () {
@@ -151,15 +153,41 @@ export default function (providerContext: FtrProviderContext) {
       it('should return a 404 with an invalid id', async function () {
         await supertest.get(`/api/fleet/package_policies/IS_NOT_PRESENT`).expect(404);
       });
+
+      it('should succeed and return formatted inputs when the format=simplified query param is passed', async function () {
+        const {
+          body: { item },
+        } = await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}?format=simplified`)
+          .expect(200);
+
+        expect(Array.isArray(item.inputs)).to.be(false);
+      });
+
+      it('should succeed and return arrayed inputs when the format=legacy query param is passed', async function () {
+        const {
+          body: { item },
+        } = await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}?format=legacy`)
+          .expect(200);
+
+        expect(Array.isArray(item.inputs));
+      });
+
+      it('should return 400 if an invalid format query param is passed', async function () {
+        await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}?format=foo`)
+          .expect(400);
+      });
     });
 
-    describe('POST /api/fleet/package_policies/_bulk_get', async function () {
+    describe('POST /api/fleet/package_policies/_bulk_get', function () {
       let agentPolicyId: string;
       let packagePolicyId: string;
       let endpointPackagePolicyId: string;
 
       before(async function () {
-        if (!server.enabled) {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
 
@@ -211,7 +239,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(async function () {
-        if (!server.enabled) {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
 
@@ -227,12 +255,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ packagePolicyIds: [packagePolicyId, endpointPackagePolicyId] })
           .expect(200);
 
-        // uninstall endpoint package
-        await supertest
-          .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ force: true })
-          .expect(200);
+        await deleteEndpointPackage();
       });
 
       it('should succeed with valid ids', async function () {
@@ -245,9 +268,10 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(items.length).eql(1);
+        expect(Array.isArray(items[0]));
       });
 
-      it('should return 404 with invvalid ids', async function () {
+      it('should return 404 with invalid ids', async function () {
         await supertest
           .post(`/api/fleet/package_policies/_bulk_get`)
           .set('kbn-xsrf', 'xxxx')
@@ -294,6 +318,40 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(items.length).eql(1);
       });
+
+      it('should succeed and return formatted inputs when the format=simplified query param is passed', async function () {
+        const {
+          body: { items },
+        } = await supertest
+          .post(`/api/fleet/package_policies/_bulk_get?format=simplified`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: [packagePolicyId] })
+          .expect(200);
+
+        expect(items.length).eql(1);
+        expect(Array.isArray(items[0])).to.be(false);
+      });
+
+      it('should succeed and return arrayed inputs when the format=legacy query param is passed', async function () {
+        const {
+          body: { items },
+        } = await supertest
+          .post(`/api/fleet/package_policies/_bulk_get?format=legacy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: [packagePolicyId] })
+          .expect(200);
+
+        expect(items.length).eql(1);
+        expect(Array.isArray(items[0]));
+      });
+
+      it('should return 400 if an invalid format query param is passed', async function () {
+        await supertest
+          .post(`/api/fleet/package_policies/_bulk_get?format=foo`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: [packagePolicyId] })
+          .expect(400);
+      });
     });
 
     describe('get orphaned policies', () => {
@@ -301,7 +359,7 @@ export default function (providerContext: FtrProviderContext) {
       let packagePolicyId: string;
 
       before(async function () {
-        if (!server.enabled) {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
 
@@ -337,14 +395,14 @@ export default function (providerContext: FtrProviderContext) {
         // Delete the agent policy directly from ES to orphan the package policy
         const esClient = getService('es');
         await esClient.delete({
-          index: '.kibana',
+          index: INGEST_SAVED_OBJECT_INDEX,
           id: `ingest-agent-policies:${agentPolicyId}`,
           refresh: 'wait_for',
         });
       });
 
       after(async function () {
-        if (!server.enabled) {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
 
@@ -362,6 +420,90 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body.items).to.have.length(1);
         expect(response.body.items[0].id).to.eql(packagePolicyId);
+      });
+    });
+
+    describe('get by kuery', function () {
+      let agentPolicyId: string;
+      let endpointPackagePolicyId: string;
+
+      before(async function () {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
+          return;
+        }
+
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test policy',
+            namespace: 'default',
+          });
+        agentPolicyId = agentPolicyResponse.item.id;
+
+        const { body: endpointPackagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'endpoint-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [],
+            force: true,
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Defend',
+              version: '8.6.1',
+            },
+          });
+        endpointPackagePolicyId = endpointPackagePolicyResponse.item.id;
+      });
+
+      after(async function () {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
+          return;
+        }
+
+        await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [endpointPackagePolicyId] })
+          .expect(200);
+
+        await deleteEndpointPackage();
+      });
+
+      it('should return 200 if the passed kuery is correct', async () => {
+        const { body: packagePolicyResponse } = await supertest
+          .get(`/api/fleet/package_policies?kuery=ingest-package-policies.package.name:endpoint`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(packagePolicyResponse.items[0].id).to.eql(endpointPackagePolicyId);
+      });
+      it('should return 400 if the passed kuery does not have prefix ingest-package-policies', async () => {
+        await supertest
+          .get(`/api/fleet/package_policies?kuery=package.name:endpoint`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('with enableStrictKQLValidation should return 400 if the passed kuery is not correct', async () => {
+        await supertest
+          .get(
+            `/api/fleet/package_policies?kuery=ingest-package-policies.non_existent_parameter:test`
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('with enableStrictKQLValidation should return 400 if the passed kuery is invalid', async () => {
+        await supertest
+          .get(`/api/fleet/package_policies?kuery='test%3A'`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
       });
     });
   });

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StartInitializer } from '../../../plugin';
 import { RendererFactory } from '../../../../types';
 import { AdvancedFilter } from './component';
@@ -16,7 +16,7 @@ import { RendererStrings } from '../../../../i18n';
 const { advancedFilter: strings } = RendererStrings;
 
 export const advancedFilterFactory: StartInitializer<RendererFactory<{}>> =
-  (core, plugins) => () => ({
+  (core, _plugins) => () => ({
     name: 'advanced_filter',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
@@ -24,12 +24,12 @@ export const advancedFilterFactory: StartInitializer<RendererFactory<{}>> =
     height: 50,
     render(domNode, _, handlers) {
       ReactDOM.render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
+        <KibanaRenderContextProvider {...core}>
           <AdvancedFilter
             commit={(filter) => handlers.event({ name: 'applyFilterAction', data: filter })}
             value={handlers.getFilter()}
           />
-        </KibanaThemeProvider>,
+        </KibanaRenderContextProvider>,
         domNode,
         () => handlers.done()
       );

@@ -4,7 +4,7 @@
     "outDir": "target/types",
     "isolatedModules": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts", ".storybook/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-views-plugin",
@@ -30,6 +30,10 @@
     "@kbn/ebt-tools",
     "@kbn/core-analytics-server",
     "@kbn/storybook",
+    "@kbn/shared-ux-router",
+    "@kbn/core-http-common",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

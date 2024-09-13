@@ -5,12 +5,10 @@
  * 2.0.
  */
 
+import type { NetworkHttpRequestOptions } from '../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
-import type {
-  NetworkHttpRequestOptions,
-  SortField,
-} from '../../../../../../common/search_strategy';
+import type { SortField } from '../../../../../../common/search_strategy';
 
 const getCountAgg = () => ({
   http_count: {
@@ -82,8 +80,8 @@ export const buildHttpQuery = ({
           format: 'strict_date_optional_time',
         },
       ],
+      size: 0,
     },
-    size: 0,
     track_total_hits: false,
   };
 

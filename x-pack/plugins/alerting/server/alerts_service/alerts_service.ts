@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty, isEqual, omit } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { Observable } from 'rxjs';
+import { filter, firstValueFrom, Observable } from 'rxjs';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
@@ -19,7 +19,13 @@ import {
   getComponentTemplateName,
   getIndexTemplateAndPattern,
 } from './resource_installer_utils';
-import { IRuleTypeAlerts } from '../types';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  IRuleTypeAlerts,
+  RuleAlertData,
+  DataStreamAdapter,
+} from '../types';
 import {
   createResourceInstallationHelper,
   errorResult,
@@ -34,7 +40,12 @@ import {
   createOrUpdateIndexTemplate,
   createConcreteWriteIndex,
   installWithTimeout,
+  InstallShutdownError,
 } from './lib';
+import type { LegacyAlertsClientParams, AlertRuleData } from '../alerts_client';
+import { AlertsClient } from '../alerts_client';
+import { IAlertsClient } from '../alerts_client/types';
+import { setAlertsToUntracked, SetAlertsToUntrackedParams } from './lib/set_alerts_to_untracked';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
@@ -46,8 +57,14 @@ interface AlertsServiceParams {
   kibanaVersion: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   timeoutMs?: number;
+  dataStreamAdapter: DataStreamAdapter;
+  elasticsearchAndSOAvailability$: Observable<boolean>;
 }
 
+export interface CreateAlertsClientParams extends LegacyAlertsClientParams {
+  namespace: string;
+  rule: AlertRuleData;
+}
 interface IAlertsService {
   /**
    * Register solution specific resources. If common resource initialization is
@@ -73,6 +90,27 @@ interface IAlertsService {
     context: string,
     namespace: string
   ): Promise<InitializationPromise>;
+
+  /**
+   * If the rule type has registered an alert context, initialize and return an AlertsClient,
+   * otherwise return null. Currently registering an alert context is optional but in the future
+   * we will make it a requirement for all rule types and this function should not return null.
+   */
+  createAlertsClient<
+    AlertData extends RuleAlertData,
+    LegacyState extends AlertInstanceState,
+    LegacyContext extends AlertInstanceContext,
+    ActionGroupIds extends string,
+    RecoveryActionGroupId extends string
+  >(
+    opts: CreateAlertsClientParams
+  ): Promise<IAlertsClient<
+    AlertData,
+    LegacyState,
+    LegacyContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  > | null>;
 }
 
 export type PublicAlertsService = Pick<IAlertsService, 'getContextInitializationPromise'>;
@@ -82,15 +120,22 @@ export type PublicFrameworkAlertsService = PublicAlertsService & {
 
 export class AlertsService implements IAlertsService {
   private initialized: boolean;
+  private isInitializing: boolean = false;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private registeredContexts: Map<string, IRuleTypeAlerts> = new Map();
   private commonInitPromise: Promise<InitializationPromise>;
+  private dataStreamAdapter: DataStreamAdapter;
 
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
 
+    this.dataStreamAdapter = options.dataStreamAdapter;
+
     // Kick off initialization of common assets and save the promise
-    this.commonInitPromise = this.initializeCommon(this.options.timeoutMs);
+    this.commonInitPromise = this.initializeCommon(
+      this.options.elasticsearchAndSOAvailability$,
+      this.options.timeoutMs
+    );
 
     // Create helper for initializing context-specific resources
     this.resourceInitializationHelper = createResourceInstallationHelper(
@@ -102,6 +147,101 @@ export class AlertsService implements IAlertsService {
 
   public isInitialized() {
     return this.initialized;
+  }
+
+  public async createAlertsClient<
+    AlertData extends RuleAlertData,
+    LegacyState extends AlertInstanceState,
+    LegacyContext extends AlertInstanceContext,
+    ActionGroupIds extends string,
+    RecoveryActionGroupId extends string
+  >(
+    opts: CreateAlertsClientParams
+  ): Promise<IAlertsClient<
+    AlertData,
+    LegacyState,
+    LegacyContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  > | null> {
+    if (!opts.ruleType.alerts) {
+      return null;
+    }
+
+    // Check if context specific installation has succeeded
+    const { result: initialized, error } = await this.getContextInitializationPromise(
+      opts.ruleType.alerts.context,
+      opts.namespace
+    );
+
+    // If initialization failed, retry
+    if (!initialized && error) {
+      let initPromise: Promise<InitializationPromise> | undefined;
+
+      // If !this.initialized, we know that common resource initialization failed
+      // and we need to retry this before retrying the context specific resources
+      // However, if this.isInitializing, then the alerts service is in the process
+      // of retrying common installation, so we don't want to kick off another retry
+      if (!this.initialized) {
+        if (!this.isInitializing) {
+          this.options.logger.info(`Retrying common resource initialization`);
+          initPromise = this.initializeCommon(
+            this.options.elasticsearchAndSOAvailability$,
+            this.options.timeoutMs
+          );
+        } else {
+          this.options.logger.info(
+            `Skipped retrying common resource initialization because it is already being retried.`
+          );
+        }
+      }
+
+      this.resourceInitializationHelper.retry(
+        opts.ruleType.alerts as IRuleTypeAlerts,
+        opts.namespace,
+        initPromise
+      );
+
+      const retryResult = await this.resourceInitializationHelper.getInitializedContext(
+        opts.ruleType.alerts.context,
+        opts.ruleType.alerts.isSpaceAware ? opts.namespace : DEFAULT_NAMESPACE_STRING
+      );
+
+      if (!retryResult.result) {
+        const errorLogPrefix = `There was an error in the framework installing namespace-level resources and creating concrete indices for context "${opts.ruleType.alerts.context}" - `;
+        // Retry also failed
+        this.options.logger.warn(
+          retryResult.error === error
+            ? `${errorLogPrefix}Retry failed with error: ${error}`
+            : `${errorLogPrefix}Original error: ${error}; Error after retry: ${retryResult.error}`
+        );
+        return null;
+      } else {
+        this.options.logger.info(
+          `Resource installation for "${opts.ruleType.alerts.context}" succeeded after retry`
+        );
+      }
+    }
+
+    // TODO - when we replace the LegacyAlertsClient, we will need to decide whether to
+    // initialize the AlertsClient even if alert resource installation failed. That would allow
+    // us to detect alerts and trigger notifications even if we can't persist the alerts
+    // (partial rule failure vs failing the entire rule execution).
+    return new AlertsClient<
+      AlertData,
+      LegacyState,
+      LegacyContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >({
+      logger: this.options.logger,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+      ruleType: opts.ruleType,
+      namespace: opts.namespace,
+      rule: opts.rule,
+      kibanaVersion: this.options.kibanaVersion,
+      dataStreamAdapter: this.dataStreamAdapter,
+    });
   }
 
   public async getContextInitializationPromise(
@@ -143,14 +283,14 @@ export class AlertsService implements IAlertsService {
     // check whether this context has been registered before
     if (this.registeredContexts.has(context)) {
       const registeredOptions = this.registeredContexts.get(context);
-      if (!isEqual(opts, registeredOptions)) {
+      if (!isEqual(omit(opts, 'shouldWrite'), omit(registeredOptions, 'shouldWrite'))) {
         throw new Error(`${context} has already been registered with different options`);
       }
       this.options.logger.debug(`Resources for context "${context}" have already been registered.`);
       return;
     }
 
-    this.options.logger.info(`Registering resources for context "${context}".`);
+    this.options.logger.debug(`Registering resources for context "${context}".`);
     this.registeredContexts.set(context, opts);
 
     // When a context is registered, we install resources in the default namespace by default
@@ -162,7 +302,16 @@ export class AlertsService implements IAlertsService {
    * - ILM policy - common policy shared by all AAD indices
    * - Component template - common mappings for fields populated and used by the framework
    */
-  private async initializeCommon(timeoutMs?: number): Promise<InitializationPromise> {
+  private async initializeCommon(
+    elasticsearchAndSOAvailability$: Observable<boolean>,
+    timeoutMs?: number
+  ): Promise<InitializationPromise> {
+    this.isInitializing = true;
+    // Wait to install resources until ES is ready
+    await firstValueFrom(
+      elasticsearchAndSOAvailability$.pipe(filter((areESAndSOAvailable) => areESAndSOAvailable))
+    );
+
     try {
       this.options.logger.debug(`Initializing resources for AlertsService`);
       const esClient = await this.options.elasticsearchClientPromise;
@@ -175,6 +324,7 @@ export class AlertsService implements IAlertsService {
             esClient,
             name: DEFAULT_ALERTS_ILM_POLICY_NAME,
             policy: DEFAULT_ALERTS_ILM_POLICY,
+            dataStreamAdapter: this.dataStreamAdapter,
           }),
         () =>
           createOrUpdateComponentTemplate({
@@ -220,12 +370,19 @@ export class AlertsService implements IAlertsService {
       );
 
       this.initialized = true;
+      this.isInitializing = false;
       return successResult();
     } catch (err) {
-      this.options.logger.error(
-        `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted. - ${err.message}`
-      );
+      if (err instanceof InstallShutdownError) {
+        this.options.logger.debug(err.message);
+      } else {
+        this.options.logger.error(
+          `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted. - ${err.message}`
+        );
+      }
+
       this.initialized = false;
+      this.isInitializing = false;
       return errorResult(err.message);
     }
   }
@@ -298,6 +455,7 @@ export class AlertsService implements IAlertsService {
             kibanaVersion: this.options.kibanaVersion,
             namespace,
             totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            dataStreamAdapter: this.dataStreamAdapter,
           }),
         }),
       async () =>
@@ -306,6 +464,7 @@ export class AlertsService implements IAlertsService {
           esClient,
           totalFieldsLimit: TOTAL_FIELDS_LIMIT,
           indexPatterns: indexTemplateAndPattern,
+          dataStreamAdapter: this.dataStreamAdapter,
         }),
     ]);
 
@@ -320,5 +479,13 @@ export class AlertsService implements IAlertsService {
         timeoutMs,
       });
     }
+  }
+
+  public async setAlertsToUntracked(opts: SetAlertsToUntrackedParams) {
+    return setAlertsToUntracked({
+      logger: this.options.logger,
+      esClient: await this.options.elasticsearchClientPromise,
+      ...opts,
+    });
   }
 }

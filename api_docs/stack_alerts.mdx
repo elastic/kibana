@@ -8,7 +8,7 @@ slug: /kibana-dev-docs/api/stackAlerts
 title: "stackAlerts"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the stackAlerts plugin
-date: 2023-04-18
+date: 2024-09-13
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'stackAlerts']
 ---
 import stackAlertsObj from './stack_alerts.devdocs.json';
@@ -21,7 +21,12 @@ Contact [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-o
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 12 | 0 | 12 | 2 |
+| 25 | 0 | 25 | 3 |
+
+## Client
+
+### Functions
+<DocDefinitionList data={stackAlertsObj.client.functions}/>
 
 ## Server
 
@@ -38,6 +43,9 @@ Contact [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-o
 
 ### Functions
 <DocDefinitionList data={stackAlertsObj.common.functions}/>
+
+### Interfaces
+<DocDefinitionList data={stackAlertsObj.common.interfaces}/>
 
 ### Consts, variables and types
 <DocDefinitionList data={stackAlertsObj.common.misc}/>

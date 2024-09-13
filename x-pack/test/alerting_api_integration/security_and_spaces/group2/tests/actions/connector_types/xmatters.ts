@@ -7,6 +7,7 @@
 
 import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import {
@@ -14,12 +15,14 @@ import {
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function xmattersTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
+  const retry = getService('retry');
 
   describe('xmatters action', () => {
     let simulatedActionId = '';
@@ -61,6 +64,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'An xmatters action',
         connector_type_id: '.xmatters',
@@ -95,6 +99,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'An xmatters action',
         connector_type_id: '.xmatters',
@@ -178,6 +183,23 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           spaceId: '',
         },
       });
+
+      const events: IValidatedEvent[] = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: 'default',
+          type: 'action',
+          id: simulatedActionId,
+          provider: 'actions',
+          actions: new Map([
+            ['execute-start', { gte: 1 }],
+            ['execute', { gte: 1 }],
+          ]),
+        });
+      });
+
+      const executeEvent = events[1];
+      expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(130);
     });
 
     it('should handle a 40x xmatters error', async () => {

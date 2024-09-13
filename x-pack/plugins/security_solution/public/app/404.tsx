@@ -8,13 +8,13 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiEmptyPrompt, EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 
 export const NotFoundPage = React.memo(() => (
   <SecuritySolutionPageWrapper>
-    <EuiPageTemplate template="centeredContent">
-      <EuiEmptyPrompt
+    <EuiPageTemplate>
+      <EuiPageTemplate.EmptyPrompt
         data-test-subj="notFoundPage"
         iconColor="default"
         iconType="logoElastic"

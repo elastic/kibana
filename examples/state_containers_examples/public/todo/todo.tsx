@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { Link, Router, Switch, useLocation } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Link, useLocation } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import {
   EuiButton,
   EuiCheckbox,
   EuiFieldText,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
@@ -202,9 +203,9 @@ export const TodoAppPage: React.FC<{
             </EuiText>
           </EuiPageHeaderSection>
         </EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody>
-            <Switch>
+        <EuiPageTemplate.Section>
+          <EuiPageSection>
+            <Routes>
               <Route path={'/completed'}>
                 <TodoApp filter={'completed'} stateContainer={stateContainer} />
               </Route>
@@ -214,7 +215,7 @@ export const TodoAppPage: React.FC<{
               <Route path={'/'}>
                 <TodoApp filter={null} stateContainer={stateContainer} />
               </Route>
-            </Switch>
+            </Routes>
             <EuiSpacer size={'xxl'} />
             <EuiText size={'s'}>
               <p>Most of kibana apps persist state in the URL in two ways:</p>
@@ -233,8 +234,8 @@ export const TodoAppPage: React.FC<{
             <EuiButton onClick={() => setUseHashedUrl(!useHashedUrl)}>
               {useHashedUrl ? 'Use Expanded State' : 'Use Hashed State'}
             </EuiButton>
-          </EuiPageContentBody>
-        </EuiPageContent>
+          </EuiPageSection>
+        </EuiPageTemplate.Section>
       </EuiPageBody>
     </Router>
   );

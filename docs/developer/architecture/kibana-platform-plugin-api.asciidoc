@@ -44,14 +44,14 @@ plugin and to specify if this plugin has server-side code, browser-side code, or
 }
 ----
 
-Learn about the {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[manifest
+Learn about the {kib-repo}blob/{branch}/packages/core/plugins/core-plugins-server/src/types.ts[manifest
 file format].
 
 NOTE: `package.json` files are irrelevant to and ignored by {kib} for discovering and loading plugins.
 
 *[2] `public/index.ts`* is the entry point into the client-side code of
 this plugin. It must export a function named `plugin`, which will
-receive {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.plugininitializercontext.md[a standard set of core capabilities] as an argument.
+receive {kib-repo}blob/{branch}/packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts[a standard set of core capabilities] as an argument.
 It should return an instance of its plugin class for
 {kib} to load.
 
@@ -93,16 +93,16 @@ export class MyPlugin implements Plugin {
 ----
 
 *[4] `server/index.ts`* is the entry-point into the server-side code of
-this plugin. {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.md[It is identical] in almost every way to the client-side
+this plugin. {kib-repo}blob/{branch}/packages/core/plugins/core-plugins-server/src/types.ts[It is identical] in almost every way to the client-side
 entry-point:
 
 
 [source,typescript]
 ----
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { MyPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { MyPlugin } = await import('./plugin');
   return new MyPlugin(initializerContext);
 }
 ----
@@ -221,16 +221,16 @@ These are the contracts exposed by the core services for each lifecycle:
 |===
 |lifecycle |server contract|browser contract
 |_constructor_
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.md[PluginInitializerContext]
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.plugininitializercontext.md[PluginInitializerContext]
+|{kib-repo}blob/{branch}/packages/core/plugins/core-plugins-server/src/types.ts[PluginInitializerContext]
+|{kib-repo}blob/{branch}/packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts[PluginInitializerContext]
 
 |_setup_
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.coresetup.md[CoreSetup]
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.coresetup.md[CoreSetup]
+|{kib-repo}blob/{branch}/packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts[CoreSetup]
+|{kib-repo}blob/{branch}/packages/core/lifecycle/core-lifecycle-browser-internal/src/internal_core_setup.ts[CoreSetup]
 
 |_start_
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.corestart.md[CoreStart]
-|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.corestart.md[CoreStart]
+|{kib-repo}blob/{branch}/packages/core/lifecycle/core-lifecycle-server/src/core_start.ts[CoreStart]
+|{kib-repo}blob/{branch}/packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts[CoreStart]
 
 |_stop_ |
 |===
@@ -283,7 +283,7 @@ export class MyPlugin implements Plugin<FoobarPluginSetup, FoobarPluginStart> {
 Unlike core, capabilities exposed by plugins are _not_ automatically
 injected into all plugins. Instead, if a plugin wishes to use the public
 interface provided by another plugin, it must first declare that
-plugin as a dependency in it's {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`kibana.json`] manifest file.
+plugin as a dependency in it's {kib-repo}blob/{branch}/packages/core/plugins/core-plugins-server/src/types.ts[`kibana.json`] manifest file.
 
 *demo kibana.json:*
 

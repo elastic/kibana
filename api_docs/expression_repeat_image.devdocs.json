@@ -16,9 +16,9 @@
           "<",
           {
             "pluginId": "@kbn/core-theme-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.CoreTheme",
+            "section": "def-public.CoreTheme",
             "text": "CoreTheme"
           },
           ">) => () => ",
@@ -55,9 +55,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
+                "section": "def-public.CoreTheme",
                 "text": "CoreTheme"
               },
               ">"
@@ -82,9 +82,9 @@
           "(core: ",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreSetup",
+            "section": "def-public.CoreSetup",
             "text": "CoreSetup"
           },
           "<object, unknown>) => () => ",
@@ -119,9 +119,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>"
@@ -192,7 +192,7 @@
         "label": "repeatImageFunction",
         "description": [],
         "signature": [
-          "() => { name: \"repeatImage\"; aliases: never[]; type: \"render\"; inputTypes: \"number\"[]; help: any; args: { emptyImage: { types: (\"string\" | \"null\")[]; help: any; default: null; }; image: { types: (\"string\" | \"null\")[]; help: any; default: null; }; max: { types: (\"number\" | \"null\")[]; help: any; default: number; }; size: { types: \"number\"[]; default: number; help: any; }; }; fn: (count: number, args: Arguments) => Promise<{ type: \"render\"; as: string; value: { image: string | null; emptyImage: string | null; size: number; max: number | null; count: number; }; }>; }"
+          "() => { name: \"repeatImage\"; aliases: never[]; type: \"render\"; inputTypes: \"number\"[]; help: string; args: { emptyImage: { types: (\"string\" | \"null\")[]; help: string; default: null; }; image: { types: (\"string\" | \"null\")[]; help: string; default: null; }; max: { types: (\"number\" | \"null\")[]; help: string; default: number; }; size: { types: \"number\"[]; default: number; help: string; }; }; fn: (count: number, args: Arguments) => Promise<{ type: \"render\"; as: string; value: { image: string | null; emptyImage: string | null; size: number; max: number | null; count: number; }; }>; }"
         ],
         "path": "src/plugins/expression_repeat_image/common/expression_functions/repeat_image_function.ts",
         "deprecated": false,
@@ -453,14 +453,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
@@ -500,7 +492,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"top\" | \"bottom\""
+          "\"right\" | \"top\" | \"bottom\" | \"left\""
         ],
         "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,

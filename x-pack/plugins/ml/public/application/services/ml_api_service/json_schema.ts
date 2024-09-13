@@ -7,9 +7,9 @@
 
 import { omitBy } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import { type SupportedPath } from '../../../../common/api_schemas/json_schema_schema';
-import { HttpService } from '../http_service';
-import { basePath } from '.';
+import type { HttpService } from '../http_service';
 
 export interface GetSchemaDefinitionParams {
   path: SupportedPath;
@@ -17,14 +17,13 @@ export interface GetSchemaDefinitionParams {
 }
 
 export function jsonSchemaProvider(httpService: HttpService) {
-  const apiBasePath = basePath();
-
   return {
     getSchemaDefinition(params: GetSchemaDefinitionParams) {
       return httpService.http<object>({
-        path: `${apiBasePath}/json_schema`,
+        path: `${ML_INTERNAL_BASE_PATH}/json_schema`,
         method: 'GET',
         query: omitBy(params, (v) => !isDefined(v)),
+        version: '1',
       });
     },
   };

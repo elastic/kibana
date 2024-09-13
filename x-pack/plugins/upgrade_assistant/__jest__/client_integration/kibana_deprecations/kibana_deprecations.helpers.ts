@@ -64,7 +64,7 @@ const createActions = (testBed: TestBed) => {
         find('kibanaDeprecations')
           .find('.euiSearchBar__filtersHolder')
           .find('.euiPopover')
-          .find('.euiFilterButton')
+          .find('button.euiFilterButton')
           .at(0)
           .simulate('click');
       });
@@ -77,7 +77,7 @@ const createActions = (testBed: TestBed) => {
         // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
         find('kibanaDeprecations')
           .find('.euiSearchBar__filtersHolder')
-          .find('.euiFilterButton')
+          .find('button.euiFilterButton')
           .at(0)
           .simulate('click');
       });

@@ -7,7 +7,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, RouteComponentProps } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route } from '@kbn/shared-ux-router';
 
 import { EuiPage, EuiText } from '@elastic/eui';
@@ -24,7 +25,7 @@ const AlertingExampleApp = (deps: AlertingExampleComponentParams) => {
       <EuiPage>
         <Route
           path={`/rule/:id`}
-          render={(props: RouteComponentProps<{ id: string }>) => {
+          render={(props) => {
             return (
               <EuiText data-test-subj="noop-title">
                 <h2>View Rule {props.match.params.id}</h2>
@@ -42,7 +43,12 @@ export const renderApp = (
   deps: any,
   { appBasePath, element }: AppMountParameters
 ) => {
-  ReactDOM.render(<AlertingExampleApp basename={appBasePath} {...deps} />, element);
+  ReactDOM.render(
+    <KibanaRenderContextProvider {...core}>
+      <AlertingExampleApp basename={appBasePath} {...deps} />
+    </KibanaRenderContextProvider>,
+    element
+  );
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

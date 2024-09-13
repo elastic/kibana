@@ -6,24 +6,66 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiText,
+  EuiButtonIcon,
+  EuiScreenReaderOnly,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
   RuleExecutionResult,
   RuleExecutionStatus,
-} from '../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../common/api/detection_engine/rule_monitoring';
 
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
+import {
+  RULE_EXECUTION_TYPE_BACKFILL,
+  RULE_EXECUTION_TYPE_STANDARD,
+} from '../../../../../common/translations';
 import { ExecutionStatusIndicator } from '../../../../rule_monitoring';
 import { PopoverTooltip } from '../../../../rule_management_ui/components/rules_table/popover_tooltip';
 import { TableHeaderTooltipCell } from '../../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 import { RuleDurationFormat } from './rule_duration_format';
 
 import * as i18n from './translations';
+
+type TableColumn = EuiBasicTableColumn<RuleExecutionResult>;
+
+interface UseColumnsArgs {
+  toggleRowExpanded: (item: RuleExecutionResult) => void;
+  isRowExpanded: (item: RuleExecutionResult) => boolean;
+}
+
+export const expanderColumn = ({
+  toggleRowExpanded,
+  isRowExpanded,
+}: UseColumnsArgs): TableColumn => {
+  return {
+    align: RIGHT_ALIGNMENT,
+    width: '40px',
+    isExpander: true,
+    name: (
+      <EuiScreenReaderOnly>
+        <span>{i18n.EXPAND_ROW}</span>
+      </EuiScreenReaderOnly>
+    ),
+    render: (item: RuleExecutionResult) =>
+      item.security_status === 'succeeded' ? null : (
+        <EuiButtonIcon
+          onClick={() => toggleRowExpanded(item)}
+          aria-label={isRowExpanded(item) ? i18n.COLLAPSE : i18n.EXPAND}
+          iconType={isRowExpanded(item) ? 'arrowUp' : 'arrowDown'}
+        />
+      ),
+  };
+};
 
 export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<RuleExecutionResult>> = [
   {
@@ -40,6 +82,19 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<RuleExecutionResul
     sortable: false,
     truncateText: false,
     width: '10%',
+  },
+  {
+    name: i18n.COLUMN_TYPE,
+    field: 'type',
+    sortable: false,
+    width: '10%',
+    render: (value, record) => {
+      return (
+        <EuiText size="s">
+          {record.backfill ? RULE_EXECUTION_TYPE_BACKFILL : RULE_EXECUTION_TYPE_STANDARD}
+        </EuiText>
+      );
+    },
   },
   {
     field: 'timestamp',
@@ -69,22 +124,67 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<RuleExecutionResul
     truncateText: false,
     width: '10%',
   },
+];
+
+export const getMessageColumn = (width: string) => ({
+  field: 'security_message',
+  name: (
+    <TableHeaderTooltipCell
+      title={i18n.COLUMN_MESSAGE}
+      tooltipContent={i18n.COLUMN_MESSAGE_TOOLTIP}
+    />
+  ),
+  render: (value: string, record: RuleExecutionResult) => {
+    if (record.security_status === 'succeeded') {
+      return value;
+    }
+
+    return (
+      <div
+        css={css`
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        `}
+      >
+        {value}
+      </div>
+    );
+  },
+  sortable: false,
+  width,
+});
+
+export const getSourceEventTimeRangeColumns = () => [
   {
-    field: 'security_message',
     name: (
       <TableHeaderTooltipCell
-        title={i18n.COLUMN_MESSAGE}
-        tooltipContent={i18n.COLUMN_MESSAGE_TOOLTIP}
+        title={i18n.COLUMN_SOURCE_EVENT_TIME_RANGE}
+        tooltipContent={i18n.COLUMN_SOURCE_EVENT_TIME_RANGE_TOOLTIP}
       />
     ),
-    render: (value: string) => <>{value}</>,
-    sortable: false,
-    truncateText: false,
-    width: '35%',
+    field: 'backfill',
+    render: (backfill: { to: string; from: string }) => {
+      return backfill ? (
+        <div>
+          <div>
+            <FormattedDate value={backfill.from} fieldName="backfill.from" />
+          </div>
+          <EuiText textAlign="center">{'-'}</EuiText>
+          <div>
+            <FormattedDate value={backfill.to} fieldName="backfill.to" />
+          </div>
+        </div>
+      ) : (
+        getEmptyValue()
+      );
+    },
+    width: '20%',
   },
 ];
 
-export const GET_EXECUTION_LOG_METRICS_COLUMNS = (
+export const getExecutionLogMetricsColumns = (
   docLinks: DocLinksStart
 ): Array<EuiBasicTableColumn<RuleExecutionResult>> => [
   {

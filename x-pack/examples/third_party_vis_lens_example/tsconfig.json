@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/expressions-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/data-views-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/lens-plugin",

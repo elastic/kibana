@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import type { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
-import type { BrowserField } from '../../containers/source';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
-export type EventFieldsData = BrowserField & TimelineEventsDetailsItem;
+export type EventFieldsData = FieldSpec & TimelineEventsDetailsItem;
 
 export interface FieldsData {
   field: string;
@@ -18,17 +16,6 @@ export interface FieldsData {
   type: string;
   isObjectArray: boolean;
 }
-
-export interface EnrichedFieldInfo {
-  data: FieldsData | EventFieldsData;
-  eventId: string;
-  fieldFromBrowserField?: BrowserField;
-  scopeId: string;
-  values: string[] | null | undefined;
-  linkValue?: string;
-}
-
-export type EnrichedFieldInfoWithValues = EnrichedFieldInfo & { values: string[] };
 
 export interface EventSummaryField {
   id: string;
@@ -38,29 +25,3 @@ export interface EventSummaryField {
   fieldType?: string;
   overrideField?: string;
 }
-
-export interface RawEventData {
-  fields: ParsedTechnicalFields;
-  _id: string;
-}
-
-export interface ExpandedEventFieldsObject {
-  agent?: {
-    id: string[];
-  };
-  kibana: {
-    alert?: {
-      rule?: {
-        parameters: RuleParameters;
-        name: string[];
-      };
-    };
-  };
-}
-
-type RuleParameters = Array<{
-  response_actions: Array<{
-    action_type_id: RESPONSE_ACTION_TYPES;
-    params: Record<string, unknown>;
-  }>;
-}>;

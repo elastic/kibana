@@ -21,9 +21,9 @@ export default function indexTest({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('index connector', () => {
-    beforeEach(() => {
-      esDeleteAllIndices(ES_TEST_INDEX_NAME);
-      esDeleteAllIndices(ES_TEST_DATASTREAM_INDEX_NAME);
+    beforeEach(async () => {
+      await esDeleteAllIndices(ES_TEST_INDEX_NAME);
+      await esDeleteAllIndices(ES_TEST_DATASTREAM_INDEX_NAME);
     });
 
     after(async () => {
@@ -57,6 +57,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         id: createdConnector.id,
         is_preconfigured: false,
         is_deprecated: false,
+        is_system_action: false,
         name: 'An index connector',
         connector_type_id: '.index',
         is_missing_secrets: false,
@@ -78,6 +79,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         is_preconfigured: false,
         is_deprecated: false,
         is_missing_secrets: false,
+        is_system_action: false,
         name: 'An index connector',
         connector_type_id: '.index',
         config: { index: ES_TEST_INDEX_NAME, refresh: false, executionTimeField: null },
@@ -102,6 +104,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         id: createdConnectorWithIndex.id,
         is_preconfigured: false,
         is_deprecated: false,
+        is_system_action: false,
         name: 'An index connector with index config',
         connector_type_id: '.index',
         is_missing_secrets: false,
@@ -122,6 +125,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         id: fetchedConnectorWithIndex.id,
         is_preconfigured: false,
         is_deprecated: false,
+        is_system_action: false,
         name: 'An index connector with index config',
         connector_type_id: '.index',
         is_missing_secrets: false,

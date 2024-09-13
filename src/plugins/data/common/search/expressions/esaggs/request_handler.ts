@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { defer } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter, TimeRange } from '@kbn/es-query';
@@ -30,7 +32,7 @@ export interface RequestHandlerParams {
   searchSourceService: ISearchStartSearchSource;
   timeFields?: string[];
   timeRange?: TimeRange;
-  disableShardWarnings?: boolean;
+  disableWarningToasts?: boolean;
   getNow?: () => Date;
   executionContext?: KibanaExecutionContext;
   title?: string;
@@ -48,7 +50,7 @@ export const handleRequest = ({
   searchSourceService,
   timeFields,
   timeRange,
-  disableShardWarnings,
+  disableWarningToasts,
   getNow,
   executionContext,
   title,
@@ -110,7 +112,7 @@ export const handleRequest = ({
       requestSearchSource
         .fetch$({
           abortSignal,
-          disableShardFailureWarning: disableShardWarnings,
+          disableWarningToasts,
           sessionId: searchSessionId,
           inspector: {
             adapter: inspectorAdapters.requests,

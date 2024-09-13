@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getIndexForTypeMock } from './unknown_object_types.test.mocks';
@@ -12,7 +13,7 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { deleteUnknownTypeObjects, getUnknownTypesDeprecations } from './unknown_object_types';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { type SavedObjectsType, MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 const createAggregateTypesSearchResponse = (
   typesIds: Record<string, string[]> = {}
@@ -50,7 +51,7 @@ describe('unknown saved object types deprecation', () => {
 
   let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
   let esClient: ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>;
-  const kibanaIndex = '.kibana';
+  const kibanaIndex = MAIN_SAVED_OBJECT_INDEX;
 
   beforeEach(() => {
     typeRegistry = typeRegistryMock.create();

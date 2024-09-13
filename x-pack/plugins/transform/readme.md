@@ -122,7 +122,7 @@ With PATH_TO_CONFIG and other options as follows.
     edit, clone | `test/functional/apps/transform/edit_clone/config.ts`
     feature controls | `test/functional/apps/transform/feature_controls/config.ts`
     permissions | `test/functional/apps/transform/permissions/config.ts`
-    start, reset, delete | `test/functional/apps/transform/start_reset_delete/config.ts`
+    actions | `test/functional/apps/transform/actions/config.ts`
 
 1.  Functional UI tests with `Basic` license:
 
@@ -133,7 +133,7 @@ With PATH_TO_CONFIG and other options as follows.
     edit, clone | `test/functional_basic/apps/transform/edit_clone/config.ts`
     feature controls | `test/functional_basic/apps/transform/feature_controls/config.ts`
     permissions | `test/functional_basic/apps/transform/permissions/config.ts`
-    start, reset, delete | `test/functional_basic/apps/transform/start_reset_delete/config.ts`
+    actions | `test/functional_basic/apps/transform/actions/config.ts`
 
 1. API integration tests with `Trial` license:
 
@@ -151,4 +151,4 @@ With PATH_TO_CONFIG and other options as follows.
          node scripts/functional_tests_server --config test/accessibility/config.ts
          node scripts/functional_test_runner.js --config test/accessibility/config.ts --grep=transform
 
-    Transform accessibility tests are located in `x-pack/test/accessibility/apps`.
+    Transform accessibility tests are located in `x-pack/test/accessibility/apps/group2`.

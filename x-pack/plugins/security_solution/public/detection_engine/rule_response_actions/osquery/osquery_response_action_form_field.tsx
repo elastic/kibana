@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type {
+  FieldHook,
+  ValidationError,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty, map } from 'lodash';
+import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useKibana } from '../../../common/lib/kibana';
 
 export const ResponseActionFormField = React.memo(({ field }: { field: FieldHook }) => {
-  const { setErrors, clearErrors, value, setValue } = field;
+  const { clearErrors, value, setValue, path } = field;
   const { osquery } = useKibana().services;
+  const context = useFormContext();
 
   const OsqueryForm = useMemo(
     () => osquery?.OsqueryResponseActionTypeForm,
@@ -20,14 +25,15 @@ export const ResponseActionFormField = React.memo(({ field }: { field: FieldHook
   );
 
   const handleError = useCallback(
-    (newErrors) => {
+    (newErrors: ValidationError) => {
       if (isEmpty(newErrors)) {
         clearErrors();
       } else {
-        setErrors(map(newErrors, (error) => ({ message: error.message })));
+        const errors = map(newErrors, (error) => ({ message: error.message }));
+        context.setFieldErrors(path, errors);
       }
     },
-    [setErrors, clearErrors]
+    [clearErrors, context, path]
   );
 
   // @ts-expect-error update types

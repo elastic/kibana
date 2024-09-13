@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // @ts-expect-error
 import fetchMock from 'fetch-mock/es5/client';
 import * as Rx from 'rxjs';
-import { takeUntil, toArray } from 'rxjs/operators';
+import { takeUntil, toArray } from 'rxjs';
 
 import { setup as httpSetup } from '@kbn/core-test-helpers-http-setup-browser';
 import { UiSettingsApi } from './ui_settings_api';
@@ -343,5 +344,47 @@ describe('#stop', () => {
       [0, 1],
     ]);
     await batchSetPromise;
+  });
+});
+
+describe('#validate', () => {
+  it('sends a validation request', async () => {
+    fetchMock.mock('*', {
+      body: { errorMessage: 'Test validation error message.' },
+    });
+
+    const { uiSettingsApi } = setup();
+    await uiSettingsApi.validate('foo', 'bar');
+    expect(fetchMock.calls()).toMatchSnapshot('validation request');
+  });
+
+  it('rejects on 404 response', async () => {
+    fetchMock.mock('*', {
+      status: 404,
+      body: 'not found',
+    });
+
+    const { uiSettingsApi } = setup();
+    await expect(uiSettingsApi.validate('foo', 'bar')).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  it('rejects on 301', async () => {
+    fetchMock.mock('*', {
+      status: 301,
+      body: 'redirect',
+    });
+
+    const { uiSettingsApi } = setup();
+    await expect(uiSettingsApi.validate('foo', 'bar')).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  it('rejects on 500', async () => {
+    fetchMock.mock('*', {
+      status: 500,
+      body: 'redirect',
+    });
+
+    const { uiSettingsApi } = setup();
+    await expect(uiSettingsApi.validate('foo', 'bar')).rejects.toThrowErrorMatchingSnapshot();
   });
 });

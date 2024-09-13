@@ -13,8 +13,8 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageHeader,
+  EuiPageSection,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { Role, User } from '../../../../common/model';
+import type { Role, User } from '../../../../common';
 import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
 import { RoleTableDisplay } from '../../role_table_display';
 import type { RolesAPIClient } from '../../roles';
@@ -85,7 +85,7 @@ export class UsersGridPage extends Component<Props, State> {
     if (permissionDenied) {
       return (
         <EuiFlexGroup gutterSize="none">
-          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+          <EuiPageSection alignment="center" color="danger">
             <EuiEmptyPrompt
               iconType="securityApp"
               title={
@@ -105,7 +105,7 @@ export class UsersGridPage extends Component<Props, State> {
                 </p>
               }
             />
-          </EuiPageContent>
+          </EuiPageSection>
         </EuiFlexGroup>
       );
     }
@@ -282,7 +282,6 @@ export class UsersGridPage extends Component<Props, State> {
             search={search}
             sorting={sorting}
             rowProps={rowProps}
-            isSelectable
           />
         }
       </>

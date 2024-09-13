@@ -5,35 +5,73 @@
  * 2.0.
  */
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import type { RequestHandler, RouteConfig, KibanaRequest } from '@kbn/core/server';
+import type { IRouter, RouteMethod, RequestHandler, KibanaRequest } from '@kbn/core/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { RouterMock } from '@kbn/core-http-router-server-mocks';
+import type { AddVersionOpts, VersionedRouteConfig } from '@kbn/core-http-server';
 
 import { requestMock } from './request';
 import { responseMock as responseFactoryMock } from './response';
 import { requestContextMock } from './request_context';
 import { responseAdapter } from './test_adapters';
+import { INTERNAL_API_VERSION } from '../../common/constants';
 
 interface Route {
-  config: RouteConfig<unknown, unknown, unknown, 'get' | 'post' | 'delete' | 'patch' | 'put'>;
+  config: AddVersionOpts<unknown, unknown, unknown>;
   handler: RequestHandler;
 }
 
-const getRoute = (routerMock: MockServer['router']): Route => {
-  const routeCalls = [
-    ...routerMock.get.mock.calls,
-    ...routerMock.post.mock.calls,
-    ...routerMock.put.mock.calls,
-    ...routerMock.patch.mock.calls,
-    ...routerMock.delete.mock.calls,
+interface RegisteredVersionedRoute {
+  routeConfig: VersionedRouteConfig<RouterMethod>;
+  versionConfig: AddVersionOpts<unknown, unknown, unknown>;
+  routeHandler: RequestHandler;
+}
+
+type RouterMethod = Extract<keyof IRouter, RouteMethod>;
+
+export const getRegisteredVersionedRouteMock = (
+  routerMock: RouterMock,
+  method: RouterMethod,
+  path: string,
+  version: string
+): RegisteredVersionedRoute => {
+  const route = routerMock.versioned.getRoute(method, path);
+  const routeVersion = route.versions[version];
+
+  if (!routeVersion) {
+    throw new Error(`Handler for [${method}][${path}] with version [${version}] no found!`);
+  }
+
+  return {
+    routeConfig: route.config,
+    versionConfig: routeVersion.config,
+    routeHandler: routeVersion.handler,
+  };
+};
+
+const getRoute = (routerMock: MockServer['router'], request: KibanaRequest): Route => {
+  const versionedRouteCalls = [
+    ...routerMock.versioned.get.mock.calls,
+    ...routerMock.versioned.post.mock.calls,
+    ...routerMock.versioned.put.mock.calls,
+    ...routerMock.versioned.patch.mock.calls,
+    ...routerMock.versioned.delete.mock.calls,
   ];
 
-  const [route] = routeCalls;
-  if (!route) {
+  const [versionedRoute] = versionedRouteCalls;
+
+  if (!versionedRoute) {
     throw new Error('No route registered!');
   }
 
-  const [config, handler] = route;
-  return { config, handler };
+  const { routeHandler, versionConfig } = getRegisteredVersionedRouteMock(
+    routerMock,
+    request.route.method,
+    request.route.path,
+    INTERNAL_API_VERSION
+  );
+
+  return { config: versionConfig, handler: routeHandler };
 };
 
 const buildResultMock = () => ({ ok: jest.fn((x) => x), badRequest: jest.fn((x) => x) });
@@ -53,17 +91,19 @@ class MockServer {
 
   public async inject(request: KibanaRequest, context: RequestHandlerContext = this.contextMock) {
     const validatedRequest = this.validateRequest(request);
+
     const [rejection] = this.resultMock.badRequest.mock.calls;
     if (rejection) {
       throw new Error(`Request was rejected with message: '${rejection}'`);
     }
 
-    await this.getRoute().handler(context, validatedRequest, this.responseMock);
+    await this.getRoute(validatedRequest).handler(context, validatedRequest, this.responseMock);
+
     return responseAdapter(this.responseMock);
   }
 
-  private getRoute(): Route {
-    return getRoute(this.router);
+  private getRoute(request: KibanaRequest): Route {
+    return getRoute(this.router, request);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -72,7 +112,12 @@ class MockServer {
   }
 
   private validateRequest(request: KibanaRequest): KibanaRequest {
-    const validations = this.getRoute().config.validate;
+    const config = this.getRoute(request).config;
+    const validations = config.validate
+      ? typeof config.validate === 'function'
+        ? config.validate().request
+        : config.validate.request
+      : undefined;
     if (!validations) {
       return request;
     }

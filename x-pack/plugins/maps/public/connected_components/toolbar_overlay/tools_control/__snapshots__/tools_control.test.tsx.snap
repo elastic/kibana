@@ -14,6 +14,7 @@ exports[`Should render cancel button when drawing 1`] = `
         >
           <EuiButtonIcon
             aria-label="Tools"
+            className="mapToolbarOverlay__buttonIcon-empty"
             color="text"
             iconType="wrench"
             isDisabled={false}
@@ -31,8 +32,9 @@ exports[`Should render cancel button when drawing 1`] = `
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="none"
+      repositionToCrossAxis={true}
     >
-      <EuiContextMenu
+      <EuiContextMenuClass
         initialPanelId={0}
         panels={
           Array [
@@ -85,21 +87,18 @@ exports[`Should render cancel button when drawing 1`] = `
             },
           ]
         }
-        size="m"
       />
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem>
     <EuiButton
-      color="primary"
       fill={true}
       onClick={[Function]}
       size="s"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Cancel"
         id="xpack.maps.tooltip.toolsControl.cancelDrawButtonLabel"
-        values={Object {}}
       />
     </EuiButton>
   </EuiFlexItem>
@@ -116,6 +115,7 @@ exports[`renders 1`] = `
     >
       <EuiButtonIcon
         aria-label="Tools"
+        className="mapToolbarOverlay__buttonIcon-empty"
         color="text"
         iconType="wrench"
         isDisabled={false}
@@ -133,8 +133,9 @@ exports[`renders 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
+  repositionToCrossAxis={true}
 >
-  <EuiContextMenu
+  <EuiContextMenuClass
     initialPanelId={0}
     panels={
       Array [
@@ -187,7 +188,6 @@ exports[`renders 1`] = `
         },
       ]
     }
-    size="m"
   />
 </EuiPopover>
 `;

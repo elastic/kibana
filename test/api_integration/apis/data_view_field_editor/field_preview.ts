@@ -1,16 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
 
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { getErrorCodeFromErrorReason } from '@kbn/data-view-field-editor-plugin/public/lib/runtime_field_validation';
+import {
+  FIELD_PREVIEW_PATH,
+  INITIAL_REST_VERSION,
+} from '@kbn/data-view-field-editor-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { API_BASE_PATH } from './constants';
 
 const INDEX_NAME = 'api-integration-test-field-preview';
 
@@ -83,9 +91,11 @@ export default function ({ getService }: FtrProviderContext) {
           };
 
           const { body: response } = await supertest
-            .post(`${API_BASE_PATH}/field_preview`)
+            .post(FIELD_PREVIEW_PATH)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
             .send(payload)
             .set('kbn-xsrf', 'xxx')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .expect(200);
 
           expect(response.values).eql([test.expected]);
@@ -96,34 +106,40 @@ export default function ({ getService }: FtrProviderContext) {
     describe('payload validation', () => {
       it('should require a script', async () => {
         await supertest
-          .post(`${API_BASE_PATH}/field_preview`)
+          .post(FIELD_PREVIEW_PATH)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .send({
             context: 'keyword_field',
             index: INDEX_NAME,
           })
           .set('kbn-xsrf', 'xxx')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(400);
       });
 
       it('should require a context', async () => {
         await supertest
-          .post(`${API_BASE_PATH}/field_preview`)
+          .post(FIELD_PREVIEW_PATH)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .send({
             script: { source: 'emit("hello")' },
             index: INDEX_NAME,
           })
           .set('kbn-xsrf', 'xxx')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(400);
       });
 
       it('should require an index', async () => {
         await supertest
-          .post(`${API_BASE_PATH}/field_preview`)
+          .post(FIELD_PREVIEW_PATH)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .send({
             script: { source: 'emit("hello")' },
             context: 'keyword_field',
           })
           .set('kbn-xsrf', 'xxx')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(400);
       });
     });
@@ -134,13 +150,15 @@ export default function ({ getService }: FtrProviderContext) {
       // If this test fail we'll need to update the "getErrorCodeFromErrorReason()" handler
       it('should detect a script casting error', async () => {
         const { body: response } = await supertest
-          .post(`${API_BASE_PATH}/field_preview`)
+          .post(FIELD_PREVIEW_PATH)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           .send({
             script: { source: 'emit(123)' }, // We send a long but the type is "keyword"
             context: 'keyword_field',
             index: INDEX_NAME,
           })
-          .set('kbn-xsrf', 'xxx');
+          .set('kbn-xsrf', 'xxx')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
         const errorCode = getErrorCodeFromErrorReason(response.error?.caused_by?.reason);
 

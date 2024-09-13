@@ -1,18 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { FC } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ServerVersion } from '@kbn/core-status-common-internal';
 
@@ -23,7 +19,7 @@ interface VersionHeaderProps {
 export const VersionHeader: FC<VersionHeaderProps> = ({ version }) => {
   const { build_hash: buildHash, build_number: buildNumber, number } = version;
   return (
-    <EuiPageContent grow={false}>
+    <EuiPanel grow={false}>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiText size="s">
@@ -65,6 +61,6 @@ export const VersionHeader: FC<VersionHeaderProps> = ({ version }) => {
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPageContent>
+    </EuiPanel>
   );
 };

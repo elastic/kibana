@@ -10,6 +10,7 @@ import type {
   AGENT_TYPE_PERMANENT,
   AGENT_TYPE_TEMPORARY,
   FleetServerAgentComponentStatuses,
+  AgentStatuses,
 } from '../../constants';
 
 export type AgentType =
@@ -17,16 +18,8 @@ export type AgentType =
   | typeof AGENT_TYPE_PERMANENT
   | typeof AGENT_TYPE_TEMPORARY;
 
-export type AgentStatus =
-  | 'offline'
-  | 'error'
-  | 'online'
-  | 'inactive'
-  | 'enrolling'
-  | 'unenrolling'
-  | 'unenrolled'
-  | 'updating'
-  | 'degraded';
+type AgentStatusTuple = typeof AgentStatuses;
+export type AgentStatus = AgentStatusTuple[number];
 
 export type SimplifiedAgentStatus =
   | 'healthy'
@@ -48,6 +41,17 @@ export type AgentActionType =
   | 'POLICY_CHANGE'
   | 'INPUT_ACTION';
 
+export type AgentUpgradeStateType =
+  | 'UPG_REQUESTED'
+  | 'UPG_SCHEDULED'
+  | 'UPG_DOWNLOADING'
+  | 'UPG_EXTRACTING'
+  | 'UPG_REPLACING'
+  | 'UPG_RESTARTING'
+  | 'UPG_WATCHING'
+  | 'UPG_ROLLBACK'
+  | 'UPG_FAILED';
+
 type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
 export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
 
@@ -57,6 +61,7 @@ export interface NewAgentAction {
   ack_data?: any;
   sent_at?: string;
   agents: string[];
+  namespaces?: string[];
   created_at?: string;
   id?: string;
   expiration?: string;
@@ -79,6 +84,8 @@ export interface AgentAction extends NewAgentAction {
 export interface AgentMetadata {
   [x: string]: any;
 }
+
+// SO definition for this type is declared in server/types/interfaces
 interface AgentBase {
   type: AgentType;
   active: boolean;
@@ -87,6 +94,7 @@ interface AgentBase {
   unenrollment_started_at?: string;
   upgraded_at?: string | null;
   upgrade_started_at?: string | null;
+  upgrade_details?: AgentUpgradeDetails;
   access_api_key_id?: string;
   default_api_key?: string;
   default_api_key_id?: string;
@@ -99,6 +107,15 @@ interface AgentBase {
   local_metadata: AgentMetadata;
   tags?: string[];
   components?: FleetServerAgentComponent[];
+  agent?: FleetServerAgentMetadata;
+  unhealthy_reason?: UnhealthyReason[];
+  namespaces?: string[];
+}
+
+export enum UnhealthyReason {
+  INPUT = 'input',
+  OUTPUT = 'output',
+  OTHER = 'other',
 }
 
 export interface AgentMetrics {
@@ -106,26 +123,24 @@ export interface AgentMetrics {
   memory_size_byte_avg?: number;
 }
 
+export interface OutputMap {
+  [key: string]: {
+    api_key_id: string;
+    type: string;
+    to_retire_api_key_ids?: FleetServerAgent['default_api_key_history'];
+  };
+}
+
 export interface Agent extends AgentBase {
   id: string;
   access_api_key?: string;
   // @deprecated
   default_api_key_history?: FleetServerAgent['default_api_key_history'];
-  outputs?: Record<
-    string,
-    {
-      api_key_id: string;
-      to_retire_api_key_ids?: FleetServerAgent['default_api_key_history'];
-    }
-  >;
+  outputs?: OutputMap;
   status?: AgentStatus;
   packages: string[];
   sort?: Array<number | string | null>;
   metrics?: AgentMetrics;
-}
-
-export interface AgentSOAttributes extends AgentBase {
-  packages?: string[];
 }
 
 export interface CurrentUpgrade {
@@ -174,12 +189,15 @@ export interface AgentDiagnostics {
   name: string;
   createTime: string;
   filePath: string;
-  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'IN_PROGRESS' | 'FAILED';
+  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'EXPIRED' | 'IN_PROGRESS' | 'FAILED';
   actionId: string;
   error?: string;
 }
 
 // Generated from FleetServer schema.json
+/**
+ * Fleet Server agent component unit
+ */
 export interface FleetServerAgentComponentUnit {
   id: string;
   type: 'input' | 'output';
@@ -190,12 +208,16 @@ export interface FleetServerAgentComponentUnit {
   };
 }
 
-interface FleetServerAgentComponent {
+/**
+ * Fleet server agent component
+ */
+export interface FleetServerAgentComponent {
   id: string;
   type: string;
   status: FleetServerAgentComponentStatus;
   message: string;
-  units: FleetServerAgentComponentUnit[];
+  // In some case units could be missing
+  units?: FleetServerAgentComponentUnit[];
 }
 
 /**
@@ -241,6 +263,10 @@ export interface FleetServerAgent {
   /**
    * ID of the API key the Elastic Agent must used to contact Fleet Server
    */
+  /**
+   * Upgrade state of the Elastic Agent
+   */
+  upgrade_details?: AgentUpgradeDetails;
   access_api_key_id?: string;
   agent?: FleetServerAgentMetadata;
   /**
@@ -314,7 +340,23 @@ export interface FleetServerAgent {
    * Components array
    */
   components?: FleetServerAgentComponent[];
+
+  /**
+   * Outputs map
+   */
+  outputs?: OutputMap;
+
+  /**
+   * Unhealthy reason: input, output, other
+   */
+  unhealthy_reason?: UnhealthyReason[];
+
+  /**
+   * Namespaces
+   */
+  namespaces?: string[];
 }
+
 /**
  * An Elastic Agent metadata
  */
@@ -367,6 +409,8 @@ export interface FleetServerAgentAction {
    */
   agents?: string[];
 
+  namespaces?: string[];
+
   /**
    * Date when the agent should execute that agent. This field could be altered by Fleet server for progressive rollout of the action.
    */
@@ -394,5 +438,34 @@ export interface FleetServerAgentAction {
   /** Trace id */
   traceparent?: string | null;
 
+  // signed data + signature
+  signed?: {
+    data: string;
+    signature: string;
+  };
+
   [k: string]: unknown;
+}
+
+export interface ActionStatusOptions {
+  errorSize: number;
+  page?: number;
+  perPage?: number;
+  date?: string;
+  latest?: number;
+}
+
+export interface AgentUpgradeDetails {
+  target_version: string;
+  action_id: string;
+  state: AgentUpgradeStateType;
+  metadata?: {
+    scheduled_at?: string;
+    download_percent?: number;
+    download_rate?: number; // bytes per second
+    failed_state?: AgentUpgradeStateType;
+    error_msg?: string;
+    retry_error_msg?: string;
+    retry_until?: string;
+  };
 }

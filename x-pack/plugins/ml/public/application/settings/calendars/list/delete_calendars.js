@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { getToastNotifications } from '../../../util/dependency_cache';
-import { ml } from '../../../services/ml_api_service';
 import { i18n } from '@kbn/i18n';
-import { extractErrorMessage } from '../../../../../common/util/errors';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-export async function deleteCalendars(calendarsToDelete, callback) {
+export async function deleteCalendars(mlApi, toastNotifications, calendarsToDelete, callback) {
   if (calendarsToDelete === undefined || calendarsToDelete.length === 0) {
     return;
   }
-  const toastNotifications = getToastNotifications();
 
   // Delete each of the specified calendars in turn, waiting for each response
   // before deleting the next to minimize load on the cluster.
@@ -35,7 +32,7 @@ export async function deleteCalendars(calendarsToDelete, callback) {
   for (const calendar of calendarsToDelete) {
     const calendarId = calendar.calendar_id;
     try {
-      await ml.deleteCalendar({ calendarId });
+      await mlApi.deleteCalendar({ calendarId });
     } catch (error) {
       console.log('Error deleting calendar:', error);
       toastNotifications.addDanger({

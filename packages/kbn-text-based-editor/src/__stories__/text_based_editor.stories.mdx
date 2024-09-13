@@ -1,0 +1,74 @@
+import { Canvas, Meta, Story, ArgsTable } from '@storybook/addon-docs/blocks';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { TextBasedLanguagesEditor } from '../text_based_languages_editor';
+
+
+export const Template = (args) => 
+<I18nProvider> 
+    <KibanaContextProvider
+        services={{
+          settings: { client: { get: () => {} } },
+          uiSettings: { get: () => {} },
+        }}
+    >
+        <TextBasedLanguagesEditor {...args} />
+    </KibanaContextProvider>
+</I18nProvider>;
+
+<Meta 
+    title="Text based languages editor"
+    component={TextBasedLanguagesEditor}
+/>
+
+
+# Overview
+
+The TextBasedLanguagesEditor component is a reusable component and can be used to support text based languages in your application (SQL, ESQL):
+
+<Canvas>
+    <Story 
+        name='expanded mode'
+        args={
+            {
+                query: { esql: 'from dataview | keep field1, field2' },
+                'data-test-subj':'test-id'
+            }
+        }
+        argTypes={
+            { onTextLangQueryChange: { action: 'changed' }, onTextLangQuerySubmit:  { action: 'submitted' }}
+        }
+        >
+    {Template.bind({})}
+    </Story>
+</Canvas>
+
+When there are errors to the query the UI displays the errors to the editor:
+
+<Canvas>
+    <Story 
+        name='with errors'
+        args={
+            {
+                query: { esql: 'from dataview | keep field1, field2' },
+                'data-test-subj':'test-id',
+                errors: [
+        new Error(
+          '[essql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 1:16: Unknown column [field10]'
+        ),
+      ]
+            }
+        }
+        argTypes={
+            { onTextLangQueryChange: { action: 'changed' }, onTextLangQuerySubmit:  { action: 'submitted' }}
+        }
+        >
+    {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Component props
+
+The component exposes the following properties:
+
+<ArgsTable story="expanded mode"/>

@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-
+import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '../../../../locator';
-import { NavigateToPath } from '../../../contexts/kibana';
-
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import type { MlRoute } from '../../router';
+import { createPath, PageLoader } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
-import { Page } from '../../../data_frame_analytics/pages/source_selection';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+
+const Page = dynamic(async () => ({
+  default: (await import('../../../data_frame_analytics/pages/source_selection')).Page,
+}));
 
 export const analyticsSourceSelectionRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
   path: createPath(ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   title: i18n.translate('xpack.ml.dataFrameAnalytics.sourceSelection.docTitle', {
     defaultMessage: 'Source Selection',
   }),
@@ -38,15 +41,8 @@ export const analyticsSourceSelectionRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { context } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    basicResolvers(deps)
-  );
+const PageWrapper: FC = () => {
+  const { context } = useRouteResolver('full', ['canGetDataFrameAnalytics'], basicResolvers());
 
   return (
     <PageLoader context={context}>

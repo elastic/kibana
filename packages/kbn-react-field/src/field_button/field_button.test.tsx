@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -21,9 +22,11 @@ describe('sizes', () => {
   });
 });
 
-describe('isDraggable', () => {
+describe('with drag handle', () => {
   it('is rendered', () => {
-    const component = shallow(<FieldButton onClick={noop} fieldName="name" isDraggable />);
+    const component = shallow(
+      <FieldButton size="s" onClick={noop} fieldName="name" dragHandle={<span>drag</span>} />
+    );
     expect(component).toMatchSnapshot();
   });
 });
@@ -31,7 +34,7 @@ describe('isDraggable', () => {
 describe('fieldIcon', () => {
   it('is rendered', () => {
     const component = shallow(
-      <FieldButton onClick={noop} fieldName="name" fieldIcon={<span>fieldIcon</span>} />
+      <FieldButton size="s" onClick={noop} fieldName="name" fieldIcon={<span>fieldIcon</span>} />
     );
     expect(component).toMatchSnapshot();
   });
@@ -40,7 +43,12 @@ describe('fieldIcon', () => {
 describe('fieldAction', () => {
   it('is rendered', () => {
     const component = shallow(
-      <FieldButton onClick={noop} fieldName="name" fieldAction={<span>fieldAction</span>} />
+      <FieldButton
+        size="s"
+        onClick={noop}
+        fieldName="name"
+        fieldAction={<span>fieldAction</span>}
+      />
     );
     expect(component).toMatchSnapshot();
   });
@@ -48,11 +56,11 @@ describe('fieldAction', () => {
 
 describe('isActive', () => {
   it('defaults to false', () => {
-    const component = shallow(<FieldButton onClick={noop} fieldName="name" />);
+    const component = shallow(<FieldButton size="s" onClick={noop} fieldName="name" />);
     expect(component).toMatchSnapshot();
   });
   it('renders true', () => {
-    const component = shallow(<FieldButton onClick={noop} fieldName="name" isActive />);
+    const component = shallow(<FieldButton size="s" onClick={noop} fieldName="name" isActive />);
     expect(component).toMatchSnapshot();
   });
 });

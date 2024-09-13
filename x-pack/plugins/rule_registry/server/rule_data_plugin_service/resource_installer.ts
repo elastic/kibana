@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Observable } from 'rxjs';
+import { type Observable, firstValueFrom, filter } from 'rxjs';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
@@ -20,6 +20,8 @@ import {
   installWithTimeout,
   TOTAL_FIELDS_LIMIT,
   type PublicFrameworkAlertsService,
+  type DataStreamAdapter,
+  VALID_ALERT_INDEX_PREFIXES,
 } from '@kbn/alerting-plugin/server';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
@@ -34,6 +36,8 @@ interface ConstructorOptions {
   disabledRegistrationContexts: string[];
   frameworkAlerts: PublicFrameworkAlertsService;
   pluginStop$: Observable<void>;
+  dataStreamAdapter: DataStreamAdapter;
+  elasticsearchAndSOAvailability$: Observable<boolean>;
 }
 
 export type IResourceInstaller = PublicMethodsOf<ResourceInstaller>;
@@ -50,6 +54,11 @@ export class ResourceInstaller {
    *   - component template containing all standard ECS fields
    */
   public async installCommonResources(): Promise<void> {
+    await firstValueFrom(
+      this.options.elasticsearchAndSOAvailability$.pipe(
+        filter((areESAndSOAvailable) => areESAndSOAvailable)
+      )
+    );
     const resourceDescription = 'common resources shared between all indices';
     const { logger, isWriteEnabled } = this.options;
     if (!isWriteEnabled) {
@@ -78,6 +87,7 @@ export class ResourceInstaller {
                     esClient: clusterClient,
                     name: DEFAULT_ALERTS_ILM_POLICY_NAME,
                     policy: DEFAULT_ALERTS_ILM_POLICY,
+                    dataStreamAdapter: this.options.dataStreamAdapter,
                   }),
                   createOrUpdateComponentTemplate({
                     logger,
@@ -143,6 +153,7 @@ export class ResourceInstaller {
             esClient: clusterClient,
             name: indexInfo.getIlmPolicyName(),
             policy: ilmPolicy,
+            dataStreamAdapter: this.options.dataStreamAdapter,
           });
         }
 
@@ -216,6 +227,7 @@ export class ResourceInstaller {
       alias: indexInfo.getPrimaryAlias(namespace),
       name: indexInfo.getConcreteIndexInitialName(namespace),
       template: indexInfo.getIndexTemplateName(namespace),
+      validPrefixes: VALID_ALERT_INDEX_PREFIXES,
       ...(secondaryNamespacedAlias ? { secondaryAlias: secondaryNamespacedAlias } : {}),
     };
 
@@ -245,6 +257,7 @@ export class ResourceInstaller {
         kibanaVersion: indexInfo.kibanaVersion,
         namespace,
         totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+        dataStreamAdapter: this.options.dataStreamAdapter,
       }),
     });
 
@@ -253,6 +266,7 @@ export class ResourceInstaller {
       esClient: clusterClient,
       totalFieldsLimit: TOTAL_FIELDS_LIMIT,
       indexPatterns,
+      dataStreamAdapter: this.options.dataStreamAdapter,
     });
   }
 }

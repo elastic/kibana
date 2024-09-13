@@ -8,11 +8,10 @@
 import sinon from 'sinon';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
+import { TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   loggingSystemMock,
-  savedObjectsRepositoryMock,
   httpServiceMock,
   savedObjectsServiceMock,
   elasticsearchServiceMock,
@@ -30,9 +29,15 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { rulesSettingsClientMock } from '../rules_settings_client.mock';
+import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
+import { schema } from '@kbn/config-schema';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { TaskRunnerContext } from './types';
+import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
+const backfillClient = backfillClientMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
@@ -43,6 +48,7 @@ const elasticsearchService = elasticsearchServiceMock.createInternalStart();
 const dataPlugin = dataPluginMock.createStartContract();
 const dataViewsMock = {
   dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+  getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
 } as DataViewsServerPluginStart;
 const ruleType: UntypedNormalizedRuleType = {
   id: 'test',
@@ -56,7 +62,12 @@ const ruleType: UntypedNormalizedRuleType = {
     name: 'Recovered',
   },
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
+  validate: {
+    params: schema.any(),
+  },
+  validLegacyConsumers: [],
 };
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -89,8 +100,10 @@ describe('Task Runner Factory', () => {
 
   const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
   const rulesClient = rulesClientMock.create();
+  const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
+    backfillClient,
     data: dataPlugin,
     dataViews: dataViewsMock,
     savedObjects: savedObjectsService,
@@ -104,7 +117,6 @@ describe('Task Runner Factory', () => {
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
-    internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     ruleTypeRegistry: ruleTypeRegistryMock.create(),
     alertsService: mockAlertService,
     kibanaBaseUrl: 'https://localhost:5601',
@@ -120,24 +132,35 @@ describe('Task Runner Factory', () => {
       },
     },
     getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
+    getMaintenanceWindowClientWithRequest: jest
+      .fn()
+      .mockReturnValue(maintenanceWindowClientMock.create()),
+    connectorAdapterRegistry,
   };
 
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  test(`throws an error if factory isn't initialized`, () => {
+  test(`throws an error if factory is initialized multiple times`, () => {
+    const factory = new TaskRunnerFactory();
+    factory.initialize(taskRunnerFactoryInitializerParams);
+    expect(() =>
+      factory.initialize(taskRunnerFactoryInitializerParams)
+    ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory already initialized"`);
+  });
+
+  test(`throws an error if create is called when factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory();
     expect(() =>
       factory.create(ruleType, { taskInstance: mockedTaskInstance }, inMemoryMetrics)
     ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 
-  test(`throws an error if factory is already initialized`, () => {
+  test(`throws an error if createAdHoc is called when factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory();
-    factory.initialize(taskRunnerFactoryInitializerParams);
     expect(() =>
-      factory.initialize(taskRunnerFactoryInitializerParams)
-    ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory already initialized"`);
+      factory.createAdHoc({ taskInstance: mockedTaskInstance })
+    ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 });

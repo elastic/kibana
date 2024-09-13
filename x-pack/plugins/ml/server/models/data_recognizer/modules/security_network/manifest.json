@@ -2,7 +2,7 @@
   "id": "security_network",
   "title": "Security: Network",
   "description": "Detect anomalous network activity in your ECS-compatible network logs.",
-  "type": "network data",
+  "type": "Network data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "logs-*,filebeat-*,packetbeat-*",
   "query": {
@@ -14,7 +14,7 @@
           }
         }
       ],
-      "must_not": { "terms": { "_tier": [ "data_frozen", "data_cold" ] } }
+      "must_not": { "terms": { "_tier": ["data_frozen", "data_cold"] } }
     }
   },
   "jobs": [
@@ -56,5 +56,8 @@
       "file": "datafeed_rare_destination_country.json",
       "job_id": "rare_destination_country"
     }
+  ],
+  "tags": [
+    "security"
   ]
 }

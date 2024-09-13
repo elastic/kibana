@@ -14,11 +14,12 @@ import type { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
-import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 import type { OnTimeChangeProps } from '@elastic/eui';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { inputsActions } from '../../store/inputs';
 import type { InputsRange } from '../../store/inputs/model';
 import type { InputsModelId } from '../../store/inputs/constants';
@@ -34,7 +35,7 @@ import {
   startSelector,
   toStrSelector,
 } from './selectors';
-import { timelineActions } from '../../../timelines/store/timeline';
+import { timelineActions } from '../../../timelines/store';
 import { useKibana } from '../../lib/kibana';
 import { usersActions } from '../../../explore/users/store';
 import { hostsActions } from '../../../explore/hosts/store';
@@ -44,8 +45,8 @@ import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timera
 
 interface SiemSearchBarProps {
   id: InputsModelId.global | InputsModelId.timeline;
-  indexPattern: DataViewBase;
   pollForSignalIndex?: () => void;
+  sourcererDataView: DataViewSpec | undefined;
   timelineId?: string;
   dataTestSubj?: string;
   hideFilterBar?: boolean;
@@ -60,13 +61,13 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     hideFilterBar = false,
     hideQueryInput = false,
     id,
-    indexPattern,
     isLoading = false,
     pollForSignalIndex,
     queries,
     savedQuery,
     setSavedQuery,
     setSearchBarFilter,
+    sourcererDataView,
     start,
     toStr,
     updateSearch,
@@ -82,6 +83,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       unifiedSearch: {
         ui: { SearchBar },
       },
+      fieldFormats,
     } = useKibana().services;
 
     const dispatch = useDispatch();
@@ -294,9 +296,16 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+    const dataViews: DataView[] | null = useMemo(() => {
+      if (sourcererDataView != null) {
+        return [new DataView({ spec: sourcererDataView, fieldFormats })];
+      } else {
+        return null;
+      }
+    }, [sourcererDataView, fieldFormats]);
+
     const onTimeRangeChange = useCallback(
-      ({ query, dateRange }) => {
+      ({ dateRange }: { dateRange: TimeRange }) => {
         const isQuickSelection = dateRange.from.includes('now') || dateRange.to.includes('now');
         updateSearch({
           end: dateRange.to,
@@ -304,7 +313,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           id,
           isInvalid: false,
           isQuickSelection,
-          query,
           setTablesActivePageToZero,
           start: dateRange.from,
           updateTime: true,
@@ -312,12 +320,12 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       },
       [filterManager, id, setTablesActivePageToZero, updateSearch]
     );
-    return (
+    return dataViews ? (
       <div data-test-subj={`${id}DatePicker`}>
         <SearchBar
           appName="siem"
           isLoading={isLoading}
-          indexPatterns={indexPatterns as DataView[]}
+          indexPatterns={dataViews}
           query={filterQuery}
           onClearSavedQuery={onClearSavedQuery}
           onQuerySubmit={onQuerySubmit}
@@ -329,16 +337,17 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           showFilterBar={!hideFilterBar}
           showDatePicker={true}
           showQueryInput={!hideQueryInput}
-          showSaveQuery={true}
+          saveQueryMenuVisibility="allowed_by_app_privilege"
           dataTestSubj={dataTestSubj}
         />
       </div>
-    );
+    ) : null;
   },
   (prevProps, nextProps) =>
     prevProps.end === nextProps.end &&
     prevProps.filterQuery === nextProps.filterQuery &&
     prevProps.fromStr === nextProps.fromStr &&
+    deepEqual(prevProps.sourcererDataView, nextProps.sourcererDataView) &&
     prevProps.id === nextProps.id &&
     prevProps.isLoading === nextProps.isLoading &&
     prevProps.savedQuery === nextProps.savedQuery &&
@@ -348,7 +357,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     prevProps.toStr === nextProps.toStr &&
     prevProps.updateSearch === nextProps.updateSearch &&
     prevProps.dataTestSubj === nextProps.dataTestSubj &&
-    deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
     deepEqual(prevProps.queries, nextProps.queries)
 );
 

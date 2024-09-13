@@ -7,14 +7,17 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-
-import { type AggregateQuery, getIndexPatternFromSQLQuery } from '@kbn/es-query';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { generateId } from '../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
-
 import type { IndexPatternRef, TextBasedPrivateState, TextBasedLayerColumn } from './types';
 import type { DataViewsState } from '../../state_management';
+import { addColumnsToCache } from './fieldlist_cache';
+
+export const MAX_NUM_OF_COLUMNS = 5;
 
 export async function loadIndexPatternRefs(
   indexPatternsService: DataViewsPublicPluginStart
@@ -80,37 +83,25 @@ export async function getStateFromAggregateQuery(
   // get the id of the dataview
   let dataViewId = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
   let columnsFromQuery: DatatableColumn[] = [];
-  let allColumns: TextBasedLayerColumn[] = [];
   let timeFieldName;
   try {
-    const dataView = dataViewId
-      ? await dataViews.get(dataViewId)
-      : await dataViews.create({
-          title: indexPattern,
-        });
-    if (!dataViewId && !dataView.isPersisted()) {
-      if (dataView && dataView.id) {
-        if (dataView.fields.getByName('@timestamp')?.type === 'date') {
-          dataView.timeFieldName = '@timestamp';
-        } else if (dataView.fields.getByType('date')?.length) {
-          const dateFields = dataView.fields.getByType('date');
-          dataView.timeFieldName = dateFields[0].name;
-        }
-        dataViewId = dataView?.id;
-        indexPatternRefs = [
-          ...indexPatternRefs,
-          {
-            id: dataView.id,
-            title: dataView.name,
-            timeField: dataView.timeFieldName,
-          },
-        ];
-      }
+    const dataView = await getESQLAdHocDataview(query.esql, dataViews);
+
+    if (dataView && dataView.id) {
+      dataViewId = dataView?.id;
+      indexPatternRefs = [
+        ...indexPatternRefs,
+        {
+          id: dataView.id,
+          title: dataView.name,
+          timeField: dataView.timeFieldName,
+        },
+      ];
     }
     timeFieldName = dataView.timeFieldName;
     const table = await fetchDataFromAggregateQuery(query, dataView, data, expressions);
     columnsFromQuery = table?.columns ?? [];
-    allColumns = getAllColumns(state.layers[newLayerId].allColumns, columnsFromQuery);
+    addColumnsToCache(query, columnsFromQuery);
   } catch (e) {
     errors.push(e);
   }
@@ -121,7 +112,6 @@ export async function getStateFromAggregateQuery(
         index: dataViewId,
         query,
         columns: state.layers[newLayerId].columns ?? [],
-        allColumns,
         timeField: timeFieldName,
         errors,
       },
@@ -130,19 +120,37 @@ export async function getStateFromAggregateQuery(
 
   return {
     ...tempState,
-    fieldList: columnsFromQuery ?? [],
     indexPatternRefs,
     initialContext: context,
   };
 }
 
 export function getIndexPatternFromTextBasedQuery(query: AggregateQuery): string {
-  let indexPattern = '';
-  // sql queries
-  if ('sql' in query) {
-    indexPattern = getIndexPatternFromSQLQuery(query.sql);
-  }
-  // other textbased queries....
+  return getIndexPatternFromESQLQuery(query.esql);
+}
 
-  return indexPattern;
+export const isNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>
+  column?.meta?.type === 'number';
+export const isNotNumeric = (column: TextBasedLayerColumn | DatatableColumn) => !isNumeric(column);
+
+export function canColumnBeDroppedInMetricDimension(
+  columns: TextBasedLayerColumn[] | DatatableColumn[],
+  selectedColumnType?: string
+): boolean {
+  // check if at least one numeric field exists
+  const hasNumberTypeColumns = columns?.some(isNumeric);
+  return !hasNumberTypeColumns || (hasNumberTypeColumns && selectedColumnType === 'number');
+}
+
+export function canColumnBeUsedBeInMetricDimension(
+  columns: TextBasedLayerColumn[] | DatatableColumn[],
+  selectedColumnType?: string
+): boolean {
+  // check if at least one numeric field exists
+  const hasNumberTypeColumns = columns?.some(isNumeric);
+  return (
+    !hasNumberTypeColumns ||
+    columns.length >= MAX_NUM_OF_COLUMNS ||
+    (hasNumberTypeColumns && selectedColumnType === 'number')
+  );
 }

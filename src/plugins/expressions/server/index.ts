@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { ExpressionsServerPlugin } from './plugin';
+import type { ExpressionsServerPlugin } from './plugin';
 
 export type { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';
 
 // Kibana Platform.
 export { ExpressionsServerPlugin as Plugin };
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { ExpressionsServerPlugin } = await import('./plugin');
   return new ExpressionsServerPlugin(initializerContext);
 }
 

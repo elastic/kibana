@@ -5,10 +5,6 @@ Object {
   "debug": Array [
     Array [
       "[.my-so-index] INIT RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] INIT -> LEGACY_REINDEX. took: 0ms.",
@@ -25,6 +21,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -52,6 +51,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "endpoint:user-artifact",
                       },
                     },
                     Object {
@@ -137,9 +141,37 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
+              "indexTypesMap": Object {
+                ".kibana": Array [
+                  "typeA",
+                  "typeB",
+                  "typeC",
+                ],
+                ".kibana_cases": Array [
+                  "typeD",
+                  "typeE",
+                ],
+                ".kibana_task_manager": Array [
+                  "task",
+                ],
+              },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -147,13 +179,16 @@ Object {
                   "message": "Log from LEGACY_REINDEX control state",
                 },
               ],
+              "maxBatchSize": 1000,
               "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
               "migrationDocLinks": Object {
                 "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
               },
+              "mustRelocateDocuments": true,
               "outdatedDocuments": Array [],
               "outdatedDocumentsQuery": Object {
                 "bool": Object {
@@ -170,15 +205,15 @@ Object {
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+              "tempIndexAlias": ".my-so-index_7.11.0_reindex_temp_alias",
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -192,10 +227,6 @@ Object {
     ],
     Array [
       "[.my-so-index] LEGACY_REINDEX RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE. took: 0ms.",
@@ -212,6 +243,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -239,6 +273,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "endpoint:user-artifact",
                       },
                     },
                     Object {
@@ -324,9 +363,37 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
+              "indexTypesMap": Object {
+                ".kibana": Array [
+                  "typeA",
+                  "typeB",
+                  "typeC",
+                ],
+                ".kibana_cases": Array [
+                  "typeD",
+                  "typeE",
+                ],
+                ".kibana_task_manager": Array [
+                  "task",
+                ],
+              },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -338,13 +405,16 @@ Object {
                   "message": "Log from LEGACY_DELETE control state",
                 },
               ],
+              "maxBatchSize": 1000,
               "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
               "migrationDocLinks": Object {
                 "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
               },
+              "mustRelocateDocuments": true,
               "outdatedDocuments": Array [],
               "outdatedDocumentsQuery": Object {
                 "bool": Object {
@@ -361,15 +431,15 @@ Object {
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+              "tempIndexAlias": ".my-so-index_7.11.0_reindex_temp_alias",
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -383,10 +453,6 @@ Object {
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE -> LEGACY_DELETE. took: 0ms.",
@@ -403,6 +469,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -430,6 +499,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "endpoint:user-artifact",
                       },
                     },
                     Object {
@@ -515,9 +589,37 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
+              "indexTypesMap": Object {
+                ".kibana": Array [
+                  "typeA",
+                  "typeB",
+                  "typeC",
+                ],
+                ".kibana_cases": Array [
+                  "typeD",
+                  "typeE",
+                ],
+                ".kibana_task_manager": Array [
+                  "task",
+                ],
+              },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -533,13 +635,16 @@ Object {
                   "message": "Log from LEGACY_DELETE control state",
                 },
               ],
+              "maxBatchSize": 1000,
               "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
               "migrationDocLinks": Object {
                 "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
               },
+              "mustRelocateDocuments": true,
               "outdatedDocuments": Array [],
               "outdatedDocumentsQuery": Object {
                 "bool": Object {
@@ -556,15 +661,15 @@ Object {
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+              "tempIndexAlias": ".my-so-index_7.11.0_reindex_temp_alias",
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -578,10 +683,6 @@ Object {
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE -> DONE. took: 0ms.",
@@ -598,6 +699,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -625,6 +729,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "endpoint:user-artifact",
                       },
                     },
                     Object {
@@ -710,9 +819,37 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
+              "indexTypesMap": Object {
+                ".kibana": Array [
+                  "typeA",
+                  "typeB",
+                  "typeC",
+                ],
+                ".kibana_cases": Array [
+                  "typeD",
+                  "typeE",
+                ],
+                ".kibana_task_manager": Array [
+                  "task",
+                ],
+              },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -732,13 +869,16 @@ Object {
                   "message": "Log from DONE control state",
                 },
               ],
+              "maxBatchSize": 1000,
               "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
               "migrationDocLinks": Object {
                 "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
               },
+              "mustRelocateDocuments": true,
               "outdatedDocuments": Array [],
               "outdatedDocumentsQuery": Object {
                 "bool": Object {
@@ -755,15 +895,15 @@ Object {
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+              "tempIndexAlias": ".my-so-index_7.11.0_reindex_temp_alias",
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -783,25 +923,13 @@ Object {
       "[.my-so-index] Log from LEGACY_REINDEX control state",
     ],
     Array [
-      "[.my-so-index] INIT -> LEGACY_REINDEX. took: 0ms.",
-    ],
-    Array [
       "[.my-so-index] Log from LEGACY_DELETE control state",
     ],
     Array [
-      "[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE. took: 0ms.",
-    ],
-    Array [
       "[.my-so-index] Log from LEGACY_DELETE control state",
-    ],
-    Array [
-      "[.my-so-index] LEGACY_DELETE -> LEGACY_DELETE. took: 0ms.",
     ],
     Array [
       "[.my-so-index] Log from DONE control state",
-    ],
-    Array [
-      "[.my-so-index] LEGACY_DELETE -> DONE. took: 0ms.",
     ],
   ],
   "log": Array [],
@@ -815,10 +943,6 @@ Object {
   "debug": Array [
     Array [
       "[.my-so-index] INIT RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] INIT -> LEGACY_DELETE. took: 0ms.",
@@ -841,6 +965,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -868,6 +995,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "endpoint:user-artifact",
                       },
                     },
                     Object {
@@ -953,9 +1085,37 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
+              "indexTypesMap": Object {
+                ".kibana": Array [
+                  "typeA",
+                  "typeB",
+                  "typeC",
+                ],
+                ".kibana_cases": Array [
+                  "typeD",
+                  "typeE",
+                ],
+                ".kibana_task_manager": Array [
+                  "task",
+                ],
+              },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -963,13 +1123,16 @@ Object {
                   "message": "Log from LEGACY_DELETE control state",
                 },
               ],
+              "maxBatchSize": 1000,
               "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
               "migrationDocLinks": Object {
                 "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
               },
+              "mustRelocateDocuments": true,
               "outdatedDocuments": Array [
                 Object {
                   "_id": "1234",
@@ -991,15 +1154,15 @@ Object {
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+              "tempIndexAlias": ".my-so-index_7.11.0_reindex_temp_alias",
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -1013,10 +1176,6 @@ Object {
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE -> FATAL. took: 0ms.",
@@ -1039,6 +1198,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -1066,6 +1228,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "endpoint:user-artifact",
                       },
                     },
                     Object {
@@ -1151,9 +1318,37 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
+              "indexTypesMap": Object {
+                ".kibana": Array [
+                  "typeA",
+                  "typeB",
+                  "typeC",
+                ],
+                ".kibana_cases": Array [
+                  "typeD",
+                  "typeE",
+                ],
+                ".kibana_task_manager": Array [
+                  "task",
+                ],
+              },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -1165,13 +1360,16 @@ Object {
                   "message": "Log from FATAL control state",
                 },
               ],
+              "maxBatchSize": 1000,
               "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
               "migrationDocLinks": Object {
                 "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
               },
+              "mustRelocateDocuments": true,
               "outdatedDocuments": Array [
                 Object {
                   "_id": "1234",
@@ -1193,15 +1391,15 @@ Object {
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
+              "tempIndexAlias": ".my-so-index_7.11.0_reindex_temp_alias",
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -1221,13 +1419,7 @@ Object {
       "[.my-so-index] Log from LEGACY_DELETE control state",
     ],
     Array [
-      "[.my-so-index] INIT -> LEGACY_DELETE. took: 0ms.",
-    ],
-    Array [
       "[.my-so-index] Log from FATAL control state",
-    ],
-    Array [
-      "[.my-so-index] LEGACY_DELETE -> FATAL. took: 0ms.",
     ],
   ],
   "log": Array [],

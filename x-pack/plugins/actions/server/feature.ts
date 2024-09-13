@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
+
+export const CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-advanced-connectors';
+export const CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-basic-connectors';
 
 /**
  * The order of appearance in the feature privilege page
@@ -25,6 +29,7 @@ export const ACTIONS_FEATURE = {
     defaultMessage: 'Actions and Connectors',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [],
   order: FEATURE_ORDER,
   management: {
@@ -33,7 +38,10 @@ export const ACTIONS_FEATURE = {
   privileges: {
     all: {
       app: [],
-      api: [],
+      api: [
+        CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG,
+        CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG,
+      ],
       catalogue: [],
       management: {
         insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
@@ -50,7 +58,7 @@ export const ACTIONS_FEATURE = {
     },
     read: {
       app: [],
-      api: [],
+      api: [CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG],
       catalogue: [],
       management: {
         insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],

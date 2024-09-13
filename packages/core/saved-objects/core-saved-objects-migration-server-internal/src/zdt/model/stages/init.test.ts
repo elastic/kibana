@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -12,6 +13,9 @@ import {
   buildIndexMappingsMock,
   generateAdditiveMappingDiffMock,
   getAliasActionsMock,
+  checkIndexCurrentAlgorithmMock,
+  getAliasesMock,
+  getCreationAliasesMock,
 } from './init.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
 import { FetchIndexResponse } from '../../../actions';
@@ -30,6 +34,7 @@ describe('Stage: init', () => {
     retryDelay: 0,
     retryCount: 0,
     logs: [],
+    skipDocumentMigration: false,
     ...parts,
   });
 
@@ -38,7 +43,7 @@ describe('Stage: init', () => {
       aliases: {},
       mappings: {
         properties: {},
-        _meta: { mappingVersions: { foo: 1, bar: 1 } },
+        _meta: { mappingVersions: { foo: '10.1.0', bar: '10.1.0' } },
       },
       settings: {},
     },
@@ -51,6 +56,10 @@ describe('Stage: init', () => {
     });
     generateAdditiveMappingDiffMock.mockReset().mockReturnValue({});
     getAliasActionsMock.mockReset().mockReturnValue([]);
+    checkIndexCurrentAlgorithmMock.mockReset().mockReturnValue('zdt');
+    getAliasesMock.mockReset().mockReturnValue(Either.right({}));
+    buildIndexMappingsMock.mockReset().mockReturnValue({});
+    getCreationAliasesMock.mockReset().mockReturnValue([]);
 
     context = createContextMock({ indexPrefix: '.kibana', types: ['foo', 'bar'] });
     context.typeRegistry.registerType({
@@ -67,35 +76,32 @@ describe('Stage: init', () => {
     });
   });
 
-  it('INIT -> INIT when cluster routing allocation is incompatible', () => {
-    const state = createState();
-    const res: StateActionResponse<'INIT'> = Either.left({
-      type: 'incompatible_cluster_routing_allocation',
-    });
-
-    const newState = init(state, res, context);
-
-    expect(newState.controlState).toEqual('INIT');
-    expect(newState.retryCount).toEqual(1);
-    expect(newState.retryDelay).toEqual(2000);
-    expect(newState.logs).toHaveLength(1);
-  });
-
   it('calls getCurrentIndex with the correct parameters', () => {
     const state = createState();
     const fetchIndexResponse = createResponse();
-    const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+    const res: StateActionResponse<'INIT'> = Either.right(
+      fetchIndexResponse
+    ) as Either.Right<FetchIndexResponse>;
+
+    const aliases = { '.foo': '.bar' };
+    getAliasesMock.mockReturnValue(Either.right(aliases));
 
     init(state, res, context);
 
     expect(getCurrentIndexMock).toHaveBeenCalledTimes(1);
-    expect(getCurrentIndexMock).toHaveBeenCalledWith(fetchIndexResponse, context.indexPrefix);
+    expect(getCurrentIndexMock).toHaveBeenCalledWith({
+      indices: Object.keys(fetchIndexResponse),
+      indexPrefix: context.indexPrefix,
+      aliases,
+    });
   });
 
   it('calls checkVersionCompatibility with the correct parameters', () => {
     const state = createState();
     const fetchIndexResponse = createResponse();
-    const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+    const res: StateActionResponse<'INIT'> = Either.right(
+      fetchIndexResponse
+    ) as Either.Right<FetchIndexResponse>;
 
     init(state, res, context);
 
@@ -108,28 +114,117 @@ describe('Stage: init', () => {
     });
   });
 
-  describe('when getCurrentIndex returns undefined', () => {
+  describe('when checkIndexCurrentAlgorithm returns `unknown`', () => {
     beforeEach(() => {
-      getCurrentIndexMock.mockReturnValue(undefined);
+      checkIndexCurrentAlgorithmMock.mockReset().mockReturnValue('unknown');
+    });
+
+    it('adds a log entry about the algo check', () => {
+      const state = createState();
+      const res: StateActionResponse<'INIT'> = Either.right(
+        createResponse()
+      ) as Either.Right<FetchIndexResponse>;
+
+      const newState = init(state, res, context);
+
+      expect(newState.logs.map((entry) => entry.message)).toContain(
+        `INIT: current algo check result: unknown`
+      );
+    });
+
+    it('INIT -> FATAL', () => {
+      const state = createState();
+      const fetchIndexResponse = createResponse();
+      const res: StateActionResponse<'INIT'> = Either.right(
+        fetchIndexResponse
+      ) as Either.Right<FetchIndexResponse>;
+
+      const newState = init(state, res, context);
+
+      expect(newState).toEqual(
+        expect.objectContaining({
+          controlState: 'FATAL',
+          reason: 'Cannot identify algorithm used for index .kibana_1',
+        })
+      );
+    });
+  });
+
+  describe('when checkIndexCurrentAlgorithm returns `v2-incompatible`', () => {
+    beforeEach(() => {
+      checkIndexCurrentAlgorithmMock.mockReset().mockReturnValue('v2-incompatible');
+    });
+
+    it('adds a log entry about the algo check', () => {
+      const state = createState();
+      const res: StateActionResponse<'INIT'> = Either.right(
+        createResponse()
+      ) as Either.Right<FetchIndexResponse>;
+
+      const newState = init(state, res, context);
+
+      expect(newState.logs.map((entry) => entry.message)).toContain(
+        `INIT: current algo check result: v2-incompatible`
+      );
+    });
+
+    it('INIT -> FATAL', () => {
+      const state = createState();
+      const fetchIndexResponse = createResponse();
+      const res: StateActionResponse<'INIT'> = Either.right(
+        fetchIndexResponse
+      ) as Either.Right<FetchIndexResponse>;
+
+      const newState = init(state, res, context);
+
+      expect(newState).toEqual(
+        expect.objectContaining({
+          controlState: 'FATAL',
+          reason: 'Index .kibana_1 is using an incompatible version of the v2 algorithm',
+        })
+      );
+    });
+  });
+
+  describe('when checkIndexCurrentAlgorithm returns `v2-compatible`', () => {
+    beforeEach(() => {
+      checkIndexCurrentAlgorithmMock.mockReset().mockReturnValue('v2-compatible');
+      buildIndexMappingsMock.mockReturnValue({});
     });
 
     it('calls buildIndexMappings with the correct parameters', () => {
       const state = createState();
-      const fetchIndexResponse = createResponse();
-      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+      const res: StateActionResponse<'INIT'> = Either.right(
+        createResponse()
+      ) as Either.Right<FetchIndexResponse>;
 
       init(state, res, context);
 
       expect(buildIndexMappingsMock).toHaveBeenCalledTimes(1);
-      expect(buildIndexMappingsMock).toHaveBeenCalledWith({
+      expect(buildIndexMappingsMock).toHaveBeenLastCalledWith({
         types: ['foo', 'bar'].map((type) => context.typeRegistry.getType(type)),
       });
     });
 
-    it('INIT -> CREATE_TARGET_INDEX', () => {
+    it('adds a log entry about the algo check', () => {
+      const state = createState();
+      const res: StateActionResponse<'INIT'> = Either.right(
+        createResponse()
+      ) as Either.Right<FetchIndexResponse>;
+
+      const newState = init(state, res, context);
+
+      expect(newState.logs.map((entry) => entry.message)).toContain(
+        `INIT: current algo check result: v2-compatible`
+      );
+    });
+
+    it('INIT -> UPDATE_INDEX_MAPPINGS', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
-      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+      const res: StateActionResponse<'INIT'> = Either.right(
+        fetchIndexResponse
+      ) as Either.Right<FetchIndexResponse>;
 
       const mockMappings = { properties: { someMappings: 'string' } };
       buildIndexMappingsMock.mockReturnValue(mockMappings);
@@ -138,43 +233,46 @@ describe('Stage: init', () => {
 
       expect(newState).toEqual(
         expect.objectContaining({
-          controlState: 'CREATE_TARGET_INDEX',
-          currentIndex: '.kibana_1',
-          indexMappings: mockMappings,
+          controlState: 'UPDATE_INDEX_MAPPINGS',
+          currentIndex,
+          previousMappings: fetchIndexResponse[currentIndex].mappings,
+          additiveMappingChanges: mockMappings.properties,
+          previousAlgorithm: 'v2',
+          skipDocumentMigration: false,
         })
       );
     });
   });
 
-  describe('when checkVersionCompatibility returns `greater`', () => {
-    it('calls generateAdditiveMappingDiff with the correct parameters', () => {
+  describe('when checkIndexCurrentAlgorithm returns `v2-partially-migrated`', () => {
+    beforeEach(() => {
+      checkIndexCurrentAlgorithmMock.mockReset().mockReturnValue('v2-partially-migrated');
+      buildIndexMappingsMock.mockReturnValue({});
+      checkVersionCompatibilityMock.mockReturnValue({ status: 'greater' });
+    });
+
+    it('adds a log entry about the algo check', () => {
       const state = createState();
-      const fetchIndexResponse = createResponse();
-      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+      const res: StateActionResponse<'INIT'> = Either.right(
+        createResponse()
+      ) as Either.Right<FetchIndexResponse>;
 
-      checkVersionCompatibilityMock.mockReturnValue({
-        status: 'greater',
-      });
+      const newState = init(state, res, context);
 
-      init(state, res, context);
-
-      expect(generateAdditiveMappingDiffMock).toHaveBeenCalledTimes(1);
-      expect(generateAdditiveMappingDiffMock).toHaveBeenCalledWith({
-        types: ['foo', 'bar'].map((type) => context.typeRegistry.getType(type)),
-        meta: fetchIndexResponse[currentIndex].mappings._meta,
-        deletedTypes: context.deletedTypes,
-      });
+      expect(newState.logs.map((entry) => entry.message)).toContain(
+        `INIT: current algo check result: v2-partially-migrated`
+      );
     });
 
     it('INIT -> UPDATE_INDEX_MAPPINGS', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
-      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+      const res: StateActionResponse<'INIT'> = Either.right(
+        fetchIndexResponse
+      ) as Either.Right<FetchIndexResponse>;
 
-      checkVersionCompatibilityMock.mockReturnValue({
-        status: 'greater',
-      });
-      generateAdditiveMappingDiffMock.mockReturnValue({ someToken: {} });
+      const mockMappings = { properties: { someMappings: 'string' } };
+      buildIndexMappingsMock.mockReturnValue(mockMappings);
 
       const newState = init(state, res, context);
 
@@ -183,158 +281,304 @@ describe('Stage: init', () => {
           controlState: 'UPDATE_INDEX_MAPPINGS',
           currentIndex,
           previousMappings: fetchIndexResponse[currentIndex].mappings,
-          additiveMappingChanges: { someToken: {} },
-          newIndexCreation: false,
+          previousAlgorithm: 'v2',
         })
       );
-    });
-
-    it('adds a log entry about the version check', () => {
-      const state = createState();
-      const res: StateActionResponse<'INIT'> = Either.right(createResponse());
-
-      checkVersionCompatibilityMock.mockReturnValue({
-        status: 'greater',
-      });
-
-      const newState = init(state, res, context);
-
-      expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `Mappings model version check result: greater`,
-      ]);
     });
   });
 
-  describe('when checkVersionCompatibility returns `equal`', () => {
-    it('INIT -> UPDATE_ALIASES if alias actions are not empty', () => {
-      const state = createState();
-      const fetchIndexResponse = createResponse();
-      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+  describe('when checkIndexCurrentAlgorithm returns `zdt`', () => {
+    beforeEach(() => {
+      checkIndexCurrentAlgorithmMock.mockReset().mockReturnValue('zdt');
+    });
 
-      checkVersionCompatibilityMock.mockReturnValue({
-        status: 'equal',
-      });
-      getAliasActionsMock.mockReturnValue([{ add: { index: '.kibana_1', alias: '.kibana' } }]);
+    it('adds a log entry about the algo check', () => {
+      const state = createState();
+      const res: StateActionResponse<'INIT'> = Either.right(
+        createResponse()
+      ) as Either.Right<FetchIndexResponse>;
 
       const newState = init(state, res, context);
 
-      expect(newState).toEqual(
-        expect.objectContaining({
-          controlState: 'UPDATE_ALIASES',
-          currentIndex,
-          previousMappings: fetchIndexResponse[currentIndex].mappings,
-          newIndexCreation: false,
-        })
+      expect(newState.logs.map((entry) => entry.message)).toContain(
+        `INIT: current algo check result: zdt`
       );
     });
 
-    it('INIT -> INDEX_STATE_UPDATE_DONE if alias actions are empty', () => {
-      const state = createState();
-      const fetchIndexResponse = createResponse();
-      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
-
-      checkVersionCompatibilityMock.mockReturnValue({
-        status: 'equal',
+    describe('when getCurrentIndex returns undefined', () => {
+      beforeEach(() => {
+        getCurrentIndexMock.mockReturnValue(undefined);
       });
-      getAliasActionsMock.mockReturnValue([]);
 
-      const newState = init(state, res, context);
+      it('calls buildIndexMappings with the correct parameters', () => {
+        const state = createState();
+        const fetchIndexResponse = createResponse();
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
 
-      expect(newState).toEqual(
-        expect.objectContaining({
-          controlState: 'INDEX_STATE_UPDATE_DONE',
-          currentIndex,
-          previousMappings: fetchIndexResponse[currentIndex].mappings,
-          newIndexCreation: false,
-        })
-      );
+        init(state, res, context);
+
+        expect(buildIndexMappingsMock).toHaveBeenCalledTimes(1);
+        expect(buildIndexMappingsMock).toHaveBeenCalledWith({
+          types: ['foo', 'bar'].map((type) => context.typeRegistry.getType(type)),
+        });
+      });
+
+      it('calls getCreationAliases with the correct parameters', () => {
+        const state = createState();
+        const fetchIndexResponse = createResponse();
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
+
+        init(state, res, context);
+
+        expect(getCreationAliasesMock).toHaveBeenCalledTimes(1);
+        expect(getCreationAliasesMock).toHaveBeenCalledWith({
+          indexPrefix: context.indexPrefix,
+          kibanaVersion: context.kibanaVersion,
+        });
+      });
+
+      it('INIT -> CREATE_TARGET_INDEX', () => {
+        const state = createState();
+        const fetchIndexResponse = createResponse();
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
+
+        const mockMappings = { properties: { someMappings: 'string' } };
+        buildIndexMappingsMock.mockReturnValue(mockMappings);
+
+        const creationAliases = ['.foo', '.bar'];
+        getCreationAliasesMock.mockReturnValue(creationAliases);
+
+        const newState = init(state, res, context);
+
+        expect(newState).toEqual(
+          expect.objectContaining({
+            controlState: 'CREATE_TARGET_INDEX',
+            currentIndex: '.kibana_1',
+            indexMappings: mockMappings,
+            creationAliases,
+          })
+        );
+      });
     });
 
-    it('adds a log entry about the version check', () => {
-      const state = createState();
-      const res: StateActionResponse<'INIT'> = Either.right(createResponse());
+    describe('when checkVersionCompatibility returns `greater`', () => {
+      it('calls generateAdditiveMappingDiff with the correct parameters', () => {
+        const state = createState();
+        const fetchIndexResponse = createResponse();
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
 
-      checkVersionCompatibilityMock.mockReturnValue({
-        status: 'equal',
+        checkVersionCompatibilityMock.mockReturnValue({
+          status: 'greater',
+        });
+
+        init(state, res, context);
+
+        expect(generateAdditiveMappingDiffMock).toHaveBeenCalledTimes(1);
+        expect(generateAdditiveMappingDiffMock).toHaveBeenCalledWith({
+          types: ['foo', 'bar'].map((type) => context.typeRegistry.getType(type)),
+          mapping: fetchIndexResponse[currentIndex].mappings,
+          deletedTypes: context.deletedTypes,
+        });
       });
 
-      const newState = init(state, res, context);
+      it('INIT -> UPDATE_INDEX_MAPPINGS', () => {
+        const state = createState();
+        const fetchIndexResponse = createResponse();
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
 
-      expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `Mappings model version check result: equal`,
-      ]);
-    });
-  });
+        checkVersionCompatibilityMock.mockReturnValue({
+          status: 'greater',
+        });
+        generateAdditiveMappingDiffMock.mockReturnValue({ someToken: {} });
 
-  describe('when checkVersionCompatibility returns `lesser`', () => {
-    it('INIT -> FATAL', () => {
-      const state = createState();
-      const fetchIndexResponse = createResponse();
-      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+        const newState = init(state, res, context);
 
-      checkVersionCompatibilityMock.mockReturnValue({
-        status: 'lesser',
+        expect(newState).toEqual(
+          expect.objectContaining({
+            controlState: 'UPDATE_INDEX_MAPPINGS',
+            currentIndex,
+            previousMappings: fetchIndexResponse[currentIndex].mappings,
+            additiveMappingChanges: { someToken: {} },
+            skipDocumentMigration: false,
+            previousAlgorithm: 'zdt',
+          })
+        );
       });
 
-      const newState = init(state, res, context);
+      it('adds a log entry about the version check', () => {
+        const state = createState();
+        const res: StateActionResponse<'INIT'> = Either.right(
+          createResponse()
+        ) as Either.Right<FetchIndexResponse>;
 
-      expect(newState).toEqual(
-        expect.objectContaining({
-          controlState: 'FATAL',
-          reason: 'Downgrading model version is currently unsupported',
-        })
-      );
-    });
+        checkVersionCompatibilityMock.mockReturnValue({
+          status: 'greater',
+        });
 
-    it('adds a log entry about the version check', () => {
-      const state = createState();
-      const res: StateActionResponse<'INIT'> = Either.right(createResponse());
+        const newState = init(state, res, context);
 
-      checkVersionCompatibilityMock.mockReturnValue({
-        status: 'lesser',
+        expect(newState.logs.map((entry) => entry.message)).toContain(
+          `INIT: mapping version check result: greater`
+        );
       });
-
-      const newState = init(state, res, context);
-
-      expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `Mappings model version check result: lesser`,
-      ]);
-    });
-  });
-
-  describe('when checkVersionCompatibility returns `conflict`', () => {
-    it('INIT -> FATAL', () => {
-      const state = createState();
-      const fetchIndexResponse = createResponse();
-      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
-
-      checkVersionCompatibilityMock.mockReturnValue({
-        status: 'conflict',
-      });
-
-      const newState = init(state, res, context);
-
-      expect(newState).toEqual(
-        expect.objectContaining({
-          controlState: 'FATAL',
-          reason: 'Model version conflict: inconsistent higher/lower versions',
-        })
-      );
     });
 
-    it('adds a log entry about the version check', () => {
-      const state = createState();
-      const res: StateActionResponse<'INIT'> = Either.right(createResponse());
+    describe('when checkVersionCompatibility returns `equal`', () => {
+      it('INIT -> UPDATE_ALIASES if alias actions are not empty', () => {
+        const state = createState();
+        const fetchIndexResponse = createResponse();
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
 
-      checkVersionCompatibilityMock.mockReturnValue({
-        status: 'conflict',
+        checkVersionCompatibilityMock.mockReturnValue({
+          status: 'equal',
+        });
+        getAliasActionsMock.mockReturnValue([{ add: { index: '.kibana_1', alias: '.kibana' } }]);
+
+        const newState = init(state, res, context);
+
+        expect(newState).toEqual(
+          expect.objectContaining({
+            controlState: 'UPDATE_ALIASES',
+            currentIndex,
+            previousMappings: fetchIndexResponse[currentIndex].mappings,
+            skipDocumentMigration: false,
+            previousAlgorithm: 'zdt',
+          })
+        );
       });
 
-      const newState = init(state, res, context);
+      it('INIT -> INDEX_STATE_UPDATE_DONE if alias actions are empty', () => {
+        const state = createState();
+        const fetchIndexResponse = createResponse();
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
 
-      expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `Mappings model version check result: conflict`,
-      ]);
+        checkVersionCompatibilityMock.mockReturnValue({
+          status: 'equal',
+        });
+        getAliasActionsMock.mockReturnValue([]);
+
+        const newState = init(state, res, context);
+
+        expect(newState).toEqual(
+          expect.objectContaining({
+            controlState: 'INDEX_STATE_UPDATE_DONE',
+            currentIndex,
+            previousMappings: fetchIndexResponse[currentIndex].mappings,
+            skipDocumentMigration: false,
+            previousAlgorithm: 'zdt',
+          })
+        );
+      });
+
+      it('adds a log entry about the version check', () => {
+        const state = createState();
+        const res: StateActionResponse<'INIT'> = Either.right(
+          createResponse()
+        ) as Either.Right<FetchIndexResponse>;
+
+        checkVersionCompatibilityMock.mockReturnValue({
+          status: 'equal',
+        });
+
+        const newState = init(state, res, context);
+
+        expect(newState.logs.map((entry) => entry.message)).toContain(
+          `INIT: mapping version check result: equal`
+        );
+      });
+    });
+
+    describe('when checkVersionCompatibility returns `lesser`', () => {
+      it('INIT -> INDEX_STATE_UPDATE_DONE', () => {
+        const state = createState();
+        const fetchIndexResponse = createResponse();
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
+
+        checkVersionCompatibilityMock.mockReturnValue({
+          status: 'lesser',
+        });
+
+        const newState = init(state, res, context);
+
+        expect(newState).toEqual(
+          expect.objectContaining({
+            controlState: 'INDEX_STATE_UPDATE_DONE',
+          })
+        );
+      });
+
+      it('adds a log entry about the version check', () => {
+        const state = createState();
+        const res: StateActionResponse<'INIT'> = Either.right(
+          createResponse()
+        ) as Either.Right<FetchIndexResponse>;
+
+        checkVersionCompatibilityMock.mockReturnValue({
+          status: 'lesser',
+        });
+
+        const newState = init(state, res, context);
+
+        expect(newState.logs.map((entry) => entry.message)).toContain(
+          `INIT: mapping version check result: lesser`
+        );
+      });
+    });
+
+    describe('when checkVersionCompatibility returns `conflict`', () => {
+      it('INIT -> FATAL', () => {
+        const state = createState();
+        const fetchIndexResponse = createResponse();
+        const res: StateActionResponse<'INIT'> = Either.right(
+          fetchIndexResponse
+        ) as Either.Right<FetchIndexResponse>;
+
+        checkVersionCompatibilityMock.mockReturnValue({
+          status: 'conflict',
+        });
+
+        const newState = init(state, res, context);
+
+        expect(newState).toEqual(
+          expect.objectContaining({
+            controlState: 'FATAL',
+            reason: 'Model version conflict: inconsistent higher/lower versions',
+          })
+        );
+      });
+
+      it('adds a log entry about the version check', () => {
+        const state = createState();
+        const res: StateActionResponse<'INIT'> = Either.right(
+          createResponse()
+        ) as Either.Right<FetchIndexResponse>;
+
+        checkVersionCompatibilityMock.mockReturnValue({
+          status: 'conflict',
+        });
+
+        const newState = init(state, res, context);
+
+        expect(newState.logs.map((entry) => entry.message)).toContain(
+          `INIT: mapping version check result: conflict`
+        );
+      });
     });
   });
 });

@@ -155,6 +155,14 @@ When making a change like this, import statements that previously pointed to the
 called `@kbn/imports/exports_moved_packages` which allows contributors to define the exports previously available from one package as now being available from another package and leverage 
 auto-fixing to migration all existing and new uses of this export to the proper package.
 
+## Logging
+
+- Do not log sensitive information (personally identifiable information, passwords, api keys, etc.), regardless of the log level. Err on the side of caution. Personally identifiable information is common in user input; for example, dashboard titles, index names and Elasticsearch `_search` queries.
+- Logs should include just enough information to be actionable.
+- Use the right log level, see <DocLink id="kibCoreLogging" section="log-level" text="Log Levels"/>.
+- Use ECS format for any additional LogMeta you add to your logging statements.
+- Logs are read by customers, a large number of Elastic employees, and Kibana contributors. As such, log messages should use language that is understandable to a wide audience and should avoid disclosing implementation details (unless they're at the `debug`/`trace` level).
+
 ## Licensing
 
 <DocCallOut title="Internal only">

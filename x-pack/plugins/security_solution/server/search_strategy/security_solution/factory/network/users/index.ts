@@ -7,13 +7,12 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type {
   NetworkUsersStrategyResponse,
   NetworkQueries,
-  NetworkUsersRequestOptions,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
@@ -23,14 +22,14 @@ import { getUsersEdges } from './helpers';
 import { buildUsersQuery } from './query.users_network.dsl';
 
 export const networkUsers: SecuritySolutionFactory<NetworkQueries.users> = {
-  buildDsl: (options: NetworkUsersRequestOptions) => {
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildUsersQuery(options);
   },
   parse: async (
-    options: NetworkUsersRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkUsersStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;

@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { of, Subscription } from 'rxjs';
-import type { AnalyticsClient } from '@kbn/analytics-client';
-import { createAnalytics } from '@kbn/analytics-client';
+import type { AnalyticsClient } from '@elastic/ebt/client';
+import { createAnalytics } from '@elastic/ebt/client';
 import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { trackPerformanceMeasureEntries } from './track_performance_measure_entries';
 import { trackClicks } from './track_clicks';
+
 import { getSessionId } from './get_session_id';
-import { createLogger } from './logger';
 import { trackViewportSize } from './track_viewport_size';
 
 /** @internal */
@@ -30,10 +32,7 @@ export class AnalyticsService {
   constructor(core: CoreContext) {
     this.analyticsClient = createAnalytics({
       isDev: core.env.mode.dev,
-      logger: createLogger(core.env.mode.dev),
-      // TODO: We need to be able to edit sendTo once we resolve the telemetry config.
-      //  For now, we are relying on whether it's a distributable or running from source.
-      sendTo: core.env.packageInfo.dist ? 'production' : 'staging',
+      logger: core.logger.get('analytics'),
     });
 
     this.registerBuildInfoAnalyticsContext(core);
@@ -44,6 +43,9 @@ export class AnalyticsService {
     this.registerSessionIdContext();
     this.registerBrowserInfoAnalyticsContext();
     this.subscriptionsHandler.add(trackClicks(this.analyticsClient, core.env.mode.dev));
+    this.subscriptionsHandler.add(
+      trackPerformanceMeasureEntries(this.analyticsClient, core.env.mode.dev)
+    );
     this.subscriptionsHandler.add(trackViewportSize(this.analyticsClient));
 
     // Register a flush method in the browser so CI can explicitly call it before closing the browser.
@@ -183,6 +185,10 @@ export class AnalyticsService {
         cluster_version: {
           type: 'keyword',
           _meta: { description: 'The Cluster version', optional: true },
+        },
+        cluster_build_flavor: {
+          type: 'keyword',
+          _meta: { description: 'The Cluster build flavor', optional: true },
         },
       },
     });

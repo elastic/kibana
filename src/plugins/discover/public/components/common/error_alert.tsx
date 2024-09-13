@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export const DiscoverError = ({ error }: { error: Error }) => {
-  const history = useHistory();
+  const { locator } = useDiscoverServices();
 
-  const goToMain = () => {
-    history.push('/');
+  const goToMain = async () => {
+    await locator.navigate({});
   };
 
   return (

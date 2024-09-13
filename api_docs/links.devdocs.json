@@ -1,0 +1,97 @@
+{
+  "id": "links",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "links",
+        "id": "def-common.APP_ICON",
+        "type": "string",
+        "tags": [],
+        "label": "APP_ICON",
+        "description": [],
+        "signature": [
+          "\"link\""
+        ],
+        "path": "src/plugins/links/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "links",
+        "id": "def-common.APP_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "APP_NAME",
+        "description": [],
+        "path": "src/plugins/links/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "links",
+        "id": "def-common.CONTENT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONTENT_ID",
+        "description": [],
+        "signature": [
+          "\"links\""
+        ],
+        "path": "src/plugins/links/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "links",
+        "id": "def-common.DISPLAY_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "DISPLAY_NAME",
+        "description": [],
+        "path": "src/plugins/links/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "links",
+        "id": "def-common.LATEST_VERSION",
+        "type": "number",
+        "tags": [],
+        "label": "LATEST_VERSION",
+        "description": [],
+        "signature": [
+          "1"
+        ],
+        "path": "src/plugins/links/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Type } from '@kbn/config-schema';
 import type { UiCounterMetricType } from '@kbn/analytics';
 
@@ -26,6 +28,14 @@ export type UiSettingsType =
   | 'color';
 
 /**
+ * Type for the readonly mode of the readonly settings.
+ * 'strict' indicates that the value cannot be changed through API and is not displayed in the UI
+ * 'ui' indicates that the value is just not displayed in the UI
+ * @public
+ * */
+export type ReadonlyModeType = 'strict' | 'ui';
+
+/**
  * UiSettings deprecation field options.
  * @public
  * */
@@ -34,6 +44,10 @@ export interface DeprecationSettings {
   message: string;
   /** Key to documentation links */
   docLinksKey: string;
+}
+
+export interface GetUiSettingsContext {
+  request?: KibanaRequest;
 }
 
 /**
@@ -45,6 +59,8 @@ export interface UiSettingsParams<T = unknown> {
   name?: string;
   /** default value to fall back to if a user doesn't provide any */
   value?: T;
+  /** handler to return the default value asynchronously. Supersedes the `value` prop */
+  getValue?: (context?: GetUiSettingsContext) => Promise<T>;
   /** description provided to a user in UI */
   description?: string;
   /** used to group the configured setting in the UI */
@@ -57,6 +73,8 @@ export interface UiSettingsParams<T = unknown> {
   requiresPageReload?: boolean;
   /** a flag indicating that value cannot be changed */
   readonly?: boolean;
+  /** a flag indicating the level of restriction of the readonly settings {@link ReadonlyModeType} */
+  readonlyMode?: ReadonlyModeType;
   /**
    * a flag indicating that value might contain user sensitive data.
    * used by telemetry to mask the value of the setting when sent.
@@ -73,9 +91,15 @@ export interface UiSettingsParams<T = unknown> {
    * @remark settings without order defined will be displayed last and ordered by name
    */
   order?: number;
-  /*
-   * Value validation schema
+  /**
+   * Value validation schema.
    * Used to validate value on write and read.
+   *
+   * This schema is also used for validating the user input in all settings fields {@link FieldRow} across Kibana UI.
+   * Use schema options to specify limits on the value. For example:
+   * `schema.number({ min: 0, max: 100 })`
+   *
+   * More information about schema in https://github.com/elastic/kibana/blob/main/packages/kbn-config-schema/README.md
    */
   schema: Type<T>;
   /**

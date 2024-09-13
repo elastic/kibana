@@ -5,36 +5,32 @@
  * 2.0.
  */
 
-import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
-import pMap from 'p-map';
-import {
-  MAX_RULES_TO_UPDATE_IN_PARALLEL,
-  NOTIFICATION_THROTTLE_NO_ACTIONS,
-} from '../../../../../../common/constants';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 
-import type {
-  BulkActionEditPayload,
-  BulkActionEditPayloadRuleActions,
-} from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { ExperimentalFeatures } from '../../../../../../common';
+import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
 
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
-import { enrichFilterWithRuleTypeMapping } from '../search/enrich_filter_with_rule_type_mappings';
-import { readRules } from '../crud/read_rules';
-import type { RuleAlertType } from '../../../rule_schema';
+import type { RuleAlertType, RuleParams } from '../../../rule_schema';
 
+import type { IPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import { convertAlertingRuleToRuleResponse } from '../detection_rules_client/converters/convert_alerting_rule_to_rule_response';
+import { calculateIsCustomized } from '../detection_rules_client/mergers/rule_source/calculate_is_customized';
+import { bulkEditActionToRulesClientOperation } from './action_to_rules_client_operation';
 import { ruleParamsModifier } from './rule_params_modifier';
 import { splitBulkEditActions } from './split_bulk_edit_actions';
 import { validateBulkEditRule } from './validations';
-import { bulkEditActionToRulesClientOperation } from './action_to_rules_client_operation';
 
 export interface BulkEditRulesArguments {
+  actionsClient: ActionsClient;
   rulesClient: RulesClient;
+  prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   actions: BulkActionEditPayload[];
-  filter?: string;
-  ids?: string[];
+  rules: RuleAlertType[];
   mlAuthz: MlAuthz;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -45,74 +41,74 @@ export interface BulkEditRulesArguments {
  * @returns edited rules and caught errors
  */
 export const bulkEditRules = async ({
+  actionsClient,
   rulesClient,
-  ids,
+  prebuiltRuleAssetClient,
+  rules,
   actions,
-  filter,
   mlAuthz,
+  experimentalFeatures,
 }: BulkEditRulesArguments) => {
+  // Split operations
   const { attributesActions, paramsActions } = splitBulkEditActions(actions);
-  const operations = attributesActions.map(bulkEditActionToRulesClientOperation).flat();
-  const result = await rulesClient.bulkEdit({
-    ...(ids ? { ids } : { filter: enrichFilterWithRuleTypeMapping(filter) }),
+  const operations = attributesActions
+    .map((attribute) => bulkEditActionToRulesClientOperation(actionsClient, attribute))
+    .flat();
+
+  // Check if there are any prebuilt rules and fetch their base versions
+  const prebuiltRules = rules.filter((rule) => rule.params.immutable);
+  const baseVersions = await prebuiltRuleAssetClient.fetchAssetsByVersion(
+    prebuiltRules.map((rule) => ({
+      rule_id: rule.params.ruleId,
+      version: rule.params.version,
+    }))
+  );
+  const baseVersionsMap = new Map(
+    baseVersions.map((baseVersion) => [baseVersion.rule_id, baseVersion])
+  );
+
+  const result = await rulesClient.bulkEdit<RuleParams>({
+    ids: rules.map((rule) => rule.id),
     operations,
-    paramsModifier: async (ruleParams: RuleAlertType['params']) => {
+    paramsModifier: async (rule) => {
+      const ruleParams = rule.params;
+
       await validateBulkEditRule({
         mlAuthz,
         ruleType: ruleParams.type,
         edit: actions,
         immutable: ruleParams.immutable,
+        experimentalFeatures,
       });
-      return ruleParamsModifier(ruleParams, paramsActions);
+      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
+        ruleParams,
+        paramsActions,
+        experimentalFeatures
+      );
+
+      // Update rule source
+      const updatedRule = {
+        ...rule,
+        params: modifiedParams,
+      };
+      const ruleResponse = convertAlertingRuleToRuleResponse(updatedRule);
+      const ruleSource =
+        ruleResponse.immutable === true
+          ? {
+              type: 'external' as const,
+              isCustomized: calculateIsCustomized(
+                baseVersionsMap.get(ruleResponse.rule_id),
+                ruleResponse
+              ),
+            }
+          : {
+              type: 'internal' as const,
+            };
+      modifiedParams.ruleSource = ruleSource;
+
+      return { modifiedParams, isParamsUpdateSkipped };
     },
   });
-
-  // rulesClient bulkEdit currently doesn't support bulk mute/unmute.
-  // this is a workaround to mitigate this,
-  // until https://github.com/elastic/kibana/issues/139084 is resolved
-  // if rule actions has been applied, we go through each rule, unmute it if necessary and refetch it
-  // calling unmute needed only if rule was muted and throttle value is not NOTIFICATION_THROTTLE_NO_ACTIONS
-  const ruleActions = attributesActions.filter((rule): rule is BulkActionEditPayloadRuleActions =>
-    [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].includes(rule.type)
-  );
-
-  // bulk edit actions are applied in historical order.
-  // So, we need to find a rule action that will be applied the last, to be able to check if rule should be muted/unmuted
-  const rulesAction = ruleActions.pop();
-
-  if (rulesAction) {
-    const unmuteErrors: BulkOperationError[] = [];
-    const rulesToUnmute = await pMap(
-      result.rules,
-      async (rule) => {
-        try {
-          if (rule.muteAll && rulesAction.value.throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
-            await rulesClient.unmuteAll({ id: rule.id });
-            return (await readRules({ rulesClient, id: rule.id, ruleId: undefined })) ?? rule;
-          }
-
-          return rule;
-        } catch (err) {
-          unmuteErrors.push({
-            message: err.message,
-            rule: {
-              id: rule.id,
-              name: rule.name,
-            },
-          });
-
-          return null;
-        }
-      },
-      { concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL }
-    );
-
-    return {
-      ...result,
-      rules: rulesToUnmute.filter((rule): rule is RuleAlertType => rule != null),
-      errors: [...result.errors, ...unmuteErrors],
-    };
-  }
 
   return result;
 };

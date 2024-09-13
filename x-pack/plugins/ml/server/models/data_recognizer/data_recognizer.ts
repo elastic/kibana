@@ -13,15 +13,16 @@ import type {
   IScopedClusterClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-
 import moment from 'moment';
-import { merge } from 'lodash';
+import { merge, intersection } from 'lodash';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { CompatibleModule } from '../../../common/constants/app';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import type { MlClient } from '../../lib/ml_client';
+import type { RecognizeModuleResultDataView } from '../../../common/types/modules';
 import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import type {
   KibanaObjects,
@@ -40,6 +41,7 @@ import type {
   DataRecognizerConfigResponse,
   GeneralDatafeedsOverride,
   JobSpecificOverride,
+  RecognizeResult,
 } from '../../../common/types/modules';
 import { isGeneralJobOverride } from '../../../common/types/modules';
 import {
@@ -74,18 +76,10 @@ function isFileBasedModule(arg: unknown): arg is FileBasedModule {
   return isPopulatedObject(arg) && Array.isArray(arg.jobs) && arg.jobs[0]?.file !== undefined;
 }
 
-interface Config {
+export interface Config {
   dirName?: string;
   module: FileBasedModule | Module;
   isSavedObject: boolean;
-}
-
-export interface RecognizeResult {
-  id: string;
-  title: string;
-  query: any;
-  description: string;
-  logo: Logo;
 }
 
 interface ObjectExistResult {
@@ -123,6 +117,7 @@ export class DataRecognizer {
   private _jobsService: ReturnType<typeof jobServiceProvider>;
   private _resultsService: ReturnType<typeof resultsServiceProvider>;
   private _calculateModelMemoryLimit: ReturnType<typeof calculateModelMemoryLimitProvider>;
+  private _compatibleModuleType: CompatibleModule | null;
 
   /**
    * A temporary cache of configs loaded from disk and from save object service.
@@ -146,7 +141,8 @@ export class DataRecognizer {
     savedObjectsClient: SavedObjectsClientContract,
     dataViewsService: DataViewsService,
     mlSavedObjectService: MLSavedObjectService,
-    request: KibanaRequest
+    request: KibanaRequest,
+    compatibleModuleType: CompatibleModule | null
   ) {
     this._client = mlClusterClient;
     this._mlClient = mlClient;
@@ -158,6 +154,7 @@ export class DataRecognizer {
     this._jobsService = jobServiceProvider(mlClusterClient, mlClient);
     this._resultsService = resultsServiceProvider(mlClient);
     this._calculateModelMemoryLimit = calculateModelMemoryLimitProvider(mlClusterClient, mlClient);
+    this._compatibleModuleType = compatibleModuleType;
   }
 
   // list all directories under the given directory
@@ -191,12 +188,12 @@ export class DataRecognizer {
     });
   }
 
-  private async _loadConfigs(): Promise<Config[]> {
+  private async _loadConfigs(moduleTagFilters?: string[]): Promise<Config[]> {
     if (this._configCache !== null) {
       return this._configCache;
     }
 
-    const configs: Config[] = [];
+    const localConfigs: Config[] = [];
     const dirs = await this._listDirs(this._modulesDir);
     await Promise.all(
       dirs.map(async (dir) => {
@@ -209,7 +206,7 @@ export class DataRecognizer {
 
         if (file !== undefined) {
           try {
-            configs.push({
+            localConfigs.push({
               dirName: dir,
               module: JSON.parse(file),
               isSavedObject: false,
@@ -226,7 +223,11 @@ export class DataRecognizer {
       isSavedObject: true,
     }));
 
-    this._configCache = [...configs, ...savedObjectConfigs];
+    this._configCache = filterConfigs(
+      [...localConfigs, ...savedObjectConfigs],
+      this._compatibleModuleType,
+      moduleTagFilters ?? []
+    );
 
     return this._configCache;
   }
@@ -241,14 +242,83 @@ export class DataRecognizer {
   }
 
   // get the manifest.json file for a specified id, e.g. "nginx"
-  private async _findConfig(id: string) {
-    const configs = await this._loadConfigs();
+  private async _findConfig(id: string, moduleTagFilters?: string[]) {
+    const configs = await this._loadConfigs(moduleTagFilters);
     return configs.find((i) => i.module.id === id);
   }
 
   // called externally by an endpoint
-  public async findMatches(indexPattern: string): Promise<RecognizeResult[]> {
-    const manifestFiles = await this._loadConfigs();
+  public async findIndexMatches(
+    moduleId: string,
+    size: number = 15
+  ): Promise<RecognizeModuleResultDataView[]> {
+    const config = await this._findConfig(moduleId);
+    if (config?.module.query === undefined) {
+      return [];
+    }
+
+    try {
+      const idsWithTitle = await this._dataViewsService.getIdsWithTitle();
+      // create temp objects with a function for running the query
+      const tempObjs = idsWithTitle.map(({ id, title, name }) => {
+        return {
+          id,
+          title,
+          name,
+          func: async () =>
+            this._client.asCurrentUser.search(
+              {
+                index: title, // title is index pattern we can search by e.g. "filebeat-*"
+                size: 0,
+                body: {
+                  query: config?.module.query,
+                },
+              },
+              { maxRetries: 0 }
+            ),
+        };
+      });
+
+      // run all the queries in parallel
+      const response = await Promise.all(
+        tempObjs.map(async ({ id, name, title, func }) => {
+          try {
+            const resp = await func();
+            const totalHits =
+              typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits?.total?.value ?? 0;
+            return { id, name, title, totalHits };
+          } catch (error) {
+            mlLog.warn(
+              `Data recognizer error running search for query defined in module ${config.module.id}. ${error}`
+            );
+            return { id, name, title, totalHits: 0 };
+          }
+        })
+      );
+
+      return response
+        .reduce<RecognizeModuleResultDataView[]>((acc, { id, title, name, totalHits }) => {
+          if (totalHits > 0) {
+            acc.push({ id, title, name });
+          }
+          return acc;
+        }, [])
+        .slice(0, size);
+    } catch (error) {
+      mlLog.warn(
+        `Data recognizer error fetching and matching data views for query in ${config.module.id}. ${error}`
+      );
+    }
+
+    return [];
+  }
+
+  // called externally by an endpoint
+  public async findMatches(
+    indexPattern: string,
+    moduleTagFilters?: string[]
+  ): Promise<RecognizeResult[]> {
+    const manifestFiles = await this._loadConfigs(moduleTagFilters);
     const results: RecognizeResult[] = [];
 
     await Promise.all(
@@ -264,25 +334,12 @@ export class DataRecognizer {
         }
 
         if (match === true) {
-          let logo: Logo = null;
-          if (moduleConfig.logo) {
-            logo = moduleConfig.logo;
-          } else if (moduleConfig.logoFile) {
-            try {
-              const logoFile = await this._readFile(
-                `${this._modulesDir}/${i.dirName}/${moduleConfig.logoFile}`
-              );
-              logo = JSON.parse(logoFile);
-            } catch (e) {
-              logo = null;
-            }
-          }
           results.push({
             id: moduleConfig.id,
             title: moduleConfig.title,
             query: moduleConfig.query,
             description: moduleConfig.description,
-            logo,
+            logo: await this._loadLogoFile(moduleConfig, i.dirName),
           });
         }
       })
@@ -291,6 +348,30 @@ export class DataRecognizer {
     results.sort((res1, res2) => res1.id.localeCompare(res2.id));
 
     return results;
+  }
+
+  private async _loadLogoFile(
+    moduleConfig: FileBasedModule | Module,
+    dirName: string | null | undefined
+  ) {
+    let logo: Logo = null;
+
+    if (moduleConfig.logo) {
+      logo = moduleConfig.logo;
+    } else if (moduleConfig.logoFile) {
+      try {
+        const logoFileString = await this._readFile(
+          `${this._modulesDir}/${dirName}/${moduleConfig.logoFile}`
+        );
+        logo = JSON.parse(logoFileString);
+      } catch (error) {
+        mlLog.warn(
+          `Data recognizer error loading logo file ${moduleConfig.logoFile} for module ${moduleConfig.id}. ${error}`
+        );
+      }
+    }
+
+    return logo;
   }
 
   private async _searchForFields(moduleConfig: FileBasedModule | Module, indexPattern: string) {
@@ -317,8 +398,8 @@ export class DataRecognizer {
     return body.hits.total.value > 0;
   }
 
-  public async listModules() {
-    const manifestFiles = await this._loadConfigs();
+  public async listModules(moduleTagFilters?: string[]): Promise<Module[]> {
+    const manifestFiles = await this._loadConfigs(moduleTagFilters);
     manifestFiles.sort((a, b) => a.module.id.localeCompare(b.module.id)); // sort as json files are read from disk and could be in any order.
 
     const configs: Array<Module | FileBasedModule> = [];
@@ -326,7 +407,7 @@ export class DataRecognizer {
       if (config.isSavedObject) {
         configs.push(config.module);
       } else {
-        configs.push(await this.getModule(config.module.id));
+        configs.push(await this.getModule(config.module.id, moduleTagFilters));
       }
     }
     // casting return as Module[] so not to break external plugins who rely on this function
@@ -337,11 +418,11 @@ export class DataRecognizer {
   // called externally by an endpoint
   // supplying an optional prefix will add the prefix
   // to the job and datafeed configs
-  public async getModule(id: string, prefix = ''): Promise<Module> {
+  public async getModule(id: string, moduleTagFilters?: string[], prefix = ''): Promise<Module> {
     let module: FileBasedModule | Module | null = null;
     let dirName: string | null = null;
 
-    const config = await this._findConfig(id);
+    const config = await this._findConfig(id, moduleTagFilters);
     if (config !== undefined) {
       module = config.module;
       dirName = config.dirName ?? null;
@@ -351,7 +432,7 @@ export class DataRecognizer {
 
     const jobs: ModuleJob[] = [];
     const datafeeds: ModuleDatafeed[] = [];
-    const kibana: KibanaObjects = {};
+    const kibana: KibanaObjects = Object.create(null);
     // load all of the job configs
     if (isModule(module)) {
       const tempJobs: ModuleJob[] = module.jobs.map((j) => ({
@@ -414,6 +495,9 @@ export class DataRecognizer {
 
       datafeeds.push(...(await Promise.all(tempDatafeed)).filter(isDefined));
     }
+
+    module.logo = await this._loadLogoFile(module, dirName);
+
     // load all of the kibana saved objects
     if (module.kibana !== undefined) {
       const kKeys = Object.keys(module.kibana) as Array<keyof FileBasedModule['kibana']>;
@@ -475,7 +559,7 @@ export class DataRecognizer {
     applyToAllSpaces: boolean = false
   ) {
     // load the config from disk
-    const moduleConfig = await this.getModule(moduleId, jobPrefix);
+    const moduleConfig = await this.getModule(moduleId, undefined, jobPrefix);
 
     if (indexPatternName === undefined && moduleConfig.defaultIndexPattern === undefined) {
       throw Boom.badRequest(
@@ -487,7 +571,7 @@ export class DataRecognizer {
       indexPatternName === undefined ? moduleConfig.defaultIndexPattern : indexPatternName;
     this._indexPatternId = await this._getIndexPatternId(this._indexPatternName);
 
-    // the module's jobs contain custom URLs which require an index patten id
+    // the module's jobs contain custom URLs which require an index pattern id
     // but there is no corresponding data view, throw an error
     if (this._indexPatternId === undefined && this._doJobUrlsContainIndexPatternId(moduleConfig)) {
       throw Boom.badRequest(
@@ -495,7 +579,7 @@ export class DataRecognizer {
       );
     }
 
-    // the module's saved objects require an index patten id
+    // the module's saved objects require an index pattern id
     // but there is no corresponding data view, throw an error
     if (
       this._indexPatternId === undefined &&
@@ -586,12 +670,12 @@ export class DataRecognizer {
       }
     }
     // merge all the save results
-    this._updateResults(results, saveResults);
+    await this._updateResults(results, saveResults);
     return results;
   }
 
   public async dataRecognizerJobsExist(moduleId: string): Promise<JobExistResult> {
-    const results = {} as JobExistResult;
+    const results = Object.create(null) as JobExistResult;
 
     // Load the module with the specified ID and check if the jobs
     // in the module have been created.
@@ -643,8 +727,8 @@ export class DataRecognizer {
   // returns a id based on a data view name
   private async _getIndexPatternId(name: string): Promise<string | undefined> {
     try {
-      const dataViews = await this._dataViewsService.find(name);
-      return dataViews.find((d) => d.title === name)?.id;
+      const dataViews = await this._dataViewsService.findLazy(name);
+      return dataViews.find((d) => d.getIndexPattern() === name)?.id;
     } catch (error) {
       mlLog.warn(`Error loading data views, ${error}`);
       return;
@@ -847,7 +931,7 @@ export class DataRecognizer {
     start?: number,
     end?: number
   ): Promise<{ [key: string]: DatafeedResponse }> {
-    const results = {} as { [key: string]: DatafeedResponse };
+    const results = Object.create(null) as { [key: string]: DatafeedResponse };
     for (const datafeed of datafeeds) {
       results[datafeed.id] = await this._startDatafeed(datafeed, start, end);
     }
@@ -953,7 +1037,9 @@ export class DataRecognizer {
   // creates an empty results object,
   // listing each job/datafeed/savedObject with a save success boolean
   private _createResultsTemplate(moduleConfig: Module): DataRecognizerConfigResponse {
-    const results: DataRecognizerConfigResponse = {} as DataRecognizerConfigResponse;
+    const results: DataRecognizerConfigResponse = Object.create(
+      null
+    ) as DataRecognizerConfigResponse;
     const reducedConfig = {
       jobs: moduleConfig.jobs,
       datafeeds: moduleConfig.datafeeds,
@@ -978,7 +1064,7 @@ export class DataRecognizer {
       if (Array.isArray(reducedConfig[i])) {
         createResultsItems(reducedConfig[i] as any[], results, i);
       } else {
-        results[i] = {} as any;
+        results[i] = Object.create(null);
         Object.keys(reducedConfig[i]).forEach((k) => {
           createResultsItems((reducedConfig[i] as Module['kibana'])[k] as any[], results[i], k);
         });
@@ -1170,7 +1256,7 @@ export class DataRecognizer {
           );
 
           if (!job.config.analysis_limits) {
-            job.config.analysis_limits = {} as AnalysisLimits;
+            job.config.analysis_limits = Object.create(null) as AnalysisLimits;
           }
 
           job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
@@ -1202,7 +1288,7 @@ export class DataRecognizer {
           // so set the jobs mml to be the max
 
           if (!job.config.analysis_limits) {
-            job.config.analysis_limits = {} as AnalysisLimits;
+            job.config.analysis_limits = Object.create(null) as AnalysisLimits;
           }
 
           job.config.analysis_limits.model_memory_limit = maxMml;
@@ -1402,7 +1488,8 @@ export function dataRecognizerFactory(
   savedObjectsClient: SavedObjectsClientContract,
   dataViewsService: DataViewsService,
   mlSavedObjectService: MLSavedObjectService,
-  request: KibanaRequest
+  request: KibanaRequest,
+  compatibleModuleType: CompatibleModule | null
 ) {
   return new DataRecognizer(
     client,
@@ -1410,6 +1497,50 @@ export function dataRecognizerFactory(
     savedObjectsClient,
     dataViewsService,
     mlSavedObjectService,
-    request
+    request,
+    compatibleModuleType
   );
+}
+
+/**
+ * Filters an array of modules based on the provided tag filters
+ *
+ * @param configs - The array of module config objects to filter.
+ * @param compatibleModuleType - The CompatibleModule type to filter by, or null to include all modules. The compatibleModuleType is provided by the kibana yml config.
+ * @param moduleTagFilters - An array of module tags to filter by. Only modules that have at least one matching tag will be included. The moduleTagFilters are provided as a query parameter to the endpoint.
+ * @returns An array of module Config objects that match the provided criteria.
+ */
+export function filterConfigs(
+  configs: Config[],
+  compatibleModuleType: CompatibleModule | null,
+  moduleTagFilters: string[]
+) {
+  let filteredConfigs: Config[] = [];
+  if (compatibleModuleType === null && moduleTagFilters.length === 0) {
+    filteredConfigs = configs;
+  } else {
+    const filteredForCompatibleModule =
+      compatibleModuleType === null
+        ? configs
+        : configs.filter(({ module }) => {
+            if (module.tags === undefined || module.tags.length === 0) {
+              // if the module has no tags, it is compatible with all serverless projects
+              return true;
+            }
+            return module.tags.includes(compatibleModuleType!);
+          });
+    const filteredForModuleTags =
+      moduleTagFilters.length === 0
+        ? filteredForCompatibleModule
+        : filteredForCompatibleModule.filter(({ module }) => {
+            if (module.tags === undefined || module.tags.length === 0) {
+              // a tag filter has been specified when calling the endpoint therefore
+              // if the module has no tags, it should be filtered out from the results
+              return false;
+            }
+            return intersection(module.tags, moduleTagFilters).length > 0;
+          });
+    filteredConfigs = filteredForModuleTags;
+  }
+  return filteredConfigs;
 }

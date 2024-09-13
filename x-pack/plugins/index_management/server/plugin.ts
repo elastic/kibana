@@ -12,6 +12,7 @@ import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { IndexDataEnricher } from './services';
 import { handleEsError } from './shared_imports';
+import { IndexManagementConfig } from './config';
 
 export interface IndexManagementPluginSetup {
   indexDataEnricher: {
@@ -22,10 +23,12 @@ export interface IndexManagementPluginSetup {
 export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
   private readonly indexDataEnricher: IndexDataEnricher;
+  private readonly config: IndexManagementConfig;
 
   constructor(initContext: PluginInitializerContext) {
     this.apiRoutes = new ApiRoutes();
     this.indexDataEnricher = new IndexDataEnricher();
+    this.config = initContext.config.get();
   }
 
   setup(
@@ -51,6 +54,12 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
       router: http.createRouter(),
       config: {
         isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
+        isLegacyTemplatesEnabled: this.config.enableLegacyTemplates,
+        isIndexStatsEnabled: this.config.enableIndexStats ?? true,
+        isSizeAndDocCountEnabled: this.config.enableSizeAndDocCount ?? false,
+        isDataStreamStatsEnabled: this.config.enableDataStreamStats,
+        enableMappingsSourceFieldSection: this.config.enableMappingsSourceFieldSection,
+        enableTogglingDataRetention: this.config.enableTogglingDataRetention,
       },
       indexDataEnricher: this.indexDataEnricher,
       lib: {

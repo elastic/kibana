@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
 
-import { WebElementWrapper } from '../../../services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -19,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const { common } = getPageObjects(['common']);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -31,28 +32,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/152938
-  describe.skip('discover accessibility', () => {
+  describe('discover accessibility', () => {
     before(async () => {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-    });
-
-    it('should give focus to the saved search title h1 on navigate', async () => {
-      expect(await hasFocus('discoverSavedSearchTitle')).to.be(true);
-    });
-
-    it('should give focus to the data view switch link when Tab is pressed', async () => {
-      await browser.pressKeys(browser.keys.TAB);
-      expect(await hasFocus('discover-dataView-switch-link')).to.be(true);
     });
 
     describe('top nav menu buttons', () => {
@@ -73,9 +64,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.pressKeys(browser.keys.ESCAPE);
         expect(await hasFocus(menuButtonTestSubject)).to.be(true);
       };
-
-      it('should return focus to the options button when dismissing the options popover', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOptionsButton'));
 
       it('should return focus to the open button when dismissing the open search flyout', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOpenButton'));

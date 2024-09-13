@@ -6,17 +6,20 @@
  */
 
 import { ReactElement } from 'react';
-import type { SensorAPI } from 'react-beautiful-dnd';
+import type { SensorAPI } from '@hello-pangea/dnd';
 import { Store } from 'redux';
 import { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { ApmBase } from '@elastic/apm-rum';
 import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
 import { HoverActionsConfig } from './components/hover_actions';
 import { LastUpdatedAtProps } from './components/last_updated';
 import { LoadingPanelProps } from './components/loading';
 export interface TimelinesUIStart {
+  /**
+   * @deprecated Use cell-actions package instead
+   */
   getHoverActions: () => HoverActionsConfig;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getTimelineReducer: () => any;
@@ -29,7 +32,7 @@ export interface TimelinesUIStart {
 
 export interface TimelinesStartPlugins {
   data: DataPublicPluginStart;
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   apm?: ApmBase;
 }
 

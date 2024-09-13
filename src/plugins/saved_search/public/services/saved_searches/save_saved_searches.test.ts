@@ -1,28 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsStart } from '@kbn/core/public';
-
-import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { saveSavedSearch } from './save_saved_searches';
 import type { SavedSearch } from './types';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 
 describe('saveSavedSearch', () => {
-  let savedObjectsClient: SavedObjectsStart['client'];
+  let cmApi: ContentManagementPublicStart['client'];
   let savedSearch: SavedSearch;
 
   beforeEach(() => {
-    savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
+    cmApi = contentManagementMock.createStartContract().client;
     const searchSource = dataPluginMock.createStartContract().search.searchSource.createEmpty();
-
     savedSearch = {
       id: 'id',
       title: 'title',
@@ -36,13 +35,20 @@ describe('saveSavedSearch', () => {
       sharingSavedObjectProps: {
         outcome: 'aliasMatch',
       },
+      managed: false,
     } as SavedSearch;
   });
 
   describe('onTitleDuplicate', () => {
     test('should check for title duplicating', async () => {
-      savedObjectsClient.find = jest.fn().mockReturnValue({
-        savedObjects: [{ get: () => 'title' }],
+      cmApi.search = jest.fn().mockReturnValue({
+        hits: [
+          {
+            attributes: {
+              title: 'title',
+            },
+          },
+        ],
       });
       const onTitleDuplicate = jest.fn();
 
@@ -52,7 +58,7 @@ describe('saveSavedSearch', () => {
           onTitleDuplicate,
           copyOnSave: true,
         },
-        savedObjectsClient,
+        cmApi,
         undefined
       );
 
@@ -60,8 +66,19 @@ describe('saveSavedSearch', () => {
     });
 
     test('should not check for title duplicating for saving existing search', async () => {
-      savedObjectsClient.find = jest.fn().mockReturnValue({
-        savedObjects: [{ get: () => 'title' }],
+      cmApi.search = jest.fn().mockReturnValue({
+        hits: [
+          {
+            attributes: {
+              title: 'title',
+            },
+          },
+        ],
+      });
+      cmApi.update = jest.fn().mockReturnValue({
+        item: {
+          id: 'id',
+        },
       });
       const onTitleDuplicate = jest.fn();
 
@@ -71,7 +88,7 @@ describe('saveSavedSearch', () => {
           onTitleDuplicate,
           copyOnSave: false,
         },
-        savedObjectsClient,
+        cmApi,
         undefined
       );
 
@@ -80,49 +97,96 @@ describe('saveSavedSearch', () => {
   });
 
   test('should call savedObjectsClient.create for saving new search', async () => {
+    cmApi.search = jest.fn().mockReturnValue({
+      hits: [
+        {
+          attributes: {
+            title: 'title',
+          },
+        },
+      ],
+    });
+    cmApi.create = jest.fn().mockReturnValue({
+      item: {
+        id: 'id',
+      },
+    });
+
     delete savedSearch.id;
 
-    await saveSavedSearch(savedSearch, {}, savedObjectsClient, undefined);
+    await saveSavedSearch(savedSearch, {}, cmApi, undefined);
 
-    expect(savedObjectsClient.create).toHaveBeenCalledWith(
-      'search',
-      {
+    expect(cmApi.create).toHaveBeenCalledWith({
+      contentTypeId: 'search',
+      data: {
+        breakdownField: undefined,
         columns: [],
         description: '',
         grid: {},
-        isTextBasedQuery: false,
+        hideAggregatedPreview: undefined,
         hideChart: false,
+        isTextBasedQuery: false,
         kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+        refreshInterval: undefined,
+        rowHeight: undefined,
+        headerRowHeight: undefined,
+        rowsPerPage: undefined,
+        sampleSize: undefined,
         sort: [],
-        title: 'title',
+        timeRange: undefined,
         timeRestore: false,
+        title: 'title',
+        usesAdHocDataView: undefined,
+        viewMode: undefined,
       },
-      { references: [] }
-    );
+      options: { references: [] },
+    });
   });
 
   test('should call savedObjectsClient.update for saving existing search', async () => {
-    await saveSavedSearch(savedSearch, {}, savedObjectsClient, undefined);
+    cmApi.update = jest.fn().mockReturnValue({
+      item: {
+        id: 'id',
+      },
+    });
 
-    expect(savedObjectsClient.update).toHaveBeenCalledWith(
-      'search',
-      'id',
-      {
+    await saveSavedSearch(savedSearch, {}, cmApi, undefined);
+
+    expect(cmApi.update).toHaveBeenCalledWith({
+      contentTypeId: 'search',
+      data: {
+        breakdownField: undefined,
         columns: [],
         description: '',
         grid: {},
+        hideAggregatedPreview: undefined,
         isTextBasedQuery: false,
         hideChart: false,
         kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+        refreshInterval: undefined,
+        rowHeight: undefined,
+        headerRowHeight: undefined,
+        rowsPerPage: undefined,
+        sampleSize: undefined,
+        timeRange: undefined,
         sort: [],
         title: 'title',
         timeRestore: false,
+        usesAdHocDataView: undefined,
+        viewMode: undefined,
       },
-      { references: [] }
-    );
+      id: 'id',
+      options: { references: [] },
+    });
   });
 
   test('should call savedObjectsTagging.ui.updateTagsReferences', async () => {
+    cmApi.update = jest.fn().mockReturnValue({
+      item: {
+        id: 'id',
+      },
+    });
+
     const savedObjectsTagging = {
       ui: {
         updateTagsReferences: jest.fn((_, tags) => tags),
@@ -131,7 +195,7 @@ describe('saveSavedSearch', () => {
     await saveSavedSearch(
       { ...savedSearch, tags: ['tag-1', 'tag-2'] },
       {},
-      savedObjectsClient,
+      cmApi,
       savedObjectsTagging
     );
 
@@ -139,21 +203,31 @@ describe('saveSavedSearch', () => {
       [],
       ['tag-1', 'tag-2']
     );
-    expect(savedObjectsClient.update).toHaveBeenCalledWith(
-      'search',
-      'id',
-      {
+    expect(cmApi.update).toHaveBeenCalledWith({
+      contentTypeId: 'search',
+      data: {
+        breakdownField: undefined,
         columns: [],
         description: '',
         grid: {},
-        isTextBasedQuery: false,
+        hideAggregatedPreview: undefined,
         hideChart: false,
+        isTextBasedQuery: false,
         kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+        refreshInterval: undefined,
+        rowHeight: undefined,
+        headerRowHeight: undefined,
+        rowsPerPage: undefined,
+        sampleSize: undefined,
         sort: [],
-        title: 'title',
+        timeRange: undefined,
         timeRestore: false,
+        title: 'title',
+        usesAdHocDataView: undefined,
+        viewMode: undefined,
       },
-      { references: ['tag-1', 'tag-2'] }
-    );
+      id: 'id',
+      options: { references: ['tag-1', 'tag-2'] },
+    });
   });
 });

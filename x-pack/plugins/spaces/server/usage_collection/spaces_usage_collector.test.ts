@@ -12,12 +12,12 @@ import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { ILicense, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
+import type { UsageData } from './spaces_usage_collector';
+import { getSpacesUsageCollector } from './spaces_usage_collector';
 import type { PluginsSetup } from '../plugin';
 import type { UsageStats } from '../usage_stats';
 import { usageStatsClientMock } from '../usage_stats/usage_stats_client.mock';
 import { usageStatsServiceMock } from '../usage_stats/usage_stats_service.mock';
-import type { UsageData } from './spaces_usage_collector';
-import { getSpacesUsageCollector } from './spaces_usage_collector';
 
 interface SetupOpts {
   license?: Partial<ILicense>;
@@ -45,6 +45,7 @@ const MOCK_USAGE_STATS: UsageStats = {
 };
 
 const kibanaIndex = '.kibana-tests';
+const getIndexForType = () => Promise.resolve(kibanaIndex);
 
 function setup({
   license = { isAvailable: true },
@@ -111,6 +112,14 @@ const getMockedEsClient = () => {
           },
         ],
       },
+      solution: {
+        buckets: [
+          {
+            key: 'search',
+            doc_count: 5,
+          },
+        ],
+      },
     },
   });
   return esClient;
@@ -122,7 +131,7 @@ describe('error handling', () => {
       license: { isAvailable: true, type: 'basic' },
     });
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndex,
+      getIndexForType,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -146,7 +155,7 @@ describe('with a basic license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndex,
+      getIndexForType,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -160,6 +169,7 @@ describe('with a basic license', () => {
           disabledFeatures: {
             terms: { field: 'space.disabledFeatures', include: ['feature1', 'feature2'], size: 2 },
           },
+          solution: { terms: { field: 'space.solution', missing: 'unset', size: 5 } },
         },
         query: { term: { type: { value: 'space' } } },
         size: 0,
@@ -205,7 +215,7 @@ describe('with no license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndex,
+      getIndexForType,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -246,7 +256,7 @@ describe('with platinum license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndex,
+      getIndexForType,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),

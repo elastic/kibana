@@ -8,7 +8,6 @@
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
-import { EuiDescriptionListDescription } from '@elastic/eui';
 import {
   registerTestBed,
   TestBed,
@@ -28,6 +27,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     clickIncludeStatsSwitch: () => void;
     toggleViewFilterAt: (index: number) => void;
     sortTableOnStorageSize: () => void;
+    sortTableOnName: () => void;
     clickReloadButton: () => void;
     clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
@@ -35,6 +35,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     selectDataStream: (name: string, selected: boolean) => void;
     clickConfirmDelete: () => void;
     clickDeleteDataStreamButton: () => void;
+    clickEditDataRetentionButton: () => void;
     clickDetailPanelIndexTemplateLink: () => void;
   };
   findDeleteActionAt: (index: number) => ReactWrapper;
@@ -43,8 +44,9 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   findDetailPanelTitle: () => string;
   findEmptyPromptIndexTemplateLink: () => ReactWrapper;
   findDetailPanelIlmPolicyLink: () => ReactWrapper;
-  findDetailPanelIlmPolicyName: () => ReactWrapper;
+  findDetailPanelIlmPolicyDetail: () => ReactWrapper;
   findDetailPanelIndexTemplateLink: () => ReactWrapper;
+  findDetailPanelDataRetentionDetail: () => ReactWrapper;
 }
 
 export const setup = async (
@@ -113,6 +115,14 @@ export const setup = async (
     component.update();
   };
 
+  const sortTableOnName = () => {
+    const { find, component } = testBed;
+    act(() => {
+      find('tableHeaderCell_name_0.tableHeaderSortButton').simulate('click');
+    });
+    component.update();
+  };
+
   const clickReloadButton = () => {
     const { find } = testBed;
     find('reloadButton').simulate('click');
@@ -176,8 +186,13 @@ export const setup = async (
   };
 
   const clickDeleteDataStreamButton = () => {
-    const { find } = testBed;
-    find('deleteDataStreamButton').simulate('click');
+    testBed.find('manageDataStreamButton').simulate('click');
+    testBed.find('deleteDataStreamButton').simulate('click');
+  };
+
+  const clickEditDataRetentionButton = () => {
+    testBed.find('manageDataStreamButton').simulate('click');
+    testBed.find('editDataRetentionButton').simulate('click');
   };
 
   const clickDetailPanelIndexTemplateLink = async () => {
@@ -211,10 +226,14 @@ export const setup = async (
     return find('indexTemplateLink');
   };
 
-  const findDetailPanelIlmPolicyName = () => {
-    const descriptionList = testBed.component.find(EuiDescriptionListDescription);
-    // ilm policy is the last in the details list
-    return descriptionList.last();
+  const findDetailPanelIlmPolicyDetail = () => {
+    const { find } = testBed;
+    return find('ilmPolicyDetail');
+  };
+
+  const findDetailPanelDataRetentionDetail = () => {
+    const { find } = testBed;
+    return find('dataRetentionDetail');
   };
 
   return {
@@ -225,6 +244,7 @@ export const setup = async (
       clickIncludeStatsSwitch,
       toggleViewFilterAt,
       sortTableOnStorageSize,
+      sortTableOnName,
       clickReloadButton,
       clickNameAt,
       clickIndicesAt,
@@ -232,6 +252,7 @@ export const setup = async (
       selectDataStream,
       clickConfirmDelete,
       clickDeleteDataStreamButton,
+      clickEditDataRetentionButton,
       clickDetailPanelIndexTemplateLink,
     },
     findDeleteActionAt,
@@ -240,8 +261,9 @@ export const setup = async (
     findDetailPanelTitle,
     findEmptyPromptIndexTemplateLink,
     findDetailPanelIlmPolicyLink,
-    findDetailPanelIlmPolicyName,
+    findDetailPanelIlmPolicyDetail,
     findDetailPanelIndexTemplateLink,
+    findDetailPanelDataRetentionDetail,
   };
 };
 
@@ -252,9 +274,12 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
     {
       name: 'indexName',
       uuid: 'indexId',
+      preferILM: false,
+      managedBy: 'Data stream lifecycle',
     },
   ],
   generation: 1,
+  nextGenerationManagedBy: 'Data stream lifecycle',
   health: 'green',
   indexTemplateName: 'indexTemplate',
   storageSize: '1b',
@@ -262,8 +287,13 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
   maxTimeStamp: 420,
   privileges: {
     delete_index: true,
+    manage_data_stream_lifecycle: true,
   },
   hidden: false,
+  lifecycle: {
+    enabled: true,
+    data_retention: '7d',
+  },
   ...dataStream,
 });
 

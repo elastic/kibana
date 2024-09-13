@@ -17,14 +17,12 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
   const featuresService: FeaturesService = getService('features');
 
-  const uiCapabilitiesExceptions = [
-    // enterprise_search plugin is loaded but disabled because security isn't enabled in ES. That means the following capabilities are disabled
-    'enterpriseSearch',
-    'enterpriseSearchContent',
-    'enterpriseSearchAnalytics',
-    'appSearch',
-    'workplaceSearch',
-  ];
+  const uiCapabilitiesExceptions = {
+    // appSearch and workplace Search are loaded but disabled because the ent-search application isn't running.
+    // That means the following capabilities are disabled:
+    feature: 'enterpriseSearch',
+    apps: ['appSearch', 'workplaceSearch'],
+  };
 
   describe('navLinks', () => {
     let navLinksBuilder: NavLinksBuilder;
@@ -41,7 +39,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.except(...uiCapabilitiesExceptions)
+              navLinksBuilder.except(uiCapabilitiesExceptions)
             );
             break;
           case 'nothing_space':
@@ -53,7 +51,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.except('foo', ...uiCapabilitiesExceptions)
+              navLinksBuilder.except('foo', uiCapabilitiesExceptions)
             );
             break;
           default:

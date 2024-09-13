@@ -20,9 +20,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -30,20 +30,24 @@
             "pluginId": "navigation",
             "scope": "public",
             "docId": "kibNavigationPluginApi",
-            "section": "def-public.NavigationPublicPluginSetup",
-            "text": "NavigationPublicPluginSetup"
+            "section": "def-public.NavigationPublicSetup",
+            "text": "NavigationPublicSetup"
           },
           ", ",
           {
             "pluginId": "navigation",
             "scope": "public",
             "docId": "kibNavigationPluginApi",
-            "section": "def-public.NavigationPublicPluginStart",
-            "text": "NavigationPublicPluginStart"
+            "section": "def-public.NavigationPublicStart",
+            "text": "NavigationPublicStart"
           },
-          ", object, object>"
+          ", ",
+          "NavigationPublicSetupDependencies",
+          ", ",
+          "NavigationPublicStartDependencies",
+          ">"
         ],
-        "path": "src/plugins/navigation/public/plugin.ts",
+        "path": "src/plugins/navigation/public/plugin.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +61,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/navigation/public/plugin.ts",
+            "path": "src/plugins/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -71,14 +75,14 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-public.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
                 ],
-                "path": "src/plugins/navigation/public/plugin.ts",
+                "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -97,9 +101,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>) => ",
@@ -107,11 +111,11 @@
                 "pluginId": "navigation",
                 "scope": "public",
                 "docId": "kibNavigationPluginApi",
-                "section": "def-public.NavigationPublicPluginSetup",
-                "text": "NavigationPublicPluginSetup"
+                "section": "def-public.NavigationPublicSetup",
+                "text": "NavigationPublicSetup"
               }
             ],
-            "path": "src/plugins/navigation/public/plugin.ts",
+            "path": "src/plugins/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -125,14 +129,14 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
                 ],
-                "path": "src/plugins/navigation/public/plugin.ts",
+                "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -151,23 +155,23 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
-              ", { unifiedSearch }: ",
-              "NavigationPluginStartDependencies",
+              ", depsStart: ",
+              "NavigationPublicStartDependencies",
               ") => ",
               {
                 "pluginId": "navigation",
                 "scope": "public",
                 "docId": "kibNavigationPluginApi",
-                "section": "def-public.NavigationPublicPluginStart",
-                "text": "NavigationPublicPluginStart"
+                "section": "def-public.NavigationPublicStart",
+                "text": "NavigationPublicStart"
               }
             ],
-            "path": "src/plugins/navigation/public/plugin.ts",
+            "path": "src/plugins/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -181,13 +185,13 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-public.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
-                "path": "src/plugins/navigation/public/plugin.ts",
+                "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -197,12 +201,12 @@
                 "id": "def-public.NavigationPublicPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ unifiedSearch }",
+                "label": "depsStart",
                 "description": [],
                 "signature": [
-                  "NavigationPluginStartDependencies"
+                  "NavigationPublicStartDependencies"
                 ],
-                "path": "src/plugins/navigation/public/plugin.ts",
+                "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -220,7 +224,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/navigation/public/plugin.ts",
+            "path": "src/plugins/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -274,6 +278,140 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
+        "id": "def-public.TopNavMenuBadges",
+        "type": "Function",
+        "tags": [],
+        "label": "TopNavMenuBadges",
+        "description": [],
+        "signature": [
+          "({ badges }: { badges: ",
+          {
+            "pluginId": "navigation",
+            "scope": "public",
+            "docId": "kibNavigationPluginApi",
+            "section": "def-public.TopNavMenuBadgeProps",
+            "text": "TopNavMenuBadgeProps"
+          },
+          "[] | undefined; }) => JSX.Element | null"
+        ],
+        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuBadges.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ badges }",
+            "description": [],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "navigation",
+                "id": "def-public.TopNavMenuBadges.$1.badges",
+                "type": "Array",
+                "tags": [],
+                "label": "badges",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "navigation",
+                    "scope": "public",
+                    "docId": "kibNavigationPluginApi",
+                    "section": "def-public.TopNavMenuBadgeProps",
+                    "text": "TopNavMenuBadgeProps"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
+        "id": "def-public.TopNavMenuItems",
+        "type": "Function",
+        "tags": [],
+        "label": "TopNavMenuItems",
+        "description": [],
+        "signature": [
+          "({ config, className, }: { config: ",
+          {
+            "pluginId": "navigation",
+            "scope": "public",
+            "docId": "kibNavigationPluginApi",
+            "section": "def-public.TopNavMenuData",
+            "text": "TopNavMenuData"
+          },
+          "[] | undefined; className?: string | undefined; }) => JSX.Element | null"
+        ],
+        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuItems.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  config,\n  className,\n}",
+            "description": [],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "navigation",
+                "id": "def-public.TopNavMenuItems.$1.config",
+                "type": "Array",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "navigation",
+                    "scope": "public",
+                    "docId": "kibNavigationPluginApi",
+                    "section": "def-public.TopNavMenuData",
+                    "text": "TopNavMenuData"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "navigation",
+                "id": "def-public.TopNavMenuItems.$1.className",
+                "type": "string",
+                "tags": [],
+                "label": "className",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -598,6 +736,34 @@
           },
           {
             "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.fill",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fill",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
             "id": "def-public.TopNavMenuData.isLoading",
             "type": "CompoundType",
             "tags": [],
@@ -665,6 +831,21 @@
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.intl",
+            "type": "Object",
+            "tags": [],
+            "label": "intl",
+            "description": [],
+            "signature": [
+              "IntlShape",
+              " | undefined"
+            ],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -674,28 +855,77 @@
     "misc": [
       {
         "parentPluginId": "navigation",
+        "id": "def-public.AddSolutionNavigationArg",
+        "type": "Type",
+        "tags": [],
+        "label": "AddSolutionNavigationArg",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "SolutionNavigation",
+          ", \"sideNavComponent\"> & { dataTestSubj?: string | undefined; panelContentProvider?: ",
+          {
+            "pluginId": "@kbn/shared-ux-chrome-navigation",
+            "scope": "public",
+            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
+            "section": "def-public.ContentProvider",
+            "text": "ContentProvider"
+          },
+          " | undefined; }"
+        ],
+        "path": "src/plugins/navigation/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
+        "id": "def-public.SolutionType",
+        "type": "Type",
+        "tags": [],
+        "label": "SolutionType",
+        "description": [],
+        "signature": [
+          "\"security\" | \"analytics\" | \"es\" | \"oblt\""
+        ],
+        "path": "src/plugins/navigation/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
+        "id": "def-public.TopNavMenuBadgeProps",
+        "type": "Type",
+        "tags": [],
+        "label": "TopNavMenuBadgeProps",
+        "description": [],
+        "signature": [
+          "EuiBadgeProps",
+          " & { badgeText: string; toolTipProps?: Partial<",
+          "EuiToolTipProps",
+          "> | undefined; renderCustomBadge?: ((props: { badgeText: string; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>) | undefined; }"
+        ],
+        "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
         "id": "def-public.TopNavMenuProps",
         "type": "Type",
         "tags": [],
         "label": "TopNavMenuProps",
         "description": [],
         "signature": [
-          "SearchBarOwnProps",
-          "<QT> & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; onFiltersUpdated?: ((filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]) => void) | undefined; } & Omit<",
+          "Omit<",
           {
             "pluginId": "unifiedSearch",
             "scope": "public",
             "docId": "kibUnifiedSearchPluginApi",
-            "section": "def-public.SearchBarProps",
-            "text": "SearchBarProps"
+            "section": "def-public.StatefulSearchBarProps",
+            "text": "StatefulSearchBarProps"
           },
           "<QT>, \"kibana\" | \"intl\" | \"timeHistory\"> & { config?: ",
           {
@@ -705,7 +935,15 @@
             "section": "def-public.TopNavMenuData",
             "text": "TopNavMenuData"
           },
-          "[] | undefined; badges?: Badge[] | undefined; showSearchBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; unifiedSearch?: ",
+          "[] | undefined; badges?: ",
+          {
+            "pluginId": "navigation",
+            "scope": "public",
+            "docId": "kibNavigationPluginApi",
+            "section": "def-public.TopNavMenuBadgeProps",
+            "text": "TopNavMenuBadgeProps"
+          },
+          "[] | undefined; showSearchBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; unifiedSearch?: ",
           {
             "pluginId": "unifiedSearch",
             "scope": "public",
@@ -716,9 +954,9 @@
           " | undefined; className?: string | undefined; visible?: boolean | undefined; setMenuMountPoint?: ((menuMount: ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-common.MountPoint",
+            "section": "def-public.MountPoint",
             "text": "MountPoint"
           },
           "<HTMLElement> | undefined) => void) | undefined; }"
@@ -732,10 +970,10 @@
     "objects": [],
     "setup": {
       "parentPluginId": "navigation",
-      "id": "def-public.NavigationPublicPluginSetup",
+      "id": "def-public.NavigationPublicSetup",
       "type": "Interface",
       "tags": [],
-      "label": "NavigationPublicPluginSetup",
+      "label": "NavigationPublicSetup",
       "description": [],
       "path": "src/plugins/navigation/public/types.ts",
       "deprecated": false,
@@ -743,7 +981,7 @@
       "children": [
         {
           "parentPluginId": "navigation",
-          "id": "def-public.NavigationPublicPluginSetup.registerMenuItem",
+          "id": "def-public.NavigationPublicSetup.registerMenuItem",
           "type": "Function",
           "tags": [],
           "label": "registerMenuItem",
@@ -760,7 +998,7 @@
           "children": [
             {
               "parentPluginId": "navigation",
-              "id": "def-public.NavigationPublicPluginSetup.registerMenuItem.$1",
+              "id": "def-public.NavigationPublicSetup.registerMenuItem.$1",
               "type": "Object",
               "tags": [],
               "label": "menuItem",
@@ -780,10 +1018,10 @@
     },
     "start": {
       "parentPluginId": "navigation",
-      "id": "def-public.NavigationPublicPluginStart",
+      "id": "def-public.NavigationPublicStart",
       "type": "Interface",
       "tags": [],
-      "label": "NavigationPublicPluginStart",
+      "label": "NavigationPublicStart",
       "description": [],
       "path": "src/plugins/navigation/public/types.ts",
       "deprecated": false,
@@ -791,7 +1029,7 @@
       "children": [
         {
           "parentPluginId": "navigation",
-          "id": "def-public.NavigationPublicPluginStart.ui",
+          "id": "def-public.NavigationPublicStart.ui",
           "type": "Object",
           "tags": [],
           "label": "ui",
@@ -829,7 +1067,114 @@
               "section": "def-common.AggregateQuery",
               "text": "AggregateQuery"
             },
-            ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; }"
+            ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; createTopNavWithCustomContext: (customUnifiedSearch?: ",
+            {
+              "pluginId": "unifiedSearch",
+              "scope": "public",
+              "docId": "kibUnifiedSearchPluginApi",
+              "section": "def-public.UnifiedSearchPublicPluginStart",
+              "text": "UnifiedSearchPublicPluginStart"
+            },
+            " | undefined, customExtensions?: ",
+            "RegisteredTopNavMenuData",
+            "[] | undefined) => <QT extends ",
+            {
+              "pluginId": "@kbn/es-query",
+              "scope": "common",
+              "docId": "kibKbnEsQueryPluginApi",
+              "section": "def-common.Query",
+              "text": "Query"
+            },
+            " | ",
+            {
+              "pluginId": "@kbn/es-query",
+              "scope": "common",
+              "docId": "kibKbnEsQueryPluginApi",
+              "section": "def-common.AggregateQuery",
+              "text": "AggregateQuery"
+            },
+            " = ",
+            {
+              "pluginId": "@kbn/es-query",
+              "scope": "common",
+              "docId": "kibKbnEsQueryPluginApi",
+              "section": "def-common.Query",
+              "text": "Query"
+            },
+            ">(props: ",
+            {
+              "pluginId": "navigation",
+              "scope": "public",
+              "docId": "kibNavigationPluginApi",
+              "section": "def-public.TopNavMenuProps",
+              "text": "TopNavMenuProps"
+            },
+            "<QT>) => JSX.Element; }"
+          ],
+          "path": "src/plugins/navigation/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "navigation",
+          "id": "def-public.NavigationPublicStart.addSolutionNavigation",
+          "type": "Function",
+          "tags": [],
+          "label": "addSolutionNavigation",
+          "description": [
+            "Add a solution navigation to the header nav switcher."
+          ],
+          "signature": [
+            "(solutionNavigationAgg: ",
+            {
+              "pluginId": "navigation",
+              "scope": "public",
+              "docId": "kibNavigationPluginApi",
+              "section": "def-public.AddSolutionNavigationArg",
+              "text": "AddSolutionNavigationArg"
+            },
+            ") => void"
+          ],
+          "path": "src/plugins/navigation/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "navigation",
+              "id": "def-public.NavigationPublicStart.addSolutionNavigation.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "solutionNavigationAgg",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "navigation",
+                  "scope": "public",
+                  "docId": "kibNavigationPluginApi",
+                  "section": "def-public.AddSolutionNavigationArg",
+                  "text": "AddSolutionNavigationArg"
+                }
+              ],
+              "path": "src/plugins/navigation/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "navigation",
+          "id": "def-public.NavigationPublicStart.isSolutionNavEnabled$",
+          "type": "Object",
+          "tags": [],
+          "label": "isSolutionNavEnabled$",
+          "description": [
+            "Flag to indicate if the solution navigation is enabled."
+          ],
+          "signature": [
+            "Observable",
+            "<boolean>"
           ],
           "path": "src/plugins/navigation/public/types.ts",
           "deprecated": false,
@@ -853,7 +1198,82 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "navigation",
+        "id": "def-common.DEFAULT_ROUTE_UI_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_ROUTE_UI_SETTING_ID",
+        "description": [],
+        "signature": [
+          "\"defaultRoute\""
+        ],
+        "path": "src/plugins/navigation/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "navigation",
+        "id": "def-common.DEFAULT_ROUTES",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_ROUTES",
+        "description": [],
+        "path": "src/plugins/navigation/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.classic",
+            "type": "string",
+            "tags": [],
+            "label": "classic",
+            "description": [],
+            "path": "src/plugins/navigation/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.es",
+            "type": "string",
+            "tags": [],
+            "label": "es",
+            "description": [],
+            "path": "src/plugins/navigation/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.oblt",
+            "type": "string",
+            "tags": [],
+            "label": "oblt",
+            "description": [],
+            "path": "src/plugins/navigation/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.security",
+            "type": "string",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "path": "src/plugins/navigation/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

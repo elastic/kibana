@@ -13,17 +13,22 @@ import { createMockedIndexPattern } from '../../../mocks';
 import { FilterPopover } from './filter_popover';
 import { LabelInput } from '../shared_components';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { QueryInput } from '../../../../../shared_components';
+import { QueryInput } from '@kbn/visualization-ui-components';
+import { Query } from '@kbn/es-query';
 
-jest.mock('.', () => ({
-  isQueryValid: () => true,
-  defaultLabel: 'label',
-}));
+jest.mock('.', () => ({}));
+
+jest.mock('@kbn/visualization-ui-components', () => {
+  const original = jest.requireActual('@kbn/visualization-ui-components');
+
+  return {
+    ...original,
+    isQueryValid: jest.fn((q: Query) => (q.query === 'bytes >= 1 and' ? false : true)),
+  };
+});
 
 jest.mock('@kbn/unified-search-plugin/public', () => ({
-  QueryStringInput: () => {
-    return 'QueryStringInput';
-  },
+  QueryStringInput: () => 'QueryStringInput',
 }));
 
 describe('filter popover', () => {
@@ -116,6 +121,16 @@ describe('filter popover', () => {
       label: 'More than one',
       id: '1',
     });
+  });
+
+  it('should not call setFilter if QueryInput value is not valid', () => {
+    const setFilter = jest.fn();
+    const instance = shallow(<FilterPopover {...defaultProps} setFilter={setFilter} />);
+    instance.find(QueryInput).prop('onChange')!({
+      query: 'bytes >= 1 and',
+      language: 'kuery',
+    });
+    expect(setFilter).not.toHaveBeenCalled();
   });
 
   it('should call setFilter when modifying LabelInput', () => {

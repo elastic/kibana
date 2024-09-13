@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
+  coreMock,
   notificationServiceMock,
   httpServiceMock,
-  themeServiceMock,
   docLinksServiceMock,
 } from '@kbn/core/public/mocks';
 
@@ -22,6 +23,8 @@ import { createApi, createEsHostService } from '../lib';
 
 import { ContextValue } from './services_context';
 
+const coreStart = coreMock.createStart();
+
 export const serviceContextMock = {
   create: (): ContextValue => {
     const storage = new StorageMock({} as unknown as Storage, 'test');
@@ -30,6 +33,7 @@ export const serviceContextMock = {
     const esHostService = createEsHostService({ api });
     (storage.keys as jest.Mock).mockImplementation(() => []);
     return {
+      ...coreStart,
       services: {
         trackUiMetric: { count: () => {}, load: () => {} },
         storage,
@@ -42,8 +46,11 @@ export const serviceContextMock = {
         autocompleteInfo: new AutocompleteInfoMock(),
       },
       docLinkVersion: 'NA',
-      theme$: themeServiceMock.create().start().theme$,
       docLinks: docLinksServiceMock.createStartContract().links,
+      config: {
+        isMonacoEnabled: false,
+        isDevMode: false,
+      },
     };
   },
 };

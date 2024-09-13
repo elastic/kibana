@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -46,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 200 with individual responses', async () =>
       await supertest
         .post(`/s/${SPACE_ID}/api/saved_objects/_bulk_create`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(BULK_REQUESTS)
         .expect(200)
         .then((resp) => {
@@ -75,6 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 coreMigrationVersion: '8.8.0',
                 typeMigrationVersion: resp.body.saved_objects[1].typeMigrationVersion,
+                managed: false,
                 references: [],
                 namespaces: [SPACE_ID],
               },
@@ -85,6 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should not return raw id when object id is unspecified', async () =>
       await supertest
         .post(`/s/${SPACE_ID}/api/saved_objects/_bulk_create`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(BULK_REQUESTS.map(({ id, ...rest }) => rest))
         .expect(200)
         .then((resp) => {

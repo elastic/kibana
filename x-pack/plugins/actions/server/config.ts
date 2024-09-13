@@ -7,6 +7,11 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
+import {
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+} from '../common';
 
 export enum AllowedHosts {
   Any = '*',
@@ -18,6 +23,9 @@ export enum EnabledActionTypes {
 
 const MAX_MAX_ATTEMPTS = 10;
 const MIN_MAX_ATTEMPTS = 1;
+
+const MIN_QUEUED_MAX = 1;
+export const DEFAULT_QUEUED_MAX = 1000000;
 
 const preconfiguredActionSchema = schema.object({
   name: schema.string({ minLength: 1 }),
@@ -64,6 +72,15 @@ const connectorTypeSchema = schema.object({
   maxAttempts: schema.maybe(schema.number({ min: MIN_MAX_ATTEMPTS, max: MAX_MAX_ATTEMPTS })),
 });
 
+// We leverage enabledActionTypes list by allowing the other plugins to overwrite it by using "setEnabledConnectorTypes" in the plugin setup.
+// The list can be overwritten only if it's not already been set in the config.
+const enabledConnectorTypesSchema = schema.arrayOf(
+  schema.oneOf([schema.string(), schema.literal(EnabledActionTypes.Any)]),
+  {
+    defaultValue: [AllowedHosts.Any],
+  }
+);
+
 export const configSchema = schema.object({
   allowedHosts: schema.arrayOf(
     schema.oneOf([schema.string({ hostname: true }), schema.literal(AllowedHosts.Any)]),
@@ -71,12 +88,7 @@ export const configSchema = schema.object({
       defaultValue: [AllowedHosts.Any],
     }
   ),
-  enabledActionTypes: schema.arrayOf(
-    schema.oneOf([schema.string(), schema.literal(EnabledActionTypes.Any)]),
-    {
-      defaultValue: [AllowedHosts.Any],
-    }
-  ),
+  enabledActionTypes: enabledConnectorTypesSchema,
   preconfiguredAlertHistoryEsIndex: schema.boolean({ defaultValue: false }),
   preconfigured: schema.recordOf(schema.string(), preconfiguredActionSchema, {
     defaultValue: {},
@@ -113,7 +125,9 @@ export const configSchema = schema.object({
   maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
   responseTimeout: schema.duration({ defaultValue: '60s' }),
   customHostSettings: schema.maybe(schema.arrayOf(customHostSettingsSchema)),
-  microsoftGraphApiUrl: schema.maybe(schema.string()),
+  microsoftGraphApiUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_URL }),
+  microsoftGraphApiScope: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_SCOPE }),
+  microsoftExchangeUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_EXCHANGE_URL }),
   email: schema.maybe(
     schema.object({
       domain_allowlist: schema.arrayOf(schema.string()),
@@ -126,9 +140,15 @@ export const configSchema = schema.object({
     })
   ),
   enableFooterInEmail: schema.boolean({ defaultValue: true }),
+  queued: schema.maybe(
+    schema.object({
+      max: schema.maybe(schema.number({ min: MIN_QUEUED_MAX, defaultValue: DEFAULT_QUEUED_MAX })),
+    })
+  ),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
+export type EnabledConnectorTypes = TypeOf<typeof enabledConnectorTypesSchema>;
 
 // It would be nicer to add the proxyBypassHosts / proxyOnlyHosts restriction on
 // simultaneous usage in the config validator directly, but there's no good way to express
@@ -142,13 +162,13 @@ export function getValidatedConfig(logger: Logger, originalConfig: ActionsConfig
     try {
       new URL(proxyUrl);
     } catch (err) {
-      logger.warn(`The confguration xpack.actions.proxyUrl: ${proxyUrl} is invalid.`);
+      logger.warn(`The configuration xpack.actions.proxyUrl: ${proxyUrl} is invalid.`);
     }
   }
 
   if (proxyBypassHosts && proxyOnlyHosts) {
     logger.warn(
-      'The confgurations xpack.actions.proxyBypassHosts and xpack.actions.proxyOnlyHosts can not be used at the same time. The configuration xpack.actions.proxyOnlyHosts will be ignored.'
+      'The configurations xpack.actions.proxyBypassHosts and xpack.actions.proxyOnlyHosts can not be used at the same time. The configuration xpack.actions.proxyOnlyHosts will be ignored.'
     );
     const tmp: Record<string, unknown> = originalConfig;
     delete tmp.proxyOnlyHosts;

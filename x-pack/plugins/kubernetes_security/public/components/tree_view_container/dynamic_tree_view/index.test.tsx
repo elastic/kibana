@@ -29,6 +29,7 @@ describe('DynamicTreeView component', () => {
   } as any;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     mockedContext = createAppRootMockRenderer();
     mockedApi = mockedContext.coreStart.http.get;
     mockedApi.mockResolvedValue(clusterResponseMock);
@@ -55,7 +56,6 @@ describe('DynamicTreeView component', () => {
                 },
               },
             ]}
-            aria-label="Logical Tree View"
             onSelect={(selectionDepth, key, type) => {}}
             {...props}
           />
@@ -103,6 +103,7 @@ describe('DynamicTreeView component', () => {
               perPage: 50,
               query: '{"bool":{"filter":[],"must":[],"must_not":[],"should":[]}}',
             },
+            version: '1',
           }
         );
       });
@@ -173,6 +174,7 @@ describe('DynamicTreeView component', () => {
             perPage: 50,
             query: `{"bool":{"filter":[{"term":{"orchestrator.cluster.id":"${parent}"}}],"must":[],"must_not":[],"should":[]}}`,
           },
+          version: '1',
         });
       });
     });

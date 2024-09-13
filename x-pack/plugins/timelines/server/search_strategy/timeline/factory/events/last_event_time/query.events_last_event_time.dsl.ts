@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/search-types';
 import {
-  TimelineEventsLastEventTimeRequestOptions,
   LastEventIndexKey,
-} from '../../../../../../common/search_strategy';
+  TimelineEventsLastEventTimeRequestOptions,
+} from '../../../../../../common/api/search_strategy/timeline/timeline';
 
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
@@ -23,8 +23,8 @@ export const buildLastEventTimeQuery = ({
   defaultIndex,
 }: TimelineEventsLastEventTimeRequestOptions) => {
   const indicesToQuery: EventIndices = {
-    hosts: defaultIndex,
-    network: defaultIndex,
+    hosts: defaultIndex || [],
+    network: defaultIndex || [],
   };
   const getUserDetailsFilter = (userName: string) => [{ term: { 'user.name': userName } }];
   const getHostDetailsFilter = (hostName: string) => [{ term: { 'host.name': hostName } }];

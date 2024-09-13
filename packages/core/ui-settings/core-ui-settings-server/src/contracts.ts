@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
@@ -48,6 +49,19 @@ export interface UiSettingsServiceSetup {
    * ```
    */
   registerGlobal(settings: Record<string, UiSettingsParams>): void;
+
+  /**
+   * Sets an allowlist of setting keys.
+   * @param keys
+   *
+   * @example
+   * ```ts
+   * setup(core: CoreSetup){
+   *  core.uiSettings.setAllowlist(['csv:quoteValues', 'dateFormat:dow']);
+   * }
+   * ```
+   */
+  setAllowlist(keys: string[]): void;
 }
 
 /** @public */
@@ -56,7 +70,7 @@ export interface UiSettingsServiceStart {
    * Creates a {@link IUiSettingsClient} with provided *scoped* saved objects client.
    *
    * This should only be used in the specific case where the client needs to be accessed
-   * from outside of the scope of a {@link RequestHandler}.
+   * from outside the scope of a {@link RequestHandler}.
    *
    * @example
    * ```ts
@@ -72,7 +86,7 @@ export interface UiSettingsServiceStart {
    * Creates a global {@link IUiSettingsClient} with provided *scoped* saved objects client.
    *
    * This should only be used in the specific case where the client needs to be accessed
-   * from outside of the scope of a {@link RequestHandler}.
+   * from outside the scope of a {@link RequestHandler}.
    *
    * @example
    * ```ts

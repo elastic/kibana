@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import type { caseApiV1 } from '../../../../common/types/api';
+import type { caseDomainV1 } from '../../../../common/types/domain';
 import { getWarningHeader, logDeprecatedEndpoint } from '../utils';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -20,7 +22,7 @@ const params = {
     /**
      * @deprecated since version 8.1.0
      */
-    includeComments: schema.boolean({ defaultValue: true }),
+    includeComments: schema.boolean({ defaultValue: true, meta: { deprecated: true } }),
   }),
 };
 
@@ -28,6 +30,11 @@ export const getCaseRoute = createCasesRoute({
   method: 'get',
   path: CASE_DETAILS_URL,
   params,
+  routerOptions: {
+    access: 'public',
+    summary: `Get a case`,
+    tags: ['oas-tag:cases'],
+  },
   handler: async ({ context, request, response, logger, kibanaVersion }) => {
     try {
       const isIncludeCommentsParamProvidedByTheUser =
@@ -45,16 +52,18 @@ export const getCaseRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
       const id = request.params.case_id;
 
+      const res: caseDomainV1.Case = await casesClient.cases.get({
+        id,
+        includeComments: request.query.includeComments,
+      });
+
       return response.ok({
         ...(isIncludeCommentsParamProvidedByTheUser && {
           headers: {
             ...getWarningHeader(kibanaVersion, 'Deprecated query parameter includeComments'),
           },
         }),
-        body: await casesClient.cases.get({
-          id,
-          includeComments: request.query.includeComments,
-        }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({
@@ -75,11 +84,13 @@ export const resolveCaseRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
       const id = request.params.case_id;
 
+      const res: caseApiV1.CaseResolveResponse = await casesClient.cases.resolve({
+        id,
+        includeComments: request.query.includeComments,
+      });
+
       return response.ok({
-        body: await casesClient.cases.resolve({
-          id,
-          includeComments: request.query.includeComments,
-        }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

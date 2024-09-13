@@ -12,28 +12,52 @@ import { responseMock as responseFactoryMock } from './response_factory';
 import { requestMock } from '.';
 import { responseAdapter } from './test_adapters';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
+import type { RegisteredVersionedRoute } from '@kbn/core-http-router-server-mocks';
+import { getRequestValidation } from '@kbn/core-http-server';
 
 interface Route {
-  config: RouteConfig<unknown, unknown, unknown, 'get' | 'post' | 'delete' | 'patch' | 'put'>;
+  validate: RouteConfig<
+    unknown,
+    unknown,
+    unknown,
+    'get' | 'post' | 'delete' | 'patch' | 'put'
+  >['validate'];
   handler: RequestHandler;
 }
 
-const getRoute = (routerMock: MockServer['router']): Route => {
-  const routeCalls = [
-    ...routerMock.get.mock.calls,
-    ...routerMock.post.mock.calls,
-    ...routerMock.put.mock.calls,
-    ...routerMock.patch.mock.calls,
-    ...routerMock.delete.mock.calls,
-  ];
+const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete'] as const;
 
-  const [route] = routeCalls;
-  if (!route) {
-    throw new Error('No route registered!');
+const getClassicRoute = (routerMock: MockServer['router']): Route | undefined => {
+  const method = HTTP_METHODS.find((m) => routerMock[m].mock.calls.length > 0);
+  if (!method) {
+    return undefined;
   }
 
-  const [config, handler] = route;
-  return { config, handler };
+  const [config, handler] = routerMock[method].mock.calls[0];
+  return { validate: config.validate, handler };
+};
+
+const getVersionedRoute = (router: MockServer['router']): Route => {
+  const method = HTTP_METHODS.find((m) => router.versioned[m].mock.calls.length > 0);
+  if (!method) {
+    throw new Error('No route registered!');
+  }
+  const config = router.versioned[method].mock.calls[0][0];
+  const routePath = config.path;
+
+  const route: RegisteredVersionedRoute = router.versioned.getRoute(method, routePath);
+  const firstVersion = Object.values(route.versions)[0];
+
+  const validation = firstVersion.config.validate
+    ? typeof firstVersion.config.validate === 'function'
+      ? firstVersion.config.validate().request
+      : firstVersion.config.validate.request
+    : undefined;
+
+  return {
+    validate: validation ?? false,
+    handler: firstVersion.handler,
+  };
 };
 
 const buildResultMock = () => ({ ok: jest.fn((x) => x), badRequest: jest.fn((x) => x) });
@@ -66,7 +90,7 @@ class MockServer {
   }
 
   private getRoute(): Route {
-    return getRoute(this.router);
+    return getClassicRoute(this.router) ?? getVersionedRoute(this.router);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,10 +99,12 @@ class MockServer {
   }
 
   private validateRequest(request: KibanaRequest): KibanaRequest {
-    const validations = this.getRoute().config.validate;
-    if (!validations) {
+    const route = this.getRoute();
+    if (!route.validate) {
       return request;
     }
+
+    const validations = getRequestValidation(route.validate);
 
     const validatedRequest = requestMock.create({
       path: request.route.path,

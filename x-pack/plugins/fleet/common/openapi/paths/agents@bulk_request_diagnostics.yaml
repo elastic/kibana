@@ -1,7 +1,7 @@
 post:
   summary: Bulk request diagnostics from agents
   tags:
-    - Agents
+    - Elastic Agents
   responses:
     '200':
       description: OK
@@ -33,6 +33,13 @@ post:
                   items:
                     type: string
                   description: list of agent IDs
+            additional_metrics:
+              type: array
+              items:
+                oneOf:
+                  - type: string
+                    enum:
+                      - "CPU"
           required:
             - agents
         example:

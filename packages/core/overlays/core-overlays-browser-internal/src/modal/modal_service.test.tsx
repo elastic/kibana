@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { ModalService } from './modal_service';
@@ -17,6 +19,7 @@ import type { OverlayModalStart } from '@kbn/core-overlays-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
+const analyticsMock = analyticsServiceMock.createAnalyticsServiceStart();
 const i18nMock = i18nServiceMock.createStartContract();
 const themeMock = themeServiceMock.createStartContract();
 
@@ -28,6 +31,7 @@ beforeEach(() => {
 const getServiceStart = () => {
   const service = new ModalService();
   return service.start({
+    analytics: analyticsMock,
     i18n: i18nMock,
     theme: themeMock,
     targetDomElement: document.createElement('div'),

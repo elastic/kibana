@@ -326,7 +326,7 @@
           "Mixed",
           ">(obj: object, schema: T) => [",
           "TypeOf",
-          "<T> | null, string | null]"
+          "<T>, null] | [null, string]"
         ],
         "path": "packages/kbn-securitysolution-io-ts-utils/src/validate/index.ts",
         "deprecated": false,
@@ -428,9 +428,9 @@
         "signature": [
           "<T extends ",
           "Mixed",
-          ">(obj: unknown, schema: T) => [",
+          ">(obj: unknown, schema: T) => [null, string] | [",
           "TypeOf",
-          "<T> | null, string | null]"
+          "<T>, null]"
         ],
         "path": "packages/kbn-securitysolution-io-ts-utils/src/validate/index.ts",
         "deprecated": false,

@@ -5,22 +5,28 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ML_PAGES } from '../../../locator';
-import { NavigateToPath } from '../../contexts/kibana';
-import { MlRoute, PageLoader, PageProps, createPath } from '../router';
-import { useResolver } from '../use_resolver';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { basicResolvers } from '../resolvers';
+import { ML_PAGES } from '../../../locator';
+import type { NavigateToPath } from '../../contexts/kibana';
+import type { MlRoute } from '../router';
+import { createPath, PageLoader } from '../router';
+import { useRouteResolver } from '../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import { MemoryUsagePage } from '../../memory_usage';
+
+const MemoryUsagePage = dynamic(async () => ({
+  default: (await import('../../memory_usage')).MemoryUsagePage,
+}));
 
 export const nodesListRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
   path: createPath(ML_PAGES.MEMORY_USAGE),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   title: i18n.translate('xpack.ml.modelManagement.memoryUsage.docTitle', {
     defaultMessage: 'Memory Usage',
   }),
@@ -35,15 +41,8 @@ export const nodesListRouteFactory = (
   enableDatePicker: true,
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { context } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    basicResolvers(deps)
-  );
+const PageWrapper: FC = () => {
+  const { context } = useRouteResolver('full', [], basicResolvers());
 
   return (
     <PageLoader context={context}>

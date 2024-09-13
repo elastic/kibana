@@ -12,17 +12,30 @@ import { hasFleetServers } from '../../services/fleet_server';
 import { defaultFleetErrorHandler } from '../../errors';
 import type { FleetRequestHandler } from '../../types';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
+import { isSecretStorageEnabled } from '../../services/secrets';
+import { isSpaceAwarenessEnabled } from '../../services/spaces/helpers';
 
 export const getFleetStatusHandler: FleetRequestHandler = async (context, request, response) => {
+  const coreContext = await context.core;
+
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
   try {
     const isApiKeysEnabled = await appContextService
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
-    const coreContext = await context.core;
-    const isFleetServerSetup = await hasFleetServers(
-      coreContext.elasticsearch.client.asInternalUser
-    );
 
+    const [hasFleetServersRes, useSecretsStorage, isSpaceAwarenessEnabledRes] = await Promise.all([
+      hasFleetServers(esClient, soClient),
+      isSecretStorageEnabled(esClient, soClient),
+      isSpaceAwarenessEnabled(),
+    ]);
+
+    const isFleetServerMissing = !hasFleetServersRes;
+
+    const isFleetServerStandalone =
+      appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
     const missingOptionalFeatures: GetFleetStatusResponse['missing_optional_features'] = [];
 
@@ -30,7 +43,7 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
       missingRequirements.push('api_keys');
     }
 
-    if (!isFleetServerSetup) {
+    if (!isFleetServerStandalone && isFleetServerMissing) {
       missingRequirements.push('fleet_server');
     }
 
@@ -42,6 +55,8 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
       isReady: missingRequirements.length === 0,
       missing_requirements: missingRequirements,
       missing_optional_features: missingOptionalFeatures,
+      is_secrets_storage_enabled: useSecretsStorage,
+      is_space_awareness_enabled: isSpaceAwarenessEnabledRes,
     };
 
     const packageVerificationKeyId = await getGpgKeyIdOrUndefined();

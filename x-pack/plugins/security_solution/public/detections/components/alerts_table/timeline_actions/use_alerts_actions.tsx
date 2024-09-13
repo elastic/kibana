@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { AlertWorkflowStatus } from '../../../../common/types';
 import { useBulkActionItems } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
 import { getScopedActions } from '../../../../helpers';
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/api/detection_engine';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import type { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 interface Props {
@@ -19,7 +19,6 @@ interface Props {
   closePopover: () => void;
   eventId: string;
   scopeId: string;
-  indexName: string;
   refetch?: () => void;
 }
 
@@ -28,7 +27,6 @@ export const useAlertsActions = ({
   closePopover,
   eventId,
   scopeId,
-  indexName,
   refetch,
 }: Props) => {
   const dispatch = useDispatch();
@@ -60,17 +58,22 @@ export const useAlertsActions = ({
     [dispatch, scopeId, scopedActions]
   );
 
-  const actionItems = useBulkActionItems({
-    eventIds: [eventId],
-    currentStatus: alertStatus as AlertWorkflowStatus,
-    indexName,
-    setEventsLoading: localSetEventsLoading,
-    setEventsDeleted,
-    onUpdateSuccess: onStatusUpdate,
-    onUpdateFailure: onStatusUpdate,
-  });
+  const eventIds = useMemo(() => [eventId], [eventId]);
 
-  return {
-    actionItems: hasIndexWrite ? actionItems : [],
-  };
+  const actionItemArgs = useMemo(() => {
+    return {
+      eventIds,
+      currentStatus: alertStatus as AlertWorkflowStatus,
+      setEventsLoading: localSetEventsLoading,
+      setEventsDeleted,
+      onUpdateSuccess: onStatusUpdate,
+      onUpdateFailure: onStatusUpdate,
+    };
+  }, [alertStatus, eventIds, localSetEventsLoading, onStatusUpdate, setEventsDeleted]);
+
+  const actionItems = useBulkActionItems(actionItemArgs);
+
+  return useMemo(() => {
+    return { actionItems: hasIndexWrite ? actionItems : [] };
+  }, [actionItems, hasIndexWrite]);
 };

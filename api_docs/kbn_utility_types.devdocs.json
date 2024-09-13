@@ -629,6 +629,61 @@
       },
       {
         "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.RecursivePartial",
+        "type": "Type",
+        "tags": [],
+        "label": "RecursivePartial",
+        "description": [],
+        "signature": [
+          "{ [P in keyof T]?: (T[P] extends NonAny[] ? T[P] : T[P] extends readonly NonAny[] ? T[P] : T[P] extends (infer U)[] ? ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.RecursivePartial",
+            "text": "RecursivePartial"
+          },
+          "<U>[] : T[P] extends readonly (infer U)[] ? readonly ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.RecursivePartial",
+            "text": "RecursivePartial"
+          },
+          "<U>[] : T[P] extends Set<infer V> ? Set<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.RecursivePartial",
+            "text": "RecursivePartial"
+          },
+          "<V>> : T[P] extends Map<infer K, infer V> ? Map<K, ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.RecursivePartial",
+            "text": "RecursivePartial"
+          },
+          "<V>> : T[P] extends NonAny ? T[P] : ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.RecursivePartial",
+            "text": "RecursivePartial"
+          },
+          "<T[P]>) | undefined; }"
+        ],
+        "path": "packages/kbn-utility-types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
         "id": "def-common.RecursiveReadonly",
         "type": "Type",
         "tags": [],

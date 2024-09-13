@@ -19,6 +19,7 @@ const KIBANA_URL = 'http://localhost:5601';
 const KIBANA_USERNAME = 'elastic';
 const KIBANA_PASSWORD = 'changeme';
 const KIBANA_VERSION = kibanaPackageJson.version;
+const PUBLIC_VERSION_V1 = '2023-10-31';
 
 const { base = '', prerelease = false, batchSize = 1 } = yargs(process.argv).argv;
 
@@ -50,6 +51,8 @@ async function getPackage(name: string, version: string, full: boolean = false) 
           'kbn-xsrf': 'xyz',
           Authorization:
             'Basic ' + Buffer.from(`${KIBANA_USERNAME}:${KIBANA_PASSWORD}`).toString('base64'),
+          // Note: version can change in the future
+          'Elastic-Api-Version': PUBLIC_VERSION_V1,
         },
         method: 'GET',
       }

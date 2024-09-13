@@ -7,9 +7,10 @@
 
 import Boom from '@hapi/boom';
 
+import type { KibanaRequest, SavedObjectsClient } from '@kbn/core/server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
-import type { KibanaRequest, SavedObjectsClient } from '@kbn/core/server';
+import type { AuditLogger, AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
@@ -18,9 +19,7 @@ import type {
   Space,
 } from '@kbn/spaces-plugin/server';
 
-import type { AuditLogger } from '../audit';
 import { SpaceAuditAction, spaceAuditEvent } from '../audit';
-import type { AuthorizationServiceSetup } from '../authorization';
 import type { SecurityPluginSetup } from '../plugin';
 
 const PURPOSE_PRIVILEGE_MAP: Record<
@@ -81,10 +80,13 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
 
     // Collect all privileges which need to be checked
     const allPrivileges = Object.entries(PURPOSE_PRIVILEGE_MAP).reduce(
-      (acc, [getSpacesPurpose, privilegeFactory]) =>
-        !includeAuthorizedPurposes && getSpacesPurpose !== purpose
-          ? acc
-          : { ...acc, [getSpacesPurpose]: privilegeFactory(this.authorization) },
+      (acc, [getSpacesPurpose, privilegeFactory]) => {
+        if (!includeAuthorizedPurposes && getSpacesPurpose !== purpose) {
+          return acc;
+        }
+        acc[getSpacesPurpose as GetAllSpacesPurpose] = privilegeFactory(this.authorization);
+        return acc;
+      },
       {} as Record<GetAllSpacesPurpose, string[]>
     );
 
@@ -117,7 +119,8 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
             const requiredActions = privilegeFactory(this.authorization);
             const hasAllRequired = checkHasAllRequired(space, requiredActions);
             hasAnyAuthorization = hasAnyAuthorization || hasAllRequired;
-            return { ...acc, [purposeKey]: hasAllRequired };
+            acc[purposeKey as GetAllSpacesPurpose] = hasAllRequired;
+            return acc;
           },
           {} as Record<GetAllSpacesPurpose, boolean>
         );

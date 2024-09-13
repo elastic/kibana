@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EventEmitter } from 'events';
@@ -11,7 +12,7 @@ import { useEffect, useRef, useState } from 'react';
 import { VisualizeInput } from '../../..';
 import { ByValueVisInstance, VisualizeServices, IEditorController } from '../../types';
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
-import { getEditBreadcrumbs } from '../breadcrumbs';
+import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from '../breadcrumbs';
 
 export const useVisByValue = (
   services: VisualizeServices,
@@ -33,6 +34,7 @@ export const useVisByValue = (
       application: { navigateToApp },
       stateTransferService,
       visEditorsRegistry,
+      serverless,
     } = services;
     const getVisInstance = async () => {
       if (!valueInput || loaded.current || !visEditorRef.current) {
@@ -59,9 +61,16 @@ export const useVisByValue = (
       const redirectToOrigin = originatingApp
         ? () => navigateToApp(originatingApp, { path: originatingPath })
         : undefined;
-      chrome?.setBreadcrumbs(
-        getEditBreadcrumbs({ byValue: true, originatingAppName, redirectToOrigin })
-      );
+
+      if (serverless?.setBreadcrumbs) {
+        serverless.setBreadcrumbs(
+          getEditServerlessBreadcrumbs({ byValue: true, originatingAppName, redirectToOrigin })
+        );
+      } else {
+        chrome?.setBreadcrumbs(
+          getEditBreadcrumbs({ byValue: true, originatingAppName, redirectToOrigin })
+        );
+      }
 
       loaded.current = true;
       setState({

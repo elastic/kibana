@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactNode, FC, PropsWithChildren } from 'react';
 import {
   EuiPanel,
   EuiText,
@@ -22,6 +22,9 @@ interface ChartPanelProps {
   hasBorder?: boolean;
   isLoading?: boolean;
   isError?: boolean;
+  rightSideItems?: ReactNode[];
+  styles?: React.CSSProperties;
+  children: React.ReactNode;
 }
 
 const Loading = () => (
@@ -46,12 +49,14 @@ const Error = () => (
   </EuiFlexGroup>
 );
 
-export const ChartPanel: React.FC<ChartPanelProps> = ({
+export const ChartPanel: FC<PropsWithChildren<ChartPanelProps>> = ({
   title,
   hasBorder = true,
   isLoading,
   isError,
   children,
+  rightSideItems,
+  styles,
 }) => {
   const { euiTheme } = useEuiTheme();
   const renderChart = () => {
@@ -61,16 +66,23 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
   };
 
   return (
-    <EuiPanel hasBorder={hasBorder} hasShadow={false} data-test-subj="chart-panel">
+    <EuiPanel hasBorder={hasBorder} hasShadow={false} style={styles} data-test-subj="chart-panel">
       <EuiFlexGroup direction="column" gutterSize="m" style={{ height: '100%' }}>
         <EuiFlexItem grow={false}>
-          {title && (
-            <EuiTitle size="xs">
-              <h3 style={{ lineHeight: 'initial', paddingLeft: euiTheme.size.s }}>{title}</h3>
-            </EuiTitle>
-          )}
+          <EuiFlexGroup justifyContent={'spaceBetween'}>
+            <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+              {title && (
+                <EuiTitle size="s">
+                  <h3 style={{ lineHeight: 'initial', paddingLeft: euiTheme.size.s }}>{title}</h3>
+                </EuiTitle>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ flexDirection: 'row', gap: euiTheme.size.s }}>
+              {rightSideItems}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>{renderChart()}</EuiFlexItem>
+        <EuiFlexItem style={{ height: '100%' }}>{renderChart()}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );

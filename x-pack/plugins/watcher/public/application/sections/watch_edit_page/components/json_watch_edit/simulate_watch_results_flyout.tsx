@@ -14,6 +14,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -23,7 +24,7 @@ import {
   ExecutedWatchDetails,
   ExecutedWatchResults,
 } from '../../../../../../common/types/watch_types';
-import { ActionStateBadge, WatchStateBadge, SectionError } from '../../../../components';
+import { ActionStateBadge, SectionError } from '../../../../components';
 import { getTypeFromAction } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
 
@@ -42,6 +43,36 @@ export const SimulateWatchResultsFlyout = ({
 
   const { actionModes } = executeDetails;
 
+  const conditionNotMetActionStatus = (mode: string) => {
+    switch (mode) {
+      case 'simulate':
+      case 'force_simulate':
+        return i18n.translate(
+          'xpack.watcher.sections.watchEdit.simulateResults.table.statusColumnValue.notSimulated',
+          {
+            defaultMessage: 'not simulated',
+          }
+        );
+      case 'execute':
+      case 'force_execute':
+        return i18n.translate(
+          'xpack.watcher.sections.watchEdit.simulateResults.table.statusColumnValue.notExecuted',
+          {
+            defaultMessage: 'not executed',
+          }
+        );
+      case 'skip':
+        return i18n.translate(
+          'xpack.watcher.sections.watchEdit.simulateResults.table.statusColumnValue.throttled',
+          {
+            defaultMessage: 'throttled',
+          }
+        );
+      default:
+        return '';
+    }
+  };
+
   const getTableData = () => {
     const actions = watch.watch && watch.watch.actions;
     if (executeResults && actions) {
@@ -49,12 +80,19 @@ export const SimulateWatchResultsFlyout = ({
         executeResults.watchStatus && executeResults.watchStatus.actionStatuses;
       return Object.keys(actions).map((actionKey) => {
         const actionStatus = actionStatuses.find((status) => status.id === actionKey);
+        const isConditionMet = executeResults.details?.result?.condition?.met;
+
         return {
           actionId: actionKey,
           actionType: getTypeFromAction(actions[actionKey]),
           actionMode: actionModes[actionKey],
           actionState: actionStatus && actionStatus.state,
           actionReason: actionStatus && actionStatus.lastExecutionReason,
+          actionStatus:
+            (isConditionMet &&
+              executeResults.details?.result?.actions.find((action: any) => action.id === actionKey)
+                ?.status) ||
+            conditionNotMetActionStatus(actionModes[actionKey]),
         };
       });
     }
@@ -103,7 +141,7 @@ export const SimulateWatchResultsFlyout = ({
         }
       ),
       dataType: 'string' as const,
-      render: (actionState: string, _item: typeof actionsTableData[number]) => (
+      render: (actionState: string, _item: (typeof actionsTableData)[number]) => (
         <ActionStateBadge state={actionState} />
       ),
     },
@@ -113,6 +151,15 @@ export const SimulateWatchResultsFlyout = ({
         'xpack.watcher.sections.watchEdit.simulateResults.table.reasonColumnLabel',
         {
           defaultMessage: 'Reason',
+        }
+      ),
+    },
+    {
+      field: 'actionStatus',
+      name: i18n.translate(
+        'xpack.watcher.sections.watchEdit.simulateResults.table.statusColumnLabel',
+        {
+          defaultMessage: 'Status',
         }
       ),
     },
@@ -156,10 +203,25 @@ export const SimulateWatchResultsFlyout = ({
     return null;
   }
 
-  const {
-    watchStatus: { state },
-    details,
-  } = executeResults;
+  const { details } = executeResults;
+
+  const conditionMetStatus = (details?.result?.condition?.met && (
+    <>
+      <EuiIcon color="green" type="check" data-test-subj="conditionMetStatus" />{' '}
+      <FormattedMessage
+        id="xpack.watcher.sections.watchEdit.simulateResults.conditionMetStatus"
+        defaultMessage="Condition met"
+      />
+    </>
+  )) || (
+    <>
+      <EuiIcon color="subdued" type="cross" data-test-subj="conditionNotMetStatus" />{' '}
+      <FormattedMessage
+        id="xpack.watcher.sections.watchEdit.simulateResults.conditionNotMetStatus"
+        defaultMessage="Condition not met"
+      />
+    </>
+  );
 
   return (
     <EuiFlyout
@@ -171,8 +233,12 @@ export const SimulateWatchResultsFlyout = ({
     >
       <EuiFlyoutHeader hasBorder>
         {flyoutTitle}
-        <EuiSpacer size="s" />
-        <WatchStateBadge state={state} size="m" />
+        {details?.result?.condition?.met != null && (
+          <>
+            <EuiSpacer size="s" />
+            {conditionMetStatus}
+          </>
+        )}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -189,7 +255,11 @@ export const SimulateWatchResultsFlyout = ({
               </h5>
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiBasicTable columns={columns} items={actionsTableData} />
+            <EuiBasicTable
+              columns={columns}
+              items={actionsTableData}
+              data-test-subj="simulateResultsTable"
+            />
             <EuiSpacer size="l" />
           </Fragment>
         )}

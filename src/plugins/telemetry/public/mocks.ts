@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
   overlayServiceMock,
+  analyticsServiceMock,
   httpServiceMock,
+  i18nServiceMock,
   notificationServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
-import { TelemetryService } from './services/telemetry_service';
-import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
-import { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';
-import { TelemetryConstants } from '.';
+import type { TelemetryConstants } from '.';
+import type { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';
+import { TelemetryService, TelemetryNotifications } from './services';
 
 // The following is to be able to access private methods
 /* eslint-disable dot-notation */
@@ -39,6 +41,7 @@ export function mockTelemetryService({
     optIn: true,
     banner: true,
     allowChangingOptInStatus: true,
+    appendServerlessChannelsSuffix: false,
     telemetryNotifyUserAboutOptInDefault: true,
     userCanChangeSettings: true,
     labels: {},
@@ -76,6 +79,8 @@ export function mockTelemetryNotifications({
   return new TelemetryNotifications({
     http: httpServiceMock.createSetupContract(),
     overlays: overlayServiceMock.createStartContract(),
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
+    i18n: i18nServiceMock.createStartContract(),
     theme: themeServiceMock.createStartContract(),
     telemetryService,
     telemetryConstants: mockTelemetryConstants(),
@@ -102,12 +107,13 @@ function createSetupContract(): Setup {
 
 function createStartContract(): Start {
   const telemetryService = mockTelemetryService();
-  const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
   const telemetryConstants = mockTelemetryConstants();
 
   const startContract: Start = {
     telemetryService,
-    telemetryNotifications,
+    telemetryNotifications: {
+      setOptedInNoticeSeen: jest.fn(),
+    },
     telemetryConstants,
   };
 

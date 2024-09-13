@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -14,7 +15,10 @@ import { Adapters } from '../../common';
 import type { ApplicationStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { ThemeServiceStart } from '@kbn/core/public';
 
 describe('InspectorPanel', () => {
   let adapters: Adapters;
@@ -24,11 +28,15 @@ describe('InspectorPanel', () => {
     http: {},
     share: sharePluginMock.createStartContract(),
     uiSettings: {},
+    settings: settingsServiceMock.createStartContract(),
+    theme: themeServiceMock.createStartContract(),
   } as unknown as {
     application: ApplicationStart;
     http: HttpSetup;
     share: SharePluginStart;
     uiSettings: IUiSettingsClient;
+    settings: SettingsStart;
+    theme: ThemeServiceStart;
   };
 
   beforeEach(() => {

@@ -23,10 +23,9 @@ exports[`LayerControl is rendered 1`] = `
             size="xxxs"
           >
             <h2>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Layers"
                 id="xpack.maps.layerControl.layersTitle"
-                values={Object {}}
               />
             </h2>
           </EuiTitle>
@@ -97,18 +96,15 @@ exports[`LayerControl is rendered 1`] = `
   />
   <EuiButton
     className="mapLayerControl__addLayerButton"
-    color="primary"
     data-test-subj="addLayerButton"
     fill={true}
     fullWidth={true}
     isDisabled={false}
     onClick={[Function]}
-    size="m"
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Add layer"
       id="xpack.maps.layerControl.addLayerButtonLabel"
-      values={Object {}}
     />
   </EuiButton>
 </Fragment>
@@ -121,12 +117,9 @@ exports[`LayerControl isLayerTOCOpen Should render expand button 1`] = `
   display="inlineBlock"
   position="left"
 >
-  <EuiButtonIcon
-    aria-label="Expand layers panel"
-    className="mapLayerControl__openLayerTOCButton"
-    color="text"
-    data-test-subj="mapExpandLayerControlButton"
-    iconType="menuLeft"
+  <ExpandButton
+    hasErrorsOrWarnings={false}
+    isLoading={false}
     onClick={[Function]}
   />
 </EuiToolTip>
@@ -139,53 +132,26 @@ exports[`LayerControl isLayerTOCOpen Should render expand button with error icon
   display="inlineBlock"
   position="left"
 >
-  <EuiButtonIcon
-    aria-label="Expand layers panel"
-    className="mapLayerControl__openLayerTOCButton"
-    color="text"
-    data-test-subj="mapExpandLayerControlButton"
-    iconType="warning"
+  <ExpandButton
+    hasErrorsOrWarnings={true}
+    isLoading={false}
     onClick={[Function]}
   />
 </EuiToolTip>
 `;
 
-exports[`LayerControl isLayerTOCOpen spinner icon Should not render expand button with loading icon when layer is invisible 1`] = `
+exports[`LayerControl isLayerTOCOpen Should render expand button with loading icon when layer is loading 1`] = `
 <EuiToolTip
   content="Expand layers panel"
   delay="long"
   display="inlineBlock"
   position="left"
 >
-  <EuiButtonIcon
-    aria-label="Expand layers panel"
-    className="mapLayerControl__openLayerTOCButton"
-    color="text"
-    data-test-subj="mapExpandLayerControlButton"
-    iconType="menuLeft"
+  <ExpandButton
+    hasErrorsOrWarnings={false}
+    isLoading={true}
     onClick={[Function]}
   />
-</EuiToolTip>
-`;
-
-exports[`LayerControl isLayerTOCOpen spinner icon Should render expand button with loading icon when layer is loading 1`] = `
-<EuiToolTip
-  content="Expand layers panel"
-  delay="long"
-  display="inlineBlock"
-  position="left"
->
-  <button
-    aria-label="Expand layers panel"
-    className="euiButtonIcon euiButtonIcon--text mapLayerControl__openLayerTOCButton"
-    data-test-subj="mapExpandLayerControlButton"
-    onClick={[Function]}
-    type="button"
-  >
-    <EuiLoadingSpinner
-      size="m"
-    />
-  </button>
 </EuiToolTip>
 `;
 
@@ -212,10 +178,9 @@ exports[`LayerControl isReadOnly 1`] = `
             size="xxxs"
           >
             <h2>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Layers"
                 id="xpack.maps.layerControl.layersTitle"
-                values={Object {}}
               />
             </h2>
           </EuiTitle>
@@ -307,10 +272,9 @@ exports[`LayerControl should disable buttons when flyout is open 1`] = `
             size="xxxs"
           >
             <h2>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Layers"
                 id="xpack.maps.layerControl.layersTitle"
-                values={Object {}}
               />
             </h2>
           </EuiTitle>
@@ -381,18 +345,15 @@ exports[`LayerControl should disable buttons when flyout is open 1`] = `
   />
   <EuiButton
     className="mapLayerControl__addLayerButton"
-    color="primary"
     data-test-subj="addLayerButton"
     fill={true}
     fullWidth={true}
     isDisabled={true}
     onClick={[Function]}
-    size="m"
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Add layer"
       id="xpack.maps.layerControl.addLayerButtonLabel"
-      values={Object {}}
     />
   </EuiButton>
 </Fragment>

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { QueryClient } from '@tanstack/react-query';
-import { validateVersion } from '@kbn/object-versioning/lib/utils';
+import { validateVersion } from '@kbn/object-versioning-utils';
 import type { Version } from '@kbn/object-versioning';
 import { createQueryObservable } from './query_observable';
 import type { CrudClient } from '../crud_client';
@@ -96,7 +97,7 @@ export class ContentClient {
     private readonly crudClientProvider: (contentType?: string) => CrudClient,
     private readonly contentTypeRegistry: ContentTypeRegistry
   ) {
-    this.queryClient = new QueryClient();
+    this.queryClient = new QueryClient({ defaultOptions: { queries: { networkMode: 'always' } } });
     this.queryOptionBuilder = createQueryOptionBuilder({
       crudClientProvider: this.crudClientProvider,
       contentTypeRegistry: this.contentTypeRegistry,

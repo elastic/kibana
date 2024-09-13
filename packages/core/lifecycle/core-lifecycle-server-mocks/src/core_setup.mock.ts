@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { CoreSetup, StartServicesAccessor } from '@kbn/core-lifecycle-server';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import type { CoreSetup, StartServicesAccessor } from '@kbn/core-lifecycle-server';
-import type { MockedKeys } from '@kbn/utility-types-jest';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
@@ -25,6 +26,9 @@ import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
+import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { createCoreStartMock } from './core_start.mock';
 
 type CoreSetupMockType = MockedKeys<CoreSetup> & {
@@ -47,12 +51,14 @@ export function createCoreSetupMock({
   const uiSettingsMock = {
     register: uiSettingsServiceMock.createSetupContract().register,
     registerGlobal: uiSettingsServiceMock.createSetupContract().registerGlobal,
+    setAllowlist: uiSettingsServiceMock.createSetupContract().setAllowlist,
   };
 
   const mock: CoreSetupMockType = {
     analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     capabilities: capabilitiesServiceMock.createSetupContract(),
     customBranding: customBrandingServiceMock.createSetupContract(),
+    userSettings: userSettingsServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetup(),
     http: httpMock,
@@ -64,8 +70,14 @@ export function createCoreSetupMock({
     metrics: metricsServiceMock.createSetupContract(),
     deprecations: deprecationsServiceMock.createSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
+    security: securityServiceMock.createSetup(),
+    userProfile: userProfileServiceMock.createSetup(),
     coreUsageData: {
       registerUsageCounter: coreUsageDataServiceMock.createSetupContract().registerUsageCounter,
+    },
+    plugins: {
+      onSetup: jest.fn(),
+      onStart: jest.fn(),
     },
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()

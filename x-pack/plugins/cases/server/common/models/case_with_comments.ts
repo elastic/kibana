@@ -13,26 +13,26 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import type {
-  CaseResponse,
-  CommentAttributes,
-  CommentPatchRequest,
-  CommentRequest,
-  CommentRequestUserType,
-  CommentRequestAlertType,
-} from '../../../common/api';
+  AlertAttachmentPayload,
+  AttachmentAttributes,
+  Case,
+  UserCommentAttachmentPayload,
+} from '../../../common/types/domain';
 import {
-  CaseResponseRt,
+  CaseRt,
   CaseStatuses,
-  CommentType,
-  ActionTypes,
-  Actions,
-} from '../../../common/api';
+  UserActionActions,
+  UserActionTypes,
+  AttachmentType,
+} from '../../../common/types/domain';
+
 import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
 import { AttachmentLimitChecker } from '../limiter_checker';
-import type { AlertInfo, CaseSavedObject } from '../types';
+import type { AlertInfo } from '../types';
+import type { CaseSavedObjectTransformed } from '../types/case';
 import {
   countAlertsForID,
   flattenCommentSavedObjects,
@@ -42,18 +42,20 @@ import {
   getAlertInfoFromComments,
   getIDsAndIndicesAsArrays,
 } from '../utils';
+import { decodeOrThrow } from '../runtime_types';
+import type { AttachmentRequest, AttachmentPatchRequest } from '../../../common/types/api';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
-type CommentRequestWithId = Array<{ id: string } & CommentRequest>;
+type CommentRequestWithId = Array<{ id: string } & AttachmentRequest>;
 
 /**
  * This class represents a case that can have a comment attached to it.
  */
 export class CaseCommentModel {
   private readonly params: CaseCommentModelParams;
-  private readonly caseInfo: CaseSavedObject;
+  private readonly caseInfo: CaseSavedObjectTransformed;
 
-  private constructor(caseInfo: CaseSavedObject, params: CaseCommentModelParams) {
+  private constructor(caseInfo: CaseSavedObjectTransformed, params: CaseCommentModelParams) {
     this.caseInfo = caseInfo;
     this.params = params;
   }
@@ -69,7 +71,7 @@ export class CaseCommentModel {
     return new CaseCommentModel(savedObject, options);
   }
 
-  public get savedObject(): CaseSavedObject {
+  public get savedObject(): CaseSavedObjectTransformed {
     return this.caseInfo;
   }
 
@@ -81,13 +83,13 @@ export class CaseCommentModel {
     updatedAt,
     owner,
   }: {
-    updateRequest: CommentPatchRequest;
+    updateRequest: AttachmentPatchRequest;
     updatedAt: string;
     owner: string;
   }): Promise<CaseCommentModel> {
     try {
       const { id, version, ...queryRestAttributes } = updateRequest;
-      const options: SavedObjectsUpdateOptions<CommentAttributes> = {
+      const options: SavedObjectsUpdateOptions<AttachmentAttributes> = {
         version,
         /**
          * This is to handle a scenario where an update occurs for an attachment framework style comment.
@@ -99,10 +101,10 @@ export class CaseCommentModel {
         refresh: false,
       };
 
-      if (queryRestAttributes.type === CommentType.user && queryRestAttributes?.comment) {
+      if (queryRestAttributes.type === AttachmentType.user && queryRestAttributes?.comment) {
         const currentComment = (await this.params.services.attachmentService.getter.get({
           attachmentId: id,
-        })) as SavedObject<CommentRequestUserType>;
+        })) as SavedObject<UserCommentAttachmentPayload>;
 
         const updatedReferences = getOrUpdateLensReferences(
           this.params.lensEmbeddableFactory,
@@ -127,7 +129,7 @@ export class CaseCommentModel {
           },
           options,
         }),
-        this.updateCaseUserAndDateSkipRefresh(updatedAt),
+        this.partialUpdateCaseUserAndDateSkipRefresh(updatedAt),
       ]);
 
       await commentableCase.createUpdateCommentUserAction(comment, updateRequest, owner);
@@ -142,11 +144,11 @@ export class CaseCommentModel {
     }
   }
 
-  private async updateCaseUserAndDateSkipRefresh(date: string) {
-    return this.updateCaseUserAndDate(date, false);
+  private async partialUpdateCaseUserAndDateSkipRefresh(date: string) {
+    return this.partialUpdateCaseUserAndDate(date, false);
   }
 
-  private async updateCaseUserAndDate(
+  private async partialUpdateCaseUserAndDate(
     date: string,
     refresh: RefreshSetting
   ): Promise<CaseCommentModel> {
@@ -158,7 +160,6 @@ export class CaseCommentModel {
           updated_at: date,
           updated_by: { ...this.params.user },
         },
-        version: this.caseInfo.version,
         refresh,
       });
 
@@ -179,25 +180,27 @@ export class CaseCommentModel {
     }
   }
 
-  private newObjectWithInfo(caseInfo: CaseSavedObject): CaseCommentModel {
+  private newObjectWithInfo(caseInfo: CaseSavedObjectTransformed): CaseCommentModel {
     return new CaseCommentModel(caseInfo, this.params);
   }
 
   private async createUpdateCommentUserAction(
-    comment: SavedObjectsUpdateResponse<CommentAttributes>,
-    updateRequest: CommentPatchRequest,
+    comment: SavedObjectsUpdateResponse<AttachmentAttributes>,
+    updateRequest: AttachmentPatchRequest,
     owner: string
   ) {
     const { id, version, ...queryRestAttributes } = updateRequest;
 
     await this.params.services.userActionService.creator.createUserAction({
-      type: ActionTypes.comment,
-      action: Actions.update,
-      caseId: this.caseInfo.id,
-      attachmentId: comment.id,
-      payload: { attachment: queryRestAttributes },
-      user: this.params.user,
-      owner,
+      userAction: {
+        type: UserActionTypes.comment,
+        action: UserActionActions.update,
+        caseId: this.caseInfo.id,
+        attachmentId: comment.id,
+        payload: { attachment: queryRestAttributes },
+        user: this.params.user,
+        owner,
+      },
     });
   }
 
@@ -210,7 +213,7 @@ export class CaseCommentModel {
     id,
   }: {
     createdDate: string;
-    commentReq: CommentRequest;
+    commentReq: AttachmentRequest;
     id: string;
   }): Promise<CaseCommentModel> {
     try {
@@ -238,7 +241,7 @@ export class CaseCommentModel {
           id,
           refresh: false,
         }),
-        this.updateCaseUserAndDateSkipRefresh(createdDate),
+        this.partialUpdateCaseUserAndDateSkipRefresh(createdDate),
       ]);
 
       await Promise.all([
@@ -314,13 +317,13 @@ export class CaseCommentModel {
     return dedupedAlertAttachments;
   }
 
-  private getAlertAttachments(attachments: CommentRequest[]): CommentRequestAlertType[] {
+  private getAlertAttachments(attachments: AttachmentRequest[]): AlertAttachmentPayload[] {
     return attachments.filter(
-      (attachment): attachment is CommentRequestAlertType => attachment.type === CommentType.alert
+      (attachment): attachment is AlertAttachmentPayload => attachment.type === AttachmentType.alert
     );
   }
 
-  private async validateCreateCommentRequest(req: CommentRequest[]) {
+  private async validateCreateCommentRequest(req: AttachmentRequest[]) {
     const alertAttachments = this.getAlertAttachments(req);
     const hasAlertsInRequest = alertAttachments.length > 0;
 
@@ -351,10 +354,10 @@ export class CaseCommentModel {
     ];
   }
 
-  private getCommentReferences(commentReq: CommentRequest) {
+  private getCommentReferences(commentReq: AttachmentRequest) {
     let references: SavedObjectReference[] = [];
 
-    if (commentReq.type === CommentType.user && commentReq?.comment) {
+    if (commentReq.type === AttachmentType.user && commentReq?.comment) {
       const commentStringReferences = getOrUpdateLensReferences(
         this.params.lensEmbeddableFactory,
         commentReq.comment
@@ -365,7 +368,7 @@ export class CaseCommentModel {
     return references;
   }
 
-  private async handleAlertComments(attachments: CommentRequest[]) {
+  private async handleAlertComments(attachments: AttachmentRequest[]) {
     const alertAttachments = this.getAlertAttachments(attachments);
 
     const alerts = getAlertInfoFromComments(alertAttachments);
@@ -397,23 +400,27 @@ export class CaseCommentModel {
   }
 
   private async createCommentUserAction(
-    comment: SavedObject<CommentAttributes>,
-    req: CommentRequest
+    comment: SavedObject<AttachmentAttributes>,
+    req: AttachmentRequest
   ) {
     await this.params.services.userActionService.creator.createUserAction({
-      type: ActionTypes.comment,
-      action: Actions.create,
-      caseId: this.caseInfo.id,
-      attachmentId: comment.id,
-      payload: {
-        attachment: req,
+      userAction: {
+        type: UserActionTypes.comment,
+        action: UserActionActions.create,
+        caseId: this.caseInfo.id,
+        attachmentId: comment.id,
+        payload: {
+          attachment: req,
+        },
+        user: this.params.user,
+        owner: comment.attributes.owner,
       },
-      user: this.params.user,
-      owner: comment.attributes.owner,
     });
   }
 
-  private async bulkCreateCommentUserAction(attachments: Array<{ id: string } & CommentRequest>) {
+  private async bulkCreateCommentUserAction(
+    attachments: Array<{ id: string } & AttachmentRequest>
+  ) {
     await this.params.services.userActionService.creator.bulkCreateAttachmentCreation({
       caseId: this.caseInfo.id,
       attachments: attachments.map(({ id, ...attachment }) => ({
@@ -434,7 +441,7 @@ export class CaseCommentModel {
     };
   }
 
-  public async encodeWithComments(): Promise<CaseResponse> {
+  public async encodeWithComments(): Promise<Case> {
     try {
       const comments = await this.params.services.caseService.getAllCaseComments({
         id: this.caseInfo.id,
@@ -453,7 +460,7 @@ export class CaseCommentModel {
         ...this.formatForEncoding(comments.total),
       };
 
-      return CaseResponseRt.encode(caseResponse);
+      return decodeOrThrow(CaseRt)(caseResponse);
     } catch (error) {
       throw createCaseError({
         message: `Failed encoding the commentable case, case id: ${this.caseInfo.id}: ${error}`,
@@ -494,7 +501,7 @@ export class CaseCommentModel {
           }),
           refresh: false,
         }),
-        this.updateCaseUserAndDateSkipRefresh(new Date().toISOString()),
+        this.partialUpdateCaseUserAndDateSkipRefresh(new Date().toISOString()),
       ]);
 
       const savedObjectsWithoutErrors = newlyCreatedAttachments.saved_objects.filter(

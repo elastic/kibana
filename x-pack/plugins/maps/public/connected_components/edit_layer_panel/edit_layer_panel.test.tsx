@@ -43,6 +43,13 @@ jest.mock('../../kibana_services', () => {
     getCore() {
       return {};
     },
+    getEMSSettings() {
+      return {
+        isEMSUrlSet() {
+          return false;
+        },
+      };
+    },
   };
 });
 
@@ -50,9 +57,11 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { LAYER_TYPE } from '../../../common/constants';
 import { ILayer } from '../../classes/layers/layer';
+import { mockVectorLayer } from '../../classes/layers/__fixtures__/mock_vector_layer';
 import { EditLayerPanel } from './edit_layer_panel';
 
 const mockLayer = {
+  ...mockVectorLayer,
   getId: () => {
     return '1';
   },
@@ -62,17 +71,8 @@ const mockLayer = {
   getDisplayName: () => {
     return 'layer 1';
   },
-  getImmutableSourceProperties: () => {
-    return [{ label: 'source prop1', value: 'you get one chance to set me' }];
-  },
-  showJoinEditor: () => {
-    return true;
-  },
   canShowTooltip: () => {
     return true;
-  },
-  supportsElasticsearchFilters: () => {
-    return false;
   },
   getLayerTypeIconName: () => {
     return 'vector';
@@ -94,6 +94,13 @@ const mockLayer = {
   },
   getStyleForEditing: () => {
     return {};
+  },
+  getSource: () => {
+    return {
+      supportsJoins: () => {
+        return true;
+      },
+    };
   },
 } as unknown as ILayer;
 

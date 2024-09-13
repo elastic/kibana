@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -13,44 +14,111 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import {
   type SavedObjectsMigrationConfigType,
   SavedObjectTypeRegistry,
+  type IndexMapping,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { createInitialState } from './initial_state';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { createInitialState, type CreateInitialStateParams } from './initial_state';
+import * as getOutdatedDocumentsQueryModule from './get_outdated_documents_query';
+import { getOutdatedDocumentsQuery } from './get_outdated_documents_query';
 
 const mockLogger = loggingSystemMock.create();
+
+const migrationsConfig = {
+  retryAttempts: 15,
+  batchSize: 1000,
+  maxBatchSizeBytes: ByteSizeValue.parse('100mb'),
+  maxReadBatchSizeBytes: ByteSizeValue.parse('500mb'),
+} as unknown as SavedObjectsMigrationConfigType;
+
+const indexTypesMap = {
+  '.kibana': ['typeA', 'typeB', 'typeC'],
+  '.kibana_task_manager': ['task'],
+  '.kibana_cases': ['typeD', 'typeE'],
+};
+
+const createInitialStateCommonParams = {
+  kibanaVersion: '8.1.0',
+  waitForMigrationCompletion: false,
+  mustRelocateDocuments: true,
+  indexTypes: ['typeA', 'typeB', 'typeC'],
+  indexTypesMap,
+  hashToVersionMap: {
+    'typeA|someHash': '10.1.0',
+    'typeB|someHash': '10.1.0',
+    'typeC|someHash': '10.1.0',
+  },
+  targetIndexMappings: {
+    dynamic: 'strict',
+    properties: { my_type: { properties: { title: { type: 'text' } } } },
+    _meta: {
+      indexTypesMap,
+    },
+  } as IndexMapping,
+  coreMigrationVersionPerType: {},
+  migrationVersionPerType: {},
+  indexPrefix: '.kibana_task_manager',
+  migrationsConfig,
+};
 
 describe('createInitialState', () => {
   let typeRegistry: SavedObjectTypeRegistry;
   let docLinks: DocLinksServiceSetup;
+  let logger: Logger;
+  let createInitialStateParams: CreateInitialStateParams;
 
   beforeEach(() => {
     typeRegistry = new SavedObjectTypeRegistry();
+    typeRegistry.registerType({
+      name: 'foo',
+      hidden: false,
+      mappings: {
+        properties: {},
+      },
+      namespaceType: 'single',
+      modelVersions: {
+        1: {
+          changes: [],
+        },
+      },
+      switchToModelVersionAt: '8.10.0',
+    });
+    typeRegistry.registerType({
+      name: 'bar',
+      hidden: false,
+      mappings: {
+        properties: {},
+      },
+      namespaceType: 'single',
+      modelVersions: {
+        1: {
+          changes: [],
+        },
+        2: {
+          changes: [{ type: 'mappings_addition', addedMappings: {} }],
+        },
+      },
+      switchToModelVersionAt: '8.10.0',
+    });
     docLinks = docLinksServiceMock.createSetupContract();
+    logger = mockLogger.get();
+    createInitialStateParams = {
+      ...createInitialStateCommonParams,
+      typeRegistry,
+      docLinks,
+      logger,
+      esCapabilities: elasticsearchServiceMock.createCapabilities(),
+    };
   });
 
   afterEach(() => jest.clearAllMocks());
 
-  const migrationsConfig = {
-    retryAttempts: 15,
-    batchSize: 1000,
-    maxBatchSizeBytes: ByteSizeValue.parse('100mb'),
-  } as unknown as SavedObjectsMigrationConfigType;
-
   it('creates the initial state for the model based on the passed in parameters', () => {
     expect(
       createInitialState({
-        kibanaVersion: '8.1.0',
+        ...createInitialStateParams,
         waitForMigrationCompletion: true,
-        targetMappings: {
-          dynamic: 'strict',
-          properties: { my_type: { properties: { title: { type: 'text' } } } },
-        },
-        migrationVersionPerType: {},
-        indexPrefix: '.kibana_task_manager',
-        migrationsConfig,
-        typeRegistry,
-        docLinks,
-        logger: mockLogger.get(),
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -59,6 +127,9 @@ describe('createInitialState', () => {
         "currentAlias": ".kibana_task_manager",
         "discardCorruptObjects": false,
         "discardUnknownObjects": false,
+        "esCapabilities": Object {
+          "serverless": false,
+        },
         "excludeFromUpgradeFilterHooks": Object {},
         "excludeOnUpgradeQuery": Object {
           "bool": Object {
@@ -86,6 +157,11 @@ describe('createInitialState', () => {
               Object {
                 "term": Object {
                   "type": "csp_rule",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "endpoint:user-artifact",
                 },
               },
               Object {
@@ -171,18 +247,52 @@ describe('createInitialState', () => {
             ],
           },
         },
+        "hashToVersionMap": Object {
+          "typeA|someHash": "10.1.0",
+          "typeB|someHash": "10.1.0",
+          "typeC|someHash": "10.1.0",
+        },
         "indexPrefix": ".kibana_task_manager",
+        "indexTypes": Array [
+          "typeA",
+          "typeB",
+          "typeC",
+        ],
+        "indexTypesMap": Object {
+          ".kibana": Array [
+            "typeA",
+            "typeB",
+            "typeC",
+          ],
+          ".kibana_cases": Array [
+            "typeD",
+            "typeE",
+          ],
+          ".kibana_task_manager": Array [
+            "task",
+          ],
+        },
         "kibanaVersion": "8.1.0",
-        "knownTypes": Array [],
+        "knownTypes": Array [
+          "foo",
+          "bar",
+        ],
+        "latestMappingsVersions": Object {
+          "bar": "10.2.0",
+          "foo": "10.0.0",
+        },
         "legacyIndex": ".kibana_task_manager",
         "logs": Array [],
+        "maxBatchSize": 1000,
         "maxBatchSizeBytes": 104857600,
+        "maxReadBatchSizeBytes": 524288000,
         "migrationDocLinks": Object {
           "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
           "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
           "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
           "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
         },
+        "mustRelocateDocuments": true,
         "outdatedDocumentsQuery": Object {
           "bool": Object {
             "should": Array [],
@@ -195,6 +305,22 @@ describe('createInitialState', () => {
         "retryCount": 0,
         "retryDelay": 0,
         "targetIndexMappings": Object {
+          "_meta": Object {
+            "indexTypesMap": Object {
+              ".kibana": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
+              ".kibana_cases": Array [
+                "typeD",
+                "typeE",
+              ],
+              ".kibana_task_manager": Array [
+                "task",
+              ],
+            },
+          },
           "dynamic": "strict",
           "properties": Object {
             "my_type": Object {
@@ -207,15 +333,15 @@ describe('createInitialState', () => {
           },
         },
         "tempIndex": ".kibana_task_manager_8.1.0_reindex_temp",
+        "tempIndexAlias": ".kibana_task_manager_8.1.0_reindex_temp_alias",
         "tempIndexMappings": Object {
           "dynamic": false,
           "properties": Object {
-            "migrationVersion": Object {
-              "dynamic": "true",
-              "type": "object",
-            },
             "type": Object {
               "type": "keyword",
+            },
+            "typeMigrationVersion": Object {
+              "type": "version",
             },
           },
         },
@@ -227,53 +353,17 @@ describe('createInitialState', () => {
   });
 
   it('creates the initial state for the model with waitForMigrationCompletion false,', () => {
-    expect(
-      createInitialState({
-        kibanaVersion: '8.1.0',
-        waitForMigrationCompletion: false,
-        targetMappings: {
-          dynamic: 'strict',
-          properties: { my_type: { properties: { title: { type: 'text' } } } },
-        },
-        migrationVersionPerType: {},
-        indexPrefix: '.kibana_task_manager',
-        migrationsConfig,
-        typeRegistry,
-        docLinks,
-        logger: mockLogger.get(),
-      })
-    ).toMatchObject({
+    expect(createInitialState(createInitialStateParams)).toMatchObject({
       waitForMigrationCompletion: false,
     });
   });
 
   it('returns state with the correct `knownTypes`', () => {
-    typeRegistry.registerType({
-      name: 'foo',
-      namespaceType: 'single',
-      hidden: false,
-      mappings: { properties: {} },
-    });
-    typeRegistry.registerType({
-      name: 'bar',
-      namespaceType: 'multiple',
-      hidden: true,
-      mappings: { properties: {} },
-    });
-
     const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
-      migrationsConfig,
+      ...createInitialStateParams,
       typeRegistry,
       docLinks,
-      logger: mockLogger.get(),
+      logger,
     });
 
     expect(initialState.knownTypes).toEqual(['foo', 'bar']);
@@ -282,47 +372,22 @@ describe('createInitialState', () => {
   it('returns state with the correct `excludeFromUpgradeFilterHooks`', () => {
     const fooExcludeOnUpgradeHook = jest.fn();
     typeRegistry.registerType({
-      name: 'foo',
+      name: 'baz',
       namespaceType: 'single',
       hidden: false,
       mappings: { properties: {} },
       excludeOnUpgrade: fooExcludeOnUpgradeHook,
     });
 
-    const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
-      migrationsConfig,
-      typeRegistry,
-      docLinks,
-      logger: mockLogger.get(),
-    });
-
-    expect(initialState.excludeFromUpgradeFilterHooks).toEqual({ foo: fooExcludeOnUpgradeHook });
+    const initialState = createInitialState(createInitialStateParams);
+    expect(initialState.excludeFromUpgradeFilterHooks).toEqual({ baz: fooExcludeOnUpgradeHook });
   });
 
   it('returns state with a preMigration script', () => {
     const preMigrationScript = "ctx._id = ctx._source.type + ':' + ctx._id";
     const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
+      ...createInitialStateParams,
       preMigrationScript,
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
-      migrationsConfig,
-      typeRegistry,
-      docLinks,
-      logger: mockLogger.get(),
     });
 
     expect(Option.isSome(initialState.preMigrationScript)).toEqual(true);
@@ -334,39 +399,21 @@ describe('createInitialState', () => {
     expect(
       Option.isNone(
         createInitialState({
-          kibanaVersion: '8.1.0',
-          waitForMigrationCompletion: false,
-          targetMappings: {
-            dynamic: 'strict',
-            properties: { my_type: { properties: { title: { type: 'text' } } } },
-          },
+          ...createInitialStateParams,
           preMigrationScript: undefined,
-          migrationVersionPerType: {},
-          indexPrefix: '.kibana_task_manager',
-          migrationsConfig,
-          typeRegistry,
-          docLinks,
-          logger: mockLogger.get(),
         }).preMigrationScript
       )
     ).toEqual(true);
   });
   it('returns state with an outdatedDocumentsQuery', () => {
+    jest.spyOn(getOutdatedDocumentsQueryModule, 'getOutdatedDocumentsQuery');
+
     expect(
       createInitialState({
-        kibanaVersion: '8.1.0',
-        waitForMigrationCompletion: false,
-        targetMappings: {
-          dynamic: 'strict',
-          properties: { my_type: { properties: { title: { type: 'text' } } } },
-        },
+        ...createInitialStateParams,
         preMigrationScript: "ctx._id = ctx._source.type + ':' + ctx._id",
+        coreMigrationVersionPerType: {},
         migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
-        indexPrefix: '.kibana_task_manager',
-        migrationsConfig,
-        typeRegistry,
-        docLinks,
-        logger: mockLogger.get(),
       }).outdatedDocumentsQuery
     ).toMatchInlineSnapshot(`
       Object {
@@ -385,6 +432,22 @@ describe('createInitialState', () => {
                       "should": Array [
                         Object {
                           "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "typeMigrationVersion",
+                                },
+                              },
+                              Object {
+                                "exists": Object {
+                                  "field": "migrationVersion.my_dashboard",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        Object {
+                          "bool": Object {
                             "must": Object {
                               "exists": Object {
                                 "field": "migrationVersion",
@@ -398,19 +461,10 @@ describe('createInitialState', () => {
                           },
                         },
                         Object {
-                          "bool": Object {
-                            "must_not": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "migrationVersion",
-                                },
-                              },
-                              Object {
-                                "term": Object {
-                                  "typeMigrationVersion": "7.10.1",
-                                },
-                              },
-                            ],
+                          "range": Object {
+                            "typeMigrationVersion": Object {
+                              "lt": "7.10.1",
+                            },
                           },
                         },
                       ],
@@ -432,6 +486,22 @@ describe('createInitialState', () => {
                       "should": Array [
                         Object {
                           "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "typeMigrationVersion",
+                                },
+                              },
+                              Object {
+                                "exists": Object {
+                                  "field": "migrationVersion.my_viz",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        Object {
+                          "bool": Object {
                             "must": Object {
                               "exists": Object {
                                 "field": "migrationVersion",
@@ -445,19 +515,10 @@ describe('createInitialState', () => {
                           },
                         },
                         Object {
-                          "bool": Object {
-                            "must_not": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "migrationVersion",
-                                },
-                              },
-                              Object {
-                                "term": Object {
-                                  "typeMigrationVersion": "8.0.0",
-                                },
-                              },
-                            ],
+                          "range": Object {
+                            "typeMigrationVersion": Object {
+                              "lt": "8.0.0",
+                            },
                           },
                         },
                       ],
@@ -470,47 +531,26 @@ describe('createInitialState', () => {
         },
       }
     `);
+    expect(getOutdatedDocumentsQuery).toHaveBeenCalledWith({
+      coreMigrationVersionPerType: {},
+      migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
+    });
   });
 
   it('initializes the `discardUnknownObjects` flag to false if the flag is not provided in the config', () => {
-    const logger = mockLogger.get();
-    const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
-      migrationsConfig,
-      typeRegistry,
-      docLinks,
-      logger,
-    });
+    const initialState = createInitialState(createInitialStateParams);
 
     expect(logger.warn).not.toBeCalled();
     expect(initialState.discardUnknownObjects).toEqual(false);
   });
 
   it('initializes the `discardUnknownObjects` flag to false if the value provided in the config does not match the current kibana version', () => {
-    const logger = mockLogger.get();
     const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
+      ...createInitialStateParams,
       migrationsConfig: {
         ...migrationsConfig,
         discardUnknownObjects: '8.0.0',
       },
-      typeRegistry,
-      docLinks,
-      logger,
     });
 
     expect(initialState.discardUnknownObjects).toEqual(false);
@@ -522,44 +562,23 @@ describe('createInitialState', () => {
 
   it('initializes the `discardUnknownObjects` flag to true if the value provided in the config matches the current kibana version', () => {
     const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
+      ...createInitialStateParams,
       migrationsConfig: {
         ...migrationsConfig,
         discardUnknownObjects: '8.1.0',
       },
-      typeRegistry,
-      docLinks,
-      logger: mockLogger.get(),
     });
 
     expect(initialState.discardUnknownObjects).toEqual(true);
   });
 
   it('initializes the `discardCorruptObjects` flag to false if the value provided in the config does not match the current kibana version', () => {
-    const logger = mockLogger.get();
     const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
+      ...createInitialStateParams,
       migrationsConfig: {
         ...migrationsConfig,
         discardCorruptObjects: '8.0.0',
       },
-      typeRegistry,
-      docLinks,
-      logger,
     });
 
     expect(initialState.discardCorruptObjects).toEqual(false);
@@ -571,21 +590,11 @@ describe('createInitialState', () => {
 
   it('initializes the `discardCorruptObjects` flag to true if the value provided in the config matches the current kibana version', () => {
     const initialState = createInitialState({
-      kibanaVersion: '8.1.0',
-      waitForMigrationCompletion: false,
-      targetMappings: {
-        dynamic: 'strict',
-        properties: { my_type: { properties: { title: { type: 'text' } } } },
-      },
-      migrationVersionPerType: {},
-      indexPrefix: '.kibana_task_manager',
+      ...createInitialStateParams,
       migrationsConfig: {
         ...migrationsConfig,
         discardCorruptObjects: '8.1.0',
       },
-      typeRegistry,
-      docLinks,
-      logger: mockLogger.get(),
     });
 
     expect(initialState.discardCorruptObjects).toEqual(true);

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { FileMetadata, Pagination, UpdatableFileMetadata } from '../../common/types';
@@ -63,6 +64,16 @@ export interface DeleteFileArgs {
 }
 
 /**
+ * Arguments to delete files in a bulk request.
+ */
+export interface BulkDeleteFilesArgs {
+  /**
+   * File IDs.
+   */
+  ids: string[];
+}
+
+/**
  * Arguments to get a file by ID.
  */
 export interface GetByIdArgs {
@@ -70,6 +81,26 @@ export interface GetByIdArgs {
    * File ID.
    */
   id: string;
+}
+
+/**
+ * Arguments to bulk get multiple files by their IDs.
+ */
+export interface BulkGetByIdArgs {
+  /**
+   * File IDs.
+   */
+  ids: string[];
+  /**
+   * Flag to indicate if an Error is thrown if any of the file id is not found. If set to `false`, "null" will be returned.
+   * @default true
+   */
+  throwIfNotFound?: boolean;
+  /**
+   * Format of the response, either a list of File[] (sorted by id passed) or a map `{[fileId: string]: File}`
+   * @default "array"
+   */
+  format?: 'array' | 'map';
 }
 
 /**
@@ -82,6 +113,10 @@ export interface FindFileArgs extends Pagination {
    * File kind(s), see {@link FileKind}.
    */
   kind?: string[];
+  /**
+   * File kind(s) to exclude from search, see {@link FileKind}.
+   */
+  kindToExclude?: string[];
   /**
    * File name(s).
    */

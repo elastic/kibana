@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
+import { APP_ID } from '../../../common';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SocTrends } from '../components/detection_response/soc_trends';
@@ -14,13 +15,12 @@ import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { HeaderPage } from '../../common/components/header_page';
-import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 
-import { LandingPageComponent } from '../../common/components/landing_page';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
 import { HostAlertsTable } from '../components/detection_response/host_alerts_table';
 import { RuleAlertsTable } from '../components/detection_response/rule_alerts_table';
@@ -29,14 +29,22 @@ import * as i18n from './translations';
 import { CasesTable } from '../components/detection_response/cases_table';
 import { CasesByStatus } from '../components/detection_response/cases_by_status';
 import { NoPrivileges } from '../../common/components/no_privileges';
+import { FiltersGlobal } from '../../common/components/filters_global';
+import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
+import { useKibana } from '../../common/lib/kibana';
 
 const DetectionResponseComponent = () => {
-  const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
+  const { cases } = useKibana().services;
+  const { filterQuery } = useGlobalFilterQuery();
+  const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
   const { signalIndexName } = useSignalIndex();
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
-  const canReadCases = useGetUserCasesPermissions().read;
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+  const canReadCases = userCasesPermissions.read;
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
   const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
+  const additionalFilters = useMemo(() => (filterQuery ? [filterQuery] : []), [filterQuery]);
+
   if (!canReadAlerts && !canReadCases) {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
   }
@@ -45,16 +53,11 @@ const DetectionResponseComponent = () => {
     <>
       {indicesExist ? (
         <>
+          <FiltersGlobal>
+            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+          </FiltersGlobal>
           <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">
-            <HeaderPage title={i18n.DETECTION_RESPONSE_TITLE}>
-              <SiemSearchBar
-                id={InputsModelId.global}
-                indexPattern={indexPattern}
-                hideFilterBar
-                hideQueryInput
-              />
-            </HeaderPage>
-
+            <HeaderPage title={i18n.DETECTION_RESPONSE_TITLE} />
             {isSourcererLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="detectionResponseLoader" />
             ) : (
@@ -63,7 +66,10 @@ const DetectionResponseComponent = () => {
                   <EuiFlexGroup>
                     {canReadAlerts && (
                       <EuiFlexItem>
-                        <AlertsByStatus signalIndexName={signalIndexName} />
+                        <AlertsByStatus
+                          signalIndexName={signalIndexName}
+                          additionalFilters={additionalFilters}
+                        />
                       </EuiFlexItem>
                     )}
                     {canReadCases && (
@@ -115,7 +121,7 @@ const DetectionResponseComponent = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.detectionAndResponse} />

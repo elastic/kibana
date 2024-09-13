@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { FilterStateStore, Query } from '@kbn/es-query';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 import type { SavedObject, SavedQueryAttributes } from '../../common';
-import { registerSavedQueryRouteHandlerContext } from './route_handler_context';
+import {
+  InternalSavedQueryAttributes,
+  registerSavedQueryRouteHandlerContext,
+} from './route_handler_context';
 import { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 
 const mockContext = {
@@ -30,6 +34,10 @@ const savedQueryAttributes: SavedQueryAttributes = {
     query: 'response:200',
   },
   filters: [],
+};
+const internalSavedQueryAttributes: InternalSavedQueryAttributes = {
+  ...savedQueryAttributes,
+  titleKeyword: 'foo',
 };
 const savedQueryAttributesBar: SavedQueryAttributes = {
   title: 'bar',
@@ -90,19 +98,29 @@ describe('saved query route handler context', () => {
 
   describe('create', function () {
     it('should create a saved object for the given attributes', async () => {
-      const mockResponse: SavedObject<SavedQueryAttributes> = {
+      const mockResponse: SavedObject<InternalSavedQueryAttributes> = {
         id: 'foo',
         type: 'query',
-        attributes: savedQueryAttributes,
+        attributes: internalSavedQueryAttributes,
         references: [],
       };
+      mockSavedObjectsClient.find.mockResolvedValue({
+        total: 0,
+        page: 0,
+        per_page: 0,
+        saved_objects: [],
+      });
       mockSavedObjectsClient.create.mockResolvedValue(mockResponse);
 
       const response = await context.create(savedQueryAttributes);
 
-      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith('query', savedQueryAttributes, {
-        references: [],
-      });
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        'query',
+        { ...internalSavedQueryAttributes, timefilter: null },
+        {
+          references: [],
+        }
+      );
       expect(response).toEqual({
         id: 'foo',
         attributes: savedQueryAttributes,
@@ -117,17 +135,29 @@ describe('saved query route handler context', () => {
           query: { match_all: {} },
         },
       };
-      const mockResponse: SavedObject<SavedQueryAttributes> = {
+      const mockResponse: SavedObject<InternalSavedQueryAttributes> = {
         id: 'foo',
         type: 'query',
-        attributes: savedQueryAttributesWithQueryObject,
+        attributes: {
+          ...savedQueryAttributesWithQueryObject,
+          titleKeyword: 'foo',
+        },
         references: [],
       };
+      mockSavedObjectsClient.find.mockResolvedValue({
+        total: 0,
+        page: 0,
+        per_page: 0,
+        saved_objects: [],
+      });
       mockSavedObjectsClient.create.mockResolvedValue(mockResponse);
 
-      const { attributes } = await context.create(savedQueryAttributesWithQueryObject);
+      const result = await context.create(savedQueryAttributesWithQueryObject);
 
-      expect(attributes).toEqual(savedQueryAttributesWithQueryObject);
+      expect(result).toEqual({
+        id: 'foo',
+        attributes: savedQueryAttributesWithQueryObject,
+      });
     });
 
     it('should optionally accept filters and timefilters in object format', async () => {
@@ -136,12 +166,21 @@ describe('saved query route handler context', () => {
         filters: savedQueryAttributesWithFilters.filters,
         timefilter: savedQueryAttributesWithFilters.timefilter,
       };
-      const mockResponse: SavedObject<SavedQueryAttributes> = {
+      const mockResponse: SavedObject<InternalSavedQueryAttributes> = {
         id: 'foo',
         type: 'query',
-        attributes: serializedSavedQueryAttributesWithFilters,
+        attributes: {
+          ...serializedSavedQueryAttributesWithFilters,
+          titleKeyword: 'foo',
+        },
         references: [],
       };
+      mockSavedObjectsClient.find.mockResolvedValue({
+        total: 0,
+        page: 0,
+        per_page: 0,
+        saved_objects: [],
+      });
       mockSavedObjectsClient.create.mockResolvedValue(mockResponse);
 
       await context.create(savedQueryAttributesWithFilters);
@@ -154,6 +193,12 @@ describe('saved query route handler context', () => {
     });
 
     it('should throw an error when saved objects client returns error', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        total: 0,
+        page: 0,
+        per_page: 0,
+        saved_objects: [],
+      });
       mockSavedObjectsClient.create.mockResolvedValue({
         error: {
           error: '123',
@@ -163,25 +208,31 @@ describe('saved query route handler context', () => {
 
       const response = context.create(savedQueryAttributes);
 
-      expect(response).rejects.toMatchInlineSnapshot(`[Error: An Error]`);
+      await expect(response).rejects.toMatchInlineSnapshot(`[Error: An Error]`);
     });
 
     it('should throw an error if the saved query does not have a title', async () => {
       const response = context.create({ ...savedQueryAttributes, title: '' });
-      expect(response).rejects.toMatchInlineSnapshot(
-        `[Error: Cannot create saved query without a title]`
+      await expect(response).rejects.toMatchInlineSnapshot(
+        `[Error: Cannot create query without a title]`
       );
     });
   });
 
   describe('update', function () {
     it('should update a saved object for the given attributes', async () => {
-      const mockResponse: SavedObject<SavedQueryAttributes> = {
+      const mockResponse: SavedObject<InternalSavedQueryAttributes> = {
         id: 'foo',
         type: 'query',
-        attributes: savedQueryAttributes,
+        attributes: internalSavedQueryAttributes,
         references: [],
       };
+      mockSavedObjectsClient.find.mockResolvedValue({
+        total: 0,
+        page: 0,
+        per_page: 0,
+        saved_objects: [],
+      });
       mockSavedObjectsClient.update.mockResolvedValue(mockResponse);
 
       const response = await context.update('foo', savedQueryAttributes);
@@ -189,7 +240,7 @@ describe('saved query route handler context', () => {
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
         'query',
         'foo',
-        savedQueryAttributes,
+        { ...internalSavedQueryAttributes, timefilter: null },
         {
           references: [],
         }
@@ -201,6 +252,12 @@ describe('saved query route handler context', () => {
     });
 
     it('should throw an error when saved objects client returns error', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        total: 0,
+        page: 0,
+        per_page: 0,
+        saved_objects: [],
+      });
       mockSavedObjectsClient.update.mockResolvedValue({
         error: {
           error: '123',
@@ -210,13 +267,13 @@ describe('saved query route handler context', () => {
 
       const response = context.update('foo', savedQueryAttributes);
 
-      expect(response).rejects.toMatchInlineSnapshot(`[Error: An Error]`);
+      await expect(response).rejects.toMatchInlineSnapshot(`[Error: An Error]`);
     });
 
     it('should throw an error if the saved query does not have a title', async () => {
       const response = context.create({ ...savedQueryAttributes, title: '' });
-      expect(response).rejects.toMatchInlineSnapshot(
-        `[Error: Cannot create saved query without a title]`
+      await expect(response).rejects.toMatchInlineSnapshot(
+        `[Error: Cannot create query without a title]`
       );
     });
   });
@@ -241,6 +298,13 @@ describe('saved query route handler context', () => {
 
       const response = await context.find();
 
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: 'query',
+        page: 1,
+        perPage: 50,
+        sortField: 'titleKeyword',
+        sortOrder: 'asc',
+      });
       expect(response.savedQueries).toEqual([{ id: 'foo', attributes: savedQueryAttributes }]);
     });
 
@@ -271,13 +335,15 @@ describe('saved query route handler context', () => {
       };
       mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
 
-      const response = await context.find({ search: 'foo' });
+      const response = await context.find({ search: 'Foo < And > Bar' });
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: 'query',
         page: 1,
         perPage: 50,
-        search: 'foo',
-        type: 'query',
+        filter: 'query.attributes.title:(*Foo AND \\And AND Bar*)',
+        sortField: 'titleKeyword',
+        sortOrder: 'asc',
       });
       expect(response.savedQueries).toEqual([{ id: 'foo', attributes: savedQueryAttributes }]);
     });
@@ -360,7 +426,8 @@ describe('saved query route handler context', () => {
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
         page: 1,
         perPage: 2,
-        search: '',
+        sortField: 'titleKeyword',
+        sortOrder: 'asc',
         type: 'query',
       });
       expect(response.savedQueries).toEqual(
@@ -378,7 +445,6 @@ describe('saved query route handler context', () => {
             attributes: {
               description: 'baz',
               query: { language: 'kuery', query: 'response:200' },
-              filters: [],
               title: 'bar',
             },
             id: 'bar',
@@ -529,7 +595,7 @@ describe('saved query route handler context', () => {
       });
 
       const response = await context.get('food');
-      expect(response.attributes.filters[0].meta.index).toBe('my-new-index');
+      expect(response.attributes.filters?.[0].meta.index).toBe('my-new-index');
     });
 
     it('should throw if conflict', async () => {
@@ -544,7 +610,7 @@ describe('saved query route handler context', () => {
       });
 
       const result = context.get('food');
-      expect(result).rejects.toMatchInlineSnapshot(
+      await expect(result).rejects.toMatchInlineSnapshot(
         `[Error: Multiple saved queries found with ID: food (legacy URL alias conflict)]`
       );
     });
@@ -553,7 +619,7 @@ describe('saved query route handler context', () => {
   describe('delete', function () {
     it('should delete the saved query for the given ID', async () => {
       await context.delete('foo');
-      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('query', 'foo');
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('query', 'foo', { force: true });
     });
   });
 
@@ -568,6 +634,11 @@ describe('saved query route handler context', () => {
 
       const response = await context.count();
 
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: 'query',
+        page: 0,
+        perPage: 0,
+      });
       expect(response).toEqual(1);
     });
   });

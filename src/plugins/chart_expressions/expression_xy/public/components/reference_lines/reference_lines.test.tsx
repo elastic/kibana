@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Chart, LineAnnotation, RectAnnotation } from '@elastic/charts';
@@ -47,7 +48,8 @@ const data: Datatable = {
 };
 
 function createLayers(
-  decorations: ReferenceLineLayerArgs['decorations']
+  decorations: ReferenceLineLayerArgs['decorations'],
+  table?: Datatable
 ): ReferenceLineLayerConfig[] {
   return [
     {
@@ -56,7 +58,7 @@ function createLayers(
       decorations,
       type: 'referenceLineLayer',
       layerType: LayerTypes.REFERENCELINE,
-      table: data,
+      table: table || data,
     },
   ];
 }
@@ -96,6 +98,7 @@ describe('ReferenceLines', () => {
 
     beforeEach(() => {
       defaultProps = {
+        formatters: {},
         xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
         axesConfiguration: [
@@ -161,6 +164,68 @@ describe('ReferenceLines', () => {
           </Chart>
         )
       ).not.toThrow();
+    });
+
+    it('should prefer column formatter over x axis default one', () => {
+      const convertLeft = jest.fn((x) => `left-${x}`);
+      const convertRight = jest.fn((x) => `right-${x}`);
+      const wrapper = shallow(
+        <ReferenceLines
+          {...defaultProps}
+          formatters={{
+            yAccessorLeftFirstId: { convert: convertLeft } as unknown as FieldFormat,
+            yAccessorRightFirstId: { convert: convertRight } as unknown as FieldFormat,
+          }}
+          layers={createLayers(
+            [
+              {
+                forAccessor: `yAccessorLeftFirstId`,
+                position: getAxisFromId('yAccessorLeft'),
+                lineStyle: 'solid',
+                fill: undefined,
+                type: 'referenceLineDecorationConfig',
+              },
+              {
+                forAccessor: `yAccessorRightFirstId`,
+                position: getAxisFromId('yAccessorRight'),
+                lineStyle: 'solid',
+                fill: 'above',
+                type: 'referenceLineDecorationConfig',
+              },
+            ],
+            {
+              type: 'datatable',
+              rows: [row],
+              columns: Object.keys(row).map((id) => ({
+                id,
+                name: `Static value: ${row[id]}`,
+                meta: {
+                  type: 'number',
+                  params: { id: 'number', params: { formatOverride: true, pattern: '0.0' } },
+                },
+              })),
+            }
+          )}
+        />
+      );
+      const referenceLineLayer = wrapper.find(ReferenceLineLayer).dive();
+      const annotations = referenceLineLayer.find(ReferenceLineAnnotations);
+      expect(annotations.first().dive().find(LineAnnotation).prop('dataValues')).toEqual(
+        expect.arrayContaining([{ dataValue: 5, details: `left-5`, header: undefined }])
+      );
+      expect(annotations.last().dive().find(RectAnnotation).prop('dataValues')).toEqual(
+        expect.arrayContaining([
+          {
+            coordinates: { x0: undefined, x1: undefined, y0: 5, y1: undefined },
+            details: `right-5`,
+            header: undefined,
+          },
+        ])
+      );
+
+      expect(convertLeft).toHaveBeenCalled();
+      expect(convertRight).toHaveBeenCalled();
+      expect(defaultProps.xAxisFormatter.convert).not.toHaveBeenCalled();
     });
 
     it.each([
@@ -482,6 +547,7 @@ describe('ReferenceLines', () => {
 
     beforeEach(() => {
       defaultProps = {
+        formatters: {},
         xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
         axesConfiguration: [

@@ -14,15 +14,25 @@ import {
 } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { AlertingRulesConfig } from '@kbn/alerting-plugin/server';
+import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
-export function createConfigRoute(
-  logger: Logger,
-  router: IRouter,
-  baseRoute: string,
-  // config is a function because "isUsingSecurity" is pulled from the license
+export interface ConfigRouteOpts {
+  logger: Logger;
+  router: IRouter;
+  baseRoute: string;
+  // alertingConfig is a function because "isUsingSecurity" is pulled from the license
   // state which gets populated after plugin setup().
-  config: () => AlertingRulesConfig
-) {
+  alertingConfig: () => AlertingRulesConfig;
+  getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClientApi>;
+}
+
+export function createConfigRoute({
+  logger,
+  router,
+  baseRoute,
+  alertingConfig,
+  getRulesClientWithRequest,
+}: ConfigRouteOpts) {
   const path = `${baseRoute}/_config`;
   logger.debug(`registering triggers_actions_ui config route GET ${path}`);
   router.get(
@@ -33,10 +43,27 @@ export function createConfigRoute(
     handler
   );
   async function handler(
-    ctx: RequestHandlerContext,
+    _: RequestHandlerContext,
     req: KibanaRequest<unknown, unknown, unknown>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
-    return res.ok({ body: config() });
+    // Check that user has access to at least one rule type
+    const rulesClient = await getRulesClientWithRequest(req);
+    const ruleTypes = Array.from(await rulesClient.listRuleTypes());
+    const { minimumScheduleInterval, maxScheduledPerMinute, isUsingSecurity } = alertingConfig(); // Only returns exposed config values
+
+    if (ruleTypes.length > 0) {
+      return res.ok({
+        body: {
+          minimumScheduleInterval,
+          maxScheduledPerMinute,
+          isUsingSecurity,
+        },
+      });
+    } else {
+      return res.forbidden({
+        body: { message: `Unauthorized to access config` },
+      });
+    }
   }
 }

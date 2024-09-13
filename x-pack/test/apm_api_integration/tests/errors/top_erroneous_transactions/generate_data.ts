@@ -21,12 +21,12 @@ export const config = {
 };
 
 export async function generateData({
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
   serviceName,
   start,
   end,
 }: {
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
   serviceName: string;
   start: number;
   end: number;
@@ -59,7 +59,7 @@ export async function generateData({
             .transaction({ transactionName: transaction.name })
             .errors(
               serviceGoProdInstance
-                .error({ message: 'Error 1', type: transaction.name, groupingName: 'Error test' })
+                .error({ message: 'Error 1', type: transaction.name })
                 .timestamp(timestamp)
             )
             .duration(1000)
@@ -69,5 +69,5 @@ export async function generateData({
     ];
   });
 
-  await synthtraceEsClient.index(documents);
+  await apmSynthtraceEsClient.index(documents);
 }

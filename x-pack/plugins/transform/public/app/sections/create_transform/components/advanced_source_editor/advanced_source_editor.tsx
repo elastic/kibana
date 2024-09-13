@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 
-import { StepDefineFormHook } from '../step_define';
+import type { StepDefineFormHook } from '../step_define';
 
 export const AdvancedSourceEditor: FC<StepDefineFormHook> = ({
   searchBar: {

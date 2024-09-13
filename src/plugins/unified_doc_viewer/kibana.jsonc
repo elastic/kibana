@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/unified-doc-viewer-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "description": "This plugin contains services reliant on the plugin lifecycle for the unified doc viewer component (see @kbn/unified-doc-viewer).",
+  "plugin": {
+    "id": "unifiedDocViewer",
+    "server": false,
+    "browser": true,
+    "requiredBundles": ["kibanaUtils"],
+    "requiredPlugins": ["data", "fieldFormats", "share"],
+    "optionalPlugins": ["fieldsMetadata"]
+  }
+}

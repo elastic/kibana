@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -11,15 +12,17 @@ import type {
   SavedObjectsMappingProperties,
 } from '@kbn/core-saved-objects-server';
 import {
-  IndexMappingMeta,
-  getModelVersionsFromMappingMeta,
-  getModelVersionMapForTypes,
+  type IndexMapping,
+  getVirtualVersionsFromMappingMeta,
+  getVirtualVersionMap,
   getModelVersionDelta,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { getUpdatedRootFields } from '../../core/compare_mappings';
+import { getBaseMappings } from '../../core/build_active_mappings';
 
 interface GenerateAdditiveMappingsDiffOpts {
   types: SavedObjectsType[];
-  meta: IndexMappingMeta;
+  mapping: IndexMapping;
   deletedTypes: string[];
 }
 
@@ -32,11 +35,17 @@ interface GenerateAdditiveMappingsDiffOpts {
  */
 export const generateAdditiveMappingDiff = ({
   types,
-  meta,
+  mapping,
   deletedTypes,
 }: GenerateAdditiveMappingsDiffOpts): SavedObjectsMappingProperties => {
-  const typeVersions = getModelVersionMapForTypes(types);
-  const mappingVersion = getModelVersionsFromMappingMeta({
+  const meta = mapping._meta;
+  if (!meta) {
+    // should never occur given we only generate additive mapping diff when we've recognized a zdt index
+    throw new Error('Cannot generate additive mapping diff: meta not present on index');
+  }
+
+  const typeVersions = getVirtualVersionMap(types);
+  const mappingVersion = getVirtualVersionsFromMappingMeta({
     meta,
     source: 'mappingVersions',
     knownTypes: types.map((type) => type.name),
@@ -68,6 +77,14 @@ export const generateAdditiveMappingDiff = ({
   changedTypes.forEach((type) => {
     addedMappings[type] = typeMap[type].mappings;
   });
+
+  const changedRootFields = getUpdatedRootFields(mapping);
+  if (changedRootFields.length) {
+    const baseMappings = getBaseMappings();
+    changedRootFields.forEach((changedRootField) => {
+      addedMappings[changedRootField] = baseMappings.properties[changedRootField];
+    });
+  }
 
   return addedMappings;
 };

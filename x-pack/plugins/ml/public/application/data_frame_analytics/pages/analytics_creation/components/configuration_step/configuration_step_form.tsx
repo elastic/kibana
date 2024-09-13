@@ -5,69 +5,62 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiBadge,
-  EuiComboBoxOptionOption,
-  EuiFormRow,
-  EuiPanel,
-  EuiRange,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import type { FC } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiBadge, EuiFormRow, EuiPanel, EuiRange, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce, cloneDeep } from 'lodash';
 
-import { Query } from '@kbn/data-plugin/common/query';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import type { Query } from '@kbn/data-plugin/common/query';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
+import {
+  getCombinedRuntimeMappings,
+  isRuntimeMappings,
+  isRuntimeField,
+  type RuntimeMappings as RuntimeMappingsType,
+} from '@kbn/ml-runtime-field-utils';
+import {
+  type FieldSelectionItem,
+  ANALYSIS_CONFIG_TYPE,
+  TRAINING_PERCENT_MIN,
+  TRAINING_PERCENT_MAX,
+} from '@kbn/ml-data-frame-analytics-utils';
+import { DataGrid } from '@kbn/ml-data-grid';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import {
   EuiComboBoxWithFieldStats,
   FieldStatsFlyoutProvider,
 } from '../../../../../components/field_stats_flyout';
-import { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
-import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-import { useMlContext } from '../../../../../contexts/ml';
-import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
+import type { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
+import { useNewJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import { useDataSource } from '../../../../../contexts/ml';
 
-import {
-  ANALYSIS_CONFIG_TYPE,
-  TRAINING_PERCENT_MIN,
-  TRAINING_PERCENT_MAX,
-} from '../../../../common/analytics';
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
-import { RuntimeMappings as RuntimeMappingsType } from '../../../../../../../common/types/fields';
-import { FieldSelectionItem } from '../../../../../../../common/types/data_frame_analytics';
-import {
-  isRuntimeMappings,
-  isRuntimeField,
-} from '../../../../../../../common/util/runtime_field_utils';
-import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import type { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { Messages } from '../shared';
-import {
-  DEFAULT_MODEL_MEMORY_LIMIT,
-  State,
-} from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import type { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { handleExplainErrorMessage, shouldAddAsDepVarOption } from './form_options_validation';
-import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
 import { JobType } from './job_type';
 import { SupportedFieldsMessage } from './supported_fields_message';
 import { AnalysisFieldsTable } from './analysis_fields_table';
-import { DataGrid } from '../../../../../components/data_grid';
 import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
-import { useSavedSearch, SavedSearchQuery } from './use_saved_search';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
-import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
+import type { SavedSearchQuery } from './use_saved_search';
+import { useSavedSearch } from './use_saved_search';
+import type { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
 
 import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 import { RuntimeMappings } from '../runtime_mappings';
-import { ConfigurationStepProps } from './configuration_step';
+import type { ConfigurationStepProps } from './configuration_step';
+import { IndexPermissionsCallout } from '../index_permissions_callout';
 
 const runtimeMappingKey = 'runtime_mapping';
 const notIncludedReason = 'field not in includes list';
@@ -119,9 +112,13 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   isClone,
   state,
   setCurrentStep,
+  sourceDataViewTitle,
 }) => {
-  const mlContext = useMlContext();
-  const { currentDataView, selectedSavedSearch } = mlContext;
+  const { services } = useMlKibana();
+  const toastNotifications = services.notifications.toasts;
+  const mlApi = useMlApi();
+  const newJobCapsServiceAnalytics = useNewJobCapsServiceAnalytics();
+  const { selectedDataView, selectedSavedSearch } = useDataSource();
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 
   const [fieldOptionsFetchFail, setFieldOptionsFetchFail] = useState<boolean>(false);
@@ -173,8 +170,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     language: jobConfigQueryLanguage ?? SEARCH_QUERY_LANGUAGE.KUERY,
   });
 
-  const toastNotifications = getToastNotifications();
-
   const setJobConfigQuery: ExplorationQueryBarProps['setSearchQuery'] = (update) => {
     if (update.query) {
       setFormState({
@@ -187,7 +182,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   };
 
   const indexData = useIndexData(
-    currentDataView,
+    selectedDataView,
     getIndexDataQuery(savedSearchQuery, jobConfigQuery),
     toastNotifications,
     runtimeMappings
@@ -216,7 +211,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     setMaxDistinctValuesError(undefined);
 
     try {
-      if (currentDataView !== undefined) {
+      if (selectedDataView !== undefined) {
         const depVarOptions = [];
         let depVarUpdate = formState.dependentVariable;
         // Get fields and filter for supported types for job type
@@ -293,7 +288,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       fieldSelection,
       errorMessage,
       noDocsContainMappedFields: noDocsWithFields,
-    } = await fetchExplainData(formToUse);
+    } = await fetchExplainData(mlApi, formToUse);
 
     if (success) {
       if (shouldUpdateEstimatedMml) {
@@ -353,13 +348,13 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   }, 300);
 
   useEffect(() => {
-    setFormState({ sourceIndex: currentDataView.title });
+    setFormState({ sourceIndex: selectedDataView.title });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const indexPatternFieldsTableItems = useMemo(() => {
-    if (indexData?.indexPatternFields !== undefined) {
-      return indexData.indexPatternFields.map((field) => ({
+  const dataViewFieldsTableItems = useMemo(() => {
+    if (indexData?.dataViewFields !== undefined) {
+      return indexData.dataViewFields.map((field) => ({
         name: field,
         is_included: false,
         is_required: false,
@@ -367,7 +362,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     }
     return [];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [`${indexData?.indexPatternFields}`]);
+  }, [`${indexData?.dataViewFields}`]);
 
   useEffect(() => {
     if (typeof savedSearchQueryStr === 'string') {
@@ -378,11 +373,11 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
   useEffect(() => {
     if (isJobTypeWithDepVar) {
-      const indexPatternRuntimeFields = getCombinedRuntimeMappings(currentDataView);
+      const dataViewRuntimeFields = getCombinedRuntimeMappings(selectedDataView);
       let runtimeOptions;
 
-      if (indexPatternRuntimeFields) {
-        runtimeOptions = getRuntimeDepVarOptions(jobType, indexPatternRuntimeFields);
+      if (dataViewRuntimeFields) {
+        runtimeOptions = getRuntimeDepVarOptions(jobType, dataViewRuntimeFields);
       }
 
       loadDepVarOptions(form, runtimeOptions);
@@ -449,7 +444,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           fieldSelection,
           errorMessage,
           noDocsContainMappedFields: noDocsWithFields,
-        } = await fetchExplainData(formCopy);
+        } = await fetchExplainData(mlApi, formCopy);
         if (success) {
           // update the field selection table
           const hasRequiredFields = fieldSelection.some(
@@ -524,15 +519,15 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       fields: includesTableItems
         .filter((d) => d.feature_type === 'numerical' && d.is_included)
         .map((d) => d.name),
-      index: currentDataView.title,
+      index: selectedDataView.title,
       legendType: getScatterplotMatrixLegendType(jobType),
       searchQuery: jobConfigQuery,
       runtimeMappings,
-      indexPattern: currentDataView,
+      dataView: selectedDataView,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      currentDataView.title,
+      selectedDataView.title,
       dependentVariable,
       includesTableItems,
       isJobTypeWithDepVar,
@@ -553,7 +548,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [dependentVariableEmpty, jobType, scatterplotMatrixProps.fields.length]
   );
-  const { services } = useMlKibana();
   const fieldStatsServices: FieldStatsServices = useMemo(() => {
     const { uiSettings, data, fieldFormats, charts } = services;
     return {
@@ -572,11 +566,11 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   const tableItems =
     includesTableItems.length > 0 && !noDocsContainMappedFields
       ? includesTableItems
-      : indexPatternFieldsTableItems;
+      : dataViewFieldsTableItems;
 
   return (
     <FieldStatsFlyoutProvider
-      dataView={currentDataView}
+      dataView={selectedDataView}
       fieldStatsServices={fieldStatsServices}
       timeRangeMs={indexData.timeRangeMs}
       dslQuery={jobConfigQuery}
@@ -584,6 +578,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       <Fragment>
         <Messages messages={requestMessages} />
         <SupportedFieldsMessage jobType={jobType} />
+        <IndexPermissionsCallout indexName={sourceDataViewTitle} docsType="create" />
         <JobType type={jobType} setFormState={setFormState} />
         {savedSearchQuery === null && (
           <EuiFormRow
@@ -593,7 +588,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
             fullWidth
           >
             <ExplorationQueryBar
-              indexPattern={currentDataView}
+              dataView={selectedDataView}
               setSearchQuery={setJobConfigQuery}
               query={query}
             />
@@ -613,7 +608,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
               <EuiBadge color="hollow">
                 {selectedSavedSearch !== null
                   ? selectedSavedSearch.title
-                  : currentDataView.getName()}
+                  : selectedDataView.getName()}
               </EuiBadge>
             </Fragment>
           }
@@ -631,7 +626,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
               helpText={
                 dependentVariableOptions.length === 0 &&
                 dependentVariableFetchFail === false &&
-                currentDataView &&
+                selectedDataView &&
                 i18n.translate(
                   'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
                   {

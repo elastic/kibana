@@ -6,29 +6,6 @@
  */
 
 import { savedMap } from './saved_map';
-import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
-import { ExpressionValueFilter } from '../../../types';
-
-const filterContext: ExpressionValueFilter = {
-  type: 'filter',
-  and: [
-    {
-      type: 'filter',
-      and: [],
-      value: 'filter-value',
-      column: 'filter-column',
-      filterType: 'exactly',
-    },
-    {
-      type: 'filter',
-      and: [],
-      column: 'time-column',
-      filterType: 'time',
-      from: '2019-06-04T04:00:00.000Z',
-      to: '2019-06-05T04:00:00.000Z',
-    },
-  ],
-};
 
 describe('savedMap', () => {
   const fn = savedMap().fn;
@@ -43,13 +20,18 @@ describe('savedMap', () => {
   it('accepts null context', () => {
     const expression = fn(null, args, {} as any);
 
-    expect(expression.input.filters).toEqual([]);
-  });
-
-  it('accepts filter context', () => {
-    const expression = fn(filterContext, args, {} as any);
-    const embeddableFilters = getQueryFilters(filterContext.and);
-
-    expect(expression.input.filters).toEqual(embeddableFilters);
+    expect(expression.input).toEqual({
+      hiddenLayers: [],
+      hideFilterActions: true,
+      id: 'some-id',
+      isLayerTOCOpen: false,
+      mapCenter: undefined,
+      savedObjectId: 'some-id',
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
+      title: undefined,
+    });
   });
 });

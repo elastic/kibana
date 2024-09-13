@@ -8,7 +8,9 @@
 import React from 'react';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
 import type { SuggestUsersPopoverProps } from './suggest_users_popover';
 import { SuggestUsersPopover } from './suggest_users_popover';
 import { userProfiles } from '../../../containers/user_profiles/api.mock';
@@ -18,22 +20,25 @@ import type { AssigneeWithProfile } from '../../user_profiles/types';
 
 jest.mock('../../../containers/user_profiles/api');
 
+const asAssignee = (profile: UserProfileWithAvatar): AssigneeWithProfile => ({
+  uid: profile.uid,
+  profile,
+});
+
 describe('SuggestUsersPopover', () => {
   let appMockRender: AppMockRenderer;
-  let defaultProps: SuggestUsersPopoverProps;
+  const defaultProps: SuggestUsersPopoverProps = {
+    isLoading: false,
+    assignedUsersWithProfiles: [],
+    isPopoverOpen: true,
+    onUsersChange: jest.fn(),
+    togglePopover: jest.fn(),
+    onClosePopover: jest.fn(),
+    currentUserProfile: undefined,
+  };
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
-
-    defaultProps = {
-      isLoading: false,
-      assignedUsersWithProfiles: [],
-      isPopoverOpen: true,
-      onUsersChange: jest.fn(),
-      togglePopover: jest.fn(),
-      onClosePopover: jest.fn(),
-      currentUserProfile: undefined,
-    };
   });
 
   it('calls onUsersChange when 1 user is selected', async () => {
@@ -43,13 +48,9 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
-
-    await waitFor(() => {
-      expect(screen.getByText('WD')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('WD'));
+    await userEvent.click(await screen.findByPlaceholderText('Search users'));
+    await userEvent.paste('dingo');
+    await userEvent.click(await screen.findByText('WD'));
 
     expect(onUsersChange.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
@@ -74,15 +75,10 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'elastic' } });
-
-    await waitFor(() => {
-      expect(screen.getByText('WD')).toBeInTheDocument();
-      expect(screen.getByText('DR')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('WD'));
-    fireEvent.click(screen.getByText('DR'));
+    await userEvent.click(await screen.findByPlaceholderText('Search users'));
+    await userEvent.paste('elastic');
+    await userEvent.click(await screen.findByText('WD'));
+    await userEvent.click(await screen.findByText('DR'));
 
     expect(onUsersChange.mock.calls[1][0]).toMatchInlineSnapshot(`
       Array [
@@ -122,13 +118,9 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'elastic' } });
-
-    await waitFor(() => {
-      expect(screen.getByText('WD')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('WD'));
+    await userEvent.click(await screen.findByPlaceholderText('Search users'));
+    await userEvent.paste('elastic');
+    await userEvent.click(await screen.findByText('WD'));
 
     expect(onUsersChange.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
@@ -172,14 +164,12 @@ describe('SuggestUsersPopover', () => {
     await waitForEuiPopoverOpen();
 
     expect(screen.queryByText('assigned')).not.toBeInTheDocument();
-    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
 
-    await waitFor(() => {
-      expect(screen.getByText('WD')).toBeInTheDocument();
-    });
+    await userEvent.click(await screen.findByPlaceholderText('Search users'));
+    await userEvent.paste('dingo');
+    await userEvent.click(await screen.findByText('WD'));
 
-    fireEvent.click(screen.getByText('WD'));
-    expect(screen.getByText('1 assigned')).toBeInTheDocument();
+    expect(await screen.findByText('1 assigned')).toBeInTheDocument();
   });
 
   it('shows the 1 assigned total after clicking on a user', async () => {
@@ -188,9 +178,12 @@ describe('SuggestUsersPopover', () => {
     await waitForEuiPopoverOpen();
 
     expect(screen.queryByText('assigned')).not.toBeInTheDocument();
-    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
-    fireEvent.click(screen.getByText('WD'));
-    expect(screen.getByText('1 assigned')).toBeInTheDocument();
+
+    await userEvent.click(await screen.findByPlaceholderText('Search users'));
+    await userEvent.paste('dingo');
+    await userEvent.click(await screen.findByText('WD'));
+
+    expect(await screen.findByText('1 assigned')).toBeInTheDocument();
   });
 
   it('shows the 1 assigned total when the users are passed in', async () => {
@@ -202,8 +195,8 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    expect(screen.getByText('1 assigned')).toBeInTheDocument();
-    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(await screen.findByText('1 assigned')).toBeInTheDocument();
+    expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
   });
 
   it('calls onTogglePopover when clicking the edit button after the popover is already open', async () => {
@@ -216,11 +209,9 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    await waitFor(() => {
-      expect(screen.getByTestId('case-view-assignees-edit-button')).not.toBeDisabled();
-    });
+    expect(await screen.findByTestId('case-view-assignees-edit-button')).not.toBeDisabled();
 
-    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    await userEvent.click(await screen.findByTestId('case-view-assignees-edit-button'));
 
     expect(togglePopover).toBeCalled();
   });
@@ -230,11 +221,6 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    await waitFor(() => expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument());
+    expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
   });
-});
-
-const asAssignee = (profile: UserProfileWithAvatar): AssigneeWithProfile => ({
-  uid: profile.uid,
-  profile,
 });

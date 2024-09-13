@@ -5,30 +5,42 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import type { CaseConnector } from '../../../common/api';
-import type { CaseAttributes } from '../../../common/api/cases/case';
-import type { CaseStatuses } from '../../../common/api/cases/status';
-import type { Case, UpdateByKey, UpdateKey } from '../../containers/types';
+import type { CaseStatuses, CaseAttributes, CaseConnector } from '../../../common/types/domain';
+import type { CaseUI, UpdateByKey, UpdateKey } from '../../containers/types';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
 import type { OnUpdateFields } from './types';
 
-export const useOnUpdateField = ({ caseData }: { caseData: Case }) => {
-  const { isLoading, updateKey: loadingKey, updateCaseProperty } = useUpdateCase();
+export const useOnUpdateField = ({ caseData }: { caseData: CaseUI }) => {
+  const { isLoading, mutate: updateCaseProperty } = useUpdateCase();
+  const [loadingKey, setLoadingKey] = useState<UpdateKey | null>(null);
 
   const onUpdateField = useCallback(
     ({ key, value, onSuccess, onError }: OnUpdateFields) => {
-      const callUpdate = (updateKey: UpdateKey, updateValue: UpdateByKey['updateValue']) =>
-        updateCaseProperty({
-          updateKey,
-          updateValue,
-          caseData,
-          onSuccess,
-          onError,
-        });
+      const callUpdate = (updateKey: UpdateKey, updateValue: UpdateByKey['updateValue']) => {
+        setLoadingKey(updateKey);
+
+        updateCaseProperty(
+          {
+            updateKey,
+            updateValue,
+            caseData,
+          },
+          {
+            onSuccess: () => {
+              onSuccess?.();
+              setLoadingKey(null);
+            },
+            onError: () => {
+              onError?.();
+              setLoadingKey(null);
+            },
+          }
+        );
+      };
 
       switch (key) {
         case 'title':
@@ -53,6 +65,10 @@ export const useOnUpdateField = ({ caseData }: { caseData: Case }) => {
           const tagsUpdate = getTypedPayload<string[]>(value);
           callUpdate('tags', tagsUpdate);
           break;
+        case 'category':
+          const categoryUpdate = getTypedPayload<string>(value);
+          callUpdate('category', categoryUpdate);
+          break;
         case 'status':
           const statusUpdate = getTypedPayload<CaseStatuses>(value);
           if (caseData.status !== value) {
@@ -75,6 +91,12 @@ export const useOnUpdateField = ({ caseData }: { caseData: Case }) => {
           const assigneesUpdate = getTypedPayload<CaseAttributes['assignees']>(value);
           if (!deepEqual(caseData.assignees, value)) {
             callUpdate('assignees', assigneesUpdate);
+          }
+          break;
+        case 'customFields':
+          const customFields = getTypedPayload<CaseAttributes['customFields']>(value);
+          if (!deepEqual(caseData.customFields, value)) {
+            callUpdate('customFields', customFields);
           }
           break;
         default:

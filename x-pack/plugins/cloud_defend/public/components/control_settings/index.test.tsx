@@ -7,6 +7,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import '@kbn/code-editor-mock/jest_helper';
 import { TestProvider } from '../../test/test_provider';
 import { getCloudDefendNewPolicyMock } from '../../test/mocks';
 import { ControlSettings } from '.';
@@ -40,14 +41,14 @@ describe('<ControlSettings />', () => {
 
   it('renders a yaml editor when the user switches to yaml view', async () => {
     render(<WrappedComponent />);
-    userEvent.click(screen.getByText('YAML view'));
+    await userEvent.click(screen.getByText('YAML view'));
 
-    await waitFor(() => expect(screen.getByTestId('monacoEditorTextarea')).toBeTruthy());
+    await waitFor(() => expect(screen.getByTestId('mockedCodeEditor')).toBeTruthy());
   });
 
   it('renders a friendly UI when the user switches to general view', async () => {
     render(<WrappedComponent />);
-    userEvent.click(screen.getByText('General view'));
+    await userEvent.click(screen.getByText('General view'));
 
     await waitFor(() => expect(screen.findByTestId('cloud-defend-generalview')).toBeTruthy());
   });
@@ -57,7 +58,7 @@ describe('<ControlSettings />', () => {
 
     const btnClear = await waitFor(() => getAllByTestId('comboBoxClearButton')[0]);
 
-    userEvent.click(btnClear);
+    await userEvent.click(btnClear);
 
     const updated = onChange.mock.calls[0][0].updatedPolicy;
 

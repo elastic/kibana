@@ -27,6 +27,10 @@ export const BETA_LABEL = i18n.translate('xpack.enterpriseSearch.betaLabel', {
   defaultMessage: 'Beta',
 });
 
+export const NATIVE_LABEL = i18n.translate('xpack.enterpriseSearch.nativeLabel', {
+  defaultMessage: 'Native',
+});
+
 export const NAME_LABEL = i18n.translate('xpack.enterpriseSearch.nameLabel', {
   defaultMessage: 'Name',
 });
@@ -42,3 +46,17 @@ export const OPTIONAL_LABEL = i18n.translate('xpack.enterpriseSearch.optionalLab
 export const LEARN_MORE_LINK = i18n.translate('xpack.enterpriseSearch.learnMore.link', {
   defaultMessage: 'Learn more',
 });
+
+export const CONNECTOR_CLIENT_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.connectorClientLabel',
+  {
+    defaultMessage: 'Connector Client',
+  }
+);
+
+export const EXAMPLE_CONNECTOR_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.exampleConnectorLabel',
+  {
+    defaultMessage: 'Example',
+  }
+);

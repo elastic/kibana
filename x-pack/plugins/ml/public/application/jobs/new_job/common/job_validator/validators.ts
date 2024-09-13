@@ -6,16 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { distinctUntilChanged, filter, map, pluck, switchMap, startWith } from 'rxjs/operators';
-import { combineLatest, Observable, Subject } from 'rxjs';
-import {
+import { distinctUntilChanged, filter, map, pluck, switchMap, startWith } from 'rxjs';
+import type { Observable, Subject } from 'rxjs';
+import { combineLatest } from 'rxjs';
+import type {
   CardinalityModelPlotHigh,
   CardinalityValidationResult,
-  ml,
 } from '../../../../services/ml_api_service';
-import { JobCreator } from '../job_creator';
-import { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
-import { BasicValidations } from './job_validator';
+import type { JobCreator } from '../job_creator';
+import type { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
+import type { BasicValidations } from './job_validator';
 
 export enum VALIDATOR_SEVERITY {
   ERROR,
@@ -81,7 +81,7 @@ export function cardinalityValidator(
       }),
       switchMap(({ jobCreator }) => {
         // Perform a cardinality check only with enabled model plot.
-        return ml
+        return jobCreator.mlApi
           .validateCardinality$({
             ...jobCreator.jobConfig,
             datafeed_config: jobCreator.datafeedConfig,
@@ -113,12 +113,11 @@ export function cardinalityValidator(
 
 export function jobIdValidator(jobCreator$: Subject<JobCreator>): Observable<JobExistsResult> {
   return jobCreator$.pipe(
-    map((jobCreator) => {
-      return jobCreator.jobId;
-    }),
     // No need to perform an API call if the analysis configuration hasn't been changed
-    distinctUntilChanged((prevJobId, currJobId) => prevJobId === currJobId),
-    switchMap((jobId) => ml.jobs.jobsExist$([jobId], true)),
+    distinctUntilChanged(
+      (prevJobCreator, currJobCreator) => prevJobCreator.jobId === currJobCreator.jobId
+    ),
+    switchMap((jobCreator) => jobCreator.mlApi.jobs.jobsExist$([jobCreator.jobId], true)),
     map((jobExistsResults) => {
       const jobs = Object.values(jobExistsResults);
       const valid = jobs?.[0].exists === false;
@@ -134,13 +133,13 @@ export function jobIdValidator(jobCreator$: Subject<JobCreator>): Observable<Job
 
 export function groupIdsValidator(jobCreator$: Subject<JobCreator>): Observable<GroupsExistResult> {
   return jobCreator$.pipe(
-    map((jobCreator) => jobCreator.groups),
     // No need to perform an API call if the analysis configuration hasn't been changed
     distinctUntilChanged(
-      (prevGroups, currGroups) => JSON.stringify(prevGroups) === JSON.stringify(currGroups)
+      (prevJobCreator, currJobCreator) =>
+        JSON.stringify(prevJobCreator.groups) === JSON.stringify(currJobCreator.groups)
     ),
-    switchMap((groups) => {
-      return ml.jobs.jobsExist$(groups, true);
+    switchMap((jobCreator) => {
+      return jobCreator.mlApi.jobs.jobsExist$(jobCreator.groups, true);
     }),
     map((jobExistsResults) => {
       const groups = Object.values(jobExistsResults);

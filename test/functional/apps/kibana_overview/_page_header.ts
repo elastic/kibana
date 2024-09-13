@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -34,10 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('click on integrations leads to integrations', async () => {
       const header = await find.byCssSelector('.euiPageHeaderContent');
-      const items = await header.findAllByCssSelector('.kbnRedirectCrossAppLinks');
+      const items = await header.findAllByTestSubject('kbnRedirectAppLink');
       expect(items!.length).to.be(3);
 
-      const integrations = await items!.at(0);
+      const integrations = await items!.at(2);
       await integrations!.click();
       await PageObjects.common.waitUntilUrlIncludes('app/integrations/browse');
     });
@@ -47,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const header = await find.byCssSelector('.euiPageHeaderContent');
-      const items = await header.findAllByCssSelector('.kbnRedirectCrossAppLinks');
+      const items = await header.findAllByTestSubject('kbnRedirectAppLink');
 
       const management = await items!.at(1);
       await management!.click();
@@ -59,9 +60,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const header = await find.byCssSelector('.euiPageHeaderContent');
-      const items = await header.findAllByCssSelector('.kbnRedirectCrossAppLinks');
+      const items = await header.findAllByTestSubject('kbnRedirectAppLink');
 
-      const devTools = await items!.at(2);
+      const devTools = await items!.at(0);
       await devTools!.click();
       await PageObjects.common.waitUntilUrlIncludes('app/dev_tools');
     });

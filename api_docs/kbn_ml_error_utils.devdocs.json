@@ -1,0 +1,800 @@
+{
+  "id": "@kbn/ml-error-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.MLRequestFailure",
+        "type": "Class",
+        "tags": [
+          "export",
+          "class",
+          "typedef",
+          "extends"
+        ],
+        "label": "MLRequestFailure",
+        "description": [
+          "\nML Request Failure\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-error-utils",
+            "scope": "common",
+            "docId": "kibKbnMlErrorUtilsPluginApi",
+            "section": "def-common.MLRequestFailure",
+            "text": "MLRequestFailure"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/request_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.MLRequestFailure.Unnamed",
+            "type": "Function",
+            "tags": [
+              "constructor"
+            ],
+            "label": "Constructor",
+            "description": [
+              "\nCreates an instance of MLRequestFailure.\n"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/request_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-error-utils",
+                "id": "def-common.MLRequestFailure.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ml-error-utils",
+                    "scope": "common",
+                    "docId": "kibKbnMlErrorUtilsPluginApi",
+                    "section": "def-common.MLErrorObject",
+                    "text": "MLErrorObject"
+                  }
+                ],
+                "path": "x-pack/packages/ml/error_utils/src/request_error.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ml-error-utils",
+                "id": "def-common.MLRequestFailure.Unnamed.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "resp",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ml-error-utils",
+                    "scope": "common",
+                    "docId": "kibKbnMlErrorUtilsPluginApi",
+                    "section": "def-common.ErrorType",
+                    "text": "ErrorType"
+                  }
+                ],
+                "path": "x-pack/packages/ml/error_utils/src/request_error.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.extractErrorMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "extractErrorMessage",
+        "description": [
+          "\nExtract only the error message within the response error\ncoming from Kibana, Elasticsearch, and our own ML messages.\n"
+        ],
+        "signature": [
+          "(error: ",
+          {
+            "pluginId": "@kbn/ml-error-utils",
+            "scope": "common",
+            "docId": "kibKbnMlErrorUtilsPluginApi",
+            "section": "def-common.ErrorType",
+            "text": "ErrorType"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/process_errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.extractErrorMessage.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-error-utils",
+                "scope": "common",
+                "docId": "kibKbnMlErrorUtilsPluginApi",
+                "section": "def-common.ErrorType",
+                "text": "ErrorType"
+              }
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/process_errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.extractErrorProperties",
+        "type": "Function",
+        "tags": [],
+        "label": "extractErrorProperties",
+        "description": [
+          "\nExtract properties of the error object from within the response error\ncoming from Kibana, Elasticsearch, and our own ML messages.\n"
+        ],
+        "signature": [
+          "(error: ",
+          {
+            "pluginId": "@kbn/ml-error-utils",
+            "scope": "common",
+            "docId": "kibKbnMlErrorUtilsPluginApi",
+            "section": "def-common.ErrorType",
+            "text": "ErrorType"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/ml-error-utils",
+            "scope": "common",
+            "docId": "kibKbnMlErrorUtilsPluginApi",
+            "section": "def-common.MLErrorObject",
+            "text": "MLErrorObject"
+          }
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/process_errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.extractErrorProperties.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-error-utils",
+                "scope": "common",
+                "docId": "kibKbnMlErrorUtilsPluginApi",
+                "section": "def-common.ErrorType",
+                "text": "ErrorType"
+              }
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/process_errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.isBoomError",
+        "type": "Function",
+        "tags": [
+          "export"
+        ],
+        "label": "isBoomError",
+        "description": [
+          "\nType guard to check if error is of type Boom."
+        ],
+        "signature": [
+          "(error: any) => boolean"
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.isBoomError.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.isErrorString",
+        "type": "Function",
+        "tags": [
+          "export"
+        ],
+        "label": "isErrorString",
+        "description": [
+          "\nType guard to check if error is a string."
+        ],
+        "signature": [
+          "(error: any) => boolean"
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.isErrorString.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.isEsErrorBody",
+        "type": "Function",
+        "tags": [
+          "export"
+        ],
+        "label": "isEsErrorBody",
+        "description": [
+          "\nType guard to check if error is of type EsErrorBody"
+        ],
+        "signature": [
+          "(error: any) => boolean"
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.isEsErrorBody.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.isMLResponseError",
+        "type": "Function",
+        "tags": [
+          "export"
+        ],
+        "label": "isMLResponseError",
+        "description": [
+          "\nType guard to check if error is of type MLResponseError."
+        ],
+        "signature": [
+          "(error: any) => boolean"
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.isMLResponseError.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.ErrorMessage",
+        "type": "Interface",
+        "tags": [
+          "export",
+          "interface",
+          "typedef"
+        ],
+        "label": "ErrorMessage",
+        "description": [
+          "\nInterface holding error message"
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.ErrorMessage.message",
+            "type": "string",
+            "tags": [
+              "type"
+            ],
+            "label": "message",
+            "description": [
+              "\nmessage"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.MLErrorObject",
+        "type": "Interface",
+        "tags": [
+          "export",
+          "interface",
+          "typedef"
+        ],
+        "label": "MLErrorObject",
+        "description": [
+          "\nML Error Object"
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.MLErrorObject.causedBy",
+            "type": "string",
+            "tags": [
+              "type"
+            ],
+            "label": "causedBy",
+            "description": [
+              "\nOptional causedBy"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.MLErrorObject.message",
+            "type": "string",
+            "tags": [
+              "type"
+            ],
+            "label": "message",
+            "description": [
+              "\nmessage"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.MLErrorObject.statusCode",
+            "type": "number",
+            "tags": [
+              "type"
+            ],
+            "label": "statusCode",
+            "description": [
+              "\nOptional statusCode"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.MLErrorObject.fullError",
+            "type": "Object",
+            "tags": [
+              "type"
+            ],
+            "label": "fullError",
+            "description": [
+              "\nOptional fullError"
+            ],
+            "signature": [
+              "ErrorResponseBase",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.MLHttpFetchErrorBase",
+        "type": "Interface",
+        "tags": [
+          "export",
+          "interface",
+          "typedef",
+          "template",
+          "extends"
+        ],
+        "label": "MLHttpFetchErrorBase",
+        "description": [
+          "\nMLHttpFetchErrorBase"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-error-utils",
+            "scope": "common",
+            "docId": "kibKbnMlErrorUtilsPluginApi",
+            "section": "def-common.MLHttpFetchErrorBase",
+            "text": "MLHttpFetchErrorBase"
+          },
+          "<T> extends ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-public.IHttpFetchError",
+            "text": "IHttpFetchError"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.MLHttpFetchErrorBase.body",
+            "type": "Uncategorized",
+            "tags": [
+              "type"
+            ],
+            "label": "body",
+            "description": [
+              "\nbody"
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.MLResponseError",
+        "type": "Interface",
+        "tags": [
+          "export",
+          "interface",
+          "typedef"
+        ],
+        "label": "MLResponseError",
+        "description": [
+          "\nML Response error"
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.MLResponseError.statusCode",
+            "type": "number",
+            "tags": [
+              "type"
+            ],
+            "label": "statusCode",
+            "description": [
+              "\nstatusCode"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.MLResponseError.error",
+            "type": "string",
+            "tags": [
+              "type"
+            ],
+            "label": "error",
+            "description": [
+              "\nerror"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.MLResponseError.message",
+            "type": "string",
+            "tags": [
+              "type"
+            ],
+            "label": "message",
+            "description": [
+              "\nmessage"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.MLResponseError.attributes",
+            "type": "Object",
+            "tags": [
+              "type"
+            ],
+            "label": "attributes",
+            "description": [
+              "\nOptional attributes"
+            ],
+            "signature": [
+              "{ body: ",
+              "ErrorResponseBase",
+              "; } | undefined"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.QueryErrorMessage",
+        "type": "Interface",
+        "tags": [],
+        "label": "QueryErrorMessage",
+        "description": [
+          "\nTo be used for client side errors related to search query bars."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-error-utils",
+            "scope": "common",
+            "docId": "kibKbnMlErrorUtilsPluginApi",
+            "section": "def-common.QueryErrorMessage",
+            "text": "QueryErrorMessage"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/ml-error-utils",
+            "scope": "common",
+            "docId": "kibKbnMlErrorUtilsPluginApi",
+            "section": "def-common.ErrorMessage",
+            "text": "ErrorMessage"
+          }
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-error-utils",
+            "id": "def-common.QueryErrorMessage.query",
+            "type": "string",
+            "tags": [
+              "type"
+            ],
+            "label": "query",
+            "description": [
+              "\nquery"
+            ],
+            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.ErrorType",
+        "type": "Type",
+        "tags": [
+          "export",
+          "typedef"
+        ],
+        "label": "ErrorType",
+        "description": [
+          "\nUnion type of error types"
+        ],
+        "signature": [
+          "string | ",
+          {
+            "pluginId": "@kbn/ml-error-utils",
+            "scope": "common",
+            "docId": "kibKbnMlErrorUtilsPluginApi",
+            "section": "def-common.MLHttpFetchError",
+            "text": "MLHttpFetchError"
+          },
+          " | ",
+          "ErrorResponseBase",
+          " | ",
+          "Boom",
+          "<any> | undefined"
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.EsErrorBody",
+        "type": "Type",
+        "tags": [
+          "typedef"
+        ],
+        "label": "EsErrorBody",
+        "description": [
+          "\nShort hand type of estypes.ErrorResponseBase."
+        ],
+        "signature": [
+          "ErrorResponseBase"
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.EsErrorRootCause",
+        "type": "Type",
+        "tags": [
+          "typedef"
+        ],
+        "label": "EsErrorRootCause",
+        "description": [
+          "\nShort hand type of estypes.ErrorCause."
+        ],
+        "signature": [
+          "ErrorCauseKeys",
+          " & { [property: string]: any; }"
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-error-utils",
+        "id": "def-common.MLHttpFetchError",
+        "type": "Type",
+        "tags": [
+          "export",
+          "typedef"
+        ],
+        "label": "MLHttpFetchError",
+        "description": [
+          "\nMLHttpFetchError"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-error-utils",
+            "scope": "common",
+            "docId": "kibKbnMlErrorUtilsPluginApi",
+            "section": "def-common.MLHttpFetchErrorBase",
+            "text": "MLHttpFetchErrorBase"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/ml-error-utils",
+            "scope": "common",
+            "docId": "kibKbnMlErrorUtilsPluginApi",
+            "section": "def-common.MLResponseError",
+            "text": "MLResponseError"
+          },
+          ">"
+        ],
+        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

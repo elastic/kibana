@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import {
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -17,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMlKibana } from '../../contexts/kibana';
-import { ModelItem } from '../models_list';
+import type { ModelItem } from '../models_list';
 import { ProcessorsStats } from './expanded_row';
 
 export type IngestStatsResponse = Exclude<ModelItem['stats'], undefined>['ingest'];
@@ -45,9 +46,8 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
         const pipelineDefinition = pipelines?.[pipelineName];
 
         return (
-          <>
+          <React.Fragment key={pipelineName}>
             <EuiAccordion
-              key={pipelineName}
               id={pipelineName}
               buttonContent={
                 <EuiTitle size="xs">
@@ -81,7 +81,7 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
               initialIsOpen={initialIsOpen}
             >
               <EuiFlexGrid columns={2}>
-                {ingestStats?.pipelines ? (
+                {ingestStats!.pipelines[pipelineName]?.processors ? (
                   <EuiFlexItem data-test-subj={`mlTrainedModelPipelineIngestStats_${pipelineName}`}>
                     <EuiPanel>
                       <EuiTitle size={'xxs'}>
@@ -93,7 +93,7 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
                         </h6>
                       </EuiTitle>
 
-                      <ProcessorsStats stats={ingestStats!.pipelines[pipelineName].processors} />
+                      <ProcessorsStats stats={ingestStats!.pipelines[pipelineName]?.processors} />
                     </EuiPanel>
                   </EuiFlexItem>
                 ) : null}
@@ -123,7 +123,7 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
                 ) : null}
               </EuiFlexGrid>
             </EuiAccordion>
-          </>
+          </React.Fragment>
         );
       })}
     </>

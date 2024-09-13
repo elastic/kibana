@@ -20,9 +20,8 @@ import type {
   MlSavedObjectType,
 } from '../../common/types/saved_objects';
 
-import type { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
 import type { ResolveMlCapabilities } from '../../common/types/capabilities';
-import { getJobDetailsFromTrainedModel } from './util';
+import { getJobDetailsFromTrainedModel, getJobsAndModels } from './util';
 
 export interface JobSavedObjectStatus {
   jobId: string;
@@ -79,7 +78,7 @@ export function checksFactory(
   mlSavedObjectService: MLSavedObjectService
 ) {
   async function checkStatus(): Promise<StatusResponse> {
-    const [
+    const {
       jobObjects,
       allJobObjects,
       modelObjects,
@@ -88,18 +87,7 @@ export function checksFactory(
       datafeeds,
       dfaJobs,
       models,
-    ] = await Promise.all([
-      mlSavedObjectService.getAllJobObjects(undefined, false),
-      mlSavedObjectService.getAllJobObjectsForAllSpaces(),
-      mlSavedObjectService.getAllTrainedModelObjects(false),
-      mlSavedObjectService.getAllTrainedModelObjectsForAllSpaces(),
-      client.asInternalUser.ml.getJobs(),
-      client.asInternalUser.ml.getDatafeeds(),
-      client.asInternalUser.ml.getDataFrameAnalytics() as unknown as {
-        data_frame_analytics: DataFrameAnalyticsConfig[];
-      },
-      client.asInternalUser.ml.getTrainedModels(),
-    ]);
+    } = await getJobsAndModels(client, mlSavedObjectService);
 
     const jobSavedObjectsStatus: JobSavedObjectStatus[] = jobObjects.map(
       ({ attributes, namespaces }) => {
@@ -111,10 +99,10 @@ export function checksFactory(
         let datafeedExists: boolean | undefined;
 
         if (type === 'anomaly-detector') {
-          jobExists = adJobs.jobs.some((j) => j.job_id === jobId);
-          datafeedExists = datafeeds.datafeeds.some((d) => d.job_id === jobId);
+          jobExists = adJobs.some((j) => j.job_id === jobId);
+          datafeedExists = datafeeds.some((d) => d.job_id === jobId);
         } else {
-          jobExists = dfaJobs.data_frame_analytics.some((j) => j.id === jobId);
+          jobExists = dfaJobs.some((j) => j.id === jobId);
         }
 
         return {
@@ -130,12 +118,12 @@ export function checksFactory(
       }
     );
 
-    const dfaJobsCreateTimeMap = dfaJobs.data_frame_analytics.reduce((acc, cur) => {
+    const dfaJobsCreateTimeMap = dfaJobs.reduce((acc, cur) => {
       acc.set(cur.id, cur.create_time!);
       return acc;
     }, new Map<string, number>());
 
-    const modelJobExits = models.trained_model_configs.reduce((acc, cur) => {
+    const modelJobExits = models.reduce((acc, cur) => {
       const job = getJobDetailsFromTrainedModel(cur);
       if (job === null) {
         return acc;
@@ -152,7 +140,7 @@ export function checksFactory(
 
     const modelSavedObjectsStatus: TrainedModelSavedObjectStatus[] = modelObjects.map(
       ({ attributes: { job, model_id: modelId }, namespaces }) => {
-        const trainedModelExists = models.trained_model_configs.some((m) => m.model_id === modelId);
+        const trainedModelExists = models.some((m) => m.model_id === modelId);
         const dfaJobExists = modelJobExits.get(modelId) ?? null;
 
         return {
@@ -194,14 +182,14 @@ export function checksFactory(
     );
     const modelObjectIds = new Set(modelSavedObjectsStatus.map(({ modelId }) => modelId));
 
-    const anomalyDetectorsStatus = adJobs.jobs
+    const anomalyDetectorsStatus = adJobs
       .filter(({ job_id: jobId }) => {
         // only list jobs which are in the current space (adObjectIds)
         // or are not in any spaces (nonSpaceADObjectIds)
         return adObjectIds.has(jobId) === true || nonSpaceADObjectIds.has(jobId) === false;
       })
       .map(({ job_id: jobId }) => {
-        const datafeedId = datafeeds.datafeeds.find((df) => df.job_id === jobId)?.datafeed_id;
+        const datafeedId = datafeeds.find((df) => df.job_id === jobId)?.datafeed_id;
         return {
           jobId,
           datafeedId: datafeedId ?? null,
@@ -211,7 +199,7 @@ export function checksFactory(
         };
       });
 
-    const dataFrameAnalyticsStatus = dfaJobs.data_frame_analytics
+    const dataFrameAnalyticsStatus = dfaJobs
       .filter(({ id: jobId }) => {
         // only list jobs which are in the current space (dfaObjectIds)
         // or are not in any spaces (nonSpaceDFAObjectIds)
@@ -227,7 +215,7 @@ export function checksFactory(
         };
       });
 
-    const modelsStatus = models.trained_model_configs
+    const modelsStatus = models
       .filter(({ model_id: modelId }) => {
         // only list jobs which are in the current space (adObjectIds)
         // or are not in any spaces (nonSpaceADObjectIds)
@@ -416,7 +404,7 @@ export function checksFactory(
       .reduce((acc, cur) => {
         const type = cur.type;
         if (acc[type] === undefined) {
-          acc[type] = {};
+          acc[type] = Object.create(null);
         }
         acc[type][cur.jobId] = cur.namespaces;
         return acc;

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiFlyout,
   EuiTitle,
@@ -16,10 +15,11 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SavedQuerySOFormData, SavedQueryFormData } from './form/use_saved_query_form';
@@ -30,16 +30,9 @@ import { useCreateSavedQuery } from './use_create_saved_query';
 interface AddQueryFlyoutProps {
   defaultValue: SavedQuerySOFormData;
   onClose: () => void;
-  isExternal?: boolean;
 }
 
-const additionalZIndexStyle = { style: 'z-index: 6000' };
-
-const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
-  defaultValue,
-  onClose,
-  isExternal,
-}) => {
+const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue, onClose }) => {
   const createSavedQueryMutation = useCreateSavedQuery({ withRedirect: false });
 
   const hooksForm = useSavedQueryForm({
@@ -58,15 +51,23 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
     },
     [createSavedQueryMutation, onClose, serializer]
   );
+  const { euiTheme } = useEuiTheme();
+
+  // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
+  const maskProps = useMemo(
+    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }),
+    [euiTheme.levels.flyout]
+  );
 
   return (
     <EuiPortal>
       <EuiFlyout
+        data-test-subj={'osquery-save-query-flyout'}
         size="m"
         ownFocus
         onClose={onClose}
         aria-labelledby="flyoutTitle"
-        maskProps={isExternal ? additionalZIndexStyle : undefined} // For an edge case to display above the alerts flyout
+        maskProps={maskProps}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
@@ -94,7 +95,12 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton isLoading={isSubmitting} onClick={handleSubmit(onSubmit)} fill>
+              <EuiButton
+                data-test-subj="savedQueryFlyoutSaveButton"
+                isLoading={isSubmitting}
+                onClick={handleSubmit(onSubmit)}
+                fill
+              >
                 <FormattedMessage
                   id="xpack.osquery.pack.queryFlyoutForm.saveButtonLabel"
                   defaultMessage="Save"

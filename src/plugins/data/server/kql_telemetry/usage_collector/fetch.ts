@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { get } from 'lodash';
@@ -18,19 +19,19 @@ export interface Usage {
   defaultQueryLanguage: string;
 }
 
-export function fetchProvider(index: string) {
+export function fetchProvider(getIndexForType: (type: string) => Promise<string>) {
   return async ({ esClient }: CollectorFetchContext): Promise<Usage> => {
     const [response, config] = await Promise.all([
       esClient.get(
         {
-          index,
+          index: await getIndexForType('kql-telemetry'),
           id: 'kql-telemetry:kql-telemetry',
         },
         { ignore: [404] }
       ),
       esClient.search(
         {
-          index,
+          index: await getIndexForType('config'),
           body: { query: { term: { type: 'config' } } },
         },
         { ignore: [404] }

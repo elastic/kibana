@@ -2,26 +2,10 @@
   "id": "@kbn/core-http-browser",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.isHttpFetchError",
+        "id": "def-public.isHttpFetchError",
         "type": "Function",
         "tags": [],
         "label": "isHttpFetchError",
@@ -30,9 +14,9 @@
           "(error: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.IHttpFetchError",
+            "section": "def-public.IHttpFetchError",
             "text": "IHttpFetchError"
           },
           "<unknown> | T) => boolean"
@@ -43,7 +27,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.isHttpFetchError.$1",
+            "id": "def-public.isHttpFetchError.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "error",
@@ -51,9 +35,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.IHttpFetchError",
+                "section": "def-public.IHttpFetchError",
                 "text": "IHttpFetchError"
               },
               "<unknown> | T"
@@ -71,7 +55,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.HttpFetchOptions",
+        "id": "def-public.HttpFetchOptions",
         "type": "Interface",
         "tags": [],
         "label": "HttpFetchOptions",
@@ -81,17 +65,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpFetchOptions",
+            "section": "def-public.HttpFetchOptions",
             "text": "HttpFetchOptions"
           },
           " extends ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpRequestInit",
+            "section": "def-public.HttpRequestInit",
             "text": "HttpRequestInit"
           }
         ],
@@ -101,7 +85,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpFetchOptions.query",
+            "id": "def-public.HttpFetchOptions.query",
             "type": "Object",
             "tags": [],
             "label": "query",
@@ -111,9 +95,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpFetchQuery",
+                "section": "def-public.HttpFetchQuery",
                 "text": "HttpFetchQuery"
               },
               " | undefined"
@@ -124,7 +108,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpFetchOptions.prependBasePath",
+            "id": "def-public.HttpFetchOptions.prependBasePath",
             "type": "CompoundType",
             "tags": [],
             "label": "prependBasePath",
@@ -140,7 +124,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpFetchOptions.headers",
+            "id": "def-public.HttpFetchOptions.headers",
             "type": "Object",
             "tags": [],
             "label": "headers",
@@ -150,9 +134,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpHeadersInit",
+                "section": "def-public.HttpHeadersInit",
                 "text": "HttpHeadersInit"
               },
               " | undefined"
@@ -163,7 +147,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpFetchOptions.asSystemRequest",
+            "id": "def-public.HttpFetchOptions.asSystemRequest",
             "type": "CompoundType",
             "tags": [],
             "label": "asSystemRequest",
@@ -179,7 +163,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpFetchOptions.asResponse",
+            "id": "def-public.HttpFetchOptions.asResponse",
             "type": "CompoundType",
             "tags": [],
             "label": "asResponse",
@@ -195,7 +179,23 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpFetchOptions.context",
+            "id": "def-public.HttpFetchOptions.rawResponse",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rawResponse",
+            "description": [
+              "\nWhen true, the response from the `fetch` call will be returned as is, without being awaited or processed.\nDefaults to `false`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-public.HttpFetchOptions.context",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -216,7 +216,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpFetchOptions.version",
+            "id": "def-public.HttpFetchOptions.version",
             "type": "string",
             "tags": [
               "experimental"
@@ -235,7 +235,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.HttpFetchOptionsWithPath",
+        "id": "def-public.HttpFetchOptionsWithPath",
         "type": "Interface",
         "tags": [],
         "label": "HttpFetchOptionsWithPath",
@@ -245,17 +245,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpFetchOptionsWithPath",
+            "section": "def-public.HttpFetchOptionsWithPath",
             "text": "HttpFetchOptionsWithPath"
           },
           " extends ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpFetchOptions",
+            "section": "def-public.HttpFetchOptions",
             "text": "HttpFetchOptions"
           }
         ],
@@ -265,7 +265,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpFetchOptionsWithPath.path",
+            "id": "def-public.HttpFetchOptionsWithPath.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -279,7 +279,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.HttpFetchQuery",
+        "id": "def-public.HttpFetchQuery",
         "type": "Interface",
         "tags": [],
         "label": "HttpFetchQuery",
@@ -290,7 +290,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpFetchQuery.Unnamed",
+            "id": "def-public.HttpFetchQuery.Unnamed",
             "type": "IndexSignature",
             "tags": [],
             "label": "[key: string]: string | number | boolean | string[] | boolean[] | number[] | null | undefined",
@@ -309,7 +309,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.HttpHandler",
+        "id": "def-public.HttpHandler",
         "type": "Interface",
         "tags": [],
         "label": "HttpHandler",
@@ -322,7 +322,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpHandler.Unnamed",
+            "id": "def-public.HttpHandler.Unnamed",
             "type": "Any",
             "tags": [],
             "label": "Unnamed",
@@ -336,7 +336,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpHandler.Unnamed",
+            "id": "def-public.HttpHandler.Unnamed",
             "type": "Any",
             "tags": [],
             "label": "Unnamed",
@@ -350,7 +350,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpHandler.Unnamed",
+            "id": "def-public.HttpHandler.Unnamed",
             "type": "Any",
             "tags": [],
             "label": "Unnamed",
@@ -364,7 +364,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpHandler.Unnamed",
+            "id": "def-public.HttpHandler.Unnamed",
             "type": "Any",
             "tags": [],
             "label": "Unnamed",
@@ -381,12 +381,12 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.HttpHeadersInit",
+        "id": "def-public.HttpHeadersInit",
         "type": "Interface",
         "tags": [],
         "label": "HttpHeadersInit",
         "description": [
-          "\nHeaders to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause\n{@link HttpHandler} to throw an error."
+          "\nHeaders to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause\n{@link HttpHandler} to throw an error.\nIncludes the required Header that validates internal requests to internal APIs"
         ],
         "path": "packages/core/http/core-http-browser/src/types.ts",
         "deprecated": false,
@@ -394,7 +394,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpHeadersInit.Unnamed",
+            "id": "def-public.HttpHeadersInit.Unnamed",
             "type": "IndexSignature",
             "tags": [],
             "label": "[name: string]: any",
@@ -411,7 +411,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.HttpInterceptor",
+        "id": "def-public.HttpInterceptor",
         "type": "Interface",
         "tags": [],
         "label": "HttpInterceptor",
@@ -424,7 +424,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpInterceptor.request",
+            "id": "def-public.HttpInterceptor.request",
             "type": "Function",
             "tags": [],
             "label": "request",
@@ -435,17 +435,17 @@
               "((fetchOptions: Readonly<",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpFetchOptionsWithPath",
+                "section": "def-public.HttpFetchOptionsWithPath",
                 "text": "HttpFetchOptionsWithPath"
               },
               ">, controller: ",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.IHttpInterceptController",
+                "section": "def-public.IHttpInterceptController",
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
@@ -459,9 +459,9 @@
               "<Partial<",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpFetchOptionsWithPath",
+                "section": "def-public.HttpFetchOptionsWithPath",
                 "text": "HttpFetchOptionsWithPath"
               },
               ">>) | undefined"
@@ -472,7 +472,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.HttpInterceptor.request.$1",
+                "id": "def-public.HttpInterceptor.request.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "fetchOptions",
@@ -481,9 +481,9 @@
                   "Readonly<",
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpFetchOptionsWithPath",
+                    "section": "def-public.HttpFetchOptionsWithPath",
                     "text": "HttpFetchOptionsWithPath"
                   },
                   ">"
@@ -495,7 +495,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.HttpInterceptor.request.$2",
+                "id": "def-public.HttpInterceptor.request.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "controller",
@@ -505,9 +505,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.IHttpInterceptController",
+                    "section": "def-public.IHttpInterceptController",
                     "text": "IHttpInterceptController"
                   }
                 ],
@@ -521,7 +521,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpInterceptor.requestError",
+            "id": "def-public.HttpInterceptor.requestError",
             "type": "Function",
             "tags": [],
             "label": "requestError",
@@ -532,17 +532,17 @@
               "((httpErrorRequest: ",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpInterceptorRequestError",
+                "section": "def-public.HttpInterceptorRequestError",
                 "text": "HttpInterceptorRequestError"
               },
               ", controller: ",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.IHttpInterceptController",
+                "section": "def-public.IHttpInterceptController",
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
@@ -556,9 +556,9 @@
               "<Partial<",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpFetchOptionsWithPath",
+                "section": "def-public.HttpFetchOptionsWithPath",
                 "text": "HttpFetchOptionsWithPath"
               },
               ">>) | undefined"
@@ -569,7 +569,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.HttpInterceptor.requestError.$1",
+                "id": "def-public.HttpInterceptor.requestError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "httpErrorRequest",
@@ -579,9 +579,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpInterceptorRequestError",
+                    "section": "def-public.HttpInterceptorRequestError",
                     "text": "HttpInterceptorRequestError"
                   }
                 ],
@@ -592,7 +592,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.HttpInterceptor.requestError.$2",
+                "id": "def-public.HttpInterceptor.requestError.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "controller",
@@ -602,9 +602,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.IHttpInterceptController",
+                    "section": "def-public.IHttpInterceptController",
                     "text": "IHttpInterceptController"
                   }
                 ],
@@ -618,7 +618,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpInterceptor.response",
+            "id": "def-public.HttpInterceptor.response",
             "type": "Function",
             "tags": [],
             "label": "response",
@@ -629,17 +629,17 @@
               "((httpResponse: ",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpResponse",
+                "section": "def-public.HttpResponse",
                 "text": "HttpResponse"
               },
               "<unknown>, controller: ",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.IHttpInterceptController",
+                "section": "def-public.IHttpInterceptController",
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
@@ -653,9 +653,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.IHttpResponseInterceptorOverrides",
+                "section": "def-public.IHttpResponseInterceptorOverrides",
                 "text": "IHttpResponseInterceptorOverrides"
               },
               "<unknown>>) | undefined"
@@ -666,7 +666,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.HttpInterceptor.response.$1",
+                "id": "def-public.HttpInterceptor.response.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "httpResponse",
@@ -676,9 +676,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpResponse",
+                    "section": "def-public.HttpResponse",
                     "text": "HttpResponse"
                   },
                   "<unknown>"
@@ -690,7 +690,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.HttpInterceptor.response.$2",
+                "id": "def-public.HttpInterceptor.response.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "controller",
@@ -700,9 +700,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.IHttpInterceptController",
+                    "section": "def-public.IHttpInterceptController",
                     "text": "IHttpInterceptController"
                   }
                 ],
@@ -716,7 +716,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpInterceptor.responseError",
+            "id": "def-public.HttpInterceptor.responseError",
             "type": "Function",
             "tags": [],
             "label": "responseError",
@@ -727,17 +727,17 @@
               "((httpErrorResponse: ",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpInterceptorResponseError",
+                "section": "def-public.HttpInterceptorResponseError",
                 "text": "HttpInterceptorResponseError"
               },
               ", controller: ",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.IHttpInterceptController",
+                "section": "def-public.IHttpInterceptController",
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
@@ -751,9 +751,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.IHttpResponseInterceptorOverrides",
+                "section": "def-public.IHttpResponseInterceptorOverrides",
                 "text": "IHttpResponseInterceptorOverrides"
               },
               "<unknown>>) | undefined"
@@ -764,7 +764,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.HttpInterceptor.responseError.$1",
+                "id": "def-public.HttpInterceptor.responseError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "httpErrorResponse",
@@ -774,9 +774,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpInterceptorResponseError",
+                    "section": "def-public.HttpInterceptorResponseError",
                     "text": "HttpInterceptorResponseError"
                   }
                 ],
@@ -787,7 +787,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.HttpInterceptor.responseError.$2",
+                "id": "def-public.HttpInterceptor.responseError.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "controller",
@@ -797,9 +797,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.IHttpInterceptController",
+                    "section": "def-public.IHttpInterceptController",
                     "text": "IHttpInterceptController"
                   }
                 ],
@@ -816,7 +816,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.HttpInterceptorRequestError",
+        "id": "def-public.HttpInterceptorRequestError",
         "type": "Interface",
         "tags": [],
         "label": "HttpInterceptorRequestError",
@@ -827,7 +827,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpInterceptorRequestError.fetchOptions",
+            "id": "def-public.HttpInterceptorRequestError.fetchOptions",
             "type": "Object",
             "tags": [],
             "label": "fetchOptions",
@@ -836,20 +836,20 @@
               "{ readonly path: string; readonly query?: ",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpFetchQuery",
+                "section": "def-public.HttpFetchQuery",
                 "text": "HttpFetchQuery"
               },
               " | undefined; readonly prependBasePath?: boolean | undefined; readonly headers?: ",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpHeadersInit",
+                "section": "def-public.HttpHeadersInit",
                 "text": "HttpHeadersInit"
               },
-              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
+              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly rawResponse?: boolean | undefined; readonly context?: ",
               {
                 "pluginId": "@kbn/core-execution-context-common",
                 "scope": "common",
@@ -865,7 +865,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpInterceptorRequestError.error",
+            "id": "def-public.HttpInterceptorRequestError.error",
             "type": "Object",
             "tags": [],
             "label": "error",
@@ -882,7 +882,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.HttpInterceptorResponseError",
+        "id": "def-public.HttpInterceptorResponseError",
         "type": "Interface",
         "tags": [],
         "label": "HttpInterceptorResponseError",
@@ -890,17 +890,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpInterceptorResponseError",
+            "section": "def-public.HttpInterceptorResponseError",
             "text": "HttpInterceptorResponseError"
           },
           " extends ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpResponse",
+            "section": "def-public.HttpResponse",
             "text": "HttpResponse"
           },
           "<unknown>"
@@ -911,7 +911,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpInterceptorResponseError.request",
+            "id": "def-public.HttpInterceptorResponseError.request",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -925,7 +925,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpInterceptorResponseError.error",
+            "id": "def-public.HttpInterceptorResponseError.error",
             "type": "CompoundType",
             "tags": [],
             "label": "error",
@@ -934,9 +934,9 @@
               "Error | ",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.IHttpFetchError",
+                "section": "def-public.IHttpFetchError",
                 "text": "IHttpFetchError"
               },
               "<unknown>"
@@ -950,7 +950,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.HttpRequestInit",
+        "id": "def-public.HttpRequestInit",
         "type": "Interface",
         "tags": [],
         "label": "HttpRequestInit",
@@ -963,7 +963,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpRequestInit.body",
+            "id": "def-public.HttpRequestInit.body",
             "type": "CompoundType",
             "tags": [],
             "label": "body",
@@ -979,7 +979,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpRequestInit.cache",
+            "id": "def-public.HttpRequestInit.cache",
             "type": "CompoundType",
             "tags": [],
             "label": "cache",
@@ -995,7 +995,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpRequestInit.credentials",
+            "id": "def-public.HttpRequestInit.credentials",
             "type": "CompoundType",
             "tags": [],
             "label": "credentials",
@@ -1011,7 +1011,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpRequestInit.headers",
+            "id": "def-public.HttpRequestInit.headers",
             "type": "Object",
             "tags": [],
             "label": "headers",
@@ -1021,9 +1021,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpHeadersInit",
+                "section": "def-public.HttpHeadersInit",
                 "text": "HttpHeadersInit"
               },
               " | undefined"
@@ -1034,7 +1034,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpRequestInit.integrity",
+            "id": "def-public.HttpRequestInit.integrity",
             "type": "string",
             "tags": [],
             "label": "integrity",
@@ -1050,7 +1050,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpRequestInit.keepalive",
+            "id": "def-public.HttpRequestInit.keepalive",
             "type": "CompoundType",
             "tags": [],
             "label": "keepalive",
@@ -1066,7 +1066,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpRequestInit.method",
+            "id": "def-public.HttpRequestInit.method",
             "type": "string",
             "tags": [],
             "label": "method",
@@ -1082,7 +1082,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpRequestInit.mode",
+            "id": "def-public.HttpRequestInit.mode",
             "type": "CompoundType",
             "tags": [],
             "label": "mode",
@@ -1098,7 +1098,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpRequestInit.redirect",
+            "id": "def-public.HttpRequestInit.redirect",
             "type": "CompoundType",
             "tags": [],
             "label": "redirect",
@@ -1114,7 +1114,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpRequestInit.referrer",
+            "id": "def-public.HttpRequestInit.referrer",
             "type": "string",
             "tags": [],
             "label": "referrer",
@@ -1130,7 +1130,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpRequestInit.referrerPolicy",
+            "id": "def-public.HttpRequestInit.referrerPolicy",
             "type": "CompoundType",
             "tags": [],
             "label": "referrerPolicy",
@@ -1146,7 +1146,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpRequestInit.signal",
+            "id": "def-public.HttpRequestInit.signal",
             "type": "CompoundType",
             "tags": [],
             "label": "signal",
@@ -1162,7 +1162,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpRequestInit.window",
+            "id": "def-public.HttpRequestInit.window",
             "type": "Uncategorized",
             "tags": [],
             "label": "window",
@@ -1181,7 +1181,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.HttpResponse",
+        "id": "def-public.HttpResponse",
         "type": "Interface",
         "tags": [],
         "label": "HttpResponse",
@@ -1189,9 +1189,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpResponse",
+            "section": "def-public.HttpResponse",
             "text": "HttpResponse"
           },
           "<TResponseBody>"
@@ -1202,7 +1202,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpResponse.fetchOptions",
+            "id": "def-public.HttpResponse.fetchOptions",
             "type": "Object",
             "tags": [],
             "label": "fetchOptions",
@@ -1213,20 +1213,20 @@
               "{ readonly path: string; readonly query?: ",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpFetchQuery",
+                "section": "def-public.HttpFetchQuery",
                 "text": "HttpFetchQuery"
               },
               " | undefined; readonly prependBasePath?: boolean | undefined; readonly headers?: ",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpHeadersInit",
+                "section": "def-public.HttpHeadersInit",
                 "text": "HttpHeadersInit"
               },
-              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
+              " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly rawResponse?: boolean | undefined; readonly context?: ",
               {
                 "pluginId": "@kbn/core-execution-context-common",
                 "scope": "common",
@@ -1242,7 +1242,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpResponse.request",
+            "id": "def-public.HttpResponse.request",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -1258,7 +1258,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpResponse.response",
+            "id": "def-public.HttpResponse.response",
             "type": "Object",
             "tags": [],
             "label": "response",
@@ -1274,7 +1274,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpResponse.body",
+            "id": "def-public.HttpResponse.body",
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
@@ -1293,7 +1293,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.HttpSetup",
+        "id": "def-public.HttpSetup",
         "type": "Interface",
         "tags": [],
         "label": "HttpSetup",
@@ -1304,7 +1304,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpSetup.basePath",
+            "id": "def-public.HttpSetup.basePath",
             "type": "Object",
             "tags": [],
             "label": "basePath",
@@ -1314,9 +1314,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.IBasePath",
+                "section": "def-public.IBasePath",
                 "text": "IBasePath"
               }
             ],
@@ -1326,7 +1326,29 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpSetup.anonymousPaths",
+            "id": "def-public.HttpSetup.staticAssets",
+            "type": "Object",
+            "tags": [],
+            "label": "staticAssets",
+            "description": [
+              "\nAPIs for creating hrefs to static assets.\nSee {@link IStaticAssets}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.IStaticAssets",
+                "text": "IStaticAssets"
+              }
+            ],
+            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-public.HttpSetup.anonymousPaths",
             "type": "Object",
             "tags": [],
             "label": "anonymousPaths",
@@ -1336,9 +1358,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.IAnonymousPaths",
+                "section": "def-public.IAnonymousPaths",
                 "text": "IAnonymousPaths"
               }
             ],
@@ -1348,7 +1370,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpSetup.externalUrl",
+            "id": "def-public.HttpSetup.externalUrl",
             "type": "Object",
             "tags": [],
             "label": "externalUrl",
@@ -1356,9 +1378,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.IExternalUrl",
+                "section": "def-public.IExternalUrl",
                 "text": "IExternalUrl"
               }
             ],
@@ -1368,7 +1390,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpSetup.intercept",
+            "id": "def-public.HttpSetup.intercept",
             "type": "Function",
             "tags": [],
             "label": "intercept",
@@ -1379,9 +1401,9 @@
               "(interceptor: ",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpInterceptor",
+                "section": "def-public.HttpInterceptor",
                 "text": "HttpInterceptor"
               },
               ") => () => void"
@@ -1392,7 +1414,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.HttpSetup.intercept.$1",
+                "id": "def-public.HttpSetup.intercept.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "interceptor",
@@ -1402,9 +1424,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpInterceptor",
+                    "section": "def-public.HttpInterceptor",
                     "text": "HttpInterceptor"
                   }
                 ],
@@ -1420,7 +1442,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpSetup.fetch",
+            "id": "def-public.HttpSetup.fetch",
             "type": "Function",
             "tags": [],
             "label": "fetch",
@@ -1430,9 +1452,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpHandler",
+                "section": "def-public.HttpHandler",
                 "text": "HttpHandler"
               }
             ],
@@ -1442,7 +1464,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpSetup.delete",
+            "id": "def-public.HttpSetup.delete",
             "type": "Function",
             "tags": [],
             "label": "delete",
@@ -1452,9 +1474,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpHandler",
+                "section": "def-public.HttpHandler",
                 "text": "HttpHandler"
               }
             ],
@@ -1464,7 +1486,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpSetup.get",
+            "id": "def-public.HttpSetup.get",
             "type": "Function",
             "tags": [],
             "label": "get",
@@ -1474,9 +1496,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpHandler",
+                "section": "def-public.HttpHandler",
                 "text": "HttpHandler"
               }
             ],
@@ -1486,7 +1508,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpSetup.head",
+            "id": "def-public.HttpSetup.head",
             "type": "Function",
             "tags": [],
             "label": "head",
@@ -1496,9 +1518,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpHandler",
+                "section": "def-public.HttpHandler",
                 "text": "HttpHandler"
               }
             ],
@@ -1508,7 +1530,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpSetup.options",
+            "id": "def-public.HttpSetup.options",
             "type": "Function",
             "tags": [],
             "label": "options",
@@ -1518,9 +1540,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpHandler",
+                "section": "def-public.HttpHandler",
                 "text": "HttpHandler"
               }
             ],
@@ -1530,7 +1552,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpSetup.patch",
+            "id": "def-public.HttpSetup.patch",
             "type": "Function",
             "tags": [],
             "label": "patch",
@@ -1540,9 +1562,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpHandler",
+                "section": "def-public.HttpHandler",
                 "text": "HttpHandler"
               }
             ],
@@ -1552,7 +1574,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpSetup.post",
+            "id": "def-public.HttpSetup.post",
             "type": "Function",
             "tags": [],
             "label": "post",
@@ -1562,9 +1584,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpHandler",
+                "section": "def-public.HttpHandler",
                 "text": "HttpHandler"
               }
             ],
@@ -1574,7 +1596,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpSetup.put",
+            "id": "def-public.HttpSetup.put",
             "type": "Function",
             "tags": [],
             "label": "put",
@@ -1584,9 +1606,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpHandler",
+                "section": "def-public.HttpHandler",
                 "text": "HttpHandler"
               }
             ],
@@ -1596,7 +1618,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpSetup.addLoadingCountSource",
+            "id": "def-public.HttpSetup.addLoadingCountSource",
             "type": "Function",
             "tags": [],
             "label": "addLoadingCountSource",
@@ -1614,7 +1636,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.HttpSetup.addLoadingCountSource.$1",
+                "id": "def-public.HttpSetup.addLoadingCountSource.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "countSource$",
@@ -1635,7 +1657,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.HttpSetup.getLoadingCount$",
+            "id": "def-public.HttpSetup.getLoadingCount$",
             "type": "Function",
             "tags": [],
             "label": "getLoadingCount$",
@@ -1658,7 +1680,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.IAnonymousPaths",
+        "id": "def-public.IAnonymousPaths",
         "type": "Interface",
         "tags": [],
         "label": "IAnonymousPaths",
@@ -1671,7 +1693,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IAnonymousPaths.isAnonymous",
+            "id": "def-public.IAnonymousPaths.isAnonymous",
             "type": "Function",
             "tags": [],
             "label": "isAnonymous",
@@ -1687,7 +1709,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.IAnonymousPaths.isAnonymous.$1",
+                "id": "def-public.IAnonymousPaths.isAnonymous.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -1705,7 +1727,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IAnonymousPaths.register",
+            "id": "def-public.IAnonymousPaths.register",
             "type": "Function",
             "tags": [],
             "label": "register",
@@ -1721,7 +1743,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.IAnonymousPaths.register.$1",
+                "id": "def-public.IAnonymousPaths.register.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -1742,7 +1764,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.IBasePath",
+        "id": "def-public.IBasePath",
         "type": "Interface",
         "tags": [],
         "label": "IBasePath",
@@ -1755,7 +1777,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IBasePath.get",
+            "id": "def-public.IBasePath.get",
             "type": "Function",
             "tags": [],
             "label": "get",
@@ -1773,7 +1795,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IBasePath.prepend",
+            "id": "def-public.IBasePath.prepend",
             "type": "Function",
             "tags": [],
             "label": "prepend",
@@ -1789,7 +1811,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.IBasePath.prepend.$1",
+                "id": "def-public.IBasePath.prepend.$1",
                 "type": "string",
                 "tags": [],
                 "label": "url",
@@ -1807,7 +1829,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IBasePath.remove",
+            "id": "def-public.IBasePath.remove",
             "type": "Function",
             "tags": [],
             "label": "remove",
@@ -1823,7 +1845,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.IBasePath.remove.$1",
+                "id": "def-public.IBasePath.remove.$1",
                 "type": "string",
                 "tags": [],
                 "label": "url",
@@ -1841,7 +1863,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IBasePath.serverBasePath",
+            "id": "def-public.IBasePath.serverBasePath",
             "type": "string",
             "tags": [],
             "label": "serverBasePath",
@@ -1854,7 +1876,20 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IBasePath.publicBaseUrl",
+            "id": "def-public.IBasePath.assetsHrefBase",
+            "type": "string",
+            "tags": [],
+            "label": "assetsHrefBase",
+            "description": [
+              "\nHref (hypertext reference) intended to be used as the base for constructing\nother hrefs to static assets."
+            ],
+            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-public.IBasePath.publicBaseUrl",
             "type": "string",
             "tags": [],
             "label": "publicBaseUrl",
@@ -1873,7 +1908,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.IExternalUrl",
+        "id": "def-public.IExternalUrl",
         "type": "Interface",
         "tags": [],
         "label": "IExternalUrl",
@@ -1886,7 +1921,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IExternalUrl.isInternalUrl",
+            "id": "def-public.IExternalUrl.isInternalUrl",
             "type": "Function",
             "tags": [],
             "label": "isInternalUrl",
@@ -1902,7 +1937,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.IExternalUrl.isInternalUrl.$1",
+                "id": "def-public.IExternalUrl.isInternalUrl.$1",
                 "type": "string",
                 "tags": [],
                 "label": "relativeOrAbsoluteUrl",
@@ -1920,7 +1955,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IExternalUrl.validateUrl",
+            "id": "def-public.IExternalUrl.validateUrl",
             "type": "Function",
             "tags": [],
             "label": "validateUrl",
@@ -1936,7 +1971,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser",
-                "id": "def-common.IExternalUrl.validateUrl.$1",
+                "id": "def-public.IExternalUrl.validateUrl.$1",
                 "type": "string",
                 "tags": [],
                 "label": "relativeOrAbsoluteUrl",
@@ -1957,7 +1992,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.IHttpFetchError",
+        "id": "def-public.IHttpFetchError",
         "type": "Interface",
         "tags": [],
         "label": "IHttpFetchError",
@@ -1965,9 +2000,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.IHttpFetchError",
+            "section": "def-public.IHttpFetchError",
             "text": "IHttpFetchError"
           },
           "<TResponseBody> extends Error"
@@ -1978,7 +2013,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IHttpFetchError.name",
+            "id": "def-public.IHttpFetchError.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -1989,7 +2024,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IHttpFetchError.request",
+            "id": "def-public.IHttpFetchError.request",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -2003,7 +2038,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IHttpFetchError.response",
+            "id": "def-public.IHttpFetchError.response",
             "type": "Object",
             "tags": [],
             "label": "response",
@@ -2017,7 +2052,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IHttpFetchError.body",
+            "id": "def-public.IHttpFetchError.body",
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
@@ -2034,7 +2069,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.IHttpInterceptController",
+        "id": "def-public.IHttpInterceptController",
         "type": "Interface",
         "tags": [],
         "label": "IHttpInterceptController",
@@ -2047,7 +2082,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IHttpInterceptController.halted",
+            "id": "def-public.IHttpInterceptController.halted",
             "type": "boolean",
             "tags": [],
             "label": "halted",
@@ -2060,7 +2095,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IHttpInterceptController.halt",
+            "id": "def-public.IHttpInterceptController.halt",
             "type": "Function",
             "tags": [],
             "label": "halt",
@@ -2081,7 +2116,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.IHttpResponseInterceptorOverrides",
+        "id": "def-public.IHttpResponseInterceptorOverrides",
         "type": "Interface",
         "tags": [],
         "label": "IHttpResponseInterceptorOverrides",
@@ -2091,9 +2126,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.IHttpResponseInterceptorOverrides",
+            "section": "def-public.IHttpResponseInterceptorOverrides",
             "text": "IHttpResponseInterceptorOverrides"
           },
           "<TResponseBody>"
@@ -2104,7 +2139,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IHttpResponseInterceptorOverrides.response",
+            "id": "def-public.IHttpResponseInterceptorOverrides.response",
             "type": "Object",
             "tags": [],
             "label": "response",
@@ -2120,7 +2155,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.IHttpResponseInterceptorOverrides.body",
+            "id": "def-public.IHttpResponseInterceptorOverrides.body",
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
@@ -2139,7 +2174,57 @@
       },
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.ResponseErrorBody",
+        "id": "def-public.IStaticAssets",
+        "type": "Interface",
+        "tags": [],
+        "label": "IStaticAssets",
+        "description": [
+          "\nAPIs for creating hrefs to static assets.\n"
+        ],
+        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-public.IStaticAssets.getPluginAssetHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getPluginAssetHref",
+            "description": [
+              "\nGets the full href to the current plugin's asset,\ngiven its path relative to the plugin's `public/assets` folder.\n"
+            ],
+            "signature": [
+              "(assetPath: string) => string"
+            ],
+            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.IStaticAssets.getPluginAssetHref.$1",
+                "type": "string",
+                "tags": [],
+                "label": "assetPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-browser",
+        "id": "def-public.ResponseErrorBody",
         "type": "Interface",
         "tags": [],
         "label": "ResponseErrorBody",
@@ -2150,7 +2235,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.ResponseErrorBody.message",
+            "id": "def-public.ResponseErrorBody.message",
             "type": "string",
             "tags": [],
             "label": "message",
@@ -2161,7 +2246,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.ResponseErrorBody.statusCode",
+            "id": "def-public.ResponseErrorBody.statusCode",
             "type": "number",
             "tags": [],
             "label": "statusCode",
@@ -2172,7 +2257,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
-            "id": "def-common.ResponseErrorBody.attributes",
+            "id": "def-public.ResponseErrorBody.attributes",
             "type": "Object",
             "tags": [],
             "label": "attributes",
@@ -2192,7 +2277,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-http-browser",
-        "id": "def-common.HttpStart",
+        "id": "def-public.HttpStart",
         "type": "Type",
         "tags": [],
         "label": "HttpStart",
@@ -2202,9 +2287,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           }
         ],
@@ -2214,6 +2299,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

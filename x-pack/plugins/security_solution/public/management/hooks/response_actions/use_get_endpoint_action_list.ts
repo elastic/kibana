@@ -6,9 +6,9 @@
  */
 
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
-import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { useHttp } from '../../../common/lib/kibana';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
@@ -35,10 +35,13 @@ export const useGetEndpointActionList = (
   return useQuery<ActionListApiResponse, IHttpFetchError<ErrorType>>({
     queryKey: ['get-action-list', query],
     ...options,
+    keepPreviousData: true,
     queryFn: async () => {
       return http.get<ActionListApiResponse>(BASE_ENDPOINT_ACTION_ROUTE, {
+        version: '2023-10-31',
         query: {
           agentIds: query.agentIds,
+          agentTypes: query.agentTypes,
           commands: query.commands,
           endDate: query.endDate,
           page: query.page,
@@ -47,8 +50,7 @@ export const useGetEndpointActionList = (
           statuses: query.statuses,
           userIds,
           withOutputs: query.withOutputs,
-          withAutomatedActions: query.withAutomatedActions,
-          alertId: query.alertId,
+          types: query.types,
         },
       });
     },

@@ -5,29 +5,25 @@
  * 2.0.
  */
 
-import {
-  CSV_JOB_TYPE,
-  PDF_JOB_TYPE,
-  PNG_JOB_TYPE,
-  PDF_JOB_TYPE_V2,
-  PNG_JOB_TYPE_V2,
-  CSV_JOB_TYPE_DEPRECATED,
-} from './constants';
+import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
+import { PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_JOB_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
-// TODO: Remove this code once everyone is using the new PDF format, then we can also remove the legacy
-// export type entirely
+// TODO: Remove this code once the enabled CSV export type is using the new format
 export const isJobV2Params = ({ sharingData }: { sharingData: Record<string, unknown> }): boolean =>
   sharingData.locatorParams != null;
 
 export const prettyPrintJobType = (type: string) => {
   switch (type) {
-    case PDF_JOB_TYPE:
+    case 'pdf':
+    case 'printable_pdf':
     case PDF_JOB_TYPE_V2:
       return 'PDF';
+    case 'csv':
     case CSV_JOB_TYPE:
-    case CSV_JOB_TYPE_DEPRECATED:
+    case CSV_JOB_TYPE_V2:
       return 'CSV';
-    case PNG_JOB_TYPE:
+    case 'png':
     case PNG_JOB_TYPE_V2:
       return 'PNG';
     default:

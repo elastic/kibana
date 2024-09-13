@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObject, SavedObjectKibanaServices } from '../../types';
+import { SavedObject, SavedObjectKibanaServices, StartServices } from '../../types';
 import { findObjectByTitle } from './find_object_by_title';
 import { SAVE_DUPLICATE_REJECTED } from '../../constants';
 import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
@@ -19,6 +20,7 @@ import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_con
  * @param isTitleDuplicateConfirmed
  * @param onTitleDuplicate
  * @param services
+ * @param startServices
  */
 export async function checkForDuplicateTitle(
   savedObject: Pick<
@@ -27,7 +29,8 @@ export async function checkForDuplicateTitle(
   >,
   isTitleDuplicateConfirmed: boolean,
   onTitleDuplicate: (() => void) | undefined,
-  services: Pick<SavedObjectKibanaServices, 'savedObjectsClient' | 'overlays'>
+  services: Pick<SavedObjectKibanaServices, 'savedObjectsClient' | 'overlays'>,
+  startServices: StartServices
 ): Promise<true> {
   const { savedObjectsClient, overlays } = services;
   // Don't check for duplicates if user has already confirmed save with duplicate title
@@ -58,5 +61,5 @@ export async function checkForDuplicateTitle(
 
   // TODO: make onTitleDuplicate a required prop and remove UI components from this class
   // Need to leave here until all users pass onTitleDuplicate.
-  return displayDuplicateTitleConfirmModal(savedObject, overlays);
+  return displayDuplicateTitleConfirmModal(savedObject, overlays, startServices);
 }

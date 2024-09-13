@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { WritableDraft } from 'immer/dist/types/types-external';
@@ -16,8 +17,6 @@ import { RangeSliderReduxState } from './types';
 import { RangeValue } from '../../common/range_slider/types';
 
 export const getDefaultComponentState = (): RangeSliderReduxState['componentState'] => ({
-  min: '',
-  max: '',
   isInvalid: false,
 });
 
@@ -26,7 +25,15 @@ export const rangeSliderReducers = {
     state: WritableDraft<RangeSliderReduxState>,
     action: PayloadAction<RangeValue>
   ) => {
-    state.explicitInput.value = action.payload;
+    const [minSelection, maxSelection]: RangeValue = action.payload;
+    if (
+      minSelection === String(state.componentState.min) &&
+      maxSelection === String(state.componentState.max)
+    ) {
+      state.explicitInput.value = undefined;
+    } else {
+      state.explicitInput.value = action.payload;
+    }
   },
   setField: (
     state: WritableDraft<RangeSliderReduxState>,
@@ -40,15 +47,21 @@ export const rangeSliderReducers = {
   ) => {
     state.output.dataViewId = action.payload;
   },
+  setErrorMessage: (
+    state: WritableDraft<RangeSliderReduxState>,
+    action: PayloadAction<string | undefined>
+  ) => {
+    state.componentState.error = action.payload;
+  },
   setLoading: (state: WritableDraft<RangeSliderReduxState>, action: PayloadAction<boolean>) => {
     state.output.loading = action.payload;
   },
   setMinMax: (
     state: WritableDraft<RangeSliderReduxState>,
-    action: PayloadAction<{ min: string; max: string }>
+    action: PayloadAction<{ min?: number; max?: number }>
   ) => {
-    state.componentState.min = action.payload.min;
-    state.componentState.max = action.payload.max;
+    if (action.payload.min !== undefined) state.componentState.min = Math.floor(action.payload.min);
+    if (action.payload.max !== undefined) state.componentState.max = Math.ceil(action.payload.max);
   },
   publishFilters: (
     state: WritableDraft<RangeSliderReduxState>,

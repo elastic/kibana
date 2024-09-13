@@ -14,8 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/116038
-  describe.skip('Partial results example', () => {
+  describe('Partial results example', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('searchExamples');
       await testSubjects.click('/search');
@@ -31,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('requestFibonacci');
 
       await retry.waitFor('update progress bar', async () => {
-        const newValue = await progressBar.getAttribute('value');
+        const newValue = (await progressBar.getAttribute('value')) ?? '';
         return parseFloat(newValue) > 0;
       });
     });

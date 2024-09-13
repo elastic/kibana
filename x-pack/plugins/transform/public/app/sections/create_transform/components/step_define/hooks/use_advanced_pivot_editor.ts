@@ -10,9 +10,9 @@ import { XJsonMode } from '@kbn/ace';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
-import { PostTransformsPreviewRequestSchema } from '../../../../../../../common/api_schemas/transforms';
+import type { PostTransformsPreviewRequestSchema } from '../../../../../../../server/routes/api_schemas/transforms';
 
-import { StepDefineExposedState } from '../common';
+import type { StepDefineExposedState } from '../common';
 
 const { useXJsonMode } = XJson;
 const xJsonMode = new XJsonMode();

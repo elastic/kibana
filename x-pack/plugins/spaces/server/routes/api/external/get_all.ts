@@ -13,11 +13,14 @@ import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, log, getSpacesService } = deps;
+  const { router, log, getSpacesService } = deps;
 
-  externalRouter.get(
+  router.get(
     {
       path: '/api/spaces/space',
+      options: {
+        description: `Get all spaces`,
+      },
       validate: {
         query: schema.object({
           purpose: schema.maybe(

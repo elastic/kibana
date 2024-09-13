@@ -8,12 +8,12 @@ import React, { useContext } from 'react';
 import { css } from '@emotion/react';
 import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
+import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { SecuritySolutionContext } from '../../../application/security_solution_context';
 import type { FindingsBaseURLQuery } from '../../../common/types';
-import type { CspClientPluginStartDeps } from '../../../types';
 import { PLUGIN_NAME } from '../../../../common';
 
 type SearchBarQueryProps = Pick<FindingsBaseURLQuery, 'query' | 'filters'>;
@@ -21,13 +21,18 @@ type SearchBarQueryProps = Pick<FindingsBaseURLQuery, 'query' | 'filters'>;
 interface FindingsSearchBarProps {
   setQuery(v: Partial<SearchBarQueryProps>): void;
   loading: boolean;
+  placeholder?: string;
+  query: SearchBarQueryProps;
 }
 
 export const FindingsSearchBar = ({
-  dataView,
   loading,
+  query,
   setQuery,
-}: FindingsSearchBarProps & { dataView: DataView }) => {
+  placeholder = i18n.translate('xpack.csp.findings.searchBar.searchPlaceholder', {
+    defaultMessage: 'Search findings (eg. rule.section : "API Server" )',
+  }),
+}: FindingsSearchBarProps) => {
   const { euiTheme } = useEuiTheme();
   const {
     unifiedSearch: {
@@ -37,6 +42,8 @@ export const FindingsSearchBar = ({
 
   const securitySolutionContext = useContext(SecuritySolutionContext);
 
+  const { dataView } = useDataViewContext();
+
   let searchBarNode = (
     <div css={getContainerStyle(euiTheme)}>
       <SearchBar
@@ -44,14 +51,17 @@ export const FindingsSearchBar = ({
         showFilterBar={true}
         showQueryInput={true}
         showDatePicker={false}
-        showSaveQuery={false}
+        saveQueryMenuVisibility="hidden"
         isLoading={loading}
         indexPatterns={[dataView]}
         onQuerySubmit={setQuery}
         onFiltersUpdated={(value: Filter[]) => setQuery({ filters: value })}
-        placeholder={i18n.translate('xpack.csp.findings.searchBar.searchPlaceholder', {
-          defaultMessage: 'Search findings (eg. rule.section : "API Server" )',
-        })}
+        placeholder={placeholder}
+        query={{
+          query: query?.query?.query || '',
+          language: query?.query?.language || 'kuery',
+        }}
+        filters={query?.filters || []}
       />
     </div>
   );

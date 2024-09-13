@@ -17,7 +17,7 @@ import React from 'react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { TimestampTableCell } from '../timestamp_table_cell';
-import type { CloudDefendPolicy } from '../../../common/types';
+import type { CloudDefendPolicy } from '../../../common';
 import { useKibana } from '../../common/hooks/use_kibana';
 import * as TEST_SUBJ from '../../pages/policies/test_subjects';
 
@@ -68,7 +68,7 @@ const POLICIES_TABLE_COLUMNS: Array<EuiBasicTableColumn<CloudDefendPolicy>> = [
       <IntegrationButtonLink
         packageName={packageName}
         packagePolicyId={policy.package_policy.id}
-        policyId={policy.package_policy.policy_id}
+        policyId={policy.package_policy.policy_ids[0]}
       />
     ),
     truncateText: true,

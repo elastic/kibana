@@ -16,6 +16,7 @@ import type {
   AssigneesSchema,
   AttachmentFrameworkSchema,
   AttachmentItemsSchema,
+  CustomFieldsSolutionTelemetrySchema,
 } from './types';
 
 const long: TypeLong = { type: 'long' };
@@ -73,6 +74,16 @@ const solutionTelemetry: SolutionTelemetrySchema = {
   attachmentFramework: attachmentFrameworkSchema,
 };
 
+const customFieldsSolutionTelemetrySchema: CustomFieldsSolutionTelemetrySchema = {
+  customFields: {
+    totalsByType: {
+      DYNAMIC_KEY: long,
+    },
+    totals: long,
+    required: long,
+  },
+};
+
 const statusSchema: StatusSchema = {
   open: long,
   inProgress: long,
@@ -128,6 +139,14 @@ export const casesSchema: CasesTelemetrySchema = {
         manually: long,
         automatic: long,
       },
+      ...customFieldsSolutionTelemetrySchema,
     },
+    sec: customFieldsSolutionTelemetrySchema,
+    obs: customFieldsSolutionTelemetrySchema,
+    main: customFieldsSolutionTelemetrySchema,
+  },
+  casesSystemAction: {
+    totalCasesCreated: long,
+    totalRules: long,
   },
 };

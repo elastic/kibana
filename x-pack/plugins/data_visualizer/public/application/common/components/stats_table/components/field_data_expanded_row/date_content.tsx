@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
-import { EuiBasicTable, HorizontalAlignment, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
-// @ts-ignore
-import { formatDate } from '@elastic/eui/lib/services/format';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
+import type { HorizontalAlignment } from '@elastic/eui';
+import { EuiBasicTable, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { formatDate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';

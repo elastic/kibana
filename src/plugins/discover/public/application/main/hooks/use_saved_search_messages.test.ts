@@ -1,23 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import {
   checkHitCount,
   sendCompleteMsg,
   sendErrorMsg,
   sendErrorTo,
   sendLoadingMsg,
+  sendLoadingMoreMsg,
+  sendLoadingMoreFinishedMsg,
   sendNoResultsFoundMsg,
   sendPartialMsg,
 } from './use_saved_search_messages';
 import { FetchStatus } from '../../types';
 import { BehaviorSubject } from 'rxjs';
-import { DataMainMsg, RecordRawType } from '../services/discover_data_state_container';
-import { filter } from 'rxjs/operators';
+import { DataDocumentsMsg, DataMainMsg } from '../state_management/discover_data_state_container';
+import { filter } from 'rxjs';
+import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 
 describe('test useSavedSearch message generators', () => {
   test('sendCompleteMsg', (done) => {
@@ -60,13 +67,67 @@ describe('test useSavedSearch message generators', () => {
     main$.subscribe((value) => {
       if (value.fetchStatus !== FetchStatus.COMPLETE) {
         expect(value.fetchStatus).toBe(FetchStatus.LOADING);
-        expect(value.recordRawType).toBe(RecordRawType.DOCUMENT);
         done();
       }
     });
     sendLoadingMsg(main$, {
       foundDocuments: true,
-      recordRawType: RecordRawType.DOCUMENT,
+    });
+  });
+  test('sendLoadingMoreMsg', (done) => {
+    const documents$ = new BehaviorSubject<DataDocumentsMsg>({
+      fetchStatus: FetchStatus.COMPLETE,
+    });
+    documents$.subscribe((value) => {
+      if (value.fetchStatus !== FetchStatus.COMPLETE) {
+        expect(value.fetchStatus).toBe(FetchStatus.LOADING_MORE);
+        done();
+      }
+    });
+    sendLoadingMoreMsg(documents$);
+  });
+  test('sendLoadingMoreFinishedMsg', (done) => {
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const initialRecords = [records[0], records[1]];
+    const moreRecords = [records[2], records[3]];
+
+    const documents$ = new BehaviorSubject<DataDocumentsMsg>({
+      fetchStatus: FetchStatus.LOADING_MORE,
+      result: initialRecords,
+    });
+    documents$.subscribe((value) => {
+      if (value.fetchStatus !== FetchStatus.LOADING_MORE) {
+        expect(value.fetchStatus).toBe(FetchStatus.COMPLETE);
+        expect(value.result).toStrictEqual([...initialRecords, ...moreRecords]);
+        expect(value.interceptedWarnings).toHaveLength(1);
+        done();
+      }
+    });
+    sendLoadingMoreFinishedMsg(documents$, {
+      moreRecords,
+      interceptedWarnings: [searchResponseIncompleteWarningLocalCluster],
+    });
+  });
+  test('sendLoadingMoreFinishedMsg after an exception', (done) => {
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const initialRecords = [records[0], records[1]];
+
+    const documents$ = new BehaviorSubject<DataDocumentsMsg>({
+      fetchStatus: FetchStatus.LOADING_MORE,
+      result: initialRecords,
+      interceptedWarnings: [searchResponseIncompleteWarningLocalCluster],
+    });
+    documents$.subscribe((value) => {
+      if (value.fetchStatus !== FetchStatus.LOADING_MORE) {
+        expect(value.fetchStatus).toBe(FetchStatus.COMPLETE);
+        expect(value.result).toBe(initialRecords);
+        expect(value.interceptedWarnings).toBeUndefined();
+        done();
+      }
+    });
+    sendLoadingMoreFinishedMsg(documents$, {
+      moreRecords: [],
+      interceptedWarnings: undefined,
     });
   });
   test('sendErrorMsg', (done) => {

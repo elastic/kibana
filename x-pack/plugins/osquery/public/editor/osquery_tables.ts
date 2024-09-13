@@ -17,10 +17,21 @@ let osqueryTables: TablesJSON | null = null;
 export const getOsqueryTables = () => {
   if (!osqueryTables) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    osqueryTables = normalizeTables(require('../common/schemas/osquery/v5.7.0.json'));
+    osqueryTables = normalizeTables(require('../common/schemas/osquery/v5.10.2.json'));
   }
 
   return osqueryTables;
 };
 
-export const getOsqueryTableNames = () => flatMap(getOsqueryTables(), 'name');
+const normalizedOsqueryTables = getOsqueryTables();
+
+export const osqueryTablesRecord: Record<string, { columns: Array<{ name: string }> }> =
+  normalizedOsqueryTables.reduce(
+    (acc, table) => ({
+      ...acc,
+      [table.name]: table,
+    }),
+    {}
+  );
+
+export const getOsqueryTableNames = () => flatMap(normalizedOsqueryTables, 'name');

@@ -36,14 +36,6 @@ export const FIRST_LAST_SEEN_TOOLTIP = i18n.translate(
   }
 );
 
-export const HOST_RISK_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.hostsTable.hostRiskToolTip',
-  {
-    defaultMessage:
-      'Host risk classification is determined by host risk score. Hosts classified as Critical or High are indicated as risky.',
-  }
-);
-
 export const OS_LAST_SEEN_TOOLTIP = i18n.translate(
   'xpack.securitySolution.hostsTable.osLastSeenToolTip',
   {
@@ -68,3 +60,10 @@ export const ROWS_10 = i18n.translate('xpack.securitySolution.hostsTable.rows', 
   values: { numRows: 10 },
   defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
 });
+
+export const ASSET_CRITICALITY = i18n.translate(
+  'xpack.securitySolution.hostsTable.assetCriticality',
+  {
+    defaultMessage: 'Asset criticality',
+  }
+);

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, CoreStart, Capabilities } from '@kbn/core/public';
-import { first, map, skip } from 'rxjs/operators';
+import { first, map, skip } from 'rxjs';
 import { Subject, combineLatest } from 'rxjs';
 
 import type { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
@@ -28,7 +28,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
   private capabilities$: Subject<Capabilities> = new Subject();
 
   setup(
-    { notifications, http, uiSettings, getStartServices }: CoreSetup,
+    { notifications, uiSettings, getStartServices }: CoreSetup,
     { licensing, management, data, home, charts, licenseManagement }: Dependencies
   ) {
     const esSection = management.sections.section.insightsAndAlerting;
@@ -42,14 +42,15 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       id: 'watcher',
       title: pluginName,
       order: 5,
-      mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
+      mount: async ({ element, setBreadcrumbs, history }) => {
         const [coreStart] = await getStartServices();
         const {
           chrome: { docTitle },
-          i18n: i18nDep,
           docLinks,
           application,
           executionContext,
+          settings,
+          ...startServices
         } = coreStart;
 
         docTitle.change(pluginName);
@@ -63,18 +64,16 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           licenseStatus$: licensing.license$.pipe(skip(1), map(licenseToLicenseStatus)),
           element,
           toasts: notifications.toasts,
-          http,
-          uiSettings,
+          settings,
           docLinks,
           setBreadcrumbs,
-          theme: charts.theme,
-          I18nContext: i18nDep.Context,
+          chartsTheme: charts.theme,
           createTimeBuckets: () => new TimeBuckets(uiSettings, data),
           history,
           getUrlForApp: application.getUrlForApp,
-          theme$,
           licenseManagementLocator: licenseManagement?.locator,
           executionContext,
+          ...startServices,
         });
 
         return () => {

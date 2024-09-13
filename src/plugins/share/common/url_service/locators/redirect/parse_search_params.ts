@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -22,7 +23,9 @@ import type { RedirectOptions } from './types';
  * @param urlSearch Search part of URL path.
  * @returns Parsed out locator ID, version, and locator params.
  */
-export function parseSearchParams(urlSearch: string): RedirectOptions {
+export function parseSearchParams<P extends SerializableRecord = unknown & SerializableRecord>(
+  urlSearch: string
+): RedirectOptions<P> {
   const search = new URLSearchParams(urlSearch);
 
   const id = search.get('l');
@@ -66,7 +69,7 @@ export function parseSearchParams(urlSearch: string): RedirectOptions {
     throw new Error(message);
   }
 
-  let params: unknown & SerializableRecord;
+  let params: P;
   try {
     params = JSON.parse(paramsJson);
   } catch {

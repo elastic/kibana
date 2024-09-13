@@ -6,33 +6,24 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { caseTitle } from '.';
 
 export default function ({ getService }: FtrProviderContext) {
+  const browser = getService('browser');
   const cases = getService('cases');
   const commonScreenshots = getService('commonScreenshots');
+  const testSubjects = getService('testSubjects');
 
   const screenshotDirectories = ['response_ops_docs', 'stack_cases'];
-  let CASE_ID: string;
 
   describe('details view', function () {
-    before(async () => {
-      const { id: caseId } = await cases.api.createCase({
-        title: 'Web transactions',
-        tags: ['e-commerce'],
-        description: 'Investigate e-commerce sample data.',
-      });
-      CASE_ID = caseId;
-    });
-
-    after(async () => {
-      await cases.api.deleteAllCases();
-    });
-
-    it('cases visualization screenshot', async () => {
+    it('case details screenshots', async () => {
       await cases.navigation.navigateToApp();
-      await cases.navigation.navigateToSingleCase('cases', CASE_ID);
-      await cases.singleCase.addVisualization('[Logs] Bytes distribution');
-
+      await testSubjects.setValue('search-cases', caseTitle);
+      await browser.pressKeys(browser.keys.ENTER);
+      const caseLink = await testSubjects.find('case-details-link');
+      await caseLink.click();
+      await cases.singleCase.addVisualizationToNewComment('[Logs] Bytes distribution');
       await cases.singleCase.openVisualizationButtonTooltip();
       await commonScreenshots.takeScreenshot(
         'cases-visualization',
@@ -40,6 +31,9 @@ export default function ({ getService }: FtrProviderContext) {
         1400,
         1024
       );
+      const filesTab = await testSubjects.find('case-view-tab-title-files');
+      await filesTab.click();
+      await commonScreenshots.takeScreenshot('cases-files', screenshotDirectories, 1400, 1024);
     });
   });
 }

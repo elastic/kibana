@@ -6,11 +6,9 @@
  */
 
 import {
-  EuiButton,
   EuiComboBox,
   EuiDescribedFormGroup,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -18,18 +16,20 @@ import {
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
+import type { BuildFlavor } from '@kbn/config';
 import type { DocLinksStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { SecurityLicense } from '../../../../../../common/licensing';
-import type { BuiltinESPrivileges, Role } from '../../../../../../common/model';
+import { ClusterPrivileges } from './cluster_privileges';
+import { IndexPrivileges } from './index_privileges';
+import { RemoteClusterPrivileges } from './remote_cluster_privileges';
+import type { BuiltinESPrivileges, Role, SecurityLicense } from '../../../../../../common';
 import type { IndicesAPIClient } from '../../../indices_api_client';
 import { CollapsiblePanel } from '../../collapsible_panel';
 import type { RoleValidator } from '../../validate_role';
-import { ClusterPrivileges } from './cluster_privileges';
-import { IndexPrivileges } from './index_privileges';
 
 interface Props {
   role: Role;
@@ -42,6 +42,11 @@ interface Props {
   validator: RoleValidator;
   builtinESPrivileges: BuiltinESPrivileges;
   indexPatterns: string[];
+  remoteClusters?: Cluster[];
+  canUseRemoteIndices?: boolean;
+  canUseRemoteClusters?: boolean;
+  isDarkMode?: boolean;
+  buildFlavor: BuildFlavor;
 }
 
 export class ElasticsearchPrivileges extends Component<Props, {}> {
@@ -62,8 +67,12 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       onChange,
       editable,
       indexPatterns,
+      remoteClusters,
       license,
       builtinESPrivileges,
+      canUseRemoteIndices,
+      canUseRemoteClusters,
+      buildFlavor,
     } = this.props;
 
     return (
@@ -96,55 +105,90 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
-
         <EuiSpacer />
+        {buildFlavor === 'traditional' && canUseRemoteClusters && (
+          <>
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.remoteClusterPrivilegesTitle"
+                  defaultMessage="Remote cluster privileges"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToRemoteClusterActionsDescription"
+                  defaultMessage="Manage the actions this role can perform against your remote cluster. "
+                />
+                {this.learnMore(docLinks.links.security.clusterPrivileges)}
+              </p>
+            </EuiText>
+            <RemoteClusterPrivileges
+              remoteClusters={remoteClusters}
+              role={role}
+              validator={validator}
+              license={license}
+              onChange={onChange}
+              availableRemoteClusterPrivileges={builtinESPrivileges.remote_cluster ?? []}
+              editable={editable}
+            />
+            <EuiSpacer />
+            <EuiSpacer />
+          </>
+        )}
 
-        <EuiDescribedFormGroup
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesTitle"
-                defaultMessage="Run As privileges"
+        {buildFlavor === 'traditional' && (
+          <>
+            <EuiDescribedFormGroup
+              title={
+                <h3>
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesTitle"
+                    defaultMessage="Run As privileges"
+                  />
+                </h3>
+              }
+              description={
+                <p>
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
+                    defaultMessage="Allow requests to be submitted on the behalf of other users. "
+                  />
+                  {this.learnMore(docLinks.links.security.runAsPrivilege)}
+                </p>
+              }
+            >
+              <EuiComboBox
+                aria-label={i18n.translate(
+                  'xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesAriaLabel',
+                  { defaultMessage: 'Run as privileges' }
+                )}
+                placeholder={
+                  this.props.editable
+                    ? i18n.translate(
+                        'xpack.security.management.editRole.elasticSearchPrivileges.addUserTitle',
+                        { defaultMessage: 'Add a user…' }
+                      )
+                    : undefined
+                }
+                options={this.props.runAsUsers.map((username) => ({
+                  label: username,
+                  isGroupLabelOption: false,
+                }))}
+                selectedOptions={this.props.role.elasticsearch.run_as.map((u) => ({ label: u }))}
+                onCreateOption={this.onCreateRunAsOption}
+                onChange={this.onRunAsUserChange}
+                isDisabled={!editable}
               />
-            </h3>
-          }
-          description={
-            <p>
-              <FormattedMessage
-                id="xpack.security.management.editRole.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
-                defaultMessage="Allow requests to be submitted on the behalf of other users. "
-              />
-              {this.learnMore(docLinks.links.security.runAsPrivilege)}
-            </p>
-          }
-        >
-          <EuiComboBox
-            aria-label={i18n.translate(
-              'xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesAriaLabel',
-              { defaultMessage: 'Run as privileges' }
-            )}
-            placeholder={
-              this.props.editable
-                ? i18n.translate(
-                    'xpack.security.management.editRole.elasticSearchPrivileges.addUserTitle',
-                    { defaultMessage: 'Add a user…' }
-                  )
-                : undefined
-            }
-            options={this.props.runAsUsers.map((username) => ({
-              label: username,
-              isGroupLabelOption: false,
-            }))}
-            selectedOptions={this.props.role.elasticsearch.run_as.map((u) => ({ label: u }))}
-            onCreateOption={this.onCreateRunAsOption}
-            onChange={this.onRunAsUserChange}
-            isDisabled={!editable}
-          />
-        </EuiDescribedFormGroup>
+            </EuiDescribedFormGroup>
+            <EuiSpacer />
+          </>
+        )}
 
-        <EuiSpacer />
-
-        <EuiTitle size={'xs'}>
+        <EuiTitle size="xs">
           <h3>
             <FormattedMessage
               id="xpack.security.management.editRole.elasticSearchPrivileges.indexPrivilegesTitle"
@@ -152,8 +196,8 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             />
           </h3>
         </EuiTitle>
-        <EuiSpacer size={'s'} />
-        <EuiText size={'s'} color={'subdued'}>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
               id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToClusterDataDescription"
@@ -162,27 +206,53 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             {this.learnMore(docLinks.links.security.indicesPrivileges)}
           </p>
         </EuiText>
-
         <IndexPrivileges
+          indexType="indices"
+          indexPatterns={indexPatterns}
           role={role}
           indicesAPIClient={indicesAPIClient}
           validator={validator}
-          indexPatterns={indexPatterns}
           license={license}
           onChange={onChange}
           availableIndexPrivileges={builtinESPrivileges.index}
           editable={editable}
+          isDarkMode={this.props.isDarkMode}
         />
-
-        {editable && (
+        {buildFlavor === 'traditional' && canUseRemoteIndices && (
           <>
-            <EuiHorizontalRule />
-            <EuiButton iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>
-              <FormattedMessage
-                id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
-                defaultMessage="Add index privilege"
-              />
-            </EuiButton>
+            <EuiSpacer />
+            <EuiSpacer />
+
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.remoteIndexPrivilegesTitle"
+                  defaultMessage="Remote index privileges"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToRemoteClusterDataDescription"
+                  defaultMessage="Control access to the data in remote clusters. "
+                />
+                {this.learnMore(docLinks.links.security.indicesPrivileges)}
+              </p>
+            </EuiText>
+            <IndexPrivileges
+              indexType="remote_indices"
+              remoteClusters={remoteClusters}
+              role={role}
+              indicesAPIClient={indicesAPIClient}
+              validator={validator}
+              license={license}
+              onChange={onChange}
+              availableIndexPrivileges={builtinESPrivileges.index}
+              editable={editable}
+              isDarkMode={this.props.isDarkMode}
+            />
           </>
         )}
       </Fragment>

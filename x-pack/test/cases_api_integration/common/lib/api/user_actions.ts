@@ -6,17 +6,19 @@
  */
 
 import {
-  UserActionFindResponse,
   getCaseFindUserActionsUrl,
-  UserActionFindRequest,
   getCaseUserActionUrl,
-  CaseUserActionDeprecatedResponse,
-  CaseUserActionsDeprecatedResponse,
   getCaseUserActionStatsUrl,
-  CaseUserActionStatsResponse,
-  GetCaseUsersResponse,
   getCaseUsersUrl,
 } from '@kbn/cases-plugin/common/api';
+import {
+  CaseUserActionDeprecatedResponse,
+  CaseUserActionsDeprecatedResponse,
+  CaseUserActionStatsResponse,
+  GetCaseUsersResponse,
+  UserActionFindRequest,
+  UserActionFindResponse,
+} from '@kbn/cases-plugin/common/types/api';
 import type SuperTest from 'supertest';
 import { User } from '../authentication/types';
 
@@ -30,7 +32,7 @@ export const removeServerGeneratedPropertiesFromUserAction = (
   const keysToRemove: Array<keyof CaseUserActionDeprecatedResponse> = ['action_id', 'created_at'];
   return removeServerGeneratedPropertiesFromObject<
     CaseUserActionDeprecatedResponse,
-    typeof keysToRemove[number]
+    (typeof keysToRemove)[number]
   >(attributes, keysToRemove);
 };
 
@@ -40,7 +42,7 @@ export const getCaseUserActions = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseID: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -59,7 +61,7 @@ export const findCaseUserActions = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseID: string;
   options?: UserActionFindRequest;
   expectedHttpCode?: number;
@@ -80,7 +82,7 @@ export const getCaseUserActionStats = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseID: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -99,7 +101,7 @@ export const getCaseUsers = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseId: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };

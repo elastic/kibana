@@ -1,42 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Logger, SavedObjectAttributes, SavedObjectReference } from '@kbn/core/server';
 import moment from 'moment';
+
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { CoreSetup, Logger, SavedObjectReference } from '@kbn/core/server';
+import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
+
 import {
   controlsCollectorFactory,
   collectPanelsByType,
   getEmptyDashboardData,
-  DashboardCollectorData,
 } from './dashboard_telemetry';
-import { injectReferences, SavedDashboardPanel } from '../../common';
+import { injectReferences } from '../../common';
+import { DashboardAttributesAndReferences } from '../../common/types';
+import { DashboardAttributes, SavedDashboardPanel } from '../../common/content_management';
 
 // This task is responsible for running daily and aggregating all the Dashboard telemerty data
 // into a single document. This is an effort to make sure the load of fetching/parsing all of the
 // dashboards will only occur once per day
 const TELEMETRY_TASK_TYPE = 'dashboard_telemetry';
 export const TASK_ID = `Dashboard-${TELEMETRY_TASK_TYPE}`;
-
-interface SavedObjectAttributesAndReferences {
-  attributes: SavedObjectAttributes;
-  references: SavedObjectReference[];
-}
-
-export interface DashboardTelemetryTaskState {
-  runs: number;
-  telemetry: DashboardCollectorData;
-}
 
 export function initializeDashboardTelemetryTask(
   logger: Logger,
@@ -61,6 +56,7 @@ function registerDashboardTelemetryTask(
     [TELEMETRY_TASK_TYPE]: {
       title: 'Dashboard telemetry collection task',
       timeout: '2m',
+      stateSchemaByVersion,
       createTaskRunner: dashboardTaskRunner(logger, core, embeddable),
     },
   });
@@ -71,7 +67,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
     return await taskManager.ensureScheduled({
       id: TASK_ID,
       taskType: TELEMETRY_TASK_TYPE,
-      state: { byDate: {}, suggestionsByDate: {}, saved: {}, runs: 0 },
+      state: emptyState,
       params: {},
     });
   } catch (e) {
@@ -81,7 +77,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 
 export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable: EmbeddableSetup) {
   return ({ taskInstance }: RunContext) => {
-    const { state } = taskInstance;
+    const state = taskInstance.state as LatestTaskStateSchema;
 
     const getEsClient = async () => {
       const [coreStart] = await core.getStartServices();
@@ -92,7 +88,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
       async run() {
         let dashboardData = getEmptyDashboardData();
         const controlsCollector = controlsCollectorFactory(embeddable);
-        const processDashboards = (dashboards: SavedObjectAttributesAndReferences[]) => {
+        const processDashboards = (dashboards: DashboardAttributesAndReferences[]) => {
           for (const dashboard of dashboards) {
             const attributes = injectReferences(dashboard, {
               embeddablePersistableStateService: embeddable,
@@ -114,12 +110,14 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
           return dashboardData;
         };
 
-        const kibanaIndex = core.savedObjects.getKibanaIndex();
+        const dashboardIndex = await core
+          .getStartServices()
+          .then(([coreStart]) => coreStart.savedObjects.getIndexForType('dashboard'));
         const pageSize = 50;
 
         const searchParams = {
           size: pageSize,
-          index: kibanaIndex,
+          index: dashboardIndex,
           ignore_unavailable: true,
           filter_path: ['hits.hits', '_scroll_id'],
           body: { query: { bool: { filter: { term: { type: 'dashboard' } } } } },
@@ -131,7 +129,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
           const esClient = await getEsClient();
 
           let result = await esClient.search<{
-            dashboard: SavedObjectAttributes;
+            dashboard: DashboardAttributes;
             references: SavedObjectReference[];
           }>(searchParams);
 
@@ -146,8 +144,8 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
                 }
                 return undefined;
               })
-              .filter<SavedObjectAttributesAndReferences>(
-                (s): s is SavedObjectAttributesAndReferences => s !== undefined
+              .filter<DashboardAttributesAndReferences>(
+                (s): s is DashboardAttributesAndReferences => s !== undefined
               )
           );
 
@@ -165,17 +163,18 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
                   }
                   return undefined;
                 })
-                .filter<SavedObjectAttributesAndReferences>(
-                  (s): s is SavedObjectAttributesAndReferences => s !== undefined
+                .filter<DashboardAttributesAndReferences>(
+                  (s): s is DashboardAttributesAndReferences => s !== undefined
                 )
             );
           }
 
+          const updatedState: LatestTaskStateSchema = {
+            runs: state.runs + 1,
+            telemetry: dashboardData,
+          };
           return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              telemetry: dashboardData,
-            },
+            state: updatedState,
             runAt: getNextMidnight(),
           };
         } catch (e) {

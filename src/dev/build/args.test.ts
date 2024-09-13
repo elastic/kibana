@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -29,11 +30,15 @@ it('build default and oss dist for current platform, without packages, by defaul
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
         "createArchives": true,
+        "createCdnAssets": true,
         "createDebPackage": false,
         "createDockerCloud": false,
         "createDockerContexts": true,
+        "createDockerFIPS": false,
+        "createDockerServerless": false,
         "createDockerUBI": false,
         "createDockerUbuntu": false,
+        "createDockerWolfi": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
@@ -49,6 +54,7 @@ it('build default and oss dist for current platform, without packages, by defaul
         "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": false,
+        "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
         "withTestPlugins": false,
@@ -66,11 +72,15 @@ it('builds packages if --all-platforms is passed', () => {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
         "createArchives": true,
+        "createCdnAssets": true,
         "createDebPackage": true,
         "createDockerCloud": true,
         "createDockerContexts": true,
+        "createDockerFIPS": true,
+        "createDockerServerless": true,
         "createDockerUBI": true,
         "createDockerUbuntu": true,
+        "createDockerWolfi": true,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": true,
@@ -86,6 +96,7 @@ it('builds packages if --all-platforms is passed', () => {
         "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
+        "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
         "withTestPlugins": false,
@@ -103,11 +114,15 @@ it('limits packages if --rpm passed with --all-platforms', () => {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
         "createArchives": true,
+        "createCdnAssets": true,
         "createDebPackage": false,
         "createDockerCloud": false,
         "createDockerContexts": true,
+        "createDockerFIPS": false,
+        "createDockerServerless": false,
         "createDockerUBI": false,
         "createDockerUbuntu": false,
+        "createDockerWolfi": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": true,
@@ -123,6 +138,7 @@ it('limits packages if --rpm passed with --all-platforms', () => {
         "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
+        "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
         "withTestPlugins": false,
@@ -140,11 +156,15 @@ it('limits packages if --deb passed with --all-platforms', () => {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
         "createArchives": true,
+        "createCdnAssets": true,
         "createDebPackage": true,
         "createDockerCloud": false,
         "createDockerContexts": true,
+        "createDockerFIPS": false,
+        "createDockerServerless": false,
         "createDockerUBI": false,
         "createDockerUbuntu": false,
+        "createDockerWolfi": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
@@ -160,6 +180,7 @@ it('limits packages if --deb passed with --all-platforms', () => {
         "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
+        "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
         "withTestPlugins": false,
@@ -178,11 +199,15 @@ it('limits packages if --docker passed with --all-platforms', () => {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
         "createArchives": true,
+        "createCdnAssets": true,
         "createDebPackage": false,
         "createDockerCloud": true,
         "createDockerContexts": true,
+        "createDockerFIPS": true,
+        "createDockerServerless": true,
         "createDockerUBI": true,
         "createDockerUbuntu": true,
+        "createDockerWolfi": true,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
@@ -198,6 +223,7 @@ it('limits packages if --docker passed with --all-platforms', () => {
         "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
+        "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
         "withTestPlugins": false,
@@ -223,11 +249,15 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
         "createArchives": true,
+        "createCdnAssets": true,
         "createDebPackage": false,
         "createDockerCloud": true,
         "createDockerContexts": true,
+        "createDockerFIPS": true,
+        "createDockerServerless": true,
         "createDockerUBI": false,
         "createDockerUbuntu": true,
+        "createDockerWolfi": true,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
@@ -243,6 +273,7 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
         "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
+        "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
         "withTestPlugins": false,
@@ -261,11 +292,15 @@ it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => 
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
         "createArchives": true,
+        "createCdnAssets": true,
         "createDebPackage": true,
         "createDockerCloud": true,
         "createDockerContexts": true,
+        "createDockerFIPS": true,
+        "createDockerServerless": true,
         "createDockerUBI": true,
         "createDockerUbuntu": false,
+        "createDockerWolfi": true,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": true,
@@ -281,6 +316,50 @@ it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => 
         "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
+        "targetServerlessPlatforms": false,
+        "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
+});
+
+it('limits packages if --all-platforms passed with --skip-docker-fips', () => {
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-fips']))
+    .toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "buildCanvasShareableRuntime": true,
+        "createArchives": true,
+        "createCdnAssets": true,
+        "createDebPackage": true,
+        "createDockerCloud": true,
+        "createDockerContexts": true,
+        "createDockerFIPS": false,
+        "createDockerServerless": true,
+        "createDockerUBI": true,
+        "createDockerUbuntu": true,
+        "createDockerWolfi": true,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
+        "createRpmPackage": true,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerNamespace": null,
+        "dockerPush": false,
+        "dockerTag": null,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
+        "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
+        "initialize": true,
+        "isRelease": false,
+        "targetAllPlatforms": true,
+        "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
         "withTestPlugins": false,

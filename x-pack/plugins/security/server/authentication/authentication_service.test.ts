@@ -12,7 +12,6 @@ import { mockCanRedirectRequest } from './authentication_service.test.mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
-import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import type {
   AuthenticationHandler,
   AuthToolkit,
@@ -20,6 +19,7 @@ import type {
   ElasticsearchServiceSetup,
   HttpServiceSetup,
   HttpServiceStart,
+  IStaticAssets,
   KibanaRequest,
   Logger,
   LoggerFactory,
@@ -35,13 +35,16 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import type { UnauthorizedError } from '@kbn/es-errors';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { AuthenticationResult } from './authentication_result';
+import { AuthenticationService } from './authentication_service';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import type { AuditServiceSetup } from '../audit';
 import { auditServiceMock } from '../audit/mocks';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
@@ -52,8 +55,6 @@ import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
-import { AuthenticationResult } from './authentication_result';
-import { AuthenticationService } from './authentication_service';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -63,7 +64,7 @@ describe('AuthenticationService', () => {
     elasticsearch: jest.Mocked<ElasticsearchServiceSetup>;
     config: ConfigType;
     license: jest.Mocked<SecurityLicense>;
-    buildNumber: number;
+    staticAssets: IStaticAssets;
     customBranding: jest.Mocked<CustomBrandingSetup>;
   };
   let mockStartAuthenticationParams: {
@@ -78,6 +79,7 @@ describe('AuthenticationService', () => {
     applicationName: 'kibana-.kibana';
     kibanaFeatures: [];
     isElasticCloudDeployment: jest.Mock;
+    customLogoutURL?: string;
   };
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -95,7 +97,7 @@ describe('AuthenticationService', () => {
         isTLSEnabled: false,
       }),
       license: licenseMock.create(),
-      buildNumber: 100500,
+      staticAssets: coreSetupMock.http.staticAssets,
       customBranding: customBrandingServiceMock.createSetupContract(),
     };
     mockCanRedirectRequest.mockReturnValue(false);
@@ -121,6 +123,7 @@ describe('AuthenticationService', () => {
       applicationName: 'kibana-.kibana',
       kibanaFeatures: [],
       isElasticCloudDeployment: jest.fn().mockReturnValue(false),
+      customLogoutURL: 'https://some-logout-origin/logout',
     };
     (mockStartAuthenticationParams.http.basePath.get as jest.Mock).mockImplementation(
       () => mockStartAuthenticationParams.http.basePath.serverBasePath
@@ -203,7 +206,7 @@ describe('AuthenticationService', () => {
 
         expect(mockResponse.customError).toHaveBeenCalledTimes(1);
         expect(mockResponse.customError).toHaveBeenCalledWith({
-          body: 'License is not available.',
+          body: 'License information could not be obtained from Elasticsearch. Please check the logs for further details.',
           statusCode: 503,
           headers: { 'Retry-After': '30' },
         });
@@ -781,6 +784,7 @@ describe('AuthenticationService', () => {
           body: '<div/>',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -806,6 +810,7 @@ describe('AuthenticationService', () => {
           body: '<div/>',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
             Refresh:
               '0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -833,6 +838,7 @@ describe('AuthenticationService', () => {
           body: '<div/>',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
           },
@@ -879,6 +885,7 @@ describe('AuthenticationService', () => {
           body: '<div/>',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -904,6 +911,7 @@ describe('AuthenticationService', () => {
           body: '<div/>',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
             Refresh:
               '0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -931,6 +939,7 @@ describe('AuthenticationService', () => {
           body: '<div/>',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
           },
@@ -963,7 +972,6 @@ describe('AuthenticationService', () => {
         const { authenticator, onPreResponseHandler } = getService();
         authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
         mockCanRedirectRequest.mockReturnValue(true);
-
         await expect(
           onPreResponseHandler(
             httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
@@ -976,12 +984,13 @@ describe('AuthenticationService', () => {
           body: 'rendered-view',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
           },
         });
 
         expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
           basePath: mockSetupAuthenticationParams.http.basePath,
-          buildNumber: 100500,
+          staticAssets: expect.any(Object),
           originalURL: '/mock-server-basepath/app/some',
         });
       });
@@ -1008,12 +1017,13 @@ describe('AuthenticationService', () => {
           body: 'rendered-view',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
           },
         });
 
         expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
           basePath: mockSetupAuthenticationParams.http.basePath,
-          buildNumber: 100500,
+          staticAssets: expect.any(Object),
           originalURL: '/mock-server-basepath/app/some',
         });
       });
@@ -1043,13 +1053,134 @@ describe('AuthenticationService', () => {
           body: 'rendered-view',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
           },
         });
 
         expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
           basePath: mockSetupAuthenticationParams.http.basePath,
-          buildNumber: 100500,
+          staticAssets: expect.any(Object),
           originalURL: '/mock-server-basepath/',
+        });
+      });
+    });
+
+    describe('handles unexpected post-authentication failures', () => {
+      let mockReturnedValue: { type: any; body: string };
+      let mockOnPreResponseToolkit: jest.Mocked<OnPreResponseToolkit>;
+      beforeEach(() => {
+        mockReturnedValue = { type: 'render' as any, body: 'body' };
+        mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.render.mockReturnValue(mockReturnedValue);
+      });
+
+      it('when login page is unavailable', async () => {
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate({
+            authc: {
+              providers: { saml: { saml1: { order: 150, realm: 'saml1' } } },
+            },
+          }),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+        const mockRenderUnauthorizedPage = jest
+          .requireMock('./unauthenticated_page')
+          .renderUnauthenticatedPage.mockReturnValue('rendered-view');
+
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({
+              path: '/app/some',
+              query: { param: 'one two' },
+              routeTags: [ROUTE_TAG_AUTH_FLOW],
+            }),
+            { statusCode: 500 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: 'rendered-view',
+          headers: {
+            'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
+          },
+        });
+
+        expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
+          basePath: mockSetupAuthenticationParams.http.basePath,
+          staticAssets: expect.any(Object),
+          originalURL: '/mock-server-basepath/',
+          customBranding: undefined,
+        });
+      });
+
+      it('when login page is available', async () => {
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate({
+            authc: {
+              selector: { enabled: true },
+            },
+          }),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({
+              path: '/app/some',
+              query: { param: 'one two' },
+              routeTags: [ROUTE_TAG_AUTH_FLOW],
+            }),
+            { statusCode: 500 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: '<div/>',
+          headers: {
+            'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
+            Refresh:
+              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
+          },
+        });
+      });
+
+      it('when logout redirect fails', async () => {
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+        const mockRenderUnauthorizedPage = jest
+          .requireMock('./unauthenticated_page')
+          .renderUnauthenticatedPage.mockReturnValue('rendered-view');
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({
+              path: '/api/security/logout',
+              routeTags: [ROUTE_TAG_AUTH_FLOW],
+            }),
+            { statusCode: 500 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
+          basePath: mockSetupAuthenticationParams.http.basePath,
+          staticAssets: expect.any(Object),
+          originalURL: '/mock-server-basepath/',
+          customBranding: undefined,
         });
       });
     });

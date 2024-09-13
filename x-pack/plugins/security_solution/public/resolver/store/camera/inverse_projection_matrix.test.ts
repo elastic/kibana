@@ -5,26 +5,34 @@
  * 2.0.
  */
 
-import type { Store } from 'redux';
+import type { Store, AnyAction, Reducer } from 'redux';
 import { createStore } from 'redux';
-import type { CameraAction } from './action';
-import type { CameraState } from '../../types';
+import type { AnalyzerById } from '../../types';
 import { cameraReducer } from './reducer';
 import { inverseProjectionMatrix } from './selectors';
 import { applyMatrix3 } from '../../models/vector2';
 import { scaleToZoom } from './scale_to_zoom';
+import { EMPTY_RESOLVER } from '../helpers';
+import { userSetZoomLevel, userSetPositionOfCamera, userSetRasterSize } from './action';
 
 describe('inverseProjectionMatrix', () => {
-  let store: Store<CameraState, CameraAction>;
+  let store: Store<AnalyzerById, AnyAction>;
   let compare: (worldPosition: [number, number], expectedRasterPosition: [number, number]) => void;
+  const id = 'test-id';
   beforeEach(() => {
-    store = createStore(cameraReducer, undefined);
+    const testReducer: Reducer<AnalyzerById, AnyAction> = (
+      state = {
+        [id]: EMPTY_RESOLVER,
+      },
+      action
+    ): AnalyzerById => cameraReducer(state, action);
+    store = createStore(testReducer, undefined);
     compare = (rasterPosition: [number, number], expectedWorldPosition: [number, number]) => {
       // time isn't really relevant as we aren't testing animation
       const time = 0;
       const [worldX, worldY] = applyMatrix3(
         rasterPosition,
-        inverseProjectionMatrix(store.getState())(time)
+        inverseProjectionMatrix(store.getState()[id].camera)(time)
       );
       expect(worldX).toBeCloseTo(expectedWorldPosition[0]);
       expect(worldY).toBeCloseTo(expectedWorldPosition[1]);
@@ -33,8 +41,7 @@ describe('inverseProjectionMatrix', () => {
 
   describe('when the raster size is 0x0 pixels', () => {
     beforeEach(() => {
-      const action: CameraAction = { type: 'userSetRasterSize', payload: [0, 0] };
-      store.dispatch(action);
+      store.dispatch(userSetRasterSize({ id, dimensions: [0, 0] }));
     });
     it('should convert 0,0 in raster space to 0,0 (center) in world space', () => {
       compare([10, 0], [0, 0]);
@@ -43,8 +50,7 @@ describe('inverseProjectionMatrix', () => {
 
   describe('when the raster size is 300 x 200 pixels', () => {
     beforeEach(() => {
-      const action: CameraAction = { type: 'userSetRasterSize', payload: [300, 200] };
-      store.dispatch(action);
+      store.dispatch(userSetRasterSize({ id, dimensions: [300, 200] }));
     });
     it('should convert 150,100 in raster space to 0,0 (center) in world space', () => {
       compare([150, 100], [0, 0]);
@@ -75,8 +81,7 @@ describe('inverseProjectionMatrix', () => {
     });
     describe('when the user has zoomed to 0.5', () => {
       beforeEach(() => {
-        const action: CameraAction = { type: 'userSetZoomLevel', payload: scaleToZoom(0.5) };
-        store.dispatch(action);
+        store.dispatch(userSetZoomLevel({ id, zoomLevel: scaleToZoom(0.5) }));
       });
       it('should convert 150, 100 (center) to 0, 0 (center) in world space', () => {
         compare([150, 100], [0, 0]);
@@ -84,8 +89,7 @@ describe('inverseProjectionMatrix', () => {
     });
     describe('when the user has panned to the right and up by 50', () => {
       beforeEach(() => {
-        const action: CameraAction = { type: 'userSetPositionOfCamera', payload: [50, 50] };
-        store.dispatch(action);
+        store.dispatch(userSetPositionOfCamera({ id, cameraView: [50, 50] }));
       });
       it('should convert 100,150 in raster space to 0,0 (center) in world space', () => {
         compare([100, 150], [0, 0]);
@@ -99,14 +103,12 @@ describe('inverseProjectionMatrix', () => {
     });
     describe('when the user has panned to the right by 350 and up by 250', () => {
       beforeEach(() => {
-        const action: CameraAction = { type: 'userSetPositionOfCamera', payload: [350, 250] };
-        store.dispatch(action);
+        store.dispatch(userSetPositionOfCamera({ id, cameraView: [350, 250] }));
       });
       describe('when the user has scaled to 2', () => {
         // the viewport will only cover half, or 150x100 instead of 300x200
         beforeEach(() => {
-          const action: CameraAction = { type: 'userSetZoomLevel', payload: scaleToZoom(2) };
-          store.dispatch(action);
+          store.dispatch(userSetZoomLevel({ id, zoomLevel: scaleToZoom(2) }));
         });
         // we expect the viewport to be
         // minX = 350 - (150/2) = 275

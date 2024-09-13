@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { chunk } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { SavedObjectsBulkDeleteResponse } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsBulkDeleteResponse,
+  SavedObjectsFindResponse,
+} from '@kbn/core-saved-objects-api-server';
 
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
@@ -28,6 +32,11 @@ interface SavedObjectResponse<Attributes extends Record<string, any>> {
   type: string;
   updated_at?: string;
   version?: string;
+}
+
+interface FindOptions {
+  type: string;
+  space?: string;
 }
 
 interface GetOptions {
@@ -88,25 +97,42 @@ const STANDARD_LIST_TYPES = [
   'dashboard',
   'search',
   'lens',
+  'links',
   'map',
+  // cases saved objects
   'cases',
+  'cases-comments',
+  'cases-user-actions',
+  'cases-configure',
+  'cases-connector-mappings',
+  // synthetics based objects
+  'synthetics-monitor',
   'uptime-dynamic-settings',
+  'synthetics-privates-locations',
+
   'osquery-saved-query',
   'osquery-pack',
   'infrastructure-ui-source',
+  'metrics-data-source',
   'metrics-explorer-view',
   'inventory-view',
   'infrastructure-monitoring-log-view',
   'apm-indices',
   // Fleet saved object types
+  'ingest_manager_settings',
   'ingest-outputs',
   'ingest-download-sources',
   'ingest-agent-policies',
+  'fleet-agent-policies',
   'ingest-package-policies',
+  'fleet-package-policies',
   'epm-packages',
   'epm-packages-assets',
   'fleet-preconfiguration-deletion-record',
   'fleet-fleet-server-host',
+  'fleet-proxy',
+  'fleet-uninstall-tokens',
+  'fleet-space-settings',
 ];
 
 /**
@@ -143,6 +169,22 @@ export class KbnClientSavedObjects {
       path: options.space
         ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${options.type}/${options.id}`
         : uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`,
+      method: 'GET',
+    });
+    return data;
+  }
+
+  /**
+   * Find saved objects
+   */
+  public async find<Attributes extends Record<string, any>>(options: FindOptions) {
+    this.log.debug('Find saved objects: %j', options);
+
+    const { data } = await this.requester.request<SavedObjectsFindResponse<Attributes>>({
+      description: 'find saved objects',
+      path: options.space
+        ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/_find?type=${options.type}`
+        : uriencode`/internal/ftr/kbn_client_so/_find?type=${options.type}`,
       method: 'GET',
     });
     return data;

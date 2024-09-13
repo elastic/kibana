@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/discover-customization-examples-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "plugin": {
+    "id": "discoverCustomizationExamples",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "controls",
+      "developerExamples",
+      "discover",
+      "embeddable",
+      "kibanaUtils",
+      "data"
+    ]
+  }
+}

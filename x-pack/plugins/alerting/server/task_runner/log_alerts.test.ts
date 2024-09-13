@@ -27,6 +27,7 @@ describe('logAlerts', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    logger.isLevelEnabled.mockReturnValue(true);
     ruleRunMetricsStore = new RuleRunMetricsStore();
   });
 
@@ -353,6 +354,87 @@ describe('logAlerts', () => {
       uuid: expect.any(String),
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(8, {
+      action: 'active-instance',
+      id: '4',
+      message: "test-rule-type-id:123: 'test rule' active alert: '4' in actionGroup: 'undefined'",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+    });
+  });
+
+  test('should correctly set maintenance window in ruleRunMetricsStore and call alertingEventLogger.logAlert', () => {
+    jest.clearAllMocks();
+    logAlerts({
+      logger,
+      alertingEventLogger,
+      newAlerts: {
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
+      },
+      activeAlerts: {
+        '1': new Alert<{}, {}, DefaultActionGroupId>('1', {
+          meta: { maintenanceWindowIds: ['window-id-1'] },
+        }),
+        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
+      },
+      recoveredAlerts: {
+        '7': new Alert<{}, {}, DefaultActionGroupId>('7'),
+        '8': new Alert<{}, {}, DefaultActionGroupId>('8', {
+          meta: { maintenanceWindowIds: ['window-id-8'] },
+        }),
+      },
+      ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
+      ruleRunMetricsStore,
+      canSetRecoveryContext: false,
+      shouldPersistAlerts: true,
+    });
+
+    expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toEqual(1);
+    expect(ruleRunMetricsStore.getNumberOfActiveAlerts()).toEqual(2);
+    expect(ruleRunMetricsStore.getNumberOfRecoveredAlerts()).toEqual(2);
+
+    expect(alertingEventLogger.logAlert).toHaveBeenCalledTimes(5);
+
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(1, {
+      action: 'recovered-instance',
+      id: '7',
+      message: "test-rule-type-id:123: 'test rule' alert '7' has recovered",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(2, {
+      action: 'recovered-instance',
+      id: '8',
+      message: "test-rule-type-id:123: 'test rule' alert '8' has recovered",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+      maintenanceWindowIds: ['window-id-8'],
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(3, {
+      action: 'new-instance',
+      id: '4',
+      message: "test-rule-type-id:123: 'test rule' created new alert: '4'",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(4, {
+      action: 'active-instance',
+      id: '1',
+      message: "test-rule-type-id:123: 'test rule' active alert: '1' in actionGroup: 'undefined'",
+      state: {},
+      flapping: false,
+      group: undefined,
+      uuid: expect.any(String),
+      maintenanceWindowIds: ['window-id-1'],
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(5, {
       action: 'active-instance',
       id: '4',
       message: "test-rule-type-id:123: 'test rule' active alert: '4' in actionGroup: 'undefined'",

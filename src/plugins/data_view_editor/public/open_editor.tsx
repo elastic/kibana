@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { CoreStart, OverlayRef } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-import { createKibanaReactContext, toMountPoint, DataPublicPluginStart } from './shared_imports';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { createKibanaReactContext, DataPublicPluginStart } from './shared_imports';
 
 import { CloseEditor, DataViewEditorContext, DataViewEditorProps } from './types';
 import { DataViewEditorLazy } from './components/data_view_editor_lazy';
@@ -67,26 +68,28 @@ export const getEditorOpener =
       overlayRef = overlays.openFlyout(
         toMountPoint(
           <KibanaReactContextProvider>
-            <I18nProvider>
-              <DataViewEditorLazy
-                onSave={onSaveIndexPattern}
-                onCancel={() => {
-                  closeEditor();
-                  onCancel();
-                }}
-                editData={editData}
-                defaultTypeIsRollup={defaultTypeIsRollup}
-                requireTimestampField={requireTimestampField}
-                allowAdHocDataView={allowAdHocDataView}
-                showManagementLink={Boolean(editData && editData.isPersisted())}
-              />
-            </I18nProvider>
+            <DataViewEditorLazy
+              onSave={onSaveIndexPattern}
+              onCancel={() => {
+                closeEditor();
+                onCancel();
+              }}
+              editData={editData}
+              defaultTypeIsRollup={defaultTypeIsRollup}
+              requireTimestampField={requireTimestampField}
+              allowAdHocDataView={allowAdHocDataView}
+              showManagementLink={Boolean(editData && editData.isPersisted())}
+            />
           </KibanaReactContextProvider>,
-          { theme$: core.theme.theme$ }
+          core
         ),
         {
           hideCloseButton: true,
           size: 'l',
+          maskProps: {
+            // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+            style: 'z-index: 1003', // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
+          },
         }
       );
 

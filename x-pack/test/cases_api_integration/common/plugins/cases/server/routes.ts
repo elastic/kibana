@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { createHash } from 'crypto';
-import semverCompare from 'semver/functions/compare';
-import type { CasesPatchRequest } from '@kbn/cases-plugin/common/api';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   ExternalReferenceAttachmentType,
   PersistableStateAttachmentTypeSetup,
 } from '@kbn/cases-plugin/server/attachment_framework/types';
+import { BulkCreateCasesRequest, CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
@@ -22,22 +23,12 @@ const hashParts = (parts: string[]): string => {
   return hash.update(hashFeed).digest('hex');
 };
 
-const extractMigrationInfo = (type: PersistableStateAttachmentTypeSetup) => {
-  const migrationMap = typeof type.migrations === 'function' ? type.migrations() : type.migrations;
-  const migrationVersions = Object.keys(migrationMap ?? {});
-  migrationVersions.sort(semverCompare);
-
-  return { migrationVersions };
-};
-
 const getExternalReferenceAttachmentTypeHash = (type: ExternalReferenceAttachmentType) => {
   return hashParts([type.id]);
 };
 
 const getPersistableStateAttachmentTypeHash = (type: PersistableStateAttachmentTypeSetup) => {
-  const { migrationVersions } = extractMigrationInfo(type);
-
-  return hashParts([type.id, migrationVersions.join(',')]);
+  return hashParts([type.id]);
 };
 
 export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger) => {
@@ -59,7 +50,7 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
         const client = await cases.getCasesClientWithRequest(request);
 
         return response.ok({
-          body: await client.cases.update(request.body as CasesPatchRequest),
+          body: await client.cases.bulkUpdate(request.body as CasesPatchRequest),
         });
       } catch (error) {
         logger.error(`CasesClientUser failure: ${error}`);
@@ -114,6 +105,76 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
       } catch (error) {
         logger.error(`Error : ${error}`);
         throw error;
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/cases_fixture/cases:bulkCreate',
+      validate: {
+        body: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const [_, { cases }] = await core.getStartServices();
+        const client = await cases.getCasesClientWithRequest(request);
+
+        return response.ok({
+          body: await client.cases.bulkCreate(request.body as BulkCreateCasesRequest),
+        });
+      } catch (error) {
+        logger.error(`Error : ${error}`);
+
+        const boom = new Boom.Boom(error.message, {
+          statusCode: error.wrappedError.output.statusCode,
+        });
+
+        return response.customError({
+          body: boom,
+          headers: boom.output.headers as { [key: string]: string },
+          statusCode: boom.output.statusCode,
+        });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/cases_fixture/{id}/connectors:execute',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          params: schema.recordOf(schema.string(), schema.any()),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      const [_, { actions }] = await core.getStartServices();
+
+      const actionsClient = await actions.getActionsClientWithRequest(req);
+
+      try {
+        return res.ok({
+          body: await actionsClient.execute({
+            actionId: req.params.id,
+            params: req.body.params,
+            source: {
+              type: ActionExecutionSourceType.HTTP_REQUEST,
+              source: req,
+            },
+            relatedSavedObjects: [],
+          }),
+        });
+      } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
+        throw err;
       }
     }
   );

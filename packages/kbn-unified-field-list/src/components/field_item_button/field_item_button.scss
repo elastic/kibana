@@ -1,0 +1,114 @@
+// Removes EUI focus ring
+@mixin removeEuiFocusRing {
+  outline: none;
+
+  &:focus-visible {
+    outline-style: none;
+  }
+}
+
+// Passes focus ring styles down to a child of a focused element
+@mixin passDownFocusRing($target) {
+  @include removeEuiFocusRing;
+
+  #{$target} {
+    outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
+  }
+
+  &:focus-visible #{$target} {
+    outline-style: auto; // Chrome
+  }
+
+  &:not(:focus-visible) #{$target} {
+    outline: none;
+  }
+}
+
+/**
+ * 1. Only visually hide the action, so that it's still accessible to screen readers.
+ * 2. When tabbed to, this element needs to be visible for keyboard accessibility.
+ */
+.unifiedFieldListItemButton__action {
+  opacity: 0; /* 1 */
+
+  &--always {
+    opacity: 1;
+  }
+
+  &:focus {
+    opacity: 1; /* 2 */
+  }
+}
+
+.unifiedFieldListItemButton {
+  width: 100%;
+  @include euiSlightShadow;
+  background: $euiColorEmptyShade;
+  border-radius: $euiBorderRadius;
+  &.kbnFieldButton {
+    &:focus-within,
+    &-isActive {
+      @include removeEuiFocusRing;
+    }
+  }
+
+  .kbnFieldButton__button:focus {
+    @include passDownFocusRing('.kbnFieldButton__nameInner');
+  }
+
+  & button .kbnFieldButton__nameInner:hover {
+    text-decoration: underline;
+  }
+
+  &:hover,
+  &[class*='-isActive'] {
+    .unifiedFieldListItemButton__action {
+      opacity: 1;
+    }
+  }
+}
+
+.unifiedFieldList__fieldPopover__fieldPopoverPanel .unifiedFieldListItemButton {
+  box-shadow: none;
+  background: none;
+}
+
+.unifiedFieldListItemButton--missing {
+  background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
+  color: $euiColorDarkShade;
+}
+
+.unifiedFieldListItemButton__fieldIconContainer {
+  position: relative;
+}
+
+.unifiedFieldListItemButton__fieldIcon {
+  transition: opacity $euiAnimSpeedNormal ease-in-out;
+}
+
+.unifiedFieldListItemButton__fieldIconDrag {
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: opacity $euiAnimSpeedNormal ease-in-out;
+}
+
+// A drag handle will appear only on item hover/focus
+.unifiedFieldListItemButton--withDragIcon {
+  .unifiedFieldListItemButton__fieldIconDrag {
+    visibility: visible;
+    opacity: 0;
+  }
+
+  &:hover,
+  &[class*='-isActive'],
+  .domDraggable__keyboardHandler:focus + & {
+    .unifiedFieldListItemButton__fieldIcon {
+      opacity: 0;
+    }
+    .unifiedFieldListItemButton__fieldIconDrag {
+      opacity: 1;
+    }
+  }
+}

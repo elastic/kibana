@@ -1,0 +1,1372 @@
+{
+  "id": "@kbn/observability-alerting-test-data",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/observability-alerting-test-data",
+        "id": "def-common.createApmErrorCountRule",
+        "type": "Function",
+        "tags": [],
+        "label": "createApmErrorCountRule",
+        "description": [],
+        "signature": [
+          "(actionId: string) => Promise<",
+          "AxiosResponse",
+          "<any, any>>"
+        ],
+        "path": "x-pack/packages/observability/alerting_test_data/src/create_apm_error_count_threshold_rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.createApmErrorCountRule.$1",
+            "type": "string",
+            "tags": [],
+            "label": "actionId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/observability/alerting_test_data/src/create_apm_error_count_threshold_rule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-alerting-test-data",
+        "id": "def-common.createApmFailedTransactionRateRule",
+        "type": "Function",
+        "tags": [],
+        "label": "createApmFailedTransactionRateRule",
+        "description": [],
+        "signature": [
+          "(actionId: string) => Promise<",
+          "AxiosResponse",
+          "<any, any>>"
+        ],
+        "path": "x-pack/packages/observability/alerting_test_data/src/create_apm_failed_transaction_rate_rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.createApmFailedTransactionRateRule.$1",
+            "type": "string",
+            "tags": [],
+            "label": "actionId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/observability/alerting_test_data/src/create_apm_failed_transaction_rate_rule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-alerting-test-data",
+        "id": "def-common.createCustomThresholdRule",
+        "type": "Function",
+        "tags": [],
+        "label": "createCustomThresholdRule",
+        "description": [],
+        "signature": [
+          "(actionId: string, dataViewId: string, ruleParams: { consumer?: string | undefined; name?: string | undefined; params?: { criteria: any[]; groupBy?: string[] | undefined; searchConfiguration: { query: { query?: string | undefined; }; }; } | undefined; }) => Promise<",
+          "AxiosResponse",
+          "<any, any>>"
+        ],
+        "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.createCustomThresholdRule.$1",
+            "type": "string",
+            "tags": [],
+            "label": "actionId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.createCustomThresholdRule.$2",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.createCustomThresholdRule.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleParams",
+            "description": [],
+            "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.createCustomThresholdRule.$3.consumer",
+                "type": "string",
+                "tags": [],
+                "label": "consumer",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.createCustomThresholdRule.$3.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.createCustomThresholdRule.$3.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ criteria: any[]; groupBy?: string[] | undefined; searchConfiguration: { query: { query?: string | undefined; }; }; } | undefined"
+                ],
+                "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-alerting-test-data",
+        "id": "def-common.createDataView",
+        "type": "Function",
+        "tags": [],
+        "label": "createDataView",
+        "description": [],
+        "signature": [
+          "({ indexPattern, id, }: { indexPattern: string; id: string; }) => Promise<",
+          "AxiosResponse",
+          "<any, any>>"
+        ],
+        "path": "x-pack/packages/observability/alerting_test_data/src/create_data_view.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.createDataView.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  indexPattern,\n  id,\n}",
+            "description": [],
+            "path": "x-pack/packages/observability/alerting_test_data/src/create_data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.createDataView.$1.indexPattern",
+                "type": "string",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/create_data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.createDataView.$1.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/create_data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-alerting-test-data",
+        "id": "def-common.createIndexConnector",
+        "type": "Function",
+        "tags": [],
+        "label": "createIndexConnector",
+        "description": [],
+        "signature": [
+          "() => Promise<",
+          "AxiosResponse",
+          "<any, any>>"
+        ],
+        "path": "x-pack/packages/observability/alerting_test_data/src/create_index_connector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-alerting-test-data",
+        "id": "def-common.createRule",
+        "type": "Function",
+        "tags": [],
+        "label": "createRule",
+        "description": [],
+        "signature": [
+          "(ruleParams: any) => Promise<",
+          "AxiosResponse",
+          "<any, any>>"
+        ],
+        "path": "x-pack/packages/observability/alerting_test_data/src/create_rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.createRule.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "ruleParams",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/observability/alerting_test_data/src/create_rule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-alerting-test-data",
+        "id": "def-common.run",
+        "type": "Function",
+        "tags": [],
+        "label": "run",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "x-pack/packages/observability/alerting_test_data/src/run.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/observability-alerting-test-data",
+        "id": "def-common.scenario1",
+        "type": "Object",
+        "tags": [],
+        "label": "scenario1",
+        "description": [],
+        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.scenario1.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario1.dataView.indexPattern",
+                "type": "string",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario1.dataView.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario1.dataView.shouldCreate",
+                "type": "boolean",
+                "tags": [],
+                "label": "shouldCreate",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.scenario1.ruleParams",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleParams",
+            "description": [],
+            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario1.ruleParams.consumer",
+                "type": "string",
+                "tags": [],
+                "label": "consumer",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario1.ruleParams.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario1.ruleParams.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/observability-alerting-test-data",
+                    "id": "def-common.scenario1.ruleParams.params.criteria",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "criteria",
+                    "description": [],
+                    "signature": [
+                      "{ comparator: ",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
+                      "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; filter: string; aggType: ",
+                      "Aggregators",
+                      "; }[]; }[]"
+                    ],
+                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/observability-alerting-test-data",
+                    "id": "def-common.scenario1.ruleParams.params.searchConfiguration",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "searchConfiguration",
+                    "description": [],
+                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/observability-alerting-test-data",
+                        "id": "def-common.scenario1.ruleParams.params.searchConfiguration.query",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "query",
+                        "description": [],
+                        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/observability-alerting-test-data",
+                            "id": "def-common.scenario1.ruleParams.params.searchConfiguration.query.query",
+                            "type": "string",
+                            "tags": [],
+                            "label": "query",
+                            "description": [],
+                            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-alerting-test-data",
+        "id": "def-common.scenario2",
+        "type": "Object",
+        "tags": [],
+        "label": "scenario2",
+        "description": [],
+        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.scenario2.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario2.dataView.indexPattern",
+                "type": "string",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario2.dataView.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario2.dataView.shouldCreate",
+                "type": "boolean",
+                "tags": [],
+                "label": "shouldCreate",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.scenario2.ruleParams",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleParams",
+            "description": [],
+            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario2.ruleParams.consumer",
+                "type": "string",
+                "tags": [],
+                "label": "consumer",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario2.ruleParams.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario2.ruleParams.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/observability-alerting-test-data",
+                    "id": "def-common.scenario2.ruleParams.params.criteria",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "criteria",
+                    "description": [],
+                    "signature": [
+                      "{ comparator: ",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
+                      "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; filter: string; aggType: ",
+                      "Aggregators",
+                      "; }[]; }[]"
+                    ],
+                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/observability-alerting-test-data",
+                    "id": "def-common.scenario2.ruleParams.params.groupBy",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "groupBy",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/observability-alerting-test-data",
+                    "id": "def-common.scenario2.ruleParams.params.searchConfiguration",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "searchConfiguration",
+                    "description": [],
+                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/observability-alerting-test-data",
+                        "id": "def-common.scenario2.ruleParams.params.searchConfiguration.query",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "query",
+                        "description": [],
+                        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/observability-alerting-test-data",
+                            "id": "def-common.scenario2.ruleParams.params.searchConfiguration.query.query",
+                            "type": "string",
+                            "tags": [],
+                            "label": "query",
+                            "description": [],
+                            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-alerting-test-data",
+        "id": "def-common.scenario3",
+        "type": "Object",
+        "tags": [],
+        "label": "scenario3",
+        "description": [],
+        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.scenario3.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario3.dataView.indexPattern",
+                "type": "string",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario3.dataView.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario3.dataView.shouldCreate",
+                "type": "boolean",
+                "tags": [],
+                "label": "shouldCreate",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.scenario3.ruleParams",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleParams",
+            "description": [],
+            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario3.ruleParams.consumer",
+                "type": "string",
+                "tags": [],
+                "label": "consumer",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario3.ruleParams.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario3.ruleParams.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/observability-alerting-test-data",
+                    "id": "def-common.scenario3.ruleParams.params.criteria",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "criteria",
+                    "description": [],
+                    "signature": [
+                      "{ comparator: ",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
+                      "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; filter: string; aggType: ",
+                      "Aggregators",
+                      "; }[]; }[]"
+                    ],
+                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/observability-alerting-test-data",
+                    "id": "def-common.scenario3.ruleParams.params.searchConfiguration",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "searchConfiguration",
+                    "description": [],
+                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/observability-alerting-test-data",
+                        "id": "def-common.scenario3.ruleParams.params.searchConfiguration.query",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "query",
+                        "description": [],
+                        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/observability-alerting-test-data",
+                            "id": "def-common.scenario3.ruleParams.params.searchConfiguration.query.query",
+                            "type": "string",
+                            "tags": [],
+                            "label": "query",
+                            "description": [],
+                            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-alerting-test-data",
+        "id": "def-common.scenario4",
+        "type": "Object",
+        "tags": [],
+        "label": "scenario4",
+        "description": [],
+        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.scenario4.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario4.dataView.indexPattern",
+                "type": "string",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario4.dataView.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario4.dataView.shouldCreate",
+                "type": "boolean",
+                "tags": [],
+                "label": "shouldCreate",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.scenario4.ruleParams",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleParams",
+            "description": [],
+            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario4.ruleParams.consumer",
+                "type": "string",
+                "tags": [],
+                "label": "consumer",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario4.ruleParams.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario4.ruleParams.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/observability-alerting-test-data",
+                    "id": "def-common.scenario4.ruleParams.params.criteria",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "criteria",
+                    "description": [],
+                    "signature": [
+                      "{ comparator: ",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
+                      "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; field: string; aggType: ",
+                      "Aggregators",
+                      "; }[]; }[]"
+                    ],
+                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/observability-alerting-test-data",
+                    "id": "def-common.scenario4.ruleParams.params.searchConfiguration",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "searchConfiguration",
+                    "description": [],
+                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/observability-alerting-test-data",
+                        "id": "def-common.scenario4.ruleParams.params.searchConfiguration.query",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "query",
+                        "description": [],
+                        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/observability-alerting-test-data",
+                            "id": "def-common.scenario4.ruleParams.params.searchConfiguration.query.query",
+                            "type": "string",
+                            "tags": [],
+                            "label": "query",
+                            "description": [],
+                            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-alerting-test-data",
+        "id": "def-common.scenario5",
+        "type": "Object",
+        "tags": [],
+        "label": "scenario5",
+        "description": [],
+        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.scenario5.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario5.dataView.indexPattern",
+                "type": "string",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario5.dataView.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario5.dataView.shouldCreate",
+                "type": "boolean",
+                "tags": [],
+                "label": "shouldCreate",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.scenario5.ruleParams",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleParams",
+            "description": [],
+            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario5.ruleParams.consumer",
+                "type": "string",
+                "tags": [],
+                "label": "consumer",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario5.ruleParams.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario5.ruleParams.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/observability-alerting-test-data",
+                    "id": "def-common.scenario5.ruleParams.params.criteria",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "criteria",
+                    "description": [],
+                    "signature": [
+                      "{ comparator: ",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
+                      "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; field: string; aggType: ",
+                      "Aggregators",
+                      "; }[]; }[]"
+                    ],
+                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/observability-alerting-test-data",
+                    "id": "def-common.scenario5.ruleParams.params.groupBy",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "groupBy",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/observability-alerting-test-data",
+                    "id": "def-common.scenario5.ruleParams.params.searchConfiguration",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "searchConfiguration",
+                    "description": [],
+                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/observability-alerting-test-data",
+                        "id": "def-common.scenario5.ruleParams.params.searchConfiguration.query",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "query",
+                        "description": [],
+                        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/observability-alerting-test-data",
+                            "id": "def-common.scenario5.ruleParams.params.searchConfiguration.query.query",
+                            "type": "string",
+                            "tags": [],
+                            "label": "query",
+                            "description": [],
+                            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-alerting-test-data",
+        "id": "def-common.scenario6",
+        "type": "Object",
+        "tags": [],
+        "label": "scenario6",
+        "description": [],
+        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.scenario6.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario6.dataView.indexPattern",
+                "type": "string",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario6.dataView.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario6.dataView.shouldCreate",
+                "type": "boolean",
+                "tags": [],
+                "label": "shouldCreate",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/observability-alerting-test-data",
+            "id": "def-common.scenario6.ruleParams",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleParams",
+            "description": [],
+            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario6.ruleParams.consumer",
+                "type": "string",
+                "tags": [],
+                "label": "consumer",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario6.ruleParams.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/observability-alerting-test-data",
+                "id": "def-common.scenario6.ruleParams.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/observability-alerting-test-data",
+                    "id": "def-common.scenario6.ruleParams.params.criteria",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "criteria",
+                    "description": [],
+                    "signature": [
+                      "{ comparator: ",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
+                      "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; field: string; aggType: ",
+                      "Aggregators",
+                      "; }[]; }[]"
+                    ],
+                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/observability-alerting-test-data",
+                    "id": "def-common.scenario6.ruleParams.params.searchConfiguration",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "searchConfiguration",
+                    "description": [],
+                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/observability-alerting-test-data",
+                        "id": "def-common.scenario6.ruleParams.params.searchConfiguration.query",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "query",
+                        "description": [],
+                        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/observability-alerting-test-data",
+                            "id": "def-common.scenario6.ruleParams.params.searchConfiguration.query.query",
+                            "type": "string",
+                            "tags": [],
+                            "label": "query",
+                            "description": [],
+                            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import {
   EuiIcon,
-  IconType,
   EuiText,
   EuiTitle,
   EuiFlexItem,
@@ -17,10 +17,11 @@ import {
   EuiPanel,
   EuiLink,
 } from '@elastic/eui';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { useCurrentEuiTheme } from '../../hooks/use_current_eui_theme';
 
 export interface LinkCardProps {
-  icon: IconType;
+  icon: EuiIconType | string;
   iconAreaLabel?: string;
   title: any;
   description: any;
@@ -67,11 +68,7 @@ export const LinkCard: FC<LinkCardProps> = ({
       >
         <EuiFlexGroup gutterSize="s" responsive={true}>
           <EuiFlexItem grow={false} css={{ paddingTop: euiTheme.euiSizeXS }}>
-            {typeof icon === 'string' ? (
-              <EuiIcon size="m" type={icon} aria-label={iconAreaLabel} />
-            ) : (
-              icon
-            )}
+            <EuiIcon size="m" type={icon} aria-label={iconAreaLabel} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="xs">

@@ -24,15 +24,15 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { useSpaceSettingsContext } from '../../../../../../hooks/use_space_settings_context';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
+import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 import { useAuthz, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
 import { DevtoolsRequestFlyoutButton } from '../../../../components';
 import { generateCreateAgentPolicyDevToolsRequest } from '../../services';
-import {
-  ExperimentalFeaturesService,
-  generateNewAgentPolicyWithDefaults,
-} from '../../../../services';
+import { ExperimentalFeaturesService } from '../../../../services';
+import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
 const FlyoutWithHigherZIndex = styled(EuiFlyout)`
   z-index: ${(props) => props.theme.eui.euiZLevel5};
@@ -48,13 +48,19 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   ...restOfProps
 }) => {
   const { notifications } = useStartServices();
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const hasFleetAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
+  const spaceSettings = useSpaceSettingsContext();
   const [agentPolicy, setAgentPolicy] = useState<NewAgentPolicy>(
-    generateNewAgentPolicyWithDefaults()
+    generateNewAgentPolicyWithDefaults({
+      namespace: spaceSettings.defaultNamespace,
+    })
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
-  const validation = agentPolicyFormValidation(agentPolicy);
+  const validation = agentPolicyFormValidation(agentPolicy, {
+    allowedNamespacePrefixes: spaceSettings?.allowedNamespacePrefixes,
+  });
+  const [hasAdvancedSettingsErrors, setHasAdvancedSettingsErrors] = useState<boolean>(false);
 
   const updateAgentPolicy = (updatedFields: Partial<NewAgentPolicy>) => {
     setAgentPolicy({
@@ -97,6 +103,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
         withSysMonitoring={withSysMonitoring}
         updateSysMonitoring={(newValue) => setWithSysMonitoring(newValue)}
         validation={validation}
+        updateAdvancedSettingsHasErrors={setHasAdvancedSettingsErrors}
       />
     </EuiFlyoutBody>
   );
@@ -122,7 +129,9 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
             {showDevtoolsRequest ? (
               <EuiFlexItem grow={false}>
                 <DevtoolsRequestFlyoutButton
-                  isDisabled={isLoading || Object.keys(validation).length > 0}
+                  isDisabled={
+                    isLoading || Object.keys(validation).length > 0 || hasAdvancedSettingsErrors
+                  }
                   description={i18n.translate(
                     'xpack.fleet.createAgentPolicy.devtoolsRequestDescription',
                     {
@@ -138,7 +147,10 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
                 fill
                 isLoading={isLoading}
                 isDisabled={
-                  !hasFleetAllPrivileges || isLoading || Object.keys(validation).length > 0
+                  !hasFleetAllAgentPoliciesPrivileges ||
+                  isLoading ||
+                  Object.keys(validation).length > 0 ||
+                  hasAdvancedSettingsErrors
                 }
                 onClick={async () => {
                   setIsLoading(true);
@@ -148,7 +160,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
                     if (data) {
                       notifications.toasts.addSuccess(
                         i18n.translate('xpack.fleet.createAgentPolicy.successNotificationTitle', {
-                          defaultMessage: "Agent policy '{name}' created",
+                          defaultMessage: "Agent policy ''{name}'' created",
                           values: { name: agentPolicy.name },
                         })
                       );
@@ -186,7 +198,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   );
 
   return (
-    <FlyoutWithHigherZIndex onClose={() => onClose()} size="l" maxWidth={400} {...restOfProps}>
+    <FlyoutWithHigherZIndex onClose={() => onClose()} {...restOfProps} maxWidth={MAX_FLYOUT_WIDTH}>
       {header}
       {body}
       {footer}

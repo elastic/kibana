@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
+import {
+  ES_QUERY_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+  AlertConsumers,
+} from '@kbn/rule-data-utils';
 export {
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
@@ -17,10 +22,10 @@ export type Section = 'connectors' | 'rules' | 'alerts' | 'logs';
 
 export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
+export const routeToConnectorEdit = `/connectors/:connectorId`;
 export const routeToRules = `/rules`;
 export const routeToLogs = `/logs`;
-export const routeToInternalAlerts = `/alerts`;
-export const legacyRouteToRules = `/alerts`;
+export const legacyRouteToAlerts = `/alerts`;
 export const legacyRouteToRuleDetails = `/alert/:alertId`;
 
 export const recoveredActionGroupMessage = i18n.translate(
@@ -33,8 +38,7 @@ export const recoveredActionGroupMessage = i18n.translate(
 export const summaryMessage = i18n.translate(
   'xpack.triggersActionsUI.sections.actionForm.SummaryMessage',
   {
-    defaultMessage:
-      'The system has detected \\{\\{alerts.new.count\\}\\} new, \\{\\{alerts.ongoing.count\\}\\} ongoing, and \\{\\{alerts.recovered.count\\}\\} recovered alerts.',
+    defaultMessage: `The system has detected '{{alerts.new.count}}' new, '{{alerts.ongoing.count}}' ongoing, and '{{alerts.recovered.count}}' recovered alerts.`,
   }
 );
 
@@ -45,6 +49,8 @@ export enum SORT_ORDERS {
 }
 
 export const DEFAULT_SEARCH_PAGE_SIZE: number = 10;
+
+export const DEFAULT_CONNECTOR_RULES_LIST_PAGE_SIZE: number = 25;
 
 export const DEFAULT_RULE_INTERVAL = '1m';
 
@@ -68,6 +74,7 @@ export const RULE_EXECUTION_LOG_COLUMN_IDS = [
   'es_search_duration',
   'schedule_delay',
   'timed_out',
+  'maintenance_window_ids',
 ] as const;
 
 export const RULE_EXECUTION_LOG_DURATION_COLUMNS = [
@@ -94,7 +101,10 @@ export const LOCKED_COLUMNS = [
 ];
 
 export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [...LOCKED_COLUMNS.slice(1)];
-export const GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = ['rule_name', ...LOCKED_COLUMNS];
+export const GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [
+  'rule_name',
+  ...LOCKED_COLUMNS.slice(1),
+];
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
 
 export const CONNECTOR_EXECUTION_LOG_COLUMN_IDS = [
@@ -115,3 +125,13 @@ export const CONNECTOR_LOCKED_COLUMNS = ['timestamp', 'status', 'connector_name'
 export const GLOBAL_CONNECTOR_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [
   ...CONNECTOR_LOCKED_COLUMNS,
 ];
+
+export const MULTI_CONSUMER_RULE_TYPE_IDS = [
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ES_QUERY_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+];
+
+export const ALERT_TABLE_GENERIC_CONFIG_ID = `${AlertConsumers.STACK_ALERTS}-generic-alerts-table`;
+
+export const ALERT_TABLE_GLOBAL_CONFIG_ID = `${AlertConsumers.STACK_ALERTS}-global-alerts-table`;

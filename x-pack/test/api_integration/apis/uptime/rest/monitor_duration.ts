@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
+import expect from '@kbn/expect';
 import { expectFixtureEql } from './helper/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -41,7 +42,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
       const data = apiResponse.body;
 
-      expectFixtureEql(data, 'monitor_charts_empty_sets');
+      expect(data).to.eql({
+        locationDurationLines: [],
+      });
     });
   });
 }

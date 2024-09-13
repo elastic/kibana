@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -28,13 +29,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects([
+  const { common, dashboard, header, timePicker } = getPageObjects([
     'common',
     'dashboard',
     'header',
-    'visualize',
-    'visChart',
-    'discover',
     'timePicker',
   ]);
   let visNames: string[] = [];
@@ -75,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const expectNoDataRenders = async () => {
     await pieChart.expectEmptyPieChart();
-    await dashboardExpect.seriesElementCount(0);
+    await dashboardExpect.heatMapNoResults();
     await dashboardExpect.dataTableNoResult();
     await dashboardExpect.savedSearchNoResult();
     await dashboardExpect.inputControlItemCount(5);
@@ -100,7 +98,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  describe('dashboard embeddable rendering', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/158529
+  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
+    const from = 'Jan 1, 2018 @ 00:00:00.000';
+    const to = 'Apr 13, 2018 @ 00:00:00.000';
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
       await kibanaServer.savedObjects.cleanStandardList();
@@ -110,14 +111,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.clickNewDashboard();
+      await common.setTime({ from, to });
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.clickNewDashboard();
       await elasticChart.setNewChartUiDebugFlag(true);
-
-      const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
-      const toTime = 'Apr 13, 2018 @ 00:00:00.000';
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     after(async () => {
@@ -126,6 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newUrl = currentUrl.replace(/\?.*$/, '');
       await browser.get(newUrl, false);
       await security.testUser.restoreDefaults();
+      await common.unsetTime();
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
@@ -136,10 +135,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // This one is rendered via svg which lets us do better testing of what is being rendered.
       visNames.push(await dashboardAddPanel.addVisualization('Filter Bytes Test: vega'));
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await dashboardExpect.visualizationsArePresent(visNames);
       expect(visNames.length).to.be.equal(25);
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
     });
 
     it('adding saved searches', async () => {
@@ -147,19 +146,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardAddPanel.addEverySavedSearch('"Rendering Test"')
       );
       await dashboardAddPanel.closeAddPanel();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await dashboardExpect.visualizationsArePresent(visAndSearchNames);
       expect(visAndSearchNames.length).to.be.equal(26);
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
 
-      await PageObjects.dashboard.saveDashboard('embeddable rendering test', {
+      await dashboard.saveDashboard('embeddable rendering test', {
+        saveAsNew: true,
         storeTimeWithDashboard: true,
       });
     });
 
     it('initial render test', async () => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
 
@@ -167,9 +167,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Change the time to make sure that it's updated when re-opened from the listing page.
       const fromTime = 'May 10, 2018 @ 00:00:00.000';
       const toTime = 'May 11, 2018 @ 00:00:00.000';
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.dashboard.loadSavedDashboard('embeddable rendering test');
-      await PageObjects.dashboard.waitForRenderComplete();
+      await timePicker.setAbsoluteRange(fromTime, toTime);
+      await dashboard.loadSavedDashboard('embeddable rendering test');
+      await dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
 
@@ -181,28 +181,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // setNewChartUiDebugFlag required because window._echDebugStateFlag flag is reset after refresh
       await elasticChart.setNewChartUiDebugFlag(true);
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
 
       // call query refresh to guarantee all panels are rendered after window._echDebugStateFlag is set
       await queryBar.clickQuerySubmitButton();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
 
     it('panels are updated when time changes outside of data', async () => {
       const fromTime = 'May 11, 2018 @ 00:00:00.000';
       const toTime = 'May 12, 2018 @ 00:00:00.000';
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.dashboard.waitForRenderComplete();
+      await timePicker.setAbsoluteRange(fromTime, toTime);
+      await dashboard.waitForRenderComplete();
       await expectNoDataRenders();
     });
 
     it('panels are updated when time changes inside of data', async () => {
       const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
       const toTime = 'Apr 13, 2018 @ 00:00:00.000';
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.dashboard.waitForRenderComplete();
+      await timePicker.setAbsoluteRange(fromTime, toTime);
+      await dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
   });

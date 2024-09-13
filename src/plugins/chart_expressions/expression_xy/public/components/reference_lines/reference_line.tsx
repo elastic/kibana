@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { FC } from 'react';
@@ -12,12 +13,13 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { ReferenceLineConfig } from '../../../common/types';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
 import { AxesMap, GroupsConfiguration } from '../../helpers';
-import { getAxisGroupForReferenceLine } from './utils';
+import { FormattersMap, getAxisGroupForReferenceLine } from './utils';
 
 interface ReferenceLineProps {
   layer: ReferenceLineConfig;
   paddingMap: Partial<Record<Position, number>>;
   xAxisFormatter: FieldFormat;
+  formatters: FormattersMap;
   axesConfiguration: GroupsConfiguration;
   isHorizontal: boolean;
   nextValue?: number;
@@ -28,6 +30,7 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
   layer,
   axesConfiguration,
   xAxisFormatter,
+  formatters,
   paddingMap,
   isHorizontal,
   nextValue,
@@ -47,7 +50,8 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
 
   const axisGroup = getAxisGroupForReferenceLine(axesConfiguration, decorationConfig, isHorizontal);
 
-  const formatter = axisGroup?.formatter || xAxisFormatter;
+  const formatter =
+    formatters[decorationConfig.forAccessor] || axisGroup?.formatter || xAxisFormatter;
   const id = `${layer.layerId}-${value}`;
   const name = decorationConfig.textVisibility
     ? columnToLabelMap[decorationConfig.forAccessor]

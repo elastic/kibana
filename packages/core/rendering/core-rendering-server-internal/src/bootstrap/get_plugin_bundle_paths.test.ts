@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { PluginType } from '@kbn/core-base-common';
@@ -30,6 +31,7 @@ const createUiPlugins = (pluginDeps: Record<string, string[]>) => {
       type: PluginType.standard,
       optionalPlugins: [],
       requiredPlugins: [],
+      runtimePluginDependencies: [],
       requiredBundles: deps,
     });
 
@@ -46,7 +48,7 @@ const createUiPlugins = (pluginDeps: Record<string, string[]>) => {
 describe('getPluginsBundlePaths', () => {
   it('returns an entry for each plugin and their bundle dependencies', () => {
     const pluginBundlePaths = getPluginsBundlePaths({
-      regularBundlePath: '/regular-bundle-path',
+      bundlesHref: '/regular-bundle-path',
       uiPlugins: createUiPlugins({
         a: ['b', 'c'],
         b: ['d'],
@@ -59,7 +61,7 @@ describe('getPluginsBundlePaths', () => {
 
   it('returns correct paths for each bundle', () => {
     const pluginBundlePaths = getPluginsBundlePaths({
-      regularBundlePath: '/regular-bundle-path',
+      bundlesHref: '/regular-bundle-path',
       uiPlugins: createUiPlugins({
         a: ['b'],
       }),

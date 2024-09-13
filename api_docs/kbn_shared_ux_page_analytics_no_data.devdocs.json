@@ -2,26 +2,10 @@
   "id": "@kbn/shared-ux-page-analytics-no-data",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
-        "id": "def-common.AnalyticsNoDataPage",
+        "id": "def-public.AnalyticsNoDataPage",
         "type": "Function",
         "tags": [],
         "label": "AnalyticsNoDataPage",
@@ -29,7 +13,7 @@
           "\nAn entire page that can be displayed when Kibana \"has no data\", specifically for Analytics.  Uses\nservices from a Provider to supply props to a pure component."
         ],
         "signature": [
-          "({ onDataViewCreated, allowAdHocDataView, }: ",
+          "({ onDataViewCreated, onESQLNavigationComplete, allowAdHocDataView, }: ",
           "AnalyticsNoDataPageProps",
           ") => JSX.Element"
         ],
@@ -39,10 +23,10 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
-            "id": "def-common.AnalyticsNoDataPage.$1",
+            "id": "def-public.AnalyticsNoDataPage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onDataViewCreated,\n  allowAdHocDataView,\n}",
+            "label": "{\n  onDataViewCreated,\n  onESQLNavigationComplete,\n  allowAdHocDataView,\n}",
             "description": [],
             "signature": [
               "AnalyticsNoDataPageProps"
@@ -58,7 +42,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
-        "id": "def-common.AnalyticsNoDataPage",
+        "id": "def-public.AnalyticsNoDataPage",
         "type": "Function",
         "tags": [],
         "label": "AnalyticsNoDataPage",
@@ -66,9 +50,7 @@
           "\nA pure component of an entire page that can be displayed when Kibana \"has no data\", specifically for Analytics."
         ],
         "signature": [
-          "({ kibanaGuideDocLink, onDataViewCreated, allowAdHocDataView, showPlainSpinner, }: ",
-          "Props",
-          ") => JSX.Element"
+          "({ onDataViewCreated, onESQLNavigationComplete, allowAdHocDataView, showPlainSpinner, ...services }: React.PropsWithChildren<AnalyticsNoDataPageProps>) => JSX.Element"
         ],
         "path": "packages/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.component.tsx",
         "deprecated": false,
@@ -76,13 +58,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
-            "id": "def-common.AnalyticsNoDataPage.$1",
-            "type": "Object",
+            "id": "def-public.AnalyticsNoDataPage.$1",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{\n  kibanaGuideDocLink,\n  onDataViewCreated,\n  allowAdHocDataView,\n  showPlainSpinner,\n}",
+            "label": "{\n  onDataViewCreated,\n  onESQLNavigationComplete,\n  allowAdHocDataView,\n  showPlainSpinner,\n  ...services\n}",
             "description": [],
             "signature": [
-              "Props"
+              "React.PropsWithChildren<AnalyticsNoDataPageProps>"
             ],
             "path": "packages/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.component.tsx",
             "deprecated": false,
@@ -95,7 +77,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
-        "id": "def-common.AnalyticsNoDataPageKibanaProvider",
+        "id": "def-public.AnalyticsNoDataPageKibanaProvider",
         "type": "Function",
         "tags": [],
         "label": "AnalyticsNoDataPageKibanaProvider",
@@ -103,9 +85,9 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, ...dependencies }: React.PropsWithChildren<",
+          "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
           "AnalyticsNoDataPageKibanaDependencies",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
         "deprecated": false,
@@ -113,15 +95,15 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
-            "id": "def-common.AnalyticsNoDataPageKibanaProvider.$1",
+            "id": "def-public.AnalyticsNoDataPageKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...dependencies\n}",
+            "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "AnalyticsNoDataPageKibanaDependencies",
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
             "deprecated": false,
@@ -134,7 +116,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
-        "id": "def-common.AnalyticsNoDataPageProvider",
+        "id": "def-public.AnalyticsNoDataPageProvider",
         "type": "Function",
         "tags": [],
         "label": "AnalyticsNoDataPageProvider",
@@ -142,9 +124,9 @@
           "\nA Context Provider that provides services to the component and its dependencies."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "AnalyticsNoDataPageServices",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
         "deprecated": false,
@@ -152,15 +134,15 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
-            "id": "def-common.AnalyticsNoDataPageProvider.$1",
+            "id": "def-public.AnalyticsNoDataPageProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "AnalyticsNoDataPageServices",
-              ">"
+              ">>"
             ],
             "path": "packages/shared-ux/page/analytics_no_data/impl/src/services.tsx",
             "deprecated": false,
@@ -170,12 +152,75 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+        "id": "def-public.getHasApiKeys$",
+        "type": "Function",
+        "tags": [],
+        "label": "getHasApiKeys$",
+        "description": [],
+        "signature": [
+          "({ get, }: { get: <T>(path: string) => Promise<T>; }) => ",
+          "Observable",
+          "<",
+          "HasApiKeysResponse",
+          ">"
+        ],
+        "path": "packages/shared-ux/page/analytics_no_data/impl/lib/get_has_api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-public.getHasApiKeys$.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  get,\n}",
+            "description": [],
+            "path": "packages/shared-ux/page/analytics_no_data/impl/lib/get_has_api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+                "id": "def-public.getHasApiKeys$.$1.get",
+                "type": "Function",
+                "tags": [],
+                "label": "get",
+                "description": [],
+                "signature": [
+                  "<T>(path: string) => Promise<T>"
+                ],
+                "path": "packages/shared-ux/page/analytics_no_data/impl/lib/get_has_api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+                    "id": "def-public.getHasApiKeys$.$1.get.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "path",
+                    "description": [],
+                    "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
-        "id": "def-common.AnalyticsNoDataPageProps",
+        "id": "def-public.AnalyticsNoDataPageProps",
         "type": "Interface",
         "tags": [],
         "label": "AnalyticsNoDataPageProps",
@@ -188,7 +233,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
-            "id": "def-common.AnalyticsNoDataPageProps.onDataViewCreated",
+            "id": "def-public.AnalyticsNoDataPageProps.onDataViewCreated",
             "type": "Function",
             "tags": [],
             "label": "onDataViewCreated",
@@ -204,7 +249,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
-                "id": "def-common.AnalyticsNoDataPageProps.onDataViewCreated.$1",
+                "id": "def-public.AnalyticsNoDataPageProps.onDataViewCreated.$1",
                 "type": "Unknown",
                 "tags": [],
                 "label": "dataView",
@@ -222,7 +267,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
-            "id": "def-common.AnalyticsNoDataPageProps.allowAdHocDataView",
+            "id": "def-public.AnalyticsNoDataPageProps.allowAdHocDataView",
             "type": "CompoundType",
             "tags": [],
             "label": "allowAdHocDataView",
@@ -235,6 +280,24 @@
             "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-public.AnalyticsNoDataPageProps.onESQLNavigationComplete",
+            "type": "Function",
+            "tags": [],
+            "label": "onESQLNavigationComplete",
+            "description": [
+              "Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -244,7 +307,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
-        "id": "def-common.AnalyticsNoDataPageKibanaDependencies",
+        "id": "def-public.AnalyticsNoDataPageKibanaDependencies",
         "type": "Type",
         "tags": [],
         "label": "AnalyticsNoDataPageKibanaDependencies",
@@ -269,7 +332,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
-        "id": "def-common.AnalyticsNoDataPageServices",
+        "id": "def-public.AnalyticsNoDataPageServices",
         "type": "Type",
         "tags": [],
         "label": "AnalyticsNoDataPageServices",
@@ -293,6 +356,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

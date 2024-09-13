@@ -5,82 +5,79 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { DeleteRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
-  QueryRuleByIds,
+  DeleteRuleRequestQuery,
   validateQueryRuleByIds,
-} from '../../../../../../../common/detection_engine/rule_management';
-
+} from '../../../../../../../common/api/detection_engine/rule_management';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-
-import { deleteRules } from '../../../logic/crud/delete_rules';
-import { readRules } from '../../../logic/crud/read_rules';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { getIdError, transform } from '../../../utils/utils';
 
 export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
-  router.delete(
-    {
+  router.versioned
+    .delete({
+      access: 'public',
       path: DETECTION_ENGINE_RULES_URL,
-      validate: {
-        query: buildRouteValidation(QueryRuleByIds),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      const validationErrors = validateQueryRuleByIds(request.query);
-      if (validationErrors.length) {
-        return siemResponse.error({ statusCode: 400, body: validationErrors });
-      }
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            query: buildRouteValidationWithZod(DeleteRuleRequestQuery),
+          },
+        },
+      },
+      async (context, request, response): Promise<IKibanaResponse<DeleteRuleResponse>> => {
+        const siemResponse = buildSiemResponse(response);
+        const validationErrors = validateQueryRuleByIds(request.query);
+        if (validationErrors.length) {
+          return siemResponse.error({ statusCode: 400, body: validationErrors });
+        }
 
-      try {
-        const { id, rule_id: ruleId } = request.query;
+        try {
+          const { id, rule_id: ruleId } = request.query;
 
-        const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
-        const rulesClient = ctx.alerting.getRulesClient();
-        const savedObjectsClient = ctx.core.savedObjects.client;
+          const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
+          const rulesClient = ctx.alerting.getRulesClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
-        const rule = await readRules({ rulesClient, id, ruleId });
-        const migratedRule = await legacyMigrate({
-          rulesClient,
-          savedObjectsClient,
-          rule,
-        });
+          const rule = await readRules({ rulesClient, id, ruleId });
 
-        if (!migratedRule) {
-          const error = getIdError({ id, ruleId });
+          if (!rule) {
+            const error = getIdError({ id, ruleId });
+            return siemResponse.error({
+              body: error.message,
+              statusCode: error.statusCode,
+            });
+          }
+
+          await detectionRulesClient.deleteRule({
+            ruleId: rule.id,
+          });
+
+          const transformed = transform(rule);
+          if (transformed == null) {
+            return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
+          } else {
+            return response.ok({ body: transformed ?? {} });
+          }
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });
         }
-
-        await deleteRules({
-          ruleId: migratedRule.id,
-          rulesClient,
-        });
-
-        const transformed = transform(migratedRule);
-        if (transformed == null) {
-          return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
-        } else {
-          return response.ok({ body: transformed ?? {} });
-        }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

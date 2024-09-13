@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import type { AcknowledgeResponse } from '.';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
@@ -20,6 +23,7 @@ import {
 import {
   DEFAULT_TIMEOUT,
   INDEX_AUTO_EXPAND_REPLICAS,
+  INDEX_NUMBER_OF_SHARDS,
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
 import { type IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
@@ -43,9 +47,14 @@ export interface CreateIndexParams {
   client: ElasticsearchClient;
   indexName: string;
   mappings: IndexMapping;
+  esCapabilities: ElasticsearchCapabilities;
   aliases?: string[];
   timeout?: string;
+  waitForIndexStatusTimeout?: string;
 }
+
+export type CreateIndexSuccessResponse = 'create_index_succeeded' | 'index_already_exists';
+
 /**
  * Creates an index with the given mappings
  *
@@ -60,17 +69,41 @@ export const createIndex = ({
   client,
   indexName,
   mappings,
+  esCapabilities,
   aliases = [],
   timeout = DEFAULT_TIMEOUT,
+  waitForIndexStatusTimeout = DEFAULT_TIMEOUT,
 }: CreateIndexParams): TaskEither.TaskEither<
   RetryableEsClientError | IndexNotGreenTimeout | ClusterShardLimitExceeded,
-  'create_index_succeeded'
+  CreateIndexSuccessResponse
 > => {
   const createIndexTask: TaskEither.TaskEither<
     RetryableEsClientError | ClusterShardLimitExceeded,
-    AcknowledgeResponse
+    CreateIndexSuccessResponse
   > = () => {
     const aliasesObject = aliasArrayToRecord(aliases);
+
+    const indexSettings = {
+      // settings not being supported on serverless ES
+      ...(esCapabilities.serverless
+        ? {}
+        : {
+            // ES rule of thumb: shards should be several GB to 10's of GB, so
+            // Kibana is unlikely to cross that limit.
+            number_of_shards: INDEX_NUMBER_OF_SHARDS,
+            auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
+            // Set an explicit refresh interval so that we don't inherit the
+            // value from incorrectly configured index templates (not required
+            // after we adopt system indices)
+            refresh_interval: '1s',
+            // Bump priority so that recovery happens before newer indices
+            priority: 10,
+          }),
+      // Increase the fields limit beyond the default of 1000
+      mapping: {
+        total_fields: { limit: 1500 },
+      },
+    };
 
     return client.indices
       .create({
@@ -85,49 +118,15 @@ export const createIndex = ({
         mappings,
         aliases: aliasesObject,
         settings: {
-          index: {
-            // ES rule of thumb: shards should be several GB to 10's of GB, so
-            // Kibana is unlikely to cross that limit.
-            number_of_shards: 1,
-            auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
-            // Set an explicit refresh interval so that we don't inherit the
-            // value from incorrectly configured index templates (not required
-            // after we adopt system indices)
-            refresh_interval: '1s',
-            // Bump priority so that recovery happens before newer indices
-            priority: 10,
-            // Increase the fields limit beyond the default of 1000
-            mapping: {
-              total_fields: { limit: 1500 },
-            },
-          },
+          index: indexSettings,
         },
       })
-      .then((res) => {
-        /**
-         * - acknowledged=false, we timed out before the cluster state was
-         *   updated on all nodes with the newly created index, but it
-         *   probably will be created sometime soon.
-         * - shards_acknowledged=false, we timed out before all shards were
-         *   started
-         * - acknowledged=true, shards_acknowledged=true, index creation complete
-         */
-        return Either.right({
-          acknowledged: Boolean(res.acknowledged),
-          shardsAcknowledged: res.shards_acknowledged,
-        });
+      .then(() => {
+        return Either.right('create_index_succeeded' as const);
       })
       .catch((error) => {
         if (error?.body?.error?.type === 'resource_already_exists_exception') {
-          /**
-           * If the target index already exists it means a previous create
-           * operation had already been started. However, we can't be sure
-           * that all shards were started so return shardsAcknowledged: false
-           */
-          return Either.right({
-            acknowledged: true,
-            shardsAcknowledged: false,
-          });
+          return Either.right('index_already_exists' as const);
         } else if (isClusterShardLimitExceeded(error?.body?.error)) {
           return Either.left({
             type: 'cluster_shard_limit_exceeded' as const,
@@ -143,28 +142,22 @@ export const createIndex = ({
     createIndexTask,
     TaskEither.chain<
       RetryableEsClientError | IndexNotGreenTimeout | ClusterShardLimitExceeded,
-      AcknowledgeResponse,
-      'create_index_succeeded'
+      CreateIndexSuccessResponse,
+      CreateIndexSuccessResponse
     >((res) => {
-      if (res.acknowledged && res.shardsAcknowledged) {
-        // If the cluster state was updated and all shards started we're done
-        return TaskEither.right('create_index_succeeded');
-      } else {
-        // Otherwise, wait until the target index has a 'green' status meaning
-        // the primary (and on multi node clusters) the replica has been started
-        return pipe(
-          waitForIndexStatus({
-            client,
-            index: indexName,
-            timeout: DEFAULT_TIMEOUT,
-            status: 'green',
-          }),
-          TaskEither.map(() => {
-            /** When the index status is 'green' we know that all shards were started */
-            return 'create_index_succeeded';
-          })
-        );
-      }
+      // Systematicaly wait until the target index has a 'green' status meaning
+      // the primary (and on multi node clusters) the replica has been started
+      // When the index status is 'green' we know that all shards were started
+      // see https://github.com/elastic/kibana/issues/157968
+      return pipe(
+        waitForIndexStatus({
+          client,
+          index: indexName,
+          timeout: waitForIndexStatusTimeout,
+          status: 'green',
+        }),
+        TaskEither.map(() => res)
+      );
     })
   );
 };

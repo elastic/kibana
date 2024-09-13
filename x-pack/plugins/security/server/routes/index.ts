@@ -7,10 +7,25 @@
 
 import type { Observable } from 'rxjs';
 
+import type { BuildFlavor } from '@kbn/config/src/types';
 import type { HttpResources, IBasePath, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { defineAnalyticsRoutes } from './analytics';
+import { defineAnonymousAccessRoutes } from './anonymous_access';
+import { defineApiKeysRoutes } from './api_keys';
+import { defineAuthenticationRoutes } from './authentication';
+import { defineAuthorizationRoutes } from './authorization';
+import { defineDeprecationsRoutes } from './deprecations';
+import { defineSecurityFeatureRoutes } from './feature_check';
+import { defineIndicesRoutes } from './indices';
+import { defineRoleMappingRoutes } from './role_mapping';
+import { defineSecurityCheckupGetStateRoutes } from './security_checkup';
+import { defineSessionManagementRoutes } from './session_management';
+import { defineUserProfileRoutes } from './user_profile';
+import { defineUsersRoutes } from './users';
+import { defineViewRoutes } from './views';
 import type { SecurityLicense } from '../../common';
 import type { AnalyticsServiceSetup } from '../analytics';
 import type { AnonymousAccessServiceStart } from '../anonymous_access';
@@ -21,19 +36,6 @@ import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session } from '../session_management';
 import type { SecurityRouter } from '../types';
 import type { UserProfileServiceStartInternal } from '../user_profile';
-import { defineAnalyticsRoutes } from './analytics';
-import { defineAnonymousAccessRoutes } from './anonymous_access';
-import { defineApiKeysRoutes } from './api_keys';
-import { defineAuthenticationRoutes } from './authentication';
-import { defineAuthorizationRoutes } from './authorization';
-import { defineDeprecationsRoutes } from './deprecations';
-import { defineIndicesRoutes } from './indices';
-import { defineRoleMappingRoutes } from './role_mapping';
-import { defineSecurityCheckupGetStateRoutes } from './security_checkup';
-import { defineSessionManagementRoutes } from './session_management';
-import { defineUserProfileRoutes } from './user_profile';
-import { defineUsersRoutes } from './users';
-import { defineViewRoutes } from './views';
 
 /**
  * Describes parameters used to define HTTP routes.
@@ -54,20 +56,27 @@ export interface RouteDefinitionParams {
   getUserProfileService: () => UserProfileServiceStartInternal;
   getAnonymousAccessService: () => AnonymousAccessServiceStart;
   analyticsService: AnalyticsServiceSetup;
+  buildFlavor: BuildFlavor;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
+  defineAnalyticsRoutes(params);
+  defineApiKeysRoutes(params);
   defineAuthenticationRoutes(params);
   defineAuthorizationRoutes(params);
   defineSessionManagementRoutes(params);
-  defineApiKeysRoutes(params);
-  defineIndicesRoutes(params);
-  defineUsersRoutes(params);
   defineUserProfileRoutes(params);
-  defineRoleMappingRoutes(params);
+  defineUsersRoutes(params); // Temporarily allow user APIs (ToDo: move to non-serverless block below)
   defineViewRoutes(params);
-  defineDeprecationsRoutes(params);
-  defineAnonymousAccessRoutes(params);
-  defineSecurityCheckupGetStateRoutes(params);
-  defineAnalyticsRoutes(params);
+
+  // In the serverless environment...
+  if (params.buildFlavor !== 'serverless') {
+    defineAnonymousAccessRoutes(params); // anonymous access is disabled
+    defineDeprecationsRoutes(params); // deprecated kibana user roles are not applicable, these HTTP APIs are not needed
+    defineIndicesRoutes(params); // the ES privileges form used to help define roles (only consumer) is disabled, so there is no need for these HTTP APIs
+    defineRoleMappingRoutes(params); // role mappings are managed internally, based on configurations in control plane, these HTTP APIs are not needed
+    defineSecurityFeatureRoutes(params);
+    defineSecurityCheckupGetStateRoutes(params); // security checkup is not applicable, these HTTP APIs are not needed
+    // defineUsersRoutes(params); // the native realm is not enabled (there is only Elastic cloud SAML), no user HTTP API routes are needed
+  }
 }

@@ -9,14 +9,15 @@ import type {
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
-  SavedObjectsTypeMappingDefinition,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getOldestIdleActionTask } from '@kbn/task-manager-plugin/server';
-import mappings from './mappings.json';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { actionTaskParamsModelVersions } from './model_versions';
+import { actionMappings, actionTaskParamsMappings, connectorTokenMappings } from './mappings';
 import { getActionsMigrations } from './actions_migrations';
 import { getActionTaskParamsMigrations } from './action_task_params_migrations';
-import { PreConfiguredAction, RawAction } from '../types';
+import { InMemoryConnector, RawAction } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
 import { ActionTypeRegistry } from '../action_type_registry';
@@ -25,20 +26,22 @@ import {
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
+import { connectorModelVersions } from './model_versions';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   actionTypeRegistry: ActionTypeRegistry,
   taskManagerIndex: string,
-  preconfiguredActions: PreConfiguredAction[]
+  inMemoryConnectors: InMemoryConnector[]
 ) {
   savedObjects.registerType({
     name: ACTION_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
-    mappings: mappings.action as SavedObjectsTypeMappingDefinition,
+    mappings: actionMappings,
     migrations: getActionsMigrations(encryptedSavedObjects),
     management: {
       displayName: 'connector',
@@ -59,6 +62,7 @@ export function setupSavedObjects(
         };
       },
     },
+    modelVersions: connectorModelVersions,
   });
 
   // Encrypted attributes
@@ -68,16 +72,17 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: ACTION_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['secrets']),
-    attributesToExcludeFromAAD: new Set(['name']),
+    attributesToIncludeInAAD: new Set(['actionTypeId', 'isMissingSecrets', 'config']),
   });
 
   savedObjects.registerType({
     name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
-    mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
-    migrations: getActionTaskParamsMigrations(encryptedSavedObjects, preconfiguredActions),
+    mappings: actionTaskParamsMappings,
+    migrations: getActionTaskParamsMigrations(encryptedSavedObjects, inMemoryConnectors),
     excludeOnUpgrade: async ({ readonlyEsClient }) => {
       const oldestIdleActionTask = await getOldestIdleActionTask(
         readonlyEsClient,
@@ -92,17 +97,27 @@ export function setupSavedObjects(
         },
       };
     },
+    modelVersions: actionTaskParamsModelVersions,
   });
   encryptedSavedObjects.registerType({
     type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['apiKey']),
+    attributesToIncludeInAAD: new Set([
+      'actionId',
+      'consumer',
+      'params',
+      'executionId',
+      'relatedSavedObjects',
+      'source',
+    ]),
   });
 
   savedObjects.registerType({
     name: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'agnostic',
-    mappings: mappings.connector_token as SavedObjectsTypeMappingDefinition,
+    mappings: connectorTokenMappings,
     management: {
       importableAndExportable: false,
     },
@@ -111,5 +126,12 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token']),
+    attributesToIncludeInAAD: new Set([
+      'connectorId',
+      'tokenType',
+      'expiresAt',
+      'createdAt',
+      'updatedAt',
+    ]),
   });
 }

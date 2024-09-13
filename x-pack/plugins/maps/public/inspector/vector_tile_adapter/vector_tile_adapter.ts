@@ -5,29 +5,62 @@
  * 2.0.
  */
 
+// @ts-expect-error
+import turfCenterOfMass from '@turf/center-of-mass';
 import { EventEmitter } from 'events';
+import { LAT_INDEX, LON_INDEX } from '../../../common/constants';
+import type { TileError, TileMetaFeature } from '../../../common/descriptor_types';
 import { TileRequest } from './types';
+import { isPointInTile } from '../../classes/util/geo_tile_utils';
+
+interface LayerState {
+  label: string;
+  tileErrors?: TileError[];
+  tileMetaFeatures?: TileMetaFeature[];
+  tileUrl: string;
+}
 
 export class VectorTileAdapter extends EventEmitter {
-  private _layers: Record<string, { label: string; tileUrl: string }> = {};
+  private _layers: Record<string, LayerState> = {};
   private _tiles: Array<{ x: number; y: number; z: number }> = [];
 
-  addLayer(layerId: string, label: string, tileUrl: string) {
+  public addLayer(layerId: string, label: string, tileUrl: string) {
     this._layers[layerId] = { label, tileUrl };
     this._onChange();
   }
 
-  removeLayer(layerId: string) {
+  public removeLayer(layerId: string) {
     delete this._layers[layerId];
     this._onChange();
   }
 
-  setTiles(tiles: Array<{ x: number; y: number; z: number }>) {
+  public hasLayers() {
+    return Object.keys(this._layers).length > 0;
+  }
+
+  public setTiles(tiles: Array<{ x: number; y: number; z: number }>) {
     this._tiles = tiles;
     this._onChange();
   }
 
-  getLayerOptions(): Array<{ value: string; label: string }> {
+  public setTileResults(
+    layerId: string,
+    tileMetaFeatures?: TileMetaFeature[],
+    tileErrors?: TileError[]
+  ) {
+    if (!this._layers[layerId]) {
+      return;
+    }
+
+    this._layers[layerId] = {
+      ...this._layers[layerId],
+      tileErrors,
+      tileMetaFeatures,
+    };
+    this._onChange();
+  }
+
+  public getLayerOptions(): Array<{ value: string; label: string }> {
     return Object.keys(this._layers).map((layerId) => {
       return {
         value: layerId,
@@ -36,22 +69,58 @@ export class VectorTileAdapter extends EventEmitter {
     });
   }
 
-  getTileRequests(layerId: string): TileRequest[] {
+  public getTileRequests(layerId: string): TileRequest[] {
     if (!this._layers[layerId]) {
       return [];
     }
 
-    const { tileUrl } = this._layers[layerId];
+    const { tileErrors, tileMetaFeatures, tileUrl } = this._layers[layerId];
     return this._tiles.map((tile) => {
       return {
         layerId,
         tileUrl,
+        tileError: getTileError(tile.x, tile.y, tile.z, tileErrors),
+        tileMetaFeature: getTileMetaFeature(tile.x, tile.y, tile.z, tileMetaFeatures),
         ...tile,
       };
     });
   }
 
-  _onChange() {
+  private _onChange() {
     this.emit('change');
   }
+}
+
+export function getTileMetaFeature(
+  x: number,
+  y: number,
+  z: number,
+  tileMetaFeatures?: TileMetaFeature[]
+) {
+  if (!tileMetaFeatures || tileMetaFeatures.length === 0) {
+    return;
+  }
+
+  return tileMetaFeatures.find((tileMetaFeature) => {
+    const centerGeometry = turfCenterOfMass(tileMetaFeature).geometry;
+    return isPointInTile(
+      centerGeometry.coordinates[LAT_INDEX],
+      centerGeometry.coordinates[LON_INDEX],
+      x,
+      y,
+      z
+    );
+  });
+}
+
+export function getTileError(x: number, y: number, z: number, tileErrors?: TileError[]) {
+  if (!tileErrors || tileErrors.length === 0) {
+    return;
+  }
+
+  const tileKey = `${z}/${x}/${y}`;
+
+  return tileErrors.find((tileError) => {
+    return tileError.tileKey === tileKey;
+  });
 }

@@ -11,18 +11,10 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-i18n-server",
-        "id": "def-common.I18nServiceSetup",
+        "id": "def-server.I18nServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "I18nServiceSetup",
@@ -33,7 +25,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-i18n-server",
-            "id": "def-common.I18nServiceSetup.getLocale",
+            "id": "def-server.I18nServiceSetup.getLocale",
             "type": "Function",
             "tags": [],
             "label": "getLocale",
@@ -51,7 +43,7 @@
           },
           {
             "parentPluginId": "@kbn/core-i18n-server",
-            "id": "def-common.I18nServiceSetup.getTranslationFiles",
+            "id": "def-server.I18nServiceSetup.getTranslationFiles",
             "type": "Function",
             "tags": [],
             "label": "getTranslationFiles",
@@ -66,11 +58,37 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-i18n-server",
+            "id": "def-server.I18nServiceSetup.getTranslationHash",
+            "type": "Function",
+            "tags": [],
+            "label": "getTranslationHash",
+            "description": [
+              "\nReturns the hash generated from the current translations."
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/core/i18n/core-i18n-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

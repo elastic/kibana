@@ -3,6 +3,10 @@
 ++++
 <titleabbrev>Swimlane</titleabbrev>
 ++++
+:frontmatter-description: Add a connector that can create Swimlane records.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [configure]
 
 The Swimlane connector uses the https://swimlane.com/knowledge-center/docs/developer-guide/rest-api/[Swimlane REST API] to create Swimlane records.
 
@@ -25,81 +29,13 @@ Swimlane connectors have the following configuration properties:
 Name:: The name of the connector.
 URL:: Swimlane instance URL.
 Application ID:: Swimlane application ID.
-API token::  Swimlane API authentication token for HTTP Basic authentication.
-
-
-[float]
-[[preconfigured-swimlane-configuration]]
-=== Create preconfigured connectors
-
-If you are running {kib} on-prem, you can define connectors by
-adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
-For example:
-
-[source,text]
---
-xpack.actions.preconfigured:
-  my-swimlane:
-    name: preconfigured-swimlane-connector-type
-    actionTypeId: .swimlane
-    config:
-      apiUrl: https://elastic.swimlaneurl.us
-      appId: app-id
-      mappings:
-        alertIdConfig:
-          fieldType: text
-          id: agp4s
-          key: alert-id
-          name: Alert ID 
-        caseIdConfig:
-          fieldType: text
-          id: ae1mi
-          key: case-id
-          name: Case ID
-        caseNameConfig:
-          fieldType: text
-          id: anxnr
-          key: case-name
-          name: Case Name
-        commentsConfig:
-          fieldType: comments
-          id: au18d
-          key: comments
-          name: Comments
-        descriptionConfig:
-          fieldType: text 
-          id: ae1gd
-          key: description 
-          name: Description 
-        ruleNameConfig:
-          fieldType: text
-          id: avfsl
-          key: rule-name
-          name: Rule Name
-        severityConfig:
-          fieldType: text
-          id: a71ik
-          key: severity
-          name: severity
-    secrets:
-      apiToken: tokenkeystorevalue
---
-
-Config defines information for the connector type.
-
-`apiUrl`:: An address that corresponds to *URL*.
-`appId`:: A key that corresponds to *Application ID*.
-
-Secrets defines sensitive information for the connector type.
-
-`apiToken`:: A string that corresponds to *API Token*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+API token::  Swimlane API authentication token for HTTP basic authentication.
 
 [float]
 [[swimlane-action-configuration]]
 === Test connectors
 
-You can test connectors with the <<execute-connector-api,run connector API>> or
-as you're creating or editing the connector in {kib}. For example:
+You can test connectors as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/swimlane-params-test.png[Swimlane params test]

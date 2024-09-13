@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { format as formatUrl } from 'url';
@@ -193,17 +194,17 @@ export const createKbnUrlControls = (
 
   // runs scheduled url updates
   function flush(replace = shouldReplace) {
+    if (updateQueue.length === 0) {
+      return;
+    }
+
     const nextUrl = getPendingUrl();
-
-    if (!nextUrl) return;
-
     cleanUp();
     const newUrl = updateUrl(nextUrl, replace);
     return newUrl;
   }
 
   function getPendingUrl() {
-    if (updateQueue.length === 0) return undefined;
     const resultUrl = updateQueue.reduce(
       (url, nextUpdate) => nextUpdate(url) ?? url,
       getCurrentUrl(history)

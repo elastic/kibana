@@ -163,7 +163,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       // this allows us to catch tasks that remain in Pending/Finalizing without being
       // cleaned up
       isReadyToRun(this.instance) ? this.instance.task.startedAt : this.instance.timestamp,
-      this.definition.timeout
+      this.definition?.timeout
     )!;
   }
 
@@ -209,6 +209,12 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
    * @returns {Promise<Result<SuccessfulRunResult, FailedRunResult>>}
    */
   public async run(): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
+    const definition = this.definition;
+
+    if (!definition) {
+      throw new Error(`Running ephemeral task ${this} failed because it has no definition`);
+    }
+
     if (!isReadyToRun(this.instance)) {
       throw new Error(
         `Running ephemeral task ${this} failed as it ${
@@ -227,7 +233,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     });
     const stopTaskTimer = startTaskTimer();
     try {
-      this.task = this.definition.createTaskRunner(modifiedContext);
+      this.task = definition.createTaskRunner(modifiedContext);
       const ctx = {
         type: 'task manager',
         name: `run ephemeral ${this.instance.task.taskType}`,
@@ -347,6 +353,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
               task: { ...this.instance.task, state },
               persistence: TaskPersistence.Ephemeral,
               result: TaskRunResult.Success,
+              isExpired: false,
             }),
             taskTiming
           )
@@ -360,6 +367,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
               task: { ...this.instance.task, state },
               persistence: TaskPersistence.Ephemeral,
               result: TaskRunResult.Failed,
+              isExpired: false,
               error,
             }),
             taskTiming

@@ -1,20 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { useInspector } from './use_inspector';
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
 import { OverlayRef } from '@kbn/core/public';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
-import { DataTableRecord } from '../../../types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 describe('test useInspector', () => {
   test('inspector open function is executed, expanded doc is closed', async () => {
@@ -29,15 +29,14 @@ describe('test useInspector', () => {
     stateContainer.internalState.transitions.setExpandedDoc({} as unknown as DataTableRecord);
     const { result } = renderHook(() => {
       return useInspector({
-        inspectorAdapters: { requests, lensRequests },
-        savedSearch: savedSearchMock,
-        inspector: discoverServiceMock.inspector,
         stateContainer,
+        inspector: discoverServiceMock.inspector,
       });
     });
     await act(async () => {
       result.current();
     });
+
     expect(discoverServiceMock.inspector.open).toHaveBeenCalled();
     expect(adapters?.requests).toBeInstanceOf(AggregateRequestAdapter);
     expect(adapters?.requests?.getRequests()).toEqual([

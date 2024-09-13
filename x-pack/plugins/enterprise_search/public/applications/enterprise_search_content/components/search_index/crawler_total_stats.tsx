@@ -29,8 +29,10 @@ export const CrawlerTotalStats: React.FC = () => {
   const documentCount = indexData?.count ?? 0;
   const hideStats = isLoading || isError;
 
-  const stats: EuiStatProps[] = [
+  const stats: EuiStatProps[] & { 'data-test-subj'?: string } = [
     {
+      // @ts-expect-error upgrade typescript v4.9.5
+      'data-test-subj': 'entSearchContent-indexOverview-totalStats-ingestionType',
       description: i18n.translate(
         'xpack.enterpriseSearch.content.searchIndex.totalStats.ingestionTypeCardLabel',
         {
@@ -56,6 +58,8 @@ export const CrawlerTotalStats: React.FC = () => {
       title: domains.length,
     },
     {
+      // @ts-expect-error upgrade typescript v4.9.5
+      'data-test-subj': 'entSearchContent-indexOverview-totalStats-documentCount',
       description: i18n.translate(
         'xpack.enterpriseSearch.content.searchIndex.totalStats.documentCountCardLabel',
         {
@@ -75,7 +79,7 @@ export const CrawlerTotalStats: React.FC = () => {
         {stats.map((item, index) => (
           <EuiFlexItem key={index}>
             <EuiPanel color={index === 0 ? 'primary' : 'subdued'} hasShadow={false} paddingSize="l">
-              <EuiStat titleSize="m" {...item} />
+              <EuiStat titleSize="s" {...item} />
             </EuiPanel>
           </EuiFlexItem>
         ))}

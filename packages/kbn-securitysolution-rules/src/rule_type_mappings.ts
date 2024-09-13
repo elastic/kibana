@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
   EQL_RULE_TYPE_ID,
+  ESQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
@@ -21,6 +23,7 @@ import {
  */
 export const ruleTypeMappings = {
   eql: EQL_RULE_TYPE_ID,
+  esql: ESQL_RULE_TYPE_ID,
   machine_learning: ML_RULE_TYPE_ID,
   query: QUERY_RULE_TYPE_ID,
   saved_query: SAVED_QUERY_RULE_TYPE_ID,

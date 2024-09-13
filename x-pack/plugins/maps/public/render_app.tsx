@@ -7,27 +7,29 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Switch, Redirect, RouteComponentProps } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
-import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import {
   getCoreChrome,
+  getAnalytics,
   getCoreI18n,
+  getTheme,
   getMapsCapabilities,
   getEmbeddableService,
   getDocLinks,
   getCore,
 } from './kibana_services';
 import { ListPage, MapPage } from './routes';
-import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 import { APP_ID } from '../common/constants';
 import { registerLayerWizards } from './classes/layers/wizards/load_layer_wizards';
+import { MapSerializedState } from './react_embeddable/types';
 
 function setAppChrome() {
   if (!getMapsCapabilities().save) {
@@ -69,7 +71,7 @@ export async function renderApp(
   }: {
     coreStart: CoreStart;
     savedObjectsTagging?: SavedObjectTaggingPluginStart;
-    AppUsageTracker: React.FC;
+    AppUsageTracker: React.FC<{ children: React.ReactNode }>;
   }
 ) {
   const stateTransfer = getEmbeddableService().getStateTransfer();
@@ -81,20 +83,19 @@ export async function renderApp(
     const { embeddableId, originatingApp, valueInput, originatingPath } =
       stateTransfer.getIncomingEditorState(APP_ID) || {};
 
-    let mapEmbeddableInput;
+    let mapSerializedState: MapSerializedState | undefined;
     if (routeProps.match.params.savedMapId) {
-      mapEmbeddableInput = {
+      mapSerializedState = {
         savedObjectId: routeProps.match.params.savedMapId,
-      } as MapByReferenceInput;
-    }
-    if (valueInput) {
-      mapEmbeddableInput = valueInput as MapByValueInput;
+      };
+    } else if (valueInput) {
+      mapSerializedState = valueInput as MapSerializedState;
     }
 
     return (
       <ExitFullScreenButtonKibanaProvider coreStart={getCore()}>
         <MapPage
-          mapEmbeddableInput={mapEmbeddableInput}
+          mapSerializedState={mapSerializedState}
           embeddableId={embeddableId}
           onAppLeave={onAppLeave}
           setHeaderActionMenu={setHeaderActionMenu}
@@ -108,44 +109,40 @@ export async function renderApp(
     );
   }
 
-  const I18nContext = getCoreI18n().Context;
   render(
-    <AppUsageTracker>
-      <I18nContext>
-        <KibanaThemeProvider theme$={theme$}>
-          <TableListViewKibanaProvider
-            {...{
-              core: coreStart,
-              toMountPoint,
-              savedObjectsTagging,
-              FormattedRelative,
-            }}
-          >
-            <Router history={history}>
-              <Switch>
-                <Route path={`/map/:savedMapId`} render={renderMapApp} />
-                <Route exact path={`/map`} render={renderMapApp} />
-                // Redirect other routes to list, or if hash-containing, their non-hash equivalents
-                <Route
-                  path={``}
-                  render={({ location: { pathname, hash } }) => {
-                    if (hash) {
-                      // Remove leading hash
-                      const newPath = hash.substr(1);
-                      return <Redirect to={newPath} />;
-                    } else if (pathname === '/' || pathname === '') {
-                      return <ListPage history={history} stateTransfer={stateTransfer} />;
-                    } else {
-                      return <Redirect to="/" />;
-                    }
-                  }}
-                />
-              </Switch>
-            </Router>
-          </TableListViewKibanaProvider>
-        </KibanaThemeProvider>
-      </I18nContext>
-    </AppUsageTracker>,
+    <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getCoreI18n()} theme={getTheme()}>
+      <AppUsageTracker>
+        <TableListViewKibanaProvider
+          {...{
+            core: coreStart,
+            savedObjectsTagging,
+            FormattedRelative,
+          }}
+        >
+          <Router history={history}>
+            <Routes>
+              <Route path={`/map/:savedMapId`} render={renderMapApp} />
+              <Route exact path={`/map`} render={renderMapApp} />
+              // Redirect other routes to list, or if hash-containing, their non-hash equivalents
+              <Route
+                path={``}
+                render={({ location: { pathname, hash } }) => {
+                  if (hash) {
+                    // Remove leading hash
+                    const newPath = hash.substr(1);
+                    return <Redirect to={newPath} />;
+                  } else if (pathname === '/' || pathname === '') {
+                    return <ListPage history={history} stateTransfer={stateTransfer} />;
+                  } else {
+                    return <Redirect to="/" />;
+                  }
+                }}
+              />
+            </Routes>
+          </Router>
+        </TableListViewKibanaProvider>
+      </AppUsageTracker>
+    </KibanaRenderContextProvider>,
     element
   );
 

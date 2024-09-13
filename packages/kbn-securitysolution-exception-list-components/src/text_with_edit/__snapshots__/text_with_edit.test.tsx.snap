@@ -6,7 +6,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup css-nhr7ke"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -18,14 +18,14 @@ Object {
           </span>
         </div>
         <div
-          class="euiFlexItem emotion-EuiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         />
       </div>
     </div>
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup css-nhr7ke"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -37,7 +37,7 @@ Object {
         </span>
       </div>
       <div
-        class="euiFlexItem emotion-EuiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       />
     </div>
   </div>,
@@ -101,7 +101,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup css-nhr7ke"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -113,11 +113,11 @@ Object {
           </span>
         </div>
         <div
-          class="euiFlexItem emotion-EuiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <button
             aria-label="Edit Text List Header"
-            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="TextWithEditTestEditIcon"
             type="button"
           >
@@ -134,7 +134,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup css-nhr7ke"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -146,11 +146,11 @@ Object {
         </span>
       </div>
       <div
-        class="euiFlexItem emotion-EuiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <button
           aria-label="Edit Text List Header"
-          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
           data-test-subj="TextWithEditTestEditIcon"
           type="button"
         >

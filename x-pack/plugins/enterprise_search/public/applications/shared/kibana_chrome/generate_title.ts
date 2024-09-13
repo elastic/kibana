@@ -6,11 +6,15 @@
  */
 
 import {
-  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  AI_SEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
-  WORKPLACE_SEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
+  SEARCH_PRODUCT_NAME,
+  SEMANTIC_SEARCH_PLUGIN,
+  VECTOR_SEARCH_PLUGIN,
+  WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 
 /**
@@ -31,8 +35,7 @@ export const generateTitle = (pages: Title) => pages.join(' - ');
  * Product-specific helpers
  */
 
-export const enterpriseSearchTitle = (page: Title = []) =>
-  generateTitle([...page, ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME]);
+export const searchTitle = (page: Title = []) => generateTitle([...page, SEARCH_PRODUCT_NAME]);
 
 export const analyticsTitle = (page: Title = []) => generateTitle([...page, ANALYTICS_PLUGIN.NAME]);
 
@@ -47,3 +50,14 @@ export const workplaceSearchTitle = (page: Title = []) =>
 
 export const searchExperiencesTitle = (page: Title = []) =>
   generateTitle([...page, SEARCH_EXPERIENCES_PLUGIN.NAME]);
+
+export const aiSearchTitle = (page: Title = []) => generateTitle([...page, AI_SEARCH_PLUGIN.NAME]);
+
+export const vectorSearchTitle = (page: Title = []) =>
+  generateTitle([...page, VECTOR_SEARCH_PLUGIN.NAME]);
+
+export const semanticSearchTitle = (page: Title = []) =>
+  generateTitle([...page, SEMANTIC_SEARCH_PLUGIN.NAME]);
+
+export const enterpriseSearchContentTitle = (page: Title = []) =>
+  generateTitle([...page, ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME]);

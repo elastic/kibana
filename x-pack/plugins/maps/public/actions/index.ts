@@ -15,7 +15,6 @@ export {
   cancelAllInFlightRequests,
   fitToLayerExtent,
   fitToDataBounds,
-  setLayerDataLoadErrorStatus,
 } from './data_request_actions';
 export {
   closeOnClickTooltip,

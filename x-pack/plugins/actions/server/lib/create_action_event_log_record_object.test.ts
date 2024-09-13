@@ -33,6 +33,7 @@ describe('createActionEventLogRecordObject', () => {
         spaceId: 'default',
         name: 'test name',
         actionExecutionId: '123abc',
+        actionTypeId: '.slack',
       })
     ).toStrictEqual({
       '@timestamp': '1970-01-01T00:00:00.000Z',
@@ -64,6 +65,7 @@ describe('createActionEventLogRecordObject', () => {
         },
         action: {
           name: 'test name',
+          type_id: '.slack',
           id: '1',
           execution: {
             uuid: '123abc',
@@ -92,6 +94,7 @@ describe('createActionEventLogRecordObject', () => {
           },
         ],
         actionExecutionId: '123abc',
+        actionTypeId: '.slack',
       })
     ).toStrictEqual({
       event: {
@@ -118,6 +121,7 @@ describe('createActionEventLogRecordObject', () => {
         ],
         action: {
           name: 'test name',
+          type_id: '.slack',
           id: '1',
           execution: {
             uuid: '123abc',
@@ -145,6 +149,7 @@ describe('createActionEventLogRecordObject', () => {
           },
         ],
         actionExecutionId: '123abc',
+        actionTypeId: '.slack',
       })
     ).toStrictEqual({
       event: {
@@ -163,6 +168,7 @@ describe('createActionEventLogRecordObject', () => {
         ],
         action: {
           name: 'test name',
+          type_id: '.slack',
           id: '1',
           execution: {
             uuid: '123abc',
@@ -192,6 +198,7 @@ describe('createActionEventLogRecordObject', () => {
         ],
         name: 'test name',
         actionExecutionId: '123abc',
+        actionTypeId: '.slack',
       })
     ).toStrictEqual({
       event: {
@@ -220,6 +227,7 @@ describe('createActionEventLogRecordObject', () => {
         },
         action: {
           name: 'test name',
+          type_id: '.slack',
           id: '1',
           execution: {
             uuid: '123abc',
@@ -255,6 +263,7 @@ describe('createActionEventLogRecordObject', () => {
           },
         ],
         actionExecutionId: '123abc',
+        actionTypeId: '.slack',
       })
     ).toStrictEqual({
       event: {
@@ -289,6 +298,7 @@ describe('createActionEventLogRecordObject', () => {
         ],
         action: {
           name: 'test name',
+          type_id: '.slack',
           id: '1',
           execution: {
             uuid: '123abc',
@@ -319,6 +329,7 @@ describe('createActionEventLogRecordObject', () => {
         ],
         actionExecutionId: '123abc',
         source: asHttpRequestExecutionSource(httpServerMock.createKibanaRequest()),
+        actionTypeId: '.slack',
       })
     ).toStrictEqual({
       event: {
@@ -345,6 +356,7 @@ describe('createActionEventLogRecordObject', () => {
         ],
         action: {
           name: 'test name',
+          type_id: '.slack',
           id: '1',
           execution: {
             source: 'http_request',
@@ -376,6 +388,7 @@ describe('createActionEventLogRecordObject', () => {
         ],
         actionExecutionId: '123abc',
         source: asHttpRequestExecutionSource(httpServerMock.createKibanaRequest()),
+        actionTypeId: '.slack',
       })
     ).toStrictEqual({
       event: {
@@ -402,6 +415,7 @@ describe('createActionEventLogRecordObject', () => {
         ],
         action: {
           name: 'test name',
+          type_id: '.slack',
           id: '1',
           execution: {
             source: 'http_request',
@@ -413,7 +427,7 @@ describe('createActionEventLogRecordObject', () => {
     });
   });
 
-  test('created action event "execute" for preconfigured connector with space_agnostic true', async () => {
+  test('created action event "execute" for in-memory connector with space_agnostic true', async () => {
     expect(
       createActionEventLogRecordObject({
         actionId: '1',
@@ -432,7 +446,8 @@ describe('createActionEventLogRecordObject', () => {
           },
         ],
         actionExecutionId: '123abc',
-        isPreconfigured: true,
+        isInMemory: true,
+        actionTypeId: '.slack',
       })
     ).toStrictEqual({
       event: {
@@ -460,6 +475,7 @@ describe('createActionEventLogRecordObject', () => {
         ],
         action: {
           name: 'test name',
+          type_id: '.slack',
           id: '1',
           execution: {
             uuid: '123abc',

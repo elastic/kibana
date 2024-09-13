@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -28,19 +29,18 @@ import {
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
   TRUNCATE_MAX_HEIGHT,
+  TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
-  SHOW_LEGACY_FIELD_TOP_VALUES,
-  ENABLE_SQL,
-} from '../common';
+} from '@kbn/discover-utils';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
-const technicalPreviewLabel = i18n.translate('discover.advancedSettings.technicalPreviewLabel', {
-  defaultMessage: 'technical preview',
-});
-
-export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, UiSettingsParams> = (
-  docLinks: DocLinksServiceSetup
+export const getUiSettings: (
+  docLinks: DocLinksServiceSetup,
+  enableValidations: boolean
+) => Record<string, UiSettingsParams> = (
+  docLinks: DocLinksServiceSetup,
+  enableValidations: boolean
 ) => ({
   [DEFAULT_COLUMNS_SETTING]: {
     name: i18n.translate('discover.advancedSettings.defaultColumnsTitle', {
@@ -52,7 +52,9 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
         'Columns displayed by default in the Discover app. If empty, a summary of the document will be displayed.',
     }),
     category: ['discover'],
-    schema: schema.arrayOf(schema.string()),
+    schema: enableValidations
+      ? schema.arrayOf(schema.string(), { maxSize: 50 })
+      : schema.arrayOf(schema.string()),
   },
   [MAX_DOC_FIELDS_DISPLAYED]: {
     name: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedTitle', {
@@ -121,19 +123,6 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
       defaultMessage:
         'Controls whether a search is executed when Discover first loads. This setting does not ' +
         'have an effect when loading a saved search.',
-    }),
-    category: ['discover'],
-    schema: schema.boolean(),
-  },
-  [SHOW_LEGACY_FIELD_TOP_VALUES]: {
-    name: i18n.translate('discover.advancedSettings.showLegacyFieldStatsTitle', {
-      defaultMessage: 'Top values calculation',
-    }),
-    value: false,
-    type: 'boolean',
-    description: i18n.translate('discover.advancedSettings.showLegacyFieldStatsText', {
-      defaultMessage:
-        'To calculate the top values for a field in the sidebar using 500 instead of 5,000 records per shard, turn on this option.',
     }),
     category: ['discover'],
     schema: schema.boolean(),
@@ -213,14 +202,23 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
           '</a>',
       },
     }),
+    requiresPageReload: true,
     category: ['discover'],
     schema: schema.boolean(),
     metric: {
       type: METRIC_TYPE.CLICK,
       name: 'discover:useLegacyDataGrid',
     },
+    deprecation: {
+      message: i18n.translate(
+        'discover.advancedSettings.discover.disableDocumentExplorerDeprecation',
+        {
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+        }
+      ),
+      docLinksKey: 'discoverSettings',
+    },
   },
-
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
       defaultMessage: 'Modify columns when changing data views',
@@ -249,6 +247,15 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     value: false,
     category: ['discover'],
     schema: schema.boolean(),
+    deprecation: {
+      message: i18n.translate(
+        'discover.advancedSettings.discover.readFieldsFromSourceDeprecation',
+        {
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+        }
+      ),
+      docLinksKey: 'discoverSettings',
+    },
   },
   [SHOW_FIELD_STATISTICS]: {
     name: i18n.translate('discover.advancedSettings.discover.showFieldStatistics', {
@@ -313,7 +320,7 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
       defaultMessage: 'Maximum cell height in the classic table',
     }),
-    value: 115,
+    value: TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
     category: ['discover'],
     description: i18n.translate('discover.advancedSettings.params.maxCellHeightText', {
       defaultMessage:
@@ -321,27 +328,11 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
-  },
-  [ENABLE_SQL]: {
-    name: i18n.translate('discover.advancedSettings.enableSQLTitle', {
-      defaultMessage: 'Enable SQL',
-    }),
-    value: false,
-    description: i18n.translate('discover.advancedSettings.enableSQLDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} This tech preview feature is highly experimental--do not rely on this for production saved searches, visualizations or dashboards. This setting enables SQL as a text-based query language in Discover and Lens. If you have feedback on this experience please reach out to us on {link}',
-      values: {
-        link:
-          `<a href="https://discuss.elastic.co/c/elastic-stack/kibana" target="_blank" rel="noopener">` +
-          i18n.translate('discover.advancedSettings.enableSQL.discussLinkText', {
-            defaultMessage: 'discuss.elastic.co/c/elastic-stack/kibana',
-          }) +
-          '</a>',
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    requiresPageReload: true,
-    category: ['discover'],
-    schema: schema.boolean(),
+    deprecation: {
+      message: i18n.translate('discover.advancedSettings.discover.maxCellHeightDeprecation', {
+        defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+      }),
+      docLinksKey: 'discoverSettings',
+    },
   },
 });

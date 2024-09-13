@@ -6,11 +6,13 @@
  */
 
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '@kbn/core/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { CasesStart, CasesSetup } from '@kbn/cases-plugin/server';
+import type { CasesServerStart, CasesServerSetup } from '@kbn/cases-plugin/server';
 import { FilesSetup } from '@kbn/files-plugin/server';
+import { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { getPersistableStateAttachment } from './attachments/persistable_state';
 import { getExternalReferenceAttachment } from './attachments/external_reference';
 import { registerRoutes } from './routes';
@@ -18,14 +20,15 @@ import { registerCaseFixtureFileKinds } from './files';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
-  cases: CasesSetup;
+  cases: CasesServerSetup;
   files: FilesSetup;
 }
 
 export interface FixtureStartDeps {
+  actions: ActionsPluginsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  cases: CasesStart;
+  cases: CasesServerStart;
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
@@ -40,6 +43,46 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
     registerRoutes(core, this.log);
     registerCaseFixtureFileKinds(deps.files);
+
+    /**
+     * Kibana features
+     */
+
+    deps.features.registerKibanaFeature({
+      id: 'testNoCasesConnectorFixture',
+      name: 'TestNoCasesConnectorFixture',
+      app: ['kibana'],
+      category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      cases: ['testNoCasesConnectorFixture'],
+      privileges: {
+        all: {
+          api: [],
+          app: ['kibana'],
+          cases: {
+            create: ['testNoCasesConnectorFixture'],
+            read: ['testNoCasesConnectorFixture'],
+            update: ['testNoCasesConnectorFixture'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          app: ['kibana'],
+          cases: {
+            read: ['testNoCasesConnectorFixture'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+    });
   }
 
   public start(core: CoreStart, plugins: FixtureStartDeps) {}

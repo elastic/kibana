@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -12,17 +13,17 @@ import { EuiModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { ApplicationStart, IUiSettingsClient, DocLinksStart, HttpStart } from '@kbn/core/public';
+import { ApplicationStart, DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { ContentClient } from '@kbn/content-management-plugin/public';
 import { SearchSelection } from './search_selection';
 import { GroupSelection } from './group_selection';
 import { AggBasedSelection } from './agg_based_selection';
 import type { TypesStart, BaseVisType, VisTypeAlias } from '../vis_types';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import './dialog.scss';
 
 interface TypeSelectionProps {
+  contentClient: ContentClient;
   isOpen: boolean;
   onClose: () => void;
   visTypesRegistry: TypesStart;
@@ -30,14 +31,12 @@ interface TypeSelectionProps {
   addBasePath: (path: string) => string;
   uiSettings: IUiSettingsClient;
   docLinks: DocLinksStart;
-  http: HttpStart;
   application: ApplicationStart;
   outsideVisualizeApp?: boolean;
   stateTransfer?: EmbeddableStateTransfer;
   originatingApp?: string;
   showAggsSelection?: boolean;
   selectedVisType?: BaseVisType;
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 interface TypeSelectionState {
@@ -56,14 +55,12 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     editorParams: [],
   };
 
-  private readonly isLabsEnabled: boolean;
   private readonly trackUiMetric:
     | ((type: UiCounterMetricType, eventNames: string | string[], count?: number) => void)
     | undefined;
 
   constructor(props: TypeSelectionProps) {
     super(props);
-    this.isLabsEnabled = props.uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
 
     this.state = {
       showSearchVisModal: Boolean(this.props.selectedVisType),
@@ -91,11 +88,10 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       this.state.showSearchVisModal && this.state.visType ? (
         <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
           <SearchSelection
+            contentClient={this.props.contentClient}
+            uiSettings={this.props.uiSettings}
             onSearchSelected={this.onSearchSelected}
             visType={this.state.visType}
-            uiSettings={this.props.uiSettings}
-            http={this.props.http}
-            savedObjectsManagement={this.props.savedObjectsManagement}
             goBack={() => this.setState({ showSearchVisModal: false })}
           />
         </EuiModal>
@@ -106,11 +102,12 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
           aria-label={visNewVisDialogAriaLabel}
         >
           <WizardComponent
-            showExperimental={this.isLabsEnabled}
+            showExperimental={true}
             onVisTypeSelected={this.onVisTypeSelected}
             visTypesRegistry={this.props.visTypesRegistry}
             docLinks={this.props.docLinks}
             toggleGroups={(flag: boolean) => this.setState({ showGroups: flag })}
+            openedAsRoot={this.props.showAggsSelection && !this.props.selectedVisType}
           />
         </EuiModal>
       );
@@ -124,7 +121,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   };
 
   private onVisTypeSelected = (visType: BaseVisType | VisTypeAlias) => {
-    if (!('aliasPath' in visType) && visType.requiresSearch && visType.options.showIndexSelection) {
+    if ('visConfig' in visType && visType.requiresSearch && visType.options.showIndexSelection) {
       this.setState({
         showSearchVisModal: true,
         visType,
@@ -148,10 +145,12 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     }
 
     let params;
-    if ('aliasPath' in visType) {
-      params = visType.aliasPath;
-      this.props.onClose();
-      this.navigate(visType.aliasApp, visType.aliasPath);
+    if ('alias' in visType) {
+      if (visType.alias && 'path' in visType.alias) {
+        params = visType.alias.path;
+        this.props.onClose();
+        this.navigate(visType.alias.app, visType.alias.path);
+      }
       return;
     }
 

@@ -5,51 +5,56 @@
  * 2.0.
  */
 
-import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle, EuiFlyoutSize } from '@elastic/eui';
+import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { FC } from 'react';
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
+import type { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ALERT_BUILDING_BLOCK_TYPE } from '@kbn/rule-data-utils';
 import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import {
   dataTableActions,
   dataTableSelectors,
-  getColumnHeaders,
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import {
   useSessionView,
   useSessionViewNavigation,
-} from '../../../timelines/components/timeline/session_tab_content/use_session_view';
+} from '../../../timelines/components/timeline/tabs/session/use_session_view';
 import { inputsSelectors } from '../../../common/store';
 import { combineQueries } from '../../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
-import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useKibana } from '../../../common/lib/kibana';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getColumns } from '../../configurations/security_solution_detections';
 import { buildTimeRangeFilter } from './helpers';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import type { State } from '../../../common/store';
 import * as i18n from './translations';
+import { eventRenderedViewColumns } from '../../configurations/security_solution_detections/columns';
+import { getAlertsDefaultModel } from './default_config';
+import { useFetchNotes } from '../../../notes/hooks/use_fetch_notes';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
-const storage = new Storage(localStorage);
+// Highlight rows with building block alerts
+const shouldHighlightRow = (alert: Alert) => !!alert[ALERT_BUILDING_BLOCK_TYPE];
 
 interface GridContainerProps {
   hideLastPage: boolean;
@@ -69,13 +74,18 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
       }};
     }
   }
-  div .euiDataGridRowCell__contentByHeight {
-    height: auto;
-    align-self: center;
+  div .euiDataGridRowCell {
+    display: flex;
+    align-items: center;
   }
-  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__contentByHeight {
-    flex-grow: 0;
+  div .euiDataGridRowCell > [data-focus-lock-disabled] {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
     width: 100%;
+  }
+  div .euiDataGridRowCell__content {
+    flex-grow: 1;
   }
   div .siemEventsTable__trSupplement--summary {
     display: block;
@@ -84,16 +94,15 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
 `;
 interface DetectionEngineAlertTableProps {
   configId: string;
-  flyoutSize: EuiFlyoutSize;
   inputFilters: Filter[];
   tableId: TableId;
   sourcererScope?: SourcererScopeName;
   isLoading?: boolean;
   onRuleChange?: () => void;
 }
+
 export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   configId,
-  flyoutSize,
   inputFilters,
   tableId = TableId.alertsOnAlertsPage,
   sourcererScope = SourcererScopeName.detections,
@@ -116,12 +125,20 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     enableIpDetailsFlyout: true,
     onRuleChange,
   });
-  const { browserFields, indexPattern: indexPatterns } = useSourcererDataView(sourcererScope);
+  const {
+    browserFields,
+    indexPattern: indexPatterns,
+    sourcererDataView,
+  } = useSourcererDataView(sourcererScope);
   const license = useLicense();
 
-  const getGlobalInputs = inputsSelectors.globalSelector();
-  const globalInputs = useSelector((state: State) => getGlobalInputs(state));
-  const { query: globalQuery, filters: globalFilters } = globalInputs;
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
+  const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
@@ -140,7 +157,8 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       graphEventId, // If truthy, the graph viewer (Resolver) is showing
       sessionViewConfig,
       viewMode: tableView = eventsDefaultModel.viewMode,
-    } = eventsDefaultModel,
+      columns,
+    } = getAlertsDefaultModel(license),
   } = useShallowEqualSelector((state: State) => eventsViewerSelector(state, tableId));
 
   const combinedQuery = useMemo(() => {
@@ -168,11 +186,11 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   });
 
   const finalBoolQuery: AlertsTableStateProps['query'] = useMemo(() => {
-    if (!combinedQuery || combinedQuery.kqlError || !combinedQuery.filterQuery) {
+    if (combinedQuery?.kqlError || !combinedQuery?.filterQuery) {
       return { bool: {} };
     }
-    return { bool: { filter: JSON.parse(combinedQuery.filterQuery) } };
-  }, [combinedQuery]);
+    return { bool: { filter: JSON.parse(combinedQuery?.filterQuery) } };
+  }, [combinedQuery?.filterQuery, combinedQuery?.kqlError]);
 
   const isEventRenderedView = tableView === VIEW_SELECTION.eventRenderedView;
 
@@ -196,18 +214,9 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     return undefined;
   }, [isEventRenderedView]);
 
-  const dataTableStorage = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
-  const columnsFormStorage = dataTableStorage?.[TableId.alertsOnAlertsPage]?.columns ?? [];
-  const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns(license);
-
-  const evenRenderedColumns = useMemo(
-    () => getColumnHeaders(alertColumns, browserFields, true),
-    [alertColumns, browserFields]
-  );
-
-  const finalColumns = useMemo(
-    () => (isEventRenderedView ? evenRenderedColumns : alertColumns),
-    [evenRenderedColumns, alertColumns, isEventRenderedView]
+  const alertColumns = useMemo(
+    () => (columns.length ? columns : getColumns(license)),
+    [columns, license]
   );
 
   const finalBrowserFields = useMemo(
@@ -215,7 +224,12 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     [isEventRenderedView, browserFields]
   );
 
-  const onAlertTableUpdate: AlertsTableStateProps['onUpdate'] = useCallback(
+  const finalColumns = useMemo(
+    () => (isEventRenderedView ? eventRenderedViewColumns : alertColumns),
+    [alertColumns, isEventRenderedView]
+  );
+
+  const onAlertTableUpdate = useCallback<NonNullable<AlertsTableStateProps['onUpdate']>>(
     ({ isLoading: isAlertTableLoading, totalCount, refresh }) => {
       dispatch(
         updateIsLoading({
@@ -244,38 +258,54 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     [dispatch, tableId, alertTableRefreshHandlerRef, setQuery]
   );
 
+  const cellContext = useMemo(() => {
+    return {
+      rowRenderers: defaultRowRenderers,
+      isDetails: false,
+      truncate: true,
+      isDraggable: false,
+    };
+  }, []);
+
+  const { onLoad } = useFetchNotes();
+
   const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
       configurationId: configId,
-      // stores saperate configuration based on the view of the table
+      // stores separate configuration based on the view of the table
       id: `detection-engine-alert-table-${configId}-${tableView}`,
-      flyoutSize,
       featureIds: ['siem'],
       query: finalBoolQuery,
-      showExpandToDetails: false,
       gridStyle,
+      shouldHighlightRow,
       rowHeightsOptions,
       columns: finalColumns,
       browserFields: finalBrowserFields,
       onUpdate: onAlertTableUpdate,
+      cellContext,
+      onLoaded: onLoad,
+      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
       toolbarVisibility: {
         showColumnSelector: !isEventRenderedView,
         showSortSelector: !isEventRenderedView,
       },
+      dynamicRowHeight: isEventRenderedView,
     }),
     [
-      finalBoolQuery,
-      configId,
       triggersActionsUi.alertsTableConfigurationRegistry,
-      flyoutSize,
+      configId,
+      tableView,
+      finalBoolQuery,
       gridStyle,
       rowHeightsOptions,
       finalColumns,
       finalBrowserFields,
       onAlertTableUpdate,
+      cellContext,
+      onLoad,
+      sourcererDataView?.runtimeFieldMap,
       isEventRenderedView,
-      tableView,
     ]
   );
 
@@ -302,8 +332,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     scopeId: tableId,
   });
 
-  const { DetailsPanel, SessionView } = useSessionView({
-    entityType: 'alerts',
+  const { SessionView } = useSessionView({
     scopeId: tableId,
   });
 
@@ -327,7 +356,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
           <EuiDataGridContainer hideLastPage={false}>{AlertTable}</EuiDataGridContainer>
         </StatefulEventContext.Provider>
       </FullWidthFlexGroupTable>
-      {DetailsPanel}
     </div>
   );
 };

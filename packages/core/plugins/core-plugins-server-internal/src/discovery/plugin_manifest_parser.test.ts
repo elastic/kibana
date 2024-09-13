@@ -1,26 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { mockReadFile } from './plugin_manifest_parser.test.mocks';
 
-import { PluginDiscoveryErrorType } from './plugin_discovery_error';
-
 import { resolve } from 'path';
+import type { PackageInfo } from '@kbn/config';
+import { PluginDiscoveryErrorType } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
 
 const pluginPath = resolve('path', 'existent-dir');
 const pluginManifestPath = resolve(pluginPath, 'kibana.json');
-const packageInfo = {
+const packageInfo: PackageInfo = {
   branch: 'master',
   buildNum: 1,
   buildSha: '',
+  buildShaShort: '',
   version: '7.0.0-alpha1',
   dist: false,
+  buildDate: new Date('2023-05-15T23:12:09.000Z'),
+  buildFlavor: 'traditional',
 };
 
 afterEach(() => {
@@ -57,7 +61,7 @@ test('return error when manifest content is not a valid JSON', async () => {
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
-    message: `Unexpected token o in JSON at position 1 (invalid-manifest, ${pluginManifestPath})`,
+    message: `Unexpected token 'o', "not-json" is not valid JSON (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
@@ -386,6 +390,7 @@ test('set defaults for all missing optional fields', async () => {
     optionalPlugins: [],
     requiredPlugins: [],
     requiredBundles: [],
+    runtimePluginDependencies: [],
     server: true,
     ui: false,
     owner: { name: 'foo' },
@@ -405,6 +410,7 @@ test('return all set optional fields as they are in manifest', async () => {
           type: 'preboot',
           requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
           optionalPlugins: ['some-optional-plugin'],
+          runtimePluginDependencies: ['runtime-plugin-dependency'],
           ui: true,
           owner: { name: 'foo' },
           enabledOnAnonymousPages: true,
@@ -422,6 +428,7 @@ test('return all set optional fields as they are in manifest', async () => {
     optionalPlugins: ['some-optional-plugin'],
     requiredBundles: [],
     requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
+    runtimePluginDependencies: ['runtime-plugin-dependency'],
     server: false,
     ui: true,
     owner: { name: 'foo' },
@@ -456,6 +463,7 @@ test('return manifest when plugin expected Kibana version matches actual version
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
     requiredBundles: [],
+    runtimePluginDependencies: [],
     server: true,
     ui: false,
     owner: { name: 'foo' },
@@ -489,6 +497,7 @@ test('return manifest when plugin expected Kibana version is `kibana`', async ()
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
     requiredBundles: [],
+    runtimePluginDependencies: [],
     server: true,
     ui: true,
     owner: { name: 'foo' },

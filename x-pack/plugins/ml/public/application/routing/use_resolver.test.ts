@@ -5,101 +5,66 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
+import { useRouteResolver } from './use_resolver';
+import type { MlLicenseInfo } from '../../../common/license/ml_license';
 
-import { IUiSettingsClient } from '@kbn/core/public';
-
-import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
-import { useNotifications } from '../contexts/kibana';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-
-import { type GetSavedSearchPageDeps, useResolver } from './use_resolver';
-
-jest.mock('../contexts/kibana/use_create_url', () => {
-  return {
-    useCreateAndNavigateToMlLink: jest.fn(),
-  };
-});
-
-jest.mock('../contexts/kibana', () => {
-  return {
-    useNavigateToPath: () => jest.fn(),
-    useNotifications: jest.fn(),
-  };
-});
-
-const addError = jest.fn();
-(useNotifications as jest.Mock).mockImplementation(() => ({
-  toasts: { addSuccess: jest.fn(), addDanger: jest.fn(), addError },
-}));
-
-const redirectToJobsManagementPage = jest.fn(() => Promise.resolve());
-(useCreateAndNavigateToMlLink as jest.Mock).mockImplementation(() => redirectToJobsManagementPage);
+jest.mock('../contexts/kibana');
+jest.mock('../capabilities/check_capabilities');
 
 describe('useResolver', () => {
-  afterEach(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-  afterEach(() => {
-    jest.advanceTimersByTime(0);
-    jest.useRealTimers();
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('should accept undefined as dataViewId and savedSearchId.', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useResolver(
-        undefined,
-        undefined,
-        {} as IUiSettingsClient,
-        {} as DataViewsContract,
-        {} as GetSavedSearchPageDeps,
-        {}
-      )
-    );
-
-    await act(async () => {
-      await waitForNextUpdate();
+  it('redirects to the home page if ML is disabled', async () => {
+    (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+      isMlEnabled: false,
     });
-
-    expect(result.current).toStrictEqual({
-      context: {
-        combinedQuery: {
-          bool: {
-            must: [
-              {
-                match_all: {},
-              },
-            ],
-          },
-        },
-        currentDataView: null,
-        deprecatedSavedSearchObj: null,
-        dataViewsContract: {},
-        kibanaConfig: {},
-        selectedSavedSearch: null,
-      },
-      results: {},
-    });
-    expect(addError).toHaveBeenCalledTimes(0);
-    expect(redirectToJobsManagementPage).toHaveBeenCalledTimes(0);
+    renderHook(() => useRouteResolver('full', ['canCreateJob']));
+    expect(useMlKibana().services.application.navigateToApp).toHaveBeenCalledWith('home');
   });
 
-  it('should add an error toast and redirect if dataViewId is an empty string.', async () => {
-    const { result } = renderHook(() =>
-      useResolver(
-        '',
-        undefined,
-        {} as IUiSettingsClient,
-        {} as DataViewsContract,
-        {} as GetSavedSearchPageDeps,
-        {}
-      )
-    );
+  it('redirects to the home page if license is not sufficient', async () => {
+    (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+      isMlEnabled: true,
+      isMinimumLicense: false,
+    });
+    renderHook(() => useRouteResolver('full', ['canCreateJob']));
+    expect(useMlKibana().services.application.navigateToApp).toHaveBeenCalledWith('home');
+  });
 
-    await act(async () => {});
+  it('redirects to the data viz page if license is not full', async () => {
+    (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+      isMlEnabled: true,
+      isMinimumLicense: true,
+      isFullLicense: false,
+    });
+    renderHook(() => useRouteResolver('full', ['canCreateJob']));
+    expect(useMlKibana().services.application.navigateToApp).toHaveBeenCalledWith('ml', {
+      path: 'datavisualizer',
+    });
+  });
 
-    expect(result.current).toStrictEqual({ context: null, results: {} });
-    expect(addError).toHaveBeenCalledTimes(1);
-    expect(redirectToJobsManagementPage).toHaveBeenCalledTimes(1);
+  it('does not redirect if license requirements are met', async () => {
+    (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+      isMlEnabled: true,
+      isMinimumLicense: true,
+      isFullLicense: false,
+    });
+    renderHook(() => useRouteResolver('basic', []));
+    expect(useMlKibana().services.application.navigateToApp).not.toHaveBeenCalledWith();
+    expect(useMlKibana().services.application.navigateToUrl).not.toHaveBeenCalled();
+  });
+
+  // FIXME
+  it.skip('redirects to the access denied page if some required capabilities are missing', async () => {
+    (usePermissionCheck as jest.Mock<boolean[]>).mockReturnValueOnce([false]);
+
+    const { waitForNextUpdate } = renderHook(() => useRouteResolver('full', ['canGetCalendars']));
+    await waitForNextUpdate();
+    expect(useMlKibana().services.application.navigateToUrl).toHaveBeenCalled();
   });
 });

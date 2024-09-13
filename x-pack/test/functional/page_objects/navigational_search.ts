@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 interface SearchResult {
   label: string;
 }
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export class NavigationalSearchPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly common = this.ctx.getPageObject('common');
 
   async focus() {
     const field = await this.testSubjects.find('nav-search-input');
@@ -69,7 +68,7 @@ export class NavigationalSearchPageObject extends FtrService {
     // without heavy flakiness in this situation.
     // there is NO ui indication of any kind to detect when all the emissions are done,
     // so we are forced to fallback to awaiting a given amount of time once the first options are displayed.
-    await delay(waitUntil);
+    await this.common.sleep(waitUntil);
   }
 
   async getDisplayedResults() {
@@ -79,7 +78,7 @@ export class NavigationalSearchPageObject extends FtrService {
 
   async isNoResultsPlaceholderDisplayed(checkAfter: number = 3000) {
     // see comment in `waitForResultsLoaded`
-    await delay(checkAfter);
+    await this.common.sleep(checkAfter);
     return this.testSubjects.exists('nav-search-no-results');
   }
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { PureComponent } from 'react';
@@ -14,7 +15,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiFormControlLayoutIcons,
   EuiIconProps,
   EuiLink,
   EuiOutsideClickDetector,
@@ -29,11 +30,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEmpty, isEqual, isFunction, partition } from 'lodash';
 import { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
 import { type DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
-import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '@kbn/data-plugin/common';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import {
+  getFieldSubtypeNested,
+  KIBANA_USER_QUERY_LANGUAGE_KEY,
+  KQL_TELEMETRY_ROUTE_LATEST_VERSION,
+} from '@kbn/data-plugin/common';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
@@ -42,12 +48,15 @@ import { toUser } from './to_user';
 import { fromUser } from './from_user';
 import { type DataViewByIdOrTitle, fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
-import type { SuggestionsListSize } from '../typeahead/suggestions_component';
+import type {
+  SuggestionsAbstraction,
+  SuggestionsListSize,
+} from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
-import { getTheme } from '../services';
+import { getAnalytics, getI18n, getTheme } from '../services';
 import './query_string_input.scss';
 
 export const strings = {
@@ -112,6 +121,7 @@ export interface QueryStringInputProps {
   submitOnBlur?: boolean;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
+  suggestionsAbstraction?: SuggestionsAbstraction;
   className?: string;
   isInvalid?: boolean;
   isClearable?: boolean;
@@ -219,7 +229,11 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
       QueryStringInputProps['indexPatterns'][number],
       DataView
     >(this.props.indexPatterns || [], (indexPattern): indexPattern is DataView => {
-      return indexPattern.hasOwnProperty('fields') && indexPattern.hasOwnProperty('title');
+      return (
+        typeof indexPattern === 'object' &&
+        Object.hasOwn(indexPattern, 'fields') &&
+        Object.hasOwn(indexPattern, 'title')
+      );
     });
     const idOrTitlePatterns = stringPatterns.map((sp) =>
       typeof sp === 'string' ? { type: 'title', value: sp } : sp
@@ -286,7 +300,8 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
           signal: this.abortController.signal,
           useTimeRange: this.props.timeRangeForSuggestionsOverride,
           boolFilter: buildQueryFromFilters(this.props.filtersForSuggestions, undefined).filter,
-          method: this.props.filtersForSuggestions?.length ? 'terms_agg' : 'terms_enum',
+          method: this.props.filtersForSuggestions?.length ? 'terms_agg' : undefined,
+          suggestionsAbstraction: this.props.suggestionsAbstraction,
         })) || [];
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
@@ -553,7 +568,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>,
-            { theme$: getTheme().theme$ }
+            { analytics: getAnalytics(), i18n: getI18n(), theme: getTheme() }
           ),
         });
       }
@@ -587,7 +602,8 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
     // UI component's change handler.
-    this.props.deps.http.post('/api/kibana/kql_opt_in_stats', {
+    this.props.deps.http.post('/internal/kql_opt_in_stats', {
+      version: KQL_TELEMETRY_ROUTE_LATEST_VERSION,
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
@@ -655,7 +671,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
       : getQueryLog(uiSettings, this.props.deps.storage, appName, this.props.query.language);
   };
 
-  public onMouseEnterSuggestion = (suggestion: QuerySuggestion, index: number) => {
+  public onMouseEnterSuggestion = (_suggestion: QuerySuggestion, index: number) => {
     this.setState({ index });
   };
 
@@ -791,7 +807,11 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
             {...ariaCombobox}
-            style={{ position: 'relative', width: '100%' }}
+            style={{
+              position: 'relative',
+              width: '100%',
+              zIndex: euiThemeVars.euiZLevel1,
+            }}
             aria-label={strings.getQueryBarComboboxAriaLabel(this.props.appName)}
             aria-haspopup="true"
             aria-expanded={this.state.isSuggestionsVisible}
@@ -833,30 +853,27 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 {this.forwardNewValueIfNeeded(this.getQueryString())}
               </EuiTextArea>
               {this.props.iconType ? (
-                <div className="euiFormControlLayoutIcons">
-                  <EuiIcon
-                    className="euiFormControlLayoutCustomIcon__icon"
-                    aria-hidden="true"
-                    type={this.props.iconType}
-                  />
-                </div>
+                <EuiFormControlLayoutIcons
+                  side="left"
+                  iconsPosition="absolute"
+                  icon={{ type: this.props.iconType }}
+                  isDisabled={this.props.isDisabled}
+                />
               ) : null}
               {this.props.isClearable && !this.props.isDisabled && this.props.query.query ? (
-                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right">
-                  <button
-                    type="button"
-                    className="euiFormControlLayoutClearButton"
-                    title={strings.getQueryBarClearInputLabel()}
-                    onClick={() => {
+                <EuiFormControlLayoutIcons
+                  side="right"
+                  iconsPosition="absolute"
+                  clear={{
+                    onClick: () => {
                       this.onQueryStringChange('');
                       if (this.props.autoSubmit) {
                         this.onSubmit({ query: '', language: this.props.query.language });
                       }
-                    }}
-                  >
-                    <EuiIcon className="euiFormControlLayoutClearButton__icon" type="cross" />
-                  </button>
-                </div>
+                    },
+                    title: strings.getQueryBarClearInputLabel(),
+                  }}
+                />
               ) : null}
             </div>
             <EuiPortal>

@@ -14,6 +14,8 @@ import {
 } from '@kbn/test-jest-helpers';
 stubBroadcastChannel();
 
+import { createSessionExpiredMock } from './session_expired.mock';
+import { SessionTimeout, startTimer } from './session_timeout';
 import {
   SESSION_CHECK_MS,
   SESSION_EXPIRATION_WARNING_MS,
@@ -22,8 +24,6 @@ import {
   SESSION_ROUTE,
 } from '../../common/constants';
 import type { SessionInfo } from '../../common/types';
-import { createSessionExpiredMock } from './session_expired.mock';
-import { SessionTimeout, startTimer } from './session_timeout';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 
@@ -38,11 +38,12 @@ const visibilityStateMock = jest.spyOn(document, 'visibilityState', 'get');
 
 function createSessionTimeout(expiresInMs: number | null = 60 * 60 * 1000, canBeExtended = true) {
   const { notifications, http } = coreMock.createSetup();
+  const coreStart = coreMock.createStart();
   const toast = Symbol();
   notifications.toasts.add.mockReturnValue(toast as any);
   const sessionExpired = createSessionExpiredMock();
   const tenant = 'test';
-  const sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
+  const sessionTimeout = new SessionTimeout(coreStart, notifications, sessionExpired, http, tenant);
 
   http.fetch.mockResolvedValue({
     expiresInMs,
@@ -294,7 +295,7 @@ describe('SessionTimeout', () => {
 
     const [toast] = notifications.toasts.add.mock.calls[0] as [ToastInputFields];
 
-    await toast.onClose!();
+    toast.onClose!();
 
     expect(http.fetch).toHaveBeenCalledTimes(3);
     expect(http.fetch).toHaveBeenLastCalledWith(

@@ -7,15 +7,8 @@
 import { render } from '@testing-library/react';
 import type { RenderResult } from '@testing-library/react';
 import React from 'react';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import type { State } from '../../store';
-import { createStore } from '../../store';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { LensEmbeddable } from './lens_embeddable';
 import { useKibana } from '../../lib/kibana';
@@ -65,7 +58,7 @@ describe('LensEmbeddable', () => {
         queries: [
           {
             id: 'testId',
-            inspect: { dsl: [], response: [] },
+            inspect: { dsl: [], response: ['{"mockResponse": "mockResponse"}'] },
             isInspected: false,
             loading: false,
             selectedInspectIndex: 0,
@@ -77,8 +70,7 @@ describe('LensEmbeddable', () => {
     },
   };
 
-  const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createMockStore(state);
   const mockEmbeddableComponent = jest
     .fn()
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);
@@ -122,5 +114,16 @@ describe('LensEmbeddable', () => {
 
   it('should render with searchSessionId', () => {
     expect(mockEmbeddableComponent.mock.calls[0][0].searchSessionId).toEqual(mockSearchSessionId);
+  });
+
+  it('should not sync highlight state between visualizations', () => {
+    expect(mockEmbeddableComponent.mock.calls[0][0].syncTooltips).toEqual(false);
+    expect(mockEmbeddableComponent.mock.calls[0][0].syncCursor).toEqual(false);
+  });
+
+  it('should not render Panel settings action', () => {
+    expect(
+      mockEmbeddableComponent.mock.calls[0][0].disabledActions.includes('ACTION_CUSTOMIZE_PANEL')
+    ).toBeTruthy();
   });
 });

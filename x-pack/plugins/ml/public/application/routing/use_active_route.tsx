@@ -8,9 +8,10 @@
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { keyBy } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../contexts/kibana';
 import type { MlRoute } from './router';
@@ -23,7 +24,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
   const { pathname } = useLocation();
 
   const {
-    services: { executionContext, overlays, theme },
+    services: { executionContext, overlays, ...startServices },
   } = useMlKibana();
 
   /**
@@ -77,7 +78,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
                 />
               </p>
             </EuiCallOut>,
-            { theme$: theme.theme$ }
+            startServices
           )
         );
 
@@ -89,7 +90,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
         }, 15000);
       }
     },
-    [activeRoute, overlays, theme, pathname]
+    [activeRoute, overlays, pathname, startServices]
   );
 
   useExecutionContext(executionContext, {

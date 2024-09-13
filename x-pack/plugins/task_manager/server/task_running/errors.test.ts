@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { isUnrecoverableError, throwUnrecoverableError } from './errors';
+import {
+  createTaskRunError,
+  getErrorSource,
+  isUnrecoverableError,
+  isUserError,
+  TaskErrorSource,
+  throwUnrecoverableError,
+} from './errors';
 
 describe('Error Types', () => {
   describe('Unrecoverable error', () => {
@@ -25,6 +32,24 @@ describe('Error Types', () => {
 
     it('idnentifies normal errors', () => {
       expect(isUnrecoverableError(new Error('OMG'))).toBeFalsy();
+    });
+
+    it('createTaskRunError', () => {
+      expect(isUserError(createTaskRunError(new Error('OMG'), TaskErrorSource.USER))).toBeTruthy();
+    });
+
+    it('createTaskRunError without errorSourceParam ', () => {
+      expect(getErrorSource(createTaskRunError(new Error('OMG')))).toBe(TaskErrorSource.FRAMEWORK);
+    });
+
+    it('getErrorSource', () => {
+      expect(getErrorSource(createTaskRunError(new Error('OMG'), TaskErrorSource.USER))).toBe(
+        TaskErrorSource.USER
+      );
+    });
+
+    it('getErrorSource return undefined when there is no source data', () => {
+      expect(getErrorSource(new Error('OMG'))).toBeUndefined();
     });
   });
 });

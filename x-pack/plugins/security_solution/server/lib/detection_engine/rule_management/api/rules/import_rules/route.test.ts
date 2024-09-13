@@ -11,10 +11,8 @@ import {
   getImportRulesWithIdSchemaMock,
   ruleIdsToNdJsonString,
   rulesToNdJsonString,
-} from '../../../../../../../common/detection_engine/rule_management/mocks';
-
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { mlServicesMock } from '../../../../../machine_learning/mocks';
+} from '../../../../../../../common/api/detection_engine/rule_management/mocks';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 
 import type { requestMock } from '../../../../routes/__mocks__';
 import { createMockConfig, requestContextMock, serverMock } from '../../../../routes/__mocks__';
@@ -31,6 +29,7 @@ import {
 import * as createRulesAndExceptionsStreamFromNdJson from '../../../logic/import/create_rules_stream_from_ndjson';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { importRulesRoute } from './route';
+import { HttpAuthzError } from '../../../../../machine_learning/validation';
 
 jest.mock('../../../../../machine_learning/authz');
 
@@ -39,7 +38,6 @@ describe('Import rules route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -47,15 +45,16 @@ describe('Import rules route', () => {
     config = createMockConfig();
     const hapiStream = buildHapiStream(ruleIdsToNdJsonString(['rule-1']));
     request = getImportRulesRequest(hapiStream);
-    ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    clients.detectionRulesClient.createCustomRule.mockResolvedValue(getRulesSchemaMock());
+    clients.detectionRulesClient.importRule.mockResolvedValue(getRulesSchemaMock());
     clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
-    importRulesRoute(server.router, config, ml);
+    importRulesRoute(server.router, config);
   });
 
   describe('status codes', () => {
@@ -83,13 +82,12 @@ describe('Import rules route', () => {
 
   describe('unhappy paths', () => {
     test('returns a 403 error object if ML Authz fails', async () => {
-      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
-        validateRuleType: jest
-          .fn()
-          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      clients.detectionRulesClient.importRule.mockImplementationOnce(async () => {
+        throw new HttpAuthzError('mocked validation message');
       });
 
       const response = await server.inject(request, requestContextMock.convertContext(context));
+
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         errors: [
@@ -167,7 +165,7 @@ describe('Import rules route', () => {
         errors: [
           {
             error: {
-              message: 'Unexpected token h in JSON at position 1',
+              message: `Unexpected token 'h', "this is not"... is not valid JSON`,
               status_code: 400,
             },
             rule_id: '(unknown id)',
@@ -189,6 +187,10 @@ describe('Import rules route', () => {
     describe('rule with existing rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
+        clients.detectionRulesClient.importRule.mockRejectedValue({
+          message: 'rule_id: "rule-1" already exists',
+          statusCode: 409,
+        });
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
         expect(response.status).toEqual(200);
@@ -311,14 +313,14 @@ describe('Import rules route', () => {
         errors: [
           {
             error: {
-              message: 'Invalid value "undefined" supplied to "rule_id"',
+              message: 'rule_id: Required',
               status_code: 400,
             },
             rule_id: '(unknown id)',
           },
           {
             error: {
-              message: 'Invalid value "undefined" supplied to "rule_id"',
+              message: 'rule_id: Required',
               status_code: 400,
             },
             rule_id: '(unknown id)',
@@ -403,6 +405,10 @@ describe('Import rules route', () => {
       });
 
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
+        clients.detectionRulesClient.importRule.mockRejectedValueOnce({
+          message: 'rule_id: "rule-1" already exists',
+          statusCode: 409,
+        });
         const multiRequest = getImportRulesRequest(
           buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-2', 'rule-3']))
         );

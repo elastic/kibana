@@ -1,14 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/guided-onboarding-example-plugin",
-  "owner": "@elastic/platform-onboarding",
+  "owner": "@elastic/appex-sharedux",
   "description": "Example plugin to consume guidedOnboarding",
   "plugin": {
     "id": "guidedOnboardingExample",
     "server": true,
     "browser": true,
     "requiredPlugins": [
-      "navigation",
+      "navigation"
+    ],
+    "optionalPlugins": [
       "guidedOnboarding"
     ]
   }

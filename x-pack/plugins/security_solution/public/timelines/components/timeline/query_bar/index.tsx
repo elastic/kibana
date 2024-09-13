@@ -6,26 +6,25 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { memo, useCallback, useState, useEffect } from 'react';
+import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { Subscription } from 'rxjs';
-import deepEqual from 'fast-deep-equal';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
+import styled from '@emotion/styled';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
-import type { KqlMode } from '../../../store/timeline/model';
+import type { KqlMode } from '../../../store/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
 import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { QueryBar } from '../../../../common/components/query_bar';
 import type { DataProvider } from '../data_providers/data_provider';
-import { buildGlobalQuery } from '../helpers';
-import { timelineActions } from '../../../store/timeline';
+import { TIMELINE_FILTER_DROP_AREA, buildGlobalQuery, getNonDropAreaFilters } from '../helpers';
+import { timelineActions } from '../../../store';
 import type { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
 
 export interface QueryBarTimelineComponentProps {
@@ -39,7 +38,6 @@ export interface QueryBarTimelineComponentProps {
   isRefreshPaused: boolean;
   refreshInterval: number;
   savedQueryId: string | null;
-  setFilters: (filters: Filter[]) => void;
   setSavedQueryId: (savedQueryId: string | null) => void;
   timelineId: string;
   to: string;
@@ -47,11 +45,43 @@ export interface QueryBarTimelineComponentProps {
   updateReduxTime: DispatchUpdateReduxTime;
 }
 
-export const TIMELINE_FILTER_DROP_AREA = 'timeline-filter-drop-area';
+const SearchBarContainer = styled.div`
+  /*
+  *
+  * hide search bar default filters as they are disturbing the layout  as shown below
+  *
+  * Filters are displayed with QueryBar so below is how is the layout with default filters.
+  *
+  *
+  *                    --------------------------------
+  *   -----------------|                              |------------
+  *   | DataViewPicker |        QueryBar              | Date      |
+  *   -------------------------------------------------------------
+  *                    |      Filters                 |
+  *                    --------------------------------
+  *
+  * The tree under this component makes sure that default filters are not rendered and we can separately display
+  * them outside query component so that layout is as below:
+  *
+  *   -----------------------------------------------------------
+  *   | DataViewPicker |      QueryBar              |   Date    |
+  *   -----------------------------------------------------------
+  *   |                       Filters                           |
+  *   -----------------------------------------------------------
+  *
+  * */
+  .uniSearchBar .filter-items-group {
+    display: none;
+  }
 
-const getNonDropAreaFilters = (filters: Filter[] = []) =>
-  filters.filter((f: Filter) => f.meta.controlledBy !== TIMELINE_FILTER_DROP_AREA);
+  .euiDataGrid__restrictBody & {
+    .kbnQueryBar {
+      display: flex;
+    }
+  }
+`;
 
+// eslint-disable-next-line react/display-name
 export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
   ({
     dataProviders,
@@ -63,7 +93,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     kqlMode,
     isRefreshPaused,
     savedQueryId,
-    setFilters,
     setSavedQueryId,
     refreshInterval,
     timelineId,
@@ -84,16 +113,15 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       query: filterQuery != null ? filterQuery.expression : '',
       language: filterQuery != null ? filterQuery.kind : 'kuery',
     });
-    const [queryBarFilters, setQueryBarFilters] = useState<Filter[]>(
-      getNonDropAreaFilters(filters)
-    );
+    const queryBarFilters = useMemo(() => getNonDropAreaFilters(filters), [filters]);
+
     const [dataProvidersDsl, setDataProvidersDsl] = useState<string>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
     );
     const savedQueryServices = useSavedQueryServices();
 
     const applyKqlFilterQuery = useCallback(
-      (expression: string, kind) =>
+      (expression: string, kind: KueryFilterQueryKind) =>
         dispatch(
           timelineActions.applyKqlFilterQuery({
             id: timelineId,
@@ -108,38 +136,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         ),
       [dispatch, indexPattern, timelineId]
     );
-
-    useEffect(() => {
-      let isSubscribed = true;
-      const subscriptions = new Subscription();
-      filterManager.setFilters(filters);
-
-      subscriptions.add(
-        filterManager.getUpdates$().subscribe({
-          next: () => {
-            if (isSubscribed) {
-              const filterWithoutDropArea = getNonDropAreaFilters(filterManager.getFilters());
-              setFilters(filterWithoutDropArea);
-              setQueryBarFilters(filterWithoutDropArea);
-            }
-          },
-        })
-      );
-
-      return () => {
-        isSubscribed = false;
-        subscriptions.unsubscribe();
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    useEffect(() => {
-      const filterWithoutDropArea = getNonDropAreaFilters(filterManager.getFilters());
-      if (!deepEqual(filters, filterWithoutDropArea)) {
-        filterManager.setFilters(filters);
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filters]);
 
     useEffect(() => {
       setFilterQueryConverted({
@@ -220,6 +216,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
             isInvalid: false,
             isQuickSelection,
             timelineId,
+            hasRangeChanged: true,
           });
         }
       },
@@ -263,22 +260,24 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     );
 
     return (
-      <QueryBar
-        dateRangeFrom={dateRangeFrom}
-        dateRangeTo={dateRangeTo}
-        hideSavedQuery={kqlMode === 'search'}
-        indexPattern={indexPattern}
-        isRefreshPaused={isRefreshPaused}
-        filterQuery={filterQueryConverted}
-        filterManager={filterManager}
-        filters={queryBarFilters}
-        onSubmitQuery={onSubmitQuery}
-        refreshInterval={refreshInterval}
-        savedQuery={savedQuery}
-        onSavedQuery={onSavedQuery}
-        dataTestSubj={'timelineQueryInput'}
-        displayStyle="inPage"
-      />
+      <SearchBarContainer className="search_bar_container">
+        <QueryBar
+          dateRangeFrom={dateRangeFrom}
+          dateRangeTo={dateRangeTo}
+          hideSavedQuery={kqlMode === 'search'}
+          indexPattern={indexPattern}
+          isRefreshPaused={isRefreshPaused}
+          filterQuery={filterQueryConverted}
+          filterManager={filterManager}
+          filters={queryBarFilters}
+          onSubmitQuery={onSubmitQuery}
+          refreshInterval={refreshInterval}
+          savedQuery={savedQuery}
+          onSavedQuery={onSavedQuery}
+          dataTestSubj={'timelineQueryInput'}
+          displayStyle="inPage"
+        />
+      </SearchBarContainer>
     );
   }
 );

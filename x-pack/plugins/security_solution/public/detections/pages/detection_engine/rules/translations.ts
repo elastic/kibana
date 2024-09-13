@@ -23,7 +23,7 @@ export const IMPORT_RULE = i18n.translate(
 export const IMPORT_VALUE_LISTS = i18n.translate(
   'xpack.securitySolution.lists.detectionEngine.rules.importValueListsButton',
   {
-    defaultMessage: 'Import value lists',
+    defaultMessage: 'Manage value lists',
   }
 );
 
@@ -32,6 +32,14 @@ export const UPLOAD_VALUE_LISTS_TOOLTIP = i18n.translate(
   {
     defaultMessage:
       'Use value lists to create an exception when a field value matches a value found in a list',
+  }
+);
+
+export const UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonPrivilegesTooltip',
+  {
+    defaultMessage:
+      'A user with manage cluster privileges must visit the Rules page before you can import value lists.',
   }
 );
 
@@ -95,6 +103,13 @@ export const BULK_ACTION_EXPORT = i18n.translate(
   }
 );
 
+export const BULK_ACTION_MANUAL_RULE_RUN = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRunTitle',
+  {
+    defaultMessage: 'Manual run',
+  }
+);
+
 export const BULK_ACTION_DUPLICATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicateTitle',
   {
@@ -148,6 +163,27 @@ export const BULK_ACTION_DELETE_TAGS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteTagsTitle',
   {
     defaultMessage: 'Delete tags',
+  }
+);
+
+export const BULK_ACTION_INVESTIGATION_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.investigationFieldsTitle',
+  {
+    defaultMessage: 'Custom highlighted fields',
+  }
+);
+
+export const BULK_ACTION_ADD_INVESTIGATION_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addInvestigationFieldsTitle',
+  {
+    defaultMessage: 'Add custom highlighted fields',
+  }
+);
+
+export const BULK_ACTION_DELETE_INVESTIGATION_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteInvestigationFieldsTitle',
+  {
+    defaultMessage: 'Delete custom highlighted fields',
   }
 );
 
@@ -211,6 +247,15 @@ export const BULK_EXPORT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
     }
   );
 
+export const BULK_MANUAL_RULE_RUN_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunConfirmationDeniedTitle',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be scheduled',
+    }
+  );
+
 export const BULK_EDIT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationDeniedTitle',
@@ -262,6 +307,40 @@ export const BULK_EXPORT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
         'Export {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
     }
   );
+
+export const BULK_MANUAL_RULE_RUN_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkManualRuleRunConfirmation.confirmButtonLabel',
+    {
+      values: { customRulesCount },
+      defaultMessage:
+        'Schedule {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
+    }
+  );
+
+export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorMessage',
+  {
+    defaultMessage: 'This action can only be applied',
+  }
+);
+
+export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_MESSAGE = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorTitle',
+    {
+      values: { rulesCount },
+      defaultMessage:
+        'Manual rule run cannot be scheduled for more than {rulesCount, plural, =1 {# rule} other {# rules}}',
+    }
+  );
+
+export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_CLOSE_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorCloseButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
 
 export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.saveButtonLabel',
@@ -400,10 +479,61 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_TITLE = i18n.translate(
   }
 );
 
-export const BATCH_ACTION_DELETE_SELECTED_IMMUTABLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedImmutableTitle',
+export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_REQUIRED_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.investigationFieldsRequiredErrorMessage',
   {
-    defaultMessage: 'Selection contains immutable rules which cannot be deleted',
+    defaultMessage: 'A minimum of one custom highlighted field is required.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_OVERWRITE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addInvestigationFieldsOverwriteCheckboxLabel',
+  {
+    defaultMessage: 'Overwrite the custom highlighted fields for the selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addInvestigationFieldsComboboxLabel',
+  {
+    defaultMessage: 'Add custom highlighted fields for selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addInvestigationFieldsComboboxHelpText',
+  {
+    defaultMessage:
+      'Enter fields that you want to add.  You can choose from any of the fields included in the default Elastic Security indices.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addInvestigationFieldsTitle',
+  {
+    defaultMessage: 'Add custom highlighted fields',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_INVESTIGATION_FIELDS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteInvestigationFieldsComboboxLabel',
+  {
+    defaultMessage: 'Delete custom highlighted fields for selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_INVESTIGATION_FIELDS_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteInvestigationFieldsComboboxHelpText',
+  {
+    defaultMessage:
+      'Enter the fields that you want to remove from the selected rules. After you remove these fields, they will no longer appear in the Highlighted fields section of the alerts generated by selected rules.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_INVESTIGATION_FIELDS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteInvestigationFieldsTitle',
+  {
+    defaultMessage: 'Delete custom highlighted fields',
   }
 );
 
@@ -497,6 +627,20 @@ export const DELETE_RULE = i18n.translate(
   }
 );
 
+export const MANUAL_RULE_RUN = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.manualRuleRunDescription',
+  {
+    defaultMessage: 'Manual run',
+  }
+);
+
+export const MANUAL_RULE_RUN_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.manualRuleRunTooltip',
+  {
+    defaultMessage: 'Manual run available only for enabled rules',
+  }
+);
+
 export const COLUMN_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.ruleTitle',
   {
@@ -546,10 +690,24 @@ export const COLUMN_TAGS = i18n.translate(
   }
 );
 
+export const COLUMN_INTEGRATIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.integrationsTitle',
+  {
+    defaultMessage: 'Integrations',
+  }
+);
+
 export const COLUMN_ENABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.enabledTitle',
   {
     defaultMessage: 'Enabled',
+  }
+);
+
+export const COLUMN_SNOOZE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.snoozeTitle',
+  {
+    defaultMessage: 'Notify',
   }
 );
 
@@ -665,6 +823,13 @@ export const NO_TAGS_AVAILABLE = i18n.translate(
   }
 );
 
+export const RULE_EXECTION_STATUS_FILTER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleExecutionStatusFilter',
+  {
+    defaultMessage: 'Select rule execution status to filter by',
+  }
+);
+
 export const NO_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.noRulesTitle',
   {
@@ -676,6 +841,33 @@ export const NO_RULES_BODY = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.noRulesBodyTitle',
   {
     defaultMessage: "We weren't able to find any rules with the above filters.",
+  }
+);
+
+export const NO_RULES_AVAILABLE_FOR_INSTALL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addRules.noRulesTitle',
+  {
+    defaultMessage: 'All Elastic rules have been installed',
+  }
+);
+
+export const NO_RULES_AVAILABLE_FOR_INSTALL_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addRules.noRulesBodyTitle',
+  {
+    defaultMessage: 'There are no prebuilt detection rules available for installation',
+  }
+);
+export const NO_RULES_AVAILABLE_FOR_UPGRADE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.noRulesTitle',
+  {
+    defaultMessage: 'All Elastic rules are up to date',
+  }
+);
+
+export const NO_RULES_AVAILABLE_FOR_UPGRADE_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.noRulesBodyTitle',
+  {
+    defaultMessage: 'There are currently no available updates to your installed Elastic rules.',
   }
 );
 
@@ -817,17 +1009,24 @@ export const IMPORT_FAILED_DETAILED = (message: string) =>
     }
   );
 
-export const DELETE_CONFIRMATION_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationTitle',
+export const BULK_DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkDeleteConfirmationTitle',
   {
     defaultMessage: 'Confirm bulk deletion',
+  }
+);
+
+export const SINGLE_DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.singleDeleteConfirmationTitle',
+  {
+    defaultMessage: 'Confirm deletion',
   }
 );
 
 export const DELETE_CONFIRMATION_CONFIRM = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationConfirm',
   {
-    defaultMessage: 'Confirm',
+    defaultMessage: 'Delete',
   }
 );
 
@@ -835,14 +1034,6 @@ export const DELETE_CONFIRMATION_CANCEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationCancel',
   {
     defaultMessage: 'Cancel',
-  }
-);
-
-export const DELETE_CONFIRMATION_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationBody',
-  {
-    defaultMessage:
-      'This action will delete all rules that match current filter query. Click "Confirm" to continue.',
   }
 );
 
@@ -1061,6 +1252,44 @@ export const RULES_BULK_DISABLE_FAILURE_DESCRIPTION = (rulesCount: number) =>
   );
 
 /**
+ * Bulk Manual Rule Run
+ */
+
+export const RULES_BULK_MANUAL_RULE_RUN_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRun.successToastTitle',
+  {
+    defaultMessage: 'Rules scheduled',
+  }
+);
+
+export const RULES_BULK_MANUAL_RULE_RUN_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRun.errorToastTitle',
+  {
+    defaultMessage: 'Error scheduling manual rule run',
+  }
+);
+
+export const RULES_BULK_MANUAL_RULE_RUN_SUCCESS_DESCRIPTION = (totalRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRun.successToastDescription',
+    {
+      values: { totalRules },
+      defaultMessage:
+        'Successfully scheduled manual rule run for {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
+    }
+  );
+
+export const RULES_BULK_MANUAL_RULE_RUN_FAILURE_DESCRIPTION = (failedRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRun.errorToastDescription',
+    {
+      values: { failedRulesCount },
+      defaultMessage:
+        '{failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}} failed to schedule manual rule run.',
+    }
+  );
+
+/**
  * Bulk Edit
  */
 
@@ -1113,13 +1342,6 @@ export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (
     }
   );
 
-export const RULE_PREVIEW_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
-  {
-    defaultMessage: 'Rule preview',
-  }
-);
-
 export const CANCEL_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel',
   {
@@ -1131,5 +1353,71 @@ export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
   'xpack.securitySolution.hooks.useGetSavedQuery.errorToastMessage',
   {
     defaultMessage: 'Failed to load the saved query',
+  }
+);
+
+// Prompt Context i18n
+export const RULE_MANAGEMENT_CONTEXT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.ruleManagementContextDescription',
+  {
+    defaultMessage: 'Selected Detection Rules',
+  }
+);
+
+export const EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.explainThenSummarizeRuleDetails',
+  {
+    defaultMessage:
+      "Please explain the selected rules above. For each rule, highlight why they are relevant, the query as published on Elastic's detection rules repository and an in-depth explanation of it, and what they typically mean for an organization if detected.",
+  }
+);
+
+export const DETECTION_RULES_CONVERSATION_ID = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.detectionRulesConversationId',
+  {
+    defaultMessage: 'Detection Rules',
+  }
+);
+
+export const RULE_MANAGEMENT_CONTEXT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.ruleManagementContextTooltip',
+  {
+    defaultMessage: 'Add this alert as context',
+  }
+);
+
+export const INSTALL_RULE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.installRuleButton',
+  {
+    defaultMessage: 'Install rule',
+  }
+);
+
+export const INSTALL_RULE_BUTTON_ARIA_LABEL = (ruleName: string) =>
+  i18n.translate('xpack.securitySolution.addRules.installRuleButton.ariaLabel', {
+    defaultMessage: 'Install "{ruleName}"',
+    values: {
+      ruleName,
+    },
+  });
+
+export const UPDATE_RULE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.upgradeRuleButton',
+  {
+    defaultMessage: 'Update rule',
+  }
+);
+
+export const GO_BACK_TO_RULES_TABLE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.goBackToRulesTableButton',
+  {
+    defaultMessage: 'Go back to installed Elastic rules',
+  }
+);
+
+export const RULE_UPDATES_DOCUMENTATION_LINK = i18n.translate(
+  'xpack.securitySolution.ruleUpdates.documentationLink',
+  {
+    defaultMessage: "See what's new in Prebuilt Security Detection Rules",
   }
 );

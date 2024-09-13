@@ -5,12 +5,12 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
+import { v4 as uuidv4 } from 'uuid';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import {
-  AlertConsumers,
   ALERT_TIME_RANGE,
   ALERT_STATUS,
   getEsQueryConfig,
@@ -23,13 +23,21 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_CASE_IDS,
   MAX_CASES_PER_ALERT,
+  AlertConsumers,
 } from '@kbn/rule-data-utils';
 
 import {
-  InlineScript,
+  AggregateName,
+  AggregationsAggregate,
+  AggregationsMultiBucketAggregateBase,
+  MappingRuntimeFields,
   QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuleTypeParams } from '@kbn/alerting-plugin/server';
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/types';
+import type {
+  RuleTypeParams,
+  PluginStartContract as AlertingStart,
+} from '@kbn/alerting-plugin/server';
 import {
   ReadOperations,
   AlertingAuthorization,
@@ -38,8 +46,10 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
+import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
+import { TypeOf } from 'io-ts';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
@@ -49,9 +59,15 @@ import {
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
-import { Dataset, IRuleDataService } from '../rule_data_plugin_service';
+import { IRuleDataService } from '../rule_data_plugin_service';
 import { getAuthzFilter, getSpacesFilter } from '../lib';
 import { fieldDescriptorToBrowserFieldMapper } from './browser_fields';
+import { alertsAggregationsSchema } from '../../common/types';
+import {
+  MAX_ALERTS_GROUPING_QUERY_SIZE,
+  MAX_ALERTS_PAGES,
+  MAX_PAGINATED_ALERTS,
+} from './constants';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -79,20 +95,23 @@ export interface ConstructorOptions {
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
   ruleDataService: IRuleDataService;
+  getRuleType: RuleTypeRegistry['get'];
+  getRuleList: RuleTypeRegistry['list'];
+  getAlertIndicesAlias: AlertingStart['getAlertIndicesAlias'];
 }
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
   status: string;
-  _version: string | undefined;
+  _version?: string;
   index: string;
 }
 
 export interface BulkUpdateOptions<Params extends RuleTypeParams> {
-  ids: string[] | undefined | null;
+  ids?: string[] | null;
   status: STATUS_VALUES;
   index: string;
-  query: object | string | undefined | null;
+  query?: object | string | null;
 }
 
 interface MgetAndAuditAlert {
@@ -105,7 +124,7 @@ export interface BulkUpdateCasesOptions {
   caseIds: string[];
 }
 
-export interface RemoveAlertsFromCaseOptions {
+export interface RemoveCaseIdFromAlertsOptions {
   alerts: MgetAndAuditAlert[];
   caseId: string;
 }
@@ -124,17 +143,19 @@ interface GetAlertSummaryParams {
   fixedInterval?: string;
 }
 
-interface SingleSearchAfterAndAudit {
-  id?: string | null | undefined;
-  query?: string | object | undefined;
-  aggs?: Record<string, any> | undefined;
+interface SearchAlertsParams {
+  id?: string | null;
+  query?: string | object;
+  aggs?: Record<string, any>;
   index?: string;
-  _source?: string[] | undefined;
-  track_total_hits?: boolean | undefined;
-  size?: number | undefined;
+  _source?: string[] | false;
+  track_total_hits?: boolean | number;
+  size?: number;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
-  sort?: estypes.SortOptions[] | undefined;
-  lastSortIds?: Array<string | number> | undefined;
+  sort?: estypes.SortOptions[];
+  lastSortIds?: Array<string | number>;
+  featureIds?: string[];
+  runtimeMappings?: MappingRuntimeFields;
 }
 
 /**
@@ -149,6 +170,9 @@ export class AlertsClient {
   private readonly esClient: ElasticsearchClient;
   private readonly spaceId: string | undefined;
   private readonly ruleDataService: IRuleDataService;
+  private readonly getRuleType: RuleTypeRegistry['get'];
+  private readonly getRuleList: RuleTypeRegistry['list'];
+  private getAlertIndicesAlias!: AlertingStart['getAlertIndicesAlias'];
 
   constructor(options: ConstructorOptions) {
     this.logger = options.logger;
@@ -159,6 +183,9 @@ export class AlertsClient {
     // Otherwise, if space is enabled and not specified, it is "default"
     this.spaceId = this.authorization.getSpaceId();
     this.ruleDataService = options.ruleDataService;
+    this.getRuleType = options.getRuleType;
+    this.getRuleList = options.getRuleList;
+    this.getAlertIndicesAlias = options.getAlertIndicesAlias;
   }
 
   private getOutcome(
@@ -194,21 +221,15 @@ export class AlertsClient {
 
   /**
    * Accepts an array of ES documents and executes ensureAuthorized for the given operation
-   * @param items
-   * @param operation
-   * @returns
    */
   private async ensureAllAuthorized(
     items: Array<{
       _id: string;
       // this is typed kind of crazy to fit the output of es api response to this
-      _source?:
-        | {
-            [ALERT_RULE_TYPE_ID]?: string | null | undefined;
-            [ALERT_RULE_CONSUMER]?: string | null | undefined;
-          }
-        | null
-        | undefined;
+      _source?: {
+        [ALERT_RULE_TYPE_ID]?: string | null;
+        [ALERT_RULE_CONSUMER]?: string | null;
+      } | null;
     }>,
     operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update
   ) {
@@ -225,8 +246,8 @@ export class AlertsClient {
       { hitIds: [], ownersAndRuleTypeIds: [] } as {
         hitIds: string[];
         ownersAndRuleTypeIds: Array<{
-          [ALERT_RULE_TYPE_ID]: string | null | undefined;
-          [ALERT_RULE_CONSUMER]: string | null | undefined;
+          [ALERT_RULE_TYPE_ID]?: string | null;
+          [ALERT_RULE_CONSUMER]?: string | null;
         }>;
       }
     );
@@ -261,12 +282,9 @@ export class AlertsClient {
   }
 
   /**
-   * This will be used as a part of the "find" api
-   * In the future we will add an "aggs" param
-   * @param param0
-   * @returns
+   * Searches alerts by id or query and audits the results
    */
-  private async singleSearchAfterAndAudit({
+  private async searchAlerts<TAggregations = Record<AggregateName, AggregationsAggregate>>({
     id,
     query,
     aggs,
@@ -277,7 +295,9 @@ export class AlertsClient {
     operation,
     sort,
     lastSortIds = [],
-  }: SingleSearchAfterAndAudit) {
+    featureIds,
+    runtimeMappings,
+  }: SearchAlertsParams) {
     try {
       const alertSpaceId = this.spaceId;
       if (alertSpaceId == null) {
@@ -290,7 +310,14 @@ export class AlertsClient {
 
       let queryBody: estypes.SearchRequest['body'] = {
         fields: [ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER, ALERT_WORKFLOW_STATUS, SPACE_IDS],
-        query: await this.buildEsQueryWithAuthz(query, id, alertSpaceId, operation, config),
+        query: await this.buildEsQueryWithAuthz(
+          query,
+          id,
+          alertSpaceId,
+          operation,
+          config,
+          featureIds ? new Set(featureIds) : undefined
+        ),
         aggs,
         _source,
         track_total_hits: trackTotalHits,
@@ -303,6 +330,7 @@ export class AlertsClient {
             },
           },
         ],
+        runtime_mappings: runtimeMappings,
       };
 
       if (lastSortIds.length > 0) {
@@ -312,32 +340,35 @@ export class AlertsClient {
         };
       }
 
-      const result = await this.esClient.search<ParsedTechnicalFields>({
+      const result = await this.esClient.search<ParsedTechnicalFields, TAggregations>({
         index: index ?? '.alerts-*',
         ignore_unavailable: true,
         body: queryBody,
         seq_no_primary_term: true,
       });
 
-      if (!result?.hits.hits.every((hit) => isValidAlert(hit))) {
+      if (!result?.hits?.hits?.length) {
+        return result;
+      }
+
+      if (result.hits.hits.some((hit) => !isValidAlert(hit))) {
         const errorMessage = `Invalid alert found with id of "${id}" or with query "${query}" and operation ${operation}`;
         this.logger.error(errorMessage);
         throw Boom.badData(errorMessage);
       }
 
-      if (result?.hits?.hits != null && result?.hits.hits.length > 0) {
-        await this.ensureAllAuthorized(result.hits.hits, operation);
+      // @ts-expect-error type mismatch: SearchHit._id is optional
+      await this.ensureAllAuthorized(result.hits.hits, operation);
 
-        result?.hits.hits.map((item) =>
-          this.auditLogger?.log(
-            alertAuditEvent({
-              action: operationAlertAuditActionMap[operation],
-              id: item._id,
-              ...this.getOutcome(operation),
-            })
-          )
-        );
-      }
+      result.hits.hits.forEach((item) =>
+        this.auditLogger?.log(
+          alertAuditEvent({
+            action: operationAlertAuditActionMap[operation],
+            id: item._id,
+            ...this.getOutcome(operation),
+          })
+        )
+      );
 
       return result;
     } catch (error) {
@@ -349,8 +380,6 @@ export class AlertsClient {
 
   /**
    * When an update by ids is requested, do a multi-get, ensure authz and audit alerts, then execute bulk update
-   * @param param0
-   * @returns
    */
   private async mgetAlertsAuditOperate({
     alerts,
@@ -405,8 +434,6 @@ export class AlertsClient {
 
   /**
    * When an update by ids is requested, do a multi-get, ensure authz and audit alerts, then execute bulk update
-   * @param param0
-   * @returns
    */
   private async mgetAlertsAuditOperateStatus({
     alerts,
@@ -429,10 +456,15 @@ export class AlertsClient {
     id: string | null | undefined,
     alertSpaceId: string,
     operation: WriteOperations.Update | ReadOperations.Get | ReadOperations.Find,
-    config: EsQueryConfig
+    config: EsQueryConfig,
+    featuresIds?: Set<string>
   ) {
     try {
-      const authzFilter = (await getAuthzFilter(this.authorization, operation)) as Filter;
+      const authzFilter = (await getAuthzFilter(
+        this.authorization,
+        operation,
+        featuresIds
+      )) as Filter;
       const spacesFilter = getSpacesFilter(alertSpaceId) as unknown as Filter;
       let esQuery;
       if (id != null) {
@@ -467,9 +499,7 @@ export class AlertsClient {
   }
 
   /**
-   * executes a search after to find alerts with query (+ authz filter)
-   * @param param0
-   * @returns
+   * Executes a search after to find alerts with query (+ authz filter)
    */
   private async queryAndAuditAllAlerts({
     index,
@@ -500,7 +530,7 @@ export class AlertsClient {
 
     while (hasSortIds) {
       try {
-        const result = await this.singleSearchAfterAndAudit({
+        const result = await this.searchAlerts({
           id: null,
           query,
           index,
@@ -583,7 +613,7 @@ export class AlertsClient {
   public async get({ id, index }: GetAlertParams) {
     try {
       // first search for the alert by id, then use the alert info to check if user has access to it
-      const alert = await this.singleSearchAfterAndAudit({
+      const alert = await this.searchAlerts({
         id,
         index,
         operation: ReadOperations.Get,
@@ -596,7 +626,10 @@ export class AlertsClient {
       }
 
       // move away from pulling data from _source in the future
-      return alert.hits.hits[0]._source;
+      return {
+        ...alert.hits.hits[0]._source,
+        _index: alert.hits.hits[0]._index,
+      };
     } catch (error) {
       this.logger.error(`get threw an error: ${error}`);
       throw error;
@@ -618,7 +651,7 @@ export class AlertsClient {
       }
 
       // first search for the alert by id, then use the alert info to check if user has access to it
-      const responseAlertSum = await this.singleSearchAfterAndAudit({
+      const responseAlertSum = await this.searchAlerts({
         index: (indexToUse ?? []).join(),
         operation: ReadOperations.Get,
         aggs: {
@@ -677,12 +710,13 @@ export class AlertsClient {
           },
         },
         size: 0,
+        featureIds,
       });
 
       let activeAlertCount = 0;
       let recoveredAlertCount = 0;
       (
-        ((responseAlertSum.aggregations?.count as estypes.AggregationsMultiBucketAggregateBase)
+        ((responseAlertSum?.aggregations?.count as estypes.AggregationsMultiBucketAggregateBase)
           ?.buckets as estypes.AggregationsStringTermsBucketKeys[]) ?? []
       ).forEach((b) => {
         if (b.key === ALERT_STATUS_ACTIVE) {
@@ -697,13 +731,15 @@ export class AlertsClient {
         recoveredAlertCount,
         activeAlerts:
           (
-            responseAlertSum.aggregations
+            responseAlertSum?.aggregations
               ?.active_alerts_bucket as estypes.AggregationsAutoDateHistogramAggregate
           )?.buckets ?? [],
         recoveredAlerts:
           (
-            (responseAlertSum.aggregations?.recovered_alerts as estypes.AggregationsFilterAggregate)
-              ?.container as estypes.AggregationsAutoDateHistogramAggregate
+            (
+              responseAlertSum?.aggregations
+                ?.recovered_alerts as estypes.AggregationsFilterAggregate
+            )?.container as estypes.AggregationsAutoDateHistogramAggregate
           )?.buckets ?? [],
       };
     } catch (error) {
@@ -719,7 +755,7 @@ export class AlertsClient {
     index,
   }: UpdateOptions<Params>) {
     try {
-      const alert = await this.singleSearchAfterAndAudit({
+      const alert = await this.searchAlerts({
         id,
         index,
         operation: WriteOperations.Update,
@@ -789,19 +825,16 @@ export class AlertsClient {
         const result = await this.esClient.updateByQuery({
           index,
           conflicts: 'proceed',
-          refresh: true,
-          body: {
-            script: {
-              source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
+          script: {
+            source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
                 ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
               }
               if (ctx._source.signal != null && ctx._source.signal.status != null) {
                 ctx._source.signal.status = '${status}'
               }`,
-              lang: 'painless',
-            } as InlineScript,
-            query: fetchAndAuditResponse.authorizedQuery as Omit<QueryDslQueryContainer, 'script'>,
+            lang: 'painless',
           },
+          query: fetchAndAuditResponse.authorizedQuery as Omit<QueryDslQueryContainer, 'script'>,
           ignore_unavailable: true,
         });
         return result;
@@ -851,33 +884,33 @@ export class AlertsClient {
     });
   }
 
-  public async removeCaseIdFromAlerts({ caseId, alerts }: RemoveAlertsFromCaseOptions) {
+  public async removeCaseIdFromAlerts({ caseId, alerts }: RemoveCaseIdFromAlertsOptions) {
+    /**
+     * We intentionally do not perform any authorization
+     * on the alerts. Users should be able to remove
+     * cases from alerts when deleting a case or an
+     * attachment
+     */
     try {
       if (alerts.length === 0) {
         return;
       }
 
-      const mgetRes = await this.ensureAllAlertsAuthorized({
-        alerts,
-        operation: ReadOperations.Get,
-      });
-
       const painlessScript = `if (ctx._source['${ALERT_CASE_IDS}'] != null) {
-        for (int i=0; i < ctx._source['${ALERT_CASE_IDS}'].length; i++) {
-            if (ctx._source['${ALERT_CASE_IDS}'][i].equals('${caseId}')) {
-                ctx._source['${ALERT_CASE_IDS}'].remove(i);
-            }
+        if (ctx._source['${ALERT_CASE_IDS}'].contains('${caseId}')) {
+          int index = ctx._source['${ALERT_CASE_IDS}'].indexOf('${caseId}');
+          ctx._source['${ALERT_CASE_IDS}'].remove(index);
         }
       }`;
 
       const bulkUpdateRequest = [];
 
-      for (const doc of mgetRes.docs) {
+      for (const alert of alerts) {
         bulkUpdateRequest.push(
           {
             update: {
-              _index: doc._index,
-              _id: doc._id,
+              _index: alert.index,
+              _id: alert.id,
             },
           },
           {
@@ -891,12 +924,62 @@ export class AlertsClient {
         body: bulkUpdateRequest,
       });
     } catch (error) {
-      this.logger.error(`Error to remove case ${caseId} from alerts: ${error}`);
+      this.logger.error(`Error removing case ${caseId} from alerts: ${error}`);
       throw error;
     }
   }
 
-  public async find<Params extends RuleTypeParams = never>({
+  public async removeCaseIdsFromAllAlerts({ caseIds }: { caseIds: string[] }) {
+    /**
+     * We intentionally do not perform any authorization
+     * on the alerts. Users should be able to remove
+     * cases from alerts when deleting a case or an
+     * attachment
+     */
+    try {
+      if (caseIds.length === 0) {
+        return;
+      }
+
+      const index = `${this.ruleDataService.getResourcePrefix()}-*`;
+      const query = `${ALERT_CASE_IDS}: (${caseIds.join(' or ')})`;
+      const esQuery = buildEsQuery(undefined, { query, language: 'kuery' }, []);
+
+      const SCRIPT_PARAMS_ID = 'caseIds';
+
+      const painlessScript = `if (ctx._source['${ALERT_CASE_IDS}'] != null && ctx._source['${ALERT_CASE_IDS}'].length > 0 && params['${SCRIPT_PARAMS_ID}'] != null && params['${SCRIPT_PARAMS_ID}'].length > 0) {
+        List storedCaseIds = ctx._source['${ALERT_CASE_IDS}'];
+        List caseIdsToRemove = params['${SCRIPT_PARAMS_ID}'];
+
+        for (int i=0; i < caseIdsToRemove.length; i++) {
+          if (storedCaseIds.contains(caseIdsToRemove[i])) {
+            int index = storedCaseIds.indexOf(caseIdsToRemove[i]);
+            storedCaseIds.remove(index);
+          }
+        }
+      }`;
+
+      await this.esClient.updateByQuery({
+        index,
+        conflicts: 'proceed',
+        script: {
+          source: painlessScript,
+          lang: 'painless',
+          params: { caseIds },
+        },
+        query: esQuery,
+        ignore_unavailable: true,
+      });
+    } catch (err) {
+      this.logger.error(`Failed removing ${caseIds} from all alerts: ${err}`);
+      throw err;
+    }
+  }
+
+  public async find<
+    Params extends RuleTypeParams = never,
+    TAggregations = Record<AggregateName, AggregationsAggregate>
+  >({
     aggs,
     featureIds,
     index,
@@ -906,6 +989,7 @@ export class AlertsClient {
     sort,
     track_total_hits: trackTotalHits,
     _source,
+    runtimeMappings,
   }: {
     aggs?: object;
     featureIds?: string[];
@@ -914,8 +998,9 @@ export class AlertsClient {
     search_after?: Array<string | number>;
     size?: number;
     sort?: estypes.SortOptions[];
-    track_total_hits?: boolean;
-    _source?: string[];
+    track_total_hits?: boolean | number;
+    _source?: string[] | false;
+    runtimeMappings?: MappingRuntimeFields;
   }) {
     try {
       let indexToUse = index;
@@ -926,8 +1011,8 @@ export class AlertsClient {
         }
       }
 
-      // first search for the alert by id, then use the alert info to check if user has access to it
-      const alertsSearchResponse = await this.singleSearchAfterAndAudit({
+      const alertsSearchResponse = await this.searchAlerts<TAggregations>({
+        featureIds,
         query,
         aggs,
         _source,
@@ -937,6 +1022,7 @@ export class AlertsClient {
         operation: ReadOperations.Find,
         sort,
         lastSortIds: searchAfter,
+        runtimeMappings,
       });
 
       if (alertsSearchResponse == null) {
@@ -952,37 +1038,143 @@ export class AlertsClient {
     }
   }
 
+  /**
+   * Performs a `find` query to extract aggregations on alert groups
+   */
+  public async getGroupAggregations({
+    featureIds,
+    groupByField,
+    aggregations,
+    filters,
+    pageIndex,
+    pageSize,
+    sort = [{ unitsCount: { order: 'desc' } }],
+  }: {
+    /**
+     * The feature ids the alerts belong to, used for authorization
+     */
+    featureIds: string[];
+    /**
+     * The field to group by
+     * @example "kibana.alert.rule.name"
+     */
+    groupByField: string;
+    /**
+     * The aggregations to perform on the groupByField buckets
+     */
+    aggregations?: TypeOf<typeof alertsAggregationsSchema>;
+    /**
+     * The filters to apply to the query
+     */
+    filters?: estypes.QueryDslQueryContainer[];
+    /**
+     * Any sort options to apply to the groupByField aggregations
+     */
+    sort?: SortCombinations[];
+    /**
+     * The page index to start from
+     */
+    pageIndex: number;
+    /**
+     * The page size
+     */
+    pageSize: number;
+  }) {
+    const uniqueValue = uuidv4();
+    if (pageIndex > MAX_ALERTS_PAGES) {
+      throw Boom.badRequest(
+        `The provided pageIndex value is too high. The maximum allowed pageIndex value is ${MAX_ALERTS_PAGES}.`
+      );
+    }
+    if (Math.max(pageIndex, pageIndex * pageSize) > MAX_PAGINATED_ALERTS) {
+      throw Boom.badRequest(
+        `The number of documents is too high. Paginating through more than ${MAX_PAGINATED_ALERTS} documents is not possible.`
+      );
+    }
+    const searchResult = await this.find<
+      never,
+      { groupByFields: AggregationsMultiBucketAggregateBase<{ key: string }> }
+    >({
+      featureIds,
+      aggs: {
+        groupByFields: {
+          terms: {
+            field: 'groupByField',
+            size: MAX_ALERTS_GROUPING_QUERY_SIZE,
+          },
+          aggs: {
+            unitsCount: { value_count: { field: 'groupByField' } },
+            bucket_truncate: {
+              bucket_sort: {
+                sort,
+                from: pageIndex * pageSize,
+                size: pageSize,
+              },
+            },
+            ...(aggregations ?? {}),
+          },
+        },
+        unitsCount: { value_count: { field: 'groupByField' } },
+        groupsCount: { cardinality: { field: 'groupByField' } },
+      },
+      query: {
+        bool: {
+          filter: filters,
+        },
+      },
+      runtimeMappings: {
+        groupByField: {
+          type: 'keyword',
+          script: {
+            source:
+              // When size()==0, emits a uniqueValue as the value to represent this group  else join by uniqueValue.
+              "if (!doc.containsKey(params['selectedGroup']) || doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) }" +
+              // Else, join the values with uniqueValue. We cannot simply emit the value like doc[params['selectedGroup']].value,
+              // the runtime field will only return the first value in an array.
+              // The docs advise that if the field has multiple values, "Scripts can call the emit method multiple times to emit multiple values."
+              // However, this gives us a group for each value instead of combining the values like we're aiming for.
+              // Instead of .value, we can retrieve all values with .join().
+              // Instead of joining with a "," we should join with a unique value to avoid splitting a value that happens to contain a ",".
+              // We will format into a proper array in parseGroupingQuery .
+              " else { emit(doc[params['selectedGroup']].join(params['uniqueValue']))}",
+            params: {
+              selectedGroup: groupByField,
+              uniqueValue,
+            },
+          },
+        },
+      },
+      size: 0,
+      _source: false,
+    });
+    // Replace artificial uuid values with '--' in null-value buckets and mark them with `isNullGroup = true`
+    const groupsAggregation = searchResult.aggregations?.groupByFields;
+    if (groupsAggregation) {
+      const buckets = Array.isArray(groupsAggregation?.buckets)
+        ? groupsAggregation.buckets
+        : Object.values(groupsAggregation?.buckets ?? {});
+      buckets.forEach((bucket) => {
+        if (bucket.key === uniqueValue) {
+          bucket.key = '--';
+          (bucket as { isNullGroup?: boolean }).isNullGroup = true;
+        }
+      });
+    }
+    return searchResult;
+  }
+
   public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {
     try {
-      // ATTENTION FUTURE DEVELOPER when you are a super user the augmentedRuleTypes.authorizedRuleTypes will
-      // return all of the features that you can access and does not care about your featureIds
-      const augmentedRuleTypes = await this.authorization.getAugmentedRuleTypesWithAuthorization(
-        featureIds,
-        [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
-        AlertingAuthorizationEntity.Alert
+      const authorizedRuleTypes = await this.authorization.getAuthorizedRuleTypes(
+        AlertingAuthorizationEntity.Alert,
+        new Set(featureIds)
       );
-      // As long as the user can read a minimum of one type of rule type produced by the provided feature,
-      // the user should be provided that features' alerts index.
-      // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
-      const authorizedFeatures = new Set<string>();
-      for (const ruleType of augmentedRuleTypes.authorizedRuleTypes) {
-        authorizedFeatures.add(ruleType.producer);
-      }
-      const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
-        (feature): feature is ValidFeatureId =>
-          featureIds.includes(feature) && isValidFeatureId(feature)
+      const indices = this.getAlertIndicesAlias(
+        authorizedRuleTypes.map((art: { id: any }) => art.id),
+        this.spaceId
       );
-      const toReturn = validAuthorizedFeatures.map((feature) => {
-        const index = this.ruleDataService.findIndexByFeature(feature, Dataset.alerts);
-        if (index == null) {
-          throw new Error(`This feature id ${feature} should be associated to an alert index`);
-        }
-        return (
-          index?.getPrimaryAlias(feature === AlertConsumers.SIEM ? this.spaceId ?? '*' : '*') ?? ''
-        );
-      });
 
-      return toReturn;
+      return indices;
     } catch (exc) {
       const errMessage = `getAuthorizedAlertsIndices failed to get authorized rule types: ${exc}`;
       this.logger.error(errMessage);
@@ -1026,21 +1218,53 @@ export class AlertsClient {
   }
 
   public async getBrowserFields({
+    featureIds,
     indices,
     metaFields,
     allowNoIndex,
   }: {
+    featureIds: string[];
     indices: string[];
     metaFields: string[];
     allowNoIndex: boolean;
-  }): Promise<BrowserFields> {
+  }): Promise<{ browserFields: BrowserFields; fields: FieldDescriptor[] }> {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
+    const ruleTypeList = this.getRuleList();
+    const fieldsForAAD = new Set<string>();
+    for (const rule of ruleTypeList) {
+      if (featureIds.includes(rule.producer) && rule.hasFieldsForAAD) {
+        (rule.fieldsForAAD ?? []).forEach((f) => {
+          fieldsForAAD.add(f);
+        });
+      }
+    }
     const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
       pattern: indices,
       metaFields,
       fieldCapsOptions: { allow_no_indices: allowNoIndex },
+      fields: [...fieldsForAAD, 'kibana.*'],
     });
 
-    return fieldDescriptorToBrowserFieldMapper(fields);
+    return {
+      browserFields: fieldDescriptorToBrowserFieldMapper(fields),
+      fields,
+    };
+  }
+
+  public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {
+    const { producer, fieldsForAAD = [] } = this.getRuleType(ruleTypeId);
+    if (producer === AlertConsumers.SIEM) {
+      throw Boom.badRequest(`Security solution rule type is not supported`);
+    }
+    const indices = await this.getAuthorizedAlertsIndices([producer]);
+    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
+    const { fields = [] } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+      pattern: indices ?? [],
+      metaFields: ['_id', '_index'],
+      fieldCapsOptions: { allow_no_indices: true },
+      fields: [...fieldsForAAD, 'kibana.*'],
+    });
+
+    return fields;
   }
 }

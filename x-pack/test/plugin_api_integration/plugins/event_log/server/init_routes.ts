@@ -6,6 +6,7 @@
  */
 
 import {
+  CoreSetup,
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
@@ -16,6 +17,9 @@ import {
 } from '@kbn/core/server';
 import { IEventLogService, IEventLogger } from '@kbn/event-log-plugin/server';
 import { IValidatedEvent } from '@kbn/event-log-plugin/server/types';
+import { schema } from '@kbn/config-schema';
+import { queryOptionsSchema } from '@kbn/event-log-plugin/server/event_log_client';
+import { EventLogFixtureStartDeps } from './plugin';
 
 export const logEventRoute = (router: IRouter, eventLogger: IEventLogger, logger: Logger) => {
   router.post(
@@ -203,5 +207,83 @@ export const isEventLogServiceLoggingEntriesRoute = (
       logger.info(`test if event logger is logging entries`);
       return res.ok({ body: { isLoggingEntries: eventLogService.isLoggingEntries() } });
     }
+  );
+};
+
+export const getEventLogRoute = (router: IRouter, core: CoreSetup<EventLogFixtureStartDeps>) => {
+  router.get(
+    {
+      path: '/_test/event_log/{type}/{id}/_find',
+      validate: {
+        params: schema.object({
+          type: schema.string(),
+          id: schema.string(),
+        }),
+        query: queryOptionsSchema,
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const [, { eventLog }] = await core.getStartServices();
+      const eventLogClient = eventLog.getClient(req);
+      const {
+        params: { id, type },
+        query,
+      } = req;
+
+      try {
+        return res.ok({
+          body: await eventLogClient.findEventsBySavedObjectIds(type, [id], query),
+        });
+      } catch (err) {
+        return res.notFound();
+      }
+    }
+  );
+};
+
+export const getEventLogByIdsRoute = (
+  router: IRouter,
+  core: CoreSetup<EventLogFixtureStartDeps>
+) => {
+  router.post(
+    {
+      path: '/_test/event_log/{type}/_find',
+      validate: {
+        params: schema.object({
+          type: schema.string(),
+        }),
+        query: queryOptionsSchema,
+        body: schema.object({
+          ids: schema.arrayOf(schema.string(), { defaultValue: [] }),
+          legacyIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse> {
+      const [, { eventLog }] = await core.getStartServices();
+      const eventLogClient = eventLog.getClient(req);
+
+      const {
+        params: { type },
+        body: { ids, legacyIds },
+        query,
+      } = req;
+
+      try {
+        return res.ok({
+          body: await eventLogClient.findEventsBySavedObjectIds(type, ids, query, legacyIds),
+        });
+      } catch (err) {
+        return res.notFound();
+      }
+    })
   );
 };

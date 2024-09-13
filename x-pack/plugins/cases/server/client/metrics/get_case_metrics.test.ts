@@ -8,8 +8,7 @@
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { getCaseMetrics } from './get_case_metrics';
-import type { CaseResponse } from '../../../common/api';
-import { CaseStatuses } from '../../../common/api';
+import { CaseMetricsFeature } from '../../../common/types/api';
 import type { CasesClientMock } from '../mocks';
 import { createCasesClientMock } from '../mocks';
 import type { CasesClientArgs } from '../types';
@@ -21,7 +20,9 @@ import {
 } from '../../services/mocks';
 import { mockAlertsService } from './test_utils/alerts';
 import { createStatusChangeSavedObject } from './test_utils/lifespan';
-import type { CaseSavedObject } from '../../common/types';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import { CaseStatuses } from '@kbn/cases-components';
+import type { Case } from '../../../common';
 
 describe('getCaseMetrics', () => {
   const inProgressStatusChangeTimestamp = new Date('2021-11-23T20:00:43Z');
@@ -55,7 +56,7 @@ describe('getCaseMetrics', () => {
 
   it('returns the lifespan metrics', async () => {
     const metrics = await getCaseMetrics(
-      { caseId: '', features: ['lifespan'] },
+      { caseId: '', features: [CaseMetricsFeature.LIFESPAN] },
       client,
       clientArgs
     );
@@ -75,7 +76,7 @@ describe('getCaseMetrics', () => {
 
   it('populates the alerts.hosts and alerts.users sections', async () => {
     const metrics = await getCaseMetrics(
-      { caseId: '', features: ['alerts.hosts', 'alerts.users'] },
+      { caseId: '', features: [CaseMetricsFeature.ALERTS_HOSTS, CaseMetricsFeature.ALERTS_USERS] },
       client,
       clientArgs
     );
@@ -89,7 +90,7 @@ describe('getCaseMetrics', () => {
 
   it('populates multiple sections at a time', async () => {
     const metrics = await getCaseMetrics(
-      { caseId: '', features: ['alerts.count', 'lifespan'] },
+      { caseId: '', features: [CaseMetricsFeature.ALERTS_COUNT, CaseMetricsFeature.LIFESPAN] },
       client,
       clientArgs
     );
@@ -108,7 +109,7 @@ describe('getCaseMetrics', () => {
 
   it('populates multiple alerts sections at a time', async () => {
     const metrics = await getCaseMetrics(
-      { caseId: '', features: ['alerts.count', 'alerts.hosts'] },
+      { caseId: '', features: [CaseMetricsFeature.ALERTS_COUNT, CaseMetricsFeature.ALERTS_HOSTS] },
       client,
       clientArgs
     );
@@ -124,6 +125,7 @@ describe('getCaseMetrics', () => {
     expect.assertions(1);
 
     await expect(
+      // @ts-expect-error: testing invalid features
       getCaseMetrics({ caseId: '', features: ['bananas'] }, client, clientArgs)
     ).rejects.toThrow();
   });
@@ -133,13 +135,17 @@ describe('getCaseMetrics', () => {
 
     try {
       await getCaseMetrics(
-        { caseId: '1', features: ['bananas', 'lifespan', 'alerts.count'] },
+        {
+          caseId: '1',
+          // @ts-expect-error: testing invalid features
+          features: ['bananas', CaseMetricsFeature.LIFESPAN, CaseMetricsFeature.ALERTS_COUNT],
+        },
         client,
         clientArgs
       );
     } catch (error) {
       expect(error.message).toMatchInlineSnapshot(
-        `"Failed to retrieve metrics within client for case id: 1: Error: invalid features: [bananas], please only provide valid features: [actions.isolateHost, alerts.count, alerts.hosts, alerts.users, connectors, lifespan]"`
+        `"Failed to retrieve metrics within client for case id: 1: Error: Invalid value \\"bananas\\" supplied to \\"features\\""`
       );
     }
   });
@@ -148,7 +154,7 @@ describe('getCaseMetrics', () => {
     expect.assertions(1);
 
     await getCaseMetrics(
-      { caseId: '', features: ['alerts.users', 'alerts.hosts'] },
+      { caseId: '', features: [CaseMetricsFeature.ALERTS_USERS, CaseMetricsFeature.ALERTS_HOSTS] },
       client,
       clientArgs
     );
@@ -164,7 +170,7 @@ function createMockClient() {
     return {
       created_at: '2021-11-23T19:59:43Z',
       closed_at: '2021-11-23T19:59:44Z',
-    } as unknown as CaseResponse;
+    } as unknown as Case;
   });
 
   client.attachments.getAllAlertsAttachToCase.mockImplementation(async () => {
@@ -191,7 +197,7 @@ function createMockClientArgs() {
       attributes: {
         owner: 'security',
       },
-    } as unknown as CaseSavedObject;
+    } as unknown as CaseSavedObjectTransformed;
   });
 
   const alertsService = mockAlertsService();

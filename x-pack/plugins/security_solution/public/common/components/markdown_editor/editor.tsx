@@ -11,14 +11,17 @@ import React, {
   memo,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
   useCallback,
 } from 'react';
+import type { EuiMarkdownEditorProps, EuiMarkdownParseError } from '@elastic/eui';
 import { EuiMarkdownEditor } from '@elastic/eui';
 import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 
 import { uiPlugins, parsingPlugins, processingPlugins } from './plugins';
+import { useUpsellingMessage } from '../../hooks/use_upselling';
 
 interface MarkdownEditorProps {
   onChange: (content: string) => void;
@@ -28,6 +31,8 @@ interface MarkdownEditorProps {
   dataTestSubj?: string;
   height?: number;
   autoFocusDisabled?: boolean;
+  setIsMarkdownInvalid: (value: boolean) => void;
+  includePlugins?: boolean;
 }
 
 type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
@@ -39,11 +44,28 @@ export interface MarkdownEditorRef {
 }
 
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
-  ({ onChange, value, ariaLabel, editorId, dataTestSubj, height, autoFocusDisabled }, ref) => {
-    const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
-    const onParse = useCallback((err, { messages }) => {
-      setMarkdownErrorMessages(err ? [err] : messages);
-    }, []);
+  (
+    {
+      onChange,
+      value,
+      ariaLabel,
+      editorId,
+      dataTestSubj,
+      height,
+      autoFocusDisabled,
+      setIsMarkdownInvalid,
+      includePlugins = true,
+    },
+    ref
+  ) => {
+    const [markdownErrorMessages, setMarkdownErrorMessages] = useState<EuiMarkdownParseError[]>([]);
+    const onParse = useCallback<NonNullable<EuiMarkdownEditorProps['onParse']>>(
+      (err, { messages }) => {
+        setMarkdownErrorMessages(err ? [err] : messages);
+        setIsMarkdownInvalid(err ? true : false);
+      },
+      [setIsMarkdownInvalid]
+    );
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
 
     useEffect(() => {
@@ -51,6 +73,17 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
         editorRef.current?.textarea?.focus();
       }
     }, [autoFocusDisabled]);
+
+    const insightsUpsellingMessage = useUpsellingMessage('investigation_guide');
+    const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
+    const uiPluginsWithState = useMemo(() => {
+      return includePlugins
+        ? uiPlugins({
+            insightsUpsellingMessage,
+            interactionsUpsellingMessage,
+          })
+        : undefined;
+    }, [includePlugins, insightsUpsellingMessage, interactionsUpsellingMessage]);
 
     // @ts-expect-error update types
     useImperativeHandle(ref, () => {
@@ -73,7 +106,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
         editorId={editorId}
         onChange={onChange}
         value={value}
-        uiPlugins={uiPlugins}
+        uiPlugins={uiPluginsWithState}
         parsingPluginList={parsingPlugins}
         processingPluginList={processingPlugins}
         onParse={onParse}

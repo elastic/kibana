@@ -1,0 +1,28 @@
+openapi: 3.0.0
+info:
+  title: Update Saved Query Schema
+  version: '2023-10-31'
+paths: {}
+components:
+  schemas:
+    UpdateSavedQueryRequestBody:
+      type: object
+      properties:
+        id:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+        description:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DescriptionOrUndefined'
+        query:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/QueryOrUndefined'
+        ecs_mapping:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ECSMappingOrUndefined'
+        version:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/VersionOrUndefined'
+        platform:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DescriptionOrUndefined'
+        interval:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/IntervalOrUndefined'
+        snapshot:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SnapshotOrUndefined'
+        removed:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RemovedOrUndefined'

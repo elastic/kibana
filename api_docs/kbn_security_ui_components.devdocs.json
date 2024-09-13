@@ -1,0 +1,880 @@
+{
+  "id": "@kbn/security-ui-components",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/security-ui-components",
+        "id": "def-common.FeatureTable",
+        "type": "Class",
+        "tags": [],
+        "label": "FeatureTable",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-ui-components",
+            "scope": "common",
+            "docId": "kibKbnSecurityUiComponentsPluginApi",
+            "section": "def-common.FeatureTable",
+            "text": "FeatureTable"
+          },
+          " extends React.Component<Props, State, any>"
+        ],
+        "path": "x-pack/packages/security/ui_components/src/kibana_privilege_table/feature_table.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-ui-components",
+            "id": "def-common.FeatureTable.defaultProps",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultProps",
+            "description": [],
+            "path": "x-pack/packages/security/ui_components/src/kibana_privilege_table/feature_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.FeatureTable.defaultProps.privilegeIndex",
+                "type": "number",
+                "tags": [],
+                "label": "privilegeIndex",
+                "description": [],
+                "path": "x-pack/packages/security/ui_components/src/kibana_privilege_table/feature_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.FeatureTable.defaultProps.showLocks",
+                "type": "boolean",
+                "tags": [],
+                "label": "showLocks",
+                "description": [],
+                "path": "x-pack/packages/security/ui_components/src/kibana_privilege_table/feature_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/security-ui-components",
+            "id": "def-common.FeatureTable.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/security/ui_components/src/kibana_privilege_table/feature_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.FeatureTable.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "Props"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/kibana_privilege_table/feature_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-ui-components",
+            "id": "def-common.FeatureTable.render",
+            "type": "Function",
+            "tags": [],
+            "label": "render",
+            "description": [],
+            "signature": [
+              "() => JSX.Element"
+            ],
+            "path": "x-pack/packages/security/ui_components/src/kibana_privilege_table/feature_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-ui-components",
+        "id": "def-common.PrivilegeFormCalculator",
+        "type": "Class",
+        "tags": [],
+        "label": "PrivilegeFormCalculator",
+        "description": [
+          "\nCalculator responsible for determining the displayed and effective privilege values for the following interfaces:\n- <PrivilegeSpaceForm> and children\n- <PrivilegeSpaceTable> and children"
+        ],
+        "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-ui-components",
+            "id": "def-common.PrivilegeFormCalculator.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "kibanaPrivileges",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-role-management-model",
+                    "scope": "common",
+                    "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                    "section": "def-common.KibanaPrivileges",
+                    "text": "KibanaPrivileges"
+                  }
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-plugin-types-common",
+                    "scope": "common",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                    "section": "def-common.Role",
+                    "text": "Role"
+                  }
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-ui-components",
+            "id": "def-common.PrivilegeFormCalculator.getBasePrivilege",
+            "type": "Function",
+            "tags": [],
+            "label": "getBasePrivilege",
+            "description": [
+              "\nReturns the assigned base privilege.\nIf more than one base privilege is assigned, the most permissive privilege will be returned.\nIf no base privileges are assigned, then this will return `undefined`.\n"
+            ],
+            "signature": [
+              "(privilegeIndex: number) => ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.KibanaPrivilege",
+                "text": "KibanaPrivilege"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.getBasePrivilege.$1",
+                "type": "number",
+                "tags": [],
+                "label": "privilegeIndex",
+                "description": [
+                  "the index of the kibana privileges role component"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-ui-components",
+            "id": "def-common.PrivilegeFormCalculator.isWildcardBasePrivilege",
+            "type": "Function",
+            "tags": [],
+            "label": "isWildcardBasePrivilege",
+            "description": [
+              "\nReturns true if it is base wildcard (*) privilege.\n"
+            ],
+            "signature": [
+              "(privilegeIndex: number) => boolean"
+            ],
+            "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.isWildcardBasePrivilege.$1",
+                "type": "number",
+                "tags": [],
+                "label": "privilegeIndex",
+                "description": [
+                  "the index of the kibana privileges role component"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-ui-components",
+            "id": "def-common.PrivilegeFormCalculator.getDisplayedPrimaryFeaturePrivilegeId",
+            "type": "Function",
+            "tags": [],
+            "label": "getDisplayedPrimaryFeaturePrivilegeId",
+            "description": [
+              "\nReturns the ID of the *displayed* Primary Feature Privilege for the indicated feature and privilege index.\nIf the effective primary feature privilege is a \"minimal\" version, then this returns the corresponding non-minimal version.\n"
+            ],
+            "signature": [
+              "(featureId: string, privilegeIndex: number, allSpacesSelected: boolean) => string | undefined"
+            ],
+            "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.getDisplayedPrimaryFeaturePrivilegeId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [
+                  "the feature id to get the Primary Feature KibanaPrivilege for."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.getDisplayedPrimaryFeaturePrivilegeId.$2",
+                "type": "number",
+                "tags": [],
+                "label": "privilegeIndex",
+                "description": [
+                  "the index of the kibana privileges role component"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.getDisplayedPrimaryFeaturePrivilegeId.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "allSpacesSelected",
+                "description": [
+                  "indicates if the privilege form is configured to grant access to all spaces."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-ui-components",
+            "id": "def-common.PrivilegeFormCalculator.hasCustomizedSubFeaturePrivileges",
+            "type": "Function",
+            "tags": [],
+            "label": "hasCustomizedSubFeaturePrivileges",
+            "description": [
+              "\nDetermines if the indicated feature has sub-feature privilege assignments which differ from the \"displayed\" primary feature privilege.\n"
+            ],
+            "signature": [
+              "(featureId: string, privilegeIndex: number, allSpacesSelected: boolean) => boolean"
+            ],
+            "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.hasCustomizedSubFeaturePrivileges.$1",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [
+                  "the feature id"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.hasCustomizedSubFeaturePrivileges.$2",
+                "type": "number",
+                "tags": [],
+                "label": "privilegeIndex",
+                "description": [
+                  "the index of the kibana privileges role component"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.hasCustomizedSubFeaturePrivileges.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "allSpacesSelected",
+                "description": [
+                  "indicates if the privilege form is configured to grant access to all spaces."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-ui-components",
+            "id": "def-common.PrivilegeFormCalculator.getEffectivePrimaryFeaturePrivilege",
+            "type": "Function",
+            "tags": [],
+            "label": "getEffectivePrimaryFeaturePrivilege",
+            "description": [
+              "\nReturns the most permissive effective Primary Feature KibanaPrivilege, including the minimal versions.\n"
+            ],
+            "signature": [
+              "(featureId: string, privilegeIndex: number, allSpacesSelected?: boolean | undefined) => ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.PrimaryFeaturePrivilege",
+                "text": "PrimaryFeaturePrivilege"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.getEffectivePrimaryFeaturePrivilege.$1",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [
+                  "the feature id"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.getEffectivePrimaryFeaturePrivilege.$2",
+                "type": "number",
+                "tags": [],
+                "label": "privilegeIndex",
+                "description": [
+                  "the index of the kibana privileges role component"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.getEffectivePrimaryFeaturePrivilege.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "allSpacesSelected",
+                "description": [
+                  "indicates if the privilege form is configured to grant access to all spaces."
+                ],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-ui-components",
+            "id": "def-common.PrivilegeFormCalculator.isIndependentSubFeaturePrivilegeGranted",
+            "type": "Function",
+            "tags": [],
+            "label": "isIndependentSubFeaturePrivilegeGranted",
+            "description": [
+              "\nDetermines if the indicated sub-feature privilege is granted.\n"
+            ],
+            "signature": [
+              "(featureId: string, privilegeId: string, privilegeIndex: number) => boolean"
+            ],
+            "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.isIndependentSubFeaturePrivilegeGranted.$1",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [
+                  "the feature id"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.isIndependentSubFeaturePrivilegeGranted.$2",
+                "type": "string",
+                "tags": [],
+                "label": "privilegeId",
+                "description": [
+                  "the sub feature privilege id"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.isIndependentSubFeaturePrivilegeGranted.$3",
+                "type": "number",
+                "tags": [],
+                "label": "privilegeIndex",
+                "description": [
+                  "the index of the kibana privileges role component"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-ui-components",
+            "id": "def-common.PrivilegeFormCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege",
+            "type": "Function",
+            "tags": [],
+            "label": "getSelectedMutuallyExclusiveSubFeaturePrivilege",
+            "description": [
+              "\nReturns the most permissive effective privilege within the indicated mutually-exclusive sub feature privilege group.\n"
+            ],
+            "signature": [
+              "(featureId: string, subFeatureGroup: ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.SubFeaturePrivilegeGroup",
+                "text": "SubFeaturePrivilegeGroup"
+              },
+              ", privilegeIndex: number) => ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.SubFeaturePrivilege",
+                "text": "SubFeaturePrivilege"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege.$1",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [
+                  "the feature id"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "subFeatureGroup",
+                "description": [
+                  "the mutually-exclusive sub feature group"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-role-management-model",
+                    "scope": "common",
+                    "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                    "section": "def-common.SubFeaturePrivilegeGroup",
+                    "text": "SubFeaturePrivilegeGroup"
+                  }
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege.$3",
+                "type": "number",
+                "tags": [],
+                "label": "privilegeIndex",
+                "description": [
+                  "the index of the kibana privileges role component"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-ui-components",
+            "id": "def-common.PrivilegeFormCalculator.canCustomizeSubFeaturePrivileges",
+            "type": "Function",
+            "tags": [],
+            "label": "canCustomizeSubFeaturePrivileges",
+            "description": [
+              "\nDetermines if the indicated feature is capable of having its sub-feature privileges customized.\n"
+            ],
+            "signature": [
+              "(featureId: string, privilegeIndex: number) => boolean"
+            ],
+            "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.canCustomizeSubFeaturePrivileges.$1",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [
+                  "the feature id"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.canCustomizeSubFeaturePrivileges.$2",
+                "type": "number",
+                "tags": [],
+                "label": "privilegeIndex",
+                "description": [
+                  "the index of the kibana privileges role component"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-ui-components",
+            "id": "def-common.PrivilegeFormCalculator.updateSelectedFeaturePrivilegesForCustomization",
+            "type": "Function",
+            "tags": [],
+            "label": "updateSelectedFeaturePrivilegesForCustomization",
+            "description": [
+              "\nReturns an updated set of feature privileges based on the toggling of the \"Customize sub-feature privileges\" control.\n"
+            ],
+            "signature": [
+              "(featureId: string, privilegeIndex: number, willBeCustomizing: boolean, allSpacesSelected: boolean) => string[]"
+            ],
+            "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.updateSelectedFeaturePrivilegesForCustomization.$1",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [
+                  "the feature id"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.updateSelectedFeaturePrivilegesForCustomization.$2",
+                "type": "number",
+                "tags": [],
+                "label": "privilegeIndex",
+                "description": [
+                  "the index of the kibana privileges role component"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.updateSelectedFeaturePrivilegesForCustomization.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "willBeCustomizing",
+                "description": [
+                  "flag indicating if this feature is about to have its sub-feature privileges customized or not"
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.updateSelectedFeaturePrivilegesForCustomization.$4",
+                "type": "boolean",
+                "tags": [],
+                "label": "allSpacesSelected",
+                "description": [
+                  "indicates if the privilege form is configured to grant access to all spaces."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-ui-components",
+            "id": "def-common.PrivilegeFormCalculator.hasSupersededInheritedPrivileges",
+            "type": "Function",
+            "tags": [],
+            "label": "hasSupersededInheritedPrivileges",
+            "description": [
+              "\nDetermines if the indicated privilege entry is less permissive than the configured \"global\" entry for the role."
+            ],
+            "signature": [
+              "(privilegeIndex: number) => boolean"
+            ],
+            "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ui-components",
+                "id": "def-common.PrivilegeFormCalculator.hasSupersededInheritedPrivileges.$1",
+                "type": "number",
+                "tags": [],
+                "label": "privilegeIndex",
+                "description": [
+                  "the index of the kibana privileges role component"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/packages/security/ui_components/src/privilege_form_calculator/privilege_form_calculator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/security-ui-components",
+        "id": "def-common.FeatureTableCell",
+        "type": "Function",
+        "tags": [],
+        "label": "FeatureTableCell",
+        "description": [],
+        "signature": [
+          "({ feature, className }: Props) => JSX.Element"
+        ],
+        "path": "x-pack/packages/security/ui_components/src/kibana_privilege_table/components/feature_table_cell.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-ui-components",
+            "id": "def-common.FeatureTableCell.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ feature, className }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/packages/security/ui_components/src/kibana_privilege_table/components/feature_table_cell.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

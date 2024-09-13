@@ -22,6 +22,28 @@ Object {
 }
 `;
 
+exports[`merging two configs 1`] = `
+Object {
+  "arr1": Array [
+    4,
+    5,
+  ],
+  "arr2": Array [],
+  "bar": 3,
+  "foo": 2,
+  "nested": Object {
+    "str1": "bar",
+    "str2": "hello",
+    "str3": "dolly",
+  },
+  "obj_array": Array [
+    Object {
+      "id": 3,
+    },
+  ],
+}
+`;
+
 exports[`reads and merges multiple yaml files from file system and parses to json 1`] = `
 Object {
   "abc": Object {
@@ -89,6 +111,21 @@ Object {
       "val": 3,
     },
   },
+}
+`;
+
+exports[`should inject an environment variable in a nested list of objects 1`] = `
+Object {
+  "foo": 1,
+  "nested_list": Array [
+    Object {
+      "id": "a",
+      "values": Array [
+        "val1",
+        "val2",
+      ],
+    },
+  ],
 }
 `;
 

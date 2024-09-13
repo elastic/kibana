@@ -1,6 +1,9 @@
 {
   "dynamic": "strict",
   "properties": {
+    "@timestamp": {
+      "type": "date"
+    },
     "tie_breaker_id": {
       "type": "keyword"
     },

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createMemoryHistory } from 'history';
@@ -33,6 +34,7 @@ export {
 export { applicationServiceMock, scopedHistoryMock } from '@kbn/core-application-browser-mocks';
 export { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 export { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
+export { securityServiceMock } from '@kbn/core-security-browser-mocks';
 
 function createStorageMock() {
   const storageMock: jest.Mocked<Storage> = {

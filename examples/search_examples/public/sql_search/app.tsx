@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
@@ -13,25 +14,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
+  EuiPageTemplate,
   EuiPanel,
   EuiSuperUpdateButton,
   EuiText,
   EuiTextArea,
-  EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { CoreStart } from '@kbn/core/public';
-
-import {
-  DataPublicPluginStart,
-  IKibanaSearchResponse,
-  isCompleteResponse,
-  isErrorResponse,
-} from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
 import {
   SQL_SEARCH_STRATEGY,
   SqlSearchStrategyRequest,
@@ -70,13 +63,9 @@ export const SqlSearchExampleApp = ({ notifications, data }: SearchExamplesAppDe
       })
       .subscribe({
         next: (res) => {
-          if (isCompleteResponse(res)) {
+          if (!isRunningResponse(res)) {
             setIsLoading(false);
             setResponse(res);
-          } else if (isErrorResponse(res)) {
-            setIsLoading(false);
-            setResponse(res);
-            notifications.toasts.addDanger('An error has occurred');
           }
         },
         error: (e) => {
@@ -87,78 +76,74 @@ export const SqlSearchExampleApp = ({ notifications, data }: SearchExamplesAppDe
   };
 
   return (
-    <EuiPageBody>
-      <EuiPageHeader>
-        <EuiTitle size="l">
-          <h1>SQL search example</h1>
-        </EuiTitle>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>
-          <EuiForm>
-            <EuiFlexGroup>
-              <EuiFlexItem grow>
-                <EuiTextArea
-                  placeholder="SELECT * FROM library ORDER BY page_count DESC"
-                  aria-label="SQL query to run"
-                  value={sqlQuery}
-                  onChange={(e) => setSqlQuery(e.target.value)}
-                  fullWidth
-                  data-test-subj="sqlQueryInput"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSuperUpdateButton
-                  isLoading={isLoading}
-                  isDisabled={sqlQuery.length === 0}
-                  onClick={doSearch}
-                  fill={true}
-                  data-test-subj="querySubmitButton"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiForm>
-
-          <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem grow style={{ minWidth: 0 }}>
-              <EuiPanel grow>
-                <EuiText>
-                  <h3>Request</h3>
-                </EuiText>
-                <EuiCodeBlock
-                  language="json"
-                  fontSize="s"
-                  paddingSize="s"
-                  overflowHeight={720}
-                  isCopyable
-                  data-test-subj="requestCodeBlock"
-                  isVirtualized
-                >
-                  {JSON.stringify(request, null, 2)}
-                </EuiCodeBlock>
-              </EuiPanel>
+    <>
+      <EuiPageTemplate.Header pageTitle="SQL search example" />
+      <EuiPageTemplate.Section grow={false}>
+        <EuiForm>
+          <EuiFlexGroup>
+            <EuiFlexItem grow>
+              <EuiTextArea
+                placeholder="SELECT * FROM library ORDER BY page_count DESC"
+                aria-label="SQL query to run"
+                value={sqlQuery}
+                onChange={(e) => setSqlQuery(e.target.value)}
+                fullWidth
+                data-test-subj="sqlQueryInput"
+              />
             </EuiFlexItem>
-            <EuiFlexItem grow style={{ minWidth: 0 }}>
-              <EuiPanel grow>
-                <EuiText>
-                  <h3>Response</h3>
-                </EuiText>
-                <EuiCodeBlock
-                  language="json"
-                  fontSize="s"
-                  paddingSize="s"
-                  isCopyable
-                  data-test-subj="responseCodeBlock"
-                  overflowHeight={720}
-                  isVirtualized
-                >
-                  {JSON.stringify(rawResponse, null, 2)}
-                </EuiCodeBlock>
-              </EuiPanel>
+            <EuiFlexItem grow={false}>
+              <EuiSuperUpdateButton
+                isLoading={isLoading}
+                isDisabled={sqlQuery.length === 0}
+                onClick={doSearch}
+                fill={true}
+                data-test-subj="querySubmitButton"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </EuiPageBody>
+        </EuiForm>
+
+        <EuiSpacer />
+
+        <EuiFlexGroup gutterSize="l">
+          <EuiFlexItem grow style={{ minWidth: 0 }}>
+            <EuiPanel grow hasShadow={false} hasBorder>
+              <EuiText>
+                <h3>Request</h3>
+              </EuiText>
+              <EuiCodeBlock
+                language="json"
+                fontSize="s"
+                paddingSize="s"
+                overflowHeight={720}
+                isCopyable
+                data-test-subj="requestCodeBlock"
+                isVirtualized
+              >
+                {JSON.stringify(request, null, 2)}
+              </EuiCodeBlock>
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem grow style={{ minWidth: 0 }}>
+            <EuiPanel grow hasShadow={false} hasBorder>
+              <EuiText>
+                <h3>Response</h3>
+              </EuiText>
+              <EuiCodeBlock
+                language="json"
+                fontSize="s"
+                paddingSize="s"
+                isCopyable
+                data-test-subj="responseCodeBlock"
+                overflowHeight={720}
+                isVirtualized
+              >
+                {JSON.stringify(rawResponse, null, 2)}
+              </EuiCodeBlock>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageTemplate.Section>
+    </>
   );
 };

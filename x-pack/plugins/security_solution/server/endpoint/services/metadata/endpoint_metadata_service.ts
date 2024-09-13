@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { uniq } from 'lodash';
 import type {
   ElasticsearchClient,
   Logger,
@@ -12,8 +12,8 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 
-import type { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { Agent, AgentPolicy, AgentStatus, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import type {
@@ -22,7 +22,7 @@ import type {
   MaybeImmutable,
   MetadataListResponse,
   PolicyData,
-  UnitedAgentMetadata,
+  UnitedAgentMetadataPersistedData,
 } from '../../../../common/endpoint/types';
 import {
   EndpointHostNotFoundError,
@@ -32,12 +32,13 @@ import {
   FleetEndpointPackagePolicyNotFoundError,
 } from './errors';
 import {
+  buildUnitedIndexQuery,
   getESQueryHostMetadataByFleetAgentIds,
   getESQueryHostMetadataByID,
-  buildUnitedIndexQuery,
   getESQueryHostMetadataByIDs,
 } from '../../routes/metadata/query_builders';
 import {
+  mapToHostMetadata,
   queryResponseToHostListResult,
   queryResponseToHostResult,
 } from '../../routes/metadata/support/query_strategies';
@@ -49,7 +50,7 @@ import {
 } from '../../utils';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
-import type { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
+import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import type { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
 
@@ -169,13 +170,13 @@ export class EndpointMetadataService {
       fleetAgent = await this.getFleetAgent(fleetServices.agent, fleetAgentId);
     } catch (error) {
       if (error instanceof FleetAgentNotFoundError) {
-        this.logger?.warn(`agent with id ${fleetAgentId} not found`);
+        this.logger?.debug(`agent with id ${fleetAgentId} not found`);
       } else {
         throw error;
       }
     }
 
-    // If the agent is not longer active, then that means that the Agent/Endpoint have been un-enrolled from the host
+    // If the agent is no longer active, then that means that the Agent/Endpoint have been un-enrolled from the host
     if (fleetAgent && !fleetAgent.active) {
       throw new EndpointHostUnEnrolledError(
         `Endpoint with id ${endpointId} (Fleet agent id ${fleetAgentId}) is unenrolled`
@@ -235,7 +236,7 @@ export class EndpointMetadataService {
         fleetAgent = await this.getFleetAgent(fleetServices.agent, fleetAgentId);
       } catch (error) {
         if (error instanceof FleetAgentNotFoundError) {
-          this.logger?.warn(`agent with id ${fleetAgentId} not found`);
+          this.logger?.warn(`Agent with id ${fleetAgentId} not found`);
         } else {
           throw error;
         }
@@ -250,7 +251,7 @@ export class EndpointMetadataService {
       }
     }
 
-    // The fleetAgentPolicy might have the endpoint policy in the `package_policies`, lets check that first
+    // The fleetAgentPolicy might have the endpoint policy in the `package_policies`, let's check that first
     if (
       !endpointPackagePolicy &&
       fleetAgentPolicy &&
@@ -261,7 +262,7 @@ export class EndpointMetadataService {
       );
     }
 
-    // if we still don't have an endpoint package policy, try retrieving it from fleet
+    // if we still don't have an endpoint package policy, try retrieving it from `fleet`
     if (!endpointPackagePolicy) {
       try {
         endpointPackagePolicy = await this.getFleetEndpointPackagePolicy(
@@ -293,6 +294,8 @@ export class EndpointMetadataService {
           id: endpointPackagePolicy?.id ?? '',
         },
       },
+      last_checkin:
+        fleetAgent?.last_checkin || new Date(endpointMetadata['@timestamp']).toISOString(),
     };
   }
 
@@ -362,6 +365,8 @@ export class EndpointMetadataService {
    *
    * @param esClient
    * @param queryOptions
+   * @param soClient
+   * @param fleetServices
    *
    * @throws
    */
@@ -372,13 +377,15 @@ export class EndpointMetadataService {
     queryOptions: GetMetadataListRequestQuery
   ): Promise<Pick<MetadataListResponse, 'data' | 'total'>> {
     const endpointPolicies = await this.getAllEndpointPackagePolicies();
-    const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
+    const endpointPolicyIds = uniq(endpointPolicies.flatMap((policy) => policy.policy_ids));
     const unitedIndexQuery = await buildUnitedIndexQuery(soClient, queryOptions, endpointPolicyIds);
 
-    let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadata>;
+    let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadataPersistedData>;
 
     try {
-      unitedMetadataQueryResponse = await esClient.search<UnitedAgentMetadata>(unitedIndexQuery);
+      unitedMetadataQueryResponse = await esClient.search<UnitedAgentMetadataPersistedData>(
+        unitedIndexQuery
+      );
     } catch (error) {
       const errorType = error?.meta?.body?.error?.type ?? '';
       if (errorType === 'index_not_found_exception') {
@@ -401,39 +408,48 @@ export class EndpointMetadataService {
         .getByIds(this.DANGEROUS_INTERNAL_SO_CLIENT, agentPolicyIds)
         .catch(catchAndWrapError)) ?? [];
 
-    const agentPoliciesMap: Record<string, AgentPolicy> = agentPolicies.reduce(
-      (acc, agentPolicy) => ({
-        ...acc,
-        [agentPolicy.id]: {
+    const agentPoliciesMap = agentPolicies.reduce<Record<string, AgentPolicy>>(
+      (acc, agentPolicy) => {
+        acc[agentPolicy.id] = {
           ...agentPolicy,
-        },
-      }),
+        };
+        return acc;
+      },
       {}
     );
 
-    const endpointPoliciesMap: Record<string, PackagePolicy> = endpointPolicies.reduce(
-      (acc, packagePolicy) => ({
-        ...acc,
-        [packagePolicy.policy_id]: packagePolicy,
-      }),
+    const endpointPoliciesMap = endpointPolicies.reduce<Record<string, PackagePolicy>>(
+      (acc, packagePolicy) => {
+        for (const policyId of packagePolicy.policy_ids) {
+          acc[policyId] = packagePolicy;
+        }
+        return acc;
+      },
       {}
     );
 
     const hosts: HostInfo[] = [];
 
     for (const doc of docs) {
-      const { endpoint: metadata, agent: _agent } = doc?._source?.united ?? {};
-      if (metadata && _agent) {
+      const { endpoint, agent: _agent } = doc?._source?.united ?? {};
+
+      if (endpoint && _agent) {
+        const metadata = mapToHostMetadata(endpoint);
+
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const agentPolicy = agentPoliciesMap[_agent.policy_id!];
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const endpointPolicy = endpointPoliciesMap[_agent.policy_id!];
-        // add the agent status from the fleet runtime field to
-        // the agent object
+
+        const runtimeFields: Partial<typeof _agent> = {
+          status: doc?.fields?.status?.[0],
+          last_checkin: doc?.fields?.last_checkin?.[0],
+        };
         const agent: typeof _agent = {
           ..._agent,
-          status: doc?.fields?.status?.[0] as AgentStatus,
+          ...runtimeFields,
         };
+
         hosts.push(
           await this.enrichHostMetadata(fleetServices, metadata, agent, agentPolicy, endpointPolicy)
         );

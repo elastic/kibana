@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getSampleProbability } from './get_sample_probability';
 
@@ -40,7 +40,7 @@ type RandomSamplerOptions = RandomSamplerOptionProbability | RandomSamplerOption
  * @returns {boolean}
  */
 export function isValidProbability(p: unknown): p is number {
-  return typeof p === 'number' && p > 0 && p < 0.5;
+  return typeof p === 'number' && p > 0 && p <= 0.5;
 }
 
 /**

@@ -7,18 +7,19 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { EmailService } from './services';
-import type { NotificationsPluginStart } from './types';
+import type { NotificationsServerStart } from './types';
 import type { NotificationsPlugin } from './plugin';
 
 const emailServiceMock: jest.Mocked<EmailService> = {
   sendPlainTextEmail: jest.fn(),
+  sendHTMLEmail: jest.fn(),
 };
 
 const createEmailServiceMock = () => {
   return emailServiceMock;
 };
 
-const startMock: jest.Mocked<NotificationsPluginStart> = {
+const startMock: jest.Mocked<NotificationsServerStart> = {
   isEmailServiceAvailable: jest.fn(),
   getEmailService: jest.fn(createEmailServiceMock),
 };
@@ -29,7 +30,7 @@ const createStartMock = () => {
 
 const notificationsPluginMock: jest.Mocked<PublicMethodsOf<NotificationsPlugin>> = {
   setup: jest.fn(),
-  start: jest.fn(createStartMock) as jest.Mock<NotificationsPluginStart>,
+  start: jest.fn(createStartMock) as jest.Mock<NotificationsServerStart>,
   stop: jest.fn(),
 };
 
@@ -43,6 +44,7 @@ export const notificationsMock = {
   createStart: createStartMock,
   clear: () => {
     emailServiceMock.sendPlainTextEmail.mockClear();
+    emailServiceMock.sendHTMLEmail.mockClear();
     startMock.getEmailService.mockClear();
     startMock.isEmailServiceAvailable.mockClear();
     notificationsPluginMock.setup.mockClear();

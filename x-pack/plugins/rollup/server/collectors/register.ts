@@ -38,7 +38,7 @@ interface Usage {
 
 export function registerRollupUsageCollector(
   usageCollection: UsageCollectionSetup,
-  kibanaIndex: string
+  getIndexForType: (type: string) => Promise<string>
 ): void {
   const collector = usageCollection.makeUsageCollector<Usage>({
     type: 'rollups',
@@ -92,23 +92,26 @@ export function registerRollupUsageCollector(
       },
     },
     fetch: async ({ esClient }: CollectorFetchContext) => {
-      const rollupIndexPatterns = await fetchRollupIndexPatterns(kibanaIndex, esClient);
+      const indexPatternIndex = await getIndexForType('index-pattern');
+      const rollupIndexPatterns = await fetchRollupIndexPatterns(indexPatternIndex, esClient);
       const rollupIndexPatternToFlagMap = createIdToFlagMap(rollupIndexPatterns);
 
+      const searchIndex = await getIndexForType('search');
       const rollupSavedSearches = await fetchRollupSavedSearches(
-        kibanaIndex,
+        searchIndex,
         esClient,
         rollupIndexPatternToFlagMap
       );
       const rollupSavedSearchesToFlagMap = createIdToFlagMap(rollupSavedSearches);
 
+      const visualizationIndex = await getIndexForType('visualization');
       const {
         rollupVisualizations,
         rollupVisualizationsFromSavedSearches,
         rollupLensVisualizations,
         rollupLensVisualizationsFromSavedSearches,
       } = await fetchRollupVisualizations(
-        kibanaIndex,
+        visualizationIndex,
         esClient,
         rollupIndexPatternToFlagMap,
         rollupSavedSearchesToFlagMap

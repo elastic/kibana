@@ -13,7 +13,8 @@ import type {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { alertMappings } from './mappings';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
 import { maintenanceWindowMappings } from './maintenance_window_mapping';
 import { getMigrations } from './migrations';
@@ -22,51 +23,72 @@ import { RawRule } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import { RuleTypeRegistry } from '../rule_type_registry';
-export { partiallyUpdateAlert } from './partially_update_alert';
+export { partiallyUpdateRule } from './partially_update_rule';
 import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../common';
+import { ruleModelVersions, adHocRunParamsModelVersions } from './model_versions';
 
-// Use caution when removing items from this array! Any field which has
-// ever existed in the rule SO must be included in this array to prevent
-// decryption failures during migration.
-export const AlertAttributesExcludedFromAAD = [
-  'scheduledTaskId',
-  'muteAll',
-  'mutedInstanceIds',
-  'updatedBy',
-  'updatedAt',
-  'executionStatus',
-  'monitoring',
-  'snoozeEndTime', // field removed in 8.2, but must be retained in case an rule created/updated in 8.2 is being migrated
-  'snoozeSchedule',
-  'isSnoozedUntil',
-  'lastRun',
-  'nextRun',
-  'revision',
-  'running',
+export const RULE_SAVED_OBJECT_TYPE = 'alert';
+export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';
+export const API_KEY_PENDING_INVALIDATION_TYPE = 'api_key_pending_invalidation';
+
+export const RuleAttributesToEncrypt = ['apiKey'];
+
+// Use caution when removing items from this array! These fields
+// are used to construct decryption AAD and must be remain in
+// this array to prevent decryption failures during migration.
+// NOTE: Always update the RuleAttributesNotPartiallyUpdatable
+// type if this const changes!
+export const RuleAttributesIncludedInAAD = [
+  'enabled',
+  'name',
+  'tags',
+  'alertTypeId',
+  'consumer',
+  'legacyId',
+  'schedule',
+  'actions',
+  'params',
+  'mapped_params',
+  'createdBy',
+  'createdAt',
+  'apiKeyOwner',
+  'apiKeyCreatedByUser',
+  'throttle',
+  'notifyWhen',
+  'meta',
+  'alertDelay',
 ];
 
-// useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
-// type which is a subset of RawAlert with just attributes excluded from AAD
+// useful type for Omit<RuleAttributes, [...RuleAttributesToEncrypt, ...RuleAttributesIncludedInAAD]>
+// which will produce a subset of RuleAttributes with just attributes that are safe to partually
+// update from AAD
+export type RuleAttributesNotPartiallyUpdatable =
+  | 'apiKey'
+  | 'enabled'
+  | 'name'
+  | 'tags'
+  | 'alertTypeId'
+  | 'consumer'
+  | 'legacyId'
+  | 'schedule'
+  | 'actions'
+  | 'params'
+  | 'mapped_params'
+  | 'createdBy'
+  | 'createdAt'
+  | 'apiKeyOwner'
+  | 'apiKeyCreatedByUser'
+  | 'throttle'
+  | 'notifyWhen'
+  | 'meta'
+  | 'alertDelay';
 
-// useful for Pick<RawAlert, AlertAttributesExcludedFromAADType>
-export type AlertAttributesExcludedFromAADType =
-  | 'scheduledTaskId'
-  | 'muteAll'
-  | 'mutedInstanceIds'
-  | 'updatedBy'
-  | 'updatedAt'
-  | 'executionStatus'
-  | 'monitoring'
-  | 'snoozeEndTime'
-  | 'snoozeSchedule'
-  | 'isSnoozedUntil'
-  | 'lastRun'
-  | 'nextRun'
-  | 'revision'
-  | 'running';
+export const AdHocRunAttributesToEncrypt = ['apiKeyToUse'];
+export const AdHocRunAttributesIncludedInAAD = ['rule', 'spaceId'];
+export type AdHocRunAttributesNotPartiallyUpdatable = 'rule' | 'spaceId' | 'apiKeyToUse';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -77,7 +99,8 @@ export function setupSavedObjects(
   getSearchSourceMigrations: () => MigrateFunctionsObject
 ) {
   savedObjects.registerType({
-    name: 'alert',
+    name: RULE_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
@@ -104,10 +127,12 @@ export function setupSavedObjects(
         return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
       },
     },
+    modelVersions: ruleModelVersions,
   });
 
   savedObjects.registerType({
-    name: 'api_key_pending_invalidation',
+    name: API_KEY_PENDING_INVALIDATION_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'agnostic',
     mappings: {
@@ -124,6 +149,7 @@ export function setupSavedObjects(
 
   savedObjects.registerType({
     name: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'single',
     mappings: rulesSettingsMappings,
@@ -131,21 +157,72 @@ export function setupSavedObjects(
 
   savedObjects.registerType({
     name: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
     mappings: maintenanceWindowMappings,
   });
 
-  // Encrypted attributes
-  encryptedSavedObjects.registerType({
-    type: 'alert',
-    attributesToEncrypt: new Set(['apiKey']),
-    attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
+  savedObjects.registerType({
+    name: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    mappings: {
+      dynamic: false,
+      properties: {
+        apiKeyId: {
+          type: 'keyword',
+        },
+        createdAt: {
+          type: 'date',
+        },
+        end: {
+          type: 'date',
+        },
+        rule: {
+          properties: {
+            alertTypeId: {
+              type: 'keyword',
+            },
+            consumer: {
+              type: 'keyword',
+            },
+          },
+        },
+        start: {
+          type: 'date',
+        },
+        // TODO to allow searching/filtering by status
+        // status: {
+        //   type: 'keyword'
+        // }
+      },
+    },
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: adHocRunParamsModelVersions,
   });
 
   // Encrypted attributes
   encryptedSavedObjects.registerType({
-    type: 'api_key_pending_invalidation',
+    type: RULE_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(RuleAttributesToEncrypt),
+    attributesToIncludeInAAD: new Set(RuleAttributesIncludedInAAD),
+  });
+
+  // Encrypted attributes
+  encryptedSavedObjects.registerType({
+    type: API_KEY_PENDING_INVALIDATION_TYPE,
     attributesToEncrypt: new Set(['apiKeyId']),
+    attributesToIncludeInAAD: new Set(['createdAt']),
+  });
+
+  // Encrypted attributes
+  encryptedSavedObjects.registerType({
+    type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(AdHocRunAttributesToEncrypt),
+    attributesToIncludeInAAD: new Set(AdHocRunAttributesIncludedInAAD),
   });
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -32,22 +33,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    it('should navigate to the single doc view and give focus to the title h1 on navigate', async () => {
+    it('should give focus to the table Load link when Tab is pressed', async () => {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
       await rowActions[1].click();
-      const titleElement = await testSubjects.find('discoverContextAppTitle');
-      const activeElement = await find.activeElement();
-      expect(await titleElement.getAttribute('data-test-subj')).to.eql(
-        await activeElement.getAttribute('data-test-subj')
-      );
-    });
-
-    it('should give focus to the table tab link when Tab is pressed', async () => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await browser.pressKeys(browser.keys.TAB);
-      const dataViewSwitchLink = await testSubjects.find('showQueryBarMenu');
+      await browser.pressKeys(browser.keys.SPACE);
+      await browser.pressKeys(browser.keys.TAB);
+      const loadMoreLink = await testSubjects.find('predecessorsLoadMoreButton');
       const activeElement = await find.activeElement();
-      expect(await dataViewSwitchLink.getAttribute('data-test-subj')).to.eql(
+      expect(await loadMoreLink.getAttribute('data-test-subj')).to.eql(
         await activeElement.getAttribute('data-test-subj')
       );
     });

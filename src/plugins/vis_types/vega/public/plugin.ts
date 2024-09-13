@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
@@ -20,7 +21,7 @@ import {
   setData,
   setDataViews,
   setInjectedVars,
-  setUISettings,
+  setThemeService,
   setDocLinks,
   setMapsEms,
   setUsageCollectionStart,
@@ -30,7 +31,7 @@ import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
 import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
 
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../server/config';
 
 import { getVegaInspectorView } from './vega_inspector';
 import { getVegaVisRenderer } from './vega_vis_renderer';
@@ -77,8 +78,6 @@ export class VegaPlugin implements Plugin<void, void> {
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
     });
 
-    setUISettings(core.uiSettings);
-
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,
       plugins: {
@@ -104,6 +103,7 @@ export class VegaPlugin implements Plugin<void, void> {
     setDataViews(dataViews);
     setDocLinks(core.docLinks);
     setMapsEms(mapsEms);
+    setThemeService(core.theme);
     setUsageCollectionStart(usageCollection);
   }
 }

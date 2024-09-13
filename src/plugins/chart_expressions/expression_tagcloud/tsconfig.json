@@ -23,9 +23,11 @@
     "@kbn/coloring",
     "@kbn/i18n",
     "@kbn/i18n-react",
-    "@kbn/kibana-react-plugin",
     "@kbn/analytics",
     "@kbn/chart-expressions-common",
+    "@kbn/chart-icons",
+    "@kbn/data-plugin",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

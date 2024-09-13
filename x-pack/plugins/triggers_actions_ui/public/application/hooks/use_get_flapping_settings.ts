@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
@@ -13,32 +12,20 @@ import { getFlappingSettings } from '../lib/rule_api/get_flapping_settings';
 
 interface UseGetFlappingSettingsProps {
   enabled: boolean;
-  onSuccess: (settings: RulesSettingsFlapping) => void;
+  onSuccess?: (settings: RulesSettingsFlapping) => void;
 }
 
 export const useGetFlappingSettings = (props: UseGetFlappingSettingsProps) => {
   const { enabled, onSuccess } = props;
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { http } = useKibana().services;
 
   const queryFn = () => {
     return getFlappingSettings({ http });
   };
 
-  const onErrorFn = () => {
-    toasts.addDanger(
-      i18n.translate('xpack.triggersActionsUI.rulesSettings.modal.getRulesSettingsError', {
-        defaultMessage: 'Failed to get rules Settings.',
-      })
-    );
-  };
-
-  const { data, isFetching, isError, isLoadingError, isLoading } = useQuery({
+  const { data, isFetching, isError, isLoadingError, isLoading, isInitialLoading } = useQuery({
     queryKey: ['getFlappingSettings'],
     queryFn,
-    onError: onErrorFn,
     onSuccess,
     enabled,
     refetchOnWindowFocus: false,
@@ -46,6 +33,7 @@ export const useGetFlappingSettings = (props: UseGetFlappingSettingsProps) => {
   });
 
   return {
+    isInitialLoading,
     isLoading: isLoading || isFetching,
     isError: isError || isLoadingError,
     data,

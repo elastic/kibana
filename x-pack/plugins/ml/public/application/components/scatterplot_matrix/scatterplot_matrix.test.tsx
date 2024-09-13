@@ -21,8 +21,11 @@ const mockFilterManager = createFilterManagerMock();
 const mockEsSearch = jest.fn((body) => ({
   hits: { hits: [{ fields: { x: [1], y: [2] } }, { fields: { x: [2], y: [3] } }] },
 }));
+
+const mockEuiTheme = euiThemeLight;
+
 jest.mock('../../contexts/kibana', () => ({
-  useMlApiContext: () => ({
+  useMlApi: () => ({
     esSearch: mockEsSearch,
   }),
   useMlKibana: () => ({
@@ -45,11 +48,7 @@ jest.mock('../../contexts/kibana', () => ({
       },
     },
   }),
-}));
-
-const mockEuiTheme = euiThemeLight;
-jest.mock('../color_range_legend', () => ({
-  useCurrentEuiTheme: () => ({
+  useCurrentThemeVars: () => ({
     euiTheme: mockEuiTheme,
   }),
 }));

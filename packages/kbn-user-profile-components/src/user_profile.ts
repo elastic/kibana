@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { VISUALIZATION_COLORS } from '@elastic/eui';
+import type { UserProfileAvatarData, UserProfileData } from './types';
 
 /**
  * IMPORTANT:
@@ -58,29 +60,6 @@ export interface UserProfileUserInfo {
    * Optional full name of the user.
    */
   full_name?: string;
-}
-
-/**
- * Placeholder for data stored in user profile.
- */
-export type UserProfileData = Record<string, unknown>;
-
-/**
- * Avatar stored in user profile.
- */
-export interface UserProfileAvatarData {
-  /**
-   * Optional initials (two letters) of the user to use as avatar if avatar picture isn't specified.
-   */
-  initials?: string;
-  /**
-   * Background color of the avatar when initials are used.
-   */
-  color?: string;
-  /**
-   * Base64 data URL for the user avatar image.
-   */
-  imageUrl?: string;
 }
 
 export const USER_AVATAR_FALLBACK_CODE_POINT = 97; // code point for lowercase "a"
@@ -157,4 +136,17 @@ export interface GetUserDisplayNameParams {
  */
 export function getUserDisplayName(params: GetUserDisplayNameParams) {
   return params.full_name || params.email || params.username;
+}
+
+/**
+ * Determines the display label for the provided user information.
+ * Includes the email if it is different from the display name.
+ * @param params Set of available user's name-related fields.
+ */
+export function getUserDisplayLabel(user: GetUserDisplayNameParams): string {
+  const displayName = getUserDisplayName(user);
+  if (user.email && user.email !== displayName) {
+    return `${displayName} (${user.email})`;
+  }
+  return displayName;
 }

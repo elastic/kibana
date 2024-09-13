@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { AddDeleteButtons } from '../add_delete_buttons';
@@ -17,7 +18,7 @@ import { MetricSelect } from './metric_select';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
-export const newVariable = (opts) => ({ id: uuidv1(), name: '', field: '', ...opts });
+export const newVariable = (opts) => ({ id: uuidv4(), name: '', field: '', ...opts });
 
 export class CalculationVars extends Component {
   constructor(props) {
@@ -44,6 +45,7 @@ export class CalculationVars extends Component {
           <EuiFlexItem>
             <EuiFieldText
               className="tvbAggs__varName"
+              data-test-subj="tvbAggsVarNameInput"
               aria-label={i18n.translate('visTypeTimeseries.vars.variableNameAriaLabel', {
                 defaultMessage: 'Variable name',
               })}
@@ -54,7 +56,10 @@ export class CalculationVars extends Component {
               value={row.name}
             />
           </EuiFlexItem>
-          <EuiFlexItem className="tvbAggs__varMetricWrapper">
+          <EuiFlexItem
+            className="tvbAggs__varMetricWrapper"
+            data-test-subj="tvbAggsVarMetricWrapper"
+          >
             <MetricSelect
               onChange={this.handleChange(row, 'field')}
               metrics={this.props.metrics}

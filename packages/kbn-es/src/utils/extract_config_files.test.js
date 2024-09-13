@@ -1,15 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 jest.mock('fs', () => ({
   readFileSync: jest.fn(),
   existsSync: jest.fn().mockImplementation(() => true),
   writeFileSync: jest.fn(),
+  statSync: jest.fn((fileName) => {
+    return {
+      isFile: () => fileName.endsWith('.yml'),
+    };
+  }),
 }));
 
 const { extractConfigFiles } = require('./extract_config_files');
@@ -62,4 +68,11 @@ test('ignores directories', () => {
   const config = extractConfigFiles(['path=/data/foo.yml', 'foo.bar=/data/bar'], '/es');
 
   expect(config).toEqual(['path=foo.yml', 'foo.bar=/data/bar']);
+});
+
+test('ignores directories with dots in their names', () => {
+  fs.existsSync = () => true;
+  const config = extractConfigFiles(['path=/data/foo.yml', 'foo.bar=/data/ba/r.baz'], '/es');
+
+  expect(config).toEqual(['path=foo.yml', 'foo.bar=/data/ba/r.baz']);
 });

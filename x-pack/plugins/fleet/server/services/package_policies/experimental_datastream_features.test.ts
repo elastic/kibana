@@ -12,7 +12,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { NewPackagePolicy, PackagePolicy } from '../../types';
 import { appContextService } from '../app_context';
 import { updateCurrentWriteIndices } from '../epm/elasticsearch/template/template';
-import { getInstallation } from '../epm/packages';
+import { getInstalledPackageWithAssets } from '../epm/packages/get';
 
 import { handleExperimentalDatastreamFeatureOptIn } from './experimental_datastream_features';
 
@@ -34,6 +34,35 @@ jest.mock('../epm/packages', () => {
   };
 });
 
+function mockGetInstalledPackageWithAssets(installation: any) {
+  jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    packageInfo: {
+      name: 'test',
+      data_streams: [
+        {
+          dataset: 'test',
+          type: 'metrics',
+        },
+      ],
+    },
+    installation,
+  } as any);
+}
+
+jest.mock('../epm/packages/get', () => ({
+  getInstalledPackageWithAssets: jest.fn().mockResolvedValue({
+    packageInfo: {
+      name: 'test',
+      data_streams: [
+        {
+          dataset: 'test',
+          type: 'metrics',
+        },
+      ],
+    },
+  }),
+}));
+
 jest.mock('../app_context');
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
@@ -41,9 +70,6 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
 }));
 
 jest.mock('../epm/elasticsearch/template/template');
-
-const mockGetInstallation = getInstallation as jest.Mock;
-
 jest.mock('../epm/elasticsearch/template/install', () => {
   return {
     prepareTemplate: jest.fn().mockReturnValue({
@@ -82,6 +108,7 @@ function getNewTestPackagePolicy({
   const packagePolicy: NewPackagePolicy = {
     name: 'Test policy',
     policy_id: 'agent-policy',
+    policy_ids: ['agent-policy'],
     description: 'Test policy description',
     namespace: 'default',
     enabled: true,
@@ -122,6 +149,7 @@ function getExistingTestPackagePolicy({
     id: 'test-policy',
     name: 'Test policy',
     policy_id: 'agent-policy',
+    policy_ids: ['agent-policy'],
     description: 'Test policy description',
     namespace: 'default',
     enabled: true,
@@ -214,7 +242,7 @@ describe('experimental_datastream_features', () => {
 
   describe('when package policy does not exist (create)', () => {
     beforeEach(() => {
-      mockGetInstallation.mockResolvedValueOnce({
+      mockGetInstalledPackageWithAssets({
         experimental_data_stream_features: [
           {
             data_stream: 'metrics-test.test',
@@ -376,7 +404,7 @@ describe('experimental_datastream_features', () => {
           isDocValueOnlyOther: false,
         });
 
-        mockGetInstallation.mockResolvedValueOnce({
+        mockGetInstalledPackageWithAssets({
           experimental_data_stream_features: [
             {
               data_stream: 'metrics-test.test',
@@ -404,7 +432,7 @@ describe('experimental_datastream_features', () => {
           isDocValueOnlyOther: false,
         });
 
-        mockGetInstallation.mockResolvedValueOnce({
+        mockGetInstalledPackageWithAssets({
           experimental_data_stream_features: [
             {
               data_stream: 'metrics-test.test',
@@ -426,7 +454,7 @@ describe('experimental_datastream_features', () => {
 
     describe('when opt in status is changed', () => {
       beforeEach(() => {
-        mockGetInstallation.mockResolvedValueOnce({
+        mockGetInstalledPackageWithAssets({
           experimental_data_stream_features: [
             {
               data_stream: 'metrics-test.test',

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -11,16 +12,13 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-
-import { AppMountParameters } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 const App = ({ appName }: { appName: string }) => (
   <EuiPage>
@@ -32,21 +30,24 @@ const App = ({ appName }: { appName: string }) => (
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle>
-              <h2>{appName} home page section title</h2>
-            </EuiTitle>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
-        <EuiPageContentBody>{appName} page content</EuiPageContentBody>
-      </EuiPageContent>
+      <EuiPageSection>
+        <EuiPageHeader>
+          <EuiTitle>
+            <h2>{appName} home page section title</h2>
+          </EuiTitle>
+        </EuiPageHeader>
+        <EuiPageSection>{appName} page content</EuiPageSection>
+      </EuiPageSection>
     </EuiPageBody>
   </EuiPage>
 );
 
-export const renderApp = (appName: string, { element }: AppMountParameters) => {
-  render(<App appName={appName} />, element);
+export const renderApp = (appName: string, { element }: AppMountParameters, core: CoreStart) => {
+  render(
+    <KibanaRenderContextProvider {...core}>
+      <App appName={appName} />
+    </KibanaRenderContextProvider>,
+    element
+  );
   return () => unmountComponentAtNode(element);
 };

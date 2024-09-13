@@ -1,35 +1,41 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { SAMPLE_SIZE_SETTING } from '../../../common';
-import { usePager } from '../../hooks/use_pager';
+import { EuiText } from '@elastic/eui';
+import { usePager } from '@kbn/discover-utils';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import {
   ToolBarPagination,
   MAX_ROWS_PER_PAGE_OPTION,
 } from './components/pager/tool_bar_pagination';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
-import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { SavedSearchEmbeddableBase } from '../../embeddable/components/saved_search_embeddable_base';
 
-export interface DocTableEmbeddableProps extends DocTableProps {
-  totalHitCount: number;
+export interface DocTableEmbeddableProps extends Omit<DocTableProps, 'dataTestSubj'> {
+  totalHitCount?: number;
   rowsPerPageState?: number;
+  sampleSizeState: number;
+  interceptedWarnings?: SearchResponseWarning[];
   onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
 }
+
+export type DocTableEmbeddableSearchProps = Omit<
+  DocTableEmbeddableProps,
+  'sampleSizeState' | 'isEsqlMode'
+>;
 
 const DocTableWrapperMemoized = memo(DocTableWrapper);
 
 export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
-  const services = useDiscoverServices();
   const onUpdateRowsPerPage = props.onUpdateRowsPerPage;
   const tableWrapperRef = useRef<HTMLDivElement>(null);
   const {
@@ -78,13 +84,9 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   );
 
   const shouldShowLimitedResultsWarning = useMemo(
-    () => !hasNextPage && props.rows.length < props.totalHitCount,
+    () => !hasNextPage && props.totalHitCount && props.rows.length < props.totalHitCount,
     [hasNextPage, props.rows.length, props.totalHitCount]
   );
-
-  const sampleSize = useMemo(() => {
-    return services.uiSettings.get(SAMPLE_SIZE_SETTING, 500);
-  }, [services]);
 
   const renderDocTable = useCallback(
     (renderProps: DocTableRenderProps) => {
@@ -101,40 +103,23 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   );
 
   return (
-    <EuiFlexGroup style={{ width: '100%' }} direction="column" gutterSize="xs" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          alignItems="center"
-          gutterSize="xs"
-          responsive={false}
-          wrap={true}
-        >
-          {shouldShowLimitedResultsWarning && (
-            <EuiFlexItem grow={false}>
-              <EuiText grow={false} size="s" color="subdued">
-                <FormattedMessage
-                  id="discover.docTable.limitedSearchResultLabel"
-                  defaultMessage="Limited to {resultCount} results. Refine your search."
-                  values={{ resultCount: sampleSize }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          )}
-          {props.totalHitCount !== 0 && (
-            <EuiFlexItem grow={false} data-test-subj="toolBarTotalDocsText">
-              <TotalDocuments totalHitCount={props.totalHitCount} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      <EuiFlexItem style={{ minHeight: 0 }}>
-        <DocTableWrapperMemoized ref={tableWrapperRef} {...props} render={renderDocTable} />
-      </EuiFlexItem>
-
-      {showPagination && (
-        <EuiFlexItem grow={false}>
+    <SavedSearchEmbeddableBase
+      interceptedWarnings={props.interceptedWarnings}
+      totalHitCount={props.totalHitCount}
+      isLoading={props.isLoading}
+      prepend={
+        shouldShowLimitedResultsWarning ? (
+          <EuiText grow={false} size="s" color="subdued">
+            <FormattedMessage
+              id="discover.docTable.limitedSearchResultLabel"
+              defaultMessage="Limited to {resultCount} results. Refine your search."
+              values={{ resultCount: props.sampleSizeState }}
+            />
+          </EuiText>
+        ) : undefined
+      }
+      append={
+        showPagination ? (
           <ToolBarPagination
             pageSize={pageSize}
             pageCount={totalPages}
@@ -142,8 +127,15 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
             onPageClick={onPageChange}
             onPageSizeChange={onPageSizeChange}
           />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+        ) : undefined
+      }
+    >
+      <DocTableWrapperMemoized
+        ref={tableWrapperRef}
+        {...props}
+        dataTestSubj="embeddedSavedSearchDocTable"
+        render={renderDocTable}
+      />
+    </SavedSearchEmbeddableBase>
   );
 };

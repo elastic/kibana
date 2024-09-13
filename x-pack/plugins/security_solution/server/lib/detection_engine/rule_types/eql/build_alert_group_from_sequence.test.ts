@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
+import { ALERT_RULE_CONSUMER, ALERT_URL } from '@kbn/rule-data-utils';
 
 import { sampleDocNoSortId, sampleRuleGuid } from '../__mocks__/es_results';
 import {
@@ -25,16 +25,13 @@ import {
 } from '../../../../../common/field_maps/field_names';
 
 const SPACE_ID = 'space';
+const PUBLIC_BASE_URL = 'http://testkibanabaseurl.com';
 
 const ruleExecutionLoggerMock = ruleExecutionLogMock.forExecutors.create();
 
 describe('buildAlert', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  test('it builds an alert composed of a sequence', () => {
-    expect(true).toEqual(true);
   });
 
   test('it builds an alert as expected without original_event if event does not exist', () => {
@@ -54,7 +51,8 @@ describe('buildAlert', () => {
       SPACE_ID,
       jest.fn(),
       completeRule.ruleParams.index as string[],
-      undefined
+      undefined,
+      PUBLIC_BASE_URL
     );
     expect(alertGroup.length).toEqual(3);
     expect(alertGroup[0]).toEqual(
@@ -74,6 +72,9 @@ describe('buildAlert', () => {
         }),
       })
     );
+    expect(alertGroup[0]._source[ALERT_URL]).toContain(
+      'http://testkibanabaseurl.com/s/space/app/security/alerts/redirect/f2db3574eaf8450e3f4d1cf4f416d70b110b035ae0a7a00026242df07f0a6c90?index=.alerts-security.alerts-space'
+    );
     expect(alertGroup[1]).toEqual(
       expect.objectContaining({
         _source: expect.objectContaining({
@@ -90,6 +91,9 @@ describe('buildAlert', () => {
           [ALERT_BUILDING_BLOCK_TYPE]: 'default',
         }),
       })
+    );
+    expect(alertGroup[1]._source[ALERT_URL]).toContain(
+      'http://testkibanabaseurl.com/s/space/app/security/alerts/redirect/1dbc416333244efbda833832eb83f13ea5d980a33c2f981ca8d2b35d82a045da?index=.alerts-security.alerts-space'
     );
     expect(alertGroup[2]).toEqual(
       expect.objectContaining({
@@ -128,7 +132,9 @@ describe('buildAlert', () => {
         }),
       })
     );
-
+    expect(alertGroup[2]._source[ALERT_URL]).toContain(
+      'http://testkibanabaseurl.com/s/space/app/security/alerts/redirect/1b7d06954e74257140f3bf73f139078483f9658fe829fd806cc307fc0388fb23?index=.alerts-security.alerts-space'
+    );
     const groupIds = alertGroup.map((alert) => alert._source[ALERT_GROUP_ID]);
     for (const groupId of groupIds) {
       expect(groupId).toEqual(groupIds[0]);
@@ -136,6 +142,64 @@ describe('buildAlert', () => {
   });
 
   describe('recursive intersection between objects', () => {
+    describe('objectPairIntersection', () => {
+      test('returns the intersection of fields with identically-valued arrays', () => {
+        const a = {
+          field1: [1],
+        };
+        const b = {
+          field1: [1],
+        };
+        const intersection = objectPairIntersection(a, b);
+        const expected = {
+          field1: [1],
+        };
+        expect(intersection).toEqual(expected);
+      });
+
+      test('returns the intersection of arrays with differing lengths', () => {
+        const a = {
+          field1: 1,
+        };
+        const b = {
+          field1: [1, 2, 3],
+        };
+        const intersection = objectPairIntersection(a, b);
+        const expected = {
+          field1: [1],
+        };
+        expect(intersection).toEqual(expected);
+      });
+
+      test('should work with arrays with same lengths but only one intersecting element', () => {
+        const a = {
+          field1: [3, 4, 5],
+        };
+        const b = {
+          field1: [1, 2, 3],
+        };
+        const intersection = objectPairIntersection(a, b);
+        const expected = {
+          field1: [3],
+        };
+        expect(intersection).toEqual(expected);
+      });
+
+      test('should work with arrays with differing lengths and two intersecting elements', () => {
+        const a = {
+          field1: [3, 4, 5],
+        };
+        const b = {
+          field1: [1, 2, 3, 4],
+        };
+        const intersection = objectPairIntersection(a, b);
+        const expected = {
+          field1: [3, 4],
+        };
+        expect(intersection).toEqual(expected);
+      });
+    });
+
     test('should treat numbers and strings as unequal', () => {
       const a = {
         field1: 1,
@@ -207,7 +271,7 @@ describe('buildAlert', () => {
       expect(intersection).toEqual(expected);
     });
 
-    test('should strip arrays out regardless of whether they are equal', () => {
+    test('returns the intersection of values for fields containing arrays', () => {
       const a = {
         array_field1: [1, 2],
         array_field2: [1, 2],
@@ -217,7 +281,7 @@ describe('buildAlert', () => {
         array_field2: [3, 4],
       };
       const intersection = objectPairIntersection(a, b);
-      const expected = undefined;
+      const expected = { array_field1: [1, 2], array_field2: [] };
       expect(intersection).toEqual(expected);
     });
 
@@ -277,6 +341,7 @@ describe('buildAlert', () => {
       const intersection = objectPairIntersection(a, b);
       const expected = {
         container_field: {
+          array_field: [1, 2],
           field1: 1,
           field6: null,
           nested_container_field: {
@@ -322,6 +387,7 @@ describe('buildAlert', () => {
       };
       const intersection = objectPairIntersection(a, b);
       const expected = {
+        array_field: [1, 2],
         field1: 1,
         field6: null,
         container_field: {
@@ -409,6 +475,7 @@ describe('buildAlert', () => {
       };
       const intersection = objectArrayIntersection([a, b]);
       const expected = {
+        array_field: [1, 2],
         field1: 1,
         field6: null,
         container_field: {
@@ -417,7 +484,6 @@ describe('buildAlert', () => {
       };
       expect(intersection).toEqual(expected);
     });
-
     test('should work with 3 or more objects', () => {
       const a = {
         field1: 1,
@@ -467,6 +533,7 @@ describe('buildAlert', () => {
       };
       const intersection = objectArrayIntersection([a, b, c]);
       const expected = {
+        array_field: [1, 2],
         field1: 1,
       };
       expect(intersection).toEqual(expected);

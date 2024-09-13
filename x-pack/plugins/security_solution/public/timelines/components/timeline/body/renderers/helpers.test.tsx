@@ -33,6 +33,7 @@ describe('helpers', () => {
         // { field: 'event.category', value: ['Access'] <-- deleted entry
         { field: 'event.category', value: ['Access'] },
         { field: 'event.action', value: ['Action'] },
+        { field: 'event.kind', value: ['signal'] },
         { field: 'host.name', value: ['apache'] },
         { field: 'source.ip', value: ['192.168.0.1'] },
         { field: 'destination.ip', value: ['192.168.0.3'] },
@@ -49,6 +50,7 @@ describe('helpers', () => {
         { field: 'event.severity', value: ['3'] },
         { field: 'event.category', value: ['Access'] },
         { field: 'event.action', value: ['Action'] },
+        { field: 'event.kind', value: ['signal'] },
         { field: 'host.name', value: ['apache'] },
         { field: 'source.ip', value: ['192.168.0.1'] },
         { field: 'destination.ip', value: ['192.168.0.3'] },

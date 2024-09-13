@@ -8,13 +8,40 @@
 import { schema } from '@kbn/config-schema';
 
 import { NewAgentPolicySchema } from '../models';
+import { inputsFormat } from '../../../common/constants';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_MAPPINGS } from '../../constants';
 
-import { ListWithKuerySchema, BulkRequestBodySchema } from './common';
+import { validateKuery } from '../../routes/utils/filter_utils';
+
+import { BulkRequestBodySchema } from './common';
 
 export const GetAgentPoliciesRequestSchema = {
-  query: ListWithKuerySchema.extends({
+  query: schema.object({
+    page: schema.maybe(schema.number({ defaultValue: 1 })),
+    perPage: schema.maybe(schema.number({ defaultValue: 20 })),
+    sortField: schema.maybe(schema.string()),
+    sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
+    showUpgradeable: schema.maybe(schema.boolean()),
+    kuery: schema.maybe(
+      schema.string({
+        validate: (value: string) => {
+          const validationObj = validateKuery(
+            value,
+            [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
+            AGENT_POLICY_MAPPINGS,
+            true
+          );
+          if (validationObj?.error) {
+            return validationObj?.error;
+          }
+        },
+      })
+    ),
     noAgentCount: schema.maybe(schema.boolean()),
     full: schema.maybe(schema.boolean()),
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
   }),
 };
 
@@ -22,11 +49,21 @@ export const BulkGetAgentPoliciesRequestSchema = {
   body: BulkRequestBodySchema.extends({
     full: schema.maybe(schema.boolean()),
   }),
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
+  }),
 };
 
 export const GetOneAgentPolicyRequestSchema = {
   params: schema.object({
     agentPolicyId: schema.string(),
+  }),
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
   }),
 };
 
@@ -55,6 +92,7 @@ export const CopyAgentPolicyRequestSchema = {
 export const DeleteAgentPolicyRequestSchema = {
   body: schema.object({
     agentPolicyId: schema.string(),
+    force: schema.maybe(schema.boolean()),
   }),
 };
 

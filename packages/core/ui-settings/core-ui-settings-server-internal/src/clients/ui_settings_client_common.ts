@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -64,10 +65,13 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     return userProvided;
   }
 
-  async setMany(changes: Record<string, any>) {
+  async setMany(
+    changes: Record<string, any>,
+    { handleWriteErrors }: { validateKeys?: boolean; handleWriteErrors?: boolean } = {}
+  ) {
     this.cache.del();
     this.onWriteHook(changes);
-    await this.write({ changes });
+    await this.write({ changes, handleWriteErrors });
   }
 
   async set(key: string, value: any) {
@@ -78,16 +82,19 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     await this.set(key, null);
   }
 
-  async removeMany(keys: string[]) {
+  async removeMany(
+    keys: string[],
+    options?: { validateKeys?: boolean; handleWriteErrors?: boolean }
+  ) {
     const changes: Record<string, null> = {};
     keys.forEach((key) => {
       changes[key] = null;
     });
-    await this.setMany(changes);
+    await this.setMany(changes, options);
   }
 
   private assertUpdateAllowed(key: string) {
-    if (this.overrides.hasOwnProperty(key)) {
+    if (Object.hasOwn(this.overrides, key)) {
       throw new CannotOverrideError(`Unable to update "${key}" because it is overridden`);
     }
   }
@@ -107,7 +114,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     // validate value read from saved objects as it can be changed via SO API
     const filteredValues: UserProvided<T> = {};
     for (const [key, userValue] of Object.entries(values)) {
-      if (userValue === null || this.overrides.hasOwnProperty(key)) continue;
+      if (userValue === null || Object.hasOwn(this.overrides, key)) continue;
       try {
         this.validateKey(key, userValue);
         filteredValues[key] = {
@@ -124,12 +131,14 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   private async write({
     changes,
     autoCreateOrUpgradeIfMissing = true,
+    handleWriteErrors = false,
   }: {
     changes: Record<string, any>;
     autoCreateOrUpgradeIfMissing?: boolean;
+    handleWriteErrors?: boolean;
   }) {
     try {
-      await this.savedObjectsClient.update(this.type, this.id, changes);
+      await this.savedObjectsClient.update(this.type, this.id, changes, { refresh: false });
     } catch (error) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
         throw error;
@@ -140,7 +149,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
         version: this.id,
         buildNum: this.buildNum,
         log: this.log,
-        handleWriteErrors: false,
+        handleWriteErrors,
         type: this.type,
       });
 

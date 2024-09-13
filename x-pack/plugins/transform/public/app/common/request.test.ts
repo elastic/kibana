@@ -6,10 +6,11 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 
-import { PivotGroupByConfig } from '.';
+import type { PivotGroupByConfig } from '.';
 
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
@@ -17,23 +18,14 @@ import type { StepDetailsExposedState } from '../sections/create_transform/compo
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
 import type { PivotAggsConfig } from './pivot_aggs';
 import {
-  defaultQuery,
   getPreviewTransformRequestBody,
   getCreateTransformRequestBody,
   getCreateTransformSettingsRequestBody,
   getTransformConfigQuery,
   getMissingBucketConfig,
   getRequestPayload,
-  isDefaultQuery,
-  isMatchAllQuery,
-  isSimpleQuery,
-  matchAllQuery,
-  type TransformConfigQuery,
 } from './request';
 import type { LatestFunctionConfigUI } from '../../../common/types/transform';
-import type { RuntimeField } from '@kbn/data-views-plugin/common';
-
-const simpleQuery: TransformConfigQuery = { query_string: { query: 'airline:AAL' } };
 
 const groupByTerms: PivotGroupByConfig = {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
@@ -50,24 +42,6 @@ const aggsAvg: PivotAggsConfig = {
 };
 
 describe('Transform: Common', () => {
-  test('isMatchAllQuery()', () => {
-    expect(isMatchAllQuery(defaultQuery)).toBe(false);
-    expect(isMatchAllQuery(matchAllQuery)).toBe(true);
-    expect(isMatchAllQuery(simpleQuery)).toBe(false);
-  });
-
-  test('isSimpleQuery()', () => {
-    expect(isSimpleQuery(defaultQuery)).toBe(true);
-    expect(isSimpleQuery(matchAllQuery)).toBe(false);
-    expect(isSimpleQuery(simpleQuery)).toBe(true);
-  });
-
-  test('isDefaultQuery()', () => {
-    expect(isDefaultQuery(defaultQuery)).toBe(true);
-    expect(isDefaultQuery(matchAllQuery)).toBe(true);
-    expect(isDefaultQuery(simpleQuery)).toBe(false);
-  });
-
   test('getTransformConfigQuery()', () => {
     const query = getTransformConfigQuery('the-query');
 
@@ -303,13 +277,13 @@ describe('Transform: Common', () => {
   });
 
   test('getCreateTransformRequestBody() with runtime fields and custom values', () => {
-    const runtimeMappings = {
+    const runtimeMappings: RuntimeMappings = {
       rt_bytes_bigger: {
         type: 'double',
         script: {
           source: "emit(doc['bytes'].value * 2.0)",
         },
-      } as RuntimeField,
+      },
     };
 
     const pivotState: StepDefineExposedState = {

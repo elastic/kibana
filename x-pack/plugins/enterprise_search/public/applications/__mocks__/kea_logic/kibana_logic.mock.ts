@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
+
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { ApplicationStart, Capabilities } from '@kbn/core/public';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
+import { searchPlaygroundMock } from '@kbn/search-playground/__mocks__/search_playground_mock';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 import { mockHistory } from '../react_router/state.mock';
 
@@ -24,17 +29,24 @@ export const mockKibanaValues = {
     ),
   } as unknown as ApplicationStart,
   capabilities: {} as Capabilities,
-  config: { host: 'http://localhost:3002' },
   charts: chartPluginMock.createStartContract(),
   cloud: {
     ...cloudMock.createSetup(),
-    isCloudEnabled: false,
     deployment_url: 'https://cloud.elastic.co/deployments/some-id',
+    isCloudEnabled: false,
   },
+  config: { host: 'http://localhost:3002' },
+  connectorTypes: [],
+  consolePlugin: null,
   data: dataPluginMock.createStartContract(),
+  esConfig: { elasticsearch_host: 'https://your_deployment_url' },
+  getChromeStyle$: jest.fn().mockReturnValue(of('classic')),
   guidedOnboarding: {},
   history: mockHistory,
+  indexMappingComponent: null,
   isCloud: false,
+  isSearchHomepageEnabled: false,
+  isSidebarEnabled: true,
   lens: {
     EmbeddableComponent: jest.fn(),
     stateHelperApi: jest.fn().mockResolvedValue({
@@ -47,15 +59,24 @@ export const mockKibanaValues = {
     hasWorkplaceSearchAccess: true,
   },
   productFeatures: {
+    hasDocumentLevelSecurityEnabled: true,
+    hasIncrementalSyncEnabled: true,
     hasNativeConnectors: true,
     hasWebCrawler: true,
   },
-  uiSettings: uiSettingsServiceMock.createStartContract(),
+  renderHeaderActions: jest.fn(),
+  searchHomepage: null,
+  searchInferenceEndpoints: null,
+  searchPlayground: searchPlaygroundMock.createStart(),
   security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),
   setChromeIsVisible: jest.fn(),
   setDocTitle: jest.fn(),
-  renderHeaderActions: jest.fn(),
+  share: sharePluginMock.createStartContract(),
+  ml: mlPluginMock.createStartContract(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  updateSideNavDefinition: jest.fn(),
+  user: null,
 };
 
 jest.mock('../../shared/kibana', () => ({

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -13,81 +14,21 @@ import type {
   CoreStart,
   ISavedObjectsRepository,
   Plugin,
-  ElasticsearchClient,
-  SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { ConfigType } from './config';
-import { CollectorSet } from './collector';
-import type { Collector, CollectorOptions, UsageCollectorOptions } from './collector';
 import { setupRoutes } from './routes';
-
+import type { ConfigType } from './config';
+import type { ICollectorSet } from './collector/types';
+import type { UsageCountersServiceSetup, UsageCountersServiceStart } from './usage_counters/types';
+import { CollectorSet } from './collector';
 import { UsageCountersService } from './usage_counters';
-import type { UsageCounter } from './usage_counters';
 
-/** Server's setup APIs exposed by the UsageCollection Service **/
-export interface UsageCollectionSetup {
-  /**
-   * Creates and registers a usage counter to collect daily aggregated plugin counter events
-   */
-  createUsageCounter: (type: string) => UsageCounter;
-  /**
-   * Returns a usage counter by type
-   */
-  getUsageCounterByType: (type: string) => UsageCounter | undefined;
-  /**
-   * Creates a usage collector to collect plugin telemetry data.
-   * registerCollector must be called to connect the created collector with the service.
-   */
-  makeUsageCollector: <TFetchReturn, ExtraOptions extends object = {}>(
-    options: UsageCollectorOptions<TFetchReturn, ExtraOptions>
-  ) => Collector<TFetchReturn, ExtraOptions>;
-  /**
-   * Register a usage collector or a stats collector.
-   * Used to connect the created collector to telemetry.
-   */
-  registerCollector: <TFetchReturn, ExtraOptions extends object>(
-    collector: Collector<TFetchReturn, ExtraOptions>
-  ) => void;
-  /**
-   * Returns a usage collector by type
-   */
-  getCollectorByType: <TFetchReturn, ExtraOptions extends object>(
-    type: string
-  ) => Collector<TFetchReturn, ExtraOptions> | undefined;
-  /**
-   * Fetches the collection from all the registered collectors
-   * @internal: telemetry use
-   */
-  bulkFetch: <TFetchReturn, ExtraOptions extends object>(
-    esClient: ElasticsearchClient,
-    soClient: SavedObjectsClientContract,
-    collectors?: Map<string, Collector<TFetchReturn, ExtraOptions>>
-  ) => Promise<Array<{ type: string; result: unknown }>>;
-  /**
-   * Converts an array of fetched stats results into key/object
-   * @internal: telemetry use
-   */
-  toObject: <Result extends Record<string, unknown>, T = unknown>(
-    statsData?: Array<{ type: string; result: T }>
-  ) => Result;
-  /**
-   * Rename fields to use API conventions
-   * @internal: monitoring use
-   */
-  toApiFieldNames: (
-    apiData: Record<string, unknown> | unknown[]
-  ) => Record<string, unknown> | unknown[];
-  /**
-   * Creates a stats collector to collect plugin telemetry data.
-   * registerCollector must be called to connect the created collector with the service.
-   * @internal: telemetry and monitoring use
-   */
-  makeStatsCollector: <TFetchReturn, ExtraOptions extends object = {}>(
-    options: CollectorOptions<TFetchReturn, ExtraOptions>
-  ) => Collector<TFetchReturn, ExtraOptions>;
-}
+/** Plugin's setup API **/
+export type UsageCollectionSetup = ICollectorSet & UsageCountersServiceSetup;
 
-export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
+/** Plugin's start API **/
+export type UsageCollectionStart = UsageCountersServiceStart;
+
+export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, UsageCollectionStart> {
   private readonly logger: Logger;
   private savedObjects?: ISavedObjectsRepository;
   private usageCountersService?: UsageCountersService;
@@ -98,7 +39,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
 
   public setup(core: CoreSetup): UsageCollectionSetup {
     const config = this.initializerContext.config.get<ConfigType>();
-    const kibanaIndex = core.savedObjects.getKibanaIndex();
+    const kibanaIndex = core.savedObjects.getDefaultIndex();
 
     const collectorSet = new CollectorSet({
       logger: this.logger.get('usage-collection', 'collector-set'),
@@ -112,13 +53,12 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
       bufferDurationMs: config.usageCounters.bufferDuration.asMilliseconds(),
     });
 
-    const { createUsageCounter, getUsageCounterByType } = this.usageCountersService.setup(core);
+    const usageCountersSetup = this.usageCountersService.setup(core);
 
-    const uiCountersUsageCounter = createUsageCounter('uiCounter');
     const router = core.http.createRouter();
     setupRoutes({
       router,
-      uiCountersUsageCounter,
+      usageCounters: usageCountersSetup,
       getSavedObjects: () => this.savedObjects,
       collectorSet,
       config: {
@@ -133,6 +73,10 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
     });
 
     return {
+      // usage counters methods
+      createUsageCounter: usageCountersSetup.createUsageCounter,
+      getUsageCounterByDomainId: usageCountersSetup.getUsageCounterByDomainId,
+      // collector set methods
       bulkFetch: collectorSet.bulkFetch,
       getCollectorByType: collectorSet.getCollectorByType,
       makeStatsCollector: collectorSet.makeStatsCollector,
@@ -140,12 +84,10 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
       registerCollector: collectorSet.registerCollector,
       toApiFieldNames: collectorSet.toApiFieldNames,
       toObject: collectorSet.toObject,
-      createUsageCounter,
-      getUsageCounterByType,
     };
   }
 
-  public start({ savedObjects }: CoreStart) {
+  public start({ savedObjects }: CoreStart): UsageCollectionStart {
     this.logger.debug('Starting plugin');
     const config = this.initializerContext.config.get<ConfigType>();
     if (!this.usageCountersService) {
@@ -153,12 +95,13 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
     }
 
     this.savedObjects = savedObjects.createInternalRepository();
-    if (config.usageCounters.enabled) {
-      this.usageCountersService.start({ savedObjects });
-    } else {
-      // call stop() to complete observers.
-      this.usageCountersService.stop();
-    }
+    const usageCountersStart = config.usageCounters.enabled
+      ? this.usageCountersService.start({ savedObjects })
+      : this.usageCountersService.stop();
+
+    return {
+      search: usageCountersStart.search,
+    };
   }
 
   public stop() {

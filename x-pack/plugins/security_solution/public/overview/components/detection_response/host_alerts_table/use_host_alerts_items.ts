@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
@@ -14,6 +14,7 @@ import type { GenericBuckets } from '../../../../../common/search_strategy';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { getPageCount, ITEMS_PER_PAGE } from '../utils';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 
 const HOSTS_BY_SEVERITY_AGG = 'hostsBySeverity';
 const defaultPagination = {
@@ -30,6 +31,7 @@ export interface UseHostAlertsItemsProps {
   skip: boolean;
   queryId: string;
   signalIndexName: string | null;
+  filterQuery?: ESBoolQuery;
 }
 
 export interface HostAlertsItem {
@@ -53,12 +55,27 @@ interface Pagination {
   currentPage: number;
 }
 
-export const useHostAlertsItems: UseHostAlertsItems = ({ skip, queryId, signalIndexName }) => {
+export const useHostAlertsItems: UseHostAlertsItems = ({
+  skip,
+  queryId,
+  signalIndexName,
+  filterQuery,
+}) => {
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<HostAlertsItem[]>([]);
   const [paginationData, setPaginationData] = useState<Pagination>(defaultPagination);
-
   const { to, from, setQuery: setGlobalQuery, deleteQuery } = useGlobalTime();
+
+  const query = useMemo(
+    () =>
+      buildVulnerableHostAggregationQuery({
+        from,
+        to,
+        currentPage: paginationData.currentPage,
+        filterQuery,
+      }),
+    [filterQuery, from, paginationData.currentPage, to]
+  );
 
   const {
     data,
@@ -68,21 +85,15 @@ export const useHostAlertsItems: UseHostAlertsItems = ({ skip, queryId, signalIn
     loading,
     refetch: refetchQuery,
   } = useQueryAlerts<{}, AlertCountersBySeverityAndHostAggregation>({
-    query: buildVulnerableHostAggregationQuery({
-      from,
-      to,
-      currentPage: paginationData.currentPage,
-    }),
+    query,
     indexName: signalIndexName,
     skip,
     queryName: ALERTS_QUERY_NAMES.VULNERABLE_HOSTS,
   });
 
   useEffect(() => {
-    setQuery(
-      buildVulnerableHostAggregationQuery({ from, to, currentPage: paginationData.currentPage })
-    );
-  }, [setQuery, from, to, paginationData.currentPage]);
+    setQuery(query);
+  }, [setQuery, paginationData.currentPage, query]);
 
   useEffect(() => {
     if (data == null || !data.aggregations) {
@@ -138,7 +149,8 @@ export const buildVulnerableHostAggregationQuery = ({
   from,
   to,
   currentPage,
-}: TimeRange & { currentPage: number }) => {
+  filterQuery,
+}: TimeRange & { currentPage: number; filterQuery?: ESBoolQuery }) => {
   const fromValue = ITEMS_PER_PAGE * currentPage;
 
   return {
@@ -158,6 +170,7 @@ export const buildVulnerableHostAggregationQuery = ({
               },
             },
           },
+          ...(filterQuery ? [filterQuery] : []),
         ],
       },
     },

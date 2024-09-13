@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -18,7 +19,6 @@ import { toExpressionAst } from '../to_ast';
 import { getGaugeOptions } from '../editor/components';
 import { GaugeVisParams } from '../types';
 import { SplitTooltip } from './split_tooltip';
-import { convertGaugeToLens } from '../convert_to_lens';
 
 export const getGaugeVisTypeDefinition = (
   props: GaugeTypeProps
@@ -130,8 +130,12 @@ export const getGaugeVisTypeDefinition = (
     ],
   },
   requiresSearch: true,
-  navigateToLens: async (vis, timefilter) => (vis ? convertGaugeToLens(vis, timefilter) : null),
+  navigateToLens: async (vis, timefilter) => {
+    const { convertGaugeToLens } = await import('../convert_to_lens');
+    return vis ? convertGaugeToLens(vis, timefilter) : null;
+  },
   getExpressionVariables: async (vis, timeFilter) => {
+    const { convertGaugeToLens } = await import('../convert_to_lens');
     return {
       canNavigateToLens: Boolean(vis?.params ? await convertGaugeToLens(vis, timeFilter) : null),
     };

@@ -12,12 +12,12 @@ import { ToolbarButton, ToolbarButtonProps } from './toolbar_button';
 
 interface TriggerLabelProps {
   label: string;
-  icon?: {
+  extraIcons?: Array<{
     component: React.ReactElement;
     value?: string;
     tooltipValue?: string;
     'data-test-subj': string;
-  };
+  }>;
 }
 
 export type ChangeIndexPatternTriggerProps = ToolbarButtonProps &
@@ -27,9 +27,10 @@ export type ChangeIndexPatternTriggerProps = ToolbarButtonProps &
     isDisabled?: boolean;
   };
 
-function TriggerLabel({ label, icon }: TriggerLabelProps) {
+function TriggerLabel({ label, extraIcons }: TriggerLabelProps) {
   const { euiTheme } = useEuiTheme();
-  if (!icon) {
+
+  if (!extraIcons?.length) {
     return <>{label}</>;
   }
   return (
@@ -43,28 +44,35 @@ function TriggerLabel({ label, icon }: TriggerLabelProps) {
       >
         {label}
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        data-test-subj={icon['data-test-subj']}
-        css={css`
-          display: block;
-          *:hover &,
-          *:focus & {
-            text-decoration: none !important;
-          }
-        `}
-      >
-        <EuiToolTip content={icon.tooltipValue} position="top">
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>{icon.component}</EuiFlexItem>
-            {icon.value ? (
-              <EuiFlexItem grow={false}>
-                <EuiTextColor color={euiTheme.colors.disabledText}>{icon.value}</EuiTextColor>
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-        </EuiToolTip>
-      </EuiFlexItem>
+      {extraIcons.map((icon) => (
+        <EuiFlexItem
+          grow={false}
+          data-test-subj={icon['data-test-subj']}
+          css={css`
+            display: block;
+            *:hover &,
+            *:focus & {
+              text-decoration: none !important;
+            }
+          `}
+          key={icon['data-test-subj']}
+        >
+          <EuiToolTip
+            content={icon.tooltipValue}
+            position="top"
+            data-test-subj={`${icon['data-test-subj']}-tooltip`}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              <EuiFlexItem grow={false}>{icon.component}</EuiFlexItem>
+              {icon.value ? (
+                <EuiFlexItem grow={false}>
+                  <EuiTextColor color={euiTheme.colors.disabledText}>{icon.value}</EuiTextColor>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiToolTip>
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 }
@@ -74,7 +82,7 @@ export function TriggerButton({
   title,
   togglePopover,
   isMissingCurrent,
-  icon,
+  extraIcons,
   ...rest
 }: ChangeIndexPatternTriggerProps & {
   togglePopover: () => void;
@@ -93,9 +101,9 @@ export function TriggerButton({
       fullWidth
       {...colorProp}
       {...rest}
-      textProps={{ style: { width: '100%' } }}
+      textProps={{ style: { width: '100%', lineHeight: '1.2em' } }}
     >
-      <TriggerLabel label={label} icon={icon} />
+      <TriggerLabel label={label} extraIcons={extraIcons} />
     </ToolbarButton>
   );
 }

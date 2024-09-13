@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { History } from 'history';
 import useMount from 'react-use/lib/useMount';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -28,16 +31,19 @@ import {
   removeSearchSessionIdFromURL,
   createSessionRestorationDataProvider,
 } from './url/search_sessions_integration';
-import { DASHBOARD_APP_ID } from '../dashboard_constants';
+import { DashboardAPI, DashboardRenderer } from '..';
+import { type DashboardEmbedSettings } from './types';
 import { pluginServices } from '../services/plugin_services';
-import { DashboardTopNav } from './top_nav/dashboard_top_nav';
-import type { DashboardContainer } from '../dashboard_container';
-import { type DashboardEmbedSettings, DashboardRedirect } from './types';
+import { AwaitingDashboardAPI } from '../dashboard_container';
+import { DashboardRedirect } from '../dashboard_container/types';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
+import { createDashboardEditUrl, DASHBOARD_APP_ID } from '../dashboard_constants';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
-import DashboardContainerRenderer from '../dashboard_container/dashboard_container_renderer';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
+import { DashboardTopNav } from '../dashboard_top_nav';
+import { DashboardTabTitleSetter } from './tab_title_setter/dashboard_tab_title_setter';
+import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
 
 export interface DashboardAppProps {
   history: History;
@@ -45,6 +51,16 @@ export interface DashboardAppProps {
   redirectTo: DashboardRedirect;
   embedSettings?: DashboardEmbedSettings;
 }
+
+export const DashboardAPIContext = createContext<AwaitingDashboardAPI>(null);
+
+export const useDashboardAPI = (): DashboardAPI => {
+  const api = useContext<AwaitingDashboardAPI>(DashboardAPIContext);
+  if (api == null) {
+    throw new Error('useDashboardAPI must be used inside DashboardAPIContext');
+  }
+  return api!;
+};
 
 export function DashboardApp({
   savedDashboardId,
@@ -57,10 +73,7 @@ export function DashboardApp({
   useMount(() => {
     (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
   });
-
-  const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer | undefined>(
-    undefined
-  );
+  const [dashboardAPI, setDashboardAPI] = useState<AwaitingDashboardAPI>(null);
 
   /**
    * Unpack & set up dashboard services
@@ -71,14 +84,20 @@ export function DashboardApp({
     embeddable: { getStateTransfer },
     notifications: { toasts },
     settings: { uiSettings },
-    data: { search },
+    data: { search, dataViews },
+    customBranding,
+    share: { url },
+    observabilityAIAssistant,
   } = pluginServices.getServices();
-
-  const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
-    DASHBOARD_APP_ID,
-    true
-  );
+  const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
+
+  useObservabilityAIAssistantContext({
+    observabilityAIAssistant: observabilityAIAssistant.start,
+    dashboardAPI,
+    search,
+    dataViews,
+  });
 
   useExecutionContext(executionContext, {
     type: 'application',
@@ -108,20 +127,33 @@ export function DashboardApp({
   /**
    * Validate saved object load outcome
    */
-  const { validateOutcome, getLegacyConflictWarning } = useDashboardOutcomeValidation({
-    redirectTo,
-  });
+  const { validateOutcome, getLegacyConflictWarning } = useDashboardOutcomeValidation();
 
   /**
    * Create options to pass into the dashboard renderer
    */
-  const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
-    const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+    const getInitialInput = () => {
+      const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
+      const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
 
-    return Promise.resolve({
-      incomingEmbeddable,
+      // Override all state with URL + Locator input
+      return {
+        // State loaded from the dashboard app URL and from the locator overrides all other dashboard state.
+        ...initialUrlState,
+        ...stateFromLocator,
+
+        // if print mode is active, force viewMode.PRINT
+        ...(isScreenshotMode() && getScreenshotContext('layout') === 'print'
+          ? { viewMode: ViewMode.PRINT }
+          : {}),
+      };
+    };
+
+    return Promise.resolve<DashboardCreationOptions>({
+      getIncomingEmbeddable: () =>
+        getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true),
 
       // integrations
       useControlGroupIntegration: true,
@@ -138,74 +170,68 @@ export function DashboardApp({
         getSearchSessionIdFromURL: () => getSearchSessionIdFromURL(history),
         removeSessionIdFromUrl: () => removeSearchSessionIdFromURL(kbnUrlStateStorage),
       },
-
-      // Override all state with URL + Locator input
-      overrideInput: {
-        // State loaded from the dashboard app URL and from the locator overrides all other dashboard state.
-        ...initialUrlState,
-        ...stateFromLocator,
-
-        // if print mode is active, force viewMode.PRINT
-        ...(isScreenshotMode() && getScreenshotContext('layout') === 'print'
-          ? { viewMode: ViewMode.PRINT }
-          : {}),
-      },
-
+      getInitialInput,
       validateLoadedSavedObject: validateOutcome,
+      isEmbeddedExternally: Boolean(embedSettings), // embed settings are only sent if the dashboard URL has `embed=true`
+      getEmbeddableAppContext: (dashboardId) => ({
+        currentAppId: DASHBOARD_APP_ID,
+        getCurrentPath: () => `#${createDashboardEditUrl(dashboardId)}`,
+      }),
     });
   }, [
     history,
+    embedSettings,
     validateOutcome,
-    stateFromLocator,
+    getScopedHistory,
     isScreenshotMode,
+    getStateTransfer,
     kbnUrlStateStorage,
-    incomingEmbeddable,
     getScreenshotContext,
   ]);
-
-  /**
-   * Get the redux wrapper from the dashboard container. This is used to wrap the top nav so it can interact with the
-   * dashboard's redux state.
-   */
-  const DashboardReduxWrapper = useMemo(
-    () => dashboardContainer?.getReduxEmbeddableTools().Wrapper,
-    [dashboardContainer]
-  );
 
   /**
    * When the dashboard container is created, or re-created, start syncing dashboard state with the URL
    */
   useEffect(() => {
-    if (!dashboardContainer) return;
+    if (!dashboardAPI) return;
     const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
       kbnUrlStateStorage,
-      dashboardContainer,
+      dashboardAPI,
     });
     return () => stopWatchingAppStateInUrl();
-  }, [dashboardContainer, kbnUrlStateStorage]);
+  }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
+
+  const locator = useMemo(() => url?.locators.get(DASHBOARD_APP_LOCATOR), [url]);
 
   return (
-    <div className="dshAppWrapper">
+    <>
       {showNoDataPage && (
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
       {!showNoDataPage && (
         <>
-          {DashboardReduxWrapper && (
-            <DashboardReduxWrapper>
-              <DashboardTopNav redirectTo={redirectTo} embedSettings={embedSettings} />
-            </DashboardReduxWrapper>
+          {dashboardAPI && (
+            <>
+              <DashboardTabTitleSetter dashboardContainer={dashboardAPI} />
+              <DashboardTopNav
+                redirectTo={redirectTo}
+                embedSettings={embedSettings}
+                dashboardContainer={dashboardAPI}
+              />
+            </>
           )}
 
           {getLegacyConflictWarning?.()}
-
-          <DashboardContainerRenderer
+          <DashboardRenderer
+            locator={locator}
+            ref={setDashboardAPI}
+            dashboardRedirect={redirectTo}
             savedObjectId={savedDashboardId}
+            showPlainSpinner={showPlainSpinner}
             getCreationOptions={getCreationOptions}
-            onDashboardContainerLoaded={(container) => setDashboardContainer(container)}
           />
         </>
       )}
-    </div>
+    </>
   );
 }

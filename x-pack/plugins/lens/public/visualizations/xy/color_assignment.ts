@@ -13,8 +13,9 @@ import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
   isRangeAnnotationConfig,
-} from '@kbn/event-annotation-plugin/public';
-import type { AccessorConfig, FramePublicAPI } from '../../types';
+} from '@kbn/event-annotation-common';
+import type { AccessorConfig } from '@kbn/visualization-ui-components';
+import type { FramePublicAPI } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { FormatFactory } from '../../../common/types';
 import { isDataLayer, isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
@@ -44,15 +45,13 @@ export function getColorAssignments(
 ): ColorAssignments {
   const layersPerPalette: Record<string, XYDataLayerConfig[]> = {};
 
-  layers
-    .filter((layer): layer is XYDataLayerConfig => isDataLayer(layer))
-    .forEach((layer) => {
-      const palette = layer.palette?.name || 'default';
-      if (!layersPerPalette[palette]) {
-        layersPerPalette[palette] = [];
-      }
-      layersPerPalette[palette].push(layer);
-    });
+  layers.filter(isDataLayer).forEach((layer) => {
+    const palette = layer.palette?.name || 'default';
+    if (!layersPerPalette[palette]) {
+      layersPerPalette[palette] = [];
+    }
+    layersPerPalette[palette].push(layer);
+  });
 
   return mapValues(layersPerPalette, (paletteLayers) => {
     const seriesPerLayer = paletteLayers.map((layer, layerIndex) => {

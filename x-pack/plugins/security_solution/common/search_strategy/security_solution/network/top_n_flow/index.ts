@@ -5,33 +5,17 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type {
-  GeoItem,
-  FlowTargetSourceDest,
-  TopNetworkTablesEcsField,
-  NetworkTopTablesFields,
-} from '../common';
-import type {
-  CursorType,
-  Inspect,
-  Maybe,
-  PageInfoPaginated,
-  TotalValue,
-  GenericBuckets,
-} from '../../../common';
-import type { RequestOptionsPaginated } from '../..';
-
-export interface NetworkTopNFlowRequestOptions
-  extends RequestOptionsPaginated<NetworkTopTablesFields> {
-  flowTarget: FlowTargetSourceDest;
-  ip?: Maybe<string>;
-}
+import type { IEsSearchResponse } from '@kbn/search-types';
+import type { GeoItem, TopNetworkTablesEcsField } from '../common';
+import type { CursorType, Inspect, Maybe, TotalValue, GenericBuckets } from '../../../common';
 
 export interface NetworkTopNFlowStrategyResponse extends IEsSearchResponse {
   edges: NetworkTopNFlowEdges[];
+  inspect?: Maybe<Inspect>;
+}
+
+export interface NetworkTopNFlowCountStrategyResponse extends IEsSearchResponse {
   totalCount: number;
-  pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }
 

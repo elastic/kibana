@@ -34,7 +34,8 @@ export const useGetEndpointDetails = (
     ...options,
     queryFn: () => {
       return http.get<HostInfo>(
-        resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: endpointId.trim() || 'undefined' })
+        resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: endpointId.trim() || 'undefined' }),
+        { version: '2023-10-31' }
       );
     },
   });

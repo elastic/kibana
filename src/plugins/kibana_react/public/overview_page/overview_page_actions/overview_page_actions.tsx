@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ApplicationStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '../../app_links';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 interface Props {
   addDataHref: string;
@@ -35,7 +36,11 @@ export const overviewPageActions = ({
     application.capabilities.navLinks;
 
   const actionAddData = (
-    <RedirectAppLinks application={application}>
+    <RedirectAppLinks
+      coreStart={{
+        application,
+      }}
+    >
       <EuiButtonEmpty
         data-test-subj="homeAddData"
         className="kbnOverviewPageHeader__actionButton"
@@ -52,7 +57,11 @@ export const overviewPageActions = ({
 
   const actionStackManagement =
     managementHref && showManagementLink && isManagementEnabled ? (
-      <RedirectAppLinks application={application}>
+      <RedirectAppLinks
+        coreStart={{
+          application,
+        }}
+      >
         <EuiButtonEmpty
           data-test-subj="homeManage"
           className="kbnOverviewPageHeader__actionButton"
@@ -69,7 +78,11 @@ export const overviewPageActions = ({
 
   const actionDevTools =
     devToolsHref && showDevToolsLink && isDevToolsEnabled ? (
-      <RedirectAppLinks application={application}>
+      <RedirectAppLinks
+        coreStart={{
+          application,
+        }}
+      >
         <EuiButtonEmpty
           data-test-subj="homeDevTools"
           className="kbnOverviewPageHeader__actionButton"

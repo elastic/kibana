@@ -11,9 +11,14 @@ import { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { getIndicesStats } from './indices_stats_collector';
 import { getResourcesStats } from './resources_stats_collector';
 import { cspmUsageSchema } from './schema';
-import { CspmUsage } from './types';
+import { CspmUsage, type CloudSecurityUsageCollectorType } from './types';
 import { getAccountsStats } from './accounts_stats_collector';
 import { getRulesStats } from './rules_stats_collector';
+import { getInstallationStats } from './installation_stats_collector';
+import { getAlertsStats } from './alert_stats_collector';
+import { getAllCloudAccountsStats } from './cloud_accounts_stats_collector';
+import { getMutedRulesStats } from './muted_rules_stats_collector';
+import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 
 export function registerCspmUsageCollector(
   logger: Logger,
@@ -33,23 +38,61 @@ export function registerCspmUsageCollector(
       return true;
     },
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
-      const [indicesStats, accountsStats, resourcesStats, rulesStats] = await Promise.all([
-        getIndicesStats(
-          collectorFetchContext.esClient,
-          collectorFetchContext.soClient,
-          coreServices,
-          logger
-        ),
-        getAccountsStats(collectorFetchContext.esClient, logger),
-        getResourcesStats(collectorFetchContext.esClient, logger),
-        getRulesStats(collectorFetchContext.esClient, logger),
+      const awaitPromiseSafe = async <T>(
+        taskName: CloudSecurityUsageCollectorType,
+        promise: Promise<T>
+      ) => {
+        try {
+          const val = await promise;
+          logger.info(`Cloud Security telemetry: ${taskName} payload was sent successfully`);
+          return val;
+        } catch (error) {
+          logger.error(`${taskName} task failed: ${error.message}`);
+          logger.error(error.stack);
+          return error;
+        }
+      };
+
+      const esClient = collectorFetchContext.esClient;
+      const soClient = collectorFetchContext.soClient;
+      const encryptedSoClient = (await coreServices)[0].savedObjects.createInternalRepository([
+        INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
       ]);
 
+      const [
+        indicesStats,
+        accountsStats,
+        resourcesStats,
+        rulesStats,
+        installationStats,
+        alertsStats,
+        cloudAccountStats,
+        mutedRulesStats,
+      ] = await Promise.all([
+        awaitPromiseSafe('Indices', getIndicesStats(esClient, soClient, coreServices, logger)),
+        awaitPromiseSafe('Accounts', getAccountsStats(esClient, logger)),
+        awaitPromiseSafe('Resources', getResourcesStats(esClient, logger)),
+        awaitPromiseSafe('Rules', getRulesStats(esClient, logger)),
+        awaitPromiseSafe(
+          'Installation',
+          getInstallationStats(esClient, soClient, coreServices, logger)
+        ),
+        awaitPromiseSafe('Alerts', getAlertsStats(esClient, logger)),
+        awaitPromiseSafe(
+          'Cloud Accounts',
+          getAllCloudAccountsStats(esClient, encryptedSoClient, logger)
+        ),
+        awaitPromiseSafe('Muted Rules', getMutedRulesStats(soClient, encryptedSoClient, logger)),
+      ]);
       return {
         indices: indicesStats,
         accounts_stats: accountsStats,
         resources_stats: resourcesStats,
         rules_stats: rulesStats,
+        installation_stats: installationStats,
+        alerts_stats: alertsStats,
+        cloud_account_stats: cloudAccountStats,
+        muted_rules_stats: mutedRulesStats,
       };
     },
     schema: cspmUsageSchema,

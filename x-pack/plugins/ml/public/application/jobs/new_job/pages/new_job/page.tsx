@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, Fragment, useMemo } from 'react';
-import {
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
-} from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useEffect, Fragment, useMemo } from 'react';
+import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
-import { useTimeBuckets } from '../../../../components/custom_hooks/use_time_buckets';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { jobCloningService } from '../../../../services/job_cloning_service';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
-import { getJobCreatorTitle } from '../../common/job_creator/util/general';
+import { cloneDatafeed, getJobCreatorTitle } from '../../common/job_creator/util/general';
 import {
   jobCreatorFactory,
   isAdvancedJobCreator,
@@ -33,11 +33,10 @@ import { ChartLoader } from '../../common/chart_loader';
 import { MapLoader } from '../../common/map_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
-import { useMlContext } from '../../../../contexts/ml';
-import { useMlKibana } from '../../../../contexts/kibana';
-import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
-import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
+import { useDataSource } from '../../../../contexts/ml';
+import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
+import type { ExistingJobsAndGroups } from '../../../../services/job_service';
+import { useNewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { MlPageHeader } from '../../../../components/page_header';
@@ -53,19 +52,23 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const timefilter = useTimefilter();
-  const mlContext = useMlContext();
+  const dataSourceContext = useDataSource();
   const {
-    services: { maps: mapsPlugin },
+    services: { maps: mapsPlugin, uiSettings },
   } = useMlKibana();
+  const mlApi = useMlApi();
+  const newJobCapsService = useNewJobCapsService();
 
-  const chartInterval = useTimeBuckets();
+  const chartInterval = useTimeBuckets(uiSettings);
 
   const jobCreator = useMemo(
     () =>
       jobCreatorFactory(jobType)(
-        mlContext.currentDataView,
-        mlContext.deprecatedSavedSearchObj,
-        mlContext.combinedQuery
+        mlApi,
+        newJobCapsService,
+        dataSourceContext.selectedDataView,
+        dataSourceContext.selectedSavedSearch,
+        dataSourceContext.combinedQuery
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobType]
@@ -83,53 +86,36 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
       : WIZARD_STEPS.TIME_RANGE;
 
-  let autoSetTimeRange = mlJobService.tempJobCloningObjects.autoSetTimeRange;
-  mlJobService.tempJobCloningObjects.autoSetTimeRange = false;
+  let autoSetTimeRange = jobCloningService.autoSetTimeRange;
 
-  if (
-    mlJobService.tempJobCloningObjects.job !== undefined &&
-    mlJobService.tempJobCloningObjects.datafeed !== undefined
-  ) {
+  if (jobCloningService.job !== undefined && jobCloningService.datafeed !== undefined) {
     // cloning a job
-    const clonedJob = mlJobService.tempJobCloningObjects.job;
-    const clonedDatafeed = mlJobService.cloneDatafeed(mlJobService.tempJobCloningObjects.datafeed);
+    const clonedJob = jobCloningService.job;
+    const clonedDatafeed = cloneDatafeed(jobCloningService.datafeed);
 
     initCategorizationSettings();
     jobCreator.cloneFromExistingJob(clonedJob, clonedDatafeed);
 
     // if we're not skipping the time range, this is a standard job clone, so wipe the jobId
-    if (mlJobService.tempJobCloningObjects.skipTimeRangeStep === false) {
+    if (jobCloningService.skipTimeRangeStep === false) {
       jobCreator.jobId = '';
     } else if (jobType !== JOB_TYPE.ADVANCED) {
       firstWizardStep = WIZARD_STEPS.PICK_FIELDS;
     }
 
-    mlJobService.tempJobCloningObjects.skipTimeRangeStep = false;
-    mlJobService.tempJobCloningObjects.job = undefined;
-    mlJobService.tempJobCloningObjects.datafeed = undefined;
-    mlJobService.tempJobCloningObjects.createdBy = undefined;
-
-    if (
-      mlJobService.tempJobCloningObjects.start !== undefined &&
-      mlJobService.tempJobCloningObjects.end !== undefined
-    ) {
+    if (jobCloningService.start !== undefined && jobCloningService.end !== undefined) {
       // auto select the start and end dates for the time range picker
-      jobCreator.setTimeRange(
-        mlJobService.tempJobCloningObjects.start,
-        mlJobService.tempJobCloningObjects.end
-      );
-      mlJobService.tempJobCloningObjects.start = undefined;
-      mlJobService.tempJobCloningObjects.end = undefined;
+      jobCreator.setTimeRange(jobCloningService.start, jobCloningService.end);
     } else {
       // if not start and end times are set and this is an advanced job,
       // auto set the time range based on the index
       autoSetTimeRange = autoSetTimeRange || isAdvancedJobCreator(jobCreator);
     }
 
-    if (mlJobService.tempJobCloningObjects.calendars) {
-      jobCreator.calendars = mlJobService.tempJobCloningObjects.calendars;
-      mlJobService.tempJobCloningObjects.calendars = undefined;
+    if (jobCloningService.calendars) {
+      jobCreator.calendars = jobCloningService.calendars;
     }
+    jobCloningService.clearJobCloningData();
   } else {
     // creating a new job
     jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
@@ -148,7 +134,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       jobCreator.modelChangeAnnotations = true;
     }
 
-    if (mlContext.selectedSavedSearch !== null) {
+    if (dataSourceContext.selectedSavedSearch !== null) {
       // Jobs created from saved searches cannot be cloned in the wizard as the
       // ML job config holds no reference to the saved search ID.
       jobCreator.createdBy = null;
@@ -181,9 +167,10 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       // categorization job will always use a count agg, so give it
       // to the job creator now
       const count = newJobCapsService.getAggById('count');
+      const highCount = newJobCapsService.getAggById('high_count');
       const rare = newJobCapsService.getAggById('rare');
       const eventRate = newJobCapsService.getFieldById(EVENT_RATE_FIELD_ID);
-      jobCreator.setDefaultDetectorProperties(count, rare, eventRate);
+      jobCreator.setDefaultDetectorProperties(count, highCount, rare, eventRate);
 
       const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
       jobCreator.categorizationAnalyzer = anomalyDetectors.categorization_analyzer!;
@@ -202,13 +189,13 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   chartInterval.setInterval('auto');
 
   const chartLoader = useMemo(
-    () => new ChartLoader(mlContext.currentDataView, jobCreator.query),
-    [mlContext.currentDataView, jobCreator.query]
+    () => new ChartLoader(mlApi, dataSourceContext.selectedDataView, jobCreator.query),
+    [mlApi, dataSourceContext.selectedDataView, jobCreator.query]
   );
 
   const mapLoader = useMemo(
-    () => new MapLoader(mlContext.currentDataView, jobCreator.query, mapsPlugin),
-    [mlContext.currentDataView, jobCreator.query, mapsPlugin]
+    () => new MapLoader(mlApi, dataSourceContext.selectedDataView, jobCreator.query, mapsPlugin),
+    [mlApi, dataSourceContext.selectedDataView, jobCreator.query, mapsPlugin]
   );
 
   const resultsLoader = useMemo(
@@ -227,20 +214,28 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   return (
     <Fragment>
       <MlPageHeader>
-        <FormattedMessage id="xpack.ml.newJob.page.createJob" defaultMessage="Create job" />:{' '}
-        {jobCreatorTitle}
+        <div data-test-subj={`mlPageJobWizardHeader-${jobCreator.type}`}>
+          <FormattedMessage id="xpack.ml.newJob.page.createJob" defaultMessage="Create job" />:{' '}
+          {jobCreatorTitle}
+        </div>
       </MlPageHeader>
 
       <div style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
+        <EuiText size={'s'}>
+          {dataSourceContext.selectedDataView.isPersisted() ? (
             <FormattedMessage
               id="xpack.ml.newJob.page.createJob.dataViewName"
               defaultMessage="Using data view {dataViewName}"
               values={{ dataViewName: jobCreator.indexPatternDisplayName }}
             />
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.newJob.page.createJob.tempDataViewName"
+              defaultMessage="Using temporary data view {dataViewName}"
+              values={{ dataViewName: jobCreator.indexPatternDisplayName }}
+            />
+          )}
+        </EuiText>
 
         <Wizard
           jobCreator={jobCreator}

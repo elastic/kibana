@@ -9,6 +9,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { getDefaultChartsData } from './explorer_charts_container_service';
 import { ExplorerChartsContainer, getEntitiesQuery } from './explorer_charts_container';
@@ -20,27 +21,11 @@ import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_contex
 import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
 import { timefilterMock } from '../../contexts/kibana/__mocks__/use_timefilter';
 
-jest.mock('../../services/field_format_service', () => ({
-  mlFieldFormatService: {
-    getFieldFormat: jest.fn(),
-  },
-}));
-jest.mock('../../services/job_service', () => ({
-  mlJobService: {
-    getJob: jest.fn(),
-  },
-}));
-
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  withKibana: (comp) => {
-    return comp;
-  },
-}));
-
 jest.mock('../../contexts/kibana', () => ({
   useMlKibana: () => {
     return {
       services: {
+        chrome: { recentlyAccessed: { add: jest.fn() } },
         share: {
           url: {
             locators: {
@@ -95,12 +80,18 @@ describe('ExplorerChartsContainer', () => {
   test('Minimal Initialization', () => {
     const wrapper = shallow(
       <I18nProvider>
-        <ExplorerChartsContainer {...getDefaultChartsData()} {...getUtilityProps()} severity={10} />
+        <KibanaContextProvider services={kibanaContextMock.services}>
+          <ExplorerChartsContainer
+            {...getDefaultChartsData()}
+            {...getUtilityProps()}
+            severity={10}
+          />
+        </KibanaContextProvider>
       </I18nProvider>
     );
 
     expect(wrapper.html()).toEqual(
-      '<div class="euiFlexGrid css-17f5jta-euiFlexGrid-m-row-stretch-responsive" data-test-subj="mlExplorerChartsContainer"></div>'
+      '<div class="euiFlexGrid css-3oynhh-euiFlexGrid-m-row-stretch-responsive" data-test-subj="mlExplorerChartsContainer"></div>'
     );
   });
 
@@ -120,7 +111,9 @@ describe('ExplorerChartsContainer', () => {
     };
     const wrapper = mount(
       <I18nProvider>
-        <ExplorerChartsContainer {...props} {...getUtilityProps()} />
+        <KibanaContextProvider services={kibanaContextMock.services}>
+          <ExplorerChartsContainer {...props} {...getUtilityProps()} />
+        </KibanaContextProvider>
       </I18nProvider>
     );
 
@@ -147,7 +140,9 @@ describe('ExplorerChartsContainer', () => {
     };
     const wrapper = mount(
       <I18nProvider>
-        <ExplorerChartsContainer {...props} {...getUtilityProps()} />
+        <KibanaContextProvider services={kibanaContextMock.services}>
+          <ExplorerChartsContainer {...props} {...getUtilityProps()} />
+        </KibanaContextProvider>
       </I18nProvider>
     );
 

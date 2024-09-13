@@ -7,6 +7,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { OperationDefinition } from '.';
 import {
   ReferenceBasedIndexPatternColumn,
@@ -14,9 +15,9 @@ import {
   ValueFormatConfig,
 } from './column_types';
 import type { IndexPattern } from '../../../../types';
-import { useDebouncedValue } from '../../../../shared_components';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
 import { getColumnOrder } from '../layer_helpers';
+import { STATIC_VALUE_NOT_VALID_NUMBER } from '../../../../user_messages_ids';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.staticValueLabelDefault', {
   defaultMessage: 'Static value',
@@ -66,15 +67,19 @@ export const staticValueOperation: OperationDefinition<
   },
   getErrorMessage(layer, columnId) {
     const column = layer.columns[columnId] as StaticValueIndexPatternColumn;
+    const isValid = isValidNumber(column.params.value, false, undefined, undefined, 15);
 
-    return column.params.value != null && !isValidNumber(column.params.value)
+    return column.params.value != null && !isValid
       ? [
-          i18n.translate('xpack.lens.indexPattern.staticValueError', {
-            defaultMessage: 'The static value of {value} is not a valid number',
-            values: { value: column.params.value },
-          }),
+          {
+            uniqueId: STATIC_VALUE_NOT_VALID_NUMBER,
+            message: i18n.translate('xpack.lens.indexPattern.staticValueError', {
+              defaultMessage: 'The static value of {value} is not a valid number',
+              values: { value: column.params.value },
+            }),
+          },
         ]
-      : undefined;
+      : [];
   },
   getPossibleOperation() {
     return {
@@ -89,7 +94,8 @@ export const staticValueOperation: OperationDefinition<
     const params = currentColumn.params;
     // TODO: improve this logic
     const useDisplayLabel = currentColumn.label !== defaultLabel;
-    const label = isValidNumber(params.value)
+    const isValid = isValidNumber(params.value, false, undefined, undefined, 15);
+    const label = isValid
       ? useDisplayLabel
         ? currentColumn.label
         : params?.value ?? defaultLabel
@@ -98,11 +104,11 @@ export const staticValueOperation: OperationDefinition<
     return [
       {
         type: 'function',
-        function: isValidNumber(params.value) ? 'mathColumn' : 'mapColumn',
+        function: isValid ? 'mathColumn' : 'mapColumn',
         arguments: {
           id: [columnId],
           name: [label || defaultLabel],
-          expression: [String(isValidNumber(params.value) ? params.value! : defaultValue)],
+          expression: [String(isValid ? params.value! : defaultValue)],
         },
       },
     ];
@@ -161,9 +167,12 @@ export const staticValueOperation: OperationDefinition<
     paramEditorCustomProps,
   }) {
     const onChange = useCallback(
-      (newValue) => {
+      (newValue?: string) => {
         // even if debounced it's triggering for empty string with the previous valid value
-        if (currentColumn.params.value === newValue) {
+        if (
+          currentColumn.params.value === newValue ||
+          !isValidNumber(newValue, false, undefined, undefined, 15)
+        ) {
           return;
         }
         // Because of upstream specific UX flows, we need fresh layer state here
@@ -209,13 +218,26 @@ export const staticValueOperation: OperationDefinition<
     const onChangeHandler = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.currentTarget.value;
-        handleInputChange(isValidNumber(value) ? value : undefined);
+        handleInputChange(value);
       },
       [handleInputChange]
     );
 
+    const inputValueIsValid = isValidNumber(inputValue, false, undefined, undefined, 15);
+
     return (
-      <EuiFormRow label={paramEditorCustomProps?.labels?.[0] || defaultLabel} fullWidth>
+      <EuiFormRow
+        label={paramEditorCustomProps?.labels?.[0] || defaultLabel}
+        fullWidth
+        isInvalid={!inputValueIsValid}
+        error={
+          !inputValueIsValid &&
+          i18n.translate('xpack.lens.indexPattern.staticValueError', {
+            defaultMessage: 'The static value of {value} is not a valid number',
+            values: { value: inputValue ?? "''" },
+          })
+        }
+      >
         <EuiFieldNumber
           fullWidth
           data-test-subj="lns-indexPattern-static_value-input"

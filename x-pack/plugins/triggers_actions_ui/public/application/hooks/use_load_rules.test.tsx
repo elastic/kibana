@@ -15,7 +15,7 @@ import { RuleStatus } from '../../types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '../../common/lib/kibana';
 import { IToasts } from '@kbn/core-notifications-browser';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../lib/rule_api/rules_kuery_filter', () => ({
@@ -36,7 +36,7 @@ const queryClient = new QueryClient({
     },
   },
 });
-const wrapper = ({ children }: { children: Node }) => (
+const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
@@ -272,6 +272,7 @@ describe('useLoadRules', () => {
         types: [],
         actionTypes: [],
         ruleExecutionStatuses: [],
+        ruleParams: {},
         ruleLastRunOutcomes: [],
         ruleStatuses: [],
         tags: [],
@@ -328,6 +329,7 @@ describe('useLoadRules', () => {
         types: ['type1', 'type2'],
         actionTypes: ['action1', 'action2'],
         ruleExecutionStatuses: ['status1', 'status2'],
+        ruleParams: {},
         ruleLastRunOutcomes: ['outcome1', 'outcome2'],
         ruleStatuses: ['enabled', 'snoozed'] as RuleStatus[],
         tags: ['tag1', 'tag2'],
@@ -355,6 +357,7 @@ describe('useLoadRules', () => {
         actionTypesFilter: ['action1', 'action2'],
         ruleExecutionStatusesFilter: ['status1', 'status2'],
         ruleLastRunOutcomesFilter: ['outcome1', 'outcome2'],
+        ruleParamsFilter: {},
         ruleStatusesFilter: ['enabled', 'snoozed'],
         tagsFilter: ['tag1', 'tag2'],
         sort: { field: 'name', direction: 'asc' },
@@ -378,6 +381,7 @@ describe('useLoadRules', () => {
         types: [],
         actionTypes: [],
         ruleExecutionStatuses: [],
+        ruleParams: {},
         ruleLastRunOutcomes: [],
         ruleStatuses: [],
         tags: [],
@@ -415,6 +419,7 @@ describe('useLoadRules', () => {
         types: [],
         actionTypes: [],
         ruleExecutionStatuses: [],
+        ruleParams: {},
         ruleLastRunOutcomes: [],
         ruleStatuses: [],
         tags: [],
@@ -444,6 +449,7 @@ describe('useLoadRules', () => {
           types: [],
           actionTypes: [],
           ruleExecutionStatuses: [],
+          ruleParams: {},
           ruleLastRunOutcomes: [],
           ruleStatuses: [],
           tags: [],
@@ -477,6 +483,7 @@ describe('useLoadRules', () => {
           types: ['some-kind-of-filter'],
           actionTypes: [],
           ruleExecutionStatuses: [],
+          ruleParams: {},
           ruleLastRunOutcomes: [],
           ruleStatuses: [],
           tags: [],

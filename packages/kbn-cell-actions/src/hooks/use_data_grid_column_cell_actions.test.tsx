@@ -1,25 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { JSXElementConstructor, MutableRefObject } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiDataGridColumnCellActionProps,
-  EuiDataGridRefProps,
-  type EuiDataGridColumnCellAction,
-} from '@elastic/eui';
+import type { JSXElementConstructor, MutableRefObject } from 'react';
+import React from 'react';
+import type { EuiDataGridColumnCellActionProps, EuiDataGridRefProps } from '@elastic/eui';
+import { EuiButtonEmpty, type EuiDataGridColumnCellAction } from '@elastic/eui';
 import { render, waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 import { makeAction } from '../mocks/helpers';
-import {
-  useDataGridColumnsCellActions,
-  UseDataGridColumnsCellActionsProps,
-} from './use_data_grid_column_cell_actions';
+import type { UseDataGridColumnsCellActionsProps } from './use_data_grid_column_cell_actions';
+import { useDataGridColumnsCellActions } from './use_data_grid_column_cell_actions';
 
 const action1 = makeAction('action-1', 'icon1', 1);
 action1.execute = jest.fn();
@@ -31,14 +27,21 @@ const mockGetActions = jest.fn(async () => actions);
 jest.mock('../context/cell_actions_context', () => ({
   useCellActionsContext: () => ({ getActions: mockGetActions }),
 }));
-
-const field1 = { name: 'column1', values: ['0.0', '0.1', '0.2', '0.3'], type: 'text' };
-const field2 = { name: 'column2', values: ['1.0', '1.1', '1.2', '1.3'], type: 'keyword' };
+const fieldValues: Record<string, string[]> = {
+  column1: ['0.0', '0.1', '0.2', '0.3'],
+  column2: ['1.0', '1.1', '1.2', '1.3'],
+};
+const mockGetCellValue = jest.fn(
+  (field: string, rowIndex: number) => fieldValues[field]?.[rowIndex % fieldValues[field].length]
+);
+const field1 = { name: 'column1', type: 'text', searchable: true, aggregatable: true };
+const field2 = { name: 'column2', type: 'keyword', searchable: true, aggregatable: true };
 const columns = [{ id: field1.name }, { id: field2.name }];
 
 const mockCloseCellPopover = jest.fn();
 const useDataGridColumnsCellActionsProps: UseDataGridColumnsCellActionsProps = {
   fields: [field1, field2],
+  getCellValue: mockGetCellValue,
   triggerId: 'testTriggerId',
   metadata: { some: 'value' },
   dataGridRef: {
@@ -72,8 +75,8 @@ describe('useDataGridColumnsCellActions', () => {
     const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
-    expect(result.current).toHaveLength(columns.length);
-    expect(result.current[0]).toHaveLength(1); // loader
+
+    expect(result.current).toHaveLength(0);
 
     await waitForNextUpdate();
 
@@ -81,15 +84,23 @@ describe('useDataGridColumnsCellActions', () => {
     expect(result.current[0]).toHaveLength(actions.length);
   });
 
-  it('should render cell actions loading state', async () => {
-    const { result } = renderHook(useDataGridColumnsCellActions, {
+  it('should call getCellValue with the proper params', async () => {
+    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
 
-    await act(async () => {
-      const cellAction = renderCellAction(result.current[0][0]);
-      expect(cellAction.getByTestId('dataGridColumnCellAction-loading')).toBeInTheDocument();
-    });
+    await waitForNextUpdate();
+
+    renderCellAction(result.current[0][0], { rowIndex: 0 });
+    renderCellAction(result.current[0][1], { rowIndex: 1 });
+    renderCellAction(result.current[1][0], { rowIndex: 0 });
+    renderCellAction(result.current[1][1], { rowIndex: 1 });
+
+    expect(mockGetCellValue).toHaveBeenCalledTimes(4);
+    expect(mockGetCellValue).toHaveBeenCalledWith(field1.name, 0);
+    expect(mockGetCellValue).toHaveBeenCalledWith(field1.name, 1);
+    expect(mockGetCellValue).toHaveBeenCalledWith(field2.name, 0);
+    expect(mockGetCellValue).toHaveBeenCalledWith(field2.name, 1);
   });
 
   it('should render the cell actions', async () => {
@@ -136,12 +147,24 @@ describe('useDataGridColumnsCellActions', () => {
     cellAction1.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
 
     await waitFor(() => {
-      expect(action1.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          field: { name: field1.name, type: field1.type, value: field1.values[1] },
-          trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
-        })
-      );
+      expect(action1.execute).toHaveBeenCalledWith({
+        data: [
+          {
+            value: fieldValues[field1.name][1],
+            field: {
+              name: field1.name,
+              type: field1.type,
+              aggregatable: true,
+              searchable: true,
+            },
+          },
+        ],
+        metadata: {
+          some: 'value',
+        },
+        nodeRef: expect.any(Object),
+        trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
+      });
     });
 
     const cellAction2 = renderCellAction(result.current[1][1], { rowIndex: 2 });
@@ -149,12 +172,24 @@ describe('useDataGridColumnsCellActions', () => {
     cellAction2.getByTestId(`dataGridColumnCellAction-${action2.id}`).click();
 
     await waitFor(() => {
-      expect(action2.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          field: { name: field2.name, type: field2.type, value: field2.values[2] },
-          trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
-        })
-      );
+      expect(action2.execute).toHaveBeenCalledWith({
+        data: [
+          {
+            value: fieldValues[field2.name][2],
+            field: {
+              name: field2.name,
+              type: field2.type,
+              aggregatable: true,
+              searchable: true,
+            },
+          },
+        ],
+        metadata: {
+          some: 'value',
+        },
+        nodeRef: expect.any(Object),
+        trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
+      });
     });
   });
 
@@ -168,10 +203,22 @@ describe('useDataGridColumnsCellActions', () => {
 
     cellAction.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
 
+    expect(mockGetCellValue).toHaveBeenCalledWith(field1.name, 25);
+
     await waitFor(() => {
       expect(action1.execute).toHaveBeenCalledWith(
         expect.objectContaining({
-          field: { name: field1.name, type: field1.type, value: field1.values[1] },
+          data: [
+            {
+              value: fieldValues[field1.name][1],
+              field: {
+                name: field1.name,
+                type: field1.type,
+                aggregatable: true,
+                searchable: true,
+              },
+            },
+          ],
         })
       );
     });
@@ -190,5 +237,33 @@ describe('useDataGridColumnsCellActions', () => {
     await waitFor(() => {
       expect(mockCloseCellPopover).toHaveBeenCalled();
     });
+  });
+
+  it('should return empty array of actions when list of fields is empty', async () => {
+    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
+      initialProps: {
+        ...useDataGridColumnsCellActionsProps,
+        fields: [],
+      },
+    });
+
+    await waitForNextUpdate();
+
+    expect(result.current).toBeInstanceOf(Array);
+    expect(result.current.length).toBe(0);
+  });
+
+  it('should return empty array of actions when list of fields is undefined', async () => {
+    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
+      initialProps: {
+        ...useDataGridColumnsCellActionsProps,
+        fields: undefined,
+      },
+    });
+
+    await waitForNextUpdate();
+
+    expect(result.current).toBeInstanceOf(Array);
+    expect(result.current.length).toBe(0);
   });
 });

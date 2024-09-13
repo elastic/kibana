@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiCard, EuiIcon, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
-import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import {
+  type DataFrameAnalysisConfigType,
+  ANALYSIS_CONFIG_TYPE,
+} from '@kbn/ml-data-frame-analytics-utils';
 
-import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import type { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
 interface Props {
   type: AnalyticsJobType;

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '../..';
@@ -167,4 +168,27 @@ test('fails if nested union type fail', () => {
      - [0]: could not parse object value from json input
      - [1]: expected value of type [number] but got [string]"
   `);
+});
+
+describe('#extendsDeep', () => {
+  const type = schema.oneOf([schema.object({ foo: schema.string() })]);
+
+  test('objects with unknown attributes are kept when extending with unknowns=allow', () => {
+    const allowSchema = type.extendsDeep({ unknowns: 'allow' });
+    const result = allowSchema.validate({ foo: 'test', bar: 'test' });
+    expect(result).toEqual({ foo: 'test', bar: 'test' });
+  });
+
+  test('objects with unknown attributes are dropped when extending with unknowns=ignore', () => {
+    const ignoreSchema = type.extendsDeep({ unknowns: 'ignore' });
+    const result = ignoreSchema.validate({ foo: 'test', bar: 'test' });
+    expect(result).toEqual({ foo: 'test' });
+  });
+
+  test('objects with unknown attributes fail validation when extending with unknowns=forbid', () => {
+    const forbidSchema = type.extendsDeep({ unknowns: 'forbid' });
+    expect(() =>
+      forbidSchema.validate({ foo: 'test', bar: 'test' })
+    ).toThrowErrorMatchingInlineSnapshot(`"[bar]: definition for this key is missing"`);
+  });
 });

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ToastsApi } from '@kbn/core/public';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { Rule, RuleSummary, RuleType } from '../../../../types';
 import {
   ComponentOpts as RuleApis,
@@ -16,13 +16,14 @@ import {
 import { RuleWithApi as Rules } from './rule';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { RefreshToken } from './types';
 
 type WithRuleSummaryProps = {
   rule: Rule;
   ruleType: RuleType;
   readOnly: boolean;
   requestRefresh: () => Promise<void>;
-  refreshToken?: number;
+  refreshToken?: RefreshToken;
 } & Pick<RuleApis, 'loadRuleSummary'>;
 
 export const RuleRoute: React.FunctionComponent<WithRuleSummaryProps> = ({
@@ -75,17 +76,19 @@ export const RuleRoute: React.FunctionComponent<WithRuleSummaryProps> = ({
   );
 
   return ruleSummary ? (
-    <Rules
-      requestRefresh={requestRefresh}
-      refreshToken={refreshToken}
-      rule={rule}
-      ruleType={ruleType}
-      readOnly={readOnly}
-      ruleSummary={ruleSummary}
-      numberOfExecutions={numberOfExecutions}
-      isLoadingChart={isLoadingChart}
-      onChangeDuration={onChangeDuration}
-    />
+    <Suspense fallback={<CenterJustifiedSpinner />}>
+      <Rules
+        requestRefresh={requestRefresh}
+        refreshToken={refreshToken}
+        rule={rule}
+        ruleType={ruleType}
+        readOnly={readOnly}
+        ruleSummary={ruleSummary}
+        numberOfExecutions={numberOfExecutions}
+        isLoadingChart={isLoadingChart}
+        onChangeDuration={onChangeDuration}
+      />
+    </Suspense>
   ) : (
     <CenterJustifiedSpinner />
   );

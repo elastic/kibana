@@ -15,6 +15,7 @@
     "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-server",
     "@kbn/config-schema",
+    "@kbn/core-saved-objects-base-server-internal",
   ],
   "exclude": [
     "target/**/*",

@@ -6,21 +6,21 @@ exports[`Logs should render a link to filter by cluster uuid 1`] = `
   size="m"
   title="Want to see more log entries?"
 >
-  <p>
-    <FormattedMessage
+  <RedirectAppLinks>
+    <MemoizedFormattedMessage
       defaultMessage="Visit {link} to dive deeper."
       id="xpack.monitoring.logs.listing.linkText"
       values={
         Object {
           "link": <EuiLink
-            href="/app/logs/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345"
+            href=""
           >
             Logs
           </EuiLink>,
         }
       }
     />
-  </p>
+  </RedirectAppLinks>
 </EuiCallOut>
 `;
 
@@ -30,21 +30,21 @@ exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] 
   size="m"
   title="Want to see more log entries?"
 >
-  <p>
-    <FormattedMessage
+  <RedirectAppLinks>
+    <MemoizedFormattedMessage
       defaultMessage="Visit {link} to dive deeper."
       id="xpack.monitoring.logs.listing.linkText"
       values={
         Object {
           "link": <EuiLink
-            href="/app/logs/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345 and elasticsearch.index.name:6789"
+            href=""
           >
             Logs
           </EuiLink>,
         }
       }
     />
-  </p>
+  </RedirectAppLinks>
 </EuiCallOut>
 `;
 
@@ -54,21 +54,21 @@ exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] =
   size="m"
   title="Want to see more log entries?"
 >
-  <p>
-    <FormattedMessage
+  <RedirectAppLinks>
+    <MemoizedFormattedMessage
       defaultMessage="Visit {link} to dive deeper."
       id="xpack.monitoring.logs.listing.linkText"
       values={
         Object {
           "link": <EuiLink
-            href="/app/logs/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345 and elasticsearch.node.id:6789"
+            href=""
           >
             Logs
           </EuiLink>,
         }
       }
     />
-  </p>
+  </RedirectAppLinks>
 </EuiCallOut>
 `;
 
@@ -274,7 +274,6 @@ exports[`Logs should render normally 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     tableLayout="fixed"
   />
   <EuiSpacer
@@ -285,21 +284,21 @@ exports[`Logs should render normally 1`] = `
     size="m"
     title="Want to see more log entries?"
   >
-    <p>
-      <FormattedMessage
+    <RedirectAppLinks>
+      <MemoizedFormattedMessage
         defaultMessage="Visit {link} to dive deeper."
         id="xpack.monitoring.logs.listing.linkText"
         values={
           Object {
             "link": <EuiLink
-              href="/app/logs/link-to/internal-stack-monitoring/logs"
+              href=""
             >
               Logs
             </EuiLink>,
           }
         }
       />
-    </p>
+    </RedirectAppLinks>
   </EuiCallOut>
 </div>
 `;

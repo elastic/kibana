@@ -16,16 +16,6 @@ import { ACTIONS_COLUMN_ARIA_COL_INDEX } from './helpers';
 import { EVENTS_TABLE_ARIA_LABEL } from './translations';
 
 /**
- * The EUI theme's z-index property that is used by the timeline overlay
- */
-export const TIMELINE_EUI_THEME_ZINDEX_LEVEL = 'euiZLevel4';
-
-/**
- * The css classname added to the `document.body` whenever the timeline is visible on the page
- */
-export const SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME = 'securitySolutionTimeline-isVisible';
-
-/**
  * TIMELINE BODY
  */
 export const SELECTOR_TIMELINE_GLOBAL_CONTAINER = 'securitySolutionTimeline__container';
@@ -362,7 +352,6 @@ export const EventsTdContent = styled.div.attrs(({ className }) => ({
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   min-width: 0;
-  padding: ${({ theme }) => theme.eui.euiSizeXS};
   text-align: ${({ textAlign }) => textAlign};
   width: ${({ width }) =>
     width != null

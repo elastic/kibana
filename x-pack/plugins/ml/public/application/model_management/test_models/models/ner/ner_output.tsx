@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React, { FC, ReactNode } from 'react';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiHorizontalRule,
   EuiBadge,
-  EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
-
-import {
-  useCurrentEuiTheme,
-  EuiThemeType,
-} from '../../../../components/color_range_legend/use_color_range';
+import { useCurrentThemeVars } from '../../../../contexts/kibana';
+import type { EuiThemeType } from '../../../../components/color_range_legend/use_color_range';
 import type { NerInference, NerResponse } from './ner_inference';
 import { INPUT_TYPE } from '../inference_base';
 
@@ -88,7 +86,7 @@ const NerOutput: FC<{ inferrer: NerInference }> = ({ inferrer }) => {
 };
 
 const Lines: FC<{ result: NerResponse }> = ({ result }) => {
-  const { euiTheme } = useCurrentEuiTheme();
+  const { euiTheme } = useCurrentThemeVars();
   const lineSplit: JSX.Element[] = [];
   result.response.forEach(({ value, entity }) => {
     if (entity === null) {
@@ -142,11 +140,10 @@ const Lines: FC<{ result: NerResponse }> = ({ result }) => {
 const EntityBadge = ({
   entity,
   children,
-}: {
+}: PropsWithChildren<{
   entity: estypes.MlTrainedModelEntities;
-  children: ReactNode;
-}) => {
-  const { euiTheme } = useCurrentEuiTheme();
+}>) => {
+  const { euiTheme } = useCurrentThemeVars();
   return (
     <EuiBadge
       // @ts-expect-error colors are correct in ENTITY_TYPES

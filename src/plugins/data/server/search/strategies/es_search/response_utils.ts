@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ConnectionRequestParams } from '@elastic/transport';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ISearchOptions } from '../../../../common';
+import { ISearchOptions } from '@kbn/search-types';
+import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 /**
  * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is
@@ -24,11 +27,15 @@ export function getTotalLoaded(response: estypes.SearchResponse<unknown>) {
  * Get the Kibana representation of this response (see `IKibanaSearchResponse`).
  * @internal
  */
-export function toKibanaSearchResponse(rawResponse: estypes.SearchResponse<unknown>) {
+export function toKibanaSearchResponse(
+  rawResponse: estypes.SearchResponse<unknown>,
+  requestParams?: ConnectionRequestParams
+) {
   return {
     rawResponse,
     isPartial: false,
     isRunning: false,
+    ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
     ...getTotalLoaded(rawResponse),
   };
 }

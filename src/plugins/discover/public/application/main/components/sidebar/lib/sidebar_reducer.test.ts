@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -40,7 +41,7 @@ describe('sidebar reducer', function () {
     const resultForDocuments = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
       payload: {
-        isPlainRecord: false,
+        isEsqlMode: false,
       },
     });
     expect(resultForDocuments).toEqual(
@@ -51,13 +52,13 @@ describe('sidebar reducer', function () {
         status: DiscoverSidebarReducerStatus.PROCESSING,
       })
     );
-    const resultForTextBasedQuery = discoverSidebarReducer(state, {
+    const resultForEsqlQuery = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
       payload: {
-        isPlainRecord: true,
+        isEsqlMode: true,
       },
     });
-    expect(resultForTextBasedQuery).toEqual(
+    expect(resultForEsqlQuery).toEqual(
       expect.objectContaining({
         dataView,
         allFields: null,
@@ -75,7 +76,7 @@ describe('sidebar reducer', function () {
     const resultForDocuments = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        isPlainRecord: false,
+        isEsqlMode: false,
         dataView: stubDataViewWithoutTimeField,
         fieldCounts,
       },
@@ -96,44 +97,50 @@ describe('sidebar reducer', function () {
       status: DiscoverSidebarReducerStatus.COMPLETED,
     });
 
-    const resultForTextBasedQuery = discoverSidebarReducer(state, {
+    const resultForEsqlQuery = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        isPlainRecord: true,
+        isEsqlMode: true,
         dataView: stubDataViewWithoutTimeField,
         fieldCounts: {},
-        textBasedQueryColumns: [
+        esqlQueryColumns: [
           {
             id: '1',
             name: 'text1',
             meta: {
               type: 'number',
             },
+            isNull: true,
           },
           {
             id: '2',
             name: 'text2',
             meta: {
-              type: 'keyword',
+              type: 'string',
+              esType: 'keyword',
             },
           },
         ] as DatatableColumn[],
       },
     });
-    expect(resultForTextBasedQuery).toStrictEqual({
+    expect(resultForEsqlQuery).toStrictEqual({
       dataView: stubDataViewWithoutTimeField,
       allFields: [
         new DataViewField({
           name: 'text1',
           type: 'number',
+          esTypes: undefined,
           aggregatable: false,
-          searchable: false,
+          isNull: true,
+          searchable: true,
         }),
         new DataViewField({
           name: 'text2',
-          type: 'keyword',
+          type: 'string',
+          esTypes: ['keyword'],
           aggregatable: false,
-          searchable: false,
+          isNull: false,
+          searchable: true,
         }),
       ],
       fieldCounts: {},
@@ -143,7 +150,7 @@ describe('sidebar reducer', function () {
     const resultWhileLoading = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        isPlainRecord: false,
+        isEsqlMode: false,
         dataView: stubDataViewWithoutTimeField,
         fieldCounts: null,
       },

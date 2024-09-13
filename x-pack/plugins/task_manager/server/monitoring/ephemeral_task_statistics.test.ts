@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Subject, Observable } from 'rxjs';
 import stats from 'stats-lite';
-import { take, bufferCount, skip, map } from 'rxjs/operators';
+import { take, bufferCount, skip, map } from 'rxjs';
 
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import {
@@ -26,7 +26,7 @@ import {
   SummarizedEphemeralTaskStat,
   EphemeralTaskStat,
 } from './ephemeral_task_statistics';
-import { AggregatedStat } from './runtime_statistics_aggregator';
+import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { ephemeralTaskLifecycleMock } from '../ephemeral_task_lifecycle.mock';
 import { times, takeRight, take as takeLeft } from 'lodash';
 
@@ -176,11 +176,11 @@ describe('Ephemeral Task Statistics', () => {
     });
 
     const runningAverageWindowSize = 5;
-    const maxWorkers = 10;
+    const capacity = 10;
     const ephemeralTaskAggregator = createEphemeralTaskAggregator(
       ephemeralTaskLifecycle,
       runningAverageWindowSize,
-      maxWorkers
+      capacity
     );
 
     function expectWindowEqualsUpdate(
@@ -229,7 +229,7 @@ describe('Ephemeral Task Statistics', () => {
   });
 });
 
-test('returns the average load added per polling cycle cycle by ephemeral tasks when load exceeds max workers', async () => {
+test('returns the average load added per polling cycle cycle by ephemeral tasks when load exceeds capacity', async () => {
   const tasksExecuted = [0, 5, 10, 20, 15, 10, 5, 0, 0, 0, 0, 0];
   const expectedLoad = [0, 50, 100, 200, 150, 100, 50, 0, 0, 0, 0, 0];
 
@@ -241,11 +241,11 @@ test('returns the average load added per polling cycle cycle by ephemeral tasks 
   });
 
   const runningAverageWindowSize = 5;
-  const maxWorkers = 10;
+  const capacity = 10;
   const ephemeralTaskAggregator = createEphemeralTaskAggregator(
     ephemeralTaskLifecycle,
     runningAverageWindowSize,
-    maxWorkers
+    capacity
   );
 
   function expectWindowEqualsUpdate(
@@ -362,7 +362,7 @@ const mockTaskRunEvent = (
 ) => {
   const task = mockTaskInstance(overrides);
   const persistence = TaskPersistence.Recurring;
-  return asTaskRunEvent(task.id, asOk({ task, persistence, result }), timing);
+  return asTaskRunEvent(task.id, asOk({ task, persistence, result, isExpired: false }), timing);
 };
 
 const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({

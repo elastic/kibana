@@ -15,14 +15,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { useMlLink } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { checkPermission } from '../../../capabilities/check_capabilities';
+import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../ml_nodes_check';
 
 export const TimeseriesexplorerNoJobsFound = () => {
   const jobLink = useMlLink({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
 
-  const disableCreateAnomalyDetectionJob: boolean =
-    !checkPermission('canCreateJob') || !mlNodesAvailable();
+  const canCreateJob = usePermissionCheck('canCreateJob');
+  const disableCreateAnomalyDetectionJob: boolean = !canCreateJob || !mlNodesAvailable();
 
   return (
     <EuiEmptyPrompt

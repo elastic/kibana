@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { IStorage, IStorageWrapper } from './types';
@@ -32,9 +33,13 @@ export class Storage implements IStorageWrapper {
     }
   };
 
-  public set = (key: string, value: any) => {
+  public set = (key: string, value: any, includeUndefined: boolean = false) => {
+    const replacer = includeUndefined
+      ? (_: string, currentValue: any) =>
+          typeof currentValue === 'undefined' ? null : currentValue
+      : undefined;
     try {
-      return this.store.setItem(key, JSON.stringify(value));
+      return this.store.setItem(key, JSON.stringify(value, replacer));
     } catch (e) {
       return false;
     }

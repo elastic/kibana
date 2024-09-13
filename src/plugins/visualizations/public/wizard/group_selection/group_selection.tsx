@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -57,12 +58,17 @@ function GroupSelection(props: GroupSelectionProps) {
         [
           ...props.visTypesRegistry.getAliases(),
           ...props.visTypesRegistry.getByGroup(VisGroups.PROMOTED),
-        ],
+          // Include so TSVB still gets displayed
+          ...props.visTypesRegistry.getByGroup(VisGroups.LEGACY),
+        ].filter((visDefinition) => {
+          return !visDefinition.disableCreate;
+        }),
         ['promotion', 'title'],
         ['asc', 'asc']
       ),
     [props.visTypesRegistry]
   );
+
   return (
     <>
       <EuiModalHeader>
@@ -90,7 +96,9 @@ function GroupSelection(props: GroupSelectionProps) {
         <div className="visNewVisDialogGroupSelection__footer">
           <EuiSpacer size="l" />
           <EuiFlexGrid columns={2}>
-            {props.visTypesRegistry.getByGroup(VisGroups.AGGBASED).length > 0 && (
+            {props.visTypesRegistry.getByGroup(VisGroups.AGGBASED).filter((visDefinition) => {
+              return !visDefinition.disableCreate;
+            }).length > 0 && (
               <EuiFlexItem>
                 <EuiCard
                   titleSize="xs"
@@ -196,7 +204,7 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
         }
         onClick={onClick}
         data-test-subj={`visType-${visType.name}`}
-        data-vis-stage={!('aliasPath' in visType) ? visType.stage : 'alias'}
+        data-vis-stage={!('alias' in visType) ? visType.stage : 'alias'}
         aria-label={`visType-${visType.name}`}
         description={
           <>
@@ -215,8 +223,9 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
   const onClick = useCallback(() => {
     onVisTypeSelected(visType);
   }, [onVisTypeSelected, visType]);
-  // hide the experimental visualization if lab mode is not enabled
-  if (!showExperimental && visType.stage === 'experimental') {
+  // hide both the hidden visualizations and, if lab mode is not enabled, the experimental visualizations
+  // TODO: Remove the showExperimental logic as part of https://github.com/elastic/kibana/issues/152833
+  if (visType.disableCreate || (!showExperimental && visType.stage === 'experimental')) {
     return null;
   }
   return (
@@ -243,7 +252,7 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
                 iconType="beaker"
                 tooltipContent={i18n.translate('visualizations.newVisWizard.experimentalTooltip', {
                   defaultMessage:
-                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
                 })}
                 label={i18n.translate('visualizations.newVisWizard.experimentalTitle', {
                   defaultMessage: 'Technical preview',

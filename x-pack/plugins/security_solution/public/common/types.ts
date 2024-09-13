@@ -8,6 +8,9 @@
 import type { ResponseErrorAttributes } from '@kbn/core/server';
 import type { DataViewBase } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { StartPlugins } from '../types';
 
 export interface ServerApiError {
   statusCode: number;
@@ -19,6 +22,7 @@ export interface ServerApiError {
 export interface SecuritySolutionUiConfigType {
   enableExperimental: string[];
   prebuiltRulesPackageVersion?: string;
+  offeringSettings: Record<string, boolean>;
 }
 
 /**
@@ -31,3 +35,11 @@ export interface SecuritySolutionDataViewBase extends DataViewBase {
 
 export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
 export type Refetch = () => void;
+
+export interface FleetUiExtensionGetterOptions {
+  coreStart: CoreStart;
+  depsStart: Pick<StartPlugins, 'data' | 'fleet'>;
+  services: {
+    upsellingService: UpsellingService;
+  };
+}

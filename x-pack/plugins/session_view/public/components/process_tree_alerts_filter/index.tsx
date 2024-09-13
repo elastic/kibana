@@ -18,11 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_ALERT_FILTER_VALUE } from '../../../common/constants';
-import {
-  ProcessEventAlertCategory,
-  DefaultAlertFilterType,
-  AlertTypeCount,
-} from '../../../common/types/process_tree';
+import type { ProcessEventAlertCategory, AlertTypeCount } from '../../../common';
 import { useStyles } from './styles';
 import { FILTER_MENU_OPTIONS, SELECTED_PROCESS } from './translations';
 
@@ -30,7 +26,7 @@ export interface ProcessTreeAlertsFilterDeps {
   totalAlertsCount: number;
   alertTypeCounts: AlertTypeCount[];
   filteredAlertsCount: number;
-  onAlertEventCategorySelected: (value: ProcessEventAlertCategory | DefaultAlertFilterType) => void;
+  onAlertEventCategorySelected: (value: ProcessEventAlertCategory) => void;
 }
 
 export const ProcessTreeAlertsFilter = ({
@@ -42,7 +38,7 @@ export const ProcessTreeAlertsFilter = ({
   const { filterStatus, popover } = useStyles();
 
   const [selectedProcessEventAlertCategory, setSelectedProcessEventAlertCategory] =
-    useState<ProcessEventAlertCategory>(ProcessEventAlertCategory.all);
+    useState<ProcessEventAlertCategory>('all');
 
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -55,7 +51,7 @@ export const ProcessTreeAlertsFilter = ({
   };
 
   const onSelectedProcessEventAlertCategory = useCallback(
-    (event) => {
+    (event: any) => {
       const [_, selectedAlertEvent] = event.target.textContent.split(' ');
       setSelectedProcessEventAlertCategory(selectedAlertEvent);
       onAlertEventCategorySelected(selectedAlertEvent);
@@ -88,7 +84,7 @@ export const ProcessTreeAlertsFilter = ({
   );
 
   const alertEventCategoryFilterMenuItems = useMemo(() => {
-    const getIconType = (eventCategory: ProcessEventAlertCategory | DefaultAlertFilterType) => {
+    const getIconType = (eventCategory: ProcessEventAlertCategory) => {
       return eventCategory === selectedProcessEventAlertCategory ? 'check' : 'empty';
     };
 
@@ -114,7 +110,7 @@ export const ProcessTreeAlertsFilter = ({
         icon={getIconType(DEFAULT_ALERT_FILTER_VALUE)}
         onClick={onSelectedProcessEventAlertCategory}
       >
-        {FILTER_MENU_OPTIONS[ProcessEventAlertCategory.all]}
+        {FILTER_MENU_OPTIONS.all}
       </EuiContextMenuItem>,
       ...alertEventFilterMenuItems,
     ];
@@ -128,9 +124,10 @@ export const ProcessTreeAlertsFilter = ({
             {totalAlertsCount === filteredAlertsCount && (
               <FormattedMessage
                 id="xpack.sessionView.alertTotalCountStatusLabel"
-                defaultMessage="Showing {count} alerts"
+                defaultMessage="{count, plural, one {Showing <bold>#</bold> alert} other {Showing <bold>#</bold> alerts}}"
                 values={{
-                  count: <strong>{totalAlertsCount}</strong>,
+                  count: totalAlertsCount,
+                  bold: (str: string) => <strong>{str}</strong>,
                 }}
               />
             )}

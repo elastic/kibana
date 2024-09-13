@@ -7,75 +7,70 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { EuiGlobalToastListToast as IToast } from '@elastic/eui';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 import { KibanaLogic } from '../kibana';
 
 import { IFlashMessage } from './types';
 
 interface FlashMessagesValues {
-  messages: IFlashMessage[];
-  queuedMessages: IFlashMessage[];
-  toastMessages: IToast[];
   historyListener: Function | null;
+  messages: IFlashMessage[];
+  notifications: NotificationsStart;
+  queuedMessages: IFlashMessage[];
 }
 interface FlashMessagesActions {
   setFlashMessages(messages: IFlashMessage | IFlashMessage[]): { messages: IFlashMessage[] };
   clearFlashMessages(): void;
   setQueuedMessages(messages: IFlashMessage | IFlashMessage[]): { messages: IFlashMessage[] };
   clearQueuedMessages(): void;
-  addToastMessage(newToast: IToast): { newToast: IToast };
-  dismissToastMessage(removedToast: IToast): { removedToast: IToast };
-  clearToastMessages(): void;
   setHistoryListener(historyListener: Function): { historyListener: Function };
+}
+
+interface FlashMessagesLogicProps {
+  notifications: NotificationsStart;
 }
 
 const convertToArray = (messages: IFlashMessage | IFlashMessage[]) =>
   !Array.isArray(messages) ? [messages] : messages;
 
-export const FlashMessagesLogic = kea<MakeLogicType<FlashMessagesValues, FlashMessagesActions>>({
-  path: ['enterprise_search', 'flash_messages_logic'],
+export const FlashMessagesLogic = kea<
+  MakeLogicType<FlashMessagesValues, FlashMessagesActions, FlashMessagesLogicProps>
+>({
   actions: {
-    setFlashMessages: (messages) => ({ messages: convertToArray(messages) }),
     clearFlashMessages: () => null,
-    setQueuedMessages: (messages) => ({ messages: convertToArray(messages) }),
     clearQueuedMessages: () => null,
-    addToastMessage: (newToast) => ({ newToast }),
-    dismissToastMessage: (removedToast) => ({ removedToast }),
-    clearToastMessages: () => null,
+    setFlashMessages: (messages) => ({ messages: convertToArray(messages) }),
     setHistoryListener: (historyListener) => ({ historyListener }),
+    setQueuedMessages: (messages) => ({ messages: convertToArray(messages) }),
   },
-  reducers: {
-    messages: [
-      [],
-      {
-        setFlashMessages: (_, { messages }) => messages,
-        clearFlashMessages: () => [],
-      },
-    ],
-    queuedMessages: [
-      [],
-      {
-        setQueuedMessages: (_, { messages }) => messages,
-        clearQueuedMessages: () => [],
-      },
-    ],
-    toastMessages: [
-      [],
-      {
-        addToastMessage: (toasts, { newToast }) => [...toasts, newToast],
-        dismissToastMessage: (toasts, { removedToast }) =>
-          toasts.filter(({ id }) => id !== removedToast.id),
-        clearToastMessages: () => [],
-      },
-    ],
+  path: ['enterprise_search', 'flash_messages_logic'],
+  reducers: ({ props }) => ({
     historyListener: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setHistoryListener: (_, { historyListener }) => historyListener,
       },
     ],
-  },
+    messages: [
+      [],
+      {
+        clearFlashMessages: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
+        setFlashMessages: (_, { messages }) => messages,
+      },
+    ],
+    notifications: [props.notifications || {}, {}],
+    queuedMessages: [
+      [],
+      {
+        clearQueuedMessages: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
+        setQueuedMessages: (_, { messages }) => messages,
+      },
+    ],
+  }),
   events: ({ values, actions }) => ({
     afterMount: () => {
       // On React Router navigation, clear previous flash messages and load any queued messages
@@ -96,7 +91,8 @@ export const FlashMessagesLogic = kea<MakeLogicType<FlashMessagesValues, FlashMe
 /**
  * Mount/props helper
  */
-export const mountFlashMessagesLogic = () => {
+export const mountFlashMessagesLogic = (props: FlashMessagesLogicProps) => {
+  FlashMessagesLogic(props);
   const unmount = FlashMessagesLogic.mount();
   return unmount;
 };

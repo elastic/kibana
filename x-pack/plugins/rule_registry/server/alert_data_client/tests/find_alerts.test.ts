@@ -29,6 +29,9 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   esClient: esClientMock,
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
+  getRuleType: jest.fn(),
+  getRuleList: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';
@@ -71,6 +74,8 @@ beforeEach(() => {
 describe('find()', () => {
   test('calls ES client with given params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
+    const searchAlertsSpy = jest.spyOn(alertsClient as any, 'searchAlerts');
+    alertsClient.getAuthorizedAlertsIndices = jest.fn().mockResolvedValue([]);
     esClientMock.search.mockResponseOnce({
       took: 5,
       timed_out: false,
@@ -104,10 +109,21 @@ describe('find()', () => {
         ],
       },
     });
+    const query = { match: { [ALERT_WORKFLOW_STATUS]: 'open' } };
+    const index = '.alerts-observability.apm.alerts';
+    const featureIds = ['siem'];
     const result = await alertsClient.find({
-      query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
-      index: '.alerts-observability.apm.alerts',
+      query,
+      index,
+      featureIds,
     });
+    expect(searchAlertsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query,
+        index,
+        featureIds,
+      })
+    );
     expect(result).toMatchInlineSnapshot(`
       Object {
         "_shards": Object {
@@ -178,6 +194,7 @@ describe('find()', () => {
                 "should": Array [],
               },
             },
+            "runtime_mappings": undefined,
             "size": undefined,
             "sort": Array [
               Object {
@@ -311,6 +328,7 @@ describe('find()', () => {
                 "should": Array [],
               },
             },
+            "runtime_mappings": undefined,
             "size": undefined,
             "sort": Array [
               Object {
@@ -419,9 +437,9 @@ describe('find()', () => {
         index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
-            Error: Error: Unauthorized for fake.rule and apm"
-          `);
+      "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
+      Error: Error: Unauthorized for fake.rule and apm"
+    `);
 
     expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
       message: `Failed attempt to access alert [id=${fakeAlertId}]`,
@@ -449,9 +467,9 @@ describe('find()', () => {
         index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
-            Error: Error: something went wrong"
-          `);
+      "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
+      Error: Error: something went wrong"
+    `);
   });
 
   describe('authorization', () => {

@@ -33,12 +33,19 @@ export interface TimeSeriesQueryParameters {
   esClient: ElasticsearchClient;
   query: TimeSeriesQuery;
   condition?: TimeSeriesCondition;
+  useCalculatedDateRange?: boolean;
 }
 
 export async function timeSeriesQuery(
   params: TimeSeriesQueryParameters
 ): Promise<TimeSeriesResult> {
-  const { logger, esClient, query: queryParams, condition: conditionParams } = params;
+  const {
+    logger,
+    esClient,
+    query: queryParams,
+    condition: conditionParams,
+    useCalculatedDateRange = true,
+  } = params;
   const {
     index,
     timeWindowSize,
@@ -67,8 +74,8 @@ export async function timeSeriesQuery(
             {
               range: {
                 [timeField]: {
-                  gte: dateRangeInfo.dateStart,
-                  lt: dateRangeInfo.dateEnd,
+                  gte: useCalculatedDateRange ? dateRangeInfo.dateStart : dateStart,
+                  lt: useCalculatedDateRange ? dateRangeInfo.dateEnd : dateEnd,
                   format: 'strict_date_time',
                 },
               },
@@ -104,7 +111,7 @@ export async function timeSeriesQuery(
   const includeConditionInQuery = !!conditionParams;
 
   const logPrefix = 'indexThreshold timeSeriesQuery: callCluster';
-  logger.debug(`${logPrefix} call: ${JSON.stringify(esQuery)}`);
+  logger.debug(() => `${logPrefix} call: ${JSON.stringify(esQuery)}`);
   let esResult: estypes.SearchResponse<unknown>;
   // note there are some commented out console.log()'s below, which are left
   // in, as they are VERY useful when debugging these queries; debug logging
@@ -120,7 +127,7 @@ export async function timeSeriesQuery(
   }
 
   // console.log('time_series_query.ts response\n', JSON.stringify(esResult, null, 4));
-  logger.debug(`${logPrefix} result: ${JSON.stringify(esResult)}`);
+  logger.debug(() => `${logPrefix} result: ${JSON.stringify(esResult)}`);
   return getResultFromEs({
     isCountAgg,
     isGroupAgg,

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useMemo } from 'react';
@@ -17,17 +18,12 @@ import type {
   ApiListExportProps,
   ApiCallGetExceptionFilterFromIdsMemoProps,
   ApiCallGetExceptionFilterFromExceptionsMemoProps,
+  ApiListDuplicateProps,
 } from '@kbn/securitysolution-io-ts-list-types';
 import * as Api from '@kbn/securitysolution-list-api';
-
-// TODO: Replace these with kbn packaged versions once we have those available to us
-// These originally came from this location below before moving them to this hacked "any" types:
-// import { HttpStart, NotificationsStart } from '../../../../../src/core/public';
-interface HttpStart {
-  fetch: <T>(...args: any) => any;
-}
-
 import { getIdsAndNamespaces } from '@kbn/securitysolution-list-utils';
+import type { HttpStart } from '@kbn/core-http-browser';
+
 import { transformInput, transformNewItemOutput, transformOutput } from '../transforms';
 
 export interface ExceptionsApi {
@@ -39,6 +35,7 @@ export interface ExceptionsApi {
   }) => Promise<ExceptionListItemSchema>;
   deleteExceptionItem: (arg: ApiCallMemoProps) => Promise<void>;
   deleteExceptionList: (arg: ApiCallMemoProps) => Promise<void>;
+  duplicateExceptionList: (arg: ApiListDuplicateProps) => Promise<void>;
   getExceptionItem: (
     arg: ApiCallMemoProps & { onSuccess: (arg: ExceptionListItemSchema) => void }
   ) => Promise<void>;
@@ -106,6 +103,28 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
             signal: abortCtrl.signal,
           });
           onSuccess();
+        } catch (error) {
+          onError(error);
+        }
+      },
+      async duplicateExceptionList({
+        includeExpiredExceptions,
+        listId,
+        namespaceType,
+        onError,
+        onSuccess,
+      }: ApiListDuplicateProps): Promise<void> {
+        const abortCtrl = new AbortController();
+
+        try {
+          const newList = await Api.duplicateExceptionList({
+            http,
+            includeExpiredExceptions,
+            listId,
+            namespaceType,
+            signal: abortCtrl.signal,
+          });
+          onSuccess(newList);
         } catch (error) {
           onError(error);
         }

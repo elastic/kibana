@@ -20,13 +20,13 @@ import type {
 import semver from 'semver';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 
-import type { AuthenticationProvider } from '../../common/model';
-import type { AuditLogger } from '../audit';
+import type { AuthenticationProvider } from '../../common';
 import { sessionCleanupConcurrentLimitEvent, sessionCleanupEvent } from '../audit';
 import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
-import { getDetailedErrorMessage } from '../errors';
+import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 
 export interface SessionIndexOptions {
   readonly elasticsearchClient: ElasticsearchClient;
@@ -97,7 +97,6 @@ export function getSessionIndexSettings({
       number_of_replicas: 0,
       auto_expand_replicas: '0-1',
       priority: 1000,
-      refresh_interval: '1s',
       hidden: true,
     },
     aliases: {
@@ -106,16 +105,18 @@ export function getSessionIndexSettings({
       },
     },
     mappings: {
-      dynamic: 'strict',
+      dynamic: 'strict' as const,
       _meta: { [SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME]: SESSION_INDEX_MAPPINGS_VERSION },
       properties: {
-        usernameHash: { type: 'keyword' },
-        provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
-        idleTimeoutExpiration: { type: 'date' },
-        createdAt: { type: 'date' },
-        lifespanExpiration: { type: 'date' },
-        accessAgreementAcknowledged: { type: 'boolean' },
-        content: { type: 'binary' },
+        usernameHash: { type: 'keyword' as const },
+        provider: {
+          properties: { name: { type: 'keyword' as const }, type: { type: 'keyword' as const } },
+        },
+        idleTimeoutExpiration: { type: 'date' as const },
+        createdAt: { type: 'date' as const },
+        lifespanExpiration: { type: 'date' as const },
+        accessAgreementAcknowledged: { type: 'boolean' as const },
+        content: { type: 'binary' as const },
       },
     },
   });
@@ -275,6 +276,11 @@ export class SessionIndex {
         ({ body, statusCode } = await this.writeNewSessionDocument(sessionValue, {
           ignore404: false,
         }));
+        if (statusCode !== 201) {
+          this.options.logger.error(
+            `Failed to write a new session (status code: ${statusCode}): ${JSON.stringify(body)}.`
+          );
+        }
       }
 
       return {
@@ -404,10 +410,15 @@ export class SessionIndex {
             }
           );
         } catch (err) {
-          this.options.logger.error(
-            `Failed to check if session legacy index template exists: ${err.message}`
-          );
-          return reject(err);
+          // The Template API is deprecated and may become unavailable at some point (404 Not Found). It's also
+          // unavailable in the Serverless offering (410 Gone). In either of these cases, we should disregard the error.
+          const errorStatusCode = getErrorStatusCode(err);
+          if (errorStatusCode !== 404 && errorStatusCode !== 410) {
+            this.options.logger.error(
+              `Failed to check if session legacy index template exists: ${err.message}`
+            );
+            return reject(err);
+          }
         }
 
         if (legacyIndexTemplateExists) {
@@ -476,7 +487,7 @@ export class SessionIndex {
       for await (const sessionValues of this.getSessionValuesInBatches()) {
         const operations = sessionValues.map(({ _id, _source }) => {
           const { usernameHash, provider } = _source!;
-          auditLogger.log(sessionCleanupEvent({ sessionId: _id, usernameHash, provider }));
+          auditLogger.log(sessionCleanupEvent({ sessionId: _id!, usernameHash, provider }));
           return { delete: { _id } };
         });
 
@@ -1018,7 +1029,9 @@ export class SessionIndex {
           return [];
         }
 
-        return response.hits?.hits?.map((hit) => ({ sid: hit._id, ...sessionGroups[index] })) ?? [];
+        return (
+          response.hits?.hits?.map((hit) => ({ sid: hit._id!, ...sessionGroups[index] })) ?? []
+        );
       }
     );
 

@@ -1,0 +1,33 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/elastic-assistant-common",
+    "@kbn/core-http-browser",
+    "@kbn/i18n",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/cases-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/core-notifications-browser",
+    "@kbn/i18n-react",
+    "@kbn/ui-theme",
+    "@kbn/core-doc-links-browser",
+    "@kbn/core",
+  ]
+}

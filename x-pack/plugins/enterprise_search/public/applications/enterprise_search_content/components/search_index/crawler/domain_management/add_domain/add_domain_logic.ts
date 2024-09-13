@@ -9,6 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { DEFAULT_META } from '../../../../../../shared/constants';
 import { generateEncodedPath } from '../../../../../../shared/encode_path_params';
 import { flashSuccessToast } from '../../../../../../shared/flash_messages';
 import { getErrorsFromHttpResponse } from '../../../../../../shared/flash_messages/handle_api_errors';
@@ -28,6 +29,7 @@ import {
 import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../../../routes';
 import { IndexNameLogic } from '../../../index_name_logic';
 import { CrawlerLogic } from '../../crawler_logic';
+import { DomainManagementLogic } from '../domain_management_logic';
 
 import {
   domainValidationFailureResultChange,
@@ -118,12 +120,15 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
     }),
     validateDomainNetworkConnectivity: true,
   }),
+  // @ts-expect-error upgrade typescript v5.1.6
   reducers: () => ({
     addDomainFormInputValue: [
       DEFAULT_SELECTOR_VALUES.addDomainFormInputValue,
       {
         clearDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.addDomainFormInputValue,
+        // @ts-expect-error upgrade typescript v5.1.6
         setAddDomainFormInputValue: (_, newValue: string) => newValue,
+        // @ts-expect-error upgrade typescript v5.1.6
         validateDomainInitialVerification: (_, { newValue }: { newValue: string }) => newValue,
       },
     ],
@@ -132,6 +137,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       {
         clearDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.domainValidationResult,
         setAddDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.domainValidationResult,
+        // @ts-expect-error upgrade typescript v5.1.6
         setDomainValidationResult: ({ steps }, { change }) => ({
           steps: {
             ...steps,
@@ -153,6 +159,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       {
         clearDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.entryPointValue,
         setAddDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.entryPointValue,
+        // @ts-expect-error upgrade typescript v5.1.6
         validateDomainInitialVerification: (_, { newEntryPointValue }) => newEntryPointValue,
       },
     ],
@@ -160,6 +167,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       [],
       {
         clearDomainFormInputValue: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
         onSubmitNewDomainError: (_, { errors }) => errors,
         setAddDomainFormInputValue: () => [],
         submitNewDomain: () => [],
@@ -171,6 +179,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       {
         clearDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.ignoreValidationFailure,
         setAddDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.ignoreValidationFailure,
+        // @ts-expect-error upgrade typescript v5.1.6
         setIgnoreValidationFailure: (_, newValue: boolean) => newValue,
       },
     ],
@@ -239,7 +248,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       const { indexName } = IndexNameLogic.values;
       flashSuccessToast(
         i18n.translate('xpack.enterpriseSearch.crawler.domainsTable.action.add.successMessage', {
-          defaultMessage: "Successfully added domain '{domainUrl}'",
+          defaultMessage: "Successfully added domain ''{domainUrl}''",
           values: {
             domainUrl: domain.url,
           },
@@ -249,9 +258,12 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
         generateEncodedPath(SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH, {
           domainId: domain.id,
           indexName,
+          tabId: 'domain_management',
         })
       );
       CrawlerLogic.actions.fetchCrawlerData();
+      DomainManagementLogic.actions.getDomains(DEFAULT_META);
+      actions.clearDomainFormInputValue();
     },
     performDomainValidationStep: async ({ stepName, checks }) => {
       const { http } = HttpLogic.values;

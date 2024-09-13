@@ -35,7 +35,7 @@ export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
         await new UserAPIClient(services.http!).deleteUser(username);
         services.notifications!.toasts.addSuccess(
           i18n.translate('xpack.security.management.users.confirmDeleteUsers.successMessage', {
-            defaultMessage: "Deleted user '{username}'",
+            defaultMessage: "Deleted user ''{username}''",
             values: { username },
           })
         );
@@ -43,7 +43,7 @@ export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
       } catch (error) {
         services.notifications!.toasts.addDanger({
           title: i18n.translate('xpack.security.management.users.confirmDeleteUsers.errorMessage', {
-            defaultMessage: "Could not delete user '{username}'",
+            defaultMessage: "Could not delete user ''{username}''",
             values: { username },
           }),
           text: (error as any).body?.message || error.message,
@@ -56,7 +56,7 @@ export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
     <EuiConfirmModal
       role="dialog"
       title={i18n.translate('xpack.security.management.users.confirmDeleteUsers.title', {
-        defaultMessage: "Delete {count, plural, one{user '{username}'} other{{count} users}}?",
+        defaultMessage: "Delete {count, plural, one{user ''{username}''} other{{count} users}}?",
         values: { count: usernames.length, username: usernames[0] },
       })}
       onCancel={onCancel}

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -28,7 +29,7 @@ const TYPES = ['dashboard', 'visualization', 'search', 'index-pattern', 'graph-w
 export async function getKibanaSavedObjectCounts(
   soClient: SavedObjectsClientContract
 ): Promise<KibanaSavedObjectCounts> {
-  const { per_type: buckets } = await getSavedObjectsCounts(soClient, TYPES, true);
+  const { per_type: buckets } = await getSavedObjectsCounts(soClient, TYPES, { exclusive: true });
 
   const allZeros = Object.fromEntries(
     TYPES.map((type) => [snakeCase(type), { total: 0 }])
@@ -43,7 +44,7 @@ export async function getKibanaSavedObjectCounts(
 
 export function registerKibanaUsageCollector(
   usageCollection: UsageCollectionSetup,
-  kibanaIndex: string
+  getIndicesForTypes: (types: string[]) => Promise<string[]>
 ) {
   usageCollection.registerCollector(
     usageCollection.makeUsageCollector<KibanaUsage>({
@@ -80,8 +81,9 @@ export function registerKibanaUsageCollector(
         },
       },
       async fetch({ soClient }) {
+        const indices = await getIndicesForTypes(['dashboard', 'visualization', 'search']);
         return {
-          index: kibanaIndex,
+          index: indices[0],
           ...(await getKibanaSavedObjectCounts(soClient)),
         };
       },

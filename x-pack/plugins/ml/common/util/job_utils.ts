@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { each, isEmpty, isEqual, pick } from 'lodash';
+import { cloneDeep, each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
-import moment, { Duration } from 'moment';
+import type { Duration } from 'moment';
+import moment from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -17,22 +18,26 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { FilterStateStore } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isDefined } from '@kbn/ml-is-defined';
+import {
+  type MlEntityField,
+  ES_AGGREGATION,
+  ML_JOB_AGGREGATION,
+  MLCATEGORY,
+} from '@kbn/ml-anomaly-utils';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
 import { CREATED_BY_LABEL } from '../constants/new_job';
 import type {
   CombinedJob,
+  CombinedJobWithStats,
   CustomSettings,
   Datafeed,
   Job,
   JobId,
 } from '../types/anomaly_detection_jobs';
-import type { EntityField } from './anomaly_utils';
 import type { MlServerLimits } from '../types/ml_server_info';
 import type { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
-import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
-import { MLCATEGORY } from '../constants/field_types';
 import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
 import { findAggField } from './validation_utils';
 import { getFirstKeyInObject } from './object_utils';
@@ -133,7 +138,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
   const { detectors } = job.analysis_config;
   if (detectorIndex >= 0 && detectorIndex < detectors.length) {
     const dtr = detectors[detectorIndex];
-    const functionName = dtr.function;
+    const functionName = dtr.function as ML_JOB_AGGREGATION;
 
     // Check that the function maps to an ES aggregation,
     // and that the partitioning field isn't mlcategory
@@ -283,7 +288,7 @@ export function getPartitioningFieldNames(job: CombinedJob, detectorIndex: numbe
 export function isModelPlotEnabled(
   job: Job,
   detectorIndex: number,
-  entityFields?: EntityField[]
+  entityFields?: MlEntityField[]
 ): boolean {
   // Check if model_plot_config is enabled.
   let isEnabled = job.model_plot_config?.enabled ?? false;
@@ -296,8 +301,8 @@ export function isModelPlotEnabled(
       // 'partition' field values even though this is supported on the back-end.
       // If supplied, check both the by and partition entities are in the terms.
       const detector = job.analysis_config.detectors[detectorIndex];
-      const detectorHasPartitionField = detector.hasOwnProperty('partition_field_name');
-      const detectorHasByField = detector.hasOwnProperty('by_field_name');
+      const detectorHasPartitionField = Object.hasOwn(detector, 'partition_field_name');
+      const detectorHasByField = Object.hasOwn(detector, 'by_field_name');
       const terms = termsStr.split(',');
 
       if (detectorHasPartitionField) {
@@ -334,7 +339,7 @@ export function isJobVersionGte(job: CombinedJob, version: string): boolean {
 // Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
 // whereas the 'function_description' field holds an ML-built display hint for function e.g. 'count'.
 export function mlFunctionToESAggregation(
-  functionName: ML_JOB_AGGREGATION | string
+  functionName?: ML_JOB_AGGREGATION | string
 ): ES_AGGREGATION | null {
   if (
     functionName === ML_JOB_AGGREGATION.MEAN ||
@@ -915,4 +920,32 @@ export function isKnownEmptyQuery(query: QueryDslQueryContainer) {
   }
 
   return false;
+}
+
+/**
+ * Extract unique influencers from the job or collection of jobs
+ * @param jobs
+ */
+export function extractInfluencers(jobs: Job | Job[]): string[] {
+  if (!Array.isArray(jobs)) {
+    jobs = [jobs];
+  }
+  const influencers = new Set<string>();
+  for (const job of jobs) {
+    for (const influencer of job.analysis_config.influencers || []) {
+      influencers.add(influencer);
+    }
+  }
+  return Array.from(influencers);
+}
+
+export function removeNodeInfo(job: CombinedJobWithStats) {
+  const newJob = cloneDeep(job);
+  if (newJob.node !== undefined) {
+    delete newJob.node;
+  }
+  if (newJob.datafeed_config?.node !== undefined) {
+    delete newJob.datafeed_config.node;
+  }
+  return newJob;
 }

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '../../common/api';
+import { ConnectorTypes } from '../../common/types/domain';
 import type { ICasesConnector, CasesConnectorsMap } from './types';
 import { getCaseConnector as getJiraCaseConnector } from './jira';
 import { getCaseConnector as getResilientCaseConnector } from './resilient';
 import { getCaseConnector as getCasesWebhookCaseConnector } from './cases_webook';
 import { getServiceNowITSMCaseConnector, getServiceNowSIRCaseConnector } from './servicenow';
 import { getCaseConnector as getSwimlaneCaseConnector } from './swimlane';
+import { getCaseConnector as getTheHiveCaseConnector } from './thehive';
 
 const mapping: Record<ConnectorTypes, ICasesConnector | null> = {
   [ConnectorTypes.casesWebhook]: getCasesWebhookCaseConnector(),
@@ -20,6 +21,7 @@ const mapping: Record<ConnectorTypes, ICasesConnector | null> = {
   [ConnectorTypes.serviceNowSIR]: getServiceNowSIRCaseConnector(),
   [ConnectorTypes.resilient]: getResilientCaseConnector(),
   [ConnectorTypes.swimlane]: getSwimlaneCaseConnector(),
+  [ConnectorTypes.theHive]: getTheHiveCaseConnector(),
   [ConnectorTypes.none]: null,
 };
 

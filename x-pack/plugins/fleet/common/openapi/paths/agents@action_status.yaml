@@ -1,14 +1,14 @@
 get:
   summary: Get agent action status
   tags:
-    - Agent actions
+    - Elastic Agent actions
   parameters:
     - $ref: ../components/parameters/page_size.yaml
     - $ref: ../components/parameters/page_index.yaml
     - schema:
         type: integer
         default: 5
-      in: query  
+      in: query
       name: errorSize
   responses:
     '200':
@@ -78,7 +78,7 @@ get:
                       type: string
                       description: policy id (POLICY_CHANGE action)
                     revision:
-                      type: string  
+                      type: string
                       description: new policy revision (POLICY_CHANGE action)
                     creationTime:
                       type: string
@@ -90,11 +90,11 @@ get:
                         type: object
                         properties:
                           agentId:
-                            type: string  
+                            type: string
                           error:
                             type: string
                           timestamp:
-                            type: string    
+                            type: string
                   required:
                     - actionId
                     - complete

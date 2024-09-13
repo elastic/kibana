@@ -13,7 +13,7 @@
 // I fixed this as a drive-by, but opened an issue to do something later,
 // if needed: https://github.com/elastic/kibana/issues/144557
 
-import { type Subject, ReplaySubject } from 'rxjs';
+import { type Subject, ReplaySubject, of } from 'rxjs';
 import type { ElasticsearchClient, Logger, LogMeta } from '@kbn/core/server';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
@@ -29,6 +29,7 @@ import {
 } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_executor';
 import { Dataset, IRuleDataClient, RuleDataService } from '@kbn/rule-registry-plugin/server';
 import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { getDataStreamAdapter } from '@kbn/alerting-plugin/server/alerts_service/lib/data_stream_adapter';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   MockRuleParams,
@@ -42,7 +43,6 @@ import { cleanupRegistryIndices, getMockAlertFactory } from '../../../common/lib
 // eslint-disable-next-line import/no-default-export
 export default function createLifecycleExecutorApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
-
   const log = getService('log');
 
   const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) =>
@@ -65,9 +65,12 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
     return Promise.resolve(client);
   };
 
+  const dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts: false });
+
   describe('createLifecycleExecutor', () => {
     let ruleDataClient: IRuleDataClient;
     let pluginStop$: Subject<void>;
+    const elasticsearchAndSOAvailability$ = of(true);
 
     before(async () => {
       // First we need to setup the data service. This happens within the
@@ -86,6 +89,8 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
           getContextInitializationPromise: async () => ({ result: false }),
         },
         pluginStop$,
+        dataStreamAdapter,
+        elasticsearchAndSOAvailability$,
       });
 
       // This initializes the service. This happens immediately after the creation
@@ -201,6 +206,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
           lookBackWindow: 20,
           statusChangeThreshold: 4,
         },
+        dataStreamAdapter,
       } as unknown as RuleExecutorOptions<
         MockRuleParams,
         WrappedLifecycleRuleState<MockRuleState>,

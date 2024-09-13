@@ -7,29 +7,13 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { useIOLines, useXtermPlayer, XtermPlayerDeps } from './hooks';
-import { ProcessEventsPage } from '../../../common/types/process_tree';
+import type { ProcessEventsPage } from '../../../common';
 import { DEFAULT_TTY_FONT_SIZE, DEFAULT_TTY_PLAYSPEED_MS } from '../../../common/constants';
 
 const VIM_LINE_START = 22;
 
 describe('TTYPlayer/hooks', () => {
   beforeAll(() => {
-    // https://stackoverflow.com/questions/39830580/jest-test-fails-typeerror-window-matchmedia-is-not-a-function
-    // xtermjs is using window.matchMedia, which isn't mocked in jest by default.
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: jest.fn().mockImplementation((query) => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addListener: jest.fn(), // Deprecated
-        removeListener: jest.fn(), // Deprecated
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        dispatchEvent: jest.fn(),
-      })),
-    });
-
     jest.useFakeTimers({ legacyFakeTimers: true });
   });
 

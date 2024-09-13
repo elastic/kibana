@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FC } from 'react';
-import { PivotAggsConfigWithExtra } from '../../../../../../common/pivot_aggs';
-import { FILTERS } from './constants';
+import type { FC } from 'react';
+import type { PivotAggsConfigWithExtra } from '../../../../../../common/pivot_aggs';
+import type { FILTERS } from './constants';
 
-export type FilterAggType = typeof FILTERS[keyof typeof FILTERS];
+export type FilterAggType = (typeof FILTERS)[keyof typeof FILTERS];
 
 type FilterAggForm<T> = FC<{
   /** Filter aggregation related configuration */

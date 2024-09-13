@@ -1,31 +1,45 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useRef } from 'react';
 import * as ReactDOM from 'react-dom';
 import { keys, EuiText } from '@elastic/eui';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import './_ui_ace_keyboard_mode.scss';
+import type { AnalyticsServiceStart, I18nStart, ThemeServiceStart } from '@kbn/core/public';
 
-const OverlayText = () => (
+interface StartServices {
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  i18n: I18nStart;
+  theme: Pick<ThemeServiceStart, 'theme$'>;
+}
+
+const OverlayText = (startServices: StartServices) => (
   // The point of this element is for accessibility purposes, so ignore eslint error
   // in this case
   //
-  <>
-    <EuiText size="s">Press Enter to start editing.</EuiText>
+  <KibanaRenderContextProvider {...startServices}>
+    <EuiText size="s" data-test-subj="a11y-overlay">
+      Press Enter to start editing.
+    </EuiText>
     <EuiText size="s">When you&rsquo;re done, press Escape to stop editing.</EuiText>
-  </>
+  </KibanaRenderContextProvider>
 );
 
-export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | null) {
+export function useUIAceKeyboardMode(
+  aceTextAreaElement: HTMLTextAreaElement | null,
+  startServices: StartServices,
+  isAccessibilityOverlayEnabled: boolean = true
+) {
   const overlayMountNode = useRef<HTMLDivElement | null>(null);
   const autoCompleteVisibleRef = useRef<boolean>(false);
-
   useEffect(() => {
     function onDismissOverlay(event: KeyboardEvent) {
       if (event.key === keys.ENTER) {
@@ -60,7 +74,7 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
         enableOverlay();
       }
     };
-    if (aceTextAreaElement) {
+    if (aceTextAreaElement && isAccessibilityOverlayEnabled) {
       // We don't control HTML elements inside of ace so we imperatively create an element
       // that acts as a container and insert it just before ace's textarea element
       // so that the overlay lives at the correct spot in the DOM hierarchy.
@@ -71,7 +85,7 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
       overlayMountNode.current.addEventListener('focus', enableOverlay);
       overlayMountNode.current.addEventListener('keydown', onDismissOverlay);
 
-      ReactDOM.render(<OverlayText />, overlayMountNode.current);
+      ReactDOM.render(<OverlayText {...startServices} />, overlayMountNode.current);
 
       aceTextAreaElement.parentElement!.insertBefore(overlayMountNode.current, aceTextAreaElement);
       aceTextAreaElement.setAttribute('tabindex', '-1');
@@ -86,7 +100,7 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
       aceTextAreaElement.addEventListener('keydown', aceKeydownListener);
     }
     return () => {
-      if (aceTextAreaElement) {
+      if (aceTextAreaElement && isAccessibilityOverlayEnabled) {
         document.removeEventListener('keydown', documentKeyDownListener, { capture: true });
         aceTextAreaElement.removeEventListener('keydown', aceKeydownListener);
         const textAreaContainer = aceTextAreaElement.parentElement;
@@ -95,5 +109,5 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
         }
       }
     };
-  }, [aceTextAreaElement]);
+  }, [aceTextAreaElement, startServices, isAccessibilityOverlayEnabled]);
 }

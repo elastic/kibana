@@ -7,28 +7,26 @@
 
 import { omit } from 'lodash';
 import moment from 'moment';
-import Puid from 'puid';
-import { JOB_STATUSES } from '../../../common/constants';
+import { v4 as uuidv4 } from 'uuid';
+
+import { JOB_STATUS } from '@kbn/reporting-common';
+import { REPORTING_DATA_STREAM_ALIAS } from '@kbn/reporting-server';
 import {
   ReportApiJSON,
-  ReportDocument,
   ReportDocumentHead,
   ReportFields,
   ReportSource,
-} from '../../../common/types';
+} from '@kbn/reporting-common/types';
+
 import type { ReportTaskParams } from '../tasks';
 
-export type { ReportDocument };
-export type { ReportApiJSON, ReportSource };
-
-const puid = new Puid();
 export const MIGRATION_VERSION = '7.14.0';
 
 /*
  * Class for an ephemeral report document: possibly is not saved in Elasticsearch
  */
 export class Report implements Partial<ReportSource & ReportDocumentHead> {
-  public _index?: string;
+  public _index: string;
   public _id: string;
   public _primary_term?: number; // set by ES
   public _seq_no?: number; // set by ES
@@ -47,6 +45,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public readonly kibana_name: ReportSource['kibana_name'];
   public readonly kibana_id: ReportSource['kibana_id'];
   public readonly output: ReportSource['output'];
+  public readonly error: ReportSource['error'];
   public readonly started_at: ReportSource['started_at'];
   public readonly completed_at: ReportSource['completed_at'];
   public readonly timeout: ReportSource['timeout'];
@@ -64,8 +63,8 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
    * Index string is required
    */
   constructor(opts: Partial<ReportSource> & Partial<ReportDocumentHead>, fields?: ReportFields) {
-    this._id = opts._id != null ? opts._id : puid.generate();
-    this._index = opts._index;
+    this._id = opts._id != null ? opts._id : uuidv4();
+    this._index = opts._index ?? REPORTING_DATA_STREAM_ALIAS; // Sets the value to the data stream, unless it's a stored report and we know the name of the backing index
     this._primary_term = opts._primary_term;
     this._seq_no = opts._seq_no;
 
@@ -95,8 +94,9 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
     this.meta = opts.meta || { objectType: 'unknown' };
     this.metrics = opts.metrics;
 
-    this.status = opts.status || JOB_STATUSES.PENDING;
+    this.status = opts.status || JOB_STATUS.PENDING;
     this.output = opts.output || null;
+    this.error = opts.error;
 
     this.queue_time_ms = fields?.queue_time_ms;
     this.execution_time_ms = fields?.execution_time_ms;
@@ -168,7 +168,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   toApiJSON(): ReportApiJSON {
     return {
       id: this._id,
-      index: this._index!,
+      index: this._index ?? REPORTING_DATA_STREAM_ALIAS,
       kibana_name: this.kibana_name,
       kibana_id: this.kibana_id,
       jobtype: this.jobtype,

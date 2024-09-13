@@ -1,0 +1,3105 @@
+{
+  "id": "@kbn/unified-data-table",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.DataTableRowControl",
+        "type": "Function",
+        "tags": [],
+        "label": "DataTableRowControl",
+        "description": [],
+        "signature": [
+          "({ size, children, }: React.PropsWithChildren<React.PropsWithChildren<{ size?: ",
+          "Size",
+          " | undefined; }>>) => JSX.Element"
+        ],
+        "path": "packages/kbn-unified-data-table/src/components/data_table_row_control.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.DataTableRowControl.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  size,\n  children,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<React.PropsWithChildren<{ size?: ",
+              "Size",
+              " | undefined; }>>"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table_row_control.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.getDisplayedColumns",
+        "type": "Function",
+        "tags": [],
+        "label": "getDisplayedColumns",
+        "description": [
+          "\nFunction to provide fallback when\n1) no columns are given\n2) Just one column is given, which is the configured timefields"
+        ],
+        "signature": [
+          "(stateColumns: string[], dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ") => string[]"
+        ],
+        "path": "packages/kbn-unified-data-table/src/utils/columns.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.getDisplayedColumns.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "stateColumns",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-unified-data-table/src/utils/columns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.getDisplayedColumns.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "packages/kbn-unified-data-table/src/utils/columns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.getRenderCustomToolbarWithElements",
+        "type": "Function",
+        "tags": [],
+        "label": "getRenderCustomToolbarWithElements",
+        "description": [
+          "\nRender custom element on the left side and all controls to the right"
+        ],
+        "signature": [
+          "({ leftSide, bottomSection, }: { leftSide?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; bottomSection?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }) => ",
+          {
+            "pluginId": "@kbn/unified-data-table",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDataTablePluginApi",
+            "section": "def-public.UnifiedDataTableRenderCustomToolbar",
+            "text": "UnifiedDataTableRenderCustomToolbar"
+          }
+        ],
+        "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.getRenderCustomToolbarWithElements.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  leftSide,\n  bottomSection,\n}",
+            "description": [],
+            "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.getRenderCustomToolbarWithElements.$1.leftSide",
+                "type": "Object",
+                "tags": [],
+                "label": "leftSide",
+                "description": [],
+                "signature": [
+                  "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.getRenderCustomToolbarWithElements.$1.bottomSection",
+                "type": "Object",
+                "tags": [],
+                "label": "bottomSection",
+                "description": [],
+                "signature": [
+                  "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.getRowsPerPageOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "getRowsPerPageOptions",
+        "description": [],
+        "signature": [
+          "(currentRowsPerPage?: number | undefined) => number[]"
+        ],
+        "path": "packages/kbn-unified-data-table/src/utils/rows_per_page.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.getRowsPerPageOptions.$1",
+            "type": "number",
+            "tags": [],
+            "label": "currentRowsPerPage",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/utils/rows_per_page.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.getTextBasedColumnsMeta",
+        "type": "Function",
+        "tags": [],
+        "label": "getTextBasedColumnsMeta",
+        "description": [
+          "\nColumns meta for text based searches"
+        ],
+        "signature": [
+          "(textBasedColumns: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]) => TextBasedColumnTypes"
+        ],
+        "path": "packages/kbn-unified-data-table/src/utils/get_columns_meta.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.getTextBasedColumnsMeta.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "textBasedColumns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-unified-data-table/src/utils/get_columns_meta.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.JSONCodeEditorCommonMemoized",
+        "type": "Function",
+        "tags": [],
+        "label": "JSONCodeEditorCommonMemoized",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<JsonCodeEditorCommonProps> & { readonly type: (props: JsonCodeEditorCommonProps) => JSX.Element; }"
+        ],
+        "path": "packages/kbn-unified-data-table/src/components/json_code_editor/json_code_editor_common.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.JSONCodeEditorCommonMemoized.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.popularizeField",
+        "type": "Function",
+        "tags": [],
+        "label": "popularizeField",
+        "description": [],
+        "signature": [
+          "(dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", fieldName: string, DataViewsService: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "public",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-public.DataViewsServicePublic",
+            "text": "DataViewsServicePublic"
+          },
+          ", capabilities: ",
+          {
+            "pluginId": "@kbn/core-capabilities-common",
+            "scope": "common",
+            "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+            "section": "def-common.Capabilities",
+            "text": "Capabilities"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "packages/kbn-unified-data-table/src/utils/popularize_field.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.popularizeField.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "packages/kbn-unified-data-table/src/utils/popularize_field.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.popularizeField.$2",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-unified-data-table/src/utils/popularize_field.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.popularizeField.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "DataViewsService",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "packages/kbn-unified-data-table/src/utils/popularize_field.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.popularizeField.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "capabilities",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              }
+            ],
+            "path": "packages/kbn-unified-data-table/src/utils/popularize_field.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.renderCustomToolbar",
+        "type": "Function",
+        "tags": [],
+        "label": "renderCustomToolbar",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/unified-data-table",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDataTablePluginApi",
+            "section": "def-public.UnifiedDataTableRenderCustomToolbarProps",
+            "text": "UnifiedDataTableRenderCustomToolbarProps"
+          },
+          ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+        ],
+        "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.renderCustomToolbar.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.UnifiedDataTableRenderCustomToolbarProps",
+                "text": "UnifiedDataTableRenderCustomToolbarProps"
+              }
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.RowHeightSettings",
+        "type": "Function",
+        "tags": [],
+        "label": "RowHeightSettings",
+        "description": [],
+        "signature": [
+          "({\n  label,\n  rowHeight,\n  rowHeightLines,\n  compressed,\n  onChangeRowHeight,\n  onChangeRowHeightLines,\n  maxRowHeight,\n  ['data-test-subj']: dataTestSubj,\n}: ",
+          {
+            "pluginId": "@kbn/unified-data-table",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDataTablePluginApi",
+            "section": "def-public.RowHeightSettingsProps",
+            "text": "RowHeightSettingsProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-unified-data-table/src/components/row_height_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RowHeightSettings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  label,\n  rowHeight,\n  rowHeightLines,\n  compressed,\n  onChangeRowHeight,\n  onChangeRowHeightLines,\n  maxRowHeight,\n  ['data-test-subj']: dataTestSubj,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.RowHeightSettingsProps",
+                "text": "RowHeightSettingsProps"
+              }
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/row_height_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.UnifiedDataTable",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedDataTable",
+        "description": [],
+        "signature": [
+          "({ ariaLabelledBy, columns, columnsMeta, showColumnTokens, configHeaderRowHeight, headerRowHeightState, onUpdateHeaderRowHeight, controlColumnIds, rowAdditionalLeadingControls, dataView, loadingState, onFilter, onResize, onSetColumns, onSort, rows, searchDescription, searchTitle, settings, showTimeCol, showFullScreenButton, sort, useNewFieldsApi, isSortEnabled, isPaginationEnabled, cellActionsTriggerId, cellActionsMetadata, cellActionsHandling, visibleCellActions, className, rowHeightState, onUpdateRowHeight, maxAllowedSampleSize, sampleSizeState, onUpdateSampleSize, isPlainRecord, rowsPerPageState, onUpdateRowsPerPage, onFieldEdited, services, renderCustomGridBody, renderCustomToolbar, externalControlColumns, trailingControlColumns, totalHits, onFetchMoreRecords, renderDocumentView, setExpandedDoc, expandedDoc, configRowHeight, showMultiFields, maxDocFieldsDisplayed, externalAdditionalControls, rowsPerPageOptions, externalCustomRenderers, additionalFieldGroups, consumer, componentsTourSteps, gridStyleOverride, rowLineHeightOverride, customGridColumnsConfiguration, enableComparisonMode, cellContext, renderCellPopover, getRowIndicator, dataGridDensityState, onUpdateDataGridDensity, }: ",
+          {
+            "pluginId": "@kbn/unified-data-table",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDataTablePluginApi",
+            "section": "def-public.UnifiedDataTableProps",
+            "text": "UnifiedDataTableProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  ariaLabelledBy,\n  columns,\n  columnsMeta,\n  showColumnTokens,\n  configHeaderRowHeight,\n  headerRowHeightState,\n  onUpdateHeaderRowHeight,\n  controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,\n  rowAdditionalLeadingControls,\n  dataView,\n  loadingState,\n  onFilter,\n  onResize,\n  onSetColumns,\n  onSort,\n  rows,\n  searchDescription,\n  searchTitle,\n  settings,\n  showTimeCol,\n  showFullScreenButton = true,\n  sort,\n  useNewFieldsApi,\n  isSortEnabled = true,\n  isPaginationEnabled = true,\n  cellActionsTriggerId,\n  cellActionsMetadata,\n  cellActionsHandling = 'replace',\n  visibleCellActions,\n  className,\n  rowHeightState,\n  onUpdateRowHeight,\n  maxAllowedSampleSize,\n  sampleSizeState,\n  onUpdateSampleSize,\n  isPlainRecord = false,\n  rowsPerPageState,\n  onUpdateRowsPerPage,\n  onFieldEdited,\n  services,\n  renderCustomGridBody,\n  renderCustomToolbar,\n  externalControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls\n  trailingControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls\n  totalHits,\n  onFetchMoreRecords,\n  renderDocumentView,\n  setExpandedDoc,\n  expandedDoc,\n  configRowHeight,\n  showMultiFields = true,\n  maxDocFieldsDisplayed = 50,\n  externalAdditionalControls,\n  rowsPerPageOptions,\n  externalCustomRenderers,\n  additionalFieldGroups,\n  consumer = 'discover',\n  componentsTourSteps,\n  gridStyleOverride,\n  rowLineHeightOverride,\n  customGridColumnsConfiguration,\n  enableComparisonMode,\n  cellContext,\n  renderCellPopover,\n  getRowIndicator,\n  dataGridDensityState,\n  onUpdateDataGridDensity,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.UnifiedDataTableProps",
+                "text": "UnifiedDataTableProps"
+              }
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.useColumns",
+        "type": "Function",
+        "tags": [],
+        "label": "useColumns",
+        "description": [],
+        "signature": [
+          "({ capabilities, dataView, dataViews, setAppState, useNewFieldsApi, columns, sort, defaultOrder, settings, }: ",
+          {
+            "pluginId": "@kbn/unified-data-table",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDataTablePluginApi",
+            "section": "def-public.UseColumnsProps",
+            "text": "UseColumnsProps"
+          },
+          ") => { columns: string[]; onAddColumn: (columnName: string) => void; onRemoveColumn: (columnName: string) => void; onMoveColumn: (columnName: string, newIndex: number) => void; onSetColumns: (nextColumns: string[], hideTimeColumn: boolean) => void; }"
+        ],
+        "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.useColumns.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  capabilities,\n  dataView,\n  dataViews,\n  setAppState,\n  useNewFieldsApi,\n  columns,\n  sort,\n  defaultOrder = 'desc',\n  settings,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.UseColumnsProps",
+                "text": "UseColumnsProps"
+              }
+            ],
+            "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.CustomGridColumnProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomGridColumnProps",
+        "description": [],
+        "path": "packages/kbn-unified-data-table/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.CustomGridColumnProps.column",
+            "type": "Object",
+            "tags": [],
+            "label": "column",
+            "description": [],
+            "signature": [
+              "EuiDataGridColumn"
+            ],
+            "path": "packages/kbn-unified-data-table/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.CustomGridColumnProps.headerRowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "headerRowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.RowHeightSettingsProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "RowHeightSettingsProps",
+        "description": [],
+        "path": "packages/kbn-unified-data-table/src/components/row_height_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RowHeightSettingsProps.rowHeight",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rowHeight",
+            "description": [],
+            "signature": [
+              "RowHeightMode",
+              " | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/row_height_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RowHeightSettingsProps.rowHeightLines",
+            "type": "number",
+            "tags": [],
+            "label": "rowHeightLines",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/row_height_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RowHeightSettingsProps.maxRowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "maxRowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/row_height_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RowHeightSettingsProps.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "packages/kbn-unified-data-table/src/components/row_height_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RowHeightSettingsProps.compressed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "compressed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/row_height_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RowHeightSettingsProps.onChangeRowHeight",
+            "type": "Function",
+            "tags": [],
+            "label": "onChangeRowHeight",
+            "description": [],
+            "signature": [
+              "(newHeightMode: ",
+              "RowHeightMode",
+              " | undefined) => void"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/row_height_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.RowHeightSettingsProps.onChangeRowHeight.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "newHeightMode",
+                "description": [],
+                "signature": [
+                  "RowHeightMode",
+                  " | undefined"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/row_height_settings.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RowHeightSettingsProps.onChangeRowHeightLines",
+            "type": "Function",
+            "tags": [],
+            "label": "onChangeRowHeightLines",
+            "description": [],
+            "signature": [
+              "(newRowHeightLines: number) => void"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/row_height_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.RowHeightSettingsProps.onChangeRowHeightLines.$1",
+                "type": "number",
+                "tags": [],
+                "label": "newRowHeightLines",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/row_height_settings.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.RowHeightSettingsProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/row_height_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.UnifiedDataTableProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedDataTableProps",
+        "description": [
+          "\nUnified Data Table props"
+        ],
+        "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.ariaLabelledBy",
+            "type": "string",
+            "tags": [],
+            "label": "ariaLabelledBy",
+            "description": [
+              "\nDetermines which element labels the grid for ARIA"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.className",
+            "type": "string",
+            "tags": [],
+            "label": "className",
+            "description": [
+              "\nOptional class name to apply"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.columns",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [
+              "\nDetermines ids of the columns which are displayed"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.columnsMeta",
+            "type": "Object",
+            "tags": [],
+            "label": "columnsMeta",
+            "description": [
+              "\nIf not provided, types will be derived by default from the dataView field types.\nFor displaying text-based search results, pass columns meta (which are available separately in the fetch request) down here.\nCheck available utils in `utils/get_columns_meta.ts`"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableColumnsMeta",
+                "text": "DataTableColumnsMeta"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.showColumnTokens",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showColumnTokens",
+            "description": [
+              "\nField tokens could be rendered in column header next to the field name."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.configHeaderRowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "configHeaderRowHeight",
+            "description": [
+              "\nOptional value for providing configuration setting for UnifiedDataTable header row height"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.headerRowHeightState",
+            "type": "number",
+            "tags": [],
+            "label": "headerRowHeightState",
+            "description": [
+              "\nDetermines number of rows of a column header"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.onUpdateHeaderRowHeight",
+            "type": "Function",
+            "tags": [],
+            "label": "onUpdateHeaderRowHeight",
+            "description": [
+              "\nUpdate header row height state"
+            ],
+            "signature": [
+              "((headerRowHeight: number) => void) | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.onUpdateHeaderRowHeight.$1",
+                "type": "number",
+                "tags": [],
+                "label": "headerRowHeight",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.expandedDoc",
+            "type": "Object",
+            "tags": [],
+            "label": "expandedDoc",
+            "description": [
+              "\nIf set, the given document is displayed in a flyout"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "\nThe used data view"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.loadingState",
+            "type": "Enum",
+            "tags": [],
+            "label": "loadingState",
+            "description": [
+              "\nDetermines if data is currently loaded"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.DataLoadingState",
+                "text": "DataLoadingState"
+              }
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.onFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "onFilter",
+            "description": [
+              "\nFunction to add a filter in the grid cell or document flyout"
+            ],
+            "signature": [
+              "DocViewFilterFn",
+              " | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.onResize",
+            "type": "Function",
+            "tags": [],
+            "label": "onResize",
+            "description": [
+              "\nFunction triggered when a column is resized by the user, passes `undefined` for auto-width"
+            ],
+            "signature": [
+              "((colSettings: { columnId: string; width: number | undefined; }) => void) | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.onResize.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "colSettings",
+                "description": [],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/unified-data-table",
+                    "id": "def-public.UnifiedDataTableProps.onResize.$1.columnId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "columnId",
+                    "description": [],
+                    "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/unified-data-table",
+                    "id": "def-public.UnifiedDataTableProps.onResize.$1.width",
+                    "type": "number",
+                    "tags": [],
+                    "label": "width",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.onSetColumns",
+            "type": "Function",
+            "tags": [],
+            "label": "onSetColumns",
+            "description": [
+              "\nFunction to set all columns"
+            ],
+            "signature": [
+              "(columns: string[], hideTimeColumn: boolean) => void"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.onSetColumns.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "columns",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.onSetColumns.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "hideTimeColumn",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.onSort",
+            "type": "Function",
+            "tags": [],
+            "label": "onSort",
+            "description": [
+              "\nfunction to change sorting of the documents, skipped when isSortEnabled is set to false"
+            ],
+            "signature": [
+              "((sort: string[][]) => void) | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.onSort.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "sort",
+                "description": [],
+                "signature": [
+                  "string[][]"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.rows",
+            "type": "Array",
+            "tags": [],
+            "label": "rows",
+            "description": [
+              "\nArray of documents provided by Elasticsearch"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.setExpandedDoc",
+            "type": "Function",
+            "tags": [],
+            "label": "setExpandedDoc",
+            "description": [
+              "\nFunction to set the expanded document, which is displayed in a flyout"
+            ],
+            "signature": [
+              "((doc?: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              },
+              " | undefined) => void) | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.setExpandedDoc.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "doc",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.DataTableRecord",
+                    "text": "DataTableRecord"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [
+              "\nGrid display settings persisted in Elasticsearch (e.g. column width)"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.UnifiedDataTableSettings",
+                "text": "UnifiedDataTableSettings"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.searchDescription",
+            "type": "string",
+            "tags": [],
+            "label": "searchDescription",
+            "description": [
+              "\nSearch description"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.searchTitle",
+            "type": "string",
+            "tags": [],
+            "label": "searchTitle",
+            "description": [
+              "\nSearch title"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.showTimeCol",
+            "type": "boolean",
+            "tags": [],
+            "label": "showTimeCol",
+            "description": [
+              "\nDetermines whether the time columns should be displayed (legacy settings)"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.showFullScreenButton",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showFullScreenButton",
+            "description": [
+              "\nDetermines whether the full screen button should be displayed"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.isSortEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSortEnabled",
+            "description": [
+              "\nManage user sorting control"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.sort",
+            "type": "Array",
+            "tags": [],
+            "label": "sort",
+            "description": [
+              "\nCurrent sort setting"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.SortOrder",
+                "text": "SortOrder"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.useNewFieldsApi",
+            "type": "boolean",
+            "tags": [],
+            "label": "useNewFieldsApi",
+            "description": [
+              "\nHow the data is fetched"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.isPaginationEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isPaginationEnabled",
+            "description": [
+              "\nManage pagination control"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.controlColumnIds",
+            "type": "Array",
+            "tags": [],
+            "label": "controlColumnIds",
+            "description": [
+              "\nList of used control columns (available: 'openDetails', 'select')"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.configRowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "configRowHeight",
+            "description": [
+              "\nOptional value for providing configuration setting for UnifiedDataTable row height"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.rowHeightState",
+            "type": "number",
+            "tags": [],
+            "label": "rowHeightState",
+            "description": [
+              "\nRow height from state"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.onUpdateRowHeight",
+            "type": "Function",
+            "tags": [],
+            "label": "onUpdateRowHeight",
+            "description": [
+              "\nUpdate row height state"
+            ],
+            "signature": [
+              "((rowHeight: number) => void) | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.onUpdateRowHeight.$1",
+                "type": "number",
+                "tags": [],
+                "label": "rowHeight",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.dataGridDensityState",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dataGridDensityState",
+            "description": [
+              "\nDensity from state"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.DataGridDensity",
+                "text": "DataGridDensity"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.onUpdateDataGridDensity",
+            "type": "Function",
+            "tags": [],
+            "label": "onUpdateDataGridDensity",
+            "description": [
+              "\nCallback when the data grid density configuration is modified"
+            ],
+            "signature": [
+              "((dataGridDensity: ",
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.DataGridDensity",
+                "text": "DataGridDensity"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.onUpdateDataGridDensity.$1",
+                "type": "Enum",
+                "tags": [],
+                "label": "dataGridDensity",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/unified-data-table",
+                    "scope": "public",
+                    "docId": "kibKbnUnifiedDataTablePluginApi",
+                    "section": "def-public.DataGridDensity",
+                    "text": "DataGridDensity"
+                  }
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.isPlainRecord",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isPlainRecord",
+            "description": [
+              "\nIs text base lang mode enabled"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.rowsPerPageState",
+            "type": "number",
+            "tags": [],
+            "label": "rowsPerPageState",
+            "description": [
+              "\nCurrent state value for rowsPerPage"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.onUpdateRowsPerPage",
+            "type": "Function",
+            "tags": [],
+            "label": "onUpdateRowsPerPage",
+            "description": [
+              "\nUpdate rows per page state"
+            ],
+            "signature": [
+              "((rowsPerPage: number) => void) | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.onUpdateRowsPerPage.$1",
+                "type": "number",
+                "tags": [],
+                "label": "rowsPerPage",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.maxAllowedSampleSize",
+            "type": "number",
+            "tags": [],
+            "label": "maxAllowedSampleSize",
+            "description": [
+              "\nConfiguration option to limit sample size slider"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.sampleSizeState",
+            "type": "number",
+            "tags": [],
+            "label": "sampleSizeState",
+            "description": [
+              "\nThe max size of the documents returned by Elasticsearch"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.onUpdateSampleSize",
+            "type": "Function",
+            "tags": [],
+            "label": "onUpdateSampleSize",
+            "description": [
+              "\nUpdate rows per page state"
+            ],
+            "signature": [
+              "((sampleSize: number) => void) | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.onUpdateSampleSize.$1",
+                "type": "number",
+                "tags": [],
+                "label": "sampleSize",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.onFieldEdited",
+            "type": "Function",
+            "tags": [],
+            "label": "onFieldEdited",
+            "description": [
+              "\nCallback to execute on edit runtime field"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [
+              "\nService dependencies"
+            ],
+            "signature": [
+              "{ theme: ",
+              {
+                "pluginId": "@kbn/react-kibana-context-common",
+                "scope": "public",
+                "docId": "kibKbnReactKibanaContextCommonPluginApi",
+                "section": "def-public.ThemeServiceStart",
+                "text": "ThemeServiceStart"
+              },
+              "; fieldFormats: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "public",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-public.FieldFormatsStart",
+                "text": "FieldFormatsStart"
+              },
+              "; uiSettings: ",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-public.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              "; dataViewFieldEditor?: ",
+              {
+                "pluginId": "dataViewFieldEditor",
+                "scope": "public",
+                "docId": "kibDataViewFieldEditorPluginApi",
+                "section": "def-public.PluginStart",
+                "text": "PluginStart"
+              },
+              " | undefined; toastNotifications: ",
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-public.IToasts",
+                "text": "IToasts"
+              },
+              "; storage: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              },
+              "; data: ",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              },
+              "; }"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.renderDocumentView",
+            "type": "Function",
+            "tags": [],
+            "label": "renderDocumentView",
+            "description": [
+              "\nCallback to render DocumentView when the document is expanded"
+            ],
+            "signature": [
+              "((hit: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              },
+              ", displayedRows: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              },
+              "[], displayedColumns: string[], columnsMeta?: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableColumnsMeta",
+                "text": "DataTableColumnsMeta"
+              },
+              " | undefined) => JSX.Element | undefined) | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.renderDocumentView.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "hit",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.DataTableRecord",
+                    "text": "DataTableRecord"
+                  }
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.renderDocumentView.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "displayedRows",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.DataTableRecord",
+                    "text": "DataTableRecord"
+                  },
+                  "[]"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.renderDocumentView.$3",
+                "type": "Array",
+                "tags": [],
+                "label": "displayedColumns",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.renderDocumentView.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "columnsMeta",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.DataTableColumnsMeta",
+                    "text": "DataTableColumnsMeta"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.showMultiFields",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showMultiFields",
+            "description": [
+              "\nOptional value for providing configuration setting for enabling to display the complex fields in the table. Default is true."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.maxDocFieldsDisplayed",
+            "type": "number",
+            "tags": [],
+            "label": "maxDocFieldsDisplayed",
+            "description": [
+              "\nOptional value for providing configuration setting for maximum number of document fields to display in the table. Default is 50."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.externalControlColumns",
+            "type": "Array",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "externalControlColumns",
+            "description": [],
+            "signature": [
+              "EuiDataGridControlColumn",
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/public/components/cloud_security_data_table/cloud_security_data_table.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/unified_components/data_table/index.tsx"
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.trailingControlColumns",
+            "type": "Array",
+            "tags": [],
+            "label": "trailingControlColumns",
+            "description": [
+              "\nAn optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.\nWe recommend to rather position all controls in the beginning of rows and use `rowAdditionalLeadingControls` for that\nas number of columns can be dynamically changed and we don't want the controls to become hidden due to horizontal scroll."
+            ],
+            "signature": [
+              "EuiDataGridControlColumn",
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.rowAdditionalLeadingControls",
+            "type": "Array",
+            "tags": [],
+            "label": "rowAdditionalLeadingControls",
+            "description": [
+              "\nOptional value to extend the list of default row actions"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.RowControlColumn",
+                "text": "RowControlColumn"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.totalHits",
+            "type": "number",
+            "tags": [],
+            "label": "totalHits",
+            "description": [
+              "\nNumber total hits from ES"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.onFetchMoreRecords",
+            "type": "Function",
+            "tags": [],
+            "label": "onFetchMoreRecords",
+            "description": [
+              "\nTo fetch more"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.externalAdditionalControls",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "externalAdditionalControls",
+            "description": [
+              "\nOptional value for providing the additional controls available in the UnifiedDataTable toolbar to manage it's records or state. UnifiedDataTable includes Columns, Sorting and Bulk Actions."
+            ],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.rowsPerPageOptions",
+            "type": "Array",
+            "tags": [],
+            "label": "rowsPerPageOptions",
+            "description": [
+              "\nOptional list of number type values to set custom UnifiedDataTable paging options to display the records per page."
+            ],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.renderCustomGridBody",
+            "type": "Function",
+            "tags": [],
+            "label": "renderCustomGridBody",
+            "description": [
+              "\nAn optional function called to completely customize and control the rendering of\nEuiDataGrid's body and cell placement.  This can be used to, e.g. remove EuiDataGrid's\nvirtualization library, or roll your own.\n\nThis component is **only** meant as an escape hatch for extremely custom use cases.\n\nBehind the scenes, this function is treated as a React component,\nallowing hooks, context, and other React concepts to be used.\nIt receives #EuiDataGridCustomBodyProps as its only argument."
+            ],
+            "signature": [
+              "((args: ",
+              "EuiDataGridCustomBodyProps",
+              ") => React.ReactNode) | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UnifiedDataTableProps.renderCustomGridBody.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "EuiDataGridCustomBodyProps"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.renderCustomToolbar",
+            "type": "Function",
+            "tags": [],
+            "label": "renderCustomToolbar",
+            "description": [
+              "\nOptional render for the grid toolbar"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.UnifiedDataTableRenderCustomToolbar",
+                "text": "UnifiedDataTableRenderCustomToolbar"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.cellActionsTriggerId",
+            "type": "string",
+            "tags": [],
+            "label": "cellActionsTriggerId",
+            "description": [
+              "\nOptional triggerId to retrieve the column cell actions that will override the default ones"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.cellActionsMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "cellActionsMetadata",
+            "description": [
+              "\nCustom set of properties used by some actions.\nAn action might require a specific set of metadata properties to render.\nThis data is sent directly to actions."
+            ],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.cellActionsHandling",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cellActionsHandling",
+            "description": [
+              "\nControls whether the cell actions should replace the default cell actions or be appended to them"
+            ],
+            "signature": [
+              "\"replace\" | \"append\" | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.visibleCellActions",
+            "type": "number",
+            "tags": [],
+            "label": "visibleCellActions",
+            "description": [
+              "\nAn optional value for a custom number of the visible cell actions in the table. By default is up to 3."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.externalCustomRenderers",
+            "type": "Object",
+            "tags": [],
+            "label": "externalCustomRenderers",
+            "description": [
+              "\nAn optional settings for a specified fields rendering like links. Applied only for the listed fields rendering."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.CustomCellRenderer",
+                "text": "CustomCellRenderer"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.additionalFieldGroups",
+            "type": "Object",
+            "tags": [],
+            "label": "additionalFieldGroups",
+            "description": [
+              "\nAn optional prop to provide awareness of additional field groups when paired with the Unified Field List."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-field-list",
+                "scope": "public",
+                "docId": "kibKbnUnifiedFieldListPluginApi",
+                "section": "def-public.AdditionalFieldGroups",
+                "text": "AdditionalFieldGroups"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/field-utils",
+                "scope": "common",
+                "docId": "kibKbnFieldUtilsPluginApi",
+                "section": "def-common.FieldBase",
+                "text": "FieldBase"
+              },
+              "> | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.customGridColumnsConfiguration",
+            "type": "Object",
+            "tags": [],
+            "label": "customGridColumnsConfiguration",
+            "description": [
+              "\nAn optional settings for customising the column"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.CustomGridColumnsConfiguration",
+                "text": "CustomGridColumnsConfiguration"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.consumer",
+            "type": "string",
+            "tags": [],
+            "label": "consumer",
+            "description": [
+              "\nName of the UnifiedDataTable consumer component or application"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.componentsTourSteps",
+            "type": "Object",
+            "tags": [],
+            "label": "componentsTourSteps",
+            "description": [
+              "\nOptional key/value pairs to set guided onboarding steps ids for a data table components included to guided tour."
+            ],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.gridStyleOverride",
+            "type": "Object",
+            "tags": [],
+            "label": "gridStyleOverride",
+            "description": [
+              "\nOptional gridStyle override."
+            ],
+            "signature": [
+              "EuiDataGridStyle",
+              " | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.rowLineHeightOverride",
+            "type": "string",
+            "tags": [],
+            "label": "rowLineHeightOverride",
+            "description": [
+              "\nOptional row line height override. Default is 1.6em."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.enableComparisonMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enableComparisonMode",
+            "description": [
+              "\nSet to true to allow users to compare selected documents"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.cellContext",
+            "type": "Object",
+            "tags": [],
+            "label": "cellContext",
+            "description": [
+              "\nOptional extra props passed to the renderCellValue function/component."
+            ],
+            "signature": [
+              "CellContext | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.renderCellPopover",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "renderCellPopover",
+            "description": [
+              "\n\nCustom cell Popover Render Component.\n"
+            ],
+            "signature": [
+              "React.JSXElementConstructor<",
+              "EuiDataGridCellPopoverElementProps",
+              "> | ((props: ",
+              "EuiDataGridCellPopoverElementProps",
+              ") => React.ReactNode) | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableProps.getRowIndicator",
+            "type": "Function",
+            "tags": [],
+            "label": "getRowIndicator",
+            "description": [
+              "\nWhen specified, this function will be called to determine the color of the row indicator."
+            ],
+            "signature": [
+              "((row: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              },
+              ", euiTheme: ",
+              "EuiThemeComputed",
+              "<{}>) => { color: string; label: string; } | undefined) | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.UnifiedDataTableRenderCustomToolbarProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedDataTableRenderCustomToolbarProps",
+        "description": [],
+        "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRenderCustomToolbarProps.toolbarProps",
+            "type": "Object",
+            "tags": [],
+            "label": "toolbarProps",
+            "description": [],
+            "signature": [
+              "EuiDataGridCustomToolbarProps"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRenderCustomToolbarProps.gridProps",
+            "type": "Object",
+            "tags": [],
+            "label": "gridProps",
+            "description": [],
+            "signature": [
+              "{ additionalControls?: React.ReactNode | ",
+              "EuiDataGridToolBarAdditionalControlsOptions",
+              "; }"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.UnifiedDataTableSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedDataTableSettings",
+        "description": [
+          "\nUser configurable state of data grid, persisted in saved search"
+        ],
+        "path": "packages/kbn-unified-data-table/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableSettings.columns",
+            "type": "Object",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.UnifiedDataTableSettingsColumn",
+                "text": "UnifiedDataTableSettingsColumn"
+              },
+              "> | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.UnifiedDataTableSettingsColumn",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedDataTableSettingsColumn",
+        "description": [],
+        "path": "packages/kbn-unified-data-table/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableSettingsColumn.width",
+            "type": "number",
+            "tags": [],
+            "label": "width",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableSettingsColumn.display",
+            "type": "string",
+            "tags": [],
+            "label": "display",
+            "description": [
+              "\n  Optional props passed to Columns to display provided labels as column names instead of field names.\n  This object maps column field names to their corresponding display labels.\n  These labels will take precedence over the data view field names."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.UseColumnsProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseColumnsProps",
+        "description": [],
+        "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UseColumnsProps.capabilities",
+            "type": "Object",
+            "tags": [],
+            "label": "capabilities",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              }
+            ],
+            "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UseColumnsProps.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UseColumnsProps.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UseColumnsProps.useNewFieldsApi",
+            "type": "boolean",
+            "tags": [],
+            "label": "useNewFieldsApi",
+            "description": [],
+            "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UseColumnsProps.setAppState",
+            "type": "Function",
+            "tags": [],
+            "label": "setAppState",
+            "description": [],
+            "signature": [
+              "(state: { columns: string[]; sort?: string[][] | undefined; settings?: ",
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.UnifiedDataTableSettings",
+                "text": "UnifiedDataTableSettings"
+              },
+              " | undefined; }) => void"
+            ],
+            "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-public.UseColumnsProps.setAppState.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/unified-data-table",
+                    "id": "def-public.UseColumnsProps.setAppState.$1.columns",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "columns",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/unified-data-table",
+                    "id": "def-public.UseColumnsProps.setAppState.$1.sort",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "sort",
+                    "description": [],
+                    "signature": [
+                      "string[][] | undefined"
+                    ],
+                    "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/unified-data-table",
+                    "id": "def-public.UseColumnsProps.setAppState.$1.settings",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "settings",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/unified-data-table",
+                        "scope": "public",
+                        "docId": "kibKbnUnifiedDataTablePluginApi",
+                        "section": "def-public.UnifiedDataTableSettings",
+                        "text": "UnifiedDataTableSettings"
+                      },
+                      " | undefined"
+                    ],
+                    "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UseColumnsProps.columns",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UseColumnsProps.sort",
+            "type": "Array",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              "string[][] | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UseColumnsProps.defaultOrder",
+            "type": "string",
+            "tags": [],
+            "label": "defaultOrder",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UseColumnsProps.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.UnifiedDataTableSettings",
+                "text": "UnifiedDataTableSettings"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/hooks/use_data_grid_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.DataGridDensity",
+        "type": "Enum",
+        "tags": [],
+        "label": "DataGridDensity",
+        "description": [],
+        "path": "packages/kbn-unified-data-table/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.DataLoadingState",
+        "type": "Enum",
+        "tags": [],
+        "label": "DataLoadingState",
+        "description": [],
+        "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.CustomCellRenderer",
+        "type": "Type",
+        "tags": [],
+        "label": "CustomCellRenderer",
+        "description": [],
+        "signature": [
+          "{ [x: string]: (props: ",
+          {
+            "pluginId": "@kbn/unified-data-table",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDataTablePluginApi",
+            "section": "def-public.DataGridCellValueElementProps",
+            "text": "DataGridCellValueElementProps"
+          },
+          ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>; }"
+        ],
+        "path": "packages/kbn-unified-data-table/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.CustomGridColumnsConfiguration",
+        "type": "Type",
+        "tags": [],
+        "label": "CustomGridColumnsConfiguration",
+        "description": [],
+        "signature": [
+          "{ [x: string]: (props: ",
+          {
+            "pluginId": "@kbn/unified-data-table",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDataTablePluginApi",
+            "section": "def-public.CustomGridColumnProps",
+            "text": "CustomGridColumnProps"
+          },
+          ") => ",
+          "EuiDataGridColumn",
+          "; }"
+        ],
+        "path": "packages/kbn-unified-data-table/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.DataGridCellValueElementProps",
+        "type": "Type",
+        "tags": [],
+        "label": "DataGridCellValueElementProps",
+        "description": [],
+        "signature": [
+          "EuiDataGridCellValueElementProps",
+          " & { row: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          "; dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "; fieldFormats: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "public",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-public.FieldFormatsStart",
+            "text": "FieldFormatsStart"
+          },
+          "; closePopover: () => void; isCompressed?: boolean | undefined; }"
+        ],
+        "path": "packages/kbn-unified-data-table/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.DataTableColumnsMeta",
+        "type": "Type",
+        "tags": [],
+        "label": "DataTableColumnsMeta",
+        "description": [
+          "\nCustom column types per column name"
+        ],
+        "signature": [
+          "{ [x: string]: { type: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumnType",
+            "text": "DatatableColumnType"
+          },
+          "; esType?: string | undefined; }; }"
+        ],
+        "path": "packages/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.OPEN_DETAILS",
+        "type": "string",
+        "tags": [],
+        "label": "OPEN_DETAILS",
+        "description": [],
+        "signature": [
+          "\"openDetails\""
+        ],
+        "path": "packages/kbn-unified-data-table/src/components/data_table_columns.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.SELECT_ROW",
+        "type": "string",
+        "tags": [],
+        "label": "SELECT_ROW",
+        "description": [],
+        "signature": [
+          "\"select\""
+        ],
+        "path": "packages/kbn-unified-data-table/src/components/data_table_columns.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.SortOrder",
+        "type": "Type",
+        "tags": [],
+        "label": "SortOrder",
+        "description": [],
+        "signature": [
+          "[string, string]"
+        ],
+        "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.UnifiedDataTableRenderCustomToolbar",
+        "type": "Type",
+        "tags": [],
+        "label": "UnifiedDataTableRenderCustomToolbar",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/unified-data-table",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDataTablePluginApi",
+            "section": "def-public.UnifiedDataTableRenderCustomToolbarProps",
+            "text": "UnifiedDataTableRenderCustomToolbarProps"
+          },
+          ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+        ],
+        "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRenderCustomToolbar.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.UnifiedDataTableRenderCustomToolbarProps",
+                "text": "UnifiedDataTableRenderCustomToolbarProps"
+              }
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.ValueToStringConverter",
+        "type": "Type",
+        "tags": [],
+        "label": "ValueToStringConverter",
+        "description": [],
+        "signature": [
+          "(rowIndex: number, columnId: string, options?: { compatibleWithCSV?: boolean | undefined; } | undefined) => { formattedString: string; withFormula: boolean; }"
+        ],
+        "path": "packages/kbn-unified-data-table/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.ValueToStringConverter.$1",
+            "type": "number",
+            "tags": [],
+            "label": "rowIndex",
+            "description": [],
+            "path": "packages/kbn-unified-data-table/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.ValueToStringConverter.$2",
+            "type": "string",
+            "tags": [],
+            "label": "columnId",
+            "description": [],
+            "path": "packages/kbn-unified-data-table/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.ValueToStringConverter.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "{ compatibleWithCSV?: boolean | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-public.ROWS_HEIGHT_OPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "ROWS_HEIGHT_OPTIONS",
+        "description": [
+          "\nRow height might be a value from -1 to 20\nA value of -1 automatically adjusts the row height to fit the contents.\nA value of 0 displays the content in a single line.\nA value from 1 to 20 represents number of lines of Document explorer row to display."
+        ],
+        "signature": [
+          "{ readonly auto: -1; readonly single: 0; readonly default: 3; }"
+        ],
+        "path": "packages/kbn-unified-data-table/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

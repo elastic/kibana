@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -13,12 +14,8 @@ import {
   EuiCode,
   EuiCodeBlock,
   EuiLink,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
+  EuiPageTemplate,
+  EuiProvider,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -61,12 +58,11 @@ const UsingAnExistingFieldFormatExample: React.FC<{ deps: Deps }> = (props) => {
         </p>
       </EuiText>
       <EuiSpacer size={'s'} />
-      <EuiCodeBlock>{example1SampleCode}</EuiCodeBlock>
+      <EuiCodeBlock language="jsx">{example1SampleCode}</EuiCodeBlock>
       <EuiSpacer size={'s'} />
       <EuiBasicTable
         data-test-subj={'example1 sample table'}
         items={sample}
-        textOnly={true}
         columns={[
           {
             field: 'raw',
@@ -97,15 +93,14 @@ const CreatingCustomFieldFormat: React.FC<{ deps: Deps }> = (props) => {
         </p>
       </EuiText>
       <EuiSpacer size={'s'} />
-      <EuiCodeBlock>{example2SampleCodePart1}</EuiCodeBlock>
+      <EuiCodeBlock language="jsx">{example2SampleCodePart1}</EuiCodeBlock>
       <EuiSpacer size={'xs'} />
-      <EuiCodeBlock>{example2SampleCodePart2}</EuiCodeBlock>
+      <EuiCodeBlock language="jsx">{example2SampleCodePart2}</EuiCodeBlock>
       <EuiSpacer size={'xs'} />
-      <EuiCodeBlock>{example2SampleCodePart3}</EuiCodeBlock>
+      <EuiCodeBlock language="jsx">{example2SampleCodePart3}</EuiCodeBlock>
       <EuiSpacer size={'s'} />
       <EuiBasicTable
         items={sample}
-        textOnly={true}
         data-test-subj={'example2 sample table'}
         columns={[
           {
@@ -151,7 +146,7 @@ const CreatingCustomFieldFormatEditor: React.FC<{ deps: Deps }> = (props) => {
         </p>
       </EuiText>
       <EuiSpacer size={'s'} />
-      <EuiCodeBlock>{example3SampleCode}</EuiCodeBlock>
+      <EuiCodeBlock language="jsx">{example3SampleCode}</EuiCodeBlock>
       <EuiSpacer size={'s'} />
 
       <EuiCallOut
@@ -173,45 +168,31 @@ const CreatingCustomFieldFormatEditor: React.FC<{ deps: Deps }> = (props) => {
 
 export const App: React.FC<{ deps: Deps }> = (props) => {
   return (
-    <EuiPage>
-      <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="l">
-              <h1>Field formats examples</h1>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody style={{ maxWidth: 800, margin: '0 auto' }}>
-            <section>
-              <EuiTitle size="m">
-                <h2>Using an existing field format</h2>
-              </EuiTitle>
-              <EuiSpacer />
-              <UsingAnExistingFieldFormatExample deps={props.deps} />
-            </section>
-            <EuiSpacer />
-            <EuiSpacer />
-            <section>
-              <EuiTitle size="m">
-                <h2>Creating a custom field format</h2>
-              </EuiTitle>
-              <EuiSpacer />
-              <CreatingCustomFieldFormat deps={props.deps} />
-            </section>
-            <EuiSpacer />
-            <EuiSpacer />
-            <section>
-              <EuiTitle size="m">
-                <h2>Creating a custom field format editor</h2>
-              </EuiTitle>
-              <EuiSpacer />
-              <CreatingCustomFieldFormatEditor deps={props.deps} />
-            </section>
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <EuiProvider>
+      <EuiPageTemplate offset={0}>
+        <EuiPageTemplate.Header pageTitle="Field formats examples" />
+        <EuiPageTemplate.Section grow={false}>
+          <EuiTitle size="m">
+            <h2>Using an existing field format</h2>
+          </EuiTitle>
+          <EuiSpacer />
+          <UsingAnExistingFieldFormatExample deps={props.deps} />
+        </EuiPageTemplate.Section>
+        <EuiPageTemplate.Section grow={false}>
+          <EuiTitle size="m">
+            <h2>Creating a custom field format</h2>
+          </EuiTitle>
+          <EuiSpacer />
+          <CreatingCustomFieldFormat deps={props.deps} />
+        </EuiPageTemplate.Section>
+        <EuiPageTemplate.Section grow={false}>
+          <EuiTitle size="m">
+            <h2>Creating a custom field format editor</h2>
+          </EuiTitle>
+          <EuiSpacer />
+          <CreatingCustomFieldFormatEditor deps={props.deps} />
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
+    </EuiProvider>
   );
 };

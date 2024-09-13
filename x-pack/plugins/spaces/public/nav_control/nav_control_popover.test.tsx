@@ -12,18 +12,19 @@ import {
   EuiSelectable,
   EuiSelectableListItem,
 } from '@elastic/eui';
-import { act, waitFor } from '@testing-library/react';
-import { shallow } from 'enzyme';
+import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
+import { NavControlPopover } from './nav_control_popover';
 import type { Space } from '../../common';
+import { EventTracker } from '../analytics';
 import { SpaceAvatarInternal } from '../space_avatar/space_avatar_internal';
+import { SpaceSolutionBadge } from '../space_solution_badge';
 import type { SpacesManager } from '../spaces_manager';
 import { spacesManagerMock } from '../spaces_manager/mocks';
-import { NavControlPopover } from './nav_control_popover';
 
 const mockSpaces = [
   {
@@ -44,10 +45,18 @@ const mockSpaces = [
   },
 ];
 
+const reportEvent = jest.fn();
+const eventTracker = new EventTracker({ reportEvent });
+
 describe('NavControlPopover', () => {
-  async function setup(spaces: Space[]) {
+  async function setup(spaces: Space[], allowSolutionVisibility = false, activeSpace?: Space) {
     const spacesManager = spacesManagerMock.create();
     spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
+
+    if (activeSpace) {
+      // @ts-ignore readonly check
+      spacesManager.onActiveSpaceChange$ = Rx.of(activeSpace);
+    }
 
     const wrapper = mountWithIntl(
       <NavControlPopover
@@ -57,6 +66,8 @@ describe('NavControlPopover', () => {
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
+        allowSolutionVisibility={allowSolutionVisibility}
+        eventTracker={eventTracker}
       />
     );
 
@@ -70,7 +81,7 @@ describe('NavControlPopover', () => {
   it('renders without crashing', () => {
     const spacesManager = spacesManagerMock.create();
 
-    const wrapper = shallow(
+    const { baseElement } = render(
       <NavControlPopover
         spacesManager={spacesManager as unknown as SpacesManager}
         serverBasePath={'/server-base-path'}
@@ -78,9 +89,11 @@ describe('NavControlPopover', () => {
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
+        allowSolutionVisibility={false}
+        eventTracker={eventTracker}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(baseElement).toMatchSnapshot();
   });
 
   it('renders a SpaceAvatar with the active space', async () => {
@@ -102,10 +115,12 @@ describe('NavControlPopover', () => {
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
+        allowSolutionVisibility={false}
+        eventTracker={eventTracker}
       />
     );
 
-    wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+    wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
 
     // Wait for `getSpaces` promise to resolve
     await waitFor(() => {
@@ -118,7 +133,7 @@ describe('NavControlPopover', () => {
     const wrapper = await setup(mockSpaces);
 
     await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
     });
     wrapper.update();
 
@@ -167,7 +182,7 @@ describe('NavControlPopover', () => {
     const wrapper = await setup(eightSpaces);
 
     await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
     });
     wrapper.update();
 
@@ -200,7 +215,7 @@ describe('NavControlPopover', () => {
     const wrapper = await setup(sevenSpaces);
 
     await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
     });
     wrapper.update();
 
@@ -211,7 +226,7 @@ describe('NavControlPopover', () => {
     const wrapper = await setup(mockSpaces);
 
     await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
     });
     wrapper.update();
     expect(wrapper.find(EuiPopover).props().isOpen).toEqual(true);
@@ -222,5 +237,68 @@ describe('NavControlPopover', () => {
     wrapper.update();
 
     expect(wrapper.find(EuiPopover).props().isOpen).toEqual(false);
+  });
+
+  it('should render solution for spaces', async () => {
+    const spaces: Space[] = [
+      {
+        id: 'space-1',
+        name: 'Space-1',
+        disabledFeatures: [],
+        solution: 'classic',
+      },
+      {
+        id: 'space-2',
+        name: 'Space 2',
+        disabledFeatures: [],
+        solution: 'security',
+      },
+    ];
+
+    const wrapper = await setup(spaces, true /** isSolutionEnabled **/);
+
+    await act(async () => {
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
+    });
+
+    wrapper.update();
+
+    expect(wrapper.find(SpaceSolutionBadge)).toHaveLength(2);
+  });
+
+  it('should report event when switching space', async () => {
+    const spaces: Space[] = [
+      {
+        id: 'space-1',
+        name: 'Space-1',
+        disabledFeatures: [],
+        solution: 'classic',
+      },
+      {
+        id: 'space-2',
+        name: 'Space 2',
+        disabledFeatures: [],
+        solution: 'security',
+      },
+    ];
+
+    const activeSpace = spaces[0];
+    const wrapper = await setup(spaces, true /** allowSolutionVisibility **/, activeSpace);
+
+    await act(async () => {
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
+    });
+    wrapper.update();
+
+    expect(reportEvent).not.toHaveBeenCalled();
+
+    findTestSubject(wrapper, 'space-2-selectableSpaceItem').simulate('click');
+
+    expect(reportEvent).toHaveBeenCalledWith('space_changed', {
+      solution: 'security',
+      solution_prev: 'classic',
+      space_id: 'space-2',
+      space_id_prev: 'space-1',
+    });
   });
 });

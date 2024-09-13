@@ -23,6 +23,7 @@ import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 
 interface Props {
   repository: S3Repository;
+  isManagedRepository?: boolean;
   updateRepositorySettings: (
     updatedSettings: Partial<Repository['settings']>,
     replaceSettings?: boolean
@@ -32,6 +33,7 @@ interface Props {
 
 export const S3Settings: React.FunctionComponent<Props> = ({
   repository,
+  isManagedRepository,
   updateRepositorySettings,
   settingErrors,
 }) => {
@@ -124,6 +126,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
               });
             }}
             data-test-subj="clientInput"
+            disabled={isManagedRepository}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -168,6 +171,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
               });
             }}
             data-test-subj="bucketInput"
+            disabled={isManagedRepository}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -212,6 +216,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
               });
             }}
             data-test-subj="basePathInput"
+            disabled={isManagedRepository}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -237,7 +242,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.compress)}
           error={settingErrors.compress}
@@ -289,7 +293,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.serverSideEncryption)}
           error={settingErrors.serverSideEncryption}
@@ -498,7 +501,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}

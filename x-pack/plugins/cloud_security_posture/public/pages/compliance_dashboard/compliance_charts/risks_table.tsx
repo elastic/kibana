@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
-import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types';
+import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types_old';
 
 export interface RisksTableProps {
   data: ComplianceDashboardData['groupedFindingsEvaluation'];
@@ -58,7 +58,12 @@ export const RisksTable = ({
               defaultMessage: 'CIS Section',
             }),
         render: (name: GroupedFindingsEvaluation['name']) => (
-          <EuiLink onClick={() => onCellClick(name)} className="eui-textTruncate" color="text">
+          <EuiLink
+            data-test-subj="grouped-findings-evaluation-link"
+            onClick={() => onCellClick(name)}
+            className="eui-textTruncate"
+            color="text"
+          >
             {name}
           </EuiLink>
         ),
@@ -90,7 +95,9 @@ export const RisksTable = ({
             compact
               ? css`
                   thead {
-                    display: none;
+                    .euiTableCellContent {
+                      padding: 0;
+                    }
                   }
                   .euiTable .euiTableRow .euiTableRowCell {
                     border-top: none;
@@ -104,7 +111,11 @@ export const RisksTable = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div>
-          <EuiButtonEmpty onClick={onViewAllClick} iconType="search">
+          <EuiButtonEmpty
+            data-test-subj="view-all-failed-findings"
+            onClick={onViewAllClick}
+            iconType="search"
+          >
             {viewAllButtonTitle}
           </EuiButtonEmpty>
         </div>

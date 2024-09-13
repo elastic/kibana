@@ -14,10 +14,10 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, noUpdateCasesPermissions } from '../../common/mock';
 
 describe('UserRepresentation', () => {
-  const dataTestSubjGroup = `user-profile-assigned-user-group-${userProfiles[0].user.username}`;
-  const dataTestSubjCross = `user-profile-assigned-user-cross-${userProfiles[0].user.username}`;
-  const dataTestSubjGroupUnknown = `user-profile-assigned-user-group-unknownId`;
-  const dataTestSubjCrossUnknown = `user-profile-assigned-user-cross-unknownId`;
+  const dataTestSubjGroup = `user-profile-assigned-user-${userProfiles[0].user.username}-remove-group`;
+  const dataTestSubjCross = `user-profile-assigned-user-${userProfiles[0].user.username}-remove-button`;
+  const dataTestSubjGroupUnknown = `user-profile-assigned-user-unknownId-remove-group`;
+  const dataTestSubjCrossUnknown = `user-profile-assigned-user-unknownId-remove-button`;
 
   let defaultProps: UserRepresentationProps;
   let appMockRender: AppMockRenderer;

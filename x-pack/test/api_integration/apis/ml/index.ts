@@ -62,7 +62,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./data_frame_analytics'));
     loadTestFile(require.resolve('./fields_service'));
     loadTestFile(require.resolve('./filters'));
-    loadTestFile(require.resolve('./indices'));
     loadTestFile(require.resolve('./job_validation'));
     loadTestFile(require.resolve('./job_audit_messages'));
     loadTestFile(require.resolve('./jobs'));
@@ -73,5 +72,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./system'));
     loadTestFile(require.resolve('./trained_models'));
     loadTestFile(require.resolve('./notifications'));
+    loadTestFile(require.resolve('./model_management'));
   });
 }

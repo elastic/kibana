@@ -7,13 +7,12 @@
 
 import expect from '@kbn/expect';
 
-import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
-import type { StopTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/stop_transforms';
-import { isStopTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/type_guards';
+import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
+import type { StopTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/stop_transforms';
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
-import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -43,7 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
     await transform.api.createAndRunTransform(transformId, config);
   }
 
-  describe('/api/transform/stop_transforms', function () {
+  describe('/internal/transform/stop_transforms', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
@@ -67,16 +66,15 @@ export default ({ getService }: FtrProviderContext) => {
           { id: transformId, state: TRANSFORM_STATE.STARTED },
         ];
         const { body, status } = await supertest
-          .post(`/api/transform/stop_transforms`)
+          .post(`/internal/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
-        expect(isStopTransformsResponseSchema(body)).to.eql(true);
         expect(body[transformId].success).to.eql(true);
         expect(typeof body[transformId].error).to.eql('undefined');
         await transform.api.waitForTransformState(transformId, TRANSFORM_STATE.STOPPED);
@@ -88,16 +86,15 @@ export default ({ getService }: FtrProviderContext) => {
           { id: transformId, state: TRANSFORM_STATE.STARTED },
         ];
         const { body, status } = await supertest
-          .post(`/api/transform/stop_transforms`)
+          .post(`/internal/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
-        expect(isStopTransformsResponseSchema(body)).to.eql(true);
         expect(body[transformId].success).to.eql(false);
         expect(typeof body[transformId].error).to.eql('object');
 
@@ -112,16 +109,15 @@ export default ({ getService }: FtrProviderContext) => {
           { id: 'invalid_transform_id', state: TRANSFORM_STATE.STARTED },
         ];
         const { body, status } = await supertest
-          .post(`/api/transform/stop_transforms`)
+          .post(`/internal/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
-        expect(isStopTransformsResponseSchema(body)).to.eql(true);
         expect(body.invalid_transform_id.success).to.eql(false);
         expect(body.invalid_transform_id).to.have.property('error');
       });
@@ -149,16 +145,14 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should stop multiple transforms by transformIds', async () => {
         const { body, status } = await supertest
-          .post(`/api/transform/stop_transforms`)
+          .post(`/internal/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
-
-        expect(isStopTransformsResponseSchema(body)).to.eql(true);
 
         await asyncForEach(reqBody, async ({ id: transformId }: { id: string }, idx: number) => {
           expect(body[transformId].success).to.eql(true);
@@ -170,20 +164,18 @@ export default ({ getService }: FtrProviderContext) => {
       it('should stop multiple transforms by transformIds, even if one of the transformIds is invalid', async () => {
         const invalidTransformId = 'invalid_transform_id';
         const { body, status } = await supertest
-          .post(`/api/transform/stop_transforms`)
+          .post(`/internal/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send([
             { id: reqBody[0].id, state: reqBody[0].state },
             { id: invalidTransformId, state: TRANSFORM_STATE.STOPPED },
             { id: reqBody[1].id, state: reqBody[1].state },
           ]);
         transform.api.assertResponseStatusCode(200, status, body);
-
-        expect(isStopTransformsResponseSchema(body)).to.eql(true);
 
         await asyncForEach(reqBody, async ({ id: transformId }: { id: string }, idx: number) => {
           expect(body[transformId].success).to.eql(true);

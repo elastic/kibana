@@ -5,36 +5,32 @@
  * 2.0.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageSection } from '@elastic/eui';
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 
 interface LayoutProps {
+  children: React.ReactNode;
   title: string | React.ReactNode;
   actionSection?: React.ReactNode;
-  modalClosePath?: string;
 }
 
 export const NoDataLayout: React.FunctionComponent<LayoutProps> = withRouter<
   any,
   React.FunctionComponent<LayoutProps>
->(({ actionSection, title, modalClosePath, children }: React.PropsWithChildren<LayoutProps>) => {
+>(({ actionSection, title, children }: React.PropsWithChildren<LayoutProps>) => {
   return (
     <EuiFlexGroup justifyContent="spaceAround">
       <EuiFlexItem grow={false}>
-        <EuiPageContent>
+        <EuiPageSection color="transparent">
           <EuiEmptyPrompt
+            color="plain"
             iconType="logoBeats"
             title={<h2>{title}</h2>}
             body={children}
             actions={actionSection}
           />
-        </EuiPageContent>
+        </EuiPageSection>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

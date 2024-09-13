@@ -28,14 +28,15 @@ export interface RemoteClustersActions {
     toggle: () => void;
     isChecked: () => boolean;
   };
-  cloudUrlSwitch: {
+  cloudAdvancedOptionsSwitch: {
     toggle: () => void;
     exists: () => boolean;
     isChecked: () => boolean;
   };
-  cloudUrlInput: {
+  cloudRemoteAddressInput: {
     exists: () => boolean;
     getValue: () => string;
+    setValue: (remoteAddress: string) => void;
   };
   seedsInput: {
     setValue: (seed: string) => void;
@@ -49,9 +50,24 @@ export interface RemoteClustersActions {
     getLabel: () => string;
     exists: () => boolean;
   };
+  tlsServerNameInput: {
+    getLabel: () => string;
+    exists: () => boolean;
+  };
+  isOnFirstStep: () => boolean;
   saveButton: {
     click: () => void;
     isDisabled: () => boolean;
+  };
+  setupTrust: {
+    isSubmitInConfirmDisabled: () => boolean;
+    toggleConfirmSwitch: () => void;
+    setupTrustConfirmClick: () => void;
+    backToFirstStepClick: () => void;
+    apiCardExist: () => boolean;
+    certCardExist: () => boolean;
+    apiCardDocsExist: () => boolean;
+    certCardDocsExist: () => boolean;
   };
   getErrorMessages: () => string[];
   globalErrorExists: () => boolean;
@@ -112,10 +128,10 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     };
   };
 
-  const createCloudUrlSwitchActions = () => {
-    const cloudUrlSelector = 'remoteClusterFormCloudUrlToggle';
+  const createCloudAdvancedOptionsSwitchActions = () => {
+    const cloudUrlSelector = 'remoteClusterFormCloudAdvancedOptionsToggle';
     return {
-      cloudUrlSwitch: {
+      cloudAdvancedOptionsSwitch: {
         exists: () => exists(cloudUrlSelector),
         toggle: () => {
           act(() => {
@@ -148,7 +164,7 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     };
   };
 
-  const createSaveButtonActions = () => {
+  const createSetupTrustActions = () => {
     const click = () => {
       act(() => {
         find('remoteClusterFormSaveButton').simulate('click');
@@ -157,7 +173,56 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
       component.update();
     };
     const isDisabled = () => find('remoteClusterFormSaveButton').props().disabled;
-    return { saveButton: { click, isDisabled } };
+
+    const setupTrustConfirmClick = () => {
+      act(() => {
+        find('setupTrustDoneButton').simulate('click');
+      });
+
+      component.update();
+    };
+
+    const backToFirstStepClick = () => {
+      act(() => {
+        find('setupTrustBackButton').simulate('click');
+      });
+
+      component.update();
+    };
+
+    const isOnFirstStep = () => exists('remoteClusterFormNameInput');
+
+    const toggleConfirmSwitch = () => {
+      act(() => {
+        const $checkbox = find('remoteClusterTrustCheckbox');
+        const isChecked = $checkbox.props().checked;
+        $checkbox.simulate('change', { target: { checked: !isChecked } });
+      });
+
+      component.update();
+    };
+
+    const isSubmitInConfirmDisabled = () => find('remoteClusterTrustSubmitButton').props().disabled;
+
+    const apiCardExist = () => exists('setupTrustApiKeyCard');
+    const certCardExist = () => exists('setupTrustCertCard');
+    const apiCardDocsExist = () => exists('setupTrustApiKeyCardDocs');
+    const certCardDocsExist = () => exists('setupTrustCertCardDocs');
+
+    return {
+      isOnFirstStep,
+      saveButton: { click, isDisabled },
+      setupTrust: {
+        setupTrustConfirmClick,
+        isSubmitInConfirmDisabled,
+        toggleConfirmSwitch,
+        apiCardExist,
+        certCardExist,
+        apiCardDocsExist,
+        certCardDocsExist,
+        backToFirstStepClick,
+      },
+    };
   };
 
   const createServerNameActions = () => {
@@ -170,14 +235,26 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     };
   };
 
+  const createTlsServerNameActions = () => {
+    const serverNameSelector = 'remoteClusterFormTLSServerNameFormRow';
+    return {
+      tlsServerNameInput: {
+        getLabel: () => find(serverNameSelector).find('label').text(),
+        exists: () => exists(serverNameSelector),
+      },
+    };
+  };
+
   const globalErrorExists = () => exists('remoteClusterFormGlobalError');
 
-  const createCloudUrlInputActions = () => {
-    const cloudUrlInputSelector = 'remoteClusterFormCloudUrlInput';
+  const createCloudRemoteAddressInputActions = () => {
+    const cloudUrlInputSelector = 'remoteClusterFormRemoteAddressInput';
     return {
-      cloudUrlInput: {
+      cloudRemoteAddressInput: {
         exists: () => exists(cloudUrlInputSelector),
         getValue: () => find(cloudUrlInputSelector).props().value,
+        setValue: (remoteAddress: string) =>
+          form.setInputValue(cloudUrlInputSelector, remoteAddress),
       },
     };
   };
@@ -187,12 +264,13 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     ...createNameInputActions(),
     ...createSkipUnavailableActions(),
     ...createConnectionModeActions(),
-    ...createCloudUrlSwitchActions(),
+    ...createCloudAdvancedOptionsSwitchActions(),
     ...createSeedsInputActions(),
-    ...createCloudUrlInputActions(),
+    ...createCloudRemoteAddressInputActions(),
     ...createProxyAddressActions(),
     ...createServerNameActions(),
-    ...createSaveButtonActions(),
+    ...createTlsServerNameActions(),
+    ...createSetupTrustActions(),
     getErrorMessages: form.getErrorsMessages,
     globalErrorExists,
   };

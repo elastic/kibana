@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -12,7 +13,7 @@ import Os from 'os';
 
 import execa from 'execa';
 import * as Rx from 'rxjs';
-import { mergeMap, reduce } from 'rxjs/operators';
+import { mergeMap, reduce } from 'rxjs';
 import { supportsColor } from 'chalk';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
@@ -20,10 +21,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 import { TS_PROJECTS, type TsProject } from '@kbn/ts-projects';
 
+import { eslintBinPath } from './eslint_bin_path';
+
 export function runEslintWithTypes() {
   run(
     async ({ log, flags }) => {
-      const eslintPath = require.resolve('eslint/bin/eslint');
       const ignoreFilePath = Path.resolve(REPO_ROOT, '.eslintignore');
       const configTemplate = Fs.readFileSync(
         Path.resolve(__dirname, 'types.eslint.config.template.js'),
@@ -77,7 +79,7 @@ export function runEslintWithTypes() {
             const proc = await execa(
               process.execPath,
               [
-                Path.relative(project.directory, eslintPath),
+                Path.relative(project.directory, eslintBinPath),
                 ...(project.config.include ?? []).map((p) =>
                   p.endsWith('*') ? `${p}.{ts,tsx}` : p
                 ),

@@ -4,29 +4,43 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { SavedObjectReference } from '@kbn/core/server';
-import { RawRule } from '../../types';
-import { preconfiguredConnectorActionRefPrefix } from '../common/constants';
-import { NormalizedAlertActionWithGeneratedValues, RulesClientContext } from '../types';
+import {
+  preconfiguredConnectorActionRefPrefix,
+  systemConnectorActionRefPrefix,
+} from '../common/constants';
+import {
+  DenormalizedAction,
+  NormalizedAlertActionWithGeneratedValues,
+  RulesClientContext,
+} from '../types';
 
 export async function denormalizeActions(
   context: RulesClientContext,
   alertActions: NormalizedAlertActionWithGeneratedValues[]
-): Promise<{ actions: RawRule['actions']; references: SavedObjectReference[] }> {
+): Promise<{ actions: DenormalizedAction[]; references: SavedObjectReference[] }> {
   const references: SavedObjectReference[] = [];
-  const actions: RawRule['actions'] = [];
+  const actions: DenormalizedAction[] = [];
+
   if (alertActions.length) {
     const actionsClient = await context.getActionsClient();
     const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];
-    const actionResults = await actionsClient.getBulk(actionIds);
+
+    const actionResults = await actionsClient.getBulk({
+      ids: actionIds,
+      throwIfSystemAction: false,
+    });
+
     const actionTypeIds = [...new Set(actionResults.map((action) => action.actionTypeId))];
+
     actionTypeIds.forEach((id) => {
       // Notify action type usage via "isActionTypeEnabled" function
       actionsClient.isActionTypeEnabled(id, { notifyUsage: true });
     });
+
     alertActions.forEach(({ id, ...alertAction }, i) => {
       const actionResultValue = actionResults.find((action) => action.id === id);
+
       if (actionResultValue) {
         if (actionsClient.isPreconfigured(id)) {
           actions.push({
@@ -34,13 +48,21 @@ export async function denormalizeActions(
             actionRef: `${preconfiguredConnectorActionRefPrefix}${id}`,
             actionTypeId: actionResultValue.actionTypeId,
           });
+        } else if (actionsClient.isSystemAction(id)) {
+          actions.push({
+            ...alertAction,
+            actionRef: `${systemConnectorActionRefPrefix}${id}`,
+            actionTypeId: actionResultValue.actionTypeId,
+          });
         } else {
           const actionRef = `action_${i}`;
+
           references.push({
             id,
             name: actionRef,
             type: 'action',
           });
+
           actions.push({
             ...alertAction,
             actionRef,

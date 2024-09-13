@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { Suggestion } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
-import type { UnifiedHistogramServices } from '../../types';
+import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
 import {
   getBreakdownField,
   getChartHidden,
@@ -19,6 +20,7 @@ import {
   setChartHidden,
   setTopPanelHeight,
 } from '../utils/local_storage_utils';
+import type { UnifiedHistogramSuggestionContext } from '../../types';
 
 /**
  * The current state of the container
@@ -31,7 +33,7 @@ export interface UnifiedHistogramState {
   /**
    * The current Lens suggestion
    */
-  currentSuggestion: Suggestion | undefined;
+  currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
   /**
    * Whether or not the chart is hidden
    */
@@ -40,6 +42,14 @@ export interface UnifiedHistogramState {
    * The current Lens request adapter
    */
   lensRequestAdapter: RequestAdapter | undefined;
+  /**
+   * The current Lens adapters
+   */
+  lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
+  /**
+   * Lens embeddable output observable
+   */
+  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
   /**
    * The current time interval of the chart
    */
@@ -91,7 +101,9 @@ export interface UnifiedHistogramStateService {
   /**
    * Sets current Lens suggestion
    */
-  setCurrentSuggestion: (suggestion: Suggestion | undefined) => void;
+  setCurrentSuggestionContext: (
+    suggestionContext: UnifiedHistogramSuggestionContext | undefined
+  ) => void;
   /**
    * Sets the current top panel height
    */
@@ -108,6 +120,13 @@ export interface UnifiedHistogramStateService {
    * Sets the current Lens request adapter
    */
   setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => void;
+  /**
+   * Sets the current Lens adapters
+   */
+  setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => void;
+  setLensEmbeddableOutput$: (
+    lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
+  ) => void;
   /**
    * Sets the current total hits status and result
    */
@@ -135,7 +154,7 @@ export const createStateService = (
   const state$ = new BehaviorSubject<UnifiedHistogramState>({
     breakdownField: initialBreakdownField,
     chartHidden: initialChartHidden,
-    currentSuggestion: undefined,
+    currentSuggestionContext: undefined,
     lensRequestAdapter: undefined,
     timeInterval: 'auto',
     topPanelHeight: initialTopPanelHeight,
@@ -178,8 +197,10 @@ export const createStateService = (
       updateState({ breakdownField });
     },
 
-    setCurrentSuggestion: (suggestion: Suggestion | undefined) => {
-      updateState({ currentSuggestion: suggestion });
+    setCurrentSuggestionContext: (
+      suggestionContext: UnifiedHistogramSuggestionContext | undefined
+    ) => {
+      updateState({ currentSuggestionContext: suggestionContext });
     },
 
     setTimeInterval: (timeInterval: string) => {
@@ -190,19 +211,19 @@ export const createStateService = (
       updateState({ lensRequestAdapter });
     },
 
+    setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => {
+      updateState({ lensAdapters });
+    },
+    setLensEmbeddableOutput$: (
+      lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
+    ) => {
+      updateState({ lensEmbeddableOutput$ });
+    },
+
     setTotalHits: (totalHits: {
       totalHitsStatus: UnifiedHistogramFetchStatus;
       totalHitsResult: number | Error | undefined;
     }) => {
-      // If we have a partial result already, we don't
-      // want to update the total hits back to loading
-      if (
-        state$.getValue().totalHitsStatus === UnifiedHistogramFetchStatus.partial &&
-        totalHits.totalHitsStatus === UnifiedHistogramFetchStatus.loading
-      ) {
-        return;
-      }
-
       updateState(totalHits);
     },
   };

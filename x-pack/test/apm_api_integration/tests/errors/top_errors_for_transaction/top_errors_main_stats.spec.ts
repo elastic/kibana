@@ -20,7 +20,7 @@ type ErrorGroups =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -58,44 +58,48 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177638
+  registry.when.skip('when data is loaded', { config: 'basic', archives: [] }, () => {
     describe('top errors for transaction', () => {
       const {
         firstTransaction: { name: firstTransactionName, failureRate: firstTransactionFailureRate },
       } = config;
 
       before(async () => {
-        await generateData({ serviceName, start, end, synthtraceEsClient });
+        await generateData({ serviceName, start, end, apmSynthtraceEsClient });
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       describe('returns the correct data', () => {
+        const NUMBER_OF_BUCKETS = 15;
         let errorGroups: ErrorGroups;
         before(async () => {
           const response = await callApi({ query: { transactionName: firstTransactionName } });
           errorGroups = response.body.errorGroups;
         });
 
-        it('returns correct number of errors and error data', () => {
-          const numberOfBuckets = 15;
-
+        it('returns correct number of errors', () => {
           expect(errorGroups.length).to.equal(2);
+        });
 
-          const firstErrorId = `Error 1 transaction ${firstTransactionName}`;
+        it('error 1 is correct', () => {
+          const firstErrorId = `b6c1d4d41b0b60b841f40232497344ba36856fcbea0692a4695562ca73e790bd`;
           const firstError = errorGroups.find((x) => x.groupId === firstErrorId);
           expect(firstError).to.not.be(undefined);
           expect(firstError?.groupId).to.be(firstErrorId);
-          expect(firstError?.name).to.be(firstErrorId);
-          expect(firstError?.occurrences).to.be(firstTransactionFailureRate * numberOfBuckets);
+          expect(firstError?.name).to.be(`Error 1 transaction GET /apple 🍎`);
+          expect(firstError?.occurrences).to.be(firstTransactionFailureRate * NUMBER_OF_BUCKETS);
           expect(firstError?.lastSeen).to.be(moment(end).startOf('minute').valueOf());
+        });
 
-          const secondErrorId = `Error 2 transaction ${firstTransactionName}`;
+        it('error 2 is correct', () => {
+          const secondErrorId = `c3f388e4f7276d4fab85aa2fad2d2a42e70637f65cd5ec9f085de28b36e69ba5`;
           const secondError = errorGroups.find((x) => x.groupId === secondErrorId);
           expect(secondError).to.not.be(undefined);
           expect(secondError?.groupId).to.be(secondErrorId);
-          expect(secondError?.name).to.be(secondErrorId);
-          expect(secondError?.occurrences).to.be(firstTransactionFailureRate * numberOfBuckets);
+          expect(secondError?.name).to.be(`Error 2 transaction GET /apple 🍎`);
+          expect(secondError?.occurrences).to.be(firstTransactionFailureRate * NUMBER_OF_BUCKETS);
           expect(secondError?.lastSeen).to.be(moment(end).startOf('minute').valueOf());
         });
       });

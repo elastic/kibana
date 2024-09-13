@@ -6,9 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { CaseStatuses } from '@kbn/cases-plugin/common';
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
-import { SeverityAll } from '@kbn/cases-plugin/common/ui';
+import rison from '@kbn/rison';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  CustomFieldTypes,
+} from '@kbn/cases-plugin/common/types/domain';
 import { UserProfile } from '@kbn/user-profile-components';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -22,9 +25,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const browser = getService('browser');
+  const toasts = getService('toasts');
 
   describe('cases list', () => {
     before(async () => {
+      await cases.api.deleteAllCases();
       await cases.navigation.navigateToApp();
     });
 
@@ -279,20 +284,26 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/152925
-    describe.skip('filtering', () => {
+    describe('filtering', () => {
       const caseTitle = 'matchme';
-      const caseIds: string[] = [];
+      let caseIds: string[] = [];
+      const profiles: UserProfile[] = [];
+      const customFields = [
+        {
+          key: 'my_field_01',
+          label: 'My field',
+          type: CustomFieldTypes.TOGGLE,
+          required: false,
+        },
+      ];
 
-      before(async () => {
-        await createUsersAndRoles(getService, users, roles);
-        await cases.api.activateUserProfiles([casesAllUser, casesAllUser2]);
-
-        const profiles = await cases.api.suggestUserProfiles({ name: 'all', owners: ['cases'] });
+      const createCases = async () => {
+        caseIds = [];
 
         const case1 = await cases.api.createCase({
           title: caseTitle,
           tags: ['one'],
+          category: 'foobar',
           description: 'lots of information about an incident',
         });
         const case2 = await cases.api.createCase({ title: 'test2', tags: ['two'] });
@@ -310,18 +321,30 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         caseIds.push(case2.id);
         caseIds.push(case3.id);
         caseIds.push(case4.id);
+      };
 
+      before(async () => {
+        await cases.api.deleteAllCases();
+        await createUsersAndRoles(getService, users, roles);
+        await cases.api.activateUserProfiles([casesAllUser, casesAllUser2]);
+
+        profiles.push(...(await cases.api.suggestUserProfiles({ name: 'all', owners: ['cases'] })));
+
+        await header.waitUntilLoadingHasFinished();
+      });
+
+      beforeEach(async () => {
+        await browser.clearLocalStorage();
+        await cases.api.createConfigWithCustomFields({ customFields, owner: 'cases' });
+        await createCases();
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
 
-      beforeEach(async () => {
-        /**
-         * There is no easy way to clear the filtering.
-         * Refreshing the page seems to be easier.
-         */
-        await browser.clearLocalStorage();
-        await cases.navigation.navigateToApp();
+      afterEach(async () => {
+        await cases.casesTable.clearFilters();
+        await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
       });
 
       after(async () => {
@@ -428,11 +451,39 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await tags.getVisibleText()).to.be('one');
       });
 
+      it('filters cases by category', async () => {
+        await cases.casesTable.filterByCategory('foobar');
+        await cases.casesTable.refreshTable();
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        const row = await cases.casesTable.getCaseByIndex(0);
+        const category = await row.findByTestSubject('case-table-column-category-foobar');
+        expect(await category.getVisibleText()).to.be('foobar');
+      });
+
       it('filters cases by status', async () => {
         await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
         await testSubjects.existOrFail(`case-status-badge-${CaseStatuses['in-progress']}`);
         await cases.casesTable.filterByStatus(CaseStatuses['in-progress']);
         await cases.casesTable.validateCasesTableHasNthRows(1);
+      });
+
+      it('filter multiple status', async () => {
+        await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
+        await cases.casesTable.refreshTable();
+        await cases.casesTable.changeStatus(CaseStatuses.closed, 1);
+        await cases.casesTable.refreshTable();
+
+        // by default filter by all
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+
+        await cases.casesTable.filterByStatus(CaseStatuses.open);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+
+        await cases.casesTable.filterByStatus(CaseStatuses['in-progress']);
+        await cases.casesTable.validateCasesTableHasNthRows(3);
+
+        await cases.casesTable.filterByStatus(CaseStatuses.closed);
+        await cases.casesTable.validateCasesTableHasNthRows(4);
       });
 
       it('persists status filters', async () => {
@@ -442,6 +493,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.closed}`);
       });
 
+      it('persists multiple status filters', async () => {
+        await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
+        await cases.casesTable.changeStatus(CaseStatuses.closed, 1);
+        await cases.casesTable.filterByStatus(CaseStatuses['in-progress']);
+        await cases.casesTable.filterByStatus(CaseStatuses.closed);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+        await browser.refresh();
+        await testSubjects.existOrFail(`case-status-badge-${CaseStatuses['in-progress']}`);
+        await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.closed}`);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+      });
+
       it('persists severity filters', async () => {
         await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 0);
         await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
@@ -449,8 +512,247 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/152928
-      describe.skip('assignees filtering', () => {
+      it('persists multiple severity filters', async () => {
+        await cases.casesTable.changeSeverity(CaseSeverity.HIGH, 0);
+        await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 1);
+        await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
+        await cases.casesTable.filterBySeverity(CaseSeverity.MEDIUM);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+        await browser.refresh();
+        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.HIGH}`);
+        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+      });
+
+      it('clears the filters correctly', async () => {
+        // filter by status first
+        await cases.casesTable.filterByTag('one');
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+
+        await cases.casesTable.clearFilters();
+        await cases.casesTable.validateCasesTableHasNthRows(caseIds.length);
+      });
+
+      it('loads the state from the local storage when the URL is empty', async () => {
+        await cases.casesTable.validateCasesTableHasNthRows(caseIds.length);
+        const lsState = {
+          filterOptions: {
+            search: '',
+            searchFields: ['title', 'description'],
+            severity: [],
+            assignees: [],
+            reporters: [],
+            status: [],
+            // filter by tags
+            tags: ['one'],
+            owner: [],
+            category: [],
+            customFields: {},
+          },
+          queryParams: { page: 1, perPage: 10, sortField: 'createdAt', sortOrder: 'desc' },
+        };
+
+        await cases.casesTable.setAllCasesStateInLocalStorage(lsState);
+
+        /**
+         * Clicking to the navigation bar (sidebar) clears out any query params
+         * added by the cases app.
+         */
+        await testSubjects.click('cases');
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.verifyCase(caseIds[0], 0);
+      });
+
+      it('loads the state from the URL with empty filter configuration in local storage', async () => {
+        const theCase = await cases.api.createCase({
+          title: 'url-testing',
+          assignees: [{ uid: profiles[0].uid }],
+          description: 'url testing',
+          category: 'url-testing',
+          tags: ['url'],
+          severity: CaseSeverity.CRITICAL,
+          customFields: [{ key: customFields[0].key, type: CustomFieldTypes.TOGGLE, value: true }],
+        });
+
+        const lsState = [
+          { key: 'status', isActive: false },
+          { key: 'severity', isActive: false },
+          { key: 'tags', isActive: false },
+          { key: 'assignees', isActive: false },
+          { key: 'category', isActive: false },
+          { key: `cf_${customFields[0].key}`, isActive: false },
+        ];
+
+        await cases.casesTable.setFiltersConfigurationInLocalStorage(lsState);
+        await cases.casesTable.waitForNthToBeListed(caseIds.length + 1);
+
+        const casesState = {
+          search: theCase.title,
+          severity: [theCase.severity],
+          status: [theCase.status],
+          tags: theCase.tags,
+          assignees: [profiles[0].uid],
+          category: [theCase.category],
+          customFields: { [customFields[0].key]: ['on'] },
+        };
+
+        await cases.casesTable.setStateToUrlAndNavigate(casesState);
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.verifyCase(theCase.id, 0);
+
+        const currentUrl = decodeURIComponent(await browser.getCurrentUrl());
+        expect(new URL(currentUrl).search).to.be(`?cases=${rison.encode(casesState)}`);
+
+        await cases.casesTable.expectFiltersToBeActive([
+          'status',
+          'severity',
+          'tags',
+          'category',
+          'assignees',
+          customFields[0].key,
+        ]);
+
+        const searchBar = await testSubjects.find('search-cases');
+        expect(await searchBar.getAttribute('value')).to.be(casesState.search);
+      });
+
+      it('loads the state from the URL with filter configuration in local storage', async () => {
+        const theCase = await cases.api.createCase({
+          title: 'url-testing',
+          assignees: [{ uid: profiles[0].uid }],
+          description: 'url testing',
+          category: 'url-testing',
+          tags: ['url'],
+          severity: CaseSeverity.CRITICAL,
+          customFields: [{ key: customFields[0].key, type: CustomFieldTypes.TOGGLE, value: true }],
+        });
+
+        await cases.casesTable.waitForNthToBeListed(caseIds.length + 1);
+
+        const casesState = {
+          search: theCase.title,
+          severity: [theCase.severity],
+          status: [theCase.status],
+          tags: theCase.tags,
+          assignees: [profiles[0].uid],
+          category: [theCase.category],
+          customFields: { [customFields[0].key]: ['on'] },
+        };
+
+        await cases.casesTable.setStateToUrlAndNavigate(casesState);
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.verifyCase(theCase.id, 0);
+
+        const currentUrl = decodeURIComponent(await browser.getCurrentUrl());
+        expect(new URL(currentUrl).search).to.be(`?cases=${rison.encode(casesState)}`);
+
+        await cases.casesTable.expectFiltersToBeActive([
+          'status',
+          'severity',
+          'tags',
+          'category',
+          'assignees',
+          customFields[0].key,
+        ]);
+
+        const searchBar = await testSubjects.find('search-cases');
+        expect(await searchBar.getAttribute('value')).to.be(casesState.search);
+      });
+
+      it('updates the local storage correctly when navigating to a URL', async () => {
+        const theCase = await cases.api.createCase({
+          title: 'url-testing',
+          assignees: [{ uid: profiles[0].uid }],
+          description: 'url testing',
+          category: 'url-testing',
+          tags: ['url'],
+          severity: CaseSeverity.CRITICAL,
+          customFields: [{ key: customFields[0].key, type: CustomFieldTypes.TOGGLE, value: true }],
+        });
+
+        await cases.casesTable.waitForNthToBeListed(caseIds.length + 1);
+
+        const casesState = {
+          search: theCase.title,
+          severity: [theCase.severity],
+          status: [theCase.status],
+          tags: theCase.tags,
+          assignees: [profiles[0].uid],
+          category: [theCase.category],
+          customFields: { [customFields[0].key]: ['on'] },
+        };
+
+        await cases.casesTable.setStateToUrlAndNavigate(casesState);
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.verifyCase(theCase.id, 0);
+
+        const currentState = await cases.casesTable.getAllCasesStateInLocalStorage();
+
+        expect(currentState).to.eql({
+          queryParams: { page: 1, perPage: 10, sortField: 'createdAt', sortOrder: 'desc' },
+          filterOptions: {
+            search: theCase.title,
+            searchFields: ['title', 'description'],
+            severity: [theCase.severity],
+            assignees: [profiles[0].uid],
+            reporters: [],
+            status: [theCase.status],
+            tags: theCase.tags,
+            owner: [],
+            category: [theCase.category],
+            customFields: { my_field_01: { type: CustomFieldTypes.TOGGLE, options: ['on'] } },
+          },
+        });
+      });
+
+      it('loads the state from a legacy URL', async () => {
+        const theCase = await cases.api.createCase({
+          title: 'url-testing',
+          description: 'url testing',
+          severity: CaseSeverity.CRITICAL,
+        });
+
+        await cases.casesTable.waitForNthToBeListed(caseIds.length + 1);
+
+        const search = `severity=${theCase.severity}&status=${theCase.status}&page=1&perPage=1sortField=createdAt&sortOrder=desc`;
+
+        await cases.navigation.navigateToApp('cases', 'cases-app', search);
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.verifyCase(theCase.id, 0);
+
+        const currentUrl = decodeURIComponent(await browser.getCurrentUrl());
+        expect(new URL(currentUrl).search).to.be(`?${search}`);
+
+        await cases.casesTable.expectFiltersToBeActive([
+          'status',
+          'severity',
+          'tags',
+          'category',
+          'assignees',
+        ]);
+      });
+
+      it('navigating between pages keeps the state', async () => {
+        await cases.casesTable.filterByTag('one');
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.verifyCase(caseIds[0], 0);
+        await cases.casesTable.goToFirstListedCase();
+
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('backToCases');
+
+        await header.waitUntilLoadingHasFinished();
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.verifyCase(caseIds[0], 0);
+      });
+
+      it('loads the initial state correctly', async () => {
+        await cases.casesTable.validateCasesTableHasNthRows(caseIds.length);
+        expect(await testSubjects.exists('all-cases-clear-filters-link-icon')).to.be(false);
+      });
+
+      describe('assignees filtering', () => {
         it('filters cases by the first cases all user assignee', async () => {
           await cases.casesTable.filterByAssignee('all');
           await cases.casesTable.validateCasesTableHasNthRows(1);
@@ -504,12 +806,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.waitForCasesToBeListed();
       });
 
-      beforeEach(async () => {
-        /**
-         * There is no easy way to clear the filtering.
-         * Refreshing the page seems to be easier.
-         */
-        await cases.navigation.navigateToApp();
+      afterEach(async () => {
+        await cases.casesTable.clearFilters();
       });
 
       after(async () => {
@@ -521,21 +819,41 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         // by default filter by all
         await cases.casesTable.validateCasesTableHasNthRows(5);
 
-        // low
+        await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+        // to uncheck
+        await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
+
+        await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+        // to uncheck
+        await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
+
+        await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        // to uncheck
+        await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
+
+        await cases.casesTable.validateCasesTableHasNthRows(5);
+      });
+
+      it('filter multiple severities', async () => {
+        // by default filter by all
+        await cases.casesTable.validateCasesTableHasNthRows(5);
+
         await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
         await cases.casesTable.validateCasesTableHasNthRows(2);
 
-        // high
         await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
-        await cases.casesTable.validateCasesTableHasNthRows(2);
+        await cases.casesTable.validateCasesTableHasNthRows(4);
 
-        // critical
         await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
-        await cases.casesTable.validateCasesTableHasNthRows(1);
-
-        // back to all
-        await cases.casesTable.filterBySeverity(SeverityAll);
         await cases.casesTable.validateCasesTableHasNthRows(5);
+
+        // to uncheck
+        await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
+        await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
+        await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
       });
     });
 
@@ -564,6 +882,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('row actions', () => {
+      afterEach(async () => {
+        await toasts.dismissAllWithChecks();
+      });
+
       describe('Status', () => {
         before(async () => {
           await cases.api.createNthRandomCases(1);
@@ -642,6 +964,82 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await cases.casesTable.waitForTableToFinishLoading();
           await cases.casesTable.validateCasesTableHasNthRows(0);
         });
+      });
+    });
+
+    describe('Column Selection', () => {
+      afterEach(async () => {
+        await toasts.dismissAllWithChecks();
+      });
+
+      before(async () => {
+        await cases.api.createNthRandomCases(1);
+        await header.waitUntilLoadingHasFinished();
+        await cases.casesTable.waitForCasesToBeListed();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
+        await browser.clearLocalStorage();
+      });
+
+      it('column selection popover button exists', async () => {
+        await testSubjects.existOrFail('column-selection-popover-button');
+      });
+
+      it('selecting a column works correctly', async () => {
+        expect(await cases.casesTable.hasColumn('Closed on')).to.be(false);
+
+        await cases.casesTable.toggleColumnInPopover('closedAt');
+
+        expect(await cases.casesTable.hasColumn('Closed on')).to.be(true);
+      });
+
+      it('deselecting columns works correctly', async () => {
+        expect(await cases.casesTable.hasColumn('Name')).to.be(true);
+
+        await cases.casesTable.toggleColumnInPopover('title');
+
+        expect(await cases.casesTable.hasColumn('Name')).to.be(false);
+      });
+
+      it('"Hide All" columns works correctly', async () => {
+        await cases.casesTable.openColumnsPopover();
+
+        await testSubjects.click('column-selection-popover-hide-all-button');
+
+        await cases.casesTable.closeColumnsPopover();
+
+        expect(await cases.casesTable.hasColumn('Name')).to.be(false);
+        expect(await cases.casesTable.hasColumn('Assignees')).to.be(false);
+        expect(await cases.casesTable.hasColumn('Tags')).to.be(false);
+        expect(await cases.casesTable.hasColumn('Category')).to.be(false);
+      });
+
+      it('"Show All" columns works correctly', async () => {
+        await cases.casesTable.openColumnsPopover();
+
+        await testSubjects.click('column-selection-popover-show-all-button');
+
+        await cases.casesTable.closeColumnsPopover();
+
+        expect(await cases.casesTable.hasColumn('Name')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Assignees')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Tags')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Category')).to.be(true);
+        expect(await cases.casesTable.hasColumn('Closed on')).to.be(true);
+      });
+
+      it('search and toggle column works correctly', async () => {
+        await cases.casesTable.openColumnsPopover();
+
+        const input = await testSubjects.find('column-selection-popover-search');
+        await input.type('name');
+
+        await testSubjects.existOrFail('column-selection-switch-title');
+        await testSubjects.missingOrFail('column-selection-switch-closedAt');
+        await testSubjects.missingOrFail('column-selection-switch-category');
       });
     });
   });

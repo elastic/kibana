@@ -11,10 +11,13 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 const DRILLDOWN_TO_DISCOVER_URL = 'Go to discover';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
   const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
-  const PageObjects = getPageObjects(['dashboard', 'common', 'header', 'timePicker', 'discover']);
+  const { dashboard, timePicker, discover } = getPageObjects([
+    'dashboard',
+    'timePicker',
+    'discover',
+  ]);
   const log = getService('log');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
@@ -22,17 +25,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Dashboard to URL drilldown', function () {
     before(async () => {
       log.debug('Dashboard to URL:initTests');
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.preserveCrossAppState();
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
     });
 
     it('should create dashboard to URL drilldown and use it to navigate to discover', async () => {
-      await PageObjects.dashboard.gotoDashboardEditMode(
+      await dashboard.gotoDashboardEditMode(
         dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
       );
 
       // create drilldown
-      await dashboardPanelActions.openContextMenu();
       await dashboardDrilldownPanelActions.expectExistsCreateDrilldownAction();
       await dashboardDrilldownPanelActions.clickCreateDrilldown();
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
@@ -53,27 +55,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownsManage.closeFlyout();
 
       // check that drilldown notification badge is shown
-      expect(await PageObjects.dashboard.getPanelDrilldownCount()).to.be(2);
+      expect(await dashboardDrilldownPanelActions.getPanelDrilldownCount()).to.be(2);
 
       // save dashboard, navigate to view mode
-      await PageObjects.dashboard.saveDashboard(
-        dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME,
-        {
-          saveAsNew: false,
-          waitDialogIsClosed: true,
-          exitFromEditMode: true,
-        }
-      );
+      await dashboard.saveDashboard(dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME, {
+        saveAsNew: false,
+        waitDialogIsClosed: true,
+        exitFromEditMode: true,
+      });
 
-      const originalTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
+      const originalTimeRangeDurationHours = await timePicker.getTimeDurationInHours();
 
       await brushAreaChart();
       await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
       await dashboardDrilldownPanelActions.clickActionByText(DRILLDOWN_TO_DISCOVER_URL);
 
-      await PageObjects.discover.waitForDiscoverAppOnScreen();
+      await discover.waitForDiscoverAppOnScreen();
       // check that new time range duration was applied
-      const newTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
+      const newTimeRangeDurationHours = await timePicker.getTimeDurationInHours();
       expect(newTimeRangeDurationHours).to.be.lessThan(originalTimeRangeDurationHours);
       // check that hours duration is more than 1 hour (meaning that the default time range of last 15 minutes has not been applied)
       expect(newTimeRangeDurationHours).to.be.greaterThan(1);

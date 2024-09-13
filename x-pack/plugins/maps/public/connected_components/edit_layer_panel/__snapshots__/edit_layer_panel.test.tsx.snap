@@ -49,35 +49,13 @@ exports[`EditLayerPanel is rendered 1`] = `
       <EuiSpacer
         size="xs"
       />
-      <div
-        className="mapLayerPanel__sourceDetails"
-      >
-        <EuiAccordionClass
-          buttonContent="Source details"
-          id="accordion1"
-        >
-          <EuiText
-            color="subdued"
-            size="s"
-          >
-            <EuiSpacer
-              size="xs"
-            />
-            <p
-              className="mapLayerPanel__sourceDetail"
-              key="source prop1"
-            >
-              <strong>
-                source prop1
-              </strong>
-               
-              <span>
-                you get one chance to set me
-              </span>
-            </p>
-          </EuiText>
-        </EuiAccordionClass>
-      </div>
+      <Connect(SourceDetails)
+        source={
+          Object {
+            "supportsJoins": [Function],
+          }
+        }
+      />
     </EuiFlyoutHeader>
     <div
       className="mapLayerPanel__body"
@@ -88,19 +66,25 @@ exports[`EditLayerPanel is rendered 1`] = `
         <LayerSettings
           layer={
             Object {
+              "addFeature": [Function],
               "canShowTooltip": [Function],
+              "deleteFeature": [Function],
               "getDescriptor": [Function],
               "getDisplayName": [Function],
+              "getFields": [Function],
               "getId": [Function],
-              "getImmutableSourceProperties": [Function],
+              "getJoins": [Function],
               "getLayerTypeIconName": [Function],
+              "getLeftJoinFields": [Function],
+              "getMbTooltipLayerIds": [Function],
+              "getSource": [Function],
               "getStyleForEditing": [Function],
               "getType": [Function],
+              "getValidJoins": [Function],
               "hasErrors": [Function],
               "hasJoins": [Function],
               "renderSourceSettingsEditor": [Function],
-              "showJoinEditor": [Function],
-              "supportsElasticsearchFilters": [Function],
+              "supportsFeatureEditing": [Function],
               "supportsFitToBounds": [Function],
             }
           }
@@ -113,19 +97,25 @@ exports[`EditLayerPanel is rendered 1`] = `
           <JoinEditor
             layer={
               Object {
+                "addFeature": [Function],
                 "canShowTooltip": [Function],
+                "deleteFeature": [Function],
                 "getDescriptor": [Function],
                 "getDisplayName": [Function],
+                "getFields": [Function],
                 "getId": [Function],
-                "getImmutableSourceProperties": [Function],
+                "getJoins": [Function],
                 "getLayerTypeIconName": [Function],
+                "getLeftJoinFields": [Function],
+                "getMbTooltipLayerIds": [Function],
+                "getSource": [Function],
                 "getStyleForEditing": [Function],
                 "getType": [Function],
+                "getValidJoins": [Function],
                 "hasErrors": [Function],
                 "hasJoins": [Function],
                 "renderSourceSettingsEditor": [Function],
-                "showJoinEditor": [Function],
-                "supportsElasticsearchFilters": [Function],
+                "supportsFeatureEditing": [Function],
                 "supportsFitToBounds": [Function],
               }
             }

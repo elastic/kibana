@@ -7,17 +7,14 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
-import type { ExpandedDetailType } from '../../../../../../common/types';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { HostPanelKey } from '../../../../../flyout/entity_details/host_right';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import { getScopedActions } from '../../../../../helpers';
 import { HostDetailsLink } from '../../../../../common/components/links';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
-import { activeTimeline } from '../../../../containers/active_timeline_context';
 
 interface Props {
   contextId: string;
@@ -46,43 +43,38 @@ const HostNameComponent: React.FC<Props> = ({
   title,
   value,
 }) => {
-  const dispatch = useDispatch();
+  const { openRightPanel } = useExpandableFlyoutApi();
+
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
   const isInTimelineContext =
     hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
+
   const openHostDetailsSidePanel = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent<Element, Event>) => {
       e.preventDefault();
 
       if (onClick) {
         onClick();
       }
-      if (eventContext && isInTimelineContext) {
-        const { timelineID, tabType } = eventContext;
-        const updatedExpandedDetail: ExpandedDetailType = {
-          panelView: 'hostDetail',
-          params: {
-            hostName,
-          },
-        };
-        const scopedActions = getScopedActions(timelineID);
-        if (scopedActions) {
-          dispatch(
-            scopedActions.toggleDetailPanel({
-              ...updatedExpandedDetail,
-              id: timelineID,
-              tabType: tabType as TimelineTabs,
-            })
-          );
-        }
 
-        if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
-          activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
-        }
+      if (!eventContext || !isInTimelineContext) {
+        return;
       }
+
+      const { timelineID } = eventContext;
+
+      openRightPanel({
+        id: HostPanelKey,
+        params: {
+          hostName,
+          contextID: contextId,
+          scopeId: timelineID,
+          isDraggable,
+        },
+      });
     },
-    [onClick, eventContext, isInTimelineContext, hostName, dispatch]
+    [contextId, eventContext, hostName, isDraggable, isInTimelineContext, onClick, openRightPanel]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined

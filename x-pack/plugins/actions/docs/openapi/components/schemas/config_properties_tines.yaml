@@ -1,5 +1,0 @@
-title: Connector request properties for a Tines connector
-description: Defines properties for connectors when type is `.tines`.
-type: object
-additionalProperties: true
-# TO-DO: Add the properties for this connector.

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ApplicationStart, IBasePath } from '@kbn/core/public';
@@ -13,7 +14,7 @@ import {
   EuiSearchBar,
   EuiBasicTable,
   EuiButton,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiSpacer,
   EuiToolTip,
@@ -153,13 +154,11 @@ export class Table extends PureComponent<TableProps, TableState> {
 
       if (updatedAt.diff(moment(), 'days') > -7) {
         return (
-          <FormattedRelative value={new Date(dateTime).getTime()}>
-            {(formattedDate: string) => (
-              <EuiToolTip content={updatedAt.format('LL LT')}>
-                <span>{formattedDate}</span>
-              </EuiToolTip>
-            )}
-          </FormattedRelative>
+          <EuiToolTip content={updatedAt.format('LL LT')}>
+            <span>
+              <FormattedRelative value={new Date(dateTime).getTime()} />
+            </span>
+          </EuiToolTip>
         );
       }
       return (
@@ -234,7 +233,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         name: i18n.translate('savedObjectsManagement.objectsTable.table.columnTypeName', {
           defaultMessage: 'Type',
         }),
-        width: '50px',
+        width: '65px',
         align: 'center',
         description: i18n.translate(
           'savedObjectsManagement.objectsTable.table.columnTypeDescription',
@@ -245,14 +244,13 @@ export class Table extends PureComponent<TableProps, TableState> {
         render: (type: string, object: SavedObjectWithMetadata) => {
           const typeLabel = getSavedObjectLabel(type, allowedTypes);
           return (
-            <EuiToolTip position="top" content={typeLabel}>
-              <EuiIcon
-                aria-label={typeLabel}
-                type={object.meta.icon || 'apps'}
-                size="s"
-                data-test-subj="objectType"
-              />
-            </EuiToolTip>
+            <EuiIconTip
+              aria-label={typeLabel}
+              type={object.meta.icon || 'apps'}
+              size="s"
+              content={typeLabel}
+              iconProps={{ 'data-test-subj': 'objectType' }}
+            />
           );
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
@@ -388,6 +386,8 @@ export class Table extends PureComponent<TableProps, TableState> {
     const activeActionContents = this.state.activeAction?.render() ?? null;
     const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEM;
 
+    const allHidden = selectedSavedObjects.every(({ meta: { hiddenType } }) => hiddenType);
+
     return (
       <Fragment>
         {activeActionContents}
@@ -397,28 +397,40 @@ export class Table extends PureComponent<TableProps, TableState> {
           onChange={this.onChange}
           defaultQuery={this.props.initialQuery}
           toolsRight={[
-            <EuiButton
-              key="deleteSO"
-              iconType="trash"
-              color="danger"
-              onClick={onDelete}
-              isDisabled={
-                selectedSavedObjects.length === 0 || !capabilities.savedObjectsManagement.delete
+            <EuiToolTip
+              content={
+                allHidden ? (
+                  <FormattedMessage
+                    id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
+                    defaultMessage="Selected objects can’t be deleted because they are hidden objects."
+                  />
+                ) : undefined
               }
-              title={
-                capabilities.savedObjectsManagement.delete
-                  ? undefined
-                  : i18n.translate('savedObjectsManagement.objectsTable.table.deleteButtonTitle', {
-                      defaultMessage: 'Unable to delete saved objects',
-                    })
-              }
-              data-test-subj="savedObjectsManagementDelete"
             >
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
-                defaultMessage="Delete"
-              />
-            </EuiButton>,
+              <EuiButton
+                key="deleteSO"
+                iconType="trash"
+                color="danger"
+                onClick={onDelete}
+                isDisabled={allHidden || !capabilities.savedObjectsManagement.delete}
+                title={
+                  capabilities.savedObjectsManagement.delete
+                    ? undefined
+                    : i18n.translate(
+                        'savedObjectsManagement.objectsTable.table.deleteButtonTitle',
+                        {
+                          defaultMessage: 'Unable to delete saved objects',
+                        }
+                      )
+                }
+                data-test-subj="savedObjectsManagementDelete"
+              >
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
+                  defaultMessage="Delete"
+                />
+              </EuiButton>
+            </EuiToolTip>,
             <EuiPopover
               key="exportSOOptions"
               button={button}
@@ -457,7 +469,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           ]}
         />
         {queryParseError}
-        <EuiSpacer size="s" />
+        <EuiSpacer />
         {exceededResultCount && (
           <>
             <EuiText color="subdued" size="s" data-test-subj="savedObjectsTableTooManyResultsLabel">

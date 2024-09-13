@@ -14,18 +14,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-custom-branding-server-mocks",
-        "id": "def-common.customBrandingServiceMock",
+        "id": "def-server.customBrandingServiceMock",
         "type": "Object",
         "tags": [],
         "label": "customBrandingServiceMock",
@@ -36,7 +28,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-custom-branding-server-mocks",
-            "id": "def-common.customBrandingServiceMock.create",
+            "id": "def-server.customBrandingServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -45,9 +37,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-custom-branding-server-internal",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreCustomBrandingServerInternalPluginApi",
-                "section": "def-common.CustomBrandingService",
+                "section": "def-server.CustomBrandingService",
                 "text": "CustomBrandingService"
               },
               ">"
@@ -60,13 +52,13 @@
           },
           {
             "parentPluginId": "@kbn/core-custom-branding-server-mocks",
-            "id": "def-common.customBrandingServiceMock.createSetupContract",
+            "id": "def-server.customBrandingServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
             "description": [],
             "signature": [
-              "() => { register: jest.Mock<any, any>; getBrandingFor: jest.Mock<any, any>; }"
+              "() => { register: jest.Mock<any, any, any>; getBrandingFor: jest.Mock<any, any, any>; }"
             ],
             "path": "packages/core/custom-branding/core-custom-branding-server-mocks/src/custom_branding_service.mock.ts",
             "deprecated": false,
@@ -76,7 +68,7 @@
           },
           {
             "parentPluginId": "@kbn/core-custom-branding-server-mocks",
-            "id": "def-common.customBrandingServiceMock.createStartContract",
+            "id": "def-server.customBrandingServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -94,5 +86,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

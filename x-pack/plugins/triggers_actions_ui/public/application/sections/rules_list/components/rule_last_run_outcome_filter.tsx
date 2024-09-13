@@ -7,7 +7,13 @@
 
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, EuiHealth } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiFilterButton,
+  EuiFilterSelectItem,
+  EuiHealth,
+  useEuiTheme,
+} from '@elastic/eui';
 import { RuleLastRunOutcomes, RuleLastRunOutcomeValues } from '@kbn/alerting-plugin/common';
 import { rulesLastRunOutcomeTranslationMapping } from '../translations';
 import { getOutcomeHealthColor } from '../../../../common/lib';
@@ -23,6 +29,7 @@ export const RuleLastRunOutcomeFilter: React.FunctionComponent<RuleLastRunOutcom
   selectedOutcomes,
   onChange,
 }: RuleLastRunOutcomeFilterProps) => {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const onTogglePopover = useCallback(() => {
@@ -65,7 +72,10 @@ export const RuleLastRunOutcomeFilter: React.FunctionComponent<RuleLastRunOutcom
         </EuiFilterButton>
       }
     >
-      <div className="euiFilterSelect__items">
+      {/* EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
+          instead of EuiFilterSelectItem (which is pending deprecation).
+          @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
+      <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
         {sortedRuleLastRunOutcomeValues.map((item: RuleLastRunOutcomes) => {
           const healthColor = getOutcomeHealthColor(item);
           return (

@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/react-kibana-context-theme",
+  "owner": "@elastic/appex-sharedux"
+}

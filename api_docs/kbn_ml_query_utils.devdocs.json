@@ -73,7 +73,7 @@
           "\nBuilds the base filter criteria used in queries,\nadding criteria for the time range and an optional query.\n"
         ],
         "signature": [
-          "(timeFieldName: string | undefined, earliestMs: number | undefined, latestMs: number | undefined, query: string | { [key: string]: any; } | undefined) => ",
+          "(timeFieldName: string | undefined, earliestMs: string | number | undefined, latestMs: string | number | undefined, query: string | { [key: string]: any; } | undefined, timeFormat: string) => ",
           "QueryDslQueryContainer",
           "[]"
         ],
@@ -101,14 +101,14 @@
           {
             "parentPluginId": "@kbn/ml-query-utils",
             "id": "def-common.buildBaseFilterCriteria.$2",
-            "type": "number",
+            "type": "CompoundType",
             "tags": [],
             "label": "earliestMs",
             "description": [
               "- optional earliest timestamp of the selected time range"
             ],
             "signature": [
-              "number | undefined"
+              "string | number | undefined"
             ],
             "path": "x-pack/packages/ml/query_utils/src/build_base_filter_criteria.ts",
             "deprecated": false,
@@ -118,14 +118,14 @@
           {
             "parentPluginId": "@kbn/ml-query-utils",
             "id": "def-common.buildBaseFilterCriteria.$3",
-            "type": "number",
+            "type": "CompoundType",
             "tags": [],
             "label": "latestMs",
             "description": [
               "- optional latest timestamp of the selected time range"
             ],
             "signature": [
-              "number | undefined"
+              "string | number | undefined"
             ],
             "path": "x-pack/packages/ml/query_utils/src/build_base_filter_criteria.ts",
             "deprecated": false,
@@ -148,11 +148,46 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.buildBaseFilterCriteria.$5",
+            "type": "string",
+            "tags": [],
+            "label": "timeFormat",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/build_base_filter_criteria.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [
           "filter criteria"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.getDefaultDSLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultDSLQuery",
+        "description": [
+          "\nDefault DSL query which matches all the results"
+        ],
+        "signature": [
+          "() => ",
+          "QueryDslQueryContainer"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/get_default_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -210,11 +245,364 @@
           "safe aggregation name"
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.isDefaultQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "isDefaultQuery",
+        "description": [
+          "\nChecks if the provided query is a default query. A default query is considered as one that matches all documents,\neither directly through a `match_all` query, a `SimpleQuery` with a wildcard query string, or a `BoolFilterBasedSimpleQuery`\nthat contains a filter with a wildcard query or a `match_all` condition.\n"
+        ],
+        "signature": [
+          "(query: ",
+          {
+            "pluginId": "@kbn/ml-query-utils",
+            "scope": "common",
+            "docId": "kibKbnMlQueryUtilsPluginApi",
+            "section": "def-common.SearchQueryVariant",
+            "text": "SearchQueryVariant"
+          },
+          ") => boolean"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/default_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.isDefaultQuery.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "- The query to check."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-query-utils",
+                "scope": "common",
+                "docId": "kibKbnMlQueryUtilsPluginApi",
+                "section": "def-common.SearchQueryVariant",
+                "text": "SearchQueryVariant"
+              }
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/default_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if the query is a default query, false otherwise."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.isMatchAllQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "isMatchAllQuery",
+        "description": [
+          "\nChecks if an argument is a `match_all` query."
+        ],
+        "signature": [
+          "(query: unknown) => boolean"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/match_all_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.isMatchAllQuery.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "- Argument to check."
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/match_all_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if `query` is a `match_all` query, false otherwise."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.isSimpleQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "isSimpleQuery",
+        "description": [
+          "\nType guard verifying if an argument is a `SimpleQuery`."
+        ],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/simple_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.isSimpleQuery.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "- Argument to check."
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/simple_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if `arg` is a `SimpleQuery`, false otherwise."
+        ],
+        "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.BoolFilterBasedSimpleQuery",
+        "type": "Interface",
+        "tags": [],
+        "label": "BoolFilterBasedSimpleQuery",
+        "description": [
+          "\nRepresents simple queries that are based on a boolean filter."
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.BoolFilterBasedSimpleQuery.bool",
+            "type": "Object",
+            "tags": [],
+            "label": "bool",
+            "description": [
+              "\nThe container for the boolean filter logic."
+            ],
+            "signature": [
+              "{ filter: [",
+              {
+                "pluginId": "@kbn/ml-query-utils",
+                "scope": "common",
+                "docId": "kibKbnMlQueryUtilsPluginApi",
+                "section": "def-common.SimpleQuery",
+                "text": "SimpleQuery"
+              },
+              "<string>]; must: []; must_not: []; should?: [] | undefined; }"
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.SimpleQuery",
+        "type": "Interface",
+        "tags": [],
+        "label": "SimpleQuery",
+        "description": [
+          "\nRepresents a simple query structure for searching documents."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-query-utils",
+            "scope": "common",
+            "docId": "kibKbnMlQueryUtilsPluginApi",
+            "section": "def-common.SimpleQuery",
+            "text": "SimpleQuery"
+          },
+          "<Q>"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.SimpleQuery.query_string",
+            "type": "Object",
+            "tags": [],
+            "label": "query_string",
+            "description": [
+              "\nDefines the query string parameters for the search."
+            ],
+            "signature": [
+              "{ query: Q; default_operator?: ",
+              "QueryDslOperator",
+              " | undefined; }"
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.SavedSearchQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedSearchQuery",
+        "description": [
+          "\nPlaceholder for the structure for a saved search query."
+        ],
+        "signature": [
+          "object"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.SearchQueryLanguage",
+        "type": "Type",
+        "tags": [],
+        "label": "SearchQueryLanguage",
+        "description": [
+          "\nType for SearchQueryLanguage"
+        ],
+        "signature": [
+          "\"kuery\" | \"lucene\""
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.SearchQueryVariant",
+        "type": "Type",
+        "tags": [],
+        "label": "SearchQueryVariant",
+        "description": [
+          "\nRepresents a union of search queries that can be used to fetch documents."
+        ],
+        "signature": [
+          "object | ",
+          {
+            "pluginId": "@kbn/ml-query-utils",
+            "scope": "common",
+            "docId": "kibKbnMlQueryUtilsPluginApi",
+            "section": "def-common.BoolFilterBasedSimpleQuery",
+            "text": "BoolFilterBasedSimpleQuery"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/ml-query-utils",
+            "scope": "common",
+            "docId": "kibKbnMlQueryUtilsPluginApi",
+            "section": "def-common.SimpleQuery",
+            "text": "SimpleQuery"
+          },
+          "<string>"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.ES_CLIENT_TOTAL_HITS_RELATION",
+        "type": "Object",
+        "tags": [],
+        "label": "ES_CLIENT_TOTAL_HITS_RELATION",
+        "description": [
+          "\nCustom enum for total hits relation values"
+        ],
+        "signature": [
+          "{ GTE: ",
+          "SearchTotalHitsRelation",
+          "; EQ: ",
+          "SearchTotalHitsRelation",
+          "; }"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/es_client_total_hits_relation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.matchAllQuery",
+        "type": "Object",
+        "tags": [],
+        "label": "matchAllQuery",
+        "description": [
+          "\nRepresents a query that matches all documents."
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/match_all_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.matchAllQuery.match_all",
+            "type": "Object",
+            "tags": [],
+            "label": "match_all",
+            "description": [
+              "/**\n   * 'match_all' property specifies a query that matches all documents.\n   */"
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/match_all_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.SEARCH_QUERY_LANGUAGE",
+        "type": "Object",
+        "tags": [],
+        "label": "SEARCH_QUERY_LANGUAGE",
+        "description": [
+          "\nConstant for kuery and lucene string"
+        ],
+        "signature": [
+          "{ readonly KUERY: \"kuery\"; readonly LUCENE: \"lucene\"; }"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

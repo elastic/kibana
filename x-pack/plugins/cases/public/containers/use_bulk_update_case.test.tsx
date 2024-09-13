@@ -18,7 +18,6 @@ jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('useUpdateCases', () => {
-  const abortCtrl = new AbortController();
   const addSuccess = jest.fn();
   const addError = jest.fn();
 
@@ -43,7 +42,7 @@ describe('useUpdateCases', () => {
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith(allCases.cases, abortCtrl.signal);
+    expect(spy).toHaveBeenCalledWith({ cases: allCases.cases });
   });
 
   it('invalidates the queries correctly', async () => {

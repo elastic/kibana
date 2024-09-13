@@ -7,6 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
+import { Connector, CONNECTORS_INDEX } from '@kbn/search-connectors';
 
 import { Crawler, CrawlRequest } from '../../../common/types/crawler';
 import { fetchAll } from '../fetch_all';
@@ -99,4 +100,17 @@ export const fetchCrawlers = async (
   } catch (error) {
     return crawlers;
   }
+};
+
+export const fetchCrawlerDocumentIdByIndexName = async (
+  client: IScopedClusterClient,
+  indexName: string
+): Promise<string> => {
+  const crawlerResult = await client.asCurrentUser.search<Connector>({
+    index: CONNECTORS_INDEX,
+    query: { term: { index_name: indexName } },
+    _source: '_id',
+  });
+  const crawlerId = crawlerResult.hits.hits[0]?._id!;
+  return crawlerId;
 };

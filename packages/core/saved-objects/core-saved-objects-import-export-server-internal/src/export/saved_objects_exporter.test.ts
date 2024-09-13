@@ -1,23 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { SavedObject, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsExporter } from './saved_objects_exporter';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
+import { EXPORT_ALL_TYPES_TOKEN } from './constants';
 
 async function readStreamToCompletion(stream: Readable): Promise<Array<SavedObject<any>>> {
   return createPromiseFromStreams([stream, createConcatStream([])]);
 }
+
+const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
+  name: 'type',
+  namespaceType: 'single',
+  hidden: false,
+  mappings: { properties: {} },
+  ...parts,
+});
 
 const exportSizeLimit = 10000;
 const request = httpServerMock.createKibanaRequest();
@@ -32,13 +42,17 @@ describe('getSortedObjectsForExport()', () => {
     logger = loggerMock.create();
     typeRegistry = new SavedObjectTypeRegistry();
     savedObjectsClient = savedObjectsClientMock.create();
-    exporter = new SavedObjectsExporter({
+    exporter = createExporter();
+  });
+
+  const createExporter = () => {
+    return new SavedObjectsExporter({
       exportSizeLimit,
       logger,
       savedObjectsClient,
       typeRegistry,
     });
-  });
+  };
 
   describe('#exportByTypes', () => {
     test('exports selected types and sorts them', async () => {
@@ -985,6 +999,45 @@ describe('getSortedObjectsForExport()', () => {
           },
         ]
       `);
+    });
+
+    test(`supports the "all types" wildcard`, async () => {
+      typeRegistry.registerType(
+        createType({
+          name: 'exportable_1',
+          management: { importableAndExportable: true },
+        })
+      );
+      typeRegistry.registerType(
+        createType({
+          name: 'exportable_2',
+          management: { importableAndExportable: true },
+        })
+      );
+      typeRegistry.registerType(
+        createType({
+          name: 'not_exportable',
+          management: { importableAndExportable: false },
+        })
+      );
+
+      exporter = createExporter();
+
+      savedObjectsClient.find.mockResolvedValueOnce({
+        total: 0,
+        per_page: 1000,
+        page: 1,
+        saved_objects: [],
+      });
+
+      await exporter.exportByTypes({ request, types: [EXPORT_ALL_TYPES_TOKEN] });
+
+      expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: ['exportable_1', 'exportable_2'],
+        })
+      );
     });
   });
 

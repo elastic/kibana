@@ -24,7 +24,6 @@ Object {
         >
           <span
             class="euiBadge emotion-EuiInnerText"
-            style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
             title="Last update value"
           >
             <span
@@ -99,7 +98,6 @@ Object {
       >
         <span
           class="euiBadge emotion-EuiInnerText"
-          style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
           title="Last update value"
         >
           <span
@@ -231,7 +229,6 @@ Object {
         >
           <span
             class="euiBadge emotion-EuiInnerText"
-            style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
             title="last update"
           >
             <span
@@ -304,7 +301,6 @@ Object {
       >
         <span
           class="euiBadge emotion-EuiInnerText"
-          style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
           title="last update"
         >
           <span

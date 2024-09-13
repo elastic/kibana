@@ -21,11 +21,14 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 
+import { MAX_FLYOUT_WIDTH } from '../../../constants';
 import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../../../hooks';
 import { Loading } from '../../../components';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
+import { API_VERSIONS } from '../../../../../../common/constants';
 
 const FlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {
@@ -38,6 +41,9 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
     const core = useStartServices();
     const { isLoading: isLoadingYaml, data: yamlData, error } = useGetOneAgentPolicyFull(policyId);
     const { data: agentPolicyData } = useGetOneAgentPolicy(policyId);
+    const packagePoliciesContainSecrets = agentPolicyData?.item?.package_policies?.some(
+      (packagePolicy) => packagePolicy?.secret_references?.length
+    );
     const body = isLoadingYaml ? (
       <Loading />
     ) : error ? (
@@ -54,24 +60,26 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
         {error.message}
       </EuiCallOut>
     ) : (
-      <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
-        {fullAgentPolicyToYaml(yamlData!.item, safeDump)}
-      </EuiCodeBlock>
+      <>
+        <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
+          {fullAgentPolicyToYaml(yamlData!.item, safeDump)}
+        </EuiCodeBlock>
+      </>
     );
 
-    const downloadLink = core.http.basePath.prepend(
-      agentPolicyRouteService.getInfoFullDownloadPath(policyId)
-    );
+    const downloadLink =
+      core.http.basePath.prepend(agentPolicyRouteService.getInfoFullDownloadPath(policyId)) +
+      `?apiVersion=${API_VERSIONS.public.v1}`;
 
     return (
-      <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
+      <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
         <EuiFlyoutHeader hasBorder aria-labelledby="IngestManagerAgentPolicyYamlFlyoutTitle">
           <EuiTitle size="m">
             <h2 id="IngestManagerAgentPolicyYamlFlyoutTitle">
               {agentPolicyData?.item ? (
                 <FormattedMessage
                   id="xpack.fleet.policyDetails.yamlflyoutTitleWithName"
-                  defaultMessage="'{name}' agent policy"
+                  defaultMessage="''{name}'' agent policy"
                   values={{ name: agentPolicyData.item.name }}
                 />
               ) : (
@@ -82,6 +90,30 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
               )}
             </h2>
           </EuiTitle>
+          {packagePoliciesContainSecrets && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.fleet.policyDetails.secretsTitle"
+                    defaultMessage="This policy contains secret values"
+                  />
+                }
+                size="m"
+                color="primary"
+                iconType="iInCircle"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.policyDetails.secretsDescription"
+                  defaultMessage="Kibana does not have access to secret values. You will need to set these values manually after deploying the agent policy. Look out for environment variables in the format {envVarPrefix} in the agent configuration."
+                  values={{
+                    envVarPrefix: <code>{'${SECRET_0}'}</code>,
+                  }}
+                />
+              </EuiCallOut>
+            </>
+          )}
         </EuiFlyoutHeader>
         <FlyoutBody>{body}</FlyoutBody>
         <EuiFlyoutFooter>

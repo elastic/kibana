@@ -2,7 +2,7 @@
 [[data-rollups]]
 == Rollup Jobs
 
-experimental::[]
+deprecated::[8.11.0,'Rollups are deprecated and will be removed in a future version. Use {ref}/downsampling.html[downsampling] instead.']
 
 A rollup job is a periodic task that aggregates data from indices specified by
 an index pattern, and then rolls it into a new index. Rollup indices are a good
@@ -165,7 +165,7 @@ as your source to see both the raw and rolled up data.
 [role="screenshot"]
 image::images/management-create-rollup-bar-chart.png[Create visualization of rolled up data]
 
-. Select *Bar vertical stacked* in the chart type dropdown.
+. Select *Bar* in the chart type dropdown.
 
 . Add the `@timestamp` field to the *Horizontal axis*.
 

@@ -8,6 +8,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { TestBed } from '@kbn/test-jest-helpers';
+import { DataRetention } from '../../../../../../../common';
 
 interface MappingField {
   name: string;
@@ -52,10 +53,27 @@ export const getFormActions = (testBed: TestBed) => {
       .simulate('click');
   };
 
-  const completeStepLogistics = async ({ name }: { name: string }) => {
+  const completeStepLogistics = async ({
+    name,
+    lifecycle,
+  }: {
+    name: string;
+    lifecycle: DataRetention;
+  }) => {
     const { form, component } = testBed;
     // Add name field
     form.setInputValue('nameField.input', name);
+
+    if (lifecycle && lifecycle.enabled) {
+      act(() => {
+        form.toggleEuiSwitch('dataRetentionToggle.input');
+      });
+      component.update();
+
+      act(() => {
+        form.setInputValue('valueDataRetentionField', String(lifecycle.value));
+      });
+    }
 
     await act(async () => {
       clickNextButton();
@@ -66,14 +84,14 @@ export const getFormActions = (testBed: TestBed) => {
 
   const completeStepSettings = async (settings?: { [key: string]: any }) => {
     const { find, component } = testBed;
+    const settingsValue = JSON.stringify(settings);
+
+    if (settingsValue) {
+      find('settingsEditor').getDOMNode().setAttribute('data-currentvalue', settingsValue);
+      find('settingsEditor').simulate('change');
+    }
 
     await act(async () => {
-      if (settings) {
-        find('settingsEditor').simulate('change', {
-          jsonString: JSON.stringify(settings),
-        }); // Using mocked EuiCodeEditor
-      }
-
       clickNextButton();
     });
 
@@ -119,14 +137,14 @@ export const getFormActions = (testBed: TestBed) => {
 
   const completeStepAliases = async (aliases?: { [key: string]: any }) => {
     const { find, component } = testBed;
+    const aliasesValue = JSON.stringify(aliases);
+
+    if (aliasesValue) {
+      find('aliasesEditor').getDOMNode().setAttribute('data-currentvalue', aliasesValue);
+      find('aliasesEditor').simulate('change');
+    }
 
     await act(async () => {
-      if (aliases) {
-        find('aliasesEditor').simulate('change', {
-          jsonString: JSON.stringify(aliases),
-        }); // Using mocked EuiCodeEditor
-      }
-
       clickNextButton();
     });
 
@@ -164,8 +182,12 @@ export type ComponentTemplateFormTestSubjects =
   | 'stepReview.content'
   | 'stepReview.summaryTab'
   | 'stepReview.requestTab'
+  | 'valueDataRetentionField'
+  | 'deprecatedTemplateCallout'
+  | 'dataRetentionToggle.input'
   | 'versionField'
   | 'aliasesEditor'
   | 'mappingsEditor'
   | 'settingsEditor'
+  | 'affectedMappingsList'
   | 'versionField.input';

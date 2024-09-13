@@ -9,7 +9,7 @@ import { bodySchema, updateActionRoute } from './update';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
-import { actionsClientMock } from '../actions_client.mock';
+import { actionsClientMock } from '../actions_client/actions_client.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
 jest.mock('./verify_access_and_context', () => ({
@@ -39,6 +39,7 @@ describe('updateActionRoute', () => {
       config: { foo: true },
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -67,6 +68,7 @@ describe('updateActionRoute', () => {
         config: { foo: true },
         is_preconfigured: false,
         is_deprecated: false,
+        is_system_action: false,
       },
     });
 
@@ -106,6 +108,7 @@ describe('updateActionRoute', () => {
       config: { foo: true },
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -150,6 +153,7 @@ describe('updateActionRoute', () => {
       config: { foo: true },
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -170,7 +174,7 @@ describe('updateActionRoute', () => {
       ['ok']
     );
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
   });

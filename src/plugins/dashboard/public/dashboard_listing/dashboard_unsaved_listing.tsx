@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -19,11 +20,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { DashboardAttributes } from '../../common';
 import { pluginServices } from '../services/plugin_services';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
+import { DashboardAttributes } from '../../common/content_management';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_session_storage/dashboard_session_storage_service';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
 
 const DashboardUnsavedItem = ({
   id,
@@ -116,8 +117,8 @@ export const DashboardUnsavedListing = ({
   refreshUnsavedDashboards,
 }: DashboardUnsavedListingProps) => {
   const {
-    dashboardSessionStorage,
-    dashboardSavedObject: { savedObjectsClient, findDashboards },
+    dashboardBackup,
+    dashboardContentManagement: { findDashboards },
   } = pluginServices.getServices();
 
   const [items, setItems] = useState<UnsavedItemMap>({});
@@ -132,11 +133,11 @@ export const DashboardUnsavedListing = ({
   const onDiscard = useCallback(
     (id?: string) => {
       confirmDiscardUnsavedChanges(() => {
-        dashboardSessionStorage.clearState(id);
+        dashboardBackup.clearState(id);
         refreshUnsavedDashboards();
       });
     },
-    [refreshUnsavedDashboards, dashboardSessionStorage]
+    [refreshUnsavedDashboards, dashboardBackup]
   );
 
   useEffect(() => {
@@ -156,7 +157,10 @@ export const DashboardUnsavedListing = ({
       const newItems = results.reduce((map, result) => {
         if (result.status === 'error') {
           hasError = true;
-          dashboardSessionStorage.clearState(result.id);
+          if (result.error.statusCode === 404) {
+            // Save object not found error
+            dashboardBackup.clearState(result.id);
+          }
           return map;
         }
         return {
@@ -170,21 +174,17 @@ export const DashboardUnsavedListing = ({
       }
       setItems(newItems);
     });
+
     return () => {
       canceled = true;
     };
-  }, [
-    refreshUnsavedDashboards,
-    dashboardSessionStorage,
-    unsavedDashboardIds,
-    savedObjectsClient,
-    findDashboards,
-  ]);
+  }, [refreshUnsavedDashboards, dashboardBackup, unsavedDashboardIds, findDashboards]);
 
   return unsavedDashboardIds.length === 0 ? null : (
     <>
       <EuiCallOut
         heading="h3"
+        data-test-subj="unsavedDashboardsCallout"
         title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(
           unsavedDashboardIds.length > 1
         )}

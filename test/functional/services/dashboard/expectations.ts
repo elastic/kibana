@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 export class DashboardExpectService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -16,6 +17,7 @@ export class DashboardExpectService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly filterBar = this.ctx.getService('filterBar');
+  private readonly elasticChart = this.ctx.getService('elasticChart');
 
   private readonly dashboard = this.ctx.getPageObject('dashboard');
   private readonly visChart = this.ctx.getPageObject('visChart');
@@ -201,6 +203,7 @@ export class DashboardExpectService extends FtrService {
     if (tagCloudVisualizations.length > 0) {
       const matches = await Promise.all(
         tagCloudVisualizations.map(async (tagCloud) => {
+          await this.visChart.waitForVisualization();
           const tagCloudData = await this.tagCloud.getTextTagByElement(tagCloud);
           for (let i = 0; i < values.length; i++) {
             const valueExists = tagCloudData.includes(values[i]);
@@ -282,11 +285,11 @@ export class DashboardExpectService extends FtrService {
   }
 
   async savedSearchRowsExist() {
-    this.testSubjects.existOrFail('docTableExpandToggleColumn');
+    await this.testSubjects.existOrFail('docTableExpandToggleColumn');
   }
 
   async savedSearchRowsMissing() {
-    this.testSubjects.missingOrFail('docTableExpandToggleColumn');
+    await this.testSubjects.missingOrFail('docTableExpandToggleColumn');
   }
 
   async dataTableRowCount(expectedCount: number) {
@@ -304,12 +307,22 @@ export class DashboardExpectService extends FtrService {
     });
   }
 
+  // heatmap data
   async seriesElementCount(expectedCount: number) {
     this.log.debug(`DashboardExpect.seriesElementCount(${expectedCount})`);
-    await this.retry.try(async () => {
-      const seriesElements = await this.find.allByCssSelector('.series', this.findTimeout);
-      expect(seriesElements.length).to.be(expectedCount);
-    });
+    const heatmapData = await this.elasticChart.getChartDebugData('heatmapChart');
+    this.log.debug(heatmapData.axes?.y[0]);
+    expect(heatmapData.axes?.y[0].labels.length).to.be(expectedCount);
+  }
+
+  async heatmapXAxisBuckets(expectedCount: number) {
+    this.log.debug(`DashboardExpect.heatmapXAxisBuckets(${expectedCount})`);
+    const heatmapData = await this.elasticChart.getChartDebugData('heatmapChart');
+    expect(heatmapData.axes?.x[0].labels.length).to.be(expectedCount);
+  }
+
+  async heatMapNoResults() {
+    await this.testSubjects.find('heatmapChart>emptyPlaceholder');
   }
 
   // legacy controls visualization

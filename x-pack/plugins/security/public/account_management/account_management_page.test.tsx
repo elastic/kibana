@@ -8,16 +8,16 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 
-import type { UserProfileData } from '../../common';
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { UserAPIClient } from '../management';
-import { securityMock } from '../mocks';
 import { Providers } from './account_management_app';
 import { AccountManagementPage } from './account_management_page';
 import * as UserProfileImports from './user_profile/user_profile';
 import { UserProfileAPIClient } from './user_profile/user_profile_api_client';
+import type { UserProfileData } from '../../common';
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { UserAPIClient } from '../management';
+import { securityMock } from '../mocks';
 
 const UserProfileMock = jest.spyOn(UserProfileImports, 'UserProfile');
 
@@ -31,7 +31,6 @@ describe('<AccountManagementPage>', () => {
       },
     },
   };
-  const theme$ = themeServiceMock.createTheme$();
   let history = scopedHistoryMock.create();
   const authc = securityMock.createSetup().authc;
 
@@ -55,7 +54,6 @@ describe('<AccountManagementPage>', () => {
     const { findByRole } = render(
       <Providers
         services={coreStart}
-        theme$={theme$}
         history={history}
         authc={authc}
         securityApiClients={{

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -177,18 +178,11 @@ describe('rollTotals', () => {
       ],
       { overwrite: true }
     );
-    expect(savedObjectClient.delete).toHaveBeenCalledTimes(3);
-    expect(savedObjectClient.delete).toHaveBeenCalledWith(
-      SAVED_OBJECTS_DAILY_TYPE,
-      'appId-2:2020-01-01'
-    );
-    expect(savedObjectClient.delete).toHaveBeenCalledWith(
-      SAVED_OBJECTS_DAILY_TYPE,
-      'appId-1:2020-01-01'
-    );
-    expect(savedObjectClient.delete).toHaveBeenCalledWith(
-      SAVED_OBJECTS_DAILY_TYPE,
-      'appId-1:2020-01-01:viewId-1'
-    );
+    expect(savedObjectClient.bulkDelete).toHaveBeenCalledTimes(1);
+    expect(savedObjectClient.bulkDelete).toHaveBeenCalledWith([
+      { type: SAVED_OBJECTS_DAILY_TYPE, id: 'appId-2:2020-01-01' },
+      { type: SAVED_OBJECTS_DAILY_TYPE, id: 'appId-1:2020-01-01' },
+      { type: SAVED_OBJECTS_DAILY_TYPE, id: 'appId-1:2020-01-01:viewId-1' },
+    ]);
   });
 });

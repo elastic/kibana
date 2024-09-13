@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import { AuditMessageBase } from '../../../common/types/messages';
+import type { AuditMessageBase } from '../../../common/types/messages';
 
 interface Props {
   message: AuditMessageBase;
@@ -23,10 +23,10 @@ export const JobIcon: FC<Props> = ({ message, showTooltip = false }) => {
   }
 
   let color = 'primary';
-  const icon = 'warning';
+  let icon = 'warning';
 
   if (message.level === INFO) {
-    color = 'primary';
+    icon = 'iInCircle';
   } else if (message.level === WARNING) {
     color = 'warning';
   } else if (message.level === ERROR) {

@@ -10,6 +10,7 @@ import type {
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -21,9 +22,6 @@ import type {
   Logger,
   SavedObjectsClientContract,
   IScopedClusterClient,
-  KibanaResponseFactory,
-  RequestHandler,
-  RouteMethod,
 } from '@kbn/core/server';
 import type {
   AgentService,
@@ -32,9 +30,12 @@ import type {
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { CspStatusCode, IndexDetails } from '@kbn/cloud-security-posture-common';
 import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { CspStatusCode, IndexDetails } from '../common/types';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { AlertingPluginSetup } from '@kbn/alerting-plugin/public/plugin';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginSetup {}
@@ -47,6 +48,7 @@ export interface CspServerPluginSetupDeps {
   taskManager: TaskManagerSetupContract;
   security: SecurityPluginSetup;
   cloud: CloudSetup;
+  alerting: AlertingPluginSetup;
   // optional
   usageCollection?: UsageCollectionSetup;
 }
@@ -58,6 +60,8 @@ export interface CspServerPluginStartDeps {
   taskManager: TaskManagerStartContract;
   security: SecurityPluginStart;
   licensing: LicensingPluginStart;
+  dataViews: DataViewsPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export type CspServerPluginStartServices = Promise<
@@ -69,6 +73,7 @@ export interface CspApiRequestHandlerContext {
   logger: Logger;
   esClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
+  encryptedSavedObjects: SavedObjectsClientContract;
   agentPolicyService: AgentPolicyServiceInterface;
   agentService: AgentService;
   packagePolicyService: PackagePolicyClient;
@@ -79,19 +84,8 @@ export interface CspApiRequestHandlerContext {
 export type CspRequestHandlerContext = CustomRequestHandlerContext<{
   csp: CspApiRequestHandlerContext;
   fleet: FleetRequestHandlerContext['fleet'];
+  alerting: AlertingApiRequestHandlerContext;
 }>;
-
-/**
- * Convenience type for request handlers in CSP that includes the CspRequestHandlerContext type
- * @internal
- */
-export type CspRequestHandler<
-  P = unknown,
-  Q = unknown,
-  B = unknown,
-  Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
-> = RequestHandler<P, Q, B, CspRequestHandlerContext, Method, ResponseFactory>;
 
 /**
  * Convenience type for routers in Csp that includes the CspRequestHandlerContext type

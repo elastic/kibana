@@ -32,7 +32,7 @@ const errorMessages = {
     title: (
       <FormattedMessage
         id="xpack.crossClusterReplication.remoteClustersFormField.currentRemoteClusterNotConnectedCallOutTitle"
-        defaultMessage="Remote cluster '{name}' is not connected"
+        defaultMessage="Remote cluster ''{name}'' is not connected"
         values={{ name }}
       />
     ),
@@ -143,6 +143,12 @@ export class RemoteClustersFormField extends PureComponent {
           hasNoInitialSelection={!hasClusters}
           isInvalid={areErrorsVisible && Boolean(errorMessage)}
           data-test-subj="remoteClusterSelect"
+          aria-label={i18n.translate(
+            'xpack.crossClusterReplication.remoteClustersFormField.remoteClusterSelectAriaLabel',
+            {
+              defaultMessage: 'Remote cluster selection',
+            }
+          )}
         />
         {areErrorsVisible && Boolean(errorMessage) ? this.renderValidRemoteClusterRequired() : null}
         {errorMessage}
@@ -252,7 +258,7 @@ export class RemoteClustersFormField extends PureComponent {
     const title = i18n.translate(
       'xpack.crossClusterReplication.remoteClustersFormField.remoteClusterNotFoundTitle',
       {
-        defaultMessage: `Couldn't find remote cluster '{name}'`,
+        defaultMessage: `Couldn't find remote cluster ''{name}''`,
         values: { name },
       }
     );

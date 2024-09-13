@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -73,9 +73,9 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post(`/api/ml/results/anomalies_table_data`)
+        .post(`/internal/ml/results/anomalies_table_data`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(requestBody);
       ml.api.assertResponseStatusCode(200, status, body);
 
@@ -98,9 +98,9 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post(`/api/ml/results/anomalies_table_data`)
+        .post(`/internal/ml/results/anomalies_table_data`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(requestBody);
       ml.api.assertResponseStatusCode(400, status, body);
 
@@ -123,9 +123,9 @@ export default ({ getService }: FtrProviderContext) => {
         maxRecords: 500,
       };
       const { body, status } = await supertest
-        .post(`/api/ml/results/anomalies_table_data`)
+        .post(`/internal/ml/results/anomalies_table_data`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(requestBody);
       ml.api.assertResponseStatusCode(403, status, body);
 

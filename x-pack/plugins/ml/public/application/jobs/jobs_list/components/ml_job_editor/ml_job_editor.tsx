@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { monaco, XJsonLang } from '@kbn/monaco';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import { type EuiCodeEditorProps, XJson } from '@kbn/es-ui-shared-plugin/public';
+import { CodeEditor, type CodeEditorProps } from '@kbn/code-editor';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 const { expandLiteralStrings } = XJson;
 
@@ -18,11 +19,9 @@ interface MlJobEditorProps {
   value: string;
   height?: string;
   width?: string;
-  mode?: typeof ML_EDITOR_MODE[keyof typeof ML_EDITOR_MODE];
+  mode?: (typeof ML_EDITOR_MODE)[keyof typeof ML_EDITOR_MODE];
   readOnly?: boolean;
-  syntaxChecking?: boolean;
-  theme?: string;
-  onChange?: EuiCodeEditorProps['onChange'];
+  onChange?: CodeEditorProps['onChange'];
   'data-test-subj'?: string;
   schema?: object;
 }
@@ -32,8 +31,6 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
   width = '100%',
   mode = ML_EDITOR_MODE.JSON,
   readOnly = false,
-  syntaxChecking = true,
-  theme = 'textmate',
   onChange = () => {},
   'data-test-subj': dataTestSubj,
   schema,
@@ -50,10 +47,7 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
   return (
     <CodeEditor
       languageId={mode}
-      options={{
-        readOnly,
-        theme,
-      }}
+      options={{ readOnly }}
       value={value}
       width={width}
       height={height}

@@ -130,7 +130,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(health.status).to.eql('OK');
       expect(health.stats.configuration.value).to.eql({
         poll_interval: 3000,
-        max_poll_inactivity_cycles: 10,
         monitored_aggregated_stats_refresh_rate: monitoredAggregatedStatsRefreshRate,
         monitored_stats_running_average_window: 50,
         monitored_task_execution_thresholds: {
@@ -141,7 +140,12 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
         request_capacity: 1000,
-        max_workers: 10,
+        capacity: {
+          config: 10,
+          as_workers: 10,
+          as_cost: 20,
+        },
+        claim_strategy: 'update_by_query',
       });
     });
 
@@ -306,6 +310,34 @@ export default function ({ getService }: FtrProviderContext) {
       );
       expect(typeof execution.result_frequency_percent_as_number.sampleTask.Failed).to.eql(
         'number'
+      );
+    });
+
+    it('should exclude disabled tasks', async () => {
+      const interval = '9s';
+      await scheduleTask({
+        enabled: false,
+        taskType: 'taskToDisable',
+        schedule: { interval },
+      });
+
+      const timestamp = new Date();
+
+      const health = await retry.try(async () => {
+        const result = await getHealth();
+        expect(new Date(result.stats.runtime.timestamp).getTime()).to.be.greaterThan(
+          timestamp.getTime()
+        );
+        expect(new Date(result.stats.workload.timestamp).getTime()).to.be.greaterThan(
+          timestamp.getTime()
+        );
+        return result;
+      });
+
+      expect(health.stats.runtime.value.execution.duration.taskToDisable).to.eql(undefined);
+      expect(health.stats.workload.value.task_types.taskToDisable).to.eql(undefined);
+      expect(health.stats.workload.value.schedule.find(([val]) => val === interval)).to.eql(
+        undefined
       );
     });
   });

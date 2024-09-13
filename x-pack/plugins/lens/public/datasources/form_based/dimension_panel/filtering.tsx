@@ -7,10 +7,14 @@
 import React, { useCallback } from 'react';
 import { isEqual } from 'lodash';
 import type { Query } from '@kbn/es-query';
+import { validateQuery, FilterQueryInput } from '@kbn/visualization-ui-components';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FilterQueryInputProps } from '@kbn/visualization-ui-components/components/query_input/filter_query_input';
+import { LENS_APP_NAME } from '../../../../common/constants';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
 import type { FormBasedLayer } from '../types';
-import { validateQuery, FilterQueryInput } from '../../../shared_components';
 import type { IndexPattern } from '../../../types';
+import { LensAppServices } from '../../../app_plugin/types';
 
 export function setFilter(columnId: string, layer: FormBasedLayer, query: Query | undefined) {
   return {
@@ -41,7 +45,7 @@ export function Filtering({
   helpMessage: string | null;
 }) {
   const inputFilter = selectedColumn.filter;
-  const onChange = useCallback(
+  const onChange = useCallback<FilterQueryInputProps['onChange']>(
     (query) => {
       const { isValid } = validateQuery(query, indexPattern);
       if (isValid && !isEqual(inputFilter, query)) {
@@ -50,6 +54,8 @@ export function Filtering({
     },
     [columnId, indexPattern, inputFilter, layer, updateLayer]
   );
+
+  const lensServices = useKibana<LensAppServices>().services;
 
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
 
@@ -61,8 +67,10 @@ export function Filtering({
     <FilterQueryInput
       helpMessage={helpMessage}
       onChange={onChange}
-      indexPattern={indexPattern}
+      dataView={indexPattern}
       inputFilter={inputFilter}
+      queryInputServices={lensServices}
+      appName={LENS_APP_NAME}
     />
   );
 }

@@ -16,13 +16,7 @@ module.exports = {
       files: ['**/*.{ts,tsx}'],
       parser: '@typescript-eslint/parser',
 
-      plugins: [
-        '@typescript-eslint',
-        'ban',
-        'import',
-        'prefer-object-spread',
-        'eslint-comments'
-      ],
+      plugins: ['@typescript-eslint', 'ban', 'import', 'eslint-comments'],
 
       env: {
         es6: true,
@@ -35,7 +29,7 @@ module.exports = {
         sourceType: 'module',
         ecmaVersion: 2018,
         ecmaFeatures: {
-          jsx: true
+          jsx: true,
         },
         // NOTE: That is to avoid a known performance issue related with the `ts.Program` used by
         // typescript eslint. As we are not using rules that need types information, we can safely
@@ -44,7 +38,7 @@ module.exports = {
         // https://github.com/typescript-eslint/typescript-eslint/issues/389
         // https://github.com/typescript-eslint/typescript-eslint/issues/243
         // https://github.com/typescript-eslint/typescript-eslint/pull/361
-        project: undefined
+        project: undefined,
       },
 
       // NOTE: we can't override the extends option here to apply
@@ -61,32 +55,38 @@ module.exports = {
           //
           // Old recommended tslint rules
           '@typescript-eslint/adjacent-overload-signatures': 'error',
-          '@typescript-eslint/array-type': ['error', { default: 'array-simple', readonly: 'array-simple' }],
-          '@typescript-eslint/ban-types': ['error', {
-            types: {
-              SFC: {
-                message: 'Use FC or FunctionComponent instead.',
-                fixWith: 'FC'
+          '@typescript-eslint/array-type': [
+            'error',
+            { default: 'array-simple', readonly: 'array-simple' },
+          ],
+          '@typescript-eslint/ban-types': [
+            'error',
+            {
+              types: {
+                SFC: {
+                  message: 'Use FC or FunctionComponent instead.',
+                  fixWith: 'FC',
+                },
+                'React.SFC': {
+                  message: 'Use FC or FunctionComponent instead.',
+                  fixWith: 'React.FC',
+                },
+                StatelessComponent: {
+                  message: 'Use FunctionComponent instead.',
+                  fixWith: 'FunctionComponent',
+                },
+                'React.StatelessComponent': {
+                  message: 'Use FunctionComponent instead.',
+                  fixWith: 'React.FunctionComponent',
+                },
+                // used in the codebase in the wild
+                '{}': false,
+                object: false,
+                Function: false,
               },
-              'React.SFC': {
-                message: 'Use FC or FunctionComponent instead.',
-                fixWith: 'React.FC'
-              },
-              StatelessComponent: {
-                message: 'Use FunctionComponent instead.',
-                fixWith: 'FunctionComponent'
-              },
-              'React.StatelessComponent': {
-                message: 'Use FunctionComponent instead.',
-                fixWith: 'React.FunctionComponent'
-              },
-              // used in the codebase in the wild
-              '{}': false,
-              'object': false,
-              'Function': false,
-            }
-          }],
-          'camelcase': 'off',
+            },
+          ],
+          camelcase: 'off',
           '@typescript-eslint/naming-convention': [
             'error',
             {
@@ -94,8 +94,8 @@ module.exports = {
               format: ['camelCase'],
               filter: {
                 regex: allowedNameRegexp,
-                match: false
-              }
+                match: false,
+              },
             },
             {
               selector: 'variable',
@@ -106,19 +106,16 @@ module.exports = {
               ],
               filter: {
                 regex: allowedNameRegexp,
-                match: false
-              }
+                match: false,
+              },
             },
             {
               selector: 'parameter',
-              format: [
-                'camelCase',
-                'PascalCase',
-              ],
+              format: ['camelCase', 'PascalCase'],
               filter: {
                 regex: allowedNameRegexp,
-                match: false
-              }
+                match: false,
+              },
             },
             {
               selector: 'memberLike',
@@ -126,23 +123,23 @@ module.exports = {
                 'camelCase',
                 'PascalCase',
                 'snake_case', // keys in elasticsearch requests / responses
-                'UPPER_CASE'
+                'UPPER_CASE',
               ],
               filter: {
                 regex: allowedNameRegexp,
-                match: false
-              }
+                match: false,
+              },
             },
             {
               selector: 'function',
               format: [
                 'camelCase',
-                'PascalCase' // React.FunctionComponent =
+                'PascalCase', // React.FunctionComponent =
               ],
               filter: {
                 regex: allowedNameRegexp,
-                match: false
-              }
+                match: false,
+              },
             },
             {
               selector: 'typeLike',
@@ -165,27 +162,31 @@ module.exports = {
                 'objectLiteralMethod',
                 'typeMethod',
                 'accessor',
-                'enumMember'
+                'enumMember',
               ],
               format: null,
-              modifiers: ['requiresQuotes']
-            }
+              modifiers: ['requiresQuotes'],
+            },
           ],
-          '@typescript-eslint/explicit-member-accessibility': ['error',
+          '@typescript-eslint/explicit-member-accessibility': [
+            'error',
             {
               accessibility: 'off',
               overrides: {
                 accessors: 'explicit',
                 constructors: 'no-public',
-                parameterProperties: 'explicit'
-              }
-            }
+                parameterProperties: 'explicit',
+              },
+            },
           ],
           '@typescript-eslint/prefer-function-type': 'error',
           '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
-          '@typescript-eslint/member-ordering': ['error', {
-            'default': ['public-static-field', 'static-field', 'instance-field']
-          }],
+          '@typescript-eslint/member-ordering': [
+            'error',
+            {
+              default: ['public-static-field', 'static-field', 'instance-field'],
+            },
+          ],
           '@typescript-eslint/consistent-type-assertions': 'error',
           '@typescript-eslint/no-empty-interface': 'error',
           '@typescript-eslint/no-extra-non-null-assertion': 'error',
@@ -196,24 +197,26 @@ module.exports = {
           '@typescript-eslint/no-undef': 'off',
           'no-undef': 'off',
 
-          '@typescript-eslint/triple-slash-reference': ['error', {
-            path: 'never',
-            types: 'never',
-            lib: 'never'
-          }],
+          '@typescript-eslint/triple-slash-reference': [
+            'error',
+            {
+              path: 'never',
+              types: 'never',
+              lib: 'never',
+            },
+          ],
           '@typescript-eslint/no-var-requires': 'error',
           '@typescript-eslint/unified-signatures': 'error',
           'constructor-super': 'error',
           'dot-notation': 'error',
-          'eqeqeq': ['error', 'always', {'null': 'ignore'}],
+          eqeqeq: ['error', 'always', { null: 'ignore' }],
           'guard-for-in': 'error',
-          'import/order': ['error', {
-            'groups': [
-              ['external', 'builtin'],
-              'internal',
-              ['parent', 'sibling', 'index'],
-            ],
-          }],
+          'import/order': [
+            'error',
+            {
+              groups: [['external', 'builtin'], 'internal', ['parent', 'sibling', 'index']],
+            },
+          ],
           'max-classes-per-file': ['error', 1],
           'no-bitwise': 'error',
           'no-caller': 'error',
@@ -234,22 +237,27 @@ module.exports = {
           'no-unused-labels': 'error',
           'no-var': 'error',
           'object-shorthand': 'error',
-          'one-var': [ 'error', 'never' ],
+          'one-var': ['error', 'never'],
           'prefer-const': 'error',
           'prefer-rest-params': 'error',
-          'radix': 'error',
-          'spaced-comment': ["error", "always", {
-            "exceptions": ["/"]
-          }],
+          radix: 'error',
+          'spaced-comment': [
+            'error',
+            'always',
+            {
+              exceptions: ['/'],
+            },
+          ],
           'use-isnan': 'error',
 
           // Old tslint yml override or defined rules
           'ban/ban': [
             2,
-            {'name': ['describe', 'only'], 'message': 'No exclusive suites.'},
-            {'name': ['it', 'only'], 'message': 'No exclusive tests.'},
-            {'name': ['test', 'only'], 'message': 'No exclusive tests.'},
-
+            { name: ['describe', 'only'], message: 'No exclusive suites.' },
+            { name: ['it', 'only'], message: 'No exclusive tests.' },
+            { name: ['test', 'only'], message: 'No exclusive tests.' },
+            { name: ['testSuggestions', 'only'], message: 'No exclusive tests.' },
+            { name: ['testErrorsAndWarnings', 'only'], message: 'No exclusive tests.' },
           ],
           'import/no-default-export': 'error',
 
@@ -258,13 +266,13 @@ module.exports = {
           'no-restricted-syntax': [
             'error',
             {
-              "selector": "TSEnumDeclaration[const=true]",
-              "message": "Do not use `const` with enum declarations"
-            }
-          ]
+              selector: 'TSEnumDeclaration[const=true]',
+              message: 'Do not use `const` with enum declarations',
+            },
+          ],
         },
         eslintConfigPrettierRules
-      )
+      ),
     },
-  ]
+  ],
 };

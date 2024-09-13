@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Key } from 'selenium-webdriver';
 import moment from 'moment';
+import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -18,22 +18,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['reporting', 'common', 'discover', 'timePicker', 'share']);
+  const { reporting, common, discover, timePicker, share, header } = getPageObjects([
+    'reporting',
+    'common',
+    'discover',
+    'timePicker',
+    'share',
+    'header',
+  ]);
+  const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
 
   const setFieldsFromSource = async (setValue: boolean) => {
     await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
     await browser.refresh();
   };
 
-  const getReport = async () => {
-    await PageObjects.reporting.openCsvReportingPanel();
-    await PageObjects.reporting.clickGenerateReportButton();
+  const getReport = async ({ timeout } = { timeout: 60 * 1000 }) => {
+    // close any open notification toasts
+    await toasts.dismissAll();
 
-    const url = await PageObjects.reporting.getReportURL(60000);
-    const res = await PageObjects.reporting.getResponse(url);
+    await reporting.openExportTab();
+    await reporting.clickGenerateReportButton();
+
+    const url = await reporting.getReportURL(timeout);
+    const res = await reporting.getResponse(url ?? '');
 
     expect(res.status).to.equal(200);
     expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
@@ -45,8 +56,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
         await reportingAPI.initEcommerce();
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.selectIndexPattern('ecommerce');
+        await common.navigateToApp('discover');
+        await discover.selectIndexPattern('ecommerce');
       });
 
       after(async () => {
@@ -55,20 +66,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('is available if new', async () => {
-        await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await reporting.openExportTab();
+        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await share.closeShareModal();
       });
 
       it('becomes available when saved', async () => {
-        await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
-        await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await discover.saveSearch('my search - expectEnabledGenerateReportButton');
+        await reporting.openExportTab();
+        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await share.closeShareModal();
       });
     });
 
     describe('Generate CSV: new search', () => {
       before(async () => {
         await reportingAPI.initEcommerce();
+        /**
+         *  Important: `esArchiver.emptyKibanaIndex()` above also resets the
+         * Kibana time zone setting, so we're re-applying it here.
+         * The serverless version of the test uses
+         * `kibanaServer.savedObjects.cleanStandardList` instead,
+         * which does not reset the time zone setting,
+         * so we don't need to re-apply it in these tests.
+         */
+        await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
       });
 
       after(async () => {
@@ -77,35 +99,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.selectIndexPattern('ecommerce');
+        await common.navigateToApp('discover');
+        await discover.selectIndexPattern('ecommerce');
       });
 
       it('generates a report with single timefilter', async () => {
-        await PageObjects.discover.clickNewSearchButton();
-        await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
-        await PageObjects.discover.saveSearch('single-timefilter-search');
+        await discover.clickNewSearchButton();
+        await timePicker.setCommonlyUsedTime('Last_24 hours');
+        await discover.saveSearch('single-timefilter-search');
 
         // get shared URL value
-        await PageObjects.share.clickShareTopNavButton();
-        const sharedURL = await PageObjects.share.getSharedUrl();
+        const sharedURL = await browser.getCurrentUrl();
 
         // click 'Copy POST URL'
-        await PageObjects.share.clickShareTopNavButton();
-        await PageObjects.reporting.openCsvReportingPanel();
-        const advOpt = await find.byXPath(`//button[descendant::*[text()='Advanced options']]`);
-        await advOpt.click();
-        const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
-        await postUrl.click();
-
-        // get clipboard value using field search input, since
-        // 'browser.getClipboardValue()' doesn't work, due to permissions
-        const textInput = await testSubjects.find('fieldListFiltersFieldSearch');
-        await textInput.click();
-        await browser.getActions().keyDown(Key.CONTROL).perform();
-        await browser.getActions().keyDown('v').perform();
-
-        const reportURL = decodeURIComponent(await textInput.getAttribute('value'));
+        await share.clickShareTopNavButton();
+        await reporting.openExportTab();
+        const copyButton = await testSubjects.find('shareReportingCopyURL');
+        const reportURL = decodeURIComponent(
+          (await copyButton.getAttribute('data-share-url')) ?? ''
+        );
 
         // get number of filters in URLs
         const timeFiltersNumberInReportURL =
@@ -116,25 +128,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(sharedURL.includes('time:(from:now-24h%2Fh,to:now))')).to.be(true);
 
         expect(timeFiltersNumberInReportURL).to.be(1);
+
         expect(
           reportURL.includes(
-            'query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))'
+            `query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))`
           )
         ).to.be(true);
 
         // return keyboard state
         await browser.getActions().keyUp(Key.CONTROL).perform();
         await browser.getActions().keyUp('v').perform();
-
-        //  return field search input state
-        await textInput.clearValue();
       });
 
       it('generates a report from a new search with data: default', async () => {
-        await PageObjects.discover.clickNewSearchButton();
-        await PageObjects.reporting.setTimepickerInEcommerceDataRange();
+        await discover.clickNewSearchButton();
+        await reporting.setTimepickerInEcommerceDataRange();
 
-        await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
+        await discover.saveSearch('my search - with data - expectReportCanBeCreated');
 
         const res = await getReport();
         expect(res.status).to.equal(200);
@@ -145,8 +155,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('generates a report with no data', async () => {
-        await PageObjects.reporting.setTimepickerInEcommerceNoDataRange();
-        await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
+        await reporting.setTimepickerInEcommerceNoDataRange();
+        await discover.saveSearch('my search - no data - expectReportCanBeCreated');
 
         const res = await getReport();
         expect(res.text).to.be(`\n`);
@@ -155,18 +165,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('generates a large export', async () => {
         const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
         const toTime = 'Aug 23, 2019 @ 16:18:51.821';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.discover.clickNewSearchButton();
+        await timePicker.setAbsoluteRange(fromTime, toTime);
+        await discover.clickNewSearchButton();
         await retry.try(async () => {
-          expect(await PageObjects.discover.getHitCount()).to.equal('4,675');
+          expect(await discover.getHitCount()).to.equal('4,675');
         });
-        await PageObjects.discover.saveSearch('large export');
+        await discover.saveSearch('large export');
 
         // match file length, the beginning and the end of the csv file contents
-        const { text: csvFile } = await getReport();
-        expect(csvFile.length).to.be(4826973);
+        const { text: csvFile } = await getReport({ timeout: 80 * 1000 });
+        expect(csvFile.length).to.be(4845684);
         expectSnapshot(csvFile.slice(0, 5000)).toMatch();
         expectSnapshot(csvFile.slice(-5000)).toMatch();
+      });
+
+      it('generate a report using ES|QL', async () => {
+        await discover.selectTextBaseLang();
+        const testQuery = `from ecommerce | STATS total_sales = SUM(taxful_total_price) BY day_of_week |  SORT total_sales DESC`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+
+        const res = await getReport();
+        expect(res.status).to.equal(200);
+        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
+
+        const csvFile = res.text;
+        expectSnapshot(csvFile).toMatch();
       });
     });
 
@@ -223,8 +249,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reset();
         await createDocs();
         await reportingAPI.initLogs();
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.loadSavedSearch('Sparse Columns');
+        await common.navigateToApp('discover');
+        await discover.loadSavedSearch('Sparse Columns');
       });
 
       after(async () => {
@@ -235,9 +261,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         const fromTime = 'Jan 10, 2005 @ 00:00:00.000';
         const toTime = 'Dec 23, 2006 @ 00:00:00.000';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await timePicker.setAbsoluteRange(fromTime, toTime);
         await retry.try(async () => {
-          expect(await PageObjects.discover.getHitCount()).to.equal(TEST_DOC_COUNT.toString());
+          expect(await discover.getHitCount()).to.equal(TEST_DOC_COUNT.toString());
         });
       });
 
@@ -255,13 +281,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const setupPage = async () => {
         const fromTime = 'Jun 22, 2019 @ 00:00:00.000';
         const toTime = 'Jun 26, 2019 @ 23:30:00.000';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await timePicker.setAbsoluteRange(fromTime, toTime);
       };
 
       before(async () => {
         await reportingAPI.initEcommerce();
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.selectIndexPattern('ecommerce');
+        await common.navigateToApp('discover');
+        await discover.selectIndexPattern('ecommerce');
       });
 
       after(async () => {
@@ -273,13 +299,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await PageObjects.reporting.checkForReportingToasts();
+        await reporting.checkForReportingToasts();
       });
 
       it('generates a report with data', async () => {
-        await PageObjects.discover.loadSavedSearch('Ecommerce Data');
+        await discover.loadSavedSearch('Ecommerce Data');
         await retry.try(async () => {
-          expect(await PageObjects.discover.getHitCount()).to.equal('740');
+          expect(await discover.getHitCount()).to.equal('740');
         });
 
         const { text: csvFile } = await getReport();
@@ -287,15 +313,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('generates a report with filtered data', async () => {
-        await PageObjects.discover.loadSavedSearch('Ecommerce Data');
+        await discover.loadSavedSearch('Ecommerce Data');
         await retry.try(async () => {
-          expect(await PageObjects.discover.getHitCount()).to.equal('740');
+          expect(await discover.getHitCount()).to.equal('740');
         });
 
         // filter
         await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
         await retry.try(async () => {
-          expect(await PageObjects.discover.getHitCount()).to.equal('154');
+          expect(await discover.getHitCount()).to.equal('154');
         });
 
         const { text: csvFile } = await getReport();
@@ -303,10 +329,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('generates a report with discover:searchFieldsFromSource = true', async () => {
-        await PageObjects.discover.loadSavedSearch('Ecommerce Data');
+        await discover.loadSavedSearch('Ecommerce Data');
 
         await retry.try(async () => {
-          expect(await PageObjects.discover.getHitCount()).to.equal('740');
+          expect(await discover.getHitCount()).to.equal('740');
         });
 
         await setFieldsFromSource(true);

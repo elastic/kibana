@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
@@ -73,7 +74,12 @@ export interface SavedObjectsRawDoc {
   _primary_term?: number;
 }
 
-/** @public */
+/**
+ * Saved object document as stored in `_source` of doc in ES index
+ * Similar to SavedObjectDoc and excludes `version`, includes `references`, has `attributes` in [typeMapping]
+ *
+ * @public
+ */
 export interface SavedObjectsRawDocSource {
   type: string;
   namespace?: string;
@@ -82,8 +88,10 @@ export interface SavedObjectsRawDocSource {
   typeMigrationVersion?: string;
   updated_at?: string;
   created_at?: string;
+  created_by?: string;
   references?: SavedObjectReference[];
   originId?: string;
+  managed?: boolean;
 
   [typeMapping: string]: any;
 }
@@ -93,7 +101,7 @@ export interface SavedObjectsRawDocSource {
  *
  * @public
  */
-interface SavedObjectDoc<T = unknown> {
+export interface SavedObjectDoc<T = unknown> {
   attributes: T;
   id: string;
   type: string;
@@ -104,8 +112,11 @@ interface SavedObjectDoc<T = unknown> {
   typeMigrationVersion?: string;
   version?: string;
   updated_at?: string;
+  updated_by?: string;
   created_at?: string;
+  created_by?: string;
   originId?: string;
+  managed?: boolean;
 }
 
 /**

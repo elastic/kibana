@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { filter, first } from 'rxjs/operators';
+import { filter } from 'rxjs';
 import { errors } from '@elastic/elasticsearch';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
 /**
@@ -23,8 +24,8 @@ import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 export async function isValidConnection(
   esNodesCompatibility$: Observable<NodesVersionCompatibility>
 ) {
-  return await esNodesCompatibility$
-    .pipe(
+  return await firstValueFrom(
+    esNodesCompatibility$.pipe(
       filter(({ nodesInfoRequestError, isCompatible }) => {
         if (
           nodesInfoRequestError &&
@@ -35,8 +36,7 @@ export async function isValidConnection(
           throw nodesInfoRequestError;
         }
         return isCompatible;
-      }),
-      first()
+      })
     )
-    .toPromise();
+  );
 }

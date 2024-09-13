@@ -11,9 +11,10 @@ import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import { EventHit, TimelineEventsDetailsItem } from '../search_strategy';
+import { Fields, TimelineEventsDetailsItem } from '../search_strategy';
 import { toObjectArrayOfStrings, toStringArray } from './to_array';
 import { ENRICHMENT_DESTINATION_PATH } from '../constants';
+
 export const baseCategoryFields = ['@timestamp', 'labels', 'message', 'tags'];
 const nonFlattenedFormatParamsFields = ['related_integrations', 'threat_mapping'];
 
@@ -51,7 +52,7 @@ export const isThreatEnrichmentFieldOrSubfield = (field: string, prependField?: 
   prependField?.includes(ENRICHMENT_DESTINATION_PATH) || field === ENRICHMENT_DESTINATION_PATH;
 
 export const getDataFromFieldsHits = (
-  fields: EventHit['fields'],
+  fields: Fields,
   prependField?: string,
   prependFieldCategory?: string
 ): TimelineEventsDetailsItem[] =>
@@ -111,17 +112,23 @@ export const getDataFromFieldsHits = (
       : [];
 
     // format nested fields
-    let nestedFields;
+    let nestedFields: TimelineEventsDetailsItem[] = [];
     if (isRuleParametersFieldOrSubfield(field, prependField)) {
       nestedFields = Array.isArray(item)
         ? item
-            .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
+            .reduce<TimelineEventsDetailsItem[][]>((acc, curr) => {
+              acc.push(getDataFromFieldsHits(curr as Fields, dotField, fieldCategory));
+              return acc;
+            }, [])
             .flat()
         : getDataFromFieldsHits(item, dotField, fieldCategory);
     } else {
       nestedFields = Array.isArray(item)
         ? item
-            .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
+            .reduce<TimelineEventsDetailsItem[][]>((acc, curr) => {
+              acc.push(getDataFromFieldsHits(curr as Fields, dotField, fieldCategory));
+              return acc;
+            }, [])
             .flat()
         : getDataFromFieldsHits(item, prependField, fieldCategory);
     }
@@ -143,14 +150,14 @@ export const getDataFromFieldsHits = (
                 originalValue: acc[f.field].originalValue.includes(f.originalValue[0])
                   ? acc[f.field].originalValue
                   : [...acc[f.field].originalValue, ...f.originalValue],
-                values: acc[f.field].values.includes(f.values[0])
+                values: acc[f.field].values?.includes(f.values?.[0] || '')
                   ? acc[f.field].values
-                  : [...acc[f.field].values, ...f.values],
+                  : [...(acc[f.field].values || []), ...(f.values || [])],
               },
             }
           : { [f.field]: f }),
       }),
-      {}
+      {} as Record<string, TimelineEventsDetailsItem>
     );
 
     return Object.values(flat);

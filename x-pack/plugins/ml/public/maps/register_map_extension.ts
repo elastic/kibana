@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MapsSetupApi } from '@kbn/maps-plugin/public';
+import type { MapsSetupApi } from '@kbn/maps-plugin/public';
 import type { MlCoreSetup } from '../plugin';
 import { AnomalySourceFactory } from './anomaly_source_factory';
 import { AnomalyLayerWizardFactory } from './anomaly_layer_wizard_factory';
@@ -15,7 +15,7 @@ export async function registerMapExtension(
   core: MlCoreSetup,
   { canGetJobs, canCreateJobs }: { canGetJobs: boolean; canCreateJobs: boolean }
 ) {
-  const anomalySourceFactory = new AnomalySourceFactory(core.getStartServices, canGetJobs);
+  const anomalySourceFactory = new AnomalySourceFactory(core.getStartServices);
   const anomalyLayerWizardFactory = new AnomalyLayerWizardFactory(
     core.getStartServices,
     canGetJobs,

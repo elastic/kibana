@@ -15,6 +15,15 @@ import { sendUpgradeAgentsActions } from './upgrade';
 import { createClientMock } from './action.mock';
 import { getRollingUpgradeOptions, upgradeBatch } from './upgrade_action_runner';
 
+jest.mock('./versions', () => {
+  return {
+    getAvailableVersions: jest
+      .fn()
+      .mockResolvedValue(['8.4.0', '8.5.0', '8.6.0', '8.7.0', '8.8.0']),
+    getLatestAvailableAgentVersion: jest.fn().mockResolvedValue('8.8.0'),
+  };
+});
+
 jest.mock('./action_status', () => {
   return {
     getCancelledActions: jest.fn().mockResolvedValue([
@@ -26,15 +35,24 @@ jest.mock('./action_status', () => {
 });
 
 describe('sendUpgradeAgentsActions (plural)', () => {
+  let mocks: ReturnType<typeof createClientMock>;
+
   beforeEach(async () => {
-    appContextService.start(createAppContextStartContractMock());
+    mocks = createClientMock();
+
+    appContextService.start(
+      createAppContextStartContractMock({}, false, {
+        internal: mocks.soClient,
+        withoutSpaceExtensions: mocks.soClient,
+      })
+    );
   });
 
   afterEach(() => {
     appContextService.stop();
   });
   it('can upgrade from an regular agent policy', async () => {
-    const { soClient, esClient, agentInRegularDoc, agentInRegularDoc2 } = createClientMock();
+    const { soClient, esClient, agentInRegularDoc, agentInRegularDoc2 } = mocks;
     const idsToAction = [agentInRegularDoc._id, agentInRegularDoc2._id];
     await sendUpgradeAgentsActions(soClient, esClient, { agentIds: idsToAction, version: '8.5.0' });
 
@@ -46,6 +64,7 @@ describe('sendUpgradeAgentsActions (plural)', () => {
     const docs = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.doc)
       .map((i: any) => i.doc);
+
     expect(ids).toEqual(idsToAction);
     for (const doc of docs!) {
       expect(doc).toHaveProperty('upgrade_started_at');
@@ -53,8 +72,7 @@ describe('sendUpgradeAgentsActions (plural)', () => {
     }
   });
   it('cannot upgrade from a hosted agent policy by default', async () => {
-    const { soClient, esClient, agentInHostedDoc, agentInRegularDoc, agentInRegularDoc2 } =
-      createClientMock();
+    const { soClient, esClient, agentInHostedDoc, agentInRegularDoc, agentInRegularDoc2 } = mocks;
 
     const idsToAction = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];
     await sendUpgradeAgentsActions(soClient, esClient, { agentIds: idsToAction, version: '8.5.0' });
@@ -89,8 +107,8 @@ describe('sendUpgradeAgentsActions (plural)', () => {
   });
 
   it('can upgrade from hosted agent policy with force=true', async () => {
-    const { soClient, esClient, agentInHostedDoc, agentInRegularDoc, agentInRegularDoc2 } =
-      createClientMock();
+    const { soClient, esClient, agentInHostedDoc, agentInRegularDoc, agentInRegularDoc2 } = mocks;
+
     const idsToAction = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];
     await sendUpgradeAgentsActions(soClient, esClient, {
       agentIds: idsToAction,
@@ -114,9 +132,9 @@ describe('sendUpgradeAgentsActions (plural)', () => {
   });
 
   it('skip upgrade if action id is cancelled', async () => {
-    const { soClient, esClient, agentInRegularDoc } = createClientMock();
+    const { esClient, agentInRegularDoc } = mocks;
     const agents = [{ id: agentInRegularDoc._id } as Agent];
-    await upgradeBatch(soClient, esClient, agents, {}, {
+    await upgradeBatch(esClient, agents, {}, {
       actionId: 'cancelled-action',
     } as any);
   });
@@ -152,10 +170,10 @@ describe('getRollingUpgradeOptions', () => {
     });
   });
 
-  it('should set min expiration for no duration', () => {
+  it('should set a very long expiration (1 month) for no duration', () => {
     const options = getRollingUpgradeOptions('2023-01-06T00:00:00Z');
     expect(options).toEqual({
-      expiration: '2023-01-06T02:00:00.000Z',
+      expiration: '2023-02-05T00:00:00.000Z',
       minimum_execution_duration: 7200,
       start_time: '2023-01-06T00:00:00Z',
     });

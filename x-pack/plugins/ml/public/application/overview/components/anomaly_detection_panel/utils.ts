@@ -7,8 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
-import { GroupsDictionary } from './anomaly_detection_panel';
-import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
+import type { GroupsDictionary } from './anomaly_detection_panel';
+import type {
+  MlSummaryJobs,
+  MlSummaryJob,
+} from '../../../../../common/types/anomaly_detection_jobs';
 
 export function getGroupsFromJobs(jobs: MlSummaryJobs): {
   groups: GroupsDictionary;
@@ -74,49 +77,59 @@ export function getGroupsFromJobs(jobs: MlSummaryJobs): {
   return { groups, count };
 }
 
-export function getStatsBarData(jobsList: any) {
+export function getStatsBarData(jobsList: MlSummaryJob[] | undefined, showNodeInfo: boolean) {
   const jobStats = {
-    activeNodes: {
-      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.activeMLNodesLabel', {
-        defaultMessage: 'Active ML nodes',
-      }),
-      value: 0,
-      show: true,
-    },
     total: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.totalJobsLabel', {
-        defaultMessage: 'Total jobs',
+        defaultMessage: 'Total',
       }),
       value: 0,
       show: true,
+      group: 0,
     },
     open: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.openJobsLabel', {
-        defaultMessage: 'Open jobs',
+        defaultMessage: 'Open',
       }),
       value: 0,
       show: true,
+      group: 0,
     },
     closed: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.closedJobsLabel', {
-        defaultMessage: 'Closed jobs',
+        defaultMessage: 'Closed',
       }),
       value: 0,
       show: true,
+      group: 0,
     },
     failed: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.failedJobsLabel', {
-        defaultMessage: 'Failed jobs',
+        defaultMessage: 'Failed',
       }),
       value: 0,
       show: false,
+      group: 0,
     },
+    ...(showNodeInfo
+      ? {
+          activeNodes: {
+            label: i18n.translate('xpack.ml.overviewJobsList.statsBar.activeMLNodesLabel', {
+              defaultMessage: 'Active ML nodes',
+            }),
+            value: 0,
+            show: true,
+            group: 1,
+          },
+        }
+      : {}),
     activeDatafeeds: {
       label: i18n.translate('xpack.ml.jobsList.statsBar.activeDatafeedsLabel', {
         defaultMessage: 'Active datafeeds',
       }),
       value: 0,
       show: true,
+      group: 1,
     },
   };
 
@@ -156,7 +169,17 @@ export function getStatsBarData(jobsList: any) {
     jobStats.failed.show = false;
   }
 
-  jobStats.activeNodes.value = Object.keys(mlNodes).length;
+  if (showNodeInfo) {
+    jobStats.activeNodes!.value = Object.keys(mlNodes).length;
+  }
+
+  if (jobStats.total.value === 0) {
+    for (const [statKey, val] of Object.entries(jobStats)) {
+      if (statKey !== 'total') {
+        val.show = false;
+      }
+    }
+  }
 
   return jobStats;
 }

@@ -9,20 +9,12 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { mlApiServicesMock } from '../../../services/__mocks__/ml_api_services';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { LIGHT_THEME } from '@elastic/charts';
 
 export const chartsServiceMock = {
   theme: {
-    useChartsTheme: jest.fn(() => {
-      return {
-        crosshair: {
-          line: {
-            stroke: 'black',
-            strokeWidth: 1,
-            dash: [4, 4],
-          },
-        },
-      };
-    }),
+    useChartsBaseTheme: jest.fn(() => LIGHT_THEME),
   },
   activeCursor: {
     activeCursor$: new BehaviorSubject({
@@ -37,21 +29,47 @@ export const kibanaContextMock = {
   services: {
     uiSettings: { get: jest.fn() },
     chrome: { recentlyAccessed: { add: jest.fn() } },
-    application: { navigateToApp: jest.fn() },
+    application: {
+      navigateToApp: jest.fn(),
+      navigateToUrl: jest.fn(),
+      capabilities: {
+        ml: {
+          canCreateJob: true,
+        },
+      },
+    },
     http: {
       basePath: {
         get: jest.fn(),
       },
     },
     share: {
+      url: {
+        locators: {
+          get: jest.fn(() => {
+            return {
+              getUrl: jest.fn(() => {
+                return Promise.resolve('mock-url');
+              }),
+            };
+          }),
+        },
+      },
       urlGenerators: { getUrlGenerator: jest.fn() },
     },
     data: dataPluginMock.createStartContract(),
     charts: chartsServiceMock,
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     mlServices: {
-      mlApiServices: mlApiServicesMock,
+      mlApi: mlApiServicesMock,
+      mlCapabilities: {
+        refreshCapabilities: jest.fn(),
+      },
+      mlFieldFormatService: {
+        getFieldFormat: jest.fn(),
+      },
     },
+    notifications: notificationServiceMock.createStartContract(),
   },
 };
 

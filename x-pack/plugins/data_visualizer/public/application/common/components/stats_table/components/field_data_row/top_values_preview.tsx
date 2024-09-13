@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
-import type { ChartData, OrdinalDataItem } from './field_histograms';
+import type { ChartData, OrdinalDataItem } from '@kbn/ml-data-grid';
 import { ColumnChart } from './column_chart';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 
@@ -24,7 +25,7 @@ export const TopValuesPreview: FC<TopValuesPreviewProps> = ({ config, isNumeric 
 
   const data: OrdinalDataItem[] = topValues.map((d) => ({
     ...d,
-    key: d.key.toString(),
+    key: d.key?.toString(),
   }));
   const chartData: ChartData = {
     cardinality,

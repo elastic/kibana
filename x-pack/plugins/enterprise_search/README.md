@@ -21,7 +21,7 @@ Unify all your team's content into a personalized search experience. https://www
 1. When developing locally, Enterprise Search should be running locally alongside Kibana on `localhost:3002`.
 2. Update `config/kibana.dev.yml` with `enterpriseSearch.host: 'http://localhost:3002'`
 
-Problems? If you're an Elastic Enterprise Search engineer, please reach out to @elastic/enterprise-search-frontend for questions or our in-depth Getting Started developer guide.
+Problems? If you're an Elastic Enterprise Search engineer, please reach out to @elastic/search-kibana for questions or our in-depth Getting Started developer guide.
 
 Don't forget to read Kibana's [contributing documentation](https://github.com/elastic/kibana/#building-and-running-kibana-andor-contributing-code) and developer guides for more general info on the Kibana ecosystem.
 
@@ -89,29 +89,13 @@ Cypress tests can be run directly from the `x-pack/plugins/enterprise_search` fo
 
 ```bash
 # Basic syntax
-sh cypress.sh {run|open} {suite}
+sh cypress.sh {run|open|dev}
 
 # Examples
-sh cypress.sh run overview   # run Enterprise Search overview tests
-sh cypress.sh open overview  # open Enterprise Search overview tests
+sh cypress.sh run    # run Enterprise Search tests
+sh cypress.sh open   # open Enterprise Search tests
+sh cypress.sh dev    # run "cypress only" with Enterprise Search config
 
-sh cypress.sh run as         # run App Search tests
-sh cypress.sh open as        # open App Search tests
-
-sh cypress.sh run ws         # run Workplace Search tests
-sh cypress.sh open ws        # open Workplace Search tests
-
-# Overriding env variables
-sh cypress.sh open as --env username=enterprise_search password=123
-
-# Overriding config settings, e.g. changing the base URL to a dev path, or enabling video recording
-sh cypress.sh open as --config baseUrl=http://localhost:5601/xyz video=true
-
-# Only run a single specific test file
-sh cypress.sh run ws --spec '**/example.spec.ts'
-
-# Opt to run Chrome headlessly
-sh cypress.sh run ws --headless
 ```
 
 There are 3 ways you can spin up the required environments to run our Cypress tests:
@@ -126,13 +110,8 @@ There are 3 ways you can spin up the required environments to run our Cypress te
    - Enterprise Search:
      - Nothing extra is required to run Cypress tests, only what is already needed to run Kibana/Enterprise Search locally.
 2. Running Cypress against Kibana's functional test server:
-   - :information_source: While we won't use the runner, we can still make use of Kibana's functional test server to help us spin up Elasticsearch and Kibana instances.
-     - NOTE: We recommend stopping any other local dev processes, to reduce issues with memory/performance
-   - From the `x-pack/` project folder, run `node scripts/functional_tests_server --config test/functional_enterprise_search/cypress.config.ts`
-   - Kibana:
-     - You will need to pass `--config baseUrl=http://localhost:5620` into your Cypress command.
-   - Enterprise Search:
-     - :warning: TODO: We _currently_ do not have a way of spinning up Enterprise Search from Kibana's FTR - for now, you can use local Enterprise Search (pointed at the FTR's `http://localhost:9220` Elasticsearch host instance)
+   - Make sure docker is up and running in you system
+   - From the `x-pack/` project folder, run `sh cypress.sh` which will spin up Kibana, Elasticsearch through functional test runners and Enterprise Search instance in Docker.
 3. Running Cypress against Enterprise Search dockerized stack scripts
    - :warning: This is for Enterprise Search devs only, as this requires access to our closed source Enterprise Search repo
    - `stack_scripts/start-with-es-native-auth.sh --with-kibana`
@@ -158,4 +137,4 @@ To track what Cypress is doing while running tests, you can pass in `--config vi
 
 See [our functional test runner README](../../test/functional_enterprise_search).
 
-Our automated accessibility tests can be found in [x-pack/test/accessibility/apps](../../test/accessibility/apps/enterprise_search.ts).
+Our automated accessibility tests can be found in [x-pack/test/accessibility/apps](../../test/accessibility/apps/group3/enterprise_search.ts).

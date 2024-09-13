@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { ReactNode } from 'react';
@@ -13,7 +14,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '../../../../mocks';
 import { createConnectedSearchSessionIndicator } from './connected_search_session_indicator';
 import { BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import {
   ISessionService,
   RefreshInterval,
@@ -80,7 +81,8 @@ test("shouldn't show indicator in case no active search session", async () => {
   expect(container).toMatchInlineSnapshot(`
     <div>
       <div
-        class="kbnRedirectCrossAppLinks"
+        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+        data-test-subj="kbnRedirectAppLink"
       />
     </div>
   `);
@@ -109,7 +111,8 @@ test("shouldn't show indicator in case app hasn't opt-in", async () => {
   expect(container).toMatchInlineSnapshot(`
     <div>
       <div
-        class="kbnRedirectCrossAppLinks"
+        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+        data-test-subj="kbnRedirectAppLink"
       />
     </div>
   `);

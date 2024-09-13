@@ -65,9 +65,8 @@ function createTestJobAndDatafeed() {
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  const pageObjects = getPageObjects(['triggersActionsUI']);
+  const pageObjects = getPageObjects(['triggersActionsUI', 'header']);
   const commonScreenshots = getService('commonScreenshots');
-  const browser = getService('browser');
   const actions = getService('actions');
   const testSubjects = getService('testSubjects');
 
@@ -78,7 +77,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('anomaly detection alert', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
 
       const { job, datafeed } = createTestJobAndDatafeed();
 
@@ -105,16 +104,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('alert flyout screenshots', async () => {
         await ml.navigation.navigateToAlertsAndAction();
         await pageObjects.triggersActionsUI.clickCreateAlertButton();
-        await ml.alerting.setRuleName('test-ecommerce');
-        const searchBox = await testSubjects.find('ruleSearchField');
-        await searchBox.click();
-        await searchBox.clearValue();
-        await searchBox.type('ml');
-        await searchBox.pressKeys(browser.keys.ENTER);
-        await ml.testExecution.logTestStep('take screenshot');
-        await commonScreenshots.takeScreenshot('ml-rule', screenshotDirectories, 1920, 1400);
-
+        await ml.testExecution.logTestStep('Create anomaly detection jobs health rule');
         await ml.alerting.selectAnomalyDetectionJobHealthAlertType();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await ml.alerting.setRuleName('test-ecommerce');
         await ml.alerting.selectJobs([testJobId]);
         await ml.testExecution.logTestStep('take screenshot');
         await commonScreenshots.takeScreenshot(
@@ -123,11 +116,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           1920,
           1400
         );
+        await ml.alerting.selectSlackConnectorType();
+        await ml.testExecution.logTestStep('should open connectors');
+        await ml.alerting.clickCreateConnectorButton();
+        await ml.alerting.setConnectorName('test-connector');
+        await ml.alerting.setWebhookUrl('https://www.elastic.co');
+        await ml.alerting.clickSaveActionButton();
+        await commonScreenshots.takeScreenshot(
+          'ml-health-check-action',
+          screenshotDirectories,
+          1920,
+          1400
+        );
         await ml.alerting.clickCancelSaveRuleButton();
 
+        await ml.testExecution.logTestStep('Create anomaly detection rule');
         await pageObjects.triggersActionsUI.clickCreateAlertButton();
-        await ml.alerting.setRuleName('test-ecommerce');
         await ml.alerting.selectAnomalyDetectionAlertType();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await ml.alerting.setRuleName('test-ecommerce');
         await ml.testExecution.logTestStep('should have correct default values');
         await ml.alerting.assertSeverity(75);
         await ml.alerting.assertPreviewButtonState(false);
@@ -150,16 +157,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           1920,
           1400
         );
-        await ml.alerting.selectSlackConnectorType();
-        await ml.testExecution.logTestStep('should open connectors');
-        await ml.alerting.clickCreateConnectorButton();
-        await ml.alerting.setConnectorName('test-connector');
-        await ml.alerting.setWebhookUrl('https://www.elastic.co');
-        await ml.alerting.clickSaveActionButton();
+        await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
+        await commonScreenshots.takeScreenshot(
+          'ml-anomaly-alert-action-score-matched',
+          screenshotDirectories,
+          1920,
+          1400
+        );
         await ml.alerting.openAddRuleVariable();
         await ml.testExecution.logTestStep('take screenshot');
         await commonScreenshots.takeScreenshot(
           'ml-anomaly-alert-messages',
+          screenshotDirectories,
+          1920,
+          1400
+        );
+        const actionFrequency = await testSubjects.find('summaryOrPerRuleSelect');
+        await actionFrequency.click();
+        const actionSummary = await testSubjects.find('actionNotifyWhen-option-summary');
+        await actionSummary.click();
+        await commonScreenshots.takeScreenshot(
+          'ml-anomaly-alert-action-summary',
           screenshotDirectories,
           1920,
           1400

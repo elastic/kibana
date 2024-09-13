@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { IExternalUrl } from '@kbn/core/public';
-import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
-import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
+import { UrlDrilldown, Config } from './url_drilldown';
 import {
-  IEmbeddable,
+  ValueClickContext,
   VALUE_CLICK_TRIGGER,
   SELECT_RANGE_TRIGGER,
   CONTEXT_MENU_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { of } from '@kbn/kibana-utils-plugin/common';
-import { createPoint, rowClickData, TestEmbeddable } from './test/data';
+import { createPoint, rowClickData } from './test/data';
 import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 
 const mockDataPoints = [
   {
@@ -54,14 +56,13 @@ const mockDataPoints = [
   },
 ];
 
-const mockEmbeddable = {
-  getInput: () => ({
-    filters: [],
-    timeRange: { from: 'now-15m', to: 'now' },
-    query: { query: 'test', language: 'kuery' },
-  }),
-  getOutput: () => ({}),
-} as unknown as IEmbeddable;
+const mockEmbeddableApi = {
+  parentApi: {
+    filters$: new BehaviorSubject([]),
+    query$: new BehaviorSubject({ query: 'test', language: 'kuery' }),
+    timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
+  },
+};
 
 const mockNavigateToUrl = jest.fn(() => Promise.resolve());
 
@@ -84,7 +85,10 @@ const createDrilldown = (isExternalUrlValid: boolean = true) => {
     getSyntaxHelpDocsLink: () => 'http://localhost:5601/docs',
     getVariablesHelpDocsLink: () => 'http://localhost:5601/docs',
     navigateToUrl: mockNavigateToUrl,
-    uiSettings: uiSettingsServiceMock.createSetupContract(),
+    settings: settingsServiceMock.createSetupContract(),
+    theme: () => {
+      return themeServiceMock.createStartContract();
+    },
   });
   return drilldown;
 };
@@ -103,9 +107,10 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
-      const context: ActionContext = {
+      const context: ValueClickContext = {
         data: {
           data: mockDataPoints,
         },
@@ -120,13 +125,14 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
-      const context: ActionContext = {
+      const context: ValueClickContext = {
         data: {
           data: mockDataPoints,
         },
-        embeddable: mockEmbeddable,
+        embeddable: mockEmbeddableApi,
       };
 
       const result = urlDrilldown.isCompatible(config, context);
@@ -139,13 +145,14 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.somethingFake}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
-      const context: ActionContext = {
+      const context: ValueClickContext = {
         data: {
           data: mockDataPoints,
         },
-        embeddable: mockEmbeddable,
+        embeddable: mockEmbeddableApi,
       };
 
       await expect(urlDrilldown.isCompatible(config, context)).resolves.toBe(false);
@@ -159,13 +166,14 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
-      const context: ActionContext = {
+      const context: ValueClickContext = {
         data: {
           data: mockDataPoints,
         },
-        embeddable: mockEmbeddable,
+        embeddable: mockEmbeddableApi,
       };
 
       const result1 = await drilldown1.isCompatible(config, context);
@@ -187,13 +195,14 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
-      const context: ActionContext = {
+      const context: ValueClickContext = {
         data: {
           data: mockDataPoints,
         },
-        embeddable: mockEmbeddable,
+        embeddable: mockEmbeddableApi,
       };
 
       const url = await urlDrilldown.getHref(config, context);
@@ -209,13 +218,14 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.invalid}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
-      const context: ActionContext = {
+      const context: ValueClickContext = {
         data: {
           data: mockDataPoints,
         },
-        embeddable: mockEmbeddable,
+        embeddable: mockEmbeddableApi,
       };
 
       await expect(urlDrilldown.getHref(config, context)).rejects.toThrowError();
@@ -231,13 +241,14 @@ describe('UrlDrilldown', () => {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
         },
         openInNewTab: false,
+        encodeUrl: true,
       };
 
-      const context: ActionContext = {
+      const context: ValueClickContext = {
         data: {
           data: mockDataPoints,
         },
-        embeddable: mockEmbeddable,
+        embeddable: mockEmbeddableApi,
       };
 
       const url = await drilldown1.getHref(config, context);
@@ -261,16 +272,12 @@ describe('UrlDrilldown', () => {
   });
 
   describe('variables', () => {
-    const embeddable1 = new TestEmbeddable(
-      {
-        id: 'test',
-        title: 'The Title',
-        savedObjectId: 'SAVED_OBJECT_IDxx',
-      },
-      {
-        indexPatterns: [{ id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }],
-      }
-    );
+    const embeddable1 = {
+      dataViews: new BehaviorSubject([{ id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }]),
+      panelTitle: new BehaviorSubject('The Title'),
+      savedObjectId: new BehaviorSubject('SAVED_OBJECT_IDxx'),
+      uuid: 'test',
+    };
     const data = {
       data: [
         createPoint({ field: 'field0', value: 'value0' }),
@@ -279,18 +286,13 @@ describe('UrlDrilldown', () => {
       ],
     };
 
-    const embeddable2 = new TestEmbeddable(
-      {
-        id: 'the-id',
-        query: {
-          language: 'C++',
-          query: 'std::cout << 123;',
-        },
-        timeRange: {
-          from: 'FROM',
-          to: 'TO',
-        },
-        filters: [
+    const embeddable2 = {
+      dataViews: new BehaviorSubject([
+        { id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
+        { id: 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy' },
+      ]),
+      parentApi: {
+        filters$: new BehaviorSubject([
           {
             meta: {
               alias: 'asdf',
@@ -298,17 +300,17 @@ describe('UrlDrilldown', () => {
               negate: false,
             },
           },
-        ],
-        savedObjectId: 'SAVED_OBJECT_ID',
+        ]),
+        query$: new BehaviorSubject({
+          language: 'C++',
+          query: 'std::cout << 123;',
+        }),
+        timeRange$: new BehaviorSubject({ from: 'FROM', to: 'TO' }),
       },
-      {
-        title: 'The Title',
-        indexPatterns: [
-          { id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
-          { id: 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy' },
-        ],
-      }
-    );
+      panelTitle: new BehaviorSubject('The Title'),
+      savedObjectId: new BehaviorSubject('SAVED_OBJECT_ID'),
+      uuid: 'the-id',
+    };
 
     describe('getRuntimeVariables()', () => {
       test('builds runtime variables for VALUE_CLICK_TRIGGER trigger', () => {
@@ -486,11 +488,11 @@ describe('UrlDrilldown', () => {
 
 describe('encoding', () => {
   const urlDrilldown = createDrilldown();
-  const context: ActionContext = {
+  const context: ValueClickContext = {
     data: {
       data: mockDataPoints,
     },
-    embeddable: mockEmbeddable,
+    embeddable: mockEmbeddableApi,
   };
 
   test('encodes URL by default', async () => {
@@ -499,6 +501,7 @@ describe('encoding', () => {
         template: 'https://elastic.co?foo=head%26shoulders',
       },
       openInNewTab: false,
+      encodeUrl: true,
     };
     const url = await urlDrilldown.getHref(config, context);
 

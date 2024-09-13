@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { FC } from 'react';
@@ -98,23 +99,6 @@ const GaugeWarningFormatMessage: FC<WarningMessageProps> = (props) => {
   );
 };
 
-const HeatmapWarningFormatMessage: FC<WarningMessageProps> = (props) => {
-  return (
-    <FormattedMessage
-      id="visualizations.newHeatmapChart.notificationMessage"
-      defaultMessage="The new heatmap charts library does not yet support split chart aggregation. {conditionalMessage}"
-      values={{
-        conditionalMessage: (
-          <>
-            <SwitchToOldLibraryMessage {...props} />
-            <ContactAdminMessage {...props} />
-          </>
-        ),
-      }}
-    />
-  );
-};
-
 const PieWarningFormatMessage: FC<WarningMessageProps> = (props) => {
   return (
     <FormattedMessage
@@ -142,7 +126,6 @@ const ControlsWarningFormatMessage: FC<WarningMessageProps> = (props) => {
 };
 
 const warningMessages = {
-  [CHARTS_WITHOUT_SMALL_MULTIPLES.heatmap]: HeatmapWarningFormatMessage,
   [CHARTS_WITHOUT_SMALL_MULTIPLES.gauge]: GaugeWarningFormatMessage,
   [CHARTS_TO_BE_DEPRECATED.pie]: PieWarningFormatMessage,
   [CHARTS_TO_BE_DEPRECATED.controls]: ControlsWarningFormatMessage,

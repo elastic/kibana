@@ -7,18 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
-import { render } from 'react-dom';
-import type { FileLayer } from '@elastic/ems-client';
+import { dynamic } from '@kbn/shared-ux-utility';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import type { OperationMetadata, SuggestionRequest, Visualization } from '@kbn/lens-plugin/public';
 import { IconRegionMap } from '@kbn/chart-icons';
-import { getSuggestions } from './suggestions';
+import { getSuggestionsLazy } from './suggestions_lazy';
 import type { ChoroplethChartState } from './types';
-import { RegionKeyEditor } from './region_key_editor';
 
 const REGION_KEY_GROUP_ID = 'region_key';
 const METRIC_GROUP_ID = 'metric';
@@ -30,30 +26,26 @@ const CHART_LABEL = i18n.translate('xpack.maps.lens.choropleth.label', {
 export const getVisualization = ({
   paletteService,
   theme,
-  emsFileLayers,
 }: {
   paletteService: PaletteRegistry;
   theme: ThemeServiceStart;
-  emsFileLayers: FileLayer[];
 }): Visualization<ChoroplethChartState> => ({
   id: 'lnsChoropleth',
 
+  getVisualizationTypeId() {
+    return this.id;
+  },
   visualizationTypes: [
     {
       id: 'lnsChoropleth',
       icon: IconRegionMap,
       label: CHART_LABEL,
-      groupLabel: i18n.translate('xpack.maps.lens.groupLabel', {
-        defaultMessage: 'Map',
+      sortPriority: 10,
+      description: i18n.translate('xpack.maps.regionMap.visualizationDescription', {
+        defaultMessage: 'Show geographic data using colored regions.',
       }),
-      sortPriority: 1,
-      showExperimentalBadge: true,
     },
   ],
-
-  getVisualizationTypeId() {
-    return 'lnsChoropleth';
-  },
 
   clearLayer(state) {
     const newState = { ...state };
@@ -76,7 +68,7 @@ export const getVisualization = ({
   },
 
   getSuggestions(suggestionRequest: SuggestionRequest<ChoroplethChartState>) {
-    return getSuggestions(suggestionRequest, emsFileLayers);
+    return getSuggestionsLazy(suggestionRequest);
   },
 
   initialize(addNewLayer, state) {
@@ -195,20 +187,16 @@ export const getVisualization = ({
     return update;
   },
 
-  renderDimensionEditor(domElement, props) {
+  DimensionEditorComponent(props) {
     if (props.groupId === REGION_KEY_GROUP_ID) {
-      render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <I18nProvider>
-            <RegionKeyEditor
-              emsFileLayers={emsFileLayers}
-              state={props.state}
-              setState={props.setState}
-            />
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
-      );
+      const DimensionEditor = dynamic(async () => {
+        const { RegionKeyEditor } = await import('./region_key_editor');
+        return {
+          default: RegionKeyEditor,
+        };
+      });
+      return <DimensionEditor state={props.state} setState={props.setState} />;
     }
+    return null;
   },
 });

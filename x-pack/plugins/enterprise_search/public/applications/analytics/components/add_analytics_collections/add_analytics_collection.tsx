@@ -30,7 +30,13 @@ export const AddAnalyticsCollection: React.FC<AddAnalyticsCollectionProps> = ({
       {render ? (
         render(showModal)
       ) : (
-        <EuiButton fill iconType="plusInCircle" onClick={showModal} disabled={disabled}>
+        <EuiButton
+          fill
+          iconType="plusInCircle"
+          onClick={showModal}
+          disabled={disabled}
+          data-test-subj="create-analytics-collection-btn"
+        >
           {i18n.translate('xpack.enterpriseSearch.analytics.collections.create.buttonTitle', {
             defaultMessage: 'Create collection',
           })}

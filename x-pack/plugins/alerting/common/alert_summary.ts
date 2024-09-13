@@ -29,6 +29,7 @@ export interface AlertSummary {
   errorMessages: Array<{ date: string; message: string }>;
   alerts: Record<string, AlertStatus>;
   executionDuration: ExecutionDuration;
+  revision: number;
 }
 
 export interface AlertStatus {
@@ -38,4 +39,6 @@ export interface AlertStatus {
   actionGroupId?: string;
   activeStartDate?: string;
   flapping: boolean;
+  maintenanceWindowIds?: string[];
+  tracked: boolean;
 }

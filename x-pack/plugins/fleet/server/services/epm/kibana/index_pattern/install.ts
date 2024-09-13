@@ -12,18 +12,44 @@ import { appContextService } from '../../..';
 import { getPackageSavedObjects } from '../../packages/get';
 const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 
-export const indexPatternTypes = Object.values(dataTypes);
+export const indexPatternTypes = [dataTypes.Logs, dataTypes.Metrics];
 
 export function getIndexPatternSavedObjects() {
   return indexPatternTypes.map((indexPatternType) => ({
     id: `${indexPatternType}-*`,
     type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+    // workaround until https://github.com/elastic/kibana/issues/164454 is fixed
+    typeMigrationVersion: '8.0.0',
     attributes: {
       title: `${indexPatternType}-*`,
       timeFieldName: '@timestamp',
       allowNoIndex: true,
     },
   }));
+}
+
+export async function makeManagedIndexPatternsGlobal(
+  savedObjectsClient: SavedObjectsClientContract
+) {
+  const logger = appContextService.getLogger();
+
+  const results = [];
+
+  for (const indexPatternType of indexPatternTypes) {
+    try {
+      const result = await savedObjectsClient.updateObjectsSpaces(
+        [{ id: `${indexPatternType}-*`, type: INDEX_PATTERN_SAVED_OBJECT_TYPE }],
+        ['*'],
+        []
+      );
+
+      results.push(result);
+    } catch (error) {
+      logger.error(`Error making managed index patterns global: ${error.message}`);
+    }
+  }
+
+  return results;
 }
 
 export async function removeUnusedIndexPatterns(savedObjectsClient: SavedObjectsClientContract) {

@@ -1,21 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { EuiPageBody } from '@elastic/eui';
-import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
-import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
-import { Switch, Redirect, Router, useLocation } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { EuiPageBody, EuiPageTemplate, EuiPageSection, EuiText } from '@elastic/eui';
+import { Redirect, useLocation } from 'react-router-dom';
+import { Router, Routes as RouterRoutes, Route } from '@kbn/shared-ux-router';
 import { createBrowserHistory } from 'history';
-import { EuiText } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
 
 function useQuery() {
@@ -38,9 +36,9 @@ export const Routes: React.FC<{}> = () => {
 
   return (
     <EuiPageBody>
-      <EuiPageContent>
-        <EuiPageContentBody>
-          <Switch>
+      <EuiPageTemplate.Section>
+        <EuiPageSection>
+          <RouterRoutes>
             <Route path="/hello">
               <HelloPage
                 firstName={query.get('firstName') || ''}
@@ -48,9 +46,9 @@ export const Routes: React.FC<{}> = () => {
               />
             </Route>
             <Redirect from="/" to="/hello" />
-          </Switch>
-        </EuiPageContentBody>
-      </EuiPageContent>
+          </RouterRoutes>
+        </EuiPageSection>
+      </EuiPageTemplate.Section>
     </EuiPageBody>
   );
 };

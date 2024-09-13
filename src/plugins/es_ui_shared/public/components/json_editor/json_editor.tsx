@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
+import { CodeEditor } from '@kbn/code-editor';
 
-import { EuiCodeEditor } from '../code_editor';
 import { useJson, OnJsonEditorUpdateHandler } from './use_json';
 
 interface Props<T extends object = { [key: string]: any }> {
@@ -19,7 +20,7 @@ interface Props<T extends object = { [key: string]: any }> {
   helpText?: React.ReactNode;
   value?: string;
   defaultValue?: T;
-  euiCodeEditorProps?: { [key: string]: any };
+  codeEditorProps?: { [key: string]: any };
   error?: string | null;
 }
 
@@ -29,8 +30,9 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
   onUpdate,
   value,
   defaultValue,
-  euiCodeEditorProps,
+  codeEditorProps,
   error: propsError,
+  ...rest
 }: Props<T>) {
   const {
     content,
@@ -82,24 +84,19 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
       isInvalid={typeof error === 'string'}
       error={error}
       fullWidth
+      {...rest}
     >
-      <EuiCodeEditor
-        mode="json"
-        theme="textmate"
-        width="100%"
-        height="500px"
-        setOptions={{
-          showLineNumbers: false,
+      <CodeEditor
+        languageId="json"
+        height={500}
+        options={{
+          lineNumbers: 'off',
           tabSize: 2,
+          automaticLayout: true,
         }}
-        editorProps={{
-          $blockScrolling: Infinity,
-        }}
-        showGutter={false}
-        minLines={6}
-        value={isControlled ? value : content}
+        value={isControlled ? value! : content}
         onChange={onEuiCodeEditorChange}
-        {...euiCodeEditorProps}
+        {...codeEditorProps}
       />
     </EuiFormRow>
   );

@@ -13,6 +13,8 @@ import {
 } from './types';
 
 import * as i18n from './translations';
+import { incidentSchemaObjectProperties } from './schema';
+import { validateKeysAllowed } from '../lib/validators';
 
 export const validateCommonConfig = (
   configObject: JiraPublicConfigurationType,
@@ -34,4 +36,12 @@ export const validateCommonSecrets = (
 export const validate: ExternalServiceValidation = {
   config: validateCommonConfig,
   secrets: validateCommonSecrets,
+};
+
+export const validateOtherFieldsKeys = (key: string): string | undefined => {
+  return validateKeysAllowed({
+    key,
+    disallowList: incidentSchemaObjectProperties,
+    fieldName: 'otherFields',
+  });
 };

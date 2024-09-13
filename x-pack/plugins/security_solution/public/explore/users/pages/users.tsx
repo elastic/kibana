@@ -9,7 +9,6 @@ import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
@@ -18,7 +17,7 @@ import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
-import { TabNavigationWithBreadcrumbs } from '../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -29,7 +28,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import type { State } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
-import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { UsersTabs } from './users_tabs';
@@ -40,17 +38,16 @@ import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
 } from '../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { UsersKpiComponent } from '../components/kpi_users';
-import type { UpdateDateRange } from '../../../common/components/charts/common';
 import { LastEventIndexKey, RiskScoreEntity } from '../../../../common/search_strategy';
 import { generateSeverityFilter } from '../../hosts/store/helpers';
 import { UsersTableType } from '../store/model';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
-import { LandingPageComponent } from '../../../common/components/landing_page';
+import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import { userNameExistsFilter } from './details/helpers';
 
 const ID = 'UsersQueryId';
@@ -65,7 +62,6 @@ const StyledFullHeightContainer = styled.div`
 `;
 
 const UsersComponent = () => {
-  const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -102,7 +98,8 @@ const UsersComponent = () => {
     return globalFilters;
   }, [severitySelection, tabName, globalFilters]);
 
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
+    useSourcererDataView();
   const [globalFiltersQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -157,29 +154,8 @@ const UsersComponent = () => {
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
-  const updateDateRange = useCallback<UpdateDateRange>(
-    ({ x }) => {
-      if (!x) {
-        return;
-      }
-      const [min, max] = x;
-      dispatch(
-        setAbsoluteRangeDatePicker({
-          id: InputsModelId.global,
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-        })
-      );
-    },
-    [dispatch]
-  );
-
   const capabilities = useMlCapabilities();
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
-  const navTabs = useMemo(
-    () => navTabsUsers(hasMlUserPermissions(capabilities), isPlatinumOrTrialLicense),
-    [capabilities, isPlatinumOrTrialLicense]
-  );
+  const navTabs = useMemo(() => navTabsUsers(hasMlUserPermissions(capabilities)), [capabilities]);
 
   return (
     <>
@@ -187,7 +163,7 @@ const UsersComponent = () => {
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
-            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
+            <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -199,19 +175,11 @@ const UsersComponent = () => {
               title={i18n.PAGE_TITLE}
             />
 
-            <UsersKpiComponent
-              filterQuery={globalFiltersQuery}
-              indexNames={selectedPatterns}
-              from={from}
-              setQuery={setQuery}
-              to={to}
-              skip={isInitializing || !!kqlError}
-              updateDateRange={updateDateRange}
-            />
+            <UsersKpiComponent from={from} to={to} />
 
             <EuiSpacer />
 
-            <TabNavigationWithBreadcrumbs navTabs={navTabs} />
+            <TabNavigation navTabs={navTabs} />
 
             <EuiSpacer />
 
@@ -228,7 +196,7 @@ const UsersComponent = () => {
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.users} />

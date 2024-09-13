@@ -17,6 +17,7 @@ export const convertPackQueriesToSO = (queries: Record<string, Omit<PackQueryFor
         ...pick(value, [
           'query',
           'interval',
+          'timeout',
           'snapshot',
           'removed',
           'platform',

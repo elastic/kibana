@@ -7,22 +7,18 @@
 
 import _ from 'lodash';
 import React from 'react';
-
-import {
-  EuiComboBox,
-  EuiComboBoxProps,
-  EuiComboBoxOptionOption,
-  EuiHighlight,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiComboBox, EuiComboBoxProps, EuiComboBoxOptionOption, EuiToolTip } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
 import { DataViewField } from '@kbn/data-views-plugin/public';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import { MIDDLE_TRUNCATION_PROPS } from '../../common/constants';
 
 function fieldsToOptions(
   fields?: DataViewField[],
-  isFieldDisabled?: (field: DataViewField) => boolean
+  isFieldDisabled?: (field: DataViewField) => boolean,
+  getFieldDisabledReason?: (field: DataViewField) => string | null
 ): Array<EuiComboBoxOptionOption<DataViewField>> {
   if (!fields) {
     return [];
@@ -30,12 +26,44 @@ function fieldsToOptions(
 
   return fields
     .map((field) => {
+      const FieldTypeIcon = field.type ? (
+        <FieldIcon type={field.type} fill="none" className="eui-alignMiddle" />
+      ) : null;
       const option: EuiComboBoxOptionOption<DataViewField> = {
         value: field,
         label: field.displayName ? field.displayName : field.name,
+        prepend: FieldTypeIcon,
+        name: field.name,
       };
       if (isFieldDisabled && isFieldDisabled(field)) {
         option.disabled = true;
+
+        const disabledReason =
+          option.disabled && getFieldDisabledReason ? getFieldDisabledReason(option.value!) : null;
+
+        if (disabledReason) {
+          option.prepend = (
+            <>
+              {FieldTypeIcon}
+              <EuiToolTip
+                position="left"
+                content={disabledReason}
+                anchorProps={{
+                  css: css`
+                    position: absolute;
+                    width: 100%;
+                    top: 0;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                  `,
+                }}
+              >
+                <div />
+              </EuiToolTip>
+            </>
+          );
+        }
       }
       return option;
     })
@@ -44,7 +72,7 @@ function fieldsToOptions(
     });
 }
 
-type Props = Omit<
+export type Props = Omit<
   EuiComboBoxProps<DataViewField>,
   'isDisabled' | 'onChange' | 'options' | 'renderOption' | 'selectedOptions' | 'singleSelection'
 > & {
@@ -63,34 +91,6 @@ export function SingleFieldSelect({
   value,
   ...rest
 }: Props) {
-  function renderOption(
-    option: EuiComboBoxOptionOption<DataViewField>,
-    searchValue: string,
-    contentClassName: string
-  ) {
-    const content = (
-      <EuiFlexGroup className={contentClassName} gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={null}>
-          <FieldIcon type={option.value!.type} fill="none" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-
-    const disabledReason =
-      option.disabled && getFieldDisabledReason ? getFieldDisabledReason(option.value!) : null;
-
-    return disabledReason ? (
-      <EuiToolTip position="left" content={disabledReason}>
-        {content}
-      </EuiToolTip>
-    ) : (
-      content
-    );
-  }
-
   const onSelection = (selectedOptions: Array<EuiComboBoxOptionOption<DataViewField>>) => {
     onChange(_.get(selectedOptions, '0.value.name'));
   };
@@ -108,14 +108,20 @@ export function SingleFieldSelect({
     }
   }
 
+  const options = fieldsToOptions(fields, isFieldDisabled, getFieldDisabledReason);
+
+  const panelMinWidth = calculateWidthFromEntries(options, ['label']);
+
   return (
     <EuiComboBox
       singleSelection={true}
-      options={fieldsToOptions(fields, isFieldDisabled)}
+      options={options}
       selectedOptions={selectedOptions}
       onChange={onSelection}
       isDisabled={!fields || fields.length === 0}
-      renderOption={renderOption}
+      truncationProps={MIDDLE_TRUNCATION_PROPS}
+      inputPopoverProps={{ panelMinWidth }}
+      optionMatcher={comboBoxFieldOptionMatcher}
       {...rest}
     />
   );

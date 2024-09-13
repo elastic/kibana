@@ -26,6 +26,7 @@ import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mock
 import { getDeferred } from '../../mocks/utils';
 import { waitFor } from '@testing-library/react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../common/endpoint/service/response_actions/constants';
 
 describe('When using the `ResponseActionFileDownloadLink` component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -60,9 +61,13 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
       expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
     });
 
-    expect(renderResult.getByTestId('test-downloadButton')).not.toBeNull();
+    const downlaodButton = renderResult.getByTestId('test-downloadButton');
+
+    expect(downlaodButton.getAttribute('href')).toEqual(
+      '/api/endpoint/action/123/file/123.agent-a/download?apiVersion=2023-10-31'
+    );
     expect(renderResult.getByTestId('test-passcodeMessage')).toHaveTextContent(
-      FILE_PASSCODE_INFO_MESSAGE
+      FILE_PASSCODE_INFO_MESSAGE(RESPONSE_ACTIONS_ZIP_PASSCODE.endpoint)
     );
     expect(renderResult.getByTestId('test-fileDeleteMessage')).toHaveTextContent(
       FILE_DELETED_MESSAGE
@@ -95,6 +100,7 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
     await waitFor(() => {
       expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalledWith({
         path: '/api/endpoint/action/123/file/123.agent-a',
+        version: '2023-10-31',
       });
     });
 
@@ -192,5 +198,15 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
 
     expect(apiMocks.responseProvider.fileInfo).not.toHaveBeenCalled();
     expect(renderResult.container.children.length).toBe(0);
+  });
+
+  it('should not display the passcode text if `showPasscode` prop is `false`', async () => {
+    renderProps.showPasscode = false;
+    render();
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+    });
+
+    expect(renderResult.queryByTestId('test-passcodeMessage')).toBeNull();
   });
 });

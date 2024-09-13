@@ -6,25 +6,25 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
+
 import { useMemo } from 'react';
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
-import { HttpService } from '../http_service';
-import { useMlKibana } from '../../contexts/kibana';
+import type { MlEntityField, ML_JOB_ID, ML_PARTITION_FIELD_VALUE } from '@kbn/ml-anomaly-utils';
+import { type InfluencersFilterQuery, type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 
-import type { CriteriaField } from '../results_service';
-import { basePath } from '.';
-import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
 } from '../../../../common/types/results';
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
-import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 import type { PartitionFieldsConfig } from '../../../../common/types/storage';
-import type { AnomalyRecordDoc, MLAnomalyDoc } from '../../../../common/types/anomalies';
-import type { EntityField } from '../../../../common/util/anomaly_utils';
-import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import type { ExplorerChartsData } from '../../../../common/types/results';
+
+import { useMlKibana } from '../../contexts/kibana';
+import type { HttpService } from '../http_service';
+import type { CriteriaField } from '../results_service';
+import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 
 export interface CategoryDefinition {
   categoryId: number;
@@ -37,7 +37,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
     jobIds: string[],
     criteriaFields: string[],
-    influencers: EntityField[],
+    influencers: MlEntityField[],
     aggregationInterval: string,
     threshold: number,
     earliestMs: number,
@@ -64,9 +64,10 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
 
     return httpService.http$<any>({
-      path: `${basePath()}/results/anomalies_table_data`,
+      path: `${ML_INTERNAL_BASE_PATH}/results/anomalies_table_data`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
 
@@ -77,18 +78,20 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       latestMs,
     });
     return httpService.http<any>({
-      path: `${basePath()}/results/max_anomaly_score`,
+      path: `${ML_INTERNAL_BASE_PATH}/results/max_anomaly_score`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
 
   getCategoryDefinition(jobId: string, categoryId: string) {
     const body = JSON.stringify({ jobId, categoryId });
     return httpService.http<CategoryDefinition>({
-      path: `${basePath()}/results/category_definition`,
+      path: `${ML_INTERNAL_BASE_PATH}/results/category_definition`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
 
@@ -99,9 +102,10 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       maxExamples,
     });
     return httpService.http<any>({
-      path: `${basePath()}/results/category_examples`,
+      path: `${ML_INTERNAL_BASE_PATH}/results/category_examples`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
 
@@ -122,42 +126,46 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       fieldsConfig,
     });
     return httpService.http$<PartitionFieldsDefinition>({
-      path: `${basePath()}/results/partition_fields_values`,
+      path: `${ML_INTERNAL_BASE_PATH}/results/partition_fields_values`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
 
   anomalySearch(query: ESSearchRequest, jobIds: string[]) {
     const body = JSON.stringify({ query, jobIds });
-    return httpService.http<ESSearchResponse<MLAnomalyDoc>>({
-      path: `${basePath()}/results/anomaly_search`,
+    return httpService.http<ESSearchResponse<MlAnomalyRecordDoc>>({
+      path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_search`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
 
   anomalySearch$(query: ESSearchRequest, jobIds: string[]) {
     const body = JSON.stringify({ query, jobIds });
-    return httpService.http$<ESSearchResponse<MLAnomalyDoc>>({
-      path: `${basePath()}/results/anomaly_search`,
+    return httpService.http$<ESSearchResponse<MlAnomalyRecordDoc>>({
+      path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_search`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
 
   getCategoryStoppedPartitions(
     jobIds: string[],
-    fieldToBucket?: typeof JOB_ID | typeof PARTITION_FIELD_VALUE
+    fieldToBucket?: typeof ML_JOB_ID | typeof ML_PARTITION_FIELD_VALUE
   ) {
     const body = JSON.stringify({
       jobIds,
       fieldToBucket,
     });
     return httpService.http<GetStoppedPartitionResult>({
-      path: `${basePath()}/results/category_stopped_partitions`,
+      path: `${ML_INTERNAL_BASE_PATH}/results/category_stopped_partitions`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
 
@@ -168,15 +176,16 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       end,
     });
     return httpService.http<GetDatafeedResultsChartDataResult>({
-      path: `${basePath()}/results/datafeed_results_chart`,
+      path: `${ML_INTERNAL_BASE_PATH}/results/datafeed_results_chart`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
 
   getAnomalyCharts$(
     jobIds: string[],
-    influencers: EntityField[],
+    influencers: MlEntityField[],
     threshold: number,
     earliestMs: number,
     latestMs: number,
@@ -197,9 +206,10 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       timeBounds,
     });
     return httpService.http$<ExplorerChartsData>({
-      path: `${basePath()}/results/anomaly_charts`,
+      path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_charts`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
 
@@ -221,10 +231,11 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       interval,
       functionDescription,
     });
-    return httpService.http$<{ success: boolean; records: AnomalyRecordDoc[] }>({
-      path: `${basePath()}/results/anomaly_records`,
+    return httpService.http$<{ success: boolean; records: MlAnomalyRecordDoc[] }>({
+      path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_records`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
 });

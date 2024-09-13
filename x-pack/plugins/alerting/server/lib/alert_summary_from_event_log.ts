@@ -40,6 +40,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
       average: 0,
       valuesWithTimestamp: {},
     },
+    revision: rule.revision,
   };
 
   const alerts = new Map<string, AlertStatus>();
@@ -86,6 +87,10 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
       status.flapping = true;
     }
 
+    if (event?.kibana?.alert?.maintenance_window_ids?.length) {
+      status.maintenanceWindowIds = event.kibana.alert.maintenance_window_ids as string[];
+    }
+
     switch (action) {
       case EVENT_LOG_ACTIONS.newInstance:
         status.activeStartDate = timeStamp;
@@ -100,6 +105,8 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
         status.activeStartDate = undefined;
         status.actionGroupId = undefined;
     }
+
+    status.tracked = action !== EVENT_LOG_ACTIONS.untrackedInstance;
   }
 
   for (const event of executionEvents.reverse()) {
@@ -164,6 +171,7 @@ function getAlertStatus(
     actionGroupId: undefined,
     activeStartDate: undefined,
     flapping: false,
+    tracked: true,
   };
   alerts.set(alertId, status);
   return status;

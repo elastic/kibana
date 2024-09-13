@@ -29,7 +29,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
   const ml = getService('ml');
   const toasts = getService('toasts');
 
-  const pageObjects = getPageObjects(['discover', 'timePicker']);
+  const pageObjects = getPageObjects(['discover', 'timePicker', 'unifiedFieldList']);
 
   return {
     async clickNextButton() {
@@ -700,13 +700,42 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await this.assertTransformDescriptionValue(transformDescription);
     },
 
+    async getDestIndexSameAsIdSwitchCheckState(): Promise<boolean> {
+      const state = await testSubjects.getAttribute(
+        'mlCreationWizardUtilsJobIdAsDestIndexNameSwitch',
+        'aria-checked'
+      );
+      return state === 'true';
+    },
+
+    async assertDestIndexSameAsIdCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getDestIndexSameAsIdSwitchCheckState();
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Destination index same as job id check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertDestIndexSameAsIdSwitchExists() {
+      await testSubjects.existOrFail(`mlCreationWizardUtilsJobIdAsDestIndexNameSwitch`, {
+        allowHidden: true,
+      });
+    },
+
+    async setDestIndexSameAsIdCheckState(checkState: boolean) {
+      if ((await this.getDestIndexSameAsIdSwitchCheckState()) !== checkState) {
+        await testSubjects.click('mlCreationWizardUtilsJobIdAsDestIndexNameSwitch');
+      }
+      await this.assertDestIndexSameAsIdCheckState(checkState);
+    },
+
     async assertDestinationIndexInputExists() {
-      await testSubjects.existOrFail('transformDestinationIndexInput');
+      await testSubjects.existOrFail('mlCreationWizardUtilsDestinationIndexInput');
     },
 
     async assertDestinationIndexValue(expectedValue: string) {
       const actualDestinationIndex = await testSubjects.getAttribute(
-        'transformDestinationIndexInput',
+        'mlCreationWizardUtilsDestinationIndexInput',
         'value'
       );
       expect(actualDestinationIndex).to.eql(
@@ -716,20 +745,23 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setDestinationIndex(destinationIndex: string) {
-      await ml.commonUI.setValueWithChecks('transformDestinationIndexInput', destinationIndex, {
-        clearWithKeyboard: true,
-      });
+      await ml.commonUI.setValueWithChecks(
+        'mlCreationWizardUtilsDestinationIndexInput',
+        destinationIndex,
+        {
+          clearWithKeyboard: true,
+        }
+      );
       await this.assertDestinationIndexValue(destinationIndex);
     },
 
     async assertCreateDataViewSwitchExists() {
-      await testSubjects.existOrFail(`transformCreateDataViewSwitch`, { allowHidden: true });
+      await testSubjects.existOrFail(`mlCreateDataViewSwitch`, { allowHidden: true });
     },
 
     async assertCreateDataViewSwitchCheckState(expectedCheckState: boolean) {
       const actualCheckState =
-        (await testSubjects.getAttribute('transformCreateDataViewSwitch', 'aria-checked')) ===
-        'true';
+        (await testSubjects.getAttribute('mlCreateDataViewSwitch', 'aria-checked')) === 'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
@@ -737,14 +769,11 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertDataViewTimeFieldInputExists() {
-      await testSubjects.existOrFail(`transformDataViewTimeFieldSelect`);
+      await testSubjects.existOrFail(`mlDataViewTimeFieldSelect`);
     },
 
     async assertDataViewTimeFieldValue(expectedValue: string) {
-      const actualValue = await testSubjects.getAttribute(
-        `transformDataViewTimeFieldSelect`,
-        'value'
-      );
+      const actualValue = await testSubjects.getAttribute(`mlDataViewTimeFieldSelect`, 'value');
       expect(actualValue).to.eql(
         expectedValue,
         `Data view time field should be ${expectedValue}, got ${actualValue}`
@@ -752,7 +781,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setDataViewTimeField(fieldName: string) {
-      const selectControl = await testSubjects.find('transformDataViewTimeFieldSelect');
+      const selectControl = await testSubjects.find('mlDataViewTimeFieldSelect');
       await selectControl.type(fieldName);
       await this.assertDataViewTimeFieldValue(fieldName);
     },
@@ -769,6 +798,39 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         expectedCheckState,
         `Continuous mode switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
+    },
+
+    async setContinuousModeSwitchCheckState(expectedCheckState: boolean) {
+      await retry.tryForTime(5000, async () => {
+        const currentCheckState =
+          (await testSubjects.getAttribute('transformContinuousModeSwitch', 'aria-checked')) ===
+          'true';
+        if (currentCheckState !== expectedCheckState) {
+          await testSubjects.click('transformContinuousModeSwitch');
+          await this.assertContinuousModeSwitchCheckState(expectedCheckState);
+        }
+      });
+    },
+
+    async assertContinuousModeDateFieldSelectExists() {
+      await retry.tryForTime(1000, async () => {
+        await testSubjects.existOrFail(`transformContinuousDateFieldSelect`, { allowHidden: true });
+      });
+    },
+
+    async selectContinuousModeDateField(value: string) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.selectValue('transformContinuousDateFieldSelect', value);
+        const actualSelectState = await testSubjects.getAttribute(
+          'transformContinuousDateFieldSelect',
+          'value'
+        );
+
+        expect(actualSelectState).to.eql(
+          value,
+          `Transform continuous date field should be '${value}' (got '${actualSelectState}')`
+        );
+      });
     },
 
     async assertRetentionPolicySwitchExists() {
@@ -1050,11 +1112,9 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async assertDiscoverContainField(field: string) {
       await pageObjects.discover.isDiscoverAppOnScreen();
       await retry.tryForTime(60 * 1000, async () => {
-        const allFields = await pageObjects.discover.getAllFieldNames();
+        const allFields = await pageObjects.unifiedFieldList.getAllFieldNames();
         if (Array.isArray(allFields)) {
-          // For some reasons, Discover returns fields with dot (e.g '.avg') with extra space
-          const fields = allFields.map((n) => n.replace('.​', '.'));
-          expect(fields).to.contain(
+          expect(allFields).to.contain(
             field,
             `Expected Discover to contain field ${field}, got ${allFields.join()}`
           );
@@ -1087,12 +1147,15 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       });
     },
 
-    async startTransform() {
+    // The progress bar has to exist for batch transform, not for continuous transforms.
+    async startTransform({ expectProgressbarExists } = { expectProgressbarExists: true }) {
       await testSubjects.click('transformWizardStartButton');
       await retry.tryForTime(5000, async () => {
         await this.assertDiscoverCardExists();
         await this.assertStartButtonEnabled(false);
-        await this.assertProgressbarExists();
+        if (expectProgressbarExists) {
+          await this.assertProgressbarExists();
+        }
       });
     },
 
@@ -1115,10 +1178,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertErrorToastsNotExist() {
-      const toastCount = await toasts.getToastCount();
+      const toastCount = await toasts.getCount();
       // Toast element index starts at 1, not 0
       for (let toastIdx = 1; toastIdx < toastCount + 1; toastIdx++) {
-        const toast = await toasts.getToastElement(toastIdx);
+        const toast = await toasts.getElementByIndex(toastIdx);
         const isErrorToast = await toast.elementHasClass('euiToast--danger');
         expect(isErrorToast).to.eql(false, `Expected toast message to be successful, got error.`);
       }

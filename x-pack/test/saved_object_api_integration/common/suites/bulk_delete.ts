@@ -138,7 +138,7 @@ export function bulkDeleteTestSuiteFactory(context: FtrProviderContext) {
             const query = testForce && testForce === true ? '?force=true' : '';
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_delete${query}`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(requestBody)
               .expect(test.responseStatusCode)
               .then(test.responseBody);

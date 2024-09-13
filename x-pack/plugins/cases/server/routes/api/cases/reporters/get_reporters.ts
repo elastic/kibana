@@ -5,21 +5,28 @@
  * 2.0.
  */
 
-import type { AllReportersFindRequest } from '../../../../../common/api';
 import { CASE_REPORTERS_URL } from '../../../../../common/constants';
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';
+import type { caseApiV1 } from '../../../../../common/types/api';
 
 export const getReportersRoute = createCasesRoute({
   method: 'get',
   path: CASE_REPORTERS_URL,
+  routerOptions: {
+    access: 'public',
+    summary: `Get case creators`,
+    tags: ['oas-tag:cases'],
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
-      const options = request.query as AllReportersFindRequest;
+      const options = request.query as caseApiV1.AllReportersFindRequest;
 
-      return response.ok({ body: await client.cases.getReporters({ ...options }) });
+      const res: caseApiV1.GetReportersResponse = await client.cases.getReporters({ ...options });
+
+      return response.ok({ body: res });
     } catch (error) {
       throw createCaseError({
         message: `Failed to find cases in route: ${error}`,

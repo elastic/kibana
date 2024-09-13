@@ -7,35 +7,39 @@
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { SOURCE_TYPES } from '@kbn/maps-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { HttpService } from '../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
-import type { MlApiServices } from '../application/services/ml_api_service';
+import { ML_APP_LOCATOR } from '../../common/constants/locator';
+import type { MlApi } from '../application/services/ml_api_service';
 
 export class AnomalySourceFactory {
   public readonly type = SOURCE_TYPES.ES_ML_ANOMALIES;
 
   constructor(
-    private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
-    private canGetJobs: boolean
-  ) {
-    this.canGetJobs = canGetJobs;
-  }
+    private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
+  ) {}
 
-  private async getServices(): Promise<{ mlResultsService: MlApiServices['results'] }> {
-    const [coreStart] = await this.getStartServices();
-    const { mlApiServicesProvider } = await import('../application/services/ml_api_service');
+  private async getServices(): Promise<{
+    mlResultsService: MlApi['results'];
+    mlLocator?: LocatorPublic<SerializableRecord>;
+  }> {
+    const [coreStart, pluginStart] = await this.getStartServices();
+    const { mlApiProvider } = await import('../application/services/ml_api_service');
+    const mlLocator = pluginStart.share.url.locators.get(ML_APP_LOCATOR);
 
     const httpService = new HttpService(coreStart.http);
-    const mlResultsService = mlApiServicesProvider(httpService).results;
+    const mlResultsService = mlApiProvider(httpService).results;
 
-    return { mlResultsService };
+    return { mlResultsService, mlLocator };
   }
 
   public async create(): Promise<any> {
-    const { mlResultsService } = await this.getServices();
+    const { mlResultsService, mlLocator } = await this.getServices();
     const { AnomalySource } = await import('./anomaly_source');
     AnomalySource.mlResultsService = mlResultsService;
-    AnomalySource.canGetJobs = this.canGetJobs;
+    AnomalySource.mlLocator = mlLocator;
     return AnomalySource;
   }
 }

@@ -1,24 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useRef, useEffect } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EmbeddablePanel, ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import classNames from 'classnames';
-
-import {
-  EmbeddableChildPanel,
-  EmbeddablePhaseEvent,
-  ViewMode,
-} from '@kbn/embeddable-plugin/public';
-
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { DashboardPanelState } from '../../../../common';
 import { pluginServices } from '../../../services/plugin_services';
-import { useDashboardContainerContext } from '../../dashboard_container_context';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
@@ -26,14 +22,13 @@ export interface Props extends DivProps {
   id: DashboardPanelState['explicitInput']['id'];
   index?: number;
   type: DashboardPanelState['type'];
-  focusedPanelId?: string;
   expandedPanelId?: string;
+  focusedPanelId?: string;
   key: string;
   isRenderable?: boolean;
-  onPanelStatusChange?: (info: EmbeddablePhaseEvent) => void;
 }
 
-const Item = React.forwardRef<HTMLDivElement, Props>(
+export const Item = React.forwardRef<HTMLDivElement, Props>(
   (
     {
       expandedPanelId,
@@ -41,53 +36,114 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       id,
       index,
       type,
-      onPanelStatusChange,
       isRenderable = true,
       // The props below are passed from ReactGridLayoutn and need to be merged with their counterparts.
       // https://github.com/react-grid-layout/react-grid-layout/issues/1241#issuecomment-658306889
       children,
       className,
-      style,
       ...rest
     },
     ref
   ) => {
-    const {
-      embeddable: { EmbeddablePanel: PanelComponent },
-    } = pluginServices.getServices();
-    const { embeddableInstance: container } = useDashboardContainerContext();
+    const container = useDashboardContainer();
+    const scrollToPanelId = container.select((state) => state.componentState.scrollToPanelId);
+    const highlightPanelId = container.select((state) => state.componentState.highlightPanelId);
+    const useMargins = container.select((state) => state.explicitInput.useMargins);
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
+    const focusPanel = focusedPanelId !== undefined && focusedPanelId === id;
+    const blurPanel = focusedPanelId !== undefined && focusedPanelId !== id;
     const classes = classNames({
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
+      'dshDashboardGrid__item--focused': focusPanel,
+      'dshDashboardGrid__item--blurred': blurPanel,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: container.getInput().viewMode === ViewMode.PRINT,
     });
 
+    useLayoutEffect(() => {
+      if (typeof ref !== 'function' && ref?.current) {
+        const panelRef = ref.current;
+        if (scrollToPanelId === id) {
+          container.scrollToPanel(panelRef);
+        }
+        if (highlightPanelId === id) {
+          container.highlightPanel(panelRef);
+        }
+
+        panelRef.querySelectorAll('*').forEach((e) => {
+          if (blurPanel) {
+            // remove blurred panels and nested elements from tab order
+            e.setAttribute('tabindex', '-1');
+          } else {
+            // restore tab order
+            e.removeAttribute('tabindex');
+          }
+        });
+      }
+    }, [id, container, scrollToPanelId, highlightPanelId, ref, blurPanel]);
+
+    const focusStyles = blurPanel
+      ? css`
+          pointer-events: none;
+          opacity: 0.25;
+        `
+      : undefined;
+
+    const renderedEmbeddable = useMemo(() => {
+      const {
+        embeddable: { reactEmbeddableRegistryHasKey },
+      } = pluginServices.getServices();
+
+      const panelProps = {
+        showBadges: true,
+        showBorder: useMargins,
+        showNotifications: true,
+        showShadow: false,
+      };
+
+      // render React embeddable
+      if (reactEmbeddableRegistryHasKey(type)) {
+        return (
+          <ReactEmbeddableRenderer
+            type={type}
+            maybeId={id}
+            getParentApi={() => container}
+            key={`${type}_${id}`}
+            panelProps={panelProps}
+            onApiAvailable={(api) => container.registerChildApi(api)}
+          />
+        );
+      }
+      // render legacy embeddable
+      return (
+        <EmbeddablePanel
+          key={type}
+          index={index}
+          embeddable={() => container.untilEmbeddableLoaded(id)}
+          {...panelProps}
+        />
+      );
+    }, [id, container, type, index, useMargins]);
+
     return (
       <div
-        style={{ ...style, zIndex: focusedPanelId === id ? 2 : 'auto' }}
+        css={focusStyles}
         className={[classes, className].join(' ')}
         data-test-subj="dashboardPanel"
+        id={`panel-${id}`}
         ref={ref}
         {...rest}
       >
         {isRenderable ? (
           <>
-            <EmbeddableChildPanel
-              // This key is used to force rerendering on embeddable type change while the id remains the same
-              key={type}
-              embeddableId={id}
-              index={index}
-              onPanelStatusChange={onPanelStatusChange}
-              {...{ container, PanelComponent }}
-            />
+            {renderedEmbeddable}
             {children}
           </>
         ) : (
-          <div className="embPanel embPanel-isLoading">
+          <div>
             <EuiLoadingChart size="l" mono />
           </div>
         )}
@@ -133,11 +189,16 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
   const {
     settings: { isProjectEnabledInLabs },
   } = pluginServices.getServices();
+  const container = useDashboardContainer();
+  const focusedPanelId = container.select((state) => state.componentState.focusedPanelId);
 
-  const { useEmbeddableSelector: select } = useDashboardContainerContext();
+  const dashboard = useDashboardContainer();
 
-  const isPrintMode = select((state) => state.explicitInput.viewMode) === ViewMode.PRINT;
-  const isEnabled = !isPrintMode && isProjectEnabledInLabs('labs:dashboard:deferBelowFold');
+  const isPrintMode = dashboard.select((state) => state.explicitInput.viewMode) === ViewMode.PRINT;
+  const isEnabled =
+    !isPrintMode &&
+    isProjectEnabledInLabs('labs:dashboard:deferBelowFold') &&
+    (!focusedPanelId || focusedPanelId === props.id);
 
   return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;
 });

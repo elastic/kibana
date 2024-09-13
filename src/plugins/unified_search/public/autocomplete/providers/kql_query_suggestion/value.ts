@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { flatten } from 'lodash';
 import { CoreSetup } from '@kbn/core/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { escapeQuotes } from './lib/escape_kuery';
+import { escapeQuotes } from '@kbn/es-query';
 import { KqlQuerySuggestionProvider } from './types';
 import type { UnifiedSearchPublicPluginStart } from '../../../types';
 import { QuerySuggestion, QuerySuggestionTypes } from '../query_suggestion_provider';
@@ -31,7 +32,7 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = (
     .getStartServices()
     .then(([_, __, dataStart]) => dataStart.autocomplete);
   return async (
-    { indexPatterns, boolFilter, useTimeRange, signal, method },
+    { indexPatterns, boolFilter, useTimeRange, signal, method, suggestionsAbstraction },
     { start, end, prefix, suffix, fieldName, nestedPath }
   ): Promise<QuerySuggestion[]> => {
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
@@ -56,6 +57,7 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = (
           useTimeRange,
           signal,
           method,
+          querySuggestionKey: suggestionsAbstraction?.type,
         }).then((valueSuggestions) => {
           const quotedValues = valueSuggestions.map((value) =>
             typeof value === 'string' ? `"${escapeQuotes(value)}"` : `${value}`

@@ -13,17 +13,23 @@ import {
   EuiFlexItem,
   EuiResizableContainer,
   EuiSpacer,
-  EuiTabbedContent,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { noop } from 'lodash';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { RulePreview } from '../../../../detections/components/rules/rule_preview';
-import type { RuleUpdateProps } from '../../../../../common/detection_engine/rule_schema';
+
+import { isEsqlRule } from '../../../../../common/detection_engine/utils';
+import { RulePreview } from '../../components/rule_preview';
+import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
+import type {
+  RuleResponse,
+  RuleUpdateProps,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { useRule, useUpdateRule } from '../../../rule_management/logic';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
@@ -35,19 +41,12 @@ import {
 import { displaySuccessToast, useStateToaster } from '../../../../common/components/toasters';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
-import { StepPanel } from '../../../../detections/components/rules/step_panel';
-import { StepAboutRule } from '../../../../detections/components/rules/step_about_rule';
-import { StepDefineRule } from '../../../../detections/components/rules/step_define_rule';
-import { StepScheduleRule } from '../../../../detections/components/rules/step_schedule_rule';
-import { StepRuleActions } from '../../../../detections/components/rules/step_rule_actions';
-import {
-  formatRule,
-  stepIsValid,
-  isDefineStep,
-  isAboutStep,
-  isScheduleStep,
-  isActionsStep,
-} from '../rule_creation/helpers';
+import { StepPanel } from '../../../rule_creation/components/step_panel';
+import { StepAboutRule } from '../../components/step_about_rule';
+import { StepDefineRule } from '../../components/step_define_rule';
+import { StepScheduleRule } from '../../components/step_schedule_rule';
+import { StepRuleActions } from '../../../rule_creation/components/step_rule_actions';
+import { formatRule } from '../rule_creation/helpers';
 import {
   getStepsData,
   redirectToDetections,
@@ -55,15 +54,6 @@ import {
   MaxWidthEuiFlexItem,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
-import type {
-  ActionsStepRule,
-  AboutStepRule,
-  DefineStepRule,
-  ScheduleStepRule,
-  RuleStepsFormHooks,
-  RuleStepsFormData,
-  RuleStepsData,
-} from '../../../../detections/pages/detection_engine/rules/types';
 import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
@@ -74,14 +64,15 @@ import {
   DEFAULT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_KEY,
 } from '../../../../../common/constants';
-import { HeaderPage } from '../../../../common/components/header_page';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
+import { useRuleForms, useRuleFormsErrors, useRuleIndexPattern } from '../form';
+import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
+import { CustomHeaderPageMemo } from '..';
+import { SaveWithErrorsModal } from '../../components/save_with_errors_confirmation';
 
-const formHookNoop = async (): Promise<undefined> => undefined;
-
-const EditRulePageComponent: FC = () => {
+const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const [, dispatchToaster] = useStateToaster();
   const [
     {
@@ -94,44 +85,23 @@ const EditRulePageComponent: FC = () => {
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const { data: dataServices } = useKibana().services;
-  const { navigateToApp } = useKibana().services.application;
+  const { data: dataServices, application, triggersActionsUi } = useKibana().services;
+  const { navigateToApp } = application;
 
   const { detailName: ruleId } = useParams<{ detailName: string }>();
-  const { data: rule, isLoading: ruleLoading } = useRule(ruleId);
-  const loading = ruleLoading || userInfoLoading || listsConfigLoading;
 
-  const { isSavedQueryLoading, savedQueryBar, savedQuery } = useGetSavedQuery(rule?.saved_id, {
-    ruleType: rule?.type,
-    onError: noop,
-  });
-
-  const formHooks = useRef<RuleStepsFormHooks>({
-    [RuleStep.defineRule]: formHookNoop,
-    [RuleStep.aboutRule]: formHookNoop,
-    [RuleStep.scheduleRule]: formHookNoop,
-    [RuleStep.ruleActions]: formHookNoop,
-  });
-  const stepsData = useRef<RuleStepsFormData>({
-    [RuleStep.defineRule]: { isValid: false, data: undefined },
-    [RuleStep.aboutRule]: { isValid: false, data: undefined },
-    [RuleStep.scheduleRule]: { isValid: false, data: undefined },
-    [RuleStep.ruleActions]: { isValid: false, data: undefined },
-  });
-  const [defineStep, setDefineStep] = useState(stepsData.current[RuleStep.defineRule]);
-  const [aboutStep, setAboutStep] = useState(stepsData.current[RuleStep.aboutRule]);
-  const [scheduleStep, setScheduleStep] = useState(stepsData.current[RuleStep.scheduleRule]);
-  const [actionsStep, setActionsStep] = useState(stepsData.current[RuleStep.ruleActions]);
-  const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
-  const invalidSteps = ruleStepsOrder.filter((step) => {
-    const stepData = stepsData.current[step];
-    return stepData.data != null && !stepIsValid(stepData);
-  });
+  const [activeStep, setActiveStep] = useState<RuleStep>(
+    rule.immutable ? RuleStep.ruleActions : RuleStep.defineRule
+  );
   const { mutateAsync: updateRule, isLoading } = useUpdateRule();
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
-  const [isPreviewDisabled, setIsPreviewDisabled] = useState(false);
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
+  const [isQueryBarValid, setIsQueryBarValid] = useState(false);
+  const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
+
+  const [isSaveWithErrorsModalVisible, setIsSaveWithErrorsModalVisible] = useState(false);
+  const [nonBlockingRuleErrors, setNonBlockingRuleErrors] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -147,71 +117,110 @@ const EditRulePageComponent: FC = () => {
     };
     fetchDataViews();
   }, [dataServices.dataViews]);
-  const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
-  const setFormHook = useCallback(
-    <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => {
-      formHooks.current[step] = hook;
-      if (step === activeStep) {
-        hook();
-      }
-    },
-    [activeStep]
-  );
-  const setStepData = useCallback(
-    <K extends keyof RuleStepsData>(step: K, data: RuleStepsData[K], isValid: boolean) => {
-      switch (step) {
-        case RuleStep.aboutRule:
-          const aboutData = data as AboutStepRule;
-          setAboutStep({ ...stepsData.current[step], data: aboutData, isValid });
-          return;
-        case RuleStep.defineRule:
-          const defineData = data as DefineStepRule;
-          setDefineStep({ ...stepsData.current[step], data: defineData, isValid });
-          return;
-        case RuleStep.ruleActions:
-          const actionsData = data as ActionsStepRule;
-          setActionsStep({ ...stepsData.current[step], data: actionsData, isValid });
-          return;
-        case RuleStep.scheduleRule:
-          const scheduleData = data as ScheduleStepRule;
-          setScheduleStep({ ...stepsData.current[step], data: scheduleData, isValid });
-      }
-    },
-    []
-  );
 
-  const onDataChange = useCallback(async () => {
-    if (activeStep === RuleStep.defineRule) {
-      const defineStepData = await formHooks.current[RuleStep.defineRule]();
-      if (defineStepData?.isValid && defineStepData?.data) {
-        setDefineStep(defineStepData);
-      }
-    } else if (activeStep === RuleStep.aboutRule) {
-      const aboutStepData = await formHooks.current[RuleStep.aboutRule]();
-      if (aboutStepData?.isValid && aboutStepData?.data) {
-        setAboutStep(aboutStepData);
-      }
-    } else if (activeStep === RuleStep.scheduleRule) {
-      const scheduleStepData = await formHooks.current[RuleStep.scheduleRule]();
-      if (scheduleStepData?.isValid && scheduleStepData?.data) {
-        setScheduleStep(scheduleStepData);
-      }
-    }
-  }, [activeStep]);
+  const backOptions = useMemo(
+    () => ({
+      path: getRuleDetailsUrl(ruleId ?? ''),
+      text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
+      pageId: SecurityPageName.rules,
+      dataTestSubj: 'ruleEditBackToRuleDetails',
+    }),
+    [rule?.name, ruleId]
+  );
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
-  const defineStepDataWithSavedQuery = useMemo(
-    () =>
-      defineStep.data
-        ? {
-            ...defineStep.data,
-            queryBar: savedQueryBar ?? defineStep.data.queryBar,
-          }
-        : defineStep.data,
-    [defineStep.data, savedQueryBar]
+  const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
+    rule,
+  });
+
+  const {
+    defineStepForm,
+    defineStepData,
+    aboutStepForm,
+    aboutStepData,
+    scheduleStepForm,
+    scheduleStepData,
+    actionsStepForm,
+    actionsStepData,
+    eqlOptionsSelected,
+    setEqlOptionsSelected,
+  } = useRuleForms({
+    defineStepDefault: defineRuleData,
+    aboutStepDefault: aboutRuleData,
+    scheduleStepDefault: scheduleRuleData,
+    actionsStepDefault: ruleActionsData,
+  });
+
+  const { getRuleFormsErrors } = useRuleFormsErrors();
+
+  const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
+
+  const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, defineStepData.ruleType);
+
+  const memoizedIndex = useMemo(
+    () => (isEsqlRule(defineStepData.ruleType) ? esqlIndex : defineStepData.index),
+    [defineStepData.index, esqlIndex, defineStepData.ruleType]
   );
+
+  const isPreviewDisabled = getIsRulePreviewDisabled({
+    ruleType: defineStepData.ruleType,
+    isQueryBarValid,
+    isThreatQueryBarValid,
+    index: memoizedIndex,
+    dataViewId: defineStepData.dataViewId,
+    dataSourceType: defineStepData.dataSourceType,
+    threatIndex: defineStepData.threatIndex,
+    threatMapping: defineStepData.threatMapping,
+    machineLearningJobId: defineStepData.machineLearningJobId,
+    queryBar: defineStepData.queryBar,
+    newTermsFields: defineStepData.newTermsFields,
+  });
+
+  const loading = userInfoLoading || listsConfigLoading;
+  const { isSavedQueryLoading, savedQuery } = useGetSavedQuery({
+    savedQueryId: 'saved_id' in rule ? rule.saved_id : undefined,
+    ruleType: rule?.type,
+  });
+
+  // Since in the edit step we start with an existing rule, we assume that
+  // the steps are valid if isValid is undefined. Once the user triggers validation by
+  // trying to submit the edits, the isValid statuses will be tracked and the callout appears
+  // if some steps are invalid
+  const stepIsValid = useCallback(
+    (step: RuleStep): boolean => {
+      switch (step) {
+        case RuleStep.defineRule:
+          return defineStepForm.isValid ?? true;
+        case RuleStep.aboutRule:
+          return aboutStepForm.isValid ?? true;
+        case RuleStep.scheduleRule:
+          return scheduleStepForm.isValid ?? true;
+        case RuleStep.ruleActions:
+          return actionsStepForm.isValid ?? true;
+        default:
+          return true;
+      }
+    },
+    [
+      aboutStepForm.isValid,
+      actionsStepForm.isValid,
+      defineStepForm.isValid,
+      scheduleStepForm.isValid,
+    ]
+  );
+
+  const invalidSteps = ruleStepsOrder.filter((step) => {
+    return !stepIsValid(step);
+  });
+  const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
+
+  const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern({
+    dataSourceType: defineStepData.dataSourceType,
+    index: memoizedIndex,
+    dataViewId: defineStepData.dataViewId,
+  });
 
   const tabs = useMemo(
     () => [
@@ -221,27 +230,45 @@ const EditRulePageComponent: FC = () => {
         name: ruleI18n.DEFINITION,
         disabled: rule?.immutable,
         content: (
-          <>
+          <div
+            style={{
+              display: activeStep === RuleStep.defineRule ? undefined : 'none',
+            }}
+          >
             <EuiSpacer />
             <StepPanel loading={loading || isSavedQueryLoading} title={ruleI18n.DEFINITION}>
-              {defineStepDataWithSavedQuery != null && !isSavedQueryLoading && (
+              {!isSavedQueryLoading && (
                 <StepDefineRule
-                  isReadOnlyView={false}
-                  isLoading={isLoading || isSavedQueryLoading}
+                  isLoading={loading || isLoading || isSavedQueryLoading}
                   isUpdateView
-                  defaultValues={defineStepDataWithSavedQuery}
-                  setForm={setFormHook}
                   kibanaDataViews={dataViewOptions}
                   indicesConfig={indicesConfig}
                   threatIndicesConfig={threatIndicesConfig}
-                  onRuleDataChange={onDataChange}
-                  onPreviewDisabledStateChange={setIsPreviewDisabled}
                   defaultSavedQuery={savedQuery}
+                  form={defineStepForm}
+                  optionsSelected={eqlOptionsSelected}
+                  setOptionsSelected={setEqlOptionsSelected}
+                  key="defineStep"
+                  indexPattern={indexPattern}
+                  isIndexPatternLoading={isIndexPatternLoading}
+                  isQueryBarValid={isQueryBarValid}
+                  setIsQueryBarValid={setIsQueryBarValid}
+                  setIsThreatQueryBarValid={setIsThreatQueryBarValid}
+                  ruleType={defineStepData.ruleType}
+                  index={memoizedIndex}
+                  threatIndex={defineStepData.threatIndex}
+                  groupByFields={defineStepData.groupByFields}
+                  dataSourceType={defineStepData.dataSourceType}
+                  shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
+                  queryBarTitle={defineStepData.queryBar.title}
+                  queryBarSavedId={defineStepData.queryBar.saved_id}
+                  thresholdFields={defineStepData.threshold.field}
+                  enableThresholdSuppression={defineStepData.enableThresholdSuppression}
                 />
               )}
               <EuiSpacer />
             </StepPanel>
-          </>
+          </div>
         ),
       },
       {
@@ -250,23 +277,30 @@ const EditRulePageComponent: FC = () => {
         name: ruleI18n.ABOUT,
         disabled: rule?.immutable,
         content: (
-          <>
+          <div
+            style={{
+              display: activeStep === RuleStep.aboutRule ? undefined : 'none',
+            }}
+          >
             <EuiSpacer />
             <StepPanel loading={loading} title={ruleI18n.ABOUT}>
-              {aboutStep.data != null && defineStep.data != null && (
+              {aboutStepData != null && defineStepData != null && (
                 <StepAboutRule
-                  isReadOnlyView={false}
                   isLoading={isLoading}
                   isUpdateView
-                  defaultValues={aboutStep.data}
-                  defineRuleData={defineStep.data}
-                  setForm={setFormHook}
-                  onRuleDataChange={onDataChange}
+                  ruleType={defineStepData.ruleType}
+                  machineLearningJobId={defineStepData.machineLearningJobId}
+                  index={memoizedIndex}
+                  dataViewId={defineStepData.dataViewId}
+                  timestampOverride={aboutStepData.timestampOverride}
+                  form={aboutStepForm}
+                  esqlQuery={esqlQueryForAboutStep}
+                  key="aboutStep"
                 />
               )}
               <EuiSpacer />
             </StepPanel>
-          </>
+          </div>
         ),
       },
       {
@@ -275,22 +309,24 @@ const EditRulePageComponent: FC = () => {
         name: ruleI18n.SCHEDULE,
         disabled: rule?.immutable,
         content: (
-          <>
+          <div
+            style={{
+              display: activeStep === RuleStep.scheduleRule ? undefined : 'none',
+            }}
+          >
             <EuiSpacer />
             <StepPanel loading={loading} title={ruleI18n.SCHEDULE}>
-              {scheduleStep.data != null && (
+              {scheduleStepData != null && (
                 <StepScheduleRule
-                  isReadOnlyView={false}
                   isLoading={isLoading}
                   isUpdateView
-                  defaultValues={scheduleStep.data}
-                  setForm={setFormHook}
-                  onRuleDataChange={onDataChange}
+                  form={scheduleStepForm}
+                  key="scheduleStep"
                 />
               )}
               <EuiSpacer />
             </StepPanel>
-          </>
+          </div>
         ),
       },
       {
@@ -298,131 +334,177 @@ const EditRulePageComponent: FC = () => {
         id: RuleStep.ruleActions,
         name: ruleI18n.ACTIONS,
         content: (
-          <>
+          <div
+            style={{
+              display: activeStep === RuleStep.ruleActions ? undefined : 'none',
+            }}
+          >
             <EuiSpacer />
             <StepPanel loading={loading}>
-              {actionsStep.data != null && (
+              {actionsStepData != null && (
                 <StepRuleActions
-                  isReadOnlyView={false}
+                  ruleId={rule?.id}
                   isLoading={isLoading}
                   isUpdateView
-                  defaultValues={actionsStep.data}
-                  setForm={setFormHook}
                   actionMessageParams={actionMessageParams}
+                  summaryActionMessageParams={actionMessageParams}
                   ruleType={rule?.type}
+                  form={actionsStepForm}
+                  key="actionsStep"
                 />
               )}
               <EuiSpacer />
             </StepPanel>
-          </>
+          </div>
         ),
       },
     ],
     [
       rule?.immutable,
+      rule?.id,
       rule?.type,
+      activeStep,
       loading,
-      defineStep.data,
-      isLoading,
       isSavedQueryLoading,
-      defineStepDataWithSavedQuery,
-      setFormHook,
+      isLoading,
       dataViewOptions,
       indicesConfig,
       threatIndicesConfig,
-      onDataChange,
-      aboutStep.data,
-      scheduleStep.data,
-      actionsStep.data,
-      actionMessageParams,
       savedQuery,
+      defineStepForm,
+      eqlOptionsSelected,
+      setEqlOptionsSelected,
+      indexPattern,
+      isIndexPatternLoading,
+      isQueryBarValid,
+      defineStepData,
+      aboutStepData,
+      aboutStepForm,
+      scheduleStepData,
+      scheduleStepForm,
+      actionsStepData,
+      actionMessageParams,
+      actionsStepForm,
+      memoizedIndex,
+      esqlQueryForAboutStep,
     ]
   );
 
   const { startTransaction } = useStartTransaction();
 
-  const onSubmit = useCallback(async () => {
-    const activeStepData = await formHooks.current[activeStep]();
-    if (activeStepData?.data != null) {
-      setStepData(activeStep, activeStepData.data, activeStepData.isValid);
-    }
-    const define = isDefineStep(activeStepData) ? activeStepData : defineStep;
-    const about = isAboutStep(activeStepData) ? activeStepData : aboutStep;
-    const schedule = isScheduleStep(activeStepData) ? activeStepData : scheduleStep;
-    const actions = isActionsStep(activeStepData) ? activeStepData : actionsStep;
+  const saveChanges = useCallback(async () => {
+    startTransaction({ name: SINGLE_RULE_ACTIONS.SAVE });
+    await updateRule({
+      ...formatRule<RuleUpdateProps>(
+        defineStepData,
+        aboutStepData,
+        scheduleStepData,
+        actionsStepData,
+        triggersActionsUi.actionTypeRegistry,
+        rule?.exceptions_list
+      ),
+      ...(ruleId ? { id: ruleId } : {}),
+    });
 
-    if (
-      stepIsValid(define) &&
-      stepIsValid(about) &&
-      stepIsValid(schedule) &&
-      stepIsValid(actions)
-    ) {
-      startTransaction({ name: SINGLE_RULE_ACTIONS.SAVE });
-      await updateRule({
-        ...formatRule<RuleUpdateProps>(
-          define.data,
-          about.data,
-          schedule.data,
-          actions.data,
-          rule?.exceptions_list
-        ),
-        ...(ruleId ? { id: ruleId } : {}),
-        ...(rule != null ? { max_signals: rule.max_signals } : {}),
-      });
-
-      displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.rules,
-        path: getRuleDetailsUrl(ruleId ?? ''),
-      });
-    }
+    displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
+    navigateToApp(APP_UI_ID, {
+      deepLinkId: SecurityPageName.rules,
+      path: getRuleDetailsUrl(ruleId ?? ''),
+    });
   }, [
-    aboutStep,
-    actionsStep,
-    activeStep,
-    defineStep,
+    aboutStepData,
+    actionsStepData,
+    defineStepData,
     dispatchToaster,
     navigateToApp,
-    rule,
+    rule?.exceptions_list,
+    rule?.name,
     ruleId,
-    scheduleStep,
-    setStepData,
-    updateRule,
+    scheduleStepData,
     startTransaction,
+    triggersActionsUi.actionTypeRegistry,
+    updateRule,
   ]);
 
-  useEffect(() => {
-    if (rule != null) {
-      const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
-        rule,
-      });
-      setStepData(RuleStep.defineRule, defineRuleData, true);
-      setStepData(RuleStep.aboutRule, aboutRuleData, true);
-      setStepData(RuleStep.scheduleRule, scheduleRuleData, true);
-      setStepData(RuleStep.ruleActions, ruleActionsData, true);
-    }
-  }, [rule, setStepData]);
+  const showSaveWithErrorsModal = useCallback(() => setIsSaveWithErrorsModalVisible(true), []);
+  const closeSaveWithErrorsModal = useCallback(() => setIsSaveWithErrorsModalVisible(false), []);
+  const onConfirmSaveWithErrors = useCallback(async () => {
+    closeSaveWithErrorsModal();
+    await saveChanges();
+  }, [closeSaveWithErrorsModal, saveChanges]);
 
-  const goToStep = useCallback(async (step: RuleStep) => {
-    setActiveStep(step);
-    await formHooks.current[step]();
+  const onSubmit = useCallback(async () => {
+    setNonBlockingRuleErrors([]);
+
+    const actionsStepFormValid = await actionsStepForm.validate();
+    if (rule.immutable) {
+      // Since users cannot edit Define, About and Schedule tabs of the rule, we skip validation of those to avoid
+      // user confusion of seeing that those tabs have error and not being able to see or do anything about that.
+      // We will need to remove this condition once rule customization work is done.
+      if (actionsStepFormValid) {
+        await saveChanges();
+      }
+      return;
+    }
+
+    const defineStepFormValid = await defineStepForm.validate();
+    const aboutStepFormValid = await aboutStepForm.validate();
+    const scheduleStepFormValid = await scheduleStepForm.validate();
+    if (
+      defineStepFormValid &&
+      aboutStepFormValid &&
+      scheduleStepFormValid &&
+      actionsStepFormValid
+    ) {
+      await saveChanges();
+      return;
+    }
+
+    const { blockingErrors, nonBlockingErrors } = getRuleFormsErrors({
+      defineStepForm,
+      aboutStepForm,
+      scheduleStepForm,
+      actionsStepForm,
+    });
+    if (blockingErrors.length > 0) {
+      return;
+    }
+    if (nonBlockingErrors.length > 0) {
+      setNonBlockingRuleErrors(nonBlockingErrors);
+      showSaveWithErrorsModal();
+    }
+  }, [
+    rule.immutable,
+    defineStepForm,
+    aboutStepForm,
+    scheduleStepForm,
+    actionsStepForm,
+    getRuleFormsErrors,
+    saveChanges,
+    showSaveWithErrorsModal,
+  ]);
+
+  const onTabClick = useCallback(async (tab: EuiTabbedContentTab) => {
+    const targetStep = tab.id as RuleStep;
+    setActiveStep(targetStep);
   }, []);
 
-  const onTabClick = useCallback(
-    async (tab: EuiTabbedContentTab) => {
-      const targetStep = tab.id as RuleStep;
-      const activeStepData = await formHooks.current[activeStep]();
-
-      if (activeStepData?.data != null) {
-        setStepData(activeStep, activeStepData.data, activeStepData.isValid);
-        goToStep(targetStep);
-      }
-    },
-    [activeStep, goToStep, setStepData]
-  );
+  const renderTabs = () => {
+    return tabs.map((tab, index) => (
+      <EuiTab
+        key={index}
+        onClick={() => onTabClick(tab)}
+        isSelected={tab.id === activeStep}
+        disabled={tab.disabled}
+        data-test-subj={tab['data-test-subj']}
+      >
+        {tab.name}
+      </EuiTab>
+    ));
+  };
 
   const goToDetailsRule = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,
@@ -431,14 +513,6 @@ const EditRulePageComponent: FC = () => {
     },
     [navigateToApp, ruleId]
   );
-
-  useEffect(() => {
-    if (rule?.immutable) {
-      setActiveStep(RuleStep.ruleActions);
-    } else {
-      setActiveStep(RuleStep.defineRule);
-    }
-  }, [rule]);
 
   if (
     redirectToDetections(
@@ -463,6 +537,13 @@ const EditRulePageComponent: FC = () => {
 
   return (
     <>
+      {isSaveWithErrorsModalVisible && (
+        <SaveWithErrorsModal
+          errors={nonBlockingRuleErrors}
+          onCancel={closeSaveWithErrorsModal}
+          onConfirm={onConfirmSaveWithErrors}
+        />
+      )}
       <SecuritySolutionPageWrapper>
         <EuiResizableContainer>
           {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
@@ -472,29 +553,14 @@ const EditRulePageComponent: FC = () => {
                 <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
-                      <HeaderPage
-                        backOptions={{
-                          path: getRuleDetailsUrl(ruleId ?? ''),
-                          text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
-                          pageId: SecurityPageName.rules,
-                          dataTestSubj: 'ruleEditBackToRuleDetails',
-                        }}
+                      <CustomHeaderPageMemo
+                        backOptions={backOptions}
                         isLoading={isLoading}
                         title={i18n.PAGE_TITLE}
-                      >
-                        <EuiButton
-                          data-test-subj="preview-container"
-                          isSelected={isRulePreviewVisible}
-                          fill={isRulePreviewVisible}
-                          iconType="visBarVerticalStacked"
-                          onClick={() => {
-                            collapseFn.current?.();
-                            setIsRulePreviewVisible((isVisible) => !isVisible);
-                          }}
-                        >
-                          {ruleI18n.RULE_PREVIEW_TITLE}
-                        </EuiButton>
-                      </HeaderPage>
+                        isRulePreviewVisible={isRulePreviewVisible}
+                        setIsRulePreviewVisible={setIsRulePreviewVisible}
+                        togglePanel={togglePanel}
+                      />
                       {invalidSteps.length > 0 && (
                         <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="warning">
                           <FormattedMessage
@@ -521,12 +587,9 @@ const EditRulePageComponent: FC = () => {
                         </EuiCallOut>
                       )}
 
-                      <EuiTabbedContent
-                        initialSelectedTab={tabs[0]}
-                        selectedTab={tabs.find((t) => t.id === activeStep)}
-                        onTabClick={onTabClick}
-                        tabs={tabs}
-                      />
+                      <EuiTabs>{renderTabs()}</EuiTabs>
+
+                      {tabs.map((tab) => tab.content)}
 
                       <EuiSpacer />
 
@@ -567,15 +630,13 @@ const EditRulePageComponent: FC = () => {
                   minSize={'20%'}
                   onToggleCollapsed={() => setIsRulePreviewVisible((isVisible) => !isVisible)}
                 >
-                  {defineStep.data && aboutStep.data && scheduleStep.data && (
-                    <RulePreview
-                      isDisabled={isPreviewDisabled}
-                      defineRuleData={defineStep.data}
-                      aboutRuleData={aboutStep.data}
-                      scheduleRuleData={scheduleStep.data}
-                      exceptionsList={rule?.exceptions_list}
-                    />
-                  )}
+                  <RulePreview
+                    isDisabled={isPreviewDisabled}
+                    defineRuleData={defineStepData}
+                    aboutRuleData={aboutStepData}
+                    scheduleRuleData={scheduleStepData}
+                    exceptionsList={rule?.exceptions_list}
+                  />
                 </EuiResizablePanel>
               </>
             );
@@ -588,4 +649,10 @@ const EditRulePageComponent: FC = () => {
   );
 };
 
-export const EditRulePage = memo(EditRulePageComponent);
+const EditRulePageWrapper: FC = () => {
+  const { detailName: ruleId } = useParams<{ detailName: string }>();
+  const { data: rule } = useRule(ruleId, true);
+  return rule != null ? <EditRulePageComponent rule={rule} /> : <></>;
+};
+
+export const EditRulePage = memo(EditRulePageWrapper);

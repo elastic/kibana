@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { MetricFieldVisConfig, NonMetricFieldVisConfig } from './types';
 interface TestData {
@@ -118,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
     await ml.testExecution.logTestStep(
       `${testData.suiteTitle} loads the saved search selection page`
     );
-    await ml.dataVisualizer.navigateToIndexPatternSelection();
+    await ml.dataVisualizer.navigateToDataViewSelection();
 
     await ml.testExecution.logTestStep(
       `${testData.suiteTitle} loads the index data visualizer page`
@@ -134,6 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
     await ml.dataVisualizerIndexBased.clickUseFullDataButton(
       testData.expected.totalDocCountFormatted
     );
+    await ml.commonUI.assertDatePickerDataTierOptionsVisible(true);
   }
 
   async function checkPageDetails(testData: TestData) {
@@ -182,12 +183,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await ml.testResources.createIndexPatternIfNeeded(indexPatternTitle, '@timestamp');
+      await ml.testResources.createDataViewIfNeeded(indexPatternTitle, '@timestamp');
       await navigateToIndexDataVisualizer(originalTestData);
     });
 
     afterEach(async () => {
-      await ml.testResources.deleteIndexPatternByTitle(indexPatternTitle);
+      await ml.testResources.deleteDataViewByTitle(indexPatternTitle);
     });
 
     it(`adds new field`, async () => {

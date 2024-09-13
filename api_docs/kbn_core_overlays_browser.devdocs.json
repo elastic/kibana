@@ -3,26 +3,10 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-overlays-browser",
-        "id": "def-common.OverlayBannersStart",
+        "id": "def-public.OverlayBannersStart",
         "type": "Interface",
         "tags": [],
         "label": "OverlayBannersStart",
@@ -33,7 +17,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayBannersStart.add",
+            "id": "def-public.OverlayBannersStart.add",
             "type": "Function",
             "tags": [],
             "label": "add",
@@ -44,9 +28,9 @@
               "(mount: ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
+                "section": "def-public.MountPoint",
                 "text": "MountPoint"
               },
               "<HTMLElement>, priority?: number | undefined) => string"
@@ -57,7 +41,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayBannersStart.add.$1",
+                "id": "def-public.OverlayBannersStart.add.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "mount",
@@ -67,9 +51,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-common.MountPoint",
+                    "section": "def-public.MountPoint",
                     "text": "MountPoint"
                   },
                   "<HTMLElement>"
@@ -81,7 +65,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayBannersStart.add.$2",
+                "id": "def-public.OverlayBannersStart.add.$2",
                 "type": "number",
                 "tags": [],
                 "label": "priority",
@@ -103,7 +87,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayBannersStart.remove",
+            "id": "def-public.OverlayBannersStart.remove",
             "type": "Function",
             "tags": [],
             "label": "remove",
@@ -119,7 +103,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayBannersStart.remove.$1",
+                "id": "def-public.OverlayBannersStart.remove.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -141,7 +125,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayBannersStart.replace",
+            "id": "def-public.OverlayBannersStart.replace",
             "type": "Function",
             "tags": [],
             "label": "replace",
@@ -152,9 +136,9 @@
               "(id: string | undefined, mount: ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
+                "section": "def-public.MountPoint",
                 "text": "MountPoint"
               },
               "<HTMLElement>, priority?: number | undefined) => string"
@@ -165,7 +149,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayBannersStart.replace.$1",
+                "id": "def-public.OverlayBannersStart.replace.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -182,7 +166,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayBannersStart.replace.$2",
+                "id": "def-public.OverlayBannersStart.replace.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "mount",
@@ -192,9 +176,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-common.MountPoint",
+                    "section": "def-public.MountPoint",
                     "text": "MountPoint"
                   },
                   "<HTMLElement>"
@@ -206,7 +190,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayBannersStart.replace.$3",
+                "id": "def-public.OverlayBannersStart.replace.$3",
                 "type": "number",
                 "tags": [],
                 "label": "priority",
@@ -228,7 +212,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayBannersStart.getComponent",
+            "id": "def-public.OverlayBannersStart.getComponent",
             "type": "Function",
             "tags": [],
             "label": "getComponent",
@@ -247,210 +231,7 @@
       },
       {
         "parentPluginId": "@kbn/core-overlays-browser",
-        "id": "def-common.OverlayFlyoutOpenOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "OverlayFlyoutOpenOptions",
-        "description": [],
-        "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.className",
-            "type": "string",
-            "tags": [],
-            "label": "className",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.closeButtonAriaLabel",
-            "type": "string",
-            "tags": [],
-            "label": "closeButtonAriaLabel",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.ownFocus",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ownFocus",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.datatestsubj",
-            "type": "string",
-            "tags": [],
-            "label": "'data-test-subj'",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.arialabel",
-            "type": "string",
-            "tags": [],
-            "label": "'aria-label'",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.size",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "size",
-            "description": [],
-            "signature": [
-              "\"m\" | \"s\" | \"l\" | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.maxWidth",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "maxWidth",
-            "description": [],
-            "signature": [
-              "string | number | boolean | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.hideCloseButton",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hideCloseButton",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.outsideClickCloses",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "outsideClickCloses",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.maskProps",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "maskProps",
-            "description": [],
-            "signature": [
-              "EuiOverlayMaskProps",
-              " | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutOpenOptions.onClose",
-            "type": "Function",
-            "tags": [],
-            "label": "onClose",
-            "description": [
-              "\nEuiFlyout onClose handler.\nIf provided the consumer is responsible for calling flyout.close() to close the flyout;"
-            ],
-            "signature": [
-              "((flyout: ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.OverlayRef",
-                "text": "OverlayRef"
-              },
-              ") => void) | undefined"
-            ],
-            "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayFlyoutOpenOptions.onClose.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "flyout",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-common.OverlayRef",
-                    "text": "OverlayRef"
-                  }
-                ],
-                "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-overlays-browser",
-        "id": "def-common.OverlayFlyoutStart",
+        "id": "def-public.OverlayFlyoutStart",
         "type": "Interface",
         "tags": [],
         "label": "OverlayFlyoutStart",
@@ -463,7 +244,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayFlyoutStart.open",
+            "id": "def-public.OverlayFlyoutStart.open",
             "type": "Function",
             "tags": [
               "return"
@@ -476,25 +257,25 @@
               "(mount: ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
+                "section": "def-public.MountPoint",
                 "text": "MountPoint"
               },
               "<HTMLElement>, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayFlyoutOpenOptions",
+                "section": "def-public.OverlayFlyoutOpenOptions",
                 "text": "OverlayFlyoutOpenOptions"
               },
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.OverlayRef",
+                "section": "def-public.OverlayRef",
                 "text": "OverlayRef"
               }
             ],
@@ -504,7 +285,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayFlyoutStart.open.$1",
+                "id": "def-public.OverlayFlyoutStart.open.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "mount",
@@ -514,9 +295,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-common.MountPoint",
+                    "section": "def-public.MountPoint",
                     "text": "MountPoint"
                   },
                   "<HTMLElement>"
@@ -528,8 +309,8 @@
               },
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayFlyoutStart.open.$2",
-                "type": "Object",
+                "id": "def-public.OverlayFlyoutStart.open.$2",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [
@@ -538,9 +319,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-common.OverlayFlyoutOpenOptions",
+                    "section": "def-public.OverlayFlyoutOpenOptions",
                     "text": "OverlayFlyoutOpenOptions"
                   },
                   " | undefined"
@@ -558,7 +339,7 @@
       },
       {
         "parentPluginId": "@kbn/core-overlays-browser",
-        "id": "def-common.OverlayModalConfirmOptions",
+        "id": "def-public.OverlayModalConfirmOptions",
         "type": "Interface",
         "tags": [],
         "label": "OverlayModalConfirmOptions",
@@ -569,7 +350,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayModalConfirmOptions.title",
+            "id": "def-public.OverlayModalConfirmOptions.title",
             "type": "string",
             "tags": [],
             "label": "title",
@@ -583,7 +364,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayModalConfirmOptions.cancelButtonText",
+            "id": "def-public.OverlayModalConfirmOptions.cancelButtonText",
             "type": "string",
             "tags": [],
             "label": "cancelButtonText",
@@ -597,7 +378,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayModalConfirmOptions.confirmButtonText",
+            "id": "def-public.OverlayModalConfirmOptions.confirmButtonText",
             "type": "string",
             "tags": [],
             "label": "confirmButtonText",
@@ -611,7 +392,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayModalConfirmOptions.className",
+            "id": "def-public.OverlayModalConfirmOptions.className",
             "type": "string",
             "tags": [],
             "label": "className",
@@ -625,7 +406,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayModalConfirmOptions.closeButtonAriaLabel",
+            "id": "def-public.OverlayModalConfirmOptions.closeButtonAriaLabel",
             "type": "string",
             "tags": [],
             "label": "closeButtonAriaLabel",
@@ -639,7 +420,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayModalConfirmOptions.datatestsubj",
+            "id": "def-public.OverlayModalConfirmOptions.datatestsubj",
             "type": "string",
             "tags": [],
             "label": "'data-test-subj'",
@@ -653,7 +434,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayModalConfirmOptions.defaultFocusedButton",
+            "id": "def-public.OverlayModalConfirmOptions.defaultFocusedButton",
             "type": "CompoundType",
             "tags": [],
             "label": "defaultFocusedButton",
@@ -667,14 +448,13 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayModalConfirmOptions.buttonColor",
+            "id": "def-public.OverlayModalConfirmOptions.buttonColor",
             "type": "CompoundType",
             "tags": [],
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "EuiButtonColor",
-              " | undefined"
+              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
             ],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
@@ -682,7 +462,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayModalConfirmOptions.maxWidth",
+            "id": "def-public.OverlayModalConfirmOptions.maxWidth",
             "type": "CompoundType",
             "tags": [],
             "label": "maxWidth",
@@ -701,7 +481,7 @@
       },
       {
         "parentPluginId": "@kbn/core-overlays-browser",
-        "id": "def-common.OverlayModalOpenOptions",
+        "id": "def-public.OverlayModalOpenOptions",
         "type": "Interface",
         "tags": [],
         "label": "OverlayModalOpenOptions",
@@ -712,7 +492,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayModalOpenOptions.className",
+            "id": "def-public.OverlayModalOpenOptions.className",
             "type": "string",
             "tags": [],
             "label": "className",
@@ -726,7 +506,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayModalOpenOptions.closeButtonAriaLabel",
+            "id": "def-public.OverlayModalOpenOptions.closeButtonAriaLabel",
             "type": "string",
             "tags": [],
             "label": "closeButtonAriaLabel",
@@ -740,7 +520,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayModalOpenOptions.datatestsubj",
+            "id": "def-public.OverlayModalOpenOptions.datatestsubj",
             "type": "string",
             "tags": [],
             "label": "'data-test-subj'",
@@ -754,7 +534,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayModalOpenOptions.maxWidth",
+            "id": "def-public.OverlayModalOpenOptions.maxWidth",
             "type": "CompoundType",
             "tags": [],
             "label": "maxWidth",
@@ -771,7 +551,7 @@
       },
       {
         "parentPluginId": "@kbn/core-overlays-browser",
-        "id": "def-common.OverlayModalStart",
+        "id": "def-public.OverlayModalStart",
         "type": "Interface",
         "tags": [],
         "label": "OverlayModalStart",
@@ -784,7 +564,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayModalStart.open",
+            "id": "def-public.OverlayModalStart.open",
             "type": "Function",
             "tags": [
               "return"
@@ -797,25 +577,25 @@
               "(mount: ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
+                "section": "def-public.MountPoint",
                 "text": "MountPoint"
               },
               "<HTMLElement>, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayModalOpenOptions",
+                "section": "def-public.OverlayModalOpenOptions",
                 "text": "OverlayModalOpenOptions"
               },
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.OverlayRef",
+                "section": "def-public.OverlayRef",
                 "text": "OverlayRef"
               }
             ],
@@ -825,7 +605,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayModalStart.open.$1",
+                "id": "def-public.OverlayModalStart.open.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "mount",
@@ -835,9 +615,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-common.MountPoint",
+                    "section": "def-public.MountPoint",
                     "text": "MountPoint"
                   },
                   "<HTMLElement>"
@@ -849,7 +629,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayModalStart.open.$2",
+                "id": "def-public.OverlayModalStart.open.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -859,9 +639,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-common.OverlayModalOpenOptions",
+                    "section": "def-public.OverlayModalOpenOptions",
                     "text": "OverlayModalOpenOptions"
                   },
                   " | undefined"
@@ -876,7 +656,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayModalStart.openConfirm",
+            "id": "def-public.OverlayModalStart.openConfirm",
             "type": "Function",
             "tags": [],
             "label": "openConfirm",
@@ -887,17 +667,17 @@
               "(message: string | ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
+                "section": "def-public.MountPoint",
                 "text": "MountPoint"
               },
               "<HTMLElement>, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayModalConfirmOptions",
+                "section": "def-public.OverlayModalConfirmOptions",
                 "text": "OverlayModalConfirmOptions"
               },
               " | undefined) => Promise<boolean>"
@@ -908,7 +688,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayModalStart.openConfirm.$1",
+                "id": "def-public.OverlayModalStart.openConfirm.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "message",
@@ -919,9 +699,9 @@
                   "string | ",
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-common.MountPoint",
+                    "section": "def-public.MountPoint",
                     "text": "MountPoint"
                   },
                   "<HTMLElement>"
@@ -933,7 +713,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayModalStart.openConfirm.$2",
+                "id": "def-public.OverlayModalStart.openConfirm.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -943,9 +723,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-common.OverlayModalConfirmOptions",
+                    "section": "def-public.OverlayModalConfirmOptions",
                     "text": "OverlayModalConfirmOptions"
                   },
                   " | undefined"
@@ -963,7 +743,7 @@
       },
       {
         "parentPluginId": "@kbn/core-overlays-browser",
-        "id": "def-common.OverlayStart",
+        "id": "def-public.OverlayStart",
         "type": "Interface",
         "tags": [],
         "label": "OverlayStart",
@@ -974,7 +754,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayStart.banners",
+            "id": "def-public.OverlayStart.banners",
             "type": "Object",
             "tags": [],
             "label": "banners",
@@ -984,9 +764,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayBannersStart",
+                "section": "def-public.OverlayBannersStart",
                 "text": "OverlayBannersStart"
               }
             ],
@@ -996,7 +776,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayStart.openFlyout",
+            "id": "def-public.OverlayStart.openFlyout",
             "type": "Function",
             "tags": [],
             "label": "openFlyout",
@@ -1007,25 +787,25 @@
               "(mount: ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
+                "section": "def-public.MountPoint",
                 "text": "MountPoint"
               },
               "<HTMLElement>, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayFlyoutOpenOptions",
+                "section": "def-public.OverlayFlyoutOpenOptions",
                 "text": "OverlayFlyoutOpenOptions"
               },
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.OverlayRef",
+                "section": "def-public.OverlayRef",
                 "text": "OverlayRef"
               }
             ],
@@ -1036,7 +816,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayStart.openFlyout.$1",
+                "id": "def-public.OverlayStart.openFlyout.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "mount",
@@ -1045,9 +825,9 @@
                   "(element: HTMLElement) => ",
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-common.UnmountCallback",
+                    "section": "def-public.UnmountCallback",
                     "text": "UnmountCallback"
                   }
                 ],
@@ -1058,7 +838,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-overlays-browser",
-                    "id": "def-common.OverlayStart.openFlyout.$1.$1",
+                    "id": "def-public.OverlayStart.openFlyout.$1.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "element",
@@ -1074,17 +854,17 @@
               },
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayStart.openFlyout.$2",
-                "type": "Object",
+                "id": "def-public.OverlayStart.openFlyout.$2",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-common.OverlayFlyoutOpenOptions",
+                    "section": "def-public.OverlayFlyoutOpenOptions",
                     "text": "OverlayFlyoutOpenOptions"
                   },
                   " | undefined"
@@ -1097,7 +877,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayStart.openModal",
+            "id": "def-public.OverlayStart.openModal",
             "type": "Function",
             "tags": [],
             "label": "openModal",
@@ -1108,25 +888,25 @@
               "(mount: ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
+                "section": "def-public.MountPoint",
                 "text": "MountPoint"
               },
               "<HTMLElement>, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayModalOpenOptions",
+                "section": "def-public.OverlayModalOpenOptions",
                 "text": "OverlayModalOpenOptions"
               },
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.OverlayRef",
+                "section": "def-public.OverlayRef",
                 "text": "OverlayRef"
               }
             ],
@@ -1137,7 +917,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayStart.openModal.$1",
+                "id": "def-public.OverlayStart.openModal.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "mount",
@@ -1146,9 +926,9 @@
                   "(element: HTMLElement) => ",
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-common.UnmountCallback",
+                    "section": "def-public.UnmountCallback",
                     "text": "UnmountCallback"
                   }
                 ],
@@ -1159,7 +939,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-overlays-browser",
-                    "id": "def-common.OverlayStart.openModal.$1.$1",
+                    "id": "def-public.OverlayStart.openModal.$1.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "element",
@@ -1175,7 +955,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayStart.openModal.$2",
+                "id": "def-public.OverlayStart.openModal.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1183,9 +963,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-common.OverlayModalOpenOptions",
+                    "section": "def-public.OverlayModalOpenOptions",
                     "text": "OverlayModalOpenOptions"
                   },
                   " | undefined"
@@ -1198,7 +978,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
-            "id": "def-common.OverlayStart.openConfirm",
+            "id": "def-public.OverlayStart.openConfirm",
             "type": "Function",
             "tags": [],
             "label": "openConfirm",
@@ -1209,17 +989,17 @@
               "(message: string | ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
+                "section": "def-public.MountPoint",
                 "text": "MountPoint"
               },
               "<HTMLElement>, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayModalConfirmOptions",
+                "section": "def-public.OverlayModalConfirmOptions",
                 "text": "OverlayModalConfirmOptions"
               },
               " | undefined) => Promise<boolean>"
@@ -1231,7 +1011,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayStart.openConfirm.$1",
+                "id": "def-public.OverlayStart.openConfirm.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "message",
@@ -1240,9 +1020,9 @@
                   "string | ",
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-common.MountPoint",
+                    "section": "def-public.MountPoint",
                     "text": "MountPoint"
                   },
                   "<HTMLElement>"
@@ -1253,7 +1033,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-overlays-browser",
-                "id": "def-common.OverlayStart.openConfirm.$2",
+                "id": "def-public.OverlayStart.openConfirm.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1261,9 +1041,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-common.OverlayModalConfirmOptions",
+                    "section": "def-public.OverlayModalConfirmOptions",
                     "text": "OverlayModalConfirmOptions"
                   },
                   " | undefined"
@@ -1278,6 +1058,50 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-overlays-browser",
+        "id": "def-public.OverlayFlyoutOpenOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "OverlayFlyoutOpenOptions",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "EuiFlyoutProps",
+          "<\"div\"> | ",
+          "EuiFlyoutResizableProps",
+          ", \"onClose\"> & { onClose?: ((flyout: ",
+          {
+            "pluginId": "@kbn/core-mount-utils-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+            "section": "def-public.OverlayRef",
+            "text": "OverlayRef"
+          },
+          ") => void) | undefined; isResizable?: boolean | undefined; }"
+        ],
+        "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

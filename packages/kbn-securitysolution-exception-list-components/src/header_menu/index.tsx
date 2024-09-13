@@ -1,25 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { FC, ReactElement, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
+  EuiButtonEmptyProps,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiPopover,
-  IconType,
   PanelPaddingSize,
   PopoverAnchorPosition,
 } from '@elastic/eui';
 
-import { ButtonContentIconSide } from '@elastic/eui/src/components/button/_button_content_deprecated';
 import { css } from '@emotion/react';
 
 export interface Action {
@@ -34,8 +34,8 @@ interface HeaderMenuComponentProps {
   disableActions: boolean;
   actions: Action[] | ReactElement[] | null;
   text?: string;
-  iconType?: IconType;
-  iconSide?: ButtonContentIconSide;
+  iconType?: EuiButtonEmptyProps['iconType'];
+  iconSide?: EuiButtonEmptyProps['iconSide'];
   dataTestSubj?: string;
   emptyButton?: boolean;
   useCustomActions?: boolean;

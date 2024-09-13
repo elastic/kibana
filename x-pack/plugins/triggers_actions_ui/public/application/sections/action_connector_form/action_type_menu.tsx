@@ -10,18 +10,19 @@ import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { useKibana } from '../../../common/lib/kibana';
 import { SectionLoading } from '../../components/section_loading';
-import { betaBadgeProps } from './beta_badge_props';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
   featureId?: string;
   setHasActionsUpgradeableByTrial?: (value: boolean) => void;
+  setAllActionTypes?: (actionsType: ActionTypeIndex) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 
@@ -29,6 +30,7 @@ export const ActionTypeMenu = ({
   onActionTypeChange,
   featureId,
   setHasActionsUpgradeableByTrial,
+  setAllActionTypes,
   actionTypeRegistry,
 }: Props) => {
   const {
@@ -37,7 +39,6 @@ export const ActionTypeMenu = ({
   } = useKibana().services;
   const [loadingActionTypes, setLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
-
   useEffect(() => {
     (async () => {
       try {
@@ -50,6 +51,9 @@ export const ActionTypeMenu = ({
           index[actionTypeItem.id] = actionTypeItem;
         }
         setActionTypesIndex(index);
+        if (setAllActionTypes) {
+          setAllActionTypes(index);
+        }
         // determine if there are actions disabled by license that that
         // would be enabled by upgrading to gold or trial
         if (setHasActionsUpgradeableByTrial) {
@@ -73,9 +77,13 @@ export const ActionTypeMenu = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
-    .filter(([id, details]) => actionTypeRegistry.has(id) && details.enabledInConfig === true)
+    .filter(
+      ([id, details]) =>
+        actionTypeRegistry.has(id) &&
+        details.enabledInConfig === true &&
+        !actionTypeRegistry.get(id).hideInUi
+    )
     .map(([id, actionType]) => {
       const actionTypeModel = actionTypeRegistry.get(id);
       return {
@@ -93,14 +101,20 @@ export const ActionTypeMenu = ({
       const checkEnabledResult = checkActionTypeEnabled(item.actionType);
       const card = (
         <EuiCard
-          betaBadgeProps={item.isExperimental ? betaBadgeProps : undefined}
+          betaBadgeProps={
+            item.isExperimental
+              ? { label: TECH_PREVIEW_LABEL, tooltipContent: TECH_PREVIEW_DESCRIPTION }
+              : undefined
+          }
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
           icon={<EuiIcon size="xl" type={item.iconClass} />}
           title={item.name}
           description={item.selectMessage}
           isDisabled={!checkEnabledResult.isEnabled}
-          onClick={() => onActionTypeChange(item.actionType)}
+          onClick={() => {
+            onActionTypeChange(item.actionType);
+          }}
         />
       );
 

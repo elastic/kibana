@@ -5,105 +5,95 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { UpdateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
+import {
+  UpdateRuleRequestBody,
+  validateUpdateRuleProps,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { validateUpdateRuleProps } from '../../../../../../../common/detection_engine/rule_management';
-import { RuleUpdateProps } from '../../../../../../../common/detection_engine/rule_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import type { SetupPlugins } from '../../../../../../plugin';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-
-import { getIdError } from '../../../utils/utils';
-import { transformValidate } from '../../../utils/validate';
-import { updateRules } from '../../../logic/crud/update_rules';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
-import { readRules } from '../../../logic/crud/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
+import { getIdError } from '../../../utils/utils';
+import { validateResponseActionsPermissions } from '../../../utils/validate';
 
-export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
-  router.put(
-    {
+export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
+  router.versioned
+    .put({
+      access: 'public',
       path: DETECTION_ENGINE_RULES_URL,
-      validate: {
-        body: buildRouteValidation(RuleUpdateProps),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      const validationErrors = validateUpdateRuleProps(request.body);
-      if (validationErrors.length) {
-        return siemResponse.error({ statusCode: 400, body: validationErrors });
-      }
-      try {
-        const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(UpdateRuleRequestBody),
+          },
+        },
+      },
+      async (context, request, response): Promise<IKibanaResponse<UpdateRuleResponse>> => {
+        const siemResponse = buildSiemResponse(response);
+        const validationErrors = validateUpdateRuleProps(request.body);
+        if (validationErrors.length) {
+          return siemResponse.error({ statusCode: 400, body: validationErrors });
+        }
+        try {
+          const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
+          const rulesClient = ctx.alerting.getRulesClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
-        const rulesClient = ctx.alerting.getRulesClient();
-        const savedObjectsClient = ctx.core.savedObjects.client;
+          checkDefaultRuleExceptionListReferences({ exceptionLists: request.body.exceptions_list });
 
-        const mlAuthz = buildMlAuthz({
-          license: ctx.licensing.license,
-          ml,
-          request,
-          savedObjectsClient,
-        });
-        throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
+          await validateRuleDefaultExceptionList({
+            exceptionsList: request.body.exceptions_list,
+            rulesClient,
+            ruleRuleId: request.body.rule_id,
+            ruleId: request.body.id,
+          });
 
-        checkDefaultRuleExceptionListReferences({ exceptionLists: request.body.exceptions_list });
+          const existingRule = await readRules({
+            rulesClient,
+            ruleId: request.body.rule_id,
+            id: request.body.id,
+          });
 
-        await validateRuleDefaultExceptionList({
-          exceptionsList: request.body.exceptions_list,
-          rulesClient,
-          ruleRuleId: request.body.rule_id,
-          ruleId: request.body.id,
-        });
-
-        const existingRule = await readRules({
-          rulesClient,
-          ruleId: request.body.rule_id,
-          id: request.body.id,
-        });
-
-        const migratedRule = await legacyMigrate({
-          rulesClient,
-          savedObjectsClient,
-          rule: existingRule,
-        });
-        const rule = await updateRules({
-          rulesClient,
-          existingRule: migratedRule,
-          ruleUpdate: request.body,
-        });
-
-        if (rule != null) {
-          const [validated, errors] = transformValidate(rule);
-          if (errors != null) {
-            return siemResponse.error({ statusCode: 500, body: errors });
-          } else {
-            return response.ok({ body: validated ?? {} });
+          if (existingRule == null) {
+            const error = getIdError({ id: request.body.id, ruleId: request.body.rule_id });
+            return siemResponse.error({
+              body: error.message,
+              statusCode: error.statusCode,
+            });
           }
-        } else {
-          const error = getIdError({ id: request.body.id, ruleId: request.body.rule_id });
+
+          await validateResponseActionsPermissions(
+            ctx.securitySolution,
+            request.body,
+            existingRule
+          );
+
+          const updatedRule = await detectionRulesClient.updateRule({
+            ruleUpdate: request.body,
+          });
+
+          return response.ok({
+            body: updatedRule,
+          });
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

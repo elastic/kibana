@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom, Subject } from 'rxjs';
@@ -32,6 +33,7 @@ export class PluginWrapper<
   public readonly configPath: DiscoveredPlugin['configPath'];
   public readonly requiredPlugins: DiscoveredPlugin['requiredPlugins'];
   public readonly optionalPlugins: DiscoveredPlugin['optionalPlugins'];
+  public readonly runtimePluginDependencies: DiscoveredPlugin['runtimePluginDependencies'];
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
@@ -46,6 +48,7 @@ export class PluginWrapper<
     this.configPath = discoveredPlugin.configPath;
     this.requiredPlugins = discoveredPlugin.requiredPlugins;
     this.optionalPlugins = discoveredPlugin.optionalPlugins;
+    this.runtimePluginDependencies = discoveredPlugin.runtimePluginDependencies;
   }
 
   /**

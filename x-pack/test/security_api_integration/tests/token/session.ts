@@ -189,6 +189,9 @@ export default function ({ getService }: FtrProviderContext) {
       beforeEach(async () => (sessionCookie = await createSessionCookie()));
 
       it('should clear cookie and redirect to login', async function () {
+        // Let's make sure that created tokens are available for search.
+        await getService('es').indices.refresh({ index: '.security-tokens' });
+
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.

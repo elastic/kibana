@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { EventEmitter } from 'events';
@@ -39,7 +40,10 @@ import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type {
   Vis,
   VisualizeEmbeddableContract,
@@ -48,8 +52,8 @@ import type {
   VisParams,
 } from '..';
 
-import type { SavedVisState } from '../types';
-import type { createVisEmbeddableFromObject } from '../embeddable';
+import type { ListingViewRegistry, SavedVisState } from '../types';
+import type { createVisEmbeddableFromObject } from '../legacy/embeddable';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
 
 export interface VisualizeAppState {
@@ -102,17 +106,26 @@ export interface VisualizeServices extends CoreStart {
   visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
   dashboardCapabilities: Record<string, boolean | Record<string, boolean>>;
   setActiveUrl: (newUrl: string) => void;
+  /** @deprecated
+   * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only
+   * used within the visualize editor.
+   */
   createVisEmbeddableFromObject: ReturnType<typeof createVisEmbeddableFromObject>;
   restorePreviousUrl: () => void;
   scopedHistory: ScopedHistory;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
+  savedSearch: SavedSearchPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   getKibanaVersion: () => string;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
   visEditorsRegistry: VisEditorsRegistry;
+  listingViewRegistry: ListingViewRegistry;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  serverless?: ServerlessPluginStart;
+  noDataPage?: NoDataPagePluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 export interface VisInstance {
@@ -122,13 +135,14 @@ export interface VisInstance {
   embeddableHandler: VisualizeEmbeddableContract;
   panelTitle?: string;
   panelDescription?: string;
+  panelTimeRange?: TimeRange;
 }
 
 export type SavedVisInstance = VisInstance;
 export type ByValueVisInstance = VisInstance;
 export type VisualizeEditorVisInstance = SavedVisInstance | ByValueVisInstance;
 
-export type VisEditorConstructor<TVisParams = VisParams> = new (
+export type VisEditorConstructor<TVisParams extends VisParams = VisParams> = new (
   element: HTMLElement,
   vis: Vis<TVisParams>,
   eventEmitter: EventEmitter,

@@ -1,52 +1,48 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { ReactElement, ReactNode } from 'react';
-import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { getTagFindReferences, parseQuery } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiTableFieldDataColumnType,
-  IconType,
-  EuiIcon,
-  EuiToolTip,
   EuiSearchBarProps,
-  SearchFilterConfig,
-  Query,
-  PropertySort,
-  EuiFlexItem,
-  EuiFlexGroup,
+  EuiTableFieldDataColumnType,
   EuiText,
+  EuiToolTip,
+  EuiIconTip,
+  IconType,
+  PropertySort,
+  Query,
+  SearchFilterConfig,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { IUiSettingsClient, HttpStart } from '@kbn/core/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import {
-  SavedObjectCommon,
-  FindQueryHTTP,
-  FindResponseHTTP,
-  FinderAttributes,
-  LISTING_LIMIT_SETTING,
-} from '../../common';
+import { FinderAttributes, SavedObjectCommon, LISTING_LIMIT_SETTING } from '../../common';
 
-export interface SavedObjectMetaData<T = unknown> {
+export interface SavedObjectMetaData<T extends FinderAttributes = FinderAttributes> {
   type: string;
   name: string;
   getIconForSavedObject(savedObject: SavedObjectCommon<T>): IconType;
   getTooltipForSavedObject?(savedObject: SavedObjectCommon<T>): string;
   showSavedObject?(savedObject: SavedObjectCommon<T>): boolean;
   getSavedObjectSubType?(savedObject: SavedObjectCommon<T>): string;
+  /** @deprecated doesn't do anything, the full object is returned **/
   includeFields?: string[];
-  defaultSearchField?: string;
 }
 
 interface SavedObjectFinderItem extends SavedObjectCommon {
@@ -63,10 +59,9 @@ interface SavedObjectFinderState {
 }
 
 interface SavedObjectFinderServices {
-  http: HttpStart;
-  uiSettings: IUiSettingsClient;
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTagging?: SavedObjectsTaggingApi;
+  contentClient: ContentClient;
+  uiSettings: IUiSettingsClient;
 }
 
 interface BaseSavedObjectFinder {
@@ -81,7 +76,9 @@ interface BaseSavedObjectFinder {
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
   showFilter?: boolean;
   leftChildren?: ReactElement | ReactElement[];
+  children?: ReactElement | ReactElement[];
   helpText?: string;
+  getTooltipText?: (item: SavedObjectFinderItem) => string | undefined;
 }
 
 interface SavedObjectFinderFixedPage extends BaseSavedObjectFinder {
@@ -113,21 +110,9 @@ export class SavedObjectFinderUi extends React.Component<
 
   private debouncedFetch = debounce(async (query: Query) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
-    const { savedObjectsManagement, uiSettings, http } = this.props.services;
+    const { contentClient, uiSettings } = this.props.services;
 
-    const fields = Object.values(metaDataMap)
-      .map((metaData) => metaData.includeFields || [])
-      .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title', 'name']);
-
-    const additionalSearchFields = Object.values(metaDataMap).reduce<string[]>((col, item) => {
-      if (item.defaultSearchField) {
-        col.push(item.defaultSearchField);
-      }
-      return col;
-    }, []);
-
-    const perPage = uiSettings.get(LISTING_LIMIT_SETTING);
-    const { queryText, visibleTypes, selectedTags } = savedObjectsManagement.parseQuery(
+    const { queryText, visibleTypes, selectedTags } = parseQuery(
       query,
       Object.values(metaDataMap).map((metadata) => ({
         name: metadata.type,
@@ -136,26 +121,23 @@ export class SavedObjectFinderUi extends React.Component<
         displayName: metadata.name,
       }))
     );
-    const hasReference = savedObjectsManagement.getTagFindReferences({
+    const includeTags = getTagFindReferences({
       selectedTags,
       taggingApi: this.props.services.savedObjectsTagging,
+    })?.map(({ id, type }) => id);
+
+    const types = visibleTypes ?? Object.keys(metaDataMap);
+
+    const response = await contentClient.mSearch<SavedObjectCommon<FinderAttributes>>({
+      contentTypes: types.map((type) => ({ contentTypeId: type })),
+      query: {
+        text: queryText ? `${queryText}*` : undefined,
+        ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
+        limit: uiSettings.get(LISTING_LIMIT_SETTING), // TODO: support pagination,
+      },
     });
-    const params: FindQueryHTTP = {
-      type: visibleTypes ?? Object.keys(metaDataMap),
-      search: queryText ? `${queryText}*` : undefined,
-      fields: [...new Set(fields)],
-      page: 1,
-      perPage,
-      searchFields: ['title^3', 'description', ...additionalSearchFields],
-      defaultSearchOperator: 'AND',
-      hasReference: hasReference ? JSON.stringify(hasReference) : undefined,
-    };
 
-    const response = (await http.get('/internal/saved-objects-finder/find', {
-      query: params as Record<string, any>,
-    })) as FindResponseHTTP<FinderAttributes>;
-
-    const savedObjects = response.saved_objects
+    const savedObjects = response.hits
       .map((savedObject) => {
         const {
           attributes: { name, title },
@@ -270,18 +252,18 @@ export class SavedObjectFinderUi extends React.Component<
                 currentSavedObjectMetaData ||
                 ({
                   getIconForSavedObject: () => 'document',
-                } as Pick<SavedObjectMetaData<{ title: string }>, 'getIconForSavedObject'>)
+                } as Pick<SavedObjectMetaData, 'getIconForSavedObject'>)
               ).getIconForSavedObject(item.simple);
 
               return (
-                <EuiToolTip position="top" content={currentSavedObjectMetaData.name}>
-                  <EuiIcon
-                    aria-label={currentSavedObjectMetaData.name}
-                    type={iconType}
-                    size="s"
-                    data-test-subj="objectType"
-                  />
-                </EuiToolTip>
+                <EuiIconTip
+                  position="top"
+                  content={currentSavedObjectMetaData.name}
+                  aria-label={currentSavedObjectMetaData.name}
+                  type={iconType}
+                  size="s"
+                  data-test-subj="objectType"
+                />
               );
             },
           }
@@ -308,7 +290,7 @@ export class SavedObjectFinderUi extends React.Component<
             ? currentSavedObjectMetaData.getTooltipForSavedObject(item.simple)
             : `${item.name} (${currentSavedObjectMetaData!.name})`;
 
-          return (
+          const link = (
             <EuiLink
               onClick={
                 onChoose
@@ -322,6 +304,16 @@ export class SavedObjectFinderUi extends React.Component<
             >
               {item.name}
             </EuiLink>
+          );
+
+          const tooltipText = this.props.getTooltipText?.(item);
+
+          return tooltipText ? (
+            <EuiToolTip position="left" content={tooltipText}>
+              {link}
+            </EuiToolTip>
+          ) : (
+            link
           );
         },
       },

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment, { type MomentInput } from 'moment';
 import type { Logger, ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
 import {
   type TestElasticsearchUtils,
@@ -13,7 +15,7 @@ import {
   createTestServers,
   createRootWithCorePlugins,
 } from '@kbn/core-test-helpers-kbn-server';
-import { rollDailyData } from '../daily';
+
 import { metricsServiceMock } from '@kbn/core/server/mocks';
 
 import {
@@ -21,9 +23,20 @@ import {
   serializeSavedObjectId,
   EventLoopDelaysDaily,
 } from '../../saved_objects';
-import moment from 'moment';
+import { rollDailyData } from '../daily';
 
 const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();
+
+/*
+ * Mocking the constructor of moment, so we can control the time of the day.
+ * This is to avoid flaky tests when starting to run before midnight and ending the test after midnight
+ * because the logic might remove one extra document since we moved to the next day.
+ */
+jest.doMock('moment', () => {
+  const mockedMoment = (date?: MomentInput) => moment(date ?? '2023-07-04T10:00:00.000Z');
+  Object.setPrototypeOf(mockedMoment, moment); // inherit the prototype of `moment` so it has all the same methods.
+  return mockedMoment;
+});
 
 function createRawObject(date: moment.MomentInput): SavedObject<EventLoopDelaysDaily> {
   const pid = Math.round(Math.random() * 10000);
@@ -45,8 +58,8 @@ function createRawObject(date: moment.MomentInput): SavedObject<EventLoopDelaysD
 
 function createRawEventLoopDelaysDailyDocs() {
   const rawEventLoopDelaysDaily = [
-    createRawObject(moment.now()),
-    createRawObject(moment.now()),
+    createRawObject(moment()),
+    createRawObject(moment()),
     createRawObject(moment().subtract(1, 'days')),
     createRawObject(moment().subtract(3, 'days')),
   ];
@@ -59,8 +72,7 @@ function createRawEventLoopDelaysDailyDocs() {
   return { rawEventLoopDelaysDaily, outdatedRawEventLoopDelaysDaily };
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/111821
-describe.skip(`daily rollups integration test`, () => {
+describe(`daily rollups integration test`, () => {
   let esServer: TestElasticsearchUtils;
   let root: TestKibanaUtils['root'];
   let internalRepository: ISavedObjectsRepository;
@@ -81,15 +93,6 @@ describe.skip(`daily rollups integration test`, () => {
     const start = await root.start();
     logger = root.logger.get('test daily rollups');
     internalRepository = start.savedObjects.createInternalRepository([SAVED_OBJECTS_DAILY_TYPE]);
-
-    // If we are less than 1 second away from midnight, let's wait 1 second before creating the docs.
-    // Otherwise, we may receive 1 document less than the expected ones.
-    if (moment().endOf('day').diff(moment(), 's', true) < 1) {
-      logger.info(
-        'Delaying the creation of the docs 1s, just in case we create them before midnight and run the tests on the following day.'
-      );
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
 
     // Create the docs now
     const rawDailyDocs = createRawEventLoopDelaysDailyDocs();

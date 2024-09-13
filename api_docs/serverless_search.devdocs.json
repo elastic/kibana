@@ -1,0 +1,129 @@
+{
+  "id": "serverlessSearch",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "serverlessSearch",
+      "id": "def-public.ServerlessSearchPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessSearchPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/serverless_search/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "serverlessSearch",
+      "id": "def-public.ServerlessSearchPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessSearchPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/serverless_search/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "serverlessSearch",
+      "id": "def-server.ServerlessSearchPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessSearchPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/serverless_search/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "serverlessSearch",
+      "id": "def-server.ServerlessSearchPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessSearchPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/serverless_search/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "serverlessSearch",
+        "id": "def-common.DEFAULT_INGESTION_PIPELINE",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_INGESTION_PIPELINE",
+        "description": [],
+        "signature": [
+          "\"search-default-ingestion\""
+        ],
+        "path": "x-pack/plugins/serverless_search/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "serverlessSearch",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"serverlessSearch\""
+        ],
+        "path": "x-pack/plugins/serverless_search/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "serverlessSearch",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"serverlessSearch\""
+        ],
+        "path": "x-pack/plugins/serverless_search/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -7,10 +7,10 @@
 
 import type { CaseRoute } from '../types';
 
-import type { CasesStatusRequest } from '../../../../common/api';
 import { CASE_STATUS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { statsApiV1 } from '../../../../common/types/api';
 
 /**
  * @deprecated since version 8.1.0
@@ -19,12 +19,26 @@ export const getStatusRoute: CaseRoute = createCasesRoute({
   method: 'get',
   path: CASE_STATUS_URL,
   options: { deprecated: true },
+  routerOptions: {
+    access: 'public',
+    summary: `Get case status summary`,
+    tags: ['oas-tag:cases'],
+    description:
+      'Returns the number of cases that are open, closed, and in progress in the default space.',
+    // You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
+    deprecated: true,
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
+
+      const res: statsApiV1.CasesStatusResponse = await client.metrics.getStatusTotalsByType(
+        request.query as statsApiV1.CasesStatusRequest
+      );
+
       return response.ok({
-        body: await client.metrics.getStatusTotalsByType(request.query as CasesStatusRequest),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

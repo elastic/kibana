@@ -11,8 +11,8 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import { routeDefinitionParamsMock } from '../../index.mock';
 import { defineGetRolesRoutes } from './get';
+import { routeDefinitionParamsMock } from '../../index.mock';
 
 const application = 'kibana-.kibana';
 const reservedPrivilegesApplicationWildcard = 'kibana-*';
@@ -123,6 +123,7 @@ describe('GET role', () => {
       name: 'first_role',
       apiResponse: () => ({
         first_role: {
+          description: 'roleDescription',
           cluster: ['manage_watcher'],
           indices: [
             {
@@ -144,6 +145,7 @@ describe('GET role', () => {
         statusCode: 200,
         result: {
           name: 'first_role',
+          description: 'roleDescription',
           metadata: {
             _reserved: true,
           },
@@ -174,6 +176,7 @@ describe('GET role', () => {
           name: 'first_role',
           apiResponse: () => ({
             first_role: {
+              description: 'roleDescription',
               cluster: [],
               indices: [],
               applications: [
@@ -196,6 +199,7 @@ describe('GET role', () => {
             statusCode: 200,
             result: {
               name: 'first_role',
+              description: 'roleDescription',
               metadata: {
                 _reserved: true,
               },

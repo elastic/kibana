@@ -258,7 +258,7 @@
             "section": "def-common.ProcRunner",
             "text": "ProcRunner"
           },
-          ") => Promise<void>) => Promise<void>"
+          ") => Promise<T>) => Promise<void>"
         ],
         "path": "packages/kbn-dev-proc-runner/src/with_proc_runner.ts",
         "deprecated": false,
@@ -301,7 +301,7 @@
                 "section": "def-common.ProcRunner",
                 "text": "ProcRunner"
               },
-              ") => Promise<void>"
+              ") => Promise<T>"
             ],
             "path": "packages/kbn-dev-proc-runner/src/with_proc_runner.ts",
             "deprecated": false,

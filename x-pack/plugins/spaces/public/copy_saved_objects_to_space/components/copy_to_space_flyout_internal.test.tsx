@@ -13,15 +13,15 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
-import type { Space } from '../../../common';
-import { getSpacesContextProviderWrapper } from '../../spaces_context';
-import { spacesManagerMock } from '../../spaces_manager/mocks';
-import type { CopyToSpaceSavedObjectTarget } from '../types';
 import { CopyModeControl } from './copy_mode_control';
 import { getCopyToSpaceFlyoutComponent } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { SelectableSpacesControl } from './selectable_spaces_control';
+import type { Space } from '../../../common';
+import { getSpacesContextProviderWrapper } from '../../spaces_context';
+import { spacesManagerMock } from '../../spaces_manager/mocks';
+import type { CopyToSpaceSavedObjectTarget } from '../types';
 
 interface SetupOpts {
   mockSpaces?: Space[];
@@ -523,10 +523,9 @@ describe('CopyToSpaceFlyout', () => {
     expect(errorIconTip1.props()).toMatchInlineSnapshot(`
       Object {
         "color": "warning",
-        "content": <FormattedMessage
+        "content": <Memo(MemoizedFormattedMessage)
           defaultMessage="Object will be copied, but one or more references are missing."
           id="xpack.spaces.management.copyToSpace.copyStatus.missingReferencesMessage"
-          values={Object {}}
         />,
         "data-test-subj": "cts-object-result-missing-references-my-viz-1",
         "type": "link",
@@ -619,10 +618,9 @@ describe('CopyToSpaceFlyout', () => {
     expect(errorIconTip.props()).toMatchInlineSnapshot(`
       Object {
         "color": "danger",
-        "content": <FormattedMessage
+        "content": <Memo(MemoizedFormattedMessage)
           defaultMessage="An error occurred copying this object."
           id="xpack.spaces.management.copyToSpace.copyStatus.unresolvableErrorMessage"
-          values={Object {}}
         />,
         "data-test-subj": "cts-object-result-error-my-viz",
         "type": "alert",

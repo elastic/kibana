@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { FC, useRef, useLayoutEffect, useState } from 'react';
@@ -11,10 +12,12 @@ import { Observable } from 'rxjs';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
 
 interface HeaderActionMenuProps {
-  actionMenu$: Observable<MountPoint | undefined>;
+  mounter: { mount: MountPoint | undefined };
 }
 
-export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ actionMenu$ }) => {
+export const useHeaderActionMenuMounter = (
+  actionMenu$: Observable<MountPoint<HTMLElement> | undefined>
+) => {
   // useObservable relies on useState under the hood. The signature is type SetStateAction<S> = S | ((prevState: S) => S);
   // As we got a Observable<Function> here, React's setState setter assume he's getting a `(prevState: S) => S` signature,
   // therefore executing the mount method, causing everything to crash.
@@ -29,15 +32,14 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ actionMenu$ }) => 
     return () => s.unsubscribe();
   }, [actionMenu$]);
 
+  return mounter;
+};
+
+export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter }) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef = useRef<UnmountCallback | null>(null);
 
   useLayoutEffect(() => {
-    if (unmountRef.current) {
-      unmountRef.current();
-      unmountRef.current = null;
-    }
-
     if (mounter.mount && elementRef.current) {
       try {
         unmountRef.current = mounter.mount(elementRef.current);
@@ -47,6 +49,12 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ actionMenu$ }) => 
         console.error(e);
       }
     }
+    return () => {
+      if (unmountRef.current) {
+        unmountRef.current();
+        unmountRef.current = null;
+      }
+    };
   }, [mounter]);
 
   return <div data-test-subj="headerAppActionMenu" ref={elementRef} />;

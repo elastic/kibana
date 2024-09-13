@@ -1,0 +1,225 @@
+{
+  "id": "@kbn/serverless-project-switcher",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/serverless-project-switcher",
+        "id": "def-common.ProjectSwitcher",
+        "type": "Function",
+        "tags": [],
+        "label": "ProjectSwitcher",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/serverless-project-switcher",
+            "scope": "common",
+            "docId": "kibKbnServerlessProjectSwitcherPluginApi",
+            "section": "def-common.ProjectSwitcherProps",
+            "text": "ProjectSwitcherProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/serverless/project_switcher/src/switcher.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/serverless-project-switcher",
+            "id": "def-common.ProjectSwitcher.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/serverless-project-switcher",
+                "scope": "common",
+                "docId": "kibKbnServerlessProjectSwitcherPluginApi",
+                "section": "def-common.ProjectSwitcherProps",
+                "text": "ProjectSwitcherProps"
+              }
+            ],
+            "path": "packages/serverless/project_switcher/src/switcher.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/serverless-project-switcher",
+        "id": "def-common.ProjectSwitcherKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "ProjectSwitcherKibanaProvider",
+        "description": [
+          "\nKibana-specific Provider that maps dependencies to services."
+        ],
+        "signature": [
+          "({ children, coreStart, projectChangeAPIUrl, }: React.PropsWithChildren<React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/serverless-project-switcher",
+            "scope": "common",
+            "docId": "kibKbnServerlessProjectSwitcherPluginApi",
+            "section": "def-common.KibanaDependencies",
+            "text": "KibanaDependencies"
+          },
+          ">>) => JSX.Element"
+        ],
+        "path": "packages/serverless/project_switcher/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/serverless-project-switcher",
+            "id": "def-common.ProjectSwitcherKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  coreStart,\n  projectChangeAPIUrl,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/serverless-project-switcher",
+                "scope": "common",
+                "docId": "kibKbnServerlessProjectSwitcherPluginApi",
+                "section": "def-common.KibanaDependencies",
+                "text": "KibanaDependencies"
+              },
+              ">>"
+            ],
+            "path": "packages/serverless/project_switcher/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/serverless-project-switcher",
+        "id": "def-common.ProjectSwitcherProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "ProjectSwitcherProvider",
+        "description": [
+          "\nA Context Provider that provides services to the component and its dependencies."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "Services",
+          ">>) => JSX.Element"
+        ],
+        "path": "packages/serverless/project_switcher/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/serverless-project-switcher",
+            "id": "def-common.ProjectSwitcherProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...services\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<React.PropsWithChildren<",
+              "Services",
+              ">>"
+            ],
+            "path": "packages/serverless/project_switcher/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/serverless-project-switcher",
+        "id": "def-common.KibanaDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaDependencies",
+        "description": [
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender this component."
+        ],
+        "path": "packages/serverless/project_switcher/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/serverless-project-switcher",
+            "id": "def-common.KibanaDependencies.coreStart",
+            "type": "Object",
+            "tags": [],
+            "label": "coreStart",
+            "description": [],
+            "signature": [
+              "{ http: { post: (path: string, options: { body: string; }) => Promise<unknown>; }; }"
+            ],
+            "path": "packages/serverless/project_switcher/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/serverless-project-switcher",
+            "id": "def-common.KibanaDependencies.projectChangeAPIUrl",
+            "type": "string",
+            "tags": [],
+            "label": "projectChangeAPIUrl",
+            "description": [],
+            "path": "packages/serverless/project_switcher/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/serverless-project-switcher",
+        "id": "def-common.ProjectSwitcherProps",
+        "type": "Type",
+        "tags": [],
+        "label": "ProjectSwitcherProps",
+        "description": [],
+        "signature": [
+          "{ currentProjectType: ",
+          "ProjectType",
+          "; }"
+        ],
+        "path": "packages/serverless/project_switcher/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

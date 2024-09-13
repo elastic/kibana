@@ -6,34 +6,22 @@
  */
 
 import * as React from 'react';
-import {
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPageBody, EuiPageTemplate, EuiPageSection, EuiPageHeader } from '@elastic/eui';
 
 export interface PageProps {
+  children: React.ReactNode;
   title?: React.ReactNode;
 }
 
 export const Page: React.FC<PageProps> = ({ title = 'Untitled', children }) => {
   return (
     <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{title}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody style={{ maxWidth: 800, margin: '0 auto' }}>
-          {children}
-        </EuiPageContentBody>
-      </EuiPageContent>
+      <EuiPageSection>
+        <EuiPageHeader pageTitle={title} />
+      </EuiPageSection>
+      <EuiPageTemplate.Section>
+        <EuiPageSection style={{ maxWidth: 800, margin: '0 auto' }}>{children}</EuiPageSection>
+      </EuiPageTemplate.Section>
     </EuiPageBody>
   );
 };

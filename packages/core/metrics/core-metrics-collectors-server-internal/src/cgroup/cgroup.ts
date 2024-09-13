@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Logger } from '@kbn/logging';
@@ -42,9 +43,13 @@ export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetric
         return {};
       }
 
-      const args = { cpuAcctPath: this.cpuAcctPath!, cpuPath: this.cpuPath! };
       // "await" to handle any errors here.
-      return await (this.isCgroup2 ? gatherV2CgroupMetrics(args) : gatherV1CgroupMetrics(args));
+      return await (this.isCgroup2
+        ? gatherV2CgroupMetrics(this.cpuAcctPath!)
+        : gatherV1CgroupMetrics({
+            cpuAcctPath: this.cpuAcctPath!,
+            cpuPath: this.cpuPath!,
+          }));
     } catch (err) {
       this.noCgroupPresent = true;
 
@@ -67,10 +72,15 @@ export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetric
   private async initializePaths(): Promise<void> {
     if (this.hasPaths()) return;
 
-    const { data: cgroups, v2 } = await gatherInfo();
-    this.isCgroup2 = v2;
-    this.cpuPath = this.options.cpuPath || cgroups[GROUP_CPU];
-    this.cpuAcctPath = this.options.cpuAcctPath || cgroups[GROUP_CPUACCT];
+    const result = await gatherInfo();
+    this.isCgroup2 = result.v2;
+    if (result.v2) {
+      this.cpuPath = result.path;
+      this.cpuAcctPath = result.path;
+    } else {
+      this.cpuPath = this.options.cpuPath || result.data[GROUP_CPU];
+      this.cpuAcctPath = this.options.cpuAcctPath || result.data[GROUP_CPUACCT];
+    }
 
     // prevents undefined cgroup paths
     this.noCgroupPresent = Boolean(!this.cpuPath || !this.cpuAcctPath);

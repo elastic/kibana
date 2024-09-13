@@ -11,8 +11,10 @@ import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip } f
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useLink } from '../../../../hooks';
+import { useAuthz, useLink } from '../../../../hooks';
 import type { Output } from '../../../../types';
+
+import { OutputHealth } from '../edit_output_flyout/output_health';
 
 import { DefaultBadges } from './badges';
 
@@ -36,6 +38,10 @@ function displayOutputType(type: string) {
       return i18n.translate('xpack.fleet.settings.outputsTable.elasticsearchTypeLabel', {
         defaultMessage: 'Elasticsearch',
       });
+    case 'remote_elasticsearch':
+      return i18n.translate('xpack.fleet.settings.outputsTable.remoteElasticsearchTypeLabel', {
+        defaultMessage: 'Remote Elasticsearch',
+      });
     default:
       return type;
   }
@@ -45,6 +51,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
   outputs,
   deleteOutput,
 }) => {
+  const authz = useAuthz();
   const { getHref } = useLink();
 
   const columns = useMemo((): Array<EuiBasicTableColumn<Output>> => {
@@ -72,14 +79,14 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
           </EuiFlexGroup>
         ),
         width: '288px',
-        name: i18n.translate('xpack.fleet.settings.outputsTable.nameColomnTitle', {
+        name: i18n.translate('xpack.fleet.settings.outputsTable.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
       },
       {
         width: '172px',
         render: (output: Output) => displayOutputType(output.type),
-        name: i18n.translate('xpack.fleet.settings.outputsTable.typeColomnTitle', {
+        name: i18n.translate('xpack.fleet.settings.outputsTable.typeColumnTitle', {
           defaultMessage: 'Type',
         }),
       },
@@ -96,14 +103,24 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
             ))}
           </FlexGroupWithMinWidth>
         ),
-        name: i18n.translate('xpack.fleet.settings.outputsTable.hostColomnTitle', {
+        name: i18n.translate('xpack.fleet.settings.outputsTable.hostColumnTitle', {
           defaultMessage: 'Hosts',
+        }),
+      },
+      {
+        render: (output: Output) => {
+          return output?.id && output.type === 'remote_elasticsearch' ? (
+            <OutputHealth output={output} showBadge={true} />
+          ) : null;
+        },
+        name: i18n.translate('xpack.fleet.settings.outputsTable.statusColumnTitle', {
+          defaultMessage: 'Status',
         }),
       },
       {
         render: (output: Output) => <DefaultBadges output={output} />,
         width: '200px',
-        name: i18n.translate('xpack.fleet.settings.outputSection.defaultColomnTitle', {
+        name: i18n.translate('xpack.fleet.settings.outputSection.defaultColumnTitle', {
           defaultMessage: 'Default',
         }),
       },
@@ -111,7 +128,10 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
         width: '68px',
         render: (output: Output) => {
           const isDeleteVisible =
-            !output.is_default && !output.is_default_monitoring && !output.is_preconfigured;
+            !output.is_default &&
+            !output.is_default_monitoring &&
+            !output.is_preconfigured &&
+            authz.fleet.allSettings;
 
           return (
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
@@ -141,12 +161,12 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
             </EuiFlexGroup>
           );
         },
-        name: i18n.translate('xpack.fleet.settings.outputSection.actionsColomnTitle', {
+        name: i18n.translate('xpack.fleet.settings.outputSection.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
       },
     ];
-  }, [deleteOutput, getHref]);
+  }, [deleteOutput, getHref, authz.fleet.allSettings]);
 
-  return <EuiBasicTable columns={columns} items={outputs} />;
+  return <EuiBasicTable columns={columns} items={outputs} data-test-subj="settingsOutputsTable" />;
 };

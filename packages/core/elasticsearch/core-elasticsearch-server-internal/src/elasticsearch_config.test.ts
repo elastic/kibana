@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getDeprecationsFor } from '@kbn/core-test-helpers-deprecations-getters';
@@ -33,18 +34,22 @@ test('set correct defaults', () => {
       "apisToRedactInLogs": Array [],
       "compression": false,
       "customHeaders": Object {},
+      "dnsCacheTtl": "P0D",
       "healthCheckDelay": "PT2.5S",
+      "healthCheckStartupDelay": "PT0.5S",
       "hosts": Array [
         "http://localhost:9200",
       ],
       "idleSocketTimeout": "PT1M",
       "ignoreVersionMismatch": false,
       "maxIdleSockets": 256,
-      "maxSockets": Infinity,
+      "maxResponseSize": undefined,
+      "maxSockets": 800,
       "password": undefined,
       "pingTimeout": "PT30S",
       "requestHeadersWhitelist": Array [
         "authorization",
+        "es-client-authentication",
       ],
       "requestTimeout": "PT30S",
       "serviceAccountToken": undefined,
@@ -121,6 +126,20 @@ describe('#maxSockets', () => {
     expect(() => {
       config.schema.validate({ maxSockets: Infinity });
     }).toThrowErrorMatchingInlineSnapshot('"[maxSockets]: \\"maxSockets\\" cannot be infinity"');
+  });
+});
+
+describe('#maxResponseSize', () => {
+  test('accepts `false` value', () => {
+    const configValue = new ElasticsearchConfig(config.schema.validate({ maxResponseSize: false }));
+    expect(configValue.maxResponseSize).toBe(undefined);
+  });
+
+  test('accepts bytesize value', () => {
+    const configValue = new ElasticsearchConfig(
+      config.schema.validate({ maxResponseSize: '200b' })
+    );
+    expect(configValue.maxResponseSize!.getValueInBytes()).toBe(200);
   });
 });
 

@@ -26,7 +26,7 @@
     background: $euiColorEmptyShade;
     height: 100%;
 
-    > * {
+    &>* {
       flex: 1 1 100%;
       display: flex;
       align-items: center;
@@ -37,6 +37,7 @@
 
   &.lnsWorkspacePanelWrapper--fullscreen {
     margin-bottom: 0;
+
     .lnsWorkspacePanelWrapper__pageContentBody {
       box-shadow: none;
     }
@@ -45,9 +46,7 @@
 }
 
 .lnsWorkspacePanel__dragDrop {
-  border: $euiBorderWidthThin solid transparent;
-
-  &.domDragDrop-isDropTarget {
+  &.domDroppable--active {
     p {
       transition: filter $euiAnimSpeedFast ease-in-out;
       filter: blur(5px);
@@ -60,7 +59,7 @@
     }
   }
 
-  &.domDragDrop-isActiveDropTarget {
+  &.domDroppable--hover {
     .lnsDropIllustration__hand {
       animation: lnsWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
     }
@@ -120,9 +119,7 @@
   // Hard-coded px values OK (@cchaos)
   // sass-lint:disable-block indentation
   filter:
-    drop-shadow(0 6px 12px transparentize($euiShadowColor, .8))
-    drop-shadow(0 4px 4px transparentize($euiShadowColor, .8))
-    drop-shadow(0 2px 2px transparentize($euiShadowColor, .8));
+    drop-shadow(0 6px 12px transparentize($euiShadowColor, .8)) drop-shadow(0 4px 4px transparentize($euiShadowColor, .8)) drop-shadow(0 2px 2px transparentize($euiShadowColor, .8));
 }
 
 .lnsDropIllustration__adjustFill {
@@ -134,18 +131,56 @@
 }
 
 @keyframes lnsWorkspacePanel__illustrationPulseArrow {
-  0% { transform: translateY(0%); }
-  65% { transform: translateY(0%); }
-  72% { transform: translateY(10%); }
-  79% { transform: translateY(7%); }
-  86% { transform: translateY(10%); }
-  95% { transform: translateY(0); }
+  0% {
+    transform: translateY(0%);
+  }
+
+  65% {
+    transform: translateY(0%);
+  }
+
+  72% {
+    transform: translateY(10%);
+  }
+
+  79% {
+    transform: translateY(7%);
+  }
+
+  86% {
+    transform: translateY(10%);
+  }
+
+  95% {
+    transform: translateY(0);
+  }
 }
 
 @keyframes lnsWorkspacePanel__illustrationPulseContinuous {
-  0% { transform: translateY(10%); }
-  25% { transform: translateY(15%); }
-  50% { transform: translateY(10%); }
-  75% { transform: translateY(15%); }
-  100% { transform: translateY(10%); }
+  0% {
+    transform: translateY(10%);
+  }
+
+  25% {
+    transform: translateY(15%);
+  }
+
+  50% {
+    transform: translateY(10%);
+  }
+
+  75% {
+    transform: translateY(15%);
+  }
+
+  100% {
+    transform: translateY(10%);
+  }
+}
+
+.lnsVisualizationToolbar--fixed {
+  position: fixed;
+  width: 100%;
+  z-index: 1;
+  background-color: $euiColorLightestShade;
 }

@@ -184,7 +184,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [
-              "\nCreate a Journey which should be exported from a file in the\nx-pack/performance/journeys directory."
+              "\nCreate a Journey which should be exported from a file in the\nx-pack/performance/journeys_e2e directory."
             ],
             "signature": [
               "any"
@@ -276,13 +276,7 @@
             ],
             "signature": [
               "({ getService }: ",
-              {
-                "pluginId": "@kbn/ftr-common-functional-services",
-                "scope": "common",
-                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                "section": "def-common.FtrProviderContext",
-                "text": "FtrProviderContext"
-              },
+              "FtrProviderContext",
               ") => void"
             ],
             "path": "packages/kbn-journeys/journey/journey.ts",
@@ -297,13 +291,7 @@
                 "label": "{ getService }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "common",
-                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-common.FtrProviderContext",
-                    "text": "FtrProviderContext"
-                  }
+                  "FtrProviderContext"
                 ],
                 "path": "packages/kbn-journeys/journey/journey.ts",
                 "deprecated": false,
@@ -676,6 +664,38 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.getSynthtraceConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "getSynthtraceConfig",
+            "description": [],
+            "signature": [
+              "() => JourneySynthtrace<CtxExt, any> | undefined"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.takeScreenshotOnSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "takeScreenshotOnSuccess",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -995,7 +1015,7 @@
             "label": "get",
             "description": [],
             "signature": [
-              "() => { path: string; fullscreenPath: string; type: \"failure\" | \"success\"; title: string; filename: string; fullscreenFilename: string; }[]"
+              "() => { path: string; fullscreenPath: string; type: \"success\" | \"failure\"; title: string; filename: string; fullscreenFilename: string; }[]"
             ],
             "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
@@ -1230,6 +1250,195 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/journeys",
+        "id": "def-common.JOURNEY_APM_CONFIG",
+        "type": "Object",
+        "tags": [],
+        "label": "JOURNEY_APM_CONFIG",
+        "description": [],
+        "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JOURNEY_APM_CONFIG.serverUrl",
+            "type": "string",
+            "tags": [],
+            "label": "serverUrl",
+            "description": [],
+            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JOURNEY_APM_CONFIG.secretToken",
+            "type": "string",
+            "tags": [],
+            "label": "secretToken",
+            "description": [],
+            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JOURNEY_APM_CONFIG.active",
+            "type": "string",
+            "tags": [],
+            "label": "active",
+            "description": [],
+            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JOURNEY_APM_CONFIG.contextPropagationOnly",
+            "type": "string",
+            "tags": [],
+            "label": "contextPropagationOnly",
+            "description": [],
+            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JOURNEY_APM_CONFIG.environment",
+            "type": "string",
+            "tags": [],
+            "label": "environment",
+            "description": [],
+            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JOURNEY_APM_CONFIG.transactionSampleRate",
+            "type": "string",
+            "tags": [],
+            "label": "transactionSampleRate",
+            "description": [],
+            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JOURNEY_APM_CONFIG.captureBody",
+            "type": "string",
+            "tags": [],
+            "label": "captureBody",
+            "description": [
+              "// capture request body for both errors and request transactions\n// https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#capture-body"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JOURNEY_APM_CONFIG.captureRequestHeaders",
+            "type": "boolean",
+            "tags": [],
+            "label": "captureRequestHeaders",
+            "description": [
+              "// capture request headers\n// https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#capture-headers"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JOURNEY_APM_CONFIG.longFieldMaxLength",
+            "type": "number",
+            "tags": [],
+            "label": "longFieldMaxLength",
+            "description": [
+              "// request body with bigger size will be trimmed.\n// 300_000 is the default of the APM server.\n// for a body with larger size, we might need to reconfigure the APM server to increase the limit.\n// https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#long-field-max-length"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JOURNEY_APM_CONFIG.globalLabels",
+            "type": "Object",
+            "tags": [],
+            "label": "globalLabels",
+            "description": [],
+            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JOURNEY_APM_CONFIG.globalLabels.performancePhase",
+                "type": "string",
+                "tags": [],
+                "label": "performancePhase",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JOURNEY_APM_CONFIG.globalLabels.branch",
+                "type": "string",
+                "tags": [],
+                "label": "branch",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JOURNEY_APM_CONFIG.globalLabels.gitRev",
+                "type": "string",
+                "tags": [],
+                "label": "gitRev",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JOURNEY_APM_CONFIG.globalLabels.ciBuildName",
+                "type": "string",
+                "tags": [],
+                "label": "ciBuildName",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

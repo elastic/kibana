@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -24,7 +25,9 @@ const calculateLowerBound = (from: string, forceNow?: Date): undefined | Moment 
 const calculateUpperBound = (to: string, forceNow?: Date): undefined | Moment =>
   dateMath.parse(to, { roundUp: true, forceNow });
 
-const isRelativeTime = (value: string): boolean => value.includes('now');
+const isRelativeTime = (value: string | Moment): boolean => {
+  return typeof value === 'string' && value.includes('now');
+};
 
 export function calculateBounds(
   timeRange: TimeRange,

@@ -8,7 +8,6 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
@@ -24,7 +23,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../../../common/components/link_to');
+jest.mock('../../../../common/components/links/link_props');
 
 describe('Port', () => {
   const mount = useMountAppended();

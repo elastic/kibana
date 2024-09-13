@@ -5,37 +5,16 @@
  * 2.0.
  */
 
-export enum RRuleFrequency {
-  YEARLY = 0,
-  MONTHLY = 1,
-  WEEKLY = 2,
-  DAILY = 3,
-}
+import { Frequency } from '@kbn/rrule';
 
 export const RRuleFrequencyMap = {
-  '0': RRuleFrequency.YEARLY,
-  '1': RRuleFrequency.MONTHLY,
-  '2': RRuleFrequency.WEEKLY,
-  '3': RRuleFrequency.DAILY,
+  '0': Frequency.YEARLY,
+  '1': Frequency.MONTHLY,
+  '2': Frequency.WEEKLY,
+  '3': Frequency.DAILY,
 };
 
-export interface RecurringSchedule {
-  freq: RRuleFrequency;
-  interval: number;
-  until?: string;
-  count?: number;
-  byweekday?: string[];
-  bymonthday?: number[];
-  bymonth?: number[];
-}
-
-export type RRule = Partial<RecurringSchedule> & {
-  dtstart: string;
-  tzid: string;
-};
-
-export interface MaintenanceWindow {
-  title: string;
-  duration: number;
-  rRule: RRule;
+export enum SortDirection {
+  asc = 'asc',
+  desc = 'desc',
 }

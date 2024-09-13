@@ -5,21 +5,8 @@
  * 2.0.
  */
 
+import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-
-import { ES_SPATIAL_RELATIONS } from './constants';
-
-export function getAppTitle() {
-  return i18n.translate('xpack.maps.appTitle', {
-    defaultMessage: 'Maps',
-  });
-}
-
-export function getMapEmbeddableDisplayName() {
-  return i18n.translate('xpack.maps.embeddableDisplayName', {
-    defaultMessage: 'map',
-  });
-}
 
 export function getDataSourceLabel() {
   return i18n.translate('xpack.maps.source.dataSourceLabel', {
@@ -33,22 +20,21 @@ export function getUrlLabel() {
   });
 }
 
-export function getEsSpatialRelationLabel(spatialRelation: ES_SPATIAL_RELATIONS) {
+export function getEsSpatialRelationLabel(spatialRelation: GeoShapeRelation) {
   switch (spatialRelation) {
-    case ES_SPATIAL_RELATIONS.INTERSECTS:
+    case 'intersects':
       return i18n.translate('xpack.maps.common.esSpatialRelation.intersectsLabel', {
         defaultMessage: 'intersects',
       });
-    case ES_SPATIAL_RELATIONS.DISJOINT:
+    case 'disjoint':
       return i18n.translate('xpack.maps.common.esSpatialRelation.disjointLabel', {
         defaultMessage: 'disjoint',
       });
-    case ES_SPATIAL_RELATIONS.WITHIN:
+    case 'within':
       return i18n.translate('xpack.maps.common.esSpatialRelation.withinLabel', {
         defaultMessage: 'within',
       });
-    // @ts-ignore
-    case ES_SPATIAL_RELATIONS.CONTAINS:
+    case 'contains':
       return i18n.translate('xpack.maps.common.esSpatialRelation.containsLabel', {
         defaultMessage: 'contains',
       });
@@ -71,7 +57,7 @@ export function getDataViewSelectPlaceholder() {
 
 export function getDataViewNotFoundMessage(id: string) {
   return i18n.translate('xpack.maps.dataView.notFoundMessage', {
-    defaultMessage: `Unable to find data view '{id}'`,
+    defaultMessage: `Unable to find data view ''{id}''`,
     values: { id },
   });
 }

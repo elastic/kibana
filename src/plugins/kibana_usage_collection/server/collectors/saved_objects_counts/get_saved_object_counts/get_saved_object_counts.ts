@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { estypes } from '@elastic/elasticsearch';
@@ -41,17 +42,24 @@ export interface SavedObjectsCounts {
  *
  * @param soClient The {@link SavedObjectsClientContract} to use when performing the aggregation.
  * @param soTypes The SO types we want to know about.
- * @param exclusive If `true`, the results will only contain the breakdown for the specified `soTypes`. Otherwise, it'll also return `missing` and `others` bucket.
+ * @param options.exclusive If `true`, the results will only contain the breakdown for the specified `soTypes`. Otherwise, it'll also return `missing` and `others` bucket.
+ * @param options.namespaces array of namespaces to search. Otherwise it'll default to all namespaces ['*'].
  * @returns {@link SavedObjectsCounts}
  */
 export async function getSavedObjectsCounts(
   soClient: SavedObjectsClientContract,
   soTypes: string[],
-  exclusive: boolean = false
+  options?: {
+    exclusive?: boolean;
+    namespaces?: string[];
+  }
 ): Promise<SavedObjectsCounts> {
+  const { exclusive = false, namespaces = ['*'] } = options || {};
+
   const body = await soClient.find<void, { types: estypes.AggregationsStringTermsAggregate }>({
     type: soTypes,
     perPage: 0,
+    namespaces,
     aggs: {
       types: {
         terms: {

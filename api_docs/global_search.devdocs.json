@@ -82,6 +82,29 @@
             "path": "x-pack/plugins/global_search/public/services/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "globalSearch",
+            "id": "def-public.GlobalSearchFindOptions.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "\nA ES client of type IScopedClusterClient is passed to the `find` call.\nWhen performing calls to ES, the interested provider can utilize this parameter to identify the specific cluster."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IScopedClusterClient",
+                "text": "IScopedClusterClient"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/global_search/public/services/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -188,6 +211,29 @@
             "signature": [
               "Observable",
               "<void>"
+            ],
+            "path": "x-pack/plugins/global_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "globalSearch",
+            "id": "def-public.GlobalSearchProviderFindOptions.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "\nA ES client of type IScopedClusterClient is passed to the `find` call.\nWhen performing calls to ES, the interested provider can utilize this parameter to identify the specific cluster."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IScopedClusterClient",
+                "text": "IScopedClusterClient"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
@@ -630,6 +676,29 @@
             "path": "x-pack/plugins/global_search/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "globalSearch",
+            "id": "def-server.GlobalSearchFindOptions.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "\nA ES client of type IScopedClusterClient is passed to the `find` call.\nWhen performing calls to ES, the interested provider can utilize this parameter to identify the specific cluster."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IScopedClusterClient",
+                "text": "IScopedClusterClient"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/global_search/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -658,25 +727,25 @@
               "{ savedObjects: { client: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
+                "section": "def-server.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               },
               "; typeRegistry: ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.ISavedObjectTypeRegistry",
+                "section": "def-server.ISavedObjectTypeRegistry",
                 "text": "ISavedObjectTypeRegistry"
               },
               "; }; uiSettings: { client: ",
               {
                 "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-server.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               "; }; capabilities: ",
@@ -736,6 +805,29 @@
             "signature": [
               "Observable",
               "<void>"
+            ],
+            "path": "x-pack/plugins/global_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "globalSearch",
+            "id": "def-server.GlobalSearchProviderFindOptions.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "\nA ES client of type IScopedClusterClient is passed to the `find` call.\nWhen performing calls to ES, the interested provider can utilize this parameter to identify the specific cluster."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IScopedClusterClient",
+                "text": "IScopedClusterClient"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
@@ -1209,9 +1301,9 @@
         ", request: ",
         {
           "pluginId": "@kbn/core-http-server",
-          "scope": "common",
+          "scope": "server",
           "docId": "kibKbnCoreHttpServerPluginApi",
-          "section": "def-common.KibanaRequest",
+          "section": "def-server.KibanaRequest",
           "text": "KibanaRequest"
         },
         "<unknown, unknown, unknown, any>) => ",
@@ -1221,9 +1313,9 @@
         ">; getSearchableTypes: (request: ",
         {
           "pluginId": "@kbn/core-http-server",
-          "scope": "common",
+          "scope": "server",
           "docId": "kibKbnCoreHttpServerPluginApi",
-          "section": "def-common.KibanaRequest",
+          "section": "def-server.KibanaRequest",
           "text": "KibanaRequest"
         },
         "<unknown, unknown, unknown, any>) => Promise<string[]>; }"

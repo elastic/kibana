@@ -6,12 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SPACES } from '../lib/spaces';
 import { getUrlPrefix } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
-import {
+import type {
   ExpectResponseBody,
   TestDefinition,
   TestSuite,
@@ -47,7 +48,7 @@ const getTestTitle = ({ targetSpace, targetType, sourceId }: DisableLegacyUrlAli
 export function disableLegacyUrlAliasesTestSuiteFactory(
   es: Client,
   esArchiver: any,
-  supertest: SuperTest<any>
+  supertest: SuperTestAgent
 ) {
   const expectResponseBody =
     (testCase: DisableLegacyUrlAliasesTestCase, statusCode: 204 | 403): ExpectResponseBody =>
@@ -62,7 +63,8 @@ export function disableLegacyUrlAliasesTestSuiteFactory(
       }
       const esResponse = await es.get<RawLegacyUrlAlias>(
         {
-          index: '.kibana',
+          // affected by the .kibana split, assumes LEGACY_URL_ALIAS_TYPE is stored in .kibana
+          index: MAIN_SAVED_OBJECT_INDEX,
           id: `${LEGACY_URL_ALIAS_TYPE}:${targetSpace}:${targetType}:${sourceId}`,
         },
         { ignore: [404] }
@@ -115,7 +117,7 @@ export function disableLegacyUrlAliasesTestSuiteFactory(
             const requestBody = test.request;
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_disable_legacy_url_aliases`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(requestBody)
               .expect(test.responseStatusCode)
               .then(test.responseBody);

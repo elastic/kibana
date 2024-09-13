@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { configArray } from '../../constants';
@@ -29,29 +32,33 @@ export default function ({ getService }: FtrProviderContext) {
       describe(config.name, () => {
         it('can update an existing field', async () => {
           const title = `basic_index`;
-          const response1 = await supertest.post(config.path).send({
-            override: true,
-            [config.serviceKey]: {
-              title,
-              runtimeFieldMap: {
-                runtimeFoo: {
-                  type: 'keyword',
-                  script: {
-                    source: "doc['field_name'].value",
+          const response1 = await supertest
+            .post(config.path)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
+            .send({
+              override: true,
+              [config.serviceKey]: {
+                title,
+                runtimeFieldMap: {
+                  runtimeFoo: {
+                    type: 'keyword',
+                    script: {
+                      source: "doc['field_name'].value",
+                    },
                   },
-                },
-                runtimeBar: {
-                  type: 'keyword',
-                  script: {
-                    source: "doc['field_name'].value",
+                  runtimeBar: {
+                    type: 'keyword',
+                    script: {
+                      source: "doc['field_name'].value",
+                    },
                   },
                 },
               },
-            },
-          });
+            });
 
           const response2 = await supertest
             .post(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field/runtimeFoo`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
             .send({
               runtimeField: {
                 type: 'keyword',
@@ -63,9 +70,9 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(response2.status).to.be(200);
 
-          const response3 = await supertest.get(
-            `${config.path}/${response1.body[config.serviceKey].id}/runtime_field/runtimeFoo`
-          );
+          const response3 = await supertest
+            .get(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field/runtimeFoo`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
 
           const field =
             config.serviceKey === 'index_pattern' ? response3.body.field : response3.body.fields[0];
@@ -75,6 +82,24 @@ export default function ({ getService }: FtrProviderContext) {
           expect(field.type).to.be('string');
           expect(field.runtimeField.type).to.be('keyword');
           expect(field.runtimeField.script.source).to.be("doc['something_new'].value");
+
+          // Partial update
+          const response4 = await supertest
+            .post(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field/runtimeFoo`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
+            .send({
+              runtimeField: {
+                script: {
+                  source: "doc['partial_update'].value",
+                },
+              },
+            });
+
+          expect(response4.status).to.be(200);
+          const field2 =
+            config.serviceKey === 'index_pattern' ? response4.body.field : response4.body.fields[0];
+
+          expect(field2.runtimeField.script.source).to.be("doc['partial_update'].value");
         });
       });
     });

@@ -5,51 +5,64 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiText,
-  EuiLoadingChart,
-  EuiResizeObserver,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingChart,
+  EuiResizeObserver,
+  EuiText,
 } from '@elastic/eui';
-
 import { throttle } from 'lodash';
+import type {
+  BrushEndListener,
+  ElementClickListener,
+  CustomTooltip,
+  HeatmapBrushEvent,
+  HeatmapElementEvent,
+  HeatmapSpec,
+  HeatmapStyle,
+  PartialTheme,
+  TooltipProps,
+  TooltipValue,
+} from '@elastic/charts';
 import {
   Chart,
-  BrushEndListener,
-  Settings,
   Heatmap,
-  HeatmapElementEvent,
-  ElementClickListener,
-  TooltipValue,
-  HeatmapSpec,
-  TooltipSettings,
-  HeatmapBrushEvent,
   Position,
   ScaleType,
-  PartialTheme,
-  HeatmapStyle,
+  Settings,
+  Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import moment from 'moment';
-
 import { i18n } from '@kbn/i18n';
-import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
+import {
+  getFormattedSeverityScore,
+  ML_ANOMALY_THRESHOLD,
+  ML_SEVERITY_COLORS,
+} from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
+import type { TimeBuckets as TimeBucketsClass } from '@kbn/ml-time-buckets';
 import { SwimLanePagination } from './swimlane_pagination';
-import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
-import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
-import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
-import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
+import type {
+  AppStateSelectedCells,
+  OverallSwimlaneData,
+  ViewBySwimLaneData,
+} from './explorer_utils';
+import type { SwimlaneType } from './explorer_constants';
+import { SWIMLANE_TYPE } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
 import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
-import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
-
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
-import { useUiSettings } from '../contexts/kibana';
-import { Y_AXIS_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './swimlane_annotation_container';
-import { useCurrentEuiTheme } from '../components/color_range_legend';
+import { SWIM_LANE_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './constants';
+import { useCurrentThemeVars, useMlKibana } from '../contexts/kibana';
 
 declare global {
   interface Window {
@@ -60,29 +73,24 @@ declare global {
   }
 }
 
-function getFormattedSeverityScore(score: number): string {
-  return String(parseInt(String(score), 10));
-}
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
  */
 const RESIZE_THROTTLE_TIME_MS = 500;
 const BORDER_WIDTH = 1;
-const CELL_HEIGHT = 30;
+export const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
 const X_AXIS_HEIGHT = 24;
 
-export const SWIM_LANE_LABEL_WIDTH = Y_AXIS_LABEL_WIDTH + 2 * Y_AXIS_LABEL_PADDING;
-
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
-  return arg && arg.hasOwnProperty('cardinality');
+  return arg && Object.hasOwn(arg, 'cardinality');
 }
 
 /**
  * Provides a custom tooltip for the anomaly swim lane chart.
  */
 const SwimLaneTooltip =
-  (fieldName?: string): FC<{ values: TooltipValue[] }> =>
+  (fieldName?: string): CustomTooltip =>
   ({ values }) => {
     const tooltipData: TooltipValue[] = [];
 
@@ -160,6 +168,7 @@ export interface SwimlaneProps {
   showYAxis?: boolean;
   yAxisWidth?: HeatmapStyle['yAxisLabel']['width'];
   chartsService: ChartsPluginStart;
+  onRenderComplete?: () => void;
 }
 
 /**
@@ -187,11 +196,16 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   showLegend = true,
   'data-test-subj': dataTestSubj,
   yAxisWidth,
+  onRenderComplete,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
-  const isDarkTheme = !!useUiSettings().get('theme:darkMode');
-  const { euiTheme } = useCurrentEuiTheme();
+  const {
+    services: { theme: themeService },
+  } = useMlKibana();
+
+  const isDarkTheme = useIsDarkTheme(themeService);
+  const { euiTheme } = useCurrentThemeVars();
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
@@ -240,6 +254,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   const isPaginationVisible =
     (showSwimlane || isLoading) &&
     swimlaneLimit !== undefined &&
+    swimlaneLimit > (perPage ?? 5) &&
     onPaginationChange &&
     fromPage &&
     perPage;
@@ -365,7 +380,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     [swimlaneType, swimlaneData?.fieldName, swimlaneData?.interval, onCellsSelection]
   ) as ElementClickListener;
 
-  const tooltipOptions: TooltipSettings = useMemo(
+  const tooltipOptions = useMemo<TooltipProps>(
     () => ({
       placement: 'auto',
       fallbackPlacements: ['left'],
@@ -402,6 +417,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
   const noSwimLaneData = !isLoading && !showSwimlane && !!noDataWarning;
 
+  if (noSwimLaneData) {
+    onRenderComplete?.();
+  }
+
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
     <EuiResizeObserver onResize={resizeHandler}>
@@ -420,8 +439,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
           <EuiFlexItem
             css={{
               width: '100%',
-              'overflow-y': 'auto',
-              'overflow-x': 'hidden',
+              overflowY: 'auto',
+              overflowX: 'hidden',
             }}
             grow={false}
           >
@@ -436,17 +455,24 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                 >
                   {showSwimlane && !isLoading && (
                     <Chart className={'mlSwimLaneContainer'} ref={chartRef}>
+                      <Tooltip {...tooltipOptions} />
                       <Settings
-                        // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                         theme={themeOverrides}
+                        // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+                        baseTheme={LEGACY_LIGHT_THEME}
                         onElementClick={onElementClick}
                         onPointerUpdate={handleCursorUpdate}
                         showLegend={showLegend}
                         legendPosition={Position.Top}
                         xDomain={xDomain}
-                        tooltip={tooltipOptions}
                         debugState={window._echDebugStateFlag ?? false}
                         onBrushEnd={onBrushEnd as BrushEndListener}
+                        locale={i18n.getLocale()}
+                        onRenderChange={(isRendered) => {
+                          if (isRendered && onRenderComplete) {
+                            onRenderComplete();
+                          }
+                        }}
                       />
 
                       <Heatmap
@@ -456,29 +482,29 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                           type: 'bands',
                           bands: [
                             {
-                              start: ANOMALY_THRESHOLD.LOW,
-                              end: ANOMALY_THRESHOLD.WARNING,
-                              color: SEVERITY_COLORS.LOW,
+                              start: ML_ANOMALY_THRESHOLD.LOW,
+                              end: ML_ANOMALY_THRESHOLD.WARNING,
+                              color: ML_SEVERITY_COLORS.LOW,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.WARNING,
-                              end: ANOMALY_THRESHOLD.MINOR,
-                              color: SEVERITY_COLORS.WARNING,
+                              start: ML_ANOMALY_THRESHOLD.WARNING,
+                              end: ML_ANOMALY_THRESHOLD.MINOR,
+                              color: ML_SEVERITY_COLORS.WARNING,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.MINOR,
-                              end: ANOMALY_THRESHOLD.MAJOR,
-                              color: SEVERITY_COLORS.MINOR,
+                              start: ML_ANOMALY_THRESHOLD.MINOR,
+                              end: ML_ANOMALY_THRESHOLD.MAJOR,
+                              color: ML_SEVERITY_COLORS.MINOR,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.MAJOR,
-                              end: ANOMALY_THRESHOLD.CRITICAL,
-                              color: SEVERITY_COLORS.MAJOR,
+                              start: ML_ANOMALY_THRESHOLD.MAJOR,
+                              end: ML_ANOMALY_THRESHOLD.CRITICAL,
+                              color: ML_SEVERITY_COLORS.MAJOR,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.CRITICAL,
+                              start: ML_ANOMALY_THRESHOLD.CRITICAL,
                               end: Infinity,
-                              color: SEVERITY_COLORS.CRITICAL,
+                              color: ML_SEVERITY_COLORS.CRITICAL,
                             },
                           ],
                         }}
@@ -514,7 +540,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   {isLoading && (
                     <EuiText
                       textAlign={'center'}
-                      style={{
+                      css={{
                         position: 'absolute',
                         top: '50%',
                         left: '50%',

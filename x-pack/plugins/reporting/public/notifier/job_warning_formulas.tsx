@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { ThemeServiceStart, ToastInput } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { JobId, JobSummary } from '../../common/types';
+
+import { CoreStart, ToastInput } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { JobId } from '@kbn/reporting-common/types';
 import { DownloadButton } from './job_download_button';
+
+import { JobSummary } from '../types';
 import { ReportLink } from './report_link';
 
 export const getWarningFormulasToast = (
   job: JobSummary,
   getReportLink: () => string,
   getDownloadLink: (jobId: JobId) => string,
-  theme: ThemeServiceStart
+  core: CoreStart
 ): ToastInput => ({
   title: toMountPoint(
     <FormattedMessage
@@ -25,14 +28,14 @@ export const getWarningFormulasToast = (
       defaultMessage="{reportType} may contain formulas"
       values={{ reportType: job.jobtype }}
     />,
-    { theme$: theme.theme$ }
+    core
   ),
   text: toMountPoint(
     <>
       <p>
         <FormattedMessage
           id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage"
-          defaultMessage="The report '{reportObjectTitle}' contains characters which spreadsheet applications can interpret as formulas."
+          defaultMessage="The report ''{reportObjectTitle}'' contains characters which spreadsheet applications can interpret as formulas."
           values={{ reportObjectTitle: job.title }}
         />
       </p>
@@ -41,7 +44,7 @@ export const getWarningFormulasToast = (
       </p>
       <DownloadButton getUrl={getDownloadLink} job={job} />
     </>,
-    { theme$: theme.theme$ }
+    core
   ),
   'data-test-subj': 'completeReportCsvFormulasWarning',
 });

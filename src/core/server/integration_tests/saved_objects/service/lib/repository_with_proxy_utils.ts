@@ -1,12 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import Hapi from '@hapi/hapi';
-import { IncomingMessage } from 'http';
+import type { IncomingMessage } from 'http';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  type ISavedObjectTypeRegistry,
+  MAIN_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 
 // proxy setup
@@ -28,6 +35,8 @@ export const setProxyInterrupt = (
     | 'openPit'
     | 'deleteByNamespace'
     | 'internalBulkResolve'
+    | 'update'
+    | 'updatePreflight'
     | null
 ) => (proxyInterrupt = testArg);
 
@@ -52,16 +61,23 @@ const proxyOnResponseHandler = async (res: IncomingMessage, h: Hapi.ResponseTool
     .code(404);
 };
 
-const kbnIndex = `.kibana_${pkg.version}`;
-
 // GET /.kibana_8.0.0/_doc/{type*} route (repository.get calls)
-export const declareGetRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
+export const declareGetRoute = (
+  hapiServer: Hapi.Server,
+  hostname: string,
+  port: string,
+  kbnIndex: string
+) =>
   hapiServer.route({
     method: 'GET',
     path: `/${kbnIndex}/_doc/{type*}`,
     options: {
       handler: (req, h) => {
-        if (req.params.type === 'my_type:myTypeId1' || req.params.type === 'my_type:myType_123') {
+        if (
+          req.params.type === 'my_type:myTypeId1' ||
+          req.params.type === 'my_type:myType_123' ||
+          proxyInterrupt === 'updatePreflight'
+        ) {
           return proxyResponseHandler(h, hostname, port);
         } else {
           return relayHandler(h, hostname, port);
@@ -70,7 +86,12 @@ export const declareGetRoute = (hapiServer: Hapi.Server, hostname: string, port:
     },
   });
 // DELETE /.kibana_8.0.0/_doc/{type*} route (repository.delete calls)
-export const declareDeleteRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
+export const declareDeleteRoute = (
+  hapiServer: Hapi.Server,
+  hostname: string,
+  port: string,
+  kbnIndex: string
+) =>
   hapiServer.route({
     method: 'DELETE',
     path: `/${kbnIndex}/_doc/{_id*}`,
@@ -133,7 +154,12 @@ export const declarePostMgetRoute = (hapiServer: Hapi.Server, hostname: string, 
     },
   });
 // GET _search route
-export const declareGetSearchRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
+export const declareGetSearchRoute = (
+  hapiServer: Hapi.Server,
+  hostname: string,
+  port: string,
+  kbnIndex: string
+) =>
   hapiServer.route({
     method: 'GET',
     path: `/${kbnIndex}/_search`,
@@ -149,7 +175,12 @@ export const declareGetSearchRoute = (hapiServer: Hapi.Server, hostname: string,
     },
   });
 // POST _search route (`find` calls)
-export const declarePostSearchRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
+export const declarePostSearchRoute = (
+  hapiServer: Hapi.Server,
+  hostname: string,
+  port: string,
+  kbnIndex: string
+) =>
   hapiServer.route({
     method: 'POST',
     path: `/${kbnIndex}/_search`,
@@ -168,7 +199,12 @@ export const declarePostSearchRoute = (hapiServer: Hapi.Server, hostname: string
     },
   });
 // POST _update
-export const declarePostUpdateRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
+export const declarePostUpdateRoute = (
+  hapiServer: Hapi.Server,
+  hostname: string,
+  port: string,
+  kbnIndex: string
+) =>
   hapiServer.route({
     method: 'POST',
     path: `/${kbnIndex}/_update/{_id*}`,
@@ -187,7 +223,12 @@ export const declarePostUpdateRoute = (hapiServer: Hapi.Server, hostname: string
     },
   });
 // POST _pit
-export const declarePostPitRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
+export const declarePostPitRoute = (
+  hapiServer: Hapi.Server,
+  hostname: string,
+  port: string,
+  kbnIndex: string
+) =>
   hapiServer.route({
     method: 'POST',
     path: `/${kbnIndex}/_pit`,
@@ -209,7 +250,8 @@ export const declarePostPitRoute = (hapiServer: Hapi.Server, hostname: string, p
 export const declarePostUpdateByQueryRoute = (
   hapiServer: Hapi.Server,
   hostname: string,
-  port: string
+  port: string,
+  kbnIndex: string
 ) =>
   hapiServer.route({
     method: 'POST',
@@ -221,6 +263,31 @@ export const declarePostUpdateByQueryRoute = (
       },
       handler: (req, h) => {
         if (proxyInterrupt === 'deleteByNamespace') {
+          return proxyResponseHandler(h, hostname, port);
+        } else {
+          return relayHandler(h, hostname, port);
+        }
+      },
+    },
+  });
+
+// PUT _doc
+export const declareIndexRoute = (
+  hapiServer: Hapi.Server,
+  hostname: string,
+  port: string,
+  kbnIndex: string
+) =>
+  hapiServer.route({
+    method: ['PUT', 'POST'],
+    path: `/${kbnIndex}/_doc/{_id?}`,
+    options: {
+      payload: {
+        output: 'data',
+        parse: false,
+      },
+      handler: (req, h) => {
+        if (proxyInterrupt === 'update') {
           return proxyResponseHandler(h, hostname, port);
         } else {
           return relayHandler(h, hostname, port);
@@ -244,3 +311,33 @@ export const declarePassthroughRoute = (hapiServer: Hapi.Server, hostname: strin
       },
     },
   });
+
+/**
+ * Obtain the versioned Kibana index, tipically used by the Elasticsearch client
+ * e.g. .kibana_8.15.0
+ * @returns string
+ */
+export const getVersionedKibanaIndex = (): string => {
+  return `${MAIN_SAVED_OBJECT_INDEX}_${pkg.version}`;
+};
+
+/**
+ * Obtain a comma separated list of all SO indices that contain namespace-aware SO types
+ * inspired on delete_by_namespace.ts
+ *
+ * @param registry The SO type registry to query registered types
+ * @returns string
+ */
+export const getIndicesWithNamespaceAwareTypes = (registry: ISavedObjectTypeRegistry): string => {
+  const allTypes = registry.getAllTypes();
+  const unique = (array: string[]) => [...new Set(array)];
+
+  return unique(
+    [
+      ...allTypes
+        .filter((type) => !registry.isNamespaceAgnostic(type.name))
+        .map(({ name }) => name),
+      LEGACY_URL_ALIAS_TYPE,
+    ].map((type) => `${registry.getIndex(type) || MAIN_SAVED_OBJECT_INDEX}_${pkg.version}`)
+  ).join(',');
+};

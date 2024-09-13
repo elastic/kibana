@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/management-storybook-config",
+  "owner": "@elastic/kibana-management",
+  "devOnly": true
+}

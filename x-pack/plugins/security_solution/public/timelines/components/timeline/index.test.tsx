@@ -10,16 +10,13 @@ import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
-import '../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
+  createMockStore,
   mockGlobalState,
   mockIndexNames,
   mockIndexPattern,
-  SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../common/mock';
 
@@ -29,29 +26,23 @@ import { useTimelineEvents } from '../../containers';
 import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
 import { defaultRowRenderers } from './body/renderers';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { createStore } from '../../../common/store';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { useGetUserCasesPermissions } from '../../../common/lib/kibana';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
 
-jest.mock('./tabs_content', () => ({
+jest.mock('./tabs', () => ({
   TabsContent: () => <div data-test-subj="tabs-content" />,
 }));
 
 jest.mock('../../../common/lib/kibana');
-const originalKibanaLib = jest.requireActual('../../../common/lib/kibana');
-
-// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
-// The returned permissions object will indicate that the user does not have permissions by default
-const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
-mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 
 jest.mock('../../../common/utils/normalize_time_range');
 jest.mock('@kbn/i18n-react', () => {
+  const { i18n } = jest.requireActual('@kbn/i18n');
+  i18n.init({ locale: 'en' });
   const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
@@ -80,6 +71,9 @@ jest.mock('react-router-dom', () => {
 });
 
 const mockDispatch = jest.fn();
+const mockRef = {
+  current: null,
+};
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -90,7 +84,7 @@ jest.mock('react-redux', () => {
 });
 
 const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
-jest.mock('../../../common/containers/sourcerer');
+jest.mock('../../../sourcerer/containers');
 const mockDataView = {
   dataViewId: mockGlobalState.timeline.timelineById[TimelineId.test]?.dataViewId,
   browserFields: mockBrowserFields,
@@ -105,8 +99,8 @@ describe('StatefulTimeline', () => {
     renderCellValue: DefaultCellRenderer,
     rowRenderers: defaultRowRenderers,
     timelineId: TimelineId.test,
+    openToggleRef: mockRef,
   };
-  const { storage } = createSecuritySolutionStorageMock();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -162,26 +156,21 @@ describe('StatefulTimeline', () => {
   test('sourcerer data view updates and timeline already matches the data view, no updates', () => {
     mount(
       <TestProviders
-        store={createStore(
-          {
-            ...mockGlobalState,
-            timeline: {
-              ...mockGlobalState.timeline,
-              timelineById: {
-                [TimelineId.test]: {
-                  ...mockGlobalState.timeline.timelineById[TimelineId.test],
-                  savedObjectId: 'definitely-not-null',
-                  indexNames:
-                    mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline]
-                      .selectedPatterns,
-                },
+        store={createMockStore({
+          ...mockGlobalState,
+          timeline: {
+            ...mockGlobalState.timeline,
+            timelineById: {
+              [TimelineId.test]: {
+                ...mockGlobalState.timeline.timelineById[TimelineId.test],
+                savedObjectId: 'definitely-not-null',
+                indexNames:
+                  mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline]
+                    .selectedPatterns,
               },
             },
           },
-          SUB_PLUGINS_REDUCER,
-          kibanaObservable,
-          storage
-        )}
+        })}
       >
         <StatefulTimeline {...props} />
       </TestProviders>
@@ -192,33 +181,28 @@ describe('StatefulTimeline', () => {
   test('sourcerer data view updates, update timeline data view', () => {
     mount(
       <TestProviders
-        store={createStore(
-          {
-            ...mockGlobalState,
-            timeline: {
-              ...mockGlobalState.timeline,
-              timelineById: {
-                [TimelineId.test]: {
-                  ...mockGlobalState.timeline.timelineById[TimelineId.test],
-                  savedObjectId: 'definitely-not-null',
-                },
-              },
-            },
-            sourcerer: {
-              ...mockGlobalState.sourcerer,
-              sourcererScopes: {
-                ...mockGlobalState.sourcerer.sourcererScopes,
-                [SourcererScopeName.timeline]: {
-                  ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-                  selectedPatterns: mockIndexNames,
-                },
+        store={createMockStore({
+          ...mockGlobalState,
+          timeline: {
+            ...mockGlobalState.timeline,
+            timelineById: {
+              [TimelineId.test]: {
+                ...mockGlobalState.timeline.timelineById[TimelineId.test],
+                savedObjectId: 'definitely-not-null',
               },
             },
           },
-          SUB_PLUGINS_REDUCER,
-          kibanaObservable,
-          storage
-        )}
+          sourcerer: {
+            ...mockGlobalState.sourcerer,
+            sourcererScopes: {
+              ...mockGlobalState.sourcerer.sourcererScopes,
+              [SourcererScopeName.timeline]: {
+                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+                selectedPatterns: mockIndexNames,
+              },
+            },
+          },
+        })}
       >
         <StatefulTimeline {...props} />
       </TestProviders>

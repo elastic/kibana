@@ -26,9 +26,9 @@ import {
   AddInferencePipelineHorizontalSteps,
   AddInferencePipelineFooter,
 } from './add_inference_pipeline_flyout';
+import { ConfigureFields } from './configure_fields';
 import { ConfigurePipeline } from './configure_pipeline';
 import { EMPTY_PIPELINE_CONFIGURATION } from './ml_inference_logic';
-import { NoModelsPanel } from './no_models';
 import { ReviewPipeline } from './review_pipeline';
 import { TestPipeline } from './test_pipeline';
 import { AddInferencePipelineSteps } from './types';
@@ -81,11 +81,6 @@ describe('AddInferencePipelineFlyout', () => {
       const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);
       expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
     });
-    it('renders no models panel when there are no models', () => {
-      setMockValues({ ...DEFAULT_VALUES, supportedMLModels: [] });
-      const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);
-      expect(wrapper.find(NoModelsPanel)).toHaveLength(1);
-    });
     it('renders AddInferencePipelineHorizontalSteps', () => {
       const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);
       expect(wrapper.find(AddInferencePipelineHorizontalSteps)).toHaveLength(1);
@@ -109,6 +104,16 @@ describe('AddInferencePipelineFlyout', () => {
     it('renders configure step', () => {
       const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);
       expect(wrapper.find(ConfigurePipeline)).toHaveLength(1);
+    });
+    it('renders fields step', () => {
+      setMockValues({
+        ...DEFAULT_VALUES,
+        addInferencePipelineModal: {
+          step: AddInferencePipelineSteps.Fields,
+        },
+      });
+      const wrapper = shallow(<AddInferencePipelineContent onClose={onClose} />);
+      expect(wrapper.find(ConfigureFields)).toHaveLength(1);
     });
     it('renders test step', () => {
       setMockValues({
@@ -136,46 +141,52 @@ describe('AddInferencePipelineFlyout', () => {
     const FIELDS_STEP_INDEX = 1;
     const TEST_STEP_INDEX = 2;
     const REVIEW_STEP_INDEX = 3;
-    const setAddInferencePipelineStep = jest.fn();
+    const onAddInferencePipelineStepChange = jest.fn();
     beforeEach(() => {
       setMockActions({
-        setAddInferencePipelineStep,
+        onAddInferencePipelineStepChange,
       });
     });
     it('renders EuiStepsHorizontal', () => {
       const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       expect(wrapper.find(EuiStepsHorizontal)).toHaveLength(1);
     });
-    it('configure step is complete with valid data', () => {
+
+    const testStepStatus = (stepIndex: number, expectedTitle: string, expectedStatus: string) => {
       const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       const steps = wrapper.find(EuiStepsHorizontal);
-      const configureStep = steps.prop('steps')[CONFIGURE_STEP_INDEX];
-      expect(configureStep.title).toBe('Configure');
-      expect(configureStep.status).toBe('complete');
+      const step = steps.prop('steps')[stepIndex];
+      expect(step.title).toBe(expectedTitle);
+      expect(step.status).toBe(expectedStatus);
+    };
+
+    it('configure step is current with valid data', () => {
+      testStepStatus(CONFIGURE_STEP_INDEX, 'Configure', 'current');
     });
     it('configure step is current with invalid data', () => {
       setMockValues({
         ...DEFAULT_VALUES,
         isConfigureStepValid: false,
       });
-      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
-      const steps = wrapper.find(EuiStepsHorizontal);
-      const configureStep = steps.prop('steps')[CONFIGURE_STEP_INDEX];
-      expect(configureStep.title).toBe('Configure');
-      expect(configureStep.status).toBe('current');
+      testStepStatus(CONFIGURE_STEP_INDEX, 'Configure', 'current');
     });
-    it('fields step is complete with valid data', () => {
+    it('configure step is complete when on later step', () => {
+      setMockValues({
+        ...DEFAULT_VALUES,
+        addInferencePipelineModal: {
+          step: AddInferencePipelineSteps.Review,
+        },
+      });
+      testStepStatus(CONFIGURE_STEP_INDEX, 'Configure', 'complete');
+    });
+    it('fields step is current with valid data', () => {
       setMockValues({
         ...DEFAULT_VALUES,
         addInferencePipelineModal: {
           step: AddInferencePipelineSteps.Fields,
         },
       });
-      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
-      const steps = wrapper.find(EuiStepsHorizontal);
-      const fieldsStep = steps.prop('steps')[FIELDS_STEP_INDEX];
-      expect(fieldsStep.title).toBe('Fields');
-      expect(fieldsStep.status).toBe('complete');
+      testStepStatus(FIELDS_STEP_INDEX, 'Fields', 'current');
     });
     it('fields step is current with invalid data', () => {
       setMockValues({
@@ -185,11 +196,16 @@ describe('AddInferencePipelineFlyout', () => {
         },
         isPipelineDataValid: false,
       });
-      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
-      const steps = wrapper.find(EuiStepsHorizontal);
-      const fieldsStep = steps.prop('steps')[FIELDS_STEP_INDEX];
-      expect(fieldsStep.title).toBe('Fields');
-      expect(fieldsStep.status).toBe('current');
+      testStepStatus(FIELDS_STEP_INDEX, 'Fields', 'current');
+    });
+    it('fields step is complete when on later step', () => {
+      setMockValues({
+        ...DEFAULT_VALUES,
+        addInferencePipelineModal: {
+          step: AddInferencePipelineSteps.Review,
+        },
+      });
+      testStepStatus(FIELDS_STEP_INDEX, 'Fields', 'complete');
     });
     it('test step is current when on step', () => {
       setMockValues({
@@ -198,11 +214,16 @@ describe('AddInferencePipelineFlyout', () => {
           step: AddInferencePipelineSteps.Test,
         },
       });
-      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
-      const steps = wrapper.find(EuiStepsHorizontal);
-      const testStep = steps.prop('steps')[TEST_STEP_INDEX];
-      expect(testStep.title).toBe('Test (Optional)');
-      expect(testStep.status).toBe('current');
+      testStepStatus(TEST_STEP_INDEX, 'Test (Optional)', 'current');
+    });
+    it('test step is complete when on later step', () => {
+      setMockValues({
+        ...DEFAULT_VALUES,
+        addInferencePipelineModal: {
+          step: AddInferencePipelineSteps.Review,
+        },
+      });
+      testStepStatus(TEST_STEP_INDEX, 'Test (Optional)', 'complete');
     });
     it('review step is current when on step', () => {
       setMockValues({
@@ -211,12 +232,20 @@ describe('AddInferencePipelineFlyout', () => {
           step: AddInferencePipelineSteps.Review,
         },
       });
+      testStepStatus(REVIEW_STEP_INDEX, 'Review', 'current');
+    });
+
+    const testClickStep = (
+      stepIndex: number,
+      expectedStepAfterClicking: AddInferencePipelineSteps
+    ) => {
       const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       const steps = wrapper.find(EuiStepsHorizontal);
-      const reviewStep = steps.prop('steps')[REVIEW_STEP_INDEX];
-      expect(reviewStep.title).toBe('Review');
-      expect(reviewStep.status).toBe('current');
-    });
+      const stepToClick = steps.prop('steps')[stepIndex];
+      stepToClick.onClick({} as any);
+      expect(onAddInferencePipelineStepChange).toHaveBeenCalledWith(expectedStepAfterClicking);
+    };
+
     it('clicking configure step updates step', () => {
       setMockValues({
         ...DEFAULT_VALUES,
@@ -224,67 +253,46 @@ describe('AddInferencePipelineFlyout', () => {
           step: AddInferencePipelineSteps.Review,
         },
       });
-      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
-      const steps = wrapper.find(EuiStepsHorizontal);
-      const configStep = steps.prop('steps')[CONFIGURE_STEP_INDEX];
-      configStep.onClick({} as any);
-      expect(setAddInferencePipelineStep).toHaveBeenCalledWith(
-        AddInferencePipelineSteps.Configuration
-      );
+      testClickStep(CONFIGURE_STEP_INDEX, AddInferencePipelineSteps.Configuration);
     });
     it('clicking fields step updates step', () => {
-      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
-      const steps = wrapper.find(EuiStepsHorizontal);
-      const fieldsStep = steps.prop('steps')[FIELDS_STEP_INDEX];
-      fieldsStep.onClick({} as any);
-      expect(setAddInferencePipelineStep).toHaveBeenCalledWith(AddInferencePipelineSteps.Fields);
+      testClickStep(FIELDS_STEP_INDEX, AddInferencePipelineSteps.Fields);
     });
     it('clicking test step updates step', () => {
-      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
-      const steps = wrapper.find(EuiStepsHorizontal);
-      const testStep = steps.prop('steps')[TEST_STEP_INDEX];
-      testStep.onClick({} as any);
-      expect(setAddInferencePipelineStep).toHaveBeenCalledWith(AddInferencePipelineSteps.Test);
+      testClickStep(TEST_STEP_INDEX, AddInferencePipelineSteps.Test);
     });
     it('clicking review step updates step', () => {
+      testClickStep(REVIEW_STEP_INDEX, AddInferencePipelineSteps.Review);
+    });
+
+    const testCannotClickInvalidStep = (stepIndex: number) => {
       const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       const steps = wrapper.find(EuiStepsHorizontal);
-      const reviewStep = steps.prop('steps')[REVIEW_STEP_INDEX];
-      reviewStep.onClick({} as any);
-      expect(setAddInferencePipelineStep).toHaveBeenCalledWith(AddInferencePipelineSteps.Review);
-    });
+      const stepToClick = steps.prop('steps')[stepIndex];
+      stepToClick.onClick({} as any);
+      expect(onAddInferencePipelineStepChange).not.toHaveBeenCalled();
+    };
+
     it('cannot click fields step when data is invalid', () => {
       setMockValues({
         ...DEFAULT_VALUES,
         isConfigureStepValid: false,
       });
-      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
-      const steps = wrapper.find(EuiStepsHorizontal);
-      const fieldsStep = steps.prop('steps')[FIELDS_STEP_INDEX];
-      fieldsStep.onClick({} as any);
-      expect(setAddInferencePipelineStep).not.toHaveBeenCalled();
+      testCannotClickInvalidStep(FIELDS_STEP_INDEX);
     });
     it('cannot click test step when data is invalid', () => {
       setMockValues({
         ...DEFAULT_VALUES,
         isPipelineDataValid: false,
       });
-      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
-      const steps = wrapper.find(EuiStepsHorizontal);
-      const testStep = steps.prop('steps')[TEST_STEP_INDEX];
-      testStep.onClick({} as any);
-      expect(setAddInferencePipelineStep).not.toHaveBeenCalled();
+      testCannotClickInvalidStep(TEST_STEP_INDEX);
     });
     it('cannot click review step when data is invalid', () => {
       setMockValues({
         ...DEFAULT_VALUES,
         isPipelineDataValid: false,
       });
-      const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
-      const steps = wrapper.find(EuiStepsHorizontal);
-      const reviewStep = steps.prop('steps')[REVIEW_STEP_INDEX];
-      reviewStep.onClick({} as any);
-      expect(setAddInferencePipelineStep).not.toHaveBeenCalled();
+      testCannotClickInvalidStep(REVIEW_STEP_INDEX);
     });
   });
   describe('ModalFooter', () => {
@@ -292,7 +300,7 @@ describe('AddInferencePipelineFlyout', () => {
     const actions = {
       attachPipeline: jest.fn(),
       createPipeline: jest.fn(),
-      setAddInferencePipelineStep: jest.fn(),
+      onAddInferencePipelineStepChange: jest.fn(),
     };
     beforeEach(() => {
       setMockActions(actions);
@@ -358,12 +366,16 @@ describe('AddInferencePipelineFlyout', () => {
       cancelBtn.prop('onClick')!({} as any);
       expect(onClose).toHaveBeenCalledTimes(1);
     });
-    it('renders back button on fields step', () => {
+
+    const testBackButton = (
+      currentStep: AddInferencePipelineSteps,
+      expectedStepAfterPressingBackButton: AddInferencePipelineSteps
+    ) => {
       setMockValues({
         ...DEFAULT_VALUES,
         addInferencePipelineModal: {
           ...DEFAULT_VALUES.addInferencePipelineModal,
-          step: AddInferencePipelineSteps.Fields,
+          step: currentStep,
         },
       });
       const wrapper = shallow(
@@ -373,49 +385,22 @@ describe('AddInferencePipelineFlyout', () => {
       const backBtn = wrapper.find(EuiButtonEmpty).at(1);
       expect(backBtn.prop('children')).toBe('Back');
       backBtn.prop('onClick')!({} as any);
-      expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
-        AddInferencePipelineSteps.Configuration
+      expect(actions.onAddInferencePipelineStepChange).toHaveBeenCalledWith(
+        expectedStepAfterPressingBackButton
       );
+    };
+
+    it('renders back button on fields step', () => {
+      testBackButton(AddInferencePipelineSteps.Fields, AddInferencePipelineSteps.Configuration);
     });
     it('renders back button on test step', () => {
-      setMockValues({
-        ...DEFAULT_VALUES,
-        addInferencePipelineModal: {
-          ...DEFAULT_VALUES.addInferencePipelineModal,
-          step: AddInferencePipelineSteps.Test,
-        },
-      });
-      const wrapper = shallow(
-        <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
-      );
-      expect(wrapper.find(EuiButtonEmpty)).toHaveLength(2);
-      const backBtn = wrapper.find(EuiButtonEmpty).at(1);
-      expect(backBtn.prop('children')).toBe('Back');
-      backBtn.prop('onClick')!({} as any);
-      expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
-        AddInferencePipelineSteps.Fields
-      );
+      testBackButton(AddInferencePipelineSteps.Test, AddInferencePipelineSteps.Fields);
     });
     it('renders back button on review step', () => {
-      setMockValues({
-        ...DEFAULT_VALUES,
-        addInferencePipelineModal: {
-          ...DEFAULT_VALUES.addInferencePipelineModal,
-          step: AddInferencePipelineSteps.Review,
-        },
-      });
-      const wrapper = shallow(
-        <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
-      );
-      expect(wrapper.find(EuiButtonEmpty)).toHaveLength(2);
-      const backBtn = wrapper.find(EuiButtonEmpty).at(1);
-      expect(backBtn.prop('children')).toBe('Back');
-      backBtn.prop('onClick')!({} as any);
-      expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
-        AddInferencePipelineSteps.Test
-      );
+      testBackButton(AddInferencePipelineSteps.Review, AddInferencePipelineSteps.Test);
     });
-    it('renders enabled Continue with valid data', () => {
+
+    it('renders enabled continue button with valid data', () => {
       const wrapper = shallow(
         <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
       );
@@ -424,11 +409,11 @@ describe('AddInferencePipelineFlyout', () => {
       expect(contBtn.prop('children')).toBe('Continue');
       expect(contBtn.prop('disabled')).toBe(false);
       contBtn.prop('onClick')!({} as any);
-      expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
+      expect(actions.onAddInferencePipelineStepChange).toHaveBeenCalledWith(
         AddInferencePipelineSteps.Fields
       );
     });
-    it('renders disabled Continue with invalid data', () => {
+    it('renders disabled continue button with invalid data', () => {
       setMockValues({ ...DEFAULT_VALUES, isConfigureStepValid: false });
       const wrapper = shallow(
         <AddInferencePipelineFooter ingestionMethod={ingestionMethod} onClose={onClose} />
@@ -437,7 +422,7 @@ describe('AddInferencePipelineFlyout', () => {
       expect(wrapper.find(EuiButton).prop('children')).toBe('Continue');
       expect(wrapper.find(EuiButton).prop('disabled')).toBe(true);
     });
-    it('renders Continue button on fields step', () => {
+    it('renders continue button on fields step', () => {
       setMockValues({
         ...DEFAULT_VALUES,
         addInferencePipelineModal: {
@@ -453,11 +438,11 @@ describe('AddInferencePipelineFlyout', () => {
       expect(contBtn.prop('children')).toBe('Continue');
       expect(contBtn.prop('disabled')).toBe(false);
       contBtn.prop('onClick')!({} as any);
-      expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
+      expect(actions.onAddInferencePipelineStepChange).toHaveBeenCalledWith(
         AddInferencePipelineSteps.Test
       );
     });
-    it('renders Continue button on test step', () => {
+    it('renders continue button on test step', () => {
       setMockValues({
         ...DEFAULT_VALUES,
         addInferencePipelineModal: {
@@ -473,7 +458,7 @@ describe('AddInferencePipelineFlyout', () => {
       expect(contBtn.prop('children')).toBe('Continue');
       expect(contBtn.prop('disabled')).toBe(false);
       contBtn.prop('onClick')!({} as any);
-      expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
+      expect(actions.onAddInferencePipelineStepChange).toHaveBeenCalledWith(
         AddInferencePipelineSteps.Review
       );
     });
@@ -484,11 +469,9 @@ describe('AddInferencePipelineFlyout', () => {
           ...DEFAULT_VALUES.addInferencePipelineModal,
           step: AddInferencePipelineSteps.Review,
           configuration: {
-            destinationField: 'test',
             existingPipeline: false,
             modelID: 'test-model',
             pipelineName: 'my-test-pipeline',
-            sourceField: 'body',
           },
         },
       });
@@ -510,11 +493,9 @@ describe('AddInferencePipelineFlyout', () => {
           ...DEFAULT_VALUES.addInferencePipelineModal,
           step: AddInferencePipelineSteps.Review,
           configuration: {
-            destinationField: 'test',
             existingPipeline: true,
             modelID: 'test-model',
             pipelineName: 'my-test-pipeline',
-            sourceField: 'body',
           },
         },
       });

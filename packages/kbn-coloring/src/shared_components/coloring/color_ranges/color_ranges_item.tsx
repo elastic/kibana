@@ -1,14 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import React, { useState, useCallback, Dispatch, FocusEvent, useContext, useMemo } from 'react';
+import React, {
+  useState,
+  useCallback,
+  Dispatch,
+  FocusEvent,
+  useContext,
+  useMemo,
+  ChangeEventHandler,
+} from 'react';
 import { css } from '@emotion/react';
 
 import {
@@ -23,6 +32,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import { isValidColor } from '../../../color_manipulation';
 import {
   PaletteContinuity,
   checkIsMaxContinuity,
@@ -32,7 +42,6 @@ import {
 
 import { RelatedIcon } from '../assets/related';
 import { getAutoBoundInformation, isLastItem } from './utils';
-import { isValidColor } from '../utils';
 import {
   ColorRangeDeleteButton,
   ColorRangeAutoDetectButton,
@@ -126,9 +135,9 @@ export function ColorRangeItem({
     [colorRange.start, colorRanges, dispatch, index, popoverInFocus, dataBounds, palettes, isLast]
   );
 
-  const onValueChange = useCallback(
+  const onValueChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
     ({ target: { value: targetValue } }) => {
-      setLocalValue(targetValue);
+      setLocalValue(+targetValue);
       dispatch({
         type: 'updateValue',
         payload: { index, value: targetValue, accessor, dataBounds, palettes },
@@ -138,7 +147,7 @@ export function ColorRangeItem({
   );
 
   const onUpdateColor = useCallback(
-    (color) => {
+    (color: string) => {
       dispatch({ type: 'updateColor', payload: { index, color, dataBounds, palettes } });
     },
     [dispatch, index, dataBounds, palettes]
@@ -221,7 +230,7 @@ export function ColorRangeItem({
           append={getAppend(rangeType, mode)}
           onBlur={onLeaveFocus}
           data-test-subj={`lnsPalettePanel_dynamicColoring_range_value_${index}`}
-          prepend={<span className="euiFormLabel">{isLast ? '\u2264' : '\u2265'}</span>}
+          prepend={isLast ? '\u2264' : '\u2265'}
           aria-label={i18n.translate('coloring.dynamicColoring.customPalette.rangeAriaLabel', {
             defaultMessage: 'Range {index}',
             values: {

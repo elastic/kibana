@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 
 import classNames from 'classnames';
 import { useValues } from 'kea';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 
 import { FlashMessages } from '../flash_messages';
 import { HttpLogic } from '../http';
+import { KibanaLogic } from '../kibana';
 import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../loading';
 
 import './page_template.scss';
+import { EndpointsHeaderAction } from './endpoints_header_action';
 
 /*
  * EnterpriseSearchPageTemplateWrapper is a light wrapper for KibanaPageTemplate (which
@@ -35,13 +38,16 @@ import './page_template.scss';
 
 export type PageTemplateProps = KibanaPageTemplateProps & {
   customPageSections?: boolean; // If false, automatically wraps children in an EuiPageSection
+  emptyState?: React.ReactNode;
   hideFlashMessages?: boolean;
   isLoading?: boolean;
-  emptyState?: React.ReactNode;
-  setPageChrome?: React.ReactNode;
   // Used by product-specific page templates
   pageChrome?: BreadcrumbTrail;
   pageViewTelemetry?: string;
+  setPageChrome?: React.ReactNode;
+  solutionNavIcon?: string;
+  useEndpointHeaderActions?: boolean;
+  hideEmbeddedConsole?: boolean;
 };
 
 export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({
@@ -54,15 +60,29 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
   emptyState,
   setPageChrome,
   solutionNav,
+  solutionNavIcon,
+  useEndpointHeaderActions = true,
+  hideEmbeddedConsole = false,
   ...pageTemplateProps
 }) => {
   const { readOnlyMode } = useValues(HttpLogic);
+  const { renderHeaderActions, consolePlugin } = useValues(KibanaLogic);
+
   const hasCustomEmptyState = !!emptyState;
   const showCustomEmptyState = hasCustomEmptyState && isEmptyState;
 
+  const navIcon = solutionNavIcon ?? 'logoEnterpriseSearch';
+
+  useLayoutEffect(() => {
+    if (useEndpointHeaderActions) {
+      renderHeaderActions(EndpointsHeaderAction);
+    }
+    return () => {
+      renderHeaderActions(undefined);
+    };
+  }, []);
   return (
     <KibanaPageTemplate
-      restrictWidth={false}
       {...pageTemplateProps}
       className={classNames('enterpriseSearchPageTemplate', className)}
       mainProps={{
@@ -73,7 +93,7 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
         ),
       }}
       isEmptyState={isEmptyState && !isLoading}
-      solutionNav={solutionNav ? { icon: 'logoEnterpriseSearch', ...solutionNav } : undefined}
+      solutionNav={solutionNav && solutionNav.items ? { icon: navIcon, ...solutionNav } : undefined}
     >
       {setPageChrome}
       {readOnlyMode && (
@@ -98,6 +118,11 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
         children
       ) : (
         <KibanaPageTemplate.Section>{children}</KibanaPageTemplate.Section>
+      )}
+      {!hideEmbeddedConsole && consolePlugin?.EmbeddableConsole !== undefined ? (
+        <consolePlugin.EmbeddableConsole />
+      ) : (
+        <></>
       )}
     </KibanaPageTemplate>
   );

@@ -6,15 +6,20 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
+import { RuleResultService } from '../monitoring/rule_result_service';
 import {
   RuleExecutionStatus,
   RuleExecutionStatusValues,
   RuleExecutionStatusWarningReasons,
   RawRuleExecutionStatus,
+  RawRule,
+  Rule,
+  RuleExecutionStatusErrorReasons,
 } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import { ActionsCompletion, RuleExecutionStatuses } from '../../common';
+import { RuleExecutionStatuses } from '../../common';
 import { translations } from '../constants/translations';
 import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { RuleRunMetrics } from './rule_run_metrics_store';
@@ -24,10 +29,15 @@ export interface IExecutionStatusAndMetrics {
   metrics: RuleRunMetrics | null;
 }
 
-export function executionStatusFromState(
-  stateWithMetrics: RuleTaskStateAndMetrics,
-  lastExecutionDate?: Date
-): IExecutionStatusAndMetrics {
+export function executionStatusFromState({
+  stateWithMetrics,
+  ruleResultService,
+  lastExecutionDate,
+}: {
+  stateWithMetrics: RuleTaskStateAndMetrics;
+  ruleResultService: RuleResultService;
+  lastExecutionDate?: Date;
+}): IExecutionStatusAndMetrics {
   const alertIds = Object.keys(stateWithMetrics.alertInstances ?? {});
 
   let status: RuleExecutionStatuses =
@@ -35,6 +45,8 @@ export function executionStatusFromState(
 
   // Check for warning states
   let warning = null;
+  let error = null;
+
   // We only have a single warning field so prioritizing the alert circuit breaker over the actions circuit breaker
   if (stateWithMetrics.metrics.hasReachedAlertLimit) {
     status = RuleExecutionStatusValues[5];
@@ -44,9 +56,37 @@ export function executionStatusFromState(
     };
   } else if (stateWithMetrics.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL) {
     status = RuleExecutionStatusValues[5];
+    if (stateWithMetrics.metrics.hasReachedQueuedActionsLimit) {
+      warning = {
+        reason: RuleExecutionStatusWarningReasons.MAX_QUEUED_ACTIONS,
+        message: translations.taskRunner.warning.maxQueuedActions,
+      };
+    } else {
+      warning = {
+        reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+        message: translations.taskRunner.warning.maxExecutableActions,
+      };
+    }
+  }
+
+  // Overwrite status to be error if last run reported any errors
+  const { errors: errorsFromLastRun, warnings: warningsFromLastRun } =
+    ruleResultService.getLastRunResults();
+  if (errorsFromLastRun.length > 0) {
+    status = RuleExecutionStatusValues[2];
+    // These errors are reported by ruleResultService.addLastRunError, therefore they are landed in successful execution map
+    error = {
+      reason: RuleExecutionStatusErrorReasons.Unknown,
+      message: errorsFromLastRun.map((lastRunError) => lastRunError.message).join(','),
+    };
+  }
+
+  // Set warning status if last run reported any warnings and framework has not set any warnings
+  if (warningsFromLastRun.length > 0 && !warning) {
+    status = RuleExecutionStatusValues[5];
     warning = {
-      reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
-      message: translations.taskRunner.warning.maxExecutableActions,
+      reason: RuleExecutionStatusWarningReasons.EXECUTION,
+      message: warningsFromLastRun.join(','),
     };
   }
 
@@ -55,6 +95,7 @@ export function executionStatusFromState(
       lastExecutionDate: lastExecutionDate ?? new Date(),
       status,
       ...(warning ? { warning } : {}),
+      ...(error ? { error } : {}),
     },
     metrics: stateWithMetrics.metrics,
   };
@@ -137,9 +178,18 @@ export function ruleExecutionStatusFromRaw(
   return executionStatus;
 }
 
-export const getRuleExecutionStatusPending = (lastExecutionDate: string) => ({
-  status: 'pending' as RuleExecutionStatuses,
+export const getRuleExecutionStatusPendingAttributes = (
+  lastExecutionDate: string
+): RawRule['executionStatus'] => ({
+  status: 'pending',
   lastExecutionDate,
   error: null,
   warning: null,
+});
+
+export const getRuleExecutionStatusPending = (
+  lastExecutionDate: string
+): Rule['executionStatus'] => ({
+  status: 'pending',
+  lastExecutionDate: new Date(lastExecutionDate),
 });

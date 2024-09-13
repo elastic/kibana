@@ -12,7 +12,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import { Actions } from '../../../../common/api';
+import { UserActionActions } from '../../../../common/types/domain';
 import {
   alertComment,
   basicCase,
@@ -36,6 +36,7 @@ import { useCaseViewNavigation, useCaseViewParams } from '../../../common/naviga
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 import { userProfiles } from '../../../containers/user_profiles/api.mock';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
@@ -54,7 +55,7 @@ describe('createCommentUserActionBuilder', () => {
 
   describe('edits', () => {
     it('renders correctly when editing a comment', async () => {
-      const userAction = getUserAction('comment', Actions.update);
+      const userAction = getUserAction('comment', UserActionActions.update);
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         userAction,
@@ -73,7 +74,7 @@ describe('createCommentUserActionBuilder', () => {
 
   describe('deletions', () => {
     it('renders correctly when deleting a comment', async () => {
-      const userAction = getUserAction('comment', Actions.delete);
+      const userAction = getUserAction('comment', UserActionActions.delete);
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         userAction,
@@ -90,7 +91,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('renders correctly when deleting a single alert', async () => {
-      const userAction = getAlertUserAction({ action: Actions.delete });
+      const userAction = getAlertUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         userAction,
@@ -107,7 +108,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('renders correctly when deleting multiple alerts', async () => {
-      const userAction = getMultipleAlertsUserAction({ action: Actions.delete });
+      const userAction = getMultipleAlertsUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         userAction,
@@ -124,7 +125,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('renders correctly when deleting an external reference attachment', async () => {
-      const userAction = getExternalReferenceUserAction({ action: Actions.delete });
+      const userAction = getExternalReferenceUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         userAction,
@@ -152,7 +153,7 @@ describe('createCommentUserActionBuilder', () => {
         getAttachmentRemovalObject,
       });
 
-      const userAction = getExternalReferenceUserAction({ action: Actions.delete });
+      const userAction = getExternalReferenceUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         externalReferenceAttachmentTypeRegistry,
@@ -186,7 +187,7 @@ describe('createCommentUserActionBuilder', () => {
       const attachment = getExternalReferenceAttachment();
       externalReferenceAttachmentTypeRegistry.register(attachment);
 
-      const userAction = getExternalReferenceUserAction({ action: Actions.delete });
+      const userAction = getExternalReferenceUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         externalReferenceAttachmentTypeRegistry,
@@ -204,7 +205,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('renders correctly when deleting a persistable state attachment', async () => {
-      const userAction = getPersistableStateUserAction({ action: Actions.delete });
+      const userAction = getPersistableStateUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         userAction,
@@ -232,7 +233,7 @@ describe('createCommentUserActionBuilder', () => {
         getAttachmentRemovalObject,
       });
 
-      const userAction = getPersistableStateUserAction({ action: Actions.delete });
+      const userAction = getPersistableStateUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         persistableStateAttachmentTypeRegistry,
@@ -268,7 +269,7 @@ describe('createCommentUserActionBuilder', () => {
       const attachment = getPersistableStateAttachment();
       persistableStateAttachmentTypeRegistry.register(attachment);
 
-      const userAction = getPersistableStateUserAction({ action: Actions.delete });
+      const userAction = getPersistableStateUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         persistableStateAttachmentTypeRegistry,
@@ -288,7 +289,7 @@ describe('createCommentUserActionBuilder', () => {
 
   describe('user comments', () => {
     it('renders correctly a user comment', async () => {
-      const userAction = getUserAction('comment', Actions.create, {
+      const userAction = getUserAction('comment', UserActionActions.create, {
         commentId: basicCase.comments[0].id,
       });
 
@@ -308,7 +309,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('deletes a user comment correctly', async () => {
-      const userAction = getUserAction('comment', Actions.create, {
+      const userAction = getUserAction('comment', UserActionActions.create, {
         commentId: basicCase.comments[0].id,
       });
 
@@ -337,7 +338,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('edits a user comment correctly', async () => {
-      const userAction = getUserAction('comment', Actions.create, {
+      const userAction = getUserAction('comment', UserActionActions.create, {
         commentId: basicCase.comments[0].id,
       });
 
@@ -356,11 +357,11 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+      await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
       await waitForEuiPopoverOpen();
 
       expect(screen.queryByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
-      userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
+      await userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
 
       await waitFor(() => {
         expect(builderArgs.handleManageMarkdownEditId).toHaveBeenCalledWith('basic-comment-id');
@@ -368,7 +369,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('quotes a user comment correctly', async () => {
-      const userAction = getUserAction('comment', Actions.create, {
+      const userAction = getUserAction('comment', UserActionActions.create, {
         commentId: basicCase.comments[0].id,
       });
 
@@ -387,11 +388,11 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+      await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
       await waitForEuiPopoverOpen();
 
       expect(screen.queryByTestId('property-actions-user-action-quote')).toBeInTheDocument();
-      userEvent.click(screen.getByTestId('property-actions-user-action-quote'));
+      await userEvent.click(screen.getByTestId('property-actions-user-action-quote'));
 
       await waitFor(() => {
         expect(builderArgs.handleManageQuote).toHaveBeenCalledWith('Solve this fast!');
@@ -477,7 +478,7 @@ describe('createCommentUserActionBuilder', () => {
       );
 
       expect(screen.getByTestId('comment-action-show-alert-alert-action-id')).toBeInTheDocument();
-      userEvent.click(screen.getByTestId('comment-action-show-alert-alert-action-id'));
+      await userEvent.click(screen.getByTestId('comment-action-show-alert-alert-action-id'));
 
       await waitFor(() => {
         expect(builderArgs.onShowAlertDetails).toHaveBeenCalledWith('alert-id-1', 'alert-index-1');
@@ -578,7 +579,7 @@ describe('createCommentUserActionBuilder', () => {
       const res = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
       expect(res.getByTestId('comment-action-show-alerts-1234'));
-      userEvent.click(res.getByTestId('comment-action-show-alerts-1234'));
+      await userEvent.click(res.getByTestId('comment-action-show-alerts-1234'));
 
       await waitFor(() => {
         expect(navigateToCaseView).toHaveBeenCalledWith({ detailName: '1234', tabId: 'alerts' });
@@ -586,28 +587,60 @@ describe('createCommentUserActionBuilder', () => {
     });
   });
 
-  it('renders correctly an action', async () => {
-    const userAction = getHostIsolationUserAction();
+  describe('Host isolation action', () => {
+    it('renders correctly an action', async () => {
+      const userAction = getHostIsolationUserAction();
 
-    const builder = createCommentUserActionBuilder({
-      ...builderArgs,
-      caseData: {
-        ...builderArgs.caseData,
-        comments: [hostIsolationComment()],
-      },
-      userAction,
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [hostIsolationComment()],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('endpoint-action')).toBeInTheDocument();
+      expect(screen.getByText('submitted isolate request on host')).toBeInTheDocument();
+      expect(screen.getByText('host1')).toBeInTheDocument();
+      expect(screen.getByText('I just isolated the host!')).toBeInTheDocument();
     });
 
-    const createdUserAction = builder.build();
-    render(
-      <TestProviders>
-        <EuiCommentList comments={createdUserAction} />
-      </TestProviders>
-    );
+    it('shows the correct username', async () => {
+      const createdBy = { profileUid: userProfiles[0].uid };
+      const userAction = getHostIsolationUserAction({
+        createdBy,
+      });
 
-    expect(screen.getByText('submitted isolate request on host')).toBeInTheDocument();
-    expect(screen.getByText('host1')).toBeInTheDocument();
-    expect(screen.getByText('I just isolated the host!')).toBeInTheDocument();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [hostIsolationComment({ createdBy })],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(
+        screen.getAllByTestId('case-user-profile-avatar-damaged_raccoon')[0]
+      ).toBeInTheDocument();
+      expect(screen.getAllByText('DR')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Damaged Raccoon')[0]).toBeInTheDocument();
+    });
   });
 
   describe('Attachment framework', () => {
@@ -849,9 +882,27 @@ describe('createCommentUserActionBuilder', () => {
 
       const attachment = getExternalReferenceAttachment({
         getActions: () => [
-          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 2 button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 3 button', isPrimary: true, iconType: 'danger', onClick },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary 2 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary 3 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
         ],
       });
 
@@ -877,15 +928,56 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByLabelText('My primary 2 button')).toBeInTheDocument();
       expect(screen.queryByLabelText('My primary 3 button')).not.toBeInTheDocument();
 
-      userEvent.click(screen.getByLabelText('My primary button'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByLabelText('My primary button'), { pointerEventsCheck: 0 });
 
-      userEvent.click(screen.getByLabelText('My primary 2 button'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(screen.getByLabelText('My primary 2 button'), {
+        pointerEventsCheck: 0,
       });
 
       expect(onClick).toHaveBeenCalledTimes(2);
+    });
+
+    it('shows correctly a custom action', async () => {
+      const onClick = jest.fn();
+
+      const attachment = getExternalReferenceAttachment({
+        getActions: () => [
+          {
+            type: AttachmentActionType.CUSTOM as const,
+            isPrimary: true,
+            label: 'Test button',
+            render: () => (
+              <button type="button" onClick={onClick} data-test-subj="my-custom-button" />
+            ),
+          },
+        ],
+      });
+
+      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+      externalReferenceAttachmentTypeRegistry.register(attachment);
+
+      const userAction = getExternalReferenceUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        externalReferenceAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [externalReferenceAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+
+      appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      const customButton = await screen.findByTestId('my-custom-button');
+
+      expect(customButton).toBeInTheDocument();
+
+      await userEvent.click(customButton);
+
+      expect(onClick).toHaveBeenCalledTimes(1);
     });
 
     it('shows correctly the non visible primary actions', async () => {
@@ -893,9 +985,27 @@ describe('createCommentUserActionBuilder', () => {
 
       const attachment = getExternalReferenceAttachment({
         getActions: () => [
-          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 2 button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 3 button', isPrimary: true, iconType: 'danger', onClick },
+          {
+            type: AttachmentActionType.BUTTON,
+            label: 'My primary button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON,
+            label: 'My primary 2 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON,
+            label: 'My primary 3 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
         ],
       });
 
@@ -922,16 +1032,71 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.queryByLabelText('My primary 3 button')).not.toBeInTheDocument();
 
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
-      userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+      await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
       await waitForEuiPopoverOpen();
 
       expect(screen.getByText('My primary 3 button')).toBeInTheDocument();
 
-      userEvent.click(screen.getByText('My primary 3 button'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByText('My primary 3 button'), { pointerEventsCheck: 0 });
 
       expect(onClick).toHaveBeenCalled();
+    });
+
+    it('hides correctly the  default actions', async () => {
+      const onClick = jest.fn();
+
+      const attachment = getExternalReferenceAttachment({
+        getActions: () => [
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My button',
+            iconType: 'download',
+            onClick,
+          },
+        ],
+        hideDefaultActions: true,
+      });
+
+      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+      externalReferenceAttachmentTypeRegistry.register(attachment);
+
+      const userAction = getExternalReferenceUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        externalReferenceAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [externalReferenceAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
+      expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+
+      await waitForEuiPopoverOpen();
+
+      // default "Delete attachment" action
+      expect(screen.queryByTestId('property-actions-user-action-trash')).not.toBeInTheDocument();
+      expect(screen.queryByText('Delete attachment')).not.toBeInTheDocument();
+      expect(screen.getByText('My button')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByText('My button'), { pointerEventsCheck: 0 });
+
+      expect(onClick).toHaveBeenCalledTimes(1);
     });
 
     it('shows correctly the registered primary actions and non-primary actions', async () => {
@@ -939,11 +1104,39 @@ describe('createCommentUserActionBuilder', () => {
 
       const attachment = getExternalReferenceAttachment({
         getActions: () => [
-          { label: 'My button', iconType: 'trash', onClick },
-          { label: 'My button 2', iconType: 'download', onClick },
-          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 2 button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 3 button', isPrimary: true, iconType: 'danger', onClick },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My button',
+            iconType: 'trash',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My button 2',
+            iconType: 'download',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary 2 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary 3 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
         ],
       });
 
@@ -970,17 +1163,15 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.queryByLabelText('My primary 3 button')).not.toBeInTheDocument();
 
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
-      userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+      await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
       await waitForEuiPopoverOpen();
 
       expect(screen.getByText('My button')).toBeInTheDocument();
       expect(screen.getByText('My button 2')).toBeInTheDocument();
       expect(screen.getByText('My primary 3 button')).toBeInTheDocument();
 
-      userEvent.click(screen.getByText('My button'), undefined, { skipPointerEventsCheck: true });
-      userEvent.click(screen.getByText('My button 2'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByText('My button'), { pointerEventsCheck: 0 });
+      await userEvent.click(screen.getByText('My button 2'), { pointerEventsCheck: 0 });
 
       expect(onClick).toHaveBeenCalledTimes(2);
     });
@@ -990,7 +1181,13 @@ describe('createCommentUserActionBuilder', () => {
 
       const attachment = getExternalReferenceAttachment({
         getActions: () => [
-          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
         ],
       });
 
@@ -1014,9 +1211,7 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
       expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
 
-      userEvent.click(screen.getByLabelText('My primary button'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByLabelText('My primary button'), { pointerEventsCheck: 0 });
 
       expect(onClick).toHaveBeenCalled();
     });
@@ -1026,16 +1221,16 @@ describe('createCommentUserActionBuilder', () => {
 const deleteAttachment = async (result: RenderResult, deleteIcon: string, buttonLabel: string) => {
   expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-  userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+  await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
   await waitForEuiPopoverOpen();
 
   expect(screen.queryByTestId(`property-actions-user-action-${deleteIcon}`)).toBeInTheDocument();
 
-  userEvent.click(screen.getByTestId(`property-actions-user-action-${deleteIcon}`));
+  await userEvent.click(screen.getByTestId(`property-actions-user-action-${deleteIcon}`));
 
   await waitFor(() => {
     expect(screen.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
   });
 
-  userEvent.click(screen.getByText(buttonLabel));
+  await userEvent.click(screen.getByText(buttonLabel));
 };

@@ -10,13 +10,13 @@ import type { Duration } from 'moment';
 import path from 'path';
 
 import type { Type, TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { AppenderConfigType, Logger } from '@kbn/core/server';
 import { config as coreConfig } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { getLogsPath } from '@kbn/utils';
 
-import type { AuthenticationProvider } from '../common/model';
+import type { AuthenticationProvider } from '../common';
 
 export type ConfigType = ReturnType<typeof createConfig>;
 type RawConfigType = TypeOf<typeof ConfigSchema>;
@@ -204,6 +204,7 @@ export const ConfigSchema = schema.object({
   loginAssistanceMessage: schema.string({ defaultValue: '' }),
   showInsecureClusterWarning: schema.boolean({ defaultValue: true }),
   loginHelp: schema.maybe(schema.string()),
+  showNavLinks: schema.boolean({ defaultValue: true }),
   cookieName: schema.string({ defaultValue: 'sid' }),
   encryptionKey: schema.conditional(
     schema.contextRef('dist'),
@@ -213,7 +214,7 @@ export const ConfigSchema = schema.object({
   ),
   session: schema.object({
     idleTimeout: schema.oneOf([schema.duration(), schema.literal(null)], {
-      defaultValue: schema.duration().validate('8h'),
+      defaultValue: schema.duration().validate('3d'),
     }),
     lifespan: schema.oneOf([schema.duration(), schema.literal(null)], {
       defaultValue: schema.duration().validate('30d'),
@@ -278,6 +279,11 @@ export const ConfigSchema = schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       autoSchemesEnabled: schema.boolean({ defaultValue: true }),
       schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey', 'bearer'] }),
+      jwt: offeringBasedSchema({
+        serverless: schema.object({
+          taggedRoutesOnly: schema.boolean({ defaultValue: true }),
+        }),
+      }),
     }),
   }),
   audit: schema.object({
@@ -288,12 +294,30 @@ export const ConfigSchema = schema.object({
         schema.object({
           actions: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
           categories: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-          types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
           outcomes: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
           spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          users: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
         })
       )
     ),
+  }),
+
+  roleManagementEnabled: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+  }),
+
+  // Setting only allowed in the Serverless offering
+  ui: offeringBasedSchema({
+    serverless: schema.object({
+      userManagementEnabled: schema.boolean({ defaultValue: true }),
+      roleMappingManagementEnabled: schema.boolean({ defaultValue: true }),
+    }),
+  }),
+  experimental: schema.object({
+    fipsMode: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
 });
 
@@ -311,6 +335,9 @@ export function createConfig(
 
     encryptionKey = crypto.randomBytes(16).toString('hex');
   }
+
+  const hashedEncryptionKey = crypto.createHash('sha3-256').update(encryptionKey).digest('base64');
+  logger.info(`Hashed 'xpack.security.encryptionKey' for this instance: ${hashedEncryptionKey}`);
 
   let secureCookies = config.secureCookies;
 

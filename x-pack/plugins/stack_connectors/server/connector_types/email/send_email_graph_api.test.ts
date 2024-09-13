@@ -6,6 +6,7 @@
  */
 jest.mock('axios', () => ({
   create: jest.fn(),
+  AxiosHeaders: jest.requireActual('axios').AxiosHeaders,
 }));
 
 import axios from 'axios';
@@ -13,7 +14,7 @@ import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { CustomHostSettings } from '@kbn/actions-plugin/server/config';
-import { ProxySettings } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector, ProxySettings } from '@kbn/actions-plugin/server/types';
 import { sendEmailGraphApi } from './send_email_graph_api';
 
 const createAxiosInstanceMock = axios.create as jest.Mock;
@@ -27,13 +28,23 @@ describe('sendEmailGraphApi', () => {
   const configurationUtilities = actionsConfigMock.create();
 
   test('email contains the proper message', async () => {
+    const connectorUsageCollector = new ConnectorUsageCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
+
     axiosInstanceMock.mockReturnValueOnce({
       status: 202,
     });
     await sendEmailGraphApi(
-      { options: getSendEmailOptions(), messageHTML: 'test1', headers: {} },
+      {
+        options: getSendEmailOptions(),
+        messageHTML: 'test1',
+        headers: {},
+      },
       logger,
-      configurationUtilities
+      configurationUtilities,
+      connectorUsageCollector
     );
     expect(axiosInstanceMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -90,6 +101,7 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },
@@ -98,6 +110,7 @@ describe('sendEmailGraphApi', () => {
             "scheduling": "lifo",
             "sockets": Object {},
             "totalSocketCount": 0,
+            Symbol(shapeMode): false,
             Symbol(kCapture): false,
           },
           "maxContentLength": 1000000,
@@ -107,10 +120,14 @@ describe('sendEmailGraphApi', () => {
           "validateStatus": [Function],
         },
       ]
-      `);
+    `);
   });
 
   test('email was sent on behalf of the user "from" mailbox', async () => {
+    const connectorUsageCollector = new ConnectorUsageCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
     axiosInstanceMock.mockReturnValueOnce({
       status: 202,
     });
@@ -121,7 +138,8 @@ describe('sendEmailGraphApi', () => {
         headers: { Authorization: 'Bearer 1234567' },
       },
       logger,
-      configurationUtilities
+      configurationUtilities,
+      connectorUsageCollector
     );
     expect(axiosInstanceMock.mock.calls[1]).toMatchInlineSnapshot(`
       Array [
@@ -180,6 +198,7 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },
@@ -188,6 +207,7 @@ describe('sendEmailGraphApi', () => {
             "scheduling": "lifo",
             "sockets": Object {},
             "totalSocketCount": 0,
+            Symbol(shapeMode): false,
             Symbol(kCapture): false,
           },
           "maxContentLength": 1000000,
@@ -197,22 +217,27 @@ describe('sendEmailGraphApi', () => {
           "validateStatus": [Function],
         },
       ]
-      `);
+    `);
   });
 
   test('sendMail request was sent to the custom configured Graph API URL', async () => {
+    const connectorUsageCollector = new ConnectorUsageCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
     axiosInstanceMock.mockReturnValueOnce({
       status: 202,
     });
+    configurationUtilities.getMicrosoftGraphApiUrl.mockReturnValueOnce('https://test');
     await sendEmailGraphApi(
       {
         options: getSendEmailOptions(),
         messageHTML: 'test3',
         headers: {},
-        graphApiUrl: 'https://test',
       },
       logger,
-      configurationUtilities
+      configurationUtilities,
+      connectorUsageCollector
     );
     expect(axiosInstanceMock.mock.calls[2]).toMatchInlineSnapshot(`
       Array [
@@ -269,6 +294,7 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },
@@ -277,6 +303,7 @@ describe('sendEmailGraphApi', () => {
             "scheduling": "lifo",
             "sockets": Object {},
             "totalSocketCount": 0,
+            Symbol(shapeMode): false,
             Symbol(kCapture): false,
           },
           "maxContentLength": 1000000,
@@ -286,10 +313,14 @@ describe('sendEmailGraphApi', () => {
           "validateStatus": [Function],
         },
       ]
-      `);
+    `);
   });
 
   test('throw the exception and log the proper error if message was not sent successfuly', async () => {
+    const connectorUsageCollector = new ConnectorUsageCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
     axiosInstanceMock.mockReturnValueOnce({
       status: 400,
       data: {
@@ -304,7 +335,8 @@ describe('sendEmailGraphApi', () => {
       sendEmailGraphApi(
         { options: getSendEmailOptions(), messageHTML: 'test1', headers: {} },
         logger,
-        configurationUtilities
+        configurationUtilities,
+        connectorUsageCollector
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       '"{\\"error\\":{\\"code\\":\\"ErrorMimeContentInvalidBase64String\\",\\"message\\":\\"Invalid base64 string for MIME content.\\"}}"'

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { CursorType, Inspect, Maybe, PageInfoPaginated, SortField } from '../../../common';
-import type { RequestOptionsPaginated } from '../..';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import type { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
 
 export enum NetworkDnsFields {
   dnsName = 'dnsName',
@@ -15,12 +14,6 @@ export enum NetworkDnsFields {
   uniqueDomains = 'uniqueDomains',
   dnsBytesIn = 'dnsBytesIn',
   dnsBytesOut = 'dnsBytesOut',
-}
-
-export interface NetworkDnsRequestOptions extends RequestOptionsPaginated {
-  isPtrIncluded: boolean;
-  sort: SortField<NetworkDnsFields>;
-  stackByField?: Maybe<string>;
 }
 
 export interface NetworkDnsStrategyResponse extends IEsSearchResponse {

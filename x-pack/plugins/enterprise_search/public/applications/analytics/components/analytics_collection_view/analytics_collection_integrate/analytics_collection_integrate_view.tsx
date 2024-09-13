@@ -19,6 +19,7 @@ import {
   EuiTabs,
   EuiLink,
   EuiText,
+  EuiCodeBlock,
 } from '@elastic/eui';
 
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
@@ -26,9 +27,8 @@ import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 
 import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { docLinks } from '../../../../shared/doc_links';
-
-import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_template';
@@ -50,6 +50,63 @@ export interface AnalyticsConfig {
   collectionName: string;
   endpoint: string;
 }
+
+const CORSStep = (): EuiContainedStepProps => ({
+  title: i18n.translate(
+    'xpack.enterpriseSearch.analytics.collections.collectionsView.corsStep.title',
+    {
+      defaultMessage: 'Configure CORS',
+    }
+  ),
+  children: (
+    <>
+      <EuiText>
+        <>
+          <p>
+            {i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsView.integration.corsStep.description',
+              {
+                defaultMessage:
+                  "You must configure CORS to allow requests from your website's domain to the Analytics API endpoint. You can do this by adding the following to your Elasticsearch configuration file:",
+              }
+            )}
+          </p>
+
+          <EuiCodeBlock language="yaml" isCopyable>
+            {`# http.cors.allow-origin: "https://my-website-domain.example"
+http.cors.allow-origin: "*"
+http.cors.enabled: true
+http.cors.allow-credentials: true
+http.cors.allow-methods: OPTIONS, POST
+http.cors.allow-headers: X-Requested-With, X-Auth-Token, Content-Type, Content-Length, Authorization, Access-Control-Allow-Headers, Accept`}
+          </EuiCodeBlock>
+          <p>
+            {i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsView.integration.corsStep.descriptionTwo',
+              {
+                defaultMessage:
+                  "Alternatively you can use a proxy server to route analytic requests from your website's domain to the Analytics API endpoint which will allow you to avoid configuring CORS.",
+              }
+            )}
+          </p>
+          <EuiLink
+            href={docLinks.behavioralAnalyticsCORS}
+            data-telemetry-id="entSearchContent-analytics-cors-learnMoreLink"
+            external
+            target="_blank"
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.analytics.collectionsView.integration.corsStep.learnMoreLink',
+              {
+                defaultMessage: 'Learn more about CORS for Behavioral Analytics.',
+              }
+            )}
+          </EuiLink>
+        </>
+      </EuiText>
+    </>
+  ),
+});
 
 const apiKeyStep = (
   openApiKeyModal: () => void,
@@ -135,13 +192,17 @@ export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionInteg
   const [apiKeyModelOpen, setApiKeyModalOpen] = useState<boolean>(false);
   const { navigateToUrl } = useValues(KibanaLogic);
   const { apiKey } = useValues(GenerateApiKeyModalLogic);
+  const DEFAULT_URL = 'https://localhost:9200';
+  const cloudContext = useCloudDetails();
+
+  const baseUrl = cloudContext.elasticsearchUrl || DEFAULT_URL;
 
   const analyticsConfig: AnalyticsConfig = {
     apiKey: apiKey || '########',
     collectionName: analyticsCollection?.name,
-    endpoint: getEnterpriseSearchUrl(),
+    endpoint: baseUrl,
   };
-  const webClientSrc = `https://cdn.jsdelivr.net/npm/@elastic/behavioral-analytics-browser-tracker@2/dist/umd/index.global.js`;
+  const webClientSrc = `https://cdn.jsdelivr.net/npm/@elastic/behavioral-analytics-browser-tracker@2`;
 
   const tabs: Array<{
     key: TabKey;
@@ -179,8 +240,16 @@ export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionInteg
   const apiKeyStepGuide = apiKeyStep(() => setApiKeyModalOpen(true), navigateToUrl);
 
   const steps: Record<TabKey, EuiContainedStepProps[]> = {
-    javascriptClientEmbed: [apiKeyStepGuide, ...javascriptClientEmbedSteps(analyticsConfig)],
-    javascriptEmbed: [apiKeyStepGuide, ...javascriptEmbedSteps(webClientSrc, analyticsConfig)],
+    javascriptClientEmbed: [
+      apiKeyStepGuide,
+      CORSStep(),
+      ...javascriptClientEmbedSteps(analyticsConfig),
+    ],
+    javascriptEmbed: [
+      apiKeyStepGuide,
+      CORSStep(),
+      ...javascriptEmbedSteps(webClientSrc, analyticsConfig),
+    ],
     searchuiEmbed: searchUIEmbedSteps(setSelectedTab),
   };
 
@@ -202,7 +271,7 @@ export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionInteg
           'xpack.enterpriseSearch.analytics.collectionsView.integration.description',
           {
             defaultMessage:
-              'Easily install our tracker on your search application to receive in depth analytics data. No search applications required.',
+              'Easily install our tracker on your application or website to receive in-depth analytics data.',
           }
         ),
         rightSideItems: [],

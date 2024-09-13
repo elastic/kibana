@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Embeddable } from '@kbn/embeddable-plugin/public';
 
-import { formatAlertsData, showInitialLoadingSpinner } from './helpers';
-import { result, textResult, stackedByBooleanField, stackedByTextField } from './mock_data';
+import { createResetGroupByFieldAction, showInitialLoadingSpinner } from './helpers';
+import type { LensDataTableEmbeddable } from '../../../../common/components/visualization_actions/types';
 
 describe('helpers', () => {
   describe('showInitialLoadingSpinner', () => {
@@ -36,14 +38,102 @@ describe('helpers', () => {
   });
 });
 
-describe('formatAlertsData', () => {
-  test('stack by a boolean field', () => {
-    const res = formatAlertsData(stackedByBooleanField);
-    expect(res).toEqual(result);
+describe('createResetGroupByFieldAction', () => {
+  let action: Action;
+  const embeddable = {
+    getInput: jest.fn().mockReturnValue({
+      attributes: {
+        title: 'test',
+        description: '',
+        visualizationType: 'lnsDatatable',
+        state: {
+          visualization: {
+            columns: [
+              {
+                columnId: '2881fedd-54b7-42ba-8c97-5175dec86166',
+                isTransposed: false,
+                width: 362,
+              },
+              {
+                columnId: 'f04a71a3-399f-4d32-9efc-8a005e989991',
+                isTransposed: false,
+              },
+              {
+                columnId: '75ce269b-ee9c-4c7d-a14e-9226ba0fe059',
+                isTransposed: false,
+                hidden: true,
+              },
+            ],
+            layerId: '03b95315-16ce-4146-a76a-621f9d4422f9',
+            layerType: 'data',
+          },
+        },
+      },
+    } as unknown as Embeddable<LensDataTableEmbeddable>),
+    updateInput: jest.fn(),
+  };
+
+  const context = {
+    embeddable,
+  } as unknown as ActionExecutionContext<Embeddable<LensDataTableEmbeddable>>;
+  const mockCallback = jest.fn();
+  beforeAll(async () => {
+    action = createResetGroupByFieldAction({ callback: mockCallback });
+    await action.execute(context);
+  });
+  test('should return a correct id', () => {
+    expect(action.id).toEqual('resetGroupByField');
   });
 
-  test('stack by a text field', () => {
-    const res = formatAlertsData(stackedByTextField);
-    expect(res).toEqual(textResult);
+  test('should return display name', () => {
+    expect(action.getDisplayName(context)).toEqual('Reset group by fields');
+  });
+
+  test('should return an icon', () => {
+    expect(action.getIconType(context)).toEqual('editorRedo');
+  });
+
+  test('should return icon type', () => {
+    expect(action.type).toEqual('actionButton');
+  });
+
+  test('should execute callback', () => {
+    expect(mockCallback).toHaveBeenCalled();
+  });
+
+  test('should unhide all the columns', () => {
+    expect(embeddable.updateInput).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attributes: {
+          description: '',
+          state: {
+            visualization: {
+              columns: [
+                {
+                  columnId: '2881fedd-54b7-42ba-8c97-5175dec86166',
+                  hidden: false,
+                  isTransposed: false,
+                  width: 362,
+                },
+                {
+                  columnId: 'f04a71a3-399f-4d32-9efc-8a005e989991',
+                  hidden: false,
+                  isTransposed: false,
+                },
+                {
+                  columnId: '75ce269b-ee9c-4c7d-a14e-9226ba0fe059',
+                  hidden: false,
+                  isTransposed: false,
+                },
+              ],
+              layerId: '03b95315-16ce-4146-a76a-621f9d4422f9',
+              layerType: 'data',
+            },
+          },
+          title: 'test',
+          visualizationType: 'lnsDatatable',
+        },
+      })
+    );
   });
 });

@@ -7,42 +7,43 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
-  EuiI18nNumber,
+  type CriteriaWithPagination,
   EuiAvatar,
   EuiBasicTable,
   EuiButtonIcon,
   EuiFacetButton,
   EuiHorizontalRule,
-  RIGHT_ALIGNMENT,
+  EuiI18nNumber,
   EuiScreenReaderOnly,
+  EuiSkeletonText,
   EuiText,
   EuiToolTip,
   type HorizontalAlignment,
-  type CriteriaWithPagination,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import { SecurityPageName } from '../../../../../common/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import type { ActionListApiResponse } from '../../../../../common/endpoint/types';
-import type { EndpointActionListRequestQuery } from '../../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../../common/api/endpoint';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { TABLE_COLUMN_NAMES, UX_MESSAGES, ARIA_LABELS } from '../translations';
-import { getActionStatus, getUiCommand } from './hooks';
+import { ARIA_LABELS, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
+import { getActionStatus } from './hooks';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-import { StatusBadge } from './status_badge';
+import { ResponseActionStatusBadge } from './response_action_status_badge';
 import { ActionsLogExpandedTray } from './action_log_expanded_tray';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
-import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { useUrlPagination } from '../../../hooks/use_url_pagination';
 
 const emptyValue = getEmptyValue();
 
 // Truncated usernames
-const StyledFacetButton = euiStyled(EuiFacetButton)`
+const StyledFacetButton = euiStyled(EuiFacetButton).attrs({ title: undefined })`
   .euiText {
     margin-top: 0.38rem;
     overflow-y: visible !important;
@@ -55,12 +56,12 @@ interface ExpandedRowMapType {
 
 const getResponseActionListTableColumns = ({
   getTestId,
-  itemIdToExpandedRowMap,
+  expandedRowMap,
   showHostNames,
   onClickCallback,
 }: {
   getTestId: (suffix?: string | undefined) => string | undefined;
-  itemIdToExpandedRowMap: ExpandedRowMapType;
+  expandedRowMap: ExpandedRowMapType;
   showHostNames: boolean;
   onClickCallback: (actionListDataItem: ActionListApiResponse['data'][number]) => () => void;
 }) => {
@@ -86,7 +87,7 @@ const getResponseActionListTableColumns = ({
       width: !showHostNames ? '21%' : '10%',
       truncateText: true,
       render: (_command: ActionListApiResponse['data'][number]['command']) => {
-        const command = getUiCommand(_command);
+        const command = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[_command];
         return (
           <EuiToolTip content={command} anchorClassName="eui-textTruncate">
             <EuiText
@@ -128,6 +129,10 @@ const getResponseActionListTableColumns = ({
           <StyledFacetButton
             icon={
               <EuiAvatar
+                // We've a EuiTooltip that shows for createdBy below,
+                // Thus we don't need to add a title tooltip as well.
+                aria-hidden={true}
+                title=""
                 name={createdBy}
                 data-test-subj={getTestId('column-user-avatar')}
                 size="s"
@@ -167,6 +172,7 @@ const getResponseActionListTableColumns = ({
           .join(', ');
 
         let hostnames = _hostnames;
+
         if (!_hostnames) {
           if (hosts.length > 1) {
             // when action was for a single agent and no host name
@@ -218,7 +224,7 @@ const getResponseActionListTableColumns = ({
 
         return (
           <EuiToolTip content={status} anchorClassName="eui-textTruncate">
-            <StatusBadge
+            <ResponseActionStatusBadge
               color={
                 _status === 'failed' ? 'danger' : _status === 'successful' ? 'success' : 'warning'
               }
@@ -245,10 +251,8 @@ const getResponseActionListTableColumns = ({
           <EuiButtonIcon
             data-test-subj={getTestId('expand-button')}
             onClick={onClickCallback(actionListDataItem)}
-            aria-label={
-              itemIdToExpandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand
-            }
-            iconType={itemIdToExpandedRowMap[actionId] ? 'arrowUp' : 'arrowDown'}
+            aria-label={expandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand}
+            iconType={expandedRowMap[actionId] ? 'arrowUp' : 'arrowDown'}
           />
         );
       },
@@ -269,6 +273,7 @@ interface ActionsLogTableProps {
   isFlyout: boolean;
   loading: boolean;
   onChange: ({
+    // @ts-expect-error upgrade typescript v4.9.5
     page: _page,
   }: CriteriaWithPagination<ActionListApiResponse['data'][number]>) => void;
   onShowActionDetails: (actionIds: string[]) => void;
@@ -290,59 +295,64 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
     showHostNames,
     totalItemCount,
   }) => {
-    const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMapType>({});
-
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { pagination: paginationFromUrlParams } = useUrlPagination();
-    const { withOutputs: withOutputsFromUrl } = useActionHistoryUrlParams();
 
-    const getActionIdsWithDetails = useCallback((): string[] => {
-      // get the list of action ids from URL params on the history page
-      if (!isFlyout) {
-        return withOutputsFromUrl ?? [];
+    const [expandedRowMap, setExpandedRowMap] = useState<ExpandedRowMapType>({});
+
+    const actionIdsWithOpenTrays = useMemo(
+      (): string[] =>
+        // get the list of action ids from the query params for flyout view
+        queryParams.withOutputs
+          ? typeof queryParams.withOutputs === 'string'
+            ? [queryParams.withOutputs]
+            : queryParams.withOutputs
+          : [],
+      [queryParams.withOutputs]
+    );
+
+    const redoOpenTrays = useCallback(() => {
+      if (actionIdsWithOpenTrays.length && items.length) {
+        const openDetails = actionIdsWithOpenTrays.reduce<ExpandedRowMapType>(
+          (idToRowMap, actionId) => {
+            const actionItem = items.find((item) => item.id === actionId);
+            if (!actionItem) {
+              idToRowMap[actionId] = <EuiSkeletonText size="relative" lines={8} />;
+            } else {
+              idToRowMap[actionId] = (
+                <ActionsLogExpandedTray action={actionItem} data-test-subj={dataTestSubj} />
+              );
+            }
+            return idToRowMap;
+          },
+          {}
+        );
+        setExpandedRowMap(openDetails);
       }
-      // get the list of action ids form the query params for flyout view
-      return queryParams.withOutputs
-        ? typeof queryParams.withOutputs === 'string'
-          ? [queryParams.withOutputs]
-          : queryParams.withOutputs
-        : [];
-    }, [isFlyout, queryParams.withOutputs, withOutputsFromUrl]);
+    }, [actionIdsWithOpenTrays, dataTestSubj, items]);
 
+    // open trays that were open using URL params/ query params
     useEffect(() => {
-      const actionIdsWithDetails = getActionIdsWithDetails();
-      const openDetails = actionIdsWithDetails.reduce<ExpandedRowMapType>(
-        (idToRowMap, actionId) => {
-          idToRowMap[actionId] = (
-            <ActionsLogExpandedTray
-              action={items.filter((item) => item.id === actionId)[0]}
-              data-test-subj={dataTestSubj}
-            />
-          );
-          return idToRowMap;
-        },
-        {}
-      );
-      setItemIdToExpandedRowMap(openDetails);
-    }, [dataTestSubj, getActionIdsWithDetails, items, queryParams.withOutputs, withOutputsFromUrl]);
+      redoOpenTrays();
+    }, [redoOpenTrays]);
 
     const toggleDetails = useCallback(
       (action: ActionListApiResponse['data'][number]) => {
-        const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-        if (itemIdToExpandedRowMapValues[action.id]) {
+        const expandedRowMapCopy = { ...expandedRowMap };
+        if (expandedRowMapCopy[action.id]) {
           // close tray
-          delete itemIdToExpandedRowMapValues[action.id];
+          delete expandedRowMapCopy[action.id];
         } else {
           // assign the expanded tray content to the map
           // with action details
-          itemIdToExpandedRowMapValues[action.id] = (
+          expandedRowMapCopy[action.id] = (
             <ActionsLogExpandedTray action={action} data-test-subj={dataTestSubj} />
           );
         }
-        onShowActionDetails(Object.keys(itemIdToExpandedRowMapValues));
-        setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+        onShowActionDetails(Object.keys(expandedRowMapCopy));
+        setExpandedRowMap(expandedRowMapCopy);
       },
-      [itemIdToExpandedRowMap, onShowActionDetails, dataTestSubj]
+      [expandedRowMap, onShowActionDetails, dataTestSubj]
     );
 
     // memoized callback for toggleDetails
@@ -409,11 +419,11 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
       () =>
         getResponseActionListTableColumns({
           getTestId,
-          itemIdToExpandedRowMap,
+          expandedRowMap,
           onClickCallback,
           showHostNames,
         }),
-      [itemIdToExpandedRowMap, getTestId, onClickCallback, showHostNames]
+      [expandedRowMap, getTestId, onClickCallback, showHostNames]
     );
 
     return (
@@ -425,8 +435,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           items={items}
           columns={columns}
           itemId="id"
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isExpandable
+          itemIdToExpandedRowMap={expandedRowMap}
           pagination={tablePagination}
           onChange={onChange}
           loading={loading}

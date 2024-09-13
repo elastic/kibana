@@ -1,24 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import _ from 'lodash';
+import { isNumber, clamp } from 'lodash';
 
 import { vislibColorMaps, RawColorSchema } from './color_maps';
-
-function enforceBounds(x: number) {
-  if (x < 0) {
-    return 0;
-  } else if (x > 1) {
-    return 1;
-  } else {
-    return x;
-  }
-}
 
 function interpolateLinearly(x: number, values: RawColorSchema['value']) {
   // Split values into four lists
@@ -41,16 +32,15 @@ function interpolateLinearly(x: number, values: RawColorSchema['value']) {
   const r = rValues[i - 1] + scalingFactor * (rValues[i] - rValues[i - 1]);
   const g = gValues[i - 1] + scalingFactor * (gValues[i] - gValues[i - 1]);
   const b = bValues[i - 1] + scalingFactor * (bValues[i] - bValues[i - 1]);
-  return [enforceBounds(r), enforceBounds(g), enforceBounds(b)];
+  return [clamp(r, 0, 1), clamp(g, 0, 1), clamp(b, 0, 1)];
 }
 
 export function getHeatmapColors(value: any, colorSchemaName: string) {
-  if (!_.isNumber(value) || value < 0 || value > 1) {
+  if (!isNumber(value) || value < 0 || value > 1) {
     throw new Error('heatmap_color expects a number from 0 to 1 as first parameter');
   }
 
-  // @ts-ignore
-  const colorSchema = vislibColorMaps[colorSchemaName].value;
+  const colorSchema = vislibColorMaps[colorSchemaName]?.value;
   if (!colorSchema) {
     throw new Error('invalid colorSchemaName provided');
   }
@@ -61,22 +51,3 @@ export function getHeatmapColors(value: any, colorSchemaName: string) {
   const b = Math.round(255 * color[2]);
   return `rgb(${r},${g},${b})`;
 }
-
-function drawColormap(colorSchema: string, width = 100, height = 10) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-
-  if (ctx === null) {
-    throw new Error('no HeatmapColors canvas context found');
-  }
-
-  for (let i = 0; i <= width; i++) {
-    ctx.fillStyle = getHeatmapColors(i / width, colorSchema);
-    ctx.fillRect(i, 0, 1, height);
-  }
-  return canvas;
-}
-
-getHeatmapColors.prototype.drawColormap = drawColormap;

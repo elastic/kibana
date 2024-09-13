@@ -12,7 +12,26 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import type { ActionStatus } from '../../../../../../../common/types';
 
+import { useStartServices, useAuthz } from '../../../../hooks';
+
 import { ViewErrors } from './view_errors';
+
+jest.mock('../../../../hooks', () => {
+  return {
+    ...jest.requireActual('../../../../hooks'),
+    useLink: jest.fn(),
+    useStartServices: jest.fn(),
+    useAuthz: jest.fn(),
+    useDiscoverLocator: jest.fn().mockImplementation(() => {
+      return {
+        id: 'DISCOVER_APP_LOCATOR',
+        getRedirectUrl: jest.fn().mockResolvedValue('app/discover/logs/someview'),
+      };
+    }),
+  };
+});
+
+const mockUseStartServices = useStartServices as jest.Mock;
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
   RedirectAppLinks: (props: any) => {
@@ -20,19 +39,50 @@ jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
   },
 }));
 
-jest.mock('../../../../hooks', () => {
+jest.mock('@kbn/logs-shared-plugin/common', () => {
   return {
-    useStartServices: jest.fn().mockReturnValue({
-      http: {
-        basePath: {
-          prepend: jest.fn().mockImplementation((str) => 'http://localhost' + str),
-        },
-      },
+    getLogsLocatorsFromUrlService: jest.fn().mockReturnValue({
+      logsLocator: { getRedirectUrl: jest.fn(() => 'https://discover-redirect-url') },
     }),
   };
 });
 
+const mockStartServices = (isServerlessEnabled?: boolean) => {
+  mockUseStartServices.mockReturnValue({
+    application: {},
+    data: {
+      query: {
+        timefilter: {
+          timefilter: {
+            calculateBounds: jest.fn().mockReturnValue({
+              min: '2023-10-04T13:08:53.340Z',
+              max: '2023-10-05T13:08:53.340Z',
+            }),
+          },
+        },
+      },
+    },
+    share: {
+      url: {
+        locators: {
+          get: () => ({
+            useUrl: () => 'https://locator.url',
+          }),
+        },
+      },
+    },
+  });
+};
+
 describe('ViewErrors', () => {
+  beforeEach(() => {
+    jest.mocked(useAuthz).mockReturnValue({
+      fleet: {
+        allAgents: true,
+        readAgents: true,
+      },
+    } as any);
+  });
   const renderComponent = (action: ActionStatus) => {
     return render(
       <I18nProvider>
@@ -41,7 +91,8 @@ describe('ViewErrors', () => {
     );
   };
 
-  it('should render error message with btn to logs', () => {
+  it('should render error message with btn to Logs view', () => {
+    mockStartServices();
     const result = renderComponent({
       actionId: 'action1',
       latestErrors: [
@@ -55,10 +106,43 @@ describe('ViewErrors', () => {
 
     const errorText = result.getByTestId('errorText');
     expect(errorText.textContent).toEqual('Agent agent1 is not upgradeable');
+  });
 
-    const viewErrorBtn = result.getByTestId('viewLogsBtn');
-    expect(viewErrorBtn.getAttribute('href')).toEqual(
-      `http://localhost/app/logs/stream?logPosition=(position%3A(time%3A1678114284709)%2CstreamLive%3A!f)&logFilter=(expression%3A'elastic_agent.id%3Aagent1%20and%20(data_stream.dataset%3Aelastic_agent)%20and%20(log.level%3Aerror)'%2Ckind%3Akuery)`
-    );
+  it('should render open in Logs button if correct privileges are set', () => {
+    mockStartServices();
+    const result = renderComponent({
+      actionId: 'action1',
+      latestErrors: [
+        {
+          agentId: 'agent1',
+          error: 'Agent agent1 is not upgradeable',
+          timestamp: '2023-03-06T14:51:24.709Z',
+        },
+      ],
+    } as any);
+
+    const viewErrorBtn = result.getByTestId('viewInLogsBtn');
+    expect(viewErrorBtn.getAttribute('href')).toEqual(`https://discover-redirect-url`);
+  });
+
+  it('should not render open in Logs button if privileges are not set', () => {
+    jest.mocked(useAuthz).mockReturnValue({
+      fleet: {
+        readAgents: false,
+      },
+    } as any);
+    mockStartServices();
+    const result = renderComponent({
+      actionId: 'action1',
+      latestErrors: [
+        {
+          agentId: 'agent1',
+          error: 'Agent agent1 is not upgradeable',
+          timestamp: '2023-03-06T14:51:24.709Z',
+        },
+      ],
+    } as any);
+
+    expect(result.queryByTestId('viewInLogsBtn')).not.toBeInTheDocument();
   });
 });

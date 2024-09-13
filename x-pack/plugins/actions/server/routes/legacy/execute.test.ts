@@ -10,7 +10,7 @@ import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { verifyApiAccess, ActionTypeDisabledError, asHttpRequestExecutionSource } from '../../lib';
-import { actionsClientMock } from '../../actions_client.mock';
+import { actionsClientMock } from '../../actions_client/actions_client.mock';
 import { ActionTypeExecutorResult } from '../../types';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
@@ -170,7 +170,7 @@ describe('executeActionRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });

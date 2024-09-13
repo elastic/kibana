@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import moment from 'moment';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export type CommonlyUsed =
   | 'Today'
@@ -57,6 +58,7 @@ export class TimePickerPageObject extends FtrService {
     });
     if (isVisible) {
       await this.testSubjects.click('noDataPopoverDismissButton');
+      await this.testSubjects.waitForDeleted('noDataPopoverDismissButton');
     }
   }
 
@@ -92,7 +94,9 @@ export class TimePickerPageObject extends FtrService {
    * @param option 'Today' | 'This_week' | 'Last_15 minutes' | 'Last_24 hours' ...
    */
   async setCommonlyUsedTime(option: CommonlyUsed | string) {
+    await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 5000 });
     await this.testSubjects.click('superDatePickerToggleQuickMenuButton');
+    await this.testSubjects.exists(`superDatePickerCommonlyUsed_${option}`, { timeout: 5000 });
     await this.testSubjects.click(`superDatePickerCommonlyUsed_${option}`);
   }
 
@@ -104,6 +108,8 @@ export class TimePickerPageObject extends FtrService {
     } else {
       await this.testSubjects.setValue(dataTestSubj, value);
     }
+
+    await this.testSubjects.pressEnter(dataTestSubj);
   }
 
   private async showStartEndTimes() {
@@ -144,12 +150,10 @@ export class TimePickerPageObject extends FtrService {
     }
     this.log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
     await this.showStartEndTimes();
-    let panel!: WebElementWrapper;
 
     // set to time
     await this.retry.waitFor(`endDate is set to ${toTime}`, async () => {
       await this.testSubjects.click('superDatePickerendDatePopoverButton');
-      panel = await this.getTimePickerPanel();
       await this.testSubjects.click('superDatePickerAbsoluteTab');
       await this.testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
@@ -164,8 +168,6 @@ export class TimePickerPageObject extends FtrService {
     // set from time
     await this.retry.waitFor(`startDate is set to ${fromTime}`, async () => {
       await this.testSubjects.click('superDatePickerstartDatePopoverButton');
-      await this.waitPanelIsGone(panel);
-      panel = await this.getTimePickerPanel();
       await this.testSubjects.click('superDatePickerAbsoluteTab');
       await this.testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
@@ -196,12 +198,11 @@ export class TimePickerPageObject extends FtrService {
       await this.testSubjects.click('querySubmitButton');
     }
 
-    await this.waitPanelIsGone(panel);
     await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   public async isOff() {
-    return await this.find.existsByCssSelector('.euiAutoRefresh .euiFormControlLayout--readOnly');
+    return await this.find.existsByCssSelector('.euiAutoRefresh .euiFormControlLayout-readOnly');
   }
 
   public async getRefreshConfig(keepQuickSelectOpen = false) {

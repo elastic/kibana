@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Logger } from '@kbn/logging';
@@ -16,7 +17,6 @@ import {
   SAVED_OBJECTS_TOTAL_TYPE,
 } from '../saved_objects_types';
 import { serializeKey } from './utils';
-import { fetchAllSavedObjects } from '../fetch_all_saved_objects';
 
 /**
  * Moves all the daily documents into aggregated "total" documents as we don't care about any granularity after 90 days
@@ -29,57 +29,56 @@ export async function rollTotals(logger: Logger, savedObjectsClient?: ISavedObje
   }
 
   try {
-    const [rawApplicationUsageTotals, rawApplicationUsageDaily] = await Promise.all([
-      fetchAllSavedObjects<ApplicationUsageTotal>(savedObjectsClient, {
-        type: SAVED_OBJECTS_TOTAL_TYPE,
-      }),
-      fetchAllSavedObjects<ApplicationUsageDaily>(savedObjectsClient, {
-        type: SAVED_OBJECTS_DAILY_TYPE,
-        filter: `${SAVED_OBJECTS_DAILY_TYPE}.attributes.timestamp < now-90d`,
-      }),
-    ]);
+    const usageTotalsFinder = savedObjectsClient.createPointInTimeFinder<ApplicationUsageTotal>({
+      type: SAVED_OBJECTS_TOTAL_TYPE,
+      perPage: 200,
+    });
+    const existingTotals: Record<
+      string,
+      { appId: string; viewId: string; minutesOnScreen: number; numberOfClicks: number }
+    > = {};
+    for await (const { saved_objects: savedObjects } of usageTotalsFinder.find()) {
+      for (const savedObject of savedObjects) {
+        const {
+          appId,
+          viewId = MAIN_APP_DEFAULT_VIEW_ID,
+          numberOfClicks,
+          minutesOnScreen,
+        } = savedObject.attributes;
 
-    const existingTotals = rawApplicationUsageTotals.reduce(
-      (
-        acc,
-        {
-          attributes: { appId, viewId = MAIN_APP_DEFAULT_VIEW_ID, numberOfClicks, minutesOnScreen },
-        }
-      ) => {
         const key = viewId === MAIN_APP_DEFAULT_VIEW_ID ? appId : serializeKey(appId, viewId);
+        // No need to sum because there should be 1 document per appId only
+        existingTotals[key] = { appId, viewId, numberOfClicks, minutesOnScreen };
+      }
+    }
 
-        return {
-          ...acc,
-          // No need to sum because there should be 1 document per appId only
-          [key]: { appId, viewId, numberOfClicks, minutesOnScreen },
-        };
-      },
-      {} as Record<
-        string,
-        { appId: string; viewId: string; minutesOnScreen: number; numberOfClicks: number }
-      >
-    );
+    const usageDailyFinder = savedObjectsClient.createPointInTimeFinder<ApplicationUsageDaily>({
+      type: SAVED_OBJECTS_DAILY_TYPE,
+      filter: `${SAVED_OBJECTS_DAILY_TYPE}.attributes.timestamp < now-90d`,
+      perPage: 200,
+    });
+    const totals = { ...existingTotals };
+    const usageDailyIdsToDelete: string[] = [];
+    for await (const { saved_objects: savedObjects } of usageDailyFinder.find()) {
+      for (const savedObject of savedObjects) {
+        const {
+          appId,
+          viewId = MAIN_APP_DEFAULT_VIEW_ID,
+          numberOfClicks,
+          minutesOnScreen,
+        } = savedObject.attributes;
+        const key = viewId === MAIN_APP_DEFAULT_VIEW_ID ? appId : serializeKey(appId, viewId);
+        const existing = totals[key] || { minutesOnScreen: 0, numberOfClicks: 0 };
 
-    const totals = rawApplicationUsageDaily.reduce((acc, { attributes }) => {
-      const {
-        appId,
-        viewId = MAIN_APP_DEFAULT_VIEW_ID,
-        numberOfClicks,
-        minutesOnScreen,
-      } = attributes;
-      const key = viewId === MAIN_APP_DEFAULT_VIEW_ID ? appId : serializeKey(appId, viewId);
-      const existing = acc[key] || { minutesOnScreen: 0, numberOfClicks: 0 };
-
-      return {
-        ...acc,
-        [key]: {
+        totals[key] = {
           appId,
           viewId,
           numberOfClicks: numberOfClicks + existing.numberOfClicks,
           minutesOnScreen: minutesOnScreen + existing.minutesOnScreen,
-        },
-      };
-    }, existingTotals);
+        };
+        usageDailyIdsToDelete.push(savedObject.id);
+      }
+    }
 
     await Promise.all([
       Object.entries(totals).length &&
@@ -91,8 +90,8 @@ export async function rollTotals(logger: Logger, savedObjectsClient?: ISavedObje
           })),
           { overwrite: true }
         ),
-      ...rawApplicationUsageDaily.map(
-        ({ id }) => savedObjectsClient.delete(SAVED_OBJECTS_DAILY_TYPE, id) // There is no bulkDelete :(
+      savedObjectsClient.bulkDelete(
+        usageDailyIdsToDelete.map((id) => ({ id, type: SAVED_OBJECTS_DAILY_TYPE }))
       ),
     ]);
   } catch (err) {

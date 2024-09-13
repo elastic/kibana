@@ -25,11 +25,14 @@ describe('license features', function () {
       allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRoleRemoteIndexPrivileges: false,
+      allowRemoteClusterPrivileges: false,
       layout: 'error-es-unavailable',
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
       allowUserProfileCollaboration: false,
+      allowFips: false,
     });
   });
 
@@ -48,11 +51,14 @@ describe('license features', function () {
       allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRoleRemoteIndexPrivileges: false,
+      allowRemoteClusterPrivileges: false,
       layout: 'error-xpack-unavailable',
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
       allowUserProfileCollaboration: false,
+      allowFips: false,
     });
   });
 
@@ -74,10 +80,13 @@ describe('license features', function () {
           Object {
             "allowAccessAgreement": false,
             "allowAuditLogging": false,
+            "allowFips": false,
             "allowLogin": false,
             "allowRbac": false,
+            "allowRemoteClusterPrivileges": false,
             "allowRoleDocumentLevelSecurity": false,
             "allowRoleFieldLevelSecurity": false,
+            "allowRoleRemoteIndexPrivileges": false,
             "allowSubFeaturePrivileges": false,
             "allowUserProfileCollaboration": false,
             "layout": "error-xpack-unavailable",
@@ -96,10 +105,13 @@ describe('license features', function () {
           Object {
             "allowAccessAgreement": true,
             "allowAuditLogging": true,
+            "allowFips": true,
             "allowLogin": true,
             "allowRbac": true,
+            "allowRemoteClusterPrivileges": true,
             "allowRoleDocumentLevelSecurity": true,
             "allowRoleFieldLevelSecurity": true,
+            "allowRoleRemoteIndexPrivileges": true,
             "allowSubFeaturePrivileges": true,
             "allowUserProfileCollaboration": true,
             "showLinks": true,
@@ -132,10 +144,13 @@ describe('license features', function () {
       allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRoleRemoteIndexPrivileges: false,
+      allowRemoteClusterPrivileges: false,
       allowRbac: true,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
       allowUserProfileCollaboration: false,
+      allowFips: false,
     });
     expect(getFeatureSpy).toHaveBeenCalledTimes(1);
     expect(getFeatureSpy).toHaveBeenCalledWith('security');
@@ -158,10 +173,13 @@ describe('license features', function () {
       allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRoleRemoteIndexPrivileges: false,
+      allowRemoteClusterPrivileges: false,
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
       allowUserProfileCollaboration: false,
+      allowFips: false,
     });
   });
 
@@ -183,10 +201,13 @@ describe('license features', function () {
       allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRoleRemoteIndexPrivileges: false,
+      allowRemoteClusterPrivileges: false,
       allowRbac: true,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
       allowUserProfileCollaboration: true,
+      allowFips: false,
     });
   });
 
@@ -208,10 +229,13 @@ describe('license features', function () {
       allowAccessAgreement: true,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
+      allowRoleRemoteIndexPrivileges: false,
+      allowRemoteClusterPrivileges: false,
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
       allowUserProfileCollaboration: true,
+      allowFips: false,
     });
   });
 
@@ -233,10 +257,13 @@ describe('license features', function () {
       allowAccessAgreement: true,
       allowRoleDocumentLevelSecurity: true,
       allowRoleFieldLevelSecurity: true,
+      allowRoleRemoteIndexPrivileges: true,
+      allowRemoteClusterPrivileges: true,
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
       allowUserProfileCollaboration: true,
+      allowFips: true,
     });
   });
 });

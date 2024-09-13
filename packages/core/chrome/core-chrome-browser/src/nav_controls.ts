@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Observable } from 'rxjs';
@@ -13,6 +14,15 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 export interface ChromeNavControl {
   order?: number;
   mount: MountPoint;
+}
+
+/** @public */
+export interface ChromeHelpMenuLink {
+  title: string;
+  href?: string;
+  iconType?: string;
+  onClick?: () => void;
+  dataTestSubj?: string;
 }
 
 /**
@@ -44,6 +54,9 @@ export interface ChromeNavControls {
   /** Register an extension to be presented to the left of the top-right side of the chrome header. */
   registerExtension(navControl: ChromeNavControl): void;
 
+  /** Set the help menu links */
+  setHelpMenuLinks(links: ChromeHelpMenuLink[]): void;
+
   /** @internal */
   getLeft$(): Observable<ChromeNavControl[]>;
 
@@ -55,4 +68,7 @@ export interface ChromeNavControls {
 
   /** @internal */
   getExtension$(): Observable<ChromeNavControl[]>;
+
+  /** @internal */
+  getHelpMenuLinks$(): Observable<ChromeHelpMenuLink[]>;
 }

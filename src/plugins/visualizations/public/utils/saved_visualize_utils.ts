@@ -1,20 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
-import type {
-  SavedObjectsFindOptionsReference,
-  SavedObjectsFindOptions,
-  SavedObjectsClientContract,
-  SavedObjectAttributes,
-  SavedObjectReference,
-} from '@kbn/core/public';
-import type { OverlayStart } from '@kbn/core/public';
+import type { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import {
   extractSearchSourceReferences,
@@ -24,6 +18,7 @@ import {
 } from '@kbn/data-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { VisualizationSavedObject, Reference } from '../../common/content_management';
 import { saveWithConfirmation, checkForDuplicateTitle } from './saved_objects_utils';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type {
@@ -32,12 +27,15 @@ import type {
   ISavedVis,
   SaveVisOptions,
   GetVisOptions,
+  StartServices,
 } from '../types';
 import type { TypesStart, BaseVisType } from '../vis_types';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
 import { injectReferences, extractReferences } from './saved_visualization_references';
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from './saved_objects_utils/constants';
+import { visualizationsClient } from '../content_management';
+import { VisualizationSavedObjectAttributes } from '../../common';
 
 export const SAVED_VIS_TYPE = 'visualization';
 
@@ -65,30 +63,35 @@ export function mapHitSource(
     id,
     references,
     updatedAt,
+    managed,
   }: {
     attributes: SavedObjectAttributes;
     id: string;
     references: SavedObjectReference[];
     updatedAt?: string;
+    managed?: boolean;
   }
 ) {
   const newAttributes: {
     id: string;
     references: SavedObjectReference[];
+    managed?: boolean;
     url: string;
     savedObjectType?: string;
-    editUrl?: string;
+    editor?: { editUrl?: string };
     updatedAt?: string;
     type?: BaseVisType;
     icon?: BaseVisType['icon'];
     image?: BaseVisType['image'];
     typeTitle?: BaseVisType['title'];
     error?: string;
+    readOnly?: boolean;
   } = {
     id,
     references,
     url: urlFor(id),
     updatedAt,
+    managed,
     ...attributes,
   };
 
@@ -111,7 +114,8 @@ export function mapHitSource(
   newAttributes.icon = newAttributes.type?.icon;
   newAttributes.image = newAttributes.type?.image;
   newAttributes.typeTitle = newAttributes.type?.title;
-  newAttributes.editUrl = `/edit/${id}`;
+  newAttributes.editor = { editUrl: `/edit/${id}` };
+  newAttributes.readOnly = Boolean(visTypes.get(typeName as string)?.disableEdit);
 
   return newAttributes;
 }
@@ -154,12 +158,11 @@ export const convertFromSerializedVis = (vis: SerializedVis): ISavedVis => {
 };
 
 export async function findListItems(
-  savedObjectsClient: SavedObjectsClientContract,
   visTypes: Pick<TypesStart, 'get' | 'getAliases'>,
   search: string,
   size: number,
-  references?: SavedObjectsFindOptionsReference[],
-  referencesToExclude?: SavedObjectsFindOptionsReference[]
+  references?: SavedObjectReference[],
+  referencesToExclude?: SavedObjectReference[]
 ) {
   const visAliases = visTypes.getAliases();
   const extensions = visAliases
@@ -173,29 +176,33 @@ export async function findListItems(
   }, {} as { [visType: string]: VisualizationsAppExtension });
   const searchOption = (field: string, ...defaults: string[]) =>
     _(extensions).map(field).concat(defaults).compact().flatten().uniq().value() as string[];
-  const searchOptions: SavedObjectsFindOptions = {
-    type: searchOption('docTypes', 'visualization'),
-    searchFields: searchOption('searchFields', 'title^3', 'description'),
-    search: search ? `${search}*` : undefined,
-    perPage: size,
-    page: 1,
-    defaultSearchOperator: 'AND' as 'AND',
-    hasReference: references,
-    hasNoReference: referencesToExclude,
-  };
 
-  const { total, savedObjects } = await savedObjectsClient.find<SavedObjectAttributes>(
-    searchOptions
+  const {
+    hits: savedObjects,
+    pagination: { total },
+  } = await visualizationsClient.search(
+    {
+      text: search ? `${search}*` : undefined,
+      limit: size,
+      tags: {
+        included: references?.map((r) => r.id),
+        excluded: referencesToExclude?.map((r) => r.id),
+      },
+    },
+    {
+      types: searchOption('docTypes', 'visualization'),
+      searchFields: searchOption('searchFields', 'title^3', 'description'),
+    }
   );
 
   return {
     total,
-    hits: savedObjects.map((savedObject) => {
+    hits: savedObjects.map((savedObject: VisualizationSavedObject) => {
       const config = extensionByType[savedObject.type];
 
       if (config) {
         return {
-          ...config.toListItem(savedObject),
+          ...config.toListItem(savedObject as any),
           references: savedObject.references,
         };
       } else {
@@ -206,8 +213,7 @@ export async function findListItems(
 }
 
 export async function getSavedVisualization(
-  services: {
-    savedObjectsClient: SavedObjectsClientContract;
+  services: StartServices & {
     search: DataPublicPluginStart['search'];
     dataViews: DataPublicPluginStart['dataViews'];
     spaces?: SpacesPluginStart;
@@ -218,7 +224,6 @@ export async function getSavedVisualization(
   if (typeof opts !== 'object') {
     opts = { id: opts } as GetVisOptions;
   }
-
   const id = (opts.id as string) || '';
   const savedObject = {
     id,
@@ -227,6 +232,7 @@ export async function getSavedVisualization(
     getEsType: () => SAVED_VIS_TYPE,
     getDisplayName: () => SAVED_VIS_TYPE,
     searchSource: opts.searchSource ? services.search.searchSource.createEmpty() : undefined,
+    managed: false,
   } as VisSavedObject;
   const defaultsProps = getDefaults(opts);
 
@@ -236,13 +242,11 @@ export async function getSavedVisualization(
   }
 
   const {
-    saved_object: resp,
-    outcome,
-    alias_target_id: aliasTargetId,
-    alias_purpose: aliasPurpose,
-  } = await services.savedObjectsClient.resolve<SavedObjectAttributes>(SAVED_VIS_TYPE, id);
+    item: resp,
+    meta: { outcome, aliasTargetId, aliasPurpose },
+  } = await visualizationsClient.get(id);
 
-  if (!resp._version) {
+  if (!resp.id) {
     throw new SavedObjectNotFound(SAVED_VIS_TYPE, id || '');
   }
 
@@ -257,6 +261,7 @@ export async function getSavedVisualization(
 
   Object.assign(savedObject, attributes);
   savedObject.lastSavedTitle = savedObject.title;
+  savedObject.managed = Boolean(resp.managed);
 
   savedObject.sharingSavedObjectProps = {
     aliasTargetId,
@@ -272,9 +277,10 @@ export async function getSavedVisualization(
         : undefined,
   };
 
-  const meta = (attributes.kibanaSavedObjectMeta || {}) as SavedObjectAttributes;
+  const meta: VisualizationSavedObjectAttributes['kibanaSavedObjectMeta'] =
+    attributes.kibanaSavedObjectMeta;
 
-  if (meta.searchSourceJSON) {
+  if (meta && meta.searchSourceJSON) {
     try {
       let searchSourceValues = parseSearchSourceJSON(meta.searchSourceJSON as string);
 
@@ -300,7 +306,7 @@ export async function getSavedVisualization(
     savedObject.tags = services.savedObjectsTagging.ui.getTagIdsFromReferences(resp.references);
   }
 
-  savedObject.visState = await updateOldState(savedObject.visState);
+  savedObject.visState = updateOldState(savedObject.visState);
 
   return savedObject;
 }
@@ -313,11 +319,10 @@ export async function saveVisualization(
     onTitleDuplicate,
     copyOnSave = false,
   }: SaveVisOptions,
-  services: {
-    savedObjectsClient: SavedObjectsClientContract;
-    overlays: OverlayStart;
+  services: StartServices & {
     savedObjectsTagging?: SavedObjectsTaggingApi;
-  }
+  },
+  baseReferences: Reference[] = []
 ) {
   // Save the original id in case the save fails.
   const originalId = savedObject.id;
@@ -331,15 +336,17 @@ export async function saveVisualization(
     delete savedObject.id;
   }
 
-  const attributes: SavedObjectAttributes = {
+  const attributes = {
     visState: JSON.stringify(savedObject.visState),
     title: savedObject.title,
     uiStateJSON: savedObject.uiStateJSON,
     description: savedObject.description,
     savedSearchId: savedObject.savedSearchId,
-    version: savedObject.version,
+    savedSearchRefName: savedObject.savedSearchRefName,
+    version: savedObject.version ?? '1',
+    kibanaSavedObjectMeta: {},
   };
-  let references: SavedObjectReference[] = [];
+  let references: SavedObjectReference[] = baseReferences;
 
   if (savedObject.searchSource) {
     const { searchSourceJSON, references: searchSourceReferences } =
@@ -376,21 +383,37 @@ export async function saveVisualization(
       copyOnSave,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
-      services as any
+      services
     );
     const createOpt = {
-      id: savedObject.id,
       migrationVersion: savedObject.migrationVersion,
       references: extractedRefs.references,
     };
+
     const resp = confirmOverwrite
       ? await saveWithConfirmation(attributes, savedObject, createOpt, services)
-      : await services.savedObjectsClient.create(SAVED_VIS_TYPE, extractedRefs.attributes, {
-          ...createOpt,
-          overwrite: true,
+      : savedObject.id
+      ? await visualizationsClient.update({
+          id: savedObject.id,
+          data: {
+            ...(extractedRefs.attributes as VisualizationSavedObjectAttributes),
+          },
+          options: {
+            overwrite: true,
+            references: extractedRefs.references,
+          },
+        })
+      : await visualizationsClient.create({
+          data: {
+            ...(extractedRefs.attributes as VisualizationSavedObjectAttributes),
+          },
+          options: {
+            overwrite: true,
+            references: extractedRefs.references,
+          },
         });
 
-    savedObject.id = resp.id;
+    savedObject.id = resp.item.id;
     savedObject.lastSavedTitle = savedObject.title;
     return savedObject.id;
   } catch (err: any) {

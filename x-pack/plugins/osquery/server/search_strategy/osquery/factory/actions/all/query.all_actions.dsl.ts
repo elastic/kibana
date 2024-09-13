@@ -7,21 +7,23 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
+import type { AgentsRequestOptions } from '../../../../../../common/search_strategy/osquery/agents';
+import { getQueryFilter } from '../../../../../utils/build_query';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
-import type { AgentsRequestOptions } from '../../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
 
 export const buildActionsQuery = ({
-  filterQuery,
+  kuery = '',
   sort,
   pagination: { cursorStart, querySize },
   componentTemplateExists,
 }: AgentsRequestOptions): ISearchRequestParams => {
-  const filter = [...createQueryFilterClauses(filterQuery)];
+  const {
+    bool: { filter },
+  } = getQueryFilter({ filter: kuery });
 
-  const dslQuery = {
+  return {
     allow_no_indices: true,
     index: componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
@@ -60,6 +62,4 @@ export const buildActionsQuery = ({
       ],
     },
   };
-
-  return dslQuery;
 };

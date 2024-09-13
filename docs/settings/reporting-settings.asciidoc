@@ -4,22 +4,24 @@
 ++++
 <titleabbrev>Reporting settings</titleabbrev>
 ++++
-:keywords: administrator, reference, setup, reporting
-:description: A reference of the reporting settings administrators configure in kibana.yml.
+
+:frontmatter-description: A reference of the reporting settings administrators configure in kibana.yml.
+:frontmatter-tags-products: [kibana]
+:frontmatter-tags-content-type: [reference]
+:frontmatter-tags-user-goals: [configure]
 
 You can configure `xpack.reporting` settings in your `kibana.yml` to:
 
-* <<general-reporting-settings,Enable the {report-features}>>
-* <<encryption-keys,Configure the encryption key>>
-* <<reporting-job-queue-settings,Manage background jobs>>
-* <<reporting-capture-settings,Capture screenshots>>
-* <<reporting-network-policy,Restrict requests with a Reporting network policy>>
-* <<reporting-csv-settings,Increase the byte limit for CSV exports>>
-* <<reporting-kibana-server-settings,Control how the {report-features} communicate with the {kib} server>>
+* <<general-reporting-settings,Enable or disable the {report-features}>>
+* <<encryption-keys,Configure an encryption key to protect sensitive authentication data>>
+* <<reporting-advanced-settings,Choose an access control model of how users will be granted privileges to {report-features}>>
+* <<reporting-job-queue-settings,Manage the way reporting tasks run in the {kib} server background>>
+* <<reporting-capture-settings,Control how screenshots are captured for PNG/PDF reports>>
+* <<reporting-csv-settings,Control the limits and capabilities of CSV reports>>
 
 [float]
 [[general-reporting-settings]]
-==== Enable reporting
+=== Enable reporting
 
 [[xpack-enable-reporting]]`xpack.reporting.enabled` {ess-icon}::
 When `true`, enables the {report-features}. Set this to `false` to disable {report-features} entirely. The default is `true`.
@@ -35,7 +37,7 @@ If needed, you can also prevent a {kib} instance from claiming reporting work by
 
 [float]
 [[encryption-keys]]
-==== Encryption key setting
+=== Encryption key setting
 
 By default, an encryption key is generated for the {report-features} each
 time you start {kib}. If a static encryption key is not persisted in
@@ -56,18 +58,48 @@ xpack.reporting.encryptionKey: "something_secret"
 --------------------------------------------------------------------------------
 
 [float]
-[[reporting-job-queue-settings]]
-==== Background job settings
+[[reporting-advanced-settings]]
+=== Security settings
 
-Reporting generates reports in the background and jobs are coordinated using documents
-in {es}. Depending on how often you generate reports and the overall number of
-reports, you might need to change the following settings.
+Reporting has two forms of access control: each user can only access their own reports,
+and custom roles determine who has the privilege to generate reports. When Reporting is configured with
+<<kibana-privileges, {kib} application privileges>>, you can control the spaces and applications where users
+are allowed to generate reports.
+
+[NOTE]
+============================================================================
+The `xpack.reporting.roles` settings are for a deprecated system of access control in Reporting. Turning off
+this feature allows API keys to generate reports, and allows reporting access through {kib} application
+privileges. We recommend that you explicitly turn off reporting's deprecated access control feature by adding
+`xpack.reporting.roles.enabled: false` to kibana.yml. This will enable you to create custom roles that provide
+application privileges for reporting, as described in <<grant-user-access, granting users access to
+reporting>>.
+============================================================================
+
+[[xpack-reporting-roles-enabled]] `xpack.reporting.roles.enabled`::
+deprecated:[7.14.0,The default for this setting will be `false` in an upcoming version of {kib}.] Sets access
+control to a set of assigned reporting roles, specified by `xpack.reporting.roles.allow`. Defaults to `true`.
+
+`xpack.reporting.roles.allow`::
+deprecated:[7.14.0] In addition to superusers, specifies the roles that can generate reports using the
+{ref}/security-api.html#security-role-apis[{es} role management APIs]. Requires `xpack.reporting.roles.enabled`
+to be `true`. Defaults to `[ "reporting_user" ]`.
+
+[float]
+[[reporting-job-queue-settings]]
+=== Background job settings
+
+Reporting generates reports on the {kib} server as background tasks, and jobs are coordinated using documents
+in {es}. Depending on how often you generate reports and the overall number of reports, you might need to
+change the following settings.
 
 `xpack.reporting.capture.maxAttempts` {ess-icon}::
 If capturing a report fails for any reason, {kib} will re-queue the report job for retry, as many times as this setting. Defaults to `3`.
 
 `xpack.reporting.queue.indexInterval`::
-How often the index that stores reporting jobs rolls over to a new index. Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`.
+deprecated:[8.15.0,This setting has no effect.] How often Reporting creates a new index to store report jobs and file contents.
+Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`.
+*NOTE*: This setting exists for backwards compatibility, but is unused. Use the built-in ILM policy provided for the reporting plugin to customize the rollover of Reporting data.
 
 [[xpack-reportingQueue-pollEnabled]] `xpack.reporting.queue.pollEnabled` ::
 When `true`, enables the {kib} instance to poll {es} for pending jobs and claim them for
@@ -80,18 +112,25 @@ reporting requires identical values for <<xpack-reporting-encryptionKey, `xpack.
 security is enabled, <<xpack-security-encryptionKey, `xpack.security.encryptionKey`>>.
 
 `xpack.reporting.queue.pollInterval`::
-Specifies the {time-units}[time] that the reporting poller waits between polling the index for any pending Reporting jobs. Can be specified as number of milliseconds. Defaults to `3s`.
+Specifies the {time-units}[time] that the reporting poller waits between polling the index for any pending Reporting jobs. Can be specified as a number of milliseconds. Defaults to `3s`.
 
 [[xpack-reporting-q-timeout]] `xpack.reporting.queue.timeout` {ess-icon}::
 {time-units}[How long] each worker has to produce a report. If your machine is slow or under heavy load, you
 might need to increase this timeout. If a Reporting job execution goes over this time limit, the job is marked
-as a failure and no download will be available. Can be specified as number of milliseconds. Defaults to `4m`.
+as a failure and no download will be available. Can be specified as a number of milliseconds. Defaults to `4m`.
 
 [float]
 [[reporting-capture-settings]]
-==== Capture settings
+=== PNG/PDF settings
 
-Reporting uses an internal "screenshotting" plugin to capture screenshots from {kib}. The following settings control the capturing process.
+[NOTE]
+============
+include::../user/reporting/reporting-pdf-limitations.asciidoc[]
+============
+
+To generate PDF and PNG files, Reporting uses an internal "screenshotting" plugin which manages a headless browser that captures screenshots from {kib}.
+
+The following settings control the capturing process.
 
 `xpack.screenshotting.capture.timeouts.openUrl` {ess-icon}::
 Specify the {time-units}[time] to allow the Reporting browser to wait for the "Loading..." screen to dismiss
@@ -118,7 +157,7 @@ deprecated:[8.0.0,This setting has no effect.] Specify the {time-units}[amount o
 
 [float]
 [[reporting-chromium-settings]]
-==== Chromium settings
+==== Chromium headless browser settings
 
 For PDF and PNG reports, Reporting spawns a headless Chromium browser process on the server to load and capture a screenshot of the {kib} app. When installing {kib} on Linux and Windows platforms, the Chromium binary comes bundled with the {kib} download. For Mac platforms, the Chromium binary is downloaded the first time {kib} is started.
 
@@ -135,12 +174,35 @@ The uri for the proxy server. Providing the username and password for the proxy 
 An array of hosts that should not go through the proxy server and should use a direct connection instead. Examples of valid entries are "elastic.co", "*.elastic.co", ".elastic.co", ".elastic.co:5601".
 
 [float]
+[[reporting-kibana-server-settings]]
+==== {kib} server settings for headless browser connection
+
+To generate screenshots for PNG and PDF reports, Reporting opens the {kib} web interface using a local
+connection to the server. In most cases, using a local connection to the {kib} server presents no issue. If
+you prefer the headless browser to connect to {kib} using a specific hostname, there are a number of
+settings that allow the headless browser to connect to {kib} through a proxy, rather than directly.
+
+[NOTE]
+============
+The `xpack.reporting.kibanaServer` settings are optional. Take caution when editing these settings. Adding
+these settings can cause the PDF/PNG {report-features} to fail. If reports fail, inspect the server logs and
+pay attention to errors regarding the headless browser being unable to connect to the server. The full {kib}
+URL that Reporting is attempting to open is logged during report execution.
+============
+
+`xpack.reporting.kibanaServer.port`:: The port for accessing {kib}.
+
+`xpack.reporting.kibanaServer.protocol`:: The protocol for accessing {kib}, typically `http` or `https`.
+
+[[xpack-kibanaServer-hostname]] `xpack.reporting.kibanaServer.hostname`:: The hostname for accessing {kib}.
+
+[float]
 [[reporting-network-policy]]
-=== Network policy settings
+==== Network policy settings for headless Chromium restrictions
 
-To generate PDF reports, *Reporting* uses the Chromium browser to fully load the {kib} page on the server. This potentially involves sending requests to external hosts. For example, a request might go to an external image server to show a field formatted as an image, or to show an image in a Markdown visualization.
+To generate PDF reports, Reporting uses a headless Chromium browser to fully load the {kib} page on the server. This potentially involves sending requests to external hosts. For example, a request might go to an external image server to show a field formatted as an image, or to show an image in a Markdown visualization.
 
-If the Chromium browser is asked to send a request that violates the network policy, *Reporting* stops processing the page before the request goes out, and the report is marked as a failure. Additional information about the event is in the {kib} server logs.
+If the headless Chromium browser is asked to send a request that violates the network policy, it will stop processing the page before the request goes out, and the report is marked as a failure. Additional information about the event is in the {kib} server logs.
 
 NOTE: {kib} installations are not designed to be publicly accessible over the internet. The Reporting network policy and other capabilities of the Elastic Stack security features do not change this condition.
 
@@ -148,7 +210,7 @@ NOTE: {kib} installations are not designed to be publicly accessible over the in
 Capturing a screenshot from a {kib} page involves sending out requests for all the linked web assets. For example, a Markdown visualization can show an image from a remote server.
 
 `xpack.screenshotting.networkPolicy.enabled`::
-When `false`, disables the *Reporting* network policy. Defaults to `true`.
+When `false`, disables the headless browser network policy. Defaults to `true`.
 
 `xpack.screenshotting.networkPolicy.rules`::
 A policy is specified as an array of objects that describe what to allow or deny based on a host or protocol. If a host or protocol is not specified, the rule matches any host or protocol.
@@ -197,29 +259,42 @@ The `file:` protocol is always denied, even if no network policy is configured.
 
 [float]
 [[reporting-csv-settings]]
-==== CSV settings
-
-[[xpack-reporting-csv]] `xpack.reporting.csv.maxSizeBytes` {ess-icon}::
-The maximum {byte-units}[byte size] of a CSV file before being truncated. This setting exists to prevent large exports from causing performance and storage issues. Can be specified as number of bytes. Defaults to `10mb`.
+=== CSV settings
 
 [NOTE]
 ============
-Setting `xpack.reporting.csv.maxSizeBytes` much larger than the default 10 MB limit has the potential to negatively affect the
-performance of {kib} and your {es} cluster. There is no enforced maximum for this setting, but a reasonable maximum value depends
-on multiple factors:
-
-* The `http.max_content_length` setting in {es}.
-* Network proxies, which are often configured by default to block large requests with a 413 error.
-* The amount of memory available to the {kib} server, which limits the size of CSV data that must be held temporarily.
-
-For information about {kib} memory limits, see <<production, using {kib} in a production environment>>.
+include::../user/reporting/reporting-csv-limitations.asciidoc[]
 ============
+
+[[xpack-reporting-csv]] `xpack.reporting.csv.maxSizeBytes` {ess-icon}::
+The maximum {byte-units}[byte size] of a CSV file before being truncated. This setting exists to prevent large
+exports from causing performance and storage issues. Can be specified as a number of bytes. Defaults to `250mb`.
 
 `xpack.reporting.csv.scroll.size`::
 Number of documents retrieved from {es} for each scroll iteration during a CSV export. Defaults to `500`.
+[NOTE]
+============
+You may need to lower this setting if the default number of documents creates a strain on network resources.
+============
 
 `xpack.reporting.csv.scroll.duration`::
- Amount of {time-units}[time] allowed before {kib} cleans the scroll context during a CSV export. Defaults to `30s`.
+Amount of {time-units}[time] allowed before {kib} cleans the scroll context during a CSV export. Valid option is either `auto` or {time-units}[time], Defaults to `30s`.
+
+[NOTE]
+============
+If search latency in {es} is sufficiently high, such as if you are using {ccs}, you may either need to increase the time setting or set this config value to `auto`. When the config value is set to `auto` the scroll context will be preserved for as long as possible, before the report task is terminated due to the limits of `xpack.reporting.queue.timeout`.
+============
+
+`xpack.reporting.csv.scroll.strategy`::
+Choose the API method used to page through data during CSV export. Valid options are `scroll` and `pit`. Defaults to `pit`.
+
+[NOTE]
+============
+Each method has its own unique limitations which are important to understand.
+
+* Scroll API: Search is limited to 500 shards at the very most. In cases where data shards are unavailable or time out, the export may return partial data.
+* PIT API: Permissions to read data aliases alone will not work: the permissions are needed on the underlying indices or datastreams. In cases where data shards are unavailable or time out, the export will be empty rather than returning partial data.
+============
 
 `xpack.reporting.csv.checkForFormulas`::
 Enables a check that warns you when there's a potential formula included in the output (=, -, +, and @ chars). See OWASP: https://www.owasp.org/index.php/CSV_Injection. Defaults to `true`.
@@ -228,47 +303,10 @@ Enables a check that warns you when there's a potential formula included in the 
 Escape formula values in cells with a `'`. See OWASP: https://www.owasp.org/index.php/CSV_Injection. Defaults to `true`.
 
 `xpack.reporting.csv.enablePanelActionDownload`::
-deprecated:[7.9.0,This setting has no effect.] Enables CSV export from a saved search on a dashboard. This action is available in the dashboard panel menu for the saved search. *NOTE*: This setting exists for backwards compatibility, but is unused and hardcoded to `true`. CSV export from a saved search on a dashboard is enabled when Reporting is enabled.
+deprecated:[8.14.0,This setting will be removed in an upcoming version of {kib}.] When `true`, this
+setting enables a deprecated feature which allows users to download a CSV export from a saved search
+panel on a dashboard. When `false`, users can generate regular CSV reports from a saved search panel on a
+dashboard and later download them in *Stack Management > Reporting*. Defaults to `false`.
 
 `xpack.reporting.csv.useByteOrderMarkEncoding`::
 Adds a byte order mark (`\ufeff`) at the beginning of the CSV file. Defaults to `false`.
-
-[float]
-[[reporting-advanced-settings]]
-==== Security settings
-
-With Security enabled, Reporting has two forms of access control: each user can only access their own reports, and custom roles determine who has privilege to generate reports. When Reporting is configured with <<kibana-privileges, {kib} application privileges>>, you can control the spaces and applications where users are allowed to generate reports.
-
-[NOTE]
-============================================================================
-The `xpack.reporting.roles` settings are for a deprecated system of access control in Reporting. Turning off this feature allows API Keys to generate reports, and allows reporting access through {kib} application privileges. We recommend you explicitly turn off reporting's deprecated access control feature by adding `xpack.reporting.roles.enabled: false` in kibana.yml. This will enable you to create custom roles that provide application privileges for reporting, as described in <<grant-user-access, granting users access to reporting>>.
-============================================================================
-
-[[xpack-reporting-roles-enabled]] `xpack.reporting.roles.enabled`::
-deprecated:[7.14.0,The default for this setting will be `false` in an upcoming version of {kib}.] Sets access control to a set of assigned reporting roles, specified by `xpack.reporting.roles.allow`. Defaults to `true`.
-
-`xpack.reporting.roles.allow`::
-deprecated:[7.14.0] In addition to superusers, specifies the roles that can generate reports using the {ref}/security-api.html#security-role-apis[{es} role management APIs]. Requires `xpack.reporting.roles.enabled` to be `true`. Defaults to `[ "reporting_user" ]`.
-
-[float]
-[[reporting-kibana-server-settings]]
-==== {kib} server settings
-
-To generate screenshots for PNG and PDF reports, Reporting opens the {kib} web interface using a local
-connection on the server. In most cases, using a local connection to the {kib} server presents no issue. If
-you prefer the headless browser to connect to {kib} using a specific hostname, there are a number of
-settings that allow the headless browser to connect to {kib} through a proxy, rather than directly.
-
-[NOTE]
-============
-The `xpack.reporting.kibanaServer` settings are optional. Take caution when editing these settings. Adding
-these settings can cause the {report-features} to fail. If report fail,
-inspect the server logs. The full {kib} URL that Reporting is attempting to
-  open is logged during report execution.
-============
-
-`xpack.reporting.kibanaServer.port`:: The port for accessing {kib}.port`>> value.
-
-`xpack.reporting.kibanaServer.protocol`:: The protocol for accessing {kib}, typically `http` or `https`.
-
-[[xpack-kibanaServer-hostname]] `xpack.reporting.kibanaServer.hostname`:: The hostname for accessing {kib}.

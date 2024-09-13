@@ -9,10 +9,12 @@
 
 import { FeatureCollection } from 'geojson';
 import type { Query } from '@kbn/es-query';
+import type { ESQLColumn } from '@kbn/es-types';
 import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
   AGG_TYPE,
   GRID_RESOLUTION,
+  MASK_OPERATOR,
   RENDER_AS,
   SCALING_TYPES,
   MVT_FIELD_TYPE,
@@ -36,6 +38,30 @@ export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
   tooltipProperties: string[];
 };
 
+export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
+  /*
+   * Source UUID
+   */
+  id: string;
+  esql: string;
+  columns: ESQLColumn[];
+  dataViewId: string;
+  /*
+   * Date field used to narrow ES|QL requests by global time range
+   */
+  dateField?: string;
+  /*
+   * Geo field used to narrow ES|QL requests by
+   * 1. by visible map area
+   * 2. spatial filters drawn on map
+   */
+  geoField?: string;
+  narrowByGlobalSearch: boolean;
+  narrowByGlobalTime: boolean;
+  narrowByMapBounds: boolean;
+  applyForceRefresh: boolean;
+};
+
 export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
   // id: UUID
   id: string;
@@ -49,6 +75,10 @@ export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
 type AbstractAggDescriptor = {
   type: AGG_TYPE;
   label?: string;
+  mask?: {
+    operator: MASK_OPERATOR;
+    value: number;
+  };
 };
 
 export type CountAggDescriptor = AbstractAggDescriptor & {
@@ -86,8 +116,10 @@ export type ESGeoGridSourceDescriptor = AbstractESAggSourceDescriptor & {
 
 export type ESGeoLineSourceDescriptor = AbstractESAggSourceDescriptor & {
   geoField: string;
-  splitField: string;
-  sortField: string;
+  groupByTimeseries: boolean;
+  lineSimplificationSize: number;
+  splitField?: string;
+  sortField?: string;
 };
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
@@ -97,6 +129,7 @@ export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   sortField: string;
   sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
+  topHitsGroupByTimeseries: boolean;
   topHitsSplitField: string;
   topHitsSize: number;
 };
@@ -106,9 +139,18 @@ export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
   destGeoField: string;
 };
 
-export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
-  term: string; // term field name
+export type AbstractESJoinSourceDescriptor = AbstractESAggSourceDescriptor & {
   whereQuery?: Query;
+};
+
+export type ESDistanceSourceDescriptor = AbstractESJoinSourceDescriptor & {
+  distance: number; // km
+  geoField: string;
+  type: SOURCE_TYPES.ES_DISTANCE_SOURCE;
+};
+
+export type ESTermSourceDescriptor = AbstractESJoinSourceDescriptor & {
+  term: string; // term field name
   size?: number;
   type: SOURCE_TYPES.ES_TERM_SOURCE;
 };
@@ -178,4 +220,7 @@ export type TableSourceDescriptor = {
   term: string;
 };
 
-export type TermJoinSourceDescriptor = ESTermSourceDescriptor | TableSourceDescriptor;
+export type JoinSourceDescriptor =
+  | ESDistanceSourceDescriptor
+  | ESTermSourceDescriptor
+  | TableSourceDescriptor;

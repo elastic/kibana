@@ -7,6 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import {
+  LOGSTASH_API_KEY_CLUSTER_PERMISSIONS,
+  LOGSTASH_API_KEY_INDICES,
+  LOGSTASH_API_KEY_INDICES_PRIVILEGES,
+} from '../../../common/constants';
+
 /**
  * Check if an esClient has enought permission to create a valid API key for logstash
  *
@@ -14,19 +20,11 @@ import type { ElasticsearchClient } from '@kbn/core/server';
  */
 export async function canCreateLogstashApiKey(esClient: ElasticsearchClient) {
   const res = await esClient.security.hasPrivileges({
-    cluster: ['monitor', 'manage_own_api_key'],
+    cluster: LOGSTASH_API_KEY_CLUSTER_PERMISSIONS,
     index: [
       {
-        names: [
-          'logs-*-*',
-          'metrics-*-*',
-          'traces-*-*',
-          'synthetics-*-*',
-          '.logs-endpoint.diagnostic.collection-*',
-          '.logs-endpoint.action.responses-*',
-          'profiling-*-*',
-        ],
-        privileges: ['auto_configure', 'create_doc'],
+        names: LOGSTASH_API_KEY_INDICES,
+        privileges: LOGSTASH_API_KEY_INDICES_PRIVILEGES,
       },
     ],
   });
@@ -59,7 +57,8 @@ export async function generateLogstashApiKey(esClient: ElasticsearchClient) {
               'synthetics-*-*',
               '.logs-endpoint.diagnostic.collection-*',
               '.logs-endpoint.action.responses-*',
-              'profiling-*-*',
+              'profiling-*',
+              '.profiling-*',
             ],
             privileges: ['auto_configure', 'create_doc'],
           },

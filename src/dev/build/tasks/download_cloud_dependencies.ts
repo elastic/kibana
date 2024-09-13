@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -58,11 +59,18 @@ export const DownloadCloudDependencies: Task = {
     let manifestUrl = '';
     let manifestJSON = null;
     const buildUrl = `https://${subdomain}.elastic.co/beats/latest/${config.getBuildVersion()}.json`;
+    const axiosConfigWithNoCacheHeaders = {
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
+    };
     try {
-      const latest = await Axios.get(buildUrl);
+      const latest = await Axios.get(buildUrl, axiosConfigWithNoCacheHeaders);
       buildId = latest.data.build_id;
       manifestUrl = latest.data.manifest_url;
-      manifestJSON = (await Axios.get(manifestUrl)).data;
+      manifestJSON = (await Axios.get(manifestUrl, axiosConfigWithNoCacheHeaders)).data;
       if (!(manifestUrl && manifestJSON)) throw new Error('Missing manifest.');
     } catch (e) {
       log.error(`Unable to find Beats artifacts for ${config.getBuildVersion()} at ${buildUrl}.`);

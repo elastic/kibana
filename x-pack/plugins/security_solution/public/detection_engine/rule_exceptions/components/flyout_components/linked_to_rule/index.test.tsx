@@ -10,7 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ExceptionsLinkedToRule } from '.';
 import { TestProviders } from '../../../../../common/mock';
-import { getRulesSchemaMock } from '../../../../../../common/detection_engine/rule_schema/mocks';
+import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import type { Rule } from '../../../../rule_management/logic/types';
 
 jest.mock('../../../../rule_management/logic/use_find_rules');
@@ -24,8 +24,7 @@ describe('ExceptionsLinkedToRule', () => {
         />
       </TestProviders>
     );
-
-    expect(wrapper.find('[data-test-subj="ruleNameCell"]').at(0).text()).toEqual('NameMy rule');
-    expect(wrapper.find('[data-test-subj="ruleAction-viewDetails"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="ruleNameCell"]').at(0).text()).toEqual('My rule');
+    expect(wrapper.find('[data-test-subj="linkToRuleSecuritySolutionLink"]').exists()).toBeTruthy();
   });
 });

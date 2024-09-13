@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import Semver from 'semver';
+import type {
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from '@kbn/core-saved-objects-api-server';
 import type { ConfigAttributes } from '../saved_objects';
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 
@@ -34,7 +39,7 @@ export async function getUpgradeableConfig({
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   version: string;
-  type: 'config' | 'config-global';
+  type: 'config' | 'config-global' | 'config-user';
 }) {
   // attempt to find a config we can upgrade
   const { saved_objects: savedConfigs } =
@@ -47,11 +52,26 @@ export async function getUpgradeableConfig({
     });
 
   // try to find a config that we can upgrade
-  const findResult = savedConfigs.find((savedConfig) =>
+  const matchingResults = savedConfigs.filter((savedConfig) =>
     isConfigVersionUpgradeable(savedConfig.id, version)
   );
-  if (findResult) {
-    return { id: findResult.id, attributes: findResult.attributes };
+  const mostRecentConfig = getMostRecentConfig(matchingResults);
+  if (mostRecentConfig) {
+    return { id: mostRecentConfig.id, attributes: mostRecentConfig.attributes };
   }
   return null;
 }
+
+const getMostRecentConfig = (
+  results: Array<SavedObjectsFindResult<UpgradeableConfigAttributes>>
+): SavedObjectsFindResult<UpgradeableConfigAttributes> | undefined => {
+  return results.reduce<SavedObjectsFindResult<UpgradeableConfigAttributes> | undefined>(
+    (mostRecent, current) => {
+      if (!mostRecent) {
+        return current;
+      }
+      return Semver.gt(mostRecent.id, current.id) ? mostRecent : current;
+    },
+    undefined
+  );
+};

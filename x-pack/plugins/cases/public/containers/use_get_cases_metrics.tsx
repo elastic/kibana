@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { CaseMetricsFeature } from '../../common/types/api';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import * as i18n from './translations';
 import { useHttp } from '../common/lib/kibana';
@@ -22,14 +23,12 @@ export const useGetCasesMetrics = () => {
 
   return useQuery<CasesMetrics, ServerError>(
     casesQueriesKeys.casesMetrics(),
-    () => {
-      const abortCtrlRef = new AbortController();
-      return getCasesMetrics({
+    ({ signal }) =>
+      getCasesMetrics({
         http,
-        signal: abortCtrlRef.signal,
-        query: { owner, features: ['mttr'] },
-      });
-    },
+        query: { owner, features: [CaseMetricsFeature.MTTR] },
+        signal,
+      }),
     {
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });

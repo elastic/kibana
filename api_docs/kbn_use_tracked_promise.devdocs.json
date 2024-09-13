@@ -1,0 +1,80 @@
+{
+  "id": "@kbn/use-tracked-promise",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/use-tracked-promise",
+        "id": "def-common.useTrackedPromise",
+        "type": "Function",
+        "tags": [],
+        "label": "useTrackedPromise",
+        "description": [
+          "\nThis hook manages a Promise factory and can create new Promises from it. The\nstate of these Promises is tracked and they can be canceled when superseded\nto avoid race conditions.\n\n```\nconst [requestState, performRequest] = useTrackedPromise(\n  {\n    cancelPreviousOn: 'resolution',\n    createPromise: async (url: string) => {\n      return await fetchSomething(url)\n    },\n    onResolve: response => {\n      setSomeState(response.data);\n    },\n    onReject: response => {\n      setSomeError(response);\n    },\n  },\n  [fetchSomething]\n);\n```\n\nThe `onResolve` and `onReject` handlers are registered separately, because\nthe hook will inject a rejection when in case of a canellation. The\n`cancelPreviousOn` attribute can be used to indicate when the preceding\npending promises should be canceled:\n\n'never': No preceding promises will be canceled.\n\n'creation': Any preceding promises will be canceled as soon as a new one is\ncreated.\n\n'settlement': Any preceding promise will be canceled when a newer promise is\nresolved or rejected.\n\n'resolution': Any preceding promise will be canceled when a newer promise is\nresolved.\n\n'rejection': Any preceding promise will be canceled when a newer promise is\nrejected.\n\nAny pending promises will be canceled when the component using the hook is\nunmounted, but their status will not be tracked to avoid React warnings\nabout memory leaks.\n\nThe last argument is a normal React hook dependency list that indicates\nunder which conditions a new reference to the configuration object should be\nused.\n\nThe `onResolve`, `onReject` and possible uncatched errors are only triggered\nif the underlying component is mounted. To ensure they always trigger (i.e.\nif the promise is called in a `useLayoutEffect`) use the `triggerOrThrow`\nattribute:\n\n'whenMounted': (default) they are called only if the component is mounted.\n\n'always': they always call. The consumer is then responsible of ensuring no\nside effects happen if the underlying component is not mounted."
+        ],
+        "signature": [
+          "<Arguments extends any[], Result>({ createPromise, onResolve, onReject, cancelPreviousOn, triggerOrThrow, }: UseTrackedPromiseArgs<Arguments, Result>, dependencies: React.DependencyList) => [",
+          "PromiseState",
+          "<Result, unknown>, (...args: Arguments) => Promise<Result>, () => void]"
+        ],
+        "path": "packages/kbn-use-tracked-promise/use_tracked_promise.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/use-tracked-promise",
+            "id": "def-common.useTrackedPromise.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n    createPromise,\n    onResolve = noOp,\n    onReject = noOp,\n    cancelPreviousOn = 'never',\n    triggerOrThrow = 'whenMounted',\n  }",
+            "description": [],
+            "signature": [
+              "UseTrackedPromiseArgs<Arguments, Result>"
+            ],
+            "path": "packages/kbn-use-tracked-promise/use_tracked_promise.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/use-tracked-promise",
+            "id": "def-common.useTrackedPromise.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dependencies",
+            "description": [],
+            "signature": [
+              "React.DependencyList"
+            ],
+            "path": "packages/kbn-use-tracked-promise/use_tracked_promise.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

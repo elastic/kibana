@@ -1,13 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { Optional } from '@kbn/utility-types';
-import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
 
 export const EMBEDDABLE_EDITOR_STATE_KEY = 'embeddable_editor_state';
 
@@ -19,7 +17,7 @@ export interface EmbeddableEditorState {
   originatingApp: string;
   originatingPath?: string;
   embeddableId?: string;
-  valueInput?: EmbeddableInput;
+  valueInput?: object;
 
   /**
    * Pass current search session id when navigating to an editor,
@@ -40,9 +38,15 @@ export const EMBEDDABLE_PACKAGE_STATE_KEY = 'embeddable_package_state';
  */
 export interface EmbeddablePackageState {
   type: string;
-  input: Optional<EmbeddableInput, 'id'> | Optional<SavedObjectEmbeddableInput, 'id'>;
+  /**
+   * For react embeddables, this input must be runtime state.
+   */
+  input: object;
   embeddableId?: string;
-
+  size?: {
+    width?: number;
+    height?: number;
+  };
   /**
    * Pass current search session id when navigating to an editor,
    * Editors could use it continue previous search session

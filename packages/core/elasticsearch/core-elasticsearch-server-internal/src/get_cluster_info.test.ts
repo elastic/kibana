@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -21,7 +22,7 @@ describe('getClusterInfo', () => {
       number: '1.2.3',
       lucene_version: '1.2.3',
       build_date: 'DateString',
-      build_flavor: 'string',
+      build_flavor: 'default',
       build_hash: 'string',
       build_snapshot: true,
       build_type: 'string',
@@ -39,6 +40,7 @@ describe('getClusterInfo', () => {
     const context$ = getClusterInfo$(internalClient);
     await expect(firstValueFrom(context$)).resolves.toMatchInlineSnapshot(`
       Object {
+        "cluster_build_flavor": "default",
         "cluster_name": "cluster-name",
         "cluster_uuid": "cluster_uuid",
         "cluster_version": "1.2.3",
@@ -52,6 +54,7 @@ describe('getClusterInfo', () => {
     const context$ = getClusterInfo$(internalClient);
     await expect(firstValueFrom(context$)).resolves.toMatchInlineSnapshot(`
       Object {
+        "cluster_build_flavor": "default",
         "cluster_name": "cluster-name",
         "cluster_uuid": "cluster_uuid",
         "cluster_version": "1.2.3",
@@ -65,6 +68,7 @@ describe('getClusterInfo', () => {
     const context$ = getClusterInfo$(internalClient);
     await expect(firstValueFrom(context$)).resolves.toMatchInlineSnapshot(`
       Object {
+        "cluster_build_flavor": "default",
         "cluster_name": "cluster-name",
         "cluster_uuid": "cluster_uuid",
         "cluster_version": "1.2.3",
@@ -72,6 +76,7 @@ describe('getClusterInfo', () => {
     `);
     await expect(firstValueFrom(context$)).resolves.toMatchInlineSnapshot(`
       Object {
+        "cluster_build_flavor": "default",
         "cluster_name": "cluster-name",
         "cluster_uuid": "cluster_uuid",
         "cluster_version": "1.2.3",

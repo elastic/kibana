@@ -14,6 +14,7 @@ import React, {
   useRef,
   useEffect,
   type FC,
+  type PropsWithChildren,
 } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { isEqual } from 'lodash';
@@ -21,12 +22,23 @@ import { isEqual } from 'lodash';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { decode, encode } from '@kbn/rison';
 
-import { BehaviorSubject, Observable } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;
+}
+
+export interface ListingPageUrlState {
+  pageSize: number;
+  pageIndex: number;
+  sortField: string;
+  sortDirection: string;
+  queryText?: string;
+  showPerPageOptions?: boolean;
+  showAll?: boolean;
 }
 
 export type Accessor = '_a' | '_g';
@@ -55,7 +67,7 @@ export function isRisonSerializationRequired(queryParam: string): boolean {
 }
 
 export function parseUrlState(search: string): Dictionary<any> {
-  const urlState: Dictionary<any> = {};
+  const urlState: Dictionary<any> = Object.create(null);
   const parsedQueryString = parse(search, { sort: false });
 
   try {
@@ -90,9 +102,15 @@ export const urlStateStore = createContext<UrlState>({
 
 export const { Provider } = urlStateStore;
 
-export const UrlStateProvider: FC = ({ children }) => {
+export const UrlStateProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const history = useHistory();
   const { search: searchString } = useLocation();
+
+  const searchStringRef = useRef<string>(searchString);
+
+  useEffect(() => {
+    searchStringRef.current = searchString;
+  }, [searchString]);
 
   const setUrlState: SetUrlState = useCallback(
     (
@@ -101,12 +119,13 @@ export const UrlStateProvider: FC = ({ children }) => {
       value?: any,
       replaceState?: boolean
     ) => {
-      const prevSearchString = searchString;
+      const prevSearchString = searchStringRef.current;
+
       const urlState = parseUrlState(prevSearchString);
       const parsedQueryString = parse(prevSearchString, { sort: false });
 
-      if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
-        urlState[accessor] = {};
+      if (!Object.hasOwn(urlState, accessor)) {
+        urlState[accessor] = Object.create(null);
       }
 
       if (typeof attribute === 'string') {
@@ -142,6 +161,10 @@ export const UrlStateProvider: FC = ({ children }) => {
 
         if (oldLocationSearchString !== newLocationSearchString) {
           const newSearchString = stringify(parsedQueryString, { sort: false });
+          // Another `setUrlState` call could happen before the updated
+          // `searchString` gets propagated via `useLocation` therefore
+          // we update the ref right away too.
+          searchStringRef.current = newSearchString;
           if (replaceState) {
             history.replace({ search: newSearchString });
           } else {
@@ -154,7 +177,7 @@ export const UrlStateProvider: FC = ({ children }) => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [searchString]
+    []
   );
 
   return <Provider value={{ searchString, setUrlState }}>{children}</Provider>;
@@ -228,7 +251,7 @@ export class PageUrlStateService<T> {
   }
 }
 
-interface PageUrlState {
+export interface PageUrlState {
   pageKey: string;
   pageUrlState: object;
 }

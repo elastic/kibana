@@ -10,8 +10,8 @@ import type { UseMutationResult } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import type { BaseActionRequestBody } from '../../../../../common/api/endpoint/actions/common/base';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import type { BaseActionRequestBody } from '../../../../../common/endpoint/schema/actions';
 import { ActionSuccess } from '../components/action_success';
 import { ActionError } from '../components/action_error';
 import { FormattedError } from '../../formatted_error';
@@ -21,39 +21,51 @@ import type {
   ActionDetails,
   Immutable,
   ResponseActionApiResponse,
+  EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
 } from '../../../../../common/endpoint/types';
 import type { CommandExecutionComponentProps } from '../../console';
 
-export interface ConsoleActionSubmitter<TActionOutputContent extends object = object> {
+export interface ConsoleActionSubmitter<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+> {
   /**
    * The ui to be returned to the console. This UI will display different states of the action,
    * including pending, error conditions and generic success messages.
    */
   result: JSX.Element;
-  actionDetails: Immutable<ActionDetails<TActionOutputContent>> | undefined;
+  actionDetails: Immutable<ActionDetails<TOutputContent, TParameters>> | undefined;
 }
 
 /**
  * Command store state for response action api state.
  */
-export interface CommandResponseActionApiState<TActionOutputContent extends object = object> {
+export interface CommandResponseActionApiState<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+> {
   actionApiState?: {
     request: {
       sent: boolean;
       actionId: string | undefined;
       error: IHttpFetchError | undefined;
     };
-    actionDetails: ActionDetails<TActionOutputContent> | undefined;
+    actionDetails: ActionDetails<TOutputContent, TParameters> | undefined;
     actionDetailsError: IHttpFetchError | undefined;
   };
 }
 
 export interface UseConsoleActionSubmitterOptions<
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
-  TActionOutputContent extends object = object
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > extends Pick<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    CommandExecutionComponentProps<any, CommandResponseActionApiState<TActionOutputContent>>,
+    CommandExecutionComponentProps<
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      any,
+      CommandResponseActionApiState<TOutputContent, TParameters>
+    >,
     'ResultComponent' | 'setStore' | 'store' | 'status' | 'setStatus'
   > {
   actionCreator: UseMutationResult<ResponseActionApiResponse, IHttpFetchError, TReqBody>;
@@ -88,7 +100,8 @@ export interface UseConsoleActionSubmitterOptions<
  */
 export const useConsoleActionSubmitter = <
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
-  TActionOutputContent extends object = object
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 >({
   actionCreator,
   actionRequestBody,
@@ -100,16 +113,18 @@ export const useConsoleActionSubmitter = <
   dataTestSubj,
   pendingMessage,
   successMessage,
-}: UseConsoleActionSubmitterOptions<
-  TReqBody,
-  TActionOutputContent
->): ConsoleActionSubmitter<TActionOutputContent> => {
+}: UseConsoleActionSubmitterOptions<TReqBody, TOutputContent, TParameters>): ConsoleActionSubmitter<
+  TOutputContent,
+  TParameters
+> => {
   const isMounted = useIsMounted();
   const getTestId = useTestIdGenerator(dataTestSubj);
   const isPending = status === 'pending';
 
   const currentActionState = useMemo<
-    Immutable<Required<CommandResponseActionApiState<TActionOutputContent>>['actionApiState']>
+    Immutable<
+      Required<CommandResponseActionApiState<TOutputContent, TParameters>>['actionApiState']
+    >
   >(
     () =>
       store.actionApiState ?? {
@@ -131,21 +146,23 @@ export const useConsoleActionSubmitter = <
     error: actionRequestError,
   } = currentActionState.request;
 
-  const { data: apiActionDetailsResponse, error: apiActionDetailsError } =
-    useGetActionDetails<TActionOutputContent>(actionId ?? '-', {
-      enabled: Boolean(actionId) && isPending,
-      refetchInterval: isPending ? ACTION_DETAILS_REFRESH_INTERVAL : false,
-    });
+  const { data: apiActionDetailsResponse, error: apiActionDetailsError } = useGetActionDetails<
+    TOutputContent,
+    TParameters
+  >(actionId ?? '-', {
+    enabled: Boolean(actionId) && isPending,
+    refetchInterval: isPending ? ACTION_DETAILS_REFRESH_INTERVAL : false,
+  });
 
   // Create the action request if not yet done
   useEffect(() => {
     if (!actionRequestSent && actionRequestBody && isMounted()) {
       const updatedRequestState: Required<
-        CommandResponseActionApiState<TActionOutputContent>
+        CommandResponseActionApiState<TOutputContent, TParameters>
       >['actionApiState']['request'] = {
         ...(
           currentActionState as Required<
-            CommandResponseActionApiState<TActionOutputContent>
+            CommandResponseActionApiState<TOutputContent, TParameters>
           >['actionApiState']
         ).request,
         sent: true,

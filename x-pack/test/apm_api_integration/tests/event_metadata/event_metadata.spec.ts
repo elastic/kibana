@@ -7,17 +7,18 @@
 import expect from '@kbn/expect';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { PROCESSOR_EVENT } from '@kbn/apm-plugin/common/es_fields/apm';
+import { SpanRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/span_raw';
+import { ErrorRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/error_raw';
+import { TransactionRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/transaction_raw';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const esClient = getService('es');
+  const es = getService('es');
 
-  async function getLastDocId(processorEvent: ProcessorEvent) {
-    const response = await esClient.search<{
-      [key: string]: { id: string };
-    }>({
+  async function getMostRecentDoc(processorEvent: ProcessorEvent) {
+    const response = await es.search<TransactionRaw | SpanRaw | ErrorRaw>({
       index: ['apm-*'],
       body: {
         query: {
@@ -32,12 +33,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       },
     });
 
-    return response.hits.hits[0]._source![processorEvent].id;
+    const doc = response.hits.hits[0]._source!;
+
+    return {
+      // @ts-expect-error
+      id: doc[processorEvent].id as string,
+      timestamp: doc['@timestamp'],
+    };
   }
 
   registry.when('Event metadata', { config: 'basic', archives: ['apm_8.0.0'] }, () => {
     it('fetches transaction event metadata', async () => {
-      const id = await getLastDocId(ProcessorEvent.transaction);
+      const { id, timestamp } = await getMostRecentDoc(ProcessorEvent.transaction);
 
       const { body } = await apmApiClient.readUser({
         endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
@@ -45,6 +52,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           path: {
             processorEvent: ProcessorEvent.transaction,
             id,
+          },
+          query: {
+            start: timestamp,
+            end: timestamp,
           },
         },
       });
@@ -67,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('fetches error event metadata', async () => {
-      const id = await getLastDocId(ProcessorEvent.error);
+      const { id, timestamp } = await getMostRecentDoc(ProcessorEvent.error);
 
       const { body } = await apmApiClient.readUser({
         endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
@@ -75,6 +86,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           path: {
             processorEvent: ProcessorEvent.error,
             id,
+          },
+          query: {
+            start: timestamp,
+            end: timestamp,
           },
         },
       });
@@ -97,7 +112,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('fetches span event metadata', async () => {
-      const id = await getLastDocId(ProcessorEvent.span);
+      const { id, timestamp } = await getMostRecentDoc(ProcessorEvent.span);
 
       const { body } = await apmApiClient.readUser({
         endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
@@ -105,6 +120,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           path: {
             processorEvent: ProcessorEvent.span,
             id,
+          },
+          query: {
+            start: timestamp,
+            end: timestamp,
           },
         },
       });

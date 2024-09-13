@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useEffect, useMemo, useState } from 'react';
 
-import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../../common';
+import { CONTEXT_DEFAULT_SIZE_SETTING } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../build_services';
 import { AppState, getState, GlobalState } from '../services/context_state';
 
@@ -25,7 +27,7 @@ export function useContextAppState({
     return getState({
       defaultSize: parseInt(config.get(CONTEXT_DEFAULT_SIZE_SETTING), 10),
       storeInSessionStorage: config.get('state:storeInSessionStorage'),
-      history: history(),
+      history,
       toasts: core.notifications.toasts,
       uiSettings: config,
       data: services.data,

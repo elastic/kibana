@@ -14,7 +14,13 @@ export interface CspPageNavigationItem extends CspNavigationItem {
   id: CloudSecurityPosturePageId;
 }
 
-export type CspPage = 'dashboard' | 'findings' | 'benchmarks';
+export type CspPage =
+  | 'dashboard'
+  | 'cspm_dashboard'
+  | 'kspm_dashboard'
+  | 'vulnerability_dashboard'
+  | 'findings'
+  | 'benchmarks';
 export type CspBenchmarksPage = 'rules';
 
 /**
@@ -23,11 +29,9 @@ export type CspBenchmarksPage = 'rules';
  */
 export type CloudSecurityPosturePageId =
   | 'cloud_security_posture-dashboard'
+  | 'cloud_security_posture-cspm-dashboard'
+  | 'cloud_security_posture-kspm-dashboard'
+  | 'cloud_security_posture-vulnerability_dashboard'
   | 'cloud_security_posture-findings'
   | 'cloud_security_posture-benchmarks'
   | 'cloud_security_posture-benchmarks-rules';
-
-export interface CspIntegrationDocNavigationItem {
-  overviewPath: string;
-  getStartedPath: string;
-}

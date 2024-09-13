@@ -9,6 +9,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { encode } from '@kbn/rison';
 
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   RULE_FROM_EQL_URL_PARAM,
   RULE_FROM_TIMELINE_URL_PARAM,
@@ -16,21 +17,18 @@ import {
 import { useNavigation } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import type { SortFieldTimeline } from '../../../../common/types/timeline';
+import type { SortFieldTimeline } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import type { TimelineModel } from '../../store/timeline/model';
-import { timelineSelectors } from '../../store/timeline';
-import {
-  createTimeline as dispatchCreateNewTimeline,
-  updateIsLoading as dispatchUpdateIsLoading,
-} from '../../store/timeline/actions';
+import type { TimelineModel } from '../../store/model';
+import { timelineSelectors } from '../../store';
+import { createTimeline as dispatchCreateNewTimeline } from '../../store/actions';
 
 import { useGetAllTimeline } from '../../containers/all';
 
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 
 import { OpenTimeline } from './open_timeline';
-import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById, dispatchUpdateTimeline } from './helpers';
+import { OPEN_TIMELINE_CLASS_NAME, useQueryTimelineById } from './helpers';
 import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
 import type {
   ActionTimelineToShow,
@@ -54,10 +52,12 @@ import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
 import { deleteTimelinesByIds } from '../../containers/api';
 import type { Direction } from '../../../../common/search_strategy';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
+import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
+import { timelineDefaults } from '../../store/defaults';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -70,20 +70,58 @@ interface OwnProps<TCache = object> {
 export type OpenTimelineOwnProps = OwnProps &
   Pick<
     OpenTimelineProps,
-    'defaultPageSize' | 'title' | 'importDataModalToggle' | 'setImportDataModalToggle'
+    'defaultPageSize' | 'title' | 'importDataModalToggle' | 'setImportDataModalToggle' | 'tabName'
   >;
 
 /** Returns a collection of selected timeline ids */
-export const getSelectedTimelineIds = (selectedItems: OpenTimelineResult[]): string[] =>
-  selectedItems.reduce<string[]>(
-    (validSelections, timelineResult) =>
-      timelineResult.savedObjectId != null
-        ? [...validSelections, timelineResult.savedObjectId]
-        : validSelections,
-    []
+export const getSelectedTimelineIdsAndSearchIds = (
+  selectedItems: OpenTimelineResult[]
+): Array<{ timelineId: string; searchId?: string | null }> => {
+  return selectedItems.reduce<Array<{ timelineId: string; searchId?: string | null }>>(
+    (validSelections, timelineResult) => {
+      if (timelineResult.savedObjectId != null && timelineResult.savedSearchId != null) {
+        return [
+          ...validSelections,
+          { timelineId: timelineResult.savedObjectId, searchId: timelineResult.savedSearchId },
+        ];
+      } else if (timelineResult.savedObjectId != null) {
+        return [...validSelections, { timelineId: timelineResult.savedObjectId }];
+      } else {
+        return validSelections;
+      }
+    },
+    [] as Array<{ timelineId: string; searchId?: string | null }>
   );
+};
+
+interface DeleteTimelinesValues {
+  timelineIds: string[];
+  searchIds: string[];
+}
+
+export const getRequestIds = (
+  timelineIdsWithSearch: Array<{ timelineId: string; searchId?: string | null }>
+) => {
+  return timelineIdsWithSearch.reduce<DeleteTimelinesValues>(
+    (acc, { timelineId, searchId }) => {
+      let requestValues = acc;
+      if (searchId != null) {
+        requestValues = { ...requestValues, searchIds: [...requestValues.searchIds, searchId] };
+      }
+      if (timelineId != null) {
+        requestValues = {
+          ...requestValues,
+          timelineIds: [...requestValues.timelineIds, timelineId],
+        };
+      }
+      return requestValues;
+    },
+    { timelineIds: [], searchIds: [] }
+  );
+};
 
 /** Manages the state (e.g table selection) of the (pure) `OpenTimeline` component */
+// eslint-disable-next-line react/display-name
 export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
   ({
     closeModalTimeline,
@@ -93,6 +131,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     importDataModalToggle,
     onOpenTimeline,
     setImportDataModalToggle,
+    tabName,
     title,
   }) => {
     const dispatch = useDispatch();
@@ -114,7 +153,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     /** The requested sort direction of the query results */
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     /** The requested field to sort on */
-    const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
+    const [sortField, setSortField] = useState<SortFieldTimeline>(DEFAULT_SORT_FIELD);
 
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const timelineSavedObjectId = useShallowEqualSelector(
@@ -122,11 +161,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
 
     const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
-
-    const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
-    const updateIsLoading = useCallback(
-      (payload) => dispatch(dispatchUpdateIsLoading(payload)),
-      [dispatch]
+    const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+      'unifiedComponentsInTimelineDisabled'
     );
 
     const {
@@ -158,7 +194,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         },
         search,
         sort: {
-          sortField: sortField as SortFieldTimeline,
+          sortField,
           sortOrder: sortDirection as Direction,
         },
         onlyUserFavorite: onlyFavorites,
@@ -207,7 +243,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     // };
 
     const deleteTimelines: DeleteTimelines = useCallback(
-      async (timelineIds: string[]) => {
+      async (timelineIds: string[], searchIds?: string[]) => {
         startTransaction({
           name: timelineIds.length > 1 ? TIMELINE_ACTIONS.BULK_DELETE : TIMELINE_ACTIONS.DELETE,
         });
@@ -216,24 +252,35 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           dispatch(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
-              columns: defaultHeaders,
+              columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
               dataViewId,
               indexNames: selectedPatterns,
               show: false,
+              excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
+                ? timelineDefaults.excludedRowRendererIds
+                : [],
             })
           );
         }
 
-        await deleteTimelinesByIds(timelineIds);
+        await deleteTimelinesByIds(timelineIds, searchIds);
         refetch();
       },
-      [startTransaction, timelineSavedObjectId, refetch, dispatch, dataViewId, selectedPatterns]
+      [
+        startTransaction,
+        timelineSavedObjectId,
+        refetch,
+        dispatch,
+        dataViewId,
+        selectedPatterns,
+        unifiedComponentsInTimelineDisabled,
+      ]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
-      async (timelineIds: string[]) => {
+      async (timelineIds: string[], searchIds?: string[]) => {
         // The type for `deleteTimelines` is incorrect, it returns a Promise
-        await deleteTimelines(timelineIds);
+        await deleteTimelines(timelineIds, searchIds);
       },
       [deleteTimelines]
     );
@@ -241,7 +288,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     /** Invoked when the user clicks the action to delete the selected timelines */
     const onDeleteSelected: OnDeleteSelected = useCallback(async () => {
       // The type for `deleteTimelines` is incorrect, it returns a Promise
-      await deleteTimelines(getSelectedTimelineIds(selectedItems));
+      const timelineIdsWithSearch = getSelectedTimelineIdsAndSearchIds(selectedItems);
+      const { timelineIds, searchIds } = getRequestIds(timelineIdsWithSearch);
+      await deleteTimelines(timelineIds, searchIds);
 
       // NOTE: we clear the selection state below, but if the server fails to
       // delete a timeline, it will remain selected in the table:
@@ -261,12 +310,16 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     /** Invoked by the EUI table implementation when the user interacts with the table (i.e. to update sorting) */
     const onTableChange: OnTableChange = useCallback(({ page, sort }: OnTableChangeParams) => {
-      const { index, size } = page;
-      const { field, direction } = sort;
-      setPageIndex(index);
-      setPageSize(size);
-      setSortDirection(direction);
-      setSortField(field);
+      if (page != null) {
+        const { index, size } = page;
+        setPageIndex(index);
+        setPageSize(size);
+      }
+      if (sort != null) {
+        const { field, direction } = sort;
+        setSortDirection(direction);
+        setSortField(field as SortFieldTimeline);
+      }
     }, []);
 
     /** Invoked when the user toggles the option to only view favorite timelines */
@@ -305,6 +358,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       setSelectedItems([]);
     }, []);
 
+    const queryTimelineById = useQueryTimelineById();
+
     const openTimeline: OnOpenTimeline = useCallback(
       ({ duplicate, timelineId, timelineType: timelineTypeToOpen }) => {
         if (duplicate) {
@@ -320,12 +375,11 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           onOpenTimeline,
           timelineId,
           timelineType: timelineTypeToOpen,
-          updateIsLoading,
-          updateTimeline,
+          unifiedComponentsInTimelineDisabled,
         });
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [updateIsLoading, updateTimeline]
+      [queryTimelineById]
     );
 
     useEffect(() => {
@@ -369,6 +423,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
+        tabName={tabName}
         templateTimelineFilter={templateTimelineFilter}
         timelineType={timelineType}
         timelineStatus={timelineStatus}
@@ -385,7 +440,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         hideActions={hideActions}
         isLoading={loading}
         itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-        onAddTimelinesToFavorites={undefined}
         onlyFavorites={onlyFavorites}
         onOpenTimeline={openTimeline}
         onQueryChange={onQueryChange}
@@ -397,7 +451,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         pageSize={pageSize}
         query={search}
         searchResults={timelines}
-        selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
         templateTimelineFilter={templateTimelineFilter}

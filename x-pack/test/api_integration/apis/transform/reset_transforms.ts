@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { ResetTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/reset_transforms';
+import { ResetTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/reset_transforms';
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
-import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   };
 
-  describe('/api/transform/reset_transforms', function () {
+  describe('/internal/transform/reset_transforms', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
@@ -73,12 +73,12 @@ export default ({ getService }: FtrProviderContext) => {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
         };
         const { body, status } = await supertest
-          .post(`/api/transform/reset_transforms`)
+          .post(`/internal/transform/reset_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -103,12 +103,12 @@ export default ({ getService }: FtrProviderContext) => {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
         };
         const { body, status } = await supertest
-          .post(`/api/transform/reset_transforms`)
+          .post(`/internal/transform/reset_transforms`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(403, status, body);
 
@@ -127,12 +127,12 @@ export default ({ getService }: FtrProviderContext) => {
           transformsInfo: [{ id: 'invalid_transform_id', state: TRANSFORM_STATE.STOPPED }],
         };
         const { body, status } = await supertest
-          .post(`/api/transform/reset_transforms`)
+          .post(`/internal/transform/reset_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -175,12 +175,12 @@ export default ({ getService }: FtrProviderContext) => {
         );
 
         const { body, status } = await supertest
-          .post(`/api/transform/reset_transforms`)
+          .post(`/internal/transform/reset_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -214,12 +214,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         const invalidTransformId = 'invalid_transform_id';
         const { body, status } = await supertest
-          .post(`/api/transform/reset_transforms`)
+          .post(`/internal/transform/reset_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send({
             ...reqBody,
             transformsInfo: [

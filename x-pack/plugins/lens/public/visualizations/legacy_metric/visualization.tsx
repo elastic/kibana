@@ -5,13 +5,10 @@
  * 2.0.
  */ import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter';
 import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, shiftPalette } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
@@ -26,7 +23,7 @@ import {
 import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
 import type { MetricVisExpressionFunctionDefinition } from '@kbn/expression-legacy-metric-vis-plugin/common';
 import { getSuggestions } from './metric_suggestions';
-import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
+import { Visualization, OperationMetadata, DatasourceLayers, FramePublicAPI } from '../../types';
 import type { LegacyMetricState } from '../../../common/types';
 import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './metric_config_panel';
@@ -160,6 +157,9 @@ export const getLegacyMetricVisualization = ({
 }): Visualization<LegacyMetricState> => ({
   id: 'lnsLegacyMetric',
 
+  getVisualizationTypeId() {
+    return this.id;
+  },
   visualizationTypes: [
     {
       id: 'lnsLegacyMetric',
@@ -167,14 +167,17 @@ export const getLegacyMetricVisualization = ({
       label: i18n.translate('xpack.lens.legacyMetric.label', {
         defaultMessage: 'Legacy Metric',
       }),
-      groupLabel: i18n.translate('xpack.lens.legacyMetric.groupLabel', {
-        defaultMessage: 'Goal and single value',
+      isDeprecated: true,
+      sortPriority: 100,
+      description: i18n.translate('xpack.lens.legacyMetric.visualizationDescription', {
+        defaultMessage: 'Present individual key metrics or KPIs.',
       }),
     },
   ],
-
-  getVisualizationTypeId() {
-    return 'lnsLegacyMetric';
+  hideFromChartSwitch(frame: FramePublicAPI) {
+    return Object.values(frame.datasourceLayers).some(
+      (datasource) => datasource && datasource.datasourceId === 'textBased'
+    );
   },
 
   clearLayer(state) {
@@ -290,26 +293,12 @@ export const getLegacyMetricVisualization = ({
     return { ...prevState, accessor: undefined, colorMode: ColorMode.None, palette: undefined };
   },
 
-  renderToolbar(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <MetricToolbar state={props.state} setState={props.setState} frame={props.frame} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  ToolbarComponent(props) {
+    return <MetricToolbar state={props.state} setState={props.setState} frame={props.frame} />;
   },
 
-  renderDimensionEditor(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <MetricDimensionEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorComponent(props) {
+    return <MetricDimensionEditor {...props} paletteService={paletteService} />;
   },
 
   getVisualizationInfo(state: LegacyMetricState) {
@@ -324,6 +313,9 @@ export const getLegacyMetricVisualization = ({
       });
     }
 
+    const hasColoring = state.palette != null;
+    const stops = state.palette?.params?.stops || [];
+
     return {
       layers: [
         {
@@ -332,6 +324,7 @@ export const getLegacyMetricVisualization = ({
           chartType: 'metric',
           ...this.getDescription(state),
           dimensions,
+          palette: hasColoring ? stops.map(({ color }) => color) : undefined,
         },
       ],
     };

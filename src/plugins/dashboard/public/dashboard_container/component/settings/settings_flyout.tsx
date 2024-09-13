@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useState } from 'react';
@@ -24,11 +25,13 @@ import {
   EuiTitle,
   EuiCallOut,
   EuiSwitch,
+  EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DashboardContainerByValueInput } from '../../../../common';
+import { DashboardContainerInput } from '../../../../common';
 import { pluginServices } from '../../../services/plugin_services';
-import { useDashboardContainerContext } from '../../dashboard_container_context';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
 interface DashboardSettingsProps {
   onClose: () => void;
@@ -39,26 +42,21 @@ const DUPLICATE_TITLE_CALLOUT_ID = 'duplicateTitleCallout';
 export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
   const {
     savedObjectsTagging: { components },
-    dashboardSavedObject: { checkForDuplicateDashboardTitle },
+    dashboardContentManagement: { checkForDuplicateDashboardTitle },
   } = pluginServices.getServices();
 
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { setStateFromSettingsFlyout },
-    embeddableInstance: dashboardContainer,
-  } = useDashboardContainerContext();
+  const dashboard = useDashboardContainer();
 
   const [dashboardSettingsState, setDashboardSettingsState] = useState({
-    ...dashboardContainer.getInputAsValueType(),
+    ...dashboard.getInput(),
   });
 
   const [isTitleDuplicate, setIsTitleDuplicate] = useState(false);
   const [isTitleDuplicateConfirmed, setIsTitleDuplicateConfirmed] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
 
-  const lastSavedId = select((state) => state.componentState.lastSavedId);
-  const lastSavedTitle = select((state) => state.explicitInput.title);
+  const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
+  const lastSavedTitle = dashboard.select((state) => state.explicitInput.title);
 
   const isMounted = useMountedState();
 
@@ -83,24 +81,19 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
     setIsApplying(false);
 
     if (validTitle) {
-      dispatch(setStateFromSettingsFlyout({ lastSavedId, ...dashboardSettingsState }));
+      dashboard.dispatch.setStateFromSettingsFlyout({ lastSavedId, ...dashboardSettingsState });
       onClose();
     }
   };
 
-  const updateDashboardSetting = useCallback(
-    (newSettings: Partial<DashboardContainerByValueInput>) => {
-      setDashboardSettingsState((prevDashboardSettingsState) => {
-        return {
-          ...prevDashboardSettingsState,
-          ...newSettings,
-        };
-      });
-    },
-    []
-  );
-
-  const dispatch = useEmbeddableDispatch();
+  const updateDashboardSetting = useCallback((newSettings: Partial<DashboardContainerInput>) => {
+    setDashboardSettingsState((prevDashboardSettingsState) => {
+      return {
+        ...prevDashboardSettingsState,
+        ...newSettings,
+      };
+    });
+  }, []);
 
   const renderDuplicateTitleCallout = () => {
     if (!isTitleDuplicate) {
@@ -122,7 +115,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
         <p>
           <FormattedMessage
             id="dashboard.embeddableApi.showSettings.flyout.form.duplicateTitleDescription"
-            defaultMessage="Saving '{title}' creates a duplicate title."
+            defaultMessage="Saving ''{title}'' creates a duplicate title."
             values={{
               title: dashboardSettingsState.title,
             }}
@@ -268,16 +261,58 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
               data-test-subj="dashboardPanelTitlesCheckbox"
             />
           </EuiFormRow>
-          <EuiFormRow label="Sync across panels">
+          <EuiFormRow
+            label={i18n.translate(
+              'dashboard.embeddableApi.showSettings.flyout.formRow.syncAcrossPanelsLabel',
+              {
+                defaultMessage: 'Sync across panels',
+              }
+            )}
+          >
             <>
               <EuiFormRow>
                 <EuiSwitch
-                  label={i18n.translate(
-                    'dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchLabel',
-                    {
-                      defaultMessage: 'Sync color palettes across panels',
-                    }
-                  )}
+                  label={
+                    <EuiText size="s">
+                      {i18n.translate(
+                        'dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchLabel',
+                        {
+                          defaultMessage: 'Sync color palettes across panels',
+                        }
+                      )}{' '}
+                      <EuiIconTip
+                        color="subdued"
+                        content={
+                          <FormattedMessage
+                            id="dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchHelp"
+                            defaultMessage="Only valid for {default} and {compatibility} palettes"
+                            values={{
+                              default: (
+                                <strong>
+                                  {i18n.translate('dashboard.palettes.defaultPaletteLabel', {
+                                    defaultMessage: 'Default',
+                                  })}
+                                </strong>
+                              ),
+                              compatibility: (
+                                <strong>
+                                  {i18n.translate('dashboard.palettes.kibanaPaletteLabel', {
+                                    defaultMessage: 'Compatibility',
+                                  })}
+                                </strong>
+                              ),
+                            }}
+                          />
+                        }
+                        iconProps={{
+                          className: 'eui-alignTop',
+                        }}
+                        position="top"
+                        size="s"
+                        type="questionInCircle"
+                      />
+                    </EuiText>
+                  }
                   checked={dashboardSettingsState.syncColors}
                   onChange={(event) => updateDashboardSetting({ syncColors: event.target.checked })}
                   data-test-subj="dashboardSyncColorsCheckbox"
@@ -326,7 +361,11 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="cancelCustomizeDashboardButton" onClick={onClose}>
+            <EuiButtonEmpty
+              flush="left"
+              data-test-subj="cancelCustomizeDashboardButton"
+              onClick={onClose}
+            >
               <FormattedMessage
                 id="dashboard.embeddableApi.showSettings.flyout.cancelButtonTitle"
                 defaultMessage="Cancel"

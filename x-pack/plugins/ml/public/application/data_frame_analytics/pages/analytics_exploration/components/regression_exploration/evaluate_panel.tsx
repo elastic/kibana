@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -16,22 +16,25 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { useMlKibana } from '../../../../../contexts/kibana';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  getValuesFromResponse,
   getDependentVar,
   getPredictionFieldName,
-  loadEvalData,
-  loadDocsCount,
-  Eval,
-  DataFrameAnalyticsConfig,
-} from '../../../../common';
-import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
+  type DataFrameAnalyticsConfig,
+  type DataFrameTaskStateType,
+  ANALYSIS_CONFIG_TYPE,
+} from '@kbn/ml-data-frame-analytics-utils';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
+
+import type { Eval } from '../../../../common';
+import { getValuesFromResponse, loadEvalData, loadDocsCount } from '../../../../common';
 import {
   isResultsSearchBoolQuery,
   isRegressionEvaluateResponse,
-  ANALYSIS_CONFIG_TYPE,
   REGRESSION_STATS,
   EMPTY_STAT,
 } from '../../../../common/analytics';
@@ -43,7 +46,7 @@ import { EvaluateStat } from './evaluate_stat';
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DataFrameTaskStateType;
-  searchQuery: SavedSearchQuery;
+  searchQuery: estypes.QueryDslQueryContainer;
 }
 
 const EMPTY_STATS = {
@@ -62,6 +65,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const {
     services: { docLinks },
   } = useMlKibana();
+  const mlApi = useMlApi();
   const docLink = docLinks.links.ml.regressionEvaluation;
   const [trainingEval, setTrainingEval] = useState<Eval>(defaultEval);
   const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
@@ -81,6 +85,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     setIsLoadingGeneralization(true);
 
     const genErrorEval = await loadEvalData({
+      mlApi,
       isTraining: false,
       index,
       dependentVariable,
@@ -119,6 +124,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     setIsLoadingTraining(true);
 
     const trainingErrorEval = await loadEvalData({
+      mlApi,
       isTraining: true,
       index,
       dependentVariable,
@@ -156,6 +162,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const loadData = async () => {
     loadGeneralizationData(false);
     const genDocsCountResp = await loadDocsCount({
+      mlApi,
       ignoreDefaultQuery: false,
       isTraining: false,
       searchQuery,
@@ -170,6 +177,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
 
     loadTrainingData(false);
     const trainDocsCountResp = await loadDocsCount({
+      mlApi,
       ignoreDefaultQuery: false,
       isTraining: true,
       searchQuery,

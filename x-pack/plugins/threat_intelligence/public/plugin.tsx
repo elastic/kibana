@@ -11,7 +11,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import React, { Suspense } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import { generateAttachmentType } from './modules/cases/utils';
+import { generateAttachmentType } from './modules/cases/utils/attachments';
 import { KibanaContextProvider } from './hooks/use_kibana';
 import {
   SecuritySolutionPluginContext,
@@ -56,7 +56,7 @@ export const createApp =
 
 export class ThreatIntelligencePlugin implements Plugin<void, void> {
   public async setup(
-    core: CoreSetup,
+    _core: CoreSetup,
     plugins: SetupPlugins
   ): Promise<ThreatIntelligencePluginSetup> {
     const externalAttachmentType: ExternalReferenceAttachmentType = generateAttachmentType();
@@ -73,11 +73,11 @@ export class ThreatIntelligencePlugin implements Plugin<void, void> {
       storage: new Storage(localStorage),
     };
 
-    const services = {
+    const services: Services = {
       ...localPluginServices,
       ...core,
       ...plugins,
-    } as Services;
+    };
 
     return {
       getComponent: createApp(services),

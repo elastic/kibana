@@ -1,26 +1,10 @@
 {
   "id": "@kbn/core-notifications-browser-internal",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-notifications-browser-internal",
-        "id": "def-common.NotificationsService",
+        "id": "def-public.NotificationsService",
         "type": "Class",
         "tags": [],
         "label": "NotificationsService",
@@ -31,7 +15,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
-            "id": "def-common.NotificationsService.Unnamed",
+            "id": "def-public.NotificationsService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -47,20 +31,20 @@
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
-            "id": "def-common.NotificationsService.setup",
+            "id": "def-public.NotificationsService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
             "description": [],
             "signature": [
-              "({ uiSettings }: ",
+              "({ uiSettings, analytics }: ",
               "SetupDeps",
               ") => ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.NotificationsSetup",
+                "section": "def-public.NotificationsSetup",
                 "text": "NotificationsSetup"
               }
             ],
@@ -70,10 +54,10 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
-                "id": "def-common.NotificationsService.setup.$1",
+                "id": "def-public.NotificationsService.setup.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ uiSettings }",
+                "label": "{ uiSettings, analytics }",
                 "description": [],
                 "signature": [
                   "SetupDeps"
@@ -88,20 +72,20 @@
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
-            "id": "def-common.NotificationsService.start",
+            "id": "def-public.NotificationsService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
             "description": [],
             "signature": [
-              "({ i18n: i18nDep, overlays, theme, targetDomElement, }: ",
+              "({ analytics, i18n: i18nDep, overlays, theme, targetDomElement, }: ",
               "StartDeps",
               ") => ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.NotificationsStart",
+                "section": "def-public.NotificationsStart",
                 "text": "NotificationsStart"
               }
             ],
@@ -111,10 +95,10 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
-                "id": "def-common.NotificationsService.start.$1",
+                "id": "def-public.NotificationsService.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    i18n: i18nDep,\n    overlays,\n    theme,\n    targetDomElement,\n  }",
+                "label": "{\n    analytics,\n    i18n: i18nDep,\n    overlays,\n    theme,\n    targetDomElement,\n  }",
                 "description": [],
                 "signature": [
                   "StartDeps"
@@ -129,7 +113,7 @@
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
-            "id": "def-common.NotificationsService.stop",
+            "id": "def-public.NotificationsService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -148,7 +132,7 @@
       },
       {
         "parentPluginId": "@kbn/core-notifications-browser-internal",
-        "id": "def-common.ToastsApi",
+        "id": "def-public.ToastsApi",
         "type": "Class",
         "tags": [],
         "label": "ToastsApi",
@@ -158,17 +142,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-notifications-browser-internal",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
-            "section": "def-common.ToastsApi",
+            "section": "def-public.ToastsApi",
             "text": "ToastsApi"
           },
           " implements ",
           {
             "pluginId": "@kbn/core-notifications-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-common.IToasts",
+            "section": "def-public.IToasts",
             "text": "IToasts"
           }
         ],
@@ -178,7 +162,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
-            "id": "def-common.ToastsApi.Unnamed",
+            "id": "def-public.ToastsApi.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -192,7 +176,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
-                "id": "def-common.ToastsApi.Unnamed.$1",
+                "id": "def-public.ToastsApi.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "deps",
@@ -203,7 +187,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-notifications-browser-internal",
-                    "id": "def-common.ToastsApi.Unnamed.$1.uiSettings",
+                    "id": "def-public.ToastsApi.Unnamed.$1.uiSettings",
                     "type": "Object",
                     "tags": [],
                     "label": "uiSettings",
@@ -211,9 +195,9 @@
                     "signature": [
                       {
                         "pluginId": "@kbn/core-ui-settings-browser",
-                        "scope": "common",
+                        "scope": "public",
                         "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                        "section": "def-common.IUiSettingsClient",
+                        "section": "def-public.IUiSettingsClient",
                         "text": "IUiSettingsClient"
                       }
                     ],
@@ -228,7 +212,7 @@
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
-            "id": "def-common.ToastsApi.get$",
+            "id": "def-public.ToastsApi.get$",
             "type": "Function",
             "tags": [],
             "label": "get$",
@@ -241,9 +225,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.Toast",
+                "section": "def-public.Toast",
                 "text": "Toast"
               },
               "[]>"
@@ -256,7 +240,7 @@
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
-            "id": "def-common.ToastsApi.add",
+            "id": "def-public.ToastsApi.add",
             "type": "Function",
             "tags": [],
             "label": "add",
@@ -267,17 +251,17 @@
               "(toastOrTitle: ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.ToastInput",
+                "section": "def-public.ToastInput",
                 "text": "ToastInput"
               },
               ") => ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.Toast",
+                "section": "def-public.Toast",
                 "text": "Toast"
               }
             ],
@@ -287,7 +271,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
-                "id": "def-common.ToastsApi.add.$1",
+                "id": "def-public.ToastsApi.add.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "toastOrTitle",
@@ -297,9 +281,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-common.ToastInput",
+                    "section": "def-public.ToastInput",
                     "text": "ToastInput"
                   }
                 ],
@@ -315,7 +299,7 @@
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
-            "id": "def-common.ToastsApi.remove",
+            "id": "def-public.ToastsApi.remove",
             "type": "Function",
             "tags": [],
             "label": "remove",
@@ -326,9 +310,9 @@
               "(toastOrId: string | ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.Toast",
+                "section": "def-public.Toast",
                 "text": "Toast"
               },
               ") => void"
@@ -339,7 +323,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
-                "id": "def-common.ToastsApi.remove.$1",
+                "id": "def-public.ToastsApi.remove.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "toastOrId",
@@ -350,9 +334,9 @@
                   "string | ",
                   {
                     "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-common.Toast",
+                    "section": "def-public.Toast",
                     "text": "Toast"
                   }
                 ],
@@ -366,7 +350,7 @@
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
-            "id": "def-common.ToastsApi.addInfo",
+            "id": "def-public.ToastsApi.addInfo",
             "type": "Function",
             "tags": [],
             "label": "addInfo",
@@ -377,25 +361,25 @@
               "(toastOrTitle: ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.ToastInput",
+                "section": "def-public.ToastInput",
                 "text": "ToastInput"
               },
               ", options?: ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.ToastOptions",
+                "section": "def-public.ToastOptions",
                 "text": "ToastOptions"
               },
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.Toast",
+                "section": "def-public.Toast",
                 "text": "Toast"
               }
             ],
@@ -405,7 +389,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
-                "id": "def-common.ToastsApi.addInfo.$1",
+                "id": "def-public.ToastsApi.addInfo.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "toastOrTitle",
@@ -415,9 +399,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-common.ToastInput",
+                    "section": "def-public.ToastInput",
                     "text": "ToastInput"
                   }
                 ],
@@ -428,7 +412,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
-                "id": "def-common.ToastsApi.addInfo.$2",
+                "id": "def-public.ToastsApi.addInfo.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -438,9 +422,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-common.ToastOptions",
+                    "section": "def-public.ToastOptions",
                     "text": "ToastOptions"
                   },
                   " | undefined"
@@ -457,7 +441,7 @@
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
-            "id": "def-common.ToastsApi.addSuccess",
+            "id": "def-public.ToastsApi.addSuccess",
             "type": "Function",
             "tags": [],
             "label": "addSuccess",
@@ -468,25 +452,25 @@
               "(toastOrTitle: ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.ToastInput",
+                "section": "def-public.ToastInput",
                 "text": "ToastInput"
               },
               ", options?: ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.ToastOptions",
+                "section": "def-public.ToastOptions",
                 "text": "ToastOptions"
               },
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.Toast",
+                "section": "def-public.Toast",
                 "text": "Toast"
               }
             ],
@@ -496,7 +480,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
-                "id": "def-common.ToastsApi.addSuccess.$1",
+                "id": "def-public.ToastsApi.addSuccess.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "toastOrTitle",
@@ -506,9 +490,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-common.ToastInput",
+                    "section": "def-public.ToastInput",
                     "text": "ToastInput"
                   }
                 ],
@@ -519,7 +503,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
-                "id": "def-common.ToastsApi.addSuccess.$2",
+                "id": "def-public.ToastsApi.addSuccess.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -529,9 +513,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-common.ToastOptions",
+                    "section": "def-public.ToastOptions",
                     "text": "ToastOptions"
                   },
                   " | undefined"
@@ -548,7 +532,7 @@
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
-            "id": "def-common.ToastsApi.addWarning",
+            "id": "def-public.ToastsApi.addWarning",
             "type": "Function",
             "tags": [],
             "label": "addWarning",
@@ -559,25 +543,25 @@
               "(toastOrTitle: ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.ToastInput",
+                "section": "def-public.ToastInput",
                 "text": "ToastInput"
               },
               ", options?: ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.ToastOptions",
+                "section": "def-public.ToastOptions",
                 "text": "ToastOptions"
               },
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.Toast",
+                "section": "def-public.Toast",
                 "text": "Toast"
               }
             ],
@@ -587,7 +571,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
-                "id": "def-common.ToastsApi.addWarning.$1",
+                "id": "def-public.ToastsApi.addWarning.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "toastOrTitle",
@@ -597,9 +581,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-common.ToastInput",
+                    "section": "def-public.ToastInput",
                     "text": "ToastInput"
                   }
                 ],
@@ -610,7 +594,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
-                "id": "def-common.ToastsApi.addWarning.$2",
+                "id": "def-public.ToastsApi.addWarning.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -620,9 +604,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-common.ToastOptions",
+                    "section": "def-public.ToastOptions",
                     "text": "ToastOptions"
                   },
                   " | undefined"
@@ -639,7 +623,7 @@
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
-            "id": "def-common.ToastsApi.addDanger",
+            "id": "def-public.ToastsApi.addDanger",
             "type": "Function",
             "tags": [],
             "label": "addDanger",
@@ -650,25 +634,25 @@
               "(toastOrTitle: ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.ToastInput",
+                "section": "def-public.ToastInput",
                 "text": "ToastInput"
               },
               ", options?: ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.ToastOptions",
+                "section": "def-public.ToastOptions",
                 "text": "ToastOptions"
               },
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.Toast",
+                "section": "def-public.Toast",
                 "text": "Toast"
               }
             ],
@@ -678,7 +662,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
-                "id": "def-common.ToastsApi.addDanger.$1",
+                "id": "def-public.ToastsApi.addDanger.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "toastOrTitle",
@@ -688,9 +672,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-common.ToastInput",
+                    "section": "def-public.ToastInput",
                     "text": "ToastInput"
                   }
                 ],
@@ -701,7 +685,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
-                "id": "def-common.ToastsApi.addDanger.$2",
+                "id": "def-public.ToastsApi.addDanger.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -711,9 +695,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-common.ToastOptions",
+                    "section": "def-public.ToastOptions",
                     "text": "ToastOptions"
                   },
                   " | undefined"
@@ -730,7 +714,7 @@
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
-            "id": "def-common.ToastsApi.addError",
+            "id": "def-public.ToastsApi.addError",
             "type": "Function",
             "tags": [],
             "label": "addError",
@@ -741,17 +725,17 @@
               "(error: Error, options: ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.ErrorToastOptions",
+                "section": "def-public.ErrorToastOptions",
                 "text": "ErrorToastOptions"
               },
               ") => ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.Toast",
+                "section": "def-public.Toast",
                 "text": "Toast"
               }
             ],
@@ -761,7 +745,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
-                "id": "def-common.ToastsApi.addError.$1",
+                "id": "def-public.ToastsApi.addError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "error",
@@ -778,7 +762,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-notifications-browser-internal",
-                "id": "def-common.ToastsApi.addError.$2",
+                "id": "def-public.ToastsApi.addError.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -788,9 +772,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-common.ErrorToastOptions",
+                    "section": "def-public.ErrorToastOptions",
                     "text": "ErrorToastOptions"
                   }
                 ],
@@ -814,30 +798,30 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-notifications-browser-internal",
-        "id": "def-common.NotificationsServiceContract",
+        "id": "def-public.NotificationsServiceContract",
         "type": "Type",
         "tags": [],
         "label": "NotificationsServiceContract",
         "description": [],
         "signature": [
-          "{ start: ({ i18n: i18nDep, overlays, theme, targetDomElement, }: ",
+          "{ start: ({ analytics, i18n: i18nDep, overlays, theme, targetDomElement, }: ",
           "StartDeps",
           ") => ",
           {
             "pluginId": "@kbn/core-notifications-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-common.NotificationsStart",
+            "section": "def-public.NotificationsStart",
             "text": "NotificationsStart"
           },
-          "; setup: ({ uiSettings }: ",
+          "; setup: ({ uiSettings, analytics }: ",
           "SetupDeps",
           ") => ",
           {
             "pluginId": "@kbn/core-notifications-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-common.NotificationsSetup",
+            "section": "def-public.NotificationsSetup",
             "text": "NotificationsSetup"
           },
           "; stop: () => void; }"
@@ -848,6 +832,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

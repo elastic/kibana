@@ -6,11 +6,8 @@
  */
 
 import React from 'react';
-
-import { EuiTableActionsColumnType } from '@elastic/eui';
-
-import { checkPermission } from '../../../../../capabilities/check_capabilities';
-
+import type { EuiTableActionsColumnType } from '@elastic/eui';
+import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 import { DeleteSpaceAwareItemCheckModal } from '../../../../../components/delete_space_aware_item_check_modal';
 import { useCloneAction } from '../action_clone';
 import { useDeleteAction, DeleteActionModal } from '../action_delete';
@@ -19,17 +16,19 @@ import { useStartAction, StartActionModal } from '../action_start';
 import { useStopAction, StopActionModal } from '../action_stop';
 import { useViewAction } from '../action_view';
 import { useMapAction } from '../action_map';
-
-import { DataFrameAnalyticsListRow } from './common';
+import type { DataFrameAnalyticsListRow } from './common';
 import { useRefreshAnalyticsList } from '../../../../common/analytics';
 
 export const useActions = (): {
   actions: EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions'];
   modals: JSX.Element | null;
 } => {
-  const canCreateDataFrameAnalytics: boolean = checkPermission('canCreateDataFrameAnalytics');
-  const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
-  const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrameAnalytics');
+  const [canCreateDataFrameAnalytics, canDeleteDataFrameAnalytics, canStartStopDataFrameAnalytics] =
+    usePermissionCheck([
+      'canCreateDataFrameAnalytics',
+      'canDeleteDataFrameAnalytics',
+      'canStartStopDataFrameAnalytics',
+    ]);
 
   const viewAction = useViewAction();
   const mapAction = useMapAction();

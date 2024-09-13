@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import copy from 'copy-to-clipboard';
 
-import { Actions } from '../../../common/api';
+import { UserActionActions } from '../../../common/types/domain';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
@@ -30,7 +30,7 @@ describe('createCommonUpdateUserActionBuilder ', () => {
   });
 
   it('renders correctly', async () => {
-    const userAction = getUserAction('title', Actions.update, {
+    const userAction = getUserAction('title', UserActionActions.update, {
       createdBy: { profileUid: userProfiles[0].uid },
     });
     const builder = createCommonUpdateUserActionBuilder({
@@ -59,7 +59,7 @@ describe('createCommonUpdateUserActionBuilder ', () => {
   });
 
   it('renders shows the move to comment button if the user action is an edit comment', async () => {
-    const userAction = getUserAction('comment', Actions.update);
+    const userAction = getUserAction('comment', UserActionActions.update);
     const builder = createCommonUpdateUserActionBuilder({
       userProfiles: userProfilesMap,
       userAction,
@@ -79,7 +79,7 @@ describe('createCommonUpdateUserActionBuilder ', () => {
   });
 
   it('it copies the reference link when clicking the reference button', async () => {
-    const userAction = getUserAction('comment', Actions.update);
+    const userAction = getUserAction('comment', UserActionActions.update);
     const builder = createCommonUpdateUserActionBuilder({
       userProfiles: userProfilesMap,
       userAction,
@@ -95,12 +95,12 @@ describe('createCommonUpdateUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByLabelText('Copy reference link'));
+    await userEvent.click(screen.getByLabelText('Copy reference link'));
     expect(copy).toHaveBeenCalled();
   });
 
   it('calls the handleOutlineComment when clicking the reference button', async () => {
-    const userAction = getUserAction('comment', Actions.update);
+    const userAction = getUserAction('comment', UserActionActions.update);
     const builder = createCommonUpdateUserActionBuilder({
       userProfiles: userProfilesMap,
       userAction,
@@ -116,7 +116,7 @@ describe('createCommonUpdateUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByLabelText('Highlight the referenced comment'));
+    await userEvent.click(screen.getByLabelText('Highlight the referenced comment'));
     expect(handleOutlineComment).toHaveBeenCalled();
   });
 });

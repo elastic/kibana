@@ -7,21 +7,17 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 
-import { I18nProvider } from '@kbn/i18n-react';
-import { EuiErrorBoundary } from '@elastic/eui';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  useUiSetting$,
-} from '@kbn/kibana-react-plugin/public';
-import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
-import type { RenderAppProps } from './types';
-import { CasesApp } from './components/app';
+import type { ScopedFilesClient } from '@kbn/files-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import type { RenderAppProps } from './types';
+
+import { CasesApp } from './components/app';
 
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
@@ -37,19 +33,21 @@ export const renderApp = (deps: RenderAppProps) => {
 interface CasesAppWithContextProps {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  getFilesClient: (scope: string) => ScopedFilesClient;
 }
 
 const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
-  ({ externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry }) => {
-    const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
-
+  ({
+    externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
+    getFilesClient,
+  }) => {
     return (
-      <StyledComponentsThemeProvider darkMode={darkMode}>
-        <CasesApp
-          externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
-          persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
-        />
-      </StyledComponentsThemeProvider>
+      <CasesApp
+        externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
+        persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
+        getFilesClient={getFilesClient}
+      />
     );
   }
 );
@@ -58,32 +56,27 @@ CasesAppWithContext.displayName = 'CasesAppWithContext';
 
 export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
   const { mountParams, coreStart, pluginsStart, storage, kibanaVersion } = deps;
-  const { history, theme$ } = mountParams;
+  const { history } = mountParams;
 
   return (
-    <EuiErrorBoundary>
-      <I18nProvider>
-        <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider
-            services={{
-              kibanaVersion,
-              ...coreStart,
-              ...pluginsStart,
-              storage,
-            }}
-          >
-            <Router history={history}>
-              <CasesAppWithContext
-                externalReferenceAttachmentTypeRegistry={
-                  deps.externalReferenceAttachmentTypeRegistry
-                }
-                persistableStateAttachmentTypeRegistry={deps.persistableStateAttachmentTypeRegistry}
-              />
-            </Router>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nProvider>
-    </EuiErrorBoundary>
+    <KibanaRenderContextProvider {...coreStart}>
+      <KibanaContextProvider
+        services={{
+          kibanaVersion,
+          ...coreStart,
+          ...pluginsStart,
+          storage,
+        }}
+      >
+        <Router history={history}>
+          <CasesAppWithContext
+            externalReferenceAttachmentTypeRegistry={deps.externalReferenceAttachmentTypeRegistry}
+            persistableStateAttachmentTypeRegistry={deps.persistableStateAttachmentTypeRegistry}
+            getFilesClient={pluginsStart.files.filesClientFactory.asScoped}
+          />
+        </Router>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
   );
 };
 

@@ -31,6 +31,10 @@
     "@kbn/core-http-browser",
     "@kbn/i18n-react",
     "@kbn/config-schema",
+    "@kbn/shared-ux-router",
+    "@kbn/data-views-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/rollup",
 
   ],
   "exclude": [

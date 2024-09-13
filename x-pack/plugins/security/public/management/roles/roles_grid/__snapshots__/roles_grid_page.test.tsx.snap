@@ -1,29 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<RolesGridPage /> renders permission denied if required 1`] = `
-<div
-  class="euiPanel euiPanel--danger euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter emotion-euiPanel-grow-m-l-danger"
-  role="main"
+<section
+  class="emotion-euiPageSection-l-center-danger"
 >
   <div
-    class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
+    class="emotion-euiPageSection__content-l-center"
   >
     <div
-      class="euiEmptyPrompt__main"
+      class="euiPanel euiPanel--transparent euiEmptyPrompt emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
     >
       <div
-        class="euiEmptyPrompt__icon"
-      >
-        <span
-          color="subdued"
-          data-euiicon-type="securityApp"
-        />
-      </div>
-      <div
-        class="euiEmptyPrompt__content"
+        class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
       >
         <div
-          class="euiEmptyPrompt__contentInner"
+          class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
+        >
+          <span
+            color="subdued"
+            data-euiicon-type="securityApp"
+          />
+        </div>
+        <div
+          class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
         >
           <h2
             class="euiTitle emotion-euiTitle-m"
@@ -46,5 +45,5 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
       </div>
     </div>
   </div>
-</div>
+</section>
 `;

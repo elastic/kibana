@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
+import type { EuiRadioGroupOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -15,21 +17,20 @@ import {
   EuiIcon,
   EuiPopover,
   EuiRadioGroup,
-  EuiRadioGroupOption,
   EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Entity } from './entity_control';
-import { UiPartitionFieldConfig } from '../series_controls/series_controls';
-import { EntityFieldType } from '../../../../../common/types/anomalies';
+import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
+import type { Entity } from './entity_control';
+import type { UiPartitionFieldConfig } from '../series_controls/series_controls';
 
 interface EntityConfigProps {
   entity: Entity;
   isModelPlotEnabled: boolean;
   config: UiPartitionFieldConfig;
-  onConfigChange: (fieldType: EntityFieldType, config: Partial<UiPartitionFieldConfig>) => void;
+  onConfigChange: (fieldType: MlEntityFieldType, config: Partial<UiPartitionFieldConfig>) => void;
 }
 
 export const EntityConfig: FC<EntityConfigProps> = ({

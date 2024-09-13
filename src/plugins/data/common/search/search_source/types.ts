@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { Query, AggregateQuery } from '@kbn/es-query';
-import { SerializableRecord } from '@kbn/utility-types';
-import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { Serializable, SerializableRecord } from '@kbn/utility-types';
+import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import type { ISearchOptions } from '@kbn/search-types';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { AggConfigSerialized, IAggConfigs, ISearchOptions } from '../../../public';
+import type { SearchField } from '@kbn/es-types';
+import type { AggConfigSerialized, IAggConfigs } from '../../../public';
 import type { SearchSource } from './search_source';
 
 /**
@@ -33,16 +35,13 @@ export interface ISearchStartSearchSource
    * @param fields
    */
   create: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
+
+  createLazy: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
   /**
    * creates empty {@link SearchSource}
    */
   createEmpty: () => ISearchSource;
 }
-
-/**
- * @deprecated use {@link estypes.SortResults} instead.
- */
-export type EsQuerySearchAfter = [string | number, string | number];
 
 export enum SortDirection {
   asc = 'asc',
@@ -66,12 +65,7 @@ export type EsQuerySortValue = Record<
   SortDirection | SortDirectionNumeric | SortDirectionFormat
 >;
 
-interface SearchField {
-  [key: string]: SearchFieldValue;
-}
-
-// @internal
-export type SearchFieldValue = string | SearchField;
+export type SearchFieldValue = SearchField & Serializable;
 
 /**
  * search source fields
@@ -178,53 +172,6 @@ export interface SearchSourceOptions {
   callParentStartHandlers?: boolean;
 }
 
-export interface SortOptions {
-  mode?: 'min' | 'max' | 'sum' | 'avg' | 'median';
-  type?: 'double' | 'long' | 'date' | 'date_nanos';
-  nested?: object;
-  unmapped_type?: string;
-  distance_type?: 'arc' | 'plane';
-  unit?: string;
-  ignore_unmapped?: boolean;
-  _script?: object;
-}
-
-export interface Request {
-  docvalue_fields: string[];
-  _source: unknown;
-  query: unknown;
-  script_fields: unknown;
-  sort: unknown;
-  stored_fields: string[];
-}
-
-export interface ResponseWithShardFailure {
-  _shards: {
-    failed: number;
-    failures: ShardFailure[];
-    skipped: number;
-    successful: number;
-    total: number;
-  };
-}
-
-export interface ShardFailure {
-  index: string;
-  node: string;
-  reason: {
-    caused_by: {
-      reason: string;
-      type: string;
-    };
-    reason: string;
-    lang?: estypes.ScriptLanguage;
-    script?: string;
-    script_stack?: string[];
-    type: string;
-  };
-  shard: number;
-}
-
 export function isSerializedSearchSource(
   maybeSerializedSearchSource: unknown
 ): maybeSerializedSearchSource is SerializedSearchSourceFields {
@@ -249,7 +196,7 @@ export interface SearchSourceSearchOptions extends ISearchOptions {
   inspector?: IInspectorInfo;
 
   /**
-   * Disable default warnings of shard failures
+   * Set to true to disable warning toasts and customize warning display
    */
-  disableShardFailureWarning?: boolean;
+  disableWarningToasts?: boolean;
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 declare module 'axios/lib/adapters/xhr';
@@ -16,7 +17,5 @@ declare module 'axios/lib/adapters/xhr';
 declare module 'react-syntax-highlighter/dist/cjs/create-element';
 declare module 'react-syntax-highlighter/dist/cjs/prism-light';
 
-// Monaco languages support
-declare module 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
-declare module 'monaco-editor/esm/vs/basic-languages/css/css';
-declare module 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
+declare module 'find-cypress-specs';
+declare module '@cypress/grep/src/plugin';

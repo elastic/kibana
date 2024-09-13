@@ -12,12 +12,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
 import { useTestQuery } from './use_test_query';
+import { TestQueryRowTable } from './test_query_row_table';
 
 export interface TestQueryRowProps {
   fetch: () => Promise<{
@@ -27,14 +29,24 @@ export interface TestQueryRowProps {
   }>;
   copyQuery?: () => string;
   hasValidationErrors: boolean;
+  showTable?: boolean;
 }
 
 export const TestQueryRow: React.FC<TestQueryRowProps> = ({
   fetch,
   copyQuery,
   hasValidationErrors,
+  showTable,
 }) => {
-  const { onTestQuery, testQueryResult, testQueryError, testQueryLoading } = useTestQuery(fetch);
+  const {
+    onTestQuery,
+    testQueryResult,
+    testQueryError,
+    testQueryLoading,
+    testQueryRawResults,
+    testQueryAlerts,
+  } = useTestQuery(fetch);
+
   const [copiedMessage, setCopiedMessage] = useState<ReactNode | null>(null);
 
   return (
@@ -123,6 +135,12 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
             <p>{testQueryError}</p>
           </EuiText>
         </EuiFormRow>
+      )}
+      {showTable && testQueryRawResults && (
+        <>
+          <EuiSpacer size="s" />
+          <TestQueryRowTable rawResults={testQueryRawResults} alerts={testQueryAlerts} />
+        </>
       )}
     </>
   );

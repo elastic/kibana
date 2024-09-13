@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, FC } from 'react';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -20,7 +21,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { type DataView } from '@kbn/data-plugin/common';
-import type { FieldStatsProps, FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import type {
+  FieldStatsProps,
+  FieldStatsServices,
+} from '@kbn/unified-field-list/src/components/field_stats';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 import { FieldStatsContent } from './field_stats_content';

@@ -6,13 +6,12 @@
  */
 
 import React, { useState } from 'react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { FleetStart } from '@kbn/fleet-plugin/public';
+import { KibanaSavedObjectType } from '@kbn/fleet-plugin/public';
+import { MonitoringStartServices } from '../../../types';
 
 const INGEST_PIPELINE_DASHBOARD_ID = 'elasticsearch-metrics-ingest-pipelines';
 
@@ -22,14 +21,18 @@ const INGEST_PIPELINE_DASHBOARD_ID = 'elasticsearch-metrics-ingest-pipelines';
  * @param services
  * @returns
  */
-export const ingestPipelineTabOnClick = async (
-  services: Partial<CoreStart & { dashboard: DashboardStart; fleet: FleetStart }>
-) => {
-  const dashboard = await services.savedObjects!.client.get(
-    'dashboard',
-    INGEST_PIPELINE_DASHBOARD_ID
-  );
-  const dashboardFound = !dashboard.error && dashboard.attributes;
+export const ingestPipelineTabOnClick = async (services: MonitoringStartServices) => {
+  const response = await services.fleet?.hooks.epm.getBulkAssets({
+    assetIds: [
+      {
+        id: INGEST_PIPELINE_DASHBOARD_ID,
+        type: 'dashboard' as KibanaSavedObjectType,
+      },
+    ],
+  });
+  const dashboardFound =
+    response?.data?.items?.length &&
+    response.data.items.some((item) => item.id === INGEST_PIPELINE_DASHBOARD_ID);
 
   const navigateToDashboard = () =>
     services.dashboard!.locator!.navigate({
@@ -37,7 +40,10 @@ export const ingestPipelineTabOnClick = async (
     });
 
   if (!dashboardFound) {
-    const installPackage = () => services.http!.post('/api/fleet/epm/packages/elasticsearch');
+    const installPackage = () =>
+      services.http!.post('/api/fleet/epm/packages/elasticsearch', {
+        headers: { 'Elastic-Api-Version': '2023-10-31' },
+      });
 
     const ref = services.overlays!.openModal(
       toMountPoint(
@@ -47,9 +53,7 @@ export const ingestPipelineTabOnClick = async (
           canInstallPackages={!!services.fleet?.authz.integrations.installPackages}
           closeModal={() => ref.close()}
         />,
-        {
-          theme$: services.theme?.theme$,
-        }
+        services
       )
     );
 

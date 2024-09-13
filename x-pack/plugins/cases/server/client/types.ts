@@ -6,16 +6,15 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { SavedObjectsClientContract, Logger, SavedObject } from '@kbn/core/server';
+import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
-import type { CasesFindRequest, User } from '../../common/api';
+import type { CasesSearchRequest } from '../../common/types/api';
 import type { Authorization } from '../authorization/authorization';
 import type {
   CaseConfigureService,
@@ -29,6 +28,7 @@ import type { PersistableStateAttachmentTypeRegistry } from '../attachment_frame
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { LicensingService } from '../services/licensing';
 import type { NotificationService } from '../services/notifications/types';
+import type { User } from '../common/types/user';
 
 export interface CasesServices {
   alertsService: AlertService;
@@ -61,11 +61,19 @@ export interface CasesClientArgs {
   readonly fileService: FileServiceStart;
 }
 
-export type CasesFindQueryParams = Partial<
+export type CasesSearchParams = Partial<
   Pick<
-    CasesFindRequest,
-    'tags' | 'reporters' | 'status' | 'severity' | 'owner' | 'from' | 'to' | 'assignees'
-  > & { sortByField?: string; authorizationFilter?: KueryNode }
+    CasesSearchRequest,
+    | 'tags'
+    | 'reporters'
+    | 'status'
+    | 'severity'
+    | 'owner'
+    | 'from'
+    | 'to'
+    | 'assignees'
+    | 'category'
+    | 'sortField'
+    | 'customFields'
+  > & { authorizationFilter?: KueryNode }
 >;
-
-export type SOWithErrors<T> = Array<SavedObject<T> & { error: SavedObjectError }>;

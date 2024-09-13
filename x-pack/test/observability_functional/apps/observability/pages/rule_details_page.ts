@@ -148,10 +148,14 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Alert summary widget component', () => {
       before(async () => {
-        await observability.alerts.common.navigateToRuleDetailsByRuleId(uptimeRuleId);
+        await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
+        await retry.waitFor(
+          'Rule details to be visible',
+          async () => await testSubjects.exists('ruleDetails')
+        );
       });
 
-      it('shows component on the rule detils page', async () => {
+      it('shows component on the rule details page', async () => {
         await observability.components.alertSummaryWidget.getCompactComponentSelectorOrFail();
 
         const timeRangeTitle =
@@ -159,9 +163,9 @@ export default ({ getService }: FtrProviderContext) => {
         expect(timeRangeTitle).to.be('Last 30 days');
       });
 
-      it('handles clicking on active correctly', async () => {
+      it('handles clicking on active alerts correctly', async () => {
         const activeAlerts =
-          await observability.components.alertSummaryWidget.getCompactActiveAlertSelector();
+          await observability.components.alertSummaryWidget.getActiveAlertSelector();
         await activeAlerts.click();
 
         const url = await browser.getCurrentUrl();
@@ -174,10 +178,10 @@ export default ({ getService }: FtrProviderContext) => {
         expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
       });
 
-      it('handles clicking on widget correctly', async () => {
-        const compactWidget =
-          await observability.components.alertSummaryWidget.getCompactWidgetSelector();
-        await compactWidget.click();
+      it('handles clicking on total alerts correctly', async () => {
+        const totalAlerts =
+          await observability.components.alertSummaryWidget.getTotalAlertSelector();
+        await totalAlerts.click();
 
         const url = await browser.getCurrentUrl();
         const from = 'rangeFrom:now-30d';
@@ -190,7 +194,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('User permissions', () => {
+    describe('User permissions', function () {
+      this.tags('skipFIPS');
       before(async () => {
         await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
       });

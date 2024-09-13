@@ -1,25 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { lazy, Suspense } from 'react';
-import ReactDOM from 'react-dom';
 import { EuiPortal, EuiProgress } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   getHttp,
   getTypes,
-  getUISettings,
   getApplication,
   getEmbeddable,
   getDocLinks,
+  getAnalytics,
+  getI18n,
   getTheme,
-  getSavedObjectsManagement,
+  getContentManagement,
+  getUISettings,
 } from '../services';
 import type { BaseVisType } from '../vis_types';
 
@@ -38,7 +39,7 @@ export interface ShowNewVisModalParams {
 /**
  * shows modal dialog that allows you to create new visualization
  * @param {string[]} editorParams
- * @param {function} onClose - function that will be called when dialog is closed
+ * @param {Function} onClose - function that will be called when dialog is closed
  */
 export function showNewVisModal({
   editorParams = [],
@@ -49,21 +50,24 @@ export function showNewVisModal({
   selectedVisType,
 }: ShowNewVisModalParams = {}) {
   const container = document.createElement('div');
+
   let isClosed = false;
+
+  // initialize variable that will hold reference for unmount
+  // eslint-disable-next-line prefer-const
+  let unmount: ReturnType<ReturnType<typeof toMountPoint>>;
+
   const handleClose = () => {
     if (isClosed) return;
-    ReactDOM.unmountComponentAtNode(container);
-    document.body.removeChild(container);
-    if (onClose) {
-      onClose();
-    }
+
+    onClose?.();
+    unmount?.();
     isClosed = true;
   };
 
-  document.body.appendChild(container);
-  const element = (
-    <KibanaThemeProvider theme$={getTheme().theme$}>
-      <I18nProvider>
+  const mount = toMountPoint(
+    React.createElement(function () {
+      return (
         <Suspense
           fallback={
             <EuiPortal>
@@ -79,20 +83,21 @@ export function showNewVisModal({
             outsideVisualizeApp={outsideVisualizeApp}
             editorParams={editorParams}
             visTypesRegistry={getTypes()}
-            addBasePath={getHttp().basePath.prepend}
+            contentClient={getContentManagement().client}
             uiSettings={getUISettings()}
-            http={getHttp()}
-            savedObjectsManagement={getSavedObjectsManagement()}
+            addBasePath={getHttp().basePath.prepend}
             application={getApplication()}
             docLinks={getDocLinks()}
             showAggsSelection={showAggsSelection}
             selectedVisType={selectedVisType}
           />
         </Suspense>
-      </I18nProvider>
-    </KibanaThemeProvider>
+      );
+    }),
+    { analytics: getAnalytics(), i18n: getI18n(), theme: getTheme() }
   );
-  ReactDOM.render(element, container);
+
+  unmount = mount(container);
 
   return () => handleClose();
 }

@@ -20,7 +20,11 @@ import { CustomPipelineItem } from './custom_pipeline_item';
 import { DefaultPipelineItem } from './default_pipeline_item';
 import { IngestPipelineFlyout } from './ingest_pipeline_flyout';
 
-export const IngestPipelinesCard: React.FC = () => {
+interface IngestPipelinesCardProps {
+  extractionDisabled: boolean;
+}
+
+export const IngestPipelinesCard: React.FC<IngestPipelinesCardProps> = ({ extractionDisabled }) => {
   const { indexName, ingestionMethod } = useValues(IndexViewLogic);
 
   const { canSetPipeline, index, pipelineName, pipelineState, showPipelineSettings } =
@@ -42,6 +46,7 @@ export const IngestPipelinesCard: React.FC = () => {
         <IngestPipelineFlyout
           closeFlyout={closePipelineSettings}
           displayOnly={!canSetPipeline}
+          extractionDisabled={extractionDisabled}
           indexName={indexName}
           ingestionMethod={ingestionMethod}
           isLoading={false}

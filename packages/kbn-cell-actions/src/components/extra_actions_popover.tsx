@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -24,6 +25,7 @@ const euiContextMenuItemCSS = css`
 `;
 
 interface ActionsPopOverProps {
+  anchorPosition: 'rightCenter' | 'downCenter';
   actionContext: CellActionExecutionContext;
   isOpen: boolean;
   closePopOver: () => void;
@@ -32,6 +34,7 @@ interface ActionsPopOverProps {
 }
 
 export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
+  anchorPosition,
   actions,
   actionContext,
   isOpen,
@@ -43,7 +46,7 @@ export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
     isOpen={isOpen}
     closePopover={closePopOver}
     panelPaddingSize="xs"
-    anchorPosition={'downCenter'}
+    anchorPosition={anchorPosition}
     hasArrow
     repositionOnScroll
     ownFocus
@@ -59,11 +62,15 @@ export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
 );
 
 interface ExtraActionsPopOverWithAnchorProps
-  extends Pick<ActionsPopOverProps, 'actionContext' | 'closePopOver' | 'isOpen' | 'actions'> {
+  extends Pick<
+    ActionsPopOverProps,
+    'anchorPosition' | 'actionContext' | 'closePopOver' | 'isOpen' | 'actions'
+  > {
   anchorRef: React.RefObject<HTMLElement>;
 }
 
 export const ExtraActionsPopOverWithAnchor = ({
+  anchorPosition,
   anchorRef,
   actionContext,
   isOpen,
@@ -77,7 +84,7 @@ export const ExtraActionsPopOverWithAnchor = ({
       isOpen={isOpen}
       closePopover={closePopOver}
       panelPaddingSize="xs"
-      anchorPosition={'downCenter'}
+      anchorPosition={anchorPosition}
       hasArrow={false}
       repositionOnScroll
       ownFocus
@@ -122,10 +129,15 @@ const ExtraActionsPopOverContent: React.FC<ExtraActionsPopOverContentProps> = ({
       )),
     [actionContext, actions, closePopOver]
   );
+
   return (
     <>
       <EuiScreenReaderOnly>
-        <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field.name)}</p>
+        <p>
+          {YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(
+            actionContext.data.map(({ field }) => field.name).join(', ')
+          )}
+        </p>
       </EuiScreenReaderOnly>
       <EuiContextMenuPanel size="s" items={items} />
     </>

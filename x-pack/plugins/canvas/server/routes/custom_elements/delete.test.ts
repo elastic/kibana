@@ -32,7 +32,8 @@ describe('DELETE custom element', () => {
     const routerDeps = getMockedRouterDeps();
     initializeDeleteCustomElementRoute(routerDeps);
 
-    routeHandler = routerDeps.router.delete.mock.calls[0][1];
+    routeHandler =
+      routerDeps.router.versioned.delete.mock.results[0].value.addVersion.mock.calls[0][1];
   });
 
   it(`returns 200 ok when the custom element is deleted`, async () => {

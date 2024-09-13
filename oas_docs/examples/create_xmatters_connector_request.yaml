@@ -1,0 +1,8 @@
+summary: Create an xMatters connector with URL authentication.
+value:
+  name: my-xmatters-connector
+  connector_type_id: .xmatters
+  config:
+    usesBasic: false
+  secrets: 
+    secretsUrl: https://example.com?apiKey=xxxxx

@@ -5,18 +5,36 @@
  * 2.0.
  */
 
+import type {
+  GeoShapeRelation,
+  QueryDslFieldLookup,
+  QueryDslGeoBoundingBoxQuery,
+  QueryDslGeoDistanceQuery,
+  QueryDslGeoShapeFieldQuery,
+  QueryDslGeoShapeQuery,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { Feature, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
 // @ts-expect-error
 import turfCircle from '@turf/circle';
-import { FilterMeta, FILTERS } from '@kbn/es-query';
+import { Filter, FilterMeta, FILTERS } from '@kbn/es-query';
 import { MapExtent } from '../descriptor_types';
-import { ES_SPATIAL_RELATIONS } from '../constants';
 import { getEsSpatialRelationLabel } from '../i18n_getters';
-import { GeoFilter, GeoShapeQueryBody, PreIndexedShape } from './types';
 import { makeESBbox } from './elasticsearch_geo_utils';
 
 const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;
+
+type GeoFilter = Filter & {
+  geo_bounding_box?: QueryDslGeoBoundingBoxQuery;
+  geo_distance?: QueryDslGeoDistanceQuery;
+  geo_grid?: {
+    [geoFieldName: string]: {
+      geohex?: string;
+      geotile?: string;
+    };
+  };
+  geo_shape?: QueryDslGeoShapeQuery;
+};
 
 // wrapper around boiler plate code for creating bool.should clause with nested bool.must clauses
 // ensuring geoField exists prior to running geoField query
@@ -102,13 +120,13 @@ export function buildGeoShapeFilter({
   geometry,
   geometryLabel,
   geoFieldNames,
-  relation = ES_SPATIAL_RELATIONS.INTERSECTS,
+  relation = 'intersects',
 }: {
-  preIndexedShape?: PreIndexedShape | null;
+  preIndexedShape?: QueryDslFieldLookup | null;
   geometry?: MultiPolygon | Polygon;
   geometryLabel: string;
   geoFieldNames: string[];
-  relation?: ES_SPATIAL_RELATIONS;
+  relation?: GeoShapeRelation;
 }): GeoFilter {
   const meta: FilterMeta = {
     type: SPATIAL_FILTER_TYPE,
@@ -118,7 +136,7 @@ export function buildGeoShapeFilter({
   };
 
   function createGeoFilter(geoFieldName: string) {
-    const shapeQuery: GeoShapeQueryBody = {
+    const shapeQuery: QueryDslGeoShapeFieldQuery = {
       relation,
     };
     if (preIndexedShape) {
@@ -137,9 +155,6 @@ export function buildGeoShapeFilter({
     };
   }
 
-  // Currently no way to create an object with exclude property from index signature
-  // typescript error for "ignore_unmapped is not assignable to type 'GeoShapeQueryBody'" expected"
-  // @ts-expect-error
   return createMultiGeoFieldFilter(geoFieldNames, meta, createGeoFilter);
 }
 
@@ -220,8 +235,12 @@ function extractGeometryFromFilter(geoFieldName: string, filter: GeoFilter): Geo
     return circleFeature.geometry;
   }
 
-  if (filter.geo_shape && filter.geo_shape[geoFieldName] && filter.geo_shape[geoFieldName].shape) {
-    return filter.geo_shape[geoFieldName].shape;
+  if (
+    filter.geo_shape &&
+    filter.geo_shape[geoFieldName] &&
+    (filter.geo_shape[geoFieldName] as QueryDslGeoShapeFieldQuery).shape
+  ) {
+    return (filter.geo_shape[geoFieldName] as QueryDslGeoShapeFieldQuery).shape;
   }
 }
 

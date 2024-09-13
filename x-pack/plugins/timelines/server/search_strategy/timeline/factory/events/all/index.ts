@@ -6,24 +6,24 @@
  */
 
 import { cloneDeep, getOr } from 'lodash/fp';
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import { buildAlertFieldsRequest as buildFieldsRequest } from '@kbn/alerts-as-data-utils';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import {
   EventHit,
-  TimelineEventsQueries,
   TimelineEventsAllStrategyResponse,
-  TimelineEventsAllRequestOptions,
   TimelineEdges,
 } from '../../../../../../common/search_strategy';
 import { TimelineFactory } from '../../types';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { buildFieldsRequest } from '../../helpers/build_fields_request';
 import { formatTimelineData } from '../../helpers/format_timeline_data';
 import { TIMELINE_EVENTS_FIELDS } from '../../helpers/constants';
 
 export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
-  buildDsl: ({ authFilter, ...options }: TimelineEventsAllRequestOptions) => {
+  buildDsl: ({ authFilter, ...options }) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
@@ -32,26 +32,26 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
     return buildTimelineEventsAllQuery({ ...queryOptions, authFilter });
   },
   parse: async (
-    options: TimelineEventsAllRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<TimelineEventsAllStrategyResponse> => {
     // eslint-disable-next-line prefer-const
     let { fieldRequested, ...queryOptions } = cloneDeep(options);
     queryOptions.fields = buildFieldsRequest(fieldRequested, queryOptions.excludeEcsData);
 
-    const { activePage, querySize } = options.pagination;
+    const {
+      pagination: { activePage, querySize } = {
+        activePage: undefined,
+        querySize: DEFAULT_MAX_TABLE_QUERY_SIZE,
+      },
+    } = options;
     const producerBuckets = getOr([], 'aggregations.producers.buckets', response.rawResponse);
     const totalCount = response.rawResponse.hits.total || 0;
-    const hits = response.rawResponse.hits.hits;
+    const hits: SearchHit[] = getOr([], 'rawResponse.hits.hits', response);
 
     if (fieldRequested.includes('*') && hits.length > 0) {
       const fieldsReturned = hits.flatMap((hit) => Object.keys(hit.fields ?? {}));
-      fieldRequested = fieldsReturned.reduce((acc, f) => {
-        if (!acc.includes(f)) {
-          return [...acc, f];
-        }
-        return acc;
-      }, fieldRequested);
+      fieldRequested = [...new Set(fieldsReturned)];
     }
 
     const edges: TimelineEdges[] = await Promise.all(
@@ -64,11 +64,11 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
       )
     );
 
-    const consumers: Record<string, number> = producerBuckets.reduce(
-      (acc: Record<string, number>, b: { key: string; doc_count: number }) => ({
-        ...acc,
-        [b.key]: b.doc_count,
-      }),
+    const consumers = producerBuckets.reduce(
+      (acc: Record<string, number>, b: { key: string; doc_count: number }) => {
+        acc[b.key] = b.doc_count;
+        return acc;
+      },
       {}
     );
 

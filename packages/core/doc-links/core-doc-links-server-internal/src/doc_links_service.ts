@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
@@ -12,16 +13,16 @@ import type { DocLinksServiceSetup, DocLinksServiceStart } from '@kbn/core-doc-l
 
 /** @internal */
 export class DocLinksService {
-  private readonly kibanaBranch: string;
   private docLinks?: DocLinksServiceSetup;
 
-  constructor(core: CoreContext) {
-    this.kibanaBranch = core.env.packageInfo.branch;
-  }
+  constructor(private readonly coreContext: CoreContext) {}
 
   public setup(): DocLinksServiceSetup {
-    const docMeta = getDocLinksMeta({ kibanaBranch: this.kibanaBranch });
-    const docLinks = getDocLinks({ kibanaBranch: this.kibanaBranch });
+    const kibanaBranch = this.coreContext.env.packageInfo.branch;
+    const buildFlavor = this.coreContext.env.packageInfo.buildFlavor;
+
+    const docMeta = getDocLinksMeta({ kibanaBranch, buildFlavor });
+    const docLinks = getDocLinks({ kibanaBranch, buildFlavor });
     this.docLinks = {
       ...docMeta,
       links: docLinks,

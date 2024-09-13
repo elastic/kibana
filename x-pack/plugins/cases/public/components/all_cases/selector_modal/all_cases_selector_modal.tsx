@@ -13,52 +13,52 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useEuiTheme,
 } from '@elastic/eui';
-import styled from 'styled-components';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { css } from '@emotion/react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import type { Case, CaseStatusWithAllStatus } from '../../../../common/ui/types';
+import type { CaseStatuses } from '../../../../common/types/domain';
+import type { CaseUI } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
-import { casesQueryClient } from '../../cases_context/query_client';
 
 export interface AllCasesSelectorModalProps {
-  hiddenStatuses?: CaseStatusWithAllStatus[];
-  onRowClick?: (theCase?: Case) => void;
-  onClose?: () => void;
+  hiddenStatuses?: CaseStatuses[];
+  onRowClick?: (theCase?: CaseUI) => void;
+  onClose?: (theCase?: CaseUI, isCreateCase?: boolean) => void;
+  onCreateCaseClicked?: () => void;
 }
-
-const Modal = styled(EuiModal)`
-  ${({ theme }) => `
-    min-width: ${theme.eui.euiBreakpoints.m};
-    max-width: ${theme.eui.euiBreakpoints.xl};
-  `}
-`;
 
 export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
   ({ hiddenStatuses, onRowClick, onClose }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
+    const { euiTheme } = useEuiTheme();
     const closeModal = useCallback(() => {
-      if (onClose) {
-        onClose();
-      }
+      onClose?.();
       setIsModalOpen(false);
     }, [onClose]);
 
     const onClick = useCallback(
-      (theCase?: Case) => {
-        closeModal();
-        if (onRowClick) {
-          onRowClick(theCase);
-        }
+      (theCase?: CaseUI, isCreateCase?: boolean) => {
+        onClose?.(theCase, isCreateCase);
+        setIsModalOpen(false);
+
+        onRowClick?.(theCase);
       },
-      [closeModal, onRowClick]
+      [onClose, onRowClick]
     );
 
     return isModalOpen ? (
-      <QueryClientProvider client={casesQueryClient}>
+      <>
         <ReactQueryDevtools initialIsOpen={false} />
-        <Modal onClose={closeModal} data-test-subj="all-cases-modal">
+        <EuiModal
+          onClose={closeModal}
+          data-test-subj="all-cases-modal"
+          css={css`
+            min-width: ${euiTheme.breakpoint.m}px;
+            max-width: ${euiTheme.breakpoint.xl}px;
+          `}
+        >
           <EuiModalHeader>
             <EuiModalHeaderTitle>{i18n.SELECT_CASE_TITLE}</EuiModalHeaderTitle>
           </EuiModalHeader>
@@ -78,8 +78,8 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiModalFooter>
-        </Modal>
-      </QueryClientProvider>
+        </EuiModal>
+      </>
     ) : null;
   }
 );

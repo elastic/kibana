@@ -17,9 +17,13 @@ import { TimeRange } from '@kbn/es-query';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { FormulaPublicApi, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
+import { AnalyticsCollection } from '../../../../common/types/analytics';
+
 import { KibanaLogic } from '../../shared/kibana';
+import { findOrCreateDataView } from '../utils/find_or_create_data_view';
 
 export interface WithLensDataInputProps {
+  collection: AnalyticsCollection;
   id: string;
   searchSessionId?: string;
   setTimeRange?(timeRange: TimeRange): void;
@@ -36,7 +40,6 @@ interface WithLensDataParams<Props, OutputState> {
     formulaApi: FormulaPublicApi,
     props: Props
   ) => TypedLensByValueInput['attributes'];
-  getDataViewQuery: (props: Props) => string;
   initialValues: OutputState;
 }
 
@@ -45,15 +48,11 @@ export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
   {
     dataLoadTransform,
     getAttributes,
-    getDataViewQuery,
     initialValues,
   }: WithLensDataParams<Omit<T, keyof OutputState>, OutputState>
 ) => {
   const ComponentWithLensData: React.FC<T & WithLensDataInputProps> = (props) => {
-    const {
-      lens: { EmbeddableComponent, stateHelperApi },
-      data: { dataViews },
-    } = useValues(KibanaLogic);
+    const { lens } = useValues(KibanaLogic);
     const [dataView, setDataView] = useState<DataView | null>(null);
     const [data, setData] = useState<OutputState>(initialValues);
     const [formula, setFormula] = useState<FormulaPublicApi | null>(null);
@@ -73,21 +72,21 @@ export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
 
     useEffect(() => {
       (async () => {
-        const [target] = await dataViews.find(getDataViewQuery(props), 1);
-
-        if (target) {
-          setDataView(target);
-        }
+        setDataView(await findOrCreateDataView(props.collection));
       })();
     }, [props]);
     useEffect(() => {
       (async () => {
-        const helper = await stateHelperApi();
-
-        setFormula(helper.formula);
+        if (lens?.stateHelperApi) {
+          const helper = await lens.stateHelperApi();
+          setFormula(helper.formula);
+        }
       })();
     }, []);
 
+    if (!lens) return null;
+
+    const { EmbeddableComponent } = lens;
     return (
       <>
         <Component {...(props as T)} {...data} />
@@ -99,9 +98,9 @@ export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
               attributes={attributes}
               searchSessionId={props?.searchSessionId}
               onBrushEnd={handleBrushEnd}
-              onLoad={(...args) => {
+              onLoad={(isLoading, adapters) => {
                 if (dataLoadTransform) {
-                  setData(dataLoadTransform(...args));
+                  setData(dataLoadTransform(isLoading, adapters));
                 }
               }}
             />

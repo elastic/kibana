@@ -14,12 +14,25 @@ properties:
     example: 'my description'
   namespace:
     type: string
-    description: namespace by default "default"
-    example: 'default'
+    description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
+    example: 'customnamespace'
+  output_id:
+    type: string
+    description: Output ID to send package data to
+    example: 'output-id'
+    nullable: true
   policy_id:
     type: string
     description: Agent policy ID where that package policy will be added
     example: 'agent-policy-id'
+    deprecated: true
+    nullable: true
+  policy_ids:
+    type: array
+    items:
+      type: string
+    description: Agent policy IDs where that package policy will be added
+    example: ['agent-policy-id']
   package:
     type: object
     properties:
@@ -74,10 +87,16 @@ properties:
               vars:
                 type: object
                 description: Stream level variable (see integration documentation for more information)
+  overrides:
+    type: object
+    properties:
+      inputs:
+        type: object
+    description: Override settings that are defined in the package policy. The override option should be used only in unusual circumstances and not as a routine procedure.
+    nullable: true
   force:
     type: boolean
     description: Force package policy creation even if package is not verified, or if the agent policy is managed.
 required:
   - name
-  - policy_id
   - package

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -15,8 +15,7 @@ import {
   EuiImage,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
@@ -25,11 +24,12 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { API_ENDPOINT, ScreenshottingExpressionResponse } from '../../common';
-import { HttpContext } from './http_context';
+import { useAppContext } from './http_context';
 
 export function App() {
-  const http = useContext(HttpContext);
+  const { http, ...startServices } = useAppContext();
   const [expression, setExpression] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<ScreenshottingExpressionResponse>();
@@ -38,7 +38,7 @@ export function App() {
     try {
       setLoading(true);
       setResponse(
-        await http?.get<ScreenshottingExpressionResponse>(API_ENDPOINT, {
+        await http.get<ScreenshottingExpressionResponse>(API_ENDPOINT, {
           query: { expression },
         })
       );
@@ -51,17 +51,17 @@ export function App() {
   }, []);
 
   return (
-    <EuiPage>
-      <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="l">
-              <h1>Screenshotting Demo</h1>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody>
+    <KibanaRenderContextProvider {...startServices}>
+      <EuiPage>
+        <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <EuiPageHeader>
+            <EuiPageHeaderSection>
+              <EuiTitle size="l">
+                <h1>Screenshotting Demo</h1>
+              </EuiTitle>
+            </EuiPageHeaderSection>
+          </EuiPageHeader>
+          <EuiPageSection>
             <EuiText>
               <p>This example captures a screenshot of an expression provided below.</p>
             </EuiText>
@@ -129,9 +129,9 @@ export function App() {
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+          </EuiPageSection>
+        </EuiPageBody>
+      </EuiPage>
+    </KibanaRenderContextProvider>
   );
 }

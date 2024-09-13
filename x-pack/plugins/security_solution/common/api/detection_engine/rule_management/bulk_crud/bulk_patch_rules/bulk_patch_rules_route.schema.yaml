@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+  title: Bulk Patch API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/rules/_bulk_update:
+    patch:
+      x-labels: [ess]
+      x-codegen-enabled: true
+      summary: Patch multiple detection rules
+      operationId: BulkPatchRules
+      deprecated: true
+      description: Update specific fields of existing detection rules using the `rule_id` or `id` field.
+      tags:
+        - Bulk API
+      requestBody:
+        description: A JSON array of rules, where each rule contains the required fields.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RulePatchProps'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '../response_schema.schema.yaml#/components/schemas/BulkCrudRulesResponse'

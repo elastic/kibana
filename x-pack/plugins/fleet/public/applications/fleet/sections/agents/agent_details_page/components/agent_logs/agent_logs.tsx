@@ -4,20 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import url from 'url';
-import { stringify } from 'querystring';
-
 import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import { encode } from '@kbn/rison';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
   EuiFilterGroup,
   EuiPanel,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
@@ -28,9 +22,9 @@ import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
 
 import { createStateContainerReactHelpers } from '@kbn/kibana-utils-plugin/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { TimeRange } from '@kbn/es-query';
-import { LogStream } from '@kbn/infra-plugin/public';
+import { LogStream, type LogStreamProps } from '@kbn/logs-shared-plugin/public';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useLink, useStartServices } from '../../../../../hooks';
@@ -41,6 +35,7 @@ import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
 import { buildQuery } from './build_query';
 import { SelectLogLevel } from './select_log_level';
+import { ViewLogsButton, getFormattedRange } from './view_logs_button';
 
 const WrapperFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -49,6 +44,19 @@ const WrapperFlexGroup = styled(EuiFlexGroup)`
 const DatePickerFlexItem = styled(EuiFlexItem)`
   max-width: 312px;
 `;
+
+const LOG_VIEW_SETTINGS: LogStreamProps['logView'] = {
+  type: 'log-view-reference',
+  logViewId: 'default',
+};
+
+const LOG_VIEW_COLUMNS: LogStreamProps['columns'] = [
+  { type: 'timestamp' },
+  { field: 'event.dataset', type: 'field' },
+  { field: 'component.id', type: 'field' },
+  { type: 'message' },
+  { field: 'error.message', type: 'field' },
+];
 
 export interface AgentLogsProps {
   agent: Agent;
@@ -112,7 +120,7 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
 
 export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
   ({ agent, agentPolicy, state }) => {
-    const { data, application, http } = useStartServices();
+    const { data, application } = useStartServices();
     const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();
 
     // Util to convert date expressions (returned by datepicker) to timestamps (used by LogStream)
@@ -209,28 +217,6 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
           userQuery: state.query,
         }),
       [agent.id, state.datasets, state.logLevels, state.query]
-    );
-
-    // Generate URL to pass page state to Logs UI
-    const viewInLogsUrl = useMemo(
-      () =>
-        http.basePath.prepend(
-          url.format({
-            pathname: '/app/logs/stream',
-            search: stringify({
-              logPosition: encode({
-                start: state.start,
-                end: state.end,
-                streamLive: false,
-              }),
-              logFilter: encode({
-                expression: logStreamQuery,
-                kind: 'kuery',
-              }),
-            }),
-          })
-        ),
-      [http.basePath, state.start, state.end, logStreamQuery]
     );
 
     const agentVersion = agent.local_metadata?.elastic?.agent?.version;
@@ -336,13 +322,16 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
               />
             </DatePickerFlexItem>
             <EuiFlexItem grow={false}>
-              <RedirectAppLinks application={application}>
-                <EuiButtonEmpty href={viewInLogsUrl} iconType="popout" flush="both">
-                  <FormattedMessage
-                    id="xpack.fleet.agentLogs.openInLogsUiLinkText"
-                    defaultMessage="Open in Logs"
-                  />
-                </EuiButtonEmpty>
+              <RedirectAppLinks
+                coreStart={{
+                  application,
+                }}
+              >
+                <ViewLogsButton
+                  logStreamQuery={logStreamQuery}
+                  startTime={getFormattedRange(state.start)}
+                  endTime={getFormattedRange(state.end)}
+                />
               </RedirectAppLinks>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -350,16 +339,20 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
         <EuiFlexItem>
           <EuiPanel paddingSize="none" panelRef={logsPanelRef} grow={false}>
             <LogStream
-              logView={{ type: 'log-view-reference', logViewId: 'default' }}
+              logView={LOG_VIEW_SETTINGS}
               height={logPanelHeight}
               startTimestamp={dateRangeTimestamps.start}
               endTimestamp={dateRangeTimestamps.end}
               query={logStreamQuery}
+              columns={LOG_VIEW_COLUMNS}
             />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <SelectLogLevel agent={agent} />
+          <SelectLogLevel
+            agent={agent}
+            agentPolicyLogLevel={agentPolicy?.advanced_settings?.agent_logging_level}
+          />
         </EuiFlexItem>
       </WrapperFlexGroup>
     );

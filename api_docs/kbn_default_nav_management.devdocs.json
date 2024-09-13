@@ -1,0 +1,200 @@
+{
+  "id": "@kbn/default-nav-management",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/default-nav-management",
+        "id": "def-common.ManagementNodeDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "ManagementNodeDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.NodeDefinition",
+            "text": "NodeDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/deeplinks-management",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksManagementPluginApi",
+            "section": "def-common.DeepLinkId",
+            "text": "DeepLinkId"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-management",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavManagementPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-management",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavManagementPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          "> & { children: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.NodeDefinition",
+            "text": "NodeDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/deeplinks-management",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksManagementPluginApi",
+            "section": "def-common.DeepLinkId",
+            "text": "DeepLinkId"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-management",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavManagementPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-management",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavManagementPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          ">[]; }"
+        ],
+        "path": "packages/default-nav/management/default_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/default-nav-management",
+        "id": "def-common.NavigationID",
+        "type": "Type",
+        "tags": [],
+        "label": "NavigationID",
+        "description": [],
+        "signature": [
+          "\"ingest\" | \"kibana\" | \"data\" | \"root\" | \"rootNav:management\" | \"integration_management\" | \"stack_management\" | \"alerts_and_insights\""
+        ],
+        "path": "packages/default-nav/management/default_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/default-nav-management",
+        "id": "def-common.defaultNavigation",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultNavigation",
+        "description": [],
+        "path": "packages/default-nav/management/default_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/default-nav-management",
+            "id": "def-common.defaultNavigation.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"rootNav:management\""
+            ],
+            "path": "packages/default-nav/management/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-management",
+            "id": "def-common.defaultNavigation.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "packages/default-nav/management/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-management",
+            "id": "def-common.defaultNavigation.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "path": "packages/default-nav/management/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-management",
+            "id": "def-common.defaultNavigation.renderAs",
+            "type": "string",
+            "tags": [],
+            "label": "renderAs",
+            "description": [],
+            "signature": [
+              "\"accordion\""
+            ],
+            "path": "packages/default-nav/management/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-management",
+            "id": "def-common.defaultNavigation.children",
+            "type": "Array",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "({ link: \"monitoring\"; } | { id: \"integration_management\"; title: string; renderAs: \"accordion\"; children: ({ link: \"integrations\"; } | { link: \"fleet\"; } | { link: \"osquery\"; })[]; } | { id: \"stack_management\"; title: string; renderAs: \"accordion\"; children: ({ id: \"ingest\"; title: string; renderAs: \"accordion\"; children: ({ link: \"management:ingest_pipelines\"; } | { link: \"management:pipelines\"; })[]; } | { id: \"data\"; title: string; renderAs: \"accordion\"; children: ({ link: \"management:index_management\"; } | { link: \"management:transform\"; })[]; } | { id: \"alerts_and_insights\"; title: string; renderAs: \"accordion\"; children: ({ link: \"management:triggersActions\"; } | { link: \"management:cases\"; } | { link: \"management:triggersActionsConnectors\"; } | { link: \"management:jobsListLink\"; })[]; } | { id: \"kibana\"; title: string; renderAs: \"accordion\"; children: ({ link: \"management:dataViews\"; } | { link: \"management:aiAssistantManagementSelection\"; } | { link: \"management:objects\"; } | { link: \"management:tags\"; } | { link: \"management:spaces\"; } | { link: \"management:settings\"; })[]; })[]; })[]"
+            ],
+            "path": "packages/default-nav/management/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

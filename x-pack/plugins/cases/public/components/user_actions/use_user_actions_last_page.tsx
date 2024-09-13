@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 
-import type { CaseUserActions } from '../../containers/types';
+import type { UserActionUI } from '../../containers/types';
 import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
@@ -25,7 +25,7 @@ export const useLastPageUserActions = ({
   const { data: lastPageUserActionsData, isLoading: isLoadingLastPageUserActions } =
     useFindCaseUserActions(caseId, { ...userActivityQueryParams, page: lastPage }, lastPage > 1);
 
-  const lastPageUserActions = useMemo<CaseUserActions[]>(() => {
+  const lastPageUserActions = useMemo<UserActionUI[]>(() => {
     if (isLoadingLastPageUserActions || !lastPageUserActionsData) {
       return [];
     }

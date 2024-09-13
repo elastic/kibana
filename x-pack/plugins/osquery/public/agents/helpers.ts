@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import type {
-  SelectedGroups,
-  Overlap,
-  Group,
   AgentOptionValue,
-  AggregationDataPoint,
   AgentSelection,
-  GroupOptionValue,
   GroupOption,
+  GroupOptionValue,
+  Overlap,
+  SelectedGroups,
 } from './types';
 import { AGENT_GROUP_KEY } from './types';
 
@@ -32,49 +29,6 @@ export const getNumOverlapped = (
   });
 
   return sum;
-};
-
-interface Aggs extends estypes.AggregationsTermsAggregateBase {
-  buckets: AggregationDataPoint[];
-}
-
-export const processAggregations = (
-  aggs: Record<string, estypes.AggregationsAggregate> | undefined
-) => {
-  if (!aggs) {
-    return {
-      platforms: [],
-      overlap: {},
-      policies: [],
-    };
-  }
-
-  const platforms: Group[] = [];
-  const overlap: Overlap = {};
-  const platformTerms = aggs.platforms as Aggs;
-  const policyTerms = aggs.policies as Aggs;
-
-  const policies =
-    policyTerms?.buckets.map((o) => ({ name: o.key, id: o.key, size: o.doc_count })) ?? [];
-
-  if (platformTerms?.buckets) {
-    for (const { key, doc_count: size, policies: platformPolicies } of platformTerms.buckets) {
-      platforms.push({ name: key, id: key, size });
-      if (platformPolicies?.buckets && policies.length > 0) {
-        overlap[key] = platformPolicies.buckets.reduce((acc: { [key: string]: number }, pol) => {
-          acc[pol.key] = pol.doc_count;
-
-          return acc;
-        }, {} as { [key: string]: number });
-      }
-    }
-  }
-
-  return {
-    platforms,
-    overlap,
-    policies,
-  };
 };
 
 export const generateColorPicker = () => {
@@ -113,12 +67,19 @@ export const generateAgentCheck =
       })
       .every((a) => !a);
 
-export const generateAgentSelection = (selection: GroupOption[]) => {
+export const generateAgentSelection = (
+  selection: GroupOption[]
+): {
+  newAgentSelection: AgentSelection;
+  selectedAgents: AgentOptionValue[];
+  selectedGroups: SelectedGroups;
+} => {
   const newAgentSelection: AgentSelection = {
     agents: [],
     allAgentsSelected: false,
     platformsSelected: [],
     policiesSelected: [],
+    offlineAgentsSelected: false,
   };
   // parse through the selections to be able to determine how many are actually selected
   const selectedAgents: AgentOptionValue[] = [];
@@ -162,6 +123,10 @@ export const generateAgentSelection = (selection: GroupOption[]) => {
         }
 
         newAgentSelection.agents.push(key);
+        if (opt.disabled) {
+          newAgentSelection.offlineAgentsSelected = true;
+        }
+
         break;
       default:
         // this should never happen!

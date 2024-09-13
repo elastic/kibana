@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { ElementType, useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
@@ -13,6 +13,7 @@ import { HttpStart } from '@kbn/core/public';
 import { ExceptionListType, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   BuilderEntry,
+  DataViewField,
   ExceptionsBuilderExceptionItem,
   FormattedBuilderEntry,
   OperatorOption,
@@ -52,11 +53,6 @@ interface BuilderExceptionListItemProps {
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: (
-    pattern: DataViewBase,
-    type: ExceptionListType,
-    osTypes?: OsTypeArray
-  ) => DataViewBase;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   setErrorsExist: (arg: EntryFieldError) => void;
@@ -65,6 +61,8 @@ interface BuilderExceptionListItemProps {
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
   allowCustomOptions?: boolean;
+  getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
+  showValueListModal: ElementType;
 }
 
 export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionListItemProps>(
@@ -78,7 +76,6 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     indexPattern,
     isOnlyItem,
     listType,
-    listTypeSpecificIndexPatternFilter,
     andLogicIncluded,
     onDeleteExceptionItem,
     onChangeExceptionItem,
@@ -88,6 +85,8 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     isDisabled = false,
     operatorsList,
     allowCustomOptions = false,
+    getExtendedFields,
+    showValueListModal,
   }) => {
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
@@ -149,7 +148,6 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           httpService={httpService}
                           indexPattern={indexPattern}
                           listType={listType}
-                          listTypeSpecificIndexPatternFilter={listTypeSpecificIndexPatternFilter}
                           onChange={handleEntryChange}
                           onlyShowListOperators={onlyShowListOperators}
                           setErrorsExist={setErrorsExist}
@@ -161,6 +159,9 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           }
                           operatorsList={operatorsList}
                           allowCustomOptions={allowCustomOptions}
+                          getExtendedFields={getExtendedFields}
+                          exceptionItemIndex={exceptionItemIndex}
+                          showValueListModal={showValueListModal}
                         />
                       </MyOverflowContainer>
                       <BuilderEntryDeleteButtonComponent

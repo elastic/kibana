@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { MlResultsService } from '../../../services/results_service';
-import { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
-import { getSeverityType } from '../../../../../common/util/anomaly_utils';
-import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
-import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
+import { getSeverityType } from '@kbn/ml-anomaly-utils';
+import type { MlResultsService } from '../../../services/results_service';
+import type { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
+import type { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
+import type { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
 
 export function chartLoaderProvider(mlResultsService: MlResultsService) {
   async function loadEventRateForJob(

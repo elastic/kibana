@@ -7,14 +7,13 @@
 
 import { useRef, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import * as selectors from '../store/selectors';
+import { useDispatch } from 'react-redux';
 import { parameterName } from '../store/parameter_name';
 /**
  * Cleanup any query string keys that were added by this Resolver instance.
  * This works by having a React effect that just has behavior in the 'cleanup' function.
  */
-export function useResolverQueryParamCleaner() {
+export function useResolverQueryParamCleaner(id: string) {
   /**
    * Keep a reference to the current search value. This is used in the cleanup function.
    * This value of useLocation().search isn't used directly since that would change and
@@ -23,11 +22,11 @@ export function useResolverQueryParamCleaner() {
    */
   const searchRef = useRef<string>();
   searchRef.current = useLocation().search;
+  const dispatch = useDispatch();
 
   const history = useHistory();
-  const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
 
-  const resolverKey = parameterName(resolverComponentInstanceID);
+  const resolverKey = parameterName(id);
 
   useEffect(() => {
     /**
@@ -50,5 +49,5 @@ export function useResolverQueryParamCleaner() {
       const relativeURL = { search: urlSearchParams.toString() };
       history.replace(relativeURL);
     };
-  }, [resolverKey, history]);
+  }, [resolverKey, history, dispatch, id]);
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -22,6 +23,17 @@ export const dashboardReadonlyBadge = {
   getTooltip: () =>
     i18n.translate('dashboard.badge.readOnly.tooltip', {
       defaultMessage: 'Unable to save dashboards',
+    }),
+};
+
+export const dashboardManagedBadge = {
+  getDuplicateButtonAriaLabel: () =>
+    i18n.translate('dashboard.managedContentPopoverFooterText', {
+      defaultMessage: 'Click here to duplicate this dashboard',
+    }),
+  getBadgeAriaLabel: () =>
+    i18n.translate('dashboard.managedContentBadge.ariaLabel', {
+      defaultMessage: 'Elastic manages this dashboard. Duplicate it to make changes.',
     }),
 };
 
@@ -50,6 +62,15 @@ export const unsavedChangesBadgeStrings = {
     i18n.translate('dashboard.unsavedChangesBadgeToolTipContent', {
       defaultMessage:
         ' You have unsaved changes in this dashboard. To remove this label, save the dashboard.',
+    }),
+  getHasRunMigrationsText: () =>
+    i18n.translate('dashboard.hasRunMigrationsBadge', {
+      defaultMessage: 'Save recommended',
+    }),
+  getHasRunMigrationsToolTipContent: () =>
+    i18n.translate('dashboard.hasRunMigrationsBadgeToolTipContent', {
+      defaultMessage:
+        'One or more panels on this dashboard have been updated to a new version. Save the dashboard so it loads faster next time.',
     }),
 };
 
@@ -83,18 +104,17 @@ export const getNewDashboardTitle = () =>
     defaultMessage: 'New Dashboard',
   });
 
-export const getPanelAddedSuccessString = (savedObjectName: string) =>
-  i18n.translate('dashboard.addPanel.newEmbeddableAddedSuccessMessageTitle', {
-    defaultMessage: '{savedObjectName} was added',
-    values: {
-      savedObjectName,
-    },
-  });
-
-export const getDashboardURL404String = () =>
-  i18n.translate('dashboard.loadingError.dashboardNotFound', {
-    defaultMessage: 'The requested dashboard could not be found.',
-  });
+export const getPanelAddedSuccessString = (savedObjectName?: string) =>
+  savedObjectName
+    ? i18n.translate('dashboard.addPanel.newEmbeddableAddedSuccessMessageTitle', {
+        defaultMessage: '{savedObjectName} was added',
+        values: {
+          savedObjectName,
+        },
+      })
+    : i18n.translate('dashboard.addPanel.newEmbeddableWithNoTitleAddedSuccessMessageTitle', {
+        defaultMessage: 'A panel was added',
+      });
 
 export const getPanelTooOldErrorString = () =>
   i18n.translate('dashboard.loadURLError.PanelTooOld', {
@@ -137,7 +157,7 @@ export const shareModalStrings = {
 */
 export const getDashboardBreadcrumb = () =>
   i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
-    defaultMessage: 'Dashboard',
+    defaultMessage: 'Dashboards',
   });
 
 export const topNavStrings = {
@@ -174,12 +194,20 @@ export const topNavStrings = {
       defaultMessage: 'Quick save your dashboard without any prompts',
     }),
   },
-  saveAs: {
-    label: i18n.translate('dashboard.topNave.saveAsButtonAriaLabel', {
+  editModeInteractiveSave: {
+    label: i18n.translate('dashboard.topNave.editModeInteractiveSaveButtonAriaLabel', {
       defaultMessage: 'save as',
     }),
-    description: i18n.translate('dashboard.topNave.saveAsConfigDescription', {
+    description: i18n.translate('dashboard.topNave.editModeInteractiveSaveConfigDescription', {
       defaultMessage: 'Save as a new dashboard',
+    }),
+  },
+  resetChanges: {
+    label: i18n.translate('dashboard.topNave.resetChangesButtonAriaLabel', {
+      defaultMessage: 'Reset',
+    }),
+    description: i18n.translate('dashboard.topNave.resetChangesConfigDescription', {
+      defaultMessage: 'Reset changes to dashboard',
     }),
   },
   switchToViewMode: {
@@ -206,11 +234,11 @@ export const topNavStrings = {
       defaultMessage: 'Open dashboard settings',
     }),
   },
-  clone: {
-    label: i18n.translate('dashboard.topNave.cloneButtonAriaLabel', {
-      defaultMessage: 'clone',
+  viewModeInteractiveSave: {
+    label: i18n.translate('dashboard.topNave.viewModeInteractiveSaveButtonAriaLabel', {
+      defaultMessage: 'duplicate',
     }),
-    description: i18n.translate('dashboard.topNave.cloneConfigDescription', {
+    description: i18n.translate('dashboard.topNave.viewModeInteractiveSaveConfigDescription', {
       defaultMessage: 'Create a copy of your dashboard',
     }),
   },

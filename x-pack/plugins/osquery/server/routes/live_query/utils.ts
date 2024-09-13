@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { mergeMap } from 'rxjs';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
@@ -53,7 +53,7 @@ export const getActionResponses = (
       {
         actionId,
         factoryQueryType: OsqueryQueries.actionResults,
-        filterQuery: '',
+        kuery: '',
         pagination: generateTablePaginationOptions(0, 1000),
         sort: {
           direction: Direction.desc,

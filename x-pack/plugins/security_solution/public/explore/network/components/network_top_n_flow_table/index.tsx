@@ -17,22 +17,21 @@ import {
   NetworkTopTablesFields,
 } from '../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import type { Criteria, ItemsPerRow } from '../../../components/paginated_table';
+import type { Criteria, ItemsPerRow, SiemTables } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import { getNFlowColumnsCurated } from './columns';
 import * as i18n from './translations';
+import { getLimitedPaginationTotalCount } from '../../../components/paginated_table/helpers';
 
 interface NetworkTopNFlowTableProps {
   data: NetworkTopNFlowEdges[];
-  fakeTotalCount: number;
   flowTargeted: FlowTargetSourceDest;
   id: string;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   setQuerySkip: (skip: boolean) => void;
-  showMorePagesIndicator: boolean;
   totalCount: number;
   type: networkModel.NetworkType;
 }
@@ -52,14 +51,12 @@ export const NetworkTopNFlowTableId = 'networkTopSourceFlow-top-talkers';
 
 const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
   data,
-  fakeTotalCount,
   flowTargeted,
   id,
   isInspect,
   loading,
   loadPage,
   setQuerySkip,
-  showMorePagesIndicator,
   totalCount,
   type,
 }) => {
@@ -128,7 +125,7 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
     [flowTargeted, sort]
   );
 
-  const updateActivePage = useCallback(
+  const updateActivePage = useCallback<SiemTables['updateActivePage']>(
     (newPage) =>
       dispatch(
         networkActions.updateNetworkTable({
@@ -140,7 +137,7 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
     [dispatch, type, tableType]
   );
 
-  const updateLimitPagination = useCallback(
+  const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
     (newLimit) =>
       dispatch(
         networkActions.updateNetworkTable({
@@ -151,6 +148,16 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
       ),
     [dispatch, type, tableType]
   );
+
+  // limits pagination to 5 pages with 1 page increments to prevent expensive queries
+  const limitedPaginationTotalCount = useMemo(
+    () => getLimitedPaginationTotalCount({ activePage, totalCount, limit }),
+    [activePage, limit, totalCount]
+  );
+
+  const showMorePagesIndicator = useMemo(() => {
+    return totalCount / limit > limitedPaginationTotalCount / limit;
+  }, [totalCount, limitedPaginationTotalCount, limit]);
 
   return (
     <PaginatedTable
@@ -171,7 +178,7 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
       setQuerySkip={setQuerySkip}
       showMorePagesIndicator={showMorePagesIndicator}
       sorting={sorting}
-      totalCount={fakeTotalCount}
+      totalCount={limitedPaginationTotalCount}
       updateActivePage={updateActivePage}
       updateLimitPagination={updateLimitPagination}
     />

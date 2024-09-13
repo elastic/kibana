@@ -20,11 +20,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { Cluster, serializeCluster } from '../../../../../common/lib';
+import { ClusterPayload, serializeCluster } from '../../../../../common/lib';
 
 interface Props {
   close: () => void;
-  cluster: Cluster;
+  cluster: ClusterPayload;
 }
 
 export class RequestFlyout extends PureComponent<Props> {
@@ -43,7 +43,7 @@ export class RequestFlyout extends PureComponent<Props> {
               {name ? (
                 <FormattedMessage
                   id="xpack.remoteClusters.requestFlyout.namedTitle"
-                  defaultMessage="Request for '{name}'"
+                  defaultMessage="Request for ''{name}''"
                   values={{ name }}
                 />
               ) : (

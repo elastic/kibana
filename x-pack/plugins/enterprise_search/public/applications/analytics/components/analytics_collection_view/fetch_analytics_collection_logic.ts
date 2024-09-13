@@ -16,6 +16,7 @@ import {
 } from '../../api/fetch_analytics_collection/fetch_analytics_collection_api_logic';
 
 export interface FetchAnalyticsCollectionActions {
+  apiSuccess: Actions<{}, FetchAnalyticsCollectionApiLogicResponse>['apiSuccess'];
   fetchAnalyticsCollection(name: string): AnalyticsCollection;
   makeRequest: Actions<{}, FetchAnalyticsCollectionApiLogicResponse>['makeRequest'];
 }
@@ -33,7 +34,7 @@ export const FetchAnalyticsCollectionLogic = kea<
     fetchAnalyticsCollection: (name) => ({ name }),
   },
   connect: {
-    actions: [FetchAnalyticsCollectionAPILogic, ['makeRequest']],
+    actions: [FetchAnalyticsCollectionAPILogic, ['makeRequest', 'apiSuccess']],
     values: [FetchAnalyticsCollectionAPILogic, ['data', 'status']],
   },
   listeners: ({ actions }) => ({

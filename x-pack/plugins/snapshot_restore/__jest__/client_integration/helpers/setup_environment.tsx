@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { merge } from 'lodash';
 import { LocationDescriptorObject } from 'history';
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { HttpSetup } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { setUiMetricService, httpService } from '../../../public/application/services/http';
@@ -50,13 +51,21 @@ export const services = {
 
 setUiMetricService(services.uiMetricService);
 
+const core = coreMock.createStart();
+
 const appDependencies = {
-  core: coreMock.createStart(),
+  core,
   services,
   config: {
     slm_ui: { enabled: true },
   },
   plugins: {},
+};
+
+const kibanaContextDependencies = {
+  uiSettings: core.uiSettings,
+  settings: core.settings,
+  theme: core.theme,
 };
 
 export const setupEnvironment = () => {
@@ -88,11 +97,13 @@ export const WithAppDependencies =
       <AuthorizationContext.Provider
         value={createAuthorizationContextValue(privileges as Privileges)}
       >
-        <AppContextProvider value={merge(appDependencies, overrides) as any}>
-          <GlobalFlyoutProvider>
-            <Comp {...props} />
-          </GlobalFlyoutProvider>
-        </AppContextProvider>
+        <KibanaContextProvider services={kibanaContextDependencies}>
+          <AppContextProvider value={merge(appDependencies, overrides) as any}>
+            <GlobalFlyoutProvider>
+              <Comp {...props} />
+            </GlobalFlyoutProvider>
+          </AppContextProvider>
+        </KibanaContextProvider>
       </AuthorizationContext.Provider>
     );
   };

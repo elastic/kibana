@@ -7,14 +7,16 @@
 
 import { RouteDependencies } from '../types';
 
+import { registerComponentTemplateRoutes } from './api/component_templates';
 import { registerDataStreamRoutes } from './api/data_streams';
+import { registerEnrichPoliciesRoute } from './api/enrich_policies';
 import { registerIndicesRoutes } from './api/indices';
-import { registerTemplateRoutes } from './api/templates';
-import { registerMappingRoute } from './api/mapping';
+import { registerInferenceModelRoutes } from './api/inference_models';
+import { registerIndexMappingRoutes } from './api/mapping/register_index_mapping_route';
+import { registerNodesRoute } from './api/nodes';
 import { registerSettingsRoutes } from './api/settings';
 import { registerStatsRoute } from './api/stats';
-import { registerComponentTemplateRoutes } from './api/component_templates';
-import { registerNodesRoute } from './api/nodes';
+import { registerTemplateRoutes } from './api/templates';
 
 export class ApiRoutes {
   setup(dependencies: RouteDependencies) {
@@ -22,10 +24,15 @@ export class ApiRoutes {
     registerIndicesRoutes(dependencies);
     registerTemplateRoutes(dependencies);
     registerSettingsRoutes(dependencies);
-    registerStatsRoute(dependencies);
-    registerMappingRoute(dependencies);
+    registerIndexMappingRoutes(dependencies);
     registerComponentTemplateRoutes(dependencies);
+    registerInferenceModelRoutes(dependencies);
     registerNodesRoute(dependencies);
+    registerEnrichPoliciesRoute(dependencies);
+
+    if (dependencies.config.isIndexStatsEnabled !== false) {
+      registerStatsRoute(dependencies);
+    }
   }
 
   start() {}

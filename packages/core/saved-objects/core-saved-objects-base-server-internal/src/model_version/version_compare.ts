@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ModelVersionMap } from './version_map';
+import Semver from 'semver';
+import type { VirtualVersionMap } from './version_map';
 
 export interface CompareModelVersionMapParams {
   /** The latest model version of the types registered in the application */
-  appVersions: ModelVersionMap;
+  appVersions: VirtualVersionMap;
   /** The model version stored in the index */
-  indexVersions: ModelVersionMap;
+  indexVersions: VirtualVersionMap;
   /** The list of deleted types to exclude during the compare process */
   deletedTypes: string[];
 }
@@ -37,7 +39,7 @@ export interface CompareModelVersionResult {
   details: CompareModelVersionDetails;
 }
 
-export const compareModelVersions = ({
+export const compareVirtualVersions = ({
   appVersions,
   indexVersions,
   deletedTypes,
@@ -53,14 +55,19 @@ export const compareModelVersions = ({
   };
 
   allTypes.forEach((type) => {
-    const appVersion = appVersions[type] ?? 0;
-    const indexVersion = indexVersions[type] ?? 0;
+    const appVersion = appVersions[type] ?? '0.0.0';
+    const indexVersion = indexVersions[type] ?? '0.0.0';
 
-    if (appVersion > indexVersion) {
+    const comparison = Semver.compare(appVersion, indexVersion);
+
+    if (comparison > 0) {
+      // app version greater than index version
       details.greater.push(type);
-    } else if (appVersion < indexVersion) {
+    } else if (comparison < 0) {
+      // app version lower than index version
       details.lesser.push(type);
     } else {
+      // // app version equal to index version
       details.equal.push(type);
     }
   });

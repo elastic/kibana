@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pick, throttle, cloneDeep } from 'lodash';
-import type { HttpSetup, HttpFetchOptions } from '@kbn/core-http-browser';
+import type { HttpFetchOptions } from '@kbn/core-http-browser';
+import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBulkResolveResponse as SavedObjectsBulkResolveResponseServer,
@@ -106,7 +108,7 @@ const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
  * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export class SavedObjectsClient implements SavedObjectsClientContract {
-  private http: HttpSetup;
+  private http: InternalHttpSetup;
   private batchGetQueue: BatchGetQueueEntry[];
   private batchResolveQueue: BatchResolveQueueEntry[];
 
@@ -180,7 +182,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   );
 
   /** @internal */
-  constructor(http: HttpSetup) {
+  constructor(http: InternalHttpSetup) {
     this.http = http;
     this.batchGetQueue = [];
     this.batchResolveQueue = [];
@@ -207,6 +209,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
         attributes,
         migrationVersion: options.migrationVersion,
         typeMigrationVersion: options.typeMigrationVersion,
+        managed: options.managed,
         references: options.references,
       }),
     });
@@ -217,7 +220,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes, references, migrationVersion, typeMigrationVersion }]
+   * @param {array} objects - [{ type, id, attributes, references, migrationVersion, typeMigrationVersion, managed }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false]
    * @returns The result of the create operation containing created saved objects.

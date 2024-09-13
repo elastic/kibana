@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { URL } from 'url';
@@ -22,7 +23,7 @@ import {
   map,
 } from 'rxjs';
 
-import { ElasticV3ServerShipper } from '@kbn/analytics-shippers-elastic-v3-server';
+import { ElasticV3ServerShipper } from '@elastic/ebt/shippers/elastic_v3/server';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
@@ -40,6 +41,8 @@ import type {
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
+import apm from 'elastic-apm-node';
+import { buildShipperHeaders, createBuildShipperUrl } from '../common/ebt_v3_endpoint';
 import {
   type TelemetrySavedObject,
   getTelemetrySavedObject,
@@ -84,7 +87,7 @@ export interface TelemetryPluginSetup {
  */
 export interface TelemetryPluginStart {
   /**
-   * Resolves `true` if the user has opted into send Elastic usage data.
+   * Resolves `true` if sending usage to Elastic is enabled.
    * Resolves `false` if the user explicitly opted out of sending usage data to Elastic
    * or did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).
    *
@@ -102,6 +105,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   private isOptedIn?: boolean;
   private readonly isDev: boolean;
   private readonly fetcherTask: FetcherTask;
+  private readonly shouldStartSnapshotTelemetryFetcher: boolean;
   /**
    * @private Used to mark the completion of the old UI Settings migration
    */
@@ -132,6 +136,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       logger: this.logger,
     });
 
+    // Only generate and report the snapshot telemetry in the UI node.
+    // This allows better cache optimizations and allowing background tasks to focus on alerts and similar.
+    this.shouldStartSnapshotTelemetryFetcher = initializerContext.node.roles.ui;
+
     // If the opt-in selection cannot be changed, set it as early as possible.
     const { optIn, allowChangingOptInStatus } = this.initialConfig;
     this.isOptedIn = allowChangingOptInStatus === false ? optIn : undefined;
@@ -149,29 +157,44 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public setup(
-    { analytics, http, savedObjects }: CoreSetup,
+    { analytics, docLinks, http, savedObjects }: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsDepsSetup
   ): TelemetryPluginSetup {
+    this.isOptedIn$.subscribe((optedIn) => {
+      const optInStatusMsg = optedIn ? 'enabled' : 'disabled';
+      this.logger.info(
+        `Telemetry collection is ${optInStatusMsg}. For more information on telemetry settings, refer to ${docLinks.links.telemetry.settings}.`
+      );
+    });
+
     if (this.isOptedIn !== undefined) {
       analytics.optIn({ global: { enabled: this.isOptedIn } });
     }
 
     const currentKibanaVersion = this.currentKibanaVersion;
 
+    const sendTo = this.getSendToEnv(this.initialConfig.sendUsageTo);
     analytics.registerShipper(ElasticV3ServerShipper, {
       channelName: 'kibana-server',
       version: currentKibanaVersion,
-      sendTo: this.initialConfig.sendUsageTo === 'prod' ? 'production' : 'staging',
+      buildShipperHeaders,
+      buildShipperUrl: createBuildShipperUrl(sendTo),
     });
 
     analytics.registerContextProvider<{ labels: TelemetryConfigLabels }>({
       name: 'telemetry labels',
-      context$: this.config$.pipe(map(({ labels }) => ({ labels }))),
+      context$: this.config$.pipe(
+        map(({ labels }) => ({ labels })),
+        tap(({ labels }) =>
+          Object.entries(labels).forEach(([key, value]) => apm.setGlobalLabel(key, value))
+        )
+      ),
       schema: {
         labels: {
           type: 'pass_through',
           _meta: {
-            description: 'Custom labels added to the telemetry.labels config in the kibana.yml',
+            description:
+              'Custom labels added to the telemetry.labels config in the kibana.yml. Validated and limited to a known set of labels.',
           },
         },
       },
@@ -198,8 +221,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     return {
       getTelemetryUrl: async () => {
-        const { sendUsageTo } = await firstValueFrom(config$);
+        const { appendServerlessChannelsSuffix, sendUsageTo } = await firstValueFrom(config$);
         const telemetryUrl = getTelemetryChannelEndpoint({
+          appendServerlessChannelsSuffix,
           env: sendUsageTo,
           channelName: 'snapshot',
         });
@@ -225,7 +249,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     this.security = security;
 
-    this.startFetcher(core, telemetryCollectionManager);
+    if (this.shouldStartSnapshotTelemetryFetcher) {
+      // Only generate and report the snapshot telemetry if we are on the appropriate node role
+      this.startFetcher(core, telemetryCollectionManager);
+    }
 
     return {
       getIsOptedIn: async () => this.isOptedIn === true,
@@ -237,6 +264,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     this.pluginStop$.complete();
     this.savedObjectsInternalClient$.complete();
     this.fetcherTask.stop();
+  }
+
+  private getSendToEnv(sendUsageTo: string): 'production' | 'staging' {
+    return sendUsageTo === 'prod' ? 'production' : 'staging';
   }
 
   private async getOptInStatus(): Promise<boolean | undefined> {

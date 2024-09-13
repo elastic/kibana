@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
   const ml = getService('ml');
+  const dataViews = getService('dataViews');
   const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
@@ -45,9 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.discover.loadSavedSearch(testData.sourceIndexOrSavedSearch);
           });
         } else {
-          await ml.dashboardEmbeddables.selectDiscoverIndexPattern(
-            testData.sourceIndexOrSavedSearch
-          );
+          await dataViews.switchToAndValidate(testData.sourceIndexOrSavedSearch);
         }
         await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
 
@@ -58,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it(`displays Field statistics table in Dashboard when enabled`, async function () {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
         await dashboardAddPanel.addSavedSearch(savedSearchTitle);
@@ -96,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it(`doesn't display Field statistics table in Dashboard when disabled`, async function () {
         await ml.testResources.setAdvancedSettingProperty(SHOW_FIELD_STATISTICS, false);
 
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardTitle);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -107,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.discover.assertFieldStatsTableNotExists();
-        await PageObjects.dashboard.saveDashboard(dashboardTitle);
+        await PageObjects.dashboard.saveDashboard(dashboardTitle, { saveAsNew: false });
       });
     });
   }
@@ -115,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('field statistics in Dashboard', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded();
       await ml.securityUI.loginAsMlPowerUser();
     });
@@ -123,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function () {
       await ml.testResources.clearAdvancedSettingProperty(SHOW_FIELD_STATISTICS);
       await ml.testResources.deleteSavedSearches();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
     runTests(farequoteLuceneFiltersSearchTestData);

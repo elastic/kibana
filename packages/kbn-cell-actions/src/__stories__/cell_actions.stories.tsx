@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { ComponentStory } from '@storybook/react';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { CellActionsProvider } from '../context/cell_actions_context';
 import { makeAction } from '../mocks/helpers';
 import { CellActions } from '../components/cell_actions';
@@ -16,7 +18,13 @@ import type { CellActionsProps } from '../types';
 
 const TRIGGER_ID = 'testTriggerId';
 
-const FIELD = { name: 'name', value: '123', type: 'text' };
+const VALUE = '123';
+const FIELD: FieldSpec = {
+  name: 'name',
+  type: 'text',
+  searchable: true,
+  aggregatable: true,
+};
 
 const getCompatibleActions = () =>
   Promise.resolve([
@@ -43,15 +51,15 @@ export default {
 };
 
 const CellActionsTemplate: ComponentStory<React.FC<CellActionsProps>> = (args) => (
-  <CellActions {...args}>Field value</CellActions>
+  <CellActions {...args}>{'Field value'}</CellActions>
 );
 
 export const DefaultWithControls = CellActionsTemplate.bind({});
 
 DefaultWithControls.argTypes = {
   mode: {
-    options: [CellActionsMode.HOVER, CellActionsMode.INLINE],
-    defaultValue: CellActionsMode.HOVER,
+    options: [CellActionsMode.HOVER_DOWN, CellActionsMode.INLINE],
+    defaultValue: CellActionsMode.HOVER_DOWN,
     control: {
       type: 'radio',
     },
@@ -62,18 +70,56 @@ DefaultWithControls.args = {
   showActionTooltips: true,
   mode: CellActionsMode.INLINE,
   triggerId: TRIGGER_ID,
-  field: FIELD,
+  data: [
+    {
+      field: FIELD,
+      value: '',
+    },
+  ],
   visibleCellActions: 3,
 };
 
-export const CellActionInline = ({}: {}) => (
-  <CellActions mode={CellActionsMode.INLINE} triggerId={TRIGGER_ID} field={FIELD}>
-    Field value
+export const CellActionInline = () => (
+  <CellActions
+    mode={CellActionsMode.INLINE}
+    triggerId={TRIGGER_ID}
+    data={[
+      {
+        field: FIELD,
+        value: VALUE,
+      },
+    ]}
+  >
+    {'Field value'}
   </CellActions>
 );
 
-export const CellActionHoverPopup = ({}: {}) => (
-  <CellActions mode={CellActionsMode.HOVER} triggerId={TRIGGER_ID} field={FIELD}>
-    Hover me
+export const CellActionHoverPopoverDown = () => (
+  <CellActions
+    mode={CellActionsMode.HOVER_DOWN}
+    triggerId={TRIGGER_ID}
+    data={[
+      {
+        field: FIELD,
+        value: VALUE,
+      },
+    ]}
+  >
+    {'Hover me'}
+  </CellActions>
+);
+
+export const CellActionHoverPopoverRight = () => (
+  <CellActions
+    mode={CellActionsMode.HOVER_RIGHT}
+    triggerId={TRIGGER_ID}
+    data={[
+      {
+        field: FIELD,
+        value: VALUE,
+      },
+    ]}
+  >
+    {'Hover me'}
   </CellActions>
 );

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { PackageInfo } from '@kbn/config';
@@ -13,6 +14,7 @@ import { distDir as UiSharedDepsSrcDistDir } from '@kbn/ui-shared-deps-src';
 import * as KbnMonaco from '@kbn/monaco/server';
 import type { IRouter } from '@kbn/core-http-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import { InternalStaticAssets } from '@kbn/core-http-server-internal';
 import { FileHashCache } from './file_hash_cache';
 import { registerRouteForBundle } from './bundles_route';
 
@@ -28,56 +30,61 @@ import { registerRouteForBundle } from './bundles_route';
  */
 export function registerBundleRoutes({
   router,
-  serverBasePath,
   uiPlugins,
   packageInfo,
+  staticAssets,
 }: {
   router: IRouter;
-  serverBasePath: string;
   uiPlugins: UiPlugins;
   packageInfo: PackageInfo;
+  staticAssets: InternalStaticAssets;
 }) {
-  const { dist: isDist, buildNum } = packageInfo;
+  const { dist: isDist } = packageInfo;
   // rather than calculate the fileHash on every request, we
   // provide a cache object to `resolveDynamicAssetResponse()` that
   // will store the most recently used hashes.
   const fileHashCache = new FileHashCache();
 
+  const sharedNpmDepsPath = '/bundles/kbn-ui-shared-deps-npm/';
   registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps-npm/`,
-    routePath: `/${buildNum}/bundles/kbn-ui-shared-deps-npm/`,
+    publicPath: staticAssets.prependPublicUrl(sharedNpmDepsPath) + '/',
+    routePath: staticAssets.prependServerPath(sharedNpmDepsPath) + '/',
     bundlesPath: UiSharedDepsNpm.distDir,
     fileHashCache,
     isDist,
   });
+  const sharedDepsPath = '/bundles/kbn-ui-shared-deps-src/';
   registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps-src/`,
-    routePath: `/${buildNum}/bundles/kbn-ui-shared-deps-src/`,
+    publicPath: staticAssets.prependPublicUrl(sharedDepsPath) + '/',
+    routePath: staticAssets.prependServerPath(sharedDepsPath) + '/',
     bundlesPath: UiSharedDepsSrcDistDir,
     fileHashCache,
     isDist,
   });
+  const coreBundlePath = '/bundles/core/';
   registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildNum}/bundles/core/`,
-    routePath: `/${buildNum}/bundles/core/`,
+    publicPath: staticAssets.prependPublicUrl(coreBundlePath) + '/',
+    routePath: staticAssets.prependServerPath(coreBundlePath) + '/',
     bundlesPath: isDist
       ? fromRoot('node_modules/@kbn/core/target/public')
       : fromRoot('src/core/target/public'),
     fileHashCache,
     isDist,
   });
+  const monacoEditorPath = '/bundles/kbn-monaco/';
   registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-monaco/`,
-    routePath: `/${buildNum}/bundles/kbn-monaco/`,
+    publicPath: staticAssets.prependPublicUrl(monacoEditorPath) + '/',
+    routePath: staticAssets.prependServerPath(monacoEditorPath) + '/',
     bundlesPath: KbnMonaco.bundleDir,
     fileHashCache,
     isDist,
   });
 
   [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
+    const pluginBundlesPath = `/bundles/plugin/${id}/${version}/`;
     registerRouteForBundle(router, {
-      publicPath: `${serverBasePath}/${buildNum}/bundles/plugin/${id}/${version}/`,
-      routePath: `/${buildNum}/bundles/plugin/${id}/${version}/`,
+      publicPath: staticAssets.prependPublicUrl(pluginBundlesPath) + '/',
+      routePath: staticAssets.prependServerPath(pluginBundlesPath) + '/',
       bundlesPath: publicTargetDir,
       fileHashCache,
       isDist,

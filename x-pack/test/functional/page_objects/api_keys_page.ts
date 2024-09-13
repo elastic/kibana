@@ -45,6 +45,10 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.find('apiKeyNameInput');
     },
 
+    async isApiKeyNamePresent() {
+      return await testSubjects.exists('apiKeyNameInput');
+    },
+
     async setApiKeyCustomExpiration(expirationTime: string) {
       return await testSubjects.setValue('apiKeyCustomExpirationInput', expirationTime);
     },
@@ -66,17 +70,12 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async isApiKeyModalExists() {
-      return await find.existsByCssSelector('[role="dialog"]');
+      return await find.existsByCssSelector('.euiFlyoutHeader');
     },
 
     async getNewApiKeyCreation() {
       const euiCallOutHeader = await find.byCssSelector('.euiCallOutHeader__title');
       return euiCallOutHeader.getVisibleText();
-    },
-
-    async getErrorCallOutText() {
-      const alertElem = await find.byCssSelector('[role="dialog"] [role="alert"] .euiText');
-      return await alertElem.getVisibleText();
     },
 
     async getApiKeysFirstPromptTitle() {
@@ -133,11 +132,6 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     async getFlyoutTitleText() {
       const header = await find.byClassName('euiFlyoutHeader');
       return header.getVisibleText();
-    },
-
-    async getFlyoutUsername() {
-      const usernameField = await testSubjects.find('apiKeyFlyoutUsername');
-      return usernameField.getVisibleText();
     },
 
     async getFlyoutApiKeyStatus() {

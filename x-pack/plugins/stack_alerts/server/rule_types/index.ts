@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from '@kbn/core/server';
-import { AlertingSetup, StackAlertsStartDeps } from '../types';
+import type { RegisterRuleTypesParams } from './types';
 import { register as registerIndexThreshold } from './index_threshold';
 import { register as registerGeoContainment } from './geo_containment';
 import { register as registerEsQuery } from './es_query';
-interface RegisterRuleTypesParams {
-  logger: Logger;
-  data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
-  alerting: AlertingSetup;
-  core: CoreSetup;
-}
 
-export function registerBuiltInRuleTypes(params: RegisterRuleTypesParams) {
+export * from './constants';
+
+export function registerBuiltInRuleTypes(params: RegisterRuleTypesParams, isServerless: boolean) {
   registerIndexThreshold(params);
-  registerGeoContainment(params);
-  registerEsQuery(params);
+  if (!isServerless) {
+    registerGeoContainment(params);
+  }
+  registerEsQuery(params, isServerless);
 }

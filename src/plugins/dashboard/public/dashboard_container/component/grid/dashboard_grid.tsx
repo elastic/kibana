@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import 'react-resizable/css/styles.css';
@@ -11,41 +12,41 @@ import 'react-grid-layout/css/styles.css';
 
 import { pick } from 'lodash';
 import classNames from 'classnames';
-import { useEffectOnce } from 'react-use/lib';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layout';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
-import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';
-import { useDashboardContainerContext } from '../../dashboard_container_context';
-import { useDashboardPerformanceTracker } from './use_dashboard_performance_tracker';
-import { getPanelLayoutsAreEqual } from '../../embeddable/integrations/diff_state/dashboard_diffing_utils';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
+import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
+import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 
 export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
-  const {
-    useEmbeddableSelector: select,
-    actions: { setPanels },
-    useEmbeddableDispatch,
-  } = useDashboardContainerContext();
-  const dispatch = useEmbeddableDispatch();
-  const panels = select((state) => state.explicitInput.panels);
-  const viewMode = select((state) => state.explicitInput.viewMode);
-  const useMargins = select((state) => state.explicitInput.useMargins);
-  const expandedPanelId = select((state) => state.componentState.expandedPanelId);
+  const dashboard = useDashboardContainer();
+  const panels = dashboard.select((state) => state.explicitInput.panels);
+  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
+  const useMargins = dashboard.select((state) => state.explicitInput.useMargins);
+  const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
+  const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
+  const animatePanelTransforms = dashboard.select(
+    (state) => state.componentState.animatePanelTransforms
+  );
 
-  // turn off panel transform animations for the first 500ms so that the dashboard doesn't animate on its first render.
-  const [animatePanelTransforms, setAnimatePanelTransforms] = useState(false);
-  useEffectOnce(() => {
-    setTimeout(() => setAnimatePanelTransforms(true), 500);
-  });
-
-  const { onPanelStatusChange } = useDashboardPerformanceTracker({
-    panelCount: Object.keys(panels).length,
-  });
+  /**
+   *  Track panel maximized state delayed by one tick and use it to prevent
+   * panel sliding animations on maximize and minimize.
+   */
+  const [delayedIsPanelExpanded, setDelayedIsPanelMaximized] = useState(false);
+  useEffect(() => {
+    if (expandedPanelId) {
+      setDelayedIsPanelMaximized(true);
+    } else {
+      setTimeout(() => setDelayedIsPanelMaximized(false), 0);
+    }
+  }, [expandedPanelId]);
 
   const panelsInOrder: string[] = useMemo(() => {
     return Object.keys(panels).sort((embeddableIdA, embeddableIdB) => {
@@ -74,14 +75,16 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
           index={index + 1}
           type={type}
           expandedPanelId={expandedPanelId}
-          onPanelStatusChange={onPanelStatusChange}
+          focusedPanelId={focusedPanelId}
         />
       );
     });
-  }, [expandedPanelId, onPanelStatusChange, panels, panelsInOrder]);
+  }, [expandedPanelId, panels, panelsInOrder, focusedPanelId]);
 
   const onLayoutChange = useCallback(
     (newLayout: Array<Layout & { i: string }>) => {
+      if (viewMode !== ViewMode.EDIT) return;
+
       const updatedPanels: { [key: string]: DashboardPanelState } = newLayout.reduce(
         (updatedPanelsAcc, panelLayout) => {
           updatedPanelsAcc[panelLayout.i] = {
@@ -93,17 +96,17 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
         {} as { [key: string]: DashboardPanelState }
       );
       if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
-        dispatch(setPanels(updatedPanels));
+        dashboard.dispatch.setPanels(updatedPanels);
       }
     },
-    [dispatch, panels, setPanels]
+    [dashboard, panels, viewMode]
   );
 
   const classes = classNames({
     'dshLayout-withoutMargins': !useMargins,
     'dshLayout--viewing': viewMode === ViewMode.VIEW,
     'dshLayout--editing': viewMode !== ViewMode.VIEW,
-    'dshLayout--noAnimation': !animatePanelTransforms,
+    'dshLayout--noAnimation': !animatePanelTransforms || delayedIsPanelExpanded,
     'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
   });
 
@@ -121,10 +124,9 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       className={classes}
       width={viewportWidth}
       breakpoints={breakpoints}
-      onDragStop={onLayoutChange}
-      onResizeStop={onLayoutChange}
-      isResizable={!expandedPanelId}
-      isDraggable={!expandedPanelId}
+      onLayoutChange={onLayoutChange}
+      isResizable={!expandedPanelId && !focusedPanelId}
+      isDraggable={!expandedPanelId && !focusedPanelId}
       rowHeight={DASHBOARD_GRID_HEIGHT}
       margin={useMargins ? [DASHBOARD_MARGIN_SIZE, DASHBOARD_MARGIN_SIZE] : [0, 0]}
       draggableHandle={'.embPanel--dragHandle'}

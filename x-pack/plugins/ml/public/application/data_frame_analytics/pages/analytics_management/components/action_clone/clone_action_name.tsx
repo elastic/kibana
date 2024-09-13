@@ -6,20 +6,25 @@
  */
 
 import { EuiToolTip, EuiLink, EuiText } from '@elastic/eui';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
-import { DeepReadonly } from '../../../../../../../common/types/common';
-import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
-import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
-import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import {
+  isClassificationAnalysis,
+  isOutlierAnalysis,
+  isRegressionAnalysis,
+  DEFAULT_RESULTS_FIELD,
+  type DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { DeepReadonly } from '../../../../../../../common/types/common';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES } from '../../hooks/use_create_analytics_form';
-import { State } from '../../hooks/use_create_analytics_form/state';
-import { DataFrameAnalyticsListRow } from '../analytics_list/common';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import type { State } from '../../hooks/use_create_analytics_form/state';
+import type { DataFrameAnalyticsListRow } from '../analytics_list/common';
 
 interface PropDefinition {
   /**
@@ -42,7 +47,7 @@ interface PropDefinition {
 }
 
 function isPropDefinition(a: PropDefinition | object): a is PropDefinition {
-  return a.hasOwnProperty('optional');
+  return Object.hasOwn(a, 'optional');
 }
 
 interface AnalyticsJobMetaData {
@@ -340,7 +345,7 @@ export function isAdvancedConfig(
   meta: AnalyticsJobMetaData = getAnalyticsJobMeta(config)
 ): boolean {
   for (const configKey in config) {
-    if (config.hasOwnProperty(configKey)) {
+    if (Object.hasOwn(config, configKey)) {
       const fieldConfig = config[configKey as keyof typeof config];
       const fieldMeta = meta[configKey as keyof typeof meta];
 
@@ -409,10 +414,9 @@ export const useNavigateToWizardWithClonedJob = () => {
       data: { dataViews },
       http: { basePath },
       application: { capabilities },
-      theme,
+      ...startServices
     },
   } = useMlKibana();
-  const theme$ = theme.theme$;
   const navigateToPath = useNavigateToPath();
   const canCreateDataView =
     capabilities.savedObjectsManagement.edit === true || capabilities.indexPatterns.save === true;
@@ -430,38 +434,36 @@ export const useNavigateToWizardWithClonedJob = () => {
       } else {
         toasts.addDanger({
           title: toMountPoint(
-            wrapWithTheme(
-              <>
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analyticsList.noSourceDataViewForClone"
-                  defaultMessage="Unable to clone the analytics job. No data view exists for index {sourceIndex}."
-                  values={{ sourceIndex }}
-                />
-                {canCreateDataView ? (
-                  <EuiText size="xs" color="text">
-                    <FormattedMessage
-                      id="xpack.ml.dataframe.analytics.cloneAction.dataViewPromptLink"
-                      defaultMessage="{linkToDataViewManagement}"
-                      values={{
-                        linkToDataViewManagement: (
-                          <EuiLink
-                            href={`${basePath.get()}/app/management/kibana/dataViews/create`}
-                            target="_blank"
-                          >
-                            <FormattedMessage
-                              id="xpack.ml.dataframe.analytics.cloneAction.dataViewPromptLinkText"
-                              defaultMessage="Create a data view for {sourceIndex}"
-                              values={{ sourceIndex }}
-                            />
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </EuiText>
-                ) : null}
-              </>,
-              theme$
-            )
+            <>
+              <FormattedMessage
+                id="xpack.ml.dataframe.analyticsList.noSourceDataViewForClone"
+                defaultMessage="Unable to clone the analytics job. No data view exists for index {sourceIndex}."
+                values={{ sourceIndex }}
+              />
+              {canCreateDataView ? (
+                <EuiText size="xs" color="text">
+                  <FormattedMessage
+                    id="xpack.ml.dataframe.analytics.cloneAction.dataViewPromptLink"
+                    defaultMessage="{linkToDataViewManagement}"
+                    values={{
+                      linkToDataViewManagement: (
+                        <EuiLink
+                          href={`${basePath.get()}/app/management/kibana/dataViews/create`}
+                          target="_blank"
+                        >
+                          <FormattedMessage
+                            id="xpack.ml.dataframe.analytics.cloneAction.dataViewPromptLinkText"
+                            defaultMessage="Create a data view for {sourceIndex}"
+                            values={{ sourceIndex }}
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </EuiText>
+              ) : null}
+            </>,
+            startServices
           ),
         });
       }

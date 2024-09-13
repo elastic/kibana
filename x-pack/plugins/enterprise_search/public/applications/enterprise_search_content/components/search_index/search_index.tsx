@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { useParams } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import useObservable from 'react-use/lib/useObservable';
-
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { KibanaLogic } from '../../../shared/kibana';
-import {
-  SEARCH_INDEX_PATH,
-  SEARCH_INDEX_SELECT_CONNECTOR_PATH,
-  SEARCH_INDEX_TAB_PATH,
-} from '../../routes';
+import { ClientConfigType } from '../../../../../common/types';
 
+import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { ErrorStatePrompt } from '../../../shared/error_state';
+import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
+import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
+
+import { ElasticsearchViewIndex } from '../../types';
 import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
+import { ConnectorConfiguration } from '../connector_detail/connector_configuration';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { baseBreadcrumbs } from '../search_indices';
 
-import { getHeaderActions } from './components/header_actions/header_actions';
-import { ConnectorConfiguration } from './connector/connector_configuration';
-import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
+import { getHeaderActions } from '../shared/header_actions/header_actions';
+
+import { ConnectorScheduling } from './connector/connector_scheduling';
 import { ConnectorSyncRules } from './connector/sync_rules/connector_rules';
 import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
 import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
@@ -40,9 +40,11 @@ import { CrawlerConfiguration } from './crawler/crawler_configuration/crawler_co
 import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
 import { NoConnectorRecord } from './crawler/no_connector_record';
 import { SearchIndexDocuments } from './documents';
+import { IndexError } from './index_error';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
+import { useIndicesNav } from './indices/indices_nav';
 import { SearchIndexOverview } from './overview';
 import { SearchIndexPipelines } from './pipelines/pipelines';
 
@@ -69,6 +71,7 @@ export const SearchIndex: React.FC = () => {
   }>();
 
   const { indexName } = useValues(IndexNameLogic);
+  const { errorConnectingMessage } = useValues(HttpLogic);
 
   /**
    * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index.
@@ -76,45 +79,62 @@ export const SearchIndex: React.FC = () => {
    * Putting it here guarantees that if a user is viewing an index with data, it'll be marked as complete
    */
   const {
+    config,
     guidedOnboarding,
-    productAccess: { hasAppSearchAccess },
     productFeatures: { hasDefaultIngestPipeline },
+    updateSideNavDefinition,
   } = useValues(KibanaLogic);
-  const isAppGuideActive = useObservable(
-    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('appSearch', 'add_data')
-  );
-  const isWebsiteGuideActive = useObservable(
-    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('websiteSearch', 'add_data')
-  );
-  const isDatabaseGuideActive = useObservable(
-    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('databaseSearch', 'add_data')
-  );
-  useEffect(() => {
-    if (isAppGuideActive && index?.count) {
-      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('appSearch', 'add_data');
-    } else if (isWebsiteGuideActive && index?.count) {
-      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('websiteSearch', 'add_data');
-    } else if (isDatabaseGuideActive && index?.count) {
-      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
-    }
-  }, [isAppGuideActive, isWebsiteGuideActive, isDatabaseGuideActive, index?.count]);
+
+  const indicesItems = useIndicesNav();
 
   useEffect(() => {
-    if (
-      isConnectorIndex(index) &&
-      index.name === indexName &&
-      index.connector.is_native &&
-      index.connector.service_type === null
-    ) {
-      KibanaLogic.values.navigateToUrl(
-        generateEncodedPath(SEARCH_INDEX_SELECT_CONNECTOR_PATH, { indexName })
-      );
-    }
-  }, [index]);
+    const subscription = guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$('appSearch', 'add_data')
+      .subscribe((isStepActive) => {
+        if (isStepActive && index?.count) {
+          guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('appSearch', 'add_data');
+        }
+      });
+    return () => subscription?.unsubscribe();
+  }, [guidedOnboarding, index?.count]);
+
+  useEffect(() => {
+    const subscription = guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$('websiteSearch', 'add_data')
+      .subscribe((isStepActive) => {
+        if (isStepActive && index?.count) {
+          guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('websiteSearch', 'add_data');
+        }
+      });
+    return () => subscription?.unsubscribe();
+  }, [guidedOnboarding, index?.count]);
+
+  useEffect(() => {
+    const subscription = guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$('databaseSearch', 'add_data')
+      .subscribe((isStepActive) => {
+        if (isStepActive && index?.count) {
+          guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
+        }
+      });
+    return () => subscription?.unsubscribe();
+  }, [guidedOnboarding, index?.count]);
+
+  useEffect(() => {
+    // We update the new side nav definition with the selected indices items
+    updateSideNavDefinition({ indices: indicesItems });
+  }, [indicesItems, updateSideNavDefinition]);
+
+  useEffect(() => {
+    return () => {
+      updateSideNavDefinition({ indices: undefined });
+    };
+  }, [updateSideNavDefinition]);
 
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
     {
       content: <SearchIndexOverview />,
+      'data-test-subj': 'entSearchContent-index-overview-tab',
       id: SearchIndexTabId.OVERVIEW,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.overviewTabLabel', {
         defaultMessage: 'Overview',
@@ -156,7 +176,7 @@ export const SearchIndex: React.FC = () => {
         ]
       : []),
     {
-      content: <ConnectorSchedulingComponent />,
+      content: <ConnectorScheduling />,
       id: SearchIndexTabId.SCHEDULING,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
         defaultMessage: 'Scheduling',
@@ -184,6 +204,7 @@ export const SearchIndex: React.FC = () => {
     },
     {
       content: <AutomaticCrawlScheduler />,
+      'data-test-subj': 'entSearchContent-index-crawler-scheduler-tab',
       id: SearchIndexTabId.SCHEDULING,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
         defaultMessage: 'Scheduling',
@@ -206,19 +227,6 @@ export const SearchIndex: React.FC = () => {
     ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
   ];
 
-  const selectedTab = tabs.find((tab) => tab.id === tabId);
-
-  const onTabClick = (tab: EuiTabbedContentTab) => {
-    KibanaLogic.values.navigateToUrl(
-      generateEncodedPath(
-        tab.id === SearchIndexTabId.OVERVIEW ? SEARCH_INDEX_PATH : SEARCH_INDEX_TAB_PATH,
-        {
-          indexName,
-          tabId: tab.id,
-        }
-      )
-    );
-  };
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName]}
@@ -226,19 +234,63 @@ export const SearchIndex: React.FC = () => {
       isLoading={isInitialLoading}
       pageHeader={{
         pageTitle: indexName,
-        rightSideItems: getHeaderActions(index, hasAppSearchAccess),
+        rightSideGroupProps: {
+          responsive: false,
+        },
+        rightSideItems: getHeaderActions(index),
       }}
     >
-      {isCrawlerIndex(index) && !index.connector ? (
-        <NoConnectorRecord />
-      ) : (
-        <>
-          {indexName === index?.name && (
-            <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
-          )}
-          {isCrawlerIndex(index) && <CrawlCustomSettingsFlyout />}
-        </>
-      )}
+      <IndexError indexName={indexName} />
+      <Content
+        index={index}
+        errorConnectingMessage={errorConnectingMessage}
+        config={config}
+        tabs={tabs}
+        tabId={tabId}
+      />
     </EnterpriseSearchContentPageTemplate>
+  );
+};
+
+interface ContentProps {
+  config?: ClientConfigType;
+  errorConnectingMessage: string;
+  index?: ElasticsearchViewIndex;
+  tabId?: string;
+  tabs: EuiTabbedContentTab[];
+}
+
+const Content: React.FC<ContentProps> = ({
+  config,
+  errorConnectingMessage,
+  index,
+  tabs,
+  tabId,
+}) => {
+  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === tabId), [tabId]);
+
+  const onTabClick = (tab: EuiTabbedContentTab) => {
+    KibanaLogic.values.navigateToUrl(
+      generateEncodedPath(
+        tab.id === SearchIndexTabId.OVERVIEW ? SEARCH_INDEX_PATH : SEARCH_INDEX_TAB_PATH,
+        {
+          indexName: index?.name || '',
+          tabId: tab.id,
+        }
+      )
+    );
+  };
+
+  if (isCrawlerIndex(index) && !index.connector) {
+    return <NoConnectorRecord />;
+  }
+  if (isCrawlerIndex(index) && (Boolean(errorConnectingMessage) || !config?.host)) {
+    return <ErrorStatePrompt />;
+  }
+  return (
+    <>
+      <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+      {isCrawlerIndex(index) && <CrawlCustomSettingsFlyout />}
+    </>
   );
 };

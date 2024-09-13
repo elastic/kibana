@@ -11,13 +11,13 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions } from '../../../store';
 import { mockDataProviders } from './mock/mock_data_providers';
 import { Providers } from './providers';
 import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { TimelineId } from '../../../../../common/types';
+import { TimelineId } from '../../../../../common/types/timeline';
 
 jest.mock('../../../../common/lib/kibana');
 

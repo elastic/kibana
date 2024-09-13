@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { BoolQuery } from '@kbn/es-query';
-import type { NamedAggregation } from '@kbn/securitysolution-grouping';
-import { isNoneGroup, getGroupingQuery } from '@kbn/securitysolution-grouping';
-
-const getGroupFields = (groupValue: string) => {
-  if (groupValue === 'kibana.alert.rule.name') {
-    return [groupValue, 'kibana.alert.rule.description'];
-  } else {
-    return [groupValue];
-  }
-};
+import type { NamedAggregation } from '@kbn/grouping';
+import { isNoneGroup, getGroupingQuery } from '@kbn/grouping';
+import type { RunTimeMappings } from '../../../../sourcerer/store/model';
 
 interface AlertsGroupingQueryParams {
   additionalFilters: Array<{
@@ -25,8 +17,9 @@ interface AlertsGroupingQueryParams {
   from: string;
   pageIndex: number;
   pageSize: number;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   selectedGroup: string;
+  uniqueValue: string;
   to: string;
 }
 
@@ -37,26 +30,21 @@ export const getAlertsGroupingQuery = ({
   pageSize,
   runtimeMappings,
   selectedGroup,
+  uniqueValue,
   to,
 }: AlertsGroupingQueryParams) =>
   getGroupingQuery({
     additionalFilters,
     from,
-    groupByFields: !isNoneGroup(selectedGroup) ? getGroupFields(selectedGroup) : [],
-    statsAggregations: !isNoneGroup(selectedGroup)
+    groupByField: selectedGroup,
+    statsAggregations: !isNoneGroup([selectedGroup])
       ? getAggregationsByGroupField(selectedGroup)
       : [],
     pageNumber: pageIndex * pageSize,
-    rootAggregations: [
-      {
-        unitsCount: { value_count: { field: selectedGroup } },
-      },
-      ...(!isNoneGroup(selectedGroup)
-        ? [{ groupsCount: { cardinality: { field: selectedGroup } } }]
-        : []),
-    ],
     runtimeMappings,
+    uniqueValue,
     size: pageSize,
+    sort: [{ unitsCount: { order: 'desc' } }],
     to,
   });
 
@@ -74,6 +62,14 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
     case 'kibana.alert.rule.name':
       aggMetrics.push(
         ...[
+          {
+            description: {
+              terms: {
+                field: 'kibana.alert.rule.description',
+                size: 1,
+              },
+            },
+          },
           {
             countSeveritySubAggregation: {
               cardinality: {
@@ -171,16 +167,9 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
             },
           },
           {
-            usersCountAggregation: {
+            hostsCountAggregation: {
               cardinality: {
                 field: 'host.name',
-              },
-            },
-          },
-          {
-            usersCountAggregation: {
-              cardinality: {
-                field: 'user.name',
               },
             },
           },
@@ -212,7 +201,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
             },
           },
           {
-            usersCountAggregation: {
+            hostsCountAggregation: {
               cardinality: {
                 field: 'host.name',
               },

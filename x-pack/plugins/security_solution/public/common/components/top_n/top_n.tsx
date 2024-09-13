@@ -15,7 +15,6 @@ import { EventsByDataset } from '../../../overview/components/events_by_dataset'
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { TimelineEventsType } from '../../../../common/types/timeline';
-import { useSourcererDataView } from '../../containers/sourcerer';
 import type { TopNOption } from './helpers';
 import { getSourcererScopeName, removeIgnoredAlertFilters } from './helpers';
 import * as i18n from './translations';
@@ -26,14 +25,12 @@ const TopNContainer = styled.div`
 `;
 
 const CloseButton = styled(EuiButtonIcon)`
-  z-index: 999999;
   position: absolute;
   right: 4px;
   top: 4px;
 `;
 
-const ViewSelect = styled(EuiSuperSelect)`
-  z-index: 999999;
+const ViewSelect = styled(EuiSuperSelect<string>)`
   width: 170px;
 `;
 
@@ -47,7 +44,7 @@ const TopNContent = styled.div`
 `;
 
 export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
-  combinedQueries?: string;
+  filterQuery?: string;
   defaultView: TimelineEventsType;
   field: AlertsStackByField;
   filters: Filter[];
@@ -56,15 +53,14 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
-  showLegend?: boolean;
   scopeId?: string;
   toggleTopN: () => void;
-  onFilterAdded?: () => void;
-  value?: string[] | string | null;
+  onFilterAdded?: () => void; // eslint-disable-line react/no-unused-prop-types
+  applyGlobalQueriesAndFilters?: boolean;
 }
 
 const TopNComponent: React.FC<Props> = ({
-  combinedQueries,
+  filterQuery,
   defaultView,
   deleteQuery,
   filters,
@@ -74,21 +70,19 @@ const TopNComponent: React.FC<Props> = ({
   options,
   paddingSize,
   query,
-  showLegend,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
   scopeId,
   to,
   toggleTopN,
+  applyGlobalQueriesAndFilters,
 }) => {
   const [view, setView] = useState<TimelineEventsType>(defaultView);
   const onViewSelected = useCallback(
     (value: string) => setView(value as TimelineEventsType),
     [setView]
   );
-  const { selectedPatterns, runtimeMappings } = useSourcererDataView(
-    getSourcererScopeName({ scopeId, view })
-  );
+  const sourcererScopeId = getSourcererScopeName({ scopeId, view });
 
   useEffect(() => {
     setView(defaultView);
@@ -116,52 +110,45 @@ const TopNComponent: React.FC<Props> = ({
 
   return (
     <TopNContainer data-test-subj="topN-container">
+      <TopNContent>
+        {view === 'raw' || view === 'all' ? (
+          <EventsByDataset
+            filterQuery={filterQuery}
+            deleteQuery={deleteQuery}
+            filters={applicableFilters}
+            from={from}
+            headerChildren={headerChildren}
+            indexPattern={indexPattern}
+            onlyField={field}
+            paddingSize={paddingSize}
+            query={query}
+            queryType="topN"
+            setQuery={setQuery}
+            showSpacer={false}
+            toggleTopN={toggleTopN}
+            sourcererScopeId={sourcererScopeId}
+            to={to}
+            hideQueryToggle
+            applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
+          />
+        ) : (
+          <SignalsByCategory
+            filters={applicableFilters}
+            headerChildren={headerChildren}
+            onlyField={field}
+            paddingSize={paddingSize}
+            setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
+            hideQueryToggle
+          />
+        )}
+      </TopNContent>
+
       <CloseButton
         aria-label={i18n.CLOSE}
         data-test-subj="close"
         iconType="cross"
         onClick={toggleTopN}
       />
-
-      <TopNContent>
-        {view === 'raw' || view === 'all' ? (
-          <EventsByDataset
-            combinedQueries={combinedQueries}
-            deleteQuery={deleteQuery}
-            filters={applicableFilters}
-            from={from}
-            headerChildren={headerChildren}
-            indexPattern={indexPattern}
-            indexNames={selectedPatterns}
-            runtimeMappings={runtimeMappings}
-            onlyField={field}
-            paddingSize={paddingSize}
-            query={query}
-            queryType="topN"
-            showLegend={showLegend}
-            setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
-            setQuery={setQuery}
-            showSpacer={false}
-            toggleTopN={toggleTopN}
-            scopeId={scopeId}
-            to={to}
-            hideQueryToggle
-          />
-        ) : (
-          <SignalsByCategory
-            combinedQueries={combinedQueries}
-            filters={applicableFilters}
-            headerChildren={headerChildren}
-            onlyField={field}
-            paddingSize={paddingSize}
-            query={query}
-            showLegend={showLegend}
-            setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
-            runtimeMappings={runtimeMappings}
-            hideQueryToggle
-          />
-        )}
-      </TopNContent>
     </TopNContainer>
   );
 };

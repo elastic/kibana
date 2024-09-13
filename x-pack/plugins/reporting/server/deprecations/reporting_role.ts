@@ -43,7 +43,7 @@ export async function getDeprecationsInfo(
   }
 
   const config = reportingCore.getConfig();
-  const deprecatedRoles = config.get('roles', 'allow') || ['reporting_user'];
+  const deprecatedRoles = config.roles.allow || ['reporting_user'];
 
   return [
     ...(await getUsersDeprecations(client, reportingCore, deprecatedRoles, docLinks)),
@@ -120,7 +120,10 @@ async function getUsersDeprecations(
   const reportingUsers = Object.entries(users).reduce((userSet, current) => {
     const [userName, user] = current;
     const foundRole = user.roles.find((role) => deprecatedRoles.includes(role));
-    return foundRole ? [...userSet, `${userName}[${foundRole}]`] : userSet;
+    if (foundRole) {
+      userSet.push(`${userName}[${foundRole}]`);
+    }
+    return userSet;
   }, [] as string[]);
 
   if (reportingUsers.length === 0) {
@@ -208,8 +211,11 @@ async function getRoleMappingsDeprecations(
   const roleMappingsWithReportingRole: string[] = Object.entries(roleMappings).reduce(
     (roleSet, current) => {
       const [roleName, role] = current;
-      const foundMapping = role.roles.find((roll) => deprecatedRoles.includes(roll));
-      return foundMapping ? [...roleSet, `${roleName}[${foundMapping}]`] : roleSet;
+      const foundMapping = role.roles?.find((roll) => deprecatedRoles.includes(roll));
+      if (foundMapping) {
+        roleSet.push(`${roleName}[${foundMapping}]`);
+      }
+      return roleSet;
     },
     [] as string[]
   );

@@ -1,58 +1,59 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import type { PropsWithChildren } from 'react';
 import type {
   Action,
   ActionExecutionContext,
   UiActionsService,
 } from '@kbn/ui-actions-plugin/public';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { Serializable } from '@kbn/utility-types';
 import type { CellActionsMode } from './constants';
 
-export interface CellActionsProviderProps {
+export * from './actions/types';
+
+export type CellActionsProviderProps = PropsWithChildren<{
   /**
    * Please assign `uiActions.getTriggerCompatibleActions` function.
    * This function should return a list of actions for a triggerId that are compatible with the provided context.
    */
   getTriggerCompatibleActions: UiActionsService['getTriggerCompatibleActions'];
-}
-
-export interface CellActionField {
-  /**
-   * Field name.
-   * Example: 'host.name'
-   */
-  name: string;
-  /**
-   * Field type.
-   * Example: 'keyword'
-   */
-  type: string;
-  /**
-   * Field value.
-   * Example: 'My-Laptop'
-   */
-  value: string | string[] | null | undefined;
-  /**
-   * When true the field supports aggregations.
-   *
-   * It defaults to false.
-   *
-   * You can verify if a field is aggregatable on kibana/management/kibana/dataViews.
-   */
-  aggregatable?: boolean;
-}
+}>;
 
 type Metadata = Record<string, unknown>;
 
-export interface CellActionsProps {
+export type CellActionFieldValue =
+  | Serializable
+  // Add primitive array types to allow type guards to work.
+  // Because SerializableArray is a cyclic self referenced Array.
+  | string[]
+  | number[]
+  | boolean[]
+  | null[]
+  | undefined[];
+
+export interface CellActionsData {
+  /**
+   * The field specification
+   */
+  field: FieldSpec;
+
   /**
    * Common set of properties used by most actions.
    */
-  field: CellActionField;
+  value: CellActionFieldValue;
+}
+
+export type CellActionsProps = PropsWithChildren<{
+  data: CellActionsData | CellActionsData[];
+
   /**
    * The trigger in which the actions are registered.
    */
@@ -86,10 +87,11 @@ export interface CellActionsProps {
   metadata?: Metadata;
 
   className?: string;
-}
+}>;
 
 export interface CellActionExecutionContext extends ActionExecutionContext {
-  field: CellActionField;
+  data: CellActionsData[];
+
   /**
    * Ref to the node where the cell action are rendered.
    */
@@ -104,13 +106,15 @@ export interface CellActionExecutionContext extends ActionExecutionContext {
  * Subset of `CellActionExecutionContext` used only for the compatibility check in the `isCompatible` function.
  * It omits the references and the `field.value`.
  */
+
 export interface CellActionCompatibilityContext<
   C extends CellActionExecutionContext = CellActionExecutionContext
 > extends ActionExecutionContext {
   /**
-   * The object containing the field name and type, needed for the compatibility check
+   * CellActionsData containing the field spec but not the value for the compatibility check
    */
-  field: Omit<C['field'], 'value'>;
+  data: Array<Omit<C['data'][number], 'value'>>;
+
   /**
    * Extra configurations for actions.
    */
@@ -131,21 +135,4 @@ export type GetActions = (context: CellActionCompatibilityContext) => Promise<Ce
 export interface PartitionedActions {
   extraActions: CellAction[];
   visibleActions: CellAction[];
-}
-
-/**
- * Cell action factory template with optional `id`.
- * The id override is required when using the action factory so it
- * can be omitted in the original action creator
- */
-export type CellActionTemplate<C extends CellAction = CellAction> = Omit<C, 'id'>;
-/**
- * Action factory extend parameter type,
- */
-export type CellActionExtend<C extends CellAction = CellAction> = Partial<C> & { id: string };
-export interface CellActionFactory<C extends CellAction = CellAction> {
-  <A extends C = C>(extend: CellActionExtend<A>): A;
-  combine: <A extends C = C>(
-    partialActionTemplate: Partial<CellActionTemplate<A>>
-  ) => CellActionFactory<A>;
 }

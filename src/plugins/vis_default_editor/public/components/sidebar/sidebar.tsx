@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, {
@@ -26,7 +27,7 @@ import {
 } from '@kbn/visualizations-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { SavedSearch } from '@kbn/discover-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';

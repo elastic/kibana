@@ -10,6 +10,8 @@ import React from 'react';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 
+import { LazyWrapper } from './lazy_wrapper';
+import type { SpacesApiUiComponent } from './types';
 import { getCopyToSpaceFlyoutComponent } from '../copy_saved_objects_to_space';
 import { getEmbeddableLegacyUrlConflict, getLegacyUrlConflict } from '../legacy_urls';
 import type { PluginsStart } from '../plugin';
@@ -18,8 +20,6 @@ import { getSpaceAvatarComponent } from '../space_avatar';
 import { getSpaceListComponent } from '../space_list';
 import { getSpacesContextProviderWrapper } from '../spaces_context';
 import type { SpacesManager } from '../spaces_manager';
-import { LazyWrapper } from './lazy_wrapper';
-import type { SpacesApiUiComponent } from './types';
 
 export interface GetComponentsOptions {
   spacesManager: SpacesManager;
@@ -33,7 +33,10 @@ export const getComponents = ({
   /**
    * Returns a function that creates a lazy-loading version of a component.
    */
-  function wrapLazy<T>(fn: () => Promise<FC<T>>, options: { showLoadingSpinner?: boolean } = {}) {
+  function wrapLazy<T>(
+    fn: () => Promise<FC<PropsWithChildren<T>>>,
+    options: { showLoadingSpinner?: boolean } = {}
+  ) {
     const { showLoadingSpinner } = options;
     return (props: JSX.IntrinsicAttributes & PropsWithRef<PropsWithChildren<T>>) => (
       <LazyWrapper

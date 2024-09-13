@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useCallback, useRef, useMemo } from 'react';
@@ -11,7 +12,8 @@ import { EuiFormLabel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 
-import { CodeEditor, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { suggest, getSuggestion } from './timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
 import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
@@ -86,7 +88,9 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
     const abortController = new AbortController();
     if (kibana.services.http) {
       kibana.services.http
-        .get<ITimelionFunction[]>('../api/timelion/functions', { signal: abortController.signal })
+        .get<ITimelionFunction[]>('../internal/timelion/functions', {
+          signal: abortController.signal,
+        })
         .then((data) => {
           functionList.current = data;
         });

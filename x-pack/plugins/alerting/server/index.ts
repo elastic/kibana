@@ -7,9 +7,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { RulesClient as RulesClientClass } from './rules_client';
-import { AlertingPlugin } from './plugin';
-import { configSchema } from './config';
-import { AlertsConfigType } from './types';
+import { AlertingConfig, configSchema } from './config';
 
 export type RulesClient = PublicMethodsOf<RulesClientClass>;
 
@@ -28,21 +26,20 @@ export type {
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
-  GetSummarizedAlertsFnOpts,
+  SummarizedAlertsChunk,
+  ScopedQueryAlerts,
   ExecutorType,
   IRuleTypeAlerts,
+  GetViewInAppRelativeUrlFnOpts,
+  DataStreamAdapter,
 } from './types';
+export { DEFAULT_AAD_CONFIG } from './types';
+export { RULE_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE } from './saved_objects';
 export { RuleNotifyWhen } from '../common';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
-export type {
-  FindResult,
-  BulkEditOperation,
-  BulkOperationError,
-  BulkEditOptions,
-  BulkEditOptionsFilter,
-  BulkEditOptionsIds,
-} from './rules_client';
+export type { FindResult, BulkEditOperation, BulkOperationError } from './rules_client';
+export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';
 export { getEsErrorMessage } from './lib/errors';
@@ -60,6 +57,7 @@ export {
   ECS_COMPONENT_TEMPLATE_NAME,
   ECS_CONTEXT,
   TOTAL_FIELDS_LIMIT,
+  VALID_ALERT_INDEX_PREFIXES,
   getComponentTemplate,
   type PublicFrameworkAlertsService,
   createOrUpdateIlmPolicy,
@@ -68,13 +66,24 @@ export {
   createOrUpdateIndexTemplate,
   createConcreteWriteIndex,
   installWithTimeout,
+  isValidAlertIndexName,
+  InstallShutdownError,
 } from './alerts_service';
+export { sanitizeBulkErrorResponse, AlertsClientError } from './alerts_client';
+export { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
+export type { ConnectorAdapter } from './connector_adapters/types';
 
-export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { AlertingPlugin } = await import('./plugin');
+  return new AlertingPlugin(initContext);
+};
 
-export const config: PluginConfigDescriptor<AlertsConfigType> = {
+export const config: PluginConfigDescriptor<AlertingConfig> = {
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
+  exposeToBrowser: {
+    rules: { run: { alerts: { max: true } } },
+  },
+  deprecations: ({ renameFromRoot, deprecate }) => [
     renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck', { level: 'warning' }),
     renameFromRoot(
       'xpack.alerts.invalidateApiKeysTask.interval',
@@ -88,6 +97,10 @@ export const config: PluginConfigDescriptor<AlertsConfigType> = {
     ),
     renameFromRoot('xpack.alerting.defaultRuleTaskTimeout', 'xpack.alerting.rules.run.timeout', {
       level: 'warning',
+    }),
+    deprecate('maxEphemeralActionsPerAlert', 'a future version', {
+      level: 'warning',
+      message: `Configuring "xpack.alerting.maxEphemeralActionsPerAlert" is deprecated and will be removed in a future version. Remove this setting to increase action execution resiliency.`,
     }),
   ],
 };

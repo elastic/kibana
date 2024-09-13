@@ -11,7 +11,7 @@ import type {
   TimelineType,
   TimelineStatus,
   RowRendererId,
-} from '../../types/timeline';
+} from '../../api/timeline';
 
 export * from './events';
 
@@ -133,6 +133,7 @@ export interface TimelineInput {
   savedQueryId?: Maybe<string>;
   sort?: Maybe<SortTimelineInput[]>;
   status?: Maybe<TimelineStatus>;
+  savedSearchId: Maybe<string>;
 }
 
 export enum FlowDirection {

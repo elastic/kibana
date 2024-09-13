@@ -4,6 +4,7 @@
 // stylelint-disable selector-no-qualifying-type
 .kbnDocTableWrapper {
   @include euiScrollBar;
+  @include euiOverflowShadow;
   overflow: auto;
   display: flex;
   flex: 1 1 100%;
@@ -27,6 +28,11 @@
   .kbnDocTable__row {
     font-family: $euiCodeFontFamily;
     font-size: $euiFontSizeXS;
+  }
+
+  .embPanel & {
+    // Bug fix for dashboard panels https://github.com/elastic/kibana/issues/180828
+    mask-image: none;
   }
 }
 
@@ -68,7 +74,7 @@
     dt {
       background-color: transparentize(shade($euiColorPrimary, 20%), .9);
       color: $euiTextColor;
-      padding: ($euiSizeXS / 2) $euiSizeXS;
+      padding: calc($euiSizeXS / 2) $euiSizeXS;
       margin-right: $euiSizeXS;
       word-break: normal;
       border-radius: $euiBorderRadius;

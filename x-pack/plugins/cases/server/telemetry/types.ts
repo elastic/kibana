@@ -11,7 +11,7 @@ import type { Owner } from '../../common/constants/types';
 
 export type BucketKeyString = Omit<Bucket, 'key'> & { key: string };
 
-interface Bucket<T extends string | number = string | number> {
+export interface Bucket<T extends string | number = string | number> {
   doc_count: number;
   key: T;
 }
@@ -155,6 +155,16 @@ export interface LatestDates {
   closedAt: string;
 }
 
+export interface CustomFieldsTelemetry {
+  totalsByType: Record<string, number>;
+  totals: number;
+  required: number;
+}
+
+export interface CustomFieldsSolutionTelemetry {
+  customFields: CustomFieldsTelemetry;
+}
+
 export interface CasesTelemetry {
   cases: {
     all: Count &
@@ -197,7 +207,15 @@ export interface CasesTelemetry {
         manually: number;
         automatic: number;
       };
+      customFields: CustomFieldsTelemetry;
     };
+    sec: CustomFieldsSolutionTelemetry;
+    obs: CustomFieldsSolutionTelemetry;
+    main: CustomFieldsSolutionTelemetry;
+  };
+  casesSystemAction: {
+    totalCasesCreated: number;
+    totalRules: number;
   };
 }
 
@@ -209,3 +227,4 @@ export type AssigneesSchema = MakeSchemaFrom<Assignees>;
 export type AttachmentFrameworkSchema = MakeSchemaFrom<AttachmentFramework['attachmentFramework']>;
 export type AttachmentItemsSchema = MakeSchemaFrom<AttachmentStats>;
 export type SolutionTelemetrySchema = MakeSchemaFrom<SolutionTelemetry>;
+export type CustomFieldsSolutionTelemetrySchema = MakeSchemaFrom<CustomFieldsSolutionTelemetry>;

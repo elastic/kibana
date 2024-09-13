@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -29,31 +30,33 @@ const mock = new RedirectAppLinksStorybookMock();
 
 export const RedirectAppLinks = () => {
   return (
-    <>
-      <Component {...mock.getProps()}>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="storybookButton"
-              iconType="plusInCircle"
-              href="/some-test-url"
-            >
-              Button with URL
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="storybookButton"
-              iconType="plusInCircle"
-              onClick={action('onClick')}
-            >
-              Button without URL
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Component>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <Component {...mock.getProps()}>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="storybookButton"
+                iconType="plusInCircle"
+                href="/some-test-url"
+              >
+                Button with URL
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="storybookButton"
+                iconType="plusInCircle"
+                onClick={action('onClick')}
+              >
+                Button without URL
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Component>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <div>
           <EuiButton
             data-test-subj="storybookButton"
             iconType="plusInCircle"
@@ -61,9 +64,9 @@ export const RedirectAppLinks = () => {
           >
             Button outside RedirectAppLinks
           </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+        </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

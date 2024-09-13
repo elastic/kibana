@@ -23,19 +23,43 @@
 // ***********************************************************
 
 // force ESM in this module
+
 export {};
 
-import 'cypress-react-selector';
-// import './coverage';
+// @ts-expect-error ts(2306)  module has some interesting ways of importing, see https://github.com/cypress-io/cypress/blob/0871b03c5b21711cd23056454da8f23dcaca4950/npm/grep/README.md#support-file
+import registerCypressGrep from '@cypress/grep';
+
+registerCypressGrep();
+
+import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
+import { login } from '@kbn/security-solution-plugin/public/management/cypress/tasks/login';
+
+import type { ServerlessRoleName } from './roles';
+
+import { waitUntil } from '../tasks/wait_until';
+import { isCloudServerless, isServerless } from '../tasks/serverless';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
+    interface SuiteConfigOverrides {
+      env?: {
+        ftrConfig: SecuritySolutionDescribeBlockFtrConfig;
+      };
+    }
+
     interface Chainable {
       getBySel(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
+
       getBySelContains(
         ...args: Parameters<Cypress.Chainable['get']>
       ): Chainable<JQuery<HTMLElement>>;
+
+      clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
+
+      login(role: ServerlessRoleName, useCookiesForMKI?: boolean): void;
+
+      waitUntil(fn: () => Cypress.Chainable): Cypress.Chainable | undefined;
     }
   }
 }
@@ -48,6 +72,29 @@ Cypress.Commands.add('getBySel', (selector, ...args) =>
 Cypress.Commands.add('getBySelContains', (selector, ...args) =>
   cy.get(`[data-test-subj^="${selector}"]`, ...args)
 );
+
+Cypress.Commands.add(
+  'clickOutside',
+  () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
+);
+
+Cypress.Commands.add('login', (role, useCookiesForMKI = true) => {
+  // MKI does not support multiple logins throughout the test suite using cookies.
+  // Until a better alternative is found, we will prevent multiple logins in the MKI environment in test suites.
+  if (isCloudServerless && !useCookiesForMKI) {
+    return;
+  }
+
+  if (isServerless && !isCloudServerless) {
+    // Do not use login.with in MKI env, default to login which will route to proper login method
+    return login.with(role, 'changeme');
+  }
+
+  // @ts-expect-error hackish way to provide a new role in Osquery ESS only (Reader)
+  return login(role);
+});
+
+Cypress.Commands.add('waitUntil', waitUntil);
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

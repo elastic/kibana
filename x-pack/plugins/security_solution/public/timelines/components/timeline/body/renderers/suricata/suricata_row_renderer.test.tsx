@@ -13,11 +13,10 @@ import { waitFor } from '@testing-library/react';
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData } from '../../../../../../common/mock';
-import '../../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { suricataRowRenderer } from './suricata_row_renderer';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
-import { TimelineId } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 
 jest.mock('../../../../../../common/lib/kibana');
 

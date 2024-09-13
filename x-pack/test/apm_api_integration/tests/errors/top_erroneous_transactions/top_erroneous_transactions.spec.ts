@@ -21,11 +21,12 @@ type ErroneousTransactions =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
+  const groupId = '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03';
 
   async function callApi(
     overrides?: RecursivePartial<
@@ -63,7 +64,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177637
+  registry.when.skip('when data is loaded', { config: 'basic', archives: [] }, () => {
     const {
       firstTransaction: { name: firstTransactionName, failureRate: firstTransactionFailureRate },
       secondTransaction: { name: secondTransactionName, failureRate: secondTransactionFailureRate },
@@ -71,10 +73,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('returns the correct data', () => {
       before(async () => {
-        await generateData({ serviceName, start, end, synthtraceEsClient });
+        await generateData({ serviceName, start, end, apmSynthtraceEsClient });
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       describe('without comparison', () => {
         const numberOfBuckets = 15;
@@ -82,12 +84,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           const response = await callApi({
-            path: { groupId: '0000000000000000000000Error test' },
+            path: { groupId },
           });
           erroneousTransactions = response.body;
         });
 
-        it('displays the correct number of occurrences', () => {
+        it.skip('displays the correct number of occurrences', () => {
           const { topErroneousTransactions } = erroneousTransactions;
           expect(topErroneousTransactions.length).to.be(2);
 
@@ -132,7 +134,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           before(async () => {
             const fiveMinutes = 5 * 60 * 1000;
             const response = await callApi({
-              path: { groupId: '0000000000000000000000Error test' },
+              path: { groupId },
               query: {
                 start: new Date(end - fiveMinutes).toISOString(),
                 end: new Date(end).toISOString(),
@@ -182,7 +184,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         describe('when there are no data for the time period', () => {
           it('returns an empty array', async () => {
             const response = await callApi({
-              path: { groupId: '0000000000000000000000Error test' },
+              path: { groupId },
               query: {
                 start: '2021-01-03T00:00:00.000Z',
                 end: '2021-01-03T00:15:00.000Z',

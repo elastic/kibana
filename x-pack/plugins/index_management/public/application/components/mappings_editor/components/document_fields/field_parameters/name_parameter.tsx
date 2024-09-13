@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { TextField, UseField, FieldConfig } from '../../../shared_imports';
 import { validateUniqueName } from '../../../lib';
 import { PARAMETERS_DEFINITION } from '../../../constants';
@@ -14,7 +15,11 @@ import { useMappingsState } from '../../../mappings_state_context';
 
 const { validations, ...rest } = PARAMETERS_DEFINITION.name.fieldConfig as FieldConfig;
 
-export const NameParameter = () => {
+interface NameParameterProps {
+  isSemanticText?: boolean;
+}
+
+export const NameParameter: React.FC<NameParameterProps> = ({ isSemanticText }) => {
   const {
     fields: { rootLevelFields, byId },
     documentFields: { fieldToAddFieldTo, fieldToEdit },
@@ -32,6 +37,11 @@ export const NameParameter = () => {
   const nameConfig: FieldConfig = useMemo(
     () => ({
       ...rest,
+      label: isSemanticText
+        ? i18n.translate('xpack.idxMgmt.mappingsEditor.semanticTextNameFieldLabel', {
+            defaultMessage: 'New field name',
+          })
+        : rest.label,
       validations: [
         ...validations!,
         {
@@ -39,7 +49,7 @@ export const NameParameter = () => {
         },
       ],
     }),
-    [uniqueNameValidator]
+    [isSemanticText, uniqueNameValidator]
   );
 
   return (

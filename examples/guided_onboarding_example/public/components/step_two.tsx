@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -11,15 +12,12 @@ import React from 'react';
 import { EuiText, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiPageSection } from '@elastic/eui';
 
 export const StepTwo = () => {
   return (
     <>
-      <EuiPageContentHeader>
+      <EuiPageHeader>
         <EuiTitle>
           <h2>
             <FormattedMessage
@@ -28,8 +26,8 @@ export const StepTwo = () => {
             />
           </h2>
         </EuiTitle>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>
+      </EuiPageHeader>
+      <EuiPageSection>
         <EuiText>
           <p>
             <FormattedMessage
@@ -39,7 +37,7 @@ export const StepTwo = () => {
             />
           </p>
         </EuiText>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </>
   );
 };

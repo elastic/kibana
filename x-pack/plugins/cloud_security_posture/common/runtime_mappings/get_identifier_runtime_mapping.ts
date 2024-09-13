@@ -16,35 +16,37 @@ export const getIdentifierRuntimeMapping = (): MappingRuntimeFields => ({
     type: 'keyword',
     script: {
       source: `
-        if (!doc.containsKey('rule.benchmark.posture_type'))
-          {
-            def identifier = doc["cluster_id"].value;
-            emit(identifier);
-            return
-          }
-        else
-        {
-          if(doc["rule.benchmark.posture_type"].size() > 0)
-            {
-              def policy_template_type = doc["rule.benchmark.posture_type"].value;
-              if (policy_template_type == "cspm")
-              {
-                def identifier = doc["cloud.account.id"].value;
-                emit(identifier);
-                return
-              }
+        def postureTypeAvailable = doc.containsKey("rule.benchmark.posture_type") &&
+          !doc["rule.benchmark.posture_type"].empty;
+        def orchestratorIdAvailable = doc.containsKey("orchestrator.cluster.id") &&
+          !doc["orchestrator.cluster.id"].empty;
+        def cloudAccountIdAvailable = doc.containsKey("cloud.account.id") && !doc["cloud.account.id"].empty &&
+          doc["cloud.account.id"].value != "";
+        if (!postureTypeAvailable) {
+          def identifier = orchestratorIdAvailable ?
+            doc["orchestrator.cluster.id"].value : doc["cluster_id"].value;
+          emit(identifier);
+        } else {
+          def policy_template_type = doc["rule.benchmark.posture_type"].value;
 
-              if (policy_template_type == "kspm")
-              {
-                def identifier = doc["cluster_id"].value;
-                emit(identifier);
-                return
-              }
+          if (policy_template_type == "cspm") {
+            // Checking for emptiness due to backwards compatibility with 8.13
+            // where cloud.account.id was not available and no field was eligible for asset identifier
+            if (cloudAccountIdAvailable) {
+              emit(doc["cloud.account.id"].value);
+            } else {
+              return;
             }
-
-            def identifier = doc["cluster_id"].value;
+          } else if (policy_template_type == "kspm") {
+            def identifier = orchestratorIdAvailable ?
+              doc["orchestrator.cluster.id"].value : doc["cluster_id"].value;
             emit(identifier);
-            return
+          } else {
+            // Default behaviour when policy_template_type is unknown
+            def identifier = orchestratorIdAvailable ?
+              doc["orchestrator.cluster.id"].value : doc["cluster_id"].value;
+            emit(identifier);
+          }
         }
       `,
     },

@@ -8,6 +8,10 @@
 import type { EndpointAuthz } from '../../types/authz';
 import { getEndpointAuthzInitialState } from './authz';
 
+/**
+ * Returns the Endpoint Authz values all set to `true` (authorized)
+ * @param overrides
+ */
 export const getEndpointAuthzInitialStateMock = (
   overrides: Partial<EndpointAuthz> = {}
 ): EndpointAuthz => {
@@ -20,8 +24,6 @@ export const getEndpointAuthzInitialStateMock = (
 
       return mockPrivileges;
     }, {} as EndpointAuthz),
-    // this one is currently treated special in that everyone can un-isolate
-    canUnIsolateHost: true,
     ...overrides,
   };
 

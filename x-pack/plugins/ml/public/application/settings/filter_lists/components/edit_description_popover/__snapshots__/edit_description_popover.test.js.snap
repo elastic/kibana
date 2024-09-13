@@ -23,6 +23,7 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
     isOpen={true}
     ownFocus={true}
     panelPaddingSize="m"
+    repositionToCrossAxis={true}
   >
     <div
       style={
@@ -33,19 +34,13 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
     >
       <EuiForm>
         <EuiFormRow
-          describedByIds={Array []}
-          display="row"
-          hasChildLabel={true}
-          hasEmptyLabelSpace={false}
           id="filter_list_edit_description_row"
           label={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Filter list description"
               id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
-              values={Object {}}
             />
           }
-          labelType="label"
         >
           <EuiFieldText
             data-test-subj="mlFilterListDescriptionInput"
@@ -83,6 +78,7 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="m"
+    repositionToCrossAxis={true}
   >
     <div
       style={
@@ -93,19 +89,13 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
     >
       <EuiForm>
         <EuiFormRow
-          describedByIds={Array []}
-          display="row"
-          hasChildLabel={true}
-          hasEmptyLabelSpace={false}
           id="filter_list_edit_description_row"
           label={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Filter list description"
               id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
-              values={Object {}}
             />
           }
-          labelType="label"
         >
           <EuiFieldText
             data-test-subj="mlFilterListDescriptionInput"
@@ -143,6 +133,7 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="m"
+    repositionToCrossAxis={true}
   >
     <div
       style={
@@ -153,19 +144,13 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
     >
       <EuiForm>
         <EuiFormRow
-          describedByIds={Array []}
-          display="row"
-          hasChildLabel={true}
-          hasEmptyLabelSpace={false}
           id="filter_list_edit_description_row"
           label={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Filter list description"
               id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
-              values={Object {}}
             />
           }
-          labelType="label"
         >
           <EuiFieldText
             data-test-subj="mlFilterListDescriptionInput"

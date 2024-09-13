@@ -14,8 +14,14 @@ import { verifyAccessAndContext } from './verify_access_and_context';
 import { CreateOptions } from '../actions_client';
 
 export const bodySchema = schema.object({
-  name: schema.string({ validate: validateEmptyStrings }),
-  connector_type_id: schema.string({ validate: validateEmptyStrings }),
+  name: schema.string({
+    validate: validateEmptyStrings,
+    meta: { description: 'The display name for the connector.' },
+  }),
+  connector_type_id: schema.string({
+    validate: validateEmptyStrings,
+    meta: { description: 'The type of connector.' },
+  }),
   config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
     defaultValue: {},
   }),
@@ -35,6 +41,7 @@ const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
   isPreconfigured,
   isDeprecated,
   isMissingSecrets,
+  isSystemAction,
   ...res
 }) => ({
   ...res,
@@ -42,6 +49,7 @@ const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
   is_preconfigured: isPreconfigured,
   is_deprecated: isDeprecated,
   is_missing_secrets: isMissingSecrets,
+  is_system_action: isSystemAction,
 });
 
 export const createActionRoute = (
@@ -50,9 +58,26 @@ export const createActionRoute = (
 ) => {
   router.post(
     {
-      path: `${BASE_ACTION_API_PATH}/connector`,
+      path: `${BASE_ACTION_API_PATH}/connector/{id?}`,
+      options: {
+        access: 'public',
+        summary: 'Create a connector',
+        tags: ['oas-tag:connectors'],
+      },
       validate: {
-        body: bodySchema,
+        request: {
+          params: schema.maybe(
+            schema.object({
+              id: schema.maybe(schema.string()),
+            })
+          ),
+          body: bodySchema,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(
@@ -60,7 +85,7 @@ export const createActionRoute = (
         const actionsClient = (await context.actions).getActionsClient();
         const action = rewriteBodyReq(req.body);
         return res.ok({
-          body: rewriteBodyRes(await actionsClient.create({ action })),
+          body: rewriteBodyRes(await actionsClient.create({ action, options: req.params })),
         });
       })
     )

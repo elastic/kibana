@@ -24,8 +24,9 @@ export interface Body {
 }
 
 export const anomaliesTableData = async (body: Body, signal: AbortSignal): Promise<Anomalies> => {
-  return KibanaServices.get().http.fetch<Anomalies>('/api/ml/results/anomalies_table_data', {
+  return KibanaServices.get().http.fetch<Anomalies>('/internal/ml/results/anomalies_table_data', {
     method: 'POST',
+    version: '1',
     body: JSON.stringify(body),
     asSystemRequest: true,
     signal,

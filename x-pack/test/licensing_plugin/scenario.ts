@@ -17,6 +17,7 @@ export function createScenario({ getService, getPageObjects }: FtrProviderContex
   const esSupertestWithoutAuth = getService('esSupertestWithoutAuth');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'security']);
+  const retry = getService('retry');
 
   const scenario = {
     async setup() {
@@ -74,18 +75,18 @@ export function createScenario({ getService, getPageObjects }: FtrProviderContex
         .post('/_license/?acknowledge=true')
         .send({
           license: {
-            uid: '00000000-d3ad-7357-c0d3-000000000000',
+            uid: '504430e6-503c-4316-85cb-b402c730ca08',
             type: 'enterprise',
-            issue_date_in_millis: 1577836800000,
-            start_date_in_millis: 1577836800000,
-            // expires 2022-12-31
-            expiry_date_in_millis: 1672531199999,
+            issue_date_in_millis: 1669680000000,
+            start_date_in_millis: 1669680000000,
+            // expires 2024-12-31
+            expiry_date_in_millis: 1735689599999,
             max_resource_units: 250,
             max_nodes: null,
-            issued_to: 'Elastic Internal Use (development environments)',
-            issuer: 'Elastic',
+            issued_to: 'Elastic - INTERNAL (development environments)',
+            issuer: 'API',
             signature:
-              'AAAABQAAAA1gHUVis7hel8b8nNCAAAAAIAo5/x6hrsGh1GqqrJmy4qgmEC7gK0U4zQ6q5ZEMhm4jAAABAKMR+w3KZsMJfG5jNWgZXJLwRmiNqN7k94vKFgRdj1yM+gA9ufhXIn9d01OvFhPjilIqm+fxVjCxXwGKbFRiwtTWnTYjXPuNml+qCFGgUWguWEcVoIW6VU7/lYOqMJ4EB4zOMLe93P267iaDm542aelQrW1OJ69lGGuPBik8v9r1bNZzKBQ99VUr/qoosGDAm0udh2HxWzYoCL5lDML5Niy87xlVCubSSBXdUXzUgdZKKk6pKaMdHswB1gjvEfnwqPxEWAyrV0BCr/T1WehXd7U4p6/zt6sJ6cPh+34AZe9g4+3WPKrZhX4iaSHMDDHn4HNjO72CZ2oi42ZDNnJ37tA=',
+              'AAAABQAAAA2h1vBafHuRhjOHREKYAAAAIAo5/x6hrsGh1GqqrJmy4qgmEC7gK0U4zQ6q5ZEMhm4jAAABAByGz9MmRW/L7vQriISa6u8Oov7zykA+Cv55BToWEthSn0c5KQUxcWG+K5Cm4/OkFsXA8TE4zFnlSgYxmQi2Eqq7IAKGdcxI/xhQfMsq5RWlSEwtfyV0M2RKJxgam8o2lvKC9EbrU76ISYr7jTkgoBl6GFSjdfXMHmxNXBSKDDm03ZeXkWkvuNNFrHJuYivf2Se9OeeB/eu4jqUI0UuNfPYF07ZcYvtKfj3KX+aysCSV2FW8wgyAjndOPEinfYcwAJ09zcl+MTig2K0DQTsYkLykXmzZnLz6qeuVVFjCTowxizDFW+5MrpzUnwkjqv8CFhLfvxG7waWQWslv8fXLUn8=',
           },
         })
         .auth('license_manager_user', 'license_manager_user-password')
@@ -109,9 +110,27 @@ export function createScenario({ getService, getPageObjects }: FtrProviderContex
     },
 
     async waitForPluginToDetectLicenseUpdate() {
+      const {
+        body: { license: esLicense },
+      } = await esSupertestWithoutAuth
+        .get('/_license')
+        .auth('license_manager_user', 'license_manager_user-password')
+        .expect(200);
       // > --xpack.licensing.api_polling_frequency set in test config
       // to wait for Kibana server to re-fetch the license from Elasticsearch
-      await delay(500);
+      const pollingFrequency = 500;
+
+      await retry.waitForWithTimeout(
+        'waiting for the license.uid to match ES',
+        4 * pollingFrequency,
+        async () => {
+          const {
+            body: { license: kbLicense },
+          } = await supertest.get('/api/licensing/info').expect(200);
+          return kbLicense?.uid === esLicense?.uid;
+        },
+        () => delay(pollingFrequency)
+      );
     },
   };
   return scenario;

@@ -16,7 +16,7 @@ export default function canvasCustomElementTest({
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['canvas', 'common']);
+  const { canvas } = getPageObjects(['canvas']);
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
@@ -26,12 +26,9 @@ export default function canvasCustomElementTest({
 
     before(async () => {
       await kibanaServer.importExport.load(archive);
-      // open canvas home
-      await PageObjects.common.navigateToApp('canvas');
       // load test workpad
-      await PageObjects.common.navigateToApp('canvas', {
-        hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
-      });
+      await canvas.goToListingPage();
+      await canvas.loadFirstWorkpad('Test Workpad');
     });
 
     after(async () => {
@@ -49,10 +46,7 @@ export default function canvasCustomElementTest({
       await testSubjects.click('canvasWorkpadEditMenu__saveElementButton', 20000);
 
       // fill out the custom element form and submit it
-      await PageObjects.canvas.fillOutCustomElementForm(
-        'My New Element',
-        'An excellent new element'
-      );
+      await canvas.fillOutCustomElementForm('My New Element', 'An excellent new element');
 
       // wait for the custom element success toast notif
       await testSubjects.exists('canvasCustomElementCreate-success', {
@@ -62,14 +56,14 @@ export default function canvasCustomElementTest({
 
     it('adds the custom element to the workpad when prompted', async () => {
       // open the saved elements modal
-      await PageObjects.canvas.openSavedElementsModal();
+      await canvas.openSavedElementsModal();
 
       // ensure the custom element is the one expected and click it to add to the workpad
       const customElement = await find.byCssSelector('.canvasElementCard__wrapper');
       const elementName = await customElement.findByCssSelector('.euiCard__title');
 
       expect(await elementName.getVisibleText()).to.contain('My New Element');
-      customElement.click();
+      await customElement.click();
 
       await retry.try(async () => {
         // ensure the new element is on the workpad
@@ -97,7 +91,7 @@ export default function canvasCustomElementTest({
 
     it('saves custom element modifications', async () => {
       // open the saved elements modal
-      await PageObjects.canvas.openSavedElementsModal();
+      await canvas.openSavedElementsModal();
 
       // ensure the correct amount of custom elements exist
       const customElements = await find.allByCssSelector('.canvasElementCard__wrapper');
@@ -111,10 +105,7 @@ export default function canvasCustomElementTest({
       await testSubjects.click('canvasElementCard__editButton', 20000);
 
       // fill out the custom element form and submit it
-      await PageObjects.canvas.fillOutCustomElementForm(
-        'My Edited New Element',
-        'An excellent edited element'
-      );
+      await canvas.fillOutCustomElementForm('My Edited New Element', 'An excellent edited element');
 
       // ensure the custom element in the modal shows the updated text
       await retry.try(async () => {
@@ -124,12 +115,12 @@ export default function canvasCustomElementTest({
       });
 
       // Close the modal
-      await PageObjects.canvas.closeSavedElementsModal();
+      await canvas.closeSavedElementsModal();
     });
 
     it('deletes custom element when prompted', async () => {
       // open the saved elements modal
-      await PageObjects.canvas.openSavedElementsModal();
+      await canvas.openSavedElementsModal();
 
       // ensure the correct amount of custom elements exist
       const customElements = await find.allByCssSelector('.canvasElementCard__wrapper');
@@ -151,7 +142,7 @@ export default function canvasCustomElementTest({
       });
 
       // Close the modal
-      await PageObjects.canvas.closeSavedElementsModal();
+      await canvas.closeSavedElementsModal();
     });
   });
 }

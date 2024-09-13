@@ -24,6 +24,21 @@
     "misc": [
       {
         "parentPluginId": "filesManagement",
+        "id": "def-common.LIST_BREADCRUMB",
+        "type": "Array",
+        "tags": [],
+        "label": "LIST_BREADCRUMB",
+        "description": [],
+        "signature": [
+          "{ text: string; href: string; }[]"
+        ],
+        "path": "src/plugins/files_management/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "filesManagement",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],
@@ -40,13 +55,10 @@
       {
         "parentPluginId": "filesManagement",
         "id": "def-common.PLUGIN_NAME",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "src/plugins/files_management/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

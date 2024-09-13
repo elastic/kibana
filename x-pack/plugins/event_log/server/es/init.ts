@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { asyncForEach } from '@kbn/std';
 import { groupBy } from 'lodash';
 import pRetry, { FailedAttemptError } from 'p-retry';
-import { getIlmPolicy, getIndexTemplate } from './documents';
+import { getIndexTemplate } from './documents';
 import { EsContext } from './context';
 
 const MAX_RETRY_DELAY = 30000;
@@ -31,11 +31,13 @@ export async function initializeEs(esContext: EsContext): Promise<boolean> {
 async function initializeEsResources(esContext: EsContext) {
   const steps = new EsInitializationSteps(esContext);
 
-  // today, setExistingAssetsToHidden() never throws, but just in case ...
-  await retry(steps.setExistingAssetsToHidden);
-  await retry(steps.createIlmPolicyIfNotExists);
+  // Only set existing assets to hidden if we're not in serverless
+  if (esContext.shouldSetExistingAssetsToHidden) {
+    // today, setExistingAssetsToHidden() never throws, but just in case ...
+    await retry(steps.setExistingAssetsToHidden);
+  }
   await retry(steps.createIndexTemplateIfNotExists);
-  await retry(steps.createInitialIndexIfNotExists);
+  await retry(steps.createDataStreamIfNotExists);
 
   async function retry(stepMethod: () => Promise<void>): Promise<void> {
     // call the step method with retry options via p-retry
@@ -67,13 +69,17 @@ export interface ParsedIndexAlias extends estypes.IndicesAliasDefinition {
 }
 
 export function parseIndexAliases(aliasInfo: estypes.IndicesGetAliasResponse): ParsedIndexAlias[] {
-  return Object.keys(aliasInfo).flatMap((indexName: string) =>
-    Object.keys(aliasInfo[indexName].aliases).map((alias: string) => ({
+  const aliasInfoKeys = aliasInfo ? Object.keys(aliasInfo) : [];
+  return aliasInfoKeys.flatMap((indexName: string) => {
+    const aliasInfoIndexNameKeys = aliasInfo[indexName].aliases
+      ? Object.keys(aliasInfo[indexName].aliases)
+      : [];
+    return aliasInfoIndexNameKeys.map((alias: string) => ({
       ...aliasInfo[indexName].aliases[alias],
       indexName,
       alias,
-    }))
-  );
+    }));
+  });
 }
 
 class EsInitializationSteps {
@@ -99,7 +105,8 @@ class EsInitializationSteps {
       this.esContext.logger.error(`error getting existing index templates - ${err.message}`);
     }
 
-    await asyncForEach(Object.keys(indexTemplates), async (indexTemplateName: string) => {
+    const indexTemplateKeys = indexTemplates ? Object.keys(indexTemplates) : [];
+    await asyncForEach(indexTemplateKeys, async (indexTemplateName: string) => {
       try {
         const hidden: string | boolean = indexTemplates[indexTemplateName]?.settings?.index?.hidden;
         // Check to see if this index template is hidden
@@ -136,7 +143,9 @@ class EsInitializationSteps {
       // should not block the rest of initialization, log the error and move on
       this.esContext.logger.error(`error getting existing indices - ${err.message}`);
     }
-    await asyncForEach(Object.keys(indices), async (indexName: string) => {
+
+    const indexKeys = indices ? Object.keys(indices) : [];
+    await asyncForEach(indexKeys, async (indexName: string) => {
       try {
         const hidden: string | boolean | undefined = indices[indexName]?.settings?.index?.hidden;
 
@@ -175,7 +184,8 @@ class EsInitializationSteps {
     // Group by index alias name
     const indexAliasData = groupBy(parsedAliasData, 'alias');
 
-    await asyncForEach(Object.keys(indexAliasData), async (aliasName: string) => {
+    const indexAliasDataKeys = indexAliasData ? Object.keys(indexAliasData) : [];
+    await asyncForEach(indexAliasDataKeys, async (aliasName: string) => {
       try {
         const aliasData = indexAliasData[aliasName];
         const isNotHidden = aliasData.some((data) => data.is_hidden !== true);
@@ -202,18 +212,6 @@ class EsInitializationSteps {
     await this.setExistingIndexAliasesToHidden();
   }
 
-  async createIlmPolicyIfNotExists(): Promise<void> {
-    const exists = await this.esContext.esAdapter.doesIlmPolicyExist(
-      this.esContext.esNames.ilmPolicy
-    );
-    if (!exists) {
-      await this.esContext.esAdapter.createIlmPolicy(
-        this.esContext.esNames.ilmPolicy,
-        getIlmPolicy()
-      );
-    }
-  }
-
   async createIndexTemplateIfNotExists(): Promise<void> {
     const exists = await this.esContext.esAdapter.doesIndexTemplateExist(
       this.esContext.esNames.indexTemplate
@@ -227,12 +225,14 @@ class EsInitializationSteps {
     }
   }
 
-  async createInitialIndexIfNotExists(): Promise<void> {
-    const exists = await this.esContext.esAdapter.doesAliasExist(this.esContext.esNames.alias);
+  async createDataStreamIfNotExists(): Promise<void> {
+    const exists = await this.esContext.esAdapter.doesDataStreamExist(
+      this.esContext.esNames.dataStream
+    );
     if (!exists) {
-      await this.esContext.esAdapter.createIndex(this.esContext.esNames.initialIndex, {
+      await this.esContext.esAdapter.createDataStream(this.esContext.esNames.dataStream, {
         aliases: {
-          [this.esContext.esNames.alias]: {
+          [this.esContext.esNames.dataStream]: {
             is_write_index: true,
             is_hidden: true,
           },

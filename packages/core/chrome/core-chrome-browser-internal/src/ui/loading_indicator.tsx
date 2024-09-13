@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
@@ -19,6 +20,8 @@ export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   showAsBar?: boolean;
   customLogo?: string;
+  maxAmount?: number;
+  valueAmount?: string | number;
 }
 
 export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { visible: boolean }> {
@@ -61,8 +64,6 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
     const testSubj = this.state.visible
       ? 'globalLoadingIndicator'
       : 'globalLoadingIndicator-hidden';
-
-    const ariaHidden = !this.state.visible;
 
     const ariaLabel = i18n.translate('core.ui.loadingIndicatorAriaLabel', {
       defaultMessage: 'Loading content',
@@ -107,8 +108,8 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       <EuiProgress
         className={className}
         data-test-subj={testSubj}
-        aria-hidden={ariaHidden}
-        aria-label={ariaLabel}
+        max={this.props.maxAmount}
+        value={this.props.valueAmount}
         position="fixed"
         color="accent"
         size="xs"

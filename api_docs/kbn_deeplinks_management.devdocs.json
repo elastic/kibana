@@ -1,0 +1,88 @@
+{
+  "id": "@kbn/deeplinks-management",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/deeplinks-management",
+        "id": "def-common.AppId",
+        "type": "Type",
+        "tags": [],
+        "label": "AppId",
+        "description": [],
+        "signature": [
+          "\"monitoring\" | \"management\" | \"integrations\""
+        ],
+        "path": "packages/deeplinks/management/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-management",
+        "id": "def-common.DeepLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "DeepLinkId",
+        "description": [],
+        "signature": [
+          "\"fleet\" | \"monitoring\" | \"management\" | \"integrations\" | \"osquery\" | \"management:transform\" | \"management:watcher\" | \"management:cases\" | \"management:tags\" | \"management:maintenanceWindows\" | \"management:cross_cluster_replication\" | \"management:dataViews\" | \"management:spaces\" | \"management:settings\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:filesManagement\" | \"management:roles\" | \"management:reporting\" | \"management:aiAssistantManagementSelection\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:pipelines\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:triggersActions\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\""
+        ],
+        "path": "packages/deeplinks/management/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-management",
+        "id": "def-common.LinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "LinkId",
+        "description": [],
+        "signature": [
+          "\"transform\" | \"watcher\" | \"cases\" | \"tags\" | \"maintenanceWindows\" | \"cross_cluster_replication\" | \"dataViews\" | \"spaces\" | \"settings\" | \"users\" | \"migrate_data\" | \"search_sessions\" | \"data_quality\" | \"filesManagement\" | \"roles\" | \"reporting\" | \"aiAssistantManagementSelection\" | \"securityAiAssistantManagement\" | \"observabilityAiAssistantManagement\" | \"api_keys\" | \"license_management\" | \"index_lifecycle_management\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"pipelines\" | \"remote_clusters\" | \"role_mappings\" | \"rollup_jobs\" | \"snapshot_restore\" | \"triggersActions\" | \"triggersActionsConnectors\" | \"upgrade_assistant\""
+        ],
+        "path": "packages/deeplinks/management/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-management",
+        "id": "def-common.MONITORING_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MONITORING_APP_ID",
+        "description": [],
+        "signature": [
+          "\"monitoring\""
+        ],
+        "path": "packages/deeplinks/management/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

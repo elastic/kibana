@@ -5,9 +5,24 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
+import { isNumber } from 'lodash';
 import { isErr, tryAsResult } from './lib/result_type';
+import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import { DecoratedError } from './task_running';
+
+export const DEFAULT_TIMEOUT = '5m';
+
+export enum TaskPriority {
+  Low = 1,
+  Normal = 50,
+}
+
+export enum TaskCost {
+  Tiny = 1,
+  Normal = 2,
+  ExtraLarge = 10,
+}
 
 /*
  * Type definitions and validations for tasks.
@@ -47,6 +62,9 @@ export type SuccessfulRunResult = {
    * recurring task). See the RunContext type definition for more details.
    */
   state: Record<string, unknown>;
+  taskRunError?: DecoratedError;
+  shouldValidate?: boolean;
+  shouldDeleteTask?: boolean;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
@@ -74,27 +92,34 @@ export type FailedRunResult = SuccessfulRunResult & {
    * If specified, indicates that the task failed to accomplish its work. This is
    * logged out as a warning, and the task will be reattempted after a delay.
    */
-  error: Error;
+  error: DecoratedError;
 };
 
 export type RunResult = FailedRunResult | SuccessfulRunResult;
+
+export const getDeleteTaskRunResult = () => ({
+  state: {},
+  shouldDeleteTask: true,
+});
 
 export const isFailedRunResult = (result: unknown): result is FailedRunResult =>
   !!((result as FailedRunResult)?.error ?? false);
 
 export interface FailedTaskResult {
-  status: TaskStatus.Failed;
+  status: TaskStatus.Failed | TaskStatus.DeadLetter;
 }
 
 export type RunFunction = () => Promise<RunResult | undefined | void>;
 export type CancelFunction = () => Promise<RunResult | undefined | void>;
-export interface CancellableTask {
+export interface CancellableTask<T = never> {
   run: RunFunction;
   cancel?: CancelFunction;
   cleanup?: () => Promise<void>;
 }
 
-export type TaskRunCreatorFunction = (context: RunContext) => CancellableTask;
+export type TaskRunCreatorFunction = (
+  context: RunContext
+) => CancellableTask<RunContext['taskInstance']>;
 
 export const taskDefinitionSchema = schema.object(
   {
@@ -107,6 +132,14 @@ export const taskDefinitionSchema = schema.object(
      */
     title: schema.maybe(schema.string()),
     /**
+     * Priority of this task type. Defaults to "NORMAL" if not defined
+     */
+    priority: schema.maybe(schema.number()),
+    /**
+     * Cost to run this task type. Defaults to "Normal".
+     */
+    cost: schema.number({ defaultValue: TaskCost.Normal }),
+    /**
      * An optional more detailed description of what this task does.
      */
     description: schema.maybe(schema.string()),
@@ -117,7 +150,7 @@ export const taskDefinitionSchema = schema.object(
      * the task will be re-attempted.
      */
     timeout: schema.string({
-      defaultValue: '5m',
+      defaultValue: DEFAULT_TIMEOUT,
     }),
     /**
      * Up to how many times the task should retry when it fails to run. This will
@@ -138,11 +171,34 @@ export const taskDefinitionSchema = schema.object(
         min: 0,
       })
     ),
+    stateSchemaByVersion: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.object({
+          schema: schema.any(),
+          up: schema.any(),
+        })
+      )
+    ),
+
+    paramsSchema: schema.maybe(schema.any()),
   },
   {
-    validate({ timeout }) {
+    validate({ timeout, priority, cost }) {
       if (!isInterval(timeout) || isErr(tryAsResult(() => parseIntervalAsMillisecond(timeout)))) {
         return `Invalid timeout "${timeout}". Timeout must be of the form "{number}{cadance}" where number is an integer. Example: 5m.`;
+      }
+
+      if (priority && (!isNumber(priority) || !(priority in TaskPriority))) {
+        return `Invalid priority "${priority}". Priority must be one of ${Object.keys(TaskPriority)
+          .filter((key) => isNaN(Number(key)))
+          .map((key) => `${key} => ${TaskPriority[key as keyof typeof TaskPriority]}`)}`;
+      }
+
+      if (cost && (!isNumber(cost) || !(cost in TaskCost))) {
+        return `Invalid cost "${cost}". Cost must be one of ${Object.keys(TaskCost)
+          .filter((key) => isNaN(Number(key)))
+          .map((key) => `${key} => ${TaskCost[key as keyof typeof TaskCost]}`)}`;
       }
     },
   }
@@ -152,12 +208,20 @@ export const taskDefinitionSchema = schema.object(
  * Defines a task which can be scheduled and run by the Kibana
  * task manager.
  */
-export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
+export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSchema'> & {
   /**
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
    */
   createTaskRunner: TaskRunCreatorFunction;
+  stateSchemaByVersion?: Record<
+    number,
+    {
+      schema: ObjectType;
+      up: (state: Record<string, unknown>) => Record<string, unknown>;
+    }
+  >;
+  paramsSchema?: ObjectType;
 };
 
 export enum TaskStatus {
@@ -165,7 +229,9 @@ export enum TaskStatus {
   Claiming = 'claiming',
   Running = 'running',
   Failed = 'failed',
+  ShouldDelete = 'should_delete',
   Unrecognized = 'unrecognized',
+  DeadLetter = 'dead_letter',
 }
 
 export enum TaskLifecycleResult {
@@ -248,6 +314,7 @@ export interface TaskInstance {
   // this can be fixed by supporting generics in the future
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   state: Record<string, any>;
+  stateVersion?: number;
 
   /**
    * The serialized traceparent string of the current APM transaction or span.
@@ -274,6 +341,16 @@ export interface TaskInstance {
    * Indicates whether the task is currently enabled. Disabled tasks will not be claimed.
    */
   enabled?: boolean;
+
+  /*
+   * Optionally override the timeout defined in the task type for this specific task instance
+   */
+  timeoutOverride?: string;
+
+  /*
+   * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
+   */
+  partition?: number;
 }
 
 /**
@@ -286,6 +363,10 @@ export interface TaskInstanceWithDeprecatedFields extends TaskInstance {
    * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
    * */
   interval?: string;
+  /**
+   * Indicates the number of skipped executions.
+   */
+  numSkippedRuns?: number;
 }
 
 /**
@@ -307,6 +388,11 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * @deprecated This field has been moved under schedule (deprecated) with version 7.6.0
    */
   interval?: string;
+
+  /**
+   *  @deprecated removed with version 8.14.0
+   */
+  numSkippedRuns?: number;
 
   /**
    * The saved object version from the Elasticsearch document.
@@ -363,6 +449,26 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * The random uuid of the Kibana instance which claimed ownership of the task last
    */
   ownerId: string | null;
+
+  /*
+   * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
+   */
+  partition?: number;
+}
+
+export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {
+  id: ConcreteTaskInstance['id'];
+};
+
+export interface ConcreteTaskInstanceVersion {
+  /** The _id of the the document (not the SO id) */
+  esId: string;
+  /** The _seq_no of the document when using seq_no_primary_term on fetch */
+  seqNo?: number;
+  /** The _primary_term of the document when using seq_no_primary_term on fetch */
+  primaryTerm?: number;
+  /** The error found if trying to resolve the version info for this esId */
+  error?: string;
 }
 
 /**
@@ -386,4 +492,9 @@ export type SerializedConcreteTaskInstance = Omit<
   startedAt: string | null;
   retryAt: string | null;
   runAt: string;
+  partition?: number;
+};
+
+export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {
+  id: SerializedConcreteTaskInstance['id'];
 };

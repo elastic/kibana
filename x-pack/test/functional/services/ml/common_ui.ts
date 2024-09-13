@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { CanvasElementColorStats } from '../canvas_element';
@@ -216,7 +216,7 @@ export function MachineLearningCommonUIProvider({
       const slider = await testSubjects.find(testDataSubj);
 
       await retry.tryForTime(60 * 1000, async () => {
-        const currentValue = await slider.getAttribute('value');
+        const currentValue = (await slider.getAttribute('value')) ?? '';
         const currentDiff = +currentValue - +value;
 
         if (currentDiff === 0) {
@@ -224,15 +224,15 @@ export function MachineLearningCommonUIProvider({
         } else {
           if (currentDiff > 0) {
             if (Math.abs(currentDiff) >= 10) {
-              slider.type(browser.keys.PAGE_DOWN);
+              await slider.type(browser.keys.PAGE_DOWN);
             } else {
-              slider.type(browser.keys.ARROW_LEFT);
+              await slider.type(browser.keys.ARROW_LEFT);
             }
           } else {
             if (Math.abs(currentDiff) >= 10) {
-              slider.type(browser.keys.PAGE_UP);
+              await slider.type(browser.keys.PAGE_UP);
             } else {
-              slider.type(browser.keys.ARROW_RIGHT);
+              await slider.type(browser.keys.ARROW_RIGHT);
             }
           }
           await retry.tryForTime(1000, async () => {
@@ -363,15 +363,21 @@ export function MachineLearningCommonUIProvider({
       });
     },
 
-    async selectButtonGroupValue(inputTestSubj: string, value: string) {
+    async selectButtonGroupValue(inputTestSubj: string, value: string, valueTestSubj?: string) {
       await retry.tryForTime(5000, async () => {
         // The input element can not be clicked directly.
         // Instead, we need to click the corresponding label
 
-        const fieldSetElement = await testSubjects.find(inputTestSubj);
+        let labelElement: WebElementWrapper;
 
-        const labelElement = await fieldSetElement.findByCssSelector(`label[title="${value}"]`);
-        await labelElement.click();
+        if (valueTestSubj) {
+          await testSubjects.click(valueTestSubj);
+          labelElement = await testSubjects.find(valueTestSubj);
+        } else {
+          const fieldSetElement = await testSubjects.find(inputTestSubj);
+          labelElement = await fieldSetElement.findByCssSelector(`label[title="${value}"]`);
+          await labelElement.click();
+        }
 
         const labelClasses = await labelElement.getAttribute('class');
         expect(labelClasses).to.contain(
@@ -383,15 +389,13 @@ export function MachineLearningCommonUIProvider({
 
     async assertLastToastHeader(expectedHeader: string, timeout: number = 5000) {
       await retry.tryForTime(timeout, async () => {
-        const resultToast = await toasts.getToastElement(1);
-        const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
-        const title: string = await titleElement.getVisibleText();
+        const title: string = await toasts.getTitleByIndex(1);
         expect(title).to.eql(
           expectedHeader,
           `Expected the toast header to equal "${expectedHeader}" (got "${title}")`
         );
       });
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
     },
 
     async ensureAllMenuPopoversClosed() {
@@ -399,6 +403,14 @@ export function MachineLearningCommonUIProvider({
         await browser.pressKeys(browser.keys.ESCAPE);
         const popoverExists = await find.existsByCssSelector('euiContextMenuPanel');
         expect(popoverExists).to.eql(false, 'All popovers should be closed');
+      });
+    },
+
+    async ensureComboBoxClosed() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        const comboBoxOpen = await testSubjects.exists('~comboBoxOptionsList', { timeout: 50 });
+        expect(comboBoxOpen).to.eql(false, 'Combo box should be closed');
       });
     },
 
@@ -425,6 +437,19 @@ export function MachineLearningCommonUIProvider({
           await testSubjects.click(`${rowSelector} > ${actionTestSubject}`);
         }
       });
+    },
+
+    async assertDatePickerDataTierOptionsVisible(shouldBeVisible: boolean) {
+      const selector = 'mlDatePickerButtonDataTierOptions';
+      if (shouldBeVisible === true) {
+        await testSubjects.existOrFail(selector);
+      } else {
+        await testSubjects.missingOrFail(selector);
+      }
+    },
+
+    async toggleSwitchIfNeeded(testSubj: string, targetState: boolean) {
+      await testSubjects.setEuiSwitch(testSubj, targetState ? 'check' : 'uncheck');
     },
   };
 }

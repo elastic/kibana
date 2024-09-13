@@ -15,14 +15,21 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
-      queue: kibana-default
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
 
   - wait
 
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
-      queue: n2-16-spot
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-16
+      preemptible: true
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
@@ -34,7 +41,11 @@ steps:
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
     agents:
-      queue: kibana-default
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+    timeout_in_minutes: 10
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
@@ -49,7 +60,10 @@ steps:
     label: Trigger promotion
     timeout_in_minutes: 10
     agents:
-      queue: kibana-default
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
     depends_on:
       - ftr-configs
       - jest-integration
@@ -61,4 +75,7 @@ steps:
     label: Post-Build
     timeout_in_minutes: 10
     agents:
-      queue: kibana-default
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2

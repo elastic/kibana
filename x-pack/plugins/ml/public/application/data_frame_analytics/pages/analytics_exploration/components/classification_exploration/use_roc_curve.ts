@@ -8,19 +8,19 @@
 import { useState, useEffect } from 'react';
 
 import {
-  isClassificationEvaluateResponse,
-  ResultsSearchQuery,
-  ANALYSIS_CONFIG_TYPE,
-} from '../../../../common/analytics';
-import { isKeywordAndTextType } from '../../../../common/fields';
-import { RocCurveItem } from '../../../../../../../common/types/data_frame_analytics';
-
-import {
   getDependentVar,
   getPredictionFieldName,
-  loadEvalData,
-  DataFrameAnalyticsConfig,
-} from '../../../../common';
+  ANALYSIS_CONFIG_TYPE,
+  type DataFrameAnalyticsConfig,
+  type RocCurveItem,
+} from '@kbn/ml-data-frame-analytics-utils';
+
+import { useNewJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import { useMlApi } from '../../../../../contexts/kibana';
+
+import type { ResultsSearchQuery } from '../../../../common/analytics';
+import { isClassificationEvaluateResponse } from '../../../../common/analytics';
+import { loadEvalData } from '../../../../common';
 
 import { ACTUAL_CLASS_ID, OTHER_CLASS_ID } from './column_data';
 
@@ -40,6 +40,8 @@ export const useRocCurve = (
   searchQuery: ResultsSearchQuery,
   columns: string[]
 ) => {
+  const mlApi = useMlApi();
+  const newJobCapsServiceAnalytics = useNewJobCapsServiceAnalytics();
   const classificationClasses = columns.filter(
     (d) => d !== ACTUAL_CLASS_ID && d !== OTHER_CLASS_ID
   );
@@ -66,7 +68,7 @@ export const useRocCurve = (
       const errors: string[] = [];
 
       try {
-        requiresKeyword = isKeywordAndTextType(dependentVariable);
+        requiresKeyword = newJobCapsServiceAnalytics.isKeywordAndTextType(dependentVariable);
       } catch (e) {
         // Additional error handling due to missing field type is handled by loadEvalData
         console.error('Unable to load new field types', e); // eslint-disable-line no-console
@@ -75,6 +77,7 @@ export const useRocCurve = (
       for (let i = 0; i < classificationClasses.length; i++) {
         const rocCurveClassName = classificationClasses[i];
         const evalData = await loadEvalData({
+          mlApi,
           isTraining: isTrainingFilter(searchQuery, resultsField),
           index: jobConfig.dest.index,
           dependentVariable,

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -19,12 +20,13 @@ import { applicationServiceFactory } from './application/application_service';
 import { chromeServiceFactory } from './chrome/chrome_service';
 import { coreContextServiceFactory } from './core_context/core_context_service';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities_service';
-import { dashboardSessionStorageServiceFactory } from './dashboard_session_storage/dashboard_session_storage_service';
+import { dashboardBackupServiceFactory } from './dashboard_backup/dashboard_backup_service';
 import { dataServiceFactory } from './data/data_service';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor_service';
 import { documentationLinksServiceFactory } from './documentation_links/documentation_links_service';
 import { embeddableServiceFactory } from './embeddable/embeddable_service';
 import { httpServiceFactory } from './http/http_service';
+import { i18nServiceFactory } from './i18n/i18n_service';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context_service';
 import { navigationServiceFactory } from './navigation/navigation_service';
 import { notificationsServiceFactory } from './notifications/notifications_service';
@@ -38,22 +40,31 @@ import { urlForwardingServiceFactory } from './url_forwarding/url_forwarding_ser
 import { visualizationsServiceFactory } from './visualizations/visualizations_service';
 import { usageCollectionServiceFactory } from './usage_collection/usage_collection_service';
 import { analyticsServiceFactory } from './analytics/analytics_service';
-import { dashboardSavedObjectServiceFactory } from './dashboard_saved_object/dashboard_saved_object_service';
 import { customBrandingServiceFactory } from './custom_branding/custom_branding_service';
 import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service';
+import { dashboardContentManagementServiceFactory } from './dashboard_content_management/dashboard_content_management_service';
+import { contentManagementServiceFactory } from './content_management/content_management_service';
+import { serverlessServiceFactory } from './serverless/serverless_service';
+import { noDataPageServiceFactory } from './no_data_page/no_data_page_service';
+import { uiActionsServiceFactory } from './ui_actions/ui_actions_service';
+import { observabilityAIAssistantServiceFactory } from './observability_ai_assistant/observability_ai_assistant_service';
+import { userProfileServiceFactory } from './user_profile/user_profile_service';
+import { dashboardRecentlyAccessedFactory } from './dashboard_recently_accessed/dashboard_recently_accessed';
+import { dashboardFavoritesServiceFactory } from './dashboard_favorites/dashboard_favorites_service';
+import { dashboardContentInsightsServiceFactory } from './dashboard_content_insights/dashboard_content_insights_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
-  dashboardSavedObject: new PluginServiceProvider(dashboardSavedObjectServiceFactory, [
-    'dashboardSessionStorage',
+  dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory, [
     'savedObjectsTagging',
     'initializerContext',
+    'dashboardBackup',
     'screenshotMode',
     'notifications',
     'embeddable',
     'spaces',
     'data',
   ]),
-  dashboardSessionStorage: new PluginServiceProvider(dashboardSessionStorageServiceFactory, [
+  dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory, [
     'notifications',
     'spaces',
   ]),
@@ -68,6 +79,7 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   documentationLinks: new PluginServiceProvider(documentationLinksServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
+  i18n: new PluginServiceProvider(i18nServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
   navigation: new PluginServiceProvider(navigationServiceFactory),
   notifications: new PluginServiceProvider(notificationsServiceFactory),
@@ -82,6 +94,15 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
   customBranding: new PluginServiceProvider(customBrandingServiceFactory),
   savedObjectsManagement: new PluginServiceProvider(savedObjectsManagementServiceFactory),
+  contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
+  serverless: new PluginServiceProvider(serverlessServiceFactory),
+  noDataPage: new PluginServiceProvider(noDataPageServiceFactory),
+  uiActions: new PluginServiceProvider(uiActionsServiceFactory),
+  observabilityAIAssistant: new PluginServiceProvider(observabilityAIAssistantServiceFactory),
+  userProfile: new PluginServiceProvider(userProfileServiceFactory),
+  dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedFactory, ['http']),
+  dashboardContentInsights: new PluginServiceProvider(dashboardContentInsightsServiceFactory),
+  dashboardFavorites: new PluginServiceProvider(dashboardFavoritesServiceFactory),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();

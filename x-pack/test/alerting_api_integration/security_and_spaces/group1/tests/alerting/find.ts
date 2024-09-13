@@ -6,22 +6,24 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 const findTestUtils = (
   describeType: 'internal' | 'public',
   objectRemover: ObjectRemover,
-  supertest: SuperTest<Test>,
-  supertestWithoutAuth: any
+  supertest: SuperTestAgent,
+  supertestWithoutAuth: SupertestWithoutAuthProviderType
 ) => {
-  // FLAKY: https://github.com/elastic/kibana/issues/148660
-  describe.skip(describeType, () => {
-    afterEach(() => objectRemover.removeAll());
+  describe(describeType, () => {
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -60,6 +62,8 @@ const findTestUtils = (
               })
             )
             .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+
           const response = await supertestWithoutAuth
             .get(
               `${getUrlPrefix(space.id)}/${
@@ -105,6 +109,7 @@ const findTestUtils = (
                     id: createdAction.id,
                     connector_type_id: 'test.noop',
                     params: {},
+                    uuid: match.actions[0].uuid,
                     frequency: {
                       summary: false,
                       notify_when: 'onThrottleInterval',
@@ -121,6 +126,7 @@ const findTestUtils = (
                 notify_when: null,
                 updated_by: 'elastic',
                 api_key_owner: 'elastic',
+                api_key_created_by_user: false,
                 mute_all: false,
                 muted_alert_ids: [],
                 revision: 0,
@@ -132,6 +138,7 @@ const findTestUtils = (
                       monitoring: match.monitoring,
                       snooze_schedule: match.snooze_schedule,
                       ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                      is_snoozed_until: null,
                     }
                   : {}),
               });
@@ -328,6 +335,7 @@ const findTestUtils = (
                 params: {},
                 created_by: 'elastic',
                 throttle: '1m',
+                api_key_created_by_user: null,
                 updated_by: 'elastic',
                 api_key_owner: null,
                 mute_all: false,
@@ -344,6 +352,7 @@ const findTestUtils = (
                       monitoring: match.monitoring,
                       snooze_schedule: match.snooze_schedule,
                       ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                      is_snoozed_until: null,
                     }
                   : {}),
               });
@@ -422,6 +431,7 @@ const findTestUtils = (
                 tags: [myTag],
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
@@ -430,6 +440,7 @@ const findTestUtils = (
                 tags: [myTag],
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               break;
@@ -506,6 +517,7 @@ const findTestUtils = (
                 execution_status: matchFirst.execution_status,
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
@@ -515,6 +527,7 @@ const findTestUtils = (
                 execution_status: matchSecond.execution_status,
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               break;
@@ -569,6 +582,71 @@ const findTestUtils = (
       });
     }
   });
+
+  describe('Actions', () => {
+    const { user, space } = SuperuserAtSpace1;
+
+    it('should return the actions correctly', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          connector_type_id: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      const { body: createdRule1 } = await supertest
+        .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            enabled: true,
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+              {
+                id: 'system-connector-test.system-action',
+                params: {},
+              },
+            ],
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
+
+      const response = await supertestWithoutAuth
+        .get(`${getUrlPrefix(space.id)}/api/alerting/rules/_find`)
+        .set('kbn-xsrf', 'foo')
+        .auth(user.username, user.password);
+
+      const action = response.body.data[0].actions[0];
+      const systemAction = response.body.data[0].actions[1];
+      const { uuid, ...restAction } = action;
+      const { uuid: systemActionUuid, ...restSystemAction } = systemAction;
+
+      expect([restAction, restSystemAction]).to.eql([
+        {
+          id: createdAction.id,
+          connector_type_id: 'test.noop',
+          group: 'default',
+          params: {},
+        },
+        {
+          id: 'system-connector-test.system-action',
+          connector_type_id: 'test.system-action',
+          params: {},
+        },
+        ,
+      ]);
+    });
+  });
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -579,7 +657,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
   describe('find', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    afterEach(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     findTestUtils('public', objectRemover, supertest, supertestWithoutAuth);
     findTestUtils('internal', objectRemover, supertest, supertestWithoutAuth);

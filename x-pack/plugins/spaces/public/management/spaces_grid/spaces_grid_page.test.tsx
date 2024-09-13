@@ -15,12 +15,12 @@ import {
 } from '@kbn/core/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
+import { SpacesGridPage } from './spaces_grid_page';
 import { SpaceAvatarInternal } from '../../space_avatar/space_avatar_internal';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { SpacesGridPage } from './spaces_grid_page';
 
 const spaces = [
   {
@@ -58,11 +58,208 @@ featuresStart.getFeatures.mockResolvedValue([
   }),
 ]);
 
+const spacesGridCommonProps = {
+  serverBasePath: '',
+  maxSpaces: 1000,
+};
+
 describe('SpacesGridPage', () => {
   const getUrlForApp = (appId: string) => appId;
   const history = scopedHistoryMock.create();
 
   it('renders the list of spaces', async () => {
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([]);
+
+    const wrapper = shallowWithIntl(
+      <SpacesGridPage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowSolutionVisibility={false}
+        {...spacesGridCommonProps}
+      />
+    );
+
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
+    wrapper.update();
+
+    expect(wrapper.find('EuiInMemoryTable').prop('items')).toBe(spaces);
+    expect(wrapper.find('EuiInMemoryTable').prop('columns')).not.toContainEqual({
+      field: 'solution',
+      name: 'Solution View',
+      sortable: true,
+      render: expect.any(Function),
+    });
+  });
+
+  it('renders the list of spaces with solution column', async () => {
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([]);
+    const spacesWithSolution = [
+      {
+        id: 'default',
+        name: 'Default',
+        disabledFeatures: [],
+        _reserved: true,
+      },
+      {
+        id: 'custom-1',
+        name: 'Custom 1',
+        disabledFeatures: [],
+        solution: 'es',
+      },
+      {
+        id: 'custom-2',
+        name: 'Custom 2',
+        initials: 'LG',
+        color: '#ABCDEF',
+        description: 'my description here',
+        disabledFeatures: [],
+        solution: 'security',
+      },
+    ];
+
+    spacesManager.getSpaces = jest.fn().mockResolvedValue(spacesWithSolution);
+
+    const wrapper = shallowWithIntl(
+      <SpacesGridPage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowSolutionVisibility
+        {...spacesGridCommonProps}
+      />
+    );
+
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
+    wrapper.update();
+
+    expect(wrapper.find('EuiInMemoryTable').prop('items')).toBe(spacesWithSolution);
+    expect(wrapper.find('EuiInMemoryTable').prop('columns')).toContainEqual({
+      field: 'solution',
+      name: 'Solution View',
+      sortable: true,
+      render: expect.any(Function),
+    });
+  });
+
+  it('renders a "current" badge for the current space', async () => {
+    spacesManager.getActiveSpace.mockResolvedValue(spaces[2]);
+    const current = await spacesManager.getActiveSpace();
+    expect(current.id).toBe('custom-2');
+
+    const wrapper = mountWithIntl(
+      <SpacesGridPage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowSolutionVisibility
+        {...spacesGridCommonProps}
+      />
+    );
+
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
+    wrapper.update();
+
+    const activeRow = wrapper.find('[data-test-subj="spacesListTableRow-custom-2"]');
+    const nameCell = activeRow.find('[data-test-subj="spacesListTableRowNameCell"]');
+    const activeBadge = nameCell.find('EuiBadge');
+    expect(activeBadge.text()).toBe('current');
+  });
+
+  it('renders a non-clickable "switch" action for the current space', async () => {
+    spacesManager.getActiveSpace.mockResolvedValue(spaces[2]);
+    const current = await spacesManager.getActiveSpace();
+    expect(current.id).toBe('custom-2');
+
+    const wrapper = mountWithIntl(
+      <SpacesGridPage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowSolutionVisibility
+        {...spacesGridCommonProps}
+      />
+    );
+
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
+    wrapper.update();
+
+    const activeRow = wrapper.find('[data-test-subj="spacesListTableRow-custom-2"]');
+    const switchAction = activeRow.find('EuiButtonIcon[data-test-subj="Custom 2-switchSpace"]');
+    expect(switchAction.prop('isDisabled')).toBe(true);
+  });
+
+  it('renders a clickable "switch" action for the non-current space', async () => {
+    spacesManager.getActiveSpace.mockResolvedValue(spaces[2]);
+    const current = await spacesManager.getActiveSpace();
+    expect(current.id).toBe('custom-2');
+
+    const wrapper = mountWithIntl(
+      <SpacesGridPage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowSolutionVisibility
+        {...spacesGridCommonProps}
+      />
+    );
+
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
+    wrapper.update();
+
+    const nonActiveRow = wrapper.find('[data-test-subj="spacesListTableRow-default"]');
+    const switchAction = nonActiveRow.find('EuiButtonIcon[data-test-subj="Default-switchSpace"]');
+    expect(switchAction.prop('isDisabled')).toBe(false);
+  });
+
+  it('renders a create spaces button', async () => {
     const httpStart = httpServiceMock.createStartContract();
     httpStart.get.mockResolvedValue([]);
 
@@ -79,6 +276,8 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        allowSolutionVisibility
+        {...spacesGridCommonProps}
       />
     );
 
@@ -86,7 +285,39 @@ describe('SpacesGridPage', () => {
     await act(async () => {});
     wrapper.update();
 
-    expect(wrapper.find(SpaceAvatarInternal)).toHaveLength(spaces.length);
+    expect(wrapper.find({ 'data-test-subj': 'createSpace' }).length).toBeTruthy();
+    expect(wrapper.find('EuiCallOut')).toHaveLength(0);
+  });
+
+  it('does not render a create spaces button when limit has been reached', async () => {
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([]);
+
+    const wrapper = mountWithIntl(
+      <SpacesGridPage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        maxSpaces={1}
+        allowSolutionVisibility
+        serverBasePath={spacesGridCommonProps.serverBasePath}
+      />
+    );
+
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
+    wrapper.update();
+
+    expect(wrapper.find({ 'data-test-subj': 'createSpace' }).length).toBeFalsy();
+    expect(wrapper.find('EuiCallOut')).toHaveLength(1);
   });
 
   it('notifies when spaces fail to load', async () => {
@@ -98,7 +329,7 @@ describe('SpacesGridPage', () => {
 
     const notifications = notificationServiceMock.createStartContract();
 
-    const wrapper = mountWithIntl(
+    const wrapper = shallowWithIntl(
       <SpacesGridPage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
@@ -111,6 +342,8 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        allowSolutionVisibility
+        {...spacesGridCommonProps}
       />
     );
 
@@ -132,7 +365,7 @@ describe('SpacesGridPage', () => {
 
     const notifications = notificationServiceMock.createStartContract();
 
-    const wrapper = mountWithIntl(
+    const wrapper = shallowWithIntl(
       <SpacesGridPage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={() => Promise.reject(error)}
@@ -145,6 +378,8 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        allowSolutionVisibility
+        {...spacesGridCommonProps}
       />
     );
 

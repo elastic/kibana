@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
   euiCanAnimate,
   euiFlyoutSlideInRight,
-  euiYScrollWithShadows,
+  euiYScroll,
   logicalCSS,
   logicalCSSWithFallback,
 } from '@elastic/eui';
@@ -47,6 +48,9 @@ export const getGuidePanelStyles = ({
       animation: ${euiFlyoutSlideInRight} ${euiTheme.animation.normal}
         ${euiTheme.animation.resistance};
     }
+    @media (max-width: ${euiTheme.breakpoint.m}px) {
+      max-height: 85vh;
+    })
     @media (min-width: ${euiTheme.breakpoint.m}px) {
       right: calc(${euiTheme.size.s} + 128px); // Accounting for margin on button
     })
@@ -95,9 +99,7 @@ export const getGuidePanelStyles = ({
       flex-grow: 1;
       `,
       flyoutBody: css`
-        ${euiYScrollWithShadows(euiThemeContext, {
-          side: 'end',
-        })}
+        ${euiYScroll(euiThemeContext)}
         padding: 16px 10px 0 16px;
       `,
       flyoutBodyError: css`

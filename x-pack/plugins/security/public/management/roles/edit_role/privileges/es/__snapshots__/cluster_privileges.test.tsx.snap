@@ -15,6 +15,7 @@ exports[`it renders without crashing 1`] = `
       isDisabled={false}
       onChange={[Function]}
       onCreateOption={[Function]}
+      optionMatcher={[Function]}
       options={
         Array [
           Object {
@@ -28,6 +29,7 @@ exports[`it renders without crashing 1`] = `
           },
         ]
       }
+      placeholder="Add an action…"
       selectedOptions={Array []}
       singleSelection={false}
       sortMatchesBy="none"

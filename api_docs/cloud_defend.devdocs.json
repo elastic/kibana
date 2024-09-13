@@ -13,7 +13,17 @@
           "\nGets the cloud_defend link properties of a Cloud Defend page for navigation in the security solution."
         ],
         "signature": [
-          "<TId extends string = \"cloud_defend-policies\">(cloudDefendPage: \"policies\") => CloudDefendLinkItem<TId>"
+          "<TId extends string = ",
+          {
+            "pluginId": "cloudDefend",
+            "scope": "public",
+            "docId": "kibCloudDefendPluginApi",
+            "section": "def-public.CloudDefendPageId",
+            "text": "CloudDefendPageId"
+          },
+          ">(cloudDefendPage: ",
+          "CloudDefendPage",
+          ") => CloudDefendLinkItem<TId>"
         ],
         "path": "x-pack/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
         "deprecated": false,
@@ -22,68 +32,14 @@
           {
             "parentPluginId": "cloudDefend",
             "id": "def-public.getSecuritySolutionLink.$1",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "cloudDefendPage",
             "description": [
               "the name of the cloud defend page."
             ],
             "signature": [
-              "\"policies\""
-            ],
-            "path": "x-pack/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cloudDefend",
-        "id": "def-public.getSecuritySolutionNavTab",
-        "type": "Function",
-        "tags": [],
-        "label": "getSecuritySolutionNavTab",
-        "description": [
-          "\nGets the link properties of a Cloud Defend page for navigation in the old security solution navigation."
-        ],
-        "signature": [
-          "<TId extends string = \"cloud_defend-policies\">(cloudDefendPage: \"policies\", basePath: string) => CloudDefendNavTab<TId>"
-        ],
-        "path": "x-pack/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "cloudDefend",
-            "id": "def-public.getSecuritySolutionNavTab.$1",
-            "type": "string",
-            "tags": [],
-            "label": "cloudDefendPage",
-            "description": [
-              "the name of the cloud defend page."
-            ],
-            "signature": [
-              "\"policies\""
-            ],
-            "path": "x-pack/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "cloudDefend",
-            "id": "def-public.getSecuritySolutionNavTab.$2",
-            "type": "string",
-            "tags": [],
-            "label": "basePath",
-            "description": [
-              "the base path for links."
-            ],
-            "signature": [
-              "string"
+              "CloudDefendPage"
             ],
             "path": "x-pack/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
             "deprecated": false,
@@ -135,7 +91,15 @@
               "Gets the `SpyRoute` component for navigation highlighting and breadcrumbs."
             ],
             "signature": [
-              "() => React.ComponentType<{ pageName: \"cloud_defend-policies\"; state?: Record<string, string | undefined> | undefined; }>"
+              "() => React.ComponentType<{ pageName: ",
+              {
+                "pluginId": "cloudDefend",
+                "scope": "public",
+                "docId": "kibCloudDefendPluginApi",
+                "section": "def-public.CloudDefendPageId",
+                "text": "CloudDefendPageId"
+              },
+              "; state?: Record<string, string | undefined> | undefined; }>"
             ],
             "path": "x-pack/plugins/cloud_defend/public/types.ts",
             "deprecated": false,
@@ -176,7 +140,7 @@
           "\nAll the IDs for the cloud defend pages.\nThis needs to match the cloud defend page entries in `SecurityPageName` in `x-pack/plugins/security_solution/common/constants.ts`."
         ],
         "signature": [
-          "\"cloud_defend-policies\""
+          "\"cloud_defend-policies\" | \"kubernetes_security-dashboard\""
         ],
         "path": "x-pack/plugins/cloud_defend/public/common/navigation/types.ts",
         "deprecated": false,
@@ -276,9 +240,653 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.CloudDefendPolicy",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudDefendPolicy",
+        "description": [],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.CloudDefendPolicy.package_policy",
+            "type": "Object",
+            "tags": [],
+            "label": "package_policy",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.PackagePolicy",
+                "text": "PackagePolicy"
+              }
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.CloudDefendPolicy.agent_policy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "agent_policy",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.AgentPolicy",
+                "text": "AgentPolicy"
+              },
+              ", \"id\" | \"name\"> & { agents: number; }"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.IndexDetails",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexDetails",
+        "description": [],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.IndexDetails.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.IndexDetails.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"empty\" | \"not-empty\" | \"unprivileged\""
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.Response",
+        "type": "Interface",
+        "tags": [],
+        "label": "Response",
+        "description": [],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Response.match",
+            "type": "Array",
+            "tags": [],
+            "label": "match",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Response.exclude",
+            "type": "Array",
+            "tags": [],
+            "label": "exclude",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Response.actions",
+            "type": "Array",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "cloudDefend",
+                "scope": "common",
+                "docId": "kibCloudDefendPluginApi",
+                "section": "def-common.ResponseAction",
+                "text": "ResponseAction"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Response.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"process\" | \"file\""
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Response.hasErrors",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasErrors",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.Selector",
+        "type": "Interface",
+        "tags": [],
+        "label": "Selector",
+        "description": [],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.operation",
+            "type": "Array",
+            "tags": [],
+            "label": "operation",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.containerImageFullName",
+            "type": "Array",
+            "tags": [],
+            "label": "containerImageFullName",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.containerImageName",
+            "type": "Array",
+            "tags": [],
+            "label": "containerImageName",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.containerImageTag",
+            "type": "Array",
+            "tags": [],
+            "label": "containerImageTag",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.kubernetesClusterId",
+            "type": "Array",
+            "tags": [],
+            "label": "kubernetesClusterId",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.kubernetesClusterName",
+            "type": "Array",
+            "tags": [],
+            "label": "kubernetesClusterName",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.kubernetesNamespace",
+            "type": "Array",
+            "tags": [],
+            "label": "kubernetesNamespace",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.kubernetesPodLabel",
+            "type": "Array",
+            "tags": [],
+            "label": "kubernetesPodLabel",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.kubernetesPodName",
+            "type": "Array",
+            "tags": [],
+            "label": "kubernetesPodName",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.targetFilePath",
+            "type": "Array",
+            "tags": [],
+            "label": "targetFilePath",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.ignoreVolumeFiles",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreVolumeFiles",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.ignoreVolumeMounts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreVolumeMounts",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.processExecutable",
+            "type": "Array",
+            "tags": [],
+            "label": "processExecutable",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.processName",
+            "type": "Array",
+            "tags": [],
+            "label": "processName",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.sessionLeaderInteractive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sessionLeaderInteractive",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"process\" | \"file\""
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.hasErrors",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasErrors",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.AgentPolicyStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentPolicyStatus",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.AgentPolicy",
+            "text": "AgentPolicy"
+          },
+          ", \"id\" | \"name\"> & { agents: number; }"
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.CloudDefendSetupStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudDefendSetupStatus",
+        "description": [],
+        "signature": [
+          "CloudDefendSetupInstalledStatus | CloudDefendSetupNotInstalledStatus"
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.CloudDefendStatusCode",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudDefendStatusCode",
+        "description": [],
+        "signature": [
+          "\"indexed\" | \"unprivileged\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\""
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.IndexStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexStatus",
+        "description": [],
+        "signature": [
+          "\"empty\" | \"not-empty\" | \"unprivileged\""
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.PoliciesQueryParams",
+        "type": "Type",
+        "tags": [],
+        "label": "PoliciesQueryParams",
+        "description": [],
+        "signature": [
+          "{ readonly policy_name?: string | undefined; readonly per_page: number; readonly page: number; readonly sort_field: \"package_policy.id\" | \"package_policy.name\" | \"package_policy.policy_id\" | \"package_policy.namespace\" | \"package_policy.updated_at\" | \"package_policy.updated_by\" | \"package_policy.created_at\" | \"package_policy.created_by\" | \"package_policy.package.name\" | \"package_policy.package.title\"; readonly sort_order: \"asc\" | \"desc\"; }"
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/schemas/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.ResponseAction",
+        "type": "Type",
+        "tags": [],
+        "label": "ResponseAction",
+        "description": [],
+        "signature": [
+          "\"log\" | \"alert\" | \"block\""
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.SelectorCondition",
+        "type": "Type",
+        "tags": [],
+        "label": "SelectorCondition",
+        "description": [],
+        "signature": [
+          "\"operation\" | \"containerImageFullName\" | \"containerImageName\" | \"containerImageTag\" | \"kubernetesClusterId\" | \"kubernetesClusterName\" | \"kubernetesNamespace\" | \"kubernetesPodLabel\" | \"kubernetesPodName\" | \"targetFilePath\" | \"ignoreVolumeFiles\" | \"ignoreVolumeMounts\" | \"processExecutable\" | \"processName\" | \"sessionLeaderInteractive\""
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.SelectorType",
+        "type": "Type",
+        "tags": [],
+        "label": "SelectorType",
+        "description": [
+          "\ncloud_defend/control types"
+        ],
+        "signature": [
+          "\"process\" | \"file\""
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.policiesQueryParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "policiesQueryParamsSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ page: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; per_page: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; sort_field: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"package_policy.id\" | \"package_policy.name\" | \"package_policy.policy_id\" | \"package_policy.namespace\" | \"package_policy.updated_at\" | \"package_policy.updated_by\" | \"package_policy.created_at\" | \"package_policy.created_by\" | \"package_policy.package.name\" | \"package_policy.package.title\">; sort_order: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"asc\" | \"desc\">; policy_name: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; }>"
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/schemas/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

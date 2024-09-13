@@ -1,30 +1,59 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { css } from '@emotion/react';
-import type { EuiFlyoutProps } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import type { Interpolation, Theme } from '@emotion/react';
+import { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
-import { useExpandableFlyoutContext } from './context';
+import { useFlyoutType } from './hooks/use_flyout_type';
+import { SettingsMenu } from './components/settings_menu';
+import { useSectionSizes } from './hooks/use_sections_sizes';
+import { useWindowSize } from './hooks/use_window_size';
+import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
+import { useExpandableFlyoutApi } from './hooks/use_expandable_flyout_api';
 import { PreviewSection } from './components/preview_section';
 import { RightSection } from './components/right_section';
-import type { FlyoutPanel, Panel } from './types';
+import type { FlyoutPanelProps, Panel } from './types';
 import { LeftSection } from './components/left_section';
+import { isPreviewBanner } from './components/preview_section';
 
-export interface ExpandableFlyoutProps extends EuiFlyoutProps {
+const flyoutInnerStyles = { height: '100%' };
+
+export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
   /**
    * List of all registered panels available for render
    */
   registeredPanels: Panel[];
   /**
-   * Propagate out EuiFlyout onClose event
+   * Allows for custom styles to be passed to the EuiFlyout component
    */
-  handleOnFlyoutClosed?: () => void;
+  customStyles?: Interpolation<Theme>;
+  /**
+   * Callback function to let application's code the flyout is closed
+   */
+  onClose?: EuiFlyoutProps['onClose'];
+  /**
+   * Set of properties that drive a settings menu
+   */
+  flyoutCustomProps?: {
+    /**
+     * Hide the gear icon and settings menu if true
+     */
+    hideSettings?: boolean;
+    /**
+     * Control if the option to render in overlay or push mode is enabled or not
+     */
+    pushVsOverlay?: {
+      disabled: boolean;
+      tooltip: string;
+    };
+  };
 }
 
 /**
@@ -35,17 +64,15 @@ export interface ExpandableFlyoutProps extends EuiFlyoutProps {
  * is already rendered.
  */
 export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
+  customStyles,
   registeredPanels,
-  handleOnFlyoutClosed,
+  flyoutCustomProps,
   ...flyoutProps
 }) => {
-  const { panels, closeFlyout } = useExpandableFlyoutContext();
-  const { left, right, preview } = panels;
-
-  const onClose = useCallback(() => {
-    if (handleOnFlyoutClosed) handleOnFlyoutClosed();
-    closeFlyout();
-  }, [closeFlyout, handleOnFlyoutClosed]);
+  const windowWidth = useWindowSize();
+  const { flyoutType, flyoutTypeChange } = useFlyoutType();
+  const { left, right, preview } = useExpandableFlyoutState();
+  const { closeFlyout } = useExpandableFlyoutApi();
 
   const leftSection = useMemo(
     () => registeredPanels.find((panel) => panel.key === left?.id),
@@ -59,59 +86,86 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
 
   // retrieve the last preview panel (most recent)
   const mostRecentPreview = preview ? preview[preview.length - 1] : undefined;
-  const showBackButton = preview && preview.length > 1;
+  const previewBanner = isPreviewBanner(mostRecentPreview?.params?.banner)
+    ? mostRecentPreview?.params?.banner
+    : undefined;
+
   const previewSection = useMemo(
     () => registeredPanels.find((panel) => panel.key === mostRecentPreview?.id),
     [mostRecentPreview, registeredPanels]
   );
 
-  // do not add the flyout to the dom if there aren't any panels to display
-  if (!left && !right && !preview.length) {
-    return <></>;
-  }
+  const showRight = rightSection != null && right != null;
+  const showLeft = leftSection != null && left != null;
+  const showPreview = previewSection != null && preview != null;
 
-  const flyoutWidth: string = leftSection && rightSection ? 'l' : 's';
-  const rightSectionWidth: number = leftSection ? 0.4 : 1;
-  const leftSectionWidth: number = 0.6;
-  const previewSectionWidth: number = leftSection ? 0.4 : 1;
+  const { rightSectionWidth, leftSectionWidth, flyoutWidth, previewSectionLeft } = useSectionSizes({
+    windowWidth,
+    showRight,
+    showLeft,
+    showPreview,
+  });
+
+  const hideFlyout = !(left && leftSection) && !(right && rightSection) && !preview?.length;
+
+  if (hideFlyout) {
+    return null;
+  }
 
   return (
     <EuiFlyout
-      css={css`
-        overflow-y: scroll;
-      `}
       {...flyoutProps}
+      data-panel-id={right?.id ?? ''}
+      type={flyoutType}
       size={flyoutWidth}
       ownFocus={false}
-      onClose={onClose}
+      onClose={(e) => {
+        closeFlyout();
+        if (flyoutProps.onClose) {
+          flyoutProps.onClose(e);
+        }
+      }}
+      css={customStyles}
     >
       <EuiFlexGroup
         direction={leftSection ? 'row' : 'column'}
         wrap={false}
         gutterSize="none"
-        style={{ height: '100%' }}
+        style={flyoutInnerStyles}
+        responsive={false}
       >
-        {leftSection && left ? (
+        {showLeft ? (
           <LeftSection
-            component={leftSection.component({ ...(left as FlyoutPanel) })}
+            component={leftSection.component({ ...(left as FlyoutPanelProps) })}
             width={leftSectionWidth}
           />
         ) : null}
-        {rightSection && right ? (
+        {showRight ? (
           <RightSection
-            component={rightSection.component({ ...(right as FlyoutPanel) })}
+            component={rightSection.component({ ...(right as FlyoutPanelProps) })}
             width={rightSectionWidth}
           />
         ) : null}
       </EuiFlexGroup>
 
-      {previewSection && preview ? (
+      {showPreview ? (
         <PreviewSection
-          component={previewSection.component({ ...(mostRecentPreview as FlyoutPanel) })}
-          showBackButton={showBackButton}
-          width={previewSectionWidth}
+          component={previewSection.component({ ...(mostRecentPreview as FlyoutPanelProps) })}
+          leftPosition={previewSectionLeft}
+          banner={previewBanner}
         />
       ) : null}
+
+      {!flyoutCustomProps?.hideSettings && (
+        <SettingsMenu
+          flyoutTypeProps={{
+            type: flyoutType,
+            onChange: flyoutTypeChange,
+            disabled: flyoutCustomProps?.pushVsOverlay?.disabled || false,
+            tooltip: flyoutCustomProps?.pushVsOverlay?.tooltip || '',
+          }}
+        />
+      )}
     </EuiFlyout>
   );
 };

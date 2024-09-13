@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Serializable } from '@kbn/utility-types';
@@ -12,28 +13,28 @@ import { SavedObjectReference } from '@kbn/core/server';
 import type {
   GridData,
   DashboardAttributes as CurrentDashboardAttributes, // Dashboard attributes from common are the source of truth for the current version.
-} from '../../../../common';
+} from '../../../../common/content_management';
 
-interface SavedObjectAttributes {
+interface KibanaAttributes {
   kibanaSavedObjectMeta: {
     searchSourceJSON: string;
   };
 }
 
-interface Doc<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
+interface Doc<Attributes extends KibanaAttributes = KibanaAttributes> {
   references: SavedObjectReference[];
   attributes: Attributes;
   id: string;
   type: string;
 }
 
-interface DocPre700<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
+interface DocPre700<Attributes extends KibanaAttributes = KibanaAttributes> {
   attributes: Attributes;
   id: string;
   type: string;
 }
 
-interface DashboardAttributesTo720 extends SavedObjectAttributes {
+interface DashboardAttributesTo720 extends KibanaAttributes {
   panelsJSON: string;
   description: string;
   uiStateJSON?: string;

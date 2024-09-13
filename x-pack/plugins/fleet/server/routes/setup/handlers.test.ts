@@ -9,20 +9,22 @@ import type { AwaitedProperties } from '@kbn/utility-types';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '@kbn/core/server/mocks';
 
 import type { PostFleetSetupResponse } from '../../../common/types';
+import { API_VERSIONS } from '../../../common/constants';
 import { RegistryError } from '../../errors';
 import {
   createAppContextStartContractMock,
   createPackagePolicyServiceMock,
+  createUninstallTokenServiceMock,
   xpackMocks,
 } from '../../mocks';
 import { agentServiceMock } from '../../services/agents/agent_service.mock';
 import { appContextService } from '../../services/app_context';
 import { setupFleet } from '../../services/setup';
 import type { FleetRequestHandlerContext } from '../../types';
-
+import { hasFleetServers } from '../../services/fleet_server';
 import { createFleetAuthzMock } from '../../../common/mocks';
 
-import { fleetSetupHandler } from './handlers';
+import { fleetSetupHandler, getFleetStatusHandler } from './handlers';
 
 jest.mock('../../services/setup', () => {
   return {
@@ -30,6 +32,8 @@ jest.mock('../../services/setup', () => {
     setupFleet: jest.fn(),
   };
 });
+
+jest.mock('../../services/fleet_server');
 
 const mockSetupFleet = setupFleet as jest.MockedFunction<typeof setupFleet>;
 
@@ -42,6 +46,10 @@ describe('FleetSetupHandler', () => {
     context = {
       ...xpackMocks.createRequestHandlerContext(),
       fleet: {
+        uninstallTokenService: {
+          asCurrentUser: createUninstallTokenServiceMock(),
+        },
+        getAllSpaces: jest.fn(),
         agentClient: {
           asCurrentUser: agentServiceMock.createClient(),
           asInternalUser: agentServiceMock.createClient(),
@@ -60,6 +68,7 @@ describe('FleetSetupHandler', () => {
     request = httpServerMock.createKibanaRequest({
       method: 'post',
       path: '/api/fleet/setup',
+      headers: { 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
     });
     // prevents `Logger not set.` and other appContext errors
     appContextService.start(createAppContextStartContractMock());
@@ -113,5 +122,121 @@ describe('FleetSetupHandler', () => {
         message: 'Registry method mocked to throw',
       },
     });
+  });
+});
+
+describe('FleetStatusHandler', () => {
+  let context: AwaitedProperties<Omit<FleetRequestHandlerContext, 'resolve'>>;
+  let response: ReturnType<typeof httpServerMock.createResponseFactory>;
+  let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
+
+  beforeEach(async () => {
+    context = {
+      ...xpackMocks.createRequestHandlerContext(),
+      fleet: {
+        uninstallTokenService: {
+          asCurrentUser: createUninstallTokenServiceMock(),
+        },
+        getAllSpaces: jest.fn(),
+        agentClient: {
+          asCurrentUser: agentServiceMock.createClient(),
+          asInternalUser: agentServiceMock.createClient(),
+        },
+        authz: createFleetAuthzMock(),
+        packagePolicyService: {
+          asCurrentUser: createPackagePolicyServiceMock(),
+          asInternalUser: createPackagePolicyServiceMock(),
+        },
+        internalSoClient: savedObjectsClientMock.create(),
+        spaceId: 'default',
+        limitedToPackages: undefined,
+      },
+    };
+    response = httpServerMock.createResponseFactory();
+    request = httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: '/api/fleet/status',
+      headers: { 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
+    });
+    // prevents `Logger not set.` and other appContext errors
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  afterEach(async () => {
+    jest.clearAllMocks();
+    appContextService.stop();
+  });
+
+  it('POST /status w/200 and body without missing requirements', async () => {
+    jest
+      .mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled)
+      .mockResolvedValue(true);
+    jest.mocked(hasFleetServers).mockResolvedValue(true);
+    await getFleetStatusHandler(
+      coreMock.createCustomRequestHandlerContext(context),
+      request,
+      response
+    );
+
+    const expectedBody = {
+      isReady: true,
+      is_secrets_storage_enabled: false,
+      is_space_awareness_enabled: false,
+      missing_optional_features: [],
+      missing_requirements: [],
+    };
+    expect(response.customError).toHaveBeenCalledTimes(0);
+    expect(response.ok).toHaveBeenCalledWith({ body: expectedBody });
+  });
+
+  it('POST /status w/200 and body with missing requirements', async () => {
+    jest
+      .mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled)
+      .mockResolvedValue(false);
+    jest.mocked(hasFleetServers).mockResolvedValue(false);
+    await getFleetStatusHandler(
+      coreMock.createCustomRequestHandlerContext(context),
+      request,
+      response
+    );
+
+    const expectedBody = {
+      isReady: false,
+      is_secrets_storage_enabled: false,
+      is_space_awareness_enabled: false,
+      missing_optional_features: [],
+      missing_requirements: ['api_keys', 'fleet_server'],
+    };
+    expect(response.customError).toHaveBeenCalledTimes(0);
+    expect(response.ok).toHaveBeenCalledWith({ body: expectedBody });
+  });
+
+  it('POST /status  w/200 with fleet server standalone', async () => {
+    jest.mocked(hasFleetServers).mockResolvedValue(false);
+    appContextService.start(
+      createAppContextStartContractMock({
+        internal: {
+          fleetServerStandalone: true,
+        },
+      } as any)
+    );
+    jest
+      .mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled)
+      .mockResolvedValue(true);
+    await getFleetStatusHandler(
+      coreMock.createCustomRequestHandlerContext(context),
+      request,
+      response
+    );
+
+    const expectedBody = {
+      isReady: true,
+      is_secrets_storage_enabled: false,
+      is_space_awareness_enabled: false,
+      missing_optional_features: [],
+      missing_requirements: [],
+    };
+    expect(response.customError).toHaveBeenCalledTimes(0);
+    expect(response.ok).toHaveBeenCalledWith({ body: expectedBody });
   });
 });

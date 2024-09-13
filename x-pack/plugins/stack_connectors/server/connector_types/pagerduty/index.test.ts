@@ -10,7 +10,7 @@ import moment from 'moment';
 jest.mock('./post_pagerduty', () => ({
   postPagerduty: jest.fn(),
 }));
-import { Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector, Services } from '@kbn/actions-plugin/server/types';
 import { validateConfig, validateSecrets, validateParams } from '@kbn/actions-plugin/server/lib';
 import { postPagerduty } from './post_pagerduty';
 import { Logger } from '@kbn/core/server';
@@ -31,10 +31,15 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: PagerDutyConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
+  connectorUsageCollector = new ConnectorUsageCollector({
+    logger: mockedLogger,
+    connectorId: 'test-connector-id',
+  });
 });
 
 describe('get()', () => {
@@ -269,6 +274,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -316,6 +322,25 @@ describe('execute()', () => {
       component: 'the-component',
       group: 'the-group',
       class: 'the-class',
+      customDetails: {
+        myString: 'foo',
+        myNumber: 10,
+        myArray: ['foo', 'baz'],
+        myBoolean: true,
+        myObject: {
+          myNestedObject: 'foo',
+        },
+      },
+      links: [
+        {
+          href: 'http://example.com',
+          text: 'a link',
+        },
+        {
+          href: 'http://example.com',
+          text: 'a second link',
+        },
+      ],
     };
 
     postPagerdutyMock.mockImplementation(() => {
@@ -331,6 +356,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -340,9 +366,31 @@ describe('execute()', () => {
         "data": Object {
           "dedup_key": "a-dedup-key",
           "event_action": "trigger",
+          "links": Array [
+            Object {
+              "href": "http://example.com",
+              "text": "a link",
+            },
+            Object {
+              "href": "http://example.com",
+              "text": "a second link",
+            },
+          ],
           "payload": Object {
             "class": "the-class",
             "component": "the-component",
+            "custom_details": Object {
+              "myArray": Array [
+                "foo",
+                "baz",
+              ],
+              "myBoolean": true,
+              "myNumber": 10,
+              "myObject": Object {
+                "myNestedObject": "foo",
+              },
+              "myString": "foo",
+            },
             "group": "the-group",
             "severity": "critical",
             "source": "the-source",
@@ -383,6 +431,25 @@ describe('execute()', () => {
       component: 'the-component',
       group: 'the-group',
       class: 'the-class',
+      customDetails: {
+        myString: 'foo',
+        myNumber: 10,
+        myArray: ['foo', 'baz'],
+        myBoolean: true,
+        myObject: {
+          myNestedObject: 'foo',
+        },
+      },
+      links: [
+        {
+          href: 'http://example.com',
+          text: 'a link',
+        },
+        {
+          href: 'http://example.com',
+          text: 'a second link',
+        },
+      ],
     };
 
     postPagerdutyMock.mockImplementation(() => {
@@ -398,6 +465,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -441,6 +509,25 @@ describe('execute()', () => {
       component: 'the-component',
       group: 'the-group',
       class: 'the-class',
+      customDetails: {
+        myString: 'foo',
+        myNumber: 10,
+        myArray: ['foo', 'baz'],
+        myBoolean: true,
+        myObject: {
+          myNestedObject: 'foo',
+        },
+      },
+      links: [
+        {
+          href: 'http://example.com',
+          text: 'a link',
+        },
+        {
+          href: 'http://example.com',
+          text: 'a second link',
+        },
+      ],
     };
 
     postPagerdutyMock.mockImplementation(() => {
@@ -456,6 +543,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -499,6 +587,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
@@ -529,6 +618,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
@@ -559,6 +649,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
@@ -589,6 +680,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
@@ -629,6 +721,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -692,6 +785,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -758,6 +852,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
@@ -823,6 +918,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     const actionResponse = await connectorType.executor(executorOptions);
     const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];

@@ -204,6 +204,45 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.startTSWorker",
+        "type": "Function",
+        "tags": [],
+        "label": "startTSWorker",
+        "description": [
+          "\nProvide a TS file as the src of a NodeJS Worker with some built-in handling\nof std streams and debugging."
+        ],
+        "signature": [
+          "({\n  log,\n  src,\n  cwd = REPO_ROOT,\n  execArgv = [],\n  stdio = ['ignore', 'pipe', 'pipe', 'ipc'],\n  ...forkOptions\n}: StartTSWorkerArgs) => { msg$: ",
+          "Observable",
+          "<Message>; proc: ",
+          "ChildProcess",
+          "; }"
+        ],
+        "path": "packages/kbn-dev-utils/src/worker/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.startTSWorker.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  log,\n  src,\n  cwd = REPO_ROOT,\n  execArgv = [],\n  stdio = ['ignore', 'pipe', 'pipe', 'ipc'],\n  ...forkOptions\n}",
+            "description": [],
+            "signature": [
+              "StartTSWorkerArgs"
+            ],
+            "path": "packages/kbn-dev-utils/src/worker/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
         "id": "def-common.transformFileStream",
         "type": "Function",
         "tags": [],
@@ -346,6 +385,21 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.CA_TRUSTED_FINGERPRINT",
+        "type": "string",
+        "tags": [],
+        "label": "CA_TRUSTED_FINGERPRINT",
+        "description": [],
+        "signature": [
+          "\"F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84\""
+        ],
+        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
         "id": "def-common.ES_CERT_PATH",
         "type": "string",
         "tags": [],
@@ -421,6 +475,57 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.FLEET_SERVER_CERT_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_SERVER_CERT_PATH",
+        "description": [],
+        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.FLEET_SERVER_KEY_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_SERVER_KEY_PATH",
+        "description": [],
+        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.FLEET_SERVER_P12_PASSWORD",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_SERVER_P12_PASSWORD",
+        "description": [],
+        "signature": [
+          "\"storepass\""
+        ],
+        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.FLEET_SERVER_P12_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_SERVER_P12_PATH",
+        "description": [],
+        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
         "id": "def-common.KBN_CERT_PATH",
         "type": "string",
         "tags": [],
@@ -471,6 +576,59 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.fleetServerDevServiceAccount",
+        "type": "Object",
+        "tags": [],
+        "label": "fleetServerDevServiceAccount",
+        "description": [],
+        "path": "packages/kbn-dev-utils/src/dev_service_account.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.fleetServerDevServiceAccount.token",
+            "type": "string",
+            "tags": [],
+            "label": "token",
+            "description": [],
+            "path": "packages/kbn-dev-utils/src/dev_service_account.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.kibanaDevServiceAccount",
+        "type": "Object",
+        "tags": [],
+        "label": "kibanaDevServiceAccount",
+        "description": [
+          "\n`kibana-dev` service account token for connecting to ESS\nSee packages/kbn-es/src/serverless_resources/README.md"
+        ],
+        "path": "packages/kbn-dev-utils/src/dev_service_account.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.kibanaDevServiceAccount.token",
+            "type": "string",
+            "tags": [],
+            "label": "token",
+            "description": [],
+            "path": "packages/kbn-dev-utils/src/dev_service_account.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

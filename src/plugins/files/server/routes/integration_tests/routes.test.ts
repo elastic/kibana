@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { TypeOf } from '@kbn/config-schema';
@@ -121,6 +122,70 @@ describe('File HTTP API', () => {
         })
         .expect(200);
       expect(result.body.files).toHaveLength(1);
+    });
+
+    test('extension', async () => {
+      const result = await request
+        .post(root, '/api/files/find')
+        .send({
+          kind: testHarness.fileKind,
+          extension: 'png',
+        })
+        .expect(200);
+
+      expect(result.body.files).toHaveLength(2);
+
+      const result2 = await request
+        .post(root, '/api/files/find')
+        .send({
+          kind: testHarness.fileKind,
+          extension: 'pdf',
+        })
+        .expect(200);
+
+      expect(result2.body.files).toHaveLength(1);
+
+      const result3 = await request
+        .post(root, '/api/files/find')
+        .send({
+          kind: testHarness.fileKind,
+          extension: 'txt',
+        })
+        .expect(200);
+
+      expect(result3.body.files).toHaveLength(0);
+    });
+
+    test('mime type', async () => {
+      const result = await request
+        .post(root, '/api/files/find')
+        .send({
+          kind: testHarness.fileKind,
+          mimeType: 'image/png',
+        })
+        .expect(200);
+
+      expect(result.body.files).toHaveLength(2);
+
+      const result2 = await request
+        .post(root, '/api/files/find')
+        .send({
+          kind: testHarness.fileKind,
+          mimeType: 'application/pdf',
+        })
+        .expect(200);
+
+      expect(result2.body.files).toHaveLength(1);
+
+      const result3 = await request
+        .post(root, '/api/files/find')
+        .send({
+          kind: testHarness.fileKind,
+          mimeType: 'text/plain',
+        })
+        .expect(200);
+
+      expect(result3.body.files).toHaveLength(0);
     });
   });
 
@@ -267,7 +332,7 @@ describe('File HTTP API', () => {
         .expect(200);
 
       expect(header['content-type']).toEqual('application/pdf');
-      expect(header['content-disposition']).toEqual('attachment; filename="myfilename.pdf"');
+      expect(header['content-disposition']).toEqual('attachment; filename=myfilename.pdf');
       expect(buffer.toString('utf8')).toEqual('test');
     });
   });

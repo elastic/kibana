@@ -8,19 +8,27 @@
 import React, { memo, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { ExecuteActionRequestBody } from '../../../../../common/endpoint/schema/actions';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { ExecuteActionRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
-import type { ResponseActionExecuteOutputContent } from '../../../../../common/endpoint/types';
+import type {
+  ResponseActionExecuteOutputContent,
+  ResponseActionsExecuteParameters,
+} from '../../../../../common/endpoint/types';
 import { useSendExecuteEndpoint } from '../../../hooks/response_actions/use_send_execute_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { parsedExecuteTimeout } from '../lib/utils';
 import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 
 export const ExecuteActionResult = memo<
-  ActionRequestComponentProps<{
-    command: string;
-    timeout?: string;
-  }>
+  ActionRequestComponentProps<
+    {
+      command: string;
+      timeout?: string;
+    },
+    ResponseActionExecuteOutputContent,
+    ResponseActionsExecuteParameters
+  >
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendExecuteEndpoint();
   const actionRequestBody = useMemo<undefined | ExecuteActionRequestBody>(() => {
@@ -46,7 +54,8 @@ export const ExecuteActionResult = memo<
 
   const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
     ExecuteActionRequestBody,
-    ResponseActionExecuteOutputContent
+    ResponseActionExecuteOutputContent,
+    ResponseActionsExecuteParameters
   >({
     ResultComponent,
     setStore,
@@ -83,3 +92,32 @@ export const ExecuteActionResult = memo<
   );
 });
 ExecuteActionResult.displayName = 'ExecuteActionResult';
+
+const ABOUT_ESCAPE_DASHES = i18n.translate(
+  'xpack.securitySolution.endpointConsoleCommands.execute.args.command.aboutConsecutiveDashes',
+  {
+    defaultMessage: 'Multiple consecutive dashes in the value provided must be escaped. Ex:',
+  }
+);
+
+const ABOUT_ESCAPE_QUOTES = i18n.translate(
+  'xpack.securitySolution.endpointConsoleCommands.execute.args.command.aboutQuotes',
+  {
+    defaultMessage: 'Quotes provided in the value can be used without escaping. Ex:',
+  }
+);
+
+export const getExecuteCommandArgAboutInfo = (): React.ReactNode => {
+  return (
+    <>
+      <FormattedMessage
+        id="xpack.securitySolution.endpointConsoleCommands.execute.args.command.about"
+        defaultMessage="The command to execute."
+      />
+      <br />
+      {`${ABOUT_ESCAPE_DASHES} execute --command "/opt/directory\\-\\-\\-directory/myBinary \\-\\-version"`}
+      <br />
+      {`${ABOUT_ESCAPE_QUOTES} execute --command "cd "C:\\Program Files\\directory""`}
+    </>
+  );
+};

@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
 import { Request, RequestStatistics, RequestStatus, Response } from './types';
+import { moveRequestParamsToTopLevel } from './move_request_params_to_top_level';
 
 /**
  * An API to specify information about a specific request that will be logged.
@@ -53,7 +55,7 @@ export class RequestResponder {
   public finish(status: RequestStatus, response: Response): void {
     this.request.time = response.time ?? Date.now() - this.request.startTime;
     this.request.status = status;
-    this.request.response = response;
+    this.request.response = moveRequestParamsToTopLevel(response);
     this.onChange();
   }
 

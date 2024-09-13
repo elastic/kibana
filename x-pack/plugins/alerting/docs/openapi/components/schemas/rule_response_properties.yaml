@@ -22,8 +22,16 @@ required:
 properties:
   actions:
     $ref: 'actions.yaml'
+  alert_delay:
+    $ref: 'alert_delay.yaml'
+  api_key_created_by_user:
+    type: boolean
+    description: Indicates whether the API key that is associated with the rule was created by the user.
+    example: false
   api_key_owner:
     type: string
+    description: >
+      The owner of the API key that is associated with the rule and used to run background tasks.
     nullable: true
     example: elastic
   consumer:
@@ -79,9 +87,12 @@ properties:
         type: string
         example: succeeded
       outcome_msg:
-        type: string
+        type: array
+        items:
+          type: string
         nullable: true
-        example: null
+      outcome_order:
+        type: integer
       warning:
         type: string
         nullable: true
@@ -104,11 +115,16 @@ properties:
     nullable: true
     example: '2022-12-06T00:14:43.818Z'
   notify_when:
-    $ref: 'notify_when.yaml'
+    type: string
+    description: Indicates how often alerts generate actions.
+    nullable: true
   params:
     type: object
     description: The parameters for the rule.
     additionalProperties: true
+  revision:
+    type: integer
+    description: The rule revision number.
   rule_type_id:
     type: string
     description: >

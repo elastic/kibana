@@ -13,7 +13,7 @@ const ACTION_TEST_SUBJ = `embeddablePanelAction-${ACTION_ID}`;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const drilldowns = getService('dashboardDrilldownsManage');
-  const { dashboard, discover, common, timePicker } = getPageObjects([
+  const { dashboard, discover, timePicker } = getPageObjects([
     'dashboard',
     'discover',
     'common',
@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Explore underlying data - chart action', () => {
     describe('value click action', () => {
       it('action exists in chart click popup menu', async () => {
-        await common.navigateToApp('dashboard');
+        await dashboard.navigateToApp();
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
         await pieChart.clickOnPieSlice('160,000');
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('action is a link <a> element', async () => {
         const actionElement = await testSubjects.find(ACTION_TEST_SUBJ);
         const tag = await actionElement.getTagName();
-        const href = await actionElement.getAttribute('href');
+        const href = (await actionElement.getAttribute('href')) ?? '';
 
         expect(tag.toLowerCase()).to.be('a');
         expect(typeof href).to.be('string');
@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let originalTimeRangeDurationHours: number | undefined;
 
       it('action exists in chart brush popup menu', async () => {
-        await common.navigateToApp('dashboard');
+        await dashboard.navigateToApp();
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(drilldowns.DASHBOARD_WITH_AREA_CHART_NAME);
 

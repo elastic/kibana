@@ -20,7 +20,8 @@ import {
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { SecurityCellActionsTrigger } from '../../../../app/actions/constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { HeaderSection } from '../../../../common/components/header_section';
 
@@ -36,6 +37,9 @@ import { HoverVisibilityContainer } from '../../../../common/components/hover_vi
 import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { FormattedCount } from '../../../../common/components/formatted_number';
+import { SecurityCellActions, CellActionsMode } from '../../../../common/components/cell_actions';
+import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 export interface RuleAlertsTableProps {
   signalIndexName: string | null;
@@ -95,13 +99,26 @@ export const getTableColumns: GetTableColumns = ({
     name: i18n.RULE_ALERTS_COLUMN_ALERT_COUNT,
     'data-test-subj': 'severityRuleAlertsTable-alertCount',
     render: (alertCount: number, { name }) => (
-      <EuiLink
-        data-test-subj="severityRuleAlertsTable-alertCountLink"
-        disabled={alertCount === 0}
-        onClick={() => openRuleInAlertsPage(name)}
+      <SecurityCellActions
+        data={{
+          value: name,
+          field: ALERT_RULE_NAME,
+        }}
+        mode={CellActionsMode.HOVER_RIGHT}
+        triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        sourcererScopeId={SourcererScopeName.detections}
+        metadata={{
+          andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
+        }}
       >
-        <FormattedCount count={alertCount} />
-      </EuiLink>
+        <EuiLink
+          data-test-subj="severityRuleAlertsTable-alertCountLink"
+          disabled={alertCount === 0}
+          onClick={() => openRuleInAlertsPage(name)}
+        >
+          <FormattedCount count={alertCount} />
+        </EuiLink>
+      </SecurityCellActions>
     ),
   },
   {
@@ -117,10 +134,13 @@ export const getTableColumns: GetTableColumns = ({
 export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexName }) => {
   const { getAppUrl, navigateTo } = useNavigation();
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID);
+  const { filterQuery } = useGlobalFilterQuery();
+
   const { items, isLoading, updatedAt } = useRuleAlertsItems({
     signalIndexName,
     queryId: DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID,
     skip: !toggleStatus,
+    filterQuery,
   });
 
   const openAlertsPageWithFilter = useNavigateToAlertsPageWithFilters();
@@ -136,8 +156,12 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
   );
 
   const navigateToAlerts = useCallback(() => {
-    navigateTo({ deepLinkId: SecurityPageName.alerts });
-  }, [navigateTo]);
+    openAlertsPageWithFilter({
+      title: i18n.OPEN_IN_ALERTS_TITLE_STATUS,
+      selectedOptions: ['open'],
+      fieldName: ALERT_WORKFLOW_STATUS,
+    });
+  }, [openAlertsPageWithFilter]);
 
   const columns = useMemo(
     () => getTableColumns({ getAppUrl, navigateTo, openRuleInAlertsPage }),

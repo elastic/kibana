@@ -14,6 +14,7 @@ import {
   EuiButton,
   EuiCheckbox,
   EuiCodeBlock,
+  EuiComboBox,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -22,11 +23,20 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { AggName } from '../../../../../../common/types/aggregations';
+import type { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
+import { isDefined } from '@kbn/ml-is-defined';
+import { ACCEPTED_TIMEZONES, isValidTimeZone } from '../../../../common/time_zone_utils';
+import type { AggName } from '../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../common/types/common';
 
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 
+import type {
+  PivotGroupByConfig,
+  PivotGroupByConfigWithUiSupportDict,
+  PivotSupportedGroupByAggs,
+  PivotSupportedGroupByAggsWithInterval,
+} from '../../../../common';
 import {
   dateHistogramIntervalFormatRegex,
   getEsAggFromGroupByConfig,
@@ -35,10 +45,6 @@ import {
   isPivotGroupByConfigWithUiSupport,
   histogramIntervalFormatRegex,
   isAggName,
-  PivotGroupByConfig,
-  PivotGroupByConfigWithUiSupportDict,
-  PivotSupportedGroupByAggs,
-  PivotSupportedGroupByAggsWithInterval,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
 
@@ -109,6 +115,21 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     isPivotGroupByConfigWithUiSupport(defaultData) ? defaultData.field : ''
   );
   const [interval, setInterval] = useState(getDefaultInterval(defaultData));
+
+  const TIMEZONE_OPTIONS = useMemo(
+    () => [...ACCEPTED_TIMEZONES].map((value) => ({ value, label: value })),
+    []
+  );
+
+  // Should default to time zone that user sets in json editor first
+  const [selectedTimeZone, setSelectedTimeZone] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    isGroupByDateHistogram(defaultData) && isValidTimeZone(defaultData.time_zone)
+      ? [TIMEZONE_OPTIONS.find((v) => v.value === defaultData.time_zone)!]
+      : []
+  );
+
+  const timeZone = useMemo(() => selectedTimeZone[0]?.value, [selectedTimeZone]);
+
   const [missingBucket, setMissingBucket] = useState(
     isPivotGroupByConfigWithUiSupport(defaultData) && defaultData.missing_bucket
   );
@@ -122,6 +143,10 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
       updatedItem.interval = interval;
     } else if (isGroupByDateHistogram(updatedItem) && interval !== undefined) {
       updatedItem.calendar_interval = interval;
+
+      if (isValidTimeZone(timeZone)) {
+        updatedItem.time_zone = timeZone;
+      }
     }
 
     // Casting to PivotGroupByConfig because TS would otherwise complain about the
@@ -169,9 +194,14 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     (isGroupByDateHistogram(defaultData) || isGroupByHistogram(defaultData)) &&
     isIntervalValid(interval, defaultData.agg);
 
+  const timeZoneValid = isGroupByDateHistogram(defaultData) && isValidTimeZone(timeZone);
   let formValid = validAggName;
   if (formValid && (isGroupByDateHistogram(defaultData) || isGroupByHistogram(defaultData))) {
     formValid = isIntervalValid(interval, defaultData.agg);
+
+    if (isGroupByDateHistogram(defaultData) && isDefined(defaultData.time_zone)) {
+      formValid = timeZoneValid;
+    }
   }
 
   return (
@@ -225,13 +255,11 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
       )}
       {(isGroupByDateHistogram(defaultData) || isGroupByHistogram(defaultData)) && (
         <EuiFormRow
-          error={
-            !validInterval && [
-              i18n.translate('xpack.transform.groupBy.popoverForm.intervalError', {
-                defaultMessage: 'Invalid interval.',
-              }),
-            ]
-          }
+          error={[
+            i18n.translate('xpack.transform.groupBy.popoverForm.intervalError', {
+              defaultMessage: 'Invalid interval.',
+            }),
+          ]}
           isInvalid={!validInterval}
           label={i18n.translate('xpack.transform.groupBy.popoverForm.intervalLabel', {
             defaultMessage: 'Interval',
@@ -263,6 +291,28 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           </>
         </EuiFormRow>
       )}
+      {isGroupByDateHistogram(defaultData) && isDefined(defaultData.time_zone) ? (
+        <EuiFormRow
+          error={i18n.translate('xpack.transform.groupBy.popoverForm.timeZoneError', {
+            defaultMessage: 'Invalid time zone.',
+          })}
+          isInvalid={!timeZoneValid}
+          label={i18n.translate('xpack.transform.groupBy.popoverForm.timeZoneLabel', {
+            defaultMessage: 'Time zone',
+          })}
+        >
+          <EuiComboBox
+            options={TIMEZONE_OPTIONS}
+            onChange={(opt) => setSelectedTimeZone(opt)}
+            selectedOptions={selectedTimeZone}
+            aria-label={i18n.translate('xpack.transform.groupBy.popoverForm.timeZoneAriaLabel', {
+              defaultMessage: 'Time zone',
+            })}
+            singleSelection={{ asPlainText: true }}
+          />
+        </EuiFormRow>
+      ) : null}
+
       {!isUnsupportedAgg && (
         <EuiFormRow
           helpText={

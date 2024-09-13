@@ -1,0 +1,2745 @@
+{
+  "id": "@kbn/ml-data-grid",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.DataGrid",
+        "type": "Function",
+        "tags": [],
+        "label": "DataGrid",
+        "description": [
+          "\nCustom data grid component with support for mini histograms."
+        ],
+        "signature": [
+          "React.FunctionComponent<Props>"
+        ],
+        "path": "x-pack/packages/ml/data_grid/components/data_grid.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.DataGrid.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.DataGrid.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.getDataGridSchemaFromESFieldType",
+        "type": "Function",
+        "tags": [],
+        "label": "getDataGridSchemaFromESFieldType",
+        "description": [
+          "\nCreates a data grid schema from an ES field type."
+        ],
+        "signature": [
+          "(fieldType: \"number\" | ",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
+          " | ",
+          "MappingRuntimeFieldType",
+          " | undefined) => string | undefined"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getDataGridSchemaFromESFieldType.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fieldType",
+            "description": [
+              "- The ES field type."
+            ],
+            "signature": [
+              "\"number\" | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              " | ",
+              "MappingRuntimeFieldType",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "- The data grid schema corresponding to the field type."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.getDataGridSchemaFromKibanaFieldType",
+        "type": "Function",
+        "tags": [],
+        "label": "getDataGridSchemaFromKibanaFieldType",
+        "description": [
+          "\nRetrieves the data grid schema from the Kibana field type."
+        ],
+        "signature": [
+          "(field: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          " | undefined) => string | undefined"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getDataGridSchemaFromKibanaFieldType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "- The Kibana field object."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "- The data grid schema corresponding to the field type."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.getDataGridSchemasFromFieldTypes",
+        "type": "Function",
+        "tags": [],
+        "label": "getDataGridSchemasFromFieldTypes",
+        "description": [
+          "\nCreates an array of objects representing the data grid schemas for each field."
+        ],
+        "signature": [
+          "(fieldTypes: ",
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.FieldTypes",
+            "text": "FieldTypes"
+          },
+          ", resultsField: string) => { id: string; schema: string | undefined; isSortable: boolean; }[]"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getDataGridSchemasFromFieldTypes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldTypes",
+            "description": [
+              "- The field types object."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-grid",
+                "scope": "common",
+                "docId": "kibKbnMlDataGridPluginApi",
+                "section": "def-common.FieldTypes",
+                "text": "FieldTypes"
+              }
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getDataGridSchemasFromFieldTypes.$2",
+            "type": "string",
+            "tags": [],
+            "label": "resultsField",
+            "description": [
+              "- The results field."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "- The array of data grid schemas."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.getFeatureImportance",
+        "type": "Function",
+        "tags": [],
+        "label": "getFeatureImportance",
+        "description": [
+          "\nHelper to transform feature importance fields with arrays back to primitive value\n"
+        ],
+        "signature": [
+          "(row: ",
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.DataGridItem",
+            "text": "DataGridItem"
+          },
+          ", mlResultsField: string, isClassTypeBoolean?: boolean) => ",
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.FeatureImportance",
+            "text": "FeatureImportance"
+          },
+          "[]"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getFeatureImportance.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "row",
+            "description": [
+              "- EUI data grid data row"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-grid",
+                "scope": "common",
+                "docId": "kibKbnMlDataGridPluginApi",
+                "section": "def-common.DataGridItem",
+                "text": "DataGridItem"
+              }
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getFeatureImportance.$2",
+            "type": "string",
+            "tags": [],
+            "label": "mlResultsField",
+            "description": [
+              "- Data frame analytics results field"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getFeatureImportance.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "isClassTypeBoolean",
+            "description": [
+              "- Flag if the class type is boolean"
+            ],
+            "signature": [
+              "boolean"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "nested object structure of feature importance values"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.getFieldsFromKibanaDataView",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldsFromKibanaDataView",
+        "description": [
+          "\nRetrieves fields from a Kibana data view."
+        ],
+        "signature": [
+          "(dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ") => string[]"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getFieldsFromKibanaDataView.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "- The Kibana data view."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "- The array of field names from the data view."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.getFieldType",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldType",
+        "description": [
+          "\nGets the Kibana field type from a EUI data grid column schema.\n"
+        ],
+        "signature": [
+          "(schema: string | undefined) => ",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.KBN_FIELD_TYPES",
+            "text": "KBN_FIELD_TYPES"
+          },
+          " | undefined"
+        ],
+        "path": "x-pack/packages/ml/data_grid/hooks/use_column_chart.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getFieldType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "- EUI data grid column schema."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/hooks/use_column_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.getNestedOrEscapedVal",
+        "type": "Function",
+        "tags": [],
+        "label": "getNestedOrEscapedVal",
+        "description": [
+          "\nValue can be nested or the fieldName itself might contain other special characters like `.`"
+        ],
+        "signature": [
+          "(obj: unknown, sortId: string) => any"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getNestedOrEscapedVal.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "obj",
+            "description": [
+              "- The object to get the nested property from."
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getNestedOrEscapedVal.$2",
+            "type": "string",
+            "tags": [],
+            "label": "sortId",
+            "description": [
+              "- The sort id attribute."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.getProcessedFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getProcessedFields",
+        "description": [
+          "\nHelper function to transform { [key]: [val] } => { [key]: val }\nfor when `fields` is used in es.search since response is always an array of values\nsince response always returns an array of values for each field\n"
+        ],
+        "signature": [
+          "(originalObj: object, omitBy?: ((key: string) => boolean) | undefined) => { [key: string]: any; }"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getProcessedFields.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "originalObj",
+            "description": [
+              "- The original object to get the processed fields from."
+            ],
+            "signature": [
+              "object"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getProcessedFields.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "omitBy",
+            "description": [
+              "- Optional callback."
+            ],
+            "signature": [
+              "((key: string) => boolean) | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          ") => { [key: string]: any; }}"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.getTopClasses",
+        "type": "Function",
+        "tags": [],
+        "label": "getTopClasses",
+        "description": [
+          "\nHelper to transforms top classes fields with arrays back to original primitive value\n"
+        ],
+        "signature": [
+          "(row: ",
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.DataGridItem",
+            "text": "DataGridItem"
+          },
+          ", mlResultsField: string) => ",
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.TopClasses",
+            "text": "TopClasses"
+          }
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getTopClasses.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "row",
+            "description": [
+              "- EUI data grid data row"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-grid",
+                "scope": "common",
+                "docId": "kibKbnMlDataGridPluginApi",
+                "section": "def-common.DataGridItem",
+                "text": "DataGridItem"
+              }
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getTopClasses.$2",
+            "type": "string",
+            "tags": [],
+            "label": "mlResultsField",
+            "description": [
+              "- Data frame analytics results field"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "nested object structure of feature importance values"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.isNumericChartData",
+        "type": "Function",
+        "tags": [],
+        "label": "isNumericChartData",
+        "description": [
+          "\nDetermines if the provided argument is of type NumericChartData."
+        ],
+        "signature": [
+          "(arg: unknown) => arg is ",
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.NumericChartData",
+            "text": "NumericChartData"
+          }
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.isNumericChartData.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "- The argument to check."
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.isOrdinalChartData",
+        "type": "Function",
+        "tags": [],
+        "label": "isOrdinalChartData",
+        "description": [
+          "\nDetermines if the provided argument is of type OrdinalChartData."
+        ],
+        "signature": [
+          "(arg: unknown) => arg is ",
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.OrdinalChartData",
+            "text": "OrdinalChartData"
+          }
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.isOrdinalChartData.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "- The argument to check."
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.isUnsupportedChartData",
+        "type": "Function",
+        "tags": [],
+        "label": "isUnsupportedChartData",
+        "description": [
+          "\nDetermines if the provided argument is of type UnsupportedChartData."
+        ],
+        "signature": [
+          "(arg: unknown) => arg is ",
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.UnsupportedChartData",
+            "text": "UnsupportedChartData"
+          }
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.isUnsupportedChartData.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "- The argument to check."
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.multiColumnSortFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "multiColumnSortFactory",
+        "description": [
+          "\nHelper to sort an array of objects based on an EuiDataGrid sorting configuration.\n`sortFn()` is recursive to support sorting on multiple columns.\n"
+        ],
+        "signature": [
+          "(sortingColumns: ",
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.MultiColumnSorter",
+            "text": "MultiColumnSorter"
+          },
+          "[]) => (a: any, b: any, sortingColumnIndex?: number) => number"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.multiColumnSortFactory.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "sortingColumns",
+            "description": [
+              "- The EUI data grid sorting configuration"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-grid",
+                "scope": "common",
+                "docId": "kibKbnMlDataGridPluginApi",
+                "section": "def-common.MultiColumnSorter",
+                "text": "MultiColumnSorter"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The sorting function which can be used with an array's sort() function."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.showDataGridColumnChartErrorMessageToast",
+        "type": "Function",
+        "tags": [],
+        "label": "showDataGridColumnChartErrorMessageToast",
+        "description": [
+          "\nDisplays an error toast message for the data grid column chart.\n"
+        ],
+        "signature": [
+          "(e: unknown, toastNotifications: ",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-public.IToasts",
+            "text": "IToasts"
+          },
+          ") => void"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.showDataGridColumnChartErrorMessageToast.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "e",
+            "description": [
+              "- The error object or message."
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.showDataGridColumnChartErrorMessageToast.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "toastNotifications",
+            "description": [
+              "- The toast notifications service."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-public.IToasts",
+                "text": "IToasts"
+              }
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.useDataGrid",
+        "type": "Function",
+        "tags": [],
+        "label": "useDataGrid",
+        "description": [
+          "\nCustom hook to manage DataGrid state.\n"
+        ],
+        "signature": [
+          "(columns: ",
+          "EuiDataGridColumn",
+          "[], defaultPageSize?: number, defaultVisibleColumnsCount?: number, defaultVisibleColumnsFilter?: ((id: string) => boolean) | undefined) => ",
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.UseDataGridReturnType",
+            "text": "UseDataGridReturnType"
+          }
+        ],
+        "path": "x-pack/packages/ml/data_grid/hooks/use_data_grid.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.useDataGrid.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [
+              "- EUI column spec"
+            ],
+            "signature": [
+              "EuiDataGridColumn",
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/data_grid/hooks/use_data_grid.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.useDataGrid.$2",
+            "type": "number",
+            "tags": [],
+            "label": "defaultPageSize",
+            "description": [
+              "- Default page size"
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/data_grid/hooks/use_data_grid.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.useDataGrid.$3",
+            "type": "number",
+            "tags": [],
+            "label": "defaultVisibleColumnsCount",
+            "description": [
+              "- Default count of visible columns"
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/data_grid/hooks/use_data_grid.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.useDataGrid.$4",
+            "type": "Function",
+            "tags": [],
+            "label": "defaultVisibleColumnsFilter",
+            "description": [
+              "- Optional external columns filter"
+            ],
+            "signature": [
+              "((id: string) => boolean) | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/hooks/use_data_grid.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.useRenderCellValue",
+        "type": "Function",
+        "tags": [],
+        "label": "useRenderCellValue",
+        "description": [
+          "\nCustom hook for rendering cell values in the data grid.\n"
+        ],
+        "signature": [
+          "(dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined, pagination: Required<Pick<",
+          "EuiDataGridPaginationProps",
+          ", \"pageSize\" | \"pageIndex\">>, tableItems: ",
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.DataGridItem",
+            "text": "DataGridItem"
+          },
+          "[], resultsField?: string | undefined, cellPropsCallback?: ((columnId: string, cellValue: any, fullItem: ",
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.DataGridItem",
+            "text": "DataGridItem"
+          },
+          ", setCellProps: (props: ",
+          "EuiDataGridSetCellProps",
+          ") => void) => void) | undefined) => ",
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.RenderCellValue",
+            "text": "RenderCellValue"
+          }
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.useRenderCellValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "- The data view."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.useRenderCellValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "pagination",
+            "description": [
+              "- The pagination settings."
+            ],
+            "signature": [
+              "Required<Pick<",
+              "EuiDataGridPaginationProps",
+              ", \"pageSize\" | \"pageIndex\">>"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.useRenderCellValue.$3",
+            "type": "Array",
+            "tags": [],
+            "label": "tableItems",
+            "description": [
+              "- The table items."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-grid",
+                "scope": "common",
+                "docId": "kibKbnMlDataGridPluginApi",
+                "section": "def-common.DataGridItem",
+                "text": "DataGridItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.useRenderCellValue.$4",
+            "type": "string",
+            "tags": [],
+            "label": "resultsField",
+            "description": [
+              "- The results field."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.useRenderCellValue.$5",
+            "type": "Function",
+            "tags": [],
+            "label": "cellPropsCallback",
+            "description": [
+              "- The callback function for setting cell properties."
+            ],
+            "signature": [
+              "((columnId: string, cellValue: any, fullItem: ",
+              {
+                "pluginId": "@kbn/ml-data-grid",
+                "scope": "common",
+                "docId": "kibKbnMlDataGridPluginApi",
+                "section": "def-common.DataGridItem",
+                "text": "DataGridItem"
+              },
+              ", setCellProps: (props: ",
+              "EuiDataGridSetCellProps",
+              ") => void) => void) | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "- The render cell value function."
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.FieldTypes",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldTypes",
+        "description": [
+          "\nRecord of ES field types."
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.FieldTypes.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: ES_FIELD_TYPES",
+            "description": [],
+            "signature": [
+              "[key: string]:  ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              }
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.MultiColumnSorter",
+        "type": "Interface",
+        "tags": [],
+        "label": "MultiColumnSorter",
+        "description": [
+          "\nInterface definition for multi column sorter"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.MultiColumnSorter.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nThe id."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.MultiColumnSorter.direction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "direction",
+            "description": [
+              "\nThe direction."
+            ],
+            "signature": [
+              "\"asc\" | \"desc\""
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.MultiColumnSorter.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nThe type of the sorter."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.NumericChartData",
+        "type": "Interface",
+        "tags": [],
+        "label": "NumericChartData",
+        "description": [
+          "\nRepresents numeric chart data."
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.NumericChartData.data",
+            "type": "Array",
+            "tags": [],
+            "label": "data",
+            "description": [
+              "\nArray of numeric data items."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-grid",
+                "scope": "common",
+                "docId": "kibKbnMlDataGridPluginApi",
+                "section": "def-common.NumericDataItem",
+                "text": "NumericDataItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.NumericChartData.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nIdentifier of the chart."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.NumericChartData.interval",
+            "type": "number",
+            "tags": [],
+            "label": "interval",
+            "description": [
+              "\nInterval value."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.NumericChartData.stats",
+            "type": "Object",
+            "tags": [],
+            "label": "stats",
+            "description": [
+              "\nStatistics values."
+            ],
+            "signature": [
+              "[number, number]"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.NumericChartData.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nType of the chart data (numeric)."
+            ],
+            "signature": [
+              "\"numeric\""
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.NumericDataItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "NumericDataItem",
+        "description": [
+          "\nRepresents a numeric data item."
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.NumericDataItem.key",
+            "type": "number",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "\nNumeric key."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.NumericDataItem.key_as_string",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "key_as_string",
+            "description": [
+              "\nOptional string or numeric key."
+            ],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.NumericDataItem.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [
+              "\nNumber of documents."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.OrdinalChartData",
+        "type": "Interface",
+        "tags": [],
+        "label": "OrdinalChartData",
+        "description": [
+          "\nRepresents ordinal chart data."
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.OrdinalChartData.cardinality",
+            "type": "number",
+            "tags": [],
+            "label": "cardinality",
+            "description": [
+              "\nCardinality value."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.OrdinalChartData.data",
+            "type": "Array",
+            "tags": [],
+            "label": "data",
+            "description": [
+              "\nArray of ordinal data items."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-grid",
+                "scope": "common",
+                "docId": "kibKbnMlDataGridPluginApi",
+                "section": "def-common.OrdinalDataItem",
+                "text": "OrdinalDataItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.OrdinalChartData.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nIdentifier of the chart."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.OrdinalChartData.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nType of the chart data (ordinal or boolean)."
+            ],
+            "signature": [
+              "\"boolean\" | \"ordinal\""
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.OrdinalDataItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "OrdinalDataItem",
+        "description": [
+          "\nRepresents an ordinal data item."
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.OrdinalDataItem.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "\nKey."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.OrdinalDataItem.key_as_string",
+            "type": "string",
+            "tags": [],
+            "label": "key_as_string",
+            "description": [
+              "\nOptional key as string."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.OrdinalDataItem.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [
+              "\nNumber of documents."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.RowCountInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "RowCountInfo",
+        "description": [
+          "\nInformation about the row count."
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.RowCountInfo.rowCount",
+            "type": "number",
+            "tags": [],
+            "label": "rowCount",
+            "description": [
+              "\nRow count."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.RowCountInfo.rowCountRelation",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rowCountRelation",
+            "description": [
+              "\nRow count relation."
+            ],
+            "signature": [
+              "SearchTotalHitsRelation",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.UnsupportedChartData",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnsupportedChartData",
+        "description": [
+          "\nRepresents unsupported chart data."
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UnsupportedChartData.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nIdentifier of the chart."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UnsupportedChartData.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nType of the chart data (unsupported)."
+            ],
+            "signature": [
+              "\"unsupported\""
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.UseDataGridReturnType",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseDataGridReturnType",
+        "description": [
+          "\nReturn type of the `useDataGrid` custom hook."
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.ccsWarning",
+            "type": "boolean",
+            "tags": [],
+            "label": "ccsWarning",
+            "description": [
+              "\nBoolean flag for CCS warning."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.chartsVisible",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "chartsVisible",
+            "description": [
+              "\nBoolean flag for charts visibility."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.chartsButtonVisible",
+            "type": "boolean",
+            "tags": [],
+            "label": "chartsButtonVisible",
+            "description": [
+              "\nBoolean flag for charts button visibily."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.columnsWithCharts",
+            "type": "Array",
+            "tags": [],
+            "label": "columnsWithCharts",
+            "description": [
+              "\nArray of columns with charts data."
+            ],
+            "signature": [
+              "EuiDataGridColumn",
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.errorMessage",
+            "type": "string",
+            "tags": [],
+            "label": "errorMessage",
+            "description": [
+              "\nError message."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.invalidSortingColumnns",
+            "type": "Array",
+            "tags": [],
+            "label": "invalidSortingColumnns",
+            "description": [
+              "\nArray of invalid sorting columns."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.noDataMessage",
+            "type": "string",
+            "tags": [],
+            "label": "noDataMessage",
+            "description": [
+              "\nNo data message."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.onChangeItemsPerPage",
+            "type": "Function",
+            "tags": [],
+            "label": "onChangeItemsPerPage",
+            "description": [
+              "\nCallback function for changing the number of items per page."
+            ],
+            "signature": [
+              "(pageSize: number) => void"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-data-grid",
+                "id": "def-common.UseDataGridReturnType.onChangeItemsPerPage.$1",
+                "type": "number",
+                "tags": [],
+                "label": "pageSize",
+                "description": [],
+                "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.onChangePage",
+            "type": "Function",
+            "tags": [],
+            "label": "onChangePage",
+            "description": [
+              "\nCallback function for handling change of current page."
+            ],
+            "signature": [
+              "(pageIndex: number) => void"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-data-grid",
+                "id": "def-common.UseDataGridReturnType.onChangePage.$1",
+                "type": "number",
+                "tags": [],
+                "label": "pageIndex",
+                "description": [],
+                "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.onSort",
+            "type": "Function",
+            "tags": [],
+            "label": "onSort",
+            "description": [
+              "\nCallback function for handling sort."
+            ],
+            "signature": [
+              "(sortSettings: SortSettings) => void"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-data-grid",
+                "id": "def-common.UseDataGridReturnType.onSort.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "sortSettings",
+                "description": [],
+                "signature": [
+                  "{ id: string; direction: \"asc\" | \"desc\"; }[]"
+                ],
+                "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.pagination",
+            "type": "Object",
+            "tags": [],
+            "label": "pagination",
+            "description": [
+              "\nIndex pagination information."
+            ],
+            "signature": [
+              "{ pageSize: number; pageIndex: number; }"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.resetPagination",
+            "type": "Function",
+            "tags": [],
+            "label": "resetPagination",
+            "description": [
+              "\nFunction to reset pagination."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.rowCount",
+            "type": "number",
+            "tags": [],
+            "label": "rowCount",
+            "description": [
+              "\nRow count."
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.rowCountRelation",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rowCountRelation",
+            "description": [
+              "\nRow count relation."
+            ],
+            "signature": [
+              "SearchTotalHitsRelation",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.setCcsWarning",
+            "type": "Function",
+            "tags": [],
+            "label": "setCcsWarning",
+            "description": [
+              "\nSetter function for the CCS warning flag."
+            ],
+            "signature": [
+              "(value: React.SetStateAction<boolean>) => void"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-data-grid",
+                "id": "def-common.UseDataGridReturnType.setCcsWarning.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "A"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.setColumnCharts",
+            "type": "Function",
+            "tags": [],
+            "label": "setColumnCharts",
+            "description": [
+              "\nSetter function for the column charts."
+            ],
+            "signature": [
+              "(value: React.SetStateAction<",
+              {
+                "pluginId": "@kbn/ml-data-grid",
+                "scope": "common",
+                "docId": "kibKbnMlDataGridPluginApi",
+                "section": "def-common.ChartData",
+                "text": "ChartData"
+              },
+              "[]>) => void"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-data-grid",
+                "id": "def-common.UseDataGridReturnType.setColumnCharts.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "A"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.setErrorMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "setErrorMessage",
+            "description": [
+              "\nSetter function for the error message."
+            ],
+            "signature": [
+              "(value: React.SetStateAction<string>) => void"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-data-grid",
+                "id": "def-common.UseDataGridReturnType.setErrorMessage.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "A"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.setNoDataMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "setNoDataMessage",
+            "description": [
+              "\nSetter function for the no data message."
+            ],
+            "signature": [
+              "(value: React.SetStateAction<string>) => void"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-data-grid",
+                "id": "def-common.UseDataGridReturnType.setNoDataMessage.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "A"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.setPagination",
+            "type": "Function",
+            "tags": [],
+            "label": "setPagination",
+            "description": [
+              "\nSetter function for pagination."
+            ],
+            "signature": [
+              "(value: React.SetStateAction<Required<Pick<",
+              "EuiDataGridPaginationProps",
+              ", \"pageSize\" | \"pageIndex\">>>) => void"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-data-grid",
+                "id": "def-common.UseDataGridReturnType.setPagination.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "A"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.setRowCountInfo",
+            "type": "Function",
+            "tags": [],
+            "label": "setRowCountInfo",
+            "description": [
+              "\nSetter function for the row count info."
+            ],
+            "signature": [
+              "(value: React.SetStateAction<",
+              {
+                "pluginId": "@kbn/ml-data-grid",
+                "scope": "common",
+                "docId": "kibKbnMlDataGridPluginApi",
+                "section": "def-common.RowCountInfo",
+                "text": "RowCountInfo"
+              },
+              ">) => void"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-data-grid",
+                "id": "def-common.UseDataGridReturnType.setRowCountInfo.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "A"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.setSortingColumns",
+            "type": "Function",
+            "tags": [],
+            "label": "setSortingColumns",
+            "description": [
+              "\nSetter function for the sorting columns."
+            ],
+            "signature": [
+              "(value: React.SetStateAction<",
+              "EuiDataGridColumnSortingConfig",
+              "[]>) => void"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-data-grid",
+                "id": "def-common.UseDataGridReturnType.setSortingColumns.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "A"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.setStatus",
+            "type": "Function",
+            "tags": [],
+            "label": "setStatus",
+            "description": [
+              "\nSetter function for the index status."
+            ],
+            "signature": [
+              "(value: React.SetStateAction<",
+              {
+                "pluginId": "@kbn/ml-data-grid",
+                "scope": "common",
+                "docId": "kibKbnMlDataGridPluginApi",
+                "section": "def-common.INDEX_STATUS",
+                "text": "INDEX_STATUS"
+              },
+              ">) => void"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-data-grid",
+                "id": "def-common.UseDataGridReturnType.setStatus.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "A"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.setTableItems",
+            "type": "Function",
+            "tags": [],
+            "label": "setTableItems",
+            "description": [
+              "\nSetter function for the table items."
+            ],
+            "signature": [
+              "(value: React.SetStateAction<",
+              {
+                "pluginId": "@kbn/ml-data-grid",
+                "scope": "common",
+                "docId": "kibKbnMlDataGridPluginApi",
+                "section": "def-common.DataGridItem",
+                "text": "DataGridItem"
+              },
+              "[]>) => void"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-data-grid",
+                "id": "def-common.UseDataGridReturnType.setTableItems.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "A"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.setVisibleColumns",
+            "type": "Function",
+            "tags": [],
+            "label": "setVisibleColumns",
+            "description": [
+              "\nSetter function for the visible columns."
+            ],
+            "signature": [
+              "(value: React.SetStateAction<string[]>) => void"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-data-grid",
+                "id": "def-common.UseDataGridReturnType.setVisibleColumns.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "A"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.sortingColumns",
+            "type": "Array",
+            "tags": [],
+            "label": "sortingColumns",
+            "description": [
+              "\nSorting columns."
+            ],
+            "signature": [
+              "EuiDataGridColumnSortingConfig",
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.status",
+            "type": "Enum",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "\nIndex status."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-grid",
+                "scope": "common",
+                "docId": "kibKbnMlDataGridPluginApi",
+                "section": "def-common.INDEX_STATUS",
+                "text": "INDEX_STATUS"
+              }
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.tableItems",
+            "type": "Array",
+            "tags": [],
+            "label": "tableItems",
+            "description": [
+              "\nTable items."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-grid",
+                "scope": "common",
+                "docId": "kibKbnMlDataGridPluginApi",
+                "section": "def-common.DataGridItem",
+                "text": "DataGridItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.toggleChartVisibility",
+            "type": "Function",
+            "tags": [],
+            "label": "toggleChartVisibility",
+            "description": [
+              "\nFunction to toggle chart visibility."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.visibleColumns",
+            "type": "Array",
+            "tags": [],
+            "label": "visibleColumns",
+            "description": [
+              "\nArray of visible columns."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.baseline",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "baseline",
+            "description": [
+              "\nOptional feature importance baseline."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-frame-analytics-utils",
+                "scope": "common",
+                "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+                "section": "def-common.FeatureImportanceBaseline",
+                "text": "FeatureImportanceBaseline"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.predictionFieldName",
+            "type": "string",
+            "tags": [],
+            "label": "predictionFieldName",
+            "description": [
+              "\nOptional prediction field name."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseDataGridReturnType.resultsField",
+            "type": "string",
+            "tags": [],
+            "label": "resultsField",
+            "description": [
+              "\nOptional results field."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.UseIndexDataReturnType",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseIndexDataReturnType",
+        "description": [
+          "\nReturn type of the `useIndexData` custom hook."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.UseIndexDataReturnType",
+            "text": "UseIndexDataReturnType"
+          },
+          " extends Pick<",
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.UseDataGridReturnType",
+            "text": "UseDataGridReturnType"
+          },
+          ", \"status\" | \"ccsWarning\" | \"rowCount\" | \"errorMessage\" | \"baseline\" | \"pagination\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseIndexDataReturnType.renderCellValue",
+            "type": "Function",
+            "tags": [],
+            "label": "renderCellValue",
+            "description": [
+              "\nCallback to render cell values."
+            ],
+            "signature": [
+              "(options: CellValue) => any"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-data-grid",
+                "id": "def-common.UseIndexDataReturnType.renderCellValue.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "CellValue"
+                ],
+                "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseIndexDataReturnType.dataViewFields",
+            "type": "Array",
+            "tags": [],
+            "label": "dataViewFields",
+            "description": [
+              "\nOptional data view fields."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.UseIndexDataReturnType.timeRangeMs",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRangeMs",
+            "description": [
+              "\nOptional time range."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-date-picker",
+                "scope": "public",
+                "docId": "kibKbnMlDatePickerPluginApi",
+                "section": "def-public.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.INDEX_STATUS",
+        "type": "Enum",
+        "tags": [],
+        "label": "INDEX_STATUS",
+        "description": [
+          "\nEnum for index status"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.ChartData",
+        "type": "Type",
+        "tags": [],
+        "label": "ChartData",
+        "description": [
+          "\nRepresents chart data that can be either numeric, ordinal, or unsupported."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.NumericChartData",
+            "text": "NumericChartData"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.OrdinalChartData",
+            "text": "OrdinalChartData"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.UnsupportedChartData",
+            "text": "UnsupportedChartData"
+          }
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.ChartDataItem",
+        "type": "Type",
+        "tags": [],
+        "label": "ChartDataItem",
+        "description": [
+          "\nRepresents a chart data item that can be either numeric or ordinal."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.NumericDataItem",
+            "text": "NumericDataItem"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/ml-data-grid",
+            "scope": "common",
+            "docId": "kibKbnMlDataGridPluginApi",
+            "section": "def-common.OrdinalDataItem",
+            "text": "OrdinalDataItem"
+          }
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.DataGridItem",
+        "type": "Type",
+        "tags": [],
+        "label": "DataGridItem",
+        "description": [
+          "\nType definition for a data grid item."
+        ],
+        "signature": [
+          "{ [x: string]: any; }"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.EsSorting",
+        "type": "Type",
+        "tags": [],
+        "label": "EsSorting",
+        "description": [
+          "\nType representing ES sorting configuration."
+        ],
+        "signature": [
+          "Dictionary<{ order: \"asc\" | \"desc\"; }>"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.IndexPagination",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexPagination",
+        "description": [
+          "\nType representing the pagination settings for an index."
+        ],
+        "signature": [
+          "{ pageSize: number; pageIndex: number; }"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.INIT_MAX_COLUMNS",
+        "type": "number",
+        "tags": [],
+        "label": "INIT_MAX_COLUMNS",
+        "description": [
+          "\nThe initial maximum number of columns for the data grid."
+        ],
+        "signature": [
+          "10"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.RenderCellValue",
+        "type": "Type",
+        "tags": [],
+        "label": "RenderCellValue",
+        "description": [
+          "\nFunction used to render the cell value in a data grid."
+        ],
+        "signature": [
+          "(options: CellValue) => any"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.RenderCellValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- The options for rendering the cell value."
+            ],
+            "signature": [
+              "CellValue"
+            ],
+            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.RowCountRelation",
+        "type": "Type",
+        "tags": [],
+        "label": "RowCountRelation",
+        "description": [
+          "\nRow count relation for the data grid's number of rows.\nIt's an alias of `estypes.SearchTotalHitsRelation` (\"eq\" or \"gte\")\nthat can also be undefined."
+        ],
+        "signature": [
+          "SearchTotalHitsRelation",
+          " | undefined"
+        ],
+        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

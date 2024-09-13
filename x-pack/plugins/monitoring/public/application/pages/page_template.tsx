@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import {
-  EuiPage,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageBody,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiTab,
-  EuiTabs,
-  EuiSpacer,
-} from '@elastic/eui';
-import React, { useContext, useState, useEffect, useCallback } from 'react';
+import { EuiPage, EuiPageBody, EuiPageTemplate, EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
+import React, { useContext, useState, useEffect, useCallback, FC, PropsWithChildren } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
 import { useMonitoringTimeContainerContext } from '../hooks/use_monitoring_time';
@@ -50,7 +42,7 @@ export interface PageTemplateProps {
   product?: string;
 }
 
-export const PageTemplate: React.FC<PageTemplateProps> = ({
+export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   title,
   pageTitle,
   tabs,
@@ -119,47 +111,49 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   const { supported, enabled } = getSetupModeState();
 
   return (
-    <EuiPage data-test-subj="monitoringAppContainer">
-      <EuiPageBody>
-        <EuiPageContent>
-          {setHeaderActionMenu && theme$ && (
-            <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-              {supported && (
-                <SetupModeToggleButton enabled={enabled} toggleSetupMode={toggleSetupMode} />
-              )}
-              <AlertsDropdown />
-            </HeaderMenuPortal>
-          )}
-          <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
-          <EuiSpacer size="m" />
-          {tabs && (
-            <EuiTabs size="l">
-              {tabs.map((item, idx) => {
-                return (
-                  <EuiTab
-                    key={idx}
-                    disabled={isDisabledTab(product)}
-                    title={item.label}
-                    data-test-subj={item.testSubj}
-                    href={item.route ? createHref(item.route) : undefined}
-                    isSelected={item.route ? isTabSelected(item.route) : undefined}
-                    onClick={item.onClick}
-                    prepend={item.prepend}
-                  >
-                    {item.label}
-                  </EuiTab>
-                );
-              })}
-            </EuiTabs>
-          )}
-          <EuiPageContentBody>
-            <EuiPage paddingSize="m">
-              <EuiPageBody>{renderContent()}</EuiPageBody>
-            </EuiPage>
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <EuiPageTemplate
+      offset={0}
+      restrictWidth={false}
+      grow={false}
+      data-test-subj="monitoringAppContainer"
+    >
+      <EuiPageTemplate.Section>
+        {setHeaderActionMenu && theme$ && (
+          <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+            {supported && (
+              <SetupModeToggleButton enabled={enabled} toggleSetupMode={toggleSetupMode} />
+            )}
+            <AlertsDropdown />
+          </HeaderMenuPortal>
+        )}
+        <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
+        <EuiSpacer size="m" />
+        {tabs && (
+          <EuiTabs size="l">
+            {tabs.map((item, idx) => {
+              return (
+                <EuiTab
+                  key={idx}
+                  disabled={isDisabledTab(product)}
+                  title={item.label}
+                  data-test-subj={item.testSubj}
+                  href={item.route ? createHref(item.route) : undefined}
+                  isSelected={item.route ? isTabSelected(item.route) : undefined}
+                  onClick={item.onClick}
+                  prepend={item.prepend}
+                >
+                  {item.label}
+                </EuiTab>
+              );
+            })}
+          </EuiTabs>
+        )}
+
+        <EuiPage paddingSize="m">
+          <EuiPageBody>{renderContent()}</EuiPageBody>
+        </EuiPage>
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 };
 

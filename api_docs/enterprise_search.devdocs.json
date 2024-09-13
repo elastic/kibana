@@ -5,8 +5,40 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "enterpriseSearch",
+        "id": "def-public.EnterpriseSearchPublicStart",
+        "type": "Type",
+        "tags": [],
+        "label": "EnterpriseSearchPublicStart",
+        "description": [],
+        "signature": [
+          "{} | undefined"
+        ],
+        "path": "x-pack/plugins/enterprise_search/public/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "enterpriseSearch",
+      "id": "def-public.EnterpriseSearchPublicSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "EnterpriseSearchPublicSetup",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "x-pack/plugins/enterprise_search/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],
@@ -22,52 +54,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "{ readonly host?: string | undefined; readonly customHeaders?: Readonly<{} & {}> | undefined; readonly ssl: Readonly<{ certificateAuthorities?: string | string[] | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; }>; readonly accessCheckTimeout: number; readonly accessCheckTimeoutWarning: number; readonly canDeployEntSearch: boolean; readonly hasConnectors: boolean; readonly hasDefaultIngestPipeline: boolean; readonly hasNativeConnectors: boolean; readonly hasWebCrawler: boolean; }"
-        ],
-        "path": "x-pack/plugins/enterprise_search/server/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "enterpriseSearch",
-        "id": "def-server.CONNECTORS_INDEX",
-        "type": "string",
-        "tags": [],
-        "label": "CONNECTORS_INDEX",
-        "description": [],
-        "signature": [
-          "\".elastic-connectors\""
-        ],
-        "path": "x-pack/plugins/enterprise_search/server/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "enterpriseSearch",
-        "id": "def-server.CONNECTORS_JOBS_INDEX",
-        "type": "string",
-        "tags": [],
-        "label": "CONNECTORS_JOBS_INDEX",
-        "description": [],
-        "signature": [
-          "\".elastic-connectors-sync-jobs\""
-        ],
-        "path": "x-pack/plugins/enterprise_search/server/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "enterpriseSearch",
-        "id": "def-server.CONNECTORS_VERSION",
-        "type": "number",
-        "tags": [],
-        "label": "CONNECTORS_VERSION",
-        "description": [],
-        "signature": [
-          "1"
+          "{ readonly host?: string | undefined; readonly customHeaders?: Readonly<{} & {}> | undefined; readonly ssl: Readonly<{ certificateAuthorities?: string | string[] | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; }>; readonly enabled: boolean; readonly ui: Readonly<{} & { enabled: boolean; }>; readonly accessCheckTimeout: number; readonly accessCheckTimeoutWarning: number; readonly canDeployEntSearch: boolean; readonly hasConnectors: boolean; readonly hasDefaultIngestPipeline: boolean; readonly hasDocumentLevelSecurityEnabled: boolean; readonly hasIncrementalSyncEnabled: boolean; readonly hasNativeConnectors: boolean; readonly hasWebCrawler: boolean; readonly isCloud: boolean; }"
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
@@ -83,21 +70,6 @@
         "description": [],
         "signature": [
           "\".ent-search-actastic-crawler2_configurations_v2\""
-        ],
-        "path": "x-pack/plugins/enterprise_search/server/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "enterpriseSearch",
-        "id": "def-server.CURRENT_CONNECTORS_INDEX",
-        "type": "string",
-        "tags": [],
-        "label": "CURRENT_CONNECTORS_INDEX",
-        "description": [],
-        "signature": [
-          "\".elastic-connectors-v1\""
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
@@ -153,7 +125,15 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{} & {}> | undefined>; hasConnectors: ",
+          "<Readonly<{} & {}> | undefined>; enabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; hasConnectors: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -162,6 +142,22 @@
             "text": "Type"
           },
           "<boolean>; hasDefaultIngestPipeline: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; hasDocumentLevelSecurityEnabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; hasIncrementalSyncEnabled: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -193,7 +189,15 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<string | undefined>; ssl: ",
+          "<string | undefined>; isCloud: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; ssl: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -217,7 +221,23 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"none\" | \"full\" | \"certificate\">; }>; }>"
+          "<\"none\" | \"full\" | \"certificate\">; }>; ui: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ enabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; }>; }>"
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,

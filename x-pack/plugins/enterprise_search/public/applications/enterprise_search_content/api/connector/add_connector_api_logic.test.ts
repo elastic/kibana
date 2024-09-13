@@ -20,12 +20,25 @@ describe('addConnectorApiLogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve({ id: 'unique id', index_name: 'indexName' });
       http.post.mockReturnValue(promise);
-      const result = addConnector({ indexName: 'indexName', isNative: false, language: 'en' });
+      const result = addConnector({
+        indexName: 'indexName',
+        isNative: false,
+        language: 'en',
+        name: 'indexName',
+      });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/connectors', {
-        body: JSON.stringify({ index_name: 'indexName', is_native: false, language: 'en' }),
+        body: JSON.stringify({
+          index_name: 'indexName',
+          is_native: false,
+          language: 'en',
+          name: 'indexName',
+        }),
       });
-      await expect(result).resolves.toEqual({ id: 'unique id', indexName: 'indexName' });
+      await expect(result).resolves.toEqual({
+        id: 'unique id',
+        indexName: 'indexName',
+      });
     });
     it('adds delete param if specific', async () => {
       const promise = Promise.resolve({ id: 'unique id', index_name: 'indexName' });
@@ -35,6 +48,7 @@ describe('addConnectorApiLogic', () => {
         indexName: 'indexName',
         isNative: false,
         language: null,
+        name: 'indexName',
       });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/connectors', {
@@ -43,9 +57,13 @@ describe('addConnectorApiLogic', () => {
           index_name: 'indexName',
           is_native: false,
           language: null,
+          name: 'indexName',
         }),
       });
-      await expect(result).resolves.toEqual({ id: 'unique id', indexName: 'indexName' });
+      await expect(result).resolves.toEqual({
+        id: 'unique id',
+        indexName: 'indexName',
+      });
     });
   });
 });

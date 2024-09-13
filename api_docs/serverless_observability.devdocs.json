@@ -1,0 +1,114 @@
+{
+  "id": "serverlessObservability",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "serverlessObservability",
+      "id": "def-public.ServerlessObservabilityPublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessObservabilityPublicSetup",
+      "description": [],
+      "path": "x-pack/plugins/serverless_observability/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "serverlessObservability",
+      "id": "def-public.ServerlessObservabilityPublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessObservabilityPublicStart",
+      "description": [],
+      "path": "x-pack/plugins/serverless_observability/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "serverlessObservability",
+      "id": "def-server.ServerlessObservabilityPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessObservabilityPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/serverless_observability/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "serverlessObservability",
+      "id": "def-server.ServerlessObservabilityPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessObservabilityPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/serverless_observability/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "serverlessObservability",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"serverlessObservability\""
+        ],
+        "path": "x-pack/plugins/serverless_observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "serverlessObservability",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"serverlessObservability\""
+        ],
+        "path": "x-pack/plugins/serverless_observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

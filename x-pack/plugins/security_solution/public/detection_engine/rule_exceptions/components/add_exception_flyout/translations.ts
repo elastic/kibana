@@ -53,14 +53,18 @@ export const ADD_EXCEPTION_SUCCESS = i18n.translate(
   }
 );
 
-export const ADD_EXCEPTION_SUCCESS_DETAILS = (listNames: string) =>
-  i18n.translate(
-    'xpack.securitySolution.ruleExceptions.addExceptionFlyout.closeAlerts.successDetails',
-    {
-      values: { listNames },
-      defaultMessage: 'Rule exception has been added to shared lists: {listNames}.',
-    }
-  );
+export const ADD_ENDPOINT_EXCEPTION_SUCCESS = i18n.translate(
+  'xpack.securitySolution.ruleExceptions.addEndpointException.success',
+  {
+    defaultMessage: 'Endpoint exception added to shared exception list',
+  }
+);
+
+export const ADD_EXCEPTION_SUCCESS_DETAILS = (listType: string, listNames: string) =>
+  i18n.translate('xpack.securitySolution.ruleExceptions.addExceptionFlyout.successDetails', {
+    values: { listNames, listType },
+    defaultMessage: '{listType} exception has been added to shared lists: {listNames}.',
+  });
 
 export const ADD_RULE_EXCEPTION_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.ruleExceptions.addExceptionFlyout.addRuleExceptionToastSuccessTitle',
@@ -83,3 +87,13 @@ export const COMMENTS_SECTION_TITLE = (comments: number) =>
     values: { comments },
     defaultMessage: 'Add comments ({comments})',
   });
+
+export const ADD_RULE_EXCEPTION_FROM_ALERT_COMMENT = (alertId: string) =>
+  i18n.translate(
+    'xpack.securitySolution.ruleExceptions.addExceptionFlyout.addRuleExceptionFromAlertComment',
+    {
+      values: { alertId },
+      defaultMessage:
+        'Exception conditions are pre-filled with relevant data from an alert with the alert id (_id): {alertId}.',
+    }
+  );

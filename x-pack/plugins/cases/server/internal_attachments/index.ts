@@ -6,28 +6,24 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import {
-  excess,
-  FileAttachmentMetadataRt,
-  FILE_ATTACHMENT_TYPE,
-  throwErrors,
-} from '../../common/api';
+import { FileAttachmentMetadataRt } from '../../common/types/domain';
+import { LENS_ATTACHMENT_TYPE } from '../../common/constants/visualizations';
+import { FILE_ATTACHMENT_TYPE } from '../../common/constants';
+
+import { decodeWithExcessOrThrow } from '../common/runtime_types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 
 export const registerInternalAttachments = (
-  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
+  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry,
+  persistableStateRegistry: PersistableStateAttachmentTypeRegistry
 ) => {
   externalRefRegistry.register({ id: FILE_ATTACHMENT_TYPE, schemaValidator });
+  persistableStateRegistry.register({ id: LENS_ATTACHMENT_TYPE });
 };
 
 const schemaValidator = (data: unknown): void => {
-  const fileMetadata = pipe(
-    excess(FileAttachmentMetadataRt).decode(data),
-    fold(throwErrors(badRequest), identity)
-  );
+  const fileMetadata = decodeWithExcessOrThrow(FileAttachmentMetadataRt)(data);
 
   if (fileMetadata.files.length > 1) {
     throw badRequest('Only a single file can be stored in an attachment');

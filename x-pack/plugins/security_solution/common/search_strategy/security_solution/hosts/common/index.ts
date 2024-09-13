@@ -7,7 +7,7 @@
 
 import type { CloudEcs, HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
 import type { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
-import type { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
+import type { EndpointPendingActions, HostInfo } from '../../../../endpoint/types';
 import type { CommonFields } from '../..';
 
 export enum HostPolicyResponseActionStatus {
@@ -17,22 +17,12 @@ export enum HostPolicyResponseActionStatus {
   unsupported = 'unsupported',
 }
 
-export enum HostsFields {
-  lastSeen = 'lastSeen',
-  hostName = 'hostName',
-}
-
 export interface EndpointFields {
-  endpointPolicy?: Maybe<string>;
-  sensorVersion?: Maybe<string>;
-  policyStatus?: Maybe<HostPolicyResponseActionStatus>;
-  /** if the host is currently isolated */
-  isolation?: Maybe<boolean>;
   /** A count of pending endpoint actions against the host */
   pendingActions?: Maybe<EndpointPendingActions['pending_actions']>;
-  elasticAgentStatus?: Maybe<HostStatus>;
-  fleetAgentId?: Maybe<string>;
   id?: Maybe<string>;
+  /** The complete Endpoint Host Details information (which also includes some of the fields above */
+  hostInfo?: HostInfo;
 }
 
 interface AgentFields {
@@ -47,6 +37,7 @@ export interface HostItem {
   host?: Maybe<HostEcs>;
   lastSeen?: Maybe<string[]>;
   risk?: string;
+  criticality?: string;
 }
 
 export interface HostValue {

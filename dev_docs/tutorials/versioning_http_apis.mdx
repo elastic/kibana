@@ -3,7 +3,7 @@ id: kibDevTutorialVersioningHTTPAPIs
 slug: /kibana-dev-docs/versioning-http-apis
 title: Versioning HTTP APIs
 description: This tutorial demonstrates how to create or migrate to versionable HTTP APIs.
-date: 2023-02-09
+date: 2024-07-04
 tags: ['kibana', 'onboarding', 'dev', 'architecture']
 ---
 
@@ -41,7 +41,7 @@ router.get(
 );
 ```
 
-#### Why is this problemetic for versioning?
+#### Why is this problematic for versioning?
 
 Whenever we perform a data migration the body of this endpoint will change for all clients. This prevents us from being able to maintain past interfaces and gracefully introduce new ones.
 
@@ -119,7 +119,7 @@ router.post(
   }
 );
 ```
-#### Why is this problemetic for versioning?
+#### Why is this problematic for versioning?
 
 This HTTP API currently accepts all numbers and strings as input which allows for unexpected inputs like negative numbers or non-URL friendly characters. This may break future migrations or integrations that assume your data will always be within certain parameters.
 
@@ -141,7 +141,7 @@ This HTTP API currently accepts all numbers and strings as input which allows fo
 
 Adding this validation we negate the risk of unexpected values. It is not necessary to use `@kbn/config-schema`, as long as your validation mechanism provides finer grained controls than "number" or "string".
 
-In summary: think about the acceptable paramaters for every input your HTTP API expects.
+In summary: think about the acceptable parameters for every input your HTTP API expects.
 
 ### 3. Keep interfaces as "narrow" as possible
 
@@ -170,7 +170,7 @@ router.get(
 
 The above code follows guidelines from steps 1 and 2, but it allows clients to specify ANY string by which to sort. This is a far "wider" API than we need for this endpoint.
 
-#### Why is this problemetic for versioning?
+#### Why is this problematic for versioning?
 
 Without telemetry it is impossible to know what values clients might be passing through &mdash; and what type of sort behaviour they are expecting.
 
@@ -207,9 +207,161 @@ router.get(
 
 The changes are:
 
-1. New input validation accepts a known set of values. This makes our HTTP API far _narrower_ and specific to our use case. It does not matter that our `sortSchema` has the same values as our persistence schema, what matters is that we created a **translation layer** between our HTTP API and our internal schema. This faclitates easily versioning this endpoint.
+1. New input validation accepts a known set of values. This makes our HTTP API far _narrower_ and specific to our use case. It does not matter that our `sortSchema` has the same values as our persistence schema, what matters is that we created a **translation layer** between our HTTP API and our internal schema. This facilitates easily versioning this endpoint.
 2. **Bonus point**: we use the `escapeKuery` utility to defend against KQL injection attacks.
 
-### 4. Use the versioned API spec
+### 4. Adhere to the HTTP versioning specification
 
-_Under construction, check back here soon!_
+
+We categorize our endpoints based on their intended audience: `public` or `internal`. Different versioning practices apply to each.
+
+#### Public endpoints
+Public endpoints include any endpoint that is intended for users to directly integrate with via HTTP.
+
+<DocCallOut title="Version all public endpoints">
+  All Kibana's public endpoints must be versioned using the format described below.
+</DocCallOut>
+
+##### Version lifecycle
+
+Introducing a new version or moving a current version into deprecation to eventually be deleted must
+follow [this process](https://github.com/elastic/dev/issues/new?assignees=&labels=breaking-change-proposal&projects=&template=breaking-change.md).
+
+##### Version format
+
+Choose a date string in the format `YYYY-MM-DD`. This date should be the date that a (group) of APIs was made available.
+
+--------
+
+#### Internal endpoints
+Internal endpoints are all non-public endpoints (see definition above). Note: these endpoints do not need to be versioned,
+but versioning can be leveraged to maintain BWC with existing clients.
+
+##### Version lifecycle
+
+Introducing/removing a version is up to the team who owns the HTTP API. Consider how introduction or removal might
+affect client code when being rolled out.
+
+<DocCallOut title="Keep internal versions to a minimum">
+  To keep maintenance light it is **highly** recommended to reduce the number of versions you have for internal endpoints. In your code it is possible to
+  centrally define and share internal versions through code that is `common` to your browser- and server-side plugin code.
+</DocCallOut>
+
+
+##### Version format
+
+If you need to version an internal endpoint use a single, larger-than-zero major version. Ex. `1`.
+
+
+#### Use the versioned router
+
+Core exposes a versioned router that ensures your endpoint's behaviour and formatting all conforms to the versioning specification.
+
+```typescript
+  router.versioned.
+    .post({
+      access: 'public', // This endpoint is intended for a public audience
+      path: '/api/my-app/foo/{id?}',
+      options: { timeout: { payload: 60000 } },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31', // The public version of this API
+        validate: {
+          request: {
+            query: schema.object({
+              name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+            }),
+            params: schema.object({
+              id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
+            }),
+            body: schema.object({ foo: schema.string() }),
+          },
+          response: {
+            200: { // In development environments, this validation will run against 200 responses
+              body: schema.object({ foo: schema.string() }),
+            },
+          },
+        },
+      },
+      async (ctx, req, res) => {
+        await ctx.fooService.create(req.body.foo, req.params.id, req.query.name);
+        return res.ok({ body: { foo: req.body.foo } });
+      }
+    )
+    // BREAKING CHANGE: { foo: string } => { fooString: string } in response body
+    .addVersion(
+      {
+        version: '2024-10-31',
+        validate: {
+          request: {
+            query: schema.object({
+              name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+            }),
+            params: schema.object({
+              id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
+            }),
+            body: schema.object({ fooString: schema.string() }),
+          },
+          response: {
+            200: {
+              body: schema.object({ fooName: schema.string() }),
+            },
+          },
+        },
+      },
+      async (ctx, req, res) => {
+        await ctx.fooService.create(req.body.fooString, req.params.id, req.query.name);
+        return res.ok({ body: { fooName: req.body.fooString } });
+      }
+    )
+    // BREAKING CHANGES: Enforce min/max length on fooString
+    .addVersion(
+      {
+        version: '2025-03-01',
+        validate: {
+          request: {
+            query: schema.object({
+              name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+            }),
+            params: schema.object({
+              id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
+            }),
+            body: schema.object({ fooString: schema.string({ minLength: 0, maxLength: 1000 }) }),
+          },
+          response: {
+            200: {
+              body: schema.object({ fooName: schema.string() }),
+            },
+          },
+        },
+      },
+      async (ctx, req, res) => {
+        await ctx.fooService.create(req.body.fooString, req.params.id, req.query.name);
+        return res.ok({ body: { fooName: req.body.fooString } });
+      }
+```
+
+#### Use `http.fetch` to send a version
+
+Core's `http.fetch` (and helpers like `http.get`) accept an optional `version` parameter. The `version` parameter can be used to send your request to the corresponding handler of the route.
+
+```ts
+import type { CoreSetup, Plugin } from '@kbn/core/public';
+
+export class MyPlugin implements Plugin {
+  setup(core: CoreSetup): FilesSetup {
+    // Example call using core's http.fetch
+    core.http.post('/api/my-app/foo/1', {
+      version: '2023-10-31',
+      headers: { 'content-type': 'application/json' },
+      query: { name: 'example' },
+      body: JSON.stringify({ fooString: 'string' }),
+    });
+  }
+}
+```
+
+#### Additional reading
+
+For more details on the versioning specification see [this document](https://docs.google.com/document/d/1YpF6hXIHZaHvwNaQAxWFzexUF1nbqACTtH2IfDu0ldA/edit?usp=sharing).

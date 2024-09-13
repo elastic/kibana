@@ -19,6 +19,22 @@ export function MachineLearningSettingsCalendarProvider(
   const comboBox = getService('comboBox');
 
   return {
+    async assertCalendarRowJobs(
+      calendarId: string,
+      expectedConnectedJobs: string[]
+    ): Promise<void> {
+      await this.filterWithSearchString(calendarId, 1); // makes sure the table only has the one row we want to check
+      const calendarRow = (await this.parseCalendarTable())[0];
+      const sortedActual: string[] = calendarRow.jobs.replaceAll(',', '').split(' ').sort();
+
+      const sortedExpected = expectedConnectedJobs.sort();
+
+      expect(sortedActual).to.eql(
+        sortedExpected,
+        `Expected job column entries for calendar [${calendarId}] to be [${sortedExpected}], got [${sortedActual}]`
+      );
+    },
+
     async parseCalendarTable() {
       const table = await testSubjects.find('~mlCalendarTable');
       const $ = await table.parseDomContent();
@@ -147,7 +163,7 @@ export function MachineLearningSettingsCalendarProvider(
 
     async assertJobSelectionEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled(
-        'mlCalendarJobSelection > comboBoxToggleListButton'
+        'mlCalendarJobSelection > comboBoxSearchInput'
       );
       expect(isEnabled).to.eql(
         expectedValue,
@@ -159,7 +175,7 @@ export function MachineLearningSettingsCalendarProvider(
 
     async assertJobGroupSelectionEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled(
-        'mlCalendarJobGroupSelection > comboBoxToggleListButton'
+        'mlCalendarJobGroupSelection > comboBoxSearchInput'
       );
       expect(isEnabled).to.eql(
         expectedValue,

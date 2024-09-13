@@ -8,8 +8,6 @@
 import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import styled, { createGlobalStyle, css } from 'styled-components';
 
-import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
-
 export const SecuritySolutionAppWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -35,41 +33,6 @@ export const FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET = () => css`
   }
 `;
 
-/** The `z-index` for EuiPopover Panels that are displayed from inside of Timeline page */
-export const TIMELINE_EUI_POPOVER_PANEL_ZINDEX = 9900;
-
-/**
- * Stylesheet with Eui class overrides in order to address display issues caused when
- * the Timeline overlay is opened. These are normally adjustments to ensure that the
- * z-index of other EUI components continues to work with the z-index used by timeline
- * overlay.
- */
-export const TIMELINE_OVERRIDES_CSS_STYLESHEET = () => css`
-  .euiPopover__panel[data-popover-open] {
-    z-index: ${TIMELINE_EUI_POPOVER_PANEL_ZINDEX} !important;
-    min-width: 24px;
-  }
-  .euiPopover__panel[data-popover-open].sourcererPopoverPanel {
-    // needs to appear under modal
-    z-index: 5900 !important;
-  }
-  .euiToolTip {
-    z-index: 9950 !important;
-  }
-  /*
-      overrides the default styling of euiComboBoxOptionsList because it's implemented
-      as a popover, so it's not selectable as a child of the styled component
-   */
-  .euiComboBoxOptionsList {
-    z-index: 9999;
-  }
-
-  /* ensure elastic charts tooltips appear above open euiPopovers */
-  .echTooltip {
-    z-index: 9950;
-  }
-`;
-
 /*
   SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
   and `EuiPopover`, `EuiToolTip` global styles
@@ -77,23 +40,17 @@ export const TIMELINE_OVERRIDES_CSS_STYLESHEET = () => css`
 export const AppGlobalStyle = createGlobalStyle<{
   theme: { eui: { euiColorPrimary: string; euiColorLightShade: string; euiSizeS: string } };
 }>`
-
-  ${TIMELINE_OVERRIDES_CSS_STYLESHEET}
-
   /*
     overrides the default styling of EuiDataGrid expand popover footer to
     make it a column of actions instead of the default actions row
   */
   .euiDataGridRowCell__popover {
-
     max-width: 815px !important;
     max-height: none !important;
     overflow: hidden;
 
-
     .expandable-top-value-button {
-      &.euiButtonEmpty--primary:enabled:focus,
-      .euiButtonEmpty--primary:focus {
+      &.euiButtonEmpty:focus {
         background-color: transparent;
       }
     }
@@ -111,8 +68,8 @@ export const AppGlobalStyle = createGlobalStyle<{
       }
     }
 
-    .euiText + .euiPopoverFooter { 
-      border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade}; 
+    .euiText + .euiPopoverFooter {
+      border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
       margin-top: ${({ theme }) => theme.eui.euiSizeS};
     }
   }
@@ -128,11 +85,6 @@ export const AppGlobalStyle = createGlobalStyle<{
     .withHoverActions__popover[data-popover-open] {
       visibility: hidden !important;
     }
-  }
-
-  /* applies a "toggled" button style to the Full Screen button */
-  .${FULL_SCREEN_TOGGLED_CLASS_NAME} {
-    ${({ theme }) => `background-color: ${theme.eui.euiColorPrimary} !important`};
   }
 
   /*

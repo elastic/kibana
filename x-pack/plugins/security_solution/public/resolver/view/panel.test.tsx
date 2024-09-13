@@ -100,7 +100,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
           return {
             title: titleWrapper.exists() ? titleWrapper.text() : null,
             titleIcon: titleIconWrapper.exists() ? titleIconWrapper.text() : null,
-            detailEntries: simulator().nodeDetailDescriptionListEntries(),
+            detailEntries: simulator().nodeDetailEntries(),
           };
         })
       ).toYieldEqualTo({
@@ -122,51 +122,6 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         wordBreaks: 2,
       });
     });
-
-    /**
-     * These tests use a statically defined map of fields and expected values. The test finds the `dt` for each field and then finds the related `dd`s. From there it finds a special 'hover area' (via `data-test-subj`) and simulates a `mouseenter` on it. This is because the feature work by adding event listeners to `div`s. There is no way for the user to know that the `div`s are interactable.
-
-     * Finally the test clicks a button and checks that the clipboard was written to.
-     */
-    describe.each([...originEventDetailEntries])(
-      'when the user hovers over the description for the field (%p) with their mouse',
-      (fieldTitleText, value) => {
-        // If there are multiple values for a field, i.e. an array, this is the index for the value we are testing.
-        const entryIndex = originEventDetailEntries
-          .filter(([fieldName]) => fieldName === fieldTitleText)
-          .findIndex(([_, fieldValue]) => fieldValue === value);
-        beforeEach(async () => {
-          const dt = await simulator().resolveWrapper(() => {
-            return simulator()
-              .testSubject('resolver:node-detail:entry-title')
-              .filterWhere((title) => title.text() === fieldTitleText)
-              .at(entryIndex);
-          });
-
-          expect(dt).toHaveLength(1);
-
-          const copyableFieldHoverArea = simulator()
-            .descriptionDetails(dt!)
-            // The copyable field popup does not use a button as a trigger. It is instead triggered by mouse interaction with this `div`.
-            .find(`[data-test-subj="resolver:panel:copyable-field-hover-area"]`)
-            .filterWhere(Simulator.isDOM);
-
-          expect(copyableFieldHoverArea).toHaveLength(1);
-          copyableFieldHoverArea?.simulate('mouseenter');
-        });
-        describe('and when they click the copy-to-clipboard button', () => {
-          beforeEach(async () => {
-            const copyButton = await simulator().resolve('resolver:panel:clipboard');
-            expect(copyButton).toHaveLength(1);
-            copyButton?.simulate('click');
-            simulator().confirmTextWrittenToClipboard();
-          });
-          it(`should write ${value} to the clipboard`, async () => {
-            await expect(simulator().map(() => simulator().clipboardText)).toYieldEqualTo(value);
-          });
-        });
-      }
-    );
   });
 
   const queryStringWithFirstChildSelected = urlSearch(resolverComponentInstanceID, {
@@ -181,9 +136,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
       });
     });
     it('should show the node details for the first child', async () => {
-      await expect(
-        simulator().map(() => simulator().nodeDetailDescriptionListEntries())
-      ).toYieldEqualTo([
+      await expect(simulator().map(() => simulator().nodeDetailEntries())).toYieldEqualTo([
         ['@timestamp', 'Sep 23, 2020 @ 08:25:32.317'],
         ['process.executable', 'executable'],
         ['process.pid', '1'],
@@ -218,37 +171,6 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
     ).toYieldEqualTo({ titleCount: 3, iconCount: 3 });
   });
 
-  describe('when the user hovers over the timestamp for "c.ext" with their mouse', () => {
-    beforeEach(async () => {
-      const cExtHoverArea = await simulator().resolveWrapper(async () => {
-        const nodeLinkTitles = await simulator().resolve('resolver:node-list:node-link:title');
-
-        expect(nodeLinkTitles).toHaveLength(3);
-
-        return (
-          nodeLinkTitles!
-            .filterWhere((linkTitle) => linkTitle.text() === 'c.ext')
-            // Find the parent `tr` and the find all hover areas in that TR. The test assumes that all cells in a row are associated.
-            .closest('tr')
-            // The copyable field popup does not use a button as a trigger. It is instead triggered by mouse interaction with this `div`.
-            .find('[data-test-subj="resolver:panel:copyable-field-hover-area"]')
-            .filterWhere(Simulator.isDOM)
-        );
-      });
-      cExtHoverArea?.simulate('mouseenter');
-    });
-    describe('and when the user clicks the copy-to-clipboard button', () => {
-      beforeEach(async () => {
-        (await simulator().resolve('resolver:panel:clipboard'))?.simulate('click');
-        simulator().confirmTextWrittenToClipboard();
-      });
-      const expected = 'Sep 23, 2020 @ 08:25:32.316';
-      it(`should write "${expected}" to the clipboard`, async () => {
-        await expect(simulator().map(() => simulator().clipboardText)).toYieldEqualTo(expected);
-      });
-    });
-  });
-
   describe('when there is an item in the node list and its text has been clicked', () => {
     beforeEach(async () => {
       const nodeLinks = await simulator().resolve('resolver:node-list:node-link:title');
@@ -258,9 +180,9 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
       }
     });
     it('should show the details for the first node', async () => {
-      await expect(
-        simulator().map(() => simulator().nodeDetailDescriptionListEntries())
-      ).toYieldEqualTo([...originEventDetailEntries]);
+      await expect(simulator().map(() => simulator().nodeDetailEntries())).toYieldEqualTo([
+        ...originEventDetailEntries,
+      ]);
     });
     it("should have the first node's ID in the query string", async () => {
       await expect(simulator().map(() => simulator().historyLocationSearch)).toYieldEqualTo(
@@ -298,20 +220,19 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
             return typesAndCounts;
           })
         ).toYieldEqualTo([
-          // Because there is no printed whitespace after "Count", the count immediately follows it.
-          { link: 'registry', type: 'Count2' },
-          { link: 'authentication', type: 'Count1' },
-          { link: 'database', type: 'Count1' },
-          { link: 'driver', type: 'Count1' },
-          { link: 'file', type: 'Count1' },
-          { link: 'host', type: 'Count1' },
-          { link: 'iam', type: 'Count1' },
-          { link: 'intrusion_detection', type: 'Count1' },
-          { link: 'malware', type: 'Count1' },
-          { link: 'network', type: 'Count1' },
-          { link: 'package', type: 'Count1' },
-          { link: 'process', type: 'Count1' },
-          { link: 'web', type: 'Count1' },
+          { link: 'registry', type: '2' },
+          { link: 'authentication', type: '1' },
+          { link: 'database', type: '1' },
+          { link: 'driver', type: '1' },
+          { link: 'file', type: '1' },
+          { link: 'host', type: '1' },
+          { link: 'iam', type: '1' },
+          { link: 'intrusion_detection', type: '1' },
+          { link: 'malware', type: '1' },
+          { link: 'network', type: '1' },
+          { link: 'package', type: '1' },
+          { link: 'process', type: '1' },
+          { link: 'web', type: '1' },
         ]);
       });
       describe('and when the user clicks the registry events link', () => {
@@ -349,40 +270,6 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
               simulator().map(() => simulator().testSubject('resolver:panel:event-detail').length)
             ).toYieldEqualTo(1);
           });
-          describe.each([['user.domain', 'user.domain']])(
-            'when the user hovers over the description for the field "%p"',
-            (fieldName, expectedValue) => {
-              beforeEach(async () => {
-                const fieldHoverArea = await simulator().resolveWrapper(async () => {
-                  const dt = (
-                    await simulator().resolve('resolver:panel:event-detail:event-field-title')
-                  )?.filterWhere((title) => title.text() === fieldName);
-                  return (
-                    simulator()
-                      .descriptionDetails(dt!)
-                      // The copyable field popup does not use a button as a trigger. It is instead triggered by mouse interaction with this `div`.
-                      .find(`[data-test-subj="resolver:panel:copyable-field-hover-area"]`)
-                      .filterWhere(Simulator.isDOM)
-                  );
-                });
-                expect(fieldHoverArea).toBeTruthy();
-                fieldHoverArea?.simulate('mouseenter');
-              });
-              describe('when the user clicks on the clipboard button', () => {
-                beforeEach(async () => {
-                  const button = await simulator().resolve('resolver:panel:clipboard');
-                  expect(button).toBeTruthy();
-                  button?.simulate('click');
-                  simulator().confirmTextWrittenToClipboard();
-                });
-                it(`should write ${expectedValue} to the clipboard`, async () => {
-                  await expect(simulator().map(() => simulator().clipboardText)).toYieldEqualTo(
-                    expectedValue
-                  );
-                });
-              });
-            }
-          );
         });
       });
     });

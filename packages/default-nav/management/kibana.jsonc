@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/default-nav-management",
+  "owner": "@elastic/kibana-management"
+}

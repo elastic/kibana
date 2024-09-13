@@ -6,7 +6,9 @@ FldList [
     "aggregatable": true,
     "conflictDescriptions": undefined,
     "count": 5,
+    "customDescription": undefined,
     "customLabel": "A Runtime Field",
+    "defaultFormatter": undefined,
     "esTypes": Array [
       "keyword",
     ],
@@ -24,10 +26,13 @@ FldList [
 
 exports[`IndexPatterns createAndSave will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: undefined]`;
 
+exports[`IndexPatterns createAndSaveDataViewLazy will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: undefined]`;
+
 exports[`IndexPatterns delete will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: 1]`;
 
 exports[`IndexPatterns savedObjectToSpec 1`] = `
 Object {
+  "allowHidden": undefined,
   "allowNoIndex": undefined,
   "fieldAttrs": Object {
     "aRuntimeField": Object {

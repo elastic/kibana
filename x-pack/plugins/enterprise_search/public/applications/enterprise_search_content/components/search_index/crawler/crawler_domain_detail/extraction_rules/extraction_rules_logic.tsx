@@ -57,15 +57,12 @@ interface ExtractionRulesActions {
   hideDeleteModal: () => void;
   openEditRuleFlyout({
     fieldRule,
-    fieldRuleIndex,
     isNewRule,
   }: {
     fieldRule?: ExtractionRuleFieldRule;
-    fieldRuleIndex?: number;
     isNewRule: boolean;
   }): {
     fieldRule: ExtractionRuleFieldRule;
-    fieldRuleIndex?: number;
     isNewRule: boolean;
   };
   fetchDomainData: CrawlerDomainDetailActions['fetchDomainData'];
@@ -101,7 +98,6 @@ interface ExtractionRulesValues {
   fieldRuleFlyoutVisible: boolean;
   fieldRuleToDelete: { extractionRuleId?: string; fieldRuleIndex?: number };
   fieldRuleToEdit: ExtractionRuleFieldRule | null;
-  fieldRuleToEditIndex: number | null;
   fieldRuleToEditIsNew: boolean;
   indexName: string;
   isLoading: boolean;
@@ -240,6 +236,7 @@ export const ExtractionRulesLogic = kea<
       {
         deleteExtractionRuleSuccess: () => null,
         hideDeleteModal: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         showDeleteModal: (_, { extractionRule }) => extractionRule,
       },
     ],
@@ -248,6 +245,7 @@ export const ExtractionRulesLogic = kea<
       {
         addSuccess: () => null,
         cancelEditExtractionRule: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         editExtractionRule: (_, { extractionRule }) => extractionRule,
         updateSuccess: () => null,
         updateExtractionRuleSuccess: () => null,
@@ -275,6 +273,7 @@ export const ExtractionRulesLogic = kea<
       {},
       {
         hideDeleteFieldModal: () => ({}),
+        // @ts-expect-error upgrade typescript v5.1.6
         showDeleteFieldModal: (_, { extractionRuleId, fieldRuleIndex }) => ({
           extractionRuleId,
           fieldRuleIndex,
@@ -286,29 +285,27 @@ export const ExtractionRulesLogic = kea<
       null,
       {
         closeEditRuleFlyout: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         openEditRuleFlyout: (_, { fieldRule }) => fieldRule ?? null,
-      },
-    ],
-    fieldRuleToEditIndex: [
-      null,
-      {
-        closeEditRuleFlyout: () => null,
-        openEditRuleFlyout: (_, { fieldRuleIndex }) => fieldRuleIndex ?? null,
       },
     ],
     fieldRuleToEditIsNew: [
       true,
       {
         closeEditRuleFlyout: () => true,
+        // @ts-expect-error upgrade typescript v5.1.6
         openEditRuleFlyout: (_, { isNewRule }) => isNewRule,
       },
     ],
     updatedExtractionRules: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         addExtractionRuleSuccess: (_, { extraction_rules: extractionRules }) => extractionRules,
+        // @ts-expect-error upgrade typescript v5.1.6
         deleteExtractionRuleSuccess: (_, { extraction_rules: extractionRules }) => extractionRules,
         receiveDomainData: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         updateExtractionRuleSuccess: (_, { extraction_rules: extractionRules }) => extractionRules,
       },
     ],

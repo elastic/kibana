@@ -11,9 +11,8 @@ import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
-import type { Immutable, HostMetadata } from '../../../../../common/endpoint/types';
-import { HostStatus } from '../../../../../common/endpoint/types';
-import type { EndpointState, EndpointIndexUIQueryParams } from '../types';
+import type { EndpointSortableField, Immutable } from '../../../../../common/endpoint/types';
+import type { EndpointIndexUIQueryParams, EndpointState } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
   MANAGEMENT_DEFAULT_PAGE,
@@ -28,9 +27,6 @@ import {
 } from '../../../state';
 
 import type { ServerApiError } from '../../../../common/types';
-import { isEndpointHostIsolated } from '../../../../common/utils/validators';
-import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
-import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -38,29 +34,25 @@ export const pageIndex = (state: Immutable<EndpointState>): number => state.page
 
 export const pageSize = (state: Immutable<EndpointState>): number => state.pageSize;
 
+export const sortField = (state: Immutable<EndpointState>): EndpointSortableField =>
+  state.sortField;
+
+export const sortDirection = (state: Immutable<EndpointState>): 'asc' | 'desc' =>
+  state.sortDirection;
+
 export const totalHits = (state: Immutable<EndpointState>): number => state.total;
 
 export const listLoading = (state: Immutable<EndpointState>): boolean => state.loading;
 
 export const listError = (state: Immutable<EndpointState>) => state.error;
 
-export const detailsData = (state: Immutable<EndpointState>) =>
-  state.endpointDetails.hostDetails.details;
-
-export const detailsLoading = (state: Immutable<EndpointState>): boolean =>
-  state.endpointDetails.hostDetails.detailsLoading;
-
-export const detailsError = (
-  state: Immutable<EndpointState>
-): EndpointState['endpointDetails']['hostDetails']['detailsError'] =>
-  state.endpointDetails.hostDetails.detailsError;
-
 export const policyItems = (state: Immutable<EndpointState>) => state.policyItems;
 
 export const policyItemsLoading = (state: Immutable<EndpointState>) => state.policyItemsLoading;
 
-export const selectedPolicyId = (state: Immutable<EndpointState>) => state.selectedPolicyId;
+export const isInitialized = (state: Immutable<EndpointState>) => state.isInitialized;
 
+export const selectedPolicyId = (state: Immutable<EndpointState>) => state.selectedPolicyId;
 export const endpointPackageInfo = (state: Immutable<EndpointState>) => state.endpointPackageInfo;
 export const getIsEndpointPackageInfoUninitialized: (state: Immutable<EndpointState>) => boolean =
   createSelector(endpointPackageInfo, (packageInfo) => isUninitialisedResourceState(packageInfo));
@@ -69,14 +61,12 @@ export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.i
 
 export const autoRefreshInterval = (state: Immutable<EndpointState>) => state.autoRefreshInterval;
 
-export const policyVersionInfo = (state: Immutable<EndpointState>) => state.policyVersionInfo;
-
 export const endpointPackageVersion = createSelector(endpointPackageInfo, (info) =>
   isLoadedResourceState(info) ? info.data.version : undefined
 );
 
 /**
- * Returns the index patterns for the SearchBar to use for autosuggest
+ * Returns the index patterns for the SearchBar to use for auto-suggest
  */
 export const patterns = (state: Immutable<EndpointState>) => state.patterns;
 
@@ -111,6 +101,8 @@ export const uiQueryParams: (
         'selected_endpoint',
         'show',
         'admin_query',
+        'sort_field',
+        'sort_direction',
       ];
 
       const allowedShowValues: Array<EndpointIndexUIQueryParams['show']> = [
@@ -134,6 +126,12 @@ export const uiQueryParams: (
             if (allowedShowValues.includes(value as EndpointIndexUIQueryParams['show'])) {
               data[key] = value as EndpointIndexUIQueryParams['show'];
             }
+          } else if (key === 'sort_direction') {
+            if (['asc', 'desc'].includes(value)) {
+              data[key] = value as EndpointIndexUIQueryParams['sort_direction'];
+            }
+          } else if (key === 'sort_field') {
+            data[key] = value as EndpointSortableField;
           } else {
             data[key] = value;
           }
@@ -160,26 +158,6 @@ export const showView: (state: EndpointState) => EndpointIndexUIQueryParams['sho
   createSelector(uiQueryParams, (searchParams) => {
     return searchParams.show ?? 'details';
   });
-
-/**
- * Returns the Host Status which is connected the fleet agent
- */
-export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = createSelector(
-  (state: Immutable<EndpointState>) => state.hostStatus,
-  (hostStatus) => {
-    return hostStatus ? hostStatus : HostStatus.UNHEALTHY;
-  }
-);
-
-/**
- * Returns the Policy Response overall status
- */
-export const policyResponseStatus: (state: Immutable<EndpointState>) => string = createSelector(
-  (state: Immutable<EndpointState>) => state.policyResponse,
-  (policyResponse) => {
-    return (policyResponse && policyResponse?.Endpoint?.policy?.applied?.status) || '';
-  }
-);
 
 /**
  * returns the list of known non-existing polices that may have been in the Endpoint API response.
@@ -250,63 +228,6 @@ export const getIsolationRequestError: (
     return isolateHost.error;
   }
 });
-
-export const getIsOnEndpointDetailsActivityLog: (state: Immutable<EndpointState>) => boolean =
-  createSelector(uiQueryParams, (searchParams) => {
-    return searchParams.show === EndpointDetailsTabsTypes.activityLog;
-  });
-
-export const getIsEndpointHostIsolated = createSelector(detailsData, (details) => {
-  return (details && isEndpointHostIsolated(details)) || false;
-});
-
-export const getEndpointPendingActionsState = (
-  state: Immutable<EndpointState>
-): Immutable<EndpointState['endpointPendingActions']> => {
-  return state.endpointPendingActions;
-};
-
-/**
- * Returns a function (callback) that can be used to retrieve the props for the `EndpointHostIsolationStatus`
- * component for a given Endpoint
- */
-export const getEndpointHostIsolationStatusPropsCallback: (
-  state: Immutable<EndpointState>
-) => (endpoint: HostMetadata) => EndpointHostIsolationStatusProps = createSelector(
-  getEndpointPendingActionsState,
-  (pendingActionsState) => {
-    return (endpoint: HostMetadata) => {
-      let pendingIsolate = 0;
-      let pendingUnIsolate = 0;
-      let pendingKillProcess = 0;
-      let pendingSuspendProcess = 0;
-      let pendingRunningProcesses = 0;
-
-      if (isLoadedResourceState(pendingActionsState)) {
-        const endpointPendingActions = pendingActionsState.data.get(endpoint.elastic.agent.id);
-
-        if (endpointPendingActions) {
-          pendingIsolate = endpointPendingActions?.isolate ?? 0;
-          pendingUnIsolate = endpointPendingActions?.unisolate ?? 0;
-          pendingKillProcess = endpointPendingActions?.['kill-process'] ?? 0;
-          pendingSuspendProcess = endpointPendingActions?.['suspend-process'] ?? 0;
-          pendingRunningProcesses = endpointPendingActions?.['running-processes'] ?? 0;
-        }
-      }
-
-      return {
-        isIsolated: isEndpointHostIsolated(endpoint),
-        pendingActions: {
-          pendingIsolate,
-          pendingUnIsolate,
-          pendingKillProcess,
-          pendingSuspendProcess,
-          pendingRunningProcesses,
-        },
-      };
-    };
-  }
-);
 
 export const getMetadataTransformStats = (state: Immutable<EndpointState>) =>
   state.metadataTransformStats;

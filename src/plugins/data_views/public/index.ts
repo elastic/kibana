@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { PluginInitializerContext } from '@kbn/core/public';
 
 export {
   ILLEGAL_CHARACTERS_KEY,
@@ -19,7 +22,7 @@ export type {
   DataViewSpec,
   FieldSpec,
   DataViewAttributes,
-  SavedObjectsClientCommon,
+  PersistenceAPI,
   RuntimeField,
 } from '../common';
 export {
@@ -45,10 +48,9 @@ export type {
   DataViewsServicePublic,
   DataViewsServicePublicDeps,
 } from './data_views_service_public';
-export { DataViewsApiClient, DataViewsService, DataView } from './data_views';
+export { DataViewsApiClient, DataViewsService, DataView, DataViewLazy } from './data_views';
 export type { DataViewListItem } from './data_views';
 export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
-export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
 
 /*
  * Plugin setup
@@ -56,8 +58,8 @@ export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper
 
 import { DataViewsPublicPlugin } from './plugin';
 
-export function plugin() {
-  return new DataViewsPublicPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DataViewsPublicPlugin(initializerContext);
 }
 
 export type {

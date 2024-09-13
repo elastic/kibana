@@ -14,7 +14,6 @@ import { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { stubWebWorker } from '@kbn/test-jest-helpers';
 
-import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { uiMetricService, apiService } from '../../../services';
 import { Props } from '..';
 import { initHttpRequests } from './http_requests.helpers';
@@ -22,8 +21,8 @@ import { ProcessorsEditorWithDeps } from './processors_editor';
 
 stubWebWorker();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
 
   return {
     ...original,
@@ -32,24 +31,17 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
       <input
         data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
         data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
         }}
       />
     ),
   };
 });
 
-jest.mock('react-virtualized', () => {
-  const original = jest.requireActual('react-virtualized');
-
-  return {
-    ...original,
-    AutoSizer: ({ children }: { children: any }) => (
-      <div>{children({ height: 500, width: 500 })}</div>
-    ),
-  };
-});
+jest.mock('react-virtualized/dist/commonjs/AutoSizer', () => ({ children }: { children: any }) => (
+  <div>{children({ height: 500, width: 500 })}</div>
+));
 
 const testBedSetup = registerTestBed<TestSubject>(
   (props: Props) => <ProcessorsEditorWithDeps {...props} />,
@@ -127,10 +119,8 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     },
 
     addDocumentsJson(jsonString: string) {
-      find('documentsEditor').simulate('change', {
-        jsonString,
-      });
-      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+      find('documentsEditor').getDOMNode().setAttribute('data-currentvalue', jsonString);
+      find('documentsEditor').simulate('change');
     },
 
     clickDocumentsDropdown() {

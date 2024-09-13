@@ -8,48 +8,24 @@
 import { i18n } from '@kbn/i18n';
 import { useEffect, useCallback, useState } from 'react';
 
-import {
-  FLEET_SERVER_PACKAGE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  SO_SEARCH_LIMIT,
-} from '../../../constants';
-import { sendGetAgentStatus, sendGetPackagePolicies, useStartServices } from '../../../hooks';
+import { sendGetEnrollmentSettings, useAuthz, useStartServices } from '../../../hooks';
 
 export function useFleetServerUnhealthy() {
+  const authz = useAuthz();
   const { notifications } = useStartServices();
   const [isLoading, setIsLoading] = useState(true);
   const [isUnhealthy, setIsUnhealthy] = useState(false);
+
   const fetchData = useCallback(async () => {
     try {
-      const packagePoliciesRes = await sendGetPackagePolicies({
-        page: 1,
-        perPage: SO_SEARCH_LIMIT,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_SERVER_PACKAGE}`,
-      });
+      const enrollmentSettingsResponse = await sendGetEnrollmentSettings();
 
-      if (packagePoliciesRes.error) {
-        throw packagePoliciesRes.error;
+      if (enrollmentSettingsResponse.error) {
+        throw enrollmentSettingsResponse.error;
       }
 
-      const agentPolicyIds = [
-        ...new Set(packagePoliciesRes.data?.items.map((p) => p.policy_id) ?? []),
-      ];
-
-      if (agentPolicyIds.length > 0) {
-        const agentStatusesRes = await sendGetAgentStatus({
-          kuery: agentPolicyIds.map((policyId) => `policy_id:"${policyId}"`).join(' or '),
-        });
-
-        if (agentStatusesRes.error) {
-          throw agentStatusesRes.error;
-        }
-
-        if (
-          agentStatusesRes.data?.results.online === 0 &&
-          agentStatusesRes.data?.results.updating === 0
-        ) {
-          setIsUnhealthy(true);
-        }
+      if (!enrollmentSettingsResponse.data?.fleet_server.has_active) {
+        setIsUnhealthy(true);
       }
 
       setIsLoading(false);
@@ -64,8 +40,13 @@ export function useFleetServerUnhealthy() {
   }, [notifications.toasts]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (authz.fleet.addAgents || authz.fleet.addFleetServers) {
+      fetchData();
+    } else {
+      setIsLoading(false);
+      return;
+    }
+  }, [fetchData, authz.fleet.addAgents, authz.fleet.addFleetServers]);
 
   return {
     isLoading,

@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
+import pLimit from 'p-limit';
 
 import { BlobStorageService } from '../blob_storage_service';
 import { InternalFileShareService } from '../file_share_service';
@@ -20,10 +22,15 @@ import type {
   CreateFileArgs,
   UpdateFileArgs,
   DeleteFileArgs,
+  BulkDeleteFilesArgs,
   FindFileArgs,
   GetByIdArgs,
+  BulkGetByIdArgs,
 } from './file_action_types';
 import { createFileClient, FileClientImpl } from '../file_client/file_client';
+
+const bulkDeleteConcurrency = pLimit(10);
+
 /**
  * Service containing methods for working with files.
  *
@@ -64,6 +71,14 @@ export class InternalFileService {
     await file.delete();
   }
 
+  public async bulkDeleteFiles({
+    ids,
+  }: BulkDeleteFilesArgs): Promise<Array<PromiseSettledResult<void>>> {
+    const promises = ids.map((id) => bulkDeleteConcurrency(() => this.deleteFile({ id })));
+    const result = await Promise.allSettled(promises);
+    return result;
+  }
+
   private async get(id: string) {
     try {
       const { metadata } = await this.metadataClient.get({ id });
@@ -80,8 +95,69 @@ export class InternalFileService {
     }
   }
 
+  private async bulkGet<M>(
+    ids: string[],
+    {
+      throwIfNotFound = true,
+      format = 'array',
+    }: { throwIfNotFound?: boolean; format?: BulkGetByIdArgs['format'] } = {}
+  ): Promise<Array<IFile<M> | null> | { [id: string]: IFile<M> | null }> {
+    try {
+      const metadatas = await this.metadataClient.bulkGet({ ids, throwIfNotFound: false });
+      const result = metadatas.map((fileMetadata, i) => {
+        const notFound = !fileMetadata || !fileMetadata.metadata;
+        const deleted = fileMetadata?.metadata?.Status === 'DELETED';
+
+        if (notFound || deleted) {
+          if (!throwIfNotFound) {
+            return null;
+          }
+          throw new FileNotFoundError(
+            deleted ? 'File has been deleted' : `File [${fileMetadata?.id ?? ids[i]}] not found`
+          );
+        }
+
+        const { id, metadata } = fileMetadata;
+        return this.toFile<M>(id, metadata as FileMetadata<M>, metadata.FileKind);
+      });
+
+      return format === 'array'
+        ? result
+        : ids.reduce<{ [id: string]: IFile<M> | null }>(
+            (acc, id, i) => ({
+              ...acc,
+              [id]: result[i],
+            }),
+            {}
+          );
+    } catch (e) {
+      this.logger.error(`Could not retrieve files: ${e}`);
+      throw e;
+    }
+  }
+
   public async getById({ id }: GetByIdArgs): Promise<IFile> {
     return await this.get(id);
+  }
+
+  public async bulkGetById<M>(
+    args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound?: true }
+  ): Promise<Array<IFile<M>>>;
+  public async bulkGetById<M>(
+    args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound?: true; format: 'map' }
+  ): Promise<{ [id: string]: IFile<M> }>;
+  public async bulkGetById<M>(
+    args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound: false }
+  ): Promise<Array<IFile<M> | null>>;
+  public async bulkGetById<M>(
+    args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound: false; format: 'map' }
+  ): Promise<{ [id: string]: IFile<M> | null }>;
+  public async bulkGetById<M>({
+    ids,
+    throwIfNotFound,
+    format,
+  }: BulkGetByIdArgs): Promise<Array<IFile<M> | null> | { [id: string]: IFile<M> | null }> {
+    return await this.bulkGet<M>(ids, { throwIfNotFound, format });
   }
 
   public getFileKind(id: string): FileKind {
@@ -109,15 +185,15 @@ export class InternalFileService {
     return this.get(fileId);
   }
 
-  private toFile(
+  private toFile<M>(
     id: string,
-    fileMetadata: FileMetadata,
+    fileMetadata: FileMetadata<M>,
     fileKind: string,
     fileClient?: FileClientImpl
-  ): IFile {
-    return new File(
+  ): IFile<M> {
+    return new File<M>(
       id,
-      toJSON(id, fileMetadata),
+      toJSON<M>(id, fileMetadata),
       fileClient ?? this.createFileClient(fileKind),
       this.logger.get(`file-${id}`)
     );

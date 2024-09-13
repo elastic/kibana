@@ -5,64 +5,50 @@
  * 2.0.
  */
 
-import { reduce, each, uniq } from 'lodash';
-import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SetupPlugins } from '../../../plugin_contract';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
+import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import { osqueryResponseAction } from './osquery_response_action';
 import { endpointResponseAction } from './endpoint_response_action';
-import type { AlertsWithAgentType } from './types';
 import type { ScheduleNotificationActions } from '../rule_types/types';
-
-type Alerts = Array<ParsedTechnicalFields & { agent?: { id: string } }>;
+import type { AlertWithAgent, Alert } from './types';
 
 interface ScheduleNotificationResponseActionsService {
   endpointAppContextService: EndpointAppContextService;
-  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
+  osqueryCreateActionService?: SetupPlugins['osquery']['createActionService'];
 }
 
 export const getScheduleNotificationResponseActionsService =
   ({
-    osqueryCreateAction,
+    osqueryCreateActionService,
     endpointAppContextService,
   }: ScheduleNotificationResponseActionsService) =>
-  ({ signals, responseActions, hasEnterpriseLicense }: ScheduleNotificationActions) => {
-    const filteredAlerts = (signals as Alerts).filter((alert) => alert.agent?.id);
+  async ({ signals, responseActions }: ScheduleNotificationActions) => {
+    const alerts = (signals as Alert[]).filter((alert) => alert.agent?.id) as AlertWithAgent[];
 
-    const { alerts, agentIds, alertIds }: AlertsWithAgentType = reduce(
-      filteredAlerts,
-      (acc, alert) => {
-        const agentId = alert.agent?.id;
-        if (agentId !== undefined) {
-          return {
-            alerts: [...acc.alerts, alert],
-            agentIds: uniq([...acc.agentIds, agentId]),
-            alertIds: [...acc.alertIds, (alert as unknown as { _id: string })._id],
-          };
+    await Promise.all(
+      responseActions.map(async (responseAction) => {
+        if (
+          responseAction.actionTypeId === ResponseActionTypesEnum['.osquery'] &&
+          osqueryCreateActionService
+        ) {
+          await osqueryResponseAction(responseAction, osqueryCreateActionService, {
+            alerts,
+          });
         }
-        return acc;
-      },
-      { alerts: [], agentIds: [], alertIds: [] } as AlertsWithAgentType
-    );
+        if (responseAction.actionTypeId === ResponseActionTypesEnum['.endpoint']) {
+          // We currently support only automated response actions for Elastic Defend. This will
+          // need to be updated once we introduce support for other EDR systems.
+          // For an explanation of why this is needed, see this comment here:
+          // https://github.com/elastic/kibana/issues/180774#issuecomment-2139526239
+          const alertsFromElasticDefend = alerts.filter((alert) => alert.agent.type === 'endpoint');
 
-    each(responseActions, (responseAction) => {
-      if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY && osqueryCreateAction) {
-        osqueryResponseAction(responseAction, osqueryCreateAction, {
-          alerts,
-          alertIds,
-          agentIds,
-        });
-      }
-      if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.ENDPOINT && hasEnterpriseLicense) {
-        endpointResponseAction(responseAction, endpointAppContextService, {
-          alerts,
-          alertIds,
-          agentIds,
-          ruleId: alerts[0][ALERT_RULE_UUID],
-          ruleName: alerts[0][ALERT_RULE_NAME],
-        });
-      }
-    });
+          if (alertsFromElasticDefend.length > 0) {
+            await endpointResponseAction(responseAction, endpointAppContextService, {
+              alerts: alertsFromElasticDefend,
+            });
+          }
+        }
+      })
+    );
   };

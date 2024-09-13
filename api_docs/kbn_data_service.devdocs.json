@@ -1,0 +1,402 @@
+{
+  "id": "@kbn/data-service",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/data-service",
+        "id": "def-common.flattenHit",
+        "type": "Function",
+        "tags": [],
+        "label": "flattenHit",
+        "description": [
+          "\nFlattens an individual hit (from an ES response) into an object. This will\ncreate flattened field names, like `user.name`.\n"
+        ],
+        "signature": [
+          "(hit: Hit<unknown>, indexPattern: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined, params: (TabifyDocsOptions & { flattenedFieldsComparator?: ((a: string | symbol, b: string | symbol) => 0 | 1 | -1) | undefined; }) | undefined) => Record<string, any>"
+        ],
+        "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-service",
+            "id": "def-common.flattenHit.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hit",
+            "description": [
+              "The hit from an ES reponse's hits.hits[]"
+            ],
+            "signature": [
+              "Hit<unknown>"
+            ],
+            "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/data-service",
+            "id": "def-common.flattenHit.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [
+              "The index pattern for the requested index if available."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/data-service",
+            "id": "def-common.flattenHit.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "params",
+            "description": [
+              "Parameters how to flatten the hit"
+            ],
+            "signature": [
+              "(TabifyDocsOptions & { flattenedFieldsComparator?: ((a: string | symbol, b: string | symbol) => 0 | 1 | -1) | undefined; }) | undefined"
+            ],
+            "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-service",
+        "id": "def-common.getEsQueryConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "getEsQueryConfig",
+        "description": [],
+        "signature": [
+          "(config: KibanaConfig) => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryConfig",
+            "text": "EsQueryConfig"
+          }
+        ],
+        "path": "packages/kbn-data-service/src/es_query/get_es_query_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-service",
+            "id": "def-common.getEsQueryConfig.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "KibanaConfig"
+            ],
+            "path": "packages/kbn-data-service/src/es_query/get_es_query_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-service",
+        "id": "def-common.getFlattenedFieldsComparator",
+        "type": "Function",
+        "tags": [],
+        "label": "getFlattenedFieldsComparator",
+        "description": [],
+        "signature": [
+          "(indexPattern?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined) => (a: string | symbol, b: string | symbol) => 0 | 1 | -1"
+        ],
+        "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-service",
+            "id": "def-common.getFlattenedFieldsComparator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-service",
+        "id": "def-common.tabifyDocs",
+        "type": "Function",
+        "tags": [],
+        "label": "tabifyDocs",
+        "description": [],
+        "signature": [
+          "(esResponse: ",
+          "SearchResponse",
+          "<unknown, Record<string, ",
+          "AggregationsAggregate",
+          ">>, index?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined, params?: TabifyDocsOptions) => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          }
+        ],
+        "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-service",
+            "id": "def-common.tabifyDocs.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esResponse",
+            "description": [],
+            "signature": [
+              "SearchResponse",
+              "<unknown, Record<string, ",
+              "AggregationsAggregate",
+              ">>"
+            ],
+            "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/data-service",
+            "id": "def-common.tabifyDocs.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/data-service",
+            "id": "def-common.tabifyDocs.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "TabifyDocsOptions"
+            ],
+            "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/data-service",
+        "id": "def-common.FlattenedFieldsComparator",
+        "type": "Type",
+        "tags": [],
+        "label": "FlattenedFieldsComparator",
+        "description": [],
+        "signature": [
+          "(a: string | symbol, b: string | symbol) => 0 | 1 | -1"
+        ],
+        "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-service",
+            "id": "def-common.FlattenedFieldsComparator.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "a",
+            "description": [],
+            "signature": [
+              "string | symbol"
+            ],
+            "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-service",
+            "id": "def-common.FlattenedFieldsComparator.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "b",
+            "description": [],
+            "signature": [
+              "string | symbol"
+            ],
+            "path": "packages/kbn-data-service/src/search/tabify/tabify_docs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-service",
+        "id": "def-common.GetConfigFn",
+        "type": "Type",
+        "tags": [],
+        "label": "GetConfigFn",
+        "description": [
+          "\nIf a service is being shared on both the client and the server, and\nthe client code requires synchronous access to uiSettings, both client\nand server should wrap the core uiSettings services in a function\nmatching this signature.\n\nThis matches the signature of the public `core.uiSettings.get`, and\nshould only be used in scenarios where async access to uiSettings is\nnot possible."
+        ],
+        "signature": [
+          "<T = any>(key: string, defaultOverride?: T | undefined) => T"
+        ],
+        "path": "packages/kbn-data-service/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-service",
+            "id": "def-common.GetConfigFn.$1",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "packages/kbn-data-service/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-service",
+            "id": "def-common.GetConfigFn.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultOverride",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "packages/kbn-data-service/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/data-service",
+        "id": "def-common.UI_SETTINGS",
+        "type": "Object",
+        "tags": [],
+        "label": "UI_SETTINGS",
+        "description": [],
+        "signature": [
+          "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; readonly DATE_FORMAT: \"dateFormat\"; readonly DATEFORMAT_TZ: \"dateFormat:tz\"; }"
+        ],
+        "path": "packages/kbn-data-service/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

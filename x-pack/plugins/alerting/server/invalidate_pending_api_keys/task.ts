@@ -9,7 +9,6 @@ import {
   Logger,
   CoreStart,
   SavedObjectsFindResponse,
-  KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -19,14 +18,22 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import {
+  AggregationsStringTermsBucketKeys,
+  AggregationsTermsAggregateBase,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { InvalidateAPIKeyResult } from '../rules_client';
 import { AlertingConfig } from '../config';
 import { timePeriodBeforeDate } from '../lib/get_cadence';
 import { AlertingPluginsStart } from '../plugin';
 import { InvalidatePendingApiKey } from '../types';
+import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
+import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
+import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { AdHocRunSO } from '../data/ad_hoc_run/types';
 
 const TASK_TYPE = 'alerts_invalidate_api_keys';
+const PAGE_SIZE = 100;
 export const TASK_ID = `Alerts-${TASK_TYPE}`;
 
 const invalidateAPIKeys = async (
@@ -71,11 +78,11 @@ export async function scheduleApiKeyInvalidatorTask(
       schedule: {
         interval,
       },
-      state: {},
+      state: emptyState,
       params: {},
     });
   } catch (e) {
-    logger.debug(`Error scheduling task, received ${e.message}`);
+    logger.error(`Error scheduling ${TASK_ID} task, received ${e.message}`);
   }
 }
 
@@ -88,93 +95,58 @@ function registerApiKeyInvalidatorTaskDefinition(
   taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
       title: 'Invalidate alert API Keys',
+      stateSchemaByVersion,
       createTaskRunner: taskRunner(logger, coreStartServices, config),
     },
   });
 }
 
-function getFakeKibanaRequest(basePath: string) {
-  const requestHeaders: Record<string, string> = {};
-  return {
-    headers: requestHeaders,
-    getBasePath: () => basePath,
-    path: '/',
-    route: { settings: {} },
-    url: {
-      href: '/',
-    },
-    raw: {
-      req: {
-        url: '/',
-      },
-    },
-  } as unknown as KibanaRequest;
-}
-
-function taskRunner(
+export function taskRunner(
   logger: Logger,
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
   config: AlertingConfig
 ) {
   return ({ taskInstance }: RunContext) => {
-    const { state } = taskInstance;
+    const state = taskInstance.state as LatestTaskStateSchema;
     return {
       async run() {
         let totalInvalidated = 0;
         try {
-          const [{ savedObjects, http }, { encryptedSavedObjects, security }] =
-            await coreStartServices;
-          const savedObjectsClient = savedObjects.getScopedClient(
-            getFakeKibanaRequest(http.basePath.serverBasePath),
-            {
-              includedHiddenTypes: ['api_key_pending_invalidation'],
-              excludedExtensions: [SECURITY_EXTENSION_ID],
-            }
-          );
+          const [{ savedObjects }, { encryptedSavedObjects, security }] = await coreStartServices;
+          const savedObjectsClient = savedObjects.createInternalRepository([
+            API_KEY_PENDING_INVALIDATION_TYPE,
+            AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          ]);
           const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
-            includedHiddenTypes: ['api_key_pending_invalidation'],
+            includedHiddenTypes: [API_KEY_PENDING_INVALIDATION_TYPE],
           });
-          const configuredDelay = config.invalidateApiKeysTask.removalDelay;
-          const delay = timePeriodBeforeDate(new Date(), configuredDelay).toISOString();
 
-          let hasApiKeysPendingInvalidation = true;
-          const PAGE_SIZE = 100;
-          do {
-            const apiKeysToInvalidate = await savedObjectsClient.find<InvalidatePendingApiKey>({
-              type: 'api_key_pending_invalidation',
-              filter: `api_key_pending_invalidation.attributes.createdAt <= "${delay}"`,
-              page: 1,
-              sortField: 'createdAt',
-              sortOrder: 'asc',
-              perPage: PAGE_SIZE,
-            });
-            totalInvalidated += await invalidateApiKeys(
-              logger,
-              savedObjectsClient,
-              apiKeysToInvalidate,
-              encryptedSavedObjectsClient,
-              security
-            );
+          totalInvalidated = await runInvalidate({
+            config,
+            encryptedSavedObjectsClient,
+            logger,
+            savedObjectsClient,
+            security,
+          });
 
-            hasApiKeysPendingInvalidation = apiKeysToInvalidate.total > PAGE_SIZE;
-          } while (hasApiKeysPendingInvalidation);
-
+          const updatedState: LatestTaskStateSchema = {
+            runs: (state.runs || 0) + 1,
+            total_invalidated: totalInvalidated,
+          };
           return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              total_invalidated: totalInvalidated,
-            },
+            state: updatedState,
             schedule: {
               interval: config.invalidateApiKeysTask.interval,
             },
           };
         } catch (e) {
           logger.warn(`Error executing alerting apiKey invalidation task: ${e.message}`);
+          const updatedState: LatestTaskStateSchema = {
+            runs: state.runs + 1,
+            total_invalidated: totalInvalidated,
+          };
           return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              total_invalidated: totalInvalidated,
-            },
+            state: updatedState,
             schedule: {
               interval: config.invalidateApiKeysTask.interval,
             },
@@ -185,37 +157,175 @@ function taskRunner(
   };
 }
 
-async function invalidateApiKeys(
-  logger: Logger,
-  savedObjectsClient: SavedObjectsClientContract,
-  apiKeysToInvalidate: SavedObjectsFindResponse<InvalidatePendingApiKey>,
-  encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-  securityPluginStart?: SecurityPluginStart
-) {
+interface ApiKeyIdAndSOId {
+  id: string;
+  apiKeyId: string;
+}
+
+interface RunInvalidateOpts {
+  config: AlertingConfig;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  logger: Logger;
+  savedObjectsClient: SavedObjectsClientContract;
+  security?: SecurityPluginStart;
+}
+export async function runInvalidate({
+  config,
+  encryptedSavedObjectsClient,
+  logger,
+  savedObjectsClient,
+  security,
+}: RunInvalidateOpts) {
+  const configuredDelay = config.invalidateApiKeysTask.removalDelay;
+  const delay: string = timePeriodBeforeDate(new Date(), configuredDelay).toISOString();
+
+  let hasMoreApiKeysPendingInvalidation = true;
   let totalInvalidated = 0;
+  const excludedSOIds = new Set<string>();
+
+  do {
+    // Query for PAGE_SIZE api keys to invalidate at a time. At the end of each iteration,
+    // we should have deleted the deletable keys and added keys still in use to the excluded list
+    const filter = getFindFilter(delay, [...excludedSOIds]);
+    const apiKeysToInvalidate = await savedObjectsClient.find<InvalidatePendingApiKey>({
+      type: API_KEY_PENDING_INVALIDATION_TYPE,
+      filter,
+      page: 1,
+      sortField: 'createdAt',
+      sortOrder: 'asc',
+      perPage: PAGE_SIZE,
+    });
+
+    if (apiKeysToInvalidate.total > 0) {
+      const { apiKeyIdsToExclude, apiKeyIdsToInvalidate } = await getApiKeyIdsToInvalidate({
+        apiKeySOsPendingInvalidation: apiKeysToInvalidate,
+        encryptedSavedObjectsClient,
+        savedObjectsClient,
+      });
+      apiKeyIdsToExclude.forEach(({ id }) => excludedSOIds.add(id));
+      totalInvalidated += await invalidateApiKeysAndDeletePendingApiKeySavedObject({
+        apiKeyIdsToInvalidate,
+        logger,
+        savedObjectsClient,
+        securityPluginStart: security,
+      });
+    }
+
+    hasMoreApiKeysPendingInvalidation = apiKeysToInvalidate.total > PAGE_SIZE;
+  } while (hasMoreApiKeysPendingInvalidation);
+
+  return totalInvalidated;
+}
+interface GetApiKeyIdsToInvalidateOpts {
+  apiKeySOsPendingInvalidation: SavedObjectsFindResponse<InvalidatePendingApiKey>;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
+}
+
+interface GetApiKeysToInvalidateResult {
+  apiKeyIdsToInvalidate: ApiKeyIdAndSOId[];
+  apiKeyIdsToExclude: ApiKeyIdAndSOId[];
+}
+
+export async function getApiKeyIdsToInvalidate({
+  apiKeySOsPendingInvalidation,
+  encryptedSavedObjectsClient,
+  savedObjectsClient,
+}: GetApiKeyIdsToInvalidateOpts): Promise<GetApiKeysToInvalidateResult> {
+  // Decrypt the apiKeyId for each pending invalidation SO
   const apiKeyIds = await Promise.all(
-    apiKeysToInvalidate.saved_objects.map(async (apiKeyObj) => {
-      const decryptedApiKey =
+    apiKeySOsPendingInvalidation.saved_objects.map(async (apiKeyPendingInvalidationSO) => {
+      const decryptedApiKeyPendingInvalidationObject =
         await encryptedSavedObjectsClient.getDecryptedAsInternalUser<InvalidatePendingApiKey>(
-          'api_key_pending_invalidation',
-          apiKeyObj.id
+          API_KEY_PENDING_INVALIDATION_TYPE,
+          apiKeyPendingInvalidationSO.id
         );
-      return decryptedApiKey.attributes.apiKeyId;
+      return {
+        id: decryptedApiKeyPendingInvalidationObject.id,
+        apiKeyId: decryptedApiKeyPendingInvalidationObject.attributes.apiKeyId,
+      };
     })
   );
-  if (apiKeyIds.length > 0) {
-    const response = await invalidateAPIKeys({ ids: apiKeyIds }, securityPluginStart);
+
+  // Query saved objects index to see if any API keys are in use
+  const filter = `${apiKeyIds
+    .map(({ apiKeyId }) => `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.apiKeyId: "${apiKeyId}"`)
+    .join(' OR ')}`;
+  const { aggregations } = await savedObjectsClient.find<
+    AdHocRunSO,
+    { apiKeyId: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys> }
+  >({
+    type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+    filter,
+    perPage: 0,
+    namespaces: ['*'],
+    aggs: {
+      apiKeyId: {
+        terms: {
+          field: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.apiKeyId`,
+          size: PAGE_SIZE,
+        },
+      },
+    },
+  });
+
+  const apiKeyIdsInUseBuckets: AggregationsStringTermsBucketKeys[] =
+    (aggregations?.apiKeyId?.buckets as AggregationsStringTermsBucketKeys[]) ?? [];
+
+  const apiKeyIdsToInvalidate: ApiKeyIdAndSOId[] = [];
+  const apiKeyIdsToExclude: ApiKeyIdAndSOId[] = [];
+  apiKeyIds.forEach(({ id, apiKeyId }) => {
+    if (apiKeyIdsInUseBuckets.find((bucket) => bucket.key === apiKeyId)) {
+      apiKeyIdsToExclude.push({ id, apiKeyId });
+    } else {
+      apiKeyIdsToInvalidate.push({ id, apiKeyId });
+    }
+  });
+
+  return { apiKeyIdsToInvalidate, apiKeyIdsToExclude };
+}
+
+export function getFindFilter(delay: string, excludedSOIds: string[] = []): string {
+  let filter = `${API_KEY_PENDING_INVALIDATION_TYPE}.attributes.createdAt <= "${delay}"`;
+  if (excludedSOIds.length > 0) {
+    const excluded = [...new Set(excludedSOIds)];
+    const excludedSOIdFilter = (excluded ?? []).map(
+      (id: string) =>
+        `NOT ${API_KEY_PENDING_INVALIDATION_TYPE}.id: "${API_KEY_PENDING_INVALIDATION_TYPE}:${id}"`
+    );
+    filter += ` AND ${excludedSOIdFilter.join(' AND ')}`;
+  }
+  return filter;
+}
+
+interface InvalidateApiKeysAndDeleteSO {
+  apiKeyIdsToInvalidate: ApiKeyIdAndSOId[];
+  logger: Logger;
+  savedObjectsClient: SavedObjectsClientContract;
+  securityPluginStart?: SecurityPluginStart;
+}
+
+export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
+  apiKeyIdsToInvalidate,
+  logger,
+  savedObjectsClient,
+  securityPluginStart,
+}: InvalidateApiKeysAndDeleteSO) {
+  let totalInvalidated = 0;
+  if (apiKeyIdsToInvalidate.length > 0) {
+    const ids = apiKeyIdsToInvalidate.map(({ apiKeyId }) => apiKeyId);
+    const response = await invalidateAPIKeys({ ids }, securityPluginStart);
     if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-      logger.error(`Failed to invalidate API Keys [ids="${apiKeyIds.join(', ')}"]`);
+      logger.error(`Failed to invalidate API Keys [ids="${ids.join(', ')}"]`);
     } else {
       await Promise.all(
-        apiKeysToInvalidate.saved_objects.map(async (apiKeyObj) => {
+        apiKeyIdsToInvalidate.map(async ({ id, apiKeyId }) => {
           try {
-            await savedObjectsClient.delete('api_key_pending_invalidation', apiKeyObj.id);
+            await savedObjectsClient.delete(API_KEY_PENDING_INVALIDATION_TYPE, id);
             totalInvalidated++;
           } catch (err) {
             logger.error(
-              `Failed to delete invalidated API key "${apiKeyObj.attributes.apiKeyId}". Error: ${err.message}`
+              `Failed to delete invalidated API key "${apiKeyId}". Error: ${err.message}`
             );
           }
         })

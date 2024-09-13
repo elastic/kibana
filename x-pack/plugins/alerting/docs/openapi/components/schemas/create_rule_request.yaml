@@ -1,6 +1,5 @@
-title: Create rule request
-description: >-
-  The create rule API request body varies depending on the type of rule and actions.
+title: Create rule request body properties
+description: The properties vary depending on the rule type.
 type: object
 required:
   - consumer
@@ -11,19 +10,14 @@ required:
 properties:
   actions:
     $ref: 'actions.yaml'
+  alert_delay:
+    $ref: 'alert_delay.yaml'
   consumer:
-    type: string
-    description: >
-      The name of the application or feature that owns the rule. For example:
-      `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`,
-      `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
+    $ref: 'consumer.yaml'
   enabled:
-    type: boolean
-    description: Indicates whether you want to run the rule on an interval basis after it is created.
+    $ref: 'enabled_rule.yaml'
   name:
-    type: string
-    description: The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.
-    example: cluster_health_rule
+    $ref: 'name_rule.yaml'
   notify_when:
     $ref: 'notify_when.yaml'
   params:
@@ -32,13 +26,11 @@ properties:
     additionalProperties: true
   rule_type_id:
     type: string
-    description: >
-      The ID of the rule type that you want to call when the rule is scheduled to run.
-      For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`,
-      `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.
+    description: The ID of the rule type that you want to call when the rule is scheduled to run.
   schedule:
     $ref: 'schedule.yaml'
   tags:
     $ref: 'tags.yaml'
   throttle:
     $ref: 'throttle.yaml'
+ 

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Subject, Observable, firstValueFrom } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs';
 import { get } from 'lodash';
 import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
@@ -34,13 +35,18 @@ import type {
   CoreIncrementUsageCounter,
   ConfigUsageData,
   CoreConfigUsageData,
+  CoreIncrementCounterParams,
+  CoreUsageCounter,
 } from '@kbn/core-usage-data-server';
 import {
   CORE_USAGE_STATS_TYPE,
   type InternalCoreUsageDataSetup,
 } from '@kbn/core-usage-data-base-server-internal';
 import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
-import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import {
+  MAIN_SAVED_OBJECT_INDEX,
+  type SavedObjectsServiceStart,
+} from '@kbn/core-saved-objects-server';
 
 import { isConfigured } from './is_configured';
 import { coreUsageStatsType } from './saved_objects';
@@ -60,26 +66,6 @@ export interface StartDeps {
   elasticsearch: ElasticsearchServiceStart;
   exposedConfigsToUsage: ExposedConfigsToUsage;
 }
-
-const kibanaIndex = '.kibana';
-
-/**
- * Because users can configure their Saved Object to any arbitrary index name,
- * we need to map customized index names back to a "standard" index name.
- *
- * e.g. If a user configures `kibana.index: .my_saved_objects` we want to the
- * collected data to be grouped under `.kibana` not ".my_saved_objects".
- *
- * This is rather brittle, but the option to configure index names might go
- * away completely anyway (see #60053).
- *
- * @param index The index name configured for this SO type
- * @param kibanaConfigIndex The default kibana index as configured by the user
- * with `kibana.index`
- */
-const kibanaOrTaskManagerIndex = (index: string, kibanaConfigIndex: string) => {
-  return index === kibanaConfigIndex ? '.kibana' : '.kibana_task_manager';
-};
 
 interface UsageDataAggs extends AggregationsMultiBucketAggregateBase {
   buckets: {
@@ -133,7 +119,7 @@ export class CoreUsageDataService
           .getTypeRegistry()
           .getAllTypes()
           .reduce((acc, type) => {
-            const index = type.indexPattern ?? kibanaIndex;
+            const index = type.indexPattern ?? MAIN_SAVED_OBJECT_INDEX;
             return acc.add(index);
           }, new Set<string>())
           .values()
@@ -151,7 +137,7 @@ export class CoreUsageDataService
             const stats = body[0];
 
             return {
-              alias: kibanaOrTaskManagerIndex(index, kibanaIndex),
+              alias: index,
               docsCount: stats['docs.count'] ? parseInt(stats['docs.count'], 10) : 0,
               docsDeleted: stats['docs.deleted'] ? parseInt(stats['docs.deleted'], 10) : 0,
               storeSizeBytes: stats['store.size'] ? parseInt(stats['store.size'], 10) : 0,
@@ -192,7 +178,7 @@ export class CoreUsageDataService
       unknown,
       { aliases: UsageDataAggs }
     >({
-      index: kibanaIndex,
+      index: MAIN_SAVED_OBJECT_INDEX, // depends on the .kibana split (assuming 'legacy-url-alias' is stored in '.kibana')
       body: {
         track_total_hits: true,
         query: { match: { type: LEGACY_URL_ALIAS_TYPE } },
@@ -268,7 +254,7 @@ export class CoreUsageDataService
           pingTimeoutMs: es.pingTimeout.asMilliseconds(),
           requestHeadersWhitelistConfigured: isConfigured.stringOrArray(
             es.requestHeadersWhitelist,
-            ['authorization']
+            ['authorization', 'es-client-authentication']
           ),
           requestTimeoutMs: es.requestTimeout.asMilliseconds(),
           shardTimeoutMs: es.shardTimeout.asMilliseconds(),
@@ -348,6 +334,9 @@ export class CoreUsageDataService
       },
       environment: {
         memory: {
+          arrayBuffersBytes: this.opsMetrics.process.memory.array_buffers_in_bytes,
+          residentSetSizeBytes: this.opsMetrics.process.memory.resident_set_size_in_bytes,
+          externalBytes: this.opsMetrics.process.memory.external_in_bytes,
           heapSizeLimit: this.opsMetrics.process.memory.heap.size_limit,
           heapTotalBytes: this.opsMetrics.process.memory.heap.total_in_bytes,
           heapUsedBytes: this.opsMetrics.process.memory.heap.used_in_bytes,
@@ -510,29 +499,33 @@ export class CoreUsageDataService
       typeRegistry.registerType(coreUsageStatsType);
     };
 
-    const getClient = () => {
-      const debugLogger = (message: string) => this.logger.debug(message);
-
-      return new CoreUsageStatsClient(debugLogger, http.basePath, internalRepositoryPromise);
+    const registerUsageCounter = (usageCounter: CoreUsageCounter) => {
+      this.incrementUsageCounter = (params) => usageCounter.incrementCounter(params);
     };
 
-    this.coreUsageStatsClient = getClient();
+    const incrementUsageCounter = (params: CoreIncrementCounterParams) => {
+      try {
+        this.incrementUsageCounter(params);
+      } catch (e) {
+        // Self-defense mechanism since the handler is externally registered
+        this.logger.debug('Failed to increase the usage counter');
+        this.logger.debug(e);
+      }
+    };
+
+    this.coreUsageStatsClient = new CoreUsageStatsClient({
+      debugLogger: (message: string) => this.logger.debug(message),
+      basePath: http.basePath,
+      repositoryPromise: internalRepositoryPromise,
+      stop$: this.stop$,
+      incrementUsageCounter,
+    });
 
     const contract: InternalCoreUsageDataSetup = {
       registerType,
-      getClient,
-      registerUsageCounter: (usageCounter) => {
-        this.incrementUsageCounter = (params) => usageCounter.incrementCounter(params);
-      },
-      incrementUsageCounter: (params) => {
-        try {
-          this.incrementUsageCounter(params);
-        } catch (e) {
-          // Self-defense mechanism since the handler is externally registered
-          this.logger.debug('Failed to increase the usage counter');
-          this.logger.debug(e);
-        }
-      },
+      getClient: () => this.coreUsageStatsClient!,
+      registerUsageCounter,
+      incrementUsageCounter,
     };
 
     return contract;

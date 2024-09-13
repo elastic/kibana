@@ -23,27 +23,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings']);
   const ml = getService('ml');
   const retry = getService('retry');
+  const dataViews = getService('dataViews');
 
   const startTime = 'Jan 1, 2016 @ 00:00:00.000';
   const endTime = 'Nov 1, 2020 @ 00:00:00.000';
-
-  function runTestsWhenDisabled(testData: TestData) {
-    it('should not show view mode toggle or Field stats table', async function () {
-      await PageObjects.common.navigateToApp('discover');
-      if (testData.isSavedSearch) {
-        await retry.tryForTime(2 * 1000, async () => {
-          await PageObjects.discover.loadSavedSearch(testData.sourceIndexOrSavedSearch);
-        });
-      } else {
-        await ml.dashboardEmbeddables.selectDiscoverIndexPattern(testData.sourceIndexOrSavedSearch);
-      }
-
-      await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
-
-      await PageObjects.discover.assertViewModeToggleNotExists();
-      await PageObjects.discover.assertFieldStatsTableNotExists();
-    });
-  }
 
   function runTests(testData: TestData) {
     describe(`with ${testData.suiteTitle}`, function () {
@@ -54,9 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.discover.loadSavedSearch(testData.sourceIndexOrSavedSearch);
           });
         } else {
-          await ml.dashboardEmbeddables.selectDiscoverIndexPattern(
-            testData.sourceIndexOrSavedSearch
-          );
+          await dataViews.switchToAndValidate(testData.sourceIndexOrSavedSearch);
         }
         await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
 
@@ -96,8 +77,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
-      await ml.testResources.createIndexPatternIfNeeded('ft_module_sample_logs', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_module_sample_logs', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded();
@@ -109,8 +90,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function () {
       await ml.testResources.clearAdvancedSettingProperty(SHOW_FIELD_STATISTICS);
       await ml.testResources.deleteSavedSearches();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_logs');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_module_sample_logs');
     });
 
     describe('when enabled', function () {
@@ -128,15 +109,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       runTests(farequoteKQLFiltersSearchTestData);
       runTests(farequoteLuceneFiltersSearchTestData);
       runTests(sampleLogTestData);
-    });
-
-    describe('when disabled', function () {
-      before(async function () {
-        // Ensure that the setting is set to default state which is false
-        await ml.testResources.setAdvancedSettingProperty(SHOW_FIELD_STATISTICS, false);
-      });
-
-      runTestsWhenDisabled(farequoteDataViewTestData);
     });
   });
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
@@ -12,10 +13,7 @@ import { EuiButton, EuiSpacer, EuiText, EuiTitle, EuiTourStep } from '@elastic/e
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiPageSection } from '@elastic/eui';
 
 interface StepThreeProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
@@ -39,7 +37,7 @@ export const StepThree = (props: StepThreeProps) => {
 
   return (
     <>
-      <EuiPageContentHeader>
+      <EuiPageHeader>
         <EuiTitle>
           <h2>
             <FormattedMessage
@@ -48,8 +46,8 @@ export const StepThree = (props: StepThreeProps) => {
             />
           </h2>
         </EuiTitle>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>
+      </EuiPageHeader>
+      <EuiPageSection>
         <EuiText>
           <p>
             <FormattedMessage
@@ -92,7 +90,7 @@ export const StepThree = (props: StepThreeProps) => {
             Complete step 3
           </EuiButton>
         </EuiTourStep>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </>
   );
 };

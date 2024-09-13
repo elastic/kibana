@@ -5,29 +5,30 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { getAgentTypeName } from '../../../../common/translations';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
-import type {
-  ConsoleResponseActionCommands,
-  ResponseActionsApiCommandNames,
-  ResponseActionStatus,
-} from '../../../../../common/endpoint/service/response_actions/constants';
 import {
+  RESPONSE_ACTION_AGENT_TYPE,
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
+  RESPONSE_ACTION_TYPE,
+  RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
+  type ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { DateRangePickerValues } from './actions_log_date_range_picker';
-import type { FILTER_NAMES } from '../translations';
-import { UX_MESSAGES } from '../translations';
-import { StatusBadge } from './status_badge';
+import { FILTER_NAMES, FILTER_TYPE_OPTIONS, UX_MESSAGES } from '../translations';
+import { ResponseActionStatusBadge } from './response_action_status_badge';
 import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 
-const defaultDateRangeOptions = Object.freeze({
+export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
   autoRefreshOptions: {
     enabled: false,
     duration: 10000,
@@ -38,12 +39,23 @@ const defaultDateRangeOptions = Object.freeze({
 });
 
 export const useDateRangePicker = (isFlyout: boolean) => {
-  const { setUrlDateRangeFilters } = useActionHistoryUrlParams();
-  const [dateRangePickerState, setDateRangePickerState] =
-    useState<DateRangePickerValues>(defaultDateRangeOptions);
+  const {
+    setUrlDateRangeFilters,
+    startDate: startDateFromUrl,
+    endDate: endDateFromUrl,
+  } = useActionHistoryUrlParams();
+  const [dateRangePickerState, setDateRangePickerState] = useState<DateRangePickerValues>({
+    ...DEFAULT_DATE_RANGE_OPTIONS,
+    startDate: isFlyout
+      ? DEFAULT_DATE_RANGE_OPTIONS.startDate
+      : startDateFromUrl ?? DEFAULT_DATE_RANGE_OPTIONS.startDate,
+    endDate: isFlyout
+      ? DEFAULT_DATE_RANGE_OPTIONS.endDate
+      : endDateFromUrl ?? DEFAULT_DATE_RANGE_OPTIONS.endDate,
+  });
 
   const updateActionListDateRanges = useCallback(
-    ({ start, end }) => {
+    ({ start, end }: DurationRange) => {
       setDateRangePickerState((prevState) => ({
         ...prevState,
         startDate: start,
@@ -54,7 +66,7 @@ export const useDateRangePicker = (isFlyout: boolean) => {
   );
 
   const updateActionListRecentlyUsedDateRanges = useCallback(
-    (recentlyUsedDateRanges) => {
+    (recentlyUsedDateRanges: DateRangePickerValues['recentlyUsedDateRanges']) => {
       setDateRangePickerState((prevState) => ({
         ...prevState,
         recentlyUsedDateRanges,
@@ -110,10 +122,11 @@ export const useDateRangePicker = (isFlyout: boolean) => {
 };
 
 export type FilterItems = Array<{
-  key: string;
+  key?: string;
   label: string;
-  checked: 'on' | undefined;
-  'data-test-subj': string;
+  isGroupLabel?: boolean;
+  checked?: 'on' | undefined;
+  'data-test-subj'?: string;
 }>;
 
 export const getActionStatus = (status: ResponseActionStatus): string => {
@@ -127,50 +140,114 @@ export const getActionStatus = (status: ResponseActionStatus): string => {
   return '';
 };
 
-/**
- * map actual command to ui command
- * unisolate -> release
- * running-processes -> processes
- */
-export const getUiCommand = (
-  command: ResponseActionsApiCommandNames
-): ConsoleResponseActionCommands => {
-  if (command === 'unisolate') {
-    return 'release';
-  } else if (command === 'running-processes') {
-    return 'processes';
-  } else {
-    return command;
-  }
-};
-
-/**
- * map UI command back to actual command
- * release -> unisolate
- * processes -> running-processes
- */
-export const getCommandKey = (
-  uiCommand: ConsoleResponseActionCommands
-): ResponseActionsApiCommandNames => {
-  if (uiCommand === 'release') {
-    return 'unisolate';
-  } else if (uiCommand === 'processes') {
-    return 'running-processes';
-  } else {
-    return uiCommand;
-  }
-};
-
 export type FilterName = keyof typeof FILTER_NAMES;
+// maps filter name to a function that updates the query state
+export type TypesFilters = {
+  [k in Extract<FilterName, 'agentTypes' | 'actionTypes'>]: {
+    onChangeFilterOptions: (selectedOptions: string[]) => void;
+  };
+};
+
+export type ActionsLogPopupFilters = Extract<
+  FilterName,
+  'actions' | 'hosts' | 'statuses' | 'types'
+>;
+
+interface GetTypesFilterInitialStateArguments {
+  isFlyout: boolean;
+  agentTypes?: string[];
+  types?: string[];
+}
+
+/**
+ *
+ * @param isSentinelOneV1Enabled
+ * @param isFlyout
+ * @param agentTypes
+ * @param types
+ * @returns FilterItems
+ * @description
+ * sets the initial state of the types filter options
+ */
+const useTypesFilterInitialState = ({
+  isFlyout,
+  agentTypes,
+  types,
+}: GetTypesFilterInitialStateArguments): FilterItems => {
+  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+    'responseActionsSentinelOneV1Enabled'
+  );
+  const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
+
+  const getFilterOptions = useCallback(
+    ({ key, label, checked }: FilterItems[number]): FilterItems[number] => ({
+      key,
+      label,
+      isGroupLabel: false,
+      checked,
+      'data-test-subj': `types-filter-option`,
+    }),
+    []
+  );
+
+  // action types filter options
+  const defaultFilterOptions = useMemo(
+    () =>
+      RESPONSE_ACTION_TYPE.map((type) =>
+        getFilterOptions({
+          key: type,
+          label: getTypeDisplayName(type),
+          checked: !isFlyout && types?.includes(type) ? 'on' : undefined,
+        })
+      ),
+    [getFilterOptions, isFlyout, types]
+  );
+
+  // v8.13 onwards
+  // for showing agent types and action types in the same filter
+  if (isSentinelOneV1Enabled || isCrowdstrikeEnabled) {
+    if (!isFlyout) {
+      return [
+        {
+          label: FILTER_NAMES.agentTypes,
+          isGroupLabel: true,
+        },
+        ...RESPONSE_ACTION_AGENT_TYPE.map((type) =>
+          getFilterOptions({
+            key: type,
+            label: getAgentTypeName(type),
+            checked: !isFlyout && agentTypes?.includes(type) ? 'on' : undefined,
+          })
+        ),
+        {
+          label: FILTER_NAMES.actionTypes,
+          isGroupLabel: true,
+        },
+        ...defaultFilterOptions,
+      ];
+    }
+
+    return [
+      {
+        label: FILTER_NAMES.actionTypes,
+        isGroupLabel: true,
+      },
+      ...defaultFilterOptions,
+    ];
+  }
+
+  return defaultFilterOptions;
+};
+
 export const useActionsLogFilter = ({
   filterName,
   isFlyout,
-  isPopoverOpen,
   searchString,
 }: {
-  filterName: FilterName;
+  filterName: ActionsLogPopupFilters;
   isFlyout: boolean;
-  isPopoverOpen: boolean;
   searchString: string;
 }): {
   areHostsSelectedOnMount: boolean;
@@ -184,24 +261,32 @@ export const useActionsLogFilter = ({
   setUrlActionsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlActionsFilters'];
   setUrlHostsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlHostsFilters'];
   setUrlStatusesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlStatusesFilters'];
+  setUrlTypesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlTypesFilters'];
+  // TODO: remove this when `responseActionsSentinelOneV1Enabled` is enabled and removed
+  setUrlTypeFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlTypeFilters'];
 } => {
   const {
+    agentTypes = [],
     commands,
     statuses,
     hosts: selectedAgentIdsFromUrl,
+    types = [],
     setUrlActionsFilters,
     setUrlHostsFilters,
     setUrlStatusesFilters,
+    setUrlTypesFilters,
+    setUrlTypeFilters,
   } = useActionHistoryUrlParams();
   const isStatusesFilter = filterName === 'statuses';
   const isHostsFilter = filterName === 'hosts';
+  const isTypesFilter = filterName === 'types';
   const { data: endpointsList, isFetching } = useGetEndpointsList({
     searchString,
     selectedAgentIds: selectedAgentIdsFromUrl,
   });
 
-  // track state of selected hosts via URL
-  // when page is loaded via selected hosts on URL
+  // track the state of selected hosts via URL
+  //  when the page is loaded via selected hosts on URL
   const [areHostsSelectedOnMount, setAreHostsSelectedOnMount] = useState<boolean>(false);
   useEffect(() => {
     if (selectedAgentIdsFromUrl && selectedAgentIdsFromUrl.length > 0) {
@@ -211,13 +296,20 @@ export const useActionsLogFilter = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const typesFilterInitialState = useTypesFilterInitialState({
+    isFlyout,
+    agentTypes,
+    types,
+  });
   // filter options
   const [items, setItems] = useState<FilterItems>(
-    isStatusesFilter
+    isTypesFilter
+      ? typesFilterInitialState
+      : isStatusesFilter
       ? RESPONSE_ACTION_STATUS.map((statusName) => ({
           key: statusName,
           label: (
-            <StatusBadge
+            <ResponseActionStatusBadge
               color={
                 statusName === 'successful'
                   ? 'success'
@@ -228,35 +320,29 @@ export const useActionsLogFilter = ({
               status={getActionStatus(statusName)}
             />
           ) as unknown as string,
+          searchableLabel: statusName,
           checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
           'data-test-subj': `${filterName}-filter-option`,
         }))
       : isHostsFilter
       ? []
       : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
-          // `get-file` is currently behind FF
-          if (
-            commandName === 'get-file' &&
-            !ExperimentalFeaturesService.get().responseActionGetFileEnabled
-          ) {
-            return false;
-          }
+          const featureFlags = ExperimentalFeaturesService.get();
 
-          // TODO: remove this when `execute` is no longer behind FF
-          // planned for 8.8
-          if (
-            commandName === 'execute' &&
-            !ExperimentalFeaturesService.get().responseActionExecuteEnabled
-          ) {
+          // upload - v8.9
+          if (commandName === 'upload' && !featureFlags.responseActionUploadEnabled) {
             return false;
           }
 
           return true;
         }).map((commandName) => ({
           key: commandName,
-          label: getUiCommand(commandName),
+          label: RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[commandName],
           checked:
-            !isFlyout && commands?.map((command) => getCommandKey(command)).includes(commandName)
+            !isFlyout &&
+            commands
+              ?.map((command) => RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command])
+              .includes(commandName)
               ? 'on'
               : undefined,
           'data-test-subj': `${filterName}-filter-option`,
@@ -281,7 +367,10 @@ export const useActionsLogFilter = ({
     () => items.filter((item) => item.checked === 'on').length,
     [items]
   );
-  const numFilters = useMemo(() => items.filter((item) => item.checked !== 'on').length, [items]);
+  const numFilters = useMemo(
+    () => items.filter((item) => item.key && item.checked !== 'on').length,
+    [items]
+  );
 
   return {
     areHostsSelectedOnMount,
@@ -295,5 +384,14 @@ export const useActionsLogFilter = ({
     setUrlActionsFilters,
     setUrlHostsFilters,
     setUrlStatusesFilters,
+    setUrlTypeFilters,
+    setUrlTypesFilters,
   };
+};
+
+const getTypeDisplayName = (type: 'manual' | 'automated') => {
+  if (type === 'automated') {
+    return FILTER_TYPE_OPTIONS.automated;
+  }
+  return FILTER_TYPE_OPTIONS.manual;
 };

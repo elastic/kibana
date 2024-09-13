@@ -7,8 +7,8 @@
 
 import React, { useCallback } from 'react';
 import { EuiPortal } from '@elastic/eui';
-import { Router, Switch, useHistory, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { useHistory, Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   useBreadcrumbs,
@@ -17,21 +17,26 @@ import {
   useGetFleetServerHosts,
   useFlyoutContext,
   useGetFleetProxies,
+  useStartServices,
 } from '../../hooks';
 import { FLEET_ROUTING_PATHS, pagePathGetters } from '../../constants';
 import { DefaultLayout } from '../../layouts';
 import { Loading } from '../../components';
+import {
+  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+  SERVERLESS_DEFAULT_OUTPUT_ID,
+} from '../../../../../common/constants';
 
 import { FleetServerFlyout } from '../../components';
 
 import { SettingsPage } from './components/settings_page';
 import { withConfirmModalProvider } from './hooks/use_confirm_modal';
 import { FleetServerHostsFlyout } from './components/fleet_server_hosts_flyout';
-import { EditOutputFlyout } from './components/edit_output_flyout';
 import { useDeleteOutput, useDeleteFleetServerHost, useDeleteProxy } from './hooks';
 import { EditDownloadSourceFlyout } from './components/download_source_flyout';
 import { useDeleteDownloadSource } from './components/download_source_flyout/use_delete_download_source';
 import { FleetProxyFlyout } from './components/edit_fleet_proxy_flyout';
+import { EditOutputFlyout } from './components/edit_output_flyout';
 
 function useSettingsAppData() {
   const outputs = useGetOutputs();
@@ -49,6 +54,8 @@ export const SettingsApp = withConfirmModalProvider(() => {
   const flyoutContext = useFlyoutContext();
 
   const { outputs, fleetServerHosts, downloadSources, proxies } = useSettingsAppData();
+  const outputItems = outputs.data?.items.filter((item) => !item.is_internal);
+  const fleetServerHostsItems = fleetServerHosts.data?.items.filter((item) => !item.is_internal);
 
   const { deleteOutput } = useDeleteOutput(outputs.resendRequest);
   const { deleteDownloadSource } = useDeleteDownloadSource(downloadSources.resendRequest);
@@ -76,11 +83,13 @@ export const SettingsApp = withConfirmModalProvider(() => {
     history,
   ]);
 
+  const { cloud } = useStartServices();
+
   if (
     (outputs.isLoading && outputs.isInitialRequest) ||
-    !outputs.data?.items ||
+    !outputItems ||
     (fleetServerHosts.isLoading && fleetServerHosts.isInitialRequest) ||
-    !fleetServerHosts.data?.items ||
+    !fleetServerHostsItems ||
     (downloadSources.isLoading && downloadSources.isInitialRequest) ||
     !downloadSources.data?.items ||
     (proxies.isLoading && proxies.isInitialRequest) ||
@@ -95,107 +104,126 @@ export const SettingsApp = withConfirmModalProvider(() => {
 
   return (
     <DefaultLayout section="settings">
-      <Router history={history}>
-        <Switch>
-          <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts}>
-            {(route: { match: { params: { itemId: string } } }) => {
-              const fleetServerHost = fleetServerHosts.data?.items.find(
-                (o) => route.match.params.itemId === o.id
-              );
-              if (!fleetServerHost) {
-                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
-              }
+      <Routes>
+        <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts}>
+          {(route: { match: { params: { itemId: string } } | null }) => {
+            const fleetServerHost = fleetServerHostsItems.find(
+              (o) => route.match?.params.itemId === o.id
+            );
+            if (!fleetServerHost) {
+              return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+            }
 
-              return (
-                <EuiPortal>
-                  <FleetServerHostsFlyout
-                    proxies={proxies.data?.items ?? []}
-                    onClose={onCloseCallback}
-                    fleetServerHost={fleetServerHost}
-                  />
-                </EuiPortal>
-              );
-            }}
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts}>
-            <EuiPortal>
+            return (
+              <EuiPortal>
+                <FleetServerHostsFlyout
+                  proxies={proxies.data?.items ?? []}
+                  onClose={onCloseCallback}
+                  fleetServerHost={fleetServerHost}
+                />
+              </EuiPortal>
+            );
+          }}
+        </Route>
+        <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts}>
+          <EuiPortal>
+            {cloud?.isServerlessEnabled ? (
+              <FleetServerHostsFlyout
+                proxies={proxies.data?.items ?? []}
+                onClose={onCloseCallback}
+                defaultFleetServerHost={fleetServerHosts.data?.items.find(
+                  (o) => o.id === SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+                )}
+              />
+            ) : (
               <FleetServerFlyout onClose={onCloseCallback} />
-            </EuiPortal>
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
-            <EuiPortal>
-              <EditOutputFlyout proxies={proxies.data.items} onClose={onCloseCallback} />
-            </EuiPortal>
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_proxy}>
-            <EuiPortal>
-              <FleetProxyFlyout onClose={onCloseCallback} />
-            </EuiPortal>
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_proxy}>
-            {(route: { match: { params: { itemId: string } } }) => {
-              const fleetProxy = proxies.data?.items.find(
-                (item) => route.match.params.itemId === item.id
-              );
-              if (!fleetProxy) {
-                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
-              }
-              return (
-                <EuiPortal>
-                  <FleetProxyFlyout onClose={onCloseCallback} fleetProxy={fleetProxy} />
-                </EuiPortal>
-              );
-            }}
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_edit_outputs}>
-            {(route: { match: { params: { outputId: string } } }) => {
-              const output = outputs.data?.items.find((o) => route.match.params.outputId === o.id);
-              if (!output) {
-                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
-              }
+            )}
+          </EuiPortal>
+        </Route>
+        <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
+          <EuiPortal>
+            <EditOutputFlyout
+              proxies={proxies.data.items}
+              onClose={onCloseCallback}
+              defaultOuput={outputs.data?.items.find((o) => o.id === SERVERLESS_DEFAULT_OUTPUT_ID)}
+            />
+          </EuiPortal>
+        </Route>
+        <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_proxy}>
+          <EuiPortal>
+            <FleetProxyFlyout onClose={onCloseCallback} />
+          </EuiPortal>
+        </Route>
+        <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_proxy}>
+          {(route: { match: { params: { itemId: string } } | null }) => {
+            const fleetProxy = proxies.data?.items.find(
+              (item) => route.match?.params.itemId === item.id
+            );
+            if (!fleetProxy) {
+              return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+            }
+            return (
+              <EuiPortal>
+                <FleetProxyFlyout onClose={onCloseCallback} fleetProxy={fleetProxy} />
+              </EuiPortal>
+            );
+          }}
+        </Route>
+        <Route path={FLEET_ROUTING_PATHS.settings_edit_outputs}>
+          {(route: { match: { params: { outputId: string } } | null }) => {
+            const output = outputItems.find((o) => route.match?.params.outputId === o.id);
+            if (!output) {
+              return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+            }
 
-              return (
-                <EuiPortal>
-                  <EditOutputFlyout
-                    proxies={proxies.data?.items ?? []}
-                    onClose={onCloseCallback}
-                    output={output}
-                  />
-                </EuiPortal>
-              );
-            }}
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_create_download_sources}>
-            <EuiPortal>
-              <EditDownloadSourceFlyout onClose={onCloseCallback} />
-            </EuiPortal>
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.settings_edit_download_sources}>
-            {(route: { match: { params: { downloadSourceId: string } } }) => {
-              const downloadSource = downloadSources.data?.items.find(
-                (o) => route.match.params.downloadSourceId === o.id
-              );
-              if (!downloadSource) {
-                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
-              }
+            return (
+              <EuiPortal>
+                <EditOutputFlyout
+                  proxies={proxies.data?.items ?? []}
+                  onClose={onCloseCallback}
+                  output={output}
+                  defaultOuput={outputs.data?.items.find(
+                    (o) => o.id === SERVERLESS_DEFAULT_OUTPUT_ID
+                  )}
+                />
+              </EuiPortal>
+            );
+          }}
+        </Route>
+        <Route path={FLEET_ROUTING_PATHS.settings_create_download_sources}>
+          <EuiPortal>
+            <EditDownloadSourceFlyout
+              onClose={onCloseCallback}
+              proxies={proxies?.data?.items || []}
+            />
+          </EuiPortal>
+        </Route>
+        <Route path={FLEET_ROUTING_PATHS.settings_edit_download_sources}>
+          {(route: { match: { params: { downloadSourceId: string } } | null }) => {
+            const downloadSource = downloadSources.data?.items.find(
+              (o) => route.match?.params.downloadSourceId === o.id
+            );
+            if (!downloadSource) {
+              return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+            }
 
-              return (
-                <EuiPortal>
-                  <EditDownloadSourceFlyout
-                    onClose={onCloseCallback}
-                    downloadSource={downloadSource}
-                  />
-                </EuiPortal>
-              );
-            }}
-          </Route>
-        </Switch>
-      </Router>
+            return (
+              <EuiPortal>
+                <EditDownloadSourceFlyout
+                  onClose={onCloseCallback}
+                  downloadSource={downloadSource}
+                  proxies={proxies?.data?.items || []}
+                />
+              </EuiPortal>
+            );
+          }}
+        </Route>
+      </Routes>
       <SettingsPage
         deleteFleetProxy={deleteFleetProxy}
         proxies={proxies.data.items}
-        outputs={outputs.data.items}
-        fleetServerHosts={fleetServerHosts.data.items}
+        outputs={outputItems}
+        fleetServerHosts={fleetServerHostsItems}
         deleteOutput={deleteOutput}
         deleteFleetServerHost={deleteFleetServerHost}
         downloadSources={downloadSources.data.items}

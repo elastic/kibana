@@ -7,8 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX } from '../..';
-import { ConnectorStatus } from '../../../common/types/connectors';
+import { CONNECTORS_INDEX, ConnectorStatus } from '@kbn/search-connectors';
 
 import { recreateConnectorDocument } from './post_connector';
 
@@ -31,6 +30,7 @@ describe('recreateConnectorDocument lib function', () => {
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
       document: {
         api_key_id: null,
+        api_key_secret_id: null,
         configuration: {},
         custom_scheduling: {},
         description: null,
@@ -90,6 +90,12 @@ describe('recreateConnectorDocument lib function', () => {
         index_name: 'indexName',
         is_native: false,
         language: '',
+        last_access_control_sync_error: null,
+        last_access_control_sync_scheduled_at: null,
+        last_access_control_sync_status: null,
+        last_deleted_document_count: null,
+        last_incremental_sync_scheduled_at: null,
+        last_indexed_document_count: null,
         last_seen: null,
         last_sync_error: null,
         last_sync_scheduled_at: null,
@@ -97,7 +103,11 @@ describe('recreateConnectorDocument lib function', () => {
         last_synced: null,
         name: 'indexName',
         pipeline: null,
-        scheduling: { enabled: false, interval: '0 0 0 * * ?' },
+        scheduling: {
+          access_control: { enabled: false, interval: '0 0 0 * * ?' },
+          full: { enabled: false, interval: '0 0 0 * * ?' },
+          incremental: { enabled: false, interval: '0 0 0 * * ?' },
+        },
         service_type: 'elastic-crawler',
         status: ConnectorStatus.CONFIGURED,
         sync_now: false,

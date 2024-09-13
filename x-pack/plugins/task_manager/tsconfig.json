@@ -1,15 +1,15 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
+    "common/**/*"
   ],
   "kbn_references": [
-    "@kbn/alerting-state-types",
     "@kbn/core",
     "@kbn/usage-collection-plugin",
     "@kbn/config-schema",
@@ -18,9 +18,16 @@
     "@kbn/safer-lodash-set",
     "@kbn/es-types",
     "@kbn/apm-utils",
-    "@kbn/core-saved-objects-common"
+    "@kbn/core-saved-objects-common",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-saved-objects-server",
+    "@kbn/alerting-state-types",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/logging",
+    "@kbn/core-lifecycle-server",
+    "@kbn/cloud-plugin",
+    "@kbn/core-saved-objects-base-server-internal"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '../../../../locator';
-import { NavigateToPath } from '../../../contexts/kibana';
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import type { MlRoute } from '../../router';
+import { createPath, PageLoader } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { ModelsList } from '../../../model_management';
 import { MlPageHeader } from '../../../components/page_header';
+
+const ModelsList = dynamic(async () => ({
+  default: (await import('../../../model_management/models_list')).ModelsList,
+}));
 
 export const modelsListRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -27,7 +33,7 @@ export const modelsListRouteFactory = (
   title: i18n.translate('xpack.ml.modelManagement.trainedModels.docTitle', {
     defaultMessage: 'Trained Models',
   }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('TRAINED_MODELS', navigateToPath, basePath),
@@ -41,15 +47,9 @@ export const modelsListRouteFactory = (
   'data-test-subj': 'mlPageModelManagement',
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { context } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    basicResolvers(deps)
-  );
+const PageWrapper: FC = () => {
+  const { context } = useRouteResolver('full', ['canGetTrainedModels'], basicResolvers());
+
   return (
     <PageLoader context={context}>
       <MlPageHeader>

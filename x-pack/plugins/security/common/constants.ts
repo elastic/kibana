@@ -15,8 +15,12 @@ export const ALL_SPACES_ID = '*';
  */
 export const UNKNOWN_SPACE = '?';
 
-export const GLOBAL_RESOURCE = '*';
 export const APPLICATION_PREFIX = 'kibana-';
+
+/**
+ * The wildcard identifier for all application privileges.
+ */
+export const PRIVILEGES_ALL_WILDCARD = '*';
 
 /**
  * Reserved application privileges are always assigned to this "wildcard" application.
@@ -62,6 +66,15 @@ export const NAME_REGEX =
   /^(?! )[a-zA-Z0-9 !"#$%&'()*+,\-./\\:;<=>?@\[\]^_`{|}~]*[a-zA-Z0-9!"#$%&'()*+,\-./\\:;<=>?@\[\]^_`{|}~]$/;
 
 /**
+ * Matches valid usernames and role names for serverless offering.
+ *
+ * - Must contain only alphanumeric characters, and non-leading dots, hyphens, or underscores.
+ * - Must not contain white spaces characters.
+ * - Must not have a leading dot, hyphen, or underscore.
+ */
+export const SERVERLESS_NAME_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/;
+
+/**
  * Maximum length of usernames and role names.
  */
 export const MAX_NAME_LENGTH = 1024;
@@ -93,3 +106,8 @@ export const SESSION_EXTENSION_THROTTLE_MS = 60 * 1000;
  * Route to get session info and extend session expiration
  */
 export const SESSION_ROUTE = '/internal/security/session';
+
+/**
+ * Allowed image file types for uploading an image as avatar
+ */
+export const IMAGE_FILE_TYPES = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];

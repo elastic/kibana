@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isEqual } from 'lodash';
@@ -21,9 +22,10 @@ import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
+import { type SavedQueryMenuVisibility, canShowSavedQuery } from './lib/can_show_saved_query';
 import type { UnifiedSearchPublicPluginStart } from '../types';
 
-interface StatefulSearchBarDeps {
+export interface StatefulSearchBarDeps {
   core: CoreStart;
   data: DataPublicPluginStart;
   storage: IStorageWrapper;
@@ -32,14 +34,17 @@ interface StatefulSearchBarDeps {
   unifiedSearch: Omit<UnifiedSearchPublicPluginStart, 'ui'>;
 }
 
-export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> =
-  SearchBarOwnProps<QT> & {
-    appName: string;
-    useDefaultBehaviors?: boolean;
-    savedQueryId?: string;
-    onSavedQueryIdChange?: (savedQueryId?: string) => void;
-    onFiltersUpdated?: (filters: Filter[]) => void;
-  };
+export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> = Omit<
+  SearchBarOwnProps<QT>,
+  'showSaveQuery'
+> & {
+  appName: string;
+  useDefaultBehaviors?: boolean;
+  savedQueryId?: string;
+  saveQueryMenuVisibility?: SavedQueryMenuVisibility;
+  onSavedQueryIdChange?: (savedQueryId?: string) => void;
+  onFiltersUpdated?: (filters: Filter[]) => void;
+};
 
 // Respond to user changing the filters
 const defaultFiltersUpdated = (
@@ -56,13 +61,22 @@ const defaultFiltersUpdated = (
 };
 
 // Respond to user changing the refresh settings
-const defaultOnRefreshChange = (queryService: QueryStart) => {
+const defaultOnRefreshChange = (
+  queryService: QueryStart,
+  onRefreshChange?: (payload: { isPaused: boolean; refreshInterval: number }) => void
+) => {
   const { timefilter } = queryService.timefilter;
   return (options: { isPaused: boolean; refreshInterval: number }) => {
     timefilter.setRefreshInterval({
       value: options.refreshInterval,
       pause: options.isPaused,
     });
+    if (onRefreshChange) {
+      onRefreshChange({
+        refreshInterval: options.refreshInterval,
+        isPaused: options.isPaused,
+      });
+    }
   };
 };
 
@@ -158,7 +172,7 @@ export function createSearchBar({
       query: props.query,
       queryStringManager: data.query.queryString,
     }) as { query: QT };
-    const { timeRange, refreshInterval } = useTimefilter({
+    const { timeRange, refreshInterval, minRefreshInterval } = useTimefilter({
       dateRangeFrom: props.dateRangeFrom,
       dateRangeTo: props.dateRangeTo,
       refreshInterval: props.refreshInterval,
@@ -185,6 +199,12 @@ export function createSearchBar({
       );
     }, [query, timeRange, useDefaultBehaviors]);
 
+    const showSaveQuery = canShowSavedQuery({
+      saveQueryMenuVisibility: props.saveQueryMenuVisibility,
+      query,
+      core,
+    });
+
     return (
       <KibanaContextProvider
         services={{
@@ -203,7 +223,7 @@ export function createSearchBar({
             showFilterBar={props.showFilterBar}
             showQueryMenu={props.showQueryMenu}
             showQueryInput={props.showQueryInput}
-            showSaveQuery={props.showSaveQuery}
+            showSaveQuery={showSaveQuery}
             showSubmitButton={props.showSubmitButton}
             submitButtonStyle={props.submitButtonStyle}
             isDisabled={props.isDisabled}
@@ -213,30 +233,41 @@ export function createSearchBar({
             timeHistory={data.query.timefilter.history}
             dateRangeFrom={timeRange.from}
             dateRangeTo={timeRange.to}
+            minRefreshInterval={minRefreshInterval}
             refreshInterval={refreshInterval.value}
             isRefreshPaused={refreshInterval.pause}
+            isLoading={props.isLoading}
+            onCancel={props.onCancel}
             filters={filters}
             query={query}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
-            onRefreshChange={defaultOnRefreshChange(data.query)}
+            onRefreshChange={
+              !props.isAutoRefreshDisabled
+                ? defaultOnRefreshChange(data.query, props.onRefreshChange)
+                : undefined
+            }
             savedQuery={savedQuery}
             onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
+            onRefresh={props.onRefresh}
             onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
             onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
             onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
             iconType={props.iconType}
             nonKqlMode={props.nonKqlMode}
             customSubmitButton={props.customSubmitButton}
+            dataViewPickerOverride={props.dataViewPickerOverride}
             isClearable={props.isClearable}
             placeholder={props.placeholder}
+            additionalQueryBarMenuItems={props.additionalQueryBarMenuItems}
             {...overrideDefaultBehaviors(props)}
             dataViewPickerComponentProps={props.dataViewPickerComponentProps}
             textBasedLanguageModeErrors={props.textBasedLanguageModeErrors}
-            onTextBasedSavedAndExit={props.onTextBasedSavedAndExit}
+            textBasedLanguageModeWarning={props.textBasedLanguageModeWarning}
             displayStyle={props.displayStyle}
             isScreenshotMode={isScreenshotMode}
             dataTestSubj={props.dataTestSubj}
             filtersForSuggestions={props.filtersForSuggestions}
+            prependFilterBar={props.prependFilterBar}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

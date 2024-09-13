@@ -10,7 +10,7 @@ import { EuiConfirmModal } from '@elastic/eui';
 
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
-import { BulkActionType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
 import type { BulkActionForConfirmation, DryRunResult } from './types';
@@ -20,10 +20,12 @@ const getActionRejectedTitle = (
   failedRulesCount: number
 ) => {
   switch (bulkAction) {
-    case BulkActionType.edit:
+    case BulkActionTypeEnum.edit:
       return i18n.BULK_EDIT_CONFIRMATION_REJECTED_TITLE(failedRulesCount);
-    case BulkActionType.export:
+    case BulkActionTypeEnum.export:
       return i18n.BULK_EXPORT_CONFIRMATION_REJECTED_TITLE(failedRulesCount);
+    case BulkActionTypeEnum.run:
+      return i18n.BULK_MANUAL_RULE_RUN_CONFIRMATION_REJECTED_TITLE(failedRulesCount);
     default:
       assertUnreachable(bulkAction);
   }
@@ -34,10 +36,12 @@ const getActionConfirmLabel = (
   succeededRulesCount: number
 ) => {
   switch (bulkAction) {
-    case BulkActionType.edit:
+    case BulkActionTypeEnum.edit:
       return i18n.BULK_EDIT_CONFIRMATION_CONFIRM(succeededRulesCount);
-    case BulkActionType.export:
+    case BulkActionTypeEnum.export:
       return i18n.BULK_EXPORT_CONFIRMATION_CONFIRM(succeededRulesCount);
+    case BulkActionTypeEnum.run:
+      return i18n.BULK_MANUAL_RULE_RUN_CONFIRMATION_CONFIRM(succeededRulesCount);
     default:
       assertUnreachable(bulkAction);
   }

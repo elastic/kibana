@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Readable } from 'stream';
@@ -30,6 +31,7 @@ import {
   getPreservedOrderComparator,
   type SavedObjectComparator,
 } from './utils';
+import { EXPORT_ALL_TYPES_TOKEN } from './constants';
 
 /**
  * @internal
@@ -39,6 +41,7 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
   readonly #exportSizeLimit: number;
   readonly #typeRegistry: ISavedObjectTypeRegistry;
   readonly #log: Logger;
+  readonly #exportableTypes: string[];
 
   constructor({
     savedObjectsClient,
@@ -55,6 +58,9 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
     this.#savedObjectsClient = savedObjectsClient;
     this.#exportSizeLimit = exportSizeLimit;
     this.#typeRegistry = typeRegistry;
+    this.#exportableTypes = this.#typeRegistry
+      .getImportableAndExportableTypes()
+      .map((type) => type.name);
   }
 
   public async exportByTypes(options: SavedObjectsExportByTypeOptions) {
@@ -146,6 +152,10 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
     hasReference,
     search,
   }: SavedObjectsExportByTypeOptions) {
+    if (types.includes(EXPORT_ALL_TYPES_TOKEN)) {
+      types = this.#exportableTypes;
+    }
+
     const finder = this.#savedObjectsClient.createPointInTimeFinder({
       type: types,
       hasReference,

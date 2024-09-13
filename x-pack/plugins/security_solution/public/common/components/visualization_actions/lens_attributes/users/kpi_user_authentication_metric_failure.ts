@@ -29,6 +29,7 @@ export const kpiUserAuthenticationsMetricFailureLensAttributes: LensAttributes =
         meta: {
           alias: null,
           disabled: false,
+          // @ts-expect-error upgrade typescript v4.9.5
           indexRefName: 'filter-index-pattern-0',
           key: 'query',
           negate: false,
@@ -61,10 +62,11 @@ export const kpiUserAuthenticationsMetricFailureLensAttributes: LensAttributes =
                   query: 'event.outcome : "failure" ',
                 },
                 isBucketed: false,
-                label: '',
+                label: ' ',
                 operationType: 'count',
                 scale: 'ratio',
                 sourceField: '___records___',
+                customLabel: true,
               },
             },
             incompleteColumns: {},

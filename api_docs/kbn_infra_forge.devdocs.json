@@ -1,0 +1,189 @@
+{
+  "id": "@kbn/infra-forge",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/infra-forge",
+        "id": "def-common.cleanup",
+        "type": "Function",
+        "tags": [],
+        "label": "cleanup",
+        "description": [],
+        "signature": [
+          "({ esClient, logger }: { esClient: ",
+          "default",
+          "; logger: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; }) => Promise<void>"
+        ],
+        "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/infra-forge",
+            "id": "def-common.cleanup.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ esClient, logger }",
+            "description": [],
+            "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/infra-forge",
+                "id": "def-common.cleanup.$1.esClient",
+                "type": "Object",
+                "tags": [],
+                "label": "esClient",
+                "description": [],
+                "signature": [
+                  "default"
+                ],
+                "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/infra-forge",
+                "id": "def-common.cleanup.$1.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/infra-forge",
+        "id": "def-common.generate",
+        "type": "Function",
+        "tags": [],
+        "label": "generate",
+        "description": [],
+        "signature": [
+          "({ esClient, lookback, logger, }: { esClient: ",
+          "default",
+          "; lookback: string; logger: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; }) => Promise<string>"
+        ],
+        "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/infra-forge",
+            "id": "def-common.generate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  esClient,\n  lookback,\n  logger,\n}",
+            "description": [],
+            "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/infra-forge",
+                "id": "def-common.generate.$1.esClient",
+                "type": "Object",
+                "tags": [],
+                "label": "esClient",
+                "description": [],
+                "signature": [
+                  "default"
+                ],
+                "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/infra-forge",
+                "id": "def-common.generate.$1.lookback",
+                "type": "string",
+                "tags": [],
+                "label": "lookback",
+                "description": [],
+                "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/infra-forge",
+                "id": "def-common.generate.$1.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "x-pack/packages/kbn-infra-forge/src/run.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

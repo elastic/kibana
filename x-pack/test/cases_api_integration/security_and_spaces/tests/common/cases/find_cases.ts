@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import expect from '@kbn/expect';
-import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import {
-  CaseResponse,
+  CASES_URL,
+  MAX_ASSIGNEES_FILTER_LENGTH,
+  MAX_CASES_PER_PAGE,
+  MAX_CATEGORY_FILTER_LENGTH,
+  MAX_REPORTERS_FILTER_LENGTH,
+  MAX_TAGS_FILTER_LENGTH,
+} from '@kbn/cases-plugin/common/constants';
+import {
+  Case,
   CaseSeverity,
   CaseStatuses,
-  CommentType,
-} from '@kbn/cases-plugin/common/api';
+  AttachmentType,
+} from '@kbn/cases-plugin/common/types/domain';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -96,6 +104,29 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('can filter by reserved kql characters in tags', async () => {
+        const tagsColon = ['super:bad:case'];
+        const tagsSlashQuote = ['awesome\\"'];
+
+        const postedCase1 = await createCase(supertest, { ...postCaseReq, tags: tagsSlashQuote });
+        const postedCase2 = await createCase(supertest, {
+          ...postCaseReq,
+          tags: tagsColon,
+        });
+
+        const cases = await findCases({
+          supertest,
+          query: { tags: [...tagsColon, ...tagsSlashQuote] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [postedCase1, postedCase2],
+          count_open_cases: 2,
+        });
+      });
+
       it('filters by status', async () => {
         await createCase(supertest, postCaseReq);
         const toCloseCase = await createCase(supertest, postCaseReq);
@@ -121,6 +152,36 @@ export default ({ getService }: FtrProviderContext): void => {
           count_open_cases: 1,
           count_closed_cases: 1,
           count_in_progress_cases: 0,
+        });
+      });
+
+      it('filter by multiple status', async () => {
+        const openCase = await createCase(supertest, postCaseReq);
+        const toCloseCase = await createCase(supertest, postCaseReq);
+        const closedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: toCloseCase.id,
+                version: toCloseCase.version,
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+        });
+
+        const cases = await findCases({
+          supertest,
+          query: { status: [CaseStatuses.closed, CaseStatuses.open] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [openCase, closedCases[0]],
+          count_open_cases: 1,
+          count_closed_cases: 1,
         });
       });
 
@@ -160,6 +221,58 @@ export default ({ getService }: FtrProviderContext): void => {
           ...findCasesResp,
           total: 0,
           cases: [],
+        });
+      });
+
+      it('filters by multiple severities', async () => {
+        const lowSeverityCase = await createCase(supertest, postCaseReq);
+        const criticalSeverityCase = await createCase(supertest, {
+          ...postCaseReq,
+          severity: CaseSeverity.CRITICAL,
+        });
+
+        const cases = await findCases({
+          supertest,
+          query: { severity: [CaseSeverity.LOW, CaseSeverity.CRITICAL] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [lowSeverityCase, criticalSeverityCase],
+          count_open_cases: 2,
+        });
+      });
+
+      it('filters by a single category', async () => {
+        await createCase(supertest, postCaseReq);
+        const foobarCategory = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
+
+        const cases = await findCases({ supertest, query: { category: ['foobar'] } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [foobarCategory],
+          count_open_cases: 1,
+        });
+      });
+
+      it('filters by multiple categories', async () => {
+        await createCase(supertest, postCaseReq);
+        const foobarCategory = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
+        const otherCategory = await createCase(supertest, { ...postCaseReq, category: 'other' });
+
+        const cases = await findCases({
+          supertest,
+          query: { category: ['foobar', 'other'] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [foobarCategory, otherCategory],
+          count_open_cases: 2,
         });
       });
 
@@ -238,50 +351,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(cases.count_in_progress_cases).to.eql(1);
       });
 
-      it('returns the correct fields', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        // all fields that contain the UserRt definition must be included here (aka created_by, closed_by, and updated_by)
-        // see https://github.com/elastic/kibana/issues/139503
-        const queryFields: Array<keyof CaseResponse | Array<keyof CaseResponse>> = [
-          ['title', 'created_by', 'closed_by', 'updated_by'],
-          ['title', 'description', 'created_by', 'closed_by', 'updated_by'],
-        ];
-
-        for (const fields of queryFields) {
-          const cases = await findCases({ supertest, query: { fields } });
-          const fieldsAsArray = Array.isArray(fields) ? fields : [fields];
-
-          const expectedValues = fieldsAsArray.reduce(
-            (theCase, field) => ({
-              ...theCase,
-              [field]: postedCase[field],
-            }),
-            {}
-          );
-
-          expect(cases).to.eql({
-            ...findCasesResp,
-            total: 1,
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                external_service: postedCase.external_service,
-                owner: postedCase.owner,
-                connector: postedCase.connector,
-                severity: postedCase.severity,
-                status: postedCase.status,
-                comments: [],
-                totalAlerts: 0,
-                totalComment: 0,
-                ...expectedValues,
-              },
-            ],
-            count_open_cases: 1,
-          });
-        }
-      });
-
       it('sorts by title', async () => {
         const case3 = await createCase(supertest, { ...postCaseReq, title: 'c' });
         const case2 = await createCase(supertest, { ...postCaseReq, title: 'b' });
@@ -299,20 +368,6 @@ export default ({ getService }: FtrProviderContext): void => {
           count_open_cases: 3,
         });
       });
-
-      it('unhappy path - 400s when bad query supplied', async () => {
-        await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
-      });
-
-      for (const field of ['owner', 'tags', 'severity', 'status']) {
-        it(`should return a 400 when attempting to query a keyword field [${field}] when using a wildcard query`, async () => {
-          await findCases({
-            supertest,
-            query: { searchFields: [field], search: 'some search string*' },
-            expectedHttpCode: 400,
-          });
-        });
-      }
 
       it('sorts by severity', async () => {
         const case4 = await createCase(supertest, {
@@ -382,7 +437,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('should successfully find a case with a valid uuid in title', async () => {
-          const uuid = uuidv1();
+          const uuid = uuidv4();
           await createCase(supertest, { ...postCaseReq, title: uuid });
 
           const cases = await findCases({
@@ -394,8 +449,8 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(cases.cases[0].title).to.equal(uuid);
         });
 
-        it('should successfully find a case with a valid uuid in title', async () => {
-          const uuid = uuidv1();
+        it('should successfully find a case with a valid uuid in description', async () => {
+          const uuid = uuidv4();
           await createCase(supertest, { ...postCaseReq, description: uuid });
 
           const cases = await findCases({
@@ -424,6 +479,83 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(cases.total).to.be(1);
         });
+      });
+    });
+
+    describe('errors', () => {
+      it('unhappy path - 400s when bad query supplied', async () => {
+        await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
+      });
+
+      for (const field of ['owner', 'tags', 'severity', 'status']) {
+        it(`should return a 400 when attempting to query a keyword field [${field}] when using a wildcard query`, async () => {
+          await findCases({
+            supertest,
+            query: { searchFields: [field], search: 'some search string*' },
+            expectedHttpCode: 400,
+          });
+        });
+      }
+
+      for (const scenario of [
+        { fieldName: 'category', sizeLimit: MAX_CATEGORY_FILTER_LENGTH },
+        { fieldName: 'tags', sizeLimit: MAX_TAGS_FILTER_LENGTH },
+        { fieldName: 'assignees', sizeLimit: MAX_ASSIGNEES_FILTER_LENGTH },
+        { fieldName: 'reporters', sizeLimit: MAX_REPORTERS_FILTER_LENGTH },
+      ]) {
+        it(`unhappy path - 400s when the field ${scenario.fieldName} exceeds the size limit`, async () => {
+          const value = Array(scenario.sizeLimit + 1).fill('foobar');
+
+          await findCases({
+            supertest,
+            query: { [scenario.fieldName]: value },
+            expectedHttpCode: 400,
+          });
+        });
+      }
+
+      it('400s when trying to fetch with invalid searchField', async () => {
+        await findCases({
+          supertest,
+          query: { searchFields: 'closed_by.username', search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to fetch with invalid array of searchFields', async () => {
+        await findCases({
+          supertest,
+          query: { searchFields: ['closed_by.username', 'title'], search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to fetch with invalid sortField', async () => {
+        await findCases({
+          supertest,
+          query: { sortField: 'foobar', search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to fetch with rootSearchFields', async () => {
+        await findCases({
+          supertest,
+          query: { rootSearchFields: ['_id'], search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it(`400s when perPage > ${MAX_CASES_PER_PAGE} supplied`, async () => {
+        await findCases({
+          supertest,
+          query: { perPage: MAX_CASES_PER_PAGE + 1 },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to fetch more than 10,000 documents', async () => {
+        await findCases({ supertest, query: { page: 209, perPage: 100 }, expectedHttpCode: 400 });
       });
     });
 
@@ -456,7 +588,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId,
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -500,7 +632,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllCaseItems(es);
       });
 
-      const createCasesWithTitleAsNumber = async (total: number): Promise<CaseResponse[]> => {
+      const createCasesWithTitleAsNumber = async (total: number): Promise<Case[]> => {
         const responsePromises = [];
         for (let i = 0; i < total; i++) {
           // this doesn't guarantee that the cases will be created in order that the for-loop executes,
@@ -523,7 +655,7 @@ export default ({ getService }: FtrProviderContext): void => {
        */
       const getAllCasesSortedByCreatedAtAsc = async () => {
         const cases = await es.search<CaseAttributes>({
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           body: {
             size: 10000,
             sort: [{ 'cases.created_at': { unmapped_type: 'date', order: 'asc' } }],
@@ -814,45 +946,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
 
-      it('should return the correct cases when trying to exploit RBAC through the search query parameter', async () => {
-        await Promise.all([
-          // super user creates a case with owner securitySolutionFixture
-          createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-            200,
-            {
-              user: superUser,
-              space: 'space1',
-            }
-          ),
-          // super user creates a case with owner observabilityFixture
-          createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'observabilityFixture' }),
-            200,
-            {
-              user: superUser,
-              space: 'space1',
-            }
-          ),
-        ]);
-
-        const res = await findCases({
-          supertest: supertestWithoutAuth,
-          query: {
-            search: 'securitySolutionFixture observabilityFixture',
-            searchFields: 'owner',
-          },
-          auth: {
-            user: secOnly,
-            space: 'space1',
-          },
-        });
-
-        ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
-      });
-
       // This test is to prevent a future developer to add the filter attribute without taking into consideration
       // the authorizationFilter produced by the cases authorization class
       it('should NOT allow to pass a filter query parameter', async () => {
@@ -863,6 +956,14 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send()
           .expect(400);
+      });
+
+      it('should NOT allow to pass non-valid fields query parameter', async () => {
+        await findCases({
+          supertest,
+          query: { searchFields: ['foobar'], search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
       });
 
       // This test ensures that the user is not allowed to define the namespaces query param
@@ -915,7 +1016,6 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest: supertestWithoutAuth,
           query: {
             owner: 'securitySolutionFixture',
-            searchFields: 'owner',
           },
           auth: {
             user: obsSec,

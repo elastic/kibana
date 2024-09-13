@@ -15,9 +15,9 @@
       "controls",
       "inspector",
       "navigation",
-      "savedObjects",
       "savedObjectsFinder",
       "savedObjectsManagement",
+      "contentManagement",
       "share",
       "screenshotMode",
       "uiActions",
@@ -32,12 +32,17 @@
       "savedObjectsTaggingOss",
       "screenshotMode",
       "usageCollection",
-      "taskManager"
+      "taskManager",
+      "serverless",
+      "noDataPage",
+      "observabilityAIAssistant"
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "presentationUtil"
+      "presentationUtil",
+      "presentationPanel",
+      "savedObjects"
     ]
   }
 }

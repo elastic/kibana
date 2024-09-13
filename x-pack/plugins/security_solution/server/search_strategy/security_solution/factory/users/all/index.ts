@@ -7,8 +7,10 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import _ from 'lodash';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
@@ -17,32 +19,34 @@ import { buildUsersQuery } from './query.all_users.dsl';
 import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
 import type {
   User,
-  UsersRequestOptions,
   UsersStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/users/all';
 import type { AllUsersAggEsItem } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
 import type { RiskSeverity, UserRiskScore } from '../../../../../../common/search_strategy';
 import {
-  RiskScoreEntity,
   buildUserNamesFilter,
   getUserRiskIndex,
+  RiskScoreEntity,
+  RiskQueries,
 } from '../../../../../../common/search_strategy';
+import { buildAssetCriticalityQuery } from '../../asset_criticality/query.asset_criticality.dsl';
+import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
+import type { AssetCriticalityRecord } from '../../../../../../common/api/entity_analytics';
 
 export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
-  buildDsl: (options: UsersRequestOptions) => {
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildUsersQuery(options);
   },
   parse: async (
-    options: UsersRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>,
     deps?: {
       esClient: IScopedClusterClient;
       spaceId?: string;
-      // endpointContext: EndpointAppContext;
     }
   ): Promise<UsersStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
@@ -74,7 +78,13 @@ export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
     const edges = users.splice(cursorStart, querySize - cursorStart);
     const userNames = edges.map(({ name }) => name);
     const enhancedEdges = deps?.spaceId
-      ? await enhanceEdges(edges, userNames, deps.spaceId, deps.esClient)
+      ? await enhanceEdges(
+          edges,
+          userNames,
+          deps.spaceId,
+          deps.esClient,
+          options.isNewRiskScoreModuleInstalled
+        )
       : edges;
 
     return {
@@ -95,39 +105,40 @@ async function enhanceEdges(
   edges: User[],
   userNames: string[],
   spaceId: string,
-  esClient: IScopedClusterClient
+  esClient: IScopedClusterClient,
+  isNewRiskScoreModuleInstalled: boolean
 ): Promise<User[]> {
-  const userRiskData = await getUserRiskData(esClient, spaceId, userNames);
-  const usersRiskByUserName: Record<string, RiskSeverity> | undefined =
-    userRiskData?.hits.hits.reduce(
-      (acc, hit) => ({
-        ...acc,
-        [hit._source?.user.name ?? '']: hit._source?.user?.risk?.calculated_level,
-      }),
-      {}
-    );
+  const [riskByUserName, criticalityByUserName] = await Promise.all([
+    getUserRiskData(esClient, spaceId, userNames, isNewRiskScoreModuleInstalled).then(
+      buildRecordFromAggs('user.name', 'user.risk.calculated_level')
+    ),
+    getUserCriticalityData(esClient, userNames).then(
+      buildRecordFromAggs('id_value', 'criticality_level')
+    ),
+  ]);
 
-  return usersRiskByUserName
-    ? edges.map(({ name, lastSeen, domain }) => ({
-        name,
-        lastSeen,
-        domain,
-        risk: usersRiskByUserName[name ?? ''],
-      }))
-    : edges;
+  return edges.map(({ name, lastSeen, domain }) => ({
+    name,
+    lastSeen,
+    domain,
+    risk: riskByUserName?.[name ?? ''] as RiskSeverity,
+    criticality: criticalityByUserName?.[name ?? ''],
+  }));
 }
 
-async function getUserRiskData(
+export async function getUserRiskData(
   esClient: IScopedClusterClient,
   spaceId: string,
-  userNames: string[]
+  userNames: string[],
+  isNewRiskScoreModuleInstalled: boolean
 ) {
   try {
     const userRiskResponse = await esClient.asCurrentUser.search<UserRiskScore>(
       buildRiskScoreQuery({
-        defaultIndex: [getUserRiskIndex(spaceId)],
+        defaultIndex: [getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)],
         filterQuery: buildUserNamesFilter(userNames),
         riskScoreEntity: RiskScoreEntity.user,
+        factoryQueryType: RiskQueries.usersRiskScore,
       })
     );
     return userRiskResponse;
@@ -138,3 +149,33 @@ async function getUserRiskData(
     return undefined;
   }
 }
+
+export async function getUserCriticalityData(esClient: IScopedClusterClient, hostNames: string[]) {
+  try {
+    const criticalityResponse = await esClient.asCurrentUser.search<AssetCriticalityRecord>(
+      buildAssetCriticalityQuery({
+        defaultIndex: [getAssetCriticalityIndex('default')], // TODO:(@tiansivive) move to constant or import from somewhere else
+        filterQuery: { terms: { id_value: hostNames } },
+      })
+    );
+    return criticalityResponse;
+  } catch (error) {
+    if (error?.meta?.body?.error?.type !== 'index_not_found_exception') {
+      throw error;
+    }
+    return undefined;
+  }
+}
+
+const buildRecordFromAggs =
+  (key: string, path: string) =>
+  <T>(
+    data: SearchResponse<T, Record<string, AggregationsAggregate>> | undefined
+  ): Record<string, string> | undefined =>
+    data?.hits.hits.reduce(
+      (acc, hit) => ({
+        ...acc,
+        [_.get(hit._source, key) || '']: _.get(hit._source, path),
+      }),
+      {}
+    );

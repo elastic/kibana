@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { errors } from '@elastic/elasticsearch';
@@ -13,10 +14,10 @@ import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import { ERROR_OUTSIDE_PREBOOT_STAGE, ERROR_PING_FAILURE } from '../../common';
-import { interactiveSetupMock } from '../mocks';
 import { routeDefinitionParamsMock } from './index.mock';
 import { definePingRoute } from './ping';
+import { ERROR_OUTSIDE_PREBOOT_STAGE, ERROR_PING_FAILURE } from '../../common';
+import { interactiveSetupMock } from '../mocks';
 
 describe('Configure routes', () => {
   let router: jest.Mocked<IRouter>;

@@ -6,8 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
-
 import type { ConfigType } from '../../../../config';
 import type { SignalSource, SimpleHit } from '../types';
 import type { CompleteRule, RuleParams } from '../../rule_schema';
@@ -17,7 +15,7 @@ import type { BuildReasonMessage } from '../utils/reason_formatters';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
-} from '../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../common/api/detection_engine/model/alerts';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export const wrapHitsFactory =
@@ -28,6 +26,7 @@ export const wrapHitsFactory =
     spaceId,
     indicesToQuery,
     alertTimestampOverride,
+    publicBaseUrl,
     ruleExecutionLogger,
   }: {
     completeRule: CompleteRule<RuleParams>;
@@ -36,6 +35,7 @@ export const wrapHitsFactory =
     spaceId: string | null | undefined;
     indicesToQuery: string[];
     alertTimestampOverride: Date | undefined;
+    publicBaseUrl: string | undefined;
     ruleExecutionLogger: IRuleExecutionLogForExecutors;
   }) =>
   (
@@ -45,27 +45,32 @@ export const wrapHitsFactory =
     const wrappedDocs = events.map((event): WrappedFieldsLatest<BaseFieldsLatest> => {
       const id = generateId(
         event._index,
-        event._id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        event._id!,
         String(event._version),
         `${spaceId}:${completeRule.alertId}`
       );
+
+      const baseAlert = buildBulkBody(
+        spaceId,
+        completeRule,
+        event as SimpleHit,
+        mergeStrategy,
+        ignoreFields,
+        true,
+        buildReasonMessage,
+        indicesToQuery,
+        alertTimestampOverride,
+        ruleExecutionLogger,
+        id,
+        publicBaseUrl
+      );
+
       return {
         _id: id,
         _index: '',
         _source: {
-          ...buildBulkBody(
-            spaceId,
-            completeRule,
-            event as SimpleHit,
-            mergeStrategy,
-            ignoreFields,
-            true,
-            buildReasonMessage,
-            indicesToQuery,
-            alertTimestampOverride,
-            ruleExecutionLogger
-          ),
-          [ALERT_UUID]: id,
+          ...baseAlert,
         },
       };
     });

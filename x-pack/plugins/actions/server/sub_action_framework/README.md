@@ -350,7 +350,7 @@ plugins.actions.registerSubActionConnectorType({
   name: 'Test: Sub action connector',
   minimumLicenseRequired: 'platinum' as const,
   schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
-  Service: TestSubActionConnector,
+  getService: (params) => new TestSubActionConnector(params),
   renderParameterTemplates: renderTestTemplate
 });
 ```
@@ -368,6 +368,6 @@ plugins.actions.registerSubActionConnectorType({
   minimumLicenseRequired: 'platinum' as const,
   schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
   validators: [{type: ValidatorType.CONFIG, validate: urlAllowListValidator('url')}]
-  Service: TestSubActionConnector,
+  getService: (params) => new TestSubActionConnector(params),
 });
 ```

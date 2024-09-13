@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 import {
   alertComment,
   basicCase,
@@ -13,7 +13,7 @@ import {
   caseUserActions,
   getAlertUserAction,
 } from '../../containers/mock';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import type { CaseViewProps } from './types';
 
 export const alertsHit = [
@@ -63,7 +63,7 @@ export const caseViewProps: CaseViewProps = {
   ],
 };
 
-export const caseData: Case = {
+export const caseData: CaseUI = {
   ...basicCase,
   comments: [...basicCase.comments, alertComment],
   connector: {
@@ -96,7 +96,7 @@ export const defaultUpdateCaseState = {
   isLoading: false,
   isError: false,
   updateKey: null,
-  updateCaseProperty: jest.fn(),
+  mutate: jest.fn(),
 };
 
 export const defaultUseFindCaseUserActions = {

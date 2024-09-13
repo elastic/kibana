@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
@@ -16,9 +17,9 @@ import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
 } from '../no_data/dashboard_app_no_data';
-import { DashboardRedirect } from '../types';
 import { pluginServices } from '../../services/plugin_services';
 import { getDashboardBreadcrumb } from '../_dashboard_app_strings';
+import { DashboardRedirect } from '../../dashboard_container/types';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
 
@@ -37,16 +38,17 @@ export const DashboardListingPage = ({
 }: DashboardListingPageProps) => {
   const {
     data: { query },
+    serverless,
     chrome: { setBreadcrumbs },
-    dashboardSavedObject: { findDashboards },
+    dashboardContentManagement: { findDashboards },
   } = pluginServices.getServices();
 
-  const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  const [showNoDataPage, setShowNoDataPage] = useState<boolean | undefined>();
   useEffect(() => {
     let isMounted = true;
     (async () => {
       const isInNoDataState = await isDashboardAppInNoDataState();
-      if (isInNoDataState && isMounted) setShowNoDataPage(true);
+      setShowNoDataPage(isInNoDataState && isMounted);
     })();
     return () => {
       isMounted = false;
@@ -59,7 +61,13 @@ export const DashboardListingPage = ({
         text: getDashboardBreadcrumb(),
       },
     ]);
-  }, [setBreadcrumbs]);
+
+    if (serverless?.setBreadcrumbs) {
+      // if serverless breadcrumbs available,
+      // reset any deeper context breadcrumbs to only keep the main "dashboard" part that comes from the navigation config
+      serverless.setBreadcrumbs([]);
+    }
+  }, [setBreadcrumbs, serverless]);
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
@@ -84,6 +92,10 @@ export const DashboardListingPage = ({
   }, [title, redirectTo, query, kbnUrlStateStorage, findDashboards]);
 
   const titleFilter = title ? `${title}` : '';
+
+  if (showNoDataPage === undefined) {
+    return null;
+  }
 
   return (
     <>

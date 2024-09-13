@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { PostTransformsPreviewRequestSchema } from '../../../common/api_schemas/transforms';
+import type { PostTransformsPreviewRequestSchema } from '../../../server/routes/api_schemas/transforms';
 
-import { TransformConfigQuery } from './request';
+import type { TransformConfigQuery } from './request';
 
 export const INIT_MAX_COLUMNS = 20;
 

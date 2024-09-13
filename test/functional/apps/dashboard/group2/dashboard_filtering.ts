@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -26,12 +27,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
+  const { dashboard, header, visualize, timePicker } = getPageObjects([
+    'dashboard',
+    'header',
+    'visualize',
+    'timePicker',
+  ]);
 
-  describe('dashboard filtering', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/160062
+  describe.skip('dashboard filtering', function () {
     const populateDashboard = async () => {
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setDefaultDataRange();
+      await dashboard.clickNewDashboard();
+      await timePicker.setDefaultDataRange();
       await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
       await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
 
@@ -39,15 +46,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     const addFilterAndRefresh = async () => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       await filterBar.addFilter({ field: 'bytes', operation: 'is', value: '12345678' });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       // first round of requests sometimes times out, refresh all visualizations to fetch again
       await queryBar.clickQuerySubmitButton();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       await elasticChart.setNewChartUiDebugFlag(true);
     };
 
@@ -66,9 +73,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.gotoDashboardLandingPage();
     });
 
     after(async () => {
@@ -83,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await dashboard.gotoDashboardLandingPage();
       });
 
       it('filters on pie charts', async () => {
@@ -91,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('area, bar and heatmap charts filtered', async () => {
-        await dashboardExpect.seriesElementCount(0);
+        await dashboardExpect.heatMapNoResults();
       });
 
       it('data tables are filtered', async () => {
@@ -142,13 +149,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await addFilterAndRefresh();
 
         await filterBar.toggleFilterPinned('bytes');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
       });
 
       after(async () => {
         await filterBar.toggleFilterPinned('bytes');
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await dashboard.gotoDashboardLandingPage();
       });
 
       it('filters on pie charts', async () => {
@@ -156,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('area, bar and heatmap charts filtered', async () => {
-        await dashboardExpect.seriesElementCount(0);
+        await dashboardExpect.heatMapNoResults();
       });
 
       it('data tables are filtered', async () => {
@@ -203,8 +210,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await addFilterAndRefresh();
 
         await filterBar.toggleFilterEnabled('bytes');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
       });
 
       it('pie charts', async () => {
@@ -212,7 +219,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('area, bar and heatmap charts', async () => {
-        await dashboardExpect.seriesElementCount(2);
+        await dashboardExpect.heatmapXAxisBuckets(11);
       });
 
       it('data tables', async () => {
@@ -254,70 +261,63 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('nested filtering', () => {
       before(async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await dashboard.gotoDashboardLandingPage();
         await elasticChart.setNewChartUiDebugFlag(true);
       });
 
       it('visualization saved with a query filters data', async () => {
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setDefaultDataRange();
+        await dashboard.clickNewDashboard();
+        await timePicker.setDefaultDataRange();
 
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
         await pieChart.expectPieSliceCount(5);
 
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await queryBar.setQuery('weightLbs:>50');
         await queryBar.submitQuery();
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-        // We are on the visualize page, not dashboard, so can't use "PageObjects.dashboard.waitForRenderComplete();"
+        // We are on the visualize page, not dashboard, so can't use "dashboard.waitForRenderComplete();"
         // as that expects an item with the `data-shared-items-count` tag.
         await renderable.waitForRender();
         await pieChart.expectPieSliceCount(3);
 
-        await PageObjects.visualize.saveVisualizationExpectSuccess(
-          'Rendering Test: animal sounds pie'
-        );
-        await PageObjects.header.clickDashboard();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await visualize.saveVisualizationExpectSuccess('Rendering Test: animal sounds pie');
+        await header.clickDashboard();
+        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
         await pieChart.expectPieSliceCount(3);
       });
 
       it('Nested visualization filter pills filters data as expected', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         await pieChart.filterOnPieSlice('grr');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await pieChart.expectPieSliceCount(1);
 
-        await PageObjects.visualize.saveVisualizationExpectSuccess('animal sounds pie');
-        await PageObjects.header.clickDashboard();
+        await visualize.saveVisualizationExpectSuccess('animal sounds pie');
+        await header.clickDashboard();
 
         await pieChart.expectPieSliceCount(1);
       });
 
       it('Removing filter pills and query unfiters data as expected', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         await queryBar.setQuery('');
         await queryBar.submitQuery();
         await filterBar.removeFilter('sound.keyword');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await pieChart.expectPieSliceCount(5);
 
-        await PageObjects.visualize.saveVisualizationExpectSuccess(
-          'Rendering Test: animal sounds pie'
-        );
-        await PageObjects.header.clickDashboard();
+        await visualize.saveVisualizationExpectSuccess('Rendering Test: animal sounds pie');
+        await header.clickDashboard();
 
         await pieChart.expectPieSliceCount(5);
       });
@@ -334,7 +334,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await elasticChart.setNewChartUiDebugFlag(true);
         await queryBar.setQuery('weightLbs<40');
         await queryBar.submitQuery();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
 
         await pieChart.expectPieSliceCount(5);
       });

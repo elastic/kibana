@@ -8,8 +8,9 @@
 import type { ObjectType } from '@kbn/config-schema';
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
+import { defineGetCurrentUserProfileRoute } from './get_current';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { userProfileMock } from '../../../common/model/user_profile.mock';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
@@ -17,23 +18,25 @@ import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types'
 import type { UserProfileServiceStartInternal } from '../../user_profile';
 import { userProfileServiceMock } from '../../user_profile/user_profile_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineGetCurrentUserProfileRoute } from './get_current';
 
 function getMockContext() {
-  return {
+  return coreMock.createCustomRequestHandlerContext({
     licensing: {
       license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
     },
-  } as unknown as SecurityRequestHandlerContext;
+  }) as unknown as SecurityRequestHandlerContext;
 }
 
 describe('Get current user profile routes', () => {
   let router: jest.Mocked<SecurityRouter>;
+  let mockContext: SecurityRequestHandlerContext;
   let userProfileService: jest.Mocked<UserProfileServiceStartInternal>;
   let authenticationService: ReturnType<typeof authenticationServiceMock.createStart>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
+
+    mockContext = getMockContext();
 
     userProfileService = userProfileServiceMock.createStart();
     routeParamsMock.getUserProfileService.mockReturnValue(userProfileService);
@@ -74,7 +77,7 @@ describe('Get current user profile routes', () => {
       authenticationService.getCurrentUser.mockReturnValue(null);
 
       await expect(
-        routeHandler(getMockContext(), httpServerMock.createKibanaRequest(), kibanaResponseFactory)
+        routeHandler(mockContext, httpServerMock.createKibanaRequest(), kibanaResponseFactory)
       ).resolves.toEqual(expect.objectContaining({ status: 404 }));
 
       expect(userProfileService.getCurrent).not.toHaveBeenCalled();
@@ -83,28 +86,32 @@ describe('Get current user profile routes', () => {
     it('returns `404` if profile is not available', async () => {
       const mockRequest = httpServerMock.createKibanaRequest();
       authenticationService.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
-      userProfileService.getCurrent.mockResolvedValue(null);
 
-      await expect(
-        routeHandler(getMockContext(), mockRequest, kibanaResponseFactory)
-      ).resolves.toEqual(expect.objectContaining({ status: 404 }));
+      const coreContextMock = await mockContext.core;
+      (coreContextMock.userProfile.getCurrent as jest.Mock).mockResolvedValue(null);
 
-      expect(userProfileService.getCurrent).toBeCalledTimes(1);
-      expect(userProfileService.getCurrent).toBeCalledWith({ request: mockRequest });
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({ status: 404 })
+      );
+
+      expect(coreContextMock.userProfile.getCurrent).toBeCalledTimes(1);
+      expect(coreContextMock.userProfile.getCurrent).toBeCalledWith({});
     });
 
     it('fails if `getCurrent` call fails.', async () => {
       const unhandledException = new Error('Something went wrong.');
       const mockRequest = httpServerMock.createKibanaRequest();
       authenticationService.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
-      userProfileService.getCurrent.mockRejectedValue(unhandledException);
 
-      await expect(
-        routeHandler(getMockContext(), mockRequest, kibanaResponseFactory)
-      ).resolves.toEqual(expect.objectContaining({ status: 500, payload: unhandledException }));
+      const coreContextMock = await mockContext.core;
+      (coreContextMock.userProfile.getCurrent as jest.Mock).mockRejectedValue(unhandledException);
 
-      expect(userProfileService.getCurrent).toBeCalledTimes(1);
-      expect(userProfileService.getCurrent).toBeCalledWith({ request: mockRequest });
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({ status: 500, payload: unhandledException })
+      );
+
+      expect(coreContextMock.userProfile.getCurrent).toBeCalledTimes(1);
+      expect(coreContextMock.userProfile.getCurrent).toBeCalledWith({});
     });
 
     it('returns user profile for the current user.', async () => {
@@ -114,11 +121,11 @@ describe('Get current user profile routes', () => {
       authenticationService.getCurrentUser.mockReturnValue(mockUser);
 
       const mockProfile = userProfileMock.createWithSecurity({ uid: 'uid-1' });
-      userProfileService.getCurrent.mockResolvedValue(mockProfile);
 
-      await expect(
-        routeHandler(getMockContext(), mockRequest, kibanaResponseFactory)
-      ).resolves.toEqual(
+      const coreContextMock = await mockContext.core;
+      (coreContextMock.userProfile.getCurrent as jest.Mock).mockResolvedValue(mockProfile);
+
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
         expect.objectContaining({
           status: 200,
           payload: {
@@ -131,8 +138,8 @@ describe('Get current user profile routes', () => {
         })
       );
 
-      expect(userProfileService.getCurrent).toBeCalledTimes(1);
-      expect(userProfileService.getCurrent).toBeCalledWith({ request: mockRequest, dataPath: '*' });
+      expect(coreContextMock.userProfile.getCurrent).toBeCalledTimes(1);
+      expect(coreContextMock.userProfile.getCurrent).toBeCalledWith({ dataPath: '*' });
     });
   });
 });

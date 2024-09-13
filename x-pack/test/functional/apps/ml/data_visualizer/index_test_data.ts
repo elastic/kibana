@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
 import { TestData } from './types';
 
 export const farequoteDataViewTestData: TestData = {
@@ -51,7 +51,7 @@ export const farequoteDataViewTestData: TestData = {
         aggregatable: false,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '',
+        docCountFormatted: '1,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -81,7 +81,7 @@ export const farequoteDataViewTestData: TestData = {
         aggregatable: false,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '',
+        docCountFormatted: '1,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -148,7 +148,7 @@ export const farequoteKQLSearchTestData: TestData = {
         aggregatable: false,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '',
+        docCountFormatted: '1,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -178,7 +178,7 @@ export const farequoteKQLSearchTestData: TestData = {
         aggregatable: false,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '',
+        docCountFormatted: '1,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -246,7 +246,7 @@ export const farequoteKQLFiltersSearchTestData: TestData = {
         aggregatable: false,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '',
+        docCountFormatted: '1,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -277,7 +277,7 @@ export const farequoteKQLFiltersSearchTestData: TestData = {
         aggregatable: false,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '',
+        docCountFormatted: '1,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -344,7 +344,7 @@ export const farequoteLuceneSearchTestData: TestData = {
         aggregatable: false,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '',
+        docCountFormatted: '1,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -374,7 +374,7 @@ export const farequoteLuceneSearchTestData: TestData = {
         aggregatable: false,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '',
+        docCountFormatted: '1,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -442,7 +442,7 @@ export const farequoteLuceneFiltersSearchTestData: TestData = {
         aggregatable: false,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '',
+        docCountFormatted: '1,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -473,7 +473,7 @@ export const farequoteLuceneFiltersSearchTestData: TestData = {
         aggregatable: false,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '',
+        docCountFormatted: '1,000 (100%)',
         viewableInLens: false,
       },
       {

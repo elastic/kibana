@@ -1,35 +1,37 @@
-[role="xpack"]
 [[reporting-getting-started]]
 = Reporting and sharing
 
 [partintro]
 
 --
-
-:keywords: analyst, concept, task, reporting
-:description: {kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads with others, or on a website.
+:frontmatter-description: {kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads with others, or on a website.
+:frontmatter-tags-products: [kibana]
 
 {kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads.
 
 You access the options from the *Share* menu in the toolbar. The sharing options include the following:
 
-* *PDF Reports* &mdash; Generate and download a PDF file of a dashboard, visualization, or *Canvas* workpad. PDF reports are a link:https://www.elastic.co/subscriptions[subscription feature].
+* *PDF Reports* &mdash; Generate and download PDF files of dashboards, visualizations, and *Canvas* workpads. PDF reports are a link:https://www.elastic.co/subscriptions[subscription feature].
 
-* *PNG Reports* &mdash; Generate and download a PNG file of a dashboard or visualization. PNG reports are a link:https://www.elastic.co/subscriptions[subscription feature].
+* *PNG Reports* &mdash; Generate and download PNG files of dashboards and visualizations. PNG reports are a link:https://www.elastic.co/subscriptions[subscription feature].
 
-* *CSV Reports* &mdash; Generate and download a CSV file of a *Discover* saved search.
+* *CSV Reports* &mdash; Generate CSV reports of saved searches. <<csv-limitations,Certain limitations apply>>.
 
-* *Get links* &mdash; Share a direct link to a *Discover* saved search, dashboard, or visualization.
+* *CSV Download* &mdash; Generate and download CSV files of *Lens* visualizations.
 
-* *Download as JSON* &mdash; Generate and download a JSON file of a *Canvas* workpad.
+* *Get links* &mdash; Share direct links to saved searches, dashboards, and visualizations.
+
+* *Download as JSON* &mdash; Generate and download JSON files of *Canvas* workpads.
 
 * beta[] *Share on a website* &mdash; Download and securely share *Canvas* workpads on any website.
 
-* *Embed code* &mdash; Embed a fully interactive dashboard as an iframe on a web page.
+* *Embed code* &mdash; Embed fully interactive dashboards as an iframe on web pages.
 
 [[reporting-on-cloud-resource-requirements]]
 NOTE: For Elastic Cloud deployments, {kib} instances require a minimum of 2GB RAM to generate PDF or PNG reports. To
 change {kib} sizing, {ess-console}[edit the deployment].
+
+For more information on how to configure reporting in {kib}, refer to <<secure-reporting,Configure reporting in {kib}>>
 
 [float]
 [[manually-generate-reports]]
@@ -51,19 +53,13 @@ image::user/reporting/images/shareable-container.png["Shareable Container"]
 
 . Open the main menu, then open the saved search, dashboard, visualization, or workpad you want to share.
 
-. From the toolbar, click *Share*, then select one of the following options:
+. From the toolbar, click *Share*, then select the report option. 
 
-** **PDF Reports** &mdash; Generates a PDF file of the dashboard, visualization, or workpad.
-
-** **PNG Reports** &mdash; Generates a PNG file of the dashboard or visualization.
-
-** **CSV Reports** &mdash; Generates a CSV report of the saved search.
-
-. If you are creating a PDF report of a dashboard, select *Optimize for printing* to create a printer-friendly PDF with multiple A4 portrait pages and two visualizations per page.
+* If you are creating dashboard PDFs, select *Optimize for printing* to create printer-friendly PDFs with multiple A4 portrait pages and two visualizations per page.
 +
 NOTE: When you create a dashboard report that includes a data table or saved search, the PDF includes only the visible data.
 
-. If you are creating a PDF report of a workpad, select *Full page layout* to create a PDF without margins that surround the workpad.
+* If you are creating workpad PDFs, select *Full page layout* to create PDFs without margins that surround the workpad.
 
 . Generate the report.
 
@@ -71,16 +67,27 @@ NOTE: When you create a dashboard report that includes a data table or saved sea
 
 . To view and manage reports, open the main menu, then click *Stack Management > Reporting*.
 
-NOTE: Reports are stored in {es} and managed by the `kibana-reporting` {ilm}
-({ilm-init}) policy. By default, the policy stores reports forever. To learn
-more about {ilm-init} policies, refer to the {es}
-{ref}/index-lifecycle-management.html[{ilm-init} documentation].
+NOTE: In "stateful" deployments, reports are stored in {es} and managed by the `kibana-reporting` {ilm}
+({ilm-init}) policy. By default, the policy stores reports forever. To learn more about {ilm-init} policies, refer
+to the {es} {ref}/index-lifecycle-management.html[{ilm-init} documentation].
+
+[float]
+[[csv-limitations]]
+=== CSV report limitations
+
+include::reporting-csv-limitations.asciidoc[]
+
+[float]
+[[pdf-limitations]]
+=== PNG/PDF report limitations
+
+include::reporting-pdf-limitations.asciidoc[]
 
 [float]
 [[share-a-direct-link]]
-== Share a direct link
+== Share direct links
 
-Share a direct link to a saved search, dashboard, or visualization. To access the shared object, authentication is required.
+Create and share direct links to saved searches, dashboards, and visualizations. To access the shared object, authentication is required.
 
 . Open the main menu, then open the saved search, dashboard, or visualization you want to share.
 
@@ -105,9 +112,9 @@ NOTE: *Public URL* is available only when anonymous access is configured and you
 
 [float]
 [[download-as-json]]
-== Create a JSON file
+== Create JSON files
 
-Create a JSON file for a workpad.
+Create and share JSON files for workpads.
 
 . Open the main menu, then click *Canvas*.
 
@@ -119,16 +126,13 @@ Create a JSON file for a workpad.
 [[add-workpad-website]]
 == Share workpads on a website
 
-beta[] *Canvas* allows you to create _shareables_, which are workpads that you download and securely share on a website.
-To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
+beta[] Create and securely share static *Canvas* workpads on a website. To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
 
 . Open the main menu, then click *Canvas*.
 
 . Open the workpad you want to share.
 
 . Click *Share > Share on a website*.
-
-. Follow the instructions.
 
 . To customize the workpad behavior to autoplay the pages or hide the toolbar, use the inline parameters.
 +
@@ -142,9 +146,9 @@ NOTE: Shareable workpads encode the current state of the workpad in a JSON file.
 [[embed-code]]
 == Embed code
 
-Display your dashboard on an internal company website or personal web page with an iframe. Embedding other {kib} objects is generally supported, but you might need to manually craft the proper HTML code.
+Display your dashboards on an internal company website or personal web page with an iframe. To embed other {kib} objects, manually create the HTML code.
 
-Some users might not have access to the dashboard or visualization. For more information, refer to <<anonymous-access-and-embedding>> and <<embedded-content-authentication>>.
+For information about granting access to embedded dashboards, refer to <<kibana-authentication>>.
 
 . Open the main menu, then open the dashboard you want to share.
 
@@ -152,11 +156,11 @@ Some users might not have access to the dashboard or visualization. For more inf
 
 . Specify how you want to generate the code:
 
-* To display only the current state, select *Snapshot*.
+* To display the current state, select *Snapshot*.
 
 * To display up-to-date changes, select *Saved object*.
 
-* Select the dashboard components you want to include.
+* Select the dashboard components you want to share.
 
 * To generate a shortened link, select *Short URL*.
 
@@ -173,3 +177,5 @@ NOTE: *Public URL* is available only when anonymous access is configured and you
 
 include::automating-report-generation.asciidoc[]
 include::reporting-troubleshooting.asciidoc[]
+include::reporting-csv-troubleshooting.asciidoc[leveloffset=+1]
+include::reporting-pdf-troubleshooting.asciidoc[leveloffset=+1]

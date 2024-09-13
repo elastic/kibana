@@ -21,9 +21,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { ACTION } from '../../../../common/constants/detector_rule';
+import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+// TODO: add onForceTimeShift action
 export function ActionsSection({ actions, onSkipResultChange, onSkipModelUpdateChange }) {
   return (
     <React.Fragment>
@@ -46,7 +47,7 @@ export function ActionsSection({ actions, onSkipResultChange, onSkipModelUpdateC
                 defaultMessage="Skip result (recommended)"
               />
             }
-            checked={actions.indexOf(ACTION.SKIP_RESULT) > -1}
+            checked={actions.indexOf(ML_DETECTOR_RULE_ACTION.SKIP_RESULT) > -1}
             onChange={onSkipResultChange}
           />
         </EuiFlexItem>
@@ -77,7 +78,7 @@ export function ActionsSection({ actions, onSkipResultChange, onSkipModelUpdateC
                 defaultMessage="Skip model update"
               />
             }
-            checked={actions.indexOf(ACTION.SKIP_MODEL_UPDATE) > -1}
+            checked={actions.indexOf(ML_DETECTOR_RULE_ACTION.SKIP_MODEL_UPDATE) > -1}
             onChange={onSkipModelUpdateChange}
           />
         </EuiFlexItem>

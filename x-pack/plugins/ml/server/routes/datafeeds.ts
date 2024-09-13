@@ -6,8 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import {
   startDatafeedSchema,
   datafeedConfigSchema,
@@ -20,368 +21,364 @@ import { getAuthorizationHeader } from '../lib/request_authorization';
  * Routes for datafeed service
  */
 export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {get} /api/ml/datafeeds Get all datafeeds
-   * @apiName GetDatafeeds
-   * @apiDescription Retrieves configuration information for datafeeds
-   */
-  router.get(
-    {
-      path: '/api/ml/datafeeds',
-      validate: false,
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canGetDatafeeds'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
-      try {
-        const body = await mlClient.getDatafeeds();
-        return response.ok({
-          body,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
+      summary: 'Gets all datafeeds',
+      description: 'Retrieves configuration information for datafeeds.',
     })
-  );
-
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {get} /api/ml/datafeeds/:datafeedId Get datafeed for given datafeed id
-   * @apiName GetDatafeed
-   * @apiDescription Retrieves configuration information for datafeed
-   *
-   * @apiSchema (params) datafeedIdSchema
-   */
-  router.get(
-    {
-      path: '/api/ml/datafeeds/{datafeedId}',
-      validate: {
-        params: datafeedIdSchema,
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
       },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
+        try {
+          const body = await mlClient.getDatafeeds();
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canGetDatafeeds'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const datafeedId = request.params.datafeedId;
-        const body = await mlClient.getDatafeeds({ datafeed_id: datafeedId });
-
-        return response.ok({
-          body,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
+      summary: 'Get datafeed for given datafeed id',
+      description: 'Retrieves configuration information for a datafeed.',
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: datafeedIdSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const datafeedId = request.params.datafeedId;
+          const body = await mlClient.getDatafeeds({ datafeed_id: datafeedId });
 
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {get} /api/ml/datafeeds/_stats Get stats for all datafeeds
-   * @apiName GetDatafeedsStats
-   * @apiDescription Retrieves usage information for datafeeds
-   */
-  router.get(
-    {
-      path: '/api/ml/datafeeds/_stats',
-      validate: false,
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/_stats`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canGetDatafeeds'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
-      try {
-        const body = await mlClient.getDatafeedStats();
-        return response.ok({
-          body,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
+      summary: 'Gets stats for all datafeeds',
+      description: 'Retrieves usage information for datafeeds.',
     })
-  );
-
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {get} /api/ml/datafeeds/:datafeedId/_stats Get datafeed stats for given datafeed id
-   * @apiName GetDatafeedStats
-   * @apiDescription Retrieves usage information for datafeed
-   *
-   * @apiSchema (params) datafeedIdSchema
-   */
-  router.get(
-    {
-      path: '/api/ml/datafeeds/{datafeedId}/_stats',
-      validate: {
-        params: datafeedIdSchema,
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
       },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
+        try {
+          const body = await mlClient.getDatafeedStats();
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_stats`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canGetDatafeeds'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const datafeedId = request.params.datafeedId;
-        const body = await mlClient.getDatafeedStats({
-          datafeed_id: datafeedId,
-        });
-
-        return response.ok({
-          body,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
+      summary: 'Get datafeed stats for given datafeed id',
+      description: 'Retrieves usage information for a datafeed.',
     })
-  );
-
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {put} /api/ml/datafeeds/:datafeedId Creates datafeed
-   * @apiName CreateDatafeed
-   * @apiDescription Instantiates a datafeed
-   *
-   * @apiSchema (params) datafeedIdSchema
-   * @apiSchema (body) datafeedConfigSchema
-   */
-  router.put(
-    {
-      path: '/api/ml/datafeeds/{datafeedId}',
-      validate: {
-        params: datafeedIdSchema,
-        body: datafeedConfigSchema,
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: datafeedIdSchema,
+          },
+        },
       },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const datafeedId = request.params.datafeedId;
+          const body = await mlClient.getDatafeedStats({
+            datafeed_id: datafeedId,
+          });
+
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .put({
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canCreateDatafeed'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const datafeedId = request.params.datafeedId;
-        const body = await mlClient.putDatafeed(
-          {
-            datafeed_id: datafeedId,
-            // @ts-expect-error type mismatch for `time_span` (string | number versus estypes.Duration)
-            body: request.body,
-          },
-          getAuthorizationHeader(request)
-        );
-
-        return response.ok({
-          body,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
+      summary: 'Creates a datafeed',
+      description: 'Instantiates a datafeed.',
     })
-  );
-
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {post} /api/ml/datafeeds/:datafeedId/_update Updates datafeed for given datafeed id
-   * @apiName UpdateDatafeed
-   * @apiDescription Updates certain properties of a datafeed
-   *
-   * @apiSchema (params) datafeedIdSchema
-   * @apiSchema (body) datafeedConfigSchema
-   */
-  router.post(
-    {
-      path: '/api/ml/datafeeds/{datafeedId}/_update',
-      validate: {
-        params: datafeedIdSchema,
-        body: datafeedConfigSchema,
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: datafeedIdSchema,
+            body: datafeedConfigSchema,
+          },
+        },
       },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const datafeedId = request.params.datafeedId;
+          const body = await mlClient.putDatafeed(
+            {
+              datafeed_id: datafeedId,
+              // @ts-expect-error type mismatch for `time_span` (string | number versus estypes.Duration)
+              body: request.body,
+            },
+            getAuthorizationHeader(request)
+          );
+
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_update`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canUpdateDatafeed'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const datafeedId = request.params.datafeedId;
-        const body = await mlClient.updateDatafeed(
-          {
-            datafeed_id: datafeedId,
-            // @ts-expect-error type mismatch for `time_span` (string | number versus estypes.Duration)
-            body: request.body,
-          },
-          getAuthorizationHeader(request)
-        );
-
-        return response.ok({
-          body,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
+      summary: 'Updates a datafeed',
+      description: 'Updates certain properties of a datafeed.',
     })
-  );
-
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {delete} /api/ml/datafeeds/:datafeedId Deletes datafeed
-   * @apiName DeleteDatafeed
-   * @apiDescription Deletes an existing datafeed
-   *
-   * @apiSchema (params) datafeedIdSchema
-   * @apiSchema (query) deleteDatafeedQuerySchema
-   */
-  router.delete(
-    {
-      path: '/api/ml/datafeeds/{datafeedId}',
-      validate: {
-        params: datafeedIdSchema,
-        query: deleteDatafeedQuerySchema,
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: datafeedIdSchema,
+            body: datafeedConfigSchema,
+          },
+        },
       },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const datafeedId = request.params.datafeedId;
+          const body = await mlClient.updateDatafeed(
+            {
+              datafeed_id: datafeedId,
+              // @ts-expect-error type mismatch for `time_span` (string | number versus estypes.Duration)
+              body: request.body,
+            },
+            getAuthorizationHeader(request)
+          );
+
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .delete({
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canDeleteDatafeed'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const options: estypes.MlDeleteDatafeedRequest = {
-          datafeed_id: request.params.datafeedId,
-        };
-        const force = request.query.force;
-        if (force !== undefined) {
-          options.force = force;
-        }
-
-        const body = await mlClient.deleteDatafeed(options);
-
-        return response.ok({
-          body,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
+      summary: 'Deletes a datafeed',
+      description: 'Deletes an existing datafeed.',
     })
-  );
-
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {post} /api/ml/datafeeds/:datafeedId/_start Starts datafeed for given datafeed id(s)
-   * @apiName StartDatafeed
-   * @apiDescription Starts one or more datafeeds
-   *
-   * @apiSchema (params) datafeedIdSchema
-   * @apiSchema (body) startDatafeedSchema
-   */
-  router.post(
-    {
-      path: '/api/ml/datafeeds/{datafeedId}/_start',
-      validate: {
-        params: datafeedIdSchema,
-        body: startDatafeedSchema,
-      },
-      options: {
-        tags: ['access:ml:canStartStopDatafeed'],
-      },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const datafeedId = request.params.datafeedId;
-        const { start, end } = request.body;
-
-        const body = await mlClient.startDatafeed({
-          datafeed_id: datafeedId,
-          body: {
-            start: start !== undefined ? String(start) : undefined,
-            end: end !== undefined ? String(end) : undefined,
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: datafeedIdSchema,
+            query: deleteDatafeedQuerySchema,
           },
-        });
-
-        return response.ok({
-          body,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
-    })
-  );
-
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {post} /api/ml/datafeeds/:datafeedId/_stop Stops datafeed for given datafeed id(s)
-   * @apiName StopDatafeed
-   * @apiDescription Stops one or more datafeeds
-   *
-   * @apiSchema (params) datafeedIdSchema
-   */
-  router.post(
-    {
-      path: '/api/ml/datafeeds/{datafeedId}/_stop',
-      validate: {
-        params: datafeedIdSchema,
+        },
       },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const options: estypes.MlDeleteDatafeedRequest = {
+            datafeed_id: request.params.datafeedId,
+          };
+          const force = request.query.force;
+          if (force !== undefined) {
+            options.force = force;
+          }
+
+          const body = await mlClient.deleteDatafeed(options);
+
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_start`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canStartStopDatafeed'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const datafeedId = request.params.datafeedId;
-
-        const body = await mlClient.stopDatafeed({
-          datafeed_id: datafeedId,
-        });
-
-        return response.ok({
-          body,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
+      summary: 'Starts a datafeed',
+      description: 'Starts one or more datafeeds',
     })
-  );
-
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {get} /api/ml/datafeeds/:datafeedId/_preview Preview datafeed for given datafeed id
-   * @apiName PreviewDatafeed
-   * @apiDescription Previews a datafeed
-   *
-   * @apiSchema (params) datafeedIdSchema
-   */
-  router.get(
-    {
-      path: '/api/ml/datafeeds/{datafeedId}/_preview',
-      validate: {
-        params: datafeedIdSchema,
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: datafeedIdSchema,
+            body: startDatafeedSchema,
+          },
+        },
       },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const datafeedId = request.params.datafeedId;
+          const { start, end } = request.body;
+
+          const body = await mlClient.startDatafeed({
+            datafeed_id: datafeedId,
+            body: {
+              start: start !== undefined ? String(start) : undefined,
+              end: end !== undefined ? String(end) : undefined,
+            },
+          });
+
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_stop`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canStartStopDatafeed'],
+      },
+      summary: 'Stops a datafeed',
+      description: 'Stops one or more datafeeds',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: datafeedIdSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const datafeedId = request.params.datafeedId;
+
+          const body = await mlClient.stopDatafeed({
+            datafeed_id: datafeedId,
+          });
+
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_preview`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canPreviewDatafeed'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const datafeedId = request.params.datafeedId;
-        const body = await mlClient.previewDatafeed(
-          {
-            datafeed_id: datafeedId,
-          },
-          { ...getAuthorizationHeader(request), maxRetries: 0 }
-        );
-
-        return response.ok({
-          body,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
+      summary: 'Previews a datafeed',
+      description: 'Previews a datafeed',
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: datafeedIdSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const datafeedId = request.params.datafeedId;
+          const body = await mlClient.previewDatafeed(
+            {
+              datafeed_id: datafeedId,
+            },
+            { ...getAuthorizationHeader(request), maxRetries: 0 }
+          );
+
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 }

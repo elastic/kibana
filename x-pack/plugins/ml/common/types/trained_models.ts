@@ -4,10 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DeploymentState, TrainedModelType } from '@kbn/ml-trained-models-utils';
-import type { DataFrameAnalyticsConfig } from './data_frame_analytics';
-import type { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
+import type {
+  DataFrameAnalyticsConfig,
+  FeatureImportanceBaseline,
+  TotalFeatureImportance,
+} from '@kbn/ml-data-frame-analytics-utils';
+import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { XOR } from './common';
 import type { MlSavedObjectType } from './saved_objects';
 
@@ -51,7 +56,7 @@ export interface TrainedModelStat {
       }
     >;
   };
-  deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
+  deployment_stats?: TrainedModelDeploymentStatsResponse;
   model_size_stats?: TrainedModelModelSizeStats;
 }
 
@@ -94,6 +99,7 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
    * Associated pipelines. Extends response from the ES endpoint.
    */
   pipelines?: Record<string, PipelineDefinition> | null;
+  origin_job_exists?: boolean;
 
   metadata?: {
     analytics_config: DataFrameAnalyticsConfig;
@@ -107,6 +113,15 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
   tags: string[];
   version: string;
   inference_config?: Record<string, any>;
+  indices?: Array<Record<IndexName, IndicesIndexState | null>>;
+  /**
+   * Whether the model has inference services
+   */
+  hasInferenceServices?: boolean;
+  /**
+   * Inference services associated with the model
+   */
+  inference_apis?: InferenceAPIConfigResponse[];
 };
 
 export interface PipelineDefinition {
@@ -128,6 +143,7 @@ export interface InferenceConfigResponse {
 
 export interface TrainedModelDeploymentStatsResponse {
   model_id: string;
+  deployment_id: string;
   inference_threads: number;
   model_threads: number;
   state: DeploymentState;
@@ -160,9 +176,12 @@ export interface TrainedModelDeploymentStatsResponse {
     threads_per_allocation: number;
     number_of_allocations: number;
   }>;
+  reason?: string;
 }
 
 export interface AllocatedModel {
+  key: string;
+  deployment_id: string;
   inference_threads: number;
   allocation_status: {
     target_allocation_count: number;
@@ -194,8 +213,9 @@ export interface AllocatedModel {
     number_of_pending_requests: number;
     start_time: number;
     throughput_last_minute: number;
-    number_of_allocations: number;
-    threads_per_allocation: number;
+    number_of_allocations?: number;
+    threads_per_allocation?: number;
+    error_count?: number;
   };
 }
 
@@ -280,4 +300,9 @@ export interface MemoryStatsResponse {
 export interface TrainedModelStatsResponse extends estypes.MlTrainedModelStats {
   deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
   model_size_stats?: TrainedModelModelSizeStats;
+}
+
+export interface ModelDownloadState {
+  total_parts: number;
+  downloaded_parts: number;
 }

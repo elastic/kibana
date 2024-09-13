@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Capabilities } from '@kbn/core/public';
@@ -16,15 +17,16 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
-  DiscoverAppState,
-  isEqualFilters,
-} from '../application/main/services/discover_app_state_container';
-import { getSortForSearchSource } from './sorting';
-import {
   DOC_HIDE_TIME_COLUMN_SETTING,
+  isNestedFieldParent,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
-} from '../../common';
+} from '@kbn/discover-utils';
+import {
+  DiscoverAppState,
+  isEqualFilters,
+} from '../application/main/state_management/discover_app_state_container';
+import { getSortForSearchSource } from './sorting';
 
 /**
  * Preparing data to share the current state as link or CSV/Report
@@ -32,19 +34,22 @@ import {
 export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: DiscoverAppState | SavedSearch,
-  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart }
+  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart },
+  isEsqlMode?: boolean
 ) {
-  const { uiSettings: config, data } = services;
+  const { uiSettings, data } = services;
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
-  let existingFilter = searchSource.getField('filter') as Filter[] | Filter | undefined;
 
   searchSource.setField(
     'sort',
-    getSortForSearchSource(state.sort as SortOrder[], index, config.get(SORT_DEFAULT_ORDER_SETTING))
+    getSortForSearchSource({
+      sort: state.sort as SortOrder[],
+      dataView: index,
+      defaultSortDir: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
+    })
   );
 
-  searchSource.removeField('filter');
   searchSource.removeField('highlight');
   searchSource.removeField('highlightAll');
   searchSource.removeField('aggs');
@@ -56,8 +61,8 @@ export async function getSharingData(
   if (columns && columns.length > 0) {
     // conditionally add the time field column:
     let timeFieldName: string | undefined;
-    const hideTimeColumn = config.get(DOC_HIDE_TIME_COLUMN_SETTING);
-    if (!hideTimeColumn && index && index.timeFieldName) {
+    const hideTimeColumn = uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING);
+    if (!hideTimeColumn && index && index.timeFieldName && !isEsqlMode) {
       timeFieldName = index.timeFieldName;
     }
     if (timeFieldName && !columns.includes(timeFieldName)) {
@@ -68,28 +73,39 @@ export async function getSharingData(
   const absoluteTimeFilter = data.query.timefilter.timefilter.createFilter(index);
   const relativeTimeFilter = data.query.timefilter.timefilter.createRelativeFilter(index);
   return {
-    getSearchSource: (absoluteTime?: boolean): SerializedSearchSourceFields => {
-      const timeFilter = absoluteTime ? absoluteTimeFilter : relativeTimeFilter;
+    getSearchSource: ({
+      addGlobalTimeFilter,
+      absoluteTime,
+    }: {
+      addGlobalTimeFilter?: boolean;
+      absoluteTime?: boolean;
+    }): SerializedSearchSourceFields => {
+      let existingFilter = searchSource.getField('filter') as Filter[] | Filter | undefined;
+      const searchSourceUpdated = searchSource.createCopy();
+      searchSourceUpdated.removeField('filter');
 
-      // remove timeFilter from existing filter
-      if (Array.isArray(existingFilter)) {
-        existingFilter = existingFilter.filter(
-          (current) => !isEqualFilters(current, absoluteTimeFilter)
-        );
-      } else if (isEqualFilters(existingFilter, absoluteTimeFilter)) {
-        existingFilter = undefined;
+      const timeFilter = absoluteTime ? absoluteTimeFilter : relativeTimeFilter;
+      if (addGlobalTimeFilter && timeFilter) {
+        // remove timeFilter from existing filter
+        if (Array.isArray(existingFilter)) {
+          existingFilter = existingFilter.filter(
+            (current) => !isEqualFilters(current, absoluteTimeFilter)
+          );
+        } else if (isEqualFilters(existingFilter, absoluteTimeFilter)) {
+          existingFilter = undefined;
+        }
+
+        if (existingFilter) {
+          existingFilter = Array.isArray(existingFilter)
+            ? [timeFilter, ...existingFilter]
+            : ([timeFilter, existingFilter] as Filter[]);
+        } else {
+          existingFilter = timeFilter;
+        }
       }
 
-      if (existingFilter && timeFilter) {
-        searchSource.setField(
-          'filter',
-          Array.isArray(existingFilter)
-            ? [timeFilter, ...existingFilter]
-            : ([timeFilter, existingFilter] as Filter[])
-        );
-      } else {
-        const filter = timeFilter || existingFilter;
-        searchSource.setField('filter', filter);
+      if (existingFilter) {
+        searchSourceUpdated.setField('filter', existingFilter);
       }
 
       /*
@@ -97,16 +113,26 @@ export async function getSharingData(
        * Otherwise, the requests will ask for all fields, even if only a few are really needed.
        * Discover does not set fields, since having all fields is needed for the UI.
        */
-      const useFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
+      const useFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
       if (useFieldsApi) {
-        searchSource.removeField('fieldsFromSource');
+        searchSourceUpdated.removeField('fieldsFromSource');
         const fields = columns.length
-          ? columns.map((field) => ({ field, include_unmapped: 'true' }))
-          : [{ field: '*', include_unmapped: 'true' }];
+          ? columns.map((column) => {
+              let field = column;
 
-        searchSource.setField('fields', fields);
+              // If this column is a nested field, add a wildcard to the field name in order to fetch
+              // all leaf fields for the report, since the fields API doesn't support nested field roots
+              if (isNestedFieldParent(column, index)) {
+                field = `${column}.*`;
+              }
+
+              return { field, include_unmapped: true };
+            })
+          : [{ field: '*', include_unmapped: true }];
+
+        searchSourceUpdated.setField('fields', fields);
       }
-      return searchSource.getSerializedFields(true);
+      return searchSourceUpdated.getSerializedFields(true);
     },
     columns,
   };

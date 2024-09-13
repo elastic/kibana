@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import type { ExecutionContextSetup } from '@kbn/core/server';
 import apm from 'elastic-apm-node';
-import {
-  IKibanaSearchRequest,
+import type {
   IKibanaSearchResponse,
+  IKibanaSearchRequest,
   ISearchOptionsSerializable,
-} from '../../../common/search';
+} from '@kbn/search-types';
+import { getRequestAbortedSignal } from '../..';
 import type { ISearchStart } from '../types';
 
 export function registerBsearchRoute(
@@ -28,6 +30,7 @@ export function registerBsearchRoute(
     IKibanaSearchResponse
   >('/internal/bsearch', (request) => {
     const search = getScoped(request);
+    const abortSignal = getRequestAbortedSignal(request.events.aborted$);
     return {
       /**
        * @param requestOptions
@@ -39,14 +42,20 @@ export function registerBsearchRoute(
           apm.addLabels(executionContextService.getAsLabels());
 
           return firstValueFrom(
-            search.search(requestData, restOptions).pipe(
+            search.search(requestData, { ...restOptions, abortSignal }).pipe(
               catchError((err) => {
                 // Re-throw as object, to get attributes passed to the client
                 // eslint-disable-next-line no-throw-literal
                 throw {
                   message: err.message,
                   statusCode: err.statusCode,
-                  attributes: err.errBody?.error,
+                  attributes: err.errBody
+                    ? {
+                        error: err.errBody.error,
+                        rawResponse: err.errBody.response,
+                        ...(err.requestParams ? { requestParams: err.requestParams } : {}),
+                      }
+                    : undefined,
                 };
               })
             )

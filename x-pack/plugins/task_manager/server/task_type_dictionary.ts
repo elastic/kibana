@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import { ObjectType } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
+import {
+  TaskDefinition,
+  taskDefinitionSchema,
+  TaskRunCreatorFunction,
+  TaskPriority,
+  TaskCost,
+} from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 
 /**
@@ -24,6 +31,7 @@ export const REMOVED_TYPES: string[] = [
   'search_sessions_expire',
 
   'cleanup_failed_action_executions',
+  'reports:monitor',
 ];
 
 /**
@@ -42,6 +50,16 @@ export interface TaskRegisterDefinition {
    * the task will be re-attempted.
    */
   timeout?: string;
+  /**
+   * An optional definition of task priority. Tasks will be sorted by priority prior to claiming
+   * so high priority tasks will always be claimed before normal priority, which will always be
+   * claimed before low priority
+   */
+  priority?: TaskPriority;
+  /**
+   * An optional definition of the cost associated with running the task.
+   */
+  cost?: TaskCost;
   /**
    * An optional more detailed description of what this task does.
    */
@@ -65,6 +83,15 @@ export interface TaskRegisterDefinition {
    * The default value, if not given, is 0.
    */
   maxConcurrency?: number;
+  stateSchemaByVersion?: Record<
+    number,
+    {
+      schema: ObjectType;
+      up: (state: Record<string, unknown>) => Record<string, unknown>;
+    }
+  >;
+
+  paramsSchema?: ObjectType;
 }
 
 /**
@@ -96,9 +123,12 @@ export class TaskTypeDictionary {
     return this.definitions.has(type);
   }
 
-  public get(type: string): TaskDefinition {
-    this.ensureHas(type);
-    return this.definitions.get(type)!;
+  public size() {
+    return this.definitions.size;
+  }
+
+  public get(type: string): TaskDefinition | undefined {
+    return this.definitions.get(type);
   }
 
   public ensureHas(type: string) {

@@ -39,19 +39,30 @@ For JSON-formatted server status details, use the `localhost:5601/api/status` AP
 
 [float]
 [[not-ready]]
-=== {kib} not ready
+=== Troubleshoot {kib} UI error
 
-If you receive an error that the {kib} `server is not ready`, check the following:
+Troubleshoot the `Kibana Server is not Ready yet` error.
 
-* The {es} connectivity: 
+. From within a {kib} node, confirm the connection to {es}:
 +
 [source,sh]
 ----
-`curl -XGET elasticsearch_ip_or_hostname:9200/`
+curl -XGET elasticsearch_ip_or_hostname:9200/
 ----
-* The {kib} logs:
-** Linux, DEB or RPM package: `/var/log/kibana/kibana.log`
-** Linux, tar.gz package: `$KIBANA_HOME/log/kibana.log`
-** Windows: `$KIBANA_HOME\log\kibana.log`
-* The health status of `.kibana*` indices
+. Guarantee the health of the three {kib}-backing indices.  All indices must appear and display `status:green` and `status:open`:
++
+[source,sh]
+----
+curl -XGET elasticsearch_ip_or_hostname:9200/_cat/indices/.kibana,.kibana_task_manager,.kibana_security_session?v=true
+----
+These {kib}-backing indices must also not have {ref}/indices-get-settings.html[index settings] flagging `read_only_allow_delete` or `write` {ref}/index-modules-blocks.html[index blocks]. 
+. <<start-stop,Shut down all {kib} nodes>>. 
+. Choose any {kib} node, then update the config to set the <<change-overall-log-level,debug logging>>.
+. <<start-stop,Start the node>>, then check the start-up debug logs for `ERROR` messages or other start-up issues. 
++
+For example:
 
+* When {kib} is unable to connect to a healthy {es} cluster, errors like `master_not_discovered_exception` or `unable to revive connection` or `license is not available` errors appear.
+* When one or more {kib}-backing indices are unhealthy, the `index_not_green_timeout` error appears.
+
+For more information, refer to our https://www.elastic.co/blog/troubleshooting-kibana-health[walkthrough on troubleshooting Kibana Health].

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -22,8 +23,9 @@ const significantTermsTitle = i18n.translate('data.search.aggs.buckets.significa
 export interface AggParamsSignificantTerms extends BaseAggParams {
   field: string;
   size?: number;
-  exclude?: string;
-  include?: string;
+  shardSize?: number;
+  exclude?: string | string[];
+  include?: string | string[];
 }
 
 export const getSignificantTermsBucketAgg = () =>
@@ -51,6 +53,12 @@ export const getSignificantTermsBucketAgg = () =>
       {
         name: 'size',
         default: '',
+      },
+      {
+        name: 'shardSize',
+        write: (aggConfig, output) => {
+          output.params.shard_size = aggConfig.params.shardSize;
+        },
       },
       {
         name: 'exclude',

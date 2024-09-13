@@ -86,6 +86,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is creating a rule.
 | `failure` | User is not authorized to create a rule.
 
+.2+| `ad_hoc_run_create`
+| `unknown` | User is creating an ad hoc run.
+| `failure` | User is not authorized to create an ad hoc run.
+
 .2+| `space_create`
 | `unknown` | User is creating a space.
 | `failure` | User is not authorized to create a space.
@@ -253,6 +257,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is deleting a rule.
 | `failure` | User is not authorized to delete a rule.
 
+.2+| `ad_hoc_run_delete`
+| `unknown` | User is deleting an ad hoc run.
+| `failure` | User is not authorized to delete an ad hoc run.
+
 .2+| `space_delete`
 | `unknown` | User is deleting a space.
 | `failure` | User is not authorized to delete a space.
@@ -319,6 +327,18 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `rule_find`
 | `success` | User has accessed a rule as part of a search operation.
 | `failure` | User is not authorized to search for rules.
+
+.2+| `rule_schedule_backfill`
+| `success` | User has accessed a rule as part of a backfill schedule operation.
+| `failure` | User is not authorized to access rule for backfill scheduling.
+
+.2+| `ad_hoc_run_get`
+| `success` | User has accessed an ad hoc run.
+| `failure` | User is not authorized to access ad hoc run.
+
+.2+| `ad_hoc_run_find`
+| `success` | User has accessed an ad hoc run as part of a search operation.
+| `failure` | User is not authorized to search for ad hoc runs.
 
 .2+| `space_get`
 | `success` | User has accessed a space.
@@ -392,6 +412,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | User has accessed a case comment as part of a search operation.
 | `failure` | User is not authorized to search for case comments.
 
+.2+| `case_categories_get`
+| `success` | User has accessed a case.
+| `failure` | User is not authorized to access a case.
+
 .2+| `case_tags_get`
 | `success` | User has accessed a case.
 | `failure` | User is not authorized to access a case.
@@ -415,6 +439,10 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `case_user_action_get_metrics`
 | `success` | User has accessed metrics for the user activity of a case.
 | `failure` | User is not authorized to access metrics for the user activity of a case.
+
+.2+| `case_user_action_get_users`
+| `success` | User has accessed the users associated with a case.
+| `failure` | User is not authorized to access the users associated with a case.
 
 .2+| `case_connectors_get`
 | `success` | User has accessed the connectors of a case.

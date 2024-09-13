@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC } from 'react';
 import classNames from 'classnames';
 import { EuiPageTemplate } from '@elastic/eui';
 
@@ -21,9 +22,6 @@ const getClasses = (template?: string, className?: string) => {
   );
 };
 
-const KIBANA_CHROME_SELECTOR = '[data-test-subj="kibanaChrome"]';
-const HEADER_GLOBAL_NAV_SELECTOR = '[data-test-subj="headerGlobalNav"]';
-
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
  */
@@ -34,21 +32,10 @@ export const KibanaPageTemplateInner: FC<Props> = ({
   isEmptyState,
   pageSideBar,
   pageSideBarProps,
+  emptyPageBody,
   ...rest
 }) => {
   let header;
-
-  const [offset, setOffset] = useState<number | undefined>();
-
-  useEffect(() => {
-    const kibanaChrome = document.querySelector(KIBANA_CHROME_SELECTOR) as HTMLElement;
-    if (kibanaChrome) {
-      const kibanaChromeHeader = kibanaChrome.querySelector(
-        HEADER_GLOBAL_NAV_SELECTOR
-      ) as HTMLElement;
-      setOffset(kibanaChromeHeader?.offsetTop + kibanaChromeHeader?.offsetHeight);
-    }
-  }, []);
 
   if (isEmptyState && pageHeader && !children) {
     const { iconType, pageTitle, description, rightSideItems } = pageHeader;
@@ -67,12 +54,15 @@ export const KibanaPageTemplateInner: FC<Props> = ({
     header = <EuiPageTemplate.Header {...pageHeader} />;
   }
 
+  // NOTE: with emptyPageBody, page contents are replaced entirely with the provided element
+  if (isEmptyState && emptyPageBody) {
+    children = emptyPageBody;
+  }
+
   let sideBar;
   if (pageSideBar) {
     const sideBarProps = { ...pageSideBarProps };
-    if (offset) {
-      sideBarProps.sticky = { offset };
-    }
+    sideBarProps.sticky = true;
     sideBar = <EuiPageTemplate.Sidebar {...sideBarProps}>{pageSideBar}</EuiPageTemplate.Sidebar>;
   }
 
@@ -85,7 +75,10 @@ export const KibanaPageTemplateInner: FC<Props> = ({
       // the following props can be removed to allow the template to auto-handle
       // the fixed header and banner heights.
       offset={0}
-      minHeight={0}
+      minHeight={
+        header ? 'calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)))' : 0
+      }
+      grow={header ? false : undefined}
       {...rest}
     >
       {sideBar}

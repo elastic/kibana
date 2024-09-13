@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { UiActionsService } from './ui_actions_service';
 import { ActionDefinition, ActionInternal } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
 import { TriggerRegistry, ActionRegistry } from '../types';
-import { Trigger } from '../triggers';
-import { OverlayStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 
 const FOO_TRIGGER = 'FOO_TRIGGER';
 const BAR_TRIGGER = 'BAR_TRIGGER';
@@ -159,10 +160,12 @@ describe('UiActionsService', () => {
   });
 
   describe('.getTriggerCompatibleActions()', () => {
+    const coreStart = coreMock.createStart();
+
     test('can register and get actions', async () => {
       const actions: ActionRegistry = new Map();
       const service = new UiActionsService({ actions });
-      const helloWorldAction = createHelloWorldAction({} as unknown as OverlayStart);
+      const helloWorldAction = createHelloWorldAction(coreStart);
       const length = actions.size;
 
       service.registerAction(helloWorldAction);
@@ -173,7 +176,7 @@ describe('UiActionsService', () => {
 
     test('getTriggerCompatibleActions returns attached actions', async () => {
       const service = new UiActionsService();
-      const helloWorldAction = createHelloWorldAction({} as unknown as OverlayStart);
+      const helloWorldAction = createHelloWorldAction(coreStart);
 
       service.registerAction(helloWorldAction);
 

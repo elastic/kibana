@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -17,8 +18,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
-import { EuiThemeType } from '../../../../components/color_range_legend';
+import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
+import type { EuiThemeType } from '../../../../components/color_range_legend';
 
 const getJobTypeList = () => (
   <>
@@ -32,7 +33,10 @@ const getJobTypeList = () => (
   </>
 );
 
-export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
+export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType }> = ({
+  hasMissingJobNode,
+  theme,
+}) => {
   const [showJobTypes, setShowJobTypes] = useState<boolean>(false);
 
   return (
@@ -74,6 +78,21 @@ export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
+            <span className="mlJobMapLegend__ingestPipeline" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.ml.dataframe.analyticsMap.legend.ingestPipelineLabel"
+                defaultMessage="ingest pipeline"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
             <span className="mlJobMapLegend__transform" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -107,6 +126,23 @@ export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {hasMissingJobNode ? (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <span className="mlJobMapLegend__analyticsMissing" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analyticsMap.legend.missingAnalyticsJobLabel"
+                  defaultMessage="missing analytics job"
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>

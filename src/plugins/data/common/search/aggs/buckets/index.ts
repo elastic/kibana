@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export * from './_interval_options';
@@ -21,6 +22,8 @@ export * from './geo_tile_fn';
 export * from './geo_tile';
 export * from './histogram_fn';
 export * from './histogram';
+export * from './ip_prefix_fn';
+export * from './ip_prefix';
 export * from './ip_range_fn';
 export * from './ip_range';
 export * from './lib/cidr_mask';
@@ -37,7 +40,7 @@ export * from './significant_text_fn';
 export * from './significant_text';
 export * from './terms_fn';
 export * from './terms';
-export { MultiFieldKey } from './multi_field_key';
+export { MultiFieldKey, isMultiFieldKey, MULTI_FIELD_KEY_SEPARATOR } from './multi_field_key';
 export * from './multi_terms_fn';
 export * from './multi_terms';
 export * from './rare_terms_fn';

@@ -343,9 +343,17 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                 }
                 break;
 
+              case 'truthy':
+                if (!argValue) {
+                  dataValidationError = executionTranslations.mustHaveValue(argName);
+                }
+                break;
+
               case 'number':
               case 'number-greater-than-zero':
-                {
+                if (typeof argValue === 'boolean') {
+                  dataValidationError = executionTranslations.mustHaveValue(argName);
+                } else {
                   const valueNumber = Number(argValue);
 
                   if (!Number.isSafeInteger(valueNumber)) {

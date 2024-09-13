@@ -10,7 +10,7 @@ import { CoreSetup } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { getTelemetry, initTelemetry, Telemetry } from './telemetry';
 import { telemetryMappingsType } from './mappings';
-import { setInternalRepository } from './internal_repository';
+import { getInternalRepository, setInternalRepository } from './internal_repository';
 
 export function initFileUploadTelemetry(
   coreSetup: CoreSetup,
@@ -18,7 +18,7 @@ export function initFileUploadTelemetry(
 ) {
   coreSetup.savedObjects.registerType(telemetryMappingsType);
   registerUsageCollector(usageCollection);
-  coreSetup.getStartServices().then(([core]) => {
+  void coreSetup.getStartServices().then(([core]) => {
     setInternalRepository(core.savedObjects.createInternalRepository);
   });
 }
@@ -33,7 +33,7 @@ function registerUsageCollector(usageCollectionSetup: UsageCollectionSetup): voi
       },
     },
     fetch: async () => {
-      const mlUsage = await getTelemetry();
+      const mlUsage = await getTelemetry(getInternalRepository()!);
       if (!mlUsage) {
         return initTelemetry();
       }

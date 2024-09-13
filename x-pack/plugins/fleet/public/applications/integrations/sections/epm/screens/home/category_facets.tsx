@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFacetButton, EuiFacetGroup } from '@elastic/eui';
+import { EuiFacetButton, EuiFacetGroup, EuiSpacer } from '@elastic/eui';
 import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
 import React from 'react';
 
@@ -22,6 +22,9 @@ export interface CategoryFacet {
 }
 
 export const UPDATES_AVAILABLE = 'updates_available';
+export const INSTALL_FAILED = 'install_failed';
+export const UPDATE_FAILED = 'update_failed';
+
 export type ExtendedIntegrationCategory = IntegrationCategory | typeof UPDATES_AVAILABLE | '';
 
 export const ALL_CATEGORY = {
@@ -45,6 +48,20 @@ export const UPDATES_AVAILABLE_CATEGORY = {
   }),
 };
 
+export const INSTALL_FAILED_CATEGORY = {
+  id: INSTALL_FAILED,
+  title: i18n.translate('xpack.fleet.epmList.installFailedFilterLinkText', {
+    defaultMessage: 'Install failed',
+  }),
+};
+
+export const UPDATE_FAILED_CATEGORY = {
+  id: UPDATE_FAILED,
+  title: i18n.translate('xpack.fleet.epmList.updateFailedFilterLinkText', {
+    defaultMessage: 'Update failed',
+  }),
+};
+
 export interface Props {
   isLoading?: boolean;
   categories: CategoryFacet[];
@@ -61,7 +78,11 @@ export function CategoryFacets({
   const controls = (
     <EuiFacetGroup>
       {isLoading ? (
-        <Loading />
+        <>
+          <EuiSpacer size="m" />
+          <Loading size="l" />
+          <EuiSpacer size="m" />
+        </>
       ) : (
         categories.map((category) => {
           return (
@@ -72,6 +93,14 @@ export function CategoryFacets({
               id={category.id}
               quantity={category.count}
               onClick={() => onCategoryChange(category)}
+              aria-label={i18n.translate('xpack.fleet.epmList.facetButton.ariaLabel', {
+                defaultMessage:
+                  '{key}, {count} {count, plural, one { integration } other { integrations }}',
+                values: {
+                  key: category.title,
+                  count: category.count,
+                },
+              })}
             >
               {category.title}
             </EuiFacetButton>

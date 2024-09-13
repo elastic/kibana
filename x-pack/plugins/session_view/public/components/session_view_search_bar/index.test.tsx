@@ -10,7 +10,7 @@ import { processMock } from '../../../common/mocks/constants/session_view_proces
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { SessionViewSearchBar } from '.';
 import userEvent from '@testing-library/user-event';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent } from '@testing-library/react';
 
 describe('SessionViewSearchBar component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -44,7 +44,7 @@ describe('SessionViewSearchBar component', () => {
     expect(searchInput?.value).toEqual('ls');
 
     if (searchInput) {
-      userEvent.type(searchInput, ' -la');
+      await userEvent.type(searchInput, ' -la');
       fireEvent.keyUp(searchInput, { key: 'Enter', code: 'Enter' });
     }
 
@@ -68,23 +68,23 @@ describe('SessionViewSearchBar component', () => {
     const paginationTextClass = '.euiPagination__compressedText';
     expect(searchPagination.querySelector(paginationTextClass)?.textContent).toEqual('1 of 3');
 
-    userEvent.click(renderResult.getByTestId('pagination-button-next'));
+    await userEvent.click(renderResult.getByTestId('pagination-button-next'));
     expect(searchPagination.querySelector(paginationTextClass)?.textContent).toEqual('2 of 3');
 
-    userEvent.click(renderResult.getByTestId('pagination-button-next'));
+    await userEvent.click(renderResult.getByTestId('pagination-button-next'));
     expect(searchPagination.querySelector(paginationTextClass)?.textContent).toEqual('3 of 3');
 
     // ensure clicking next after we reach the end doesn't cause a 4 of 3 situation.
-    userEvent.click(renderResult.getByTestId('pagination-button-next'));
+    await userEvent.click(renderResult.getByTestId('pagination-button-next'));
     expect(searchPagination.querySelector(paginationTextClass)?.textContent).toEqual('3 of 3');
 
-    userEvent.click(renderResult.getByTestId('pagination-button-previous'));
+    await userEvent.click(renderResult.getByTestId('pagination-button-previous'));
     expect(searchPagination.querySelector(paginationTextClass)?.textContent).toEqual('2 of 3');
 
     const searchInput = renderResult.getByTestId('sessionView:searchBar').querySelector('input');
 
     if (searchInput) {
-      userEvent.type(searchInput, ' -la');
+      await userEvent.type(searchInput, ' -la');
       fireEvent.keyUp(searchInput, { key: 'Enter', code: 'Enter' });
     }
 

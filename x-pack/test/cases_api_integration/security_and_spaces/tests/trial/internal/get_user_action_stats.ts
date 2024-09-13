@@ -8,7 +8,7 @@
 import http from 'http';
 import expect from '@kbn/expect';
 
-import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq } from '../../../../common/lib/mock';

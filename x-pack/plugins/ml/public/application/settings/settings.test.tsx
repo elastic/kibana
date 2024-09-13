@@ -16,22 +16,19 @@ jest.mock('../components/help_menu', () => ({
 }));
 
 jest.mock('../contexts/kibana', () => ({
-  useNotifications: () => {
-    return {
-      toasts: { addDanger: jest.fn() },
-    };
-  },
-  useMlKibana: () => {
-    return {
-      services: {
-        docLinks: {
-          links: {
-            ml: { guide: jest.fn() },
-          },
+  useNotifications: () => ({
+    toasts: { addDanger: jest.fn(), addError: jest.fn() },
+  }),
+  useMlApi: jest.fn(),
+  useMlKibana: () => ({
+    services: {
+      docLinks: {
+        links: {
+          ml: { guide: jest.fn() },
         },
       },
-    };
-  },
+    },
+  }),
 }));
 
 jest.mock('../contexts/kibana/use_create_url', () => ({

@@ -8,16 +8,16 @@
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { useController } from 'react-hook-form';
+import styled from '@emotion/styled';
 
 const StyledEuiCard = styled(EuiCard)`
   padding: 0;
   display: flex;
   flex-direction: row;
-  border: ${(props) => {
-    if (props.selectable?.isSelected) {
-      return `1px solid ${props.theme.eui.euiColorSuccess}`;
+  border: ${({ theme, selectable }) => {
+    if (selectable?.isSelected) {
+      return `${theme.euiTheme.border.width.thin} solid ${theme.euiTheme.colors.success}`;
     }
   }};
   .euiCard__content {
@@ -28,7 +28,7 @@ const StyledEuiCard = styled(EuiCard)`
   }
   .euiText {
     margin-top: 0;
-    color: ${(props) => props.theme.eui.euiTextSubduedColor};
+    color: ${({ theme }) => theme.euiTheme.colors.subduedText};
   }
 
   > button[role='switch'] {
@@ -51,6 +51,7 @@ const StyledEuiCard = styled(EuiCard)`
     }
   }
 `;
+
 interface QueryPackSelectableProps {
   canRunSingleQuery: boolean;
   canRunPacks: boolean;
@@ -71,7 +72,7 @@ export const QueryPackSelectable = ({
   });
 
   const handleChange = useCallback(
-    (type) => {
+    (type: any) => {
       setQueryType(type);
     },
     [setQueryType]

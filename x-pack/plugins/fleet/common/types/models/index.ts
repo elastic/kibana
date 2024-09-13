@@ -18,3 +18,6 @@ export * from './preconfiguration';
 export * from './download_sources';
 export * from './fleet_server_policy_config';
 export * from './fleet_proxy';
+export * from './secret';
+export * from './setup_technology';
+export * from './fleet_setup_lock';

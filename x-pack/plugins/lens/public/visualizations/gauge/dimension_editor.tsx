@@ -5,28 +5,15 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiColorPaletteDisplay,
-  EuiFormRow,
-  EuiFlexItem,
-  EuiSwitchEvent,
-  EuiSwitch,
-  EuiIcon,
-} from '@elastic/eui';
-import React, { useState } from 'react';
+import { EuiFormRow, EuiSwitchEvent, EuiSwitch, EuiIcon } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  PaletteRegistry,
-  CustomizablePalette,
-  CUSTOM_PALETTE,
-  FIXED_PROGRESSION,
-} from '@kbn/coloring';
+import { PaletteRegistry, CustomizablePalette, CUSTOM_PALETTE } from '@kbn/coloring';
 import { GaugeTicksPositions, GaugeColorModes } from '@kbn/expression-gauge-plugin/common';
 import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
+import { TooltipWrapper } from '@kbn/visualization-utils';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
-import { applyPaletteParams, PalettePanelContainer, TooltipWrapper } from '../../shared_components';
+import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import type { GaugeVisualizationState } from './constants';
 import { defaultPaletteParams } from './palette_config';
@@ -39,8 +26,7 @@ export function GaugeDimensionEditor(
     paletteService: PaletteRegistry;
   }
 ) {
-  const { state, setState, frame, accessor } = props;
-  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const { state, setState, frame, accessor, isInlineEditing } = props;
 
   if (state?.metricAccessor !== accessor) return null;
 
@@ -75,7 +61,6 @@ export function GaugeDimensionEditor(
 
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
 
-  const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
   return (
     <>
       <EuiFormRow
@@ -125,62 +110,37 @@ export function GaugeDimensionEditor(
             display="columnCompressed"
             fullWidth
             label={i18n.translate('xpack.lens.paletteMetricGradient.label', {
-              defaultMessage: 'Color',
+              defaultMessage: 'Color mapping',
             })}
           >
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
-              responsive={false}
-              className="lnsDynamicColoringClickable"
+            <PalettePanelContainer
+              palette={displayStops.map(({ color }) => color)}
+              siblingRef={props.panelRef}
+              isInlineEditing={isInlineEditing}
+              title={i18n.translate('xpack.lens.paletteMetricGradient.label', {
+                defaultMessage: 'Color mapping',
+              })}
             >
-              <EuiFlexItem>
-                <EuiColorPaletteDisplay
-                  data-test-subj="lnsGauge_dynamicColoring_palette"
-                  palette={displayStops.map(({ color }) => color)}
-                  type={FIXED_PROGRESSION}
-                  onClick={togglePalette}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="lnsGauge_dynamicColoring_trigger"
-                  iconType="controlsHorizontal"
-                  onClick={togglePalette}
-                  size="xs"
-                  flush="both"
-                >
-                  {i18n.translate('xpack.lens.paletteTableGradient.customize', {
-                    defaultMessage: 'Edit',
-                  })}
-                </EuiButtonEmpty>
-                <PalettePanelContainer
-                  siblingRef={props.panelRef}
-                  isOpen={isPaletteOpen}
-                  handleClose={togglePalette}
-                >
-                  <CustomizablePalette
-                    palettes={props.paletteService}
-                    activePalette={activePalette}
-                    dataBounds={currentMinMax}
-                    setPalette={(newPalette) => {
-                      // if the new palette is not custom, replace the rangeMin with the artificial one
-                      if (
-                        newPalette.name !== CUSTOM_PALETTE &&
-                        newPalette.params &&
-                        newPalette.params.rangeMin !== currentMinMax.min
-                      ) {
-                        newPalette.params.rangeMin = currentMinMax.min;
-                      }
-                      setState({
-                        ...state,
-                        palette: newPalette,
-                      });
-                    }}
-                  />
-                </PalettePanelContainer>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              <CustomizablePalette
+                palettes={props.paletteService}
+                activePalette={activePalette}
+                dataBounds={currentMinMax}
+                setPalette={(newPalette) => {
+                  // if the new palette is not custom, replace the rangeMin with the artificial one
+                  if (
+                    newPalette.name !== CUSTOM_PALETTE &&
+                    newPalette.params &&
+                    newPalette.params.rangeMin !== currentMinMax.min
+                  ) {
+                    newPalette.params.rangeMin = currentMinMax.min;
+                  }
+                  setState({
+                    ...state,
+                    palette: newPalette,
+                  });
+                }}
+              />
+            </PalettePanelContainer>
           </EuiFormRow>
           <EuiFormRow
             display="columnCompressedSwitch"

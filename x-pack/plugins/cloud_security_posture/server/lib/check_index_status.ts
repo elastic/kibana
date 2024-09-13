@@ -6,36 +6,58 @@
  */
 
 import { ElasticsearchClient, type Logger } from '@kbn/core/server';
-import { IndexStatus, PostureTypes } from '../../common/types';
+import type { IndexStatus } from '@kbn/cloud-security-posture-common';
+import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
+import { PostureTypes } from '../../common/types_old';
+
+export interface PostureTypeAndRetention {
+  postureType?: PostureTypes;
+  retentionTime?: string;
+}
 
 export const checkIndexStatus = async (
   esClient: ElasticsearchClient,
   index: string,
   logger: Logger,
-  postureType: PostureTypes = 'all'
+  PostureTypeAndRetention?: PostureTypeAndRetention
 ): Promise<IndexStatus> => {
-  const query =
-    postureType === 'all'
-      ? {
-          match_all: {},
-        }
-      : {
-          bool: {
-            filter: {
-              term: {
-                'rule.benchmark.posture_type': postureType,
+  const isNotKspmOrCspm =
+    !PostureTypeAndRetention?.postureType ||
+    PostureTypeAndRetention?.postureType === 'all' ||
+    PostureTypeAndRetention?.postureType === 'vuln_mgmt';
+
+  const query = {
+    bool: {
+      filter: [
+        ...(isNotKspmOrCspm
+          ? []
+          : [
+              {
+                term: {
+                  safe_posture_type: PostureTypeAndRetention?.postureType,
+                },
               },
+            ]),
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${PostureTypeAndRetention?.retentionTime}`,
+              lte: 'now',
             },
           },
-        };
-
+        },
+      ],
+    },
+  };
   try {
     const queryResult = await esClient.search({
       index,
+      runtime_mappings: {
+        ...getSafePostureTypeRuntimeMapping(),
+      },
       query,
       size: 1,
     });
-
     return queryResult.hits.hits.length ? 'not-empty' : 'empty';
   } catch (e) {
     logger.debug(e);

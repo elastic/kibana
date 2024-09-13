@@ -14,45 +14,50 @@
 import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { identity, defaults, flow, omit } from 'lodash';
-import { Logger, SavedObjectsErrorHelpers, ExecutionContextStart } from '@kbn/core/server';
+import { defaults, flow, identity, omit } from 'lodash';
+import { ExecutionContextStart, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { Middleware } from '../lib/middleware';
 import {
-  asOk,
   asErr,
-  mapErr,
+  asOk,
   eitherAsync,
-  unwrap,
   isOk,
+  mapErr,
   mapOk,
-  Result,
   promiseResult,
+  Result,
+  unwrap,
 } from '../lib/result_type';
 import {
-  TaskRun,
-  TaskMarkRunning,
-  asTaskRunEvent,
   asTaskMarkRunningEvent,
+  asTaskRunEvent,
+  asTaskManagerStatEvent,
   startTaskTimerWithEventLoopMonitoring,
-  TaskTiming,
+  TaskMarkRunning,
   TaskPersistence,
+  TaskRun,
+  TaskTiming,
+  TaskManagerStat,
 } from '../task_events';
-import { intervalFromDate, maxIntervalFromDate } from '../lib/intervals';
+import { intervalFromDate } from '../lib/intervals';
 import {
   CancelFunction,
   CancellableTask,
   ConcreteTaskInstance,
-  isFailedRunResult,
-  SuccessfulRunResult,
   FailedRunResult,
   FailedTaskResult,
+  isFailedRunResult,
+  SuccessfulRunResult,
   TaskDefinition,
   TaskStatus,
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { isRetryableError, isUnrecoverableError } from './errors';
-import type { EventLoopDelayConfig } from '../config';
+import { isUnrecoverableError } from './errors';
+import { CLAIM_STRATEGY_MGET, type EventLoopDelayConfig } from '../config';
+import { TaskValidator } from '../task_validator';
+import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
+
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
 export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
@@ -63,7 +68,7 @@ export interface TaskRunner {
   isExpired: boolean;
   expiration: Date;
   startedAt: Date | null;
-  definition: TaskDefinition;
+  definition: TaskDefinition | undefined;
   cancel: CancelFunction;
   markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
@@ -89,7 +94,7 @@ export interface TaskRunning<Stage extends TaskRunningStage, Instance> {
 }
 
 export interface Updatable {
-  update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
+  update(doc: ConcreteTaskInstance, options: { validate: boolean }): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<void>;
 }
 
@@ -98,11 +103,13 @@ type Opts = {
   definitions: TaskTypeDictionary;
   instance: ConcreteTaskInstance;
   store: Updatable;
-  onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
+  onTaskEvent?: (event: TaskRun | TaskMarkRunning | TaskManagerStat) => void;
   defaultMaxAttempts: number;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
   eventLoopDelayConfig: EventLoopDelayConfig;
+  allowReadingInvalidState: boolean;
+  strategy: string;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -114,6 +121,8 @@ export enum TaskRunResult {
   RetryScheduled = 'RetryScheduled',
   // Task has failed
   Failed = 'Failed',
+  // Task deleted
+  Deleted = 'Deleted',
 }
 
 // A ConcreteTaskInstance which we *know* has a `startedAt` Date on it
@@ -145,12 +154,14 @@ export class TaskManagerRunner implements TaskRunner {
   private bufferedTaskStore: Updatable;
   private beforeRun: Middleware['beforeRun'];
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
-  private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
+  private onTaskEvent: (event: TaskRun | TaskMarkRunning | TaskManagerStat) => void;
   private defaultMaxAttempts: number;
   private uuid: string;
   private readonly executionContext: ExecutionContextStart;
   private usageCounter?: UsageCounter;
   private eventLoopDelayConfig: EventLoopDelayConfig;
+  private readonly taskValidator: TaskValidator;
+  private readonly claimStrategy: string;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -174,6 +185,8 @@ export class TaskManagerRunner implements TaskRunner {
     executionContext,
     usageCounter,
     eventLoopDelayConfig,
+    allowReadingInvalidState,
+    strategy,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -187,6 +200,12 @@ export class TaskManagerRunner implements TaskRunner {
     this.usageCounter = usageCounter;
     this.uuid = uuidv4();
     this.eventLoopDelayConfig = eventLoopDelayConfig;
+    this.taskValidator = new TaskValidator({
+      logger: this.logger,
+      definitions: this.definitions,
+      allowReadingInvalidState,
+    });
+    this.claimStrategy = strategy;
   }
 
   /**
@@ -208,7 +227,9 @@ export class TaskManagerRunner implements TaskRunner {
    * @param id
    */
   public isSameTask(executionId: string) {
-    return executionId.startsWith(this.id);
+    const executionIdParts = executionId.split('::');
+    const executionIdCompare = executionIdParts.length > 0 ? executionIdParts[0] : executionId;
+    return executionIdCompare === this.id;
   }
 
   /**
@@ -228,7 +249,7 @@ export class TaskManagerRunner implements TaskRunner {
   /**
    * Gets the task defintion from the dictionary.
    */
-  public get definition() {
+  public get definition(): TaskDefinition | undefined {
     return this.definitions.get(this.taskType);
   }
 
@@ -242,8 +263,16 @@ export class TaskManagerRunner implements TaskRunner {
       // this allows us to catch tasks that remain in Pending/Finalizing without being
       // cleaned up
       isReadyToRun(this.instance) ? this.instance.task.startedAt : this.instance.timestamp,
-      this.definition.timeout
+      this.timeout
     )!;
+  }
+
+  /*
+   * Gets the timeout of the current task. Uses the timeout
+   * defined by the task type unless this is an ad-hoc task that specifies an override
+   */
+  public get timeout() {
+    return getTimeout(this.instance.task, this.definition);
   }
 
   /**
@@ -284,6 +313,11 @@ export class TaskManagerRunner implements TaskRunner {
    * @returns {Promise<Result<SuccessfulRunResult, FailedRunResult>>}
    */
   public async run(): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
+    const definition = this.definition;
+    if (!definition) {
+      throw new Error(`Running task ${this} failed because it has no definition`);
+    }
+
     if (!isReadyToRun(this.instance)) {
       throw new Error(
         `Running task ${this} failed as it ${
@@ -296,24 +330,51 @@ export class TaskManagerRunner implements TaskRunner {
     const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
-
-    const modifiedContext = await this.beforeRun({
-      taskInstance: this.instance.task,
-    });
-
     const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
 
+    // Validate state
+    const stateValidationResult = this.validateTaskState(this.instance.task);
+
+    if (stateValidationResult.error) {
+      const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
+        this.processResult(
+          asErr({
+            error: stateValidationResult.error,
+            state: stateValidationResult.taskInstance.state,
+            shouldValidate: false,
+          }),
+          stopTaskTimer()
+        )
+      );
+      if (apmTrans) apmTrans.end('failure');
+      return processedResult;
+    }
+
+    const modifiedContext = await this.beforeRun({
+      taskInstance: stateValidationResult.taskInstance,
+    });
+
+    this.onTaskEvent(
+      asTaskManagerStatEvent(
+        'runDelay',
+        asOk(getTaskDelayInSeconds(this.instance.task.scheduledAt))
+      )
+    );
+
     try {
-      this.task = this.definition.createTaskRunner(modifiedContext);
+      this.task = definition.createTaskRunner(modifiedContext);
+
       const ctx = {
         type: 'task manager',
         name: `run ${this.instance.task.taskType}`,
         id: this.instance.task.id,
         description: 'run task',
       };
+
       const result = await this.executionContext.withContext(ctx, () =>
         withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
       );
+
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
         this.processResult(validatedResult, stopTaskTimer())
@@ -337,6 +398,18 @@ export class TaskManagerRunner implements TaskRunner {
       return processedResult;
     } finally {
       this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
+    }
+  }
+
+  private validateTaskState(taskInstance: ConcreteTaskInstance) {
+    const { taskType, id } = taskInstance;
+    try {
+      const validatedTaskInstance =
+        this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
+      return { taskInstance: validatedTaskInstance, error: null };
+    } catch (error) {
+      this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${error.message}`);
+      return { taskInstance, error };
     }
   }
 
@@ -368,11 +441,18 @@ export class TaskManagerRunner implements TaskRunner {
       );
     }
 
+    // mget claim strategy sets the task to `running` during the claim cycle
+    // so this update to mark the task as running is unnecessary
+    if (this.claimStrategy === CLAIM_STRATEGY_MGET) {
+      this.instance = asReadyToRun(this.instance.task as ConcreteTaskInstanceWithStartedAt);
+      return true;
+    }
+
     const apmTrans = apm.startTransaction(
       TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
       TASK_MANAGER_TRANSACTION_TYPE
     );
-    apmTrans?.addLabels({ entityId: this.taskType });
+    apmTrans.addLabels({ entityId: this.taskType });
 
     const now = new Date();
     try {
@@ -395,27 +475,17 @@ export class TaskManagerRunner implements TaskRunner {
       }
 
       this.instance = asReadyToRun(
-        (await this.bufferedTaskStore.update({
-          ...taskWithoutEnabled(taskInstance),
-          status: TaskStatus.Running,
-          startedAt: now,
-          attempts,
-          retryAt:
-            (this.instance.task.schedule
-              ? maxIntervalFromDate(
-                  now,
-                  this.instance.task.schedule.interval,
-                  this.definition.timeout
-                )
-              : this.getRetryDelay({
-                  attempts,
-                  // Fake an error. This allows retry logic when tasks keep timing out
-                  // and lets us set a proper "retryAt" value each time.
-                  error: new Error('Task timeout'),
-                  addDuration: this.definition.timeout,
-                })) ?? null,
-          // This is a safe convertion as we're setting the startAt above
-        })) as ConcreteTaskInstanceWithStartedAt
+        (await this.bufferedTaskStore.update(
+          {
+            ...taskWithoutEnabled(taskInstance),
+            status: TaskStatus.Running,
+            startedAt: now,
+            attempts,
+            retryAt: getRetryAt(taskInstance, this.definition) ?? null,
+            // This is a safe conversion as we're setting the startAt above
+          },
+          { validate: false }
+        )) as ConcreteTaskInstanceWithStartedAt
       );
 
       const timeUntilClaimExpiresAfterUpdate =
@@ -439,7 +509,7 @@ export class TaskManagerRunner implements TaskRunner {
           // try to release claim as an unknown failure prevented us from marking as running
           mapErr((errReleaseClaim: Error) => {
             this.logger.error(
-              `[Task Runner] Task ${this.id} failed to release claim after failure: ${errReleaseClaim}`
+              `[Task Runner] Task ${this.id} failed to release claim after failure: Error: ${errReleaseClaim.message}`
             );
           }, await this.releaseClaimAndIncrementAttempts());
         }
@@ -471,19 +541,24 @@ export class TaskManagerRunner implements TaskRunner {
   ): Result<SuccessfulRunResult, FailedRunResult> {
     return isFailedRunResult(result)
       ? asErr({ ...result, error: result.error })
-      : asOk(result || EMPTY_RUN_RESULT);
+      : asOk({
+          ...(result || EMPTY_RUN_RESULT),
+        });
   }
 
   private async releaseClaimAndIncrementAttempts(): Promise<Result<ConcreteTaskInstance, Error>> {
     return promiseResult(
-      this.bufferedTaskStore.update({
-        ...taskWithoutEnabled(this.instance.task),
-        status: TaskStatus.Idle,
-        attempts: this.instance.task.attempts + 1,
-        startedAt: null,
-        retryAt: null,
-        ownerId: null,
-      })
+      this.bufferedTaskStore.update(
+        {
+          ...taskWithoutEnabled(this.instance.task),
+          status: TaskStatus.Idle,
+          attempts: this.instance.task.attempts + 1,
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+        },
+        { validate: false }
+      )
     );
   }
 
@@ -504,9 +579,10 @@ export class TaskManagerRunner implements TaskRunner {
     failureResult: FailedRunResult
   ): Result<SuccessfulRunResult, FailedTaskResult> => {
     const { state, error } = failureResult;
+    const { schedule, attempts } = this.instance.task;
+
     if (this.shouldTryToScheduleRetry() && !isUnrecoverableError(error)) {
       // if we're retrying, keep the number of attempts
-      const { schedule, attempts } = this.instance.task;
 
       const reschedule = failureResult.runAt
         ? { runAt: failureResult.runAt }
@@ -516,7 +592,7 @@ export class TaskManagerRunner implements TaskRunner {
         ? { schedule }
         : // when result.error is truthy, then we're retrying because it failed
           {
-            runAt: this.getRetryDelay({
+            runAt: getRetryDate({
               attempts,
               error,
             }),
@@ -530,6 +606,7 @@ export class TaskManagerRunner implements TaskRunner {
         });
       }
     }
+
     // scheduling a retry isn't possible,mark task as failed
     return asErr({ status: TaskStatus.Failed });
   };
@@ -543,8 +620,20 @@ export class TaskManagerRunner implements TaskRunner {
       mapErr(this.rescheduleFailedRun),
       // if retrying is possible (new runAt) or this is an recurring task - reschedule
       mapOk(
-        ({ runAt, schedule: reschedule, state, attempts = 0 }: Partial<ConcreteTaskInstance>) => {
+        ({
+          runAt,
+          schedule: reschedule,
+          state,
+          attempts = 0,
+          shouldDeleteTask,
+        }: SuccessfulRunResult & { attempts: number }) => {
+          if (shouldDeleteTask) {
+            // set the status to failed so task will get deleted
+            return asOk({ status: TaskStatus.ShouldDelete });
+          }
+
           const { startedAt, schedule } = this.instance.task;
+
           return asOk({
             runAt:
               runAt || intervalFromDate(startedAt!, reschedule?.interval ?? schedule?.interval)!,
@@ -564,11 +653,15 @@ export class TaskManagerRunner implements TaskRunner {
         counterType: 'taskManagerTaskRunner',
         incrementBy: 1,
       });
-    } else if (fieldUpdates.status === TaskStatus.Failed) {
+    } else if (
+      fieldUpdates.status === TaskStatus.Failed ||
+      fieldUpdates.status === TaskStatus.ShouldDelete
+    ) {
       // Delete the SO instead so it doesn't remain in the index forever
       this.instance = asRan(this.instance.task);
       await this.removeTask();
     } else {
+      const { shouldValidate = true } = unwrap(result);
       this.instance = asRan(
         await this.bufferedTaskStore.update(
           defaults(
@@ -580,13 +673,16 @@ export class TaskManagerRunner implements TaskRunner {
               ownerId: null,
             },
             taskWithoutEnabled(this.instance.task)
-          )
+          ),
+          { validate: shouldValidate }
         )
       );
     }
 
     return fieldUpdates.status === TaskStatus.Failed
       ? TaskRunResult.Failed
+      : fieldUpdates.status === TaskStatus.ShouldDelete
+      ? TaskRunResult.Deleted
       : hasTaskRunFailed
       ? TaskRunResult.SuccessRescheduled
       : TaskRunResult.RetryScheduled;
@@ -612,27 +708,66 @@ export class TaskManagerRunner implements TaskRunner {
     taskTiming: TaskTiming
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     const { task } = this.instance;
+
+    const debugLogger = this.logger.get(`metrics-debugger`);
+
+    const taskHasExpired = this.isExpired;
+
     await eitherAsync(
       result,
-      async ({ runAt, schedule }: SuccessfulRunResult) => {
-        this.onTaskEvent(
-          asTaskRunEvent(
-            this.id,
-            asOk({
-              task,
-              persistence:
-                schedule || task.schedule
-                  ? TaskPersistence.Recurring
-                  : TaskPersistence.NonRecurring,
-              result: await (runAt || schedule || task.schedule
-                ? this.processResultForRecurringTask(result)
-                : this.processResultWhenDone()),
-            }),
-            taskTiming
-          )
-        );
+      async ({ runAt, schedule, taskRunError }: SuccessfulRunResult) => {
+        const taskPersistence =
+          schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring;
+        try {
+          const processedResult = {
+            task,
+            persistence: taskPersistence,
+            result: await (runAt || schedule || task.schedule
+              ? this.processResultForRecurringTask(result)
+              : this.processResultWhenDone()),
+          };
+
+          // Alerting task runner returns SuccessfulRunResult with taskRunError
+          // when the alerting task fails, so we check for this condition in order
+          // to emit the correct task run event for metrics collection
+          // taskRunError contains the "source" (TaskErrorSource) data
+          if (!!taskRunError) {
+            debugLogger.debug(`Emitting task run failed event for task ${this.taskType}`);
+            this.onTaskEvent(
+              asTaskRunEvent(
+                this.id,
+                asErr({ ...processedResult, isExpired: taskHasExpired, error: taskRunError }),
+                taskTiming
+              )
+            );
+          } else {
+            this.onTaskEvent(
+              asTaskRunEvent(
+                this.id,
+                asOk({ ...processedResult, isExpired: taskHasExpired }),
+                taskTiming
+              )
+            );
+          }
+        } catch (err) {
+          this.onTaskEvent(
+            asTaskRunEvent(
+              this.id,
+              asErr({
+                task,
+                persistence: taskPersistence,
+                result: TaskRunResult.Failed,
+                isExpired: taskHasExpired,
+                error: err,
+              }),
+              taskTiming
+            )
+          );
+          throw err;
+        }
       },
       async ({ error }: FailedRunResult) => {
+        debugLogger.debug(`Emitting task run failed event for task ${this.taskType}`);
         this.onTaskEvent(
           asTaskRunEvent(
             this.id,
@@ -640,6 +775,7 @@ export class TaskManagerRunner implements TaskRunner {
               task,
               persistence: task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring,
               result: await this.processResultForRecurringTask(result),
+              isExpired: this.isExpired,
               error,
             }),
             taskTiming
@@ -658,39 +794,11 @@ export class TaskManagerRunner implements TaskRunner {
         }
       );
     }
-
-    return result;
-  }
-
-  private getRetryDelay({
-    error,
-    attempts,
-    addDuration,
-  }: {
-    error: Error;
-    attempts: number;
-    addDuration?: string;
-  }): Date | undefined {
-    const retry: boolean | Date = isRetryableError(error) ?? true;
-
-    let result;
-    if (retry instanceof Date) {
-      result = retry;
-    } else if (retry === true) {
-      result = new Date(Date.now() + calculateDelay(attempts));
-    }
-
-    // Add a duration to the result
-    if (addDuration && result) {
-      result = intervalFromDate(result, addDuration)!;
-    }
     return result;
   }
 
   private getMaxAttempts() {
-    return this.definition.maxAttempts !== undefined
-      ? this.definition.maxAttempts
-      : this.defaultMaxAttempts;
+    return this.definition?.maxAttempts ?? this.defaultMaxAttempts;
   }
 }
 
@@ -747,12 +855,7 @@ export function asRan(task: InstanceOf<TaskRunningStage.RAN, RanTask>): RanTask 
   };
 }
 
-export function calculateDelay(attempts: number) {
-  if (attempts === 1) {
-    return 30 * 1000; // 30s
-  } else {
-    // get multiples of 5 min
-    const defaultBackoffPerFailure = 5 * 60 * 1000;
-    return defaultBackoffPerFailure * Math.pow(2, attempts - 2);
-  }
+export function getTaskDelayInSeconds(scheduledAt: Date) {
+  const now = new Date();
+  return (now.valueOf() - scheduledAt.valueOf()) / 1000;
 }

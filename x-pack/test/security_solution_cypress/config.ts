@@ -11,7 +11,7 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
     require.resolve('../functional/config.base.js')
@@ -34,8 +34,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
-        '--csp.strict=false',
-        '--csp.warnLegacyBrowsers=false',
         '--usageCollection.uiCounters.enabled=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
@@ -46,15 +44,19 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // See https://github.com/elastic/kibana/pull/125396 for details
         '--xpack.alerting.rules.minimumScheduleInterval.value=1s',
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertDetailsPageEnabled',
-          'chartEmbeddablesEnabled',
-        ])}`,
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['manualRuleRunEnabled'])}`,
         // mock cloud to enable the guided onboarding tour in e2e tests
         '--xpack.cloud.id=test',
         `--home.disableWelcomeScreen=true`,
         // Specify which version of the detection-rules package to install
         // `--xpack.securitySolution.prebuiltRulesPackageVersion=8.3.1`,
+        // Set an inexistent directory as the Fleet bundled packages location
+        // in order to force Fleet to reach out to the registry to download the
+        // packages listed in fleet_packages.json
+        // See: https://elastic.slack.com/archives/CNMNXV4RG/p1683033379063079
+        `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
+        '--csp.strict=false',
+        '--csp.warnLegacyBrowsers=false',
       ],
     },
   };

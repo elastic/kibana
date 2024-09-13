@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import path from 'path';
@@ -15,7 +16,8 @@ import globby from 'globby';
 
 import { analyzeArchive, extractArchive } from './zip';
 
-const getMode = (path) => (fs.statSync(path).mode & parseInt('777', 8)).toString(8);
+const getExecFlags = (path) =>
+  (fs.statSync(path).mode & parseInt('111', 8)).toString(8).padStart(3, '0');
 
 describe('kibana cli', function () {
   describe('zip', function () {
@@ -83,8 +85,8 @@ describe('kibana cli', function () {
           ]
         `);
 
-        expect(getMode(path.resolve(tempPath, 'executable'))).toEqual('755');
-        expect(getMode(path.resolve(tempPath, 'not-executable'))).toEqual('644');
+        expect(getExecFlags(path.resolve(tempPath, 'executable'))).toEqual('111');
+        expect(getExecFlags(path.resolve(tempPath, 'not-executable'))).toEqual('000');
       });
     });
 

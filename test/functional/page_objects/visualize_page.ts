@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { VisualizeConstants } from '@kbn/visualizations-plugin/common/constants';
@@ -16,6 +17,7 @@ interface VisualizeSaveModalArgs {
   redirectToOrigin?: boolean;
   addToDashboard?: boolean;
   dashboardId?: string;
+  description?: string;
 }
 
 type DashboardPickerOption =
@@ -41,6 +43,7 @@ export class VisualizePageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly visEditor = this.ctx.getPageObject('visEditor');
   private readonly visChart = this.ctx.getPageObject('visChart');
+  private readonly toasts = this.ctx.getService('toasts');
 
   index = {
     LOGSTASH_TIME_BASED: 'logstash-*',
@@ -64,8 +67,38 @@ export class VisualizePageObject extends FtrService {
     });
   }
 
-  public async gotoVisualizationLandingPage() {
-    await this.common.navigateToApp('visualize');
+  /**
+   *  Try to speed resets a bit if the Visualize Library breadcrumb is available
+   */
+  private async clickOnVisualizeLibraryBreadcrumb() {
+    // Try to navigate to the Visualize Listing page from breadcrumb if available
+    const selector = '[data-test-subj="breadcrumb first"][title="Visualize Library"]';
+    const visualizeLibraryBreadcrumb = await this.find.existsByCssSelector(selector);
+    if (visualizeLibraryBreadcrumb) {
+      await this.find.clickByCssSelector(selector);
+      // Lens offers a last modal before leaving the page for unsaved charts
+      // so close it as quick as possible
+      if (await this.testSubjects.exists('confirmModalConfirmButton')) {
+        await this.testSubjects.click('confirmModalConfirmButton');
+        return true;
+      }
+    }
+  }
+
+  public async gotoVisualizationLandingPage(
+    { forceRefresh }: { forceRefresh: boolean } = { forceRefresh: false }
+  ) {
+    if (forceRefresh || !(await this.clickOnVisualizeLibraryBreadcrumb())) {
+      await this.common.navigateToApp('visualize');
+    }
+  }
+
+  public async selectVisualizationsTab() {
+    await this.listingTable.selectTab(1);
+  }
+
+  public async selectAnnotationsTab() {
+    await this.listingTable.selectTab(2);
   }
 
   public async clickNewVisualization() {
@@ -132,8 +165,15 @@ export class VisualizePageObject extends FtrService {
     });
   }
 
-  public async navigateToNewVisualization() {
-    await this.gotoVisualizationLandingPage();
+  /**
+   * Navigation now happens without URL refresh by default
+   * so a new "forceRefresh" option has been passed in order to
+   * address those scenarios where a full refresh is required (i.e. changing default settings)
+   */
+  public async navigateToNewVisualization(
+    options: { forceRefresh: boolean } = { forceRefresh: false }
+  ) {
+    await this.gotoVisualizationLandingPage(options);
     await this.header.waitUntilLoadingHasFinished();
     await this.clickNewVisualization();
     await this.waitForGroupsSelectPage();
@@ -147,9 +187,8 @@ export class VisualizePageObject extends FtrService {
     await this.waitForVisualizationSelectPage();
   }
 
-  public async navigateToLensFromAnotherVisulization() {
-    const button = await this.testSubjects.find('visualizeEditInLensButton');
-    await button.click();
+  public async navigateToLensFromAnotherVisualization() {
+    await this.testSubjects.click('visualizeEditInLensButton');
   }
 
   public async hasNavigateToLensButton() {
@@ -161,6 +200,11 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickVisType(type: string) {
+    // checking for the existence of the control gives the UI more time to bind a click handler
+    // see https://github.com/elastic/kibana/issues/89958
+    if (!(await this.hasVisType(type))) {
+      throw new Error(`The '${type}' visualization type does not exist (visType-${type})`);
+    }
     await this.testSubjects.click(`visType-${type}`);
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -384,7 +428,7 @@ export class VisualizePageObject extends FtrService {
 
     // Confirm that the Visualization has actually been saved
     await this.testSubjects.existOrFail('saveVisualizationSuccess');
-    const message = await this.common.closeToast();
+    const message = await this.toasts.getTitleAndDismiss();
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForSaveModalToClose();
 
@@ -393,9 +437,19 @@ export class VisualizePageObject extends FtrService {
 
   public async setSaveModalValues(
     vizName: string,
-    { saveAsNew, redirectToOrigin, addToDashboard, dashboardId }: VisualizeSaveModalArgs = {}
+    {
+      saveAsNew,
+      redirectToOrigin,
+      addToDashboard,
+      dashboardId,
+      description,
+    }: VisualizeSaveModalArgs = {}
   ) {
     await this.testSubjects.setValue('savedObjectTitle', vizName);
+
+    if (description) {
+      await this.testSubjects.setValue('savedObjectDescription', description);
+    }
 
     const saveAsNewCheckboxExists = await this.testSubjects.exists('saveAsNewCheckbox');
     if (saveAsNewCheckboxExists) {

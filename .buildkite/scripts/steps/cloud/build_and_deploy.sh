@@ -24,7 +24,6 @@ ELASTICSEARCH_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud:$VERS
 KIBANA_CLOUD_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$VERSION-$GIT_COMMIT"
 CLOUD_DEPLOYMENT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST"
 
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 set +e
 DISTRIBUTION_EXISTS=$(docker manifest inspect $KIBANA_CLOUD_IMAGE &> /dev/null; echo $?)
 set -e
@@ -37,15 +36,17 @@ else
     --skip-generic-folders \
     --skip-platform-folders \
     --skip-archives \
+    --skip-cdn-assets \
     --docker-images \
     --docker-tag-qualifier="$GIT_COMMIT" \
     --docker-push \
     --skip-docker-ubi \
+    --skip-docker-fips \
     --skip-docker-ubuntu \
+    --skip-docker-wolfi \
+    --skip-docker-serverless \
     --skip-docker-contexts
 fi
-
-docker logout docker.elastic.co
 
 if is_pr_with_label "ci:cloud-redeploy"; then
   echo "--- Shutdown Previous Deployment"
@@ -60,7 +61,7 @@ fi
 
 echo "--- Create Deployment"
 CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
-if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
+if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; then
   jq '
     .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
     .resources.elasticsearch[0].plan.elasticsearch.docker_image = "'$ELASTICSEARCH_CLOUD_IMAGE'" |
@@ -80,11 +81,10 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' "$ECCTL_LOGS")
 
   echo "Writing to vault..."
-  VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
-  VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
-  VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-  retry 5 30 vault login -no-print "$VAULT_TOKEN"
-  retry 5 5 vault write "secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
+
+  set_in_legacy_vault "$CLOUD_DEPLOYMENT_NAME" \
+    username="$CLOUD_DEPLOYMENT_USERNAME" \
+    password="$CLOUD_DEPLOYMENT_PASSWORD"
 
   echo "Enabling Stack Monitoring..."
   jq '
@@ -116,21 +116,23 @@ else
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$ECCTL_LOGS"
 fi
 
+VAULT_READ_COMMAND=$(print_legacy_vault_read "$CLOUD_DEPLOYMENT_NAME")
+
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
 CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')
 
 cat << EOF | buildkite-agent annotate --style "info" --context cloud
-  ### Cloud Deployment
+### Cloud Deployment
 
-  Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL
+Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL
 
-  Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
+Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
 
-  Credentials: \`vault read secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME\`
+Credentials: \`$VAULT_READ_COMMAND\`
 
-  Kibana image: \`$KIBANA_CLOUD_IMAGE\`
+Kibana image: \`$KIBANA_CLOUD_IMAGE\`
 
-  Elasticsearch image: \`$ELASTICSEARCH_CLOUD_IMAGE\`
+Elasticsearch image: \`$ELASTICSEARCH_CLOUD_IMAGE\`
 EOF
 
 buildkite-agent meta-data set pr_comment:deploy_cloud:head "* [Cloud Deployment](${CLOUD_DEPLOYMENT_KIBANA_URL})"

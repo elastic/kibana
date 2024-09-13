@@ -15,10 +15,9 @@ exports[`WarningsFlyoutStep renders 1`] = `
           iconType="arrowLeft"
           onClick={[MockFunction]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Back"
             id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -30,12 +29,10 @@ exports[`WarningsFlyoutStep renders 1`] = `
           disabled={false}
           fill={true}
           onClick={[MockFunction]}
-          size="m"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Continue reindexing"
             id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.continueButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>

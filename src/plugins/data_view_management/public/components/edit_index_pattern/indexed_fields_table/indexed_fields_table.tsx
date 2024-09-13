@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
-import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { OverlayStart } from '@kbn/core/public';
 import { DataViewField, DataView, RuntimeField } from '@kbn/data-views-plugin/public';
 import { Table } from './components/table';
 import { IndexedFieldItem } from './types';
+import { StartServices } from '../../../types';
 
 interface IndexedFieldsTableProps {
   fields: DataViewField[];
@@ -27,8 +29,8 @@ interface IndexedFieldsTableProps {
   fieldWildcardMatcher: (filters: string[] | undefined) => (val: string) => boolean;
   userEditPermission: boolean;
   openModal: OverlayStart['openModal'];
-  theme: ThemeServiceStart;
   compositeRuntimeFields: Record<string, RuntimeField>;
+  startServices: StartServices;
 }
 
 interface IndexedFieldsTableState {
@@ -76,6 +78,7 @@ export class IndexedFieldsTable extends Component<
         fields.map((field) => {
           return {
             ...field.spec,
+            id: field.name,
             type: field.esTypes?.join(', ') || '',
             kbnType: field.type,
             displayName: field.displayName,
@@ -114,6 +117,7 @@ export class IndexedFieldsTable extends Component<
           },
         },
         name,
+        id: name,
         type: 'composite',
         kbnType: '',
         displayName: name,
@@ -194,7 +198,7 @@ export class IndexedFieldsTable extends Component<
           editField={(field) => this.props.helpers.editField(field.name)}
           deleteField={(fieldNames) => this.props.helpers.deleteField(fieldNames)}
           openModal={this.props.openModal}
-          theme={this.props.theme}
+          startServices={this.props.startServices}
         />
       </div>
     );

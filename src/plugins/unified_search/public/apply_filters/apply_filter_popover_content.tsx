@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -18,6 +19,7 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import React, { Component } from 'react';
 import {
   getDisplayValueFromFilter,
@@ -77,6 +79,9 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
               label={this.getLabel(filter)}
               checked={this.isFilterSelected(i)}
               onChange={() => this.toggleFilterSelected(i)}
+              css={css`
+                word-break: break-word;
+              `}
             />
           </EuiFormRow>
         ))}

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-interface IndexModule {
+export type { Index } from '@kbn/index-management-shared-types';
+
+export interface IndexModule {
   number_of_shards: number | string;
   codec: string;
   routing_partition_size: number;
+  refresh_interval: string;
   load_fixed_bitset_filters_eagerly: boolean;
   shard: {
     check_on_startup: boolean | 'checksum';
@@ -51,20 +54,7 @@ export interface IndexSettings {
   [key: string]: any;
 }
 
-export interface Index {
-  health?: string;
-  status?: string;
-  name: string;
-  uuid?: string;
-  primary?: number | string;
-  replica?: number | string;
-  documents: number;
-  documents_deleted: number;
-  size: string;
-  primary_size: string;
-  isFrozen: boolean;
-  hidden: boolean;
-  aliases: string | string[];
-  data_stream?: string;
-  [key: string]: any;
+export interface IndexSettingsResponse {
+  settings: IndexSettings;
+  defaults: IndexSettings;
 }

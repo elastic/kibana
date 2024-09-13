@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly, EuiIconTip } from '@elastic/eui';
 
 import React from 'react';
 import { get } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import { ML_JOB_AGGREGATION, isRuleSupported, isMultiBucketAnomaly } from '@kbn/ml-anomaly-utils';
 import {
   formatHumanReadableDate,
   formatHumanReadableDateTime,
   formatHumanReadableDateTimeSeconds,
-} from '../../../../common/util/date_utils';
-import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
+} from '@kbn/ml-date-utils';
 
 import { DescriptionCell } from './description_cell';
 import { DetectorCell } from './detector_cell';
@@ -26,8 +25,6 @@ import { EntityCell } from '../entity_cell';
 import { InfluencersCell } from './influencers_cell';
 import { LinksMenu } from './links_menu';
 import { checkPermission } from '../../capabilities/check_capabilities';
-import { mlFieldFormatService } from '../../services/field_format_service';
-import { isRuleSupported, isMultiBucketAnomaly } from '../../../../common/util/anomaly_utils';
 import { formatValue } from '../../formatters/format_value';
 import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS } from './anomalies_table_constants';
 import { SeverityCell } from './severity_cell';
@@ -58,6 +55,7 @@ function showLinksMenuForItem(item, showViewSeriesLink, sourceIndicesWithGeoFiel
 }
 
 export function getColumns(
+  mlFieldFormatService,
   items,
   jobIds,
   examplesByJobId,
@@ -118,19 +116,22 @@ export function getColumns(
       field: 'severity',
       'data-test-subj': 'mlAnomaliesListColumnSeverity',
       name: (
-        <EuiToolTip
-          content={i18n.translate('xpack.ml.overview.anomalyDetection.tableSeverityTooltip', {
-            defaultMessage:
-              'A normalized score between 0-100, which indicates the relative significance of the anomaly record results.',
+        <span>
+          {i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
+            defaultMessage: 'Severity',
           })}
-        >
-          <span>
-            {i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
-              defaultMessage: 'Severity',
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            content={i18n.translate('xpack.ml.overview.anomalyDetection.tableSeverityTooltip', {
+              defaultMessage:
+                'A normalized score between 0-100, which indicates the relative significance of the anomaly record results.',
             })}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+          />
+        </span>
       ),
       render: (score, item) => (
         <SeverityCell score={score} isMultiBucketAnomaly={isMultiBucketAnomaly(item.source)} />
@@ -198,18 +199,21 @@ export function getColumns(
       field: 'actualSort',
       'data-test-subj': 'mlAnomaliesListColumnActual',
       name: (
-        <EuiToolTip
-          content={i18n.translate('xpack.ml.overview.anomalyDetection.tableActualTooltip', {
-            defaultMessage: 'The actual values in the anomaly record results.',
+        <span>
+          {i18n.translate('xpack.ml.anomaliesTable.actualSortColumnName', {
+            defaultMessage: 'Actual',
           })}
-        >
-          <span>
-            {i18n.translate('xpack.ml.anomaliesTable.actualSortColumnName', {
-              defaultMessage: 'Actual',
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            content={i18n.translate('xpack.ml.overview.anomalyDetection.tableActualTooltip', {
+              defaultMessage: 'The actual values in the anomaly record results.',
             })}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+          />
+        </span>
       ),
       render: (actual, item) => {
         const fieldFormat = mlFieldFormatService.getFieldFormat(
@@ -219,6 +223,7 @@ export function getColumns(
         return formatValue(item.actual, item.source.function, fieldFormat, item.source);
       },
       sortable: true,
+      className: 'eui-textBreakNormal',
     });
   }
 
@@ -227,18 +232,21 @@ export function getColumns(
       field: 'typicalSort',
       'data-test-subj': 'mlAnomaliesListColumnTypical',
       name: (
-        <EuiToolTip
-          content={i18n.translate('xpack.ml.overview.anomalyDetection.tableTypicalTooltip', {
-            defaultMessage: 'The typical values in the anomaly record results.',
+        <span>
+          {i18n.translate('xpack.ml.anomaliesTable.typicalSortColumnName', {
+            defaultMessage: 'Typical',
           })}
-        >
-          <span>
-            {i18n.translate('xpack.ml.anomaliesTable.typicalSortColumnName', {
-              defaultMessage: 'Typical',
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            content={i18n.translate('xpack.ml.overview.anomalyDetection.tableTypicalTooltip', {
+              defaultMessage: 'The typical values in the anomaly record results.',
             })}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+          />
+        </span>
       ),
       render: (typical, item) => {
         const fieldFormat = mlFieldFormatService.getFieldFormat(
@@ -248,6 +256,7 @@ export function getColumns(
         return formatValue(item.typical, item.source.function, fieldFormat, item.source);
       },
       sortable: true,
+      className: 'eui-textBreakNormal',
     });
 
     // Assume that if we are showing typical, there will be an actual too,

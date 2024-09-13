@@ -11,12 +11,13 @@ import { EuiAccordion } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult, Rule, RuleAction, GenericValidationResult } from '../../../types';
+import { ValidationResult, GenericValidationResult, RuleUiAction } from '../../../types';
 import ActionForm from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
+  SanitizedRuleAction,
 } from '@kbn/alerting-plugin/common';
 
 jest.mock('../../../common/lib/kibana');
@@ -24,7 +25,7 @@ jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
 }));
-const { loadActionTypes } = jest.requireMock('../../lib/action_connector_api');
+const { loadActionTypes, loadAllActions } = jest.requireMock('../../lib/action_connector_api');
 
 const setHasActionsWithBrokenConnector = jest.fn();
 describe('action_form', () => {
@@ -106,6 +107,19 @@ describe('action_form', () => {
     actionParamsFields: mockedActionParamsFields,
   };
 
+  const systemActionType = {
+    id: 'my-system-action-type',
+    iconClass: 'test',
+    selectMessage: 'system action',
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
+      const validationResult = { errors: {} };
+      return Promise.resolve(validationResult);
+    },
+    actionConnectorFields: null,
+    actionParamsFields: mockedActionParamsFields,
+    actionTypeTitle: 'system-action-type-title',
+  };
+
   const allActions = [
     {
       secrets: {},
@@ -177,18 +191,28 @@ describe('action_form', () => {
       isPreconfigured: false,
       isDeprecated: false,
     },
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: 'test',
+      actionTypeId: systemActionType.id,
+      name: 'Test system connector',
+      config: {},
+      isPreconfigured: false,
+      isDeprecated: false,
+      isSystemAction: true,
+    },
   ];
 
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   async function setup(
-    customActions?: RuleAction[],
+    customActions?: RuleUiAction[],
     customRecoveredActionGroup?: string,
     isExperimental?: boolean
   ) {
     const actionTypeRegistry = actionTypeRegistryMock.create();
 
-    const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
     loadAllActions.mockResolvedValueOnce(allActions);
     const mocks = coreMock.createSetup();
     const [
@@ -209,13 +233,16 @@ describe('action_form', () => {
       ...actionType,
       isExperimental,
     };
+
     actionTypeRegistry.list.mockReturnValue([
       newActionType,
       disabledByConfigActionType,
       disabledByLicenseActionType,
       disabledByActionType,
       preconfiguredOnly,
+      systemActionType,
     ]);
+
     actionTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.get.mockReturnValue(newActionType);
     const initialAlert = {
@@ -226,7 +253,7 @@ describe('action_form', () => {
       schedule: {
         interval: '1m',
       },
-      actions: customActions
+      actions: (customActions
         ? customActions
         : [
             {
@@ -237,12 +264,12 @@ describe('action_form', () => {
                 message: '',
               },
             },
-          ],
+          ]) as SanitizedRuleAction[],
       tags: [],
       muteAll: false,
       enabled: false,
       mutedInstanceIds: [],
-    } as unknown as Rule;
+    };
 
     loadActionTypes.mockResolvedValue([
       {
@@ -299,6 +326,16 @@ describe('action_form', () => {
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
       },
+      {
+        id: 'my-system-action-type',
+        name: 'System action',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: true,
+      },
     ]);
 
     const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
@@ -314,6 +351,7 @@ describe('action_form', () => {
           context: [{ name: 'contextVar', description: 'context var1' }],
         }}
         featureId="alerting"
+        producerId="alerting"
         defaultActionGroupId={'default'}
         isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
           const recoveryActionGroupId = customRecoveredActionGroup
@@ -337,21 +375,24 @@ describe('action_form', () => {
         setActionGroupIdByIndex={(group: string, index: number) => {
           initialAlert.actions[index].group = group;
         }}
-        setActions={(_updatedActions: RuleAction[]) => {}}
+        setActions={(_updatedActions: RuleUiAction[]) => {}}
         setActionParamsProperty={(key: string, value: any, index: number) =>
           (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
         }
         setActionFrequencyProperty={(key: string, value: any, index: number) =>
           (initialAlert.actions[index] = {
             ...initialAlert.actions[index],
-            frequency: { ...initialAlert.actions[index].frequency!, [key]: value },
+            frequency: {
+              ...initialAlert.actions[index].frequency!,
+              [key]: value,
+            },
           })
         }
         setActionAlertsFilterProperty={(key: string, value: any, index: number) =>
           (initialAlert.actions[index] = {
             ...initialAlert.actions[index],
             alertsFilter: {
-              ...(initialAlert.actions[index].alertsFilter ?? { query: null, timeframe: null }),
+              ...initialAlert.actions[index].alertsFilter,
               [key]: value,
             },
           })
@@ -382,10 +423,18 @@ describe('action_form', () => {
           .find(`EuiToolTip [data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`)
           .exists()
       ).toBeFalsy();
+
       expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(false);
       expect(loadActionTypes).toBeCalledWith(
         expect.objectContaining({
           featureId: 'alerting',
+          includeSystemActions: true,
+        })
+      );
+
+      expect(loadAllActions).toBeCalledWith(
+        expect.objectContaining({
+          includeSystemActions: true,
         })
       );
     });
@@ -663,6 +712,7 @@ describe('action_form', () => {
         wrapper.find('EuiBetaBadge[data-test-subj="action-type-form-beta-badge"]').exists()
       ).toBeFalsy();
     });
+
     it(`does not render beta badge when isExperimental=false`, async () => {
       const wrapper = await setup(undefined, undefined, false);
       expect(wrapper.find('EuiKeyPadMenuItem EuiBetaBadge').exists()).toBeFalsy();
@@ -670,12 +720,37 @@ describe('action_form', () => {
         wrapper.find('EuiBetaBadge[data-test-subj="action-type-form-beta-badge"]').exists()
       ).toBeFalsy();
     });
+
     it(`renders beta badge when isExperimental=true`, async () => {
       const wrapper = await setup(undefined, undefined, true);
       expect(wrapper.find('EuiKeyPadMenuItem EuiBetaBadge').exists()).toBeTruthy();
       expect(
         wrapper.find('EuiBetaBadge[data-test-subj="action-type-form-beta-badge"]').exists()
       ).toBeTruthy();
+    });
+  });
+
+  describe('system actions', () => {
+    it('renders system action types correctly', async () => {
+      const wrapper = await setup();
+      const actionOption = wrapper.find(
+        `[data-test-subj="${systemActionType.id}-alerting-ActionTypeSelectOption"]`
+      );
+
+      expect(actionOption.exists()).toBeTruthy();
+      expect(actionOption.at(1).prop('disabled')).toBe(false);
+    });
+
+    it('disables the system action type if it is already selected', async () => {
+      const wrapper = await setup([
+        { id: 'system-connector-.cases', actionTypeId: systemActionType.id, params: {} },
+      ]);
+
+      const actionOption = wrapper.find(
+        `[data-test-subj="${systemActionType.id}-alerting-ActionTypeSelectOption"]`
+      );
+
+      expect(actionOption.at(1).prop('disabled')).toBe(true);
     });
   });
 });

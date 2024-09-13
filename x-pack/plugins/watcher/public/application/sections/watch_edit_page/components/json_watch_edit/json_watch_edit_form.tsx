@@ -20,18 +20,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { XJsonMode } from '@kbn/ace';
+import { CodeEditor } from '@kbn/code-editor';
 
+import { XJson } from '../../../../shared_imports';
 import { serializeJsonWatch } from '../../../../../../common/lib/serialization';
 import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
-import { XJson, EuiCodeEditor } from '../../../../shared_imports';
 import { onWatchSave } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
 import { goToWatchList } from '../../../../lib/navigation';
 import { RequestFlyout } from '../request_flyout';
 import { useAppContext } from '../../../../app_context';
 
-const xJsonMode = new XJsonMode();
 const { useXJsonMode } = XJson;
 
 export const JsonWatchEditForm = () => {
@@ -168,18 +167,22 @@ export const JsonWatchEditForm = () => {
           fullWidth
           errors={jsonErrors}
         >
-          <EuiCodeEditor
-            mode={xJsonMode}
-            width="100%"
-            theme="textmate"
+          <CodeEditor
+            languageId="json"
+            value={xJson}
             data-test-subj="jsonEditor"
+            height={500}
+            options={{
+              lineNumbers: 'off',
+              tabSize: 2,
+              automaticLayout: true,
+            }}
             aria-label={i18n.translate(
               'xpack.watcher.sections.watchEdit.json.form.watchJsonAriaLabel',
               {
                 defaultMessage: 'Code editor',
               }
             )}
-            value={xJson}
             onChange={(xjson: string) => {
               if (validationError) {
                 setValidationError(null);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -16,9 +16,12 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSpacer,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ingestionMethodToText } from '../../utils/indices';
 
@@ -36,6 +39,9 @@ export const DeleteIndexModal: React.FC = () => {
   } = useValues(IndicesLogic);
 
   const [inputIndexName, setInputIndexName] = useState('');
+  useEffect(() => {
+    setInputIndexName('');
+  }, [isDeleteModalVisible, indexName]);
 
   return isDeleteModalVisible ? (
     <EuiConfirmModal
@@ -80,7 +86,7 @@ export const DeleteIndexModal: React.FC = () => {
           'xpack.enterpriseSearch.content.searchIndices.deleteModal.delete.description',
           {
             defaultMessage:
-              'Deleting this index will also delete all of its data and its {ingestionMethod} configuration. Any associated search engines will no longer be able to access any data stored in this index.',
+              'Deleting this index will also delete all of its data and its {ingestionMethod} configuration. Any associated search applications will no longer be able to access any data stored in this index.',
             values: {
               ingestionMethod: ingestionMethodToText(ingestionMethod),
             },
@@ -112,15 +118,19 @@ export const DeleteIndexModal: React.FC = () => {
           <EuiSpacer />
         </>
       )}
-      <p>
-        {i18n.translate(
-          'xpack.enterpriseSearch.content.searchIndices.deleteModal.syncsWarning.indexNameDescription',
-          {
-            defaultMessage: 'This action cannot be undone. Please type {indexName} to confirm.',
-            values: { indexName },
-          }
-        )}
-      </p>
+      <EuiText>
+        <FormattedMessage
+          id="xpack.enterpriseSearch.content.searchIndices.deleteModal.syncsWarning.indexNameDescription"
+          defaultMessage="This action cannot be undone. Please type {indexName} to confirm."
+          values={{
+            indexName: (
+              <strong>
+                <EuiTextColor color="danger">{indexName}</EuiTextColor>
+              </strong>
+            ),
+          }}
+        />
+      </EuiText>
       <EuiForm>
         <EuiFormRow
           label={i18n.translate(
@@ -131,6 +141,8 @@ export const DeleteIndexModal: React.FC = () => {
           )}
         >
           <EuiFieldText
+            data-test-subj="entSearchContent-indices-deleteModal-input"
+            data-telemetry-id="entSearchContent-indices-deleteModal-input"
             onChange={(e) => setInputIndexName(e.target.value)}
             value={inputIndexName}
           />

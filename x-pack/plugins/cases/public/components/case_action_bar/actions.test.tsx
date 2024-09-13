@@ -13,7 +13,7 @@ import { basicCase, basicPush } from '../../containers/mock';
 import { Actions } from './actions';
 import * as i18n from '../case_view/translations';
 import * as api from '../../containers/api';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../containers/api');
 
@@ -122,7 +122,7 @@ describe('CaseView actions', () => {
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
     await waitFor(() => {
-      expect(deleteCasesSpy).toHaveBeenCalledWith(['basic-case-id'], expect.anything());
+      expect(deleteCasesSpy).toHaveBeenCalledWith({ caseIds: ['basic-case-id'] });
     });
   });
 

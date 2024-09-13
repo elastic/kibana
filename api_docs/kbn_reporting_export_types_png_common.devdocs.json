@@ -1,0 +1,250 @@
+{
+  "id": "@kbn/reporting-export-types-png-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/reporting-export-types-png-common",
+        "id": "def-common.JobParamsPNGV2",
+        "type": "Interface",
+        "tags": [],
+        "label": "JobParamsPNGV2",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-export-types-png-common",
+            "scope": "common",
+            "docId": "kibKbnReportingExportTypesPngCommonPluginApi",
+            "section": "def-common.JobParamsPNGV2",
+            "text": "JobParamsPNGV2"
+          },
+          " extends ",
+          "BaseParams"
+        ],
+        "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-export-types-png-common",
+            "id": "def-common.JobParamsPNGV2.layout",
+            "type": "Object",
+            "tags": [],
+            "label": "layout",
+            "description": [],
+            "signature": [
+              "{ id?: ",
+              {
+                "pluginId": "screenshotting",
+                "scope": "common",
+                "docId": "kibScreenshottingPluginApi",
+                "section": "def-common.LayoutType",
+                "text": "LayoutType"
+              },
+              " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "LayoutSelectorDictionary",
+              "> | undefined; zoom?: number | undefined; }"
+            ],
+            "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-png-common",
+            "id": "def-common.JobParamsPNGV2.locatorParams",
+            "type": "Object",
+            "tags": [],
+            "label": "locatorParams",
+            "description": [
+              "\nThis value is used to re-create the same visual state as when the report was requested as well as navigate to the correct page."
+            ],
+            "signature": [
+              "LocatorParams",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-export-types-png-common",
+        "id": "def-common.TaskPayloadPNGV2",
+        "type": "Interface",
+        "tags": [],
+        "label": "TaskPayloadPNGV2",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-export-types-png-common",
+            "scope": "common",
+            "docId": "kibKbnReportingExportTypesPngCommonPluginApi",
+            "section": "def-common.TaskPayloadPNGV2",
+            "text": "TaskPayloadPNGV2"
+          },
+          " extends ",
+          "BasePayload"
+        ],
+        "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-export-types-png-common",
+            "id": "def-common.TaskPayloadPNGV2.layout",
+            "type": "Object",
+            "tags": [],
+            "label": "layout",
+            "description": [],
+            "signature": [
+              "{ id?: ",
+              {
+                "pluginId": "screenshotting",
+                "scope": "common",
+                "docId": "kibScreenshottingPluginApi",
+                "section": "def-common.LayoutType",
+                "text": "LayoutType"
+              },
+              " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "LayoutSelectorDictionary",
+              "> | undefined; zoom?: number | undefined; }"
+            ],
+            "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-png-common",
+            "id": "def-common.TaskPayloadPNGV2.forceNow",
+            "type": "string",
+            "tags": [],
+            "label": "forceNow",
+            "description": [],
+            "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-png-common",
+            "id": "def-common.TaskPayloadPNGV2.locatorParams",
+            "type": "Array",
+            "tags": [],
+            "label": "locatorParams",
+            "description": [
+              "\nEven though we only ever handle one locator for a PNG, we store it as an array for consistency with how PDFs are stored"
+            ],
+            "signature": [
+              "LocatorParams",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">[]"
+            ],
+            "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/reporting-export-types-png-common",
+        "id": "def-common.JobParamsPNGDeprecated",
+        "type": "Type",
+        "tags": [],
+        "label": "JobParamsPNGDeprecated",
+        "description": [],
+        "signature": [
+          "BaseParamsPNG & ",
+          "BaseParams"
+        ],
+        "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-export-types-png-common",
+        "id": "def-common.PNG_JOB_TYPE_V2",
+        "type": "string",
+        "tags": [],
+        "label": "PNG_JOB_TYPE_V2",
+        "description": [],
+        "signature": [
+          "\"PNGV2\""
+        ],
+        "path": "packages/kbn-reporting/export_types/png_common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-export-types-png-common",
+        "id": "def-common.PNG_REPORT_TYPE_V2",
+        "type": "string",
+        "tags": [],
+        "label": "PNG_REPORT_TYPE_V2",
+        "description": [],
+        "signature": [
+          "\"pngV2\""
+        ],
+        "path": "packages/kbn-reporting/export_types/png_common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-export-types-png-common",
+        "id": "def-common.TaskPayloadPNG",
+        "type": "Type",
+        "tags": [],
+        "label": "TaskPayloadPNG",
+        "description": [],
+        "signature": [
+          "BaseParamsPNG & ",
+          "BasePayload"
+        ],
+        "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { v4 as uuidv4 } from 'uuid';
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiEmptyPrompt,
@@ -21,13 +22,9 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import byteSize from 'byte-size';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
-import {
-  AlertStatusEventEntityIdMap,
-  Process,
-  ProcessEvent,
-} from '../../../common/types/process_tree';
-import { DisplayOptionsState } from '../../../common/types/session_view';
-import { SessionViewDeps } from '../../types';
+import type { AlertStatusEventEntityIdMap, Process, ProcessEvent } from '../../../common';
+import type { DisplayOptionsState } from '../session_view_display_options';
+import type { SessionViewDeps, SessionViewIndices, SessionViewTelemetryKey } from '../../types';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { SessionViewDisplayOptions } from '../session_view_display_options';
@@ -40,26 +37,54 @@ import {
   useFetchGetTotalIOBytes,
 } from './hooks';
 import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
+import {
+  AUDITBEAT_DATA_SOURCE,
+  AUDITBEAT_INDEX,
+  CLOUD_DEFEND_DATA_SOURCE,
+  CLOUD_DEFEND_INDEX,
+  ELASTIC_DEFEND_DATA_SOURCE,
+  ENDPOINT_INDEX,
+} from '../../methods';
 import { REFRESH_SESSION, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from './translations';
 
 /**
  * The main wrapper component for the session view.
  */
 export const SessionView = ({
+  index,
   sessionEntityId,
+  sessionStartTime,
   height,
   isFullScreen = false,
   jumpToEntityId,
   jumpToCursor,
   investigatedAlertId,
   loadAlertDetails,
-  canAccessEndpointManagement,
-}: SessionViewDeps) => {
+  canReadPolicyManagement,
+  trackEvent,
+}: SessionViewDeps & { trackEvent: (name: SessionViewTelemetryKey) => void }) => {
   // don't engage jumpTo if jumping to session leader.
   if (jumpToEntityId === sessionEntityId) {
     jumpToEntityId = undefined;
     jumpToCursor = undefined;
   }
+
+  // track session open telemetry
+  useEffect(() => {
+    const sourceMap: Record<string, SessionViewIndices> = {
+      [CLOUD_DEFEND_INDEX]: CLOUD_DEFEND_DATA_SOURCE,
+      [ENDPOINT_INDEX]: ELASTIC_DEFEND_DATA_SOURCE,
+      [AUDITBEAT_INDEX]: AUDITBEAT_DATA_SOURCE,
+    };
+
+    const source = sourceMap[index] || 'unknown';
+
+    const eventKey: SessionViewTelemetryKey = `loaded_from_${source}_${
+      investigatedAlertId ? 'alert' : 'log'
+    }` as SessionViewTelemetryKey;
+
+    trackEvent(eventKey);
+  }, [index, investigatedAlertId, trackEvent]);
 
   const [showTTY, setShowTTY] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -78,6 +103,7 @@ export const SessionView = ({
   const [currentJumpToCursor, setCurrentJumpToCursor] = useState(jumpToCursor);
   const [currentJumpToEntityId, setCurrentJumpToEntityId] = useState(jumpToEntityId);
   const [currentJumpToOutputEntityId, setCurrentJumpToOutputEntityId] = useState('');
+  const sessionViewId = useMemo(() => `session-view-uuid-${uuidv4()}`, []);
 
   const styles = useStyles({ height, isFullScreen });
 
@@ -87,10 +113,6 @@ export const SessionView = ({
   const showVerboseSearchTooltip = useMemo(() => {
     return !!(!displayOptions?.verboseMode && searchQuery && searchResults?.length === 0);
   }, [displayOptions?.verboseMode, searchResults, searchQuery]);
-
-  const onToggleTTY = useCallback(() => {
-    setShowTTY(!showTTY);
-  }, [showTTY]);
 
   const onProcessSelected = useCallback((process: Process | null) => {
     setSelectedProcess(process);
@@ -129,7 +151,12 @@ export const SessionView = ({
     fetchPreviousPage,
     hasPreviousPage,
     refetch,
-  } = useFetchSessionViewProcessEvents(sessionEntityId, currentJumpToCursor);
+  } = useFetchSessionViewProcessEvents(
+    index,
+    sessionEntityId,
+    sessionStartTime,
+    currentJumpToCursor
+  );
 
   const {
     data: alertsData,
@@ -138,10 +165,13 @@ export const SessionView = ({
     hasNextPage: hasNextPageAlerts,
     error: alertsError,
     refetch: refetchAlerts,
-  } = useFetchSessionViewAlerts(sessionEntityId, investigatedAlertId);
+  } = useFetchSessionViewAlerts(sessionEntityId, sessionStartTime, investigatedAlertId);
 
-  const { data: totalTTYOutputBytes, refetch: refetchTotalTTYOutput } =
-    useFetchGetTotalIOBytes(sessionEntityId);
+  const { data: totalTTYOutputBytes, refetch: refetchTotalTTYOutput } = useFetchGetTotalIOBytes(
+    index,
+    sessionEntityId,
+    sessionStartTime
+  );
   const hasTTYOutput = !!totalTTYOutputBytes?.total;
   const bytesOfOutput = useMemo(() => {
     const { unit, value } = byteSize(totalTTYOutputBytes?.total || 0);
@@ -149,11 +179,21 @@ export const SessionView = ({
     return { unit, value };
   }, [totalTTYOutputBytes?.total]);
 
+  const onToggleTTY = useCallback(() => {
+    if (hasTTYOutput) {
+      setShowTTY(!showTTY);
+      trackEvent('tty_loaded');
+    } else {
+      trackEvent('disabled_tty_clicked');
+    }
+  }, [hasTTYOutput, showTTY, trackEvent]);
+
   const handleRefresh = useCallback(() => {
-    refetch({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
-    refetchAlerts({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
+    refetch({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
+    refetchAlerts({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
     refetchTotalTTYOutput();
-  }, [refetch, refetchAlerts, refetchTotalTTYOutput]);
+    trackEvent('refresh_clicked');
+  }, [refetch, refetchAlerts, refetchTotalTTYOutput, trackEvent]);
 
   const alerts = useMemo(() => {
     let events: ProcessEvent[] = [];
@@ -189,9 +229,9 @@ export const SessionView = ({
   }, [newUpdatedAlertsStatus, fetchAlertStatus]);
 
   const onSearchIndexChange = useCallback(
-    (index: number) => {
+    (i: number) => {
       if (searchResults) {
-        const process = searchResults[index];
+        const process = searchResults[i];
 
         if (process) {
           onProcessSelected(process);
@@ -210,24 +250,48 @@ export const SessionView = ({
   }, []);
 
   const toggleDetailPanel = useCallback(() => {
+    const newValue = !isDetailOpen;
     detailPanelCollapseFn.current();
-    setIsDetailOpen(!isDetailOpen);
-  }, [isDetailOpen]);
+    setIsDetailOpen(newValue);
+
+    if (newValue) {
+      trackEvent('details_opened');
+    } else {
+      trackEvent('details_closed');
+    }
+  }, [isDetailOpen, trackEvent]);
 
   const onShowAlertDetails = useCallback(
     (alertUuid: string) => {
       if (loadAlertDetails) {
         loadAlertDetails(alertUuid, () => handleOnAlertDetailsClosed(alertUuid));
+        trackEvent('alert_details_loaded');
       }
     },
-    [loadAlertDetails, handleOnAlertDetailsClosed]
+    [loadAlertDetails, trackEvent, handleOnAlertDetailsClosed]
   );
 
   const handleOptionChange = useCallback(
     (checkedOptions: DisplayOptionsState) => {
       setDisplayOptions(checkedOptions);
+
+      if (checkedOptions.verboseMode !== displayOptions?.verboseMode) {
+        if (checkedOptions.verboseMode) {
+          trackEvent('verbose_mode_enabled');
+        } else {
+          trackEvent('verbose_mode_disabled');
+        }
+      }
+
+      if (checkedOptions.timestamp !== displayOptions?.timestamp) {
+        if (checkedOptions.timestamp) {
+          trackEvent('timestamp_enabled');
+        } else {
+          trackEvent('timestamp_disabled');
+        }
+      }
     },
-    [setDisplayOptions]
+    [displayOptions?.timestamp, displayOptions?.verboseMode, setDisplayOptions, trackEvent]
   );
 
   if (renderIsLoading) {
@@ -276,6 +340,7 @@ export const SessionView = ({
               setSearchQuery={setSearchQuery}
               onPrevious={onSearchIndexChange}
               onNext={onSearchIndexChange}
+              trackEvent={trackEvent}
             />
           </EuiFlexItem>
 
@@ -292,7 +357,6 @@ export const SessionView = ({
               }
             >
               <EuiButtonIcon
-                disabled={!hasTTYOutput}
                 isSelected={showTTY}
                 display={showTTY ? 'fill' : 'empty'}
                 iconType="apmTrace"
@@ -300,6 +364,7 @@ export const SessionView = ({
                 size="m"
                 aria-label={TOGGLE_TTY_PLAYER}
                 data-test-subj="sessionView:TTYPlayerToggle"
+                css={!hasTTYOutput && styles.fakeDisabled}
               />
             </EuiToolTip>
           </EuiFlexItem>
@@ -340,13 +405,13 @@ export const SessionView = ({
       <EuiResizableContainer>
         {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
           detailPanelCollapseFn.current = () => {
-            togglePanel?.('session-detail-panel', { direction: 'left' });
+            togglePanel?.(sessionViewId, { direction: 'left' });
           };
 
           return (
             <>
               <EuiResizablePanel initialSize={100} minSize="60%" paddingSize="none">
-                {hasError && (
+                {hasError ? (
                   <EuiEmptyPrompt
                     iconType="warning"
                     color="danger"
@@ -367,7 +432,7 @@ export const SessionView = ({
                       </p>
                     }
                   />
-                )}
+                ) : null}
 
                 {hasData && (
                   <div css={styles.processTree}>
@@ -391,6 +456,7 @@ export const SessionView = ({
                       onShowAlertDetails={onShowAlertDetails}
                       showTimestamp={displayOptions?.timestamp}
                       verboseMode={displayOptions?.verboseMode}
+                      trackEvent={trackEvent}
                     />
                   </div>
                 )}
@@ -398,13 +464,14 @@ export const SessionView = ({
 
               <EuiResizableButton css={styles.resizeHandle} />
               <EuiResizablePanel
-                id="session-detail-panel"
+                id={sessionViewId}
                 initialSize={30}
                 minSize="320px"
                 paddingSize="none"
                 css={styles.detailPanel}
               >
                 <SessionViewDetailPanel
+                  index={index}
                   alerts={alerts}
                   alertsCount={alertsCount}
                   isFetchingAlerts={isFetchingAlerts}
@@ -421,13 +488,16 @@ export const SessionView = ({
         }}
       </EuiResizableContainer>
       <TTYPlayer
+        index={index}
         show={showTTY}
         sessionEntityId={sessionEntityId}
+        sessionStartTime={sessionStartTime}
         onClose={onToggleTTY}
         isFullscreen={isFullScreen}
         onJumpToEvent={onJumpToEvent}
         autoSeekToEntityId={currentJumpToOutputEntityId}
-        canAccessEndpointManagement={canAccessEndpointManagement}
+        canReadPolicyManagement={canReadPolicyManagement}
+        trackEvent={trackEvent}
       />
     </div>
   );

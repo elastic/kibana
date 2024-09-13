@@ -9,24 +9,24 @@ import React, { memo, useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
-import { EuiForm, EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlyoutBody, EuiForm } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEndpointHostIsolated } from '../../../../../../common/utils/validators';
 import type { HostMetadata } from '../../../../../../../common/endpoint/types';
 import type { EndpointIsolatedFormProps } from '../../../../../../common/components/endpoint/host_isolation';
 import {
+  ActionCompletionReturnButton,
   EndpointIsolateForm,
   EndpointIsolateSuccess,
   EndpointUnisolateForm,
-  ActionCompletionReturnButton,
 } from '../../../../../../common/components/endpoint/host_isolation';
 import { getEndpointDetailsPath } from '../../../../../common/routing';
 import { useEndpointSelector } from '../../hooks';
 import {
-  getIsolationRequestError,
   getIsIsolationRequestPending,
+  getIsolationRequestError,
   getWasIsolationRequestSuccessful,
   uiQueryParams,
-  getIsEndpointHostIsolated,
 } from '../../../store/selectors';
 import type { AppAction } from '../../../../../../common/store/actions';
 
@@ -40,7 +40,7 @@ export const EndpointIsolationFlyoutPanel = memo<{
   const dispatch = useDispatch<Dispatch<AppAction>>();
 
   const { show, ...queryParams } = useEndpointSelector(uiQueryParams);
-  const isCurrentlyIsolated = useEndpointSelector(getIsEndpointHostIsolated);
+  const isCurrentlyIsolated = isEndpointHostIsolated(hostMeta);
   const isPending = useEndpointSelector(getIsIsolationRequestPending);
   const wasSuccessful = useEndpointSelector(getWasIsolationRequestSuccessful);
   const isolateError = useEndpointSelector(getIsolationRequestError);

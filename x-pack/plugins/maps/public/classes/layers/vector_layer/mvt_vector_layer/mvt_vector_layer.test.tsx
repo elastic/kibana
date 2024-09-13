@@ -25,6 +25,7 @@ import {
 } from '../../../../../common/descriptor_types';
 import { LAYER_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
 import { MvtVectorLayer } from './mvt_vector_layer';
+import { IJoinSource } from '../../../sources/join_sources';
 
 const defaultConfig = {
   urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf',
@@ -109,133 +110,118 @@ describe('isLayerLoading', () => {
     dataRequestMetaAtStart: undefined,
     dataRequestToken: undefined,
   };
-  test('should be true when tile loading has not started', () => {
-    const layer = new MvtVectorLayer({
-      customIcons: [],
-      layerDescriptor: {
-        __dataRequests: [sourceDataRequestDescriptor],
-      } as unknown as VectorLayerDescriptor,
-      source: {
-        getMaxZoom: () => {
-          return 24;
-        },
-        getMinZoom: () => {
-          return 0;
-        },
-      } as unknown as IVectorSource,
+  const mockSource = {
+    getMaxZoom: () => {
+      return 24;
+    },
+    getMinZoom: () => {
+      return 0;
+    },
+  } as unknown as IVectorSource;
+
+  describe('no joins', () => {
+    test('should be true when tile loading has not started', () => {
+      const layer = new MvtVectorLayer({
+        customIcons: [],
+        layerDescriptor: {
+          __dataRequests: [sourceDataRequestDescriptor],
+        } as unknown as VectorLayerDescriptor,
+        source: mockSource,
+      });
+      expect(layer.isLayerLoading(1)).toBe(true);
     });
-    expect(layer.isLayerLoading()).toBe(true);
+
+    test('should be true when tiles are loading', () => {
+      const layer = new MvtVectorLayer({
+        customIcons: [],
+        layerDescriptor: {
+          __areTilesLoaded: false,
+          __dataRequests: [sourceDataRequestDescriptor],
+        } as unknown as VectorLayerDescriptor,
+        source: mockSource,
+      });
+      expect(layer.isLayerLoading(1)).toBe(true);
+    });
+
+    test('should be false when tiles are loaded', () => {
+      const layer = new MvtVectorLayer({
+        customIcons: [],
+        layerDescriptor: {
+          __areTilesLoaded: true,
+          __dataRequests: [sourceDataRequestDescriptor],
+        } as unknown as VectorLayerDescriptor,
+        source: mockSource,
+      });
+      expect(layer.isLayerLoading(1)).toBe(false);
+    });
   });
 
-  test('should be true when tiles are loading', () => {
-    const layer = new MvtVectorLayer({
-      customIcons: [],
-      layerDescriptor: {
-        __areTilesLoaded: false,
-        __dataRequests: [sourceDataRequestDescriptor],
-      } as unknown as VectorLayerDescriptor,
-      source: {
-        getMaxZoom: () => {
-          return 24;
-        },
-        getMinZoom: () => {
-          return 0;
-        },
-      } as unknown as IVectorSource,
-    });
-    expect(layer.isLayerLoading()).toBe(true);
-  });
+  describe('joins', () => {
+    const joinDataRequestId = 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2';
+    const mockJoin = {
+      hasCompleteConfig: () => {
+        return true;
+      },
+      getSourceDataRequestId: () => {
+        return joinDataRequestId;
+      },
+      getRightJoinSource: () => {
+        return {} as unknown as IJoinSource;
+      },
+    } as unknown as InnerJoin;
 
-  test('should be false when tiles are loaded', () => {
-    const layer = new MvtVectorLayer({
-      customIcons: [],
-      layerDescriptor: {
-        __areTilesLoaded: true,
-        __dataRequests: [sourceDataRequestDescriptor],
-      } as unknown as VectorLayerDescriptor,
-      source: {
-        getMaxZoom: () => {
-          return 24;
-        },
-        getMinZoom: () => {
-          return 0;
-        },
-      } as unknown as IVectorSource,
+    test('should be false when layer is not visible', () => {
+      const layer = new MvtVectorLayer({
+        customIcons: [],
+        joins: [mockJoin],
+        layerDescriptor: {
+          visible: false,
+        } as unknown as VectorLayerDescriptor,
+        source: mockSource,
+      });
+      expect(layer.isLayerLoading(1)).toBe(false);
     });
-    expect(layer.isLayerLoading()).toBe(false);
-  });
 
-  test('should be true when tiles are loaded but join is loading', () => {
-    const layer = new MvtVectorLayer({
-      customIcons: [],
-      joins: [
-        {
-          hasCompleteConfig: () => {
-            return true;
-          },
-          getSourceDataRequestId: () => {
-            return 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2';
-          },
-        } as unknown as InnerJoin,
-      ],
-      layerDescriptor: {
-        __areTilesLoaded: true,
-        __dataRequests: [
-          sourceDataRequestDescriptor,
-          {
-            dataId: 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2',
-            dataRequestMetaAtStart: {},
-            dataRequestToken: Symbol('join request'),
-          },
-        ],
-      } as unknown as VectorLayerDescriptor,
-      source: {
-        getMaxZoom: () => {
-          return 24;
-        },
-        getMinZoom: () => {
-          return 0;
-        },
-      } as unknown as IVectorSource,
+    test('should be true when tiles are loaded but join is loading', () => {
+      const layer = new MvtVectorLayer({
+        customIcons: [],
+        joins: [mockJoin],
+        layerDescriptor: {
+          __areTilesLoaded: true,
+          __dataRequests: [
+            sourceDataRequestDescriptor,
+            {
+              dataId: joinDataRequestId,
+              dataRequestMetaAtStart: {},
+              dataRequestToken: Symbol('join request'),
+            },
+          ],
+        } as unknown as VectorLayerDescriptor,
+        source: mockSource,
+      });
+      expect(layer.isLayerLoading(1)).toBe(true);
     });
-    expect(layer.isLayerLoading()).toBe(true);
-  });
 
-  test('should be false when tiles are loaded and joins are loaded', () => {
-    const layer = new MvtVectorLayer({
-      customIcons: [],
-      joins: [
-        {
-          hasCompleteConfig: () => {
-            return true;
-          },
-          getSourceDataRequestId: () => {
-            return 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2';
-          },
-        } as unknown as InnerJoin,
-      ],
-      layerDescriptor: {
-        __areTilesLoaded: true,
-        __dataRequests: [
-          sourceDataRequestDescriptor,
-          {
-            data: {},
-            dataId: 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2',
-            dataRequestMeta: {},
-            dataRequestMetaAtStart: undefined,
-            dataRequestToken: undefined,
-          },
-        ],
-      } as unknown as VectorLayerDescriptor,
-      source: {
-        getMaxZoom: () => {
-          return 24;
-        },
-        getMinZoom: () => {
-          return 0;
-        },
-      } as unknown as IVectorSource,
+    test('should be false when tiles are loaded and joins are loaded', () => {
+      const layer = new MvtVectorLayer({
+        customIcons: [],
+        joins: [mockJoin],
+        layerDescriptor: {
+          __areTilesLoaded: true,
+          __dataRequests: [
+            sourceDataRequestDescriptor,
+            {
+              data: {},
+              dataId: joinDataRequestId,
+              dataRequestMeta: {},
+              dataRequestMetaAtStart: undefined,
+              dataRequestToken: undefined,
+            },
+          ],
+        } as unknown as VectorLayerDescriptor,
+        source: mockSource,
+      });
+      expect(layer.isLayerLoading(1)).toBe(false);
     });
-    expect(layer.isLayerLoading()).toBe(false);
   });
 });

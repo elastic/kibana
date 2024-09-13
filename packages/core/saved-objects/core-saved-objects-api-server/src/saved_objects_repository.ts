@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-common';
@@ -348,7 +349,7 @@ export interface ISavedObjectsRepository {
    * It will not create a nested structure like:
    *   `{attributes: {stats: {api: {counter: 1}}}}`
    *
-   * When using incrementCounter for collecting usage data, you need to ensure
+   * When using incrementCounter you need to ensure
    * that usage collection happens on a best-effort basis and doesn't
    * negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/main/src/plugins/usage_collection/README.mdx#tracking-interactions-with-incrementcounter)
    *

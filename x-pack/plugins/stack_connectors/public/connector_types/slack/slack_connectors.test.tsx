@@ -74,7 +74,7 @@ describe('SlackActionFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -91,7 +91,7 @@ describe('SlackActionFields renders', () => {
       });
     });
 
-    it('validates teh web hook url field correctly', async () => {
+    it('validates the web hook url field correctly', async () => {
       const actionConnector = {
         secrets: {
           webhookUrl: 'http://test.com',
@@ -113,19 +113,12 @@ describe('SlackActionFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.type(
-          getByTestId('slackWebhookUrlInput'),
-          `{selectall}{backspace}no-valid`,
-          {
-            delay: 10,
-          }
-        );
+      await userEvent.clear(getByTestId('slackWebhookUrlInput'));
+      await userEvent.type(getByTestId('slackWebhookUrlInput'), 'no-valid', {
+        delay: 10,
       });
 
-      await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });

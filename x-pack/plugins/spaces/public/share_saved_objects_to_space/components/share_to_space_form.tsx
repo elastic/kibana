@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import './share_to_space_form.scss';
-
 import { EuiCallOut, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ShareModeControl } from './share_mode_control';
 import type { SpacesDataEntry } from '../../types';
 import type { ShareOptions } from '../types';
-import { ShareModeControl } from './share_mode_control';
 
 interface Props {
   spaces: SpacesDataEntry[];

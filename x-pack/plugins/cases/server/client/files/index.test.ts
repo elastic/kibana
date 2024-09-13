@@ -51,6 +51,15 @@ describe('server files', () => {
   });
 
   describe('deleteFiles', () => {
+    it('does not call delete when the file ids is empty', async () => {
+      const fileServiceMock = createFileServiceMock();
+
+      expect.assertions(1);
+      await deleteFiles([], fileServiceMock);
+
+      expect(fileServiceMock.delete).not.toBeCalled();
+    });
+
     it('calls delete twice with the ids passed in', async () => {
       const fileServiceMock = createFileServiceMock();
 

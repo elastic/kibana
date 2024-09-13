@@ -24,15 +24,15 @@ import {
   EuiFlexItem,
   EuiText,
   EuiCheckbox,
+  EuiCheckboxProps,
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import {
   ControlGeneralViewSelectorDeps,
   ControlFormErrorMap,
-  Selector,
-  SelectorCondition,
   SelectorConditionsMap,
 } from '../../types';
+import { Selector, SelectorCondition } from '../../../common';
 import {
   getSelectorConditions,
   camelToSentenceCase,
@@ -70,7 +70,7 @@ const BooleanCondition = ({
   onRemoveCondition,
 }: BooleanConditionProps) => {
   const value = selector[prop as keyof Selector] as boolean;
-  const onChange = useCallback(
+  const onChange = useCallback<EuiCheckboxProps['onChange']>(
     (e) => {
       onChangeBooleanCondition(prop, e.target.checked);
     },
@@ -142,7 +142,7 @@ const StringArrayCondition = ({
       label={label}
       fullWidth={true}
       key={prop}
-      isInvalid={!!errorMap.hasOwnProperty(prop)}
+      isInvalid={!!Object.hasOwn(errorMap, prop)}
     >
       <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem>
@@ -217,7 +217,7 @@ export const ControlGeneralViewSelector = ({
   const availableConditions = useMemo(() => getSelectorConditions(selector.type), [selector]);
 
   const remainingConditions = useMemo(() => {
-    return availableConditions.filter((condition) => !selector.hasOwnProperty(condition));
+    return availableConditions.filter((condition) => !Object.hasOwn(selector, condition));
   }, [availableConditions, selector]);
 
   const conditionsAdded = useMemo(() => {
@@ -400,7 +400,11 @@ export const ControlGeneralViewSelector = ({
                 <EuiText css={styles.conditionsBadge} size="xs">
                   <b>{i18n.conditions}</b>
                 </EuiText>
-                <EuiBadge title={conditionsAdded.join(',')} color="hollow">
+                <EuiBadge
+                  title={conditionsAdded.join(',')}
+                  color="hollow"
+                  data-test-subj="cloud-defend-conditions-count"
+                >
                   {conditionsAdded.length}
                 </EuiBadge>
               </>
@@ -459,14 +463,14 @@ export const ControlGeneralViewSelector = ({
         <EuiFormRow
           label={i18n.name}
           fullWidth={true}
-          isInvalid={!!errorMap.hasOwnProperty('name')}
+          isInvalid={!!Object.hasOwn(errorMap, 'name')}
         >
           <EuiFieldText
             fullWidth={true}
             name="name"
             value={selector.name}
             onChange={onNameChange}
-            isInvalid={errorMap.hasOwnProperty('name')}
+            isInvalid={Object.hasOwn(errorMap, 'name')}
             data-test-subj="cloud-defend-selectorcondition-name"
             maxLength={MAX_SELECTOR_NAME_LENGTH}
           />

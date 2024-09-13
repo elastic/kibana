@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useCallback } from 'react';
-import { Switch, Redirect, useParams } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import React, { FC, PropsWithChildren, useEffect, useCallback } from 'react';
+import { Redirect, useParams } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
 import { WorkpadApp } from '../../components/workpad_app';
 import { ExportApp } from '../../components/export_app';
@@ -56,7 +56,7 @@ const WorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route }) => {
       getRedirectPath={getRedirectPath}
     >
       {(workpad: CanvasWorkpad) => (
-        <Switch>
+        <Routes>
           <Route
             path="/workpad/:id/page/:pageNumber"
             children={(pageRoute) => (
@@ -72,7 +72,7 @@ const WorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route }) => {
           <Route path="/workpad/:id" strict={false} exact={true}>
             <Redirect to={`/workpad/${route.match.params.id}/page/${workpad.page + 1}`} />
           </Route>
-        </Switch>
+        </Routes>
       )}
     </WorkpadLoaderComponent>
   );
@@ -110,7 +110,7 @@ const ExportWorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route: 
   );
 };
 
-export const ExportRouteManager: FC = ({ children }) => {
+export const ExportRouteManager: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const params = useParams<WorkpadPageRouteParams>();
   usePageSync();
 
@@ -123,7 +123,7 @@ export const ExportRouteManager: FC = ({ children }) => {
   return <>{children}</>;
 };
 
-export const WorkpadHistoryManager: FC = ({ children }) => {
+export const WorkpadHistoryManager: FC<PropsWithChildren<unknown>> = ({ children }) => {
   useRestoreHistory();
   useWorkpadHistory();
   usePageSync();

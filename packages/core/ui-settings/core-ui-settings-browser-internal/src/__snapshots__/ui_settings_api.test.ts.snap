@@ -3,23 +3,25 @@
 exports[`#batchSet Buffers are always clear of previously buffered changes: two requests, second only sends bar, not foo 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/settings",
+    "/foo/bar/internal/kibana/settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
         "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
       },
       "method": "POST",
     },
   ],
   Array [
-    "/foo/bar/api/kibana/settings",
+    "/foo/bar/internal/kibana/settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
         "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
       },
       "method": "POST",
     },
@@ -30,23 +32,25 @@ Array [
 exports[`#batchSet Overwrites previously buffered values with new values for the same key: two requests, foo=d in final 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/settings",
+    "/foo/bar/internal/kibana/settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
         "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
       },
       "method": "POST",
     },
   ],
   Array [
-    "/foo/bar/api/kibana/settings",
+    "/foo/bar/internal/kibana/settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
         "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
       },
       "method": "POST",
     },
@@ -57,23 +61,25 @@ Array [
 exports[`#batchSet buffers changes while first request is in progress, sends buffered changes after first request completes: final, includes both requests 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/settings",
+    "/foo/bar/internal/kibana/settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
         "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
       },
       "method": "POST",
     },
   ],
   Array [
-    "/foo/bar/api/kibana/settings",
+    "/foo/bar/internal/kibana/settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
         "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
       },
       "method": "POST",
     },
@@ -107,12 +113,13 @@ exports[`#batchSet rejects on 500 1`] = `"Request failed with status code: 500"`
 exports[`#batchSet sends a single change immediately: single change 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/settings",
+    "/foo/bar/internal/kibana/settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
         "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
       },
       "method": "POST",
     },
@@ -123,23 +130,25 @@ Array [
 exports[`#batchSetGlobal Buffers are always clear of previously buffered changes: two requests, second only sends bar, not foo 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/global_settings",
+    "/foo/bar/internal/kibana/global_settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
         "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
       },
       "method": "POST",
     },
   ],
   Array [
-    "/foo/bar/api/kibana/global_settings",
+    "/foo/bar/internal/kibana/global_settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
         "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
       },
       "method": "POST",
     },
@@ -150,23 +159,25 @@ Array [
 exports[`#batchSetGlobal Overwrites previously buffered values with new values for the same key: two requests, foo=d in final 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/global_settings",
+    "/foo/bar/internal/kibana/global_settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
         "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
       },
       "method": "POST",
     },
   ],
   Array [
-    "/foo/bar/api/kibana/global_settings",
+    "/foo/bar/internal/kibana/global_settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
         "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
       },
       "method": "POST",
     },
@@ -177,23 +188,25 @@ Array [
 exports[`#batchSetGlobal buffers changes while first request is in progress, sends buffered changes after first request completes: final, includes both requests 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/global_settings",
+    "/foo/bar/internal/kibana/global_settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
         "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
       },
       "method": "POST",
     },
   ],
   Array [
-    "/foo/bar/api/kibana/global_settings",
+    "/foo/bar/internal/kibana/global_settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
         "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
       },
       "method": "POST",
     },
@@ -227,12 +240,36 @@ exports[`#batchSetGlobal rejects on 500 1`] = `"Request failed with status code:
 exports[`#batchSetGlobal sends a single change immediately: single change 1`] = `
 Array [
   Array [
-    "/foo/bar/api/kibana/global_settings",
+    "/foo/bar/internal/kibana/global_settings",
     Object {
       "headers": Object {
         "accept": "application/json",
         "content-type": "application/json",
         "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
+exports[`#validate rejects on 301 1`] = `"Moved Permanently"`;
+
+exports[`#validate rejects on 404 response 1`] = `"Request failed with status code: 404"`;
+
+exports[`#validate rejects on 500 1`] = `"Request failed with status code: 500"`;
+
+exports[`#validate sends a validation request: validation request 1`] = `
+Array [
+  Array [
+    "/foo/bar/internal/kibana/settings/foo/validate",
+    Object {
+      "headers": Object {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "kbn-version": "kibanaVersion",
+        "x-elastic-internal-origin": "Kibana",
       },
       "method": "POST",
     },

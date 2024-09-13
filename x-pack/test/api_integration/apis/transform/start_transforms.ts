@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { StartTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/start_transforms';
+import { StartTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/start_transforms';
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
-import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
     await transform.api.createTransform(transformId, config);
   }
 
-  describe('/api/transform/start_transforms', function () {
+  describe('/internal/transform/start_transforms', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
@@ -49,12 +49,12 @@ export default ({ getService }: FtrProviderContext) => {
       it('should start the transform by transformId', async () => {
         const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
         const { body, status } = await supertest
-          .post(`/api/transform/start_transforms`)
+          .post(`/internal/transform/start_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -67,12 +67,12 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return 200 with success:false for unauthorized user', async () => {
         const reqBody: StartTransformsRequestSchema = [{ id: transformId }];
         const { body, status } = await supertest
-          .post(`/api/transform/start_transforms`)
+          .post(`/internal/transform/start_transforms`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -88,12 +88,12 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return 200 with error in response if invalid transformId', async () => {
         const reqBody: StartTransformsRequestSchema = [{ id: 'invalid_transform_id' }];
         const { body, status } = await supertest
-          .post(`/api/transform/start_transforms`)
+          .post(`/internal/transform/start_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -124,12 +124,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should start multiple transforms by transformIds', async () => {
         const { body, status } = await supertest
-          .post(`/api/transform/start_transforms`)
+          .post(`/internal/transform/start_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -143,12 +143,12 @@ export default ({ getService }: FtrProviderContext) => {
       it('should start multiple transforms by transformIds, even if one of the transformIds is invalid', async () => {
         const invalidTransformId = 'invalid_transform_id';
         const { body, status } = await supertest
-          .post(`/api/transform/start_transforms`)
+          .post(`/internal/transform/start_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send([{ id: reqBody[0].id }, { id: invalidTransformId }, { id: reqBody[1].id }]);
         transform.api.assertResponseStatusCode(200, status, body);
 

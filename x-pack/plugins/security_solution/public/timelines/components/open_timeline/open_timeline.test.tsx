@@ -11,14 +11,13 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { waitFor } from '@testing-library/react';
 
-import '../../../common/mock/match_media';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
 import type { OpenTimelineResult, OpenTimelineProps } from './types';
 import type { TimelinesTableProps } from './timelines_table';
 import { mockTimelineResults } from '../../../common/mock/timeline_results';
 import { OpenTimeline } from './open_timeline';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
@@ -73,8 +72,8 @@ describe('OpenTimeline', () => {
     sortDirection: DEFAULT_SORT_DIRECTION,
     sortField: DEFAULT_SORT_FIELD,
     title,
-    timelineType: TimelineType.default,
-    timelineStatus: TimelineStatus.active,
+    timelineType: TimelineTypeEnum.default,
+    timelineStatus: TimelineStatusEnum.active,
     templateTimelineFilter: [<div key="mock-a" />, <div key="mock-b" />],
     totalSearchResultsCount: mockSearchResults.length,
   });
@@ -318,7 +317,7 @@ describe('OpenTimeline', () => {
   test("it should render bulk actions if timelineStatus is active (selecting custom templates' tab)", () => {
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
-      timelineStatus: TimelineStatus.active,
+      timelineStatus: TimelineStatusEnum.active,
     };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={mockTheme}>
@@ -437,7 +436,7 @@ describe('OpenTimeline', () => {
     });
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
-      timelineStatus: TimelineStatus.active,
+      timelineStatus: TimelineStatusEnum.active,
     };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={mockTheme}>
@@ -456,7 +455,7 @@ describe('OpenTimeline', () => {
     });
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
-      timelineStatus: TimelineStatus.active,
+      timelineStatus: TimelineStatusEnum.active,
     };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={mockTheme}>
@@ -472,7 +471,7 @@ describe('OpenTimeline', () => {
   test('it should NOT include createFrom, duplicate, createRule, delete in timeline actions when user has read only access', () => {
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
-      timelineStatus: TimelineStatus.active,
+      timelineStatus: TimelineStatusEnum.active,
     };
     useUserPrivilegesMock.mockReturnValue({
       kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
@@ -491,7 +490,7 @@ describe('OpenTimeline', () => {
   test("it should render selected count if timelineStatus is active (selecting custom templates' tab)", () => {
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
-      timelineStatus: TimelineStatus.active,
+      timelineStatus: TimelineStatusEnum.active,
     };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={mockTheme}>
@@ -505,7 +504,7 @@ describe('OpenTimeline', () => {
   test("it should not render bulk actions if timelineStatus is immutable (selecting Elastic templates' tab)", () => {
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
-      timelineStatus: TimelineStatus.immutable,
+      timelineStatus: TimelineStatusEnum.immutable,
     };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={mockTheme}>
@@ -522,7 +521,7 @@ describe('OpenTimeline', () => {
     });
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
-      timelineStatus: TimelineStatus.immutable,
+      timelineStatus: TimelineStatusEnum.immutable,
     };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={mockTheme}>
@@ -538,7 +537,7 @@ describe('OpenTimeline', () => {
   test("it should not render selected count if timelineStatus is immutable (selecting Elastic templates' tab)", () => {
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
-      timelineStatus: TimelineStatus.immutable,
+      timelineStatus: TimelineStatusEnum.immutable,
     };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={mockTheme}>

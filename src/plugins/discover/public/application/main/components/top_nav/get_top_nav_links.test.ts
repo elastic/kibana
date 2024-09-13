@@ -1,26 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ISearchSource } from '@kbn/data-plugin/public';
 import { getTopNavLinks } from './get_top_nav_links';
-import { dataViewMock } from '../../../../__mocks__/data_view';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverServices } from '../../../../build_services';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 
 const services = {
   capabilities: {
     discover: {
       save: true,
     },
-    advancedSettings: {
-      save: true,
-    },
+  },
+  uiSettings: {
+    get: jest.fn(() => true),
   },
 } as unknown as DiscoverServices;
 
@@ -29,27 +28,25 @@ const state = {} as unknown as DiscoverStateContainer;
 test('getTopNavLinks result', () => {
   const topNavLinks = getTopNavLinks({
     dataView: dataViewMock,
-    navigateTo: jest.fn(),
     onOpenInspector: jest.fn(),
-    savedSearch: savedSearchMock,
     services,
     state,
-    searchSource: {} as ISearchSource,
-    onOpenSavedSearch: () => {},
-    isPlainRecord: false,
-    persistDataView: jest.fn(),
-    updateDataViewList: jest.fn(),
+    isEsqlMode: false,
     adHocDataViews: [],
-    updateAdHocDataViewId: jest.fn(),
+    topNavCustomization: undefined,
+    shouldShowESQLToDataViewTransitionModal: false,
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
       Object {
-        "description": "Options",
-        "id": "options",
-        "label": "Options",
+        "color": "text",
+        "emphasize": true,
+        "fill": false,
+        "id": "esql",
+        "label": "Try ES|QL",
         "run": [Function],
-        "testId": "discoverOptionsButton",
+        "testId": "select-text-based-language-btn",
+        "tooltip": "ES|QL is Elastic's powerful new piped query language.",
       },
       Object {
         "description": "New Search",
@@ -92,30 +89,28 @@ test('getTopNavLinks result', () => {
   `);
 });
 
-test('getTopNavLinks result for sql mode', () => {
+test('getTopNavLinks result for ES|QL mode', () => {
   const topNavLinks = getTopNavLinks({
     dataView: dataViewMock,
-    navigateTo: jest.fn(),
     onOpenInspector: jest.fn(),
-    savedSearch: savedSearchMock,
     services,
     state,
-    searchSource: {} as ISearchSource,
-    onOpenSavedSearch: () => {},
-    isPlainRecord: true,
-    persistDataView: jest.fn(),
-    updateDataViewList: jest.fn(),
+    isEsqlMode: true,
     adHocDataViews: [],
-    updateAdHocDataViewId: jest.fn(),
+    topNavCustomization: undefined,
+    shouldShowESQLToDataViewTransitionModal: false,
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
       Object {
-        "description": "Options",
-        "id": "options",
-        "label": "Options",
+        "color": "text",
+        "emphasize": true,
+        "fill": false,
+        "id": "esql",
+        "label": "Switch to classic",
         "run": [Function],
-        "testId": "discoverOptionsButton",
+        "testId": "switch-to-dataviews",
+        "tooltip": "Switch to KQL or Lucene syntax.",
       },
       Object {
         "description": "New Search",
@@ -130,6 +125,13 @@ test('getTopNavLinks result for sql mode', () => {
         "label": "Open",
         "run": [Function],
         "testId": "discoverOpenButton",
+      },
+      Object {
+        "description": "Share Search",
+        "id": "share",
+        "label": "Share",
+        "run": [Function],
+        "testId": "shareTopNavButton",
       },
       Object {
         "description": "Open Inspector for search",

@@ -7,26 +7,26 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type {
-  CasesByAlertId,
   CasesByAlertIDRequest,
+  GetRelatedCasesByAlertResponse,
   CasesFindRequest,
   CasesStatusRequest,
   CasesMetricsRequest,
-} from '../../../common/api';
+} from '../../../common/types/api';
 import { getCasesFromAlertsUrl } from '../../../common/api';
-import type { Cases, CasesStatus, CasesMetrics } from '../../../common/ui';
 import { bulkGetCases, getCases, getCasesMetrics, getCasesStatus } from '../../api';
-import type { CasesUiStart } from '../../types';
+import type { CasesFindResponseUI, CasesStatus, CasesMetrics } from '../../../common/ui';
+import type { CasesPublicStart } from '../../types';
 
-export const createClientAPI = ({ http }: { http: HttpStart }): CasesUiStart['api'] => {
+export const createClientAPI = ({ http }: { http: HttpStart }): CasesPublicStart['api'] => {
   return {
     getRelatedCases: async (
       alertId: string,
       query: CasesByAlertIDRequest
-    ): Promise<CasesByAlertId> =>
-      http.get<CasesByAlertId>(getCasesFromAlertsUrl(alertId), { query }),
+    ): Promise<GetRelatedCasesByAlertResponse> =>
+      http.get<GetRelatedCasesByAlertResponse>(getCasesFromAlertsUrl(alertId), { query }),
     cases: {
-      find: (query: CasesFindRequest, signal?: AbortSignal): Promise<Cases> =>
+      find: (query: CasesFindRequest, signal?: AbortSignal): Promise<CasesFindResponseUI> =>
         getCases({ http, query, signal }),
       getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal): Promise<CasesStatus> =>
         getCasesStatus({ http, query, signal }),

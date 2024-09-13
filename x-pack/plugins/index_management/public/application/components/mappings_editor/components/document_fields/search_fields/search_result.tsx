@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import VirtualList from 'react-tiny-virtual-list';
+import React, { useMemo } from 'react';
+import { FixedSizeList as VirtualList, areEqual } from 'react-window';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -18,18 +18,60 @@ interface Props {
   result: SearchResultType[];
   documentFieldsState: State['documentFields'];
   style?: React.CSSProperties;
+  onClearSearch?: () => void;
 }
 
 const ITEM_HEIGHT = 64;
 
+interface RowProps {
+  index: number;
+  style: React.CSSProperties;
+  data: {
+    result: Props['result'];
+    status: Props['documentFieldsState']['status'];
+    fieldToEdit: Props['documentFieldsState']['fieldToEdit'];
+  };
+}
+
+const Row = React.memo<RowProps>(({ data, index, style }) => {
+  // Data passed to List as "itemData" is available as props.data
+  const { fieldToEdit, result, status } = data;
+  const item = result[index];
+
+  return (
+    <div key={item.field.id} style={style}>
+      <SearchResultItem
+        item={item}
+        areActionButtonsVisible={status === 'idle'}
+        isDimmed={status === 'editingField' && fieldToEdit !== item.field.id}
+        isHighlighted={status === 'editingField' && fieldToEdit === item.field.id}
+      />
+    </div>
+  );
+}, areEqual);
+
 export const SearchResult = React.memo(
-  ({ result, documentFieldsState: { status, fieldToEdit }, style: virtualListStyle }: Props) => {
+  ({
+    result,
+    documentFieldsState: { status, fieldToEdit },
+    style: virtualListStyle,
+    onClearSearch,
+  }: Props) => {
     const dispatch = useDispatch();
     const listHeight = Math.min(result.length * ITEM_HEIGHT, 600);
 
     const clearSearch = () => {
-      dispatch({ type: 'search:update', value: '' });
+      if (onClearSearch !== undefined) {
+        onClearSearch();
+      } else {
+        dispatch({ type: 'search:update', value: '' });
+      }
     };
+
+    const itemData = useMemo(
+      () => ({ result, status, fieldToEdit }),
+      [fieldToEdit, result, status]
+    );
 
     return result.length === 0 ? (
       <EuiEmptyPrompt
@@ -58,24 +100,12 @@ export const SearchResult = React.memo(
         style={{ overflowX: 'hidden', ...virtualListStyle }}
         width="100%"
         height={listHeight}
+        itemData={itemData}
         itemCount={result.length}
         itemSize={ITEM_HEIGHT}
-        overscanCount={4}
-        renderItem={({ index, style }) => {
-          const item = result[index];
-
-          return (
-            <div key={item.field.id} style={style}>
-              <SearchResultItem
-                item={item}
-                areActionButtonsVisible={status === 'idle'}
-                isDimmed={status === 'editingField' && fieldToEdit !== item.field.id}
-                isHighlighted={status === 'editingField' && fieldToEdit === item.field.id}
-              />
-            </div>
-          );
-        }}
-      />
+      >
+        {Row}
+      </VirtualList>
     );
   }
 );

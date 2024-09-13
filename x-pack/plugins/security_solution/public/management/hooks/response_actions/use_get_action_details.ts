@@ -11,20 +11,33 @@ import { useQuery } from '@tanstack/react-query';
 import { useHttp } from '../../../common/lib/kibana';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
-import type { ActionDetailsApiResponse } from '../../../../common/endpoint/types';
+import type {
+  ActionDetailsApiResponse,
+  EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
+} from '../../../../common/endpoint/types';
 
-export const useGetActionDetails = <TOutputType extends object = object>(
+export const useGetActionDetails = <
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+>(
   actionId: string,
-  options: UseQueryOptions<ActionDetailsApiResponse<TOutputType>, IHttpFetchError> = {}
-): UseQueryResult<ActionDetailsApiResponse<TOutputType>, IHttpFetchError> => {
+  options: UseQueryOptions<
+    ActionDetailsApiResponse<TOutputContent, TParameters>,
+    IHttpFetchError
+  > = {}
+): UseQueryResult<ActionDetailsApiResponse<TOutputContent, TParameters>, IHttpFetchError> => {
   const http = useHttp();
 
-  return useQuery<ActionDetailsApiResponse<TOutputType>, IHttpFetchError>({
+  return useQuery<ActionDetailsApiResponse<TOutputContent, TParameters>, IHttpFetchError>({
     queryKey: ['get-action-details', actionId],
     ...options,
     queryFn: () => {
-      return http.get<ActionDetailsApiResponse<TOutputType>>(
-        resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId.trim() || 'undefined' })
+      return http.get<ActionDetailsApiResponse<TOutputContent, TParameters>>(
+        resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId.trim() || 'undefined' }),
+        {
+          version: '2023-10-31',
+        }
       );
     },
   });

@@ -7,14 +7,12 @@
 
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
 import SwimlaneActionConnectorFields from './swimlane_connectors';
 import { useGetApplication } from './use_get_application';
 import { applicationFields, mappings } from './mocks';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { waitFor } from '@testing-library/dom';
+import { waitFor, render, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { render } from '@testing-library/react';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 jest.mock('./use_get_application');
@@ -342,7 +340,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
         );
 
         await act(async () => {
-          userEvent.click(getByTestId('form-test-provide-submit'));
+          await userEvent.click(getByTestId('form-test-provide-submit'));
         });
 
         expect(onSubmit).toHaveBeenCalledWith({ data: { ...connector }, isValid: true });
@@ -361,15 +359,14 @@ describe('SwimlaneActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+      await userEvent.clear(res.getByTestId(field));
+      if (value !== '') {
+        await userEvent.type(res.getByTestId(field), value, {
           delay: 10,
         });
-      });
+      }
 
-      await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });
@@ -387,7 +384,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toHaveBeenCalledWith({
@@ -426,7 +423,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
         );
 
         await act(async () => {
-          userEvent.click(getByTestId('form-test-provide-submit'));
+          await userEvent.click(getByTestId('form-test-provide-submit'));
         });
 
         expect(onSubmit).toHaveBeenCalledWith({

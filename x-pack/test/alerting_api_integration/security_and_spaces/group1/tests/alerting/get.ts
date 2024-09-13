@@ -6,22 +6,22 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { Agent as SuperTestAgent } from 'supertest';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 const getTestUtils = (
   describeType: 'internal' | 'public',
   objectRemover: ObjectRemover,
-  supertest: SuperTest<Test>,
-  supertestWithoutAuth: any
+  supertest: SuperTestAgent,
+  supertestWithoutAuth: SupertestWithoutAuthProviderType
 ) => {
   describe(describeType, () => {
     afterEach(() => objectRemover.removeAll());
@@ -50,7 +50,7 @@ const getTestUtils = (
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
+                message: getUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -134,7 +134,7 @@ const getTestUtils = (
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'get',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -179,7 +179,7 @@ const getTestUtils = (
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'get',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -189,17 +189,6 @@ const getTestUtils = (
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
-                  'get',
-                  'test.unrestricted-noop',
-                  'alertsRestrictedFixture'
-                ),
-                statusCode: 403,
-              });
-              break;
             case 'superuser at space1':
             case 'global_read at space1':
             case 'space_1_all_with_restricted_fixture at space1':
@@ -237,11 +226,7 @@ const getTestUtils = (
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'get',
-                  'test.restricted-noop',
-                  'alerts'
-                ),
+                message: getUnauthorizedErrorMessage('get', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               break;
@@ -250,7 +235,7 @@ const getTestUtils = (
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'get',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -330,6 +315,71 @@ const getTestUtils = (
         });
       });
     }
+  });
+
+  describe('Actions', () => {
+    const { user, space } = SuperuserAtSpace1;
+
+    it('should return the actions correctly', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          connector_type_id: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            enabled: true,
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+              {
+                id: 'system-connector-test.system-action',
+                params: {},
+              },
+            ],
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+      const response = await supertestWithoutAuth
+        .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
+        .set('kbn-xsrf', 'foo')
+        .auth(user.username, user.password);
+
+      const action = response.body.actions[0];
+      const systemAction = response.body.actions[1];
+      const { uuid, ...restAction } = action;
+      const { uuid: systemActionUuid, ...restSystemAction } = systemAction;
+
+      expect([restAction, restSystemAction]).to.eql([
+        {
+          id: createdAction.id,
+          connector_type_id: 'test.noop',
+          group: 'default',
+          params: {},
+        },
+        {
+          id: 'system-connector-test.system-action',
+          connector_type_id: 'test.system-action',
+          params: {},
+        },
+        ,
+      ]);
+    });
   });
 };
 

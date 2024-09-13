@@ -7,30 +7,33 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
-import { CoreTheme } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { KibanaThemeProvider } from './shared_imports';
+import { KibanaRenderContextProvider } from './shared_imports';
 import { App, AppDeps } from './app';
 import { setHttpClient } from './lib/api';
 
 interface BootDeps extends AppDeps {
   element: HTMLElement;
-  I18nContext: any;
-  theme$: Observable<CoreTheme>;
 }
 
 export const renderApp = (bootDeps: BootDeps) => {
-  const { I18nContext, element, theme$, ...appDeps } = bootDeps;
+  const { element, ...appDeps } = bootDeps;
 
   setHttpClient(appDeps.http);
 
   render(
-    <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
+    <KibanaRenderContextProvider {...appDeps}>
+      <KibanaContextProvider
+        services={{
+          uiSettings: bootDeps.uiSettings,
+          settings: bootDeps.settings,
+          theme: bootDeps.theme,
+        }}
+      >
         <App {...appDeps} />
-      </KibanaThemeProvider>
-    </I18nContext>,
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>,
     element
   );
 

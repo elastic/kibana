@@ -5,16 +5,14 @@
  * 2.0.
  */
 
+import { HostsFields } from '../../../api/search_strategy/hosts/model/sort';
+
 export * from './all';
 export * from './common';
 export * from './details';
-export * from './kpi';
 export * from './overview';
 export * from './uncommon_processes';
 
-export enum HostsQueries {
-  details = 'hostDetails',
-  hosts = 'hosts',
-  overview = 'overviewHost',
-  uncommonProcesses = 'uncommonProcesses',
-}
+export { HostsQueries } from '../../../api/search_strategy';
+
+export { HostsFields };

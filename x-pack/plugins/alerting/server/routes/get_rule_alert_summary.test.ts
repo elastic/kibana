@@ -12,6 +12,7 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { rulesClientMock } from '../rules_client.mock';
 import { AlertSummary } from '../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
@@ -38,6 +39,7 @@ describe('getRuleAlertSummaryRoute', () => {
     status: 'OK',
     errorMessages: [],
     alerts: {},
+    revision: 0,
     executionDuration: {
       average: 1,
       valuesWithTimestamp: {
@@ -97,7 +99,9 @@ describe('getRuleAlertSummaryRoute', () => {
 
     rulesClient.getAlertSummary = jest
       .fn()
-      .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
+      .mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, '1')
+      );
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -110,7 +114,7 @@ describe('getRuleAlertSummaryRoute', () => {
       ['notFound']
     );
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(
       `[Error: Saved object [alert/1] not found]`
     );
   });

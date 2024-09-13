@@ -7,12 +7,15 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { CaseStatuses } from '@kbn/cases-components';
+import { CaseSeverity, SeverityFilter } from './severity_filter';
+import { StatusFilter } from './status_filter';
 import { CasesWebhookActionConnector, CasesWebhookActionParams } from './types';
 
 const CREATE_COMMENT_WARNING_TITLE = i18n.translate(
@@ -70,7 +73,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
     [comments, editAction, incident, index]
   );
   const editComment = useCallback(
-    (key, value) => {
+    (key: string, value: string) => {
       return editAction(
         'subActionParams',
         {
@@ -104,15 +107,20 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
       <EuiFormRow
         data-test-subj="title-row"
         fullWidth
-        error={errors['subActionParams.incident.title']}
+        error={errors['subActionParams.incident.title'] as string[]}
         isInvalid={
           errors['subActionParams.incident.title'] !== undefined &&
-          errors['subActionParams.incident.title'].length > 0 &&
+          Number(errors['subActionParams.incident.title'].length) > 0 &&
           incident.title !== undefined
         }
         label={i18n.translate('xpack.stackConnectors.components.casesWebhook.titleFieldLabel', {
-          defaultMessage: 'Summary (required)',
+          defaultMessage: 'Summary',
         })}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            Required
+          </EuiText>
+        }
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -167,6 +175,52 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
           }}
           isClearable={true}
           data-test-subj="tagsComboBox"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('xpack.stackConnectors.components.casesWebhook.statusFieldLabel', {
+          defaultMessage: 'Status',
+        })}
+        error={errors['subActionParams.incident.status'] as string[]}
+      >
+        <StatusFilter
+          selectedStatus={incident.status as CaseStatuses}
+          onStatusChanged={(status: CaseStatuses) => editSubActionProperty('status', status)}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('xpack.stackConnectors.components.casesWebhook.severityFieldLabel', {
+          defaultMessage: 'Severity',
+        })}
+        error={errors['subActionParams.incident.severity'] as string[]}
+      >
+        <SeverityFilter
+          selectedSeverity={incident.severity as CaseSeverity}
+          onSeverityChange={(severity: CaseSeverity) => editSubActionProperty('severity', severity)}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        data-test-subj="id-row"
+        fullWidth
+        error={errors['subActionParams.incident.id'] as string}
+        isInvalid={
+          errors['subActionParams.incident.id'] !== undefined &&
+          Number(errors['subActionParams.incident.id'].length) > 0 &&
+          incident.id !== undefined
+        }
+        label={i18n.translate('xpack.stackConnectors.components.casesWebhook.idFieldLabel', {
+          defaultMessage: 'Case ID',
+        })}
+      >
+        <TextFieldWithMessageVariables
+          index={index}
+          editAction={editSubActionProperty}
+          messageVariables={messageVariables}
+          paramsProperty={'id'}
+          inputTargetValue={incident.id ?? undefined}
+          errors={errors['subActionParams.incident.id'] as string[]}
         />
       </EuiFormRow>
       <>

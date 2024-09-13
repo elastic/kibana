@@ -9,18 +9,14 @@ import { useState } from 'react';
 
 import { toElasticsearchQuery, fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
+import type { QueryErrorMessage } from '@kbn/ml-error-utils';
 
 import { getTransformConfigQuery } from '../../../../../common';
 
-import {
-  ErrorMessage,
-  StepDefineExposedState,
-  QUERY_LANGUAGE_KUERY,
-  QUERY_LANGUAGE_LUCENE,
-  QUERY_LANGUAGE,
-} from '../common';
+import type { StepDefineExposedState, QUERY_LANGUAGE } from '../common';
+import { QUERY_LANGUAGE_KUERY, QUERY_LANGUAGE_LUCENE } from '../common';
 
-import { StepDefineFormProps } from '../step_define_form';
+import type { StepDefineFormProps } from '../step_define_form';
 
 export const useSearchBar = (
   defaults: StepDefineExposedState,
@@ -43,7 +39,9 @@ export const useSearchBar = (
 
   const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
 
-  const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
+  const [queryErrorMessage, setQueryErrorMessage] = useState<QueryErrorMessage | undefined>(
+    undefined
+  );
 
   const searchChangeHandler = (query: Query) => setSearchInput(query);
   const searchSubmitHandler = (query: Query) => {
@@ -61,7 +59,7 @@ export const useSearchBar = (
           return;
       }
     } catch (e) {
-      setErrorMessage({ query: query.query as string, message: e.message });
+      setQueryErrorMessage({ query: query.query as string, message: e.message });
     }
   };
 
@@ -71,14 +69,14 @@ export const useSearchBar = (
     actions: {
       searchChangeHandler,
       searchSubmitHandler,
-      setErrorMessage,
+      setQueryErrorMessage,
       setSearchInput,
       setSearchLanguage,
       setSearchQuery,
       setSearchString,
     },
     state: {
-      errorMessage,
+      queryErrorMessage,
       transformConfigQuery,
       searchInput,
       searchLanguage,

@@ -1,0 +1,6 @@
+in: path
+name: type
+description: Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`.
+required: true
+schema:
+  type: string

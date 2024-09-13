@@ -5,49 +5,46 @@
  * 2.0.
  */
 
-import { EuiText, EuiSkeletonText } from '@elastic/eui';
-import React, { Fragment, useEffect, useState } from 'react';
+import { EuiText, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import React from 'react';
+import type { MutableRefObject } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-import { useLinks, sendGetFileByPath } from '../../../../../hooks';
+import { useLinks } from '../../../../../hooks';
 
 import { markdownRenderers } from './markdown_renderers';
 
 export function Readme({
-  readmePath,
   packageName,
   version,
+  markdown,
+  refs,
 }: {
-  readmePath: string;
   packageName: string;
   version: string;
+  markdown: string | undefined;
+  refs: MutableRefObject<Map<string, HTMLDivElement | null>>;
 }) {
-  const [markdown, setMarkdown] = useState<string | undefined>(undefined);
   const { toRelativeImage } = useLinks();
   const handleImageUri = React.useCallback(
     (uri: string) => {
       const isRelative =
         uri.indexOf('http://') === 0 || uri.indexOf('https://') === 0 ? false : true;
+
       const fullUri = isRelative ? toRelativeImage({ packageName, version, path: uri }) : uri;
       return fullUri;
     },
     [toRelativeImage, packageName, version]
   );
 
-  useEffect(() => {
-    sendGetFileByPath(readmePath).then((res) => {
-      setMarkdown(res.data || '');
-    });
-  }, [readmePath]);
-
   return (
-    <Fragment>
+    <>
       {markdown !== undefined ? (
         <EuiText grow={true}>
           <ReactMarkdown
             transformImageUri={handleImageUri}
-            components={markdownRenderers}
+            components={markdownRenderers(refs)}
             remarkPlugins={[remarkGfm]}
           >
             {markdown}
@@ -56,17 +53,13 @@ export function Readme({
       ) : (
         <EuiText>
           {/* simulates a long page of text loading */}
-          <p>
-            <EuiSkeletonText lines={5} />
-          </p>
-          <p>
-            <EuiSkeletonText lines={6} />
-          </p>
-          <p>
-            <EuiSkeletonText lines={4} />
-          </p>
+          <EuiSkeletonText lines={5} />
+          <EuiSpacer size="m" />
+          <EuiSkeletonText lines={6} />
+          <EuiSpacer size="m" />
+          <EuiSkeletonText lines={4} />
         </EuiText>
       )}
-    </Fragment>
+    </>
   );
 }

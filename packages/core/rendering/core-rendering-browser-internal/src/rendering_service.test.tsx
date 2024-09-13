@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
@@ -18,6 +20,7 @@ import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { RenderingService } from './rendering_service';
 
 describe('RenderingService#start', () => {
+  let analytics: ReturnType<typeof analyticsServiceMock.createAnalyticsServiceStart>;
   let application: ReturnType<typeof applicationServiceMock.createInternalStartContract>;
   let chrome: ReturnType<typeof chromeServiceMock.createStartContract>;
   let overlays: ReturnType<typeof overlayServiceMock.createStartContract>;
@@ -27,6 +30,8 @@ describe('RenderingService#start', () => {
   let rendering: RenderingService;
 
   beforeEach(() => {
+    analytics = analyticsServiceMock.createAnalyticsServiceStart();
+
     application = applicationServiceMock.createInternalStartContract();
     application.getComponent.mockReturnValue(<div>Hello application!</div>);
 
@@ -47,6 +52,7 @@ describe('RenderingService#start', () => {
 
   const startService = () => {
     return rendering.start({
+      analytics,
       application,
       chrome,
       overlays,
@@ -61,6 +67,7 @@ describe('RenderingService#start', () => {
     expect(targetDomElement.querySelector('div.kbnAppWrapper')).toMatchInlineSnapshot(`
       <div
         class="kbnAppWrapper kbnAppWrapper--hiddenChrome"
+        data-test-subj="kbnAppWrapper hiddenChrome"
       >
         <div
           id="app-fixed-viewport"
@@ -105,7 +112,7 @@ describe('RenderingService#start', () => {
           `);
   });
 
-  it('adds global styles via `CoreContextProvider` `globalStyles` configuration', () => {
+  it('adds global styles via `KibanaRootRenderingContext` `globalStyles` configuration', () => {
     startService();
     expect(document.querySelector(`style[data-emotion="eui-styles-global"]`)).toBeDefined();
   });

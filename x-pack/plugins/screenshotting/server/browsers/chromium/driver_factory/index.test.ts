@@ -6,12 +6,13 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import { ConfigType } from '@kbn/screenshotting-server';
 import * as puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
-import { mergeMap, take } from 'rxjs/operators';
+import { mergeMap, take } from 'rxjs';
 import { DEFAULT_VIEWPORT, HeadlessChromiumDriverFactory } from '.';
-import { ConfigType } from '../../../config';
 
 jest.mock('puppeteer');
 
@@ -24,22 +25,18 @@ describe('HeadlessChromiumDriverFactory', () => {
       },
     },
   } as ConfigType;
-  let logger: jest.Mocked<Logger>;
-  let screenshotMode: jest.Mocked<ScreenshotModePluginSetup>;
+  let logger: Logger;
+  let screenshotMode: ScreenshotModePluginSetup;
   let factory: HeadlessChromiumDriverFactory;
-  let mockBrowser: jest.Mocked<puppeteer.Browser>;
+  let mockBrowser: puppeteer.Browser;
 
   beforeEach(async () => {
-    logger = {
-      debug: jest.fn(),
-      error: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      get: jest.fn(() => logger),
-    } as unknown as typeof logger;
-    screenshotMode = {} as unknown as typeof screenshotMode;
+    logger = loggerMock.create();
+
+    screenshotMode = {} as unknown as ScreenshotModePluginSetup;
 
     let pageClosed = false;
+
     mockBrowser = {
       newPage: jest.fn().mockResolvedValue({
         target: jest.fn(() => ({
@@ -57,9 +54,8 @@ describe('HeadlessChromiumDriverFactory', () => {
         pageClosed = true;
       }),
       process: jest.fn(),
-    } as unknown as jest.Mocked<puppeteer.Browser>;
-
-    (puppeteer as jest.Mocked<typeof puppeteer>).launch.mockResolvedValue(mockBrowser);
+    } as unknown as puppeteer.Browser;
+    jest.spyOn(puppeteer, 'launch').mockResolvedValue(mockBrowser);
 
     factory = new HeadlessChromiumDriverFactory(screenshotMode, config, logger, path, '');
     jest.spyOn(factory, 'getBrowserLogger').mockReturnValue(Rx.EMPTY);
@@ -84,10 +80,9 @@ describe('HeadlessChromiumDriverFactory', () => {
     });
 
     it('rejects if Puppeteer launch fails', async () => {
-      (puppeteer as jest.Mocked<typeof puppeteer>).launch.mockRejectedValue(
-        `Puppeteer Launch mock fail.`
-      );
-      expect(() =>
+      jest.spyOn(puppeteer, 'launch').mockRejectedValue(`Puppeteer Launch mock fail.`);
+
+      await expect(() =>
         factory
           .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
           .pipe(take(1))
@@ -99,9 +94,8 @@ describe('HeadlessChromiumDriverFactory', () => {
 
     describe('close behaviour', () => {
       it('does not allow close to be called on the browse more than once', async () => {
-        await factory
-          .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
-          .pipe(
+        await Rx.firstValueFrom(
+          factory.createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT }).pipe(
             take(1),
             mergeMap(async ({ close }) => {
               expect(mockBrowser.close).not.toHaveBeenCalled();
@@ -110,7 +104,7 @@ describe('HeadlessChromiumDriverFactory', () => {
               expect(mockBrowser.close).toHaveBeenCalledTimes(1);
             })
           )
-          .toPromise();
+        );
         // Check again, after the observable completes
         expect(mockBrowser.close).toHaveBeenCalledTimes(1);
       });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -15,7 +16,8 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
-import { readConfigFile } from '../../functional_test_runner';
+import { applyFipsOverrides } from '../lib/fips_overrides';
+import { Config, readConfigFile } from '../../functional_test_runner';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
 import { StartServerOptions } from './flags';
@@ -27,7 +29,12 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
   const reportTime = getTimeReporter(log, 'scripts/functional_tests_server');
 
   await withProcRunner(log, async (procs) => {
-    const config = await readConfigFile(log, options.esVersion, options.config);
+    let config: Config;
+    if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
+      config = await readConfigFile(log, options.esVersion, options.config);
+    } else {
+      config = await readConfigFile(log, options.esVersion, options.config, {}, applyFipsOverrides);
+    }
 
     const shutdownEs = await runElasticsearch({
       config,
@@ -40,7 +47,16 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       procs,
       config,
       installDir: options.installDir,
-      extraKbnOpts: options.installDir ? [] : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+      extraKbnOpts: options.installDir
+        ? []
+        : [
+            '--dev',
+            '--no-dev-config',
+            '--no-dev-credentials',
+            config.get('serverless')
+              ? '--server.versioned.versionResolution=newest'
+              : '--server.versioned.versionResolution=oldest',
+          ],
     });
 
     reportTime(runStartTime, 'ready', {

@@ -143,7 +143,7 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
   if (!isLoading && enrolledAgents > 0 && numAgentsWithData > 0) {
     setAgentDataConfirmed(true);
     if (isGuidedOnboardingActive) {
-      guidedOnboarding.guidedOnboardingApi?.completeGuidedOnboardingForIntegration(
+      guidedOnboarding?.guidedOnboardingApi?.completeGuidedOnboardingForIntegration(
         packageInfo?.name
       );
     }

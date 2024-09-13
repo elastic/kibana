@@ -6,8 +6,11 @@
  */
 
 export default function loadTests({ loadTestFile }) {
-  describe('Fleet Endpoints', () => {
+  describe('Agent policies', () => {
     loadTestFile(require.resolve('./agent_policy_with_agents_setup'));
     loadTestFile(require.resolve('./agent_policy'));
+    loadTestFile(require.resolve('./agent_policy_datastream_permissions'));
+    loadTestFile(require.resolve('./privileges'));
+    loadTestFile(require.resolve('./agent_policy_root_integrations'));
   });
 }

@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, Suspense } from 'react';
+import type { FC } from 'react';
+import React, { Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_PAGES } from '../../../locator';
-import { createPath, PageLoader, PageProps } from '../router';
-import { useResolver } from '../use_resolver';
-import { checkFullLicense } from '../../license';
-import { checkGetJobsCapabilitiesResolver } from '../../capabilities/check_capabilities';
+import { createPath, PageLoader } from '../router';
+import { useRouteResolver } from '../use_resolver';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import type { MlRoute } from '..';
-import { NavigateToPath } from '../../contexts/kibana';
+import type { NavigateToPath } from '../../contexts/kibana';
 
 const NotificationsPage = React.lazy(() => import('../../notifications/page'));
 
@@ -31,7 +30,7 @@ export const notificationsRouteFactory = (
     defaultMessage: 'Notifications',
   }),
   enableDatePicker: true,
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     {
@@ -43,23 +42,12 @@ export const notificationsRouteFactory = (
   'data-test-subj': 'mlPageNotifications',
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { redirectToMlAccessDeniedPage } = deps;
+const PageWrapper: FC = () => {
+  const { context } = useRouteResolver('full', ['canGetMlInfo'], {
+    getMlNodeCount,
+    loadMlServerInfo,
+  });
 
-  const { context } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    {
-      checkFullLicense,
-      checkGetJobsCapabilities: () =>
-        checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-      getMlNodeCount,
-      loadMlServerInfo,
-    }
-  );
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   return (

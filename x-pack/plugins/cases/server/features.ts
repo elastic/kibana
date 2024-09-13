@@ -11,6 +11,7 @@ import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { APP_ID, FEATURE_ID } from '../common/constants';
 import { createUICapabilities, getApiTags } from '../common';
 
@@ -32,6 +33,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
       defaultMessage: 'Cases',
     }),
     category: DEFAULT_APP_CATEGORIES.management,
+    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: [],
     order: FEATURE_ORDER,
     management: {
@@ -95,6 +97,33 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
                   delete: [APP_ID],
                 },
                 ui: capabilities.delete,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.cases.features.casesSettingsSubFeatureName', {
+          defaultMessage: 'Case settings',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'cases_settings',
+                name: i18n.translate('xpack.cases.features.casesSettingsSubFeatureDetails', {
+                  defaultMessage: 'Edit case settings',
+                }),
+                includeIn: 'all',
+                savedObject: {
+                  all: [...filesSavedObjectTypes],
+                  read: [...filesSavedObjectTypes],
+                },
+                cases: {
+                  settings: [APP_ID],
+                },
+                ui: capabilities.settings,
               },
             ],
           },

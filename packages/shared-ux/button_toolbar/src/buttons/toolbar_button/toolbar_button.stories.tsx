@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -21,6 +22,13 @@ export default {
 };
 
 const argTypes = {
+  buttonStyle: {
+    defaultValue: 'standard',
+    control: {
+      type: 'radio',
+      options: ['standard', 'iconButton'],
+    },
+  },
   buttonType: {
     defaultValue: 'empty',
     control: {
@@ -39,9 +47,15 @@ const argTypes = {
 
 type Params = Record<keyof typeof argTypes, any>;
 
-export const ToolbarButton = ({ buttonType, iconSide }: Params) => {
+export const ToolbarButton = ({ buttonStyle, buttonType, iconSide }: Params) => {
   return (
-    <Component label="Toolbar button" iconType="lensApp" type={buttonType} iconSide={iconSide} />
+    <Component
+      as={buttonStyle}
+      label="Toolbar button"
+      iconType="lensApp"
+      type={buttonType}
+      iconSide={iconSide}
+    />
   );
 };
 

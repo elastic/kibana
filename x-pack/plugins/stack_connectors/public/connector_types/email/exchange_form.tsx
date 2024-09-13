@@ -10,8 +10,8 @@ import { EuiFlexItem, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { PasswordField, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { TextField, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
 
 const { emptyField } = fieldValidators;
@@ -83,22 +83,31 @@ const ExchangeFormFields: React.FC<ExchangeFormFieldsProps> = ({ readOnly }) => 
       </EuiFlexGroup>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
-          <PasswordField
+          <UseField
             path="secrets.clientSecret"
-            label={i18n.CLIENT_SECRET_LABEL}
-            readOnly={readOnly}
-            helpText={
-              <EuiLink
-                href={docLinks.links.alerting.emailExchangeClientSecretConfig}
-                target="_blank"
-              >
-                <FormattedMessage
-                  id="xpack.stackConnectors.components.email.exchangeForm.clientSecretHelpLabel"
-                  defaultMessage="Configure Client Secret"
-                />
-              </EuiLink>
-            }
-            data-test-subj="emailClientSecret"
+            config={{
+              label: i18n.CLIENT_SECRET_LABEL,
+              validations: [
+                {
+                  validator: emptyField(i18n.CLIENT_SECRET_REQUIRED),
+                },
+              ],
+              helpText: (
+                <EuiLink
+                  href={docLinks.links.alerting.emailExchangeClientSecretConfig}
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.stackConnectors.components.email.exchangeForm.clientSecretHelpLabel"
+                    defaultMessage="Configure Client Secret"
+                  />
+                </EuiLink>
+              ),
+            }}
+            component={PasswordField}
+            componentProps={{
+              euiFieldProps: { readOnly, 'data-test-subj': 'emailClientSecret' },
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

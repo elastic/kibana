@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
-import {
-  expandLiteralStrings,
-  XJsonMode,
-  EuiCodeEditor,
-  EuiCodeEditorProps,
-} from '../../../shared_imports';
+import { CodeEditor, type CodeEditorProps } from '@kbn/code-editor';
+import { expandLiteralStrings, XJsonMode } from '../../../shared_imports';
 
 export const EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
 
@@ -20,20 +17,17 @@ interface JobEditorProps {
   value: string;
   height?: string;
   width?: string;
-  mode?: typeof EDITOR_MODE[keyof typeof EDITOR_MODE];
+  mode?: (typeof EDITOR_MODE)[keyof typeof EDITOR_MODE];
   readOnly?: boolean;
-  syntaxChecking?: boolean;
-  theme?: string;
-  onChange?: EuiCodeEditorProps['onChange'];
+  onChange?: CodeEditorProps['onChange'];
 }
 export const JsonEditor: FC<JobEditorProps> = ({
   value,
   height = '500px',
-  width = '100%',
+  // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
+  width = '99%',
   mode = EDITOR_MODE.JSON,
   readOnly = false,
-  syntaxChecking = true,
-  theme = 'textmate',
   onChange = () => {},
 }) => {
   if (mode === EDITOR_MODE.XJSON) {
@@ -41,20 +35,30 @@ export const JsonEditor: FC<JobEditorProps> = ({
   }
 
   return (
-    <EuiCodeEditor
+    <CodeEditor
       value={value}
       width={width}
       height={height}
-      mode={mode}
-      readOnly={readOnly}
-      wrapEnabled={true}
-      showPrintMargin={false}
-      theme={theme}
-      editorProps={{ $blockScrolling: true }}
-      setOptions={{
-        useWorker: syntaxChecking,
+      languageId={mode}
+      languageConfiguration={{
+        autoClosingPairs: [
+          {
+            open: '{',
+            close: '}',
+          },
+        ],
+      }}
+      options={{
         tabSize: 2,
-        useSoftTabs: true,
+        readOnly,
+        automaticLayout: true,
+        wordWrap: 'on',
+        wrappingIndent: 'indent',
+        minimap: {
+          enabled: false,
+        },
+        scrollBeyondLastLine: false,
+        quickSuggestions: true,
       }}
       onChange={onChange}
     />

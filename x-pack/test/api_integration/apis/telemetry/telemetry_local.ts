@@ -9,12 +9,15 @@ import expect from '@kbn/expect';
 import deepmerge from 'deepmerge';
 import ossRootTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_root.json';
 import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
+import ossPackagesTelemetrySchema from '@kbn/telemetry-plugin/schema/kbn_packages.json';
 import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
 import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
+import { assertTelemetryPayload } from '@kbn/telemetry-tools';
 import {
-  assertTelemetryPayload,
-  flatKeys,
-} from '../../../../../test/api_integration/apis/telemetry/utils';
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
+import { flatKeys } from '@kbn/test-suites-src/api_integration/apis/telemetry/utils';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const disableCollection = {
@@ -33,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('/api/telemetry/v2/clusters/_stats with monitoring disabled', () => {
+  describe('/internal/telemetry/clusters/_stats with monitoring disabled', () => {
     let stats: Record<string, any>;
 
     before('disable monitoring and pull local stats', async () => {
@@ -41,8 +44,10 @@ export default function ({ getService }: FtrProviderContext) {
       await new Promise((r) => setTimeout(r, 1000));
 
       const { body } = await supertest
-        .post('/api/telemetry/v2/clusters/_stats')
+        .post('/internal/telemetry/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({ unencrypted: true, refreshCache: true })
         .expect(200);
 
@@ -52,7 +57,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should pass the schema validation', () => {
       const root = deepmerge(ossRootTelemetrySchema, xpackRootTelemetrySchema);
-      const plugins = deepmerge(ossPluginsTelemetrySchema, xpackPluginsTelemetrySchema);
+      const plugins = deepmerge(
+        deepmerge(ossPluginsTelemetrySchema, ossPackagesTelemetrySchema),
+        xpackPluginsTelemetrySchema
+      );
 
       try {
         assertTelemetryPayload({ root, plugins }, stats);

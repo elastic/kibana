@@ -5,31 +5,62 @@
  * 2.0.
  */
 
-import {
-  createHostRiskEnrichments,
-  getIsHostRiskScoreAvailable,
-} from './enrichment_by_type/host_risk';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../../../common/constants';
+import { createHostRiskEnrichments } from './enrichment_by_type/host_risk';
+
+import { createUserRiskEnrichments } from './enrichment_by_type/user_risk';
 
 import {
-  createUserRiskEnrichments,
-  getIsUserRiskScoreAvailable,
-} from './enrichment_by_type/user_risk';
+  createHostAssetCriticalityEnrichments,
+  createUserAssetCriticalityEnrichments,
+} from './enrichment_by_type/asset_criticality';
+import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
 import type {
   EnrichEventsFunction,
   EventsMapByEnrichments,
   CreateEnrichEventsFunction,
 } from './types';
 import { applyEnrichmentsToEvents } from './utils/transforms';
+import { isIndexExist } from './utils/is_index_exist';
+import {
+  getHostRiskIndex,
+  getUserRiskIndex,
+} from '../../../../../../common/search_strategy/security_solution/risk_score/common';
 
-export const enrichEvents: EnrichEventsFunction = async ({ services, logger, events, spaceId }) => {
+export const enrichEvents: EnrichEventsFunction = async ({
+  services,
+  logger,
+  events,
+  spaceId,
+  experimentalFeatures,
+}) => {
   try {
-    const enrichments = [];
+    const enrichments: Array<Promise<EventsMapByEnrichments>> = [];
 
     logger.debug('Alert enrichments started');
+    const isNewRiskScoreModuleAvailable = experimentalFeatures?.riskScoringRoutesEnabled ?? false;
+    const { uiSettingsClient } = services;
+    const isAssetCriticalityEnabled = await uiSettingsClient.get<boolean>(
+      ENABLE_ASSET_CRITICALITY_SETTING
+    );
+
+    let isNewRiskScoreModuleInstalled = false;
+    if (isNewRiskScoreModuleAvailable) {
+      isNewRiskScoreModuleInstalled = await isIndexExist({
+        services,
+        index: getHostRiskIndex(spaceId, true, true),
+      });
+    }
 
     const [isHostRiskScoreIndexExist, isUserRiskScoreIndexExist] = await Promise.all([
-      getIsHostRiskScoreAvailable({ spaceId, services }),
-      getIsUserRiskScoreAvailable({ spaceId, services }),
+      isIndexExist({
+        services,
+        index: getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled),
+      }),
+      isIndexExist({
+        services,
+        index: getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled),
+      }),
     ]);
 
     if (isHostRiskScoreIndexExist) {
@@ -39,6 +70,7 @@ export const enrichEvents: EnrichEventsFunction = async ({ services, logger, eve
           logger,
           events,
           spaceId,
+          isNewRiskScoreModuleInstalled,
         })
       );
     }
@@ -50,13 +82,39 @@ export const enrichEvents: EnrichEventsFunction = async ({ services, logger, eve
           logger,
           events,
           spaceId,
+          isNewRiskScoreModuleInstalled,
         })
       );
     }
 
+    if (isAssetCriticalityEnabled) {
+      const assetCriticalityIndexExist = await isIndexExist({
+        services,
+        index: getAssetCriticalityIndex(spaceId),
+      });
+      if (assetCriticalityIndexExist) {
+        enrichments.push(
+          createUserAssetCriticalityEnrichments({
+            services,
+            logger,
+            events,
+            spaceId,
+          })
+        );
+        enrichments.push(
+          createHostAssetCriticalityEnrichments({
+            services,
+            logger,
+            events,
+            spaceId,
+          })
+        );
+      }
+    }
+
     const allEnrichmentsResults = await Promise.allSettled(enrichments);
 
-    const allFulfilledEnrichmentsResults = allEnrichmentsResults
+    const allFulfilledEnrichmentsResults: EventsMapByEnrichments[] = allEnrichmentsResults
       .filter((result) => result.status === 'fulfilled')
       .map((result) => (result as PromiseFulfilledResult<EventsMapByEnrichments>)?.value);
 
@@ -73,10 +131,11 @@ export const enrichEvents: EnrichEventsFunction = async ({ services, logger, eve
 
 export const createEnrichEventsFunction: CreateEnrichEventsFunction =
   ({ services, logger }) =>
-  (events, { spaceId }: { spaceId: string }) =>
+  (events, { spaceId }: { spaceId: string }, experimentalFeatures) =>
     enrichEvents({
       events,
       services,
       logger,
       spaceId,
+      experimentalFeatures,
     });

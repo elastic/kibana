@@ -10,7 +10,6 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import '../../mock/match_media';
 import { TestProviders, mockIndexPattern } from '../../mock';
 
 import { allEvents, defaultOptions } from './helpers';
@@ -44,8 +43,7 @@ jest.mock('uuid', () => {
 });
 
 const field = 'host.name';
-const value = 'nice';
-const combinedQueries = {
+const filterQuery = {
   bool: {
     must: [],
     filter: [
@@ -116,7 +114,6 @@ describe('TopN', () => {
     setQuery: jest.fn(),
     to: '2020-04-15T00:31:47.695Z',
     toggleTopN,
-    value,
   };
   describe('common functionality', () => {
     let wrapper: ReactWrapper;
@@ -202,7 +199,7 @@ describe('TopN', () => {
       };
       wrapper = mount(
         <TestProviders>
-          <TopN {...testProps} combinedQueries={JSON.stringify(combinedQueries)} />
+          <TopN {...testProps} filterQuery={JSON.stringify(filterQuery)} />
         </TestProviders>
       );
     });

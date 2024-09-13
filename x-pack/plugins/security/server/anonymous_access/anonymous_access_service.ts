@@ -121,6 +121,7 @@ export class AnonymousAccessService {
 
         try {
           return await capabilities.resolveCapabilities(fakeAnonymousRequest, {
+            capabilityPath: '*',
             useDefaultCapabilities,
           });
         } catch (err) {

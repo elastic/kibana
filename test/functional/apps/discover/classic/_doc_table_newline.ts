@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -11,7 +12,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover']);
+  const { common, unifiedFieldList } = getPageObjects(['common', 'unifiedFieldList']);
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
@@ -28,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'newline-test',
         'doc_table:legacy': true,
       });
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     after(async () => {
@@ -39,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should break text on newlines', async function () {
-      await PageObjects.discover.clickFieldListItemToggle('message');
+      await unifiedFieldList.clickFieldListItemToggle('message');
       const dscTableRows = await find.allByCssSelector('.kbnDocTable__row');
 
       await retry.waitFor('height of multi-line content > single-line content', async () => {
@@ -47,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const heightWithNewline = await dscTableRows[1].getAttribute('clientHeight');
         log.debug(`Without newlines: ${heightWithoutNewline}, With newlines: ${heightWithNewline}`);
 
-        await PageObjects.common.sleep(10000);
+        await common.sleep(10000);
         return Number(heightWithNewline) > Number(heightWithoutNewline);
       });
     });

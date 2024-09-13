@@ -15,7 +15,8 @@ import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import RuleEdit from './rule_edit';
 import { useKibana } from '../../../common/lib/kibana';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -24,18 +25,18 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../lib/rule_api/rule_types', () => ({
   loadRuleTypes: jest.fn(),
 }));
-jest.mock('../../lib/rule_api/update', () => ({
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/update_rule', () => ({
   updateRule: jest.fn().mockRejectedValue({ body: { message: 'Fail message' } }),
 }));
-jest.mock('../../lib/rule_api/health', () => ({
-  alertingFrameworkHealth: jest.fn(() => ({
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health', () => ({
+  fetchAlertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
   })),
 }));
 
-jest.mock('../../../common/lib/config_api', () => ({
-  triggersActionsUiConfig: jest.fn().mockResolvedValue({
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config', () => ({
+  fetchUiConfig: jest.fn().mockResolvedValue({
     isUsingSecurity: true,
     minimumScheduleInterval: { value: '1m', enforce: false },
   }),
@@ -58,8 +59,8 @@ jest.mock('./rule_errors', () => ({
   isValidRule: jest.fn(),
 }));
 
-jest.mock('../../../common/lib/health_api', () => ({
-  triggersActionsUiHealth: jest.fn(() => ({ isRulesAvailable: true })),
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status', () => ({
+  fetchUiHealthStatus: jest.fn(() => ({ isRulesAvailable: true })),
 }));
 
 describe('rule_edit', () => {
@@ -101,9 +102,9 @@ describe('rule_edit', () => {
         defaultActionGroupId: 'testActionGroup',
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-        producer: ALERTS_FEATURE_ID,
+        producer: ALERTING_FEATURE_ID,
         authorizedConsumers: {
-          [ALERTS_FEATURE_ID]: { read: true, all: true },
+          [ALERTING_FEATURE_ID]: { read: true, all: true },
           test: { read: true, all: true },
         },
         actionVariables: {
@@ -186,15 +187,17 @@ describe('rule_edit', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <RuleEdit
-        onClose={() => {}}
-        initialRule={rule}
-        onSave={() => {
-          return new Promise<void>(() => {});
-        }}
-        actionTypeRegistry={actionTypeRegistry}
-        ruleTypeRegistry={ruleTypeRegistry}
-      />
+      <QueryClientProvider client={new QueryClient()}>
+        <RuleEdit
+          onClose={() => {}}
+          initialRule={rule}
+          onSave={() => {
+            return new Promise<void>(() => {});
+          }}
+          actionTypeRegistry={actionTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
+        />
+      </QueryClientProvider>
     );
     // Wait for active space to resolve before requesting the component to update
     await act(async () => {
@@ -207,6 +210,7 @@ describe('rule_edit', () => {
     await setup();
     expect(wrapper.find('[data-test-subj="editRuleFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveEditedRuleButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="showEditedRequestButton"]').exists()).toBeTruthy();
   });
 
   it('displays a toast message on save for server errors', async () => {
@@ -219,9 +223,9 @@ describe('rule_edit', () => {
     await act(async () => {
       wrapper.find('[data-test-subj="saveEditedRuleButton"]').last().simulate('click');
     });
-    expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      'Fail message'
-    );
+    expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith({
+      title: 'Fail message',
+    });
   });
 
   it('should pass in the config into `getRuleErrors`', async () => {

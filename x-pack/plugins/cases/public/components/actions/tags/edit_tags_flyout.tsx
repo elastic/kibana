@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,19 +22,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type { Case } from '../../../../common';
+import type { CasesUI } from '../../../../common';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { EditTagsSelectable } from './edit_tags_selectable';
 import * as i18n from './translations';
 import type { ItemsSelectionState } from '../types';
 
 interface Props {
-  selectedCases: Case[];
+  selectedCases: CasesUI;
   onClose: () => void;
   onSaveTags: (args: ItemsSelectionState) => void;
 }
 
-const FlyoutBody = styled(EuiFlyoutBody)`
+const FlyoutBodyCss = css`
   ${euiFullHeight()}
 
   .euiFlyoutBody__overflowContent {
@@ -72,7 +72,7 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSa
           <p>{headerSubtitle}</p>
         </EuiText>
       </EuiFlyoutHeader>
-      <FlyoutBody>
+      <EuiFlyoutBody css={FlyoutBodyCss}>
         {isLoading ? (
           <EuiLoadingSpinner />
         ) : (
@@ -83,7 +83,7 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSa
             onChangeTags={setTagsSelection}
           />
         )}
-      </FlyoutBody>
+      </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>

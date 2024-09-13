@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { EuiStepProps } from '@elastic/eui';
@@ -27,14 +28,7 @@ function isKibanaPastPreboot(response?: Response, body?: StatusResponse) {
   if (!response?.headers.get('content-type')?.includes('application/json')) {
     return false;
   }
-
-  return (
-    // Status endpoint may require authentication after `preboot` stage.
-    response?.status === 401 ||
-    // We're only interested in the availability of the critical core services.
-    (body?.status?.core?.elasticsearch?.level === 'available' &&
-      body?.status?.core?.savedObjects?.level === 'available')
-  );
+  return body?.status?.overall?.level === 'available';
 }
 
 export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ onSuccess }) => {

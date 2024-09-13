@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, cleanup } from '@testing-library/react-hooks';
 
 import {
-  LogLevel,
-  RuleExecutionEventType,
-} from '../../../../../common/detection_engine/rule_monitoring';
+  LogLevelEnum,
+  RuleExecutionEventTypeEnum,
+} from '../../../../../common/api/detection_engine/rule_monitoring';
 
 import { useExecutionEvents } from './use_execution_events';
 import { useToasts } from '../../../../common/lib/kibana';
 import { api } from '../../api';
+import { createReactQueryWrapper } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../api');
@@ -31,21 +30,6 @@ describe('useExecutionEvents', () => {
   afterEach(async () => {
     cleanup();
   });
-
-  const createReactQueryWrapper = () => {
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          // Turn retries off, otherwise we won't be able to test errors
-          retry: false,
-        },
-      },
-    });
-    const wrapper: React.FC = ({ children }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-    return wrapper;
-  };
 
   const render = () =>
     renderHook(() => useExecutionEvents({ ruleId: SOME_RULE_ID }), {
@@ -85,8 +69,9 @@ describe('useExecutionEvents', () => {
         {
           timestamp: '2021-12-29T10:42:59.996Z',
           sequence: 0,
-          level: LogLevel.info,
-          type: RuleExecutionEventType['status-change'],
+          level: LogLevelEnum.info,
+          type: RuleExecutionEventTypeEnum['status-change'],
+          execution_id: 'execution-id-1',
           message: 'Rule changed status to "succeeded". Rule execution completed without errors',
         },
       ],

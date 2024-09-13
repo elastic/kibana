@@ -7,7 +7,11 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTelemetrySecurityListTaskConfig } from './security_lists';
-import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
+import {
+  createMockTelemetryEventsSender,
+  createMockTelemetryReceiver,
+  createMockTaskMetrics,
+} from '../__mocks__';
 import {
   ENDPOINT_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -28,12 +32,14 @@ describe('security list telemetry task test', () => {
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const telemetrySecurityListTaskConfig = createTelemetrySecurityListTaskConfig(1);
+    const mockTaskMetrics = createMockTaskMetrics();
 
     await telemetrySecurityListTaskConfig.runTask(
       'test-id',
       logger,
       mockTelemetryReceiver,
       mockTelemetryEventsSender,
+      mockTaskMetrics,
       testTaskExecutionPeriod
     );
 

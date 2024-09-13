@@ -3,6 +3,10 @@
 ++++
 <titleabbrev>Torq</titleabbrev>
 ++++
+:frontmatter-description: Add a connector that can use Torq to trigger workflows.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to]
+:frontmatter-tags-user-goals: [configure]
 
 The Torq connector uses a Torq webhook to trigger workflows with Kibana actions.
 
@@ -28,39 +32,10 @@ Torq endpoint URL:: Endpoint URL (webhook) of the Elastic Security integration y
 Torq authentication header secret:: Secret of the webhook authentication header.
 
 [float]
-[[preconfigured-torq-configuration]]
-=== Create preconfigured connectors
-
-If you are running {kib} on-prem, you can define connectors by
-adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
-For example:
-
-[source,yaml]
---
-xpack.actions.preconfigured:
-  my-torq:
-    name: preconfigured-torq-connector-type
-    actionTypeId: .torq
-    config:
-      webhookIntegrationUrl: https://hooks.torq.io/v1/somehook
-    secrets:
-      token: mytorqtoken
---
-
-Config defines information for the connector type.
-
-`webhookIntegrationUrl`:: An address that corresponds to **Torq endpoint URL**.
-
-Secrets defines sensitive information for the connector type.
-
-`token`:: A string that corresponds to **Torq authentication header secret**.
-
-[float]
 [[torq-action-configuration]]
 === Test connectors
 
-You can test connectors with the <<execute-connector-api,run connector API>> or
-as you're creating or editing the connector in {kib}. For example:
+You can test connectors as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/torq-connector-test.png[Torq connector test]

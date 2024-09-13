@@ -6,7 +6,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import type { ActionConnector, ActionTypeConnector } from '../../../common/api';
+import type { ActionConnector, ActionTypeConnector } from '../../../common/types/domain';
 import { basicPush } from '../../containers/mock';
 import type { CaseConnectors } from '../../containers/types';
 
@@ -19,6 +19,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance1.service-now.com',
     },
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: false,
   },
   {
@@ -30,6 +31,7 @@ export const connectorsMock: ActionConnector[] = [
       orgId: '201',
     },
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: false,
   },
   {
@@ -40,6 +42,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance.atlassian.ne',
     },
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: false,
   },
   {
@@ -50,6 +53,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance1.service-now.com',
     },
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: false,
   },
   {
@@ -61,6 +65,7 @@ export const connectorsMock: ActionConnector[] = [
       usesTableApi: true,
     },
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: true,
   },
 ];
@@ -74,6 +79,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabledInConfig: true,
     enabledInLicense: true,
     supportedFeatureIds: ['alerting'],
+    isSystemActionType: false,
   },
   {
     id: '.index',
@@ -83,6 +89,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabledInConfig: true,
     enabledInLicense: true,
     supportedFeatureIds: ['alerting'],
+    isSystemActionType: false,
   },
   {
     id: '.servicenow',
@@ -92,6 +99,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabledInConfig: true,
     enabledInLicense: true,
     supportedFeatureIds: ['alerting', 'cases'],
+    isSystemActionType: false,
   },
   {
     id: '.jira',
@@ -101,6 +109,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabledInConfig: true,
     enabledInLicense: true,
     supportedFeatureIds: ['alerting', 'cases'],
+    isSystemActionType: false,
   },
   {
     id: '.resilient',
@@ -110,6 +119,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabledInConfig: true,
     enabledInLicense: true,
     supportedFeatureIds: ['alerting', 'cases'],
+    isSystemActionType: false,
   },
   {
     id: '.servicenow-sir',
@@ -119,6 +129,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabledInConfig: true,
     enabledInLicense: true,
     supportedFeatureIds: ['alerting', 'cases'],
+    isSystemActionType: false,
   },
 ];
 

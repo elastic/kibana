@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -15,6 +16,7 @@
  */
 export const IGNORE_FILE_GLOBS = [
   '.node-version',
+  'sonar-project.properties',
   '.github/**/*',
   'docs/**/*',
   '**/bin/**/*',
@@ -30,23 +32,27 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/cases/docs/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   'x-pack/plugins/fleet/cypress/packages/*.zip',
+  '**/apm-diagnostics-*.json',
   '**/.*',
   '**/__mocks__/**/*',
   'x-pack/docs/**/*',
   'packages/core/apps/core-apps-server-internal/assets/fonts/**/*',
   'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/**/*',
   'packages/kbn-utility-types/test-d/**/*',
-  '**/Jenkinsfile*',
   'Dockerfile*',
   'vars/*',
-  '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
   'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
+  'x-pack/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile',
   '**/test/**/fixtures/**/*',
+  'packages/kbn-router-to-openapispec/openapi-types.d.ts',
 
   // Required to match the name in the docs.elastic.dev repo.
-  'nav-kibana-dev.docnav.json',
+  'dev_docs/nav-kibana-dev.docnav.json',
+
+  // Match elastic wide naming convention for catalog-info.yaml
+  'catalog-info.yaml',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
@@ -64,7 +70,7 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/plugins/maps/server/fonts/**/*',
 
-  'x-pack/plugins/profiling/Makefile',
+  'x-pack/plugins/observability_solution/profiling/Makefile',
 
   // Bazel default files
   '**/WORKSPACE.bazel',
@@ -75,6 +81,12 @@ export const IGNORE_FILE_GLOBS = [
 
   // generator templates use weird filenames based on the requirements for the files they're generating
   'packages/kbn-generate/templates/**/*',
+
+  // ecs templates
+  '**/ecs/fields/**/*',
+
+  // Support for including http-client.env.json configurations
+  '**/http-client.env.json',
 ];
 
 /**
@@ -105,6 +117,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'packages/*',
   'packages/core/*/*',
   'packages/kbn-pm/src/utils/__fixtures__/*',
+  'packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules/*',
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
   'typings/*',

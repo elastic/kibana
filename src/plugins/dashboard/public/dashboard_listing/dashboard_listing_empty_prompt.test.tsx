@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper } from 'enzyme';
+import { mount, ReactWrapper, ComponentType } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -34,6 +35,7 @@ const makeDefaultProps = (): DashboardListingEmptyPromptProps => ({
   goToDashboard: jest.fn(),
   setUnsavedDashboardIds: jest.fn(),
   useSessionStorageIntegration: true,
+  disableCreateDashboardButton: false,
 });
 
 function mountWith({
@@ -47,7 +49,9 @@ function mountWith({
   }> = ({ children }) => {
     return <I18nProvider>{children}</I18nProvider>;
   };
-  const component = mount(<DashboardListingEmptyPrompt {...props} />, { wrappingComponent });
+  const component = mount(<DashboardListingEmptyPrompt {...props} />, {
+    wrappingComponent: wrappingComponent as ComponentType<{}>,
+  });
   return { component, props };
 }
 
@@ -73,6 +77,21 @@ test('renders empty prompt with link when showWriteControls is on', async () => 
 
   component!.update();
   expect(component!.find('EuiLink').length).toBe(1);
+});
+
+test('renders disabled action button when disableCreateDashboardButton is true', async () => {
+  pluginServices.getServices().dashboardCapabilities.showWriteControls = true;
+
+  let component: ReactWrapper;
+  await act(async () => {
+    ({ component } = mountWith({ props: { disableCreateDashboardButton: true } }));
+  });
+
+  component!.update();
+
+  expect(component!.find(`[data-test-subj="newItemButton"]`).first().prop('disabled')).toEqual(
+    true
+  );
 });
 
 test('renders continue button when no dashboards exist but one is in progress', async () => {

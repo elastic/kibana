@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "run-parts",
+    "index": "auditbeat-run-parts",
     "mappings": {
       "_data_stream_timestamp": {
         "enabled": true
@@ -927,6 +927,7 @@
     },
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
         "number_of_replicas": "0",
         "number_of_shards": "1"
       }

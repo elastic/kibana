@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
@@ -16,7 +17,8 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '@kbn/vis-type-heatmap-plugin/common';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '@kbn/vis-type-gauge-plugin/common';
-import { setUsageCollectionStart } from './services';
+import type { VislibPublicConfig } from '../server/config';
+import { setAnalytics, setI18n, setUsageCollectionStart } from './services';
 import { heatmapVisTypeDefinition } from './heatmap';
 
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
@@ -52,20 +54,32 @@ export class VisTypeVislibPlugin
     core: VisTypeVislibCoreSetup,
     { expressions, visualizations, charts }: VisTypeVislibPluginSetupDependencies
   ) {
-    // register vislib XY axis charts
-
     expressions.registerRenderer(getVislibVisRenderer(core, charts));
     expressions.registerFunction(createVisTypeVislibVisFn());
 
+    const { readOnly } = this.initializerContext.config.get<VislibPublicConfig>();
+
     if (core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY)) {
       // register vislib heatmap chart
-      visualizations.createBaseVisualization(heatmapVisTypeDefinition);
+      visualizations.createBaseVisualization({
+        ...heatmapVisTypeDefinition,
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      });
     }
 
     if (core.uiSettings.get(LEGACY_GAUGE_CHARTS_LIBRARY)) {
       // register vislib gauge and goal charts
-      visualizations.createBaseVisualization(gaugeVisTypeDefinition);
-      visualizations.createBaseVisualization(goalVisTypeDefinition);
+      visualizations.createBaseVisualization({
+        ...gaugeVisTypeDefinition,
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      });
+      visualizations.createBaseVisualization({
+        ...goalVisTypeDefinition,
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      });
     }
   }
 
@@ -75,6 +89,8 @@ export class VisTypeVislibPlugin
   ) {
     setFormatService(fieldFormats);
     setDataActions(data.actions);
+    setAnalytics(core.analytics);
+    setI18n(core.i18n);
     setTheme(core.theme);
     if (usageCollection) {
       setUsageCollectionStart(usageCollection);

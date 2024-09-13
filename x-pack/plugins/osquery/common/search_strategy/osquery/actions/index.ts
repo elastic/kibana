@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IEsSearchResponse, IKibanaSearchResponse } from '@kbn/data-plugin/common';
-
+import type { IEsSearchResponse } from '@kbn/search-types';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { Inspect, Maybe } from '../../common';
 import type { RequestOptions, RequestOptionsPaginated } from '../..';
 
@@ -82,4 +82,6 @@ export interface ActionResultsStrategyResponse
 
 export interface ActionResultsRequestOptions extends RequestOptionsPaginated {
   actionId: string;
+  startDate?: string;
+  useNewDataStream?: boolean;
 }

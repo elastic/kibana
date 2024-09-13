@@ -40,12 +40,12 @@ describe('Create Remote cluster', () => {
     test('should have a toggle to Skip unavailable remote cluster', () => {
       expect(actions.skipUnavailableSwitch.exists()).toBe(true);
 
-      // By default it should be set to "false"
-      expect(actions.skipUnavailableSwitch.isChecked()).toBe(false);
+      // By default it should be set to "true"
+      expect(actions.skipUnavailableSwitch.isChecked()).toBe(true);
 
       actions.skipUnavailableSwitch.toggle();
 
-      expect(actions.skipUnavailableSwitch.isChecked()).toBe(true);
+      expect(actions.skipUnavailableSwitch.isChecked()).toBe(false);
     });
 
     describe('on prem', () => {
@@ -80,8 +80,8 @@ describe('Create Remote cluster', () => {
         expect(actions.saveButton.isDisabled()).toBe(true);
       });
 
-      test('renders no switch for cloud url input and proxy address + server name input modes', () => {
-        expect(actions.cloudUrlSwitch.exists()).toBe(false);
+      test('renders no switch for cloud advanced options', () => {
+        expect(actions.cloudAdvancedOptionsSwitch.exists()).toBe(false);
       });
     });
     describe('on cloud', () => {
@@ -93,19 +93,21 @@ describe('Create Remote cluster', () => {
         component.update();
       });
 
-      test('renders a switch between cloud url input and proxy address + server name input for proxy connection', () => {
-        expect(actions.cloudUrlSwitch.exists()).toBe(true);
+      test('TLS server name has optional label', () => {
+        actions.cloudAdvancedOptionsSwitch.toggle();
+        expect(actions.tlsServerNameInput.getLabel()).toBe('TLS server name (optional)');
+      });
+
+      test('renders a switch for advanced options', () => {
+        expect(actions.cloudAdvancedOptionsSwitch.exists()).toBe(true);
       });
 
       test('renders no switch between sniff and proxy modes', () => {
         expect(actions.connectionModeSwitch.exists()).toBe(false);
       });
-      test('defaults to cloud url input for proxy connection', () => {
-        expect(actions.cloudUrlSwitch.isChecked()).toBe(false);
-      });
-      test('server name has no optional label', () => {
-        actions.cloudUrlSwitch.toggle();
-        expect(actions.serverNameInput.getLabel()).toBe('Server name');
+
+      test('advanced options are initially disabled', () => {
+        expect(actions.cloudAdvancedOptionsSwitch.isChecked()).toBe(false);
       });
     });
   });
@@ -179,6 +181,63 @@ describe('Create Remote cluster', () => {
       });
     });
 
+    describe('Setup Trust', () => {
+      beforeEach(async () => {
+        await act(async () => {
+          ({ actions, component } = await setup(httpSetup, {
+            canUseAPIKeyTrustModel: true,
+          }));
+        });
+
+        component.update();
+
+        actions.nameInput.setValue('remote_cluster_test');
+        actions.seedsInput.setValue('192.168.1.1:3000');
+
+        await actions.saveButton.click();
+      });
+
+      test('should contain two cards for setting up trust', () => {
+        // Cards exist
+        expect(actions.setupTrust.apiCardExist()).toBe(true);
+        expect(actions.setupTrust.certCardExist()).toBe(true);
+        // Each card has its doc link
+        expect(actions.setupTrust.apiCardDocsExist()).toBe(true);
+        expect(actions.setupTrust.certCardDocsExist()).toBe(true);
+      });
+
+      test('on submit should open confirm modal', async () => {
+        await actions.setupTrust.setupTrustConfirmClick();
+
+        expect(actions.setupTrust.isSubmitInConfirmDisabled()).toBe(true);
+        await actions.setupTrust.toggleConfirmSwitch();
+        expect(actions.setupTrust.isSubmitInConfirmDisabled()).toBe(false);
+      });
+
+      test('back button goes to first step', async () => {
+        await actions.setupTrust.backToFirstStepClick();
+        expect(actions.isOnFirstStep()).toBe(true);
+      });
+
+      test('shows only cert based config if API key trust model is not available', async () => {
+        await act(async () => {
+          ({ actions, component } = await setup(httpSetup, {
+            canUseAPIKeyTrustModel: false,
+          }));
+        });
+
+        component.update();
+
+        actions.nameInput.setValue('remote_cluster_test');
+        actions.seedsInput.setValue('192.168.1.1:3000');
+
+        await actions.saveButton.click();
+
+        expect(actions.setupTrust.apiCardExist()).toBe(false);
+        expect(actions.setupTrust.certCardExist()).toBe(true);
+      });
+    });
+
     describe('on prem', () => {
       beforeEach(async () => {
         await act(async () => {
@@ -233,19 +292,22 @@ describe('Create Remote cluster', () => {
         component.update();
       });
 
-      test('cloud url is required since cloud url input is enabled by default', () => {
+      test('remote address is required', () => {
         actions.saveButton.click();
-        expect(actions.getErrorMessages()).toContain('A url is required.');
+        expect(actions.getErrorMessages()).toContain('A remote address is required.');
       });
 
-      test('proxy address and server name are required when cloud url input is disabled', () => {
-        actions.cloudUrlSwitch.toggle();
-        actions.saveButton.click();
-        expect(actions.getErrorMessages()).toEqual([
-          'Name is required.',
-          'A proxy address is required.',
-          'A server name is required.',
-        ]);
+      test('should only allow alpha-numeric characters and "-" (dash) in the remote address "host" part', async () => {
+        await actions.saveButton.click(); // display form errors
+
+        const expectInvalidChar = (char: string) => {
+          actions.cloudRemoteAddressInput.setValue(`192.16${char}:3000`);
+          expect(actions.getErrorMessages()).toContain('Remote address is invalid.');
+        };
+
+        [...NON_ALPHA_NUMERIC_CHARS, ...ACCENTED_CHARS]
+          .filter(notInArray(['-', '_', ':']))
+          .forEach(expectInvalidChar);
       });
     });
   });

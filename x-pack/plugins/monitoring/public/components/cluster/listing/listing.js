@@ -15,7 +15,7 @@ import {
   EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPanel,
   EuiCallOut,
   EuiSpacer,
   EuiIcon,
@@ -28,7 +28,8 @@ import { AlertsStatus } from '../../../alerts/status';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import './listing.scss';
-import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 const IsClusterSupported = ({ isSupported, children }) => {
   return isSupported ? children : '-';
@@ -260,7 +261,7 @@ const licenseWarning = (scope, { title, text }) => {
   });
 };
 
-const handleClickIncompatibleLicense = (scope, theme$, clusterName) => {
+const handleClickIncompatibleLicense = (scope, services, clusterName) => {
   licenseWarning(scope, {
     title: i18n.translate(
       'xpack.monitoring.cluster.listing.incompatibleLicense.warningMessageTitle',
@@ -294,12 +295,12 @@ const handleClickIncompatibleLicense = (scope, theme$, clusterName) => {
           />
         </p>
       </Fragment>,
-      { theme$ }
+      services
     ),
   });
 };
 
-const handleClickInvalidLicense = (scope, theme$, clusterName) => {
+const handleClickInvalidLicense = (scope, services, clusterName) => {
   const licensingPath = `${Legacy.shims.getBasePath()}/app/management/stack/license_management/home`;
 
   licenseWarning(scope, {
@@ -340,7 +341,7 @@ const handleClickInvalidLicense = (scope, theme$, clusterName) => {
           />
         </p>
       </Fragment>,
-      { theme$ }
+      services
     ),
   });
 };
@@ -404,16 +405,8 @@ export const Listing = ({ angular, clusters, sorting, pagination, onTableChange 
   const { services } = useKibana();
 
   const _changeCluster = partial(changeCluster, scope, globalState);
-  const _handleClickIncompatibleLicense = partial(
-    handleClickIncompatibleLicense,
-    scope,
-    services.theme.theme$
-  );
-  const _handleClickInvalidLicense = partial(
-    handleClickInvalidLicense,
-    scope,
-    services.theme.theme$
-  );
+  const _handleClickIncompatibleLicense = partial(handleClickIncompatibleLicense, scope, services);
+  const _handleClickInvalidLicense = partial(handleClickInvalidLicense, scope, services);
   const hasStandaloneCluster = !!clusters.find(
     (cluster) => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID
   );
@@ -421,7 +414,7 @@ export const Listing = ({ angular, clusters, sorting, pagination, onTableChange 
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageContent>
+        <EuiPanel>
           {hasStandaloneCluster ? (
             <StandaloneClusterCallout changeCluster={_changeCluster} storage={storage} />
           ) : null}
@@ -457,7 +450,7 @@ export const Listing = ({ angular, clusters, sorting, pagination, onTableChange 
               defaultFields: ['cluster_name'],
             }}
           />
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

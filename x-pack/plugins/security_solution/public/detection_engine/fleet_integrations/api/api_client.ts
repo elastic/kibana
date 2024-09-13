@@ -5,16 +5,31 @@
  * 2.0.
  */
 
-import type { GetInstalledIntegrationsResponse } from '../../../../common/detection_engine/fleet_integrations';
-import { GET_INSTALLED_INTEGRATIONS_URL } from '../../../../common/detection_engine/fleet_integrations';
+import type {
+  GetAllIntegrationsResponse,
+  GetInstalledIntegrationsResponse,
+} from '../../../../common/api/detection_engine/fleet_integrations';
+import {
+  GET_ALL_INTEGRATIONS_URL,
+  GET_INSTALLED_INTEGRATIONS_URL,
+} from '../../../../common/api/detection_engine/fleet_integrations';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 import type {
+  FetchAllIntegrationsArgs,
   FetchInstalledIntegrationsArgs,
   IFleetIntegrationsApiClient,
 } from './api_client_interface';
 
 export const fleetIntegrationsApi: IFleetIntegrationsApiClient = {
+  fetchAllIntegrations: (args: FetchAllIntegrationsArgs): Promise<GetAllIntegrationsResponse> => {
+    return http().fetch<GetAllIntegrationsResponse>(GET_ALL_INTEGRATIONS_URL, {
+      method: 'GET',
+      version: '1',
+      signal: args.signal,
+    });
+  },
+
   fetchInstalledIntegrations: (
     args: FetchInstalledIntegrationsArgs
   ): Promise<GetInstalledIntegrationsResponse> => {
@@ -22,6 +37,7 @@ export const fleetIntegrationsApi: IFleetIntegrationsApiClient = {
 
     return http().fetch<GetInstalledIntegrationsResponse>(GET_INSTALLED_INTEGRATIONS_URL, {
       method: 'GET',
+      version: '1',
       query: {
         packages: packages?.sort()?.join(','),
       },

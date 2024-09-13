@@ -26,6 +26,7 @@ export const createArtifactsClientMock = (): jest.Mocked<ArtifactsClientInterfac
     createArtifact: jest.fn().mockResolvedValue(generateArtifactMock()),
     bulkCreateArtifacts: jest.fn().mockResolvedValue({ artifacts: generateArtifactMock() }),
     deleteArtifact: jest.fn(),
+    bulkDeleteArtifacts: jest.fn(),
     listArtifacts: jest.fn().mockResolvedValue({
       items: [generateArtifactMock()],
       total: 1,
@@ -43,10 +44,38 @@ export const createArtifactsClientMock = (): jest.Mocked<ArtifactsClientInterfac
       encodedSha256: '446086d1609189c3ad93a943976e4b7474c028612e5ec4810a81cc01a631f0f9',
       encodedSize: 24,
     }),
+    fetchAll: jest.fn(() => {
+      return createFetchAllArtifactsIterableMock();
+    }),
   };
 };
 
-export const generateArtifactMock = (): Artifact => {
+export const createFetchAllArtifactsIterableMock = (artifactPages: Artifact[][] = []) => {
+  const totalPagesOfResults = artifactPages.length;
+  let nextResults = 0;
+
+  return {
+    [Symbol.asyncIterator]() {
+      return {
+        async next() {
+          return {
+            value: artifactPages[nextResults++] ?? [],
+            done: nextResults > totalPagesOfResults,
+          };
+        },
+
+        async return() {
+          return {
+            value: [],
+            done: true,
+          };
+        },
+      };
+    },
+  };
+};
+
+export const generateArtifactMock = (overrides?: Partial<Artifact>): Artifact => {
   return {
     id: '123',
     type: 'trustlist',
@@ -61,6 +90,7 @@ export const generateArtifactMock = (): Artifact => {
     encodedSize: 22,
     body: 'eJyrVkrNKynKTC1WsoqOrQUAJxkFKQ==',
     created: '2021-03-08T14:47:13.714Z',
+    ...overrides,
   };
 };
 
@@ -98,6 +128,7 @@ export const generateArtifactEsGetSingleHitMock = (
     _version: 1,
     _score: 1,
     _source,
+    sort: ['abc'],
   };
 };
 
@@ -171,7 +202,10 @@ export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
 };
 
 type EsClientMock = ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
-type EsClientMockMethods = keyof Pick<EsClientMock, 'get' | 'create' | 'delete' | 'search'>;
+type EsClientMockMethods = keyof Pick<
+  EsClientMock,
+  'get' | 'create' | 'delete' | 'search' | 'bulk'
+>;
 
 export const setEsClientMethodResponseToError = (
   esClientMock: EsClientMock,

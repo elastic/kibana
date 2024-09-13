@@ -6,9 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -17,7 +14,9 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { excess, SuggestUserProfilesRequestRt, throwErrors } from '../../../common/api';
+import type { SuggestUserProfilesRequest } from '../../../common/types/api';
+import { SuggestUserProfilesRequestRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { LicensingService } from '../licensing';
@@ -28,7 +27,7 @@ const MIN_PROFILES_SIZE = 0;
 
 interface UserProfileOptions {
   securityPluginSetup: SecurityPluginSetup;
-  securityPluginStart: SecurityPluginStart;
+  securityPluginStart: SecurityPluginStart; // TODO: Use core's UserProfileService
   spaces?: SpacesPluginStart;
   licensingPluginStart: LicensingPluginStart;
 }
@@ -59,6 +58,7 @@ export class UserProfileService {
     size?: number;
     owners: string[];
   }) {
+    // TODO: Use core's UserProfileService
     return securityPluginStart.userProfiles.suggest({
       name: searchTerm,
       size,
@@ -72,15 +72,14 @@ export class UserProfileService {
     });
   }
 
-  public async suggest(request: KibanaRequest): Promise<UserProfile[]> {
-    const params = pipe(
-      excess(SuggestUserProfilesRequestRt).decode(request.body),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
-
-    const { name, size, owners } = params;
-
+  public async suggest(
+    request: KibanaRequest<{}, {}, SuggestUserProfilesRequest>
+  ): Promise<UserProfile[]> {
     try {
+      const params = decodeWithExcessOrThrow(SuggestUserProfilesRequestRt)(request.body);
+
+      const { name, size, owners } = params;
+
       this.validateInitialization();
 
       const licensingService = new LicensingService(
@@ -116,7 +115,7 @@ export class UserProfileService {
     } catch (error) {
       throw createCaseError({
         logger: this.logger,
-        message: `Failed to retrieve suggested user profiles in service for name: ${name} owners: [${owners}]: ${error}`,
+        message: `Failed to retrieve suggested user profiles in service: ${error}`,
         error,
       });
     }
@@ -153,9 +152,7 @@ export class UserProfileService {
   private static buildRequiredPrivileges(owners: string[], security: SecurityPluginStart) {
     const privileges: string[] = [];
     for (const owner of owners) {
-      for (const operation of [Operations.updateCase.name, Operations.getCase.name]) {
-        privileges.push(security.authz.actions.cases.get(owner, operation));
-      }
+      privileges.push(security.authz.actions.cases.get(owner, Operations.getCase.name));
     }
 
     return privileges;

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -63,7 +64,7 @@ describe('SizeParamEditor', () => {
 
   it('should set new parsed value', () => {
     const comp = mountWithIntl(<SizeParamEditor {...defaultProps} />);
-    const input = comp.find('[type="number"]');
+    const input = comp.find('input[type="number"]');
     input.simulate('change', { target: { value: '3' } });
 
     expect(defaultProps.setValue).toBeCalledWith(3);
@@ -76,7 +77,7 @@ describe('SizeParamEditor', () => {
 
   it('should call setTouched on blur', () => {
     const comp = mountWithIntl(<SizeParamEditor {...defaultProps} />);
-    comp.find('[type="number"]').simulate('blur');
+    comp.find('input[type="number"]').simulate('blur');
 
     expect(defaultProps.setTouched).toHaveBeenCalledTimes(1);
   });

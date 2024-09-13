@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -15,11 +16,9 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import {
-  UNSET_CONFIG_ITEM,
-  State,
-} from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
+import { ANALYSIS_CONFIG_TYPE } from '@kbn/ml-data-frame-analytics-utils';
+import type { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { UNSET_CONFIG_ITEM } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYTICS_STEPS } from '../../page';
 
 function getStringValue(value: number | undefined) {
@@ -77,7 +76,7 @@ export const AdvancedStepDetails: FC<{
           defaultMessage: 'Compute feature influence',
         }
       ),
-      description: computeFeatureInfluence,
+      description: computeFeatureInfluence.toString(),
     });
 
     advancedSecondCol.push({

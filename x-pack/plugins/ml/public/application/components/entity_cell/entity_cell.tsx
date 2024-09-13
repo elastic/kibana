@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { ML_ENTITY_FIELD_OPERATIONS, MLCATEGORY } from '@kbn/ml-anomaly-utils';
 import { EMPTY_FIELD_VALUE_LABEL } from '../../timeseriesexplorer/components/entity_control/entity_control';
-import { MLCATEGORY } from '../../../../common/constants/field_types';
-import { ENTITY_FIELD_OPERATIONS } from '../../../../common/util/anomaly_utils';
 import { blurButtonOnClick } from '../../util/component_utils';
 
 export type EntityCellFilter = (
@@ -44,7 +44,7 @@ function getAddFilter({ entityName, entityValue, filter }: EntityCellProps) {
           data-test-subj={`mlAnomaliesTableEntityCellAddFilterButton-${entityValue}`}
           className="filter-button"
           onClick={blurButtonOnClick(() => {
-            filter(entityName, entityValue, ENTITY_FIELD_OPERATIONS.ADD);
+            filter(entityName, entityValue, ML_ENTITY_FIELD_OPERATIONS.ADD);
           })}
           iconType="plusInCircle"
           aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.addFilterAriaLabel', {
@@ -72,7 +72,7 @@ function getRemoveFilter({ entityName, entityValue, filter }: EntityCellProps) {
           data-test-subj={`mlAnomaliesTableEntityCellRemoveFilterButton-${entityValue}`}
           className="filter-button"
           onClick={blurButtonOnClick(() => {
-            filter(entityName, entityValue, ENTITY_FIELD_OPERATIONS.REMOVE);
+            filter(entityName, entityValue, ML_ENTITY_FIELD_OPERATIONS.REMOVE);
           })}
           iconType="minusInCircle"
           aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.removeFilterAriaLabel', {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { RecursivePartial, Theme, PartialTheme } from '@elastic/charts';
@@ -26,7 +27,8 @@ type GetThemeFn = (
   visParams: PartitionVisParams,
   chartTheme: RecursivePartial<Theme>,
   dimensions?: PieContainerDimensions,
-  rescaleFactor?: number
+  rescaleFactor?: number,
+  hasOpenedOnAggBasedEditor?: boolean
 ) => PartialTheme;
 
 type GetPieDonutWaffleThemeFn = (
@@ -118,12 +120,13 @@ export const getPartitionTheme: GetThemeFn = (
   visParams,
   chartTheme,
   dimensions,
-  rescaleFactor = 1
+  rescaleFactor = 1,
+  hasOpenedOnAggBasedEditor
 ) => {
   // On small multiples we want the labels to only appear inside
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
   const paddingProps: PartialTheme | null =
-    dimensions && !isSplitChart
+    dimensions && !isSplitChart && hasOpenedOnAggBasedEditor
       ? {
           chartPaddings: {
             top: ((1 - Math.min(1, MAX_SIZE / dimensions?.height)) / 2) * dimensions?.height,

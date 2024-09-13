@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { CustomPaletteParams } from '@kbn/coloring';
@@ -70,7 +71,7 @@ export const getMaxValue = (
   if (isRespectRanges && paletteParams?.rangeMax) {
     const metricValue = accessors?.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
     return !metricValue || metricValue < paletteParams?.rangeMax
-      ? paletteParams?.rangeMax
+      ? paletteParams.rangeMax
       : metricValue;
   }
 
@@ -93,16 +94,16 @@ export const getMinValue = (
   accessors?: Accessors,
   paletteParams?: CustomPaletteParams,
   isRespectRanges?: boolean
-) => {
+): number => {
   const currentValue = accessors?.min ? getValueFromAccessor(accessors.min, row) : undefined;
-  if (currentValue !== undefined && currentValue !== null) {
+  if (currentValue != null) {
     return currentValue;
   }
 
   if (isRespectRanges && paletteParams?.rangeMin) {
     const metricValue = accessors?.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
     return !metricValue || metricValue > paletteParams?.rangeMin
-      ? paletteParams?.rangeMin
+      ? paletteParams.rangeMin
       : metricValue;
   }
 
@@ -121,7 +122,7 @@ export const getMinValue = (
 
 export const getGoalValue = (row?: DatatableRow, accessors?: Accessors) => {
   const currentValue = accessors?.goal ? getValueFromAccessor(accessors.goal, row) : undefined;
-  if (currentValue !== undefined && currentValue !== null) {
+  if (currentValue != null) {
     return currentValue;
   }
 

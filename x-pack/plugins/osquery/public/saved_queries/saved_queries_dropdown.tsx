@@ -8,7 +8,6 @@
 import { find } from 'lodash/fp';
 import { EuiCodeBlock, EuiFormRow, EuiComboBox, EuiTextColor } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
 import { useWatch, useFormContext } from 'react-hook-form';
 import { QUERIES_DROPDOWN_LABEL, QUERIES_DROPDOWN_SEARCH_FIELD_LABEL } from './constants';
 import { OsquerySchemaLink } from '../components/osquery_schema_link';
@@ -16,22 +15,17 @@ import { OsquerySchemaLink } from '../components/osquery_schema_link';
 import { useSavedQueries } from './use_saved_queries';
 import type { SavedQuerySO } from '../routes/saved_queries/list';
 
-const TextTruncate = styled.div`
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-const StyledEuiCodeBlock = styled(EuiCodeBlock)`
-  .euiCodeBlock__line {
-    white-space: nowrap;
-  }
-`;
+const euiCodeBlockCss = {
+  '.euiCodeBlock__line': {
+    whiteSpace: 'nowrap' as const,
+  },
+};
 
 export interface SavedQueriesDropdownProps {
   disabled?: boolean;
   onChange: (
     value:
-      | (Pick<SavedQuerySO['attributes'], 'id' | 'description' | 'query' | 'ecs_mapping'> & {
+      | (Pick<SavedQuerySO, 'id' | 'description' | 'query' | 'ecs_mapping' | 'timeout'> & {
           savedQueryId: string;
         })
       | null
@@ -40,7 +34,7 @@ export interface SavedQueriesDropdownProps {
 
 interface SelectedOption {
   label: string;
-  value: Pick<SavedQuerySO['attributes'], 'id' | 'description' | 'query' | 'ecs_mapping'> & {
+  value: Pick<SavedQuerySO, 'id' | 'description' | 'query' | 'ecs_mapping'> & {
     savedQueryId: string;
   };
 }
@@ -60,20 +54,20 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   const queryOptions = useMemo(
     () =>
       data?.data?.map((savedQuery) => ({
-        label: savedQuery.attributes.id ?? '',
+        label: savedQuery.id ?? '',
         value: {
           savedQueryId: savedQuery.id,
-          id: savedQuery.attributes.id,
-          description: savedQuery.attributes.description,
-          query: savedQuery.attributes.query,
-          ecs_mapping: savedQuery.attributes.ecs_mapping,
+          id: savedQuery.id,
+          description: savedQuery.description,
+          query: savedQuery.query,
+          ecs_mapping: savedQuery.ecs_mapping,
         },
       })) ?? [],
     [data]
   );
 
   const handleSavedQueryChange = useCallback(
-    (newSelectedOptions) => {
+    (newSelectedOptions: any) => {
       if (!newSelectedOptions.length) {
         onChange(null);
         setSelectedOptions(newSelectedOptions);
@@ -81,13 +75,10 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
         return;
       }
 
-      const selectedSavedQuery = find(
-        ['attributes.id', newSelectedOptions[0].value.id],
-        data?.data
-      );
+      const selectedSavedQuery = find(['id', newSelectedOptions[0].value.id], data?.data);
 
       if (selectedSavedQuery) {
-        onChange({ ...selectedSavedQuery.attributes, savedQueryId: selectedSavedQuery.id });
+        onChange({ ...selectedSavedQuery, savedQueryId: selectedSavedQuery.id });
       }
 
       setSelectedOptions(newSelectedOptions);
@@ -96,15 +87,15 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   );
 
   const renderOption = useCallback(
-    ({ value }) => (
+    ({ value }: any) => (
       <>
         <strong>{value.id}</strong>
-        <TextTruncate>
+        <div className="eui-textTruncate">
           <EuiTextColor color="subdued">{value.description}</EuiTextColor>
-        </TextTruncate>
-        <StyledEuiCodeBlock language="sql" fontSize="m" paddingSize="s">
+        </div>
+        <EuiCodeBlock css={euiCodeBlockCss} language="sql" fontSize="m" paddingSize="s">
           {value.query.split('\n').join(' ')}
-        </StyledEuiCodeBlock>
+        </EuiCodeBlock>
       </>
     ),
     []
@@ -129,7 +120,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   return (
     <EuiFormRow
       isInvalid={!!queryFieldError}
-      error={queryFieldError}
+      error={queryFieldError as React.ReactNode}
       label={QUERIES_DROPDOWN_SEARCH_FIELD_LABEL}
       labelAppend={<OsquerySchemaLink />}
       fullWidth

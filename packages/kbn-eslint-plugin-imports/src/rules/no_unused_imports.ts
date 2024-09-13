@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Rule, Scope, AST } from 'eslint';
+import type { Rule, Scope, AST } from 'eslint';
 import type { Comment } from 'estree';
 import * as T from '@babel/types';
 import { TSESTree } from '@typescript-eslint/typescript-estree';
@@ -78,6 +79,7 @@ function isTsOrEslintIgnore(comment: Comment) {
 
 export const NoUnusedImportsRule: Rule.RuleModule = {
   meta: {
+    hasSuggestions: true,
     fixable: 'code',
     docs: {
       url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',
@@ -129,9 +131,11 @@ export const NoUnusedImportsRule: Rule.RuleModule = {
     }
 
     return {
-      'Program:exit': () => {
+      'Program:exit': (node) => {
         const unusedByImport = new Map<SomeImportNode, Scope.Definition[]>();
-        for (const { importParent, def } of findUnusedImportDefs(context.getScope())) {
+        for (const { importParent, def } of findUnusedImportDefs(
+          context.sourceCode.getScope(node)
+        )) {
           const group = unusedByImport.get(importParent);
           if (group) {
             group.push(def);

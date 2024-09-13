@@ -41,7 +41,8 @@ describe('POST workpad', () => {
     const routerDeps = getMockedRouterDeps();
     initializeCreateWorkpadRoute(routerDeps);
 
-    routeHandler = routerDeps.router.post.mock.calls[0][1];
+    routeHandler =
+      routerDeps.router.versioned.post.mock.results[0].value.addVersion.mock.calls[0][1];
   });
 
   it(`returns 200 when the workpad is created`, async () => {

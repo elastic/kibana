@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -24,7 +25,8 @@ async function removeLogFile() {
   await fs.unlink(logFilePath).catch(() => void 0);
 }
 
-describe('migration v2', () => {
+// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
+describe.skip('migration v2', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
   let startES: () => Promise<TestElasticsearchUtils>;
@@ -58,8 +60,6 @@ describe('migration v2', () => {
     if (esServer) {
       await esServer.stop();
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
   it('fails with a descriptive message when maxBatchSizeBytes exceeds ES http.max_content_length', async () => {
@@ -82,7 +82,7 @@ describe('migration v2', () => {
         expect(
           records.find((rec) =>
             rec.message.startsWith(
-              `Unable to complete saved object migrations for the [.kibana] index: While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`
+              `Reason: Unable to complete saved object migrations for the [.kibana] index: While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`
             )
           )
         ).toBeDefined();

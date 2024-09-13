@@ -7,18 +7,14 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { map, reduce, upperFirst } from 'lodash';
+import { map, reduce } from 'lodash';
 import ReactMarkdown from 'react-markdown';
-import { css } from '@emotion/react';
 import { ResponseActionsWrapper } from './response_actions_wrapper';
-import { FORM_ERRORS_TITLE } from '../../detections/components/rules/rule_actions_field/translations';
+import { FORM_ERRORS_TITLE } from '../rule_creation/components/rule_actions_field/translations';
 import { ResponseActionsHeader } from './response_actions_header';
 import type { ArrayItem, FormHook } from '../../shared_imports';
 import { useSupportedResponseActionTypes } from './use_supported_response_action_types';
-
-const FieldErrorsContainer = css`
-  margin-bottom: 0;
-`;
+import { getActionDetails } from './constants';
 
 interface ResponseActionsFormProps {
   items: ArrayItem[];
@@ -58,14 +54,24 @@ export const ResponseActionsForm = ({
       const fieldErrors = reduce<string[], Array<{ type: string; errors: string[] }>>(
         map(items, 'path'),
         (acc, path) => {
-          if (fields[`${path}.params`]?.errors?.length) {
-            acc.push({
-              type: upperFirst((fields[`${path}.actionTypeId`].value as string).substring(1)),
-              errors: map(fields[`${path}.params`].errors, 'message'),
-            });
-            return acc;
-          }
+          map(fields, (_, name) => {
+            const paramsPath = `${path}.params`;
 
+            if (name.includes(paramsPath)) {
+              if (fields[name]?.errors?.length) {
+                const responseActionType = getActionDetails(
+                  fields[`${path}.actionTypeId`].value as string
+                ).name;
+                acc.push({
+                  type: responseActionType,
+                  errors: map(fields[name].errors, 'message'),
+                });
+              }
+              return acc;
+            }
+
+            return acc;
+          });
           return acc;
         },
         []
@@ -90,9 +96,9 @@ export const ResponseActionsForm = ({
     <>
       <EuiSpacer size="xxl" data-test-subj={'response-actions-form'} />
       <ResponseActionsHeader />
-      {uiFieldErrors?.length && form.isSubmitted ? (
+      {uiFieldErrors?.length ? (
         <>
-          <p css={FieldErrorsContainer}>
+          <p>
             <EuiCallOut
               data-test-subj="response-actions-error"
               title={FORM_ERRORS_TITLE}

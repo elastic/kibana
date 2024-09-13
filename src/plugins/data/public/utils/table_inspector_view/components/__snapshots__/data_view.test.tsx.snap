@@ -2,32 +2,28 @@
 
 exports[`Inspector Data View component should render empty state 1`] = `
 <div
-  class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
+  class="euiPanel euiPanel--transparent euiEmptyPrompt emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
 >
   <div
-    class="euiEmptyPrompt__main"
+    class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
   >
     <div
-      class="euiEmptyPrompt__content"
+      class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
     >
-      <div
-        class="euiEmptyPrompt__contentInner"
+      <h2
+        class="euiTitle emotion-euiTitle-m"
       >
-        <h2
-          class="euiTitle emotion-euiTitle-m"
-        >
-          No data available
-        </h2>
-        <div
-          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-        />
-        <div
-          class="euiText emotion-euiText-m-euiTextColor-subdued"
-        >
-          <p>
-            The element did not provide any data.
-          </p>
-        </div>
+        No data available
+      </h2>
+      <div
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+      />
+      <div
+        class="euiText emotion-euiText-m-euiTextColor-subdued"
+      >
+        <p>
+          The element did not provide any data.
+        </p>
       </div>
     </div>
   </div>
@@ -43,16 +39,8 @@ exports[`Inspector Data View component should render loading state 1`] = `
   }
   intl={
     Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
+      "$t": [Function],
+      "defaultFormats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -86,22 +74,22 @@ exports[`Inspector Data View component should render loading state 1`] = `
         },
         "relative": Object {
           "days": Object {
-            "units": "day",
+            "style": "long",
           },
           "hours": Object {
-            "units": "hour",
+            "style": "long",
           },
           "minutes": Object {
-            "units": "minute",
+            "style": "long",
           },
           "months": Object {
-            "units": "month",
+            "style": "long",
           },
           "seconds": Object {
-            "units": "second",
+            "style": "long",
           },
           "years": Object {
-            "units": "year",
+            "style": "long",
           },
         },
         "time": Object {
@@ -128,19 +116,36 @@ exports[`Inspector Data View component should render loading state 1`] = `
           },
         },
       },
+      "defaultLocale": "en",
+      "fallbackOnEmptyString": true,
+      "formatDate": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatNumberToParts": [Function],
+      "formatPlural": [Function],
+      "formatRelativeTime": [Function],
+      "formatTime": [Function],
+      "formatTimeToParts": [Function],
+      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
         "getMessageFormat": [Function],
         "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
       },
       "locale": "en",
       "messages": Object {},
-      "now": [Function],
       "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
+      "onWarn": [Function],
+      "timeZone": undefined,
     }
   }
 >
@@ -152,6 +157,7 @@ exports[`Inspector Data View component should render loading state 1`] = `
           "_eventsCount": 0,
           "_maxListeners": undefined,
           "_tables": Object {},
+          Symbol(shapeMode): false,
           Symbol(kCapture): false,
         },
       }
@@ -176,27 +182,23 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiPopover emotion-euiPopover"
+        class="euiPopover emotion-euiPopover-inline-block"
         id="inspectorDownloadData"
       >
-        <div
-          class="euiPopover__anchor css-16vtueo-render"
+        <button
+          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+          type="button"
         >
-          <button
-            class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-primary"
-            type="button"
+          <span
+            class="emotion-euiButtonDisplayContent"
           >
+            Download CSV
             <span
-              class="emotion-euiButtonDisplayContent"
-            >
-              Download CSV
-              <span
-                color="inherit"
-                data-euiicon-type="arrowDown"
-              />
-            </span>
-          </button>
-        </div>
+              color="inherit"
+              data-euiicon-type="arrowDown"
+            />
+          </span>
+        </button>
       </div>
     </div>
   </div>,
@@ -204,131 +206,82 @@ Array [
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
-    class="euiBasicTable insDataTableFormat__table"
+    class="euiBasicTable insDataTableFormat__table eui-xScroll css-1f59z3t"
     data-test-subj="inspectorTable"
   >
-    <div>
-      <div
-        class="euiTableHeaderMobile"
-      >
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-baseline-row"
-        >
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          />
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+    <table
+      class="euiTable emotion-euiTable-auto-uncompressed-desktop"
+      id="__table_generated-id"
+      tabindex="-1"
+    >
+      <caption
+        class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+      />
+      <thead>
+        <tr>
+          <th
+            aria-sort="none"
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_1_0"
+            role="columnheader"
+            scope="col"
           >
-            <div
-              class="euiTableSortMobile"
+            <button
+              class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+              data-test-subj="tableHeaderSortButton"
+              type="button"
             >
               <div
-                class="euiPopover emotion-euiPopover"
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                >
+                  column1
+                </span>
+                <span
+                  class="euiTableSortIcon euiTableSortIcon--sortable"
+                  color="subdued"
+                  data-euiicon-type="sortable"
+                />
+              </div>
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        class="css-0"
+      >
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
               >
                 <div
-                  class="euiPopover__anchor css-16vtueo-render"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
-                  <button
-                    class="euiButtonEmpty euiButtonEmpty--xSmall euiButtonEmpty--flushRight css-9t7nyf-empty-primary"
-                    type="button"
-                  >
-                    <span
-                      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                    >
-                      <span
-                        class="euiButtonContent__icon"
-                        color="inherit"
-                        data-euiicon-type="arrowDown"
-                      />
-                      <span
-                        class="euiButtonEmpty__text"
-                      >
-                        Sorting
-                      </span>
-                    </span>
-                  </button>
+                  123
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                  />
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-      <table
-        class="euiTable css-0 euiTable--responsive"
-        id="__table_generated-id"
-        tabindex="-1"
-      >
-        <caption
-          class="euiTableCaption emotion-euiScreenReaderOnly"
-        />
-        <thead>
-          <tr>
-            <th
-              aria-live="polite"
-              aria-sort="none"
-              class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_1_0"
-              role="columnheader"
-              scope="col"
-            >
-              <button
-                class="euiTableHeaderButton"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
-              >
-                <span
-                  class="euiTableCellContent"
-                >
-                  <span
-                    class="euiTableCellContent__text"
-                  >
-                    column1
-                  </span>
-                </span>
-              </button>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          class="css-0"
-        >
-          <tr
-            class="euiTableRow"
-          >
-            <td
-              class="euiTableRowCell euiTableRowCell--middle"
-            >
-              <div
-                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-              >
-                column1
-              </div>
-              <div
-                class="euiTableCellContent euiTableCellContent--overflowingContent"
-              >
-                <div
-                  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
-                >
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-growZero"
-                  >
-                    123
-                  </div>
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-growZero"
-                  >
-                    <div
-                      class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
-                    />
-                  </div>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <div>
       <div
         class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
@@ -340,32 +293,27 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+              data-test-subj="tablePaginationPopoverButton"
+              type="button"
             >
-              <button
-                class="euiButtonEmpty euiButtonEmpty--xSmall css-wvaqcf-empty-text"
-                data-test-subj="tablePaginationPopoverButton"
-                type="button"
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
-                  <span
-                    class="euiButtonContent__icon"
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
-                  <span
-                    class="euiButtonEmpty__text"
-                  >
-                    Rows per page: 20
-                  </span>
+                  Rows per page: 20
                 </span>
-              </button>
-            </div>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
           </div>
         </div>
         <div
@@ -373,7 +321,7 @@ Array [
         >
           <nav
             aria-label="Pagination for table: "
-            class="euiPagination emotion-euiPagination-EuiPagination"
+            class="euiPagination emotion-euiPagination"
           >
             <span
               aria-atomic="true"
@@ -385,7 +333,7 @@ Array [
             </span>
             <button
               aria-label="Previous page"
-              class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
               data-test-subj="pagination-button-previous"
               disabled=""
               type="button"
@@ -408,16 +356,16 @@ Array [
                   aria-controls="__table_generated-id"
                   aria-current="true"
                   aria-label="Page 1 of 1"
-                  class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-7ubx5w-empty-disabled-euiPaginationButton-isActive"
+                  class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
                   data-test-subj="pagination-button-0"
                   disabled=""
                   type="button"
                 >
                   <span
-                    class="euiButtonContent euiButtonEmpty__content"
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text"
                     >
                       1
                     </span>
@@ -427,7 +375,7 @@ Array [
             </ul>
             <button
               aria-label="Next page"
-              class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
               data-test-subj="pagination-button-next"
               disabled=""
               type="button"
@@ -483,33 +431,28 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
             id="inspectorTableChooser"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
+              data-test-subj="inspectorTableChooser"
+              type="button"
             >
-              <button
-                class="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
-                data-test-subj="inspectorTableChooser"
-                type="button"
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
-                  <span
-                    class="euiButtonContent__icon"
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
-                  <span
-                    class="euiButtonEmpty__text"
-                  >
-                    Table 1
-                  </span>
+                  Table 1
                 </span>
-              </button>
-            </div>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -518,27 +461,23 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiPopover emotion-euiPopover"
+        class="euiPopover emotion-euiPopover-inline-block"
         id="inspectorDownloadData"
       >
-        <div
-          class="euiPopover__anchor css-16vtueo-render"
+        <button
+          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+          type="button"
         >
-          <button
-            class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-primary"
-            type="button"
+          <span
+            class="emotion-euiButtonDisplayContent"
           >
+            Download CSV
             <span
-              class="emotion-euiButtonDisplayContent"
-            >
-              Download CSV
-              <span
-                color="inherit"
-                data-euiicon-type="arrowDown"
-              />
-            </span>
-          </button>
-        </div>
+              color="inherit"
+              data-euiicon-type="arrowDown"
+            />
+          </span>
+        </button>
       </div>
     </div>
   </div>,
@@ -546,132 +485,83 @@ Array [
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
-    class="euiBasicTable insDataTableFormat__table"
+    class="euiBasicTable insDataTableFormat__table eui-xScroll css-1f59z3t"
     data-test-subj="inspectorTable"
   >
-    <div>
-      <div
-        class="euiTableHeaderMobile"
-      >
-        <div
-          class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-baseline-row"
-        >
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          />
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
+    <table
+      class="euiTable emotion-euiTable-auto-uncompressed-desktop"
+      id="__table_generated-id"
+      tabindex="-1"
+    >
+      <caption
+        class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+      />
+      <thead>
+        <tr>
+          <th
+            aria-sort="none"
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_1_0"
+            role="columnheader"
+            scope="col"
           >
-            <div
-              class="euiTableSortMobile"
+            <button
+              class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+              data-test-subj="tableHeaderSortButton"
+              type="button"
             >
               <div
-                class="euiPopover emotion-euiPopover"
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="column1"
+                >
+                  column1
+                </span>
+                <span
+                  class="euiTableSortIcon euiTableSortIcon--sortable"
+                  color="subdued"
+                  data-euiicon-type="sortable"
+                />
+              </div>
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        class="css-0"
+      >
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
               >
                 <div
-                  class="euiPopover__anchor css-16vtueo-render"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
-                  <button
-                    class="euiButtonEmpty euiButtonEmpty--xSmall euiButtonEmpty--flushRight css-9t7nyf-empty-primary"
-                    type="button"
-                  >
-                    <span
-                      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                    >
-                      <span
-                        class="euiButtonContent__icon"
-                        color="inherit"
-                        data-euiicon-type="arrowDown"
-                      />
-                      <span
-                        class="euiButtonEmpty__text"
-                      >
-                        Sorting
-                      </span>
-                    </span>
-                  </button>
+                  123
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                  />
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-      <table
-        class="euiTable css-0 euiTable--responsive"
-        id="__table_generated-id"
-        tabindex="-1"
-      >
-        <caption
-          class="euiTableCaption emotion-euiScreenReaderOnly"
-        />
-        <thead>
-          <tr>
-            <th
-              aria-live="polite"
-              aria-sort="none"
-              class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_1_0"
-              role="columnheader"
-              scope="col"
-            >
-              <button
-                class="euiTableHeaderButton"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
-              >
-                <span
-                  class="euiTableCellContent"
-                >
-                  <span
-                    class="euiTableCellContent__text"
-                    title="column1"
-                  >
-                    column1
-                  </span>
-                </span>
-              </button>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          class="css-0"
-        >
-          <tr
-            class="euiTableRow"
-          >
-            <td
-              class="euiTableRowCell euiTableRowCell--middle"
-            >
-              <div
-                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-              >
-                column1
-              </div>
-              <div
-                class="euiTableCellContent euiTableCellContent--overflowingContent"
-              >
-                <div
-                  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
-                >
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-growZero"
-                  >
-                    123
-                  </div>
-                  <div
-                    class="euiFlexItem emotion-euiFlexItem-growZero"
-                  >
-                    <div
-                      class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
-                    />
-                  </div>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <div>
       <div
         class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
@@ -683,32 +573,27 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+              data-test-subj="tablePaginationPopoverButton"
+              type="button"
             >
-              <button
-                class="euiButtonEmpty euiButtonEmpty--xSmall css-wvaqcf-empty-text"
-                data-test-subj="tablePaginationPopoverButton"
-                type="button"
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
-                  <span
-                    class="euiButtonContent__icon"
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
-                  <span
-                    class="euiButtonEmpty__text"
-                  >
-                    Rows per page: 20
-                  </span>
+                  Rows per page: 20
                 </span>
-              </button>
-            </div>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
           </div>
         </div>
         <div
@@ -716,7 +601,7 @@ Array [
         >
           <nav
             aria-label="Pagination for table: "
-            class="euiPagination emotion-euiPagination-EuiPagination"
+            class="euiPagination emotion-euiPagination"
           >
             <span
               aria-atomic="true"
@@ -728,7 +613,7 @@ Array [
             </span>
             <button
               aria-label="Previous page"
-              class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
               data-test-subj="pagination-button-previous"
               disabled=""
               type="button"
@@ -751,16 +636,16 @@ Array [
                   aria-controls="__table_generated-id"
                   aria-current="true"
                   aria-label="Page 1 of 1"
-                  class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-7ubx5w-empty-disabled-euiPaginationButton-isActive"
+                  class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
                   data-test-subj="pagination-button-0"
                   disabled=""
                   type="button"
                 >
                   <span
-                    class="euiButtonContent euiButtonEmpty__content"
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text"
                     >
                       1
                     </span>
@@ -770,7 +655,7 @@ Array [
             </ul>
             <button
               aria-label="Next page"
-              class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
               data-test-subj="pagination-button-next"
               disabled=""
               type="button"

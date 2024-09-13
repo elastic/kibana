@@ -9,13 +9,12 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import '../../../mock/match_media';
 import { AnomalyScoreComponent } from './anomaly_score';
 import { mockAnomalies } from '../mock';
 import { TestProviders } from '../../../mock/test_providers';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 import type { Anomalies } from '../types';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../lib/kibana');
 
@@ -34,7 +33,6 @@ describe('anomaly_scores', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <AnomalyScoreComponent
-        jobKey="job-key-1"
         startDate={startDate}
         endDate={endDate}
         score={anomalies.anomalies[0]}
@@ -50,7 +48,6 @@ describe('anomaly_scores', () => {
     const wrapper = mount(
       <TestProviders>
         <AnomalyScoreComponent
-          jobKey="job-key-1"
           startDate={startDate}
           endDate={endDate}
           score={anomalies.anomalies[0]}
@@ -67,7 +64,6 @@ describe('anomaly_scores', () => {
     const wrapper = mount(
       <TestProviders>
         <AnomalyScoreComponent
-          jobKey="job-key-1"
           startDate={startDate}
           endDate={endDate}
           score={anomalies.anomalies[0]}

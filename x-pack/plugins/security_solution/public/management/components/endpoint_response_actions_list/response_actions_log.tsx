@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
-
 import type { CriteriaWithPagination } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  ResponseActionsApiCommandNames,
-  ResponseActionStatus,
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import {
+  RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
+  type ResponseActionsApiCommandNames,
+  type ResponseActionStatus,
+  type ResponseActionType,
 } from '../../../../common/endpoint/service/response_actions/constants';
 
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
-import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { ManagementEmptyStateWrapper } from '../management_empty_state_wrapper';
 import { useGetEndpointActionList } from '../../hooks';
 import { UX_MESSAGES } from './translations';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ActionsLogFilters } from './components/actions_log_filters';
-import { getCommandKey, useDateRangePicker } from './components/hooks';
+import { useDateRangePicker } from './components/hooks';
 import { useActionHistoryUrlParams } from './components/use_action_history_url_params';
 import { useUrlPagination } from '../../hooks/use_url_pagination';
 import { ManagementPageLoader } from '../management_page_loader';
@@ -47,18 +50,24 @@ export const ResponseActionsLog = memo<
     const { pagination: paginationFromUrlParams, setPagination: setPaginationOnUrlParams } =
       useUrlPagination();
     const {
+      agentTypes: agentTypesFromUrl,
       commands: commandsFromUrl,
       hosts: agentIdsFromUrl,
       statuses: statusesFromUrl,
-      startDate: startDateFromUrl,
-      endDate: endDateFromUrl,
       users: usersFromUrl,
-      withAutomatedActions: withAutomatedActionsFromUrl,
+      types: actionTypesFromUrl,
       withOutputs: withOutputsFromUrl,
       setUrlWithOutputs,
     } = useActionHistoryUrlParams();
 
     const getTestId = useTestIdGenerator(dataTestSubj);
+
+    const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+      'responseActionsSentinelOneV1Enabled'
+    );
+    const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
+      'responseActionsCrowdstrikeManualHostIsolationEnabled'
+    );
 
     // Used to decide if display global loader or not (only the fist time tha page loads)
     const [isFirstAttempt, setIsFirstAttempt] = useState(true);
@@ -67,11 +76,12 @@ export const ResponseActionsLog = memo<
       page: isFlyout ? 1 : paginationFromUrlParams.page,
       pageSize: isFlyout ? 10 : paginationFromUrlParams.pageSize,
       agentIds: isFlyout ? agentIds : agentIdsFromUrl?.length ? agentIdsFromUrl : agentIds,
+      agentTypes: [],
       commands: [],
       statuses: [],
       userIds: [],
       withOutputs: [],
-      withAutomatedActions: true,
+      types: [],
     });
 
     // update query state from URL params
@@ -79,8 +89,16 @@ export const ResponseActionsLog = memo<
       if (!isFlyout) {
         setQueryParams((prevState) => ({
           ...prevState,
+          agentTypes:
+            isSentinelOneV1Enabled || isCrowdstrikeEnabled
+              ? agentTypesFromUrl?.length
+                ? agentTypesFromUrl
+                : prevState.agentTypes
+              : [],
           commands: commandsFromUrl?.length
-            ? commandsFromUrl.map((commandFromUrl) => getCommandKey(commandFromUrl))
+            ? commandsFromUrl.map(
+                (commandFromUrl) => RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[commandFromUrl]
+              )
             : prevState.commands,
           hosts: agentIdsFromUrl?.length ? agentIdsFromUrl : prevState.agentIds,
           statuses: statusesFromUrl?.length
@@ -88,18 +106,23 @@ export const ResponseActionsLog = memo<
             : prevState.statuses,
           userIds: usersFromUrl?.length ? usersFromUrl : prevState.userIds,
           withOutputs: withOutputsFromUrl?.length ? withOutputsFromUrl : prevState.withOutputs,
-          withAutomatedActions: !!withAutomatedActionsFromUrl,
+          types: actionTypesFromUrl?.length
+            ? (actionTypesFromUrl as ResponseActionType[])
+            : prevState.types,
         }));
       }
     }, [
+      actionTypesFromUrl,
+      agentTypesFromUrl,
       commandsFromUrl,
       agentIdsFromUrl,
       isFlyout,
+      isCrowdstrikeEnabled,
+      isSentinelOneV1Enabled,
       statusesFromUrl,
       setQueryParams,
       usersFromUrl,
       withOutputsFromUrl,
-      withAutomatedActionsFromUrl,
     ]);
 
     // date range picker state and handlers
@@ -115,8 +138,8 @@ export const ResponseActionsLog = memo<
     } = useGetEndpointActionList(
       {
         ...queryParams,
-        startDate: isFlyout ? dateRangePickerState.startDate : startDateFromUrl,
-        endDate: isFlyout ? dateRangePickerState.endDate : endDateFromUrl,
+        startDate: dateRangePickerState.startDate,
+        endDate: dateRangePickerState.endDate,
       },
       { retry: false }
     );
@@ -175,6 +198,26 @@ export const ResponseActionsLog = memo<
       [setQueryParams]
     );
 
+    const onChangeAgentTypesFilter = useCallback(
+      (selectedAgentTypes: string[]) => {
+        setQueryParams((prevState) => ({
+          ...prevState,
+          agentTypes: selectedAgentTypes as ResponseActionAgentType[],
+        }));
+      },
+      [setQueryParams]
+    );
+
+    const onChangeTypeFilter = useCallback(
+      (selectedTypes: string[]) => {
+        setQueryParams((prevState) => ({
+          ...prevState,
+          types: selectedTypes as ResponseActionType[],
+        }));
+      },
+      [setQueryParams]
+    );
+
     // handle on change hosts filter
     const onChangeHostsFilter = useCallback(
       (selectedAgentIds: string[]) => {
@@ -226,7 +269,7 @@ export const ResponseActionsLog = memo<
           setUrlWithOutputs(actionIds.join());
         }
       },
-      [isFlyout, setUrlWithOutputs]
+      [isFlyout, setUrlWithOutputs, setQueryParams]
     );
 
     if (error?.body?.statusCode === 404 && error?.body?.message === 'index_not_found_exception') {
@@ -245,6 +288,8 @@ export const ResponseActionsLog = memo<
           onChangeCommandsFilter={onChangeCommandsFilter}
           onChangeStatusesFilter={onChangeStatusesFilter}
           onChangeUsersFilter={onChangeUsersFilter}
+          onChangeAgentTypesFilter={onChangeAgentTypesFilter}
+          onChangeTypeFilter={onChangeTypeFilter}
           onRefresh={onRefresh}
           onRefreshChange={onRefreshChange}
           onTimeChange={onTimeChange}

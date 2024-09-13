@@ -1,31 +1,65 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { take } from 'rxjs/operators';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
+import { take } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
-import { type KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
+import {
+  type MigrationResult,
+  SavedObjectTypeRegistry,
+} from '@kbn/core-saved-objects-base-server-internal';
+import { KibanaMigrator, type KibanaMigratorOptions } from './kibana_migrator';
 import { DocumentMigrator } from './document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { lastValueFrom } from 'rxjs';
+import { runV2Migration } from './run_v2_migration';
+import { runZeroDowntimeMigration } from './zdt';
 
-jest.mock('./document_migrator', () => {
+const V2_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
+  {
+    sourceIndex: '.my_index_pre8.2.3_001',
+    destIndex: '.my_index_8.2.3_001',
+    elapsedMs: 14,
+    status: 'migrated',
+  },
+];
+
+const ZDT_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
+  {
+    sourceIndex: '.my_index_8.8.0_001',
+    destIndex: '.my_index_8.8.1_001',
+    elapsedMs: 14,
+    status: 'migrated',
+  },
+  {
+    destIndex: '.other_index_8.8.0_001',
+    elapsedMs: 128,
+    status: 'patched',
+  },
+];
+
+jest.mock('./run_v2_migration', () => {
   return {
-    // Create a mock for spying on the constructor
-    DocumentMigrator: jest.fn().mockImplementation((...args) => {
-      const { DocumentMigrator: RealDocMigrator } = jest.requireActual('./document_migrator');
-      return new RealDocMigrator(args[0]);
-    }),
+    runV2Migration: jest.fn(
+      (): Promise<MigrationResult[]> => Promise.resolve(V2_SUCCESSFUL_MIGRATION_RESULT)
+    ),
+  };
+});
+
+jest.mock('./zdt', () => {
+  return {
+    runZeroDowntimeMigration: jest.fn(
+      (): Promise<MigrationResult[]> => Promise.resolve(ZDT_SUCCESSFUL_MIGRATION_RESULT)
+    ),
   };
 });
 
@@ -44,9 +78,15 @@ const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   return registry;
 };
 
+const mockRunV2Migration = runV2Migration as jest.MockedFunction<typeof runV2Migration>;
+const mockRunZeroDowntimeMigration = runZeroDowntimeMigration as jest.MockedFunction<
+  typeof runZeroDowntimeMigration
+>;
+
 describe('KibanaMigrator', () => {
   beforeEach(() => {
-    (DocumentMigrator as jest.Mock).mockClear();
+    mockRunV2Migration.mockClear();
+    mockRunZeroDowntimeMigration.mockClear();
   });
   describe('getActiveMappings', () => {
     it('returns full index mappings w/ core properties', () => {
@@ -60,7 +100,7 @@ describe('KibanaMigrator', () => {
         },
         {
           name: 'bmap',
-          indexPattern: 'other-index',
+          indexPattern: '.other_index',
           mappings: {
             properties: { field: { type: 'text' } },
           },
@@ -82,56 +122,70 @@ describe('KibanaMigrator', () => {
       );
     });
 
+    // TODO check if it applies
     it('calls documentMigrator.migrate', () => {
       const options = mockOptions();
       const kibanaMigrator = new KibanaMigrator(options);
-      const mockDocumentMigrator = { migrate: jest.fn() };
-      // @ts-expect-error `documentMigrator` is readonly.
-      kibanaMigrator.documentMigrator = mockDocumentMigrator;
+      jest.spyOn(DocumentMigrator.prototype, 'migrate').mockImplementation((doc) => doc);
       const doc = {} as any;
 
       expect(() => kibanaMigrator.migrateDocument(doc)).not.toThrowError();
-      expect(mockDocumentMigrator.migrate).toBeCalledTimes(1);
+      expect(DocumentMigrator.prototype.migrate).toBeCalledTimes(1);
     });
   });
 
   describe('runMigrations', () => {
-    it('throws if prepareMigrations is not called first', async () => {
+    it("calls runV2Migration with the right params when the migration algorithm is 'v2'", async () => {
       const options = mockOptions();
-
-      options.client.indices.get.mockResponse({}, { statusCode: 200 });
-
       const migrator = new KibanaMigrator(options);
+      migrator.prepareMigrations();
+      const res = await migrator.runMigrations();
 
-      await expect(() => migrator.runMigrations()).toThrowErrorMatchingInlineSnapshot(
-        `"Migrations are not ready. Make sure prepareMigrations is called first."`
+      expect(runV2Migration).toHaveBeenCalledTimes(1);
+      expect(runZeroDowntimeMigration).not.toHaveBeenCalled();
+      expect(runV2Migration).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kibanaVersion: '8.2.3',
+          kibanaIndexPrefix: '.my_index',
+          migrationConfig: options.soMigrationsConfig,
+          waitForMigrationCompletion: false,
+        })
       );
+      expect(res).toEqual(V2_SUCCESSFUL_MIGRATION_RESULT);
+    });
+
+    it("calls runZeroDowntimeMigration with the right params when the migration algorithm is 'zdt'", async () => {
+      const options = mockOptions('zdt');
+      const migrator = new KibanaMigrator(options);
+      migrator.prepareMigrations();
+      const res = await migrator.runMigrations();
+
+      expect(runZeroDowntimeMigration).toHaveBeenCalledTimes(1);
+      expect(runV2Migration).not.toHaveBeenCalled();
+      expect(runZeroDowntimeMigration).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kibanaVersion: '8.2.3',
+          kibanaIndexPrefix: '.my_index',
+          migrationConfig: options.soMigrationsConfig,
+        })
+      );
+      expect(res).toEqual(ZDT_SUCCESSFUL_MIGRATION_RESULT);
     });
 
     it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
-      options.client.indices.get.mockResponse({}, { statusCode: 200 });
-
-      options.client.cluster.getSettings.mockResponse(
-        {
-          transient: {},
-          persistent: {},
-        },
-        { statusCode: 404 }
-      );
       const migrator = new KibanaMigrator(options);
-
       migrator.prepareMigrations();
       await migrator.runMigrations();
       await migrator.runMigrations();
       await migrator.runMigrations();
 
       // indices.get is called twice during a single migration
-      expect(options.client.indices.get).toHaveBeenCalledTimes(2);
+      expect(runV2Migration).toHaveBeenCalledTimes(1);
     });
 
-    it('emits results on getMigratorResult$()', async () => {
-      const options = mockV2MigrationOptions();
+    it('emits v2 results on getMigratorResult$()', async () => {
+      const options = mockOptions();
       const migrator = new KibanaMigrator(options);
       const migratorStatus = lastValueFrom(migrator.getStatus$().pipe(take(3)));
       migrator.prepareMigrations();
@@ -139,122 +193,71 @@ describe('KibanaMigrator', () => {
 
       const { status, result } = await migratorStatus;
       expect(status).toEqual('completed');
-      expect(result![0]).toMatchObject({
-        destIndex: '.my-index_8.2.3_001',
-        sourceIndex: '.my-index_pre8.2.3_001',
-        elapsedMs: expect.any(Number),
-        status: 'migrated',
-      });
-      expect(result![1]).toMatchObject({
-        destIndex: 'other-index_8.2.3_001',
-        elapsedMs: expect.any(Number),
-        status: 'patched',
-      });
-    });
-    it('rejects when the migration state machine terminates in a FATAL state', () => {
-      const options = mockV2MigrationOptions();
-      options.client.indices.get.mockResponse(
-        {
-          '.my-index_8.2.4_001': {
-            aliases: {
-              '.my-index': {},
-              '.my-index_8.2.4': {},
-            },
-            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-            settings: {},
-          },
-        },
-        { statusCode: 200 }
-      );
-
-      const migrator = new KibanaMigrator(options);
-      migrator.prepareMigrations();
-      return expect(migrator.runMigrations()).rejects.toMatchInlineSnapshot(
-        `[Error: Unable to complete saved object migrations for the [.my-index] index: The .my-index alias is pointing to a newer version of Kibana: v8.2.4]`
-      );
+      expect(result).toEqual(V2_SUCCESSFUL_MIGRATION_RESULT);
     });
 
-    it('rejects when an unexpected exception occurs in an action', async () => {
-      const options = mockV2MigrationOptions();
-      options.client.tasks.get.mockResponse({
-        completed: true,
-        error: { type: 'elasticsearch_exception', reason: 'task failed with an error' },
-        task: { description: 'task description' } as any,
-      });
-
+    it('emits zdt results on getMigratorResult$()', async () => {
+      const options = mockOptions('zdt');
       const migrator = new KibanaMigrator(options);
+      const migratorStatus = lastValueFrom(migrator.getStatus$().pipe(take(3)));
       migrator.prepareMigrations();
-      await expect(migrator.runMigrations()).rejects.toMatchInlineSnapshot(`
-              [Error: Unable to complete saved object migrations for the [.my-index] index. Error: Reindex failed with the following error:
-              {"_tag":"Some","value":{"type":"elasticsearch_exception","reason":"task failed with an error"}}]
-            `);
-      expect(loggingSystemMock.collect(options.logger).error[0][0]).toMatchInlineSnapshot(`
-        [Error: Reindex failed with the following error:
-        {"_tag":"Some","value":{"type":"elasticsearch_exception","reason":"task failed with an error"}}]
-      `);
+      await migrator.runMigrations();
+
+      const { status, result } = await migratorStatus;
+      expect(status).toEqual('completed');
+      expect(result).toEqual(ZDT_SUCCESSFUL_MIGRATION_RESULT);
+    });
+
+    it('rejects when the v2 migrator algorithm rejects', async () => {
+      const options = mockOptions();
+      const migrator = new KibanaMigrator(options);
+
+      const fatal = new Error(
+        `Unable to complete saved object migrations for the [${options.kibanaIndex}] index: Something went horribly wrong`
+      );
+      mockRunV2Migration.mockRejectedValueOnce(fatal);
+
+      migrator.prepareMigrations();
+      expect(migrator.runMigrations()).rejects.toEqual(fatal);
+    });
+
+    it('rejects when the zdt migrator algorithm rejects', async () => {
+      const options = mockOptions('zdt');
+      const migrator = new KibanaMigrator(options);
+
+      const fatal = new Error(
+        `Unable to complete saved object migrations for the [${options.kibanaIndex}] index: Something went terribly wrong`
+      );
+      mockRunZeroDowntimeMigration.mockRejectedValueOnce(fatal);
+
+      migrator.prepareMigrations();
+      expect(migrator.runMigrations()).rejects.toEqual(fatal);
     });
   });
 });
 
-type MockedOptions = KibanaMigratorOptions & {
-  client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
-};
-
-const mockV2MigrationOptions = () => {
-  const options = mockOptions();
-  options.client.cluster.getSettings.mockResponse(
-    {
-      transient: {},
-      persistent: {},
-    },
-    { statusCode: 200 }
-  );
-
-  options.client.indices.get.mockResponse(
-    {
-      '.my-index': {
-        aliases: { '.kibana': {} },
-        mappings: { properties: {} },
-        settings: {},
-      },
-    },
-    { statusCode: 200 }
-  );
-  options.client.indices.addBlock.mockResponse({
-    acknowledged: true,
-    shards_acknowledged: true,
-    indices: [],
-  });
-  options.client.reindex.mockResponse({
-    taskId: 'reindex_task_id',
-  } as estypes.ReindexResponse);
-  options.client.tasks.get.mockResponse({
-    completed: true,
-    error: undefined,
-    failures: [],
-    task: { description: 'task description' } as any,
-  } as estypes.TasksGetResponse);
-
-  options.client.search.mockResponse({ hits: { hits: [] } } as any);
-
-  options.client.openPointInTime.mockResponse({ id: 'pit_id' });
-
-  options.client.closePointInTime.mockResponse({
-    succeeded: true,
-  } as estypes.ClosePointInTimeResponse);
-
-  return options;
-};
-
-const mockOptions = () => {
+const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2'): KibanaMigratorOptions => {
   const mockedClient = elasticsearchClientMock.createElasticsearchClient();
   (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
 
-  const options: MockedOptions = {
+  return {
     logger: loggingSystemMock.create().get(),
     kibanaVersion: '8.2.3',
     waitForMigrationCompletion: false,
+    defaultIndexTypesMap: {
+      '.my_index': ['testtype', 'testtype2'],
+      '.task_index': ['testtasktype'],
+      // this index no longer has any types registered in typeRegistry
+      // but we still need a migrator for it, so that 'testtype3' documents
+      // are moved over to their new index (.my_index)
+      '.my_complementary_index': ['testtype3'],
+    },
+    hashToVersionMap: {},
     typeRegistry: createRegistry([
+      // typeRegistry depicts an updated index map:
+      //   .my_index: ['testtype', 'testtype3'],
+      //   .other_index: ['testtype2'],
+      //   .task_index': ['testtasktype'],
       {
         name: 'testtype',
         hidden: false,
@@ -270,7 +273,32 @@ const mockOptions = () => {
         name: 'testtype2',
         hidden: false,
         namespaceType: 'single',
-        indexPattern: 'other-index',
+        // We are moving 'testtype2' from '.my_index' to '.other_index'
+        indexPattern: '.other_index',
+        mappings: {
+          properties: {
+            name: { type: 'keyword' },
+          },
+        },
+        migrations: {},
+      },
+      {
+        name: 'testtasktype',
+        hidden: false,
+        namespaceType: 'single',
+        indexPattern: '.task_index',
+        mappings: {
+          properties: {
+            name: { type: 'keyword' },
+          },
+        },
+        migrations: {},
+      },
+      {
+        // We are moving 'testtype3' from '.my_complementary_index' to '.my_index'
+        name: 'testtype3',
+        hidden: false,
+        namespaceType: 'single',
         mappings: {
           properties: {
             name: { type: 'keyword' },
@@ -279,21 +307,24 @@ const mockOptions = () => {
         migrations: {},
       },
     ]),
-    kibanaIndex: '.my-index',
+    kibanaIndex: '.my_index',
     soMigrationsConfig: {
-      algorithm: 'v2',
+      algorithm,
       batchSize: 20,
       maxBatchSizeBytes: ByteSizeValue.parse('20mb'),
+      maxReadBatchSizeBytes: new ByteSizeValue(536870888),
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,
       retryAttempts: 20,
       zdt: {
         metaPickupSyncDelaySec: 120,
+        runOnRoles: ['migrator'],
       },
     },
     client: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),
+    nodeRoles: { backgroundTasks: true, ui: true, migrator: true },
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
   };
-  return options;
 };

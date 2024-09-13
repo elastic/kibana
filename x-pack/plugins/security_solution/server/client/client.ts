@@ -5,32 +5,49 @@
  * 2.0.
  */
 
+import type { BuildFlavor } from '@kbn/config';
 import type { ConfigType } from '../config';
-import { DEFAULT_DATA_VIEW_ID, DEFAULT_PREVIEW_INDEX } from '../../common/constants';
+import {
+  DEFAULT_ALERTS_INDEX,
+  DEFAULT_DATA_VIEW_ID,
+  DEFAULT_PREVIEW_INDEX,
+} from '../../common/constants';
 
 export class AppClient {
+  private readonly alertsIndex: string;
   private readonly signalsIndex: string;
   private readonly spaceId: string;
   private readonly previewIndex: string;
   private readonly sourcererDataViewId: string;
   private readonly kibanaVersion: string;
   private readonly kibanaBranch: string;
+  private readonly buildFlavor: BuildFlavor;
 
-  constructor(spaceId: string, config: ConfigType, kibanaVersion: string, kibanaBranch: string) {
+  constructor(
+    spaceId: string,
+    config: ConfigType,
+    kibanaVersion: string,
+    kibanaBranch: string,
+    buildFlavor: BuildFlavor
+  ) {
     const configuredSignalsIndex = config.signalsIndex;
 
+    this.alertsIndex = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
     this.signalsIndex = `${configuredSignalsIndex}-${spaceId}`;
     this.previewIndex = `${DEFAULT_PREVIEW_INDEX}-${spaceId}`;
     this.sourcererDataViewId = `${DEFAULT_DATA_VIEW_ID}-${spaceId}`;
     this.spaceId = spaceId;
     this.kibanaVersion = kibanaVersion;
     this.kibanaBranch = kibanaBranch;
+    this.buildFlavor = buildFlavor;
   }
 
+  public getAlertsIndex = (): string => this.alertsIndex;
   public getSignalsIndex = (): string => this.signalsIndex;
   public getPreviewIndex = (): string => this.previewIndex;
   public getSourcererDataViewId = (): string => this.sourcererDataViewId;
   public getSpaceId = (): string => this.spaceId;
   public getKibanaVersion = (): string => this.kibanaVersion;
   public getKibanaBranch = (): string => this.kibanaBranch;
+  public getBuildFlavor = (): BuildFlavor => this.buildFlavor;
 }

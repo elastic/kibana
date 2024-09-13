@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // setup ts/pkg support in this webpack process
@@ -82,6 +83,23 @@ module.exports = {
           babelrc: false,
           envName: process.env.NODE_ENV || 'development',
           presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+        },
+      },
+      {
+        /**
+         * further process the modules exported by both monaco-editor and monaco-yaml, because;
+         * 1). they both use non-standard language APIs
+         * 2). monaco-yaml exports it's src as is see, https://www.npmjs.com/package/monaco-yaml#does-it-work-without-a-bundler
+         */
+        test: /(monaco-editor\/esm\/vs\/|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager).*(t|j)sx?$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            envName: process.env.NODE_ENV || 'development',
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+            plugins: [require.resolve('@babel/plugin-transform-numeric-separator')],
+          },
         },
       },
     ],

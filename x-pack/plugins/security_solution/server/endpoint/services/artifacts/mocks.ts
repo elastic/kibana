@@ -9,8 +9,15 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 // Because mocks are for testing only, should be ok to import the FleetArtifactsClient directly
-import { FleetArtifactsClient } from '@kbn/fleet-plugin/server/services';
-import { createArtifactsClientMock } from '@kbn/fleet-plugin/server/mocks';
+import {
+  appContextService as fleetAppContextService,
+  FleetArtifactsClient,
+} from '@kbn/fleet-plugin/server/services';
+import {
+  createAppContextStartContractMock as fleetCreateAppContextStartContractMock,
+  createArtifactsClientMock,
+} from '@kbn/fleet-plugin/server/mocks';
+
 import type { EndpointArtifactClientInterface } from './artifact_client';
 import { EndpointArtifactClient } from './artifact_client';
 import { ManifestClient } from './manifest_client';
@@ -37,6 +44,7 @@ export const createEndpointArtifactClientMock = (
   const fleetArtifactClientMocked = createArtifactsClientMock();
   const endpointArtifactClientMocked = new EndpointArtifactClient(fleetArtifactClientMocked);
 
+  fleetAppContextService.start(fleetCreateAppContextStartContractMock());
   // Return the interface mocked with jest.fn() that fowards calls to the real instance
   return {
     createArtifact: jest.fn(async (...args) => {
@@ -54,6 +62,10 @@ export const createEndpointArtifactClientMock = (
     listArtifacts: jest.fn((...args) => endpointArtifactClientMocked.listArtifacts(...args)),
     getArtifact: jest.fn((...args) => endpointArtifactClientMocked.getArtifact(...args)),
     deleteArtifact: jest.fn((...args) => endpointArtifactClientMocked.deleteArtifact(...args)),
+    bulkDeleteArtifacts: jest.fn(async (...args) =>
+      endpointArtifactClientMocked.bulkDeleteArtifacts(...args)
+    ),
+    fetchAll: jest.fn((...args) => endpointArtifactClientMocked.fetchAll(...args)),
     _esClient: esClient,
   };
 };

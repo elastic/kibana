@@ -27,9 +27,9 @@ const testBedConfig: AsyncTestBedConfig = {
 
 export interface WatchListTestBed extends TestBed<WatchListTestSubjects> {
   actions: {
-    selectWatchAt: (index: number) => void;
-    clickWatchActionAt: (index: number, action: 'delete' | 'edit') => void;
-    searchWatches: (term: string) => void;
+    selectWatchAt: (index: number) => Promise<void>;
+    clickWatchActionAt: (index: number, action: 'delete' | 'edit') => Promise<void>;
+    searchWatches: (term: string) => Promise<void>;
     advanceTimeToTableRefresh: () => Promise<void>;
   };
 }
@@ -42,11 +42,15 @@ export const setup = async (httpSetup: HttpSetup): Promise<WatchListTestBed> => 
    * User Actions
    */
 
-  const selectWatchAt = (index: number) => {
+  const selectWatchAt = async (index: number) => {
     const { rows } = testBed.table.getMetaData('watchesTable');
     const row = rows[index];
     const checkBox = row.reactWrapper.find('input').hostNodes();
-    checkBox.simulate('change', { target: { checked: true } });
+
+    await act(async () => {
+      checkBox.simulate('change', { target: { checked: true } });
+    });
+    testBed.component.update();
   };
 
   const clickWatchActionAt = async (index: number, action: 'delete' | 'edit') => {
@@ -58,18 +62,21 @@ export const setup = async (httpSetup: HttpSetup): Promise<WatchListTestBed> => 
 
     await act(async () => {
       button.simulate('click');
-      component.update();
     });
+    component.update();
   };
 
-  const searchWatches = (term: string) => {
+  const searchWatches = async (term: string) => {
     const { find, component } = testBed;
-    const searchInput = find('watchesTableContainer').find('.euiFieldSearch');
+    const searchInput = find('watchesTableContainer').find('input.euiFieldSearch');
 
     // Enter input into the search box
     // @ts-ignore
     searchInput.instance().value = term;
-    searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
+
+    await act(async () => {
+      searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
+    });
 
     component.update();
   };
@@ -100,6 +107,7 @@ export type TestSubjects =
   | 'appTitle'
   | 'documentationLink'
   | 'watchesTable'
+  | 'watcherListSearchError'
   | 'cell'
   | 'row'
   | 'deleteWatchButton'

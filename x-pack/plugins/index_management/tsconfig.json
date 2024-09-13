@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "__jest__/**/*",
@@ -9,7 +9,7 @@
     "public/**/*",
     "server/**/*",
     "test/**/*",
-    "../../../typings/**/*",
+    "../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -24,15 +24,37 @@
     "@kbn/runtime-fields-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/i18n",
+    "@kbn/ml-trained-models-utils",
     "@kbn/analytics",
-    "@kbn/utility-types",
     "@kbn/i18n-react",
     "@kbn/core-doc-links-browser-mocks",
     "@kbn/core-execution-context-browser-mocks",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/react-field",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/core-http-browser",
+    "@kbn/search-api-panels",
+    "@kbn/cloud-plugin",
+    "@kbn/ui-theme",
+    "@kbn/code-editor",
+    "@kbn/monaco",
+    "@kbn/console-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/index-management-shared-types",
+    "@kbn/utility-types",
+    "@kbn/inference_integration_flyout",
+    "@kbn/ml-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-mount",
+    "@kbn/rollup",
+    "@kbn/ml-error-utils",
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/shared-ux-table-persist",
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

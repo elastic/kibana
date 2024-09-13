@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
+import { KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BenchmarksSection } from './benchmarks_section';
-import { getMockDashboardData, getClusterMockData } from '../mock';
+import { getMockDashboardData, getBenchmarkMockData } from '../mock';
 import { TestProvider } from '../../../test/test_provider';
-import { KSPM_POLICY_TEMPLATE } from '../../../../common/constants';
 import {
   DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID,
   DASHBOARD_TABLE_HEADER_SCORE_TEST_ID,
@@ -30,22 +30,22 @@ describe('<BenchmarksSection />', () => {
 
   describe('Sorting', () => {
     const mockDashboardDataCopy = getMockDashboardData();
-    const clusterMockDataCopy = getClusterMockData();
-    clusterMockDataCopy.stats.postureScore = 50;
-    clusterMockDataCopy.meta.assetIdentifierId = '1';
+    const benchmarkMockDataCopy = getBenchmarkMockData();
+    benchmarkMockDataCopy.stats.postureScore = 50;
+    benchmarkMockDataCopy.meta.benchmarkId = 'cis_aws';
 
-    const clusterMockDataCopy1 = getClusterMockData();
-    clusterMockDataCopy1.stats.postureScore = 95;
-    clusterMockDataCopy1.meta.assetIdentifierId = '2';
+    const benchmarkMockDataCopy1 = getBenchmarkMockData();
+    benchmarkMockDataCopy1.stats.postureScore = 95;
+    benchmarkMockDataCopy1.meta.benchmarkId = 'cis_azure';
 
-    const clusterMockDataCopy2 = getClusterMockData();
-    clusterMockDataCopy2.stats.postureScore = 45;
-    clusterMockDataCopy2.meta.assetIdentifierId = '3';
+    const benchmarkMockDataCopy2 = getBenchmarkMockData();
+    benchmarkMockDataCopy2.stats.postureScore = 45;
+    benchmarkMockDataCopy2.meta.benchmarkId = 'cis_gcp';
 
-    mockDashboardDataCopy.clusters = [
-      clusterMockDataCopy,
-      clusterMockDataCopy1,
-      clusterMockDataCopy2,
+    mockDashboardDataCopy.benchmarks = [
+      benchmarkMockDataCopy,
+      benchmarkMockDataCopy1,
+      benchmarkMockDataCopy2,
     ];
 
     it('sorts by ascending order of compliance scores', () => {
@@ -55,16 +55,16 @@ describe('<BenchmarksSection />', () => {
       expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[2]).toHaveTextContent('95');
     });
 
-    it('toggles sort order when clicking Posture Score', () => {
+    it('toggles sort order when clicking Posture Score', async () => {
       const { getAllByTestId, getByTestId } = renderBenchmarks(mockDashboardDataCopy);
 
-      userEvent.click(getByTestId(DASHBOARD_TABLE_HEADER_SCORE_TEST_ID));
+      await userEvent.click(getByTestId(DASHBOARD_TABLE_HEADER_SCORE_TEST_ID));
 
       expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[0]).toHaveTextContent('95');
       expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[1]).toHaveTextContent('50');
       expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[2]).toHaveTextContent('45');
 
-      userEvent.click(getByTestId(DASHBOARD_TABLE_HEADER_SCORE_TEST_ID));
+      await userEvent.click(getByTestId(DASHBOARD_TABLE_HEADER_SCORE_TEST_ID));
 
       expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[0]).toHaveTextContent('45');
       expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[1]).toHaveTextContent('50');

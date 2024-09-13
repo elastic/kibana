@@ -9,16 +9,20 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'maps']);
+  const { common, maps } = getPageObjects(['common', 'maps']);
   const find = getService('find');
   const browser = getService('browser');
   const retry = getService('retry');
 
-  describe('Auto open file upload wizard in maps app', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/173095
+  // Failing: See https://github.com/elastic/kibana/issues/173095
+  describe.skip('Auto open file upload wizard in maps app', () => {
     before(async () => {
-      await PageObjects.common.navigateToUrl('integrations', 'browse', {
+      await common.navigateToUrl('integrations', 'browse', {
         useActualUrl: true,
       });
+      const searchInput = await find.byCssSelector('[data-test-subj="epmList.searchBar"]');
+      await searchInput.type('GeoJSON');
       const geoFileCard = await find.byCssSelector(
         '[data-test-subj="integration-card:ui_link:ingest_geojson"]'
       );
@@ -33,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should upload form exist', async () => {
       await retry.waitFor(
         `Add layer panel to be visible`,
-        async () => await PageObjects.maps.isLayerAddPanelOpen()
+        async () => await maps.isLayerAddPanelOpen()
       );
     });
   });

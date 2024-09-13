@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import { CaseStatuses, StatusAll } from '../../../../common';
+import { useCallback, useMemo } from 'react';
+import { useApplication } from '../../../common/lib/kibana/use_application';
+import { CaseStatuses } from '../../../../common/types/domain';
 import type { AllCasesSelectorModalProps } from '.';
 import { useCasesToast } from '../../../common/use_cases_toast';
-import type { Case } from '../../../containers/types';
-import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
+import type { CaseUI } from '../../../containers/types';
+import { CasesContextStoreActionsList } from '../../cases_context/state/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 import type { CaseAttachmentsWithoutOwner } from '../../../types';
@@ -27,24 +28,35 @@ export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRo
     title?: string;
     content?: string;
   };
-  onSuccess?: (theCase: Case) => void;
+  onSuccess?: (theCase: CaseUI) => void;
 };
 
-export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProps = {}) => {
-  const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
-    onClose: props.onClose,
-    onSuccess: (theCase?: Case) => {
-      if (props.onSuccess && theCase) {
-        return props.onSuccess(theCase);
+export const useCasesAddToExistingCaseModal = ({
+  successToaster,
+  noAttachmentsToaster,
+  onSuccess,
+  onClose,
+  onCreateCaseClicked,
+}: AddToExistingCaseModalProps = {}) => {
+  const handleSuccess = useCallback(
+    (theCase?: CaseUI) => {
+      if (onSuccess && theCase) {
+        return onSuccess(theCase);
       }
     },
-    toastTitle: props.successToaster?.title,
-    toastContent: props.successToaster?.content,
+    [onSuccess]
+  );
+  const { open: openCreateNewCaseFlyout } = useCasesAddToNewCaseFlyout({
+    onClose,
+    onSuccess: handleSuccess,
+    toastTitle: successToaster?.title,
+    toastContent: successToaster?.content,
   });
 
-  const { dispatch, appId } = useCasesContext();
+  const { dispatch } = useCasesContext();
+  const { appId } = useApplication();
   const casesToasts = useCasesToast();
-  const { createAttachments } = useCreateAttachments();
+  const { mutateAsync: createAttachments } = useCreateAttachments();
   const { startTransaction } = useAddAttachmentToExistingCaseTransaction();
 
   const closeModal = useCallback(() => {
@@ -60,23 +72,24 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
 
   const handleOnRowClick = useCallback(
     async (
-      theCase: Case | undefined,
-      getAttachments?: ({ theCase }: { theCase?: Case }) => CaseAttachmentsWithoutOwner
+      theCase: CaseUI | undefined,
+      getAttachments?: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner
     ) => {
       const attachments = getAttachments?.({ theCase }) ?? [];
+
       // when the case is undefined in the modal
       // the user clicked "create new case"
       if (theCase === undefined) {
         closeModal();
-        createNewCaseFlyout.open({ attachments });
+        openCreateNewCaseFlyout({ attachments });
         return;
       }
 
       try {
         // add attachments to the case
         if (attachments === undefined || attachments.length === 0) {
-          const title = props.noAttachmentsToaster?.title ?? NO_ATTACHMENTS_ADDED;
-          const content = props.noAttachmentsToaster?.content;
+          const title = noAttachmentsToaster?.title ?? NO_ATTACHMENTS_ADDED;
+          const content = noAttachmentsToaster?.content;
           casesToasts.showInfoToast(title, content);
 
           return;
@@ -87,19 +100,16 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
         await createAttachments({
           caseId: theCase.id,
           caseOwner: theCase.owner,
-          data: attachments,
-          throwOnError: true,
+          attachments,
         });
 
-        if (props.onSuccess) {
-          props.onSuccess(theCase);
-        }
+        onSuccess?.(theCase);
 
         casesToasts.showSuccessAttach({
           theCase,
           attachments,
-          title: props.successToaster?.title,
-          content: props.successToaster?.content,
+          title: successToaster?.title,
+          content: successToaster?.content,
         });
       } catch (error) {
         // error toast is handled
@@ -107,13 +117,17 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
       }
     },
     [
-      props,
-      closeModal,
-      createNewCaseFlyout,
-      startTransaction,
       appId,
-      createAttachments,
       casesToasts,
+      closeModal,
+      createAttachments,
+      openCreateNewCaseFlyout,
+      successToaster?.title,
+      successToaster?.content,
+      noAttachmentsToaster?.title,
+      noAttachmentsToaster?.content,
+      onSuccess,
+      startTransaction,
     ]
   );
 
@@ -121,32 +135,34 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
     ({
       getAttachments,
     }: {
-      getAttachments?: ({ theCase }: { theCase?: Case }) => CaseAttachmentsWithoutOwner;
+      getAttachments?: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner;
     } = {}) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: {
-          ...props,
-          hiddenStatuses: [CaseStatuses.closed, StatusAll],
-          onRowClick: (theCase?: Case) => {
+          hiddenStatuses: [CaseStatuses.closed],
+          onCreateCaseClicked,
+          onRowClick: (theCase?: CaseUI) => {
             handleOnRowClick(theCase, getAttachments);
           },
-          onClose: () => {
+          onClose: (theCase?: CaseUI, isCreateCase?: boolean) => {
             closeModal();
 
-            if (props.onClose) {
-              return props.onClose();
+            if (onClose) {
+              return onClose(theCase, isCreateCase);
             }
           },
         },
       });
     },
-    [closeModal, dispatch, handleOnRowClick, props]
+    [closeModal, dispatch, handleOnRowClick, onClose, onCreateCaseClicked]
   );
 
-  return {
-    open: openModal,
-    close: closeModal,
-  };
+  return useMemo(() => {
+    return {
+      open: openModal,
+      close: closeModal,
+    };
+  }, [openModal, closeModal]);
 };
 export type UseCasesAddToExistingCaseModal = typeof useCasesAddToExistingCaseModal;

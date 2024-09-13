@@ -234,7 +234,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                             ? i18n.translate(
                                 'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.content.htmlLabel',
                                 {
-                                  defaultMessage: 'CSS selector',
+                                  defaultMessage: 'CSS selector or XPath expression',
                                 }
                               )
                             : i18n.translate(
@@ -286,7 +286,8 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                           {i18n.translate(
                             'xpack.enterpriseSearch.content.indices.extractionRules.editRule.contentField.cssSelectorsLink',
                             {
-                              defaultMessage: 'Learn more about CSS selectors',
+                              defaultMessage:
+                                'Learn more about CSS selectors and XPath expressions',
                             }
                           )}
                         </EuiLink>
@@ -356,7 +357,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                       }
                     )}
                     isInvalid={!!error && isTouched}
-                    error={error}
+                    error={error as React.ReactNode}
                   >
                     <EuiRadioGroup
                       data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleExtraction"

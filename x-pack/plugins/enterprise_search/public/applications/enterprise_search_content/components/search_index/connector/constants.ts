@@ -5,28 +5,47 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import dedent from 'dedent';
 
-import { docLinks } from '../../../../shared/doc_links';
+import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 
-import { NativeConnector } from './types';
+export const getConnectorTemplate = ({
+  apiKeyData,
+  connectorData,
+  host,
+}: {
+  apiKeyData: ApiKey | undefined;
+  connectorData: {
+    id: string;
+    service_type: string | null;
+  };
+  host?: string;
+}) => dedent`connectors:
+  -
+    connector_id: "${connectorData.id}"
+    service_type: "${connectorData.service_type || 'changeme'}"${
+  apiKeyData?.encoded
+    ? `
+    api_key: "${apiKeyData?.encoded}"`
+    : ''
+}
 
-export const NATIVE_CONNECTORS: NativeConnector[] = [
-  {
-    docsUrl: docLinks.connectorsMongoDB,
-    externalAuthDocsUrl: 'https://www.mongodb.com/docs/atlas/app-services/authentication/',
-    externalDocsUrl: 'https://www.mongodb.com/docs/',
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.mongodb.name', {
-      defaultMessage: 'MongoDB',
-    }),
-    serviceType: 'mongodb',
-  },
-  {
-    docsUrl: docLinks.connectorsMySQL,
-    externalDocsUrl: 'https://dev.mysql.com/doc/',
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.mysql.name', {
-      defaultMessage: 'MySQL',
-    }),
-    serviceType: 'mysql',
-  },
-];
+  elasticsearch:
+    host: "${host || 'http://localhost:9200'}"
+    api_key: "${apiKeyData?.encoded || ''}"
+`;
+
+export const getRunFromDockerSnippet = ({ version }: { version: string }) => dedent`
+docker run \\
+
+    -v "</absolute/path/to>/connectors-config:/config" \ # NOTE: change absolute path to match where config.yml is located on your machine
+    --tty \\
+
+    --rm \\
+
+    docker.elastic.co/enterprise-search/elastic-connectors:${version} \\
+
+    /app/bin/elastic-ingest \\
+
+    -c /config/config.yml # Path to your configuration file in the container
+`;

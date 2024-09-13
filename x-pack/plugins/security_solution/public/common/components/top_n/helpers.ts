@@ -56,7 +56,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 
 import type { TimelineEventsType } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 import * as i18n from './translations';
 
@@ -70,6 +70,7 @@ export interface TopNOption {
 export const detectionAlertsTables: string[] = [
   TableId.alertsOnAlertsPage,
   TableId.alertsOnRuleDetailsPage,
+  TableId.alertsOnCasePage,
   TimelineId.casePage,
 ];
 

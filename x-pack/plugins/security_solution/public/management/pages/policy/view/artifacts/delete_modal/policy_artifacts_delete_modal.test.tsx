@@ -85,7 +85,7 @@ describe.each(listType)('Policy details %s artifact delete modal', (type) => {
     mockedApi.responseProvider.exceptionUpdate.mockDelay.mockReturnValue(deferred.promise);
     await render();
     const confirmButton = renderResult.getByTestId('confirmModalConfirmButton');
-    userEvent.click(confirmButton);
+    await userEvent.click(confirmButton);
 
     await waitFor(() => {
       expect(confirmButton).toBeDisabled();
@@ -100,7 +100,7 @@ describe.each(listType)('Policy details %s artifact delete modal', (type) => {
     exception.tags = ['policy:1234', 'policy:4321', `policy:${policyId}`, 'not-a-policy-tag'];
     await render();
     const confirmButton = renderResult.getByTestId('confirmModalConfirmButton');
-    userEvent.click(confirmButton);
+    await userEvent.click(confirmButton);
     await waitFor(() => {
       expect(mockedApi.responseProvider.exceptionUpdate).toHaveBeenLastCalledWith({
         body: JSON.stringify(
@@ -110,6 +110,7 @@ describe.each(listType)('Policy details %s artifact delete modal', (type) => {
           })
         ),
         path: '/api/exception_lists/items',
+        version: '2023-10-31',
       });
     });
   });
@@ -117,7 +118,7 @@ describe.each(listType)('Policy details %s artifact delete modal', (type) => {
   it('should show a success toast if the operation was success', async () => {
     await render();
     const confirmButton = renderResult.getByTestId('confirmModalConfirmButton');
-    userEvent.click(confirmButton);
+    await userEvent.click(confirmButton);
 
     await waitFor(() => {
       expect(mockedApi.responseProvider.exceptionUpdate).toHaveBeenCalled();
@@ -135,7 +136,7 @@ describe.each(listType)('Policy details %s artifact delete modal', (type) => {
 
     await render();
     const confirmButton = renderResult.getByTestId('confirmModalConfirmButton');
-    userEvent.click(confirmButton);
+    await userEvent.click(confirmButton);
 
     await waitFor(() => {
       expect(mockedApi.responseProvider.exceptionUpdate).toHaveBeenCalled();

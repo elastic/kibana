@@ -6,8 +6,8 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { SessionViewPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { SessionViewPlugin } = await import('./plugin');
   return new SessionViewPlugin(initializerContext);
 }

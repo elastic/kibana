@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -66,14 +67,18 @@ export interface SavedObjectReference {
 export interface SavedObject<T = unknown> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
-  /**  The type of Saved Object. Each plugin can define it's own custom Saved Object types. */
+  /**  The type of Saved Object. Each plugin can define its own custom Saved Object types. */
   type: string;
   /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
   /** Timestamp of the time this document had been created.  */
   created_at?: string;
+  /** The ID of the user who created this object. */
+  created_by?: string;
   /** Timestamp of the last time this document had been updated.  */
   updated_at?: string;
+  /** The ID of the user who last updated this object. */
+  updated_by?: string;
   /** Error associated with this object, populated if an operation failed for this object.  */
   error?: SavedObjectError;
   /** The data for a Saved Object is stored as an object in the `attributes` property. **/
@@ -101,4 +106,12 @@ export interface SavedObject<T = unknown> {
    * space.
    */
   originId?: string;
+  /**
+   * Flag indicating if a saved object is managed by Kibana (default=false)
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed?: boolean;
 }

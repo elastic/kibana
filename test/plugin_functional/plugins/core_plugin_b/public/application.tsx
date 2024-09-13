@@ -1,27 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, withRouter, RouteComponentProps } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { Router, Route } from '@kbn/shared-ux-router';
 
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPageSideBar_Deprecated as EuiPageSideBar,
+  EuiPageSidebar,
   EuiTitle,
   EuiSideNav,
 } from '@elastic/eui';
@@ -37,16 +36,14 @@ const Home = () => (
         </EuiTitle>
       </EuiPageHeaderSection>
     </EuiPageHeader>
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
-          <EuiTitle>
-            <h2>Bar home page sction</h2>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>It feels so homey!</EuiPageContentBody>
-    </EuiPageContent>
+    <EuiPageSection>
+      <EuiPageHeader>
+        <EuiTitle>
+          <h2>Bar home page section</h2>
+        </EuiTitle>
+      </EuiPageHeader>
+      <EuiPageSection>It feels so homey!</EuiPageSection>
+    </EuiPageSection>
   </EuiPageBody>
 );
 
@@ -63,18 +60,16 @@ const PageB = ({ location }: RouteComponentProps) => {
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle>
-              <h2>
-                Search params:{' '}
-                <span data-test-subj="barAppPageBQuery">{JSON.stringify(searchParams)}</span>
-              </h2>
-            </EuiTitle>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
-      </EuiPageContent>
+      <EuiPageSection>
+        <EuiPageHeader>
+          <EuiTitle>
+            <h2>
+              Search params:{' '}
+              <span data-test-subj="barAppPageBQuery">{JSON.stringify(searchParams)}</span>
+            </h2>
+          </EuiTitle>
+        </EuiPageHeader>
+      </EuiPageSection>
     </EuiPageBody>
   );
 };
@@ -116,9 +111,9 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
 const BarApp = ({ history, coreStart }: { history: History; coreStart: CoreStart }) => (
   <Router history={history}>
     <EuiPage>
-      <EuiPageSideBar>
+      <EuiPageSidebar>
         <Nav navigateToApp={coreStart.application.navigateToApp} />
-      </EuiPageSideBar>
+      </EuiPageSidebar>
       <Route path="/" exact component={Home} />
       <Route path="/page-b" component={PageB} />
     </EuiPage>
@@ -126,7 +121,12 @@ const BarApp = ({ history, coreStart }: { history: History; coreStart: CoreStart
 );
 
 export const renderApp = (coreStart: CoreStart, { history, element }: AppMountParameters) => {
-  ReactDOM.render(<BarApp history={history} coreStart={coreStart} />, element);
+  ReactDOM.render(
+    <KibanaRenderContextProvider {...coreStart}>
+      <BarApp history={history} coreStart={coreStart} />
+    </KibanaRenderContextProvider>,
+    element
+  );
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

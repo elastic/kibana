@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { IndexField } from '../../../../common/search_strategy/index_fields';
-import { getBrowserFields, getAllBrowserFields } from '.';
+import type { PropsWithChildren } from 'react';
 import type { IndexFieldSearch } from './use_data_view';
 import { useDataView } from './use_data_view';
-import { mockBrowserFields, mocksSource } from './mock';
+import { mocksSource } from './mock';
 import { mockGlobalState, TestProviders } from '../../mock';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useKibana } from '../../lib/kibana';
@@ -27,30 +26,6 @@ jest.mock('../../lib/kibana');
 jest.mock('../../lib/apm/use_track_http_request');
 
 describe('source/index.tsx', () => {
-  describe('getAllBrowserFields', () => {
-    test('it returns an array of all fields in the BrowserFields argument', () => {
-      expect(getAllBrowserFields(mockBrowserFields)).toMatchSnapshot();
-    });
-  });
-  describe('getBrowserFields', () => {
-    test('it returns an empty object given an empty array', () => {
-      const fields = getBrowserFields('title 1', []);
-      expect(fields).toEqual({});
-    });
-
-    test('it returns the same input given the same title and same fields length', () => {
-      const oldFields = getBrowserFields('title 1', mocksSource.indexFields as IndexField[]);
-      const newFields = getBrowserFields('title 1', mocksSource.indexFields as IndexField[]);
-      // Since it is memoized it will return the same object instance
-      expect(newFields).toBe(oldFields);
-    });
-
-    test('it transforms input into output as expected', () => {
-      const fields = getBrowserFields('title 2', mocksSource.indexFields as IndexField[]);
-      expect(fields).toEqual(mockBrowserFields);
-    });
-  });
-
   describe('useDataView hook', () => {
     const mockSearchResponse = {
       ...mocksSource,
@@ -70,6 +45,31 @@ describe('source/index.tsx', () => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
           data: {
+            dataViews: {
+              ...useKibana().services.data.dataViews,
+              get: async (dataViewId: string, displayErrors?: boolean, refreshFields = false) => {
+                const dataViewMock = {
+                  id: dataViewId,
+                  matchedIndices: refreshFields
+                    ? ['hello', 'world', 'refreshed']
+                    : ['hello', 'world'],
+                  fields: mocksSource.indexFields,
+                  getIndexPattern: () =>
+                    refreshFields ? 'hello*,world*,refreshed*' : 'hello*,world*',
+                  getRuntimeMappings: () => ({
+                    myfield: {
+                      type: 'keyword',
+                    },
+                  }),
+                };
+                return Promise.resolve({
+                  toSpec: () => dataViewMock,
+                  ...dataViewMock,
+                });
+              },
+              getFieldsForWildcard: async () => Promise.resolve(),
+              getExistingIndices: async (indices: string[]) => Promise.resolve(indices),
+            },
             search: {
               search: jest.fn().mockReturnValue({
                 subscribe: ({ next }: { next: Function }) => {
@@ -86,7 +86,7 @@ describe('source/index.tsx', () => {
     it('sets field data for data view', async () => {
       await act(async () => {
         const { waitForNextUpdate, result } = renderHook<
-          string,
+          PropsWithChildren<{}>,
           { indexFieldsSearch: IndexFieldSearch }
         >(() => useDataView(), {
           wrapper: TestProviders,
@@ -101,15 +101,13 @@ describe('source/index.tsx', () => {
       const { type: sourceType, payload } = mockDispatch.mock.calls[1][0];
       expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_DATA_VIEW');
       expect(payload.id).toEqual('neato');
-      expect(Object.keys(payload.browserFields)).toHaveLength(12);
-      expect(Object.keys(payload.indexFields)).toHaveLength(mocksSource.indexFields.length);
     });
 
     it('should reuse the result for dataView info when cleanCache not passed', async () => {
       let indexFieldsSearch: IndexFieldSearch;
       await act(async () => {
         const { waitForNextUpdate, result } = renderHook<
-          string,
+          PropsWithChildren<{}>,
           { indexFieldsSearch: IndexFieldSearch }
         >(() => useDataView(), {
           wrapper: TestProviders,
@@ -138,7 +136,7 @@ describe('source/index.tsx', () => {
       let indexFieldsSearch: IndexFieldSearch;
       await act(async () => {
         const { waitForNextUpdate, result } = renderHook<
-          string,
+          PropsWithChildren<{}>,
           { indexFieldsSearch: IndexFieldSearch }
         >(() => useDataView(), {
           wrapper: TestProviders,
@@ -149,18 +147,18 @@ describe('source/index.tsx', () => {
 
       await indexFieldsSearch!({ dataViewId: 'neato' });
       const {
-        payload: { browserFields, indexFields },
+        payload: { patternList },
       } = mockDispatch.mock.calls[1][0];
 
       mockDispatch.mockClear();
 
       await indexFieldsSearch!({ dataViewId: 'neato', cleanCache: true });
       const {
-        payload: { browserFields: newBrowserFields, indexFields: newIndexFields },
+        payload: { patternList: newPatternList },
       } = mockDispatch.mock.calls[1][0];
-
-      expect(browserFields).not.toBe(newBrowserFields);
-      expect(indexFields).not.toBe(newIndexFields);
+      expect(patternList).not.toBe(newPatternList);
+      expect(patternList).not.toContain('refreshed*');
+      expect(newPatternList).toContain('refreshed*');
     });
   });
 });

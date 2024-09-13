@@ -1,0 +1,247 @@
+{
+  "id": "@kbn/management-cards-navigation",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/management-cards-navigation",
+        "id": "def-common.CardsNavigation",
+        "type": "Function",
+        "tags": [],
+        "label": "CardsNavigation",
+        "description": [],
+        "signature": [
+          "({ sections, appBasePath, onCardClick, hideLinksTo, extendedCardNavigationDefinitions, }: ",
+          {
+            "pluginId": "@kbn/management-cards-navigation",
+            "scope": "common",
+            "docId": "kibKbnManagementCardsNavigationPluginApi",
+            "section": "def-common.CardsNavigationComponentProps",
+            "text": "CardsNavigationComponentProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-management/cards_navigation/src/cards_navigation.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-cards-navigation",
+            "id": "def-common.CardsNavigation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  sections,\n  appBasePath,\n  onCardClick,\n  hideLinksTo = [],\n  extendedCardNavigationDefinitions = {},\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-cards-navigation",
+                "scope": "common",
+                "docId": "kibKbnManagementCardsNavigationPluginApi",
+                "section": "def-common.CardsNavigationComponentProps",
+                "text": "CardsNavigationComponentProps"
+              }
+            ],
+            "path": "packages/kbn-management/cards_navigation/src/cards_navigation.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/management-cards-navigation",
+        "id": "def-common.CardsNavigationComponentProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "CardsNavigationComponentProps",
+        "description": [],
+        "path": "packages/kbn-management/cards_navigation/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-cards-navigation",
+            "id": "def-common.CardsNavigationComponentProps.sections",
+            "type": "Array",
+            "tags": [],
+            "label": "sections",
+            "description": [],
+            "signature": [
+              "AppRegistrySections",
+              "[]"
+            ],
+            "path": "packages/kbn-management/cards_navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-cards-navigation",
+            "id": "def-common.CardsNavigationComponentProps.appBasePath",
+            "type": "string",
+            "tags": [],
+            "label": "appBasePath",
+            "description": [],
+            "path": "packages/kbn-management/cards_navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-cards-navigation",
+            "id": "def-common.CardsNavigationComponentProps.onCardClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onCardClick",
+            "description": [],
+            "signature": [
+              "((e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined"
+            ],
+            "path": "packages/kbn-management/cards_navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/management-cards-navigation",
+                "id": "def-common.CardsNavigationComponentProps.onCardClick.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "e",
+                "description": [],
+                "signature": [
+                  "React.MouseEvent<HTMLAnchorElement, MouseEvent>"
+                ],
+                "path": "packages/kbn-management/cards_navigation/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/management-cards-navigation",
+            "id": "def-common.CardsNavigationComponentProps.hideLinksTo",
+            "type": "Array",
+            "tags": [],
+            "label": "hideLinksTo",
+            "description": [],
+            "signature": [
+              "(\"transform\" | \"tags\" | \"maintenanceWindows\" | \"dataViews\" | \"spaces\" | \"settings\" | \"data_quality\" | \"filesManagement\" | \"roles\" | \"reporting\" | \"api_keys\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"pipelines\" | \"triggersActions\" | \"triggersActionsConnectors\")[] | undefined"
+            ],
+            "path": "packages/kbn-management/cards_navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-cards-navigation",
+            "id": "def-common.CardsNavigationComponentProps.extendedCardNavigationDefinitions",
+            "type": "Object",
+            "tags": [],
+            "label": "extendedCardNavigationDefinitions",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "@kbn/management-cards-navigation",
+                "scope": "common",
+                "docId": "kibKbnManagementCardsNavigationPluginApi",
+                "section": "def-common.CardNavExtensionDefinition",
+                "text": "CardNavExtensionDefinition"
+              },
+              "> | undefined"
+            ],
+            "path": "packages/kbn-management/cards_navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/management-cards-navigation",
+        "id": "def-common.AppIds",
+        "type": "Enum",
+        "tags": [],
+        "label": "AppIds",
+        "description": [
+          "\napp ids shared by all solutions"
+        ],
+        "path": "packages/kbn-management/cards_navigation/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/management-cards-navigation",
+        "id": "def-common.AppId",
+        "type": "Type",
+        "tags": [],
+        "label": "AppId",
+        "description": [],
+        "signature": [
+          "\"transform\" | \"tags\" | \"maintenanceWindows\" | \"dataViews\" | \"spaces\" | \"settings\" | \"data_quality\" | \"filesManagement\" | \"roles\" | \"reporting\" | \"api_keys\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"pipelines\" | \"triggersActions\" | \"triggersActionsConnectors\""
+        ],
+        "path": "packages/kbn-management/cards_navigation/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-cards-navigation",
+        "id": "def-common.CardNavExtensionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "CardNavExtensionDefinition",
+        "description": [],
+        "signature": [
+          "AppDefinition",
+          " & ({ skipValidation?: false | undefined; } | { skipValidation: true; href: string; title: string; })"
+        ],
+        "path": "packages/kbn-management/cards_navigation/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/management-cards-navigation",
+        "id": "def-common.appCategories",
+        "type": "Object",
+        "tags": [],
+        "label": "appCategories",
+        "description": [],
+        "signature": [
+          "{ readonly DATA: \"data\"; readonly ACCESS: \"access\"; readonly ALERTS: \"alerts\"; readonly CONTENT: \"content\"; readonly OTHER: \"other\"; }"
+        ],
+        "path": "packages/kbn-management/cards_navigation/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

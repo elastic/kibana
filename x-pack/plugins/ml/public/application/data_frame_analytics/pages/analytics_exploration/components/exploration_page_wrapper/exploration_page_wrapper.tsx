@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { getAnalysisType, getDependentVar } from '../../../../../../../common/util/analytics_utils';
+import {
+  getAnalysisType,
+  getDependentVar,
+  ANALYSIS_CONFIG_TYPE,
+  type DataFrameAnalyticsConfig,
+  type DataFrameTaskStateType,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
 
@@ -18,22 +24,19 @@ import {
   defaultSearchQuery,
   getScatterplotMatrixLegendType,
   useResultsViewConfig,
-  DataFrameAnalyticsConfig,
   getDestinationIndex,
 } from '../../../../common';
-import { ResultsSearchQuery, ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
-
-import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
+import type { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSectionAnalytics, ExpandableSectionSplom } from '../expandable_section';
 import { ExplorationResultsTable } from '../exploration_results_table';
 import { ExplorationQueryBar } from '../exploration_query_bar';
 import { JobConfigErrorCallout } from '../job_config_error_callout';
 import { LoadingPanel } from '../loading_panel';
-import { FeatureImportanceSummaryPanelProps } from '../total_feature_importance_summary/feature_importance_summary';
+import type { FeatureImportanceSummaryPanelProps } from '../total_feature_importance_summary/feature_importance_summary';
 import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
-import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
-import { IndexPatternPrompt } from '../index_pattern_prompt';
+import type { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
+import { DataViewPrompt } from '../data_view_prompt';
 
 function getFilters(resultsField: string) {
   return {
@@ -82,15 +85,15 @@ export const ExplorationPageWrapper: FC<Props> = ({
   FeatureImportanceSummaryPanel,
 }) => {
   const {
-    indexPattern,
-    indexPatternErrorMessage,
+    dataView,
+    dataViewErrorMessage,
     isInitialized,
     isLoadingJobConfig,
     jobCapsServiceErrorMessage,
     jobConfig,
     jobConfigErrorMessage,
     jobStatus,
-    needsDestIndexPattern,
+    needsDestDataView,
     totalFeatureImportance,
   } = useResultsViewConfig(jobId);
 
@@ -119,13 +122,13 @@ export const ExplorationPageWrapper: FC<Props> = ({
   const destIndex = getDestinationIndex(jobConfig);
 
   const scatterplotFieldOptions = useScatterplotFieldOptions(
-    indexPattern,
+    dataView,
     jobConfig?.analyzed_fields?.includes,
     jobConfig?.analyzed_fields?.excludes,
     resultsField
   );
 
-  if (indexPatternErrorMessage !== undefined) {
+  if (dataViewErrorMessage !== undefined) {
     return (
       <EuiPanel grow={false}>
         <EuiCallOut
@@ -136,10 +139,8 @@ export const ExplorationPageWrapper: FC<Props> = ({
           iconType="cross"
         >
           <p>
-            {indexPatternErrorMessage}
-            {needsDestIndexPattern ? (
-              <IndexPatternPrompt destIndex={destIndex} color="text" />
-            ) : null}
+            {dataViewErrorMessage}
+            {needsDestDataView ? <DataViewPrompt destIndex={destIndex} color="text" /> : null}
           </p>
         </EuiCallOut>
       </EuiPanel>
@@ -168,7 +169,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
         </>
       )}
 
-      {indexPattern !== undefined && jobConfig && (
+      {dataView !== undefined && jobConfig && (
         <>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
@@ -176,7 +177,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem>
                   <ExplorationQueryBar
-                    indexPattern={indexPattern}
+                    dataView={dataView}
                     setSearchQuery={searchQueryUpdateHandler}
                     query={query}
                     filters={getFilters(jobConfig.dest.results_field!)}
@@ -225,7 +226,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
           <ExpandableSectionSplom
             fields={scatterplotFieldOptions}
             index={jobConfig?.dest.index}
-            indexPattern={indexPattern}
+            dataView={dataView}
             color={
               jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
               jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
@@ -240,13 +241,13 @@ export const ExplorationPageWrapper: FC<Props> = ({
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false &&
         jobConfig !== undefined &&
-        indexPattern !== undefined &&
+        dataView !== undefined &&
         isInitialized === true && (
           <ExplorationResultsTable
-            indexPattern={indexPattern}
+            dataView={dataView}
             jobConfig={jobConfig}
             jobStatus={jobStatus}
-            needsDestIndexPattern={needsDestIndexPattern}
+            needsDestDataView={needsDestDataView}
             searchQuery={searchQuery}
           />
         )}

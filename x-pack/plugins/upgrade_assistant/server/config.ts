@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 
 // -------------------------------
@@ -12,6 +12,15 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 // even for minor releases.
 // -------------------------------
 const configSchema = schema.object({
+  /**
+   * Disables the plugin.
+   */
+  enabled: offeringBasedSchema({
+    // Upgrade Assistant is disabled in serverless; refer to the serverless.yml file as the source of truth
+    // We take this approach in order to have a central place (serverless.yml) to view disabled plugins across Kibana
+    serverless: schema.boolean({ defaultValue: true }),
+  }),
+
   featureSet: schema.object({
     /**
      * Ml Snapshot should only be enabled for major version upgrades. Currently this
@@ -39,6 +48,9 @@ const configSchema = schema.object({
      */
     reindexCorrectiveActions: schema.boolean({ defaultValue: false }),
   }),
+  /**
+   * This config allows to hide the UI without disabling the plugin.
+   */
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),

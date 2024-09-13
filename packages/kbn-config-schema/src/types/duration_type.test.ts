@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { duration as momentDuration } from 'moment';
 import { schema } from '../..';
+import { ensureDuration } from '../duration';
 
 const { duration, object, contextRef, siblingRef } = schema;
 
@@ -21,6 +23,22 @@ test('handles numeric string', () => {
 
 test('handles number', () => {
   expect(duration().validate(123000)).toEqual(momentDuration(123000));
+});
+
+test('handles multi-unit', () => {
+  expect(duration().validate('1m30s')).toEqual(momentDuration(90000));
+  expect(duration().validate('1m30s70ms')).toEqual(momentDuration(90070));
+});
+
+test.each([60000, '60000', '60000ms', '60s', '1m', '1m0s'])(
+  'multiple ways of introducing 1 minute: %p',
+  (d) => {
+    expect(duration().validate(d)).toEqual(momentDuration(60000));
+  }
+);
+
+test('it supports years as Y and y', () => {
+  expect(duration().validate('1y')).toEqual(duration().validate('1Y'));
 });
 
 test('is required by default', () => {
@@ -135,6 +153,28 @@ describe('#defaultValue', () => {
   });
 });
 
+describe('#min', () => {
+  it('returns the value when larger', () => {
+    expect(duration({ min: '5m' }).validate('7m')).toEqual(ensureDuration('7m'));
+  });
+  it('throws error when value is smaller', () => {
+    expect(() => duration({ min: '5m' }).validate('3m')).toThrowErrorMatchingInlineSnapshot(
+      `"Value must be equal to or greater than [PT5M]"`
+    );
+  });
+});
+
+describe('#max', () => {
+  it('returns the value when smaller', () => {
+    expect(duration({ max: '10d' }).validate('7d')).toEqual(ensureDuration('7d'));
+  });
+  it('throws error when value is greater', () => {
+    expect(() => duration({ max: '10h' }).validate('17h')).toThrowErrorMatchingInlineSnapshot(
+      `"Value must be equal to or less than [PT10H]"`
+    );
+  });
+});
+
 test('returns error when not valid string or non-safe positive integer', () => {
   expect(() => duration().validate(-123)).toThrowErrorMatchingInlineSnapshot(
     `"Value in milliseconds is expected to be a safe positive integer."`
@@ -161,10 +201,10 @@ test('returns error when not valid string or non-safe positive integer', () => {
   );
 
   expect(() => duration().validate('123foo')).toThrowErrorMatchingInlineSnapshot(
-    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer."`
+    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|y] (e.g. '70ms', '5s', '3d', '1y', '1m30s'), where the duration is a safe positive integer."`
   );
 
   expect(() => duration().validate('123 456')).toThrowErrorMatchingInlineSnapshot(
-    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer."`
+    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|y] (e.g. '70ms', '5s', '3d', '1y', '1m30s'), where the duration is a safe positive integer."`
   );
 });

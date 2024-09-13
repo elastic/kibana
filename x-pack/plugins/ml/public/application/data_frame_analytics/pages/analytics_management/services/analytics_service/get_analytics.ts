@@ -6,28 +6,27 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ml } from '../../../../../services/ml_api_service';
 import {
+  getAnalysisType,
+  type DataFrameAnalysisConfigType,
+  DATA_FRAME_TASK_STATE,
+} from '@kbn/ml-data-frame-analytics-utils';
+import { useMlApi } from '../../../../../contexts/kibana';
+import type {
   GetDataFrameAnalyticsStatsResponseError,
   GetDataFrameAnalyticsStatsResponseOk,
 } from '../../../../../services/ml_api_service/data_frame_analytics';
-import {
-  getAnalysisType,
-  REFRESH_ANALYTICS_LIST_STATE,
-  refreshAnalyticsList$,
-} from '../../../../common';
+import { REFRESH_ANALYTICS_LIST_STATE, refreshAnalyticsList$ } from '../../../../common';
 
+import type { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
 import {
   DATA_FRAME_MODE,
-  DataFrameAnalyticsListRow,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
   isDataFrameAnalyticsStats,
   isDataFrameAnalyticsStopped,
 } from '../../components/analytics_list/common';
-import { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
-import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
-import { DATA_FRAME_TASK_STATE } from '../../../../../../../common/constants/data_frame_analytics';
+import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
 
 export const isGetDataFrameAnalyticsStatsResponseOk = (
   arg: any
@@ -48,7 +47,7 @@ export function getInitialAnalyticsStats(): AnalyticStatsBarStats {
   return {
     total: {
       label: i18n.translate('xpack.ml.overview.statsBar.totalAnalyticsLabel', {
-        defaultMessage: 'Total analytics jobs',
+        defaultMessage: 'Total',
       }),
       value: 0,
       show: true,
@@ -98,12 +97,18 @@ export function getAnalyticsJobsStats(
   );
   resultStats.failed.show = resultStats.failed.value > 0;
   resultStats.total.value = analyticsStats.count;
+
+  if (resultStats.total.value === 0) {
+    resultStats.started.show = false;
+    resultStats.stopped.show = false;
+  }
+
   return resultStats;
 }
 
-export const getAnalyticsFactory = (
+export const useGetAnalytics = (
   setAnalytics: React.Dispatch<React.SetStateAction<DataFrameAnalyticsListRow[]>>,
-  setAnalyticsStats: React.Dispatch<React.SetStateAction<AnalyticStatsBarStats | undefined>>,
+  setAnalyticsStats: (update: AnalyticStatsBarStats | undefined) => void,
   setErrorMessage: React.Dispatch<
     React.SetStateAction<GetDataFrameAnalyticsStatsResponseError | undefined>
   >,
@@ -111,6 +116,8 @@ export const getAnalyticsFactory = (
   setJobsAwaitingNodeCount: React.Dispatch<React.SetStateAction<number>>,
   blockRefresh: boolean
 ): GetAnalytics => {
+  const mlApi = useMlApi();
+
   let concurrentLoads = 0;
 
   const getAnalytics = async (forceRefresh = false) => {
@@ -123,8 +130,8 @@ export const getAnalyticsFactory = (
       }
 
       try {
-        const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics();
-        const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats();
+        const analyticsConfigs = await mlApi.dataFrameAnalytics.getDataFrameAnalytics();
+        const analyticsStats = await mlApi.dataFrameAnalytics.getDataFrameAnalyticsStats();
 
         const analyticsStatsResult = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? getAnalyticsJobsStats(analyticsStats)

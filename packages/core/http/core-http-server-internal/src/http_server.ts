@@ -1,31 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  createServer,
-  getListenerOptions,
-  getServerOptions,
-  getRequestId,
-} from '@kbn/server-http-tools';
-
+import { createServer, getServerOptions, setTlsConfig, getRequestId } from '@kbn/server-http-tools';
 import type { Duration } from 'moment';
-import { firstValueFrom, Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { Observable, Subscription, firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
 // @ts-expect-error no type definition
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { CoreVersionedRouter, isSafeMethod, Router } from '@kbn/core-http-router-server-internal';
 import type {
   IRouter,
   RouteConfigOptions,
@@ -43,6 +37,12 @@ import type {
   HttpAuth,
   IAuthHeadersStorage,
 } from '@kbn/core-http-server';
+import { performance } from 'perf_hooks';
+import { isBoom } from '@hapi/boom';
+import { identity } from 'lodash';
+import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
+import { Env } from '@kbn/config';
+import { CoreContext } from '@kbn/core-base-server-internal';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -54,6 +54,63 @@ import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
+import { StaticAssets, type InternalStaticAssets } from './static_assets';
+
+/**
+ * Adds ELU timings for the executed function to the current's context transaction
+ *
+ * @param path The request path
+ * @param log  Logger
+ */
+function startEluMeasurement<T>(
+  path: string,
+  log: Logger,
+  eluMonitorOptions: IHttpEluMonitorConfig | undefined
+): () => void {
+  if (!eluMonitorOptions?.enabled) {
+    return identity;
+  }
+
+  const startUtilization = performance.eventLoopUtilization();
+  const start = performance.now();
+
+  return function stopEluMeasurement() {
+    const { active, utilization } = performance.eventLoopUtilization(startUtilization);
+
+    apm.currentTransaction?.addLabels(
+      {
+        event_loop_utilization: utilization,
+        event_loop_active: active,
+      },
+      false
+    );
+
+    const duration = performance.now() - start;
+
+    const { elu: eluThreshold, ela: elaThreshold } = eluMonitorOptions.logging.threshold;
+
+    if (
+      eluMonitorOptions.logging.enabled &&
+      active >= eluMonitorOptions.logging.threshold.ela &&
+      utilization >= eluMonitorOptions.logging.threshold.elu
+    ) {
+      log.warn(
+        `Event loop utilization for ${path} exceeded threshold of ${elaThreshold}ms (${Math.round(
+          active
+        )}ms out of ${Math.round(duration)}ms) and ${eluThreshold * 100}% (${Math.round(
+          utilization * 100
+        )}%) `,
+        {
+          labels: {
+            request_path: path,
+            event_loop_active: active,
+            event_loop_utilization: utilization,
+          },
+        }
+      );
+    }
+  };
+}
 
 /** @internal */
 export interface HttpServerSetup {
@@ -70,7 +127,12 @@ export interface HttpServerSetup {
    * @param router {@link IRouter} - a router with registered route handlers.
    */
   registerRouterAfterListening: (router: IRouter) => void;
+  /**
+   * Register a static directory to be served by the Kibana server
+   * @note Static assets may be served over CDN
+   */
   registerStaticDir: (path: string, dirPath: string) => void;
+  staticAssets: InternalStaticAssets;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
@@ -94,9 +156,20 @@ export type LifecycleRegistrar = Pick<
   | 'registerOnPreResponse'
 >;
 
+export interface HttpServerSetupOptions {
+  config$: Observable<HttpConfig>;
+  executionContext?: InternalExecutionContextSetup;
+}
+
+/** @internal */
+export interface GetRoutersOptions {
+  pluginId?: string;
+}
+
 export class HttpServer {
   private server?: Server;
   private config?: HttpConfig;
+  private subscriptions: Subscription[] = [];
   private registeredRouters = new Set<IRouter>();
   private authRegistered = false;
   private cookieSessionStorageCreated = false;
@@ -105,15 +178,20 @@ export class HttpServer {
   private stopped = false;
 
   private readonly log: Logger;
+  private readonly logger: LoggerFactory;
   private readonly authState: AuthStateStorage;
   private readonly authRequestHeaders: AuthHeadersStorage;
   private readonly authResponseHeaders: AuthHeadersStorage;
+  private readonly env: Env;
 
   constructor(
-    private readonly logger: LoggerFactory,
+    private readonly coreContext: CoreContext,
     private readonly name: string,
     private readonly shutdownTimeout$: Observable<Duration>
   ) {
+    const { logger, env } = this.coreContext;
+    this.logger = logger;
+    this.env = env;
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authRequestHeaders = new AuthHeadersStorage();
     this.authResponseHeaders = new AuthHeadersStorage();
@@ -143,14 +221,16 @@ export class HttpServer {
     }
   }
 
-  public async setup(
-    config: HttpConfig,
-    executionContext?: InternalExecutionContextSetup
-  ): Promise<HttpServerSetup> {
-    const serverOptions = getServerOptions(config);
-    const listenerOptions = getListenerOptions(config);
+  public async setup({
+    config$,
+    executionContext,
+  }: HttpServerSetupOptions): Promise<HttpServerSetup> {
+    const config = await firstValueFrom(config$);
     this.config = config;
-    this.server = createServer(serverOptions, listenerOptions);
+
+    const serverOptions = getServerOptions(config);
+
+    this.server = createServer(serverOptions);
     await this.server.register([HapiStaticFiles]);
     if (config.compression.brotli.enabled) {
       await this.server.register({
@@ -159,6 +239,29 @@ export class HttpServer {
           compress: { quality: config.compression.brotli.quality },
         },
       });
+    }
+
+    // only hot-reloading TLS config - don't need to subscribe if TLS is initially disabled,
+    // given we can't hot-switch from/to enabled/disabled.
+    if (config.ssl.enabled) {
+      const configSubscription = config$
+        .pipe(pairwise())
+        .subscribe(([{ ssl: prevSslConfig }, { ssl: newSslConfig }]) => {
+          if (prevSslConfig.enabled !== newSslConfig.enabled) {
+            this.log.warn(
+              'Incompatible TLS config change detected - TLS cannot be toggled without a full server reboot.'
+            );
+            return;
+          }
+
+          const sameConfig = newSslConfig.isEqualTo(prevSslConfig);
+
+          if (!sameConfig) {
+            this.log.info('TLS configuration change detected - reloading TLS configuration.');
+            setTlsConfig(this.server!, newSslConfig);
+          }
+        });
+      this.subscriptions.push(configSubscription);
     }
 
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
@@ -170,17 +273,30 @@ export class HttpServer {
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();
 
+    const staticAssets = new StaticAssets({
+      basePath: basePathService,
+      cdnConfig: config.cdn,
+      shaDigest: this.env.packageInfo.buildShaShort,
+    });
+
     return {
       registerRouter: this.registerRouter.bind(this),
       registerRouterAfterListening: this.registerRouterAfterListening.bind(this),
       registerStaticDir: this.registerStaticDir.bind(this),
+      staticAssets,
       registerOnPreRouting: this.registerOnPreRouting.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerAuth: this.registerAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
       registerOnPreResponse: this.registerOnPreResponse.bind(this),
-      createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) =>
-        this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
+      createCookieSessionStorageFactory: <T extends object>(
+        cookieOptions: SessionStorageCookieOptions<T>
+      ) =>
+        this.createCookieSessionStorageFactory(
+          cookieOptions,
+          config.csp.disableEmbedding,
+          config.basePath
+        ),
       basePath: basePathService,
       csp: config.csp,
       auth: {
@@ -339,8 +455,10 @@ export class HttpServer {
     const log = this.logger.get('http', 'server', 'response');
 
     this.handleServerResponseEvent = (request) => {
-      const { message, meta } = getEcsResponseLog(request, this.log);
-      log.debug(message!, meta);
+      if (log.isLevelEnabled('debug')) {
+        const { message, meta } = getEcsResponseLog(request, this.log);
+        log.debug(message!, meta);
+      }
     };
 
     this.server.events.on('response', this.handleServerResponseEvent);
@@ -350,7 +468,27 @@ export class HttpServer {
     config: HttpConfig,
     executionContext?: InternalExecutionContextSetup
   ) {
+    this.server!.ext('onPreResponse', (request, responseToolkit) => {
+      const stop = (request.app as KibanaRequestState).measureElu;
+
+      if (!stop) {
+        return responseToolkit.continue;
+      }
+
+      if (isBoom(request.response)) {
+        stop();
+      } else {
+        request.response.events.once('finish', () => {
+          stop();
+        });
+      }
+
+      return responseToolkit.continue;
+    });
+
     this.server!.ext('onRequest', (request, responseToolkit) => {
+      const stop = startEluMeasurement(request.path, this.log, this.config?.eluMonitor);
+
       const requestId = getRequestId(request, config.requestId);
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
@@ -366,6 +504,7 @@ export class HttpServer {
         ...(request.app ?? {}),
         requestId,
         requestUuid: uuidv4(),
+        measureElu: stop,
         // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
         // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
         traceId: apm.currentTraceIds['trace.id'],
@@ -418,8 +557,9 @@ export class HttpServer {
     this.server.ext('onPreResponse', adoptToHapiOnPreResponseFormat(fn, this.log));
   }
 
-  private async createCookieSessionStorageFactory<T>(
+  private async createCookieSessionStorageFactory<T extends object>(
     cookieOptions: SessionStorageCookieOptions<T>,
+    disableEmbedding: boolean,
     basePath?: string
   ) {
     if (this.server === undefined) {
@@ -436,6 +576,7 @@ export class HttpServer {
       this.logger.get('http', 'server', this.name, 'cookie-session-storage'),
       this.server,
       cookieOptions,
+      disableEmbedding,
       basePath
     );
     return sessionStorageFactory;
@@ -487,6 +628,38 @@ export class HttpServer {
     });
   }
 
+  public getRouters({ pluginId }: GetRoutersOptions = {}): {
+    routers: Router[];
+    versionedRouters: CoreVersionedRouter[];
+  } {
+    const routers: {
+      routers: Router[];
+      versionedRouters: CoreVersionedRouter[];
+    } = {
+      routers: [],
+      versionedRouters: [],
+    };
+    const pluginIdFilter = pluginId ? Symbol(pluginId).toString() : undefined;
+
+    for (const router of this.registeredRouters) {
+      const matchesIdFilter =
+        !pluginIdFilter || (router as Router).pluginId?.toString() === pluginIdFilter;
+
+      if (
+        matchesIdFilter &&
+        (router as Router).getRoutes({ excludeVersionedRoutes: true }).length > 0
+      ) {
+        routers.routers.push(router as Router);
+      }
+
+      const versionedRouter = router.versioned as CoreVersionedRouter;
+      if (matchesIdFilter && versionedRouter.getRoutes().length > 0) {
+        routers.versionedRouters.push(versionedRouter);
+      }
+    }
+    return routers;
+  }
+
   private registerStaticDir(path: string, dirPath: string) {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
@@ -506,6 +679,7 @@ export class HttpServer {
         },
       },
       options: {
+        app: { access: 'public' },
         auth: false,
         cache: {
           privacy: 'public',
@@ -521,11 +695,11 @@ export class HttpServer {
     // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
     const validate = isSafeMethod(route.method) ? undefined : { payload: true };
     const { authRequired, tags, body = {}, timeout } = route.options;
-    const { accepts: allow, maxBytes, output, parse } = body;
+    const { accepts: allow, override, maxBytes, output, parse } = body;
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
-      access: route.options.access ?? (route.path.startsWith('/internal') ? 'internal' : 'public'),
+      access: route.options.access ?? 'internal',
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(
@@ -548,9 +722,12 @@ export class HttpServer {
         // (All NP routes are already required to specify their own validation in order to access the payload)
         validate,
         // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
-        payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
+        payload: [allow, override, maxBytes, output, parse, timeout?.payload].some(
+          (x) => x !== undefined
+        )
           ? {
               allow,
+              override,
               maxBytes,
               output,
               parse,

@@ -18,8 +18,18 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { AuthenticationResult } from './authentication_result';
+import type { AuthenticatorOptions } from './authenticator';
+import { Authenticator, enrichWithUserProfileId } from './authenticator';
+import { DeauthenticationResult } from './deauthentication_result';
+import type {
+  BasicAuthenticationProvider,
+  HTTPAuthenticationProvider,
+  SAMLAuthenticationProvider,
+} from './providers';
 import type { SecurityLicenseFeatures } from '../../common';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -29,7 +39,6 @@ import {
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { userProfileMock } from '../../common/model/user_profile.mock';
-import type { AuditLogger } from '../audit';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
@@ -45,15 +54,6 @@ import {
 import { sessionMock } from '../session_management/index.mock';
 import type { UserProfileGrant } from '../user_profile';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
-import { AuthenticationResult } from './authentication_result';
-import type { AuthenticatorOptions } from './authenticator';
-import { Authenticator, enrichWithUserProfileId } from './authenticator';
-import { DeauthenticationResult } from './deauthentication_result';
-import type {
-  BasicAuthenticationProvider,
-  HTTPAuthenticationProvider,
-  SAMLAuthenticationProvider,
-} from './providers';
 
 let auditLogger: AuditLogger;
 function getMockOptions({
@@ -61,11 +61,15 @@ function getMockOptions({
   http = {},
   selector,
   accessAgreementMessage,
+  customLogoutURL,
+  configContext = {},
 }: {
   providers?: Record<string, unknown> | string[];
   http?: Partial<AuthenticatorOptions['config']['authc']['http']>;
   selector?: AuthenticatorOptions['config']['authc']['selector'];
   accessAgreementMessage?: string;
+  customLogoutURL?: string;
+  configContext?: Record<string, unknown>;
 } = {}) {
   const auditService = auditServiceMock.create();
   auditLogger = auditLoggerMock.create();
@@ -84,10 +88,10 @@ function getMockOptions({
     loggers: loggingSystemMock.create(),
     getServerBaseURL: jest.fn(),
     config: createConfig(
-      ConfigSchema.validate({
-        authc: { selector, providers, http },
-        ...accessAgreementObj,
-      }),
+      ConfigSchema.validate(
+        { authc: { selector, providers, http }, ...accessAgreementObj },
+        configContext
+      ),
       loggingSystemMock.create().get(),
       { isTLSEnabled: false }
     ),
@@ -95,6 +99,7 @@ function getMockOptions({
     featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
     userProfileService: userProfileServiceMock.createStart(),
     isElasticCloudDeployment: jest.fn().mockReturnValue(false),
+    customLogoutURL,
   };
 }
 
@@ -249,6 +254,33 @@ describe('Authenticator', () => {
           '/mock-server-basepath/security/logged_out?next=%2Fapp%2Fml%2Fencode+me&msg=SESSION_EXPIRED'
         );
       });
+
+      it('points to a custom URL if `customLogoutURL` is specified', () => {
+        const authenticationProviderMock =
+          jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+        authenticationProviderMock.mockClear();
+        new Authenticator(
+          getMockOptions({
+            selector: { enabled: false },
+            providers: { saml: { saml1: { order: 0, realm: 'realm' } } },
+            customLogoutURL: 'https://some-logout-origin/logout',
+          })
+        );
+        const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
+
+        expect(getLoggedOutURL(httpServerMock.createKibanaRequest())).toBe(
+          'https://some-logout-origin/logout'
+        );
+
+        // We don't forward any Kibana specific query string parameters to the external logout URL.
+        expect(
+          getLoggedOutURL(
+            httpServerMock.createKibanaRequest({
+              query: { next: '/app/ml/encode me', msg: 'SESSION_EXPIRED' },
+            })
+          )
+        ).toBe('https://some-logout-origin/logout');
+      });
     });
 
     describe('HTTP authentication provider', () => {
@@ -284,6 +316,23 @@ describe('Authenticator', () => {
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
         ).toHaveBeenCalledWith(expect.anything(), {
           supportedSchemes: new Set(['apikey', 'basic', 'bearer']),
+        });
+      });
+
+      it('includes JWT options if specified', () => {
+        new Authenticator(
+          getMockOptions({
+            providers: { basic: { basic1: { order: 0 } } },
+            http: { jwt: { taggedRoutesOnly: true } },
+            configContext: { serverless: true },
+          })
+        );
+
+        expect(
+          jest.requireMock('./providers/http').HTTPAuthenticationProvider
+        ).toHaveBeenCalledWith(expect.anything(), {
+          supportedSchemes: new Set(['apikey', 'bearer', 'basic']),
+          jwt: { taggedRoutesOnly: true },
         });
       });
 
@@ -327,13 +376,6 @@ describe('Authenticator', () => {
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
-    });
-
-    it('fails if request is not provided.', async () => {
-      await expect(authenticator.login(undefined as any, undefined as any)).rejects.toThrowError(
-        'Request should be a valid "KibanaRequest" instance, was [undefined].'
-      );
-      expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
     it('fails if login attempt is not provided or invalid.', async () => {
@@ -1334,13 +1376,6 @@ describe('Authenticator', () => {
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
-    });
-
-    it('fails if request is not provided.', async () => {
-      await expect(authenticator.authenticate(undefined as any)).rejects.toThrowError(
-        'Request should be a valid "KibanaRequest" instance, was [undefined].'
-      );
-      expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
     it('fails if an authentication provider fails.', async () => {
@@ -2369,12 +2404,6 @@ describe('Authenticator', () => {
       authenticator = new Authenticator(mockOptions);
     });
 
-    it('fails if request is not provided.', async () => {
-      await expect(authenticator.reauthenticate(undefined as any)).rejects.toThrowError(
-        'Request should be a valid "KibanaRequest" instance, was [undefined].'
-      );
-    });
-
     it('does not try to reauthenticate request if session is not available.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
@@ -2414,6 +2443,7 @@ describe('Authenticator', () => {
 
     it('does not clear session if provider cannot handle authentication', async () => {
       const request = httpServerMock.createKibanaRequest();
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
@@ -2443,6 +2473,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(failureReason)
       );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
@@ -2463,6 +2494,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user)
       );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
@@ -2485,6 +2517,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user, { state: newState })
       );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
@@ -2511,6 +2544,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(failureReason)
       );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
@@ -2536,13 +2570,6 @@ describe('Authenticator', () => {
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
-    });
-
-    it('fails if request is not provided.', async () => {
-      await expect(authenticator.logout(undefined as any)).rejects.toThrowError(
-        'Request should be a valid "KibanaRequest" instance, was [undefined].'
-      );
-      expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
     it('redirects to login form if session does not exist.', async () => {

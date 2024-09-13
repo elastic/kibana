@@ -10,23 +10,22 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import type { EuiTableActionsColumnType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type DataViewField, UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS, type DataViewField } from '@kbn/data-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import seedrandom from 'seedrandom';
-import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import useObservable from 'react-use/lib/useObservable';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../embeddables/grid_embeddable/constants';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import { getEsQueryFromSavedSearch } from '../utils/saved_search_utils';
 import type { MetricFieldsStats } from '../../common/components/stats_table/components/field_count_stats';
-import { TimeBuckets } from '../../../../common/services/time_buckets';
 import type { FieldVisConfig } from '../../common/components/stats_table/types';
 import {
   NON_AGGREGATABLE_FIELD_TYPES,
@@ -36,13 +35,21 @@ import {
 import type { FieldRequestConfig, SupportedFieldType } from '../../../../common/types';
 import { kbnTypeToSupportedType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
-import type { DataVisualizerGridInput } from '../embeddables/grid_embeddable/grid_embeddable';
-import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { useFieldStatsSearchStrategy } from './use_field_stats';
 import { useOverallStats } from './use_overall_stats';
-import type { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
+import type {
+  OverallStatsSearchStrategyParams,
+  SamplingOption,
+} from '../../../../common/types/field_stats';
 import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
 import { getSupportedAggs } from '../utils/get_supported_aggs';
+import { DEFAULT_BAR_TARGET } from '../../common/constants';
+import {
+  DATA_VISUALIZER_INDEX_VIEWER_ID,
+  getDefaultPageState,
+} from '../constants/index_data_visualizer_viewer';
+import { getFieldsWithSubFields } from '../utils/get_fields_with_subfields_utils';
+import type { FieldStatisticTableEmbeddableProps } from '../embeddables/grid_embeddable/types';
 
 const defaults = getDefaultPageState();
 
@@ -56,20 +63,22 @@ const DEFAULT_SAMPLING_OPTION: SamplingOption = {
   probability: 0,
 };
 export const useDataVisualizerGridData = (
-  input: DataVisualizerGridInput,
+  // Data view is required for non-ES|QL queries like kuery or lucene
+  input: Required<FieldStatisticTableEmbeddableProps, 'dataView'>,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
   savedRandomSamplerPreference?: RandomSamplerOption,
   onUpdate?: (params: Dictionary<unknown>) => void
 ) => {
+  const loadIndexDataStartTime = useRef<number | undefined>(window.performance.now());
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, data, security, executionContext } = services;
+  const { uiSettings, data, security, executionContext, analytics } = services;
 
   const parentExecutionContext = useObservable(executionContext?.context$);
 
-  const embeddableExecutionContext: KibanaExecutionContext = useMemo(() => {
+  const componentExecutionContext: KibanaExecutionContext = useMemo(() => {
     const child: KibanaExecutionContext = {
       type: 'visualization',
-      name: DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE,
+      name: 'field_statistics_table',
       id: input.id,
     };
 
@@ -79,9 +88,9 @@ export const useDataVisualizerGridData = (
     };
   }, [parentExecutionContext, input.id]);
 
-  useExecutionContext(executionContext, embeddableExecutionContext);
+  useExecutionContext(executionContext, componentExecutionContext);
 
-  const { samplerShardSize, visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
+  const { visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
 
   const [lastRefresh, setLastRefresh] = useState(0);
   const searchSessionId = input.sessionId;
@@ -99,27 +108,32 @@ export const useDataVisualizerGridData = (
     return seed;
   }, [security]);
 
-  const {
-    currentSavedSearch,
-    currentDataView,
-    currentQuery,
-    currentFilters,
-    visibleFieldNames,
-    fieldsToFetch,
-    samplingOption,
-  } = useMemo(
-    () => ({
-      currentSavedSearch: input?.savedSearch,
-      currentDataView: input.dataView,
-      currentQuery: input?.query,
-      visibleFieldNames: input?.visibleFieldNames ?? [],
-      currentFilters: input?.filters,
-      fieldsToFetch: input?.fieldsToFetch,
-      /** By default, use random sampling **/
-      samplingOption: input?.samplingOption ?? DEFAULT_SAMPLING_OPTION,
-    }),
-    [input]
-  );
+  const { currentSavedSearch, currentDataView, currentQuery, currentFilters, samplingOption } =
+    useMemo(() => {
+      return {
+        currentSavedSearch: input?.savedSearch,
+        currentDataView: input.dataView,
+        currentQuery: input?.query,
+        currentFilters: input?.filters,
+        /** By default, use random sampling **/
+        samplingOption: input?.samplingOption ?? DEFAULT_SAMPLING_OPTION,
+      };
+    }, [input?.savedSearch, input.dataView, input?.query, input?.filters, input?.samplingOption]);
+  const dataViewFields: DataViewField[] = useMemo(() => currentDataView.fields, [currentDataView]);
+
+  const { visibleFieldNames, fieldsToFetch } = useMemo(() => {
+    // Helper logic to add multi-fields to the table for embeddables outside of Index data visualizer
+    // For example, adding {field} will also add {field.keyword} if it exists
+    return getFieldsWithSubFields({
+      input,
+      currentDataView,
+      shouldGetSubfields:
+        input.shouldGetSubfields !== undefined
+          ? input.shouldGetSubfields
+          : input.id !== DATA_VISUALIZER_INDEX_VIEWER_ID,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input.id, input.fieldsToFetch, input.visibleFieldNames, currentDataView]);
 
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery, queryOrAggregateQuery } = useMemo(() => {
@@ -134,10 +148,11 @@ export const useDataVisualizerGridData = (
     });
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
-      if (dataVisualizerListState.filters) {
+      if (filterManager) {
         const globalFilters = filterManager?.getGlobalFilters();
 
-        if (filterManager) filterManager.setFilters(dataVisualizerListState.filters);
+        if (dataVisualizerListState.filters)
+          filterManager.setFilters(dataVisualizerListState.filters);
         if (globalFilters) filterManager?.addFilters(globalFilters);
       }
       return {
@@ -166,16 +181,10 @@ export const useDataVisualizerGridData = (
       currentFilters,
     }),
     lastRefresh,
+    data.query.filterManager,
   ]);
 
-  const _timeBuckets = useMemo(() => {
-    return new TimeBuckets({
-      [UI_SETTINGS.HISTOGRAM_MAX_BARS]: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-      [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-      dateFormat: uiSettings.get('dateFormat'),
-      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
-    });
-  }, [uiSettings]);
+  const _timeBuckets = useTimeBuckets(uiSettings);
 
   const timefilter = useTimefilter({
     timeRangeSelector: currentDataView?.timeFieldName !== undefined,
@@ -198,24 +207,26 @@ export const useDataVisualizerGridData = (
 
       const tf = timefilter;
 
-      if (!buckets || !tf || !currentDataView) return;
+      if (!buckets || !tf || !currentDataView || lastRefresh === 0) return;
 
       const activeBounds = tf.getActiveBounds();
-
-      let earliest: number | undefined;
-      let latest: number | undefined;
+      let earliest: number | string | undefined;
+      let latest: number | string | undefined;
       if (activeBounds !== undefined && currentDataView.timeFieldName !== undefined) {
         earliest = activeBounds.min?.valueOf();
         latest = activeBounds.max?.valueOf();
       }
-
+      if (input.timeRange) {
+        earliest = input.timeRange.from;
+        latest = input.timeRange.to;
+      }
       const bounds = tf.getActiveBounds();
-      const BAR_TARGET = 75;
+      const barTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET) ?? DEFAULT_BAR_TARGET;
       buckets.setInterval('auto');
 
       if (bounds) {
         buckets.setBounds(bounds);
-        buckets.setBarTarget(BAR_TARGET);
+        buckets.setBarTarget(barTarget);
       }
 
       const aggInterval = buckets.getInterval();
@@ -241,50 +252,42 @@ export const useDataVisualizerGridData = (
           }
         }
       });
-
       return {
         earliest,
         latest,
         aggInterval,
         intervalMs: aggInterval?.asMilliseconds(),
         searchQuery,
-        samplerShardSize,
         sessionId: searchSessionId,
         index: currentDataView.title,
         timeFieldName: currentDataView.timeFieldName,
         runtimeFieldMap: currentDataView.getRuntimeMappings(),
         aggregatableFields,
         nonAggregatableFields,
-        fieldsToFetch,
         browserSessionSeed,
         samplingOption: { ...samplingOption, seed: browserSessionSeed.toString() },
-        embeddableExecutionContext,
+        embeddableExecutionContext: componentExecutionContext,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      _timeBuckets,
-      timefilter,
       currentDataView.id,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(searchQuery),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(samplingOption),
-      samplerShardSize,
-      searchSessionId,
       lastRefresh,
-      fieldsToFetch,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify({ searchQuery, samplingOption, fieldsToFetch }),
+      searchSessionId,
       browserSessionSeed,
-      embeddableExecutionContext,
+      input.timeRange?.from,
+      input.timeRange?.to,
     ]
   );
 
   const { overallStats, progress: overallStatsProgress } = useOverallStats(
+    false,
     fieldStatsRequest,
     lastRefresh,
     dataVisualizerListState.probability
   );
-
   const configsWithoutStats = useMemo(() => {
     if (overallStatsProgress.loaded < 100) return;
     const existMetricFields = metricConfigs
@@ -330,7 +333,6 @@ export const useDataVisualizerGridData = (
     () => overallStatsProgress.loaded * 0.2 + strategyResponse.progress.loaded * 0.8,
     [overallStatsProgress.loaded, strategyResponse.progress.loaded]
   );
-
   useEffect(() => {
     const timeUpdateSubscription = merge(
       timefilter.getTimeUpdate$(),
@@ -349,8 +351,6 @@ export const useDataVisualizerGridData = (
       timeUpdateSubscription.unsubscribe();
     };
   });
-
-  const dataViewFields: DataViewField[] = useMemo(() => currentDataView.fields, [currentDataView]);
 
   const createMetricCards = useCallback(() => {
     const configs: FieldVisConfig[] = [];
@@ -506,6 +506,21 @@ export const useDataVisualizerGridData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overallStats, showEmptyFields]);
 
+  useEffect(() => {
+    if (combinedProgress === 100 && loadIndexDataStartTime.current !== undefined) {
+      const loadIndexDataDuration = window.performance.now() - loadIndexDataStartTime.current;
+
+      // Set this to undefined so reporting the metric gets triggered only once.
+      loadIndexDataStartTime.current = undefined;
+
+      reportPerformanceMetricEvent(analytics, {
+        eventName: 'dataVisualizerDataLoaded',
+        duration: loadIndexDataDuration,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [combinedProgress]);
+
   const configs = useMemo(
     () => {
       const fieldStats = strategyResponse.fieldStats;
@@ -559,6 +574,7 @@ export const useDataVisualizerGridData = (
   // Inject custom action column for the index based visualizer
   // Hide the column completely if no access to any of the plugins
   const extendedColumns = useMemo(() => {
+    if (!input.dataView) return undefined;
     const actions = getActions(
       input.dataView,
       services,

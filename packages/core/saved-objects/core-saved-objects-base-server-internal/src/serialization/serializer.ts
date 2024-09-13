@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import typeDetect from 'type-detect';
@@ -94,6 +95,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       references,
       coreMigrationVersion,
       typeMigrationVersion,
+      managed,
       migrationVersion = migrationVersionCompatibility === 'compatible' && typeMigrationVersion
         ? { [type]: typeMigrationVersion }
         : undefined,
@@ -115,12 +117,15 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(includeNamespaces && { namespaces }),
       ...(originId && { originId }),
       attributes: _source[type],
-      references: references || [],
+      references: references || [], // adds references default
+      ...(managed != null ? { managed } : {}),
       ...(migrationVersion && { migrationVersion }),
       ...(coreMigrationVersion && { coreMigrationVersion }),
       ...(typeMigrationVersion != null ? { typeMigrationVersion } : {}),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
+      ...(_source.updated_by && { updated_by: _source.updated_by }),
       ...(_source.created_at && { created_at: _source.created_at }),
+      ...(_source.created_by && { created_by: _source.created_by }),
       ...(version && { version }),
     };
   }
@@ -141,16 +146,20 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       migrationVersion,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       updated_at,
+      updated_by: updatedBy,
       created_at: createdAt,
+      created_by: createdBy,
       version,
       references,
       coreMigrationVersion,
       typeMigrationVersion,
+      managed,
     } = savedObj;
     const source = {
       [type]: attributes,
       type,
       references,
+      ...(managed != null ? { managed } : {}),
       ...(namespace && this.registry.isSingleNamespace(type) && { namespace }),
       ...(namespaces && this.registry.isMultiNamespace(type) && { namespaces }),
       ...(originId && { originId }),
@@ -158,9 +167,10 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(coreMigrationVersion && { coreMigrationVersion }),
       ...(typeMigrationVersion != null ? { typeMigrationVersion } : {}),
       ...(updated_at && { updated_at }),
+      ...(updatedBy && { updated_by: updatedBy }),
       ...(createdAt && { created_at: createdAt }),
+      ...(createdBy && { created_by: createdBy }),
     };
-
     return {
       _id: this.generateRawId(namespace, type, id),
       _source: source,

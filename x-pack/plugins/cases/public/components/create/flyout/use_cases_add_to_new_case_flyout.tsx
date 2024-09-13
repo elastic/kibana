@@ -6,11 +6,11 @@
  */
 
 import type React from 'react';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCasesToast } from '../../../common/use_cases_toast';
-import type { Case } from '../../../containers/types';
-import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
+import type { CaseUI } from '../../../containers/types';
+import { CasesContextStoreActionsList } from '../../cases_context/state/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import type { CreateCaseFlyoutProps } from './create_case_flyout';
 
@@ -19,7 +19,15 @@ type AddToNewCaseFlyoutProps = Omit<CreateCaseFlyoutProps, 'attachments'> & {
   toastContent?: string;
 };
 
-export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) => {
+export const useCasesAddToNewCaseFlyout = ({
+  initialValue,
+  toastTitle,
+  toastContent,
+
+  afterCaseCreated,
+  onSuccess,
+  onClose,
+}: AddToNewCaseFlyoutProps = {}) => {
   const { dispatch } = useCasesContext();
   const casesToasts = useCasesToast();
 
@@ -37,43 +45,55 @@ export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) 
       dispatch({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
         payload: {
-          ...props,
+          initialValue,
           attachments,
           headerContent,
           onClose: () => {
             closeFlyout();
-            if (props.onClose) {
-              return props.onClose();
+            if (onClose) {
+              return onClose();
             }
           },
-          onSuccess: async (theCase: Case) => {
+          onSuccess: async (theCase: CaseUI) => {
             if (theCase) {
               casesToasts.showSuccessAttach({
                 theCase,
                 attachments: attachments ?? [],
-                title: props.toastTitle,
-                content: props.toastContent,
+                title: toastTitle,
+                content: toastContent,
               });
             }
-            if (props.onSuccess) {
-              return props.onSuccess(theCase);
+            if (onSuccess) {
+              return onSuccess(theCase);
             }
           },
           afterCaseCreated: async (...args) => {
             closeFlyout();
-            if (props.afterCaseCreated) {
-              return props.afterCaseCreated(...args);
+            if (afterCaseCreated) {
+              return afterCaseCreated(...args);
             }
           },
         },
       });
     },
-    [casesToasts, closeFlyout, dispatch, props]
+    [
+      initialValue,
+      casesToasts,
+      closeFlyout,
+      dispatch,
+      toastTitle,
+      toastContent,
+      afterCaseCreated,
+      onSuccess,
+      onClose,
+    ]
   );
-  return {
-    open: openFlyout,
-    close: closeFlyout,
-  };
+  return useMemo(() => {
+    return {
+      open: openFlyout,
+      close: closeFlyout,
+    };
+  }, [openFlyout, closeFlyout]);
 };
 
 export type UseCasesAddToNewCaseFlyout = typeof useCasesAddToNewCaseFlyout;

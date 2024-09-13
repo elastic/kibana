@@ -14,17 +14,21 @@ import { alertComment, basicComment, mockCase } from '../containers/mock';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import type { SupportedCaseAttachment } from '../types';
-import { getByTestId } from '@testing-library/dom';
+import { getByTestId, queryByTestId, screen } from '@testing-library/react';
 import { OWNER_INFO } from '../../common/constants';
+import { useApplication } from './lib/kibana/use_application';
 
 jest.mock('./lib/kibana');
+jest.mock('./lib/kibana/use_application');
 
 const useToastsMock = useToasts as jest.Mock;
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useApplicationMock = useApplication as jest.Mock;
 
 describe('Use cases toast hook', () => {
   const successMock = jest.fn();
   const errorMock = jest.fn();
+  const dangerMock = jest.fn();
   const getUrlForApp = jest.fn().mockReturnValue(`/app/cases/${mockCase.id}`);
   const navigateToUrl = jest.fn();
 
@@ -42,18 +46,19 @@ describe('Use cases toast hook', () => {
     expect(el).toHaveTextContent(content);
   }
 
-  function navigateToCase() {
+  async function navigateToCase() {
     const mockParams = successMock.mock.calls[0][0];
     const el = document.createElement('div');
     mockParams.text(el);
     const button = getByTestId(el, 'toaster-content-case-view-link');
-    userEvent.click(button);
+    await userEvent.click(button);
   }
 
   useToastsMock.mockImplementation(() => {
     return {
       addSuccess: successMock,
       addError: errorMock,
+      addDanger: dangerMock,
     };
   });
 
@@ -64,6 +69,8 @@ describe('Use cases toast hook', () => {
       getUrlForApp,
       navigateToUrl,
     };
+
+    useApplicationMock.mockReturnValue({ appId: 'testAppId' });
   });
 
   describe('showSuccessAttach', () => {
@@ -145,6 +152,7 @@ describe('Use cases toast hook', () => {
     describe('Toast content', () => {
       let appMockRender: AppMockRenderer;
       const onViewCaseClick = jest.fn();
+
       beforeEach(() => {
         appMockRender = createAppMockRenderer();
         onViewCaseClick.mockReset();
@@ -207,12 +215,19 @@ describe('Use cases toast hook', () => {
         expect(onViewCaseClick).not.toHaveBeenCalled();
       });
 
-      it('Calls the onViewCaseClick when clicked', () => {
+      it('Calls the onViewCaseClick when clicked', async () => {
         const result = appMockRender.render(
           <CaseToastSuccessContent onViewCaseClick={onViewCaseClick} />
         );
-        userEvent.click(result.getByTestId('toaster-content-case-view-link'));
+
+        await userEvent.click(result.getByTestId('toaster-content-case-view-link'));
         expect(onViewCaseClick).toHaveBeenCalled();
+      });
+
+      it('hides the view case link when onViewCaseClick is not defined', () => {
+        appMockRender.render(<CaseToastSuccessContent />);
+
+        expect(screen.queryByTestId('toaster-content-case-view-link')).not.toBeInTheDocument();
       });
     });
 
@@ -222,30 +237,33 @@ describe('Use cases toast hook', () => {
         ownerInfo.appId,
       ]);
 
-      it.each(tests)('should navigate correctly with owner %s and appId %s', (owner, appId) => {
-        const { result } = renderHook(
-          () => {
-            return useCasesToast();
-          },
-          { wrapper: TestProviders }
-        );
+      it.each(tests)(
+        'should navigate correctly with owner %s and appId %s',
+        async (owner, appId) => {
+          const { result } = renderHook(
+            () => {
+              return useCasesToast();
+            },
+            { wrapper: TestProviders }
+          );
 
-        result.current.showSuccessAttach({
-          theCase: { ...mockCase, owner },
-          title: 'Custom title',
-        });
+          result.current.showSuccessAttach({
+            theCase: { ...mockCase, owner },
+            title: 'Custom title',
+          });
 
-        navigateToCase();
+          await navigateToCase();
 
-        expect(getUrlForApp).toHaveBeenCalledWith(appId, {
-          deepLinkId: 'cases',
-          path: '/mock-id',
-        });
+          expect(getUrlForApp).toHaveBeenCalledWith(appId, {
+            deepLinkId: 'cases',
+            path: '/mock-id',
+          });
 
-        expect(navigateToUrl).toHaveBeenCalledWith('/app/cases/mock-id');
-      });
+          expect(navigateToUrl).toHaveBeenCalledWith('/app/cases/mock-id');
+        }
+      );
 
-      it('navigates to the current app if the owner is invalid', () => {
+      it('navigates to the current app if the owner is invalid', async () => {
         const { result } = renderHook(
           () => {
             return useCasesToast();
@@ -258,12 +276,37 @@ describe('Use cases toast hook', () => {
           title: 'Custom title',
         });
 
-        navigateToCase();
+        await navigateToCase();
 
         expect(getUrlForApp).toHaveBeenCalledWith('testAppId', {
           deepLinkId: 'cases',
           path: '/mock-id',
         });
+      });
+
+      it('does not navigates to a case if the appId is not defined', () => {
+        useApplicationMock.mockReturnValue({ appId: undefined });
+
+        const { result } = renderHook(
+          () => {
+            return useCasesToast();
+          },
+          { wrapper: TestProviders }
+        );
+
+        result.current.showSuccessAttach({
+          theCase: { ...mockCase, owner: 'in-valid' },
+          title: 'Custom title',
+        });
+
+        const mockParams = successMock.mock.calls[0][0];
+        const el = document.createElement('div');
+        mockParams.text(el);
+        const button = queryByTestId(el, 'toaster-content-case-view-link');
+
+        expect(button).toBeNull();
+        expect(getUrlForApp).not.toHaveBeenCalled();
+        expect(navigateToUrl).not.toHaveBeenCalled();
       });
     });
   });
@@ -349,6 +392,24 @@ describe('Use cases toast hook', () => {
       expect(successMock).toHaveBeenCalledWith({
         className: 'eui-textBreakWord',
         title: 'my title',
+      });
+    });
+  });
+
+  describe('showDangerToast', () => {
+    it('should show a danger toast', () => {
+      const { result } = renderHook(
+        () => {
+          return useCasesToast();
+        },
+        { wrapper: TestProviders }
+      );
+
+      result.current.showDangerToast('my danger toast');
+
+      expect(dangerMock).toHaveBeenCalledWith({
+        className: 'eui-textBreakWord',
+        title: 'my danger toast',
       });
     });
   });

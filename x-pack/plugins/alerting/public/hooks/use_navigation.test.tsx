@@ -9,10 +9,11 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import {
   useCreateMaintenanceWindowNavigation,
+  useEditMaintenanceWindowsNavigation,
   useMaintenanceWindowsNavigation,
 } from './use_navigation';
 import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
-import { APP_ID, MAINTENANCE_WINDOWS_APP_ID } from '../config';
+import { MANAGEMENT_APP_ID, MAINTENANCE_WINDOWS_APP_ID } from '../../common';
 
 const mockNavigateTo = jest.fn();
 const mockGetAppUrl = jest.fn();
@@ -51,7 +52,7 @@ describe('useNavigation', () => {
         result.current.getMaintenanceWindowsUrl(false);
       });
 
-      expect(mockGetAppUrl).toHaveBeenCalledWith(APP_ID, {
+      expect(mockGetAppUrl).toHaveBeenCalledWith(MANAGEMENT_APP_ID, {
         absolute: false,
         path: '/',
         deepLinkId: MAINTENANCE_WINDOWS_APP_ID,
@@ -67,7 +68,7 @@ describe('useNavigation', () => {
         result.current.navigateToMaintenanceWindows();
       });
 
-      expect(mockNavigateTo).toHaveBeenCalledWith(APP_ID, {
+      expect(mockNavigateTo).toHaveBeenCalledWith(MANAGEMENT_APP_ID, {
         path: '/',
         deepLinkId: MAINTENANCE_WINDOWS_APP_ID,
       });
@@ -84,9 +85,26 @@ describe('useNavigation', () => {
         result.current.navigateToCreateMaintenanceWindow();
       });
 
-      expect(mockNavigateTo).toHaveBeenCalledWith(APP_ID, {
+      expect(mockNavigateTo).toHaveBeenCalledWith(MANAGEMENT_APP_ID, {
         deepLinkId: MAINTENANCE_WINDOWS_APP_ID,
         path: '/create',
+      });
+    });
+  });
+
+  describe('useEditMaintenanceWindowNavigation', () => {
+    it('it calls navigateToEditMaintenanceWindow with correct arguments', () => {
+      const { result } = renderHook(() => useEditMaintenanceWindowsNavigation(), {
+        wrapper: appMockRenderer.AppWrapper,
+      });
+
+      act(() => {
+        result.current.navigateToEditMaintenanceWindows('1234');
+      });
+
+      expect(mockNavigateTo).toHaveBeenCalledWith(MANAGEMENT_APP_ID, {
+        deepLinkId: MAINTENANCE_WINDOWS_APP_ID,
+        path: '/edit/1234',
       });
     });
   });

@@ -61,6 +61,10 @@ describe('convertRuleIdsToKueryNode', () => {
   });
 
   test('should convert empty ids array correctly', () => {
-    expect(convertRuleIdsToKueryNode([])).toEqual(undefined);
+    expect(convertRuleIdsToKueryNode([])).toEqual({
+      arguments: [],
+      function: 'or',
+      type: 'function',
+    });
   });
 });

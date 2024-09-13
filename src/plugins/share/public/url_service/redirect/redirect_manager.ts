@@ -1,22 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { CoreSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
-import type { Location } from 'history';
 import { migrateToLatest } from '@kbn/kibana-utils-plugin/common';
+import type { Location } from 'history';
+import { BehaviorSubject } from 'rxjs';
 import type { UrlService } from '../../../common/url_service';
-import { parseSearchParams, RedirectOptions } from '../../../common/url_service/locators/redirect';
 import {
   LEGACY_SHORT_URL_LOCATOR_ID,
   LegacyShortUrlLocatorParams,
 } from '../../../common/url_service/locators/legacy_short_url_locator';
+import { parseSearchParams, RedirectOptions } from '../../../common/url_service/locators/redirect';
+import { getHomeHref } from '../../lib/get_home_href';
 
 export interface RedirectManagerDependencies {
   url: UrlService;
@@ -28,18 +30,27 @@ export class RedirectManager {
   constructor(public readonly deps: RedirectManagerDependencies) {}
 
   public registerLocatorRedirectApp(core: CoreSetup) {
-    core.application.register({
+    const { application, customBranding, http, theme } = core;
+
+    application.register({
       id: 'r',
       title: 'Redirect endpoint',
       chromeless: true,
       mount: async (params) => {
         const { render } = await import('./render');
+        const [start] = await core.getStartServices();
+        const { chrome, uiSettings } = start;
+
         const unmount = render(params.element, {
           manager: this,
-          theme: core.theme,
-          customBranding: core.customBranding,
+          customBranding,
+          docTitle: chrome.docTitle,
+          theme,
+          homeHref: getHomeHref(http, uiSettings),
         });
+
         this.onMount(params.history.location);
+
         return () => {
           unmount();
         };

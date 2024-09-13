@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
@@ -15,7 +16,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Package } from '@kbn/repo-packages';
 
 import { firstValueFrom, from } from 'rxjs';
-import { map, toArray } from 'rxjs/operators';
+import { map, toArray } from 'rxjs';
 import { resolve } from 'path';
 import { ConfigService, Env } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -217,7 +218,7 @@ describe('plugins discovery system', () => {
   afterEach(() => {
     mockFs.restore();
     // restore the console.log behavior
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('discovers plugins in the search locations', async () => {
@@ -278,7 +279,7 @@ describe('plugins discovery system', () => {
       .toPromise();
 
     expect(errors).toContain(
-      `Error: Unexpected token o in JSON at position 1 (invalid-manifest, ${manifestPath(
+      `Error: Unexpected token 'o', "not-json" is not valid JSON (invalid-manifest, ${manifestPath(
         'plugin_a'
       )})`
     );

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreEditor, Token } from '../types';
@@ -41,18 +42,6 @@ export default class RowParser {
     }
     let line = (this.editor.getLineValue(lineNumber) || '').trim();
 
-    // Check if the line has variables, depending on the request type, (e.g. single line, multi doc requests) return the correct mode
-    if (line && /(\${\w+})/.test(line)) {
-      lineNumber++;
-      line = (this.editor.getLineValue(lineNumber) || '').trim();
-
-      if (line.startsWith('{')) {
-        return MODE.REQUEST_START;
-      }
-      // next line is another request
-      // eslint-disable-next-line no-bitwise
-      return MODE.REQUEST_START | MODE.REQUEST_END;
-    }
     if (!line || line.startsWith('#') || line.startsWith('//') || line.startsWith('/*')) {
       return MODE.BETWEEN_REQUESTS;
     } // empty line or a comment waiting for a new req to start

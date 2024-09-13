@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './model.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
 import { createContextMock, MockedMigratorContext } from '../test_helpers';
-import type { RetryableEsClientError } from '../../actions';
+import type { FetchIndexResponse, RetryableEsClientError } from '../../actions';
 import type { State, BaseState, FatalState, AllActionStates } from '../state';
 import type { StateActionResponse } from './types';
 import { model, modelStageMap } from './model';
@@ -30,6 +31,7 @@ describe('model', () => {
     retryCount: 0,
     retryDelay: 0,
     logs: [],
+    skipDocumentMigration: false,
   };
 
   const retryableError: RetryableEsClientError = {
@@ -88,7 +90,7 @@ describe('model', () => {
           mappings: { properties: {} },
           settings: {},
         },
-      });
+      }) as Either.Right<FetchIndexResponse>;
       const newState = model(state, res, context);
 
       expect(newState.retryCount).toEqual(0);

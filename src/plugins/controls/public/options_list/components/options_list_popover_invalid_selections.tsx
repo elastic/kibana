@@ -1,49 +1,51 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
 
 import {
-  EuiSelectableOption,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiScreenReaderOnly,
   EuiSelectable,
+  EuiSelectableOption,
   EuiSpacer,
   EuiTitle,
-  EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { OptionsListReduxState } from '../types';
+import { getSelectionAsFieldType } from '../../../common/options_list/options_list_selections';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListStrings } from './options_list_strings';
-import { optionsListReducers } from '../options_list_reducers';
 
 export const OptionsListPopoverInvalidSelections = () => {
-  // Redux embeddable container Context
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { deselectOption },
-  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
-  const dispatch = useEmbeddableDispatch();
+  const optionsList = useOptionsList();
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const fieldName = select((state) => state.explicitInput.fieldName);
+  const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
+
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const fieldSpec = optionsList.select((state) => state.componentState.field);
+
+  const dataViewId = optionsList.select((state) => state.output.dataViewId);
+  const fieldFormatter = useFieldFormatter({ dataViewId, fieldSpec });
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
     /* This useEffect makes selectableOptions responsive to unchecking options */
     const options: EuiSelectableOption[] = (invalidSelections ?? []).map((key) => {
       return {
-        key,
-        label: key,
+        key: String(key),
+        label: fieldFormatter(key),
         checked: 'on',
         className: 'optionsList__selectionInvalid',
-        'data-test-subj': `optionsList-control-ignored-selection-${key}`,
+        'data-test-subj': `optionsList-control-invalid-selection-${key}`,
         prepend: (
           <EuiScreenReaderOnly>
             <div>
@@ -55,7 +57,7 @@ export const OptionsListPopoverInvalidSelections = () => {
       };
     });
     setSelectableOptions(options);
-  }, [invalidSelections]);
+  }, [fieldFormatter, invalidSelections]);
 
   return (
     <>
@@ -63,13 +65,25 @@ export const OptionsListPopoverInvalidSelections = () => {
       <EuiTitle
         size="xxs"
         className="optionsList-control-ignored-selection-title"
-        data-test-subj="optionList__ignoredSelectionLabel"
+        data-test-subj="optionList__invalidSelectionLabel"
       >
-        <label>
-          {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
-            invalidSelections?.length ?? 0
-          )}
-        </label>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              type="warning"
+              color="warning"
+              title={OptionsListStrings.popover.getInvalidSelectionScreenReaderText()}
+              size="s"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <label>
+              {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
+                invalidSelections?.length ?? 0
+              )}
+            </label>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiTitle>
       <EuiSelectable
         aria-label={OptionsListStrings.popover.getInvalidSelectionsSectionAriaLabel(
@@ -79,8 +93,15 @@ export const OptionsListPopoverInvalidSelections = () => {
         options={selectableOptions}
         listProps={{ onFocusBadge: false, isVirtualized: false }}
         onChange={(newSuggestions, _, changedOption) => {
+          if (!fieldSpec || !changedOption.key) {
+            // this should never happen, but early return for type safety
+            // eslint-disable-next-line no-console
+            console.warn(OptionsListStrings.popover.getInvalidSelectionMessage());
+            return;
+          }
           setSelectableOptions(newSuggestions);
-          dispatch(deselectOption(changedOption.label));
+          const key = getSelectionAsFieldType(fieldSpec, changedOption.key);
+          optionsList.dispatch.deselectOption(key);
         }}
       >
         {(list) => list}

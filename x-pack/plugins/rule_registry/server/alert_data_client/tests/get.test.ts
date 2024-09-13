@@ -30,6 +30,9 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   esClient: esClientMock,
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
+  getRuleType: jest.fn(),
+  getRuleList: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';
@@ -109,6 +112,7 @@ describe('get()', () => {
     const result = await alertsClient.get({ id: '1', index: '.alerts-observability.apm.alerts' });
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "_index": ".alerts-observability.apm.alerts",
         "kibana.alert.rule.consumer": "apm",
         "kibana.alert.rule.rule_type_id": "apm.error_rate",
         "kibana.alert.status": "active",
@@ -158,6 +162,7 @@ describe('get()', () => {
                 "should": Array [],
               },
             },
+            "runtime_mappings": undefined,
             "size": undefined,
             "sort": Array [
               Object {
@@ -265,9 +270,9 @@ describe('get()', () => {
 
     await expect(alertsClient.get({ id: fakeAlertId, index: '.alerts-observability.apm.alerts' }))
       .rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"undefined\\" and operation get 
-            Error: Error: Unauthorized for fake.rule and apm"
-          `);
+      "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"undefined\\" and operation get 
+      Error: Error: Unauthorized for fake.rule and apm"
+    `);
 
     expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
       message: `Failed attempt to access alert [id=${fakeAlertId}]`,
@@ -292,9 +297,9 @@ describe('get()', () => {
     await expect(
       alertsClient.get({ id: 'NoxgpHkBqbdrfX07MqXV', index: '.alerts-observability.apm.alerts' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"undefined\\" and operation get 
-            Error: Error: something went wrong"
-          `);
+      "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"undefined\\" and operation get 
+      Error: Error: something went wrong"
+    `);
   });
 
   describe('authorization', () => {
@@ -343,6 +348,7 @@ describe('get()', () => {
 
       expect(result).toMatchInlineSnapshot(`
         Object {
+          "_index": ".alerts-observability.apm.alerts",
           "kibana.alert.rule.consumer": "apm",
           "kibana.alert.rule.rule_type_id": "apm.error_rate",
           "kibana.alert.status": "active",

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { shallow } from 'enzyme';
@@ -80,13 +81,13 @@ describe('UserProfilesPopover', () => {
         closePopover={[MockFunction]}
         display="inline-block"
         hasArrow={true}
-        initialFocus="#searchInput_generated-id"
+        initialFocus="[id=\\"searchInput_generated-id\\"]"
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
-          items={Array []}
+        <EuiContextMenuPanelClass
           title="Title"
         >
           <UserProfilesSelectable
@@ -120,7 +121,7 @@ describe('UserProfilesPopover', () => {
               ]
             }
           />
-        </EuiContextMenuPanel>
+        </EuiContextMenuPanelClass>
       </EuiPopover>
     `);
   });
@@ -140,7 +141,7 @@ describe('UserProfilesPopover', () => {
       />
     );
 
-    expect(wrapper.find('EuiPopover').prop('initialFocus')).toBe('#searchInput_generated-id');
+    expect(wrapper.find('EuiPopover').prop('initialFocus')).toBe('[id="searchInput_generated-id"]');
     expect(wrapper.find('UserProfilesSelectable').prop('searchInputId')).toBe(
       'searchInput_generated-id'
     );

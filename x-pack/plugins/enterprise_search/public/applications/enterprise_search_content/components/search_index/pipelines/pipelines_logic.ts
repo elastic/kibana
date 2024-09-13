@@ -11,10 +11,11 @@ import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { i18n } from '@kbn/i18n';
 
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../../common/constants';
 
 import { HttpError } from '../../../../../../common/types/api';
-import { IngestPipelineParams } from '../../../../../../common/types/connectors';
 import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
 import { InferencePipeline } from '../../../../../../common/types/pipelines';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
@@ -226,16 +227,6 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ['data as mlInferencePipelineProcessors'],
     ],
   },
-  events: ({ actions, values }) => ({
-    afterMount: () => {
-      actions.fetchDefaultPipeline(undefined);
-      actions.setPipelineState(
-        isConnectorIndex(values.index) || isCrawlerIndex(values.index)
-          ? values.index.connector?.pipeline ?? values.defaultPipelineValues
-          : values.defaultPipelineValues
-      );
-    },
-  }),
   listeners: ({ actions, values }) => ({
     apiSuccess: ({ pipeline }) => {
       if (isConnectorIndex(values.index) || isCrawlerIndex(values.index)) {
@@ -364,6 +355,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
     pipelineState: [
       DEFAULT_PIPELINE_VALUES,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setPipelineState: (_, { pipeline }) => pipeline,
       },
     ],

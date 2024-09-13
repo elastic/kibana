@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -20,12 +21,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
   const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
 
-  const PageObjects = getPageObjects(['common', 'context']);
+  const PageObjects = getPageObjects(['common', 'context', 'discover']);
   const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/154387
-  describe.skip('context filters', function contextSize() {
+  describe('context filters', function contextSize() {
+    before(async function () {
+      await kibanaServer.uiSettings.update({
+        'discover:rowHeightOption': 0, // to have more grid rows visible at once
+      });
+    });
+
     beforeEach(async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
@@ -35,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('inclusive filter should be addable via expanded data grid rows', async function () {
       await retry.waitFor(`filter ${TEST_ANCHOR_FILTER_FIELD} in filterbar`, async () => {
         await dataGrid.clickRowToggle({ isAnchorRow: true, renderMoreRows: true });
+        await PageObjects.discover.findFieldByNameInDocViewer(TEST_ANCHOR_FILTER_FIELD);
         await dataGrid.clickFieldActionInFlyout(
           TEST_ANCHOR_FILTER_FIELD,
           'addFilterForValueButton'

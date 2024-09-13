@@ -18,17 +18,21 @@ export {
   FLEET_KUBERNETES_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE,
+  FLEET_CLOUD_DEFEND_PACKAGE,
   FLEET_ENDPOINT_PACKAGE,
   // Saved object type
   AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE as PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   OUTPUT_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
   // Fleet server index
-  FLEET_SERVER_SERVERS_INDEX,
   FLEET_SERVER_ARTIFACTS_INDEX,
   AGENTS_INDEX,
   AGENT_POLICY_INDEX,
@@ -54,6 +58,9 @@ export {
   ENDPOINT_PRIVILEGES,
   // dashboards ids
   DASHBOARD_LOCATORS_IDS,
+  FLEET_ENROLLMENT_API_PREFIX,
+  API_VERSIONS,
+  APP_API_ROUTES,
 } from './constants';
 export {
   // Route services
@@ -66,9 +73,8 @@ export {
   fleetSetupRouteService,
   // Package policy helpers
   isValidNamespace,
+  isValidDataset,
   INVALID_NAMESPACE_CHARACTERS,
-  // TODO Should probably not be exposed by Fleet
-  decodeCloudId,
   getFileMetadataIndexName,
   getFileDataIndexName,
 } from './services';
@@ -111,6 +117,7 @@ export type {
   UpgradePackagePolicyDryRunResponseItem,
   BulkGetPackagePoliciesResponse,
   BulkGetAgentPoliciesResponse,
+  GetBulkAssetsResponse,
   // Models
   Agent,
   AgentStatus,
@@ -123,6 +130,7 @@ export type {
   FullAgentPolicyOutput,
   FullAgentPolicyOutputPermissions,
   FullAgentPolicyInputStream,
+  TemplateAgentPolicyInput,
   DryRunPackagePolicy,
   AgentPolicy,
   Installation,
@@ -187,6 +195,9 @@ export type {
   // Fleet server models
   FleetServerAgent,
   FleetServerAgentComponentStatus,
+  AssetSOObject,
+  SimpleSOAssetType,
+  DisplayedAssetTypes,
 } from './types';
 
 export { ElasticsearchAssetType } from './types';

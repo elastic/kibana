@@ -5,6 +5,7 @@ properties:
   comment:
     description: The new comment. It is required only when `type` is `user`.
     type: string
+    maxLength: 30000
     example: A new comment.
   owner:
     $ref: 'owners.yaml'

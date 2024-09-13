@@ -13,22 +13,14 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['timePicker']);
-  const config = getService('config');
-  let remoteEsArchiver;
+  const { timePicker } = getPageObjects(['timePicker']);
 
   describe('lens app - group 2', () => {
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
-    const remoteIndexPatternString = 'ftr-remote:logstash-*';
     const localFixtures = {
       lensBasic: 'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json',
       lensDefault: 'x-pack/test/functional/fixtures/kbn_archiver/lens/default',
-    };
-
-    const remoteFixtures = {
-      lensBasic: 'x-pack/test/functional/fixtures/kbn_archiver/lens/ccs/lens_basic.json',
-      lensDefault: 'x-pack/test/functional/fixtures/kbn_archiver/lens/ccs/default',
     };
     let esNode: EsArchiver;
     let fixtureDirs: {
@@ -37,24 +29,15 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     };
     let indexPatternString: string;
     before(async () => {
-      await log.debug('Starting lens before method');
+      log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
       await kibanaServer.savedObjects.cleanStandardList();
-      try {
-        config.get('esTestCluster.ccs');
-        remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
-        esNode = remoteEsArchiver;
-        fixtureDirs = remoteFixtures;
-        indexPatternString = remoteIndexPatternString;
-      } catch (error) {
-        esNode = esArchiver;
-        fixtureDirs = localFixtures;
-        indexPatternString = localIndexPatternString;
-      }
-
+      esNode = esArchiver;
+      fixtureDirs = localFixtures;
+      indexPatternString = localIndexPatternString;
       await esNode.load(esArchive);
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
@@ -64,21 +47,20 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     });
 
     after(async () => {
-      await esArchiver.unload(esArchive);
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await esNode.unload(esArchive);
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    loadTestFile(require.resolve('./add_to_dashboard'));
-    loadTestFile(require.resolve('./runtime_fields'));
-    loadTestFile(require.resolve('./dashboard'));
-    loadTestFile(require.resolve('./terms'));
-    loadTestFile(require.resolve('./epoch_millis'));
-    loadTestFile(require.resolve('./show_underlying_data'));
-    loadTestFile(require.resolve('./show_underlying_data_dashboard'));
-    loadTestFile(require.resolve('./share'));
-    loadTestFile(require.resolve('./tsdb'));
+    // total run time ~ 16m 20s
+    loadTestFile(require.resolve('./partition')); // 1m 40s
+    loadTestFile(require.resolve('./persistent_context')); // 1m
+    loadTestFile(require.resolve('./table_dashboard')); // 3m 10s
+    loadTestFile(require.resolve('./table')); // 1m 40s
+    loadTestFile(require.resolve('./fields_list')); // 2m 7s
+    loadTestFile(require.resolve('./layer_actions')); // 1m 45s
+    loadTestFile(require.resolve('./field_formatters')); // 1m 30s
   });
 };

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-
-import { EuiTitle, EuiSpacer, EuiTextAlign, EuiCallOut } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
+import { EuiSkeletonText, EuiTextAlign, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Join } from './resources/join';
 import { JoinDocumentationPopover } from './resources/join_documentation_popover';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
+import { isESSource } from '../../../classes/sources/es_source';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
-import { SOURCE_TYPES } from '../../../../common/constants';
+import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { AddJoinButton } from './add_join_button';
 
 export interface JoinField {
@@ -24,17 +24,78 @@ export interface JoinField {
 }
 
 export interface Props {
-  joins: JoinDescriptor[];
+  joins: Array<Partial<JoinDescriptor>>;
   layer: IVectorLayer;
   layerDisplayName: string;
   leftJoinFields: JoinField[];
-  onChange: (layer: IVectorLayer, joins: JoinDescriptor[]) => void;
+  onChange: (layer: IVectorLayer, joins: Array<Partial<JoinDescriptor>>) => void;
 }
 
 export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDisplayName }: Props) {
+  const [supportsSpatialJoin, setSupportsSpatialJoin] = useState(false);
+  const [spatialJoinDisableReason, setSpatialJoinDisableReason] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+    const source = layer.getSource();
+    if (!isESSource(source)) {
+      setSpatialJoinDisableReason(
+        i18n.translate('xpack.maps.layerPanel.joinEditor.spatialJoin.disabled.esSourceOnly', {
+          defaultMessage: 'Spatial joins are not supported for {sourceType}.',
+          values: { sourceType: source.getType() },
+        })
+      );
+      setSupportsSpatialJoin(false);
+      return;
+    }
+
+    if (source.isMvt()) {
+      setSpatialJoinDisableReason(
+        i18n.translate('xpack.maps.layerPanel.joinEditor.spatialJoin.disabled.geoJsonOnly', {
+          defaultMessage: 'Spatial joins are not supported with vector tiles.',
+        })
+      );
+      setSupportsSpatialJoin(false);
+      return;
+    }
+
+    // TODO remove isPointsOnly check once non-point spatial joins have been implemented
+    setIsLoading(true);
+    source
+      .getSupportedShapeTypes()
+      .then((supportedShapes) => {
+        if (!ignore) {
+          const isPointsOnly =
+            supportedShapes.length === 1 && supportedShapes[0] === VECTOR_SHAPE_TYPE.POINT;
+          if (!isPointsOnly) {
+            setSpatialJoinDisableReason(
+              i18n.translate('xpack.maps.layerPanel.joinEditor.spatialJoin.disabled.pointsOnly', {
+                defaultMessage: 'Spatial joins are not supported with geo_shape geometry.',
+              })
+            );
+            setSupportsSpatialJoin(isPointsOnly);
+            setIsLoading(false);
+            return;
+          }
+
+          setSpatialJoinDisableReason('');
+          setSupportsSpatialJoin(true);
+          setIsLoading(false);
+        }
+      })
+      .catch((error) => {
+        // keep spatial joins disabled when unable to verify if they are supported
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [layer]);
+
   const renderJoins = () => {
-    return joins.map((joinDescriptor: JoinDescriptor, index: number) => {
-      const handleOnChange = (updatedDescriptor: JoinDescriptor) => {
+    return joins.map((joinDescriptor: Partial<JoinDescriptor>, index: number) => {
+      const handleOnChange = (updatedDescriptor: Partial<JoinDescriptor>) => {
         onChange(layer, [...joins.slice(0, index), updatedDescriptor, ...joins.slice(index + 1)]);
       };
 
@@ -42,74 +103,86 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
         onChange(layer, [...joins.slice(0, index), ...joins.slice(index + 1)]);
       };
 
-      if (joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
-        throw new Error(
-          'PEBKAC - Table sources cannot be edited in the UX and should only be used in MapEmbeddable'
-        );
-      } else {
-        return (
-          <Fragment key={index}>
-            <EuiSpacer size="m" />
-            <Join
-              join={joinDescriptor}
-              layer={layer}
-              onChange={handleOnChange}
-              onRemove={handleOnRemove}
-              leftFields={leftJoinFields}
-              leftSourceName={layerDisplayName}
-            />
-          </Fragment>
-        );
-      }
+      return (
+        <Join
+          key={joinDescriptor?.right?.id ?? index}
+          join={joinDescriptor}
+          onChange={handleOnChange}
+          onRemove={handleOnRemove}
+          leftFields={leftJoinFields}
+          leftSourceName={layerDisplayName}
+        />
+      );
     });
   };
 
-  const addJoin = () => {
+  const addJoin = (joinDescriptor: Partial<JoinDescriptor>) => {
     onChange(layer, [
       ...joins,
       {
+        ...joinDescriptor,
         right: {
-          id: uuidv4(),
-          applyGlobalQuery: true,
-          applyGlobalTime: true,
+          ...(joinDescriptor?.right ?? {}),
         },
-      } as JoinDescriptor,
+      },
     ]);
   };
-
-  function renderContent() {
-    const disabledReason = layer.getJoinsDisabledReason();
-
-    return disabledReason ? (
-      <EuiCallOut color="warning">{disabledReason}</EuiCallOut>
-    ) : (
-      <Fragment>
-        {renderJoins()}
-        <EuiSpacer size="s" />
-        <EuiTextAlign textAlign="center">
-          <AddJoinButton
-            addJoin={addJoin}
-            isLayerSourceMvt={layer.getSource().isMvt()}
-            numJoins={joins.length}
-          />
-        </EuiTextAlign>
-      </Fragment>
-    );
-  }
 
   return (
     <div>
       <EuiTitle size="xs">
         <h5>
-          <FormattedMessage
-            id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
-            defaultMessage="Term joins"
-          />{' '}
+          <FormattedMessage id="xpack.maps.layerPanel.joinEditor.title" defaultMessage="Joins" />{' '}
           <JoinDocumentationPopover />
         </h5>
       </EuiTitle>
 
-      {renderContent()}
+      {renderJoins()}
+
+      <EuiSkeletonText lines={1} isLoading={isLoading}>
+        <EuiTextAlign textAlign="center">
+          <AddJoinButton
+            disabledReason={spatialJoinDisableReason}
+            isDisabled={!supportsSpatialJoin}
+            label={i18n.translate('xpack.maps.layerPanel.joinEditor.spatialJoin.addButtonLabel', {
+              defaultMessage: 'Add spatial join',
+            })}
+            onClick={() => {
+              addJoin({
+                leftField: '_id',
+                right: {
+                  type: SOURCE_TYPES.ES_DISTANCE_SOURCE,
+                  id: uuidv4(),
+                  applyGlobalQuery: true,
+                  applyGlobalTime: true,
+                },
+              } as Partial<JoinDescriptor>);
+            }}
+          />
+          <AddJoinButton
+            disabledReason={i18n.translate(
+              'xpack.maps.layerPanel.joinEditor.termJoin.mvtSingleJoinMsg',
+              {
+                defaultMessage: 'Vector tiles can only support a single join.',
+              }
+            )}
+            isDisabled={layer.getSource().isMvt() && joins.length >= 1}
+            label={i18n.translate('xpack.maps.layerPanel.joinEditor.termJoin.addButtonLabel', {
+              defaultMessage: 'Add term join',
+            })}
+            onClick={() => {
+              addJoin({
+                right: {
+                  type: SOURCE_TYPES.ES_TERM_SOURCE,
+                  id: uuidv4(),
+                  applyGlobalQuery: true,
+                  applyGlobalTime: true,
+                },
+              } as Partial<JoinDescriptor>);
+            }}
+          />
+        </EuiTextAlign>
+      </EuiSkeletonText>
     </div>
   );
 }

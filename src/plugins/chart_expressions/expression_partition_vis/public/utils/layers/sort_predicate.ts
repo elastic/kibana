@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ArrayEntry } from '@elastic/charts';
@@ -22,13 +23,10 @@ type SortPredicatePieDonutFn = (visParams: PartitionVisParams) => SortFn;
 type SortPredicatePureFn = () => SortFn;
 
 export const extractUniqTermsMap = (dataTable: Datatable, columnId: string) =>
-  [...new Set(dataTable.rows.map((item) => item[columnId]))].reduce(
-    (acc, item, index) => ({
-      ...acc,
-      [item]: index,
-    }),
-    {}
-  );
+  [...new Set(dataTable.rows.map((item) => item[columnId]))].reduce((acc, item, index) => {
+    acc[item] = index;
+    return acc;
+  }, {});
 
 export const sortPredicateSaveSourceOrder: SortPredicatePureFn =
   () =>

@@ -7,13 +7,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { elasticsearchRoleSchema, getKibanaRoleSchema } from '@kbn/security-plugin-types-server';
 
 import type { ElasticsearchRole } from '../../../../authorization';
-import {
-  elasticsearchRoleSchema,
-  getKibanaRoleSchema,
-  transformPrivilegesToElasticsearchPrivileges,
-} from '../../../../lib';
+import { transformPrivilegesToElasticsearchPrivileges } from '../../../../lib';
 
 export const transformPutPayloadToElasticsearchRole = (
   rolePayload: RolePayloadSchemaType,
@@ -21,7 +18,13 @@ export const transformPutPayloadToElasticsearchRole = (
   allExistingApplications: ElasticsearchRole['applications'] = []
 ) => {
   const {
-    elasticsearch = { cluster: undefined, indices: undefined, run_as: undefined },
+    elasticsearch = {
+      remote_cluster: undefined,
+      cluster: undefined,
+      indices: undefined,
+      remote_indices: undefined,
+      run_as: undefined,
+    },
     kibana = [],
   } = rolePayload;
   const otherApplications = allExistingApplications.filter(
@@ -29,9 +32,12 @@ export const transformPutPayloadToElasticsearchRole = (
   );
 
   return {
+    ...(rolePayload.description && { description: rolePayload.description }),
     metadata: rolePayload.metadata,
     cluster: elasticsearch.cluster || [],
+    remote_cluster: elasticsearch.remote_cluster,
     indices: elasticsearch.indices || [],
+    remote_indices: elasticsearch.remote_indices,
     run_as: elasticsearch.run_as || [],
     applications: [
       ...transformPrivilegesToElasticsearchPrivileges(application, kibana),
@@ -44,6 +50,11 @@ export function getPutPayloadSchema(
   getBasePrivilegeNames: () => { global: string[]; space: string[] }
 ) {
   return schema.object({
+    /**
+     * Optional text to describe the Role
+     */
+    description: schema.maybe(schema.string({ maxLength: 2048 })),
+
     /**
      * An optional meta-data dictionary. Within the metadata, keys that begin with _ are reserved
      * for system usage.

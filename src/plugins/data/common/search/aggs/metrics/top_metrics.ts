@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
@@ -14,6 +15,7 @@ import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { DataViewField, KBN_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
+import { createTopHitFilter } from './lib/create_filter';
 
 export interface BaseAggParamsTopMetrics extends BaseAggParams {
   field: string;
@@ -40,6 +42,9 @@ export const getTopMetricsMetricAgg = () => {
     title: i18n.translate('data.search.aggs.metrics.topMetricsTitle', {
       defaultMessage: 'Top metrics',
     }),
+    getValueType: (aggConfig) => {
+      return aggConfig.getParam('field')?.type;
+    },
     makeLabel(aggConfig) {
       const isDescOrder = aggConfig.getParam('sortOrder').value === 'desc';
       const size = aggConfig.getParam('size');
@@ -162,5 +167,6 @@ export const getTopMetricsMetricAgg = () => {
       if (results.length === 1) return results[0];
       return results;
     },
+    createFilter: createTopHitFilter,
   });
 };

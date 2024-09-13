@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
@@ -31,17 +32,35 @@ export type StorageContextGetTransformFn = (
 
 /** Context that is sent to all storage instance methods */
 export interface StorageContext {
+  /** The Core HTTP request handler context */
   requestHandlerContext: RequestHandlerContext;
   version: {
+    /**
+     * The content type version for the request. It usually is the latest version although in some
+     * cases the client (browser) might still be on an older version and make requests with that version.
+     */
     request: Version;
+    /**
+     * The latest version of the content type. This is the version that the content type is currently on
+     * after updating the Kibana server.
+     */
     latest: Version;
   };
   utils: {
+    /**
+     * Get the transforms handlers for the content type.
+     * The transforms are used to transform the content object to the latest schema (up) and back
+     * to a previous schema (down).
+     */
     getTransforms: StorageContextGetTransformFn;
   };
 }
 
-export interface ContentStorage<T = unknown, U = T> {
+export interface ContentStorage<
+  T = unknown,
+  U = T,
+  TMSearchConfig extends MSearchConfig<T, any> = MSearchConfig<T, unknown>
+> {
   /** Get a single item */
   get(ctx: StorageContext, id: string, options?: object): Promise<GetResult<T, any>>;
 
@@ -69,7 +88,7 @@ export interface ContentStorage<T = unknown, U = T> {
    * Opt-in to multi-type search.
    * Can only be supported if the content type is backed by a saved object since `mSearch` is using the `savedObjects.find` API.
    **/
-  mSearch?: MSearchConfig<T>;
+  mSearch?: TMSearchConfig;
 }
 
 export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage> {
@@ -87,7 +106,7 @@ export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage
  * By configuring a content type with a `MSearchConfig`, it can be searched in the multi-type search.
  * Underneath content management is using the `savedObjects.find` API to search the saved objects.
  */
-export interface MSearchConfig<T = unknown, SavedObjectAttributes = unknown> {
+export interface MSearchConfig<T = unknown, TSavedObjectAttributes = unknown> {
   /**
    * The saved object type that corresponds to this content type.
    */
@@ -98,7 +117,7 @@ export interface MSearchConfig<T = unknown, SavedObjectAttributes = unknown> {
    */
   toItemResult: (
     ctx: StorageContext,
-    savedObject: SavedObjectsFindResult<SavedObjectAttributes>
+    savedObject: SavedObjectsFindResult<TSavedObjectAttributes>
   ) => T;
 
   /**

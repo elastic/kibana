@@ -1,15 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Semver from 'semver';
+import { getFlattenedObject } from '@kbn/std';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectsType,
+  SavedObjectsTypeMappingDefinition,
+  SavedObjectsModelVersionMap,
+} from '@kbn/core-saved-objects-server';
 import { assertValidModelVersion } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  SavedObjectsModelChange,
+  SavedObjectsModelMappingsAdditionChange,
+} from '@kbn/core-saved-objects-server';
 
 /**
  * Validates the consistency of the given type for use with the document migrator.
@@ -49,12 +59,29 @@ export function validateTypeMigrations({
       `Migrations map for type ${type.name} should be an object like { '2.0.0': (doc) => doc }.`
     );
 
-    Object.entries(migrationMap).forEach(([version, fn]) => {
+    Object.entries(migrationMap).forEach(([version, migration]) => {
       assertValidSemver(kibanaVersion, version, type.name);
-      assertValidTransform(fn, version, type.name);
+      assertValidTransform(migration, version, type.name);
       if (type.switchToModelVersionAt && Semver.gte(version, type.switchToModelVersionAt)) {
         throw new Error(
           `Migration for type ${type.name} for version ${version} registered after switchToModelVersionAt (${type.switchToModelVersionAt})`
+        );
+      }
+    });
+  }
+
+  if (type.schemas) {
+    const schemaMap = typeof type.schemas === 'object' ? type.schemas : {};
+    assertObject(
+      schemaMap,
+      `Schemas map for type ${type.name} should be an object like { '2.0.0': {schema} }.`
+    );
+
+    Object.entries(schemaMap).forEach(([version, schema]) => {
+      assertValidSemver(kibanaVersion, version, type.name);
+      if (type.switchToModelVersionAt && Semver.gte(version, type.switchToModelVersionAt)) {
+        throw new Error(
+          `Schema for type ${type.name} for version ${version} registered after switchToModelVersionAt (${type.switchToModelVersionAt})`
         );
       }
     });
@@ -64,42 +91,47 @@ export function validateTypeMigrations({
     const modelVersionMap =
       typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions ?? {};
 
-    if (Object.keys(modelVersionMap).length > 0 && !type.switchToModelVersionAt) {
-      throw new Error(
-        `Type ${type.name}: Uusing modelVersions requires to specify switchToModelVersionAt`
+    if (Object.keys(modelVersionMap).length > 0) {
+      if (!type.switchToModelVersionAt) {
+        throw new Error(
+          `Type ${type.name}: Using modelVersions requires to specify switchToModelVersionAt`
+        );
+      }
+
+      Object.entries(modelVersionMap).forEach(([version, definition]) => {
+        assertValidModelVersion(version);
+      });
+
+      const { min: minVersion, max: maxVersion } = Object.keys(modelVersionMap).reduce(
+        (minMax, rawVersion) => {
+          const version = Number.parseInt(rawVersion, 10);
+          minMax.min = Math.min(minMax.min, version);
+          minMax.max = Math.max(minMax.max, version);
+          return minMax;
+        },
+        { min: Infinity, max: -Infinity }
       );
-    }
 
-    Object.entries(modelVersionMap).forEach(([version, definition]) => {
-      assertValidModelVersion(version);
-    });
+      if (minVersion > 1) {
+        throw new Error(`Type ${type.name}: model versioning must start with version 1`);
+      }
 
-    const { min: minVersion, max: maxVersion } = Object.keys(modelVersionMap).reduce(
-      (minMax, rawVersion) => {
-        const version = Number.parseInt(rawVersion, 10);
-        minMax.min = Math.min(minMax.min, version);
-        minMax.max = Math.max(minMax.max, version);
-        return minMax;
-      },
-      { min: Infinity, max: -Infinity }
-    );
+      validateAddedMappings(type.name, type.mappings, modelVersionMap);
 
-    if (minVersion > 1) {
-      throw new Error(`Type ${type.name}: model versioning must start with version 1`);
-    }
-    const missingVersions = getMissingVersions(
-      minVersion,
-      maxVersion,
-      Object.keys(modelVersionMap).map((v) => Number.parseInt(v, 10))
-    );
-    if (missingVersions.length) {
-      throw new Error(
-        `Type ${
-          type.name
-        }: gaps between model versions aren't allowed (missing versions: ${missingVersions.join(
-          ','
-        )})`
+      const missingVersions = getMissingVersions(
+        minVersion,
+        maxVersion,
+        Object.keys(modelVersionMap).map((v) => Number.parseInt(v, 10))
       );
+      if (missingVersions.length) {
+        throw new Error(
+          `Type ${
+            type.name
+          }: gaps between model versions aren't allowed (missing versions: ${missingVersions.join(
+            ','
+          )})`
+        );
+      }
     }
   }
 
@@ -113,6 +145,60 @@ export function validateTypeMigrations({
     );
   }
 }
+
+function isMappingAddition(
+  change: SavedObjectsModelChange
+): change is SavedObjectsModelMappingsAdditionChange {
+  return change.type === 'mappings_addition';
+}
+
+const validateAddedMappings = (
+  typeName: string,
+  mappings: SavedObjectsTypeMappingDefinition,
+  modelVersions: SavedObjectsModelVersionMap
+) => {
+  const flattenedMappings = new Map(Object.entries(getFlattenedObject(mappings.properties)));
+
+  const mappingAdditionChanges = Object.values(modelVersions)
+    .flatMap((version) => version.changes)
+    .filter<SavedObjectsModelMappingsAdditionChange>(isMappingAddition);
+  const addedMappings = mappingAdditionChanges.reduce((map, change) => {
+    const flattened = getFlattenedObject(change.addedMappings);
+    Object.keys(flattened).forEach((key) => {
+      map.set(key, flattened[key]);
+    });
+    return map;
+  }, new Map<string, unknown>());
+
+  const missingMappings: string[] = [];
+  const mappingsWithDifferentValues: string[] = [];
+
+  for (const [key, value] of addedMappings.entries()) {
+    if (!flattenedMappings.has(key)) {
+      missingMappings.push(key);
+    } else {
+      const valueInMappings = flattenedMappings.get(key);
+      if (valueInMappings !== value) {
+        mappingsWithDifferentValues.push(key);
+      }
+    }
+  }
+
+  if (missingMappings.length) {
+    throw new Error(
+      `Type ${typeName}: mappings added on model versions not present on the global mappings definition: ${missingMappings.join(
+        ','
+      )}`
+    );
+  }
+  if (mappingsWithDifferentValues.length) {
+    throw new Error(
+      `Type ${typeName}: mappings added on model versions differs from the global mappings definition: ${mappingsWithDifferentValues.join(
+        ','
+      )}`
+    );
+  }
+};
 
 const assertObjectOrFunction = (entity: any, prefix: string) => {
   if (!entity || (typeof entity !== 'function' && typeof entity !== 'object')) {
@@ -169,9 +255,14 @@ const assertValidConvertToMultiNamespaceType = (
   }
 };
 
-const assertValidTransform = (fn: any, version: string, type: string) => {
-  if (typeof fn !== 'function') {
-    throw new Error(`Invalid migration ${type}.${version}: expected a function, but got ${fn}.`);
+const assertValidTransform = (migration: any, version: string, type: string) => {
+  if (
+    !(typeof migration === 'object' && typeof migration.transform === 'function') &&
+    typeof migration !== 'function'
+  ) {
+    throw new Error(
+      `Invalid migration ${type}.${version}: expected a function or an object, but got ${migration}.`
+    );
   }
 };
 

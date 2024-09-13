@@ -11,23 +11,22 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const security = getService('security');
+  const securityService = getService('security');
   const config = getService('config');
-  const PageObjects = getPageObjects([
+  const { common, error, visualize, header, security } = getPageObjects([
     'common',
     'error',
     'visualize',
     'header',
     'security',
-    'share',
-    'spaceSelector',
-    'timePicker',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
+
+  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
 
   describe('visualize feature controls security', () => {
     before(async () => {
@@ -37,19 +36,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await security.forceLogout();
     });
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await PageObjects.security.forceLogout();
+      await security.forceLogout();
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('global visualize all privileges', () => {
       before(async () => {
-        await security.role.create('global_visualize_all_role', {
+        await securityService.role.create('global_visualize_all_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -63,28 +62,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_visualize_all_user', {
+        await securityService.user.create('global_visualize_all_user', {
           password: 'global_visualize_all_user-password',
           roles: ['global_visualize_all_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await security.forceLogout();
 
-        await PageObjects.security.login(
-          'global_visualize_all_user',
-          'global_visualize_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.login('global_visualize_all_user', 'global_visualize_all_user-password', {
+          expectSpaceSelector: false,
+        });
       });
 
       after(async () => {
         // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-        await PageObjects.security.forceLogout();
-        await security.role.delete('global_visualize_all_role');
-        await security.user.delete('global_visualize_all_user');
+        await security.forceLogout();
+        await securityService.role.delete('global_visualize_all_role');
+        await securityService.user.delete('global_visualize_all_user');
       });
 
       it('shows visualize navlink', async () => {
@@ -93,7 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
-        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await visualize.gotoVisualizationLandingPage();
         await testSubjects.existOrFail('visualizationLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -105,7 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can view existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
+        await common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -115,7 +110,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('can save existing Visualization', async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
+        await common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -124,24 +119,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      it('Embed code shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Embedcode');
-        await PageObjects.share.createShortUrlExistOrFail();
-      });
-
-      it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
-        // close menu
-        await PageObjects.share.clickShareTopNavButton();
-      });
-
       it('allows saving via the saved query management component popover with no saved query loaded', async () => {
         await queryBar.setQuery('response:200');
         await queryBar.clickQuerySubmitButton();
         await testSubjects.click('showQueryBarMenu');
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
         await testSubjects.click('showQueryBarMenu');
@@ -180,7 +163,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           true,
           false
         );
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await savedQueryManagementComponent.savedQueryExistOrFail('ok2');
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
         await testSubjects.click('showQueryBarMenu');
@@ -190,7 +173,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global visualize read-only privileges', () => {
       before(async () => {
-        await security.role.create('global_visualize_read_role', {
+        await securityService.role.create('global_visualize_read_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -204,26 +187,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_visualize_read_user', {
+        await securityService.user.create('global_visualize_read_user', {
           password: 'global_visualize_read_user-password',
           roles: ['global_visualize_read_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_visualize_read_user',
-          'global_visualize_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.login('global_visualize_read_user', 'global_visualize_read_user-password', {
+          expectSpaceSelector: false,
+        });
       });
 
       after(async () => {
         // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-        await PageObjects.security.forceLogout();
-        await security.role.delete('global_visualize_read_role');
-        await security.user.delete('global_visualize_read_user');
+        await security.forceLogout();
+        await securityService.role.delete('global_visualize_read_role');
+        await securityService.user.delete('global_visualize_read_user');
       });
 
       it('shows visualize navlink', async () => {
@@ -232,7 +211,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
-        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await visualize.gotoVisualizationLandingPage();
         await testSubjects.existOrFail('visualizationLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -244,7 +223,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can view existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
+        await common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -254,7 +233,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can't save existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
+        await common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -264,18 +243,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.missingOrFail('visualizeSaveButton', {
           timeout: config.get('timeouts.waitFor'),
         });
-      });
-
-      it(`Embed Code doesn't show create short-url button`, async () => {
-        await PageObjects.share.openShareMenuItem('Embedcode');
-        await PageObjects.share.createShortUrlMissingOrFail();
-      });
-
-      it(`Permalinks doesn't show create short-url button`, async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlMissingOrFail();
-        // close the menu
-        await PageObjects.share.clickShareTopNavButton();
       });
 
       it('allows loading a saved query via the saved query management component', async () => {
@@ -306,7 +273,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global visualize read-only with url_create privileges', () => {
       before(async () => {
-        await security.role.create('global_visualize_read_url_create_role', {
+        await securityService.role.create('global_visualize_read_url_create_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -320,13 +287,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_visualize_read_url_create_user', {
+        await securityService.user.create('global_visualize_read_url_create_user', {
           password: 'global_visualize_read_url_create_user-password',
           roles: ['global_visualize_read_url_create_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        await security.login(
           'global_visualize_read_url_create_user',
           'global_visualize_read_url_create_user-password',
           {
@@ -337,9 +304,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-        await PageObjects.security.forceLogout();
-        await security.role.delete('global_visualize_read_url_create_role');
-        await security.user.delete('global_visualize_read_url_create_user');
+        await security.forceLogout();
+        await securityService.role.delete('global_visualize_read_url_create_role');
+        await securityService.user.delete('global_visualize_read_url_create_user');
       });
 
       it('shows visualize navlink', async () => {
@@ -348,7 +315,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
-        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await visualize.gotoVisualizationLandingPage();
         await testSubjects.existOrFail('visualizationLandingPage', { timeout: 10000 });
         await testSubjects.existOrFail('newItemButton');
       });
@@ -358,7 +325,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can view existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
+        await common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -366,24 +333,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can't save existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
+        await common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
         await testSubjects.existOrFail('shareTopNavButton', { timeout: 10000 });
         await testSubjects.missingOrFail('visualizeSaveButton', { timeout: 10000 });
-      });
-
-      it('Embed code shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Embedcode');
-        await PageObjects.share.createShortUrlExistOrFail();
-      });
-
-      it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
-        // close menu
-        await PageObjects.share.clickShareTopNavButton();
       });
 
       it('allows loading a saved query via the saved query management component', async () => {
@@ -414,7 +369,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('no visualize privileges', () => {
       before(async () => {
-        await security.role.create('no_visualize_privileges_role', {
+        await securityService.role.create('no_visualize_privileges_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -428,13 +383,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('no_visualize_privileges_user', {
+        await securityService.user.create('no_visualize_privileges_user', {
           password: 'no_visualize_privileges_user-password',
           roles: ['no_visualize_privileges_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        await security.login(
           'no_visualize_privileges_user',
           'no_visualize_privileges_user-password',
           { expectSpaceSelector: false }
@@ -443,25 +398,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-        await PageObjects.security.forceLogout();
-        await security.role.delete('no_visualize_privileges_role');
-        await security.user.delete('no_visualize_privileges_user');
+        await security.forceLogout();
+        await securityService.role.delete('no_visualize_privileges_role');
+        await securityService.user.delete('no_visualize_privileges_user');
       });
 
       it(`landing page shows 403`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '', {
+        await common.navigateToActualUrl('visualize', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.error.expectForbidden();
+        await error.expectForbidden();
       });
 
       it(`edit page shows 403`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
+        await common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.error.expectForbidden();
+        await error.expectForbidden();
       });
     });
   });

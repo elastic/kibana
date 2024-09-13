@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiDescriptionList, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -37,7 +38,7 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
       <EuiDescriptionList
         compressed
         type="column"
-        className="descriptionList-20_80"
+        columnWidths={[1, 4]}
         listItems={[
           {
             title: (
@@ -58,7 +59,7 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
         <EuiDescriptionList
           compressed
           type="column"
-          className="descriptionList-20_80"
+          columnWidths={[1, 4]}
           listItems={[
             {
               title: (
@@ -91,7 +92,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef, errorMessage 
 
   type CommandDetails = Array<{
     title: string;
-    description: string;
+    description: ReactNode;
   }>;
 
   const commandOptions = useMemo(() => {
@@ -138,7 +139,10 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef, errorMessage 
         <ConsoleCodeBlock bold inline>
           {item.title}
         </ConsoleCodeBlock>
-        <ConsoleCodeBlock inline>{` - ${item.description}`}</ConsoleCodeBlock>
+        <ConsoleCodeBlock inline>
+          {' - '}
+          {item.description}
+        </ConsoleCodeBlock>
       </div>
     ));
     return (
@@ -148,7 +152,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef, errorMessage 
           <EuiDescriptionList
             compressed
             type="column"
-            className="descriptionList-20_80"
+            columnWidths={[1, 4]}
             listItems={[{ title: <ConsoleCodeBlock>{title}</ConsoleCodeBlock>, description }]}
             descriptionProps={additionalProps}
             titleProps={additionalProps}
@@ -187,7 +191,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef, errorMessage 
       <EuiDescriptionList
         compressed
         type="column"
-        className="descriptionList-20_80"
+        columnWidths={[1, 4]}
         listItems={[
           {
             title: (

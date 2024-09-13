@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { EuiCommentProps } from '@elastic/eui';
-import { EuiCommentList } from '@elastic/eui';
+import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
+import { EuiCommentList, useEuiTheme } from '@elastic/eui';
 
 import React, { useMemo, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
-import type { CaseUserActions } from '../../containers/types';
+import type { UserActionUI } from '../../containers/types';
 import type { UserActionBuilderArgs, UserActionTreeProps } from './types';
 import { isUserActionTypeSupported } from './helpers';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -19,54 +19,41 @@ import { builderMap } from './builder';
 import { useCaseViewParams } from '../../common/navigation';
 import { useUserActionsHandler } from './use_user_actions_handler';
 
-const MyEuiCommentList = styled(EuiCommentList)`
-  ${({ theme }) => `
-    & .userAction__comment.outlined .euiCommentEvent {
-      outline: solid 5px ${theme.eui.euiColorVis1_behindText};
-      margin: 0.5em;
-      transition: 0.8s;
+const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
+  & .userAction__comment.outlined .euiCommentEvent {
+    outline: solid 5px ${euiTheme.colors.lightShade};
+    margin: 0.5em;
+    transition: 0.8s;
+  }
+
+  & .draftFooter {
+    & .euiCommentEvent__body {
+      padding: 0;
     }
+  }
 
-    & .draftFooter {
-      & .euiCommentEvent__body {
-        padding: 0;
-      }
-    }
-
-    & .euiComment.isEdit {
-      & .euiCommentEvent {
-        border: none;
-        box-shadow: none;
-      }
-
-      & .euiCommentEvent__body {
-        padding: 0;
-      }
-
-      & .euiCommentEvent__header {
-        display: none;
-      }
-    }
-
-    & .comment-alert .euiCommentEvent {
-      background-color: ${theme.eui.euiColorLightestShade};
-      border: ${theme.eui.euiBorderThin};
-      padding: ${theme.eui.euiSizeS};
-      border-radius: ${theme.eui.euiSizeXS};
-    }
-
-    & .comment-alert .euiCommentEvent__headerData {
-      flex-grow: 1;
-    }
-
-    & .comment-action.empty-comment [class*="euiCommentEvent-regular"] {
+  & .euiComment.isEdit {
+    & .euiCommentEvent {
+      border: none;
       box-shadow: none;
-      .euiCommentEvent__header {
-        padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeS};
-        border-bottom: 0;
-      }
     }
-  `}
+
+    & .euiCommentEvent__body {
+      padding: 0;
+    }
+
+    & .euiCommentEvent__header {
+      display: none;
+    }
+  }
+
+  & .comment-action.empty-comment [class*='euiCommentEvent-regular'] {
+    box-shadow: none;
+    .euiCommentEvent__header {
+      padding: ${euiTheme.size.m} ${euiTheme.size.s};
+      border-bottom: 0;
+    }
+  }
 `;
 
 export type UserActionListProps = Omit<
@@ -78,7 +65,7 @@ export type UserActionListProps = Omit<
   | 'statusActionButton'
 > &
   Pick<UserActionBuilderArgs, 'commentRefs' | 'handleManageQuote'> & {
-    caseUserActions: CaseUserActions[];
+    caseUserActions: UserActionUI[];
     loadingAlertData: boolean;
     manualAlertsData: Record<string, unknown>;
     bottomActions?: EuiCommentProps[];
@@ -92,6 +79,7 @@ export const UserActionsList = React.memo(
     userProfiles,
     currentUserProfile,
     data: caseData,
+    casesConfiguration,
     getRuleDetailsHref,
     actionsNavigation,
     onRuleDetailsClick,
@@ -103,13 +91,12 @@ export const UserActionsList = React.memo(
     bottomActions = [],
     isExpandable = false,
   }: UserActionListProps) => {
-    const {
-      externalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry,
-      appId,
-    } = useCasesContext();
+    const { externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry } =
+      useCasesContext();
+    const { owner } = useCasesContext();
     const { commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
+    const { euiTheme } = useEuiTheme();
 
     const {
       loadingCommentIds,
@@ -138,8 +125,9 @@ export const UserActionsList = React.memo(
         }
 
         const userActionBuilder = builder({
-          appId,
+          appId: owner[0],
           caseData,
+          casesConfiguration,
           caseConnectors,
           externalReferenceAttachmentTypeRegistry,
           persistableStateAttachmentTypeRegistry,
@@ -154,6 +142,7 @@ export const UserActionsList = React.memo(
           loadingCommentIds,
           loadingAlertData,
           alertData: manualAlertsData,
+          euiTheme,
           handleOutlineComment,
           handleManageMarkdownEditId,
           handleDeleteComment,
@@ -167,20 +156,22 @@ export const UserActionsList = React.memo(
         return [...comments, ...userActionBuilder.build()];
       }, []);
     }, [
-      appId,
-      caseConnectors,
       caseUserActions,
-      userProfiles,
-      currentUserProfile,
+      owner,
+      caseData,
+      casesConfiguration,
+      caseConnectors,
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
-      caseData,
+      userProfiles,
+      currentUserProfile,
       commentRefs,
       manageMarkdownEditIds,
       selectedOutlineCommentId,
       loadingCommentIds,
       loadingAlertData,
       manualAlertsData,
+      euiTheme,
       handleOutlineComment,
       handleManageMarkdownEditId,
       handleDeleteComment,
@@ -204,8 +195,9 @@ export const UserActionsList = React.memo(
     }, [commentId, initLoading, handleOutlineComment]);
 
     return (
-      <MyEuiCommentList
+      <EuiCommentList
         className={isExpandable ? 'commentList--hasShowMore' : ''}
+        css={getCommentListCss(euiTheme)}
         comments={comments}
         data-test-subj="user-actions-list"
       />

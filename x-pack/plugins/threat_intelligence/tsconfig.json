@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
@@ -31,9 +31,9 @@
     "@kbn/kibana-react-plugin",
     "@kbn/utility-types",
     "@kbn/ui-theme",
-    "@kbn/securitysolution-io-ts-list-types"
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/search-types"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

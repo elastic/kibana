@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
@@ -31,7 +33,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { PainlessLang } from '@kbn/monaco';
 import type {
   FieldFormat,
@@ -46,7 +48,8 @@ import {
   DataViewsPublicPluginStart,
   FieldSpec,
 } from '@kbn/data-views-plugin/public';
-import { context as contextType, CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { context as contextType } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
@@ -654,7 +657,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     return this.state.showDeleteModal ? (
       <EuiConfirmModal
         title={i18n.translate('indexPatternManagement.deleteFieldHeader', {
-          defaultMessage: "Delete field '{fieldName}'",
+          defaultMessage: "Delete field ''{fieldName}''",
           values: { fieldName: spec.name },
         })}
         onCancel={this.hideDeleteModal}
@@ -787,7 +790,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     indexPattern.removeScriptedField(spec.name);
     indexPatternService.updateSavedObject(indexPattern).then(() => {
       const message = i18n.translate('indexPatternManagement.deleteField.deletedHeader', {
-        defaultMessage: "Deleted '{fieldName}'",
+        defaultMessage: "Deleted ''{fieldName}''",
         values: { fieldName: spec.name },
       });
       this.context.services.notifications.toasts.addSuccess(message);
@@ -822,16 +825,9 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     }
 
     const { redirectAway, indexPatternService } = this.props.services;
-    const fieldExists = !!indexPattern.fields.getByName(field.name);
 
     let oldField: DataViewField['spec'];
-
-    if (fieldExists) {
-      oldField = indexPattern.fields.getByName(field.name)!.spec;
-      indexPattern.fields.update(field);
-    } else {
-      indexPattern.fields.add(field);
-    }
+    indexPattern.upsertScriptedField(field);
 
     if (fieldFormatId) {
       indexPattern.setFieldFormat(field.name, { id: fieldFormatId, params: fieldFormatParams });
@@ -841,14 +837,14 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     if (field.customLabel !== customLabel) {
       field.customLabel = customLabel;
-      indexPattern.fields.update(field);
+      indexPattern.setFieldCustomLabel(field.name, customLabel);
     }
 
     return indexPatternService
       .updateSavedObject(indexPattern)
       .then(() => {
         const message = i18n.translate('indexPatternManagement.deleteField.savedHeader', {
-          defaultMessage: "Saved '{fieldName}'",
+          defaultMessage: "Saved ''{fieldName}''",
           values: { fieldName: field.name },
         });
         this.context.services.notifications.toasts.addSuccess(message);
@@ -883,7 +879,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { isReady, isCreating, spec } = this.state;
 
     return isReady ? (
-      <div>
+      <I18nProvider>
         <EuiText>
           <h3>
             {isCreating ? (
@@ -915,7 +911,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           {this.renderDeleteModal()}
         </EuiForm>
         <EuiSpacer size="l" />
-      </div>
+      </I18nProvider>
     ) : null;
   }
 }

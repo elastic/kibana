@@ -5,73 +5,105 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { IRouter, Logger } from '@kbn/core/server';
 import { EVENT_ACTION, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { Aggregate } from '../../common/types/aggregate';
-import { EventAction, EventKind } from '../../common/types/process_tree';
+import type { Aggregate } from '../../common';
 import {
   IO_EVENTS_ROUTE,
   IO_EVENTS_PER_PAGE,
-  PROCESS_EVENTS_INDEX,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
+  TIMESTAMP_PROPERTY,
   PROCESS_ENTITY_ID_PROPERTY,
   PROCESS_EVENTS_PER_PAGE,
+  IO_EVENT_FIELDS,
 } from '../../common/constants';
 
-export const registerIOEventsRoute = (router: IRouter) => {
-  router.get(
-    {
+export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
+  router.versioned
+    .get({
+      access: 'internal',
       path: IO_EVENTS_ROUTE,
-      validate: {
-        query: schema.object({
-          sessionEntityId: schema.string(),
-          cursor: schema.maybe(schema.string()),
-          pageSize: schema.maybe(schema.number()),
-        }),
-      },
-    },
-    async (context, request, response) => {
-      const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const { sessionEntityId, cursor, pageSize = IO_EVENTS_PER_PAGE } = request.query;
-
-      try {
-        const search = await client.search({
-          index: [PROCESS_EVENTS_INDEX],
-          body: {
-            query: {
-              bool: {
-                must: [
-                  { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
-                  { term: { [EVENT_ACTION]: 'text_output' } },
-                ],
-              },
-            },
-            size: Math.min(pageSize, IO_EVENTS_PER_PAGE),
-            sort: [{ [TIMESTAMP]: 'asc' }],
-            search_after: cursor ? [cursor] : undefined,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              index: schema.string(),
+              sessionEntityId: schema.string(),
+              sessionStartTime: schema.string(),
+              cursor: schema.maybe(schema.string()),
+              pageSize: schema.maybe(schema.number({ min: 1, max: IO_EVENTS_PER_PAGE })), // currently only set in FTR tests to test pagination
+            }),
           },
-        });
+        },
+      },
+      async (context, request, response) => {
+        const client = (await context.core).elasticsearch.client.asCurrentUser;
+        const {
+          index,
+          sessionEntityId,
+          sessionStartTime,
+          cursor,
+          pageSize = IO_EVENTS_PER_PAGE,
+        } = request.query;
 
-        const events = search.hits.hits;
-        const total =
-          typeof search.hits.total === 'number' ? search.hits.total : search.hits.total?.value;
+        try {
+          const search = await client.search({
+            index: [index],
+            body: {
+              query: {
+                bool: {
+                  must: [
+                    { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
+                    { term: { [EVENT_ACTION]: 'text_output' } },
+                    {
+                      range: {
+                        // optimization to prevent data before this session from being hit.
+                        [TIMESTAMP_PROPERTY]: {
+                          gte: sessionStartTime,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              size: Math.min(pageSize, IO_EVENTS_PER_PAGE),
+              sort: [{ [TIMESTAMP]: 'asc' }],
+              search_after: cursor ? [cursor] : undefined,
+              fields: IO_EVENT_FIELDS,
+            },
+          });
 
-        return response.ok({ body: { total, events } });
-      } catch (err) {
-        // unauthorized
-        if (err?.meta?.statusCode === 403) {
-          return response.ok({ body: { total: 0, events: [] } });
+          const events = search.hits.hits;
+          const total =
+            typeof search.hits.total === 'number' ? search.hits.total : search.hits.total?.value;
+
+          return response.ok({ body: { total, events } });
+        } catch (err) {
+          const error = transformError(err);
+          logger.error(`Failed to fetch io events: ${err}`);
+
+          // unauthorized
+          if (err?.meta?.statusCode === 403) {
+            return response.ok({ body: { total: 0, events: [] } });
+          }
+
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
         }
-
-        return response.badRequest(err.message);
       }
-    }
-  );
+    );
 };
 
 export const searchProcessWithIOEvents = async (
   client: ElasticsearchClient,
+  index: string,
   sessionEntityId: string,
   range?: string[]
 ) => {
@@ -90,7 +122,7 @@ export const searchProcessWithIOEvents = async (
 
   try {
     const search = await client.search({
-      index: [PROCESS_EVENTS_INDEX],
+      index: [index],
       body: {
         query: {
           bool: {
@@ -119,8 +151,8 @@ export const searchProcessWithIOEvents = async (
     return buckets.map((bucket) => ({
       _source: {
         event: {
-          kind: EventKind.event,
-          action: EventAction.text_output,
+          kind: 'event',
+          action: 'text_output',
           id: bucket.key,
         },
         process: {

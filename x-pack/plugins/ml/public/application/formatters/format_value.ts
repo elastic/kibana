@@ -13,7 +13,8 @@
  */
 
 import moment from 'moment';
-import { AnomalyRecordDoc } from '../../../common/types/anomalies';
+import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
+
 const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 
 // Formats the value of an actual or typical field from a machine learning anomaly record.
@@ -28,7 +29,7 @@ export function formatValue(
   value: number[] | number,
   mlFunction: string,
   fieldFormat?: any,
-  record?: AnomalyRecordDoc
+  record?: MlAnomalyRecordDoc
 ) {
   // actual and typical values in anomaly record results will be arrays.
   // Unless the array is multi-valued (as it will be for multi-variate analyses such as lat_long),
@@ -58,7 +59,7 @@ export function formatSingleValue(
   value: number,
   mlFunction?: string,
   fieldFormat?: any,
-  record?: AnomalyRecordDoc
+  record?: MlAnomalyRecordDoc
 ) {
   if (value === undefined || value === null) {
     return '';

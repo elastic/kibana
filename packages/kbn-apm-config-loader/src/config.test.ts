@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { AgentConfigOptions, Labels } from 'elastic-apm-node';
 import {
   packageMock,
@@ -91,7 +93,6 @@ describe('ApmConfiguration', () => {
         "contextPropagationOnly": true,
         "environment": "development",
         "globalLabels": Object {},
-        "logUncaughtExceptions": true,
         "metricsInterval": "30s",
         "propagateTracestate": true,
         "secretToken": "JpBCcOQxN81D5yucs2",
@@ -116,7 +117,6 @@ describe('ApmConfiguration', () => {
         "globalLabels": Object {
           "git_rev": "sha",
         },
-        "logUncaughtExceptions": true,
         "metricsInterval": "120s",
         "propagateTracestate": true,
         "secretToken": "JpBCcOQxN81D5yucs2",
@@ -148,10 +148,41 @@ describe('ApmConfiguration', () => {
     );
   });
 
+  it('flattens the `globalLabels` object', () => {
+    const kibanaConfig = {
+      elastic: {
+        apm: {
+          globalLabels: {
+            keyOne: 'k1',
+            objectOne: {
+              objectOneKeyOne: 'o1k1',
+              objectOneKeyTwo: {
+                objectOneKeyTwoSubkeyOne: 'o1k2s1',
+              },
+            },
+          },
+        },
+      },
+    };
+    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, true);
+    expect(config.getConfig('serviceName')).toEqual(
+      expect.objectContaining({
+        globalLabels: {
+          git_rev: 'sha',
+          keyOne: 'k1',
+          'objectOne.objectOneKeyOne': 'o1k1',
+          'objectOne.objectOneKeyTwo.objectOneKeyTwoSubkeyOne': 'o1k2s1',
+        },
+      })
+    );
+  });
+
   describe('env vars', () => {
     beforeEach(() => {
       delete process.env.ELASTIC_APM_ENVIRONMENT;
       delete process.env.ELASTIC_APM_SECRET_TOKEN;
+      delete process.env.ELASTIC_APM_API_KEY;
+      delete process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE;
       delete process.env.ELASTIC_APM_SERVER_URL;
       delete process.env.NODE_ENV;
     });
@@ -184,6 +215,18 @@ describe('ApmConfiguration', () => {
             environment: 'ci',
           })
         );
+      });
+    });
+
+    it('ELASTIC_APM_KIBANA_FRONTEND_ACTIVE', () => {
+      process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE = 'false';
+      const config = new ApmConfiguration(mockedRootDir, {}, false);
+      const serverConfig = config.getConfig('servicesOverrides');
+      // @ts-ignore
+      expect(serverConfig.servicesOverrides).toEqual({
+        'kibana-frontend': {
+          active: false,
+        },
       });
     });
 
@@ -223,6 +266,15 @@ describe('ApmConfiguration', () => {
       const config = new ApmConfiguration(mockedRootDir, {}, false);
       const serverConfig = config.getConfig('serviceName');
       expect(serverConfig).toHaveProperty('secretToken', process.env.ELASTIC_APM_SECRET_TOKEN);
+      expect(serverConfig).toHaveProperty('serverUrl', process.env.ELASTIC_APM_SERVER_URL);
+    });
+
+    it('uses apiKey instead of secret token if env var is set', () => {
+      process.env.ELASTIC_APM_API_KEY = 'banana';
+      process.env.ELASTIC_APM_SERVER_URL = 'http://banana.com/';
+      const config = new ApmConfiguration(mockedRootDir, {}, false);
+      const serverConfig = config.getConfig('serviceName');
+      expect(serverConfig).toHaveProperty('apiKey', process.env.ELASTIC_APM_API_KEY);
       expect(serverConfig).toHaveProperty('serverUrl', process.env.ELASTIC_APM_SERVER_URL);
     });
   });
@@ -350,6 +402,77 @@ describe('ApmConfiguration', () => {
           contextPropagationOnly: false,
         })
       );
+    });
+
+    it('allows overriding some services settings', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {
+            active: true,
+            serverUrl: 'http://an.internal.apm.server:port/',
+            transactionSampleRate: 0.1,
+            servicesOverrides: {
+              externalServiceName: {
+                active: false,
+                serverUrl: 'http://a.public.apm.server:port/',
+                disableSend: true, // just adding an extra field to prove merging works
+              },
+            },
+          },
+        },
+      };
+
+      const internalService = new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig(
+        'internalServiceName'
+      );
+      expect(internalService).toEqual(
+        expect.objectContaining({
+          active: true,
+          serverUrl: 'http://an.internal.apm.server:port/',
+          transactionSampleRate: 0.1,
+          serviceName: 'internalServiceName',
+        })
+      );
+      expect(internalService).not.toHaveProperty('disableSend');
+      expect(internalService).not.toHaveProperty('servicesOverrides'); // We don't want to leak this to the client's config
+
+      expect(
+        new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig('externalServiceName')
+      ).toEqual(
+        expect.objectContaining({
+          active: false,
+          serverUrl: 'http://a.public.apm.server:port/',
+          transactionSampleRate: 0.1,
+          disableSend: true,
+          serviceName: 'externalServiceName',
+        })
+      );
+    });
+  });
+
+  describe('isUsersRedactionEnabled', () => {
+    it('defaults to true', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {},
+        },
+      };
+
+      const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
+      expect(config.isUsersRedactionEnabled()).toEqual(true);
+    });
+
+    it('uses the value defined in the config if specified', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {
+            redactUsers: false,
+          },
+        },
+      };
+
+      const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
+      expect(config.isUsersRedactionEnabled()).toEqual(false);
     });
   });
 });

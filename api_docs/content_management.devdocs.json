@@ -490,7 +490,7 @@
         "label": "ContentClientProvider",
         "description": [],
         "signature": [
-          "({ contentClient, children, }: React.PropsWithChildren<{ contentClient: ",
+          "({ contentClient, children }: React.PropsWithChildren<React.PropsWithChildren<{ contentClient: ",
           {
             "pluginId": "contentManagement",
             "scope": "public",
@@ -498,7 +498,7 @@
             "section": "def-public.ContentClient",
             "text": "ContentClient"
           },
-          "; }>) => JSX.Element"
+          "; }>>) => JSX.Element"
         ],
         "path": "src/plugins/content_management/public/content_client/content_client_context.tsx",
         "deprecated": false,
@@ -509,10 +509,10 @@
             "id": "def-public.ContentClientProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  contentClient,\n  children,\n}",
+            "label": "{ contentClient, children }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<{ contentClient: ",
+              "React.PropsWithChildren<React.PropsWithChildren<{ contentClient: ",
               {
                 "pluginId": "contentManagement",
                 "scope": "public",
@@ -520,7 +520,7 @@
                 "section": "def-public.ContentClient",
                 "text": "ContentClient"
               },
-              "; }>"
+              "; }>>"
             ],
             "path": "src/plugins/content_management/public/content_client/content_client_context.tsx",
             "deprecated": false,
@@ -1259,7 +1259,7 @@
             "section": "def-server.ContentStorage",
             "text": "ContentStorage"
           },
-          "<T, U>"
+          "<T, U, TMSearchConfig>"
         ],
         "path": "src/plugins/content_management/server/core/types.ts",
         "deprecated": false,
@@ -1283,7 +1283,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", id: string, options?: object | undefined) => Promise<{ item: T; } | { item: T; meta: any; }>"
+              ", id: string, options?: object | undefined) => Promise<{ item: T; meta?: undefined; } | { item: T; meta: any; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1361,7 +1361,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", ids: string[], options?: object | undefined) => Promise<{ hits: ({ item: T; } | { item: T; meta: any; })[]; }>"
+              ", ids: string[], options?: object | undefined) => Promise<{ hits: ({ item: T; meta?: undefined; } | { item: T; meta: any; })[]; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1439,7 +1439,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", data: object, options?: object | undefined) => Promise<{ item: T; } | { item: T; meta: any; }>"
+              ", data: object, options?: object | undefined) => Promise<{ item: T; meta?: undefined; } | { item: T; meta: any; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1517,7 +1517,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", id: string, data: object, options?: object | undefined) => Promise<{ item: U; } | { item: U; meta: any; }>"
+              ", id: string, data: object, options?: object | undefined) => Promise<{ item: U; meta?: undefined; } | { item: U; meta: any; }>"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1773,15 +1773,147 @@
           {
             "parentPluginId": "contentManagement",
             "id": "def-server.ContentStorage.mSearch",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "mSearch",
             "description": [
               "\nOpt-in to multi-type search.\nCan only be supported if the content type is backed by a saved object since `mSearch` is using the `savedObjects.find` API."
             ],
             "signature": [
-              "MSearchConfig",
-              "<T, unknown> | undefined"
+              "TMSearchConfig | undefined"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-server.MSearchConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "MSearchConfig",
+        "description": [
+          "\nA configuration for multi-type search.\nBy configuring a content type with a `MSearchConfig`, it can be searched in the multi-type search.\nUnderneath content management is using the `savedObjects.find` API to search the saved objects."
+        ],
+        "signature": [
+          {
+            "pluginId": "contentManagement",
+            "scope": "server",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-server.MSearchConfig",
+            "text": "MSearchConfig"
+          },
+          "<T, TSavedObjectAttributes>"
+        ],
+        "path": "src/plugins/content_management/server/core/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.MSearchConfig.savedObjectType",
+            "type": "string",
+            "tags": [],
+            "label": "savedObjectType",
+            "description": [
+              "\nThe saved object type that corresponds to this content type."
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.MSearchConfig.toItemResult",
+            "type": "Function",
+            "tags": [],
+            "label": "toItemResult",
+            "description": [
+              "\nMapper function that transforms the saved object into the content item result."
+            ],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", savedObject: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsFindResult",
+                "text": "SavedObjectsFindResult"
+              },
+              "<TSavedObjectAttributes>) => T"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.MSearchConfig.toItemResult.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.MSearchConfig.toItemResult.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObject",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsFindResult",
+                    "text": "SavedObjectsFindResult"
+                  },
+                  "<TSavedObjectAttributes>"
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.MSearchConfig.additionalSearchFields",
+            "type": "Array",
+            "tags": [],
+            "label": "additionalSearchFields",
+            "description": [
+              "\nAdditional fields to search on. These fields will be added to the search query.\nBy default, only `title` and `description` are searched."
+            ],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
@@ -1809,13 +1941,15 @@
             "type": "Object",
             "tags": [],
             "label": "requestHandlerContext",
-            "description": [],
+            "description": [
+              "The Core HTTP request handler context"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               }
             ],
@@ -2701,7 +2835,7 @@
         "label": "CreateResult",
         "description": [],
         "signature": [
-          "M extends void ? { item: T; } : { item: T; meta: M; }"
+          "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
         ],
         "path": "src/plugins/content_management/common/rpc/create.ts",
         "deprecated": false,
@@ -2716,7 +2850,7 @@
         "label": "GetResult",
         "description": [],
         "signature": [
-          "M extends void ? { item: T; } : { item: T; meta: M; }"
+          "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
         ],
         "path": "src/plugins/content_management/common/rpc/get.ts",
         "deprecated": false,
@@ -2812,7 +2946,7 @@
         "label": "UpdateResult",
         "description": [],
         "signature": [
-          "M extends void ? { item: T; } : { item: T; meta: M; }"
+          "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
         ],
         "path": "src/plugins/content_management/common/rpc/update.ts",
         "deprecated": false,

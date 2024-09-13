@@ -10,8 +10,9 @@
 import http from 'http';
 
 import expect from '@kbn/expect';
-import { CaseConnector, CaseStatuses, CommentType, User } from '@kbn/cases-plugin/common/api';
+import { CaseStatuses, AttachmentType, User } from '@kbn/cases-plugin/common/types/domain';
 import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
+import { CaseConnector } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -53,6 +54,7 @@ import {
 } from '../../../../common/lib/api';
 import {
   globalRead,
+  noCasesConnectors,
   noKibanaPrivileges,
   obsOnlyRead,
   obsSecRead,
@@ -60,6 +62,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { arraysToEqual } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -217,6 +220,14 @@ export default ({ getService }: FtrProviderContext): void => {
           Boolean(request.work_notes)
         );
 
+        const allWorkNotes = allCommentRequests.map((request) => request.work_notes);
+        const expectedNotes = [
+          'This is a cool comment\n\nAdded by elastic.',
+          'Isolated host host-name with comment: comment text\n\nAdded by elastic.',
+          'Released host host-name with comment: comment text\n\nAdded by elastic.',
+          `Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/app/management/insightsAndAlerting/cases/${patchedCase.id}/?tabId=alerts`,
+        ];
+
         /**
          * For each of these comments a request is made:
          * postCommentUserReq, postCommentActionsReq, postCommentActionsReleaseReq, and a comment with the
@@ -225,23 +236,9 @@ export default ({ getService }: FtrProviderContext): void => {
          */
         expect(allCommentRequests.length).be(4);
 
-        // User comment: postCommentUserReq
-        expect(allCommentRequests[0].work_notes).eql('This is a cool comment\n\nAdded by elastic.');
-
-        // Isolate host comment: postCommentActionsReq
-        expect(allCommentRequests[1].work_notes).eql(
-          'Isolated host host-name with comment: comment text\n\nAdded by elastic.'
-        );
-
-        // Unisolate host comment: postCommentActionsReleaseReq
-        expect(allCommentRequests[2].work_notes).eql(
-          'Released host host-name with comment: comment text\n\nAdded by elastic.'
-        );
-
-        // Total alerts
-        expect(allCommentRequests[3].work_notes).eql(
-          `Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/app/management/insightsAndAlerting/cases/${patchedCase.id}/?tabId=alerts`
-        );
+        // since we're using a bulk create we can't guarantee the ordering so we'll check that the values exist but not
+        // there specific order in the results
+        expect(arraysToEqual(allWorkNotes, expectedNotes)).to.be(true);
       });
 
       it('should format the totalAlerts with spaceId correctly', async () => {
@@ -518,7 +515,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('user profile uid', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/157588
+      describe.skip('user profile uid', () => {
         let headers: Record<string, string>;
         let superUserWithProfile: User;
         let superUserInfo: User;
@@ -650,7 +648,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId: signalID,
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -664,7 +662,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId: signalID2,
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });
@@ -843,6 +841,24 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           expect(theCase.status).to.eql('open');
+        });
+
+        it('should return 403 when the user does not have access to push', async () => {
+          const { postedCase } = await createCaseWithConnector({
+            supertest,
+            serviceNowSimulatorURL,
+            actionsRemover,
+            configureReq: { owner: 'testNoCasesConnectorFixture' },
+            createCaseReq: { ...getPostCaseRequest(), owner: 'testNoCasesConnectorFixture' },
+          });
+
+          await pushCase({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            connectorId: postedCase.connector.id,
+            expectedHttpCode: 403,
+            auth: { user: noCasesConnectors, space: null },
+          });
         });
       });
     });

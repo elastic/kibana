@@ -11,6 +11,7 @@ node_modules
 !/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
 !/src/dev/notice/__fixtures__/node_modules
 !/packages/kbn-import-resolver/src/__fixtures__/node_modules
+!/packages/kbn-import-resolver/src/__fixtures__/packages/box/node_modules
 trash
 /optimize
 /built_assets
@@ -42,6 +43,14 @@ __tmp__
 /x-pack/test/*/screenshots/visual_regression_gallery.html
 /x-pack/test/functional/apps/*/*/reporting/reports/failure
 
+# Ignore the same artifacts in x-pack/test_serverless
+/x-pack/test_serverless/*/failure_debug
+/x-pack/test_serverless/*/screenshots/diff
+/x-pack/test_serverless/*/screenshots/failure
+/x-pack/test_serverless/*/screenshots/session
+/x-pack/test_serverless/*/screenshots/visual_regression_gallery.html
+/x-pack/test_serverless/functional/apps/*/*/reporting/reports/failure
+
 /html_docs
 .eslintcache
 /plugins/
@@ -72,9 +81,6 @@ package-lock.json
 npm-debug.log*
 .tern-project
 .nyc_output
-.ci/pipeline-library/build/
-.ci/runbld
-.ci/bash_standard_lib.sh
 .gradle
 .vagrant
 .envrc
@@ -84,12 +90,21 @@ npm-debug.log*
 
 ## @cypress/snapshot from apm plugin
 /snapshots.js
+/apm-diagnostics*.json
+/x-pack/plugins/observability_solution/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.actual.png
+/x-pack/plugins/observability_solution/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.diff.png
 
 # transpiled cypress config
 x-pack/plugins/fleet/cypress.config.d.ts
 x-pack/plugins/fleet/cypress.config.js
 x-pack/plugins/osquery/cypress.config.d.ts
 x-pack/plugins/osquery/cypress.config.js
+x-pack/plugins/enterprise_search/cypress.config.d.ts
+x-pack/plugins/enterprise_search/cypress.config.js
+x-pack/plugins/security_solution/public/management/cypress.config.d.ts
+x-pack/plugins/security_solution/public/management/cypress.config.js
+x-pack/plugins/security_solution/public/management/cypress_endpoint.config.d.ts
+x-pack/plugins/security_solution/public/management/cypress_endpoint.config.js
 
 # release notes script output
 report.csv
@@ -122,3 +137,24 @@ fleet-server.yml
 **/.synthetics/
 **/.journeys/
 x-pack/test/security_api_integration/plugins/audit_log/audit.log
+
+# ignore FTR temp directory
+.ftr
+role_users.json
+
+
+.devcontainer/.env
+
+# Ignore temporary files in oas_docs
+oas_docs/output/kibana.serverless.tmp*.yaml
+oas_docs/output/kibana.tmp*.yaml
+oas_docs/output/kibana.new.yaml
+oas_docs/output/kibana.serverless.new.yaml
+
+# Security Solution Playwright
+x-pack/test/security_solution_playwright/test-results/
+x-pack/test/security_solution_playwright/playwright-report/
+x-pack/test/security_solution_playwright/blob-report/
+x-pack/test/security_solution_playwright/playwright/.cache/
+x-pack/test/security_solution_playwright/.auth/
+x-pack/test/security_solution_playwright/.env

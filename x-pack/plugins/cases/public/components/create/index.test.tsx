@@ -6,15 +6,11 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
-
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import { TestProviders } from '../../common/mock';
-import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
@@ -33,20 +29,20 @@ import { CreateCase } from '.';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 
+jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/api');
 jest.mock('../../containers/user_profiles/api');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../containers/configure/use_configure');
+jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/jira/use_get_issue_types');
 jest.mock('../connectors/jira/use_get_fields_by_issue_type');
-jest.mock('../connectors/jira/use_get_single_issue');
 jest.mock('../connectors/jira/use_get_issues');
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useCaseConfigureMock = useCaseConfigure as jest.Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
@@ -54,36 +50,28 @@ const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const fetchTags = jest.fn();
 
-const fillForm = (wrapper: ReactWrapper) => {
-  wrapper
-    .find(`[data-test-subj="caseTitle"] input`)
-    .first()
-    .simulate('change', { target: { value: sampleData.title } });
-
-  wrapper
-    .find(`[data-test-subj="caseDescription"] textarea`)
-    .first()
-    .simulate('change', { target: { value: sampleData.description } });
-
-  act(() => {
-    (
-      wrapper.find(EuiComboBox).at(0).props() as unknown as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }
-    ).onChange(sampleTags.map((tag) => ({ label: tag })));
-  });
-};
-
 const defaultProps = {
   onCancel: jest.fn(),
   onSuccess: jest.fn(),
 };
 
 describe('CreateCase case', () => {
+  let user: UserEvent;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     useGetConnectorsMock.mockReturnValue(sampleConnectorData);
-    useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+    useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
@@ -95,49 +83,50 @@ describe('CreateCase case', () => {
   });
 
   it('it renders', async () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <CreateCase {...defaultProps} />
       </TestProviders>
     );
-    await act(async () => {
-      expect(wrapper.find(`[data-test-subj="create-case-submit"]`).exists()).toBeTruthy();
-      expect(wrapper.find(`[data-test-subj="create-case-cancel"]`).exists()).toBeTruthy();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('create-case-submit')).toBeInTheDocument();
+      expect(screen.getByTestId('create-case-cancel')).toBeInTheDocument();
     });
   });
 
   it('should open modal on cancel click', async () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <CreateCase {...defaultProps} />
       </TestProviders>
     );
 
-    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+    await user.click(screen.getByTestId('create-case-cancel'));
 
     await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
     });
   });
 
   it('should confirm cancelation on modal confirm click', async () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <CreateCase {...defaultProps} />
       </TestProviders>
     );
 
-    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
-
     await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('create-case-cancel')).toBeInTheDocument();
     });
 
-    wrapper.find(`button[data-test-subj="confirmModalConfirmButton"]`).simulate('click');
+    await user.click(screen.getByTestId('create-case-cancel'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByTestId('confirmModalConfirmButton'));
 
     await waitFor(() => {
       expect(defaultProps.onCancel).toHaveBeenCalled();
@@ -145,40 +134,43 @@ describe('CreateCase case', () => {
   });
 
   it('should close modal on modal cancel click', async () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <CreateCase {...defaultProps} />
       </TestProviders>
     );
 
-    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+    await user.click(screen.getByTestId('create-case-cancel'));
 
     await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
-      ).toBeTruthy();
+      expect(screen.queryByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
     });
 
-    wrapper.find(`button[data-test-subj="confirmModalCancelButton"]`).simulate('click');
+    await user.click(screen.getByTestId('confirmModalCancelButton'));
 
     await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
-      ).toBeFalsy();
+      expect(screen.queryByTestId('cancel-creation-confirmation-modal')).not.toBeInTheDocument();
     });
   });
 
   it('should redirect to new case when posting the case', async () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <CreateCase {...defaultProps} />
       </TestProviders>
     );
 
-    await act(async () => {
-      fillForm(wrapper);
-      wrapper.find(`button[data-test-subj="create-case-submit"]`).first().simulate('click');
-    });
+    const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
+    await user.click(titleInput);
+    await user.paste(sampleData.title);
+
+    const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
+      'euiMarkdownEditorTextArea'
+    );
+    await user.click(descriptionInput);
+    await user.paste(sampleData.description);
+
+    await user.click(screen.getByTestId('create-case-submit'));
 
     expect(defaultProps.onSuccess).toHaveBeenCalled();
   });

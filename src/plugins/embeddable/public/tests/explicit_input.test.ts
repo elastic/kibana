@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { skip } from 'rxjs/operators';
+import { skip } from 'rxjs';
 import { testPlugin } from './test_plugin';
 import {
   MockFilter,
@@ -21,12 +22,8 @@ import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_
 import { isErrorEmbeddable } from '../lib';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 import { coreMock } from '@kbn/core/public/mocks';
-import { createEmbeddablePanelMock } from '../mocks';
 
-const { setup, doStart, coreStart, uiActions } = testPlugin(
-  coreMock.createSetup(),
-  coreMock.createStart()
-);
+const { setup, doStart, uiActions } = testPlugin(coreMock.createSetup(), coreMock.createStart());
 
 setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
 const factory = new SlowContactCardEmbeddableFactory({
@@ -69,19 +66,10 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
 });
 
 test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async () => {
-  const testPanel = createEmbeddablePanelMock({
-    getActions: uiActions.getTriggerCompatibleActions,
-    getEmbeddableFactory: start.getEmbeddableFactory,
-    getAllEmbeddableFactories: start.getEmbeddableFactories,
-    overlays: coreStart.overlays,
-    notifications: coreStart.notifications,
-    application: coreStart.application,
-  });
   const container = new HelloWorldContainer(
     { id: 'hello', panels: {} },
     {
       getEmbeddableFactory: start.getEmbeddableFactory,
-      panelComponent: testPanel,
     }
   );
 
@@ -111,14 +99,6 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
 // but before the embeddable factory returns the embeddable, that the `inheritedChildInput` and
 // embeddable input comparisons won't cause explicit input to be set when it shouldn't.
 test('Explicit input tests in async situations', (done: () => void) => {
-  const testPanel = createEmbeddablePanelMock({
-    getActions: uiActions.getTriggerCompatibleActions,
-    getEmbeddableFactory: start.getEmbeddableFactory,
-    getAllEmbeddableFactories: start.getEmbeddableFactories,
-    overlays: coreStart.overlays,
-    notifications: coreStart.notifications,
-    application: coreStart.application,
-  });
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -131,7 +111,6 @@ test('Explicit input tests in async situations', (done: () => void) => {
     },
     {
       getEmbeddableFactory: start.getEmbeddableFactory,
-      panelComponent: testPanel,
     }
   );
 

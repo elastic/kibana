@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -97,6 +98,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.context.viewport_width).to.be.a('number');
       expect(event.context).to.have.property('viewport_height');
       expect(event.context.viewport_height).to.be.a('number');
+    });
+
+    it('should have the properties provided by the "page title" context provider', async () => {
+      expect(event.context).to.have.property('page_title');
+      expect(event.context.page_title).to.be.a('string');
+    });
+
+    it('should have the properties provided by the "page url" context provider', () => {
+      expect(event.context).to.have.property('page_url');
+      expect(event.context.page_url).to.be.a('string');
     });
   });
 }

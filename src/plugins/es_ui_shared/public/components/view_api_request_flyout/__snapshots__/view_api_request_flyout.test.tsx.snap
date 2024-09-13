@@ -25,7 +25,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
     class="euiFlyoutBody emotion-euiFlyoutBody"
   >
     <div
-      class="euiFlyoutBody__overflow css-18yrfj9-noBanner"
+      class="euiFlyoutBody__overflow emotion-euiFlyoutBody__overflow-noBanner"
       tabindex="0"
     >
       <div
@@ -53,20 +53,19 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           >
             <button
-              class="euiButtonEmpty euiButtonEmpty--xSmall euiButtonEmpty--flushRight css-9t7nyf-empty-primary"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-right"
               data-test-subj="apiRequestFlyoutCopyClipboardButton"
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent__icon"
                   color="inherit"
                   data-euiicon-type="copyClipboard"
                 />
                 <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   Copy to clipboard
                 </span>
@@ -94,20 +93,19 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
     class="euiFlyoutFooter emotion-euiFlyoutFooter"
   >
     <button
-      class="euiButtonEmpty euiButtonEmpty--flushLeft css-9t7nyf-empty-primary"
+      class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary-flush-left"
       data-test-subj="apiRequestFlyoutClose"
       type="button"
     >
       <span
-        class="euiButtonContent euiButtonEmpty__content"
+        class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
       >
         <span
-          class="euiButtonContent__icon"
           color="inherit"
           data-euiicon-type="cross"
         />
         <span
-          class="euiButtonEmpty__text"
+          class="eui-textTruncate euiButtonEmpty__text"
         >
           Close
         </span>

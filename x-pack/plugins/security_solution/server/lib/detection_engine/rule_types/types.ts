@@ -10,6 +10,8 @@ import type { Moment } from 'moment';
 import type { Logger } from '@kbn/logging';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 
 import type { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
@@ -26,38 +28,35 @@ import type { ListClient } from '@kbn/lists-plugin/server';
 import type {
   PersistenceServices,
   IRuleDataClient,
-  IRuleDataReader,
   SuppressedAlertService,
 } from '@kbn/rule-registry-plugin/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
+import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
 import type { CompleteRule, RuleParams } from '../rule_schema';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
-import type { IRuleExecutionLogForExecutors, IRuleExecutionLogService } from '../rule_monitoring';
+import type { IRuleExecutionLogForExecutors, IRuleMonitoringService } from '../rule_monitoring';
 import type { RefreshTypes } from '../types';
 
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import type {
-  BaseHit,
-  RuleAlertAction,
-  SearchTypes,
-  EqlSequence,
-} from '../../../../common/detection_engine/types';
+import type { Status } from '../../../../common/api/detection_engine';
+import type { BaseHit, SearchTypes, EqlSequence } from '../../../../common/detection_engine/types';
 import type { GenericBulkCreateResponse } from './factories';
 import type { BuildReasonMessage } from './utils/reason_formatters';
 import type {
   BaseFieldsLatest,
   DetectionAlert,
   WrappedFieldsLatest,
-} from '../../../../common/detection_engine/schemas/alerts';
-import type { RuleResponse } from '../../../../common/detection_engine/rule_schema';
+} from '../../../../common/api/detection_engine/model/alerts';
+import type {
+  RuleAction,
+  RuleResponse,
+} from '../../../../common/api/detection_engine/model/rule_schema';
 import type { EnrichEvents } from './utils/enrichments/types';
 import type { ThresholdResult } from './threshold/types';
 
@@ -67,12 +66,14 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
+  userError?: boolean;
   lastLookbackDate?: Date | null;
   searchAfterTimes: string[];
   state: TState;
   success: boolean;
   warning: boolean;
   warningMessages: string[];
+  suppressedAlertsCount?: number;
 }
 
 export interface RunOpts<TParams extends RuleParams> {
@@ -88,7 +89,7 @@ export interface RunOpts<TParams extends RuleParams> {
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
-  ruleDataReader: IRuleDataReader;
+  ruleDataClient: IRuleDataClient;
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   mergeStrategy: ConfigType['alertMergeStrategy'];
@@ -100,6 +101,9 @@ export interface RunOpts<TParams extends RuleParams> {
   alertTimestampOverride: Date | undefined;
   alertWithSuppression: SuppressedAlertService;
   refreshOnIndexingAlerts: RefreshTypes;
+  publicBaseUrl: string | undefined;
+  inputIndexFields: DataViewFieldBase[];
+  experimentalFeatures?: ExperimentalFeatures;
 }
 
 export type SecurityAlertType<
@@ -127,23 +131,24 @@ export type SecurityAlertType<
 
 export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
+  actions: SetupPlugins['actions'];
   logger: Logger;
   config: ConfigType;
+  publicBaseUrl: string | undefined;
   ruleDataClient: IRuleDataClient;
-  ruleExecutionLoggerFactory: IRuleExecutionLogService['createClientForExecutors'];
+  ruleExecutionLoggerFactory: IRuleMonitoringService['createRuleExecutionLogClientForExecutors'];
   version: string;
   isPreview?: boolean;
+  experimentalFeatures?: ExperimentalFeatures;
+  alerting: SetupPlugins['alerting'];
+  analytics?: AnalyticsServiceSetup;
 }
 
 export type CreateSecurityRuleTypeWrapper = (
   options: CreateSecurityRuleTypeWrapperProps
-) => <
-  TParams extends RuleParams,
-  TState extends RuleTypeState,
-  TInstanceContext extends AlertInstanceContext = {}
->(
-  type: SecurityAlertType<TParams, TState, TInstanceContext, 'default'>
-) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;
+) => <TParams extends RuleParams, TState extends RuleTypeState>(
+  type: SecurityAlertType<TParams, TState, AlertInstanceContext, 'default'>
+) => RuleType<TParams, TParams, TState, AlertInstanceState, AlertInstanceContext, 'default'>;
 
 export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
@@ -157,7 +162,6 @@ export interface CreateRuleOptions {
 export interface ScheduleNotificationActions {
   signals: unknown[];
   responseActions: RuleResponseAction[];
-  hasEnterpriseLicense?: boolean;
 }
 export interface CreateQueryRuleAdditionalOptions {
   scheduleNotificationResponseActionsService?: (params: ScheduleNotificationActions) => void;
@@ -306,7 +310,7 @@ export interface SignalHit {
 }
 
 export interface AlertAttributes<T extends RuleParams = RuleParams> {
-  actions: RuleAlertAction[];
+  actions: RuleAction[];
   alertTypeId: string;
   enabled: boolean;
   name: string;
@@ -337,6 +341,11 @@ export type WrapHits = (
   hits: Array<estypes.SearchHit<SignalSource>>,
   buildReasonMessage: BuildReasonMessage
 ) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
+
+export type WrapSuppressedHits = (
+  hits: Array<estypes.SearchHit<SignalSource>>,
+  buildReasonMessage: BuildReasonMessage
+) => Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
 
 export type WrapSequences = (
   sequences: Array<EqlSequence<SignalSource>>,
@@ -372,6 +381,7 @@ export interface SearchAfterAndBulkCreateParams {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  additionalFilters?: estypes.QueryDslQueryContainer[];
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
@@ -384,7 +394,9 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
+  userError?: boolean;
   warningMessages: string[];
+  suppressedAlertsCount?: number;
 }
 
 // the new fields can be added later if needed

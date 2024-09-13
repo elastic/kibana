@@ -15,79 +15,66 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   return {
-    async getSavedViewsButton() {
-      return await testSubjects.find('savedViews-openPopover');
-    },
-
     async clickSavedViewsButton() {
-      return await testSubjects.click('savedViews-openPopover');
-    },
+      const button = await testSubjects.find('savedViews-openPopover');
 
-    async getSavedViewsPopoer() {
-      return await testSubjects.find('savedViews-popover');
+      await retry.waitFor('Wait for button to be enabled', async () => {
+        const isDisabled = Boolean(await button.getAttribute('disabled'));
+        return !isDisabled;
+      });
+
+      return button.click();
+    },
+    pressEsc() {
+      return browser.pressKeys([Key.ESCAPE]);
     },
 
     async closeSavedViewsPopover() {
       await testSubjects.find('savedViews-popover');
-      return await browser.pressKeys([Key.ESCAPE]);
+      return this.pressEsc();
     },
 
-    async getLoadViewButton() {
-      return await testSubjects.find('savedViews-loadView');
+    clickManageViewsButton() {
+      return testSubjects.click('savedViews-manageViews');
     },
 
-    async clickLoadViewButton() {
-      return await testSubjects.click('savedViews-loadView');
+    async getManageViewsEntries() {
+      await this.clickManageViewsButton();
+      return testSubjects.findAll('infraRenderNameButton');
     },
 
-    async getManageViewsButton() {
-      return await testSubjects.find('savedViews-manageViews');
+    clickUpdateViewButton() {
+      return testSubjects.click('savedViews-updateView');
     },
 
-    async clickManageViewsButton() {
-      return await testSubjects.click('savedViews-manageViews');
-    },
-
-    async getUpdateViewButton() {
-      return await testSubjects.find('savedViews-updateView');
-    },
-
-    async clickUpdateViewButton() {
-      return await testSubjects.click('savedViews-updateView');
-    },
-
-    async getSaveNewViewButton() {
-      return await testSubjects.find('savedViews-saveNewView');
-    },
-
-    async clickSaveNewViewButton() {
-      return await testSubjects.click('savedViews-saveNewView');
-    },
-
-    async getCreateSavedViewModal() {
-      return await testSubjects.find('savedViews-createModal');
+    clickSaveNewViewButton() {
+      return testSubjects.click('savedViews-saveNewView');
     },
 
     async createNewSavedView(name: string) {
-      await testSubjects.setValue('savedViewViweName', name);
+      await testSubjects.setValue('savedViewName', name);
       await testSubjects.click('createSavedViewButton');
-      await testSubjects.missingOrFail('savedViews-createModal');
-    },
-
-    async ensureViewIsLoaded(name: string) {
-      await retry.try(async () => {
-        const subject = await testSubjects.find('savedViews-openPopover');
-        expect(await subject.getVisibleText()).to.be(name);
+      await testSubjects.missingOrFail('createSavedViewButton', { timeout: 20000 });
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.missingOrFail('savedViews-upsertModal');
       });
     },
 
-    async ensureViewIsLoadable(name: string) {
-      const subject = await testSubjects.find('savedViews-loadList');
-      await subject.findByCssSelector(`li[title="${name}"]`);
+    async createView(name: string) {
+      await this.clickSaveNewViewButton();
+      await this.createNewSavedView(name);
     },
 
-    async closeSavedViewsLoadModal() {
-      return await testSubjects.click('cancelSavedViewModal');
+    async updateView(name: string) {
+      await this.clickUpdateViewButton();
+      await this.createNewSavedView(name);
+    },
+
+    async ensureViewIsLoaded(name: string) {
+      await retry.tryForTime(5000, async () => {
+        const subject = await testSubjects.find('savedViews-openPopover');
+        expect(await subject.getVisibleText()).to.be(name);
+      });
     },
   };
 }

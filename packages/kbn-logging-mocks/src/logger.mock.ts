@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/logging';
+import type { Logger, LogMeta, LogMessageSource } from '@kbn/logging';
 
 export type MockedLogger = jest.Mocked<Logger> & { context: string[] };
 
@@ -24,9 +25,10 @@ const createLoggerMock = (context: string[] = []) => {
     isLevelEnabled: jest.fn(),
   };
   mockLog.get.mockImplementation((...ctx) => ({
-    ctx,
     ...mockLog,
+    context: Array.isArray(context) ? context.concat(ctx) : [context, ...ctx].filter(Boolean),
   }));
+
   mockLog.isLevelEnabled.mockReturnValue(true);
 
   return mockLog;
@@ -42,15 +44,39 @@ const clearLoggerMock = (logger: MockedLogger) => {
   logger.log.mockClear();
 };
 
+const convertMessageSource = (
+  value: [message: LogMessageSource, meta?: LogMeta | undefined]
+): [string] | [string, LogMeta | undefined] => {
+  const message = typeof value[0] === 'function' ? value[0]() : value[0];
+  const meta = value[1];
+  if (meta) {
+    return [message, meta];
+  } else {
+    return [message];
+  }
+};
+
+const convertMessageSourceOrError = (
+  value: [message: LogMessageSource | Error, meta?: LogMeta | undefined]
+): [string | Error] | [string | Error, LogMeta | undefined] => {
+  const message = typeof value[0] === 'function' ? value[0]() : value[0];
+  const meta = value[1];
+  if (meta) {
+    return [message, meta];
+  } else {
+    return [message];
+  }
+};
+
 const collectLoggerMock = (logger: MockedLogger) => {
   return {
-    debug: logger.debug.mock.calls,
-    error: logger.error.mock.calls,
-    fatal: logger.fatal.mock.calls,
-    info: logger.info.mock.calls,
+    debug: logger.debug.mock.calls.map(convertMessageSource),
+    error: logger.error.mock.calls.map(convertMessageSourceOrError),
+    fatal: logger.fatal.mock.calls.map(convertMessageSourceOrError),
+    info: logger.info.mock.calls.map(convertMessageSource),
     log: logger.log.mock.calls,
-    trace: logger.trace.mock.calls,
-    warn: logger.warn.mock.calls,
+    trace: logger.trace.mock.calls.map(convertMessageSource),
+    warn: logger.warn.mock.calls.map(convertMessageSourceOrError),
   };
 };
 

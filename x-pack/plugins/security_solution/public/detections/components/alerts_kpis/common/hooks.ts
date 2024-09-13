@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { IFieldSubTypeNested } from '@kbn/es-query';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 
-import type { BrowserField } from '@kbn/timelines-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
-import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { getScopeFromPath } from '../../../../sourcerer/containers/sourcerer_paths';
 import { getAllFieldsByName } from '../../../../common/containers/source';
+import { isLensSupportedType } from '../../../../common/utils/lens';
 
 export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   response: string;
@@ -60,24 +64,19 @@ export const useInspectButton = ({
   }, [setQuery, loading, response, request, refetch, uniqueQueryId, deleteQuery, searchSessionId]);
 };
 
-export function isDataViewFieldSubtypeNested(field: Partial<BrowserField>) {
+export function isDataViewFieldSubtypeNested(field: Partial<FieldSpec>) {
   const subTypeNested = field?.subType as IFieldSubTypeNested;
   return !!subTypeNested?.nested?.path;
 }
 
-export function isLensSupportedType(fieldType: string | undefined) {
-  const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
-  return fieldType ? supportedTypes.has(fieldType) : false;
-}
-
 export interface GetAggregatableFields {
-  [fieldName: string]: Partial<BrowserField>;
+  [fieldName: string]: Partial<FieldSpec>;
 }
 
 export function getAggregatableFields(
   fields: GetAggregatableFields,
   useLensCompatibleFields?: boolean
-): EuiComboBoxOptionOption[] {
+): Array<EuiComboBoxOptionOption<string>> {
   const result = [];
   for (const [key, field] of Object.entries(fields)) {
     if (useLensCompatibleFields) {
@@ -99,14 +98,22 @@ export function getAggregatableFields(
 
 export const useStackByFields = (useLensCompatibleFields?: boolean) => {
   const { pathname } = useLocation();
-
+  const { addError } = useAppToasts();
   const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
-  const allFields = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
-  const [stackByFieldOptions, setStackByFieldOptions] = useState(() =>
-    getAggregatableFields(allFields, useLensCompatibleFields)
-  );
-  useEffect(() => {
-    setStackByFieldOptions(getAggregatableFields(allFields, useLensCompatibleFields));
-  }, [allFields, useLensCompatibleFields]);
-  return useMemo(() => stackByFieldOptions, [stackByFieldOptions]);
+
+  return useCallback(() => {
+    try {
+      return getAggregatableFields(getAllFieldsByName(browserFields), useLensCompatibleFields);
+    } catch (err) {
+      addError(err, {
+        title: i18n.translate('xpack.securitySolution.useStackByFields.error.title', {
+          defaultMessage: 'Error fetching fields',
+        }),
+        toastMessage: i18n.translate('xpack.securitySolution.useStackByFields.error.toastMessage', {
+          defaultMessage: 'This error indicates an exceedingly large number of fields in an index',
+        }),
+      });
+      return [];
+    }
+  }, [addError, browserFields, useLensCompatibleFields]);
 };

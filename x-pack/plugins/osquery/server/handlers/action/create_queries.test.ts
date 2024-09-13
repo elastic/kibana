@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { createDynamicQueries, PARAMETER_NOT_FOUND } from './create_queries';
+import { createDynamicQueries } from './create_queries';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 
 describe('create queries', () => {
   const defualtQueryParams = {
@@ -59,15 +60,13 @@ describe('create queries', () => {
           process: {
             pid,
           },
-        } as unknown as ParsedTechnicalFields,
+        } as unknown as ParsedTechnicalFields & { _index: string },
         osqueryContext: {} as OsqueryAppContext,
       });
       expect(queries[0].query).toBe(`SELECT * FROM processes where pid=${pid};`);
       expect(queries[0].error).toBe(undefined);
       expect(queries[1].query).toBe('SELECT * FROM processes where pid={{process.not-existing}};');
-      expect(queries[1].error).toBe(
-        "This query hasn't been called due to parameter used and its value not found in the alert."
-      );
+      expect(queries[1].error).toBe(PARAMETER_NOT_FOUND);
       expect(queries[2].query).toBe('SELECT * FROM processes;');
       expect(queries[2].error).toBe(undefined);
     });
@@ -78,7 +77,7 @@ describe('create queries', () => {
         agents: [TEST_AGENT],
         alertData: {
           process: { pid },
-        } as unknown as ParsedTechnicalFields,
+        } as unknown as ParsedTechnicalFields & { _index: string },
         osqueryContext: {} as OsqueryAppContext,
       });
       expect(queries[0].query).toBe(`SELECT * FROM processes where pid=${pid};`);
@@ -90,7 +89,7 @@ describe('create queries', () => {
         agents: [TEST_AGENT],
         alertData: {
           process: {},
-        } as unknown as ParsedTechnicalFields,
+        } as unknown as ParsedTechnicalFields & { _index: string },
         osqueryContext: {} as OsqueryAppContext,
       });
       expect(queries[0].query).toBe('SELECT * FROM processes where pid={{process.pid}};');

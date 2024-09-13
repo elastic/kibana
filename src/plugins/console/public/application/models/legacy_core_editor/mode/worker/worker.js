@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* @notice
@@ -53,10 +54,7 @@ function init(window) {
       let alias = paths[testPath];
       if ('string' === typeof alias) return alias + tail;
       if (alias)
-        {return (
-          alias.location.replace(/\/*$/, '/') +
-          (tail || alias.main || alias.name)
-        );}
+        {return (alias.location.replace(/\/*$/, '/') + (tail || alias.main || alias.name));}
       if (alias === !1) return '';
       let i = testPath.lastIndexOf('/');
       if (-1 === i) break;
@@ -2090,6 +2088,12 @@ ace.define(
           case 'p':
             next('p');
             switch (ch) {
+              case 'a':
+                next('a');
+                next('t');
+                next('c');
+                next('h');
+                return 'patch';
               case 'u':
                 next('u');
                 next('t');
@@ -2106,6 +2110,12 @@ ace.define(
           case 'P':
             next('P');
             switch (ch) {
+              case 'A':
+                next('A');
+                next('T');
+                next('C');
+                next('H');
+                return 'PATCH';
               case 'U':
                 next('U');
                 next('T');
@@ -2120,7 +2130,7 @@ ace.define(
             }
             break;
           default:
-            error('Expected one of GET/POST/PUT/DELETE/HEAD');
+            error('Expected one of GET/POST/PUT/DELETE/HEAD/PATCH');
         }
       },
       value, // Place holder for the value function.
@@ -2254,7 +2264,7 @@ ace.define(
             annotate('error', e.message);
             // snap
             const substring = text.substr(at);
-            const nextMatch = substring.search(/^POST|HEAD|GET|PUT|DELETE/m);
+            const nextMatch = substring.search(/^POST|HEAD|GET|PUT|DELETE|PATCH/m);
             if (nextMatch < 1) return;
             reset(at + nextMatch);
           }

@@ -8,15 +8,15 @@
 import React, { Component } from 'react';
 
 import type { Capabilities } from '@kbn/core/public';
+import type { KibanaPrivileges } from '@kbn/security-role-management-model';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 
-import type { Role } from '../../../../../../common/model';
-import type { KibanaPrivileges } from '../../../model';
-import { CollapsiblePanel } from '../../collapsible_panel';
-import type { RoleValidator } from '../../validate_role';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
+import type { Role } from '../../../../../../common';
+import { CollapsiblePanel } from '../../collapsible_panel';
+import type { RoleValidator } from '../../validate_role';
 
 interface Props {
   role: Role;

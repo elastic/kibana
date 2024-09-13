@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as uuid } from 'uuid';
 import { defineConfig } from 'cypress';
 import wp from '@cypress/webpack-preprocessor';
 
@@ -15,9 +17,12 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
     e2e: {
       ...options?.e2e,
       setupNodeEvents(on, config) {
-        on(
-          'file:preprocessor',
-          wp({
+        on('file:preprocessor', (file) => {
+          const id = uuid();
+          // Fix an issue with running Cypress parallel
+          file.outputPath = file.outputPath.replace(/^(.*\/)(.*?)(\..*)$/, `$1$2.${id}$3`);
+
+          return wp({
             webpackOptions: {
               resolve: {
                 extensions: ['.ts', '.tsx', '.js'],
@@ -39,8 +44,8 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
                 ],
               },
             },
-          })
-        );
+          })(file);
+        });
 
         const external = options?.e2e?.setupNodeEvents;
         if (external) {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -11,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiAccordion,
+  EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiCode,
@@ -20,30 +22,26 @@ import {
   EuiFlexItem,
   EuiFormLabel,
   EuiLoadingSpinner,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
+  EuiPageTemplate,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs';
 import { lastValueFrom, of } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { TimeRange } from '@kbn/es-query';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
+
 import {
   connectToQueryState,
   DataPublicPluginStart,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  isCompleteResponse,
-  isErrorResponse,
+  isRunningResponse,
   QueryState,
   SearchSessionState,
 } from '@kbn/data-plugin/public';
@@ -55,6 +53,9 @@ import { getInitialStateFromUrl, SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR } from './
 
 interface SearchSessionsExampleAppDeps {
   notifications: CoreStart['notifications'];
+  analytics: CoreStart['analytics'];
+  i18n: CoreStart['i18n'];
+  theme: CoreStart['theme'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -84,10 +85,10 @@ interface State extends QueryState {
 }
 
 export const SearchSessionsExampleApp = ({
-  notifications,
   navigation,
   data,
   unifiedSearch,
+  ...startServices
 }: SearchSessionsExampleAppDeps) => {
   const { IndexPatternSelect } = unifiedSearch.ui;
 
@@ -200,7 +201,7 @@ export const SearchSessionsExampleApp = ({
       if (!numericFieldName) return;
       setIsSearching(true);
       const requestId = ++nextRequestIdRef.current;
-      doSearch({ dataView, numericFieldName, restoreSearchSessionId }, { data, notifications })
+      doSearch({ dataView, numericFieldName, restoreSearchSessionId }, { data, ...startServices })
         .then(({ response: res, request: req, tookMs: _tookMs }) => {
           if (requestId !== nextRequestIdRef.current) return; // no longer interested in this result
           if (restoreSearchSessionId) {
@@ -218,7 +219,7 @@ export const SearchSessionsExampleApp = ({
           setIsSearching(false);
         });
     },
-    [data, notifications, dataView, numericFieldName]
+    [data, dataView, numericFieldName, startServices]
   );
 
   useEffect(() => {
@@ -228,49 +229,43 @@ export const SearchSessionsExampleApp = ({
   }, [search, state.restoreSessionId]);
 
   return (
-    <EuiPageBody>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>Search session example</h1>
-          </EuiTitle>
-          <EuiSpacer />
-          {!isShardDelayEnabled(data) && (
-            <>
-              <NoShardDelayCallout />
-              <EuiSpacer />
-            </>
-          )}
-          {!dataView && (
-            <>
-              <NoDataViewsCallout />
-              <EuiSpacer />
-            </>
-          )}
-          <EuiText>
-            <p>
-              This example shows how you can use <EuiCode>data.search.session</EuiCode> service to
-              group your searches into a search session and allow user to save search results for
-              later. <br />
-              Start a long-running search, save the session and then restore it. See how fast search
-              is completed when restoring the session comparing to when doing initial search. <br />
-              <br />
-              Follow this demo step-by-step:{' '}
-              <b>configure the query, start the search and then save your session.</b> You can save
-              your session both when search is still in progress or when it is completed. After you
-              save the session and when initial search is completed you can{' '}
-              <b>restore the session</b>: the search will re-run reusing previous results. It will
-              finish a lot faster then the initial search. You can also{' '}
-              <b>go to search sessions management</b> and <b>get back to the stored results</b> from
-              there.
-            </p>
-          </EuiText>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>
-          {!isRestoring && (
-            <>
+    <>
+      <EuiPageTemplate.Header pageTitle="Search session example" />
+      <EuiPageTemplate.Section grow={false}>
+        {!isShardDelayEnabled(data) && (
+          <>
+            <NoShardDelayCallout />
+            <EuiSpacer />
+          </>
+        )}
+        {!dataView && (
+          <>
+            <NoDataViewsCallout />
+            <EuiSpacer />
+          </>
+        )}
+        <EuiText>
+          <p>
+            This example shows how you can use <EuiCode>data.search.session</EuiCode> service to
+            group your searches into a search session and allow user to save search results for
+            later. <br />
+            Start a long-running search, save the session and then restore it. See how fast search
+            is completed when restoring the session comparing to when doing initial search. <br />
+            <br />
+            Follow this demo step-by-step:{' '}
+            <b>configure the query, start the search and then save your session.</b> You can save
+            your session both when search is still in progress or when it is completed. After you
+            save the session and when initial search is completed you can <b>restore the session</b>
+            : the search will re-run reusing previous results. It will finish a lot faster then the
+            initial search. You can also <b>go to search sessions management</b> and{' '}
+            <b>get back to the stored results</b> from there.
+          </p>
+        </EuiText>
+      </EuiPageTemplate.Section>
+      <>
+        {!isRestoring && (
+          <>
+            <EuiPageTemplate.Section grow={false}>
               <EuiTitle size="s">
                 <h2>1. Configure the search query (OK to leave defaults)</h2>
               </EuiTitle>
@@ -313,22 +308,24 @@ export const SearchSessionsExampleApp = ({
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiSpacer size={'xl'} />
+            </EuiPageTemplate.Section>
+
+            <EuiPageTemplate.Section grow={false}>
               <EuiTitle size="s">
                 <h2>
                   2. Start the search using <EuiCode>data.search</EuiCode> service
                 </h2>
               </EuiTitle>
-              <EuiText style={{ maxWidth: 600 }}>
+              <EuiSpacer size="s" />
+              <EuiText>
                 In this example each search creates a new session by calling{' '}
                 <EuiCode>data.search.session.start()</EuiCode> that returns a{' '}
                 <EuiCode>searchSessionId</EuiCode>. Then this <EuiCode>searchSessionId</EuiCode> is
                 passed into a search request.
-                <EuiSpacer />
                 <div>
                   {demoStep === DemoStep.ConfigureQuery && (
                     <EuiButtonEmpty
-                      size="xs"
+                      flush="both"
                       onClick={() => search()}
                       iconType="play"
                       disabled={isSearching || !dataView || !numericFieldName}
@@ -337,148 +334,170 @@ export const SearchSessionsExampleApp = ({
                       Start the search from low-level client (data.search.search)
                     </EuiButtonEmpty>
                   )}
-                  {isSearching && <EuiLoadingSpinner />}
+
+                  {isSearching && (
+                    <>
+                      <EuiSpacer />
+                      <EuiLoadingSpinner />
+                    </>
+                  )}
 
                   {response && request && (
-                    <SearchInspector
-                      accordionId={'1'}
-                      request={request}
-                      response={response}
-                      tookMs={tookMs}
-                    />
+                    <>
+                      <EuiSpacer />
+                      <SearchInspector
+                        accordionId={'1'}
+                        request={request}
+                        response={response}
+                        tookMs={tookMs}
+                      />
+                    </>
                   )}
                 </div>
               </EuiText>
-              <EuiSpacer size={'xl'} />
-              {(demoStep === DemoStep.RunSession ||
-                demoStep === DemoStep.RestoreSessionOnScreen ||
-                demoStep === DemoStep.SaveSession) && (
-                <>
-                  <EuiTitle size="s">
-                    <h2>3. Save your session</h2>
-                  </EuiTitle>
-                  <EuiText style={{ maxWidth: 600 }}>
-                    Use the search session indicator in the Kibana header to save the search
-                    session.
-                    <div>
-                      <EuiButtonEmpty
-                        size="xs"
-                        iconType={'save'}
-                        onClick={() => {
-                          // hack for demo purposes:
-                          document
-                            .querySelector('[data-test-subj="searchSessionIndicator"]')
-                            ?.querySelector('button')
-                            ?.click();
-                        }}
-                        isDisabled={
-                          demoStep === DemoStep.RestoreSessionOnScreen ||
-                          demoStep === DemoStep.SaveSession
-                        }
-                      >
-                        Try saving the session using the search session indicator in the header.
-                      </EuiButtonEmpty>
-                    </div>
-                  </EuiText>
-                </>
-              )}
-              {(demoStep === DemoStep.RestoreSessionOnScreen ||
-                demoStep === DemoStep.SaveSession) && (
-                <>
-                  <EuiSpacer size={'xl'} />
-                  <EuiTitle size="s">
-                    <h2>4. Restore the session</h2>
-                  </EuiTitle>
-                  <EuiText style={{ maxWidth: 600 }}>
-                    Now you can restore your saved session. The same search request completes
-                    significantly faster because it reuses stored results.
-                    <EuiSpacer />
-                    <div>
-                      {!isSearching && !restoreResponse && (
-                        <EuiButtonEmpty
-                          size="xs"
-                          iconType={'refresh'}
-                          onClick={() => {
-                            search(data.search.session.getSessionId());
-                          }}
-                          data-test-subj={'restoreSearch'}
-                        >
-                          Restore the search session
-                        </EuiButtonEmpty>
-                      )}
-                      {isSearching && <EuiLoadingSpinner />}
+            </EuiPageTemplate.Section>
 
-                      {restoreRequest && restoreResponse && (
+            {(demoStep === DemoStep.RunSession ||
+              demoStep === DemoStep.RestoreSessionOnScreen ||
+              demoStep === DemoStep.SaveSession) && (
+              <EuiPageTemplate.Section grow={false}>
+                <EuiTitle size="s">
+                  <h2>3. Save your session</h2>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiText>
+                  Use the search session indicator in the Kibana header to save the search session.
+                  <div>
+                    <EuiButtonEmpty
+                      flush="both"
+                      iconType="save"
+                      onClick={() => {
+                        // hack for demo purposes:
+                        document
+                          .querySelector('[data-test-subj="searchSessionIndicator"]')
+                          ?.querySelector('button')
+                          ?.click();
+                      }}
+                      isDisabled={
+                        demoStep === DemoStep.RestoreSessionOnScreen ||
+                        demoStep === DemoStep.SaveSession
+                      }
+                    >
+                      Try saving the session using the search session indicator in the header.
+                    </EuiButtonEmpty>
+                  </div>
+                </EuiText>
+              </EuiPageTemplate.Section>
+            )}
+
+            {(demoStep === DemoStep.RestoreSessionOnScreen ||
+              demoStep === DemoStep.SaveSession) && (
+              <EuiPageTemplate.Section grow={false}>
+                <EuiTitle size="s">
+                  <h2>4. Restore the session</h2>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiText>
+                  Now you can restore your saved session. The same search request completes
+                  significantly faster because it reuses stored results.
+                  <div>
+                    {!isSearching && !restoreResponse && (
+                      <EuiButtonEmpty
+                        flush="both"
+                        iconType="refresh"
+                        onClick={() => {
+                          search(data.search.session.getSessionId());
+                        }}
+                        data-test-subj={'restoreSearch'}
+                      >
+                        Restore the search session
+                      </EuiButtonEmpty>
+                    )}
+
+                    {isSearching && (
+                      <>
+                        <EuiSpacer />
+                        <EuiLoadingSpinner />
+                      </>
+                    )}
+
+                    {restoreRequest && restoreResponse && (
+                      <>
+                        <EuiSpacer />
                         <SearchInspector
                           accordionId={'2'}
                           request={restoreRequest}
                           response={restoreResponse}
                           tookMs={restoreTookMs}
                         />
-                      )}
-                    </div>
-                  </EuiText>
-                </>
-              )}
-              {demoStep === DemoStep.RestoreSessionOnScreen && (
-                <>
-                  <EuiSpacer size={'xl'} />
-                  <EuiTitle size="s">
-                    <h2>5. Restore from Management</h2>
-                  </EuiTitle>
-                  <EuiText style={{ maxWidth: 600 }}>
-                    You can also get back to your session from the Search Session Management.
-                    <div>
-                      <EuiButtonEmpty
-                        size="xs"
-                        onClick={() => {
-                          // hack for demo purposes:
-                          document
-                            .querySelector('[data-test-subj="searchSessionIndicator"]')
-                            ?.querySelector('button')
-                            ?.click();
-                        }}
-                      >
-                        Use Search Session indicator to navigate to management
-                      </EuiButtonEmpty>
-                    </div>
-                  </EuiText>
-                </>
-              )}
-            </>
-          )}
-          {isRestoring && (
-            <>
-              <EuiTitle size="s">
-                <h2>You restored the search session!</h2>
-              </EuiTitle>
-              <EuiSpacer />
-              <EuiText style={{ maxWidth: 600 }}>
-                {isSearching && <EuiLoadingSpinner />}
+                      </>
+                    )}
+                  </div>
+                </EuiText>
+              </EuiPageTemplate.Section>
+            )}
 
-                {restoreRequest && restoreResponse && (
-                  <SearchInspector
-                    accordionId={'2'}
-                    request={restoreRequest}
-                    response={restoreResponse}
-                    tookMs={restoreTookMs}
-                  />
-                )}
-              </EuiText>
-            </>
-          )}
-          <EuiSpacer size={'xl'} />
-          <EuiButtonEmpty
+            {demoStep === DemoStep.RestoreSessionOnScreen && (
+              <EuiPageTemplate.Section grow={false}>
+                <EuiTitle size="s">
+                  <h2>5. Restore from Management</h2>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiText>
+                  You can also get back to your session from the Search Session Management.
+                  <div>
+                    <EuiButtonEmpty
+                      flush="both"
+                      iconType="refresh"
+                      onClick={() => {
+                        // hack for demo purposes:
+                        document
+                          .querySelector('[data-test-subj="searchSessionIndicator"]')
+                          ?.querySelector('button')
+                          ?.click();
+                      }}
+                    >
+                      Use Search Session indicator to navigate to management
+                    </EuiButtonEmpty>
+                  </div>
+                </EuiText>
+              </EuiPageTemplate.Section>
+            )}
+          </>
+        )}
+
+        {isRestoring && (
+          <EuiPageTemplate.Section grow={false}>
+            <EuiTitle size="s">
+              <h2>You restored the search session!</h2>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText>
+              {isSearching && <EuiLoadingSpinner />}
+
+              {restoreRequest && restoreResponse && (
+                <SearchInspector
+                  accordionId={'2'}
+                  request={restoreRequest}
+                  response={restoreResponse}
+                  tookMs={restoreTookMs}
+                />
+              )}
+            </EuiText>
+          </EuiPageTemplate.Section>
+        )}
+        <EuiPageTemplate.Section>
+          <EuiButton
             onClick={() => {
               // hack to quickly reset all the state and remove state stuff from the URL
               window.location.assign(window.location.href.split('?')[0]);
             }}
           >
             Start again
-          </EuiButtonEmpty>
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </EuiPageBody>
+          </EuiButton>
+        </EuiPageTemplate.Section>
+      </>
+    </>
   );
 };
 
@@ -648,7 +667,14 @@ function doSearch(
   {
     data,
     notifications,
-  }: { data: DataPublicPluginStart; notifications: CoreStart['notifications'] }
+    ...startServices
+  }: {
+    data: DataPublicPluginStart;
+    notifications: CoreStart['notifications'];
+    analytics: CoreStart['analytics'];
+    i18n: CoreStart['i18n'];
+    theme: CoreStart['theme'];
+  }
 ): Promise<{ request: IEsSearchRequest; response: IEsSearchResponse; tookMs?: number }> {
   if (!dataView) return Promise.reject('Select a data view');
   if (!numericFieldName) return Promise.reject('Select a field to aggregate on');
@@ -692,25 +718,25 @@ function doSearch(
   return lastValueFrom(
     data.search.search(req, { sessionId }).pipe(
       tap((res) => {
-        if (isCompleteResponse(res)) {
+        if (!isRunningResponse(res)) {
           const avgResult: number | undefined = res.rawResponse.aggregations
             ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
               res.rawResponse.aggregations[1]?.value ?? res.rawResponse.aggregations[2]?.value
             : undefined;
           const message = (
-            <EuiText>
-              Searched {res.rawResponse.hits.total} documents. <br />
-              The average of {numericFieldName} is {avgResult ? Math.floor(avgResult) : 0}
-              .
-              <br />
-            </EuiText>
+            <KibanaRenderContextProvider {...startServices}>
+              <EuiText>
+                Searched {res.rawResponse.hits.total as number} documents. <br />
+                The average of {numericFieldName} is {avgResult ? Math.floor(avgResult) : 0}
+                .
+                <br />
+              </EuiText>
+            </KibanaRenderContextProvider>
           );
           notifications.toasts.addSuccess({
             title: 'Query result',
             text: mountReactNode(message),
           });
-        } else if (isErrorResponse(res)) {
-          notifications.toasts.addWarning('An error has occurred');
         }
       }),
       map((res) => ({ response: res, request: req, tookMs: performance.now() - startTs })),
@@ -770,7 +796,9 @@ function NoShardDelayCallout() {
         queries. <br />
         We recommend to enable it in your <EuiCode>kibana.dev.yml</EuiCode>:
       </p>
-      <EuiCodeBlock isCopyable={true}>data.search.aggs.shardDelay.enabled: true</EuiCodeBlock>
+      <EuiCodeBlock isCopyable={true} language="yaml">
+        data.search.aggs.shardDelay.enabled: true
+      </EuiCodeBlock>
     </EuiCallOut>
   );
 }

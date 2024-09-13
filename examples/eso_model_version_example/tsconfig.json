@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../typings/**/*"
+  ],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/security-plugin",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/features-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/config-schema",
+    "@kbn/spaces-plugin"
+  ]
+}

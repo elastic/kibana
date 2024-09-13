@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
-import { PivotGroupByConfig, PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
+import type { PivotGroupByConfig } from '../../../../common';
+import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
 
 import { GroupByLabelForm } from './group_by_label_form';
 
@@ -29,9 +30,9 @@ describe('Transform: <GroupByLabelForm />', () => {
       onChange() {},
     };
 
-    const wrapper = shallow(<GroupByLabelForm {...props} />);
+    const { container } = render(<GroupByLabelForm {...props} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toContain('the-group-by-agg-name');
   });
 
   test('Histogram aggregation', () => {
@@ -50,9 +51,9 @@ describe('Transform: <GroupByLabelForm />', () => {
       onChange() {},
     };
 
-    const wrapper = shallow(<GroupByLabelForm {...props} />);
+    const { container } = render(<GroupByLabelForm {...props} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toContain('the-group-by-agg-name');
   });
 
   test('Terms aggregation', () => {
@@ -70,8 +71,8 @@ describe('Transform: <GroupByLabelForm />', () => {
       onChange() {},
     };
 
-    const wrapper = shallow(<GroupByLabelForm {...props} />);
+    const { container } = render(<GroupByLabelForm {...props} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toContain('the-group-by-agg-name');
   });
 });

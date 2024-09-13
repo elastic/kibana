@@ -7,26 +7,31 @@
 
 import { cloneDeep, assign, defaults, forOwn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  IBasePath,
-  OverlayStart,
-  SavedObjectsClientContract,
-  SavedObjectAttributes,
-} from '@kbn/core/public';
+import { CoreStart, IBasePath, SavedObjectAttributes } from '@kbn/core/public';
 
-import {
-  SavedObjectSaveOpts,
-  checkForDuplicateTitle,
-  saveWithConfirmation,
-  isErrorNonFatal,
-} from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveOpts, isErrorNonFatal } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import { ContentClient } from '@kbn/content-management-plugin/public';
+import {
+  GraphGetIn,
+  GraphGetOut,
+  GraphSearchIn,
+  GraphSearchOut,
+  GraphDeleteIn,
+  GraphDeleteOut,
+  GraphCreateIn,
+  GraphCreateOut,
+  GraphSavedObjectAttributes,
+  GraphUpdateOut,
+  GraphUpdateIn,
+  CONTENT_ID,
+} from '../../common/content_management';
 import {
   injectReferences,
   extractReferences,
 } from '../services/persistence/saved_workspace_references';
 import { GraphWorkspaceSavedObject } from '../types';
-
+import { checkForDuplicateTitle, saveWithConfirmation } from './saved_objects_utils';
 const savedWorkspaceType = 'graph-workspace';
 const mapping: Record<string, string> = {
   title: 'text',
@@ -54,31 +59,31 @@ function mapHits(hit: any, url: string): GraphWorkspaceSavedObject {
   source.id = hit.id;
   source.url = url;
   source.updatedAt = hit.updatedAt;
-  source.icon = 'fa-share-alt'; // looks like a graph
+  source.icon = 'cluster'; // maybe there's a better choice here?
   return source;
 }
 
 interface SavedWorkspaceServices {
   basePath: IBasePath;
-  savedObjectsClient: SavedObjectsClientContract;
+  contentClient: ContentClient;
 }
 
 export function findSavedWorkspace(
-  { savedObjectsClient, basePath }: SavedWorkspaceServices,
+  { contentClient, basePath }: SavedWorkspaceServices,
   searchString: string,
   size: number = 100
 ) {
-  return savedObjectsClient
-    .find<Record<string, unknown>>({
-      type: savedWorkspaceType,
-      search: searchString ? `${searchString}*` : undefined,
-      perPage: size,
-      searchFields: ['title^3', 'description'],
+  return contentClient
+    .search<GraphSearchIn, GraphSearchOut>({
+      contentTypeId: CONTENT_ID,
+      query: {
+        text: searchString ? `${searchString}*` : '',
+      },
     })
     .then((resp) => {
       return {
-        total: resp.total,
-        hits: resp.savedObjects.map((hit) => mapHits(hit, urlFor(basePath, hit.id))),
+        total: resp.pagination.total,
+        hits: resp.hits.map((hit) => mapHits(hit, urlFor(basePath, hit.id))),
       };
     });
 }
@@ -93,18 +98,15 @@ export function getEmptyWorkspace() {
   };
 }
 
-export async function getSavedWorkspace(
-  savedObjectsClient: SavedObjectsClientContract,
-  id: string
-) {
-  const resolveResult = await savedObjectsClient.resolve<Record<string, unknown>>(
-    savedWorkspaceType,
-    id
-  );
+export async function getSavedWorkspace(contentClient: ContentClient, id: string) {
+  const resolveResult = await contentClient.get<GraphGetIn, GraphGetOut>({
+    contentTypeId: CONTENT_ID,
+    id,
+  });
 
-  const resp = resolveResult.saved_object;
+  const resp = resolveResult.item;
 
-  if (!resp._version) {
+  if (!resp.attributes) {
     throw new SavedObjectNotFound(savedWorkspaceType, id || '');
   }
 
@@ -112,8 +114,10 @@ export async function getSavedWorkspace(
     id,
     displayName: 'graph workspace',
     getEsType: () => savedWorkspaceType,
-    _source: cloneDeep(resp.attributes),
-  } as GraphWorkspaceSavedObject;
+    _source: cloneDeep({
+      ...resp.attributes,
+    }),
+  } as unknown as GraphWorkspaceSavedObject;
 
   // assign the defaults to the response
   defaults(savedObject._source, defaultsProps);
@@ -132,9 +136,9 @@ export async function getSavedWorkspace(
   }
 
   const sharingSavedObjectProps = {
-    outcome: resolveResult.outcome,
-    aliasTargetId: resolveResult.alias_target_id,
-    aliasPurpose: resolveResult.alias_purpose,
+    outcome: resolveResult.meta.outcome,
+    aliasTargetId: resolveResult.meta.aliasTargetId,
+    aliasPurpose: resolveResult.meta.aliasPurpose,
   };
 
   return {
@@ -143,11 +147,15 @@ export async function getSavedWorkspace(
   };
 }
 
-export function deleteSavedWorkspace(
-  savedObjectsClient: SavedObjectsClientContract,
-  ids: string[]
-) {
-  return Promise.all(ids.map((id: string) => savedObjectsClient.delete(savedWorkspaceType, id)));
+export function deleteSavedWorkspace(contentClient: ContentClient, ids: string[]) {
+  return Promise.all(
+    ids.map((id: string) =>
+      contentClient.delete<GraphDeleteIn, GraphDeleteOut>({
+        contentTypeId: CONTENT_ID,
+        id,
+      })
+    )
+  );
 }
 
 export async function saveSavedWorkspace(
@@ -158,9 +166,8 @@ export async function saveSavedWorkspace(
     onTitleDuplicate,
   }: SavedObjectSaveOpts = {},
   services: {
-    savedObjectsClient: SavedObjectsClientContract;
-    overlays: OverlayStart;
-  }
+    contentClient: ContentClient;
+  } & Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>
 ) {
   let attributes: SavedObjectAttributes = {};
 
@@ -208,13 +215,33 @@ export async function saveSavedWorkspace(
       references,
     };
     const resp = confirmOverwrite
-      ? await saveWithConfirmation(attributes, savedObject, createOpt, services)
-      : await services.savedObjectsClient.create(savedObject.getEsType(), attributes, {
-          ...createOpt,
-          overwrite: true,
+      ? await saveWithConfirmation(
+          attributes as GraphSavedObjectAttributes,
+          savedObject,
+          createOpt,
+          services
+        )
+      : savedObject.id
+      ? await services.contentClient.update<GraphUpdateIn, GraphUpdateOut>({
+          contentTypeId: CONTENT_ID,
+          id: savedObject.id,
+          data: {
+            ...(extractedRefs.attributes as GraphSavedObjectAttributes),
+          },
+          options: {
+            references: extractedRefs.references,
+          },
+        })
+      : await services.contentClient.create<GraphCreateIn, GraphCreateOut>({
+          contentTypeId: CONTENT_ID,
+          data: attributes as GraphSavedObjectAttributes,
+          options: {
+            references: createOpt.references,
+            overwrite: true,
+          },
         });
 
-    savedObject.id = resp.id;
+    savedObject.id = resp.item.id;
     savedObject.isSaving = false;
     savedObject.lastSavedTitle = savedObject.title;
     return savedObject.id;

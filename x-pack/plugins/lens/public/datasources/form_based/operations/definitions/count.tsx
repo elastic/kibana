@@ -11,6 +11,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
 import { TimeScaleUnit } from '../../../../../common/expressions';
 import { OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
@@ -18,7 +19,6 @@ import type { IndexPatternField } from '../../../../types';
 import {
   getInvalidFieldMessage,
   getFilter,
-  combineErrorMessages,
   getFormatFromPreviousColumn,
   isColumnOfType,
 } from './helpers';
@@ -72,7 +72,7 @@ function ofName(
 }
 
 export type CountIndexPatternColumn = FieldBasedIndexPatternColumn & {
-  operationType: 'count';
+  operationType: typeof COUNT_ID;
   params?: {
     emptyAsNull?: boolean;
     format?: ValueFormatConfig;
@@ -83,16 +83,14 @@ const SCALE = 'ratio';
 const IS_BUCKETED = false;
 
 export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field', {}, true> = {
-  type: 'count',
-  displayName: i18n.translate('xpack.lens.indexPattern.count', {
-    defaultMessage: 'Count',
-  }),
+  type: COUNT_ID,
+  displayName: COUNT_NAME,
   input: 'field',
-  getErrorMessage: (layer, columnId, indexPattern) =>
-    combineErrorMessages([
-      getInvalidFieldMessage(layer, columnId, indexPattern),
-      getColumnReducedTimeRangeError(layer, columnId, indexPattern),
-    ]),
+  getErrorMessage: (layer, columnId, indexPattern) => [
+    ...getInvalidFieldMessage(layer, columnId, indexPattern),
+    ...getColumnReducedTimeRangeError(layer, columnId, indexPattern),
+  ],
+
   allowAsReference: true,
   onFieldChange: (oldColumn, field) => {
     return {
@@ -117,8 +115,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       return { dataType: 'number', isBucketed: IS_BUCKETED, scale: SCALE };
     }
   },
-  getDefaultLabel: (column, indexPattern) => {
-    const field = indexPattern.getFieldByName(column.sourceField);
+  getDefaultLabel: (column, columns, indexPattern) => {
+    const field = indexPattern?.getFieldByName(column.sourceField);
     return ofName(field, column.timeShift, column.timeScale, column.reducedTimeRange);
   },
   buildColumn({ field, previousColumn }, columnParams) {
@@ -130,7 +128,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         previousColumn?.reducedTimeRange
       ),
       dataType: 'number',
-      operationType: 'count',
+      operationType: COUNT_ID,
       isBucketed: false,
       scale: 'ratio',
       sourceField: field.name,
@@ -141,7 +139,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       params: {
         ...getFormatFromPreviousColumn(previousColumn),
         emptyAsNull:
-          previousColumn && isColumnOfType<CountIndexPatternColumn>('count', previousColumn)
+          previousColumn && isColumnOfType<CountIndexPatternColumn>(COUNT_ID, previousColumn)
             ? previousColumn.params?.emptyAsNull
             : !columnParams?.usedInMath,
       },
@@ -232,25 +230,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   timeScalingMode: 'optional',
   filterable: true,
   canReduceTimeRange: true,
-  documentation: {
-    section: 'elasticsearch',
-    signature: i18n.translate('xpack.lens.indexPattern.count.signature', {
-      defaultMessage: '[field: string]',
-    }),
-    description: i18n.translate('xpack.lens.indexPattern.count.documentation.markdown', {
-      defaultMessage: `
-The total number of documents. When you provide a field, the total number of field values is counted. When you use the Count function for fields that have multiple values in a single document, all values are counted.
-
-#### Examples
-
-To calculate the total number of documents, use \`count()\`.
-
-To calculate the number of products in all orders, use \`count(products.id)\`.
-
-To calculate the number of documents that match a specific filter, use \`count(kql='price > 500')\`.
-      `,
-    }),
-  },
   quickFunctionDocumentation: i18n.translate('xpack.lens.indexPattern.count.documentation.quick', {
     defaultMessage: `
 The total number of documents. When you provide a field, the total number of field values is counted. When you use the Count function for fields that have multiple values in a single document, all values are counted.

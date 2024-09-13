@@ -72,10 +72,11 @@ export class WhereExpression extends Component<Props, State> {
               }
             )}
             uppercase={false}
-            value={expressionValue}
+            value={expressionValue as string}
             data-test-subj="mapJoinWhereExpressionButton"
           />
         }
+        repositionOnScroll={true}
       >
         <div className="mapFilterEditor" data-test-subj="mapJoinWhereFilterEditor">
           <EuiFormHelpText className="mapJoinExpressionHelpText">

@@ -6,24 +6,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-export interface ExtensionsSetup {
-  addSummary(summary: any): void;
-  addAction(action: any): void;
-  addBanner(banner: any): void;
-  addFilter(filter: any): void;
-  addBadge(badge: any): void;
-  addToggle(toggle: any): void;
-}
+import {
+  IndexBadge,
+  IndexToggle,
+  IndicesListColumn,
+  EmptyListContent,
+  IndexContent,
+  ExtensionsSetup,
+} from '@kbn/index-management-shared-types';
+import { IndexDetailsTab } from '../../common/constants';
 
 export class ExtensionsService {
-  private _summaries: any[] = [];
   private _actions: any[] = [];
   private _banners: any[] = [];
   private _filters: any[] = [];
-  private _badges: any[] = [
+  private _badges: IndexBadge[] = [
     {
-      matchIndex: (index: { isFrozen: boolean }) => {
+      matchIndex: (index) => {
         return index.isFrozen;
       },
       label: i18n.translate('xpack.idxMgmt.frozenBadgeLabel', {
@@ -33,7 +32,22 @@ export class ExtensionsService {
       color: 'primary',
     },
   ];
-  private _toggles: any[] = [];
+  private _toggles: IndexToggle[] = [
+    {
+      matchIndex: (index) => {
+        return index.hidden;
+      },
+      label: i18n.translate('xpack.idxMgmt.indexTable.hiddenIndicesSwitchLabel', {
+        defaultMessage: 'Include hidden indices',
+      }),
+      name: 'includeHiddenIndices',
+    },
+  ];
+  private _columns: IndicesListColumn[] = [];
+  private _emptyListContent: EmptyListContent | null = null;
+  private _indexDetailsTabs: IndexDetailsTab[] = [];
+  private _indexOverviewContent: IndexContent | null = null;
+  private _indexMappingsContent: IndexContent | null = null;
   private service?: ExtensionsSetup;
 
   public setup(): ExtensionsSetup {
@@ -42,15 +56,15 @@ export class ExtensionsService {
       addBadge: this.addBadge.bind(this),
       addBanner: this.addBanner.bind(this),
       addFilter: this.addFilter.bind(this),
-      addSummary: this.addSummary.bind(this),
       addToggle: this.addToggle.bind(this),
+      addColumn: this.addColumn.bind(this),
+      setEmptyListContent: this.setEmptyListContent.bind(this),
+      addIndexDetailsTab: this.addIndexDetailsTab.bind(this),
+      setIndexOverviewContent: this.setIndexOverviewContent.bind(this),
+      setIndexMappingsContent: this.setIndexMappingsContent.bind(this),
     };
 
     return this.service;
-  }
-
-  private addSummary(summary: any) {
-    this._summaries.push(summary);
   }
 
   private addAction(action: any) {
@@ -65,7 +79,7 @@ export class ExtensionsService {
     this._filters.push(filter);
   }
 
-  private addBadge(badge: any) {
+  private addBadge(badge: IndexBadge) {
     this._badges.push(badge);
   }
 
@@ -73,8 +87,36 @@ export class ExtensionsService {
     this._toggles.push(toggle);
   }
 
-  public get summaries() {
-    return this._summaries;
+  private addColumn(column: IndicesListColumn) {
+    this._columns.push(column);
+  }
+
+  private setEmptyListContent(content: EmptyListContent) {
+    if (this._emptyListContent) {
+      throw new Error(`The empty list content has already been set.`);
+    } else {
+      this._emptyListContent = content;
+    }
+  }
+
+  private addIndexDetailsTab(tab: IndexDetailsTab) {
+    this._indexDetailsTabs.push(tab);
+  }
+
+  private setIndexOverviewContent(content: IndexContent) {
+    if (this._indexOverviewContent) {
+      throw new Error(`The content for index overview has already been set.`);
+    } else {
+      this._indexOverviewContent = content;
+    }
+  }
+
+  private setIndexMappingsContent(content: IndexContent) {
+    if (this._indexMappingsContent) {
+      throw new Error(`The content for index mappings has already been set.`);
+    } else {
+      this._indexMappingsContent = content;
+    }
   }
 
   public get actions() {
@@ -95,5 +137,25 @@ export class ExtensionsService {
 
   public get toggles() {
     return this._toggles;
+  }
+
+  public get columns() {
+    return this._columns;
+  }
+
+  public get emptyListContent() {
+    return this._emptyListContent;
+  }
+
+  public get indexDetailsTabs() {
+    return this._indexDetailsTabs;
+  }
+
+  public get indexOverviewContent() {
+    return this._indexOverviewContent;
+  }
+
+  public get indexMappingsContent() {
+    return this._indexMappingsContent;
   }
 }

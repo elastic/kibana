@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, createContext, useContext } from 'react';
-import Color from 'color';
+import chroma from 'chroma-js';
 import { LegendColorPicker, Position } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
 import type { DatatableRow } from '@kbn/expressions-plugin/public';
@@ -109,7 +110,7 @@ export const LegendColorPickerWrapper: LegendColorPicker = ({
     const enablePicker = isOnInnerLayer(bucketColumns[0], data, seriesName) || !bucketColumns[0].id;
     if (!enablePicker) return null;
   }
-  const hexColor = new Color(color).hex();
+  const hexColor = chroma(color).hex();
   return (
     <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
       <EuiWrappingPopover

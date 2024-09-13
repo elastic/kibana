@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { useEffect, useMemo } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
@@ -14,7 +16,6 @@ import { i18n } from '@kbn/i18n';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { Doc } from './components/doc';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getScopedHistory } from '../../kibana_services';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDataView } from '../../hooks/use_data_view';
 import { DocHistoryLocationState } from './locator';
@@ -25,7 +26,7 @@ export interface DocUrlParams {
 }
 
 export const SingleDocRoute = () => {
-  const { timefilter, core } = useDiscoverServices();
+  const { timefilter, core, getScopedHistory } = useDiscoverServices();
   const { search } = useLocation();
   const { dataViewId, index } = useParams<DocUrlParams>();
 
@@ -33,8 +34,8 @@ export const SingleDocRoute = () => {
   const id = query.get('id');
 
   const locationState = useMemo(
-    () => getScopedHistory().location.state as DocHistoryLocationState | undefined,
-    []
+    () => getScopedHistory<DocHistoryLocationState>()?.location.state,
+    [getScopedHistory]
   );
 
   useExecutionContext(core.executionContext, {
@@ -93,9 +94,5 @@ export const SingleDocRoute = () => {
     );
   }
 
-  return (
-    <div className="app-container">
-      <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />
-    </div>
-  );
+  return <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />;
 };

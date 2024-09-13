@@ -4,27 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { IUiSettingsClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { create, CreateParams } from './methods/create';
-import { get, GetParams } from './methods/get';
-import { update, UpdateParams } from './methods/update';
-import { find, FindResult } from './methods/find';
-import { deleteMaintenanceWindow, DeleteParams } from './methods/delete';
-import { archive, ArchiveParams } from './methods/archive';
+import { createMaintenanceWindow } from '../application/maintenance_window/methods/create/create_maintenance_window';
+import type { CreateMaintenanceWindowParams } from '../application/maintenance_window/methods/create/types';
+import { getMaintenanceWindow } from '../application/maintenance_window/methods/get/get_maintenance_window';
+import type { GetMaintenanceWindowParams } from '../application/maintenance_window/methods/get/types';
+import { updateMaintenanceWindow } from '../application/maintenance_window/methods/update/update_maintenance_window';
+import type { UpdateMaintenanceWindowParams } from '../application/maintenance_window/methods/update/types';
+import { findMaintenanceWindows } from '../application/maintenance_window/methods/find/find_maintenance_windows';
+import type { FindMaintenanceWindowsResult } from '../application/maintenance_window/methods/find/types';
+import { deleteMaintenanceWindow } from '../application/maintenance_window/methods/delete/delete_maintenance_window';
+import type { DeleteMaintenanceWindowParams } from '../application/maintenance_window/methods/delete/types';
+import { archiveMaintenanceWindow } from '../application/maintenance_window/methods/archive/archive_maintenance_window';
+import type { ArchiveMaintenanceWindowParams } from '../application/maintenance_window/methods/archive/types';
+import { getActiveMaintenanceWindows } from '../application/maintenance_window/methods/get_active/get_active_maintenance_windows';
+import { finishMaintenanceWindow } from '../application/maintenance_window/methods/finish/finish_maintenance_window';
+import type { FinishMaintenanceWindowParams } from '../application/maintenance_window/methods/finish/types';
+import { bulkGetMaintenanceWindows } from '../application/maintenance_window/methods/bulk_get/bulk_get_maintenance_windows';
+import type {
+  BulkGetMaintenanceWindowsParams,
+  BulkGetMaintenanceWindowsResult,
+} from '../application/maintenance_window/methods/bulk_get/types';
 import {
-  getActiveMaintenanceWindows,
-  ActiveParams,
-} from './methods/get_active_maintenance_windows';
-import { finish, FinishParams } from './methods/finish';
-
-import {
-  MaintenanceWindow,
   MaintenanceWindowModificationMetadata,
   MaintenanceWindowClientContext,
 } from '../../common';
+import type { MaintenanceWindow } from '../application/maintenance_window/types';
 
 export interface MaintenanceWindowClientConstructorOptions {
+  readonly uiSettings: IUiSettingsClient;
   readonly logger: Logger;
   readonly savedObjectsClient: SavedObjectsClientContract;
   readonly getUserName: () => Promise<string | null>;
@@ -44,6 +53,7 @@ export class MaintenanceWindowClient {
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
       getModificationMetadata: this.getModificationMetadata.bind(this),
+      uiSettings: options.uiSettings,
     };
   }
 
@@ -59,18 +69,22 @@ export class MaintenanceWindowClient {
     };
   }
 
-  public create = (params: CreateParams): Promise<MaintenanceWindow> =>
-    create(this.context, params);
-  public get = (params: GetParams): Promise<MaintenanceWindow> => get(this.context, params);
-  public update = (params: UpdateParams): Promise<MaintenanceWindow> =>
-    update(this.context, params);
-  public find = (): Promise<FindResult> => find(this.context);
-  public delete = (params: DeleteParams): Promise<{}> =>
+  public create = (params: CreateMaintenanceWindowParams): Promise<MaintenanceWindow> =>
+    createMaintenanceWindow(this.context, params);
+  public get = (params: GetMaintenanceWindowParams): Promise<MaintenanceWindow> =>
+    getMaintenanceWindow(this.context, params);
+  public update = (params: UpdateMaintenanceWindowParams): Promise<MaintenanceWindow> =>
+    updateMaintenanceWindow(this.context, params);
+  public find = (): Promise<FindMaintenanceWindowsResult> => findMaintenanceWindows(this.context);
+  public delete = (params: DeleteMaintenanceWindowParams): Promise<{}> =>
     deleteMaintenanceWindow(this.context, params);
-  public archive = (params: ArchiveParams): Promise<MaintenanceWindow> =>
-    archive(this.context, params);
-  public finish = (params: FinishParams): Promise<MaintenanceWindow> =>
-    finish(this.context, params);
-  public getActiveMaintenanceWindows = (params: ActiveParams): Promise<MaintenanceWindow[]> =>
-    getActiveMaintenanceWindows(this.context, params);
+  public archive = (params: ArchiveMaintenanceWindowParams): Promise<MaintenanceWindow> =>
+    archiveMaintenanceWindow(this.context, params);
+  public finish = (params: FinishMaintenanceWindowParams): Promise<MaintenanceWindow> =>
+    finishMaintenanceWindow(this.context, params);
+  public bulkGet = (
+    params: BulkGetMaintenanceWindowsParams
+  ): Promise<BulkGetMaintenanceWindowsResult> => bulkGetMaintenanceWindows(this.context, params);
+  public getActiveMaintenanceWindows = (): Promise<MaintenanceWindow[]> =>
+    getActiveMaintenanceWindows(this.context);
 }

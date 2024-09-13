@@ -139,6 +139,24 @@ describe('kibana index telemetry', () => {
               },
             ],
           },
+          by_search_type: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'esQuery',
+                doc_count: 0,
+              },
+              {
+                key: 'searchSource',
+                doc_count: 1,
+              },
+              {
+                key: 'esqlQuery',
+                doc_count: 3,
+              },
+            ],
+          },
           max_throttle_time: { value: 60 },
           min_throttle_time: { value: 0 },
           avg_throttle_time: { value: 30 },
@@ -157,7 +175,7 @@ describe('kibana index telemetry', () => {
 
       const telemetry = await getTotalCountAggregations({
         esClient,
-        kibanaIndex: 'test',
+        alertIndex: 'test',
         logger,
       });
 
@@ -174,6 +192,9 @@ describe('kibana index telemetry', () => {
           document__test__: 1,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 1,
+          '__es-query_es_query': 0,
+          '__es-query_esql_query': 3,
+          '__es-query_search_source': 1,
         },
         count_total: 4,
         hasErrors: false,
@@ -228,7 +249,7 @@ describe('kibana index telemetry', () => {
 
       const telemetry = await getTotalCountAggregations({
         esClient,
-        kibanaIndex: 'test',
+        alertIndex: 'test',
         logger,
       });
 
@@ -328,12 +349,30 @@ describe('kibana index telemetry', () => {
               },
             ],
           },
+          by_search_type: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'esQuery',
+                doc_count: 0,
+              },
+              {
+                key: 'searchSource',
+                doc_count: 1,
+              },
+              {
+                key: 'esqlQuery',
+                doc_count: 3,
+              },
+            ],
+          },
         },
       });
 
       const telemetry = await getTotalCountInUse({
         esClient,
-        kibanaIndex: 'test',
+        alertIndex: 'test',
         logger,
       });
 
@@ -345,6 +384,9 @@ describe('kibana index telemetry', () => {
           document__test__: 1,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 1,
+          '__es-query_es_query': 0,
+          '__es-query_esql_query': 3,
+          '__es-query_search_source': 1,
         },
         countNamespaces: 1,
         countTotal: 4,
@@ -357,7 +399,7 @@ describe('kibana index telemetry', () => {
 
       const telemetry = await getTotalCountInUse({
         esClient,
-        kibanaIndex: 'test',
+        alertIndex: 'test',
         logger,
       });
 

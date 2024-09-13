@@ -11,6 +11,8 @@ import type { AppLinkItems } from '../../links';
 import { updateAppLinks } from '../../links';
 import { mockGlobalState } from '../../mock';
 import type { Capabilities } from '@kbn/core-capabilities-common';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 const defaultAppLinks: AppLinkItems = [
   {
@@ -27,11 +29,16 @@ const defaultAppLinks: AppLinkItems = [
   },
 ];
 
+const mockUpselling = new UpsellingService();
+const mockUiSettingsClient = uiSettingsServiceMock.createStartContract();
+
 describe('helpers', () => {
   beforeAll(() => {
     updateAppLinks(defaultAppLinks, {
       capabilities: {} as unknown as Capabilities,
       experimentalFeatures: mockGlobalState.app.enableExperimental,
+      upselling: mockUpselling,
+      uiSettingsClient: mockUiSettingsClient,
     });
   });
   it('returns the search string', () => {

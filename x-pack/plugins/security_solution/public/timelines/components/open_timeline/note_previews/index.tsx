@@ -12,23 +12,28 @@ import {
   EuiCommentList,
   EuiScreenReaderOnly,
   EuiText,
+  EuiConfirmModal,
 } from '@elastic/eui';
+import type { EuiConfirmModalProps } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useKibana } from '../../../../common/lib/kibana';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type { TimelineResultNote } from '../types';
 import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store';
 import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useDeleteNote } from './hooks/use_delete_note';
+import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -45,25 +50,31 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   eventId,
   timelineId,
 }) => {
-  const dispatch = useDispatch();
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
+  const { telemetry } = useKibana().services;
+  const { openFlyout } = useExpandableFlyoutApi();
+
   const handleClick = useCallback(() => {
-    dispatch(
-      timelineActions.toggleDetailPanel({
-        panelView: 'eventDetail',
-        tabType: TimelineTabs.notes,
-        id: timelineId,
+    openFlyout({
+      right: {
+        id: DocumentDetailsRightPanelKey,
         params: {
-          eventId,
+          id: eventId,
           indexName: selectedPatterns.join(','),
+          scopeId: timelineId,
         },
-      })
-    );
-  }, [dispatch, eventId, selectedPatterns, timelineId]);
+      },
+    });
+    telemetry.reportDetailsFlyoutOpened({
+      location: timelineId,
+      panel: 'right',
+    });
+  }, [eventId, openFlyout, selectedPatterns, telemetry, timelineId]);
 
   return (
     <EuiButtonIcon
+      data-test-subj="notes-toggle-event-details"
       title={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
       aria-label={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
       color="text"
@@ -74,24 +85,160 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
 };
 
 const ToggleEventDetailsButton = React.memo(ToggleEventDetailsButtonComponent);
+
+const DeleteNoteConfirm = React.memo<{
+  closeModal: EuiConfirmModalProps['onCancel'];
+  confirmModal: EuiConfirmModalProps['onConfirm'];
+}>(({ closeModal, confirmModal }) => {
+  return (
+    <EuiConfirmModal
+      title={i18n.DELETE_NOTE_CONFIRM}
+      onCancel={closeModal}
+      onConfirm={confirmModal}
+      cancelButtonText={i18n.CANCEL_DELETE_NOTE}
+      confirmButtonText={i18n.DELETE_NOTE}
+      buttonColor="danger"
+      defaultFocusedButton="confirm"
+    />
+  );
+});
+
+DeleteNoteConfirm.displayName = 'DeleteNoteConfirm';
+
+const DeleteNoteButton = React.memo<{
+  noteId?: string | null;
+  eventId?: string | null;
+  confirmingNoteId?: string | null;
+  savedObjectId?: string | null;
+  timelineId?: string;
+  eventIdToNoteIds?: Record<string, string[]>;
+}>(({ noteId, eventId, confirmingNoteId, timelineId, eventIdToNoteIds, savedObjectId }) => {
+  const dispatch = useDispatch();
+  const [showModal, setShowModal] = useState(false);
+  const { mutate, isLoading } = useDeleteNote(noteId, eventId, eventIdToNoteIds, savedObjectId);
+
+  const handleOpenDeleteModal = useCallback(() => {
+    setShowModal(true);
+    dispatch(
+      timelineActions.setConfirmingNoteId({
+        confirmingNoteId: noteId,
+        id: timelineId ?? TimelineId.active,
+      })
+    );
+  }, [noteId, dispatch, timelineId]);
+
+  const handleCancelDelete = useCallback(() => {
+    setShowModal(false);
+    dispatch(
+      timelineActions.setConfirmingNoteId({
+        confirmingNoteId: null,
+        id: timelineId ?? TimelineId.active,
+      })
+    );
+  }, [dispatch, timelineId]);
+
+  const handleConfirmDelete = useCallback(() => {
+    mutate(savedObjectId);
+    setShowModal(false);
+    dispatch(
+      timelineActions.setConfirmingNoteId({
+        confirmingNoteId: null,
+        id: timelineId ?? TimelineId.active,
+      })
+    );
+  }, [mutate, savedObjectId, dispatch, timelineId]);
+
+  const disableDelete = useMemo(() => {
+    return isLoading || savedObjectId == null;
+  }, [isLoading, savedObjectId]);
+  return (
+    <>
+      <EuiButtonIcon
+        title={i18n.DELETE_NOTE}
+        aria-label={i18n.DELETE_NOTE}
+        data-test-subj={'delete-note'}
+        color="text"
+        iconType="trash"
+        onClick={handleOpenDeleteModal}
+        disabled={disableDelete}
+      />
+      {confirmingNoteId === noteId && showModal ? (
+        <DeleteNoteConfirm closeModal={handleCancelDelete} confirmModal={handleConfirmDelete} />
+      ) : null}
+    </>
+  );
+});
+
+DeleteNoteButton.displayName = 'DeleteNoteButton';
+
+const NoteActions = React.memo<{
+  eventId: string | null;
+  timelineId?: string;
+  noteId?: string | null;
+  savedObjectId?: string | null;
+  confirmingNoteId?: string | null;
+  eventIdToNoteIds?: Record<string, string[]>;
+  showToggleEventDetailsAction?: boolean;
+}>(
+  ({
+    eventId,
+    timelineId,
+    noteId,
+    confirmingNoteId,
+    eventIdToNoteIds,
+    savedObjectId,
+    showToggleEventDetailsAction = true,
+  }) => {
+    return eventId && timelineId ? (
+      <>
+        {showToggleEventDetailsAction ? (
+          <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
+        ) : null}
+        <DeleteNoteButton
+          noteId={noteId}
+          eventId={eventId}
+          confirmingNoteId={confirmingNoteId}
+          savedObjectId={savedObjectId}
+          timelineId={timelineId}
+          eventIdToNoteIds={eventIdToNoteIds}
+        />
+      </>
+    ) : (
+      <DeleteNoteButton
+        noteId={noteId}
+        eventId={eventId}
+        confirmingNoteId={confirmingNoteId}
+        savedObjectId={savedObjectId}
+        timelineId={timelineId}
+        eventIdToNoteIds={eventIdToNoteIds}
+      />
+    );
+  }
+);
+
+NoteActions.displayName = 'NoteActions';
 /**
  * Renders a preview of a note in the All / Open Timelines table
  */
 
 interface NotePreviewsProps {
-  eventIdToNoteIds?: Record<string, string[]>;
   notes?: TimelineResultNote[] | null;
   timelineId?: string;
   showTimelineDescription?: boolean;
+  showToggleEventDetailsAction?: boolean;
 }
 
 export const NotePreviews = React.memo<NotePreviewsProps>(
-  ({ eventIdToNoteIds, notes, timelineId, showTimelineDescription }) => {
+  ({ notes, timelineId, showTimelineDescription, showToggleEventDetailsAction = true }) => {
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const getTimelineNotes = useMemo(() => getTimelineNoteSelector(), []);
     const timeline = useDeepEqualSelector((state) =>
-      timelineId ? getTimeline(state, timelineId) : null
+      getTimeline(state, timelineId ?? TimelineId.active)
     );
-
+    const timelineNotes = useDeepEqualSelector((state) =>
+      getTimelineNotes(state, timelineId ?? TimelineId.active)
+    );
+    const eventIdToNoteIds = timelineNotes?.eventIdToNoteIds;
     const descriptionList = useMemo(
       () =>
         showTimelineDescription && timelineId && timeline?.description
@@ -114,7 +261,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
                     size="l"
                   />
                 ),
-                actions: <SaveTimelineButton timelineId={timelineId} initialFocus="description" />,
+                actions: null,
               },
             ]
           : [],
@@ -148,10 +295,17 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
                 <MarkdownRenderer>{note.note ?? ''}</MarkdownRenderer>
               </div>
             ),
-            actions:
-              eventId && timelineId ? (
-                <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
-              ) : null,
+            actions: (
+              <NoteActions
+                eventId={eventId}
+                timelineId={timelineId}
+                noteId={note.noteId}
+                savedObjectId={note.savedObjectId}
+                confirmingNoteId={timeline?.confirmingNoteId}
+                eventIdToNoteIds={eventIdToNoteIds}
+                showToggleEventDetailsAction={showToggleEventDetailsAction}
+              />
+            ),
             timelineAvatar: (
               <EuiAvatar
                 data-test-subj="avatar"
@@ -161,15 +315,21 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
             ),
           };
         }),
-      [eventIdToNoteIds, notes, timelineId]
+      [
+        eventIdToNoteIds,
+        notes,
+        timelineId,
+        timeline?.confirmingNoteId,
+        showToggleEventDetailsAction,
+      ]
     );
 
-    return (
-      <EuiCommentList
-        data-test-subj="note-comment-list"
-        comments={[...descriptionList, ...notesList]}
-      />
+    const commentList = useMemo(
+      () => [...descriptionList, ...notesList],
+      [descriptionList, notesList]
     );
+
+    return <EuiCommentList data-test-subj="note-comment-list" comments={commentList} />;
   }
 );
 

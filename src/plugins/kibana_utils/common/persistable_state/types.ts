@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SerializableRecord, Serializable } from '@kbn/utility-types';
@@ -78,9 +79,9 @@ export interface PersistableState<P extends SerializableRecord = SerializableRec
 
   /**
    * A list of migration functions, which migrate the persistable state
-   * serializable object to the next version. Migration functions should are
-   * keyed by the Kibana version using semver, where the version indicates to
-   * which version the state will be migrated to.
+   * serializable object to the next version. Migration functions should be
+   * keyed using semver, where the version indicates which version the state
+   * will be migrated to.
    */
   migrations: MigrateFunctionsObject | GetMigrationFunctionObjectFn;
 }

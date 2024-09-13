@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import deepEqual from 'fast-deep-equal';
 
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 
 import {
@@ -33,7 +34,7 @@ export class OptionsListEmbeddableFactory
   constructor() {}
 
   public async create(initialInput: OptionsListEmbeddableInput, parent?: IContainer) {
-    const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
+    const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
     const { OptionsListEmbeddable } = await import('./options_list_embeddable');
     return Promise.resolve(
       new OptionsListEmbeddable(reduxEmbeddablePackage, initialInput, {}, parent)
@@ -61,9 +62,8 @@ export class OptionsListEmbeddableFactory
   public isFieldCompatible = (field: DataViewField) => {
     return (
       !field.spec.scripted &&
-      ((field.aggregatable && field.type === 'string') ||
-        field.type === 'boolean' ||
-        field.type === 'ip')
+      field.aggregatable &&
+      ['string', 'boolean', 'ip', 'date', 'number'].includes(field.type)
     );
   };
 

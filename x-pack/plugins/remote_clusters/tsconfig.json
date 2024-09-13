@@ -33,6 +33,8 @@
     "@kbn/i18n-react",
     "@kbn/config-schema",
     "@kbn/expect",
+    "@kbn/shared-ux-router",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

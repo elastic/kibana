@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
-import type { RequestOptionsPaginated } from '../..';
-import type { FlowTargetSourceDest } from '../common';
 
 export interface NetworkTlsBuckets {
   key: string;
@@ -46,12 +44,6 @@ export enum NetworkTlsFields {
 export interface NetworkTlsEdges {
   node: NetworkTlsNode;
   cursor: CursorType;
-}
-
-export interface NetworkTlsRequestOptions extends RequestOptionsPaginated<NetworkTlsFields> {
-  ip: string;
-  flowTarget: FlowTargetSourceDest;
-  defaultIndex: string[];
 }
 
 export interface NetworkTlsStrategyResponse extends IEsSearchResponse {

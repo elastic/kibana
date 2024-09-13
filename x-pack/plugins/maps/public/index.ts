@@ -8,7 +8,7 @@
 import { PluginInitializer } from '@kbn/core/public';
 import { PluginInitializerContext } from '@kbn/core/public';
 import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
-import { MapsXPackConfig } from '../config';
+import type { MapsXPackConfig } from '../server/config';
 
 export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
   initContext: PluginInitializerContext<MapsXPackConfig>
@@ -17,11 +17,8 @@ export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
   return new MapsPlugin(initContext);
 };
 
-export { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
-export { MAPS_APP_LOCATOR } from './locators';
-export type { PreIndexedShape } from '../common/elasticsearch_util';
-
-export { GEOJSON_FEATURE_ID_PROPERTY_NAME } from './classes/layers/vector_layer/geojson_vector_layer/assign_feature_ids';
+export { GEOJSON_FEATURE_ID_PROPERTY_NAME, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+export { MAPS_APP_LOCATOR } from './locators/map_locator/locator_definition';
 
 export type {
   ITooltipProperty,
@@ -29,8 +26,9 @@ export type {
 } from './classes/tooltips/tooltip_property';
 
 export type { MapsSetupApi, MapsStartApi } from './api';
+export type { CreateLayerDescriptorParams } from './classes/sources/es_search_source/create_layer_descriptor';
 
-export type { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from './embeddable';
+export { type MapApi, type MapSerializedState, isMapApi } from './react_embeddable/types';
 
 export type { EMSTermJoinConfig, SampleValuesConfig } from './ems_autosuggest';
 

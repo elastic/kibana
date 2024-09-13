@@ -7,7 +7,6 @@
 
 import type { Context } from 'react';
 import { createContext } from 'react';
-import ResizeObserver from 'resize-observer-polyfill';
 import type { SideEffectors } from '../types';
 
 /**

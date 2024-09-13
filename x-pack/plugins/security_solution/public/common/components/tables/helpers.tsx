@@ -4,15 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+import {
+  EuiLink,
+  EuiPopover,
+  EuiToolTip,
+  EuiText,
+  EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
-import { MoreContainer } from '../../../timelines/components/field_renderers/field_renderers';
+import { MoreContainer } from '../../../timelines/components/field_renderers/more_container';
 
 const Subtext = styled.div`
   font-size: ${(props) => props.theme.eui.euiFontSizeXS};
@@ -21,23 +30,19 @@ const Subtext = styled.div`
 interface GetRowItemsWithActionsParams {
   values: string[] | null | undefined;
   fieldName: string;
-  fieldType?: string;
   idPrefix: string;
   render?: (item: string) => JSX.Element;
   displayCount?: number;
   maxOverflow?: number;
-  aggregatable: boolean;
 }
 
 export const getRowItemsWithActions = ({
   values,
   fieldName,
-  fieldType = 'keyword',
   idPrefix,
   render,
   displayCount = 5,
   maxOverflow = 5,
-  aggregatable,
 }: GetRowItemsWithActionsParams): JSX.Element => {
   if (values != null && values.length > 0) {
     const visibleItems = values.slice(0, displayCount).map((value, index) => {
@@ -45,15 +50,13 @@ export const getRowItemsWithActions = ({
       return (
         <SecurityCellActions
           key={id}
-          mode={CellActionsMode.HOVER}
+          mode={CellActionsMode.HOVER_DOWN}
           visibleCellActions={5}
           showActionTooltips
           triggerId={SecurityCellActionsTrigger.DEFAULT}
-          field={{
-            name: fieldName,
+          data={{
             value,
-            type: fieldType,
-            aggregatable,
+            field: fieldName,
           }}
         >
           <>{render ? render(value) : defaultToEmptyTag(value)}</>
@@ -67,11 +70,9 @@ export const getRowItemsWithActions = ({
         <RowItemOverflow
           fieldName={fieldName}
           values={values}
-          fieldType={fieldType}
           idPrefix={idPrefix}
-          maxOverflowItems={maxOverflow}
           overflowIndexStart={displayCount}
-          isAggregatable={aggregatable}
+          maxOverflowItems={maxOverflow}
         />
       </>
     ) : (
@@ -84,23 +85,23 @@ export const getRowItemsWithActions = ({
 
 interface RowItemOverflowProps {
   fieldName: string;
-  fieldType: string;
-  isAggregatable?: boolean;
   values: string[];
   idPrefix: string;
-  maxOverflowItems: number;
   overflowIndexStart: number;
+  maxOverflowItems: number;
 }
 
 export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
   fieldName,
   values,
-  fieldType,
-  isAggregatable,
   idPrefix,
-  maxOverflowItems = 5,
   overflowIndexStart = 5,
+  maxOverflowItems = 5,
 }) => {
+  const maxVisibleValues = useMemo(
+    () => values.slice(0, maxOverflowItems + 1),
+    [values, maxOverflowItems]
+  );
   return (
     <>
       {values.length > overflowIndexStart && (
@@ -109,25 +110,30 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
             <MoreContainer
               fieldName={fieldName}
               idPrefix={idPrefix}
-              isAggregatable={isAggregatable}
-              fieldType={fieldType}
-              values={values}
+              values={maxVisibleValues}
               overflowIndexStart={overflowIndexStart}
               moreMaxHeight="none"
             />
-
-            {values.length > overflowIndexStart + maxOverflowItems && (
-              <p data-test-subj="popover-additional-overflow">
-                <EuiTextColor color="subdued">
-                  {values.length - overflowIndexStart - maxOverflowItems}{' '}
-                  <FormattedMessage
-                    id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
-                    defaultMessage="more not shown"
-                  />
-                </EuiTextColor>
-              </p>
-            )}
           </EuiText>
+          {values.length > overflowIndexStart + maxOverflowItems && (
+            <EuiFlexGroup
+              css={{ paddingTop: euiThemeVars.euiSizeM }}
+              data-test-subj="popover-additional-overflow"
+            >
+              <EuiFlexItem>
+                <EuiText size="xs">
+                  <EuiTextColor color="subdued">
+                    {values.length - overflowIndexStart - maxOverflowItems}{' '}
+                    <FormattedMessage
+                      data-test-subj="popover-additional-overflow-text"
+                      id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
+                      defaultMessage="more not shown"
+                    />
+                  </EuiTextColor>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </Popover>
       )}
     </>

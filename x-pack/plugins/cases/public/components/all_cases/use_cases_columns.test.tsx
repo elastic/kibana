@@ -9,32 +9,164 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
-import '../../common/mock/match_media';
 import type { GetCasesColumn } from './use_cases_columns';
 import { ExternalServiceColumn, useCasesColumns } from './use_cases_columns';
 import { useGetCasesMockState } from '../../containers/mock';
-import { connectors } from '../configure_cases/__mock__';
+import { connectors, useCaseConfigureResponse } from '../configure_cases/__mock__';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
 import { renderHook } from '@testing-library/react-hooks';
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+
+jest.mock('../../containers/configure/use_get_case_configuration');
+
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
+
+const DEFAULT_SELECTED_COLUMNS = [
+  { field: 'title', name: 'title', isChecked: true },
+  { field: 'assignees', name: 'assignees', isChecked: true },
+  { field: 'tags', name: 'tags', isChecked: true },
+  { field: 'totalAlerts', name: 'totalAlerts', isChecked: true },
+  { field: 'totalComment', name: 'totalComment', isChecked: true },
+  { field: 'category', name: 'category', isChecked: true },
+  { field: 'createdAt', name: 'createdAt', isChecked: true },
+  { field: 'updatedAt', name: 'updatedAt', isChecked: true },
+  { field: 'closedAt', name: 'closedAt', isChecked: false },
+  { field: 'externalIncident', name: 'externalIncident', isChecked: true },
+  { field: 'status', name: 'status', isChecked: true },
+  { field: 'severity', name: 'severity', isChecked: true },
+];
 
 describe('useCasesColumns ', () => {
   let appMockRender: AppMockRenderer;
   const useCasesColumnsProps: GetCasesColumn = {
-    filterStatus: CaseStatuses.open,
+    filterStatus: [CaseStatuses.open],
     userProfiles: userProfilesMap,
     isSelectorView: false,
-    showSolutionColumn: true,
+    selectedColumns: DEFAULT_SELECTED_COLUMNS,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+    useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
   });
 
-  it('return all columns correctly', async () => {
+  it('return all selected columns correctly', async () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+
+    appMockRender = createAppMockRenderer({ license });
+
+    const { result } = renderHook(
+      () =>
+        useCasesColumns({
+          ...useCasesColumnsProps,
+          selectedColumns: DEFAULT_SELECTED_COLUMNS.map((element) => ({
+            ...element,
+            isChecked: true,
+          })),
+        }),
+      {
+        wrapper: appMockRender.AppWrapper,
+      }
+    );
+
+    expect(result.current).toMatchInlineSnapshot(`
+      Object {
+        "columns": Array [
+          Object {
+            "field": "title",
+            "name": "Name",
+            "render": [Function],
+            "sortable": true,
+            "width": "20%",
+          },
+          Object {
+            "field": "assignees",
+            "name": "Assignees",
+            "render": [Function],
+          },
+          Object {
+            "field": "tags",
+            "name": "Tags",
+            "render": [Function],
+            "width": "12%",
+          },
+          Object {
+            "align": "right",
+            "field": "totalAlerts",
+            "name": "Alerts",
+            "render": [Function],
+            "width": "80px",
+          },
+          Object {
+            "align": "right",
+            "field": "totalComment",
+            "name": "Comments",
+            "render": [Function],
+            "width": "90px",
+          },
+          Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "120px",
+          },
+          Object {
+            "field": "createdAt",
+            "name": "Created on",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "field": "closedAt",
+            "name": "Closed on",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "name": "External incident",
+            "render": [Function],
+          },
+          Object {
+            "field": "status",
+            "name": "Status",
+            "render": [Function],
+            "sortable": true,
+            "width": "110px",
+          },
+          Object {
+            "field": "severity",
+            "name": "Severity",
+            "render": [Function],
+            "sortable": true,
+            "width": "90px",
+          },
+          Object {
+            "align": "right",
+            "name": "Actions",
+            "render": [Function],
+            "width": "100px",
+          },
+        ],
+        "isLoadingColumns": false,
+        "rowHeader": "title",
+      }
+    `);
+  });
+
+  it('only returns selected columns', async () => {
     const license = licensingMock.createLicense({
       license: { type: 'platinum' },
     });
@@ -59,13 +191,12 @@ describe('useCasesColumns ', () => {
             "field": "assignees",
             "name": "Assignees",
             "render": [Function],
-            "width": "180px",
           },
           Object {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "width": "15%",
+            "width": "12%",
           },
           Object {
             "align": "right",
@@ -76,15 +207,17 @@ describe('useCasesColumns ', () => {
           },
           Object {
             "align": "right",
-            "field": "owner",
-            "name": "Solution",
-            "render": [Function],
-          },
-          Object {
-            "align": "right",
             "field": "totalComment",
             "name": "Comments",
             "render": [Function],
+            "width": "90px",
+          },
+          Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "120px",
           },
           Object {
             "field": "createdAt",
@@ -99,28 +232,32 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
-            "name": "External Incident",
+            "name": "External incident",
             "render": [Function],
-            "width": undefined,
           },
           Object {
             "field": "status",
             "name": "Status",
             "render": [Function],
             "sortable": true,
+            "width": "110px",
           },
           Object {
             "field": "severity",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
             "name": "Actions",
             "render": [Function],
+            "width": "100px",
           },
         ],
+        "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -150,6 +287,13 @@ describe('useCasesColumns ', () => {
             "width": "55%",
           },
           Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "120px",
+          },
+          Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
@@ -160,347 +304,15 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
             "render": [Function],
           },
         ],
-      }
-    `);
-  });
-
-  it('does not render the solution columns', async () => {
-    const license = licensingMock.createLicense({
-      license: { type: 'platinum' },
-    });
-
-    appMockRender = createAppMockRenderer({ license });
-
-    const { result } = renderHook(
-      () => useCasesColumns({ ...useCasesColumnsProps, showSolutionColumn: false }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
-
-    expect(result.current).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          Object {
-            "field": "title",
-            "name": "Name",
-            "render": [Function],
-            "sortable": true,
-            "width": "20%",
-          },
-          Object {
-            "field": "assignees",
-            "name": "Assignees",
-            "render": [Function],
-            "width": "180px",
-          },
-          Object {
-            "field": "tags",
-            "name": "Tags",
-            "render": [Function],
-            "width": "15%",
-          },
-          Object {
-            "align": "right",
-            "field": "totalAlerts",
-            "name": "Alerts",
-            "render": [Function],
-            "width": "80px",
-          },
-          Object {
-            "align": "right",
-            "field": "totalComment",
-            "name": "Comments",
-            "render": [Function],
-          },
-          Object {
-            "field": "createdAt",
-            "name": "Created on",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "field": "updatedAt",
-            "name": "Updated on",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "name": "External Incident",
-            "render": [Function],
-            "width": undefined,
-          },
-          Object {
-            "field": "status",
-            "name": "Status",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "field": "severity",
-            "name": "Severity",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "align": "right",
-            "name": "Actions",
-            "render": [Function],
-          },
-        ],
-      }
-    `);
-  });
-
-  it('does not return the alerts column', async () => {
-    const license = licensingMock.createLicense({
-      license: { type: 'platinum' },
-    });
-
-    appMockRender = createAppMockRenderer({ license, features: { alerts: { enabled: false } } });
-
-    const { result } = renderHook(() => useCasesColumns(useCasesColumnsProps), {
-      wrapper: appMockRender.AppWrapper,
-    });
-
-    expect(result.current).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          Object {
-            "field": "title",
-            "name": "Name",
-            "render": [Function],
-            "sortable": true,
-            "width": "20%",
-          },
-          Object {
-            "field": "assignees",
-            "name": "Assignees",
-            "render": [Function],
-            "width": "180px",
-          },
-          Object {
-            "field": "tags",
-            "name": "Tags",
-            "render": [Function],
-            "width": "15%",
-          },
-          Object {
-            "align": "right",
-            "field": "owner",
-            "name": "Solution",
-            "render": [Function],
-          },
-          Object {
-            "align": "right",
-            "field": "totalComment",
-            "name": "Comments",
-            "render": [Function],
-          },
-          Object {
-            "field": "createdAt",
-            "name": "Created on",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "field": "updatedAt",
-            "name": "Updated on",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "name": "External Incident",
-            "render": [Function],
-            "width": undefined,
-          },
-          Object {
-            "field": "status",
-            "name": "Status",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "field": "severity",
-            "name": "Severity",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "align": "right",
-            "name": "Actions",
-            "render": [Function],
-          },
-        ],
-      }
-    `);
-  });
-
-  it('does not return the assignees column', async () => {
-    const { result } = renderHook(() => useCasesColumns(useCasesColumnsProps), {
-      wrapper: appMockRender.AppWrapper,
-    });
-
-    expect(result.current).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          Object {
-            "field": "title",
-            "name": "Name",
-            "render": [Function],
-            "sortable": true,
-            "width": "20%",
-          },
-          Object {
-            "field": "tags",
-            "name": "Tags",
-            "render": [Function],
-            "width": "15%",
-          },
-          Object {
-            "align": "right",
-            "field": "totalAlerts",
-            "name": "Alerts",
-            "render": [Function],
-            "width": "80px",
-          },
-          Object {
-            "align": "right",
-            "field": "owner",
-            "name": "Solution",
-            "render": [Function],
-          },
-          Object {
-            "align": "right",
-            "field": "totalComment",
-            "name": "Comments",
-            "render": [Function],
-          },
-          Object {
-            "field": "createdAt",
-            "name": "Created on",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "field": "updatedAt",
-            "name": "Updated on",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "name": "External Incident",
-            "render": [Function],
-            "width": undefined,
-          },
-          Object {
-            "field": "status",
-            "name": "Status",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "field": "severity",
-            "name": "Severity",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "align": "right",
-            "name": "Actions",
-            "render": [Function],
-          },
-        ],
-      }
-    `);
-  });
-
-  it('shows the closedAt column if the filterStatus=closed', async () => {
-    appMockRender = createAppMockRenderer();
-
-    const { result } = renderHook(
-      () => useCasesColumns({ ...useCasesColumnsProps, filterStatus: CaseStatuses.closed }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
-
-    expect(result.current).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          Object {
-            "field": "title",
-            "name": "Name",
-            "render": [Function],
-            "sortable": true,
-            "width": "20%",
-          },
-          Object {
-            "field": "tags",
-            "name": "Tags",
-            "render": [Function],
-            "width": "15%",
-          },
-          Object {
-            "align": "right",
-            "field": "totalAlerts",
-            "name": "Alerts",
-            "render": [Function],
-            "width": "80px",
-          },
-          Object {
-            "align": "right",
-            "field": "owner",
-            "name": "Solution",
-            "render": [Function],
-          },
-          Object {
-            "align": "right",
-            "field": "totalComment",
-            "name": "Comments",
-            "render": [Function],
-          },
-          Object {
-            "field": "closedAt",
-            "name": "Closed on",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "field": "updatedAt",
-            "name": "Updated on",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "name": "External Incident",
-            "render": [Function],
-            "width": undefined,
-          },
-          Object {
-            "field": "status",
-            "name": "Status",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "field": "severity",
-            "name": "Severity",
-            "render": [Function],
-            "sortable": true,
-          },
-          Object {
-            "align": "right",
-            "name": "Actions",
-            "render": [Function],
-          },
-        ],
+        "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -524,6 +336,13 @@ describe('useCasesColumns ', () => {
             "width": "55%",
           },
           Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "120px",
+          },
+          Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
@@ -534,17 +353,20 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
             "render": [Function],
           },
         ],
+        "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
 
-  it('does not shows the actions if isSelectorView=true', async () => {
+  it('shows the correct columns if isSelectorView=true', async () => {
     const { result } = renderHook(
       () => useCasesColumns({ ...useCasesColumnsProps, isSelectorView: true }),
       {
@@ -563,6 +385,13 @@ describe('useCasesColumns ', () => {
             "width": "55%",
           },
           Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "120px",
+          },
+          Object {
             "field": "createdAt",
             "name": "Created on",
             "render": [Function],
@@ -573,12 +402,15 @@ describe('useCasesColumns ', () => {
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
           Object {
             "align": "right",
             "render": [Function],
           },
         ],
+        "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -604,7 +436,7 @@ describe('useCasesColumns ', () => {
             "field": "tags",
             "name": "Tags",
             "render": [Function],
-            "width": "15%",
+            "width": "12%",
           },
           Object {
             "align": "right",
@@ -615,15 +447,17 @@ describe('useCasesColumns ', () => {
           },
           Object {
             "align": "right",
-            "field": "owner",
-            "name": "Solution",
-            "render": [Function],
-          },
-          Object {
-            "align": "right",
             "field": "totalComment",
             "name": "Comments",
             "render": [Function],
+            "width": "90px",
+          },
+          Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "120px",
           },
           Object {
             "field": "createdAt",
@@ -638,23 +472,146 @@ describe('useCasesColumns ', () => {
             "sortable": true,
           },
           Object {
-            "name": "External Incident",
+            "name": "External incident",
             "render": [Function],
-            "width": undefined,
           },
           Object {
             "field": "status",
             "name": "Status",
             "render": [Function],
             "sortable": true,
+            "width": "110px",
           },
           Object {
             "field": "severity",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
+            "width": "90px",
           },
         ],
+        "isLoadingColumns": false,
+        "rowHeader": "title",
+      }
+    `);
+  });
+
+  it('returns custom field columns', async () => {
+    const textKey = 'text_key';
+    const toggleKey = 'toggle_key';
+
+    const textLabel = 'Text Label';
+    const toggleLabel = 'Toggle Label';
+
+    appMockRender = createAppMockRenderer({ permissions: readCasesPermissions() });
+    useGetCaseConfigurationMock.mockImplementation(() => ({
+      data: {
+        ...useCaseConfigureResponse.data,
+        customFields: [
+          { key: textKey, label: textLabel, type: CustomFieldTypes.TEXT },
+          { key: toggleKey, label: toggleLabel, type: CustomFieldTypes.TOGGLE },
+        ],
+      },
+      isFetching: false,
+    }));
+
+    const { result } = renderHook(
+      () =>
+        useCasesColumns({
+          ...useCasesColumnsProps,
+          selectedColumns: [
+            ...DEFAULT_SELECTED_COLUMNS,
+            { field: textKey, name: textLabel, isChecked: true },
+            { field: toggleKey, name: toggleLabel, isChecked: true },
+          ],
+        }),
+      {
+        wrapper: appMockRender.AppWrapper,
+      }
+    );
+
+    expect(result.current).toMatchInlineSnapshot(`
+      Object {
+        "columns": Array [
+          Object {
+            "field": "title",
+            "name": "Name",
+            "render": [Function],
+            "sortable": true,
+            "width": "20%",
+          },
+          Object {
+            "field": "tags",
+            "name": "Tags",
+            "render": [Function],
+            "width": "12%",
+          },
+          Object {
+            "align": "right",
+            "field": "totalAlerts",
+            "name": "Alerts",
+            "render": [Function],
+            "width": "80px",
+          },
+          Object {
+            "align": "right",
+            "field": "totalComment",
+            "name": "Comments",
+            "render": [Function],
+            "width": "90px",
+          },
+          Object {
+            "field": "category",
+            "name": "Category",
+            "render": [Function],
+            "sortable": true,
+            "width": "120px",
+          },
+          Object {
+            "field": "createdAt",
+            "name": "Created on",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "field": "updatedAt",
+            "name": "Updated on",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "name": "External incident",
+            "render": [Function],
+          },
+          Object {
+            "field": "status",
+            "name": "Status",
+            "render": [Function],
+            "sortable": true,
+            "width": "110px",
+          },
+          Object {
+            "field": "severity",
+            "name": "Severity",
+            "render": [Function],
+            "sortable": true,
+            "width": "90px",
+          },
+          Object {
+            "data-test-subj": "text-custom-field-column",
+            "name": "Text Label",
+            "render": [Function],
+            "width": "250px",
+          },
+          Object {
+            "data-test-subj": "toggle-custom-field-column",
+            "name": "Toggle Label",
+            "render": [Function],
+            "width": "100px",
+          },
+        ],
+        "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -719,6 +676,7 @@ describe('useCasesColumns ', () => {
                   name: 'None',
                   config: {},
                   isPreconfigured: false,
+                  isSystemAction: false,
                   isDeprecated: false,
                 },
               ]}

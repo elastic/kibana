@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreStart, HttpStart } from '@kbn/core/public';
@@ -24,19 +25,43 @@ export class HasData {
     return true;
   };
 
-  start(core: CoreStart) {
+  start(core: CoreStart, callResolveCluster: boolean) {
     const { http } = core;
+
+    const hasESDataViaResolveIndex = async () => {
+      // fallback to previous implementation
+      const hasLocalESData = await this.checkLocalESData(http);
+      if (!hasLocalESData) {
+        const hasRemoteESData = await this.checkRemoteESData(http);
+        return hasRemoteESData;
+      }
+      return hasLocalESData;
+    };
+
+    const hasESDataViaResolveCluster = async () => {
+      try {
+        const { hasEsData } = await http.get<{ hasEsData: boolean }>(
+          '/internal/data_views/has_es_data',
+          {
+            version: '1',
+          }
+        );
+        return hasEsData;
+      } catch (e) {
+        // fallback to previous implementation
+        return hasESDataViaResolveIndex();
+      }
+    };
+
     return {
       /**
        * Check to see if ES data exists
        */
       hasESData: async (): Promise<boolean> => {
-        const hasLocalESData = await this.checkLocalESData(http);
-        if (!hasLocalESData) {
-          const hasRemoteESData = await this.checkRemoteESData(http);
-          return hasRemoteESData;
+        if (callResolveCluster) {
+          return hasESDataViaResolveCluster();
         }
-        return hasLocalESData;
+        return hasESDataViaResolveIndex();
       },
       /**
        * Check to see if a data view exists
@@ -82,6 +107,7 @@ export class HasData {
   }): Promise<boolean> =>
     http
       .post<IndicesViaSearchResponse>(`/internal/search/ese`, {
+        version: '1',
         body: JSON.stringify({
           params: {
             ignore_unavailable: true,
@@ -156,7 +182,7 @@ export class HasData {
   // Data Views
 
   private getHasDataViews = async ({ http }: { http: HttpStart }): Promise<HasDataViewsResponse> =>
-    http.get<HasDataViewsResponse>(`/internal/data_views/has_data_views`);
+    http.get<HasDataViewsResponse>(`/internal/data_views/has_data_views`, { version: '1' });
 
   private hasDataViews = (http: HttpStart): Promise<boolean> => {
     return this.getHasDataViews({ http })

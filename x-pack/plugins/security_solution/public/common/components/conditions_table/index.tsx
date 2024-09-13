@@ -18,11 +18,11 @@ const AndOrBadgeContainer = styled(EuiFlexItem)`
   padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-type ConditionsTableProps<T> = EuiBasicTableProps<T> & {
+type ConditionsTableProps<T extends object> = EuiBasicTableProps<T> & {
   badge: AndOr;
 };
 
-export const ConditionsTable = <T,>({ badge, ...props }: ConditionsTableProps<T>) => {
+export const ConditionsTable = <T extends object>({ badge, ...props }: ConditionsTableProps<T>) => {
   return (
     <EuiFlexGroup direction="row" gutterSize="none">
       {props.items.length > 1 && (

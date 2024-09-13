@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const transform = getService('transform');
   const screenshotDirectories = ['transform_docs'];
-  const pageObjects = getPageObjects(['triggersActionsUI']);
+  const pageObjects = getPageObjects(['triggersActionsUI', 'header']);
 
   let testTransformId = '';
 
@@ -37,20 +37,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await transform.testExecution.logTestStep('navigate to stack management rules');
       await transform.navigation.navigateToRules();
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      await transform.alerting.setRuleName('transform-health-rule');
-
-      await transform.testExecution.logTestStep(
-        'search for transform rule type and take screenshot'
-      );
-      const searchBox = await testSubjects.find('ruleSearchField');
-      await searchBox.click();
-      await searchBox.clearValue();
-      await searchBox.type('transform');
-      await searchBox.pressKeys(browser.keys.ENTER);
-      await commonScreenshots.takeScreenshot('transform-rule', screenshotDirectories);
-
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await transform.testExecution.logTestStep('select transform details and take screenshot');
       await transform.alerting.selectTransformAlertType();
+      await transform.alerting.setRuleName('transform-health-rule');
       testTransformId = '*';
       await transform.alerting.selectTransforms([testTransformId]);
       await commonScreenshots.takeScreenshot('transform-check-config', screenshotDirectories);
@@ -61,6 +51,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('.server-log-alerting-ActionTypeSelectOption');
       await transform.alerting.openAddRuleVariable();
       await commonScreenshots.takeScreenshot('transform-alert-actions', screenshotDirectories);
+      await transform.testExecution.logTestStep('set summary action frequency and take screenshot');
+      const actionFrequency = await testSubjects.find('summaryOrPerRuleSelect');
+      await actionFrequency.click();
+      const actionSummary = await testSubjects.find('actionNotifyWhen-option-summary');
+      await actionSummary.click();
+      await commonScreenshots.takeScreenshot(
+        'transform-alert-summary-actions',
+        screenshotDirectories
+      );
       await transform.alerting.clickCancelSaveRuleButton();
     });
   });

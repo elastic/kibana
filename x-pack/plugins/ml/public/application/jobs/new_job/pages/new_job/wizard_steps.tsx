@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useState, useMemo, useEffect, useContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { Fragment, useState, useMemo, useEffect, useContext } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiSpacer, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { type FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { JobCreatorContext } from '../components/job_creator_context';
 import { useMlKibana } from '../../../../contexts/kibana';
 import { FieldStatsFlyoutProvider } from '../../../../components/field_stats_flyout';
@@ -24,7 +25,7 @@ import { JobDetailsStep } from '../components/job_details_step';
 import { ValidationStep } from '../components/validation_step';
 import { SummaryStep } from '../components/summary_step';
 import { DatafeedStep } from '../components/datafeed_step';
-import { useMlContext } from '../../../../contexts/ml';
+import { useDataSource } from '../../../../contexts/ml';
 
 interface Props {
   currentStep: WIZARD_STEPS;
@@ -32,7 +33,7 @@ interface Props {
 }
 
 export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
-  const mlContext = useMlContext();
+  const dataSourceContext = useDataSource();
   const { services } = useMlKibana();
   const fieldStatsServices: FieldStatsServices = useMemo(() => {
     const { uiSettings, data, fieldFormats, charts } = services;
@@ -63,7 +64,7 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   const timeRangeMs = useMemo(() => {
     // If time range is available via jobCreator, use that
     // else mimic Discover and set timeRange to be now for data view without time field
-    return start && end ? { from: start, to: start } : undefined;
+    return start && end ? { from: start, to: end } : undefined;
   }, [start, end]);
 
   // store whether the advanced and additional sections have been expanded.
@@ -71,15 +72,15 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const [additionalExpanded, setAdditionalExpanded] = useState(false);
   function getSummaryStepTitle() {
-    if (mlContext.selectedSavedSearch) {
+    if (dataSourceContext.selectedSavedSearch) {
       return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleSavedSearch', {
         defaultMessage: 'New job from saved search {title}',
-        values: { title: mlContext.selectedSavedSearch.title ?? '' },
+        values: { title: dataSourceContext.selectedSavedSearch.title ?? '' },
       });
-    } else if (mlContext.currentDataView.id !== undefined) {
+    } else if (dataSourceContext.selectedDataView.id !== undefined) {
       return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleDataView', {
         defaultMessage: 'New job from data view {dataViewName}',
-        values: { dataViewName: mlContext.currentDataView.getName() },
+        values: { dataViewName: dataSourceContext.selectedDataView.getName() },
       });
     }
     return '';
@@ -118,7 +119,7 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
       {currentStep === WIZARD_STEPS.PICK_FIELDS && (
         <Fragment>
           <FieldStatsFlyoutProvider
-            dataView={mlContext.currentDataView}
+            dataView={dataSourceContext.selectedDataView}
             fieldStatsServices={fieldStatsServices}
             timeRangeMs={timeRangeMs}
             dslQuery={jobCreator.query}
@@ -187,7 +188,10 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   );
 };
 
-const Title: FC<{ 'data-test-subj': string }> = ({ 'data-test-subj': dataTestSubj, children }) => {
+const Title: FC<PropsWithChildren<{ 'data-test-subj': string }>> = ({
+  'data-test-subj': dataTestSubj,
+  children,
+}) => {
   return (
     <Fragment>
       <EuiTitle size="s">

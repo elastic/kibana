@@ -1,0 +1,49 @@
+# These pipeline steps constitute the quality gate for your service within the QA environment.
+# Incorporate any necessary additional logic to validate the service's integrity.
+# A failure in this pipeline build will prevent further progression to the subsequent stage.
+
+steps:
+  - label: ":kibana: Kibana Serverless Tests for ${ENVIRONMENT}"
+    trigger: appex-qa-serverless-kibana-ftr-tests # https://buildkite.com/elastic/appex-qa-serverless-kibana-ftr-tests
+    soft_fail: true # Remove when tests stabilize
+    build:
+      env:
+        ENVIRONMENT: ${ENVIRONMENT}
+        EC_ENV: qa
+        EC_REGION: aws-eu-west-1
+        RETRY_TESTS_ON_FAIL: "true"
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
+
+  - label: ":pipeline::female-detective::seedling: Trigger Security Solution quality gate script"
+    trigger: security-serverless-quality-gate # https://buildkite.com/elastic/security-serverless-quality-gate
+    soft_fail: true
+    build:
+      env:
+        ENVIRONMENT: ${ENVIRONMENT}
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
+
+  - label: ":ship: Fleet serverless smoke tests for ${ENVIRONMENT}"
+    trigger: fleet-smoke-tests # https://buildkite.com/elastic/fleet-smoke-tests
+    build:
+      env:
+        ENVIRONMENT: ${ENVIRONMENT}
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
+
+  - label: ":rocket: control-plane e2e tests"
+    trigger: "ess-k8s-qa-e2e-tests-daily" # https://buildkite.com/elastic/ess-k8s-qa-e2e-tests-daily
+    build:
+      env:
+        REGION_ID: aws-eu-west-1
+        NAME_PREFIX: ci_test_kibana-promotion_
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
+
+  - wait: ~
+
+  - group: "Kibana Release Manager"
+    steps:
+      - label: ":judge::seedling: Trigger Manual Tests Phase - Kibana Release Manager"
+        command: "make -C /agent trigger-manual-verification-phase"
+        env:
+          USE_GROUP_LABEL: true
+        agents:
+          image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.6"

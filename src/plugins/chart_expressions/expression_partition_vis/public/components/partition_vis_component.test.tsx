@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
-import { Settings, TooltipType, SeriesIdentifier } from '@elastic/charts';
+import { Settings, TooltipType, SeriesIdentifier, Tooltip, TooltipAction } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -27,15 +28,6 @@ import {
 import { ChartTypes } from '../../common/types';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { cloneDeep } from 'lodash';
-
-jest.mock('@elastic/charts', () => {
-  const original = jest.requireActual('@elastic/charts');
-
-  return {
-    ...original,
-    getSpecId: jest.fn(() => {}),
-  };
-});
 
 const actWithTimeout = (action: Function, timer: number = 1) =>
   act(
@@ -83,6 +75,7 @@ describe('PartitionVisComponent', function () {
         data: dataPluginMock.createStartContract(),
         fieldFormats: fieldFormatsServiceMock.createStartContract(),
       },
+      hasOpenedOnAggBasedEditor: false,
     };
   });
 
@@ -238,14 +231,14 @@ describe('PartitionVisComponent', function () {
 
   it('defaults on displaying the tooltip', () => {
     const component = shallow(<PartitionVisComponent {...wrapperProps} />);
-    expect(component.find(Settings).prop('tooltip')).toStrictEqual({ type: TooltipType.Follow });
+    expect(component.find(Tooltip).prop('type')).toBe(TooltipType.Follow);
   });
 
   it('doesnt show the tooltip when the user requests it', () => {
     const newParams = { ...visParams, addTooltip: false };
     const newProps = { ...wrapperProps, visParams: newParams };
     const component = shallow(<PartitionVisComponent {...newProps} />);
-    expect(component.find(Settings).prop('tooltip')).toStrictEqual({ type: TooltipType.None });
+    expect(component.find(Tooltip).prop('type')).toBe(TooltipType.None);
   });
 
   it('calls filter callback', () => {
@@ -342,6 +335,70 @@ describe('PartitionVisComponent', function () {
       const settingsComponent = component.find(Settings);
       expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
       expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
+    });
+  });
+
+  describe('tooltip', () => {
+    it('should not have actions if chart is not interactive', () => {
+      const component = shallow(<PartitionVisComponent {...wrapperProps} interactive={false} />);
+      const tooltip = component.find(Tooltip);
+      const actions = tooltip.prop('actions');
+      expect(actions).toBeUndefined();
+    });
+    it('should not have actions if chart has only metrics', () => {
+      const noBucketParams = {
+        ...wrapperProps,
+        visParams: {
+          ...wrapperProps.visParams,
+          dimensions: { ...wrapperProps.visParams.dimensions, buckets: [] },
+        },
+      };
+
+      const component = shallow(<PartitionVisComponent {...noBucketParams} />);
+      const tooltip = component.find(Tooltip);
+      const actions = tooltip.prop('actions');
+      expect(actions).toBeUndefined();
+    });
+    it('should have tooltip actions when the chart is fully configured and interactive', () => {
+      const component = shallow(<PartitionVisComponent {...wrapperProps} />);
+      const tooltip = component.find(Tooltip);
+      const actions = tooltip.prop('actions');
+      expect(actions?.length).toBe(1);
+      expect(actions).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            onSelect: expect.any(Function),
+            disabled: expect.any(Function),
+          }),
+        ])
+      );
+    });
+    it('selecting correct actions calls a callback with correct filter data', () => {
+      const component = shallow(<PartitionVisComponent {...wrapperProps} />);
+      const tooltip = component.find(Tooltip);
+      const actions = tooltip.prop('actions') as TooltipAction[];
+      actions[0].onSelect!(
+        [
+          {
+            label: 'JetBeats',
+            color: '#79aad9',
+            isHighlighted: false,
+            isVisible: true,
+            seriesIdentifier: {
+              specId: 'donut',
+              key: 'JetBeats',
+            },
+            value: 655,
+            formattedValue: '655',
+            valueAccessor: 1,
+          },
+        ],
+        []
+      );
+      expect(wrapperProps.fireEvent).toHaveBeenCalledWith({
+        name: 'multiFilter',
+        data: { data: [{ cells: [{ column: 0, row: 2 }], table: wrapperProps.visData }] },
+      });
     });
   });
 });

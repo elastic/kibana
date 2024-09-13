@@ -14,8 +14,8 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -29,6 +29,7 @@ import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 
 import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { LensAttributeService } from '../lens_attribute_service';
 import type {
   LensByValueInput,
@@ -40,6 +41,7 @@ import { DOC_TYPE } from '../../common/constants';
 import { LensAppServices } from '../app_plugin/types';
 import { mockDataPlugin } from './data_plugin_mock';
 import { getLensInspectorService } from '../lens_inspector_service';
+import { SavedObjectIndexStore } from '../persistence';
 
 const startMock = coreMock.createStart();
 
@@ -134,23 +136,21 @@ export function makeDefaultServices(
   }
 
   return {
-    http: core.http,
+    ...startMock,
     chrome: core.chrome,
-    overlays: core.overlays,
-    uiSettings: core.uiSettings,
-    executionContext: core.executionContext,
     navigation: navigationStartMock,
-    notifications: core.notifications,
     attributeService: makeAttributeService(),
     inspector: {
       adapters: getLensInspectorService(inspectorPluginMock.createStartContract()).adapters,
       inspect: jest.fn(),
       close: jest.fn(),
     },
-    dashboard: dashboardPluginMock.createStartContract(),
     presentationUtil: presentationUtilPluginMock.createStartContract(core),
-    savedObjectsClient: core.savedObjects.client,
-    dashboardFeatureFlag: { allowByValueEmbeddables: false },
+    savedObjectStore: {
+      load: jest.fn(),
+      search: jest.fn(),
+      save: jest.fn(),
+    } as unknown as SavedObjectIndexStore,
     stateTransfer: createEmbeddableStateTransferMock() as EmbeddableStateTransfer,
     getOriginatingAppName: jest.fn(() => 'defaultOriginatingApp'),
     application: {
@@ -176,6 +176,7 @@ export function makeDefaultServices(
     dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
     dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-    docLinks: startMock.docLinks,
+    contentManagement: contentManagementMock.createStartContract(),
+    eventAnnotationService: {} as EventAnnotationServiceType,
   };
 }

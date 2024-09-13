@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
@@ -39,6 +40,16 @@ export interface SavedObjectsIncrementCounterOptions<Attributes = unknown>
    * Attributes to use when upserting the document if it doesn't exist.
    */
   upsertAttributes?: Attributes;
+  /**
+   * Flag indicating if a saved object is managed by Kibana (default=false).
+   * Only used when upserting a saved object. If the saved object already
+   * exist this option has no effect.
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed?: boolean;
 }
 
 /**

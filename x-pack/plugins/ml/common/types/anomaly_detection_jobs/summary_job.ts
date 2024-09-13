@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Moment } from 'moment';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Moment } from 'moment';
 
-import { MlCustomSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlCustomSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CombinedJob, CombinedJobWithStats } from './combined_job';
 import type { MlAnomalyDetectionAlertRule } from '../alerts';
 import type { MlJobBlocked } from './job';
@@ -90,7 +90,7 @@ export interface MlSummaryJob {
 
   /**
    * Used in older implementations of the job config, where the datafeed was placed inside the job for convenience.
-   * This will be populated if the job's id has been passed to the /api/ml/jobs/jobs_summary endpoint.
+   * This will be populated if the job's id has been passed to the /internal/ml/jobs/jobs_summary endpoint.
    */
   fullJob?: CombinedJob;
 

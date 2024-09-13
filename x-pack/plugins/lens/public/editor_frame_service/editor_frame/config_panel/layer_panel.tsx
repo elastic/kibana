@@ -21,24 +21,13 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
-import { LayerType } from '../../../../common/types';
+import { DimensionButton } from '@kbn/visualization-ui-components';
 import { LayerActions } from './layer_actions';
-import { IndexPatternServiceAPI } from '../../../data_views_service/service';
-import { NativeRenderer } from '../../../native_renderer';
-import {
-  StateSetter,
-  Visualization,
-  DragDropOperation,
-  isOperation,
-  LayerAction,
-  VisualizationDimensionGroupConfig,
-  UserMessagesGetter,
-} from '../../../types';
-import { LayerSettings } from './layer_settings';
-import { LayerPanelProps, ActiveDimensionState } from './types';
+import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
+import { LayerHeader } from './layer_header';
+import { LayerPanelProps } from './types';
 import { DimensionContainer } from './dimension_container';
 import { EmptyDimensionButton } from './buttons/empty_dimension_button';
-import { DimensionButton } from './buttons/dimension_button';
 import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
 import { useFocusUpdate } from './use_focus_update';
 import {
@@ -47,56 +36,18 @@ import {
   selectResolvedDateRange,
   selectDatasourceStates,
 } from '../../../state_management';
-import { onDropForVisualization, shouldRemoveSource } from './buttons/drop_targets_utils';
 import { getSharedActions } from './layer_actions/layer_actions';
-import { FlyoutContainer } from './flyout_container';
+import { FlyoutContainer } from '../../../shared_components/flyout_container';
+import { FakeDimensionButton } from './buttons/fake_dimension_button';
 
-const initialActiveDimensionState = {
-  isNew: false,
-};
+export function LayerPanel(props: LayerPanelProps) {
+  const [openDimension, setOpenDimension] = useState<{
+    isComplete?: boolean;
+    openColumnId?: string;
+    openColumnGroup?: VisualizationDimensionGroupConfig;
+  }>({});
 
-export function LayerPanel(
-  props: Exclude<LayerPanelProps, 'state' | 'setState'> & {
-    activeVisualization: Visualization;
-    dimensionGroups: VisualizationDimensionGroupConfig[];
-    layerId: string;
-    layerIndex: number;
-    isOnlyLayer: boolean;
-    addLayer: (layerType: LayerType) => void;
-    updateVisualization: StateSetter<unknown>;
-    updateDatasource: (
-      datasourceId: string | undefined,
-      newState: unknown,
-      dontSyncLinkedDimensions?: boolean
-    ) => void;
-    updateDatasourceAsync: (datasourceId: string | undefined, newState: unknown) => void;
-    updateAll: (
-      datasourceId: string | undefined,
-      newDatasourcestate: unknown,
-      newVisualizationState: unknown
-    ) => void;
-    onRemoveLayer: (layerId: string) => void;
-    onCloneLayer: () => void;
-    onRemoveDimension: (props: { columnId: string; layerId: string }) => void;
-    registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
-    toggleFullscreen: () => void;
-    onEmptyDimensionAdd: (columnId: string, group: { groupId: string }) => void;
-    onChangeIndexPattern: (args: {
-      indexPatternId: string;
-      layerId: string;
-      datasourceId?: string;
-      visualizationId?: string;
-    }) => void;
-    indexPatternService: IndexPatternServiceAPI;
-    getUserMessages: UserMessagesGetter;
-  }
-) {
-  const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
-    initialActiveDimensionState
-  );
   const [isPanelSettingsOpen, setPanelSettingsOpen] = useState(false);
-
-  const [hideTooltip, setHideTooltip] = useState<boolean>(false);
 
   const {
     framePublicAPI,
@@ -108,6 +59,8 @@ export function LayerPanel(
     registerNewLayerRef,
     layerIndex,
     activeVisualization,
+    visualizationMap,
+    datasourceMap,
     updateVisualization,
     updateDatasource,
     toggleFullscreen,
@@ -116,22 +69,51 @@ export function LayerPanel(
     visualizationState,
     onChangeIndexPattern,
     core,
+    onDropToDimension,
+    setIsInlineFlyoutVisible,
+    onlyAllowSwitchToSubtypes,
   } = props;
+
+  const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
+
+  const isSaveable = useLensSelector((state) => state.lens.isSaveable);
 
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
   const dateRange = useLensSelector(selectResolvedDateRange);
 
   useEffect(() => {
-    setActiveDimension(initialActiveDimensionState);
-  }, [activeVisualization.id]);
+    // is undefined when the dimension panel is closed
+    setIsInlineFlyoutVisible?.(!openDimension.openColumnId);
+  }, [openDimension.openColumnId, setIsInlineFlyoutVisible]);
 
   const panelRef = useRef<HTMLDivElement | null>(null);
   const settingsPanelRef = useRef<HTMLDivElement | null>(null);
+
   const registerLayerRef = useCallback(
-    (el) => registerNewLayerRef(layerId, el),
+    (el: HTMLDivElement | null) => registerNewLayerRef(layerId, el),
     [layerId, registerNewLayerRef]
   );
+
+  const closeDimensionEditor = () => {
+    if (layerDatasource) {
+      if (layerDatasource.updateStateOnCloseDimension) {
+        const newState = layerDatasource.updateStateOnCloseDimension({
+          state: layerDatasourceState,
+          layerId,
+          columnId: openColumnId!,
+        });
+        if (newState) {
+          props.updateDatasource(datasourceId, newState);
+        }
+      }
+    }
+
+    setOpenDimension({});
+    if (isFullscreen) {
+      toggleFullscreen();
+    }
+  };
 
   const layerVisualizationConfigProps = {
     layerId,
@@ -143,7 +125,16 @@ export function LayerPanel(
 
   const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
   const datasourceId = datasourcePublicAPI?.datasourceId;
-  const layerDatasourceState = datasourceId ? datasourceStates?.[datasourceId]?.state : undefined;
+  let layerDatasourceState = datasourceId ? datasourceStates?.[datasourceId]?.state : undefined;
+  // try again with aliases
+  if (!layerDatasourceState && datasourcePublicAPI?.datasourceAliasIds && datasourceStates) {
+    const aliasId = datasourcePublicAPI.datasourceAliasIds.find(
+      (id) => datasourceStates?.[id]?.state
+    );
+    if (aliasId) {
+      layerDatasourceState = datasourceStates[aliasId].state;
+    }
+  }
   const layerDatasource = datasourceId ? props.datasourceMap[datasourceId] : undefined;
 
   const layerDatasourceConfigProps = {
@@ -159,10 +150,42 @@ export function LayerPanel(
   const columnLabelMap =
     !layerDatasource && activeVisualization.getUniqueLabels
       ? activeVisualization.getUniqueLabels(props.visualizationState)
-      : layerDatasource?.uniqueLabels?.(layerDatasourceConfigProps?.state);
+      : layerDatasource?.uniqueLabels?.(
+          layerDatasourceConfigProps?.state,
+          framePublicAPI.dataViews.indexPatterns
+        );
 
   const isEmptyLayer = !dimensionGroups.some((d) => d.accessors.length > 0);
-  const { activeId, activeGroup } = activeDimension;
+  const { openColumnId, openColumnGroup, isComplete } = openDimension;
+
+  useEffect(() => {
+    if (!openColumnId) {
+      return;
+    }
+
+    const derivedOpenColumnGroup = dimensionGroups.find((group) =>
+      group.accessors.some((a) => a.columnId === openColumnId)
+    );
+    // dont update if nothing has changed
+    if (
+      isComplete === !!derivedOpenColumnGroup &&
+      derivedOpenColumnGroup?.groupId === openColumnGroup?.groupId
+    ) {
+      return;
+    }
+    if (derivedOpenColumnGroup) {
+      // if column is found, mark it as complete. If it's moved to another group, update the group
+      setOpenDimension({
+        openColumnId,
+        openColumnGroup: derivedOpenColumnGroup,
+        isComplete: !!derivedOpenColumnGroup,
+      });
+    }
+    // if column is not found but is not new (is complete), close the dimension panel
+    if (isComplete && !derivedOpenColumnGroup) {
+      setOpenDimension({});
+    }
+  }, [openColumnId, dimensionGroups, isComplete, openColumnGroup?.groupId]);
 
   const allAccessors = dimensionGroups.flatMap((group) =>
     group.accessors.map((accessor) => accessor.columnId)
@@ -174,8 +197,8 @@ export function LayerPanel(
     registerNewRef: registerNewButtonRef,
   } = useFocusUpdate(allAccessors);
 
-  const onDrop = useMemo(() => {
-    return (source: DragDropIdentifier, target: DragDropIdentifier, dropType?: DropType) => {
+  const onDrop = useCallback(
+    (source: DragDropIdentifier, target: DragDropIdentifier, dropType?: DropType) => {
       if (!dropType) {
         return;
       }
@@ -189,67 +212,12 @@ export function LayerPanel(
         setNextFocusedButtonId(target.columnId);
       }
 
-      let hasDropSucceeded = true;
-      if (layerDatasource) {
-        hasDropSucceeded = Boolean(
-          layerDatasource?.onDrop({
-            state: layerDatasourceState,
-            setState: (newState: unknown) => {
-              // we don't sync linked dimension here because that would trigger an onDrop routine within an onDrop routine
-              updateDatasource(datasourceId, newState, true);
-            },
-            source,
-            target: {
-              ...(target as unknown as DragDropOperation),
-              filterOperations:
-                dimensionGroups.find(({ groupId: gId }) => gId === target.groupId)
-                  ?.filterOperations || Boolean,
-            },
-            targetLayerDimensionGroups: dimensionGroups,
-            dropType,
-            indexPatterns: framePublicAPI.dataViews.indexPatterns,
-          })
-        );
-      }
-      if (hasDropSucceeded) {
-        activeVisualization.onDrop = activeVisualization.onDrop?.bind(activeVisualization);
+      onDropToDimension({ source, target, dropType });
+    },
+    [setNextFocusedButtonId, onDropToDimension]
+  );
 
-        updateVisualization(
-          (activeVisualization.onDrop || onDropForVisualization)?.(
-            {
-              prevState: props.visualizationState,
-              frame: framePublicAPI,
-              target,
-              source,
-              dropType,
-              group: dimensionGroups.find(({ groupId: gId }) => gId === target.groupId),
-            },
-            activeVisualization
-          )
-        );
-
-        if (isOperation(source) && shouldRemoveSource(source, dropType)) {
-          props.onRemoveDimension({
-            columnId: source.columnId,
-            layerId: source.layerId,
-          });
-        }
-      }
-    };
-  }, [
-    layerDatasource,
-    setNextFocusedButtonId,
-    layerDatasourceState,
-    dimensionGroups,
-    framePublicAPI,
-    updateDatasource,
-    datasourceId,
-    activeVisualization,
-    updateVisualization,
-    props,
-  ]);
-
-  const isDimensionPanelOpen = Boolean(activeId);
+  const isDimensionPanelOpen = Boolean(openColumnId);
 
   const updateDataLayerState = useCallback(
     (
@@ -261,10 +229,10 @@ export function LayerPanel(
         forceRender = false,
       }: { isDimensionComplete?: boolean; forceRender?: boolean } = {}
     ) => {
-      if (!activeGroup || !activeId) {
+      if (!openColumnGroup || !openColumnId) {
         return;
       }
-      if (allAccessors.includes(activeId)) {
+      if (allAccessors.includes(openColumnId)) {
         if (isDimensionComplete) {
           if (forceRender) {
             updateDatasource(datasourceId, newState);
@@ -276,7 +244,7 @@ export function LayerPanel(
           // complete, which clears the visualization. This keeps the flyout open and reuses
           // the previous columnId
           props.updateDatasource(datasourceId, newState);
-          props.onRemoveDimension({ layerId, columnId: activeId });
+          props.onRemoveDimension({ layerId, columnId: openColumnId });
         }
       } else if (isDimensionComplete) {
         updateAll(
@@ -284,13 +252,12 @@ export function LayerPanel(
           newState,
           activeVisualization.setDimension({
             layerId,
-            groupId: activeGroup.groupId,
-            columnId: activeId,
+            groupId: openColumnGroup.groupId,
+            columnId: openColumnId,
             prevState: visualizationState,
             frame: framePublicAPI,
           })
         );
-        setActiveDimension({ ...activeDimension, isNew: false });
       } else {
         if (forceRender) {
           updateDatasource(datasourceId, newState);
@@ -301,9 +268,9 @@ export function LayerPanel(
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      activeDimension,
-      activeGroup,
-      activeId,
+      openDimension,
+      openColumnGroup,
+      openColumnId,
       activeVisualization,
       datasourceId,
       layerId,
@@ -332,19 +299,23 @@ export function LayerPanel(
     () =>
       [
         ...(activeVisualization
-          .getSupportedActionsForLayer?.(layerId, visualizationState)
+          .getSupportedActionsForLayer?.(
+            layerId,
+            visualizationState,
+            updateVisualization,
+            props.registerLibraryAnnotationGroup,
+            isSaveable
+          )
           .map((action) => ({
             ...action,
             execute: () => {
-              updateVisualization(
-                activeVisualization.onLayerAction?.(layerId, action.id, visualizationState)
-              );
+              action.execute(layerActionsFlyoutRef.current);
             },
           })) || []),
+
         ...getSharedActions({
           layerId,
           activeVisualization,
-          visualizationState,
           core,
           layerIndex,
           layerType: activeVisualization.getLayerType(layerId, visualizationState),
@@ -352,38 +323,50 @@ export function LayerPanel(
           isTextBasedLanguage,
           hasLayerSettings: Boolean(
             (Object.values(visualizationLayerSettings).some(Boolean) &&
-              activeVisualization.renderLayerSettings) ||
-              layerDatasource?.renderLayerSettings
+              activeVisualization.LayerSettingsComponent) ||
+              layerDatasource?.LayerSettingsComponent
           ),
           openLayerSettings: () => setPanelSettingsOpen(true),
           onCloneLayer,
           onRemoveLayer: () => onRemoveLayer(layerId),
+          customRemoveModalText: activeVisualization.getCustomRemoveLayerText?.(
+            layerId,
+            visualizationState
+          ),
         }),
       ].filter((i) => i.isCompatible),
     [
       activeVisualization,
+      layerId,
+      visualizationState,
+      updateVisualization,
+      props.registerLibraryAnnotationGroup,
+      isSaveable,
       core,
+      layerIndex,
       isOnlyLayer,
       isTextBasedLanguage,
-      layerDatasource?.renderLayerSettings,
-      layerId,
-      layerIndex,
+      visualizationLayerSettings,
+      layerDatasource?.LayerSettingsComponent,
       onCloneLayer,
       onRemoveLayer,
-      updateVisualization,
-      visualizationLayerSettings,
-      visualizationState,
     ]
   );
+  const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <>
-      <section tabIndex={-1} ref={registerLayerRef} className="lnsLayerPanel">
-        <EuiPanel data-test-subj={`lns-layerPanel-${layerIndex}`} paddingSize="none">
+      <section
+        tabIndex={-1}
+        ref={registerLayerRef}
+        className="lnsLayerPanel"
+        data-test-subj={`lns-layerPanel-${layerIndex}`}
+      >
+        <EuiPanel paddingSize="none">
           <header className="lnsLayerPanel__layerHeader">
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
-                <LayerSettings
+                <LayerHeader
                   layerConfigProps={{
                     ...layerVisualizationConfigProps,
                     setState: props.updateVisualization,
@@ -394,18 +377,31 @@ export function LayerPanel(
                         visualizationId: activeVisualization.id,
                       }),
                   }}
-                  activeVisualization={activeVisualization}
+                  activeVisualizationId={activeVisualization.id}
+                  visualizationMap={visualizationMap}
+                  datasourceMap={datasourceMap}
+                  onlyAllowSwitchToSubtypes={onlyAllowSwitchToSubtypes}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <LayerActions actions={compatibleActions} layerIndex={layerIndex} />
-              </EuiFlexItem>
+              {props.displayLayerSettings && (
+                <EuiFlexItem grow={false}>
+                  <LayerActions
+                    actions={compatibleActions}
+                    layerIndex={layerIndex}
+                    mountingPoint={layerActionsFlyoutRef.current}
+                  />
+                  <div ref={layerActionsFlyoutRef} />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
-            {(layerDatasource || activeVisualization.renderLayerPanel) && <EuiSpacer size="s" />}
-            {layerDatasource && (
-              <NativeRenderer
-                render={layerDatasource.renderLayerPanel}
-                nativeProps={{
+            {props.indexPatternService &&
+              !isTextBasedLanguage &&
+              (layerDatasource || activeVisualization.LayerPanelComponent) && (
+                <EuiSpacer size="s" />
+              )}
+            {layerDatasource && props.indexPatternService && (
+              <layerDatasource.LayerPanelComponent
+                {...{
                   layerId,
                   state: layerDatasourceState,
                   activeData: props.framePublicAPI.activeData,
@@ -415,10 +411,9 @@ export function LayerPanel(
                 }}
               />
             )}
-            {activeVisualization.renderLayerPanel && (
-              <NativeRenderer
-                render={activeVisualization.renderLayerPanel}
-                nativeProps={{
+            {activeVisualization.LayerPanelComponent && (
+              <activeVisualization.LayerPanelComponent
+                {...{
                   layerId,
                   state: visualizationState,
                   frame: framePublicAPI,
@@ -434,261 +429,239 @@ export function LayerPanel(
             )}
           </header>
 
-          {dimensionGroups.map((group, groupIndex) => {
-            let errorText: string = '';
+          {dimensionGroups
+            .filter((group) => !group.isHidden)
+            .map((group, groupIndex) => {
+              let errorText: string = '';
 
-            if (!isEmptyLayer) {
-              if (
-                group.requiredMinDimensionCount &&
-                group.requiredMinDimensionCount > group.accessors.length
-              ) {
-                if (group.requiredMinDimensionCount > 1) {
+              if (!isEmptyLayer || isInlineEditing) {
+                if (
+                  group.requiredMinDimensionCount &&
+                  group.requiredMinDimensionCount > group.accessors.length
+                ) {
+                  if (group.requiredMinDimensionCount > 1) {
+                    errorText = i18n.translate(
+                      'xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel',
+                      {
+                        defaultMessage: 'Requires {requiredMinDimensionCount} fields',
+                        values: {
+                          requiredMinDimensionCount: group.requiredMinDimensionCount,
+                        },
+                      }
+                    );
+                  } else {
+                    errorText = i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
+                      defaultMessage: 'Requires field',
+                    });
+                  }
+                } else if (group.dimensionsTooMany && group.dimensionsTooMany > 0) {
                   errorText = i18n.translate(
-                    'xpack.lens.editorFrame.requiresTwoOrMoreFieldsWarningLabel',
+                    'xpack.lens.editorFrame.tooManyDimensionsSingularWarningLabel',
                     {
-                      defaultMessage: 'Requires {requiredMinDimensionCount} fields',
+                      defaultMessage:
+                        'Please remove {dimensionsTooMany, plural, one {a dimension} other {{dimensionsTooMany} dimensions}}',
                       values: {
-                        requiredMinDimensionCount: group.requiredMinDimensionCount,
+                        dimensionsTooMany: group.dimensionsTooMany,
                       },
                     }
                   );
-                } else {
-                  errorText = i18n.translate('xpack.lens.editorFrame.requiresFieldWarningLabel', {
-                    defaultMessage: 'Requires field',
-                  });
                 }
-              } else if (group.dimensionsTooMany && group.dimensionsTooMany > 0) {
-                errorText = i18n.translate(
-                  'xpack.lens.editorFrame.tooManyDimensionsSingularWarningLabel',
-                  {
-                    defaultMessage:
-                      'Please remove {dimensionsTooMany, plural, one {a dimension} other {{dimensionsTooMany} dimensions}}',
-                    values: {
-                      dimensionsTooMany: group.dimensionsTooMany,
-                    },
-                  }
-                );
               }
-            }
-            const isOptional = !group.requiredMinDimensionCount && !group.suggestedValue;
-            return (
-              <EuiFormRow
-                className="lnsLayerPanel__row"
-                fullWidth
-                label={
-                  <>
-                    {group.groupLabel}
-                    {group.groupTooltip && (
-                      <>
-                        <EuiIconTip
-                          color="subdued"
-                          content={group.groupTooltip}
-                          iconProps={{
-                            className: 'eui-alignTop',
-                          }}
-                          position="top"
-                          size="s"
-                          type="questionInCircle"
-                        />
-                      </>
-                    )}
-                  </>
-                }
-                labelAppend={
-                  isOptional ? (
-                    <EuiText color="subdued" size="xs" data-test-subj="lnsGroup_optional">
-                      {i18n.translate('xpack.lens.editorFrame.optionalDimensionLabel', {
-                        defaultMessage: 'Optional',
-                      })}
-                    </EuiText>
-                  ) : null
-                }
-                labelType="legend"
-                key={group.groupId}
-                isInvalid={Boolean(errorText)}
-                error={errorText}
-              >
-                <>
-                  {group.accessors.length ? (
-                    <ReorderProvider
-                      id={group.groupId}
-                      className={'lnsLayerPanel__group'}
-                      dataTestSubj="lnsDragDrop"
-                    >
-                      {group.accessors.map((accessorConfig, accessorIndex) => {
-                        const { columnId } = accessorConfig;
-
-                        const messages = props.getUserMessages('dimensionButton', {
-                          dimensionId: columnId,
-                        });
-
-                        return (
-                          <DraggableDimensionButton
-                            activeVisualization={activeVisualization}
-                            registerNewButtonRef={registerNewButtonRef}
-                            order={[2, layerIndex, groupIndex, accessorIndex]}
-                            target={{
-                              id: columnId,
-                              layerId,
-                              columnId,
-                              groupId: group.groupId,
-                              filterOperations: group.filterOperations,
-                              prioritizedOperation: group.prioritizedOperation,
-                              indexPatternId: layerDatasource
-                                ? layerDatasource.getUsedDataView(layerDatasourceState, layerId)
-                                : activeVisualization.getUsedDataView?.(
-                                    visualizationState,
-                                    layerId
-                                  ),
-                              humanData: {
-                                label: columnLabelMap?.[columnId] ?? '',
-                                groupLabel: group.groupLabel,
-                                position: accessorIndex + 1,
-                                layerNumber: layerIndex + 1,
-                              },
+              const isOptional = !group.requiredMinDimensionCount && !group.suggestedValue;
+              return (
+                <EuiFormRow
+                  className="lnsLayerPanel__row"
+                  fullWidth
+                  label={
+                    <>
+                      {group.groupLabel}
+                      {group.groupTooltip && (
+                        <>
+                          <EuiIconTip
+                            color="subdued"
+                            content={group.groupTooltip}
+                            iconProps={{
+                              className: 'eui-alignTop',
                             }}
-                            group={group}
-                            key={columnId}
-                            state={layerDatasourceState}
-                            layerDatasource={layerDatasource}
-                            datasourceLayers={framePublicAPI.datasourceLayers}
-                            onDragStart={() => setHideTooltip(true)}
-                            onDragEnd={() => setHideTooltip(false)}
-                            onDrop={onDrop}
-                            indexPatterns={dataViews.indexPatterns}
-                          >
-                            <div className="lnsLayerPanel__dimension">
+                            position="top"
+                            size="s"
+                            type="questionInCircle"
+                          />
+                        </>
+                      )}
+                    </>
+                  }
+                  labelAppend={
+                    isOptional ? (
+                      <EuiText color="subdued" size="xs" data-test-subj="lnsGroup_optional">
+                        {i18n.translate('xpack.lens.editorFrame.optionalDimensionLabel', {
+                          defaultMessage: 'Optional',
+                        })}
+                      </EuiText>
+                    ) : null
+                  }
+                  labelType="legend"
+                  key={group.groupId}
+                  isInvalid={Boolean(errorText)}
+                  error={errorText}
+                >
+                  <>
+                    {group.accessors.length ? (
+                      <ReorderProvider
+                        className={'lnsLayerPanel__group'}
+                        dataTestSubj="lnsDragDrop"
+                      >
+                        {group.accessors.map((accessorConfig, accessorIndex) => {
+                          const { columnId } = accessorConfig;
+
+                          const messages =
+                            props?.getUserMessages?.('dimensionButton', {
+                              dimensionId: columnId,
+                            }) ?? [];
+
+                          return (
+                            <DraggableDimensionButton
+                              activeVisualization={activeVisualization}
+                              registerNewButtonRef={registerNewButtonRef}
+                              order={[2, layerIndex, groupIndex, accessorIndex]}
+                              target={{
+                                id: columnId,
+                                layerId,
+                                columnId,
+                                groupId: group.groupId,
+                                filterOperations: group.filterOperations,
+                                prioritizedOperation: group.prioritizedOperation,
+                                isMetricDimension: group?.isMetricDimension,
+                                indexPatternId: layerDatasource
+                                  ? layerDatasource.getUsedDataView(layerDatasourceState, layerId)
+                                  : activeVisualization.getUsedDataView?.(
+                                      visualizationState,
+                                      layerId
+                                    ),
+                                humanData: {
+                                  label: columnLabelMap?.[columnId] ?? '',
+                                  groupLabel: group.groupLabel,
+                                  position: accessorIndex + 1,
+                                  layerNumber: layerIndex + 1,
+                                },
+                              }}
+                              group={group}
+                              key={columnId}
+                              state={layerDatasourceState}
+                              layerDatasource={layerDatasource}
+                              datasourceLayers={framePublicAPI.datasourceLayers}
+                              onDrop={onDrop}
+                              indexPatterns={dataViews.indexPatterns}
+                            >
                               <DimensionButton
                                 accessorConfig={accessorConfig}
                                 label={columnLabelMap?.[accessorConfig.columnId] ?? ''}
-                                group={group}
+                                groupLabel={group.groupLabel}
                                 onClick={(id: string) => {
-                                  setActiveDimension({
-                                    isNew: false,
-                                    activeGroup: group,
-                                    activeId: id,
+                                  setOpenDimension({
+                                    openColumnGroup: group,
+                                    openColumnId: id,
                                   });
                                 }}
                                 onRemoveClick={(id: string) => {
                                   props.onRemoveDimension({ columnId: id, layerId });
                                   removeButtonRef(id);
                                 }}
-                                message={messages[0]}
+                                message={{
+                                  severity: messages[0]?.severity,
+                                  content: (messages[0]?.shortMessage ||
+                                    messages[0]?.longMessage) as React.ReactNode,
+                                }}
                               >
                                 {layerDatasource ? (
-                                  <NativeRenderer
-                                    render={layerDatasource.renderDimensionTrigger}
-                                    nativeProps={{
+                                  <>
+                                    {layerDatasource.DimensionTriggerComponent({
                                       ...layerDatasourceConfigProps,
                                       columnId: accessorConfig.columnId,
                                       groupId: group.groupId,
                                       filterOperations: group.filterOperations,
                                       indexPatterns: dataViews.indexPatterns,
-                                    }}
-                                  />
+                                    })}
+                                  </>
                                 ) : (
                                   <>
-                                    {activeVisualization?.renderDimensionTrigger?.({
+                                    {activeVisualization?.DimensionTriggerComponent?.({
                                       columnId,
                                       label: columnLabelMap?.[columnId] ?? '',
-                                      hideTooltip,
                                     })}
                                   </>
                                 )}
                               </DimensionButton>
-                            </div>
-                          </DraggableDimensionButton>
-                        );
-                      })}
-                    </ReorderProvider>
-                  ) : null}
+                            </DraggableDimensionButton>
+                          );
+                        })}
+                      </ReorderProvider>
+                    ) : null}
 
-                  {group.fakeFinalAccessor && (
-                    <div
-                      className="lnsLayerPanel__dimension domDragDrop-isDraggable"
-                      css={css`
-                        cursor: default !important;
-                        border-color: transparent !important;
-                        margin-top: ${group.accessors.length ? 8 : 0}px !important;
-                        background-color: ${euiThemeVars.euiColorLightShade} !important;
-                        box-shadow: none !important;
-                      `}
-                    >
-                      <EuiText
-                        size="s"
-                        className="lnsLayerPanel__triggerText"
-                        data-test-subj="lns-fakeDimension"
-                        color={'subdued'}
-                      >
-                        <span className="lnsLayerPanel__triggerTextLabel">
-                          {group.fakeFinalAccessor.label}
-                        </span>
-                      </EuiText>
-                    </div>
-                  )}
+                    {group.fakeFinalAccessor && (
+                      <FakeDimensionButton label={group.fakeFinalAccessor.label} />
+                    )}
 
-                  {group.supportsMoreColumns ? (
-                    <EmptyDimensionButton
-                      activeVisualization={activeVisualization}
-                      order={[2, layerIndex, groupIndex, group.accessors.length]}
-                      group={group}
-                      target={{
-                        layerId,
-                        groupId: group.groupId,
-                        filterOperations: group.filterOperations,
-                        prioritizedOperation: group.prioritizedOperation,
-                        isNewColumn: true,
-                        isMetricDimension: group?.isMetricDimension,
-                        indexPatternId: layerDatasource
-                          ? layerDatasource.getUsedDataView(layerDatasourceState, layerId)
-                          : activeVisualization.getUsedDataView?.(visualizationState, layerId),
-                        humanData: {
-                          groupLabel: group.groupLabel,
-                          layerNumber: layerIndex + 1,
-                          position: group.accessors.length + 1,
-                          label: i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
-                            defaultMessage: 'Empty dimension',
-                          }),
-                        },
-                      }}
-                      layerDatasource={layerDatasource}
-                      state={layerDatasourceState}
-                      datasourceLayers={framePublicAPI.datasourceLayers}
-                      onClick={(id) => {
-                        props.onEmptyDimensionAdd(id, group);
-                        setActiveDimension({
-                          activeGroup: group,
-                          activeId: id,
-                          isNew: !group.supportStaticValue && Boolean(layerDatasource),
-                        });
-                      }}
-                      onDrop={onDrop}
-                      indexPatterns={dataViews.indexPatterns}
-                    />
-                  ) : null}
-                </>
-              </EuiFormRow>
-            );
-          })}
+                    {group.supportsMoreColumns ? (
+                      <EmptyDimensionButton
+                        activeVisualization={activeVisualization}
+                        order={[2, layerIndex, groupIndex, group.accessors.length]}
+                        group={group}
+                        target={{
+                          layerId,
+                          groupId: group.groupId,
+                          filterOperations: group.filterOperations,
+                          prioritizedOperation: group.prioritizedOperation,
+                          isNewColumn: true,
+                          isMetricDimension: group?.isMetricDimension,
+                          indexPatternId: layerDatasource
+                            ? layerDatasource.getUsedDataView(layerDatasourceState, layerId)
+                            : activeVisualization.getUsedDataView?.(visualizationState, layerId),
+                          humanData: {
+                            groupLabel: group.groupLabel,
+                            layerNumber: layerIndex + 1,
+                            position: group.accessors.length + 1,
+                            label: i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
+                              defaultMessage: 'Empty dimension',
+                            }),
+                          },
+                        }}
+                        layerDatasource={layerDatasource}
+                        state={layerDatasourceState}
+                        datasourceLayers={framePublicAPI.datasourceLayers}
+                        onClick={(id) => {
+                          props.onEmptyDimensionAdd(id, group);
+                          setOpenDimension({
+                            openColumnGroup: group,
+                            openColumnId: id,
+                          });
+                        }}
+                        onDrop={onDrop}
+                        indexPatterns={dataViews.indexPatterns}
+                      />
+                    ) : null}
+                  </>
+                </EuiFormRow>
+              );
+            })}
         </EuiPanel>
       </section>
-      {(layerDatasource?.renderLayerSettings || activeVisualization?.renderLayerSettings) && (
+      {(layerDatasource?.LayerSettingsComponent || activeVisualization?.LayerSettingsComponent) && (
         <FlyoutContainer
           panelRef={(el) => (settingsPanelRef.current = el)}
-          isOpen={isPanelSettingsOpen}
           isFullscreen={false}
-          groupLabel={i18n.translate('xpack.lens.editorFrame.layerSettingsTitle', {
+          label={i18n.translate('xpack.lens.editorFrame.layerSettingsTitle', {
             defaultMessage: 'Layer settings',
           })}
+          isOpen={isPanelSettingsOpen}
           handleClose={() => {
-            // update the current layer settings
             setPanelSettingsOpen(false);
-            return true;
           }}
+          isInlineEditing={isInlineEditing}
         >
           <div id={layerId}>
             <div className="lnsIndexPatternDimensionEditor--padded">
-              {layerDatasource?.renderLayerSettings || visualizationLayerSettings.data ? (
+              {layerDatasource?.LayerSettingsComponent || visualizationLayerSettings.data ? (
                 <EuiText
                   size="s"
                   css={css`
@@ -702,21 +675,15 @@ export function LayerPanel(
                   </h4>
                 </EuiText>
               ) : null}
-              {layerDatasource?.renderLayerSettings && (
-                <>
-                  <NativeRenderer
-                    render={layerDatasource.renderLayerSettings}
-                    nativeProps={layerDatasourceConfigProps}
-                  />
-                </>
+              {layerDatasource?.LayerSettingsComponent && (
+                <layerDatasource.LayerSettingsComponent {...layerDatasourceConfigProps} />
               )}
-              {layerDatasource?.renderLayerSettings && visualizationLayerSettings.data ? (
+              {layerDatasource?.LayerSettingsComponent && visualizationLayerSettings.data ? (
                 <EuiSpacer size="m" />
               ) : null}
-              {activeVisualization?.renderLayerSettings && visualizationLayerSettings.data ? (
-                <NativeRenderer
-                  render={activeVisualization?.renderLayerSettings}
-                  nativeProps={{
+              {activeVisualization?.LayerSettingsComponent && visualizationLayerSettings.data ? (
+                <activeVisualization.LayerSettingsComponent
+                  {...{
                     ...layerVisualizationConfigProps,
                     setState: props.updateVisualization,
                     panelRef: settingsPanelRef,
@@ -738,10 +705,9 @@ export function LayerPanel(
                   </h4>
                 </EuiText>
               ) : null}
-              {activeVisualization?.renderLayerSettings && (
-                <NativeRenderer
-                  render={activeVisualization?.renderLayerSettings}
-                  nativeProps={{
+              {activeVisualization?.LayerSettingsComponent && (
+                <activeVisualization.LayerSettingsComponent
+                  {...{
                     ...layerVisualizationConfigProps,
                     setState: props.updateVisualization,
                     panelRef: settingsPanelRef,
@@ -757,91 +723,40 @@ export function LayerPanel(
         panelRef={(el) => (panelRef.current = el)}
         isOpen={isDimensionPanelOpen}
         isFullscreen={isFullscreen}
-        groupLabel={activeGroup?.dimensionEditorGroupLabel ?? (activeGroup?.groupLabel || '')}
-        handleClose={() => {
-          if (layerDatasource) {
-            if (
-              layerDatasource.canCloseDimensionEditor &&
-              !layerDatasource.canCloseDimensionEditor(layerDatasourceState)
-            ) {
-              return false;
-            }
-            if (layerDatasource.updateStateOnCloseDimension) {
-              const newState = layerDatasource.updateStateOnCloseDimension({
-                state: layerDatasourceState,
-                layerId,
-                columnId: activeId!,
-              });
-              if (newState) {
-                props.updateDatasource(datasourceId, newState);
-              }
-            }
-          }
-
-          setActiveDimension(initialActiveDimensionState);
-          if (isFullscreen) {
-            toggleFullscreen();
-          }
-          return true;
-        }}
+        label={openColumnGroup?.dimensionEditorGroupLabel ?? (openColumnGroup?.groupLabel || '')}
+        isInlineEditing={isInlineEditing}
+        handleClose={closeDimensionEditor}
         panel={
           <>
-            {activeGroup && activeId && layerDatasource && (
-              <NativeRenderer
-                render={layerDatasource.renderDimensionEditor}
-                nativeProps={{
-                  ...layerDatasourceConfigProps,
-                  core: props.core,
-                  columnId: activeId,
-                  groupId: activeGroup.groupId,
-                  hideGrouping: activeGroup.hideGrouping,
-                  filterOperations: activeGroup.filterOperations,
-                  isMetricDimension: activeGroup?.isMetricDimension,
-                  dimensionGroups,
-                  toggleFullscreen,
-                  isFullscreen,
-                  setState: updateDataLayerState,
-                  supportStaticValue: Boolean(activeGroup.supportStaticValue),
-                  paramEditorCustomProps: activeGroup.paramEditorCustomProps,
-                  enableFormatSelector: activeGroup.enableFormatSelector !== false,
-                  formatSelectorOptions: activeGroup.formatSelectorOptions,
-                  layerType: activeVisualization.getLayerType(layerId, visualizationState),
-                  indexPatterns: dataViews.indexPatterns,
-                  activeData: layerVisualizationConfigProps.activeData,
-                  dataSectionExtra: !isFullscreen &&
-                    !activeDimension.isNew &&
-                    activeVisualization.renderDimensionEditorDataExtra && (
-                      <NativeRenderer
-                        render={activeVisualization.renderDimensionEditorDataExtra}
-                        nativeProps={{
-                          ...layerVisualizationConfigProps,
-                          groupId: activeGroup.groupId,
-                          accessor: activeId,
-                          datasource,
-                          setState: props.updateVisualization,
-                          addLayer: props.addLayer,
-                          removeLayer: props.onRemoveLayer,
-                          panelRef,
-                        }}
-                      />
-                    ),
-                }}
-              />
-            )}
-            {activeGroup &&
-              activeId &&
-              !isFullscreen &&
-              !activeDimension.isNew &&
-              activeVisualization.renderDimensionEditor &&
-              activeGroup?.enableDimensionEditor && (
-                <>
-                  <div className="lnsLayerPanel__styleEditor">
-                    <NativeRenderer
-                      render={activeVisualization.renderDimensionEditor}
-                      nativeProps={{
+            {openColumnGroup &&
+              openColumnId &&
+              layerDatasource &&
+              layerDatasource.DimensionEditorComponent({
+                ...layerDatasourceConfigProps,
+                core: props.core,
+                columnId: openColumnId,
+                groupId: openColumnGroup.groupId,
+                hideGrouping: openColumnGroup.hideGrouping,
+                filterOperations: openColumnGroup.filterOperations,
+                isMetricDimension: openColumnGroup?.isMetricDimension,
+                dimensionGroups,
+                toggleFullscreen,
+                isFullscreen,
+                setState: updateDataLayerState,
+                supportStaticValue: Boolean(openColumnGroup.supportStaticValue),
+                paramEditorCustomProps: openColumnGroup.paramEditorCustomProps,
+                enableFormatSelector: openColumnGroup.enableFormatSelector !== false,
+                layerType: activeVisualization.getLayerType(layerId, visualizationState),
+                indexPatterns: dataViews.indexPatterns,
+                activeData: layerVisualizationConfigProps.activeData,
+                dataSectionExtra: !isFullscreen &&
+                  openDimension.isComplete &&
+                  activeVisualization.DimensionEditorDataExtraComponent && (
+                    <activeVisualization.DimensionEditorDataExtraComponent
+                      {...{
                         ...layerVisualizationConfigProps,
-                        groupId: activeGroup.groupId,
-                        accessor: activeId,
+                        groupId: openColumnGroup.groupId,
+                        accessor: openColumnId,
                         datasource,
                         setState: props.updateVisualization,
                         addLayer: props.addLayer,
@@ -849,14 +764,36 @@ export function LayerPanel(
                         panelRef,
                       }}
                     />
-                  </div>
-                  {activeVisualization.renderDimensionEditorAdditionalSection && (
-                    <NativeRenderer
-                      render={activeVisualization.renderDimensionEditorAdditionalSection}
-                      nativeProps={{
+                  ),
+              })}
+            {openColumnGroup &&
+              openColumnId &&
+              !isFullscreen &&
+              openDimension.isComplete &&
+              activeVisualization.DimensionEditorComponent &&
+              openColumnGroup?.enableDimensionEditor && (
+                <>
+                  <div className="lnsLayerPanel__styleEditor">
+                    <activeVisualization.DimensionEditorComponent
+                      {...{
                         ...layerVisualizationConfigProps,
-                        groupId: activeGroup.groupId,
-                        accessor: activeId,
+                        groupId: openColumnGroup.groupId,
+                        accessor: openColumnId,
+                        datasource,
+                        setState: props.updateVisualization,
+                        addLayer: props.addLayer,
+                        removeLayer: props.onRemoveLayer,
+                        panelRef,
+                        isInlineEditing,
+                      }}
+                    />
+                  </div>
+                  {activeVisualization.DimensionEditorAdditionalSectionComponent && (
+                    <activeVisualization.DimensionEditorAdditionalSectionComponent
+                      {...{
+                        ...layerVisualizationConfigProps,
+                        groupId: openColumnGroup.groupId,
+                        accessor: openColumnId,
                         datasource,
                         setState: props.updateVisualization,
                         addLayer: props.addLayer,

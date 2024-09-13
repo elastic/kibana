@@ -14,6 +14,7 @@ import { useCasesFeatures } from './use_cases_features';
 import { TestProviders } from './mock/test_providers';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
+import { CaseMetricsFeature } from '../../common/types/api';
 
 describe('useCasesFeatures', () => {
   // isAlertsEnabled, isSyncAlertsEnabled, alerts
@@ -36,9 +37,14 @@ describe('useCasesFeatures', () => {
   it.each(tests)(
     'returns isAlertsEnabled=%s and isSyncAlertsEnabled=%s if feature.alerts=%s',
     async (isAlertsEnabled, isSyncAlertsEnabled, alerts) => {
-      const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
-        wrapper: ({ children }) => <TestProviders features={{ alerts }}>{children}</TestProviders>,
-      });
+      const { result } = renderHook<React.PropsWithChildren<{}>, UseCasesFeatures>(
+        () => useCasesFeatures(),
+        {
+          wrapper: ({ children }) => (
+            <TestProviders features={{ alerts }}>{children}</TestProviders>
+          ),
+        }
+      );
 
       expect(result.current).toEqual({
         isAlertsEnabled,
@@ -51,16 +57,21 @@ describe('useCasesFeatures', () => {
   );
 
   it('returns the metrics correctly', async () => {
-    const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
-      wrapper: ({ children }) => (
-        <TestProviders features={{ metrics: ['connectors'] }}>{children}</TestProviders>
-      ),
-    });
+    const { result } = renderHook<React.PropsWithChildren<{}>, UseCasesFeatures>(
+      () => useCasesFeatures(),
+      {
+        wrapper: ({ children }) => (
+          <TestProviders features={{ metrics: [CaseMetricsFeature.CONNECTORS] }}>
+            {children}
+          </TestProviders>
+        ),
+      }
+    );
 
     expect(result.current).toEqual({
       isAlertsEnabled: true,
       isSyncAlertsEnabled: true,
-      metricsFeatures: ['connectors'],
+      metricsFeatures: [CaseMetricsFeature.CONNECTORS],
       caseAssignmentAuthorized: false,
       pushToServiceAuthorized: false,
     });
@@ -80,9 +91,12 @@ describe('useCasesFeatures', () => {
         license: { type },
       });
 
-      const { result } = renderHook<{}, UseCasesFeatures>(() => useCasesFeatures(), {
-        wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders>,
-      });
+      const { result } = renderHook<React.PropsWithChildren<{}>, UseCasesFeatures>(
+        () => useCasesFeatures(),
+        {
+          wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders>,
+        }
+      );
 
       expect(result.current).toEqual({
         isAlertsEnabled: true,

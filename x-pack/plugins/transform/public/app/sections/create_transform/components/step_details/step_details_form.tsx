@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,47 +22,50 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiCallOut,
-  EuiText,
+  EuiTextArea,
 } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
+import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 
-import { isHttpFetchError } from '@kbn/core-http-browser';
-import { integerRangeMinus1To100Validator } from '../../../transform_management/components/edit_transform_flyout/use_edit_transform_flyout';
-import {
-  isEsIndices,
-  isEsIngestPipelines,
-  isPostTransformsPreviewResponseSchema,
-} from '../../../../../../common/api_schemas/type_guards';
+import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/validators/messages';
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
-import { TransformId } from '../../../../../../common/types/transform';
+import type { TransformId } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
-import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
-import { SearchItems } from '../../../../hooks/use_search_items';
-import { useApi } from '../../../../hooks/use_api';
-import { StepDetailsTimeField } from './step_details_time_field';
+import {
+  useDocumentationLinks,
+  useGetDataViewTitles,
+  useGetEsIndices,
+  useGetEsIngestPipelines,
+  useGetTransforms,
+  useGetTransformsPreview,
+} from '../../../../hooks';
+import type { SearchItems } from '../../../../hooks/use_search_items';
 import {
   getTransformConfigQuery,
   getPreviewTransformRequestBody,
   isTransformIdValid,
 } from '../../../../common';
-import { EsIndexName, DataViewTitle } from './common';
+import type { EsIndexName } from './common';
 import {
-  continuousModeDelayValidator,
-  retentionPolicyMaxAgeValidator,
-  transformFrequencyValidator,
-  transformSettingsMaxPageSearchSizeValidator,
+  isContinuousModeDelay,
+  isRetentionPolicyMaxAge,
+  isTransformWizardFrequency,
+  integerRangeMinus1To100Validator,
+  transformSettingsPageSearchSizeValidator,
 } from '../../../../common/validators';
-import { StepDefineExposedState } from '../step_define/common';
+import type { StepDefineExposedState } from '../step_define/common';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
-import { getDefaultStepDetailsState, StepDetailsExposedState } from './common';
+import type { StepDetailsExposedState } from './common';
+import { getDefaultStepDetailsState } from './common';
 
 interface StepDetailsFormProps {
   overrides?: StepDetailsExposedState;
@@ -72,8 +76,8 @@ interface StepDetailsFormProps {
 
 export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
   ({ overrides = {}, onChange, searchItems, stepDefineState }) => {
-    const deps = useAppDependencies();
-    const { capabilities } = deps.application;
+    const { application, ...startServices } = useAppDependencies();
+    const { capabilities } = application;
     const toastNotifications = useToastNotifications();
     const { esIndicesCreateIndex } = useDocumentationLinks();
 
@@ -86,27 +90,55 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [destinationIndex, setDestinationIndex] = useState<EsIndexName>(
       defaults.destinationIndex
     );
+    const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(
+      destinationIndex !== undefined && destinationIndex === transformId
+    );
     const [destinationIngestPipeline, setDestinationIngestPipeline] = useState<string>(
       defaults.destinationIngestPipeline
     );
-    const [transformIds, setTransformIds] = useState<TransformId[]>([]);
-    const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
-    const [ingestPipelineNames, setIngestPipelineNames] = useState<string[]>([]);
 
     const canCreateDataView = useMemo(
       () =>
-        capabilities.savedObjectsManagement.edit === true ||
-        capabilities.indexPatterns.save === true,
+        capabilities.savedObjectsManagement?.edit === true ||
+        capabilities.indexPatterns?.save === true,
       [capabilities]
     );
 
     // Index pattern state
-    const [dataViewTitles, setDataViewTitles] = useState<DataViewTitle[]>([]);
     const [createDataView, setCreateDataView] = useState(
       canCreateDataView === false ? false : defaults.createDataView
     );
-    const [dataViewAvailableTimeFields, setDataViewAvailableTimeFields] = useState<string[]>([]);
     const [dataViewTimeField, setDataViewTimeField] = useState<string | undefined>();
+
+    const previewRequest = useMemo(() => {
+      const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
+      const transformConfigQuery = getTransformConfigQuery(searchQuery);
+      return getPreviewTransformRequestBody(
+        searchItems.dataView,
+        transformConfigQuery,
+        partialPreviewRequest,
+        stepDefineState.runtimeMappings
+      );
+    }, [searchItems.dataView, stepDefineState]);
+
+    const { error: transformsPreviewError, data: transformPreview } =
+      useGetTransformsPreview(previewRequest);
+
+    const destIndexAvailableTimeFields = useMemo<string[]>(() => {
+      if (!transformPreview) return [];
+      const properties = transformPreview.generated_dest_index.mappings.properties;
+      const timeFields: string[] = Object.keys(properties).filter(
+        (col) => properties[col].type === 'date'
+      );
+      return timeFields;
+    }, [transformPreview]);
+
+    useEffect(
+      function resetDataViewTimeField() {
+        setDataViewTimeField(destIndexAvailableTimeFields[0]);
+      },
+      [destIndexAvailableTimeFields]
+    );
 
     const onTimeFieldChanged = React.useCallback(
       (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -117,152 +149,123 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         }
         // Find the time field based on the selected value
         // this is to account for undefined when user chooses not to use a date field
-        const timeField = dataViewAvailableTimeFields.find((col) => col === value);
+        const timeField = destIndexAvailableTimeFields.find((col) => col === value);
 
         setDataViewTimeField(timeField);
       },
-      [setDataViewTimeField, dataViewAvailableTimeFields]
+      [setDataViewTimeField, destIndexAvailableTimeFields]
     );
 
-    const { overlays, theme } = useAppDependencies();
-    const api = useApi();
+    const {
+      error: transformsError,
+      data: { transformIds },
+    } = useGetTransforms();
 
-    // fetch existing transform IDs and indices once for form validation
     useEffect(() => {
-      // use an IIFE to avoid returning a Promise to useEffect.
-      (async function () {
-        const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
-        const transformConfigQuery = getTransformConfigQuery(searchQuery);
-        const previewRequest = getPreviewTransformRequestBody(
-          searchItems.dataView,
-          transformConfigQuery,
-          partialPreviewRequest,
-          stepDefineState.runtimeMappings
-        );
-
-        const transformPreview = await api.getTransformsPreview(previewRequest);
-
-        if (isPostTransformsPreviewResponseSchema(transformPreview)) {
-          const properties = transformPreview.generated_dest_index.mappings.properties;
-          const timeFields: string[] = Object.keys(properties).filter(
-            (col) => properties[col].type === 'date'
-          );
-
-          setDataViewAvailableTimeFields(timeFields);
-          setDataViewTimeField(timeFields[0]);
-        } else {
-          toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformPreview', {
-              defaultMessage: 'An error occurred fetching the transform preview',
-            }),
-            text: toMountPoint(
-              <ToastNotificationText
-                overlays={overlays}
-                theme={theme}
-                text={getErrorMessage(transformPreview)}
-              />,
-              { theme$: theme.theme$ }
-            ),
-          });
-        }
-
-        const resp = await api.getTransforms();
-
-        if (isHttpFetchError(resp)) {
-          toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
-              defaultMessage: 'An error occurred getting the existing transform IDs:',
-            }),
-            text: toMountPoint(
-              <ToastNotificationText
-                overlays={overlays}
-                theme={theme}
-                text={getErrorMessage(resp)}
-              />,
-              { theme$: theme.theme$ }
-            ),
-          });
-        } else {
-          setTransformIds(resp.transforms.map((transform) => transform.id));
-        }
-
-        const [indices, ingestPipelines] = await Promise.all([
-          api.getEsIndices(),
-          api.getEsIngestPipelines(),
-        ]);
-
-        if (isEsIndices(indices)) {
-          setIndexNames(indices.map((index) => index.name));
-        } else {
-          toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
-              defaultMessage: 'An error occurred getting the existing index names:',
-            }),
-            text: toMountPoint(
-              <ToastNotificationText
-                overlays={overlays}
-                theme={theme}
-                text={getErrorMessage(indices)}
-              />,
-              { theme$: theme.theme$ }
-            ),
-          });
-        }
-
-        if (isEsIngestPipelines(ingestPipelines)) {
-          setIngestPipelineNames(ingestPipelines.map(({ name }) => name));
-        } else {
-          toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIngestPipelines', {
-              defaultMessage: 'An error occurred getting the existing ingest pipeline names:',
-            }),
-            text: toMountPoint(
-              <ToastNotificationText
-                overlays={overlays}
-                theme={theme}
-                text={getErrorMessage(ingestPipelines)}
-              />,
-              { theme$: theme.theme$ }
-            ),
-          });
-        }
-
-        try {
-          setDataViewTitles(await deps.data.dataViews.getTitles());
-        } catch (e) {
-          toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingDataViewTitles', {
-              defaultMessage: 'An error occurred getting the existing data view titles:',
-            }),
-            text: toMountPoint(
-              <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(e)} />,
-              { theme$: theme.theme$ }
-            ),
-          });
-        }
-      })();
-      // run once
+      if (transformsError !== null) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
+            defaultMessage: 'An error occurred getting the existing transform IDs:',
+          }),
+          text: toMountPoint(
+            <ToastNotificationText text={getErrorMessage(transformsError)} />,
+            startServices
+          ),
+        });
+      }
+      // custom comparison
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [transformsError]);
 
-    const dateFieldNames = searchItems.dataView.fields
+    useEffect(() => {
+      if (transformsPreviewError !== null) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformPreview', {
+            defaultMessage: 'An error occurred fetching the transform preview',
+          }),
+          text: toMountPoint(
+            <ToastNotificationText text={getErrorMessage(transformsPreviewError)} />,
+            startServices
+          ),
+        });
+      }
+      // custom comparison
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [transformsPreviewError]);
+
+    const { error: esIndicesError, data: esIndicesData } = useGetEsIndices();
+    const indexNames = esIndicesData?.map((index) => index.name) ?? [];
+
+    useEffect(() => {
+      if (esIndicesError !== null) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
+            defaultMessage: 'An error occurred getting the existing index names:',
+          }),
+          text: toMountPoint(
+            <ToastNotificationText text={getErrorMessage(esIndicesError)} />,
+            startServices
+          ),
+        });
+      }
+      // custom comparison
+      /* eslint-disable react-hooks/exhaustive-deps */
+    }, [esIndicesError]);
+
+    const { error: esIngestPipelinesError, data: esIngestPipelinesData } =
+      useGetEsIngestPipelines();
+    const ingestPipelineNames = esIngestPipelinesData?.map(({ name }) => name) ?? [];
+
+    useEffect(() => {
+      if (esIngestPipelinesError !== null) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIngestPipelines', {
+            defaultMessage: 'An error occurred getting the existing ingest pipeline names:',
+          }),
+          text: toMountPoint(
+            <ToastNotificationText text={getErrorMessage(esIngestPipelinesError)} />,
+            startServices
+          ),
+        });
+      }
+      // custom comparison
+      /* eslint-disable react-hooks/exhaustive-deps */
+    }, [esIngestPipelinesError]);
+
+    const { error: dataViewTitlesError, data: dataViewTitles } = useGetDataViewTitles();
+
+    useEffect(() => {
+      if (dataViewTitlesError !== null) {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingDataViewTitles', {
+            defaultMessage: 'An error occurred getting the existing data view titles:',
+          }),
+          text: toMountPoint(
+            <ToastNotificationText text={getErrorMessage(dataViewTitlesError)} />,
+            startServices
+          ),
+        });
+      }
+    }, [dataViewTitlesError]);
+
+    const sourceIndexDateFieldNames = searchItems.dataView.fields
       .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
       .map((f) => f.name)
       .sort();
 
     // Continuous Mode
-    const isContinuousModeAvailable = dateFieldNames.length > 0;
+    const isContinuousModeAvailable = sourceIndexDateFieldNames.length > 0;
     const [isContinuousModeEnabled, setContinuousModeEnabled] = useState(
       defaults.isContinuousModeEnabled
     );
     const [continuousModeDateField, setContinuousModeDateField] = useState(
-      isContinuousModeAvailable ? dateFieldNames[0] : ''
+      isContinuousModeAvailable ? sourceIndexDateFieldNames[0] : ''
     );
     const [continuousModeDelay, setContinuousModeDelay] = useState(defaults.continuousModeDelay);
-    const isContinuousModeDelayValid = continuousModeDelayValidator(continuousModeDelay);
+    const isContinuousModeDelayValid = isContinuousModeDelay(continuousModeDelay);
 
     // Retention Policy
-    const isRetentionPolicyAvailable = dateFieldNames.length > 0;
+    const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
     const [isRetentionPolicyEnabled, setRetentionPolicyEnabled] = useState(
       defaults.isRetentionPolicyEnabled
     );
@@ -273,16 +276,29 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       defaults.retentionPolicyMaxAge
     );
     const retentionPolicyMaxAgeEmpty = retentionPolicyMaxAge === '';
-    const isRetentionPolicyMaxAgeValid = retentionPolicyMaxAgeValidator(retentionPolicyMaxAge);
+    const isRetentionPolicyMaxAgeValid = isRetentionPolicyMaxAge(retentionPolicyMaxAge);
 
-    // Reset retention policy settings when the user disables the whole option
     useEffect(() => {
+      // Reset retention policy settings when the user disables the whole option
       if (!isRetentionPolicyEnabled) {
-        setRetentionPolicyDateField(isRetentionPolicyAvailable ? dateFieldNames[0] : '');
+        setRetentionPolicyDateField(
+          isRetentionPolicyAvailable ? destIndexAvailableTimeFields[0] : ''
+        );
         setRetentionPolicyMaxAge('');
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isRetentionPolicyEnabled]);
+
+      // When retention policy is first enabled, pick a default option
+      if (
+        isRetentionPolicyAvailable &&
+        isRetentionPolicyEnabled &&
+        retentionPolicyDateField === ''
+      ) {
+        // If a time field '@timestamp' exists, prioritize that
+        const prioritizeTimestamp = destIndexAvailableTimeFields.find((d) => d === '@timestamp');
+        // else pick the first available option
+        setRetentionPolicyDateField(prioritizeTimestamp ?? destIndexAvailableTimeFields[0]);
+      }
+    }, [isRetentionPolicyEnabled, isRetentionPolicyAvailable, destIndexAvailableTimeFields]);
 
     const transformIdExists = transformIds.some((id) => transformId === id);
     const transformIdEmpty = transformId === '';
@@ -291,19 +307,21 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const indexNameExists = indexNames.some((name) => destinationIndex === name);
     const indexNameEmpty = destinationIndex === '';
     const indexNameValid = isValidIndexName(destinationIndex);
-    const dataViewTitleExists = dataViewTitles.some((name) => destinationIndex === name);
+    const dataViewTitleExists = dataViewTitles?.some((name) => destinationIndex === name) ?? false;
 
     const [transformFrequency, setTransformFrequency] = useState(defaults.transformFrequency);
-    const isTransformFrequencyValid = transformFrequencyValidator(transformFrequency);
+    const isTransformFrequencyValid = isTransformWizardFrequency(transformFrequency);
 
-    const [transformSettingsMaxPageSearchSize, setTransformSettingsMaxPageSearchSize] = useState(
-      defaults.transformSettingsMaxPageSearchSize
-    );
+    const [transformSettingsMaxPageSearchSize, setTransformSettingsMaxPageSearchSize] = useState<
+      number | undefined
+    >(defaults.transformSettingsMaxPageSearchSize);
     const [transformSettingsDocsPerSecond] = useState(defaults.transformSettingsDocsPerSecond);
 
-    const isTransformSettingsMaxPageSearchSizeValid = transformSettingsMaxPageSearchSizeValidator(
+    const transformSettingsMaxPageSearchSizeErrors = transformSettingsPageSearchSizeValidator(
       transformSettingsMaxPageSearchSize
     );
+    const isTransformSettingsMaxPageSearchSizeValid =
+      transformSettingsMaxPageSearchSizeErrors.length === 0;
 
     const [transformSettingsNumFailureRetries, setTransformSettingsNumFailureRetries] = useState<
       string | number | undefined
@@ -381,6 +399,13 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       /* eslint-enable react-hooks/exhaustive-deps */
     ]);
 
+    useEffect(() => {
+      if (destIndexSameAsId === true && !transformIdEmpty && transformIdValid) {
+        setDestinationIndex(transformId);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [destIndexSameAsId, transformId]);
+
     return (
       <div data-test-subj="transformStepDetailsForm">
         <EuiForm>
@@ -425,7 +450,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               defaultMessage: 'Transform description',
             })}
           >
-            <EuiFieldText
+            <EuiTextArea
               placeholder={i18n.translate(
                 'xpack.transform.stepDetailsForm.transformDescriptionPlaceholderText',
                 { defaultMessage: 'Description (optional)' }
@@ -442,51 +467,31 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             />
           </EuiFormRow>
 
-          <EuiFormRow
-            label={i18n.translate('xpack.transform.stepDetailsForm.destinationIndexLabel', {
-              defaultMessage: 'Destination index',
-            })}
-            isInvalid={!indexNameEmpty && !indexNameValid}
-            helpText={
-              indexNameExists &&
-              i18n.translate('xpack.transform.stepDetailsForm.destinationIndexHelpText', {
+          <DestinationIndexForm
+            createIndexLink={esIndicesCreateIndex}
+            destinationIndex={destinationIndex}
+            destinationIndexNameEmpty={indexNameEmpty}
+            destinationIndexNameExists={indexNameExists}
+            destinationIndexNameValid={indexNameValid}
+            destIndexSameAsId={destIndexSameAsId}
+            fullWidth={false}
+            indexNameExistsMessage={i18n.translate(
+              'xpack.transform.stepDetailsForm.destinationIndexHelpText',
+              {
                 defaultMessage:
                   'An index with this name already exists. Be aware that running this transform will modify this destination index.',
-              })
-            }
-            error={
-              !indexNameEmpty &&
-              !indexNameValid && [
-                <>
-                  {i18n.translate('xpack.transform.stepDetailsForm.destinationIndexInvalidError', {
-                    defaultMessage: 'Invalid destination index name.',
-                  })}
-                  <br />
-                  <EuiLink href={esIndicesCreateIndex} target="_blank">
-                    {i18n.translate(
-                      'xpack.transform.stepDetailsForm.destinationIndexInvalidErrorLink',
-                      {
-                        defaultMessage: 'Learn more about index name limitations.',
-                      }
-                    )}
-                  </EuiLink>
-                </>,
-              ]
-            }
-          >
-            <EuiFieldText
-              value={destinationIndex}
-              onChange={(e) => setDestinationIndex(e.target.value)}
-              aria-label={i18n.translate(
-                'xpack.transform.stepDetailsForm.destinationIndexInputAriaLabel',
-                {
-                  defaultMessage: 'Choose a unique destination index name.',
-                }
-              )}
-              isInvalid={!indexNameEmpty && !indexNameValid}
-              data-test-subj="transformDestinationIndexInput"
-            />
-          </EuiFormRow>
+              }
+            )}
+            isJobCreated={transformIdExists}
+            onDestinationIndexChange={setDestinationIndex}
+            setDestIndexSameAsId={setDestIndexSameAsId}
+            switchLabel={i18n.translate(
+              'xpack.transform.stepDetailsForm.destinationIndexFormSwitchLabel',
+              {
+                defaultMessage: 'Use transform ID as destination index name',
+              }
+            )}
+          />
 
           {ingestPipelineNames.length > 0 && (
             <EuiFormRow
@@ -545,45 +550,15 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             </>
           ) : null}
 
-          <EuiFormRow
-            isInvalid={(createDataView && dataViewTitleExists) || canCreateDataView === false}
-            error={[
-              ...(canCreateDataView === false
-                ? [
-                    <EuiText size="xs" color="warning">
-                      {i18n.translate('xpack.transform.stepDetailsForm.dataViewPermissionWarning', {
-                        defaultMessage: 'You need permission to create data views.',
-                      })}
-                    </EuiText>,
-                  ]
-                : []),
-              ...(createDataView && dataViewTitleExists
-                ? [
-                    i18n.translate('xpack.transform.stepDetailsForm.dataViewTitleError', {
-                      defaultMessage: 'A data view with this title already exists.',
-                    }),
-                  ]
-                : []),
-            ]}
-          >
-            <EuiSwitch
-              name="transformCreateDataView"
-              disabled={canCreateDataView === false}
-              label={i18n.translate('xpack.transform.stepCreateForm.createDataViewLabel', {
-                defaultMessage: 'Create Kibana data view',
-              })}
-              checked={createDataView === true}
-              onChange={() => setCreateDataView(!createDataView)}
-              data-test-subj="transformCreateDataViewSwitch"
-            />
-          </EuiFormRow>
-          {createDataView && !dataViewTitleExists && dataViewAvailableTimeFields.length > 0 && (
-            <StepDetailsTimeField
-              dataViewAvailableTimeFields={dataViewAvailableTimeFields}
-              dataViewTimeField={dataViewTimeField}
-              onTimeFieldChanged={onTimeFieldChanged}
-            />
-          )}
+          <CreateDataViewForm
+            canCreateDataView={canCreateDataView}
+            createDataView={createDataView}
+            dataViewTitleExists={dataViewTitleExists}
+            setCreateDataView={setCreateDataView}
+            dataViewAvailableTimeFields={destIndexAvailableTimeFields}
+            dataViewTimeField={dataViewTimeField}
+            onTimeFieldChanged={onTimeFieldChanged}
+          />
 
           {/* Continuous mode */}
           <EuiFormRow
@@ -625,7 +600,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
               >
                 <EuiSelect
-                  options={dateFieldNames.map((text: string) => ({ text }))}
+                  options={sourceIndexDateFieldNames.map((text: string) => ({ text, value: text }))}
                   value={continuousModeDateField}
                   onChange={(e) => setContinuousModeDateField(e.target.value)}
                   data-test-subj="transformContinuousDateFieldSelect"
@@ -695,7 +670,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               data-test-subj="transformRetentionPolicySwitch"
             />
           </EuiFormRow>
-          {isRetentionPolicyEnabled && (
+          {isRetentionPolicyEnabled && isRetentionPolicyAvailable && (
             <>
               <EuiFormRow
                 label={i18n.translate(
@@ -713,7 +688,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
               >
                 <EuiSelect
-                  options={dateFieldNames.map((text: string) => ({ text }))}
+                  options={destIndexAvailableTimeFields.map((text: string) => ({ text }))}
                   value={retentionPolicyDateField}
                   onChange={(e) => setRetentionPolicyDateField(e.target.value)}
                   data-test-subj="transformRetentionPolicyDateFieldSelect"
@@ -729,11 +704,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 isInvalid={!retentionPolicyMaxAgeEmpty && !isRetentionPolicyMaxAgeValid}
                 error={
                   !retentionPolicyMaxAgeEmpty &&
-                  !isRetentionPolicyMaxAgeValid && [
-                    i18n.translate('xpack.transform.stepDetailsForm.retentionPolicyMaxAgeError', {
-                      defaultMessage: 'Invalid max age format. Minimum of 60s required.',
-                    }),
-                  ]
+                  !isRetentionPolicyMaxAgeValid && [retentionPolicyMaxAgeInvalidErrorMessage]
                 }
                 helpText={i18n.translate(
                   'xpack.transform.stepDetailsForm.retentionPolicyMaxAgeHelpText',
@@ -819,14 +790,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 defaultMessage: 'Maximum page search size',
               })}
               isInvalid={!isTransformSettingsMaxPageSearchSizeValid}
-              error={
-                !isTransformSettingsMaxPageSearchSizeValid && [
-                  i18n.translate('xpack.transform.stepDetailsForm.maxPageSearchSizeError', {
-                    defaultMessage:
-                      'max_page_search_size needs to be a number between 10 and 10000.',
-                  }),
-                ]
-              }
+              error={transformSettingsMaxPageSearchSizeErrors}
               helpText={i18n.translate(
                 'xpack.transform.stepDetailsForm.maxPageSearchSizeHelpText',
                 {
@@ -843,10 +807,19 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                     values: { defaultValue: 500 },
                   }
                 )}
-                value={transformSettingsMaxPageSearchSize.toString()}
-                onChange={(e) =>
-                  setTransformSettingsMaxPageSearchSize(parseInt(e.target.value, 10))
+                value={
+                  transformSettingsMaxPageSearchSize
+                    ? transformSettingsMaxPageSearchSize.toString()
+                    : transformSettingsMaxPageSearchSize
                 }
+                onChange={(e) => {
+                  if (e.target.value !== '') {
+                    const parsed = parseInt(e.target.value, 10);
+                    setTransformSettingsMaxPageSearchSize(isFinite(parsed) ? parsed : undefined);
+                  } else {
+                    setTransformSettingsMaxPageSearchSize(undefined);
+                  }
+                }}
                 aria-label={i18n.translate(
                   'xpack.transform.stepDetailsForm.maxPageSearchSizeAriaLabel',
                   {
@@ -886,7 +859,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 value={
                   transformSettingsNumFailureRetries ||
                   (transformSettingsNumFailureRetries !== undefined &&
-                    transformSettingsNumFailureRetries >= -1)
+                    Number(transformSettingsNumFailureRetries) >= -1)
                     ? transformSettingsNumFailureRetries.toString()
                     : ''
                 }

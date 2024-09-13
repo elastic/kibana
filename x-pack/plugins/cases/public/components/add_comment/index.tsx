@@ -13,8 +13,8 @@ import React, {
   useEffect,
   useState,
 } from 'react';
+import { css } from '@emotion/react';
 import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
-import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import {
@@ -23,10 +23,10 @@ import {
   UseField,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { CommentType } from '../../../common/api';
+import { AttachmentType } from '../../../common/types/domain';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import type { Case } from '../../containers/types';
-import type { EuiMarkdownEditorRef } from '../markdown_editor';
+import type { CaseUI } from '../../containers/types';
+import type { MarkdownEditorRef } from '../markdown_editor';
 import { MarkdownEditorForm } from '../markdown_editor';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import { removeItemFromSessionStorage } from '../utils';
@@ -36,12 +36,7 @@ import type { AddCommentFormSchema } from './schema';
 import { schema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
 import { useCasesContext } from '../cases_context/use_cases_context';
-
-const MySpinner = styled(EuiLoadingSpinner)`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-`;
+import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 
 const initialCommentValue: AddCommentFormSchema = {
   comment: '',
@@ -50,17 +45,19 @@ const initialCommentValue: AddCommentFormSchema = {
 export interface AddCommentRefObject {
   addQuote: (quote: string) => void;
   setComment: (newComment: string) => void;
-  editor: EuiMarkdownEditorRef | null;
+  editor: MarkdownEditorRef | null;
 }
 
+/* eslint-disable react/no-unused-prop-types */
 export interface AddCommentProps {
   id: string;
   caseId: string;
   onCommentSaving?: () => void;
-  onCommentPosted: (newCase: Case) => void;
+  onCommentPosted: (newCase: CaseUI) => void;
   showLoading?: boolean;
   statusActionButton: JSX.Element | null;
 }
+/* eslint-enable react/no-unused-prop-types */
 
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
@@ -68,11 +65,15 @@ export const AddComment = React.memo(
       { id, caseId, onCommentPosted, onCommentSaving, showLoading = true, statusActionButton },
       ref
     ) => {
-      const editorRef = useRef<EuiMarkdownEditorRef>(null);
+      const editorRef = useRef<MarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
-      const { permissions, owner, appId } = useCasesContext();
-      const { isLoading, createAttachments } = useCreateAttachments();
-      const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
+      const { permissions, owner } = useCasesContext();
+      const { isLoading, mutate: createAttachments } = useCreateAttachments();
+      const draftStorageKey = getMarkdownEditorStorageKey({
+        appId: owner[0],
+        caseId,
+        commentId: id,
+      });
 
       const { form } = useForm<AddCommentFormSchema>({
         defaultValue: initialCommentValue,
@@ -84,7 +85,7 @@ export const AddComment = React.memo(
       const { setFieldValue, reset, submit } = form;
       const [{ comment }] = useFormData<{ comment: string }>({ form, watch: [fieldName] });
 
-      const addQuote = useCallback(
+      const addQuote = useCallback<AddCommentRefObject['addQuote']>(
         (quote) => {
           const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '\n> ');
           const val = `> ${addCarrots} \n\n`;
@@ -94,7 +95,7 @@ export const AddComment = React.memo(
         [comment, setFieldValue]
       );
 
-      const setComment = useCallback(
+      const setComment = useCallback<AddCommentRefObject['setComment']>(
         (newComment) => {
           setFieldValue(fieldName, newComment);
         },
@@ -113,15 +114,23 @@ export const AddComment = React.memo(
           if (onCommentSaving != null) {
             onCommentSaving();
           }
-          createAttachments({
-            caseId,
-            caseOwner: owner[0],
-            data: [{ ...data, type: CommentType.user }],
-            updateCase: onCommentPosted,
-          });
+
+          createAttachments(
+            {
+              caseId,
+              caseOwner: owner[0],
+              attachments: [{ ...data, type: AttachmentType.user }],
+            },
+            {
+              onSuccess: (theCase) => {
+                onCommentPosted(theCase);
+              },
+            }
+          );
 
           reset({ defaultValue: {} });
         }
+
         removeItemFromSessionStorage(draftStorageKey);
       }, [
         submit,
@@ -166,9 +175,22 @@ export const AddComment = React.memo(
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [focusOnContext]);
 
+      const isDisabled =
+        isLoading || !comment?.trim().length || comment.trim().length > MAX_COMMENT_LENGTH;
+
       return (
         <span id="add-comment-permLink">
-          {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
+          {isLoading && showLoading && (
+            <EuiLoadingSpinner
+              css={css`
+                position: absolute;
+                top: 50%;
+                left: 50%;
+              `}
+              data-test-subj="loading-spinner"
+              size="xl"
+            />
+          )}
           {permissions.create && (
             <Form form={form}>
               <UseField
@@ -192,7 +214,7 @@ export const AddComment = React.memo(
                           data-test-subj="submit-comment"
                           fill
                           iconType="plusInCircle"
-                          isDisabled={!comment || isLoading}
+                          isDisabled={isDisabled}
                           isLoading={isLoading}
                           onClick={onSubmit}
                         >

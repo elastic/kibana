@@ -1,80 +1,66 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`License prompt renders a prompt with a link to License Management 1`] = `
-<EuiPageContent_Deprecated
-  color="danger"
-  horizontalPosition="center"
-  verticalPosition="center"
->
-  <EuiEmptyPrompt
-    actions={
-      Array [
-        <EuiLink
-          href="/license_management"
-        >
-          <FormattedMessage
-            defaultMessage="Manage your license"
-            id="xpack.watcher.app.licenseErrorLinkText"
-            values={Object {}}
-          />
-        </EuiLink>,
-      ]
-    }
-    body={
-      <p>
-        License error
-      </p>
-    }
-    iconType="warning"
-    title={
-      <h1>
-        <FormattedMessage
-          defaultMessage="License error"
-          id="xpack.watcher.app.licenseErrorTitle"
-          values={Object {}}
+<_EuiPageEmptyPrompt
+  actions={
+    Array [
+      <EuiLink
+        href="/license_management"
+      >
+        <Memo(MemoizedFormattedMessage)
+          defaultMessage="Manage your license"
+          id="xpack.watcher.app.licenseErrorLinkText"
         />
-      </h1>
-    }
-  />
-</EuiPageContent_Deprecated>
+      </EuiLink>,
+    ]
+  }
+  body={
+    <p>
+      License error
+    </p>
+  }
+  color="danger"
+  iconType="warning"
+  title={
+    <h1>
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="License error"
+        id="xpack.watcher.app.licenseErrorTitle"
+      />
+    </h1>
+  }
+/>
 `;
 
 exports[`License prompt renders a prompt without a link to License Management 1`] = `
-<EuiPageContent_Deprecated
-  color="danger"
-  horizontalPosition="center"
-  verticalPosition="center"
->
-  <EuiEmptyPrompt
-    actions={
-      Array [
-        undefined,
-      ]
-    }
-    body={
-      <React.Fragment>
-        <p>
-          License error
-        </p>
-        <p>
-          <FormattedMessage
-            defaultMessage="Contact your administrator to change your license."
-            id="xpack.watcher.app.licenseErrorBody"
-            values={Object {}}
-          />
-        </p>
-      </React.Fragment>
-    }
-    iconType="warning"
-    title={
-      <h1>
-        <FormattedMessage
-          defaultMessage="License error"
-          id="xpack.watcher.app.licenseErrorTitle"
-          values={Object {}}
+<_EuiPageEmptyPrompt
+  actions={
+    Array [
+      undefined,
+    ]
+  }
+  body={
+    <React.Fragment>
+      <p>
+        License error
+      </p>
+      <p>
+        <Memo(MemoizedFormattedMessage)
+          defaultMessage="Contact your administrator to change your license."
+          id="xpack.watcher.app.licenseErrorBody"
         />
-      </h1>
-    }
-  />
-</EuiPageContent_Deprecated>
+      </p>
+    </React.Fragment>
+  }
+  color="danger"
+  iconType="warning"
+  title={
+    <h1>
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="License error"
+        id="xpack.watcher.app.licenseErrorTitle"
+      />
+    </h1>
+  }
+/>
 `;

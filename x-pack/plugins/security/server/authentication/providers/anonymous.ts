@@ -7,7 +7,9 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 
-import { getErrorStatusCode } from '../../errors';
+import type { AuthenticationProviderOptions } from './base';
+import { BaseAuthenticationProvider } from './base';
+import { getDetailedErrorMessage, getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -15,8 +17,6 @@ import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
 } from '../http_authentication';
-import type { AuthenticationProviderOptions } from './base';
-import { BaseAuthenticationProvider } from './base';
 
 /**
  * Credentials that are based on the username and password.
@@ -57,7 +57,7 @@ function isAPIKeyCredentials(
     | ElasticsearchAnonymousUserCredentials
     | APIKeyCredentials
     | UsernameAndPasswordCredentials
-): credentials is APIKeyCredentials {
+): credentials is Readonly<APIKeyCredentials> {
   return !!(credentials as APIKeyCredentials).apiKey;
 }
 
@@ -216,22 +216,23 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
       // Create session only if it doesn't exist yet, otherwise keep it unchanged.
       return AuthenticationResult.succeeded(user, { authHeaders, state: state ? undefined : {} });
     } catch (err) {
+      const errorMessage = getDetailedErrorMessage(err);
       if (getErrorStatusCode(err) === 401) {
         if (!this.httpAuthorizationHeader) {
           this.logger.error(
-            `Failed to authenticate anonymous request using Elasticsearch reserved anonymous user. Anonymous access may not be properly configured in Elasticsearch: ${err.message}`
+            `Failed to authenticate anonymous request using Elasticsearch reserved anonymous user. Anonymous access may not be properly configured in Elasticsearch: ${errorMessage}`
           );
         } else if (this.httpAuthorizationHeader.scheme.toLowerCase() === 'basic') {
           this.logger.error(
-            `Failed to authenticate anonymous request using provided username/password credentials. The user with the provided username may not exist or the password is wrong: ${err.message}`
+            `Failed to authenticate anonymous request using provided username/password credentials. The user with the provided username may not exist or the password is wrong: ${errorMessage}`
           );
         } else {
           this.logger.error(
-            `Failed to authenticate anonymous request using provided API key. The key may not exist or expired: ${err.message}`
+            `Failed to authenticate anonymous request using provided API key. The key may not exist or expired: ${errorMessage}`
           );
         }
       } else {
-        this.logger.error(`Failed to authenticate request : ${err.message}`);
+        this.logger.error(`Failed to authenticate request : ${errorMessage}`);
       }
       return AuthenticationResult.failed(err);
     }

@@ -11,7 +11,7 @@ import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react'
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -68,7 +68,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
   }, [error, isLoading, data, setForceOnPremStep]);
 
   if (isInitialRequest && isLoading) {
-    return <EuiLoadingContent data-test-subj="cloudBackupLoading" lines={3} />;
+    return <EuiSkeletonText data-test-subj="cloudBackupLoading" lines={3} />;
   }
 
   if (error) {
@@ -82,7 +82,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
         data-test-subj="cloudBackupErrorCallout"
       >
         <p>
-          {error.statusCode} - {error.message}
+          {error.statusCode} - {error.message as string}
         </p>
         <EuiButton color="danger" onClick={resendRequest} data-test-subj="cloudBackupRetryButton">
           {i18n.translate('xpack.upgradeAssistant.overview.cloudBackup.retryButton', {

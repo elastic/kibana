@@ -9,10 +9,15 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 
 import { createExternalService } from './service';
 import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { CasesWebhookMethods, CasesWebhookPublicConfigurationType, ExternalService } from './types';
+import { CasesWebhookPublicConfigurationType, ExternalService } from './types';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { AuthType, WebhookMethods, SSLCertType } from '../../../common/auth/constants';
+import { CRT_FILE, KEY_FILE } from '../../../common/auth/mocks';
+
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -24,38 +29,58 @@ jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
 });
 
 axios.create = jest.fn(() => axios);
+
 const requestMock = request as jest.Mock;
 const configurationUtilities = actionsConfigMock.create();
 
 const config: CasesWebhookPublicConfigurationType = {
   createCommentJson: '{"body":{{{case.comment}}}}',
-  createCommentMethod: CasesWebhookMethods.POST,
+  createCommentMethod: WebhookMethods.POST,
   createCommentUrl: 'https://coolsite.net/issue/{{{external.system.id}}}/comment',
   createIncidentJson:
     '{"fields":{"title":{{{case.title}}},"description":{{{case.description}}},"tags":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
-  createIncidentMethod: CasesWebhookMethods.POST,
+  createIncidentMethod: WebhookMethods.POST,
   createIncidentResponseKey: 'id',
   createIncidentUrl: 'https://coolsite.net/issue',
   getIncidentResponseExternalTitleKey: 'key',
   hasAuth: true,
-  headers: { ['content-type']: 'application/json' },
+  headers: { ['content-type']: 'application/json', foo: 'bar' },
   viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
   getIncidentUrl: 'https://coolsite.net/issue/{{{external.system.id}}}',
   updateIncidentJson:
     '{"fields":{"title":{{{case.title}}},"description":{{{case.description}}},"tags":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
-  updateIncidentMethod: CasesWebhookMethods.PUT,
+  updateIncidentMethod: WebhookMethods.PUT,
   updateIncidentUrl: 'https://coolsite.net/issue/{{{external.system.id}}}',
 };
 const secrets = {
   user: 'user',
   password: 'pass',
+  crt: null,
+  key: null,
+  pfx: null,
 };
+const defaultSSLOverrides = {};
 const actionId = '1234';
 const mockTime = new Date('2021-10-20T19:41:02.754+0300');
+
+const sslConfig: CasesWebhookPublicConfigurationType = {
+  ...config,
+  authType: AuthType.SSL,
+  certType: SSLCertType.CRT,
+  hasAuth: true,
+};
+const sslSecrets = { crt: CRT_FILE, key: KEY_FILE, password: 'foobar', user: null, pfx: null };
+let connectorUsageCollector: ConnectorUsageCollector;
+
 describe('Cases webhook service', () => {
   let service: ExternalService;
+  let sslService: ExternalService;
 
   beforeAll(() => {
+    connectorUsageCollector = new ConnectorUsageCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
     service = createExternalService(
       actionId,
       {
@@ -63,7 +88,19 @@ describe('Cases webhook service', () => {
         secrets,
       },
       logger,
-      configurationUtilities
+      configurationUtilities,
+      connectorUsageCollector
+    );
+
+    sslService = createExternalService(
+      actionId,
+      {
+        config: sslConfig,
+        secrets: sslSecrets,
+      },
+      logger,
+      configurationUtilities,
+      connectorUsageCollector
     );
     jest.useFakeTimers();
     jest.setSystemTime(mockTime);
@@ -92,37 +129,81 @@ describe('Cases webhook service', () => {
             secrets,
           },
           logger,
-          configurationUtilities
+          configurationUtilities,
+          connectorUsageCollector
         )
       ).toThrow();
     });
 
-    test('throws if hasAuth and no user/pass', () => {
+    it('throws if hasAuth and no user/pass', () => {
       expect(() =>
         createExternalService(
           actionId,
           {
             config,
-            secrets: { user: '', password: '' },
+            secrets: { ...secrets, user: '', password: '' },
           },
           logger,
-          configurationUtilities
+          configurationUtilities,
+          connectorUsageCollector
         )
       ).toThrow();
     });
 
-    test('does not throw if hasAuth=false and no user/pass', () => {
+    it('does not throw if hasAuth=false and no user/pass', () => {
       expect(() =>
         createExternalService(
           actionId,
           {
             config: { ...config, hasAuth: false },
-            secrets: { user: '', password: '' },
+            secrets: { ...secrets, user: '', password: '' },
           },
           logger,
-          configurationUtilities
+          configurationUtilities,
+          connectorUsageCollector
         )
       ).not.toThrow();
+    });
+
+    it('uses the basic auth header for authentication', () => {
+      createExternalService(
+        actionId,
+        {
+          config,
+          secrets: { ...secrets, user: 'username', password: 'password' },
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          ...getBasicAuthHeader({ username: 'username', password: 'password' }),
+          'content-type': 'application/json',
+          foo: 'bar',
+        },
+      });
+    });
+
+    it('does not add the basic auth header for authentication if hasAuth=false', () => {
+      createExternalService(
+        actionId,
+        {
+          config: { ...config, hasAuth: false },
+          secrets: { ...secrets, user: 'username', password: 'password' },
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          'content-type': 'application/json',
+          foo: 'bar',
+        },
+      });
     });
   });
 
@@ -138,7 +219,7 @@ describe('Cases webhook service', () => {
       },
     };
 
-    test('it returns the incident correctly', async () => {
+    it('it returns the incident correctly', async () => {
       requestMock.mockImplementation(() => createAxiosResponse(axiosRes));
       const res = await service.getIncident('1');
       expect(res).toEqual({
@@ -147,7 +228,7 @@ describe('Cases webhook service', () => {
       });
     });
 
-    test('it should call request with correct arguments', async () => {
+    it('it should call request with correct arguments', async () => {
       requestMock.mockImplementation(() => createAxiosResponse(axiosRes));
 
       await service.getIncident('1');
@@ -156,10 +237,180 @@ describe('Cases webhook service', () => {
         url: 'https://coolsite.net/issue/1',
         logger,
         configurationUtilities,
+        sslOverrides: defaultSSLOverrides,
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
     });
 
-    test('it should throw an error', async () => {
+    it('it should call request with correct arguments when authType=SSL', async () => {
+      requestMock.mockImplementation(() => createAxiosResponse(axiosRes));
+
+      await sslService.getIncident('1');
+
+      // irrelevant snapshot content
+      delete requestMock.mock.calls[0][0].configurationUtilities;
+      expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "axios": [Function],
+          "connectorUsageCollector": ConnectorUsageCollector {
+            "connectorId": "test-connector-id",
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction],
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "isLevelEnabled": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
+            "usage": Object {
+              "requestBodyBytes": 0,
+            },
+          },
+          "logger": Object {
+            "context": Array [],
+            "debug": [MockFunction],
+            "error": [MockFunction],
+            "fatal": [MockFunction],
+            "get": [MockFunction],
+            "info": [MockFunction],
+            "isLevelEnabled": [MockFunction],
+            "log": [MockFunction],
+            "trace": [MockFunction],
+            "warn": [MockFunction],
+          },
+          "sslOverrides": Object {
+            "cert": Object {
+              "data": Array [
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                66,
+                69,
+                71,
+                73,
+                78,
+                32,
+                67,
+                69,
+                82,
+                84,
+                73,
+                70,
+                73,
+                67,
+                65,
+                84,
+                69,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                69,
+                78,
+                68,
+                32,
+                67,
+                69,
+                82,
+                84,
+                73,
+                70,
+                73,
+                67,
+                65,
+                84,
+                69,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+              ],
+              "type": "Buffer",
+            },
+            "key": Object {
+              "data": Array [
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                66,
+                69,
+                71,
+                73,
+                78,
+                32,
+                80,
+                82,
+                73,
+                86,
+                65,
+                84,
+                69,
+                32,
+                75,
+                69,
+                89,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                69,
+                78,
+                68,
+                32,
+                80,
+                82,
+                73,
+                86,
+                65,
+                84,
+                69,
+                32,
+                75,
+                69,
+                89,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+              ],
+              "type": "Buffer",
+            },
+            "passphrase": "foobar",
+          },
+          "url": "https://coolsite.net/issue/1",
+        }
+      `);
+    });
+
+    it('it should throw an error', async () => {
       requestMock.mockImplementation(() => {
         const error: AxiosError = new Error('An error has occurred') as AxiosError;
         error.response = { statusText: 'Required field' } as AxiosResponse;
@@ -170,7 +421,7 @@ describe('Cases webhook service', () => {
       );
     });
 
-    test('it should throw if the request is not a JSON', async () => {
+    it('it should throw if the request is not a JSON', async () => {
       requestMock.mockImplementation(() =>
         createAxiosResponse({ ...axiosRes, headers: { ['content-type']: 'text/html' } })
       );
@@ -180,7 +431,7 @@ describe('Cases webhook service', () => {
       );
     });
 
-    test('it should throw if the required attributes are not there', async () => {
+    it('it should throw if the required attributes are not there', async () => {
       requestMock.mockImplementation(() =>
         createAxiosResponse({ data: { fields: { notRequired: 'test' } } })
       );
@@ -197,13 +448,13 @@ describe('Cases webhook service', () => {
         title: 'title',
         description: 'desc',
         tags: ['hello', 'world'],
-        issueType: '10006',
-        priority: 'High',
-        parent: 'RJ-107',
+        id: '10006',
+        severity: 'High',
+        status: 'Open',
       },
     };
 
-    test('it creates the incident correctly', async () => {
+    it('it creates the incident correctly', async () => {
       requestMock.mockImplementationOnce(() =>
         createAxiosResponse({
           data: { id: '1', key: 'CK-1', fields: { title: 'title', description: 'description' } },
@@ -233,7 +484,7 @@ describe('Cases webhook service', () => {
       });
     });
 
-    test('it should call request with correct arguments', async () => {
+    it('it should call request with correct arguments', async () => {
       requestMock.mockImplementationOnce(() =>
         createAxiosResponse({
           data: {
@@ -258,13 +509,225 @@ describe('Cases webhook service', () => {
         axios,
         url: 'https://coolsite.net/issue',
         logger,
-        method: CasesWebhookMethods.POST,
+        method: WebhookMethods.POST,
         configurationUtilities,
+        sslOverrides: defaultSSLOverrides,
         data: `{"fields":{"title":"title","description":"desc","tags":["hello","world"],"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`,
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
     });
 
-    test('it should throw an error', async () => {
+    it('it should call request with correct arguments when authType=SSL', async () => {
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+          },
+        })
+      );
+
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+          },
+        })
+      );
+
+      await sslService.createIncident(incident);
+
+      // irrelevant snapshot content
+      delete requestMock.mock.calls[0][0].configurationUtilities;
+      expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "axios": [Function],
+          "connectorUsageCollector": ConnectorUsageCollector {
+            "connectorId": "test-connector-id",
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "response from webhook action \\"1234\\": [HTTP 200] OK",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "isLevelEnabled": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
+            "usage": Object {
+              "requestBodyBytes": 0,
+            },
+          },
+          "data": "{\\"fields\\":{\\"title\\":\\"title\\",\\"description\\":\\"desc\\",\\"tags\\":[\\"hello\\",\\"world\\"],\\"project\\":{\\"key\\":\\"ROC\\"},\\"issuetype\\":{\\"id\\":\\"10024\\"}}}",
+          "logger": Object {
+            "context": Array [],
+            "debug": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "response from webhook action \\"1234\\": [HTTP 200] OK",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": undefined,
+                },
+              ],
+            },
+            "error": [MockFunction],
+            "fatal": [MockFunction],
+            "get": [MockFunction],
+            "info": [MockFunction],
+            "isLevelEnabled": [MockFunction],
+            "log": [MockFunction],
+            "trace": [MockFunction],
+            "warn": [MockFunction],
+          },
+          "method": "post",
+          "sslOverrides": Object {
+            "cert": Object {
+              "data": Array [
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                66,
+                69,
+                71,
+                73,
+                78,
+                32,
+                67,
+                69,
+                82,
+                84,
+                73,
+                70,
+                73,
+                67,
+                65,
+                84,
+                69,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                69,
+                78,
+                68,
+                32,
+                67,
+                69,
+                82,
+                84,
+                73,
+                70,
+                73,
+                67,
+                65,
+                84,
+                69,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+              ],
+              "type": "Buffer",
+            },
+            "key": Object {
+              "data": Array [
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                66,
+                69,
+                71,
+                73,
+                78,
+                32,
+                80,
+                82,
+                73,
+                86,
+                65,
+                84,
+                69,
+                32,
+                75,
+                69,
+                89,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                69,
+                78,
+                68,
+                32,
+                80,
+                82,
+                73,
+                86,
+                65,
+                84,
+                69,
+                32,
+                75,
+                69,
+                89,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+              ],
+              "type": "Buffer",
+            },
+            "passphrase": "foobar",
+          },
+          "url": "https://coolsite.net/issue",
+        }
+      `);
+    });
+
+    it('it should throw an error', async () => {
       requestMock.mockImplementation(() => {
         const error: AxiosError = new Error('An error has occurred') as AxiosError;
         error.response = { statusText: 'Required field' } as AxiosResponse;
@@ -276,7 +739,7 @@ describe('Cases webhook service', () => {
       );
     });
 
-    test('it should throw if the request is not a JSON', async () => {
+    it('it should throw if the request is not a JSON', async () => {
       requestMock.mockImplementation(() =>
         createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
       );
@@ -286,7 +749,7 @@ describe('Cases webhook service', () => {
       );
     });
 
-    test('it should throw if the required attributes are not there', async () => {
+    it('it should throw if the required attributes are not there', async () => {
       requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
 
       await expect(service.createIncident(incident)).rejects.toThrow(
@@ -302,10 +765,13 @@ describe('Cases webhook service', () => {
         title: 'title',
         description: 'desc',
         tags: ['hello', 'world'],
+        id: '10006',
+        severity: 'High',
+        status: 'Open',
       },
     };
 
-    test('it updates the incident correctly', async () => {
+    it('it updates the incident correctly', async () => {
       requestMock.mockImplementation(() =>
         createAxiosResponse({
           data: {
@@ -325,7 +791,7 @@ describe('Cases webhook service', () => {
       });
     });
 
-    test('it should call request with correct arguments', async () => {
+    it('it should call request with correct arguments', async () => {
       requestMock.mockImplementation(() =>
         createAxiosResponse({
           data: {
@@ -340,8 +806,9 @@ describe('Cases webhook service', () => {
       expect(requestMock.mock.calls[0][0]).toEqual({
         axios,
         logger,
-        method: CasesWebhookMethods.PUT,
+        method: WebhookMethods.PUT,
         configurationUtilities,
+        sslOverrides: defaultSSLOverrides,
         url: 'https://coolsite.net/issue/1',
         data: JSON.stringify({
           fields: {
@@ -352,10 +819,188 @@ describe('Cases webhook service', () => {
             issuetype: { id: '10024' },
           },
         }),
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
     });
 
-    test('it should throw an error', async () => {
+    it('it should call request with correct arguments when authType=SSL', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+          },
+        })
+      );
+
+      await sslService.updateIncident(incident);
+
+      // irrelevant snapshot content
+      delete requestMock.mock.calls[0][0].configurationUtilities;
+      expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "axios": [Function],
+          "connectorUsageCollector": ConnectorUsageCollector {
+            "connectorId": "test-connector-id",
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction],
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "isLevelEnabled": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
+            "usage": Object {
+              "requestBodyBytes": 0,
+            },
+          },
+          "data": "{\\"fields\\":{\\"title\\":\\"title\\",\\"description\\":\\"desc\\",\\"tags\\":[\\"hello\\",\\"world\\"],\\"project\\":{\\"key\\":\\"ROC\\"},\\"issuetype\\":{\\"id\\":\\"10024\\"}}}",
+          "logger": Object {
+            "context": Array [],
+            "debug": [MockFunction],
+            "error": [MockFunction],
+            "fatal": [MockFunction],
+            "get": [MockFunction],
+            "info": [MockFunction],
+            "isLevelEnabled": [MockFunction],
+            "log": [MockFunction],
+            "trace": [MockFunction],
+            "warn": [MockFunction],
+          },
+          "method": "put",
+          "sslOverrides": Object {
+            "cert": Object {
+              "data": Array [
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                66,
+                69,
+                71,
+                73,
+                78,
+                32,
+                67,
+                69,
+                82,
+                84,
+                73,
+                70,
+                73,
+                67,
+                65,
+                84,
+                69,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                69,
+                78,
+                68,
+                32,
+                67,
+                69,
+                82,
+                84,
+                73,
+                70,
+                73,
+                67,
+                65,
+                84,
+                69,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+              ],
+              "type": "Buffer",
+            },
+            "key": Object {
+              "data": Array [
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                66,
+                69,
+                71,
+                73,
+                78,
+                32,
+                80,
+                82,
+                73,
+                86,
+                65,
+                84,
+                69,
+                32,
+                75,
+                69,
+                89,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                69,
+                78,
+                68,
+                32,
+                80,
+                82,
+                73,
+                86,
+                65,
+                84,
+                69,
+                32,
+                75,
+                69,
+                89,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+              ],
+              "type": "Buffer",
+            },
+            "passphrase": "foobar",
+          },
+          "url": "https://coolsite.net/issue/1",
+        }
+      `);
+    });
+
+    it('it should throw an error', async () => {
       requestMock.mockImplementation(() => {
         const error: AxiosError = new Error('An error has occurred') as AxiosError;
         error.response = { statusText: 'Required field' } as AxiosResponse;
@@ -367,7 +1012,7 @@ describe('Cases webhook service', () => {
       );
     });
 
-    test('it should throw if the request is not a JSON', async () => {
+    it('it should throw if the request is not a JSON', async () => {
       requestMock.mockImplementation(() =>
         createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
       );
@@ -386,7 +1031,7 @@ describe('Cases webhook service', () => {
         commentId: 'comment-1',
       },
     };
-    test('it creates the comment correctly', async () => {
+    it('it creates the comment correctly', async () => {
       requestMock.mockImplementation(() =>
         createAxiosResponse({
           data: {
@@ -401,7 +1046,7 @@ describe('Cases webhook service', () => {
       expect(requestMock.mock.calls[0][0].data).toEqual('{"body":"comment"}');
     });
 
-    test('it should call request with correct arguments', async () => {
+    it('it should call request with correct arguments', async () => {
       requestMock.mockImplementation(() =>
         createAxiosResponse({
           data: {
@@ -416,14 +1061,193 @@ describe('Cases webhook service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
-        method: CasesWebhookMethods.POST,
+        method: WebhookMethods.POST,
         configurationUtilities,
+        sslOverrides: defaultSSLOverrides,
         url: 'https://coolsite.net/issue/1/comment',
         data: `{"body":"comment"}`,
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
     });
 
-    test('it should throw an error', async () => {
+    it('it should call request with correct arguments when authType=SSL', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+          },
+        })
+      );
+
+      await sslService.createComment(commentReq);
+
+      // irrelevant snapshot content
+      delete requestMock.mock.calls[0][0].configurationUtilities;
+      expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "axios": [Function],
+          "connectorUsageCollector": ConnectorUsageCollector {
+            "connectorId": "test-connector-id",
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction],
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "isLevelEnabled": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
+            "usage": Object {
+              "requestBodyBytes": 0,
+            },
+          },
+          "data": "{\\"body\\":\\"comment\\"}",
+          "logger": Object {
+            "context": Array [],
+            "debug": [MockFunction],
+            "error": [MockFunction],
+            "fatal": [MockFunction],
+            "get": [MockFunction],
+            "info": [MockFunction],
+            "isLevelEnabled": [MockFunction],
+            "log": [MockFunction],
+            "trace": [MockFunction],
+            "warn": [MockFunction],
+          },
+          "method": "post",
+          "sslOverrides": Object {
+            "cert": Object {
+              "data": Array [
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                66,
+                69,
+                71,
+                73,
+                78,
+                32,
+                67,
+                69,
+                82,
+                84,
+                73,
+                70,
+                73,
+                67,
+                65,
+                84,
+                69,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                69,
+                78,
+                68,
+                32,
+                67,
+                69,
+                82,
+                84,
+                73,
+                70,
+                73,
+                67,
+                65,
+                84,
+                69,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+              ],
+              "type": "Buffer",
+            },
+            "key": Object {
+              "data": Array [
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                66,
+                69,
+                71,
+                73,
+                78,
+                32,
+                80,
+                82,
+                73,
+                86,
+                65,
+                84,
+                69,
+                32,
+                75,
+                69,
+                89,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                69,
+                78,
+                68,
+                32,
+                80,
+                82,
+                73,
+                86,
+                65,
+                84,
+                69,
+                32,
+                75,
+                69,
+                89,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+              ],
+              "type": "Buffer",
+            },
+            "passphrase": "foobar",
+          },
+          "url": "https://coolsite.net/issue/1/comment",
+        }
+      `);
+    });
+
+    it('it should throw an error', async () => {
       requestMock.mockImplementation(() => {
         const error: AxiosError = new Error('An error has occurred') as AxiosError;
         error.response = { statusText: 'Required field' } as AxiosResponse;
@@ -435,7 +1259,7 @@ describe('Cases webhook service', () => {
       );
     });
 
-    test('it should throw if the request is not a JSON', async () => {
+    it('it should throw if the request is not a JSON', async () => {
       requestMock.mockImplementation(() =>
         createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
       );
@@ -445,7 +1269,7 @@ describe('Cases webhook service', () => {
       );
     });
 
-    test('it fails silently if createCommentUrl is missing', async () => {
+    it('it fails silently if createCommentUrl is missing', async () => {
       service = createExternalService(
         actionId,
         {
@@ -453,14 +1277,15 @@ describe('Cases webhook service', () => {
           secrets,
         },
         logger,
-        configurationUtilities
+        configurationUtilities,
+        connectorUsageCollector
       );
       const res = await service.createComment(commentReq);
       expect(requestMock).not.toHaveBeenCalled();
       expect(res).toBeUndefined();
     });
 
-    test('it fails silently if createCommentJson is missing', async () => {
+    it('it fails silently if createCommentJson is missing', async () => {
       service = createExternalService(
         actionId,
         {
@@ -468,14 +1293,15 @@ describe('Cases webhook service', () => {
           secrets,
         },
         logger,
-        configurationUtilities
+        configurationUtilities,
+        connectorUsageCollector
       );
       const res = await service.createComment(commentReq);
       expect(requestMock).not.toHaveBeenCalled();
       expect(res).toBeUndefined();
     });
 
-    test('properly encodes external system id as string in request body', async () => {
+    it('properly encodes external system id as string in request body', async () => {
       requestMock.mockImplementation(() =>
         createAxiosResponse({
           data: {
@@ -494,20 +1320,23 @@ describe('Cases webhook service', () => {
           secrets,
         },
         logger,
-        configurationUtilities
+        configurationUtilities,
+        connectorUsageCollector
       );
       await service.createComment(commentReq);
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
-        method: CasesWebhookMethods.POST,
+        method: WebhookMethods.POST,
         configurationUtilities,
         url: 'https://coolsite.net/issue/1/comment',
         data: `{"body":"comment","id":"1"}`,
+        sslOverrides: defaultSSLOverrides,
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
     });
 
-    test('properly encodes external system id as number in request body', async () => {
+    it('properly encodes external system id as number in request body', async () => {
       const commentReq2 = {
         incidentId: 1 as unknown as string,
         comment: {
@@ -533,16 +1362,19 @@ describe('Cases webhook service', () => {
           secrets,
         },
         logger,
-        configurationUtilities
+        configurationUtilities,
+        connectorUsageCollector
       );
       await service.createComment(commentReq2);
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
-        method: CasesWebhookMethods.POST,
+        method: WebhookMethods.POST,
         configurationUtilities,
         url: 'https://coolsite.net/issue/1/comment',
         data: `{"body":"comment","id":1}`,
+        sslOverrides: defaultSSLOverrides,
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
     });
   });
@@ -561,27 +1393,28 @@ describe('Cases webhook service', () => {
           ensureUriAllowed: jest.fn().mockImplementation(() => {
             throw new Error('Uri not allowed');
           }),
-        }
+        },
+        connectorUsageCollector
       );
     });
 
     beforeEach(() => {
       jest.clearAllMocks();
     });
-    test('getIncident- throws for bad url', async () => {
+    it('getIncident- throws for bad url', async () => {
       await expect(service.getIncident('whack')).rejects.toThrow(
         '[Action][Webhook - Case Management]: Unable to get case with id whack. Error: Invalid Get case URL: Error: error configuring connector action: Uri not allowed.'
       );
     });
-    test('createIncident- throws for bad url', async () => {
+    it('createIncident- throws for bad url', async () => {
       const incident = {
         incident: {
           title: 'title',
           description: 'desc',
           tags: ['hello', 'world'],
-          issueType: '10006',
-          priority: 'High',
-          parent: 'RJ-107',
+          id: '10006',
+          severity: 'High',
+          status: 'Open',
         },
       };
 
@@ -589,16 +1422,16 @@ describe('Cases webhook service', () => {
         '[Action][Webhook - Case Management]: Unable to create case. Error: Invalid Create case URL: Error: error configuring connector action: Uri not allowed.'
       );
     });
-    test('updateIncident- throws for bad url', async () => {
+    it('updateIncident- throws for bad url', async () => {
       const incident = {
         incidentId: '123',
         incident: {
           title: 'title',
           description: 'desc',
           tags: ['hello', 'world'],
-          issueType: '10006',
-          priority: 'High',
-          parent: 'RJ-107',
+          id: '10006',
+          severity: 'High',
+          status: 'Open',
         },
       };
 
@@ -606,7 +1439,7 @@ describe('Cases webhook service', () => {
         '[Action][Webhook - Case Management]: Unable to update case with id 123. Error: Invalid Update case URL: Error: error configuring connector action: Uri not allowed.'
       );
     });
-    test('createComment- throws for bad url', async () => {
+    it('createComment- throws for bad url', async () => {
       const commentReq = {
         incidentId: '1',
         comment: {
@@ -635,27 +1468,28 @@ describe('Cases webhook service', () => {
           secrets,
         },
         logger,
-        configurationUtilities
+        configurationUtilities,
+        connectorUsageCollector
       );
     });
 
     beforeEach(() => {
       jest.clearAllMocks();
     });
-    test('getIncident- throws for bad protocol', async () => {
+    it('getIncident- throws for bad protocol', async () => {
       await expect(service.getIncident('whack')).rejects.toThrow(
         '[Action][Webhook - Case Management]: Unable to get case with id whack. Error: Invalid Get case URL: Error: Invalid protocol.'
       );
     });
-    test('createIncident- throws for bad protocol', async () => {
+    it('createIncident- throws for bad protocol', async () => {
       const incident = {
         incident: {
           title: 'title',
           description: 'desc',
           tags: ['hello', 'world'],
-          issueType: '10006',
-          priority: 'High',
-          parent: 'RJ-107',
+          id: '10006',
+          severity: 'High',
+          status: 'Open',
         },
       };
 
@@ -663,16 +1497,16 @@ describe('Cases webhook service', () => {
         '[Action][Webhook - Case Management]: Unable to create case. Error: Invalid Create case URL: Error: Invalid protocol.'
       );
     });
-    test('updateIncident- throws for bad protocol', async () => {
+    it('updateIncident- throws for bad protocol', async () => {
       const incident = {
         incidentId: '123',
         incident: {
           title: 'title',
           description: 'desc',
           tags: ['hello', 'world'],
-          issueType: '10006',
-          priority: 'High',
-          parent: 'RJ-107',
+          id: '10006',
+          severity: 'High',
+          status: 'Open',
         },
       };
 
@@ -680,7 +1514,7 @@ describe('Cases webhook service', () => {
         '[Action][Webhook - Case Management]: Unable to update case with id 123. Error: Invalid Update case URL: Error: Invalid protocol.'
       );
     });
-    test('createComment- throws for bad protocol', async () => {
+    it('createComment- throws for bad protocol', async () => {
       const commentReq = {
         incidentId: '1',
         comment: {
@@ -705,7 +1539,8 @@ describe('Cases webhook service', () => {
         logger,
         {
           ...configurationUtilities,
-        }
+        },
+        connectorUsageCollector
       );
       requestMock.mockImplementation(() =>
         createAxiosResponse({
@@ -720,22 +1555,22 @@ describe('Cases webhook service', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
-    test('getIncident- escapes url', async () => {
+    it('getIncident- escapes url', async () => {
       await service.getIncident('../../malicious-app/malicious-endpoint/');
       expect(requestMock.mock.calls[0][0].url).toEqual(
         'https://coolsite.net/issue/..%2F..%2Fmalicious-app%2Fmalicious-endpoint%2F'
       );
     });
 
-    test('createIncident- escapes url', async () => {
+    it('createIncident- escapes url', async () => {
       const incident = {
         incident: {
           title: 'title',
           description: 'desc',
           tags: ['hello', 'world'],
-          issueType: '10006',
-          priority: 'High',
-          parent: 'RJ-107',
+          id: '10006',
+          severity: 'High',
+          status: 'Open',
         },
       };
       const res = await service.createIncident(incident);
@@ -744,16 +1579,16 @@ describe('Cases webhook service', () => {
       );
     });
 
-    test('updateIncident- escapes url', async () => {
+    it('updateIncident- escapes url', async () => {
       const incident = {
         incidentId: '../../malicious-app/malicious-endpoint/',
         incident: {
           title: 'title',
           description: 'desc',
           tags: ['hello', 'world'],
-          issueType: '10006',
-          priority: 'High',
-          parent: 'RJ-107',
+          id: '10006',
+          severity: 'High',
+          status: 'Open',
         },
       };
 
@@ -762,7 +1597,7 @@ describe('Cases webhook service', () => {
         'https://coolsite.net/issue/..%2F..%2Fmalicious-app%2Fmalicious-endpoint%2F'
       );
     });
-    test('createComment- escapes url', async () => {
+    it('createComment- escapes url', async () => {
       const commentReq = {
         incidentId: '../../malicious-app/malicious-endpoint/',
         comment: {

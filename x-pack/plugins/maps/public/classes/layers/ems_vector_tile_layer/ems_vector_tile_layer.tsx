@@ -137,7 +137,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
       };
       stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, data);
     } catch (error) {
-      onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
+      onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error);
     }
   }
 
@@ -261,7 +261,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
   _addSpriteSheetToMapFromImageData(json: EmsSpriteSheet, imgData: ImageData, mbMap: MbMap) {
     for (const imageId in json) {
-      if (!(json.hasOwnProperty(imageId) && !mbMap.hasImage(imageId))) {
+      if (!(Object.hasOwn(json, imageId) && !mbMap.hasImage(imageId))) {
         continue;
       }
       const { width, height, x, y, sdf, pixelRatio } = json[imageId];
@@ -310,7 +310,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
       }
       const newJson: EmsSpriteSheet = {};
       for (const imageId in spriteMeta.json) {
-        if (spriteMeta.json.hasOwnProperty(imageId)) {
+        if (Object.hasOwn(spriteMeta.json, imageId)) {
           const namespacedImageId = this._makeNamespacedImageId(imageId);
           newJson[namespacedImageId] = spriteMeta.json[imageId];
         }

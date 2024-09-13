@@ -1,14 +1,9 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-    "../../../typings/**/*"
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/charts-plugin",
@@ -42,20 +37,42 @@
     "@kbn/i18n-react",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-page-analytics-no-data",
-    "@kbn/content-management-table-list",
+    "@kbn/content-management-table-list-view",
+    "@kbn/content-management-tabbed-table-list-view",
     "@kbn/test-jest-helpers",
     "@kbn/analytics",
     "@kbn/content-management-content-editor",
-    "@kbn/core-saved-objects-api-browser",
     "@kbn/core-overlays-browser",
     "@kbn/config-schema",
     "@kbn/usage-collection-plugin",
-    "@kbn/core-http-browser-mocks",
     "@kbn/shared-ux-router",
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-finder-plugin",
+    "@kbn/content-management-plugin",
+    "@kbn/object-versioning",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/content-management-table-list-view-table",
+    "@kbn/content-management-tabbed-table-list-view",
+    "@kbn/content-management-table-list-view",
+    "@kbn/serverless",
+    "@kbn/no-data-page-plugin",
+    "@kbn/logging",
+    "@kbn/content-management-table-list-view-common",
+    "@kbn/chart-expressions-common",
+    "@kbn/shared-ux-utility",
+    "@kbn/managed-content-badge",
+    "@kbn/presentation-publishing",
+    "@kbn/shared-ux-markdown",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-execution-context-common",
+    "@kbn/presentation-containers",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/presentation-containers",
+    "@kbn/search-response-warnings",
+    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/content-management-utils"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -45,6 +45,8 @@ export function defineActionTypes(
       params: { schema: schema.object({}, { defaultValue: {} }) },
     },
     async executor() {
+      // add a delay so the execution time is non-zero
+      await new Promise((r) => setTimeout(r, 1000));
       throw new Error('this action is intended to fail');
     },
   };
@@ -74,6 +76,13 @@ export function defineActionTypes(
   actions.registerType(getNoAttemptsRateLimitedActionType());
   actions.registerType(getAuthorizationActionType(core));
   actions.registerType(getExcludedActionType());
+
+  /**
+   * System actions
+   */
+  actions.registerType(getSystemActionType());
+  actions.registerType(getSystemActionTypeWithKibanaPrivileges());
+  actions.registerType(getSystemActionTypeWithConnectorAdapter());
 
   /** Sub action framework */
 
@@ -397,5 +406,154 @@ function getExcludedActionType() {
       return { status: 'ok', actionId };
     },
   };
+  return result;
+}
+
+function getSystemActionType() {
+  const result: ActionType<{}, {}, {}> = {
+    id: 'test.system-action',
+    name: 'Test system action',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      params: {
+        schema: schema.any(),
+      },
+      config: {
+        schema: schema.any(),
+      },
+      secrets: {
+        schema: schema.any(),
+      },
+    },
+    isSystemActionType: true,
+    async executor({ config, secrets, params, services, actionId }) {
+      return { status: 'ok', actionId };
+    },
+  };
+
+  return result;
+}
+
+function getSystemActionTypeWithKibanaPrivileges() {
+  const result: ActionType<{}, {}, { index?: string; reference?: string }> = {
+    id: 'test.system-action-kibana-privileges',
+    name: 'Test system action with kibana privileges',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    /**
+     * Requires all access to the case feature
+     * in Stack management
+     */
+    getKibanaPrivileges: () => ['cases:cases/createCase'],
+    validate: {
+      params: {
+        /**
+         * Adapter: x-pack/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+         */
+        schema: schema.object({
+          index: schema.maybe(schema.string()),
+          reference: schema.maybe(schema.string()),
+        }),
+      },
+      config: {
+        schema: schema.any(),
+      },
+      secrets: {
+        schema: schema.any(),
+      },
+    },
+    isSystemActionType: true,
+    /**
+     * The executor writes a doc to the
+     * testing index. The test uses the doc
+     * to verify that the action is executed
+     * correctly
+     */
+    async executor({ params, services, actionId }) {
+      const { index, reference } = params;
+
+      if (index == null || reference == null) {
+        return { status: 'ok', actionId };
+      }
+
+      await services.scopedClusterClient.index({
+        index,
+        refresh: 'wait_for',
+        body: {
+          params,
+          reference,
+          source: 'action:test.system-action-kibana-privileges',
+        },
+      });
+
+      return { status: 'ok', actionId };
+    },
+  };
+
+  return result;
+}
+
+function getSystemActionTypeWithConnectorAdapter() {
+  const result: ActionType<
+    {},
+    {},
+    { myParam: string; injected: string; index?: string; reference?: string }
+  > = {
+    id: 'test.system-action-connector-adapter',
+    name: 'Test system action with a connector adapter set',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      params: {
+        /**
+         * The injected params will be set by the
+         * connector adapter while executing the action.
+         *
+         * Adapter: x-pack/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+         */
+        schema: schema.object({
+          myParam: schema.string(),
+          injected: schema.string(),
+          index: schema.maybe(schema.string()),
+          reference: schema.maybe(schema.string()),
+        }),
+      },
+
+      config: {
+        schema: schema.any(),
+      },
+      secrets: {
+        schema: schema.any(),
+      },
+    },
+    isSystemActionType: true,
+    /**
+     * The executor writes a doc to the
+     * testing index. The test uses the doc
+     * to verify that the action is executed
+     * correctly
+     */
+    async executor({ params, services, actionId }) {
+      const { index, reference } = params;
+
+      if (index == null || reference == null) {
+        return { status: 'ok', actionId };
+      }
+
+      await services.scopedClusterClient.index({
+        index,
+        refresh: 'wait_for',
+        body: {
+          params,
+          reference,
+          source: 'action:test.system-action-connector-adapter',
+        },
+      });
+
+      return { status: 'ok', actionId };
+    },
+  };
+
   return result;
 }

@@ -87,48 +87,101 @@
       },
       {
         "parentPluginId": "@kbn/observability-alert-details",
-        "id": "def-common.getPaddedAlertTimeRange",
+        "id": "def-common.AlertThresholdAnnotation",
         "type": "Function",
         "tags": [],
-        "label": "getPaddedAlertTimeRange",
+        "label": "AlertThresholdAnnotation",
         "description": [],
         "signature": [
-          "(alertStart: string, alertEnd?: string | undefined) => ",
-          "TimeRange"
+          "({ threshold, color, id }: Props) => JSX.Element"
         ],
-        "path": "x-pack/packages/observability/alert_details/src/helpers/get_padded_alert_time_range.ts",
+        "path": "x-pack/packages/observability/alert_details/src/components/alert_threshold_annotation.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/observability-alert-details",
-            "id": "def-common.getPaddedAlertTimeRange.$1",
-            "type": "string",
+            "id": "def-common.AlertThresholdAnnotation.$1",
+            "type": "Object",
             "tags": [],
-            "label": "alertStart",
+            "label": "{ threshold, color, id }",
             "description": [],
             "signature": [
-              "string"
+              "Props"
             ],
-            "path": "x-pack/packages/observability/alert_details/src/helpers/get_padded_alert_time_range.ts",
+            "path": "x-pack/packages/observability/alert_details/src/components/alert_threshold_annotation.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          },
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-alert-details",
+        "id": "def-common.AlertThresholdTimeRangeRect",
+        "type": "Function",
+        "tags": [],
+        "label": "AlertThresholdTimeRangeRect",
+        "description": [],
+        "signature": [
+          "({ color, id, threshold }: Props) => JSX.Element"
+        ],
+        "path": "x-pack/packages/observability/alert_details/src/components/alert_threshold_time_range_rect.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
             "parentPluginId": "@kbn/observability-alert-details",
-            "id": "def-common.getPaddedAlertTimeRange.$2",
-            "type": "string",
+            "id": "def-common.AlertThresholdTimeRangeRect.$1",
+            "type": "Object",
             "tags": [],
-            "label": "alertEnd",
+            "label": "{ color, id, threshold }",
             "description": [],
             "signature": [
-              "string | undefined"
+              "Props"
             ],
-            "path": "x-pack/packages/observability/alert_details/src/helpers/get_padded_alert_time_range.ts",
+            "path": "x-pack/packages/observability/alert_details/src/components/alert_threshold_time_range_rect.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-alert-details",
+        "id": "def-common.useAlertsHistory",
+        "type": "Function",
+        "tags": [],
+        "label": "useAlertsHistory",
+        "description": [],
+        "signature": [
+          "({\n  featureIds,\n  ruleId,\n  dateRange,\n  http,\n  instanceId,\n}: ",
+          "Props",
+          ") => ",
+          "UseAlertsHistory"
+        ],
+        "path": "x-pack/packages/observability/alert_details/src/hooks/use_alerts_history.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-alert-details",
+            "id": "def-common.useAlertsHistory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  featureIds,\n  ruleId,\n  dateRange,\n  http,\n  instanceId,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/packages/observability/alert_details/src/hooks/use_alerts_history.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],

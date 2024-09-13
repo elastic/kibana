@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
@@ -30,8 +31,10 @@ export function toArrayOrUndefined(val?: string | string[]): undefined | string[
 const rt = {
   body: schema.object({
     kind: schema.maybe(stringOrArrayOfStrings),
+    kindToExclude: schema.maybe(stringOrArrayOfStrings),
     status: schema.maybe(stringOrArrayOfStrings),
     extension: schema.maybe(stringOrArrayOfStrings),
+    mimeType: schema.maybe(stringOrArrayOfStrings),
     name: schema.maybe(nameStringOrArrayOfNameStrings),
     meta: fileMeta,
   }),
@@ -50,15 +53,17 @@ export type Endpoint = CreateRouteDefinition<
 const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
   const { fileService } = await files;
   const {
-    body: { meta, extension, kind, name, status },
+    body: { meta, extension, mimeType, kind, name, status, kindToExclude },
     query,
   } = req;
 
   const { files: results, total } = await fileService.asCurrentUser().find({
     kind: toArrayOrUndefined(kind),
+    kindToExclude: toArrayOrUndefined(kindToExclude),
     name: toArrayOrUndefined(name),
     status: toArrayOrUndefined(status),
     extension: toArrayOrUndefined(extension),
+    mimeType: toArrayOrUndefined(mimeType),
     meta: meta as Record<string, string>,
     ...query,
   });

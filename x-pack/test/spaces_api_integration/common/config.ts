@@ -6,24 +6,24 @@
  */
 
 import path from 'path';
-// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
+  testFiles?: string[];
 }
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
-  const { license, disabledPlugins = [] } = options;
+  const { license, disabledPlugins = [], testFiles } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const config = {
       kibana: {
         api: await readConfigFile(path.resolve(REPO_ROOT, 'test/api_integration/config.js')),
         functional: await readConfigFile(
-          require.resolve('../../../../test/functional/config.base.js')
+          require.resolve('@kbn/test-suites-src/functional/config.base')
         ),
       },
       xpack: {
@@ -32,7 +32,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
-      testFiles: [require.resolve(`../${name}/apis/`)],
+      testFiles: testFiles ?? [require.resolve(`../${name}/apis/`)],
       servers: config.xpack.api.get('servers'),
       services: {
         es: config.kibana.api.get('services.es'),
@@ -43,6 +43,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         esArchiver: config.kibana.functional.get('services.esArchiver'),
         kibanaServer: config.kibana.functional.get('services.kibanaServer'),
         spaces: config.xpack.api.get('services.spaces'),
+        usageAPI: config.xpack.api.get('services.usageAPI'),
       },
       junit: {
         reportName: 'X-Pack Spaces API Integration Tests -- ' + name,
@@ -68,6 +69,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
+          // Note: we fake a cloud deployment as the solution view is only available in cloud
+          '--xpack.cloud.id=ftr_fake_cloud_id:aGVsbG8uY29tOjQ0MyRFUzEyM2FiYyRrYm4xMjNhYmM=',
+          '--xpack.cloud.base_url=https://cloud.elastic.co',
+          '--xpack.cloud.deployment_url=/deployments/deploymentId',
         ],
       },
     };

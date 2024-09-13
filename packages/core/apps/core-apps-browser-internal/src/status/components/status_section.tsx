@@ -1,19 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { FC, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiPanel } from '@elastic/eui';
 import { StatusTable } from './status_table';
 import { FormattedStatus, getHighestStatus } from '../lib';
 import { StatusBadge } from './status_badge';
@@ -28,7 +23,7 @@ export const StatusSection: FC<StatusSectionProps> = ({ id, title, statuses }) =
   const highestStatus = useMemo(() => getHighestStatus(statuses), [statuses]);
 
   return (
-    <EuiPageContent grow={false}>
+    <EuiPanel grow={false}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
@@ -41,6 +36,6 @@ export const StatusSection: FC<StatusSectionProps> = ({ id, title, statuses }) =
       </EuiFlexGroup>
       <EuiSpacer />
       <StatusTable statuses={statuses} />
-    </EuiPageContent>
+    </EuiPanel>
   );
 };

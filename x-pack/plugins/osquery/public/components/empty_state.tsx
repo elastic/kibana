@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
 
-import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { isModifiedEvent, isLeftClickEvent, useKibana } from '../common/lib/kibana';
@@ -35,7 +35,7 @@ const OsqueryAppEmptyStateComponent = () => {
   );
 
   const integrationClick = useCallback(
-    (event) => {
+    (event: any) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
 

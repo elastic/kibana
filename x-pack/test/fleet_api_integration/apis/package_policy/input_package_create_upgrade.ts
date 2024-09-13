@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 const PACKAGE_NAME = 'input_package_upgrade';
 const START_VERSION = '1.0.0';
 const UPGRADE_VERSION = '1.1.0';
@@ -20,6 +19,8 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
+
   const uninstallPackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
@@ -33,7 +34,7 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   const getInstallationSavedObject = async (name: string, version: string) => {
-    const res = await supertest.get(`/api/fleet/epm/packages/${name}-${version}`).expect(200);
+    const res = await supertest.get(`/api/fleet/epm/packages/${name}/${version}`).expect(200);
     return res.body.item.savedObject.attributes;
   };
 
@@ -77,13 +78,6 @@ export default function (providerContext: FtrProviderContext) {
       .expect(expectStatusCode);
 
     return res.body.item;
-  };
-
-  const deletePackagePolicy = (id: string) => {
-    return supertest
-      .delete(`/api/fleet/package_policies/${id}`)
-      .set('kbn-xsrf', 'xxxx')
-      .expect(200);
   };
 
   const createAgentPolicy = async (name = 'Input Package Test 3') => {
@@ -180,21 +174,25 @@ export default function (providerContext: FtrProviderContext) {
     await es.indices.deleteIndexTemplate({ name: templateName });
   };
 
-  describe('Package Policy - input package behavior', async function () {
+  describe('Package Policy - input package behavior', function () {
     skipIfNoDockerRegistry(providerContext);
 
-    let agentPolicyId: string;
-    const packagePolicyIds: string[] = [];
     before(async () => {
-      installPackage(PACKAGE_NAME, START_VERSION);
+      await fleetAndAgents.setup();
+    });
+
+    let agentPolicyId: string;
+    beforeEach(async () => {
+      await installPackage(PACKAGE_NAME, START_VERSION);
       const agentPolicy = await createAgentPolicy();
       agentPolicyId = agentPolicy.id;
     });
 
-    after(async () => {
+    afterEach(async () => {
       await deleteAgentPolicy(agentPolicyId);
+
+      await uninstallPackage(PACKAGE_NAME, START_VERSION);
     });
-    setupFleetAndAgents(providerContext);
 
     it('should not have created any ES assets on install', async () => {
       const installation = await getInstallationSavedObject(PACKAGE_NAME, START_VERSION);
@@ -202,8 +200,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should create index templates and update installed_es on package policy creation', async () => {
-      const packagePolicy = await createPackagePolicyWithDataset(agentPolicyId, 'dataset1');
-      packagePolicyIds.push(packagePolicy.id);
+      await createPackagePolicyWithDataset(agentPolicyId, 'dataset1');
       const installation = await getInstallationSavedObject(PACKAGE_NAME, START_VERSION);
       expectIdArraysEqual(installation.installed_es, [
         { id: 'logs-dataset1-1.0.0', type: 'ingest_pipeline' },
@@ -221,9 +218,10 @@ export default function (providerContext: FtrProviderContext) {
             settings: {
               index: {
                 lifecycle: { name: 'logs' },
-                codec: 'best_compression',
                 default_pipeline: 'logs-dataset1-1.0.0',
-                mapping: { total_fields: { limit: '10000' } },
+                mapping: {
+                  total_fields: { limit: '1000' },
+                },
               },
             },
             mappings: {
@@ -249,37 +247,39 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should create index templates and update installed_es on second package policy creation', async () => {
-      const packagePolicy = await createPackagePolicyWithDataset(agentPolicyId, 'dataset2');
-      packagePolicyIds.push(packagePolicy.id);
+      await createPackagePolicyWithDataset(agentPolicyId, 'dataset2');
       const installation = await getInstallationSavedObject(PACKAGE_NAME, START_VERSION);
-      expectIdArraysEqual(installation.installed_es, [
-        { id: 'logs-dataset1-1.0.0', type: 'ingest_pipeline' },
-        { id: 'logs-dataset1', type: 'index_template' },
-        { id: 'logs-dataset1@package', type: 'component_template' },
-        { id: 'logs-dataset1@custom', type: 'component_template' },
+      let found = 0;
+      [
         { id: 'logs-dataset2-1.0.0', type: 'ingest_pipeline' },
         { id: 'logs-dataset2', type: 'index_template' },
         { id: 'logs-dataset2@package', type: 'component_template' },
         { id: 'logs-dataset2@custom', type: 'component_template' },
-      ]);
+      ].forEach((obj) => {
+        if (installation.installed_es.find((installed: any) => installed.id === obj.id)) {
+          found++;
+        }
+      });
+      expect(found).to.eql(4);
     });
 
     it('should allow data to be sent to existing stream if owned by package and should not create templates', async () => {
       await createFakeFleetDataStream('dataset3');
 
-      const packagePolicy = await createPackagePolicyWithDataset(agentPolicyId, 'dataset3');
-      packagePolicyIds.push(packagePolicy.id);
+      await createPackagePolicyWithDataset(agentPolicyId, 'dataset3');
       const installation = await getInstallationSavedObject(PACKAGE_NAME, START_VERSION);
-      expectIdArraysEqual(installation.installed_es, [
-        { id: 'logs-dataset1-1.0.0', type: 'ingest_pipeline' },
-        { id: 'logs-dataset1', type: 'index_template' },
-        { id: 'logs-dataset1@package', type: 'component_template' },
-        { id: 'logs-dataset1@custom', type: 'component_template' },
-        { id: 'logs-dataset2-1.0.0', type: 'ingest_pipeline' },
-        { id: 'logs-dataset2', type: 'index_template' },
-        { id: 'logs-dataset2@package', type: 'component_template' },
-        { id: 'logs-dataset2@custom', type: 'component_template' },
-      ]);
+      let found = 0;
+      [
+        { id: 'logs-dataset3-1.0.0', type: 'ingest_pipeline' },
+        { id: 'logs-dataset3', type: 'index_template' },
+        { id: 'logs-dataset3@package', type: 'component_template' },
+        { id: 'logs-dataset3@custom', type: 'component_template' },
+      ].forEach((obj) => {
+        if (installation.installed_es.find((installed: any) => installed.id === obj.id)) {
+          found++;
+        }
+      });
+      expect(found).to.eql(0);
 
       const dataset3PkgComponentTemplate = await getComponentTemplate('logs-dataset3@package');
       expect(dataset3PkgComponentTemplate).eql(null);
@@ -344,6 +344,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should update all index templates created by package policies when the package is upgraded', async () => {
+      await createPackagePolicyWithDataset(agentPolicyId, 'dataset1');
       // version 1.1.0 of the test package introduces elasticsearch mappings to the index
       // templates, upgrading the package should add this field to both package component templates
       await installPackage(PACKAGE_NAME, UPGRADE_VERSION);
@@ -365,24 +366,15 @@ export default function (providerContext: FtrProviderContext) {
         mappingsWithTimestamp
       );
 
-      const dataset2PkgComponentTemplate = await getComponentTemplate('logs-dataset2@package');
-      expect(dataset2PkgComponentTemplate).not.eql(null);
-      expect(dataset2PkgComponentTemplate!.component_template.template?.mappings?.properties).eql(
-        mappingsWithTimestamp
-      );
+      await uninstallPackage(PACKAGE_NAME, UPGRADE_VERSION);
     });
     it('should delete all index templates created by package policies when the package is uninstalled', async () => {
-      for (const packagePolicyId of packagePolicyIds) {
-        await deletePackagePolicy(packagePolicyId);
-      }
+      await createPackagePolicyWithDataset(agentPolicyId, 'dataset1');
       await deleteAgentPolicy(agentPolicyId);
       await uninstallPackage(PACKAGE_NAME, UPGRADE_VERSION);
 
       const dataset1PkgComponentTemplate = await getComponentTemplate('logs-dataset1@package');
       expect(dataset1PkgComponentTemplate).eql(null);
-
-      const dataset2PkgComponentTemplate = await getComponentTemplate('logs-dataset2@package');
-      expect(dataset2PkgComponentTemplate).eql(null);
     });
   });
 }

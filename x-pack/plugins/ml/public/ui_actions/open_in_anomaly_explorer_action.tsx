@@ -6,30 +6,60 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
+import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiIsOfType } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { MlCoreSetup } from '../plugin';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
-import {
-  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  AnomalyChartsFieldSelectionContext,
-  isAnomalyExplorerEmbeddable,
-  isSwimLaneEmbeddable,
-  SwimLaneDrilldownContext,
-} from '../embeddables';
-import { ENTITY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
-import { ExplorerAppState } from '../../common/types/locator';
+import type { ExplorerAppState } from '../../common/types/locator';
+import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
+import type { AnomalyChartsApi, AnomalyChartsEmbeddableApi } from '../embeddables';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
+import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
+import { isSwimLaneEmbeddableContext } from '../embeddables/anomaly_swimlane/types';
+import type { MlCoreSetup } from '../plugin';
+import { getEmbeddableTimeRange } from './get_embeddable_time_range';
+
+export interface OpenInAnomalyExplorerSwimLaneActionContext extends EmbeddableApiContext {
+  embeddable: AnomalySwimLaneEmbeddableApi;
+  /**
+   * Optional data provided by swim lane selection
+   */
+  data?: AppStateSelectedCells;
+}
+
+export interface OpenInAnomalyExplorerAnomalyChartsActionContext extends EmbeddableApiContext {
+  embeddable: AnomalyChartsEmbeddableApi;
+  /**
+   * Optional fields selected using anomaly charts
+   */
+  data?: MlEntityField[];
+}
 
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
 
+export function isAnomalyChartsEmbeddableContext(arg: unknown): arg is {
+  embeddable: AnomalyChartsApi;
+} {
+  return (
+    isPopulatedObject(arg, ['embeddable']) &&
+    apiIsOfType(arg.embeddable, ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE)
+  );
+}
+
 export function createOpenInExplorerAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<SwimLaneDrilldownContext | AnomalyChartsFieldSelectionContext> {
+): UiActionsActionDefinition<
+  OpenInAnomalyExplorerSwimLaneActionContext | OpenInAnomalyExplorerAnomalyChartsActionContext
+> {
   return {
     id: 'open-in-anomaly-explorer',
     type: OPEN_IN_ANOMALY_EXPLORER_ACTION,
-    getIconType(context): string {
+    order: 40,
+    getIconType(): string {
       return 'visTable';
     },
     getDisplayName() {
@@ -41,21 +71,20 @@ export function createOpenInExplorerAction(
       const [, pluginsStart] = await getStartServices();
       const locator = pluginsStart.share.url.locators.get(ML_APP_LOCATOR)!;
 
-      if (isSwimLaneEmbeddable(context)) {
-        const { embeddable, data } = context;
+      if (isSwimLaneEmbeddableContext(context)) {
+        const { data, embeddable } = context;
 
-        const { jobIds, timeRange, viewBy } = embeddable.getInput();
-        const { perPage, fromPage } = embeddable.getOutput();
+        const { viewBy, jobIds, perPage, fromPage } = embeddable;
 
         return locator.getUrl({
           page: 'explorer',
           pageState: {
-            jobIds,
-            timeRange,
+            jobIds: jobIds.getValue(),
+            timeRange: getEmbeddableTimeRange(embeddable),
             mlExplorerSwimlane: {
-              viewByFromPage: fromPage,
-              viewByPerPage: perPage,
-              viewByFieldName: viewBy,
+              viewByFromPage: fromPage.getValue(),
+              viewByPerPage: perPage.getValue(),
+              viewByFieldName: viewBy.getValue(),
               ...(data
                 ? {
                     selectedType: data.type,
@@ -66,19 +95,20 @@ export function createOpenInExplorerAction(
             },
           },
         });
-      } else if (isAnomalyExplorerEmbeddable(context)) {
+      } else if (isAnomalyChartsEmbeddableContext(context)) {
         const { embeddable } = context;
+        const { jobIds$, selectedEntities$ } = embeddable;
 
-        const { jobIds, timeRange } = embeddable.getInput();
-        const { entityFields } = embeddable.getOutput();
-
+        const jobIds = jobIds$?.getValue() ?? [];
         let mlExplorerFilter: ExplorerAppState['mlExplorerFilter'] | undefined;
+        const entityFieldsValue = selectedEntities$?.getValue();
+
         if (
-          Array.isArray(entityFields) &&
-          entityFields.length === 1 &&
-          entityFields[0].operation === ENTITY_FIELD_OPERATIONS.ADD
+          Array.isArray(entityFieldsValue) &&
+          entityFieldsValue.length === 1 &&
+          entityFieldsValue[0].operation === ML_ENTITY_FIELD_OPERATIONS.ADD
         ) {
-          const { fieldName, fieldValue } = entityFields[0];
+          const { fieldName, fieldValue } = entityFieldsValue[0];
           if (fieldName !== undefined && fieldValue !== undefined) {
             const influencersFilterQuery = {
               bool: {
@@ -105,7 +135,7 @@ export function createOpenInExplorerAction(
           page: 'explorer',
           pageState: {
             jobIds,
-            timeRange,
+            timeRange: getEmbeddableTimeRange(embeddable),
             // @ts-ignore QueryDslQueryContainer is not compatible with SerializableRecord
             ...(mlExplorerFilter ? ({ mlExplorerFilter } as SerializableRecord) : {}),
             query: {},
@@ -123,13 +153,8 @@ export function createOpenInExplorerAction(
         await application.navigateToUrl(anomalyExplorerUrl!);
       }
     },
-    async isCompatible({
-      embeddable,
-    }: SwimLaneDrilldownContext | AnomalyChartsFieldSelectionContext) {
-      return (
-        embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE ||
-        embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE
-      );
+    async isCompatible(context: EmbeddableApiContext) {
+      return isSwimLaneEmbeddableContext(context) || isAnomalyChartsEmbeddableContext(context);
     },
   };
 }

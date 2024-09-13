@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { merge } from 'lodash';
+import { LocationDescriptorObject } from 'history';
 import SemVer from 'semver/classes/semver';
 
 import { HttpSetup } from '@kbn/core/public';
@@ -14,11 +15,19 @@ import {
   notificationServiceMock,
   docLinksServiceMock,
   uiSettingsServiceMock,
+  themeServiceMock,
+  scopedHistoryMock,
   executionContextServiceMock,
+  applicationServiceMock,
+  fatalErrorsServiceMock,
+  httpServiceMock,
 } from '@kbn/core/public/mocks';
-import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
+import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { MAJOR_VERSION } from '../../../common';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { httpService } from '../../../public/application/services/http';
@@ -41,25 +50,55 @@ const { GlobalFlyoutProvider } = GlobalFlyout;
 export const services = {
   extensionsService: new ExtensionsService(),
   uiMetricService: new UiMetricService('index_management'),
+  notificationService: notificationServiceMock.createSetupContract(),
 };
 
 services.uiMetricService.setup({ reportUiCounter() {} } as any);
 setExtensionsService(services.extensionsService);
 setUiMetricService(services.uiMetricService);
 
+const history = scopedHistoryMock.create();
+history.createHref.mockImplementation((location: LocationDescriptorObject) => {
+  return `${location.pathname}?${location.search}`;
+});
+
 const appDependencies = {
   services,
+  history,
   core: {
-    getUrlForApp: () => {},
+    getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
     executionContext: executionContextServiceMock.createStartContract(),
+    http: httpServiceMock.createSetupContract(),
+    application: applicationServiceMock.createStartContract(),
+    fatalErrors: fatalErrorsServiceMock.createSetupContract(),
   },
-  plugins: {},
+  plugins: {
+    usageCollection: usageCollectionPluginMock.createSetupContract(),
+    isFleetEnabled: false,
+    share: sharePluginMock.createStartContract(),
+  },
+  // Default stateful configuration
+  config: {
+    enableLegacyTemplates: true,
+    enableIndexActions: true,
+    enableIndexStats: true,
+    enableDataStreamStats: true,
+    editableIndexSettings: 'all',
+    enableMappingsSourceFieldSection: true,
+    enableTogglingDataRetention: true,
+    enableSemanticText: true,
+  },
+  overlays: {
+    openConfirm: jest.fn(),
+  },
 } as any;
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   uiSettings: uiSettingsServiceMock.createSetupContract(),
+  settings: settingsServiceMock.createStartContract(),
+  theme: themeServiceMock.createStartContract(),
   kibanaVersion: {
     get: () => kibanaVersion,
   },
@@ -77,8 +116,13 @@ export const WithAppDependencies =
   (Comp: any, httpSetup: HttpSetup, overridingDependencies: any = {}) =>
   (props: any) => {
     httpService.setup(httpSetup);
-    const mergedDependencies = merge({}, appDependencies, overridingDependencies);
-
+    const mergedDependencies = merge(
+      {
+        services: { httpService },
+      },
+      appDependencies,
+      overridingDependencies
+    );
     return (
       <KibanaReactContextProvider>
         <AppContextProvider value={mergedDependencies}>

@@ -10,64 +10,61 @@
 
 import {
   EuiButtonIcon,
-  EuiLoadingSpinner,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiToolTip,
   EuiWindowEvent,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { i18n as i18nTranslate } from '@kbn/i18n';
-import { Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { noop, omit } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Switch, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import {
-  tableDefaults,
   dataTableActions,
   dataTableSelectors,
   FILTER_OPEN,
+  tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
-import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
-import { FormattedDate } from '../../../../common/components/formatted_date';
 import {
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import type { Rule } from '../../../rule_management/logic';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { StepAboutRuleToggleDetails } from '../../../../detections/components/rules/step_about_rule_details';
+import { StepAboutRuleToggleDetails } from '../../../rule_creation/components/step_about_rule_details';
 import { AlertsHistogramPanel } from '../../../../detections/components/alerts_kpis/alerts_histogram_panel';
 import { useUserData } from '../../../../detections/components/user_info';
-import { StepDefineRule } from '../../../../detections/components/rules/step_define_rule';
-import { StepScheduleRule } from '../../../../detections/components/rules/step_schedule_rule';
+import { StepRuleActionsReadOnly } from '../../../rule_creation/components/step_rule_actions';
 import {
   buildAlertsFilter,
   buildAlertStatusFilter,
@@ -75,11 +72,13 @@ import {
   buildThreatMatchFilter,
 } from '../../../../detections/components/alerts_table/default_config';
 import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
-import { StepPanel } from '../../../../detections/components/rules/step_panel';
+import { StepPanel } from '../../../rule_creation/components/step_panel';
 import {
+  getMachineLearningJobId,
   getStepsData,
   redirectToDetections,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
+import { CreatedBy, UpdatedBy } from '../../../../detections/components/rules/rule_info';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
@@ -88,12 +87,7 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../app/types';
-import {
-  ALERTS_TABLE_REGISTRY_CONFIG_IDS,
-  APP_UI_ID,
-  DEFAULT_INDEX_KEY,
-  DEFAULT_THREAT_INDEX_KEY,
-} from '../../../../../common/constants';
+import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, APP_UI_ID } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../../explore/hosts/pages/display';
 
@@ -103,13 +97,13 @@ import {
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import {
-  explainLackOfPermission,
   canEditRuleWithActions,
-  isBoolean,
+  explainLackOfPermission,
   hasUserCRUDPermission,
+  isBoolean,
 } from '../../../../common/utils/privileges';
 
 import {
@@ -117,29 +111,46 @@ import {
   RuleStatusFailedCallOut,
   ruleStatusI18n,
 } from '../../../../detections/components/rules/rule_execution_status';
-import { ExecutionEventsTable, useRuleExecutionSettings } from '../../../rule_monitoring';
+import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
+import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 
-import * as detectionI18n from '../../../../detections/pages/detection_engine/translations';
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
+
 import { RuleDetailsContextProvider } from './rule_details_context';
-import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { RuleResponse, Status } from '../../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
-import { useSignalHelpers } from '../../../../common/containers/sourcerer/use_signal_helpers';
+import { useSignalHelpers } from '../../../../sourcerer/containers/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
-import type { NavTab } from '../../../../common/components/navigation/types';
 import { EditRuleSettingButtonLink } from '../../../../detections/pages/detection_engine/rules/details/components/edit_rule_settings_button_link';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
+import { useAsyncConfirmation } from '../../../rule_management_ui/components/rules_table/rules_table/use_async_confirmation';
+import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
+import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import { RuleDefinitionSection } from '../../../rule_management/components/rule_details/rule_definition_section';
+import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
+import { CustomizedPrebuiltRuleBadge } from '../../../rule_management/components/rule_details/customized_prebuilt_rule_badge';
+import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
+import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
+// eslint-disable-next-line no-restricted-imports
+import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
+import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
+
+const RULE_EXCEPTION_LIST_TYPES = [
+  ExceptionListTypeEnum.DETECTION,
+  ExceptionListTypeEnum.RULE_DEFAULT,
+];
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -157,21 +168,13 @@ const StyledMinHeightTabContainer = styled.div`
   min-height: 800px;
 `;
 
-export enum RuleDetailTabs {
-  alerts = 'alerts',
-  exceptions = 'rule_exceptions',
-  endpointExceptions = 'endpoint_exceptions',
-  executionResults = 'execution_results',
-  executionEvents = 'execution_events',
-}
-
-export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
-  [RuleDetailTabs.alerts]: detectionI18n.ALERT,
-  [RuleDetailTabs.exceptions]: i18n.EXCEPTIONS_TAB,
-  [RuleDetailTabs.endpointExceptions]: i18n.ENDPOINT_EXCEPTIONS_TAB,
-  [RuleDetailTabs.executionResults]: i18n.EXECUTION_RESULTS_TAB,
-  [RuleDetailTabs.executionEvents]: i18n.EXECUTION_EVENTS_TAB,
-};
+/**
+ * Wrapper for the About, Definition and Schedule sections.
+ * - Allows for overflow wrapping of extremely long text, that might otherwise break the layout.
+ */
+const RuleFieldsSectionWrapper = styled.div`
+  overflow-wrap: anywhere;
+`;
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
@@ -181,7 +184,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   clearSelected,
 }) => {
   const {
-    data,
+    analytics,
+    i18n: i18nStart,
+    theme,
     application: {
       navigateToApp,
       capabilities: { actions },
@@ -228,16 +233,16 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
-  const {
-    indexPattern,
-    runtimeMappings,
-    loading: isLoadingIndexPattern,
-  } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView, loading: isLoadingIndexPattern } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
+
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{
     detailName: string;
     tabName: string;
   }>();
+
   const {
     rule: maybeRule,
     refresh: refreshRule,
@@ -246,71 +251,34 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   } = useRuleWithFallback(ruleId);
 
   const { pollForSignalIndex } = useSignalHelpers();
-  const [rule, setRule] = useState<Rule | null>(null);
+  const [rule, setRule] = useState<RuleResponse | null>(null);
   const isLoading = ruleLoading && rule == null;
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
   const startMlJobsIfNeeded = useCallback(async () => {
-    await startMlJobs(rule?.machine_learning_job_id);
+    if (rule) {
+      await startMlJobs(getMachineLearningJobId(rule));
+    }
   }, [rule, startMlJobs]);
 
-  const ruleDetailTabs = useMemo(
-    (): Record<RuleDetailTabs, NavTab> => ({
-      [RuleDetailTabs.alerts]: {
-        id: RuleDetailTabs.alerts,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.alerts],
-        disabled: false,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.alerts}`,
-      },
-      [RuleDetailTabs.exceptions]: {
-        id: RuleDetailTabs.exceptions,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.exceptions],
-        disabled: rule == null,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.exceptions}`,
-      },
-      [RuleDetailTabs.endpointExceptions]: {
-        id: RuleDetailTabs.endpointExceptions,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.endpointExceptions],
-        disabled: rule == null,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.endpointExceptions}`,
-      },
-      [RuleDetailTabs.executionResults]: {
-        id: RuleDetailTabs.executionResults,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionResults],
-        disabled: !isExistingRule,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.executionResults}`,
-      },
-      [RuleDetailTabs.executionEvents]: {
-        id: RuleDetailTabs.executionEvents,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionEvents],
-        disabled: !isExistingRule,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.executionEvents}`,
-      },
-    }),
-    [isExistingRule, rule, ruleId]
-  );
+  const pageTabs = useRuleDetailsTabs({ rule, ruleId, isExistingRule, hasIndexRead });
 
-  const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
+  const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
+    useBoolState();
 
-  const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
+  const [confirmDeletion, handleDeletionConfirm, handleDeletionCancel] = useAsyncConfirmation({
+    onInit: showDeleteConfirmation,
+    onFinish: hideDeleteConfirmation,
+  });
+
+  const { aboutRuleData, modifiedAboutRuleDetailsData, ruleActionsData } =
     rule != null
       ? getStepsData({ rule, detailsView: true })
       : {
           aboutRuleData: null,
           modifiedAboutRuleDetailsData: null,
-          defineRuleData: null,
-          scheduleRuleData: null,
+          ruleActionsData: null,
         };
-  const [dataViewTitle, setDataViewTitle] = useState<string>();
-  useEffect(() => {
-    const fetchDataViewTitle = async () => {
-      if (defineRuleData?.dataViewId != null && defineRuleData?.dataViewId !== '') {
-        const dataView = await data.dataViews.get(defineRuleData?.dataViewId);
-        setDataViewTitle(dataView.title);
-      }
-    };
-    fetchDataViewTitle();
-  }, [data.dataViews, defineRuleData?.dataViewId]);
 
   const { showBuildingBlockAlerts, setShowBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } =
     useDataTableFilters(TableId.alertsOnRuleDetailsPage);
@@ -319,31 +287,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
-  const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
-
-  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery(rule?.saved_id, {
-    ruleType: rule?.type,
-  });
-
-  const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
-
-  useEffect(() => {
-    const fetchDataViews = async () => {
-      const dataViewsRefs = await data.dataViews.getIdsWithTitle();
-      if (dataViewsRefs.length > 0) {
-        const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
-          (acc, item) => ({
-            ...acc,
-            [item.id]: item,
-          }),
-          {}
-        );
-        setDataViewOptions(dataViewIdIndexPatternMap);
-      }
-    };
-    fetchDataViews();
-  }, [data.dataViews]);
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 
@@ -368,74 +311,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
   }, [maybeRule]);
 
-  useEffect(() => {
-    if (rule) {
-      const outcome = rule.outcome;
-      if (spacesApi && outcome === 'aliasMatch') {
-        // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
-        const path = `rules/id/${rule.id}${window.location.search}${window.location.hash}`;
-        spacesApi.ui.redirectLegacyUrl({
-          path,
-          aliasPurpose: rule.alias_purpose,
-          objectNoun: i18nTranslate.translate(
-            'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
-            { defaultMessage: 'rule' }
-          ),
-        });
-      }
-    }
-  }, [rule, spacesApi]);
-
-  const getLegacyUrlConflictCallout = useMemo(() => {
-    if (rule?.alias_target_id != null && spacesApi && rule.outcome === 'conflict') {
-      const aliasTargetId = rule.alias_target_id;
-      // We have resolved to one rule, but there is another one with a legacy URL associated with this page. Display a
-      // callout with a warning for the user, and provide a way for them to navigate to the other rule.
-      const otherRulePath = `rules/id/${aliasTargetId}${window.location.search}${window.location.hash}`;
-      return (
-        <>
-          <EuiSpacer />
-          {spacesApi.ui.components.getLegacyUrlConflict({
-            objectNoun: i18nTranslate.translate(
-              'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
-              {
-                defaultMessage: 'rule',
-              }
-            ),
-            currentObjectId: rule.id,
-            otherObjectId: aliasTargetId,
-            otherObjectPath: otherRulePath,
-          })}
-        </>
-      );
-    }
-    return null;
-  }, [rule, spacesApi]);
-
-  const ruleExecutionSettings = useRuleExecutionSettings();
-
-  useEffect(() => {
-    const hiddenTabs = [];
-
-    if (!hasIndexRead) {
-      hiddenTabs.push(RuleDetailTabs.alerts);
-    }
-    if (!ruleExecutionSettings.extendedLogging.isEnabled) {
-      hiddenTabs.push(RuleDetailTabs.executionEvents);
-    }
-    if (rule != null) {
-      const hasEndpointList = (rule.exceptions_list ?? []).some(
-        (list) => list.type === ExceptionListTypeEnum.ENDPOINT
-      );
-      if (!hasEndpointList) {
-        hiddenTabs.push(RuleDetailTabs.endpointExceptions);
-      }
-    }
-
-    const tabs = omit<Record<RuleDetailTabs, NavTab>>(hiddenTabs, ruleDetailTabs);
-
-    setTabs(tabs);
-  }, [hasIndexRead, rule, ruleDetailTabs, ruleExecutionSettings]);
+  useLegacyUrlRedirect({ rule, spacesApi });
 
   const showUpdating = useMemo(
     () => isLoadingIndexPattern || isAlertsLoading || loading,
@@ -464,33 +340,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     () =>
       rule ? (
         [
-          <FormattedMessage
-            id="xpack.securitySolution.detectionEngine.ruleDetails.ruleCreationDescription"
-            defaultMessage="Created by: {by} on {date}"
-            values={{
-              by: rule?.created_by ?? i18n.UNKNOWN,
-              date: (
-                <FormattedDate
-                  value={rule?.created_at ?? new Date().toISOString()}
-                  fieldName="createdAt"
-                />
-              ),
-            }}
-          />,
+          <CreatedBy createdBy={rule?.created_by} createdAt={rule?.created_at} />,
           rule?.updated_by != null ? (
-            <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.ruleDetails.ruleUpdateDescription"
-              defaultMessage="Updated by: {by} on {date}"
-              values={{
-                by: rule?.updated_by ?? i18n.UNKNOWN,
-                date: (
-                  <FormattedDate
-                    value={rule?.updated_at ?? new Date().toISOString()}
-                    fieldName="updatedAt"
-                  />
-                ),
-              }}
-            />
+            <UpdatedBy updatedBy={rule?.updated_by} updatedAt={rule?.updated_at} />
           ) : (
             ''
           ),
@@ -513,19 +365,21 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
   );
 
+  const isBuildingBlockTypeNotNull = rule?.building_block_type != null;
   // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
   useEffect(() => {
-    setShowBuildingBlockAlerts(rule?.building_block_type != null);
-  }, [rule, setShowBuildingBlockAlerts]);
+    setShowBuildingBlockAlerts(isBuildingBlockTypeNotNull);
+  }, [isBuildingBlockTypeNotNull, setShowBuildingBlockAlerts]);
 
+  const ruleRuleId = rule?.rule_id ?? '';
   const alertDefaultFilters = useMemo(
     () => [
-      ...buildAlertsFilter(rule?.rule_id ?? ''),
+      ...buildAlertsFilter(ruleRuleId ?? ''),
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildAlertStatusFilter(filterGroup),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
+    [ruleRuleId, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
   );
 
   const alertMergedFilters = useMemo(
@@ -539,23 +393,36 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const lastExecutionMessage = lastExecution?.message ?? '';
 
   const ruleStatusInfo = useMemo(() => {
-    return ruleLoading ? (
-      <EuiFlexItem>
-        <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
-      </EuiFlexItem>
-    ) : (
-      <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
-        <EuiButtonIcon
-          data-test-subj="refreshButton"
-          color="primary"
-          onClick={refreshRule}
-          iconType="refresh"
-          aria-label={ruleI18n.REFRESH}
-          isDisabled={!isExistingRule}
-        />
-      </RuleStatus>
+    return (
+      <>
+        {ruleLoading ? (
+          <EuiFlexItem>
+            <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
+          </EuiFlexItem>
+        ) : (
+          <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
+            <EuiButtonIcon
+              data-test-subj="ruleLastExecutionStatusRefreshButton"
+              color="primary"
+              onClick={refreshRule}
+              iconType="refresh"
+              aria-label={ruleI18n.REFRESH}
+              isDisabled={!isExistingRule}
+            />
+          </RuleStatus>
+        )}
+        <EuiFlexItem grow={false}>
+          <RuleSnoozeBadge ruleId={ruleId} showTooltipInline />
+        </EuiFlexItem>
+      </>
     );
-  }, [lastExecutionStatus, lastExecutionDate, ruleLoading, isExistingRule, refreshRule]);
+  }, [ruleId, lastExecutionStatus, lastExecutionDate, ruleLoading, isExistingRule, refreshRule]);
+
+  // Extract rule index if available on rule type
+  let ruleIndex: string[] | undefined;
+  if (rule != null && 'index' in rule && Array.isArray(rule.index)) {
+    ruleIndex = rule.index;
+  }
 
   const ruleError = useMemo(() => {
     return ruleLoading ? (
@@ -564,12 +431,22 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       </EuiFlexItem>
     ) : (
       <RuleStatusFailedCallOut
+        ruleName={rule?.immutable ? rule?.name : undefined}
+        dataSources={rule?.immutable ? ruleIndex : undefined}
         status={lastExecutionStatus}
         date={lastExecutionDate}
         message={lastExecutionMessage}
       />
     );
-  }, [lastExecutionStatus, lastExecutionDate, lastExecutionMessage, ruleLoading]);
+  }, [
+    lastExecutionStatus,
+    lastExecutionDate,
+    lastExecutionMessage,
+    ruleLoading,
+    rule?.immutable,
+    rule?.name,
+    ruleIndex,
+  ]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -613,13 +490,19 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
+  const currentAlertStatusFilterValue = useMemo(() => [filterGroup], [filterGroup]);
+  const updatedAtValue = useMemo(() => {
+    return timelinesUi.getLastUpdated({
+      updatedAt: updatedAt || Date.now(),
+      showUpdating,
+    });
+  }, [updatedAt, showUpdating, timelinesUi]);
 
   const renderGroupedAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
       return (
         <AlertsTableComponent
           configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}
-          flyoutSize="m"
           inputFilters={[...alertMergedFilters, ...groupingFilters]}
           tableId={TableId.alertsOnRuleDetailsPage}
           onRuleChange={refreshRule}
@@ -635,6 +518,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     cancelRuleDuplication,
     confirmRuleDuplication,
   } = useBulkDuplicateExceptionsConfirmation();
+
+  const {
+    isManualRuleRunConfirmationVisible,
+    showManualRuleRunConfirmation,
+    cancelManualRuleRun,
+    confirmManualRuleRun,
+  } = useManualRuleRunConfirmation();
 
   if (
     redirectToDetections(
@@ -653,6 +543,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const defaultRuleStackByOption: AlertsStackByField = 'event.category';
 
+  const hasNotificationActions = ruleActionsData != null && ruleActionsData.actions.length > 0;
+  const hasResponseActions =
+    ruleActionsData != null && (ruleActionsData.responseActions || []).length > 0;
+  const hasActions = hasNotificationActions || hasResponseActions;
+
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
@@ -664,13 +559,30 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           rulesCount={1}
         />
       )}
+      {isDeleteConfirmationVisible && (
+        <EuiConfirmModal
+          title={ruleI18n.SINGLE_DELETE_CONFIRMATION_TITLE}
+          onCancel={handleDeletionCancel}
+          onConfirm={handleDeletionConfirm}
+          confirmButtonText={ruleI18n.DELETE_CONFIRMATION_CONFIRM}
+          cancelButtonText={ruleI18n.DELETE_CONFIRMATION_CANCEL}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+          data-test-subj="deleteRulesConfirmationModal"
+        >
+          {i18n.DELETE_CONFIRMATION_BODY}
+        </EuiConfirmModal>
+      )}
+      {isManualRuleRunConfirmationVisible && (
+        <ManualRuleRunModal onCancel={cancelManualRuleRun} onConfirm={confirmManualRuleRun} />
+      )}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
         <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
           <SiemSearchBar
             id={InputsModelId.global}
             pollForSignalIndex={pollForSignalIndex}
-            indexPattern={indexPattern}
+            sourcererDataView={sourcererDataView}
           />
         </FiltersGlobal>
         <RuleDetailsContextProvider>
@@ -680,15 +592,16 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 border
                 subtitle={subTitle}
                 subtitle2={
-                  <>
-                    <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
+                  <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
+                    <CustomizedPrebuiltRuleBadge rule={rule} />
+                    <EuiFlexGroup alignItems="center" gutterSize="xs">
                       <EuiFlexItem grow={false}>
                         {ruleStatusI18n.STATUS}
                         {':'}
                       </EuiFlexItem>
                       {ruleStatusInfo}
                     </EuiFlexGroup>
-                  </>
+                  </EuiFlexGroup>
                 }
                 title={title}
                 badgeOptions={badgeOptions}
@@ -708,6 +621,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         <RuleSwitch
                           id={rule?.id ?? '-1'}
                           isDisabled={
+                            !rule ||
                             !isExistingRule ||
                             !canEditRuleWithActions(rule, hasActionsPrivileges) ||
                             !hasUserCRUDPermission(canUserCRUD) ||
@@ -716,6 +630,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           enabled={isExistingRule && (rule?.enabled ?? false)}
                           startMlJobsIfNeeded={startMlJobsIfNeeded}
                           onChange={handleOnChangeEnabledRule}
+                          ruleName={rule?.name}
                         />
                         <EuiFlexItem>{i18n.ENABLE_RULE}</EuiFlexItem>
                       </EuiFlexGroup>
@@ -749,6 +664,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             hasActionsPrivileges
                           )}
                           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
+                          showManualRuleRunConfirmation={showManualRuleRunConfirmation}
+                          confirmDeletion={confirmDeletion}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -756,63 +673,60 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </EuiFlexGroup>
               </HeaderPage>
               {ruleError}
-              {getLegacyUrlConflictCallout}
+              <LegacyUrlConflictCallOut rule={rule} spacesApi={spacesApi} />
               <EuiSpacer />
-              <EuiFlexGroup>
-                <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
-                  <StepAboutRuleToggleDetails
-                    loading={isLoading}
-                    stepData={aboutRuleData}
-                    stepDataDetails={modifiedAboutRuleDetailsData}
-                  />
-                </EuiFlexItem>
+              <RuleFieldsSectionWrapper>
+                <EuiFlexGroup>
+                  <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
+                    {rule !== null && (
+                      <StepAboutRuleToggleDetails
+                        loading={isLoading}
+                        stepData={aboutRuleData}
+                        stepDataDetails={modifiedAboutRuleDetailsData}
+                        rule={rule}
+                      />
+                    )}
+                  </EuiFlexItem>
 
-                <EuiFlexItem grow={1}>
-                  <EuiFlexGroup direction="column">
-                    <EuiFlexItem component="section" grow={1} data-test-subj="defineRule">
-                      <StepPanel
-                        loading={isLoading || isSavedQueryLoading}
-                        title={ruleI18n.DEFINITION}
-                      >
-                        {defineRuleData != null && !isSavedQueryLoading && !isStartingJobs && (
-                          <StepDefineRule
-                            descriptionColumns="singleSplit"
-                            isReadOnlyView={true}
-                            isLoading={false}
-                            defaultValues={{
-                              dataViewTitle,
-                              ...defineRuleData,
-                              queryBar: savedQueryBar ?? defineRuleData.queryBar,
-                            }}
-                            kibanaDataViews={dataViewOptions}
-                            indicesConfig={indicesConfig}
-                            threatIndicesConfig={threatIndicesConfig}
-                          />
-                        )}
-                      </StepPanel>
-                    </EuiFlexItem>
-                    <EuiSpacer />
-                    <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
-                      <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                        {scheduleRuleData != null && (
-                          <StepScheduleRule
-                            descriptionColumns="singleSplit"
-                            isReadOnlyView={true}
-                            isLoading={false}
-                            defaultValues={scheduleRuleData}
-                          />
-                        )}
-                      </StepPanel>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                  <EuiFlexItem grow={1}>
+                    <EuiFlexGroup direction="column">
+                      <EuiFlexItem component="section" grow={1} data-test-subj="defineRule">
+                        <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
+                          {rule !== null && !isStartingJobs && (
+                            <RuleDefinitionSection
+                              rule={rule}
+                              isInteractive
+                              dataTestSubj="definitionRule"
+                            />
+                          )}
+                        </StepPanel>
+                      </EuiFlexItem>
+                      <EuiSpacer />
+                      <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
+                        <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
+                          {rule != null && <RuleScheduleSection rule={rule} />}
+                        </StepPanel>
+                      </EuiFlexItem>
+                      {hasActions && (
+                        <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
+                          <StepPanel loading={isLoading} title={ruleI18n.ACTIONS}>
+                            <StepRuleActionsReadOnly
+                              addPadding={false}
+                              defaultValues={ruleActionsData}
+                            />
+                          </StepPanel>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </RuleFieldsSectionWrapper>
               <EuiSpacer />
-              <TabNavigationWithBreadcrumbs navTabs={pageTabs} />
+              <TabNavigation navTabs={pageTabs} />
               <EuiSpacer />
             </Display>
             <StyledMinHeightTabContainer>
-              <Switch>
+              <Routes>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                   <>
                     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -822,29 +736,21 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           onFilterGroupChanged={onFilterGroupChangedCallback}
                         />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        {updatedAt &&
-                          timelinesUi.getLastUpdated({
-                            updatedAt: updatedAt || Date.now(),
-                            showUpdating,
-                          })}
-                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>{updatedAtValue}</EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiSpacer size="l" />
                     <Display show={!globalFullScreen}>
                       <AlertsHistogramPanel
                         filters={alertMergedFilters}
-                        query={query}
                         signalIndexName={signalIndexName}
                         defaultStackByOption={defaultRuleStackByOption}
                         updateDateRange={updateDateRangeCallback}
-                        runtimeMappings={runtimeMappings}
                       />
                       <EuiSpacer />
                     </Display>
                     {ruleId != null && (
                       <GroupedAlertsTable
-                        currentAlertStatusFilterValue={filterGroup}
+                        currentAlertStatusFilterValue={currentAlertStatusFilterValue}
                         defaultFilters={alertMergedFilters}
                         from={from}
                         globalFilters={filters}
@@ -853,7 +759,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         hasIndexWrite={hasIndexWrite ?? false}
                         loading={loading}
                         renderChildComponent={renderGroupedAlertTable}
-                        runtimeMappings={runtimeMappings}
+                        runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
                         signalIndexName={signalIndexName}
                         tableId={TableId.alertsOnRuleDetailsPage}
                         to={to}
@@ -864,10 +770,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
                   <ExceptionsViewer
                     rule={rule}
-                    listTypes={[
-                      ExceptionListTypeEnum.DETECTION,
-                      ExceptionListTypeEnum.RULE_DEFAULT,
-                    ]}
+                    listTypes={RULE_EXCEPTION_LIST_TYPES}
                     onRuleChange={refreshRule}
                     isViewReadOnly={!isExistingRule}
                     data-test-subj="exceptionTab"
@@ -876,21 +779,30 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <Route
                   path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.endpointExceptions})`}
                 >
-                  <ExceptionsViewer
+                  <EndpointExceptionsViewer
                     rule={rule}
-                    listTypes={[ExceptionListTypeEnum.ENDPOINT]}
                     onRuleChange={refreshRule}
                     isViewReadOnly={!isExistingRule}
                     data-test-subj="endpointExceptionsTab"
                   />
                 </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}>
-                  <ExecutionLogTable ruleId={ruleId} selectAlertsTab={navigateToAlertsTab} />
+                  <>
+                    <ExecutionLogTable
+                      ruleId={ruleId}
+                      selectAlertsTab={navigateToAlertsTab}
+                      analytics={analytics}
+                      i18n={i18nStart}
+                      theme={theme}
+                    />
+                    <EuiSpacer size="xl" />
+                    <RuleBackfillsInfo ruleId={ruleId} />
+                  </>
                 </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}>
                   <ExecutionEventsTable ruleId={ruleId} />
                 </Route>
-              </Switch>
+              </Routes>
             </StyledMinHeightTabContainer>
           </SecuritySolutionPageWrapper>
         </RuleDetailsContextProvider>

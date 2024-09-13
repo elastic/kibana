@@ -12,9 +12,10 @@ import {
   EuiIcon,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiFacetGroup,
   EuiFacetButton,
+  EuiPanel,
   EuiToolTip,
   EuiSpacer,
 } from '@elastic/eui';
@@ -136,9 +137,9 @@ export class LayerWizardSelect extends Component<Props, State> {
   render() {
     if (!this.state.hasLoadedWizards) {
       return (
-        <div>
-          <EuiCard title={''} description={<EuiLoadingContent lines={2} />} layout="horizontal" />
-        </div>
+        <EuiPanel>
+          <EuiSkeletonText lines={2} />
+        </EuiPanel>
       );
     }
 
@@ -159,7 +160,13 @@ export class LayerWizardSelect extends Component<Props, State> {
           <EuiCard
             title={layerWizard.title}
             titleSize="xs"
-            betaBadgeProps={{ label: layerWizard.isBeta ? 'beta' : '' }}
+            betaBadgeProps={{
+              label: layerWizard.isBeta
+                ? i18n.translate('xpack.maps.layerWizardSelect.technicalPreviewLabel', {
+                    defaultMessage: 'Technical preview',
+                  })
+                : '',
+            }}
             icon={icon}
             onClick={onClick}
             description={layerWizard.description}

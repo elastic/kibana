@@ -6,43 +6,46 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
+import type {
+  RuleResponse,
+  RuleSignatureId,
+} from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
+import { findRules } from '../../../rule_management/logic/search/find_rules';
 import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
-import { internalRuleToAPIResponse } from '../../../rule_management/normalization/rule_converters';
-import type { PrebuiltRuleVersionInfo } from '../../model/rule_versions/prebuilt_rule_version_info';
+import { internalRuleToAPIResponse } from '../../../rule_management/logic/detection_rules_client/converters/internal_rule_to_api_response';
 
 export interface IPrebuiltRuleObjectsClient {
-  fetchInstalledRules(): Promise<FetchInstalledRulesResult>;
-}
-
-export interface FetchInstalledRulesResult {
-  installedRules: RuleResponse[];
-  installedVersions: PrebuiltRuleVersionInfo[];
+  fetchAllInstalledRules(): Promise<RuleResponse[]>;
+  fetchInstalledRulesByIds(ruleIds: string[]): Promise<RuleResponse[]>;
 }
 
 export const createPrebuiltRuleObjectsClient = (
   rulesClient: RulesClient
 ): IPrebuiltRuleObjectsClient => {
   return {
-    fetchInstalledRules: (): Promise<FetchInstalledRulesResult> => {
+    fetchAllInstalledRules: (): Promise<RuleResponse[]> => {
       return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRules', async () => {
         const rulesData = await getExistingPrepackagedRules({ rulesClient });
         const rules = rulesData.map((rule) => internalRuleToAPIResponse(rule));
-        const versions = rules.map((rule) => convertRuleToVersionInfo(rule));
-        return {
-          installedRules: rules,
-          installedVersions: versions,
-        };
+        return rules;
+      });
+    },
+    fetchInstalledRulesByIds: (ruleIds: RuleSignatureId[]): Promise<RuleResponse[]> => {
+      return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRulesByIds', async () => {
+        const { data } = await findRules({
+          rulesClient,
+          perPage: ruleIds.length,
+          page: 1,
+          sortField: 'createdAt',
+          sortOrder: 'desc',
+          fields: undefined,
+          filter: `alert.attributes.params.ruleId:(${ruleIds.join(' or ')})`,
+        });
+
+        const rules = data.map((rule) => internalRuleToAPIResponse(rule));
+        return rules;
       });
     },
   };
-};
-
-const convertRuleToVersionInfo = (rule: RuleResponse): PrebuiltRuleVersionInfo => {
-  const versionInfo: PrebuiltRuleVersionInfo = {
-    rule_id: rule.rule_id,
-    version: rule.version,
-  };
-  return versionInfo;
 };

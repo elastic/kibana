@@ -21,6 +21,38 @@
     "functions": [
       {
         "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.PerformanceContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "PerformanceContextProvider",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<{ children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; } & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-ebt-tools/src/performance_metrics/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.PerformanceContextProvider.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
         "id": "def-common.registerPerformanceMetricEventType",
         "type": "Function",
         "tags": [
@@ -32,13 +64,7 @@
         ],
         "signature": [
           "(analytics: Pick<",
-          {
-            "pluginId": "@kbn/analytics-client",
-            "scope": "common",
-            "docId": "kibKbnAnalyticsClientPluginApi",
-            "section": "def-common.IAnalyticsClient",
-            "text": "IAnalyticsClient"
-          },
+          "IAnalyticsClient",
           ", \"registerEventType\">) => void"
         ],
         "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
@@ -56,13 +82,7 @@
             ],
             "signature": [
               "Pick<",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.IAnalyticsClient",
-                "text": "IAnalyticsClient"
-              },
+              "IAnalyticsClient",
               ", \"registerEventType\">"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
@@ -85,13 +105,7 @@
         ],
         "signature": [
           "(analytics: Pick<",
-          {
-            "pluginId": "@kbn/analytics-client",
-            "scope": "common",
-            "docId": "kibKbnAnalyticsClientPluginApi",
-            "section": "def-common.IAnalyticsClient",
-            "text": "IAnalyticsClient"
-          },
+          "IAnalyticsClient",
           ", \"reportEvent\">, eventData: ",
           {
             "pluginId": "@kbn/ebt-tools",
@@ -117,13 +131,7 @@
             ],
             "signature": [
               "Pick<",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.IAnalyticsClient",
-                "text": "IAnalyticsClient"
-              },
+              "IAnalyticsClient",
               ", \"reportEvent\">"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
@@ -155,6 +163,83 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.usePageReady",
+        "type": "Function",
+        "tags": [],
+        "label": "usePageReady",
+        "description": [],
+        "signature": [
+          "(state: { customMetrics?: ",
+          "CustomMetrics",
+          " | undefined; isReady: boolean; }) => void"
+        ],
+        "path": "packages/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.usePageReady.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "path": "packages/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ebt-tools",
+                "id": "def-common.usePageReady.$1.customMetrics",
+                "type": "Object",
+                "tags": [],
+                "label": "customMetrics",
+                "description": [],
+                "signature": [
+                  "CustomMetrics",
+                  " | undefined"
+                ],
+                "path": "packages/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ebt-tools",
+                "id": "def-common.usePageReady.$1.isReady",
+                "type": "boolean",
+                "tags": [],
+                "label": "isReady",
+                "description": [],
+                "path": "packages/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.usePerformanceContext",
+        "type": "Function",
+        "tags": [],
+        "label": "usePerformanceContext",
+        "description": [],
+        "signature": [
+          "() => ",
+          "PerformanceApi"
+        ],
+        "path": "packages/kbn-ebt-tools/src/performance_metrics/context/use_performance_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -374,6 +459,134 @@
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.PerformanceMetricEvent.key6",
+            "type": "string",
+            "tags": [
+              "group"
+            ],
+            "label": "key6",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.PerformanceMetricEvent.value6",
+            "type": "number",
+            "tags": [
+              "group"
+            ],
+            "label": "value6",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.PerformanceMetricEvent.key7",
+            "type": "string",
+            "tags": [
+              "group"
+            ],
+            "label": "key7",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.PerformanceMetricEvent.value7",
+            "type": "number",
+            "tags": [
+              "group"
+            ],
+            "label": "value7",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.PerformanceMetricEvent.key8",
+            "type": "string",
+            "tags": [
+              "group"
+            ],
+            "label": "key8",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.PerformanceMetricEvent.value8",
+            "type": "number",
+            "tags": [
+              "group"
+            ],
+            "label": "value8",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.PerformanceMetricEvent.key9",
+            "type": "string",
+            "tags": [
+              "group"
+            ],
+            "label": "key9",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.PerformanceMetricEvent.value9",
+            "type": "number",
+            "tags": [
+              "group"
+            ],
+            "label": "value9",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -381,6 +594,43 @@
     ],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.perfomanceMarkers",
+        "type": "Object",
+        "tags": [],
+        "label": "perfomanceMarkers",
+        "description": [],
+        "path": "packages/kbn-ebt-tools/src/performance_metrics/performance_markers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.perfomanceMarkers.startPageChange",
+            "type": "string",
+            "tags": [],
+            "label": "startPageChange",
+            "description": [],
+            "path": "packages/kbn-ebt-tools/src/performance_metrics/performance_markers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.perfomanceMarkers.endPageReady",
+            "type": "string",
+            "tags": [],
+            "label": "endPageReady",
+            "description": [],
+            "path": "packages/kbn-ebt-tools/src/performance_metrics/performance_markers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

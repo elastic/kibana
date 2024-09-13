@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/serverless",
+  "owner": "@elastic/appex-sharedux",
+  "description": "The core Serverless plugin, providing APIs to Serverless Project plugins.",
+  "plugin": {
+    "id": "serverless",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "serverless",
+      "plugin",
+    ],
+    "requiredPlugins": [
+      "cloud"
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

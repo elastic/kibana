@@ -14,7 +14,9 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
+import { initGetSpaceApi } from './get';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -25,7 +27,6 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { initGetSpaceApi } from './get';
 
 describe('GET space', () => {
   const spacesSavedObjects = createSpaces();
@@ -41,7 +42,7 @@ describe('GET space', () => {
 
     const log = loggingSystemMock.create().get('spaces');
 
-    const clientService = new SpacesClientService(jest.fn());
+    const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -53,7 +54,7 @@ describe('GET space', () => {
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
@@ -61,11 +62,12 @@ describe('GET space', () => {
     });
 
     initGetSpaceApi({
-      externalRouter: router,
+      router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
+      isServerless: false,
     });
 
     return {

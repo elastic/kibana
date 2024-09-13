@@ -6,26 +6,28 @@
  */
 
 import expect from '@kbn/expect';
-import { compressToEncodedURIComponent } from 'lz-string';
 import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const testIndex = 'test-index';
+const testQuery = {
+  query: {
+    match_all: {},
+  },
+};
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common']);
-  const testSubjects = getService('testSubjects');
-  const aceEditor = getService('aceEditor');
+  const PageObjects = getPageObjects(['common', 'searchProfiler']);
   const retry = getService('retry');
   const security = getService('security');
   const es = getService('es');
   const log = getService('log');
 
-  const editorTestSubjectSelector = 'searchProfilerEditor';
-
-  describe('Search Profiler Editor', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/186126
+  describe.skip('Search Profiler Editor', () => {
     before(async () => {
       await security.testUser.setRoles(['global_devtools_read']);
       await PageObjects.common.navigateToApp('searchProfiler');
-      expect(await testSubjects.exists('searchProfilerEditor')).to.be(true);
+      expect(await PageObjects.searchProfiler.editorExists()).to.be(true);
     });
 
     after(async () => {
@@ -36,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // The below inputs are written to work _with_ ace's autocomplete unlike console's unit test
       // counterparts in src/legacy/core_plugins/console/public/tests/src/editor.test.js
 
-      const okInput = [
+      const okInputs = [
         `{
     "query": {
     "match_all": {}`,
@@ -46,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     "test": """{ "more": "json" }"""`,
       ];
 
-      const notOkInput = [
+      const notOkInputs = [
         `{
     "query": {
     "match_all": {
@@ -59,24 +61,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       const expectHasParseErrorsToBe = (expectation: boolean) => async (inputs: string[]) => {
         for (const input of inputs) {
-          await aceEditor.setValue(editorTestSubjectSelector, input);
+          await PageObjects.searchProfiler.setQuery(input);
 
           await retry.waitFor(
             `parser errors to match expectation: HAS ${expectation ? 'ERRORS' : 'NO ERRORS'}`,
             async () => {
-              const actual = await aceEditor.hasParseErrors(editorTestSubjectSelector);
+              const actual = await PageObjects.searchProfiler.editorHasParseErrors();
               return expectation === actual;
             }
           );
         }
       };
 
-      await expectHasParseErrorsToBe(false)(okInput);
-      await expectHasParseErrorsToBe(true)(notOkInput);
+      await expectHasParseErrorsToBe(false)(okInputs);
+      await expectHasParseErrorsToBe(true)(notOkInputs);
     });
 
     it('supports pre-configured search query', async () => {
-      const searchQuery = {
+      const query = {
         query: {
           bool: {
             should: [
@@ -106,24 +108,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // this index name is just an input placeholder and does not exist
       const indexName = 'my_index';
 
-      const searchQueryURI = compressToEncodedURIComponent(JSON.stringify(searchQuery, null, 2));
-
       await PageObjects.common.navigateToUrl(
         'searchProfiler',
-        `/searchprofiler?index=${indexName}&load_from=${searchQueryURI}`,
+        PageObjects.searchProfiler.getUrlWithIndexAndQuery({ indexName, query }),
         {
           useActualUrl: true,
         }
       );
 
-      const indexInput = await testSubjects.find('indexName');
-      const indexInputValue = await indexInput.getAttribute('value');
+      const indexInputValue = await PageObjects.searchProfiler.getIndexName();
 
       expect(indexInputValue).to.eql(indexName);
 
       await retry.try(async () => {
-        const searchProfilerInput = JSON.parse(await aceEditor.getValue('searchProfilerEditor'));
-        expect(searchProfilerInput).to.eql(searchQuery);
+        const searchProfilerInput = await PageObjects.searchProfiler.getQuery();
+        expect(searchProfilerInput).to.eql(query);
       });
     });
 
@@ -148,22 +147,34 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('returns error if profile is executed with no valid indices', async () => {
-        const input = {
-          query: {
-            match_all: {},
-          },
-        };
+        await PageObjects.searchProfiler.setIndexName('_all');
+        await PageObjects.searchProfiler.setQuery(testQuery);
 
-        await testSubjects.setValue('indexName', '_all');
-        await aceEditor.setValue(editorTestSubjectSelector, JSON.stringify(input));
-
-        await testSubjects.click('profileButton');
+        await PageObjects.searchProfiler.clickProfileButton();
 
         await retry.waitFor('notification renders', async () => {
-          const notification = await testSubjects.find('noShardsNotification');
-          const notificationText = await notification.getVisibleText();
-          return notificationText.includes('Unable to profile');
+          return await PageObjects.searchProfiler.editorHasErrorNotification();
         });
+      });
+    });
+
+    describe('With a test index', () => {
+      before(async () => {
+        await es.indices.create({ index: testIndex });
+      });
+
+      after(async () => {
+        await es.indices.delete({ index: testIndex });
+      });
+
+      it('profiles a simple query', async () => {
+        await PageObjects.searchProfiler.setIndexName(testIndex);
+        await PageObjects.searchProfiler.setQuery(testQuery);
+
+        await PageObjects.searchProfiler.clickProfileButton();
+
+        const content = await PageObjects.searchProfiler.getProfileContent();
+        expect(content).to.contain(testIndex);
       });
     });
   });

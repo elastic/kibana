@@ -11,8 +11,6 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
-import { SubscriptionNotAllowed } from './subscription_not_allowed';
-import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { CspLoadingState } from './csp_loading_state';
 
@@ -21,10 +19,7 @@ export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
 export const PACKAGE_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_package_not_installed';
 export const CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_cspm_not_installed';
 export const KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_kspm_not_installed';
-export const VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT =
-  'cloud_posture_page_vuln_mgmt_not_installed';
 export const DEFAULT_NO_DATA_TEST_SUBJECT = 'cloud_posture_page_no_data';
-export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_posture_page_subscription_not_allowed';
 
 interface CommonError {
   body: {
@@ -92,7 +87,7 @@ export const CspNoDataPage = ({
   );
 };
 
-const defaultLoadingRenderer = () => (
+export const defaultLoadingRenderer = () => (
   <CspLoadingState data-test-subj={LOADING_STATE_TEST_SUBJECT}>
     <FormattedMessage
       id="xpack.csp.cloudPosturePage.loadingDescription"
@@ -134,7 +129,7 @@ const defaultErrorRenderer = (error: unknown) => (
   </FullSizeCenteredPage>
 );
 
-const defaultNoDataRenderer = () => (
+export const defaultNoDataRenderer = () => (
   <FullSizeCenteredPage>
     <NoDataPage
       data-test-subj={DEFAULT_NO_DATA_TEST_SUBJECT}
@@ -149,12 +144,6 @@ const defaultNoDataRenderer = () => (
       logo={'logoSecurity'}
       actions={{}}
     />
-  </FullSizeCenteredPage>
-);
-
-const subscriptionNotAllowedRenderer = () => (
-  <FullSizeCenteredPage data-test-subj={SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT}>
-    <SubscriptionNotAllowed />
   </FullSizeCenteredPage>
 );
 
@@ -173,21 +162,7 @@ export const CloudPosturePage = <TData, TError>({
   errorRender = defaultErrorRenderer,
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
-  const subscriptionStatus = useSubscriptionStatus();
-
   const render = () => {
-    if (subscriptionStatus.isError) {
-      return defaultErrorRenderer(subscriptionStatus.error);
-    }
-
-    if (subscriptionStatus.isLoading) {
-      return defaultLoadingRenderer();
-    }
-
-    if (!subscriptionStatus.data) {
-      return subscriptionNotAllowedRenderer();
-    }
-
     if (!query) {
       return children;
     }

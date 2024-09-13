@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { HttpSetup } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { init as initHttpRequests } from './http_requests';
 import { mockContextValue } from './app_context.mock';
@@ -18,9 +19,11 @@ export const WithAppDependencies =
     setHttpClient(httpSetup);
 
     return (
-      <AppContextProvider value={mockContextValue}>
-        <Component {...props} />
-      </AppContextProvider>
+      <KibanaContextProvider services={{ uiSettings: mockContextValue.uiSettings }}>
+        <AppContextProvider value={mockContextValue}>
+          <Component {...props} />
+        </AppContextProvider>
+      </KibanaContextProvider>
     );
   };
 

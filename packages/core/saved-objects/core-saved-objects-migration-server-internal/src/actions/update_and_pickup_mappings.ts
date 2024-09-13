@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
@@ -28,6 +30,8 @@ export interface UpdateAndPickupMappingsParams {
   client: ElasticsearchClient;
   index: string;
   mappings: IndexMapping;
+  batchSize: number;
+  query?: QueryDslQueryContainer;
 }
 /**
  * Updates an index's mappings and runs an pickupUpdatedMappings task so that the mapping
@@ -37,6 +41,8 @@ export const updateAndPickupMappings = ({
   client,
   index,
   mappings,
+  batchSize,
+  query,
 }: UpdateAndPickupMappingsParams): TaskEither.TaskEither<
   RetryableEsClientError,
   UpdateAndPickupMappingsResponse
@@ -74,7 +80,7 @@ export const updateAndPickupMappings = ({
   return pipe(
     putMappingTask,
     TaskEither.chain((res) => {
-      return pickupUpdatedMappings(client, index);
+      return pickupUpdatedMappings(client, index, batchSize, query);
     })
   );
 };

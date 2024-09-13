@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { config, ServerConfig } from './server_config';
@@ -19,7 +20,9 @@ describe('server config', () => {
         "maxPayload": ByteSizeValue {
           "valueInBytes": 1048576,
         },
+        "payloadTimeout": 20000,
         "port": 3000,
+        "restrictInternalApis": false,
         "shutdownTimeout": "PT30S",
         "socketTimeout": 120000,
         "ssl": Object {
@@ -186,6 +189,36 @@ describe('server config', () => {
           "enabled": false,
         }
       `);
+    });
+  });
+
+  describe('restrictInternalApis', () => {
+    test('is false by default', () => {
+      const configSchema = config.schema;
+      const obj = {};
+      expect(new ServerConfig(configSchema.validate(obj)).restrictInternalApis).toBe(false);
+    });
+
+    test('can specify retriction on access to internal APIs', () => {
+      const configSchema = config.schema;
+      expect(
+        new ServerConfig(configSchema.validate({ restrictInternalApis: true })).restrictInternalApis
+      ).toBe(true);
+
+      expect(
+        new ServerConfig(configSchema.validate({ restrictInternalApis: false }))
+          .restrictInternalApis
+      ).toBe(false);
+    });
+
+    test('throws if not boolean', () => {
+      const configSchema = config.schema;
+      expect(() => configSchema.validate({ restrictInternalApis: 100 })).toThrowError(
+        'restrictInternalApis]: expected value of type [boolean] but got [number]'
+      );
+      expect(() => configSchema.validate({ restrictInternalApis: 'something' })).toThrowError(
+        'restrictInternalApis]: expected value of type [boolean] but got [string]'
+      );
     });
   });
 });

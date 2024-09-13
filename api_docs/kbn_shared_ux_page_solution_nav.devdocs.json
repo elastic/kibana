@@ -121,11 +121,11 @@
         "signature": [
           "Omit<",
           "EuiSideNavProps",
-          "<{}>, \"children\" | \"heading\" | \"items\"> & { name: string; icon?: ",
+          "<{}>, \"children\" | \"items\" | \"heading\"> & { name: string; icon?: ",
           "IconType",
           " | undefined; items?: ",
           "EuiSideNavItemType",
-          "<{}>[] | undefined; children?: React.ReactNode; closeFlyoutButtonPosition?: \"outside\" | \"inside\" | undefined; isOpenOnDesktop?: boolean | undefined; onCollapse?: (() => void) | undefined; canBeCollapsed?: boolean | undefined; }"
+          "<{}>[] | undefined; children?: React.ReactNode; closeFlyoutButtonPosition?: \"inside\" | \"outside\" | undefined; isOpenOnDesktop?: boolean | undefined; onCollapse?: (() => void) | undefined; canBeCollapsed?: boolean | undefined; }"
         ],
         "path": "packages/shared-ux/page/solution_nav/src/solution_nav.tsx",
         "deprecated": false,

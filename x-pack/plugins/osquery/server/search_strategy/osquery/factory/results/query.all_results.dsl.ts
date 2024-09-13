@@ -5,37 +5,44 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/search-types';
+import { isEmpty } from 'lodash';
+import moment from 'moment/moment';
+import { getQueryFilter } from '../../../../utils/build_query';
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
 import type { ResultsRequestOptions } from '../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
 
 export const buildResultsQuery = ({
   actionId,
   agentId,
-  filterQuery,
+  kuery,
   sort,
+  startDate,
   pagination: { activePage, querySize },
 }: ResultsRequestOptions): ISearchRequestParams => {
-  const filter = [
-    ...createQueryFilterClauses(filterQuery),
-    {
-      match_phrase: {
-        action_id: actionId,
-      },
-    },
-    ...(agentId
+  const actionIdQuery = `action_id: ${actionId}`;
+  const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
+  let filter = actionIdQuery + agentQuery;
+  if (!isEmpty(kuery)) {
+    filter = filter + ` AND ${kuery}`;
+  }
+
+  const timeRangeFilter =
+    startDate && !isEmpty(startDate)
       ? [
           {
-            match_phrase: {
-              'agent.id': agentId,
+            range: {
+              '@timestamp': {
+                gte: startDate,
+                lte: moment(startDate).clone().add(30, 'minutes').toISOString(),
+              },
             },
           },
         ]
-      : []),
-  ];
+      : [];
+  const filterQuery = [...timeRangeFilter, getQueryFilter({ filter })];
 
-  const dslQuery = {
+  return {
     allow_no_indices: true,
     index: `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
     ignore_unavailable: true,
@@ -53,7 +60,7 @@ export const buildResultsQuery = ({
           },
         },
       },
-      query: { bool: { filter } },
+      query: { bool: { filter: filterQuery } },
       from: activePage * querySize,
       size: querySize,
       track_total_hits: true,
@@ -66,6 +73,4 @@ export const buildResultsQuery = ({
         })) ?? [],
     },
   };
-
-  return dslQuery;
 };

@@ -14,27 +14,33 @@ const apmDebugLogger = {
   appenders: ['console'],
 };
 
+const kibanaConfig = {
+  'xpack.apm.forceSyntheticSource': 'true',
+  'logging.loggers': [apmDebugLogger],
+  'server.publicBaseUrl': 'http://mockedPublicBaseUrl',
+};
+
 const apmFtrConfigs = {
   basic: {
     license: 'basic' as const,
-    kibanaConfig: {
-      'xpack.apm.forceSyntheticSource': 'true',
-      'logging.loggers': [apmDebugLogger],
-    },
+    kibanaConfig,
   },
   trial: {
     license: 'trial' as const,
-    kibanaConfig: {
-      'xpack.apm.forceSyntheticSource': 'true',
-      'logging.loggers': [apmDebugLogger],
-    },
+    kibanaConfig,
   },
   rules: {
     license: 'trial' as const,
     kibanaConfig: {
+      ...kibanaConfig,
       'xpack.ruleRegistry.write.enabled': 'true',
-      'xpack.apm.forceSyntheticSource': 'true',
-      'logging.loggers': [apmDebugLogger],
+    },
+  },
+  cloud: {
+    license: 'basic' as const,
+    kibanaConfig: {
+      ...kibanaConfig,
+      'xpack.apm.agent.migrations.enabled': 'true',
     },
   },
 };

@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/management-settings-components-field-row",
+  "owner": "@elastic/kibana-management"
+}

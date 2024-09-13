@@ -21,24 +21,25 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
-
-import type { SavedObject } from '@kbn/core/public';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { QUERY_TIMEOUT } from '../../../../common/constants';
 import { Direction } from '../../../../common/search_strategy';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
 
-export type SavedQuerySO = SavedObject<{
+export interface SavedQuerySO {
   name: string;
   id: string;
+  saved_object_id: string;
   description?: string;
   query: string;
+  timeout?: number;
   ecs_mapping: ECSMapping;
   updated_at: string;
   prebuilt?: boolean;
-}>;
+}
 
 interface PlayButtonProps {
   disabled: boolean;
@@ -54,8 +55,9 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, save
       push('/live_queries/new', {
         form: {
           savedQueryId: savedQuery.id,
-          query: savedQuery.attributes.query,
-          ecs_mapping: savedQuery.attributes.ecs_mapping,
+          query: savedQuery.query,
+          ecs_mapping: savedQuery.ecs_mapping,
+          timeout: savedQuery.timeout ?? QUERY_TIMEOUT.DEFAULT,
         },
       }),
     [push, savedQuery]
@@ -66,7 +68,7 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, save
       i18n.translate('xpack.osquery.savedQueryList.queriesTable.runActionAriaLabel', {
         defaultMessage: 'Run {savedQueryName}',
         values: {
-          savedQueryName: savedQuery.attributes.id,
+          savedQueryName: savedQuery.id,
         },
       }),
     [savedQuery]
@@ -133,14 +135,14 @@ const SavedQueriesPageComponent = () => {
   const newQueryLinkProps = useRouterNavigate('saved_queries/new');
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
-  const [sortField, setSortField] = useState('attributes.updated_at');
+  const [sortField, setSortField] = useState('updated_at');
   const [sortDirection, setSortDirection] = useState<Direction>(Direction.desc);
 
   const { data } = useSavedQueries({ isLive: true });
 
   const renderEditAction = useCallback(
     (item: SavedQuerySO) => (
-      <EditButton savedQueryId={item.id} savedQueryName={item.attributes.id} />
+      <EditButton savedQueryId={item.saved_object_id} savedQueryName={item.id} />
     ),
     []
   );
@@ -155,13 +157,10 @@ const SavedQueriesPageComponent = () => {
     [permissions.runSavedQueries, permissions.writeLiveQueries]
   );
 
-  const renderUpdatedAt = useCallback((updatedAt, item) => {
+  const renderUpdatedAt = useCallback((updatedAt: any, item: any) => {
     if (!updatedAt) return '-';
 
-    const updatedBy =
-      item.attributes.updated_by !== item.attributes.created_by
-        ? ` @ ${item.attributes.updated_by}`
-        : '';
+    const updatedBy = item.updated_by !== item.created_by ? ` @ ${item.updated_by}` : '';
 
     return updatedAt ? `${moment(updatedAt).fromNow()}${updatedBy}` : '-';
   }, []);
@@ -179,16 +178,16 @@ const SavedQueriesPageComponent = () => {
   const columns: Array<EuiBasicTableColumn<SavedQuerySO>> = useMemo(
     () => [
       {
-        field: 'attributes.id',
+        field: 'id',
         name: i18n.translate('xpack.osquery.savedQueries.table.queryIdColumnTitle', {
           defaultMessage: 'Query ID',
         }),
-        sortable: (item) => item.attributes.id.toLowerCase(),
+        sortable: (item) => item.id.toLowerCase(),
         truncateText: true,
         width: '15%',
       },
       {
-        field: 'attributes.description',
+        field: 'description',
         name: i18n.translate('xpack.osquery.savedQueries.table.descriptionColumnTitle', {
           defaultMessage: 'Description',
         }),
@@ -196,7 +195,7 @@ const SavedQueriesPageComponent = () => {
         width: '50%',
       },
       {
-        field: 'attributes.created_by',
+        field: 'created_by',
         name: i18n.translate('xpack.osquery.savedQueries.table.createdByColumnTitle', {
           defaultMessage: 'Created by',
         }),
@@ -205,13 +204,12 @@ const SavedQueriesPageComponent = () => {
         truncateText: true,
       },
       {
-        field: 'attributes.updated_at',
+        field: 'updated_at',
         name: i18n.translate('xpack.osquery.savedQueries.table.updatedAtColumnTitle', {
           defaultMessage: 'Last updated at',
         }),
         width: '10%',
-        sortable: (item) =>
-          item.attributes.updated_at ? Date.parse(item.attributes.updated_at) : 0,
+        sortable: (item) => (item.updated_at ? Date.parse(item.updated_at) : 0),
         truncateText: true,
         render: renderUpdatedAt,
       },
@@ -225,7 +223,7 @@ const SavedQueriesPageComponent = () => {
     [renderDescriptionColumn, renderEditAction, renderPlayAction, renderUpdatedAt]
   );
 
-  const onTableChange = useCallback(({ page = {}, sort = {} }) => {
+  const onTableChange = useCallback(({ page = {}, sort = {} }: any) => {
     setPageIndex(page.index);
     setPageSize(page.size);
     setSortField(sort.field);

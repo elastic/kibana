@@ -19,6 +19,7 @@ import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 
 import { SEARCH_INDEX_TAB_PATH } from '../../../../routes';
+import { SyncsContextMenu } from '../../../shared/header_actions/syncs_context_menu';
 import { IndexNameLogic } from '../../index_name_logic';
 import { SearchIndexTabId } from '../../search_index';
 
@@ -39,6 +40,7 @@ export const NativeConnectorAdvancedConfiguration: React.FC = () => {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonTo
+              data-test-subj="entSearchContent-connector-configuration-setScheduleAndSync"
               data-telemetry-id="entSearchContent-connector-configuration-setScheduleAndSync"
               to={`${generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
                 indexName,
@@ -52,6 +54,9 @@ export const NativeConnectorAdvancedConfiguration: React.FC = () => {
                 }
               )}
             </EuiButtonTo>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SyncsContextMenu />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
@@ -30,6 +31,14 @@ export interface CreateSavedObjectsParams<T> {
    * different Kibana versions (e.g. generate legacy URL aliases for all imported objects that have to change IDs).
    */
   compatibilityMode?: boolean;
+  /**
+   * If true, create the object as managed.
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed?: boolean;
 }
 
 export interface CreateSavedObjectsResult<T> {
@@ -50,6 +59,7 @@ export const createSavedObjects = async <T>({
   overwrite,
   refresh,
   compatibilityMode,
+  managed,
 }: CreateSavedObjectsParams<T>): Promise<CreateSavedObjectsResult<T>> => {
   // filter out any objects that resulted in errors
   const errorSet = accumulatedErrors.reduce(
@@ -96,7 +106,12 @@ export const createSavedObjects = async <T>({
         ...(!importStateValue.omitOriginId && { originId: originId ?? object.id }),
       };
     }
-    return { ...object, ...(references && { references }), ...(originId && { originId }) };
+    return {
+      ...object,
+      ...(references && { references }),
+      ...(originId && { originId }),
+      ...{ managed: managed ?? object.managed ?? false },
+    };
   });
 
   const resolvableErrors = ['conflict', 'ambiguous_conflict', 'missing_references'];
@@ -150,6 +165,7 @@ export const createSavedObjects = async <T>({
           targetId: result.id,
           purpose: 'savedObjectImport',
         },
+        ...{ managed: managed ?? false }, // we can safey create each doc with the given managed flag, even if it's set as the default, bulkCreate would "override" this otherwise.
       });
     }
   }
@@ -165,7 +181,6 @@ export const createSavedObjects = async <T>({
           })
         ).saved_objects
       : [];
-
   return {
     createdObjects: remappedResults.filter((obj) => !obj.error),
     errors: extractErrors(remappedResults, objects, legacyUrlAliasResults, legacyUrlAliases),

@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export const ConfigSchema = schema.object({
@@ -26,6 +26,34 @@ export const ConfigSchema = schema.object({
     })
   ),
   maxSpaces: schema.number({ defaultValue: 1000 }),
+  allowFeatureVisibility: offeringBasedSchema({
+    serverless: schema.literal(false),
+    traditional: schema.boolean({
+      validate: (rawValue) => {
+        // This setting should not be configurable on-prem to avoid bugs when e.g. existing spaces
+        // have feature visibility customized but admins would be unable to change them back if the
+        // UI/APIs are disabled.
+        if (rawValue === false) {
+          return 'Feature visibility can only be disabled on serverless';
+        }
+      },
+      defaultValue: true,
+    }),
+  }),
+  allowSolutionVisibility: offeringBasedSchema({
+    serverless: schema.literal(false),
+    traditional: schema.boolean({
+      validate: (rawValue) => {
+        // This setting should not be configurable on-prem to avoid bugs when e.g. existing spaces
+        // have custom solution but admins would be unable to change the navigation solution if the
+        // UI/APIs are disabled.
+        if (rawValue === false) {
+          return 'Solution visibility can only be disabled on serverless';
+        }
+      },
+      defaultValue: true,
+    }),
+  }),
 });
 
 export function createConfig$(context: PluginInitializerContext) {

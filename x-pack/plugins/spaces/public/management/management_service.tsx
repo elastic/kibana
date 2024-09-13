@@ -7,23 +7,48 @@
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
+import type {
+  PrivilegesAPIClientPublicContract,
+  RolesAPIClient,
+} from '@kbn/security-plugin-types-public';
 
+import { spacesManagementApp } from './spaces_management_app';
+import type { EventTracker } from '../analytics';
+import type { ConfigType } from '../config';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
-import { spacesManagementApp } from './spaces_management_app';
 
 interface SetupDeps {
   management: ManagementSetup;
   getStartServices: StartServicesAccessor<PluginsStart>;
   spacesManager: SpacesManager;
+  config: ConfigType;
+  getRolesAPIClient: () => Promise<RolesAPIClient>;
+  eventTracker: EventTracker;
+  getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
 }
 
 export class ManagementService {
   private registeredSpacesManagementApp?: ManagementApp;
 
-  public setup({ getStartServices, management, spacesManager }: SetupDeps) {
+  public setup({
+    getStartServices,
+    management,
+    spacesManager,
+    config,
+    getRolesAPIClient,
+    eventTracker,
+    getPrivilegesAPIClient,
+  }: SetupDeps) {
     this.registeredSpacesManagementApp = management.sections.section.kibana.registerApp(
-      spacesManagementApp.create({ getStartServices, spacesManager })
+      spacesManagementApp.create({
+        getStartServices,
+        spacesManager,
+        config,
+        getRolesAPIClient,
+        eventTracker,
+        getPrivilegesAPIClient,
+      })
     );
   }
 

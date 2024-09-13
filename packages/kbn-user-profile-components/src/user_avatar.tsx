@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { EuiAvatarProps } from '@elastic/eui';
 import { EuiAvatar, useEuiTheme } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
+import { UserProfileAvatarData } from './types';
 
-import type { UserProfile, UserProfileUserInfo, UserProfileAvatarData } from './user_profile';
+import type { UserProfile, UserProfileUserInfo } from './user_profile';
 import {
   getUserAvatarColor,
   getUserAvatarInitials,
-  getUserDisplayName,
+  getUserDisplayLabel,
   USER_AVATAR_MAX_INITIALS,
 } from './user_profile';
 
@@ -61,15 +63,15 @@ export const UserAvatar: FunctionComponent<UserAvatarProps> = ({ user, avatar, .
     return <EuiAvatar name="" color={euiTheme.colors.lightestShade} initials="?" {...rest} />;
   }
 
-  const displayName = getUserDisplayName(user);
+  const displayLabel = getUserDisplayLabel(user);
 
   if (avatar?.imageUrl) {
-    return <EuiAvatar name={displayName} imageUrl={avatar.imageUrl} color="plain" {...rest} />;
+    return <EuiAvatar name={displayLabel} imageUrl={avatar.imageUrl} color="plain" {...rest} />;
   }
 
   return (
     <EuiAvatar
-      name={displayName}
+      name={displayLabel}
       initials={getUserAvatarInitials(user, avatar)}
       initialsLength={USER_AVATAR_MAX_INITIALS}
       color={getUserAvatarColor(user, avatar)}

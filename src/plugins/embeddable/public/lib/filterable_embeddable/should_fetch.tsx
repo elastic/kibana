@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fastIsEqual from 'fast-deep-equal';
 import { Observable } from 'rxjs';
-import { map, distinctUntilChanged, skip, startWith } from 'rxjs/operators';
+import { map, distinctUntilChanged, skip, startWith } from 'rxjs';
 import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import type { FilterableEmbeddableInput } from './types';
 
@@ -27,19 +28,24 @@ export function shouldFetch$<
   return updated$.pipe(map(() => getInput())).pipe(
     // wrapping distinctUntilChanged with startWith and skip to prime distinctUntilChanged with an initial input value.
     startWith(getInput()),
-    distinctUntilChanged((a: TFilterableEmbeddableInput, b: TFilterableEmbeddableInput) => {
-      // Only need to diff searchSessionId when container uses search sessions because
-      // searchSessionId changes with any filter, query, or time changes
-      if (a.searchSessionId !== undefined || b.searchSessionId !== undefined) {
-        return a.searchSessionId === b.searchSessionId;
-      }
+    distinctUntilChanged(
+      (previous: TFilterableEmbeddableInput, current: TFilterableEmbeddableInput) => {
+        if (
+          !fastIsEqual(
+            [previous.searchSessionId, previous.query, previous.timeRange, previous.timeslice],
+            [current.searchSessionId, current.query, current.timeRange, current.timeslice]
+          )
+        ) {
+          return false;
+        }
 
-      if (!fastIsEqual([a.query, a.timeRange, a.timeslice], [b.query, b.timeRange, b.timeslice])) {
-        return false;
+        return onlyDisabledFiltersChanged(
+          previous.filters,
+          current.filters,
+          shouldRefreshFilterCompareOptions
+        );
       }
-
-      return onlyDisabledFiltersChanged(a.filters, b.filters, shouldRefreshFilterCompareOptions);
-    }),
+    ),
     skip(1)
   );
 }

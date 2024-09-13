@@ -20,12 +20,17 @@ import { IMAGE_MIME_TYPES } from '../../common/constants/mime_types';
 import type { FilesConfig } from './types';
 import { constructFileKindIdByOwner, constructFilesHttpOperationTag } from '../../common/files';
 
-const buildFileKind = (config: FilesConfig, owner: Owner): FileKind => {
+const buildFileKind = (config: FilesConfig, owner: Owner, isFipsMode = false): FileKind => {
+  const hashes: FileKind['hashes'] = ['sha1', 'sha256'];
+  if (!isFipsMode) {
+    hashes.unshift('md5');
+  }
   return {
     id: constructFileKindIdByOwner(owner),
     http: fileKindHttpTags(owner),
     maxSizeBytes: createMaxCallback(config),
     allowedMimeTypes: config.allowedMimeTypes,
+    hashes,
   };
 };
 
@@ -72,16 +77,20 @@ export const createMaxCallback =
 /**
  * The file kind definition for interacting with the file service for the backend
  */
-const createFileKinds = (config: FilesConfig): Record<Owner, FileKind> => {
+const createFileKinds = (config: FilesConfig, isFipsMode = false): Record<Owner, FileKind> => {
   return {
-    [APP_ID]: buildFileKind(config, APP_ID),
-    [OBSERVABILITY_OWNER]: buildFileKind(config, OBSERVABILITY_OWNER),
-    [SECURITY_SOLUTION_OWNER]: buildFileKind(config, SECURITY_SOLUTION_OWNER),
+    [APP_ID]: buildFileKind(config, APP_ID, isFipsMode),
+    [OBSERVABILITY_OWNER]: buildFileKind(config, OBSERVABILITY_OWNER, isFipsMode),
+    [SECURITY_SOLUTION_OWNER]: buildFileKind(config, SECURITY_SOLUTION_OWNER, isFipsMode),
   };
 };
 
-export const registerCaseFileKinds = (config: FilesConfig, filesSetupPlugin: FilesSetup) => {
-  const fileKinds = createFileKinds(config);
+export const registerCaseFileKinds = (
+  config: FilesConfig,
+  filesSetupPlugin: FilesSetup,
+  isFipsMode = false
+) => {
+  const fileKinds = createFileKinds(config, isFipsMode);
 
   for (const fileKind of Object.values(fileKinds)) {
     filesSetupPlugin.registerFileKind(fileKind);

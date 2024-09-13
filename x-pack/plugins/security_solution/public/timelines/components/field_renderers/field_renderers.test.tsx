@@ -7,48 +7,36 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-
 import { TestProviders } from '../../../common/mock';
-import '../../../common/mock/match_media';
 import { getEmptyValue } from '../../../common/components/empty_value';
-
 import {
   autonomousSystemRenderer,
-  dateRenderer,
   hostNameRenderer,
   locationRenderer,
   whoisRenderer,
   reputationRenderer,
-  DefaultFieldRenderer,
-  DEFAULT_MORE_MAX_HEIGHT,
-  DefaultFieldRendererOverflow,
-  MoreContainer,
 } from './field_renderers';
 import { mockData } from '../../../explore/network/components/details/mock';
 import type { AutonomousSystem } from '../../../../common/search_strategy';
 import { FlowTarget } from '../../../../common/search_strategy';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
+import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/lib/kibana/kibana_react', () => {
-  return {
-    useKibana: () => ({
-      services: {
-        application: {
-          getUrlForApp: (appId: string, options?: { path?: string; deepLinkId?: boolean }) =>
-            `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`,
-        },
-      },
-    }),
-  };
-});
+jest.mock('@kbn/security-solution-navigation/src/context');
+mockGetUrlForApp.mockImplementation(
+  (appId: string, options?: { path?: string; deepLinkId?: boolean }) =>
+    `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`
+);
+
+jest.mock('../../../common/hooks/use_get_field_spec');
 
 describe('Field Renderers', () => {
   describe('#locationRenderer', () => {
     test('it renders correctly against snapshot', () => {
       const { asFragment } = render(
-        locationRenderer(['source.geo.city_name', 'source.geo.region_name'], mockData.complete)
+        locationRenderer(['source.geo.city_name', 'source.geo.region_name'], mockData.complete),
+        { wrapper: TestProviders }
       );
 
       expect(asFragment()).toMatchSnapshot();
@@ -69,26 +57,14 @@ describe('Field Renderers', () => {
     });
   });
 
-  describe('#dateRenderer', () => {
-    test('it renders correctly against snapshot', () => {
-      const { asFragment } = render(dateRenderer(mockData.complete.source?.firstSeen));
-
-      expect(asFragment()).toMatchSnapshot();
-    });
-
-    test('it renders emptyTagValue when invalid field provided', () => {
-      render(<TestProviders>{dateRenderer(null)}</TestProviders>);
-      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
-    });
-  });
-
   describe('#autonomousSystemRenderer', () => {
     const emptyMock: AutonomousSystem = { organization: { name: null }, number: null };
     const halfEmptyMock: AutonomousSystem = { organization: { name: 'Test Org' }, number: null };
 
     test('it renders correctly against snapshot', () => {
       const { asFragment } = render(
-        autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source)
+        autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source),
+        { wrapper: TestProviders }
       );
 
       expect(asFragment()).toMatchSnapshot();
@@ -109,17 +85,23 @@ describe('Field Renderers', () => {
     });
   });
 
+  const emptyIdHost: Partial<HostEcs> = {
+    name: ['test'],
+    id: undefined,
+    ip: ['10.10.10.10'],
+  };
+  const emptyIpHost: Partial<HostEcs> = {
+    name: ['test'],
+    id: ['test'],
+    ip: undefined,
+  };
+  const emptyNameHost: Partial<HostEcs> = {
+    name: undefined,
+    id: ['test'],
+    ip: ['10.10.10.10'],
+  };
+
   describe('#hostIdRenderer', () => {
-    const emptyIdHost: Partial<HostEcs> = {
-      name: ['test'],
-      id: undefined,
-      ip: ['10.10.10.10'],
-    };
-    const emptyIpHost: Partial<HostEcs> = {
-      name: ['test'],
-      id: ['test'],
-      ip: undefined,
-    };
     test('it renders correctly against snapshot', () => {
       const { asFragment } = render(
         <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.10')}</TestProviders>
@@ -145,21 +127,6 @@ describe('Field Renderers', () => {
   });
 
   describe('#hostNameRenderer', () => {
-    const emptyIdHost: Partial<HostEcs> = {
-      name: ['test'],
-      id: undefined,
-      ip: ['10.10.10.10'],
-    };
-    const emptyIpHost: Partial<HostEcs> = {
-      name: ['test'],
-      id: ['test'],
-      ip: undefined,
-    };
-    const emptyNameHost: Partial<HostEcs> = {
-      name: undefined,
-      id: ['test'],
-      ip: ['10.10.10.10'],
-    };
     test('it renders correctly against snapshot', () => {
       const { asFragment } = render(
         <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.10')}</TestProviders>
@@ -204,234 +171,6 @@ describe('Field Renderers', () => {
       );
 
       expect(asFragment()).toMatchSnapshot();
-    });
-  });
-
-  describe('DefaultFieldRenderer', () => {
-    test('it should render a single item', () => {
-      render(
-        <TestProviders>
-          <DefaultFieldRenderer rowItems={['item1']} attrName={'item1'} idPrefix={'prefix-1'} />
-        </TestProviders>
-      );
-      expect(screen.getByTestId('DefaultFieldRendererComponent').textContent).toEqual('item1 ');
-    });
-
-    test('it should render two items', () => {
-      render(
-        <TestProviders>
-          <DefaultFieldRenderer
-            displayCount={5}
-            rowItems={['item1', 'item2']}
-            attrName={'item1'}
-            idPrefix={'prefix-1'}
-          />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('DefaultFieldRendererComponent').textContent).toEqual(
-        'item1,item2 '
-      );
-    });
-
-    test('it should render all items when the item count exactly equals displayCount', () => {
-      render(
-        <TestProviders>
-          <DefaultFieldRenderer
-            displayCount={5}
-            rowItems={['item1', 'item2', 'item3', 'item4', 'item5']}
-            attrName={'item1'}
-            idPrefix={'prefix-1'}
-          />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('DefaultFieldRendererComponent').textContent).toEqual(
-        'item1,item2,item3,item4,item5 '
-      );
-    });
-
-    test('it should render all items up to displayCount and the expected "+ n More" popover anchor text for items greater than displayCount', () => {
-      render(
-        <TestProviders>
-          <DefaultFieldRenderer
-            displayCount={5}
-            rowItems={['item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7']}
-            attrName={'item1'}
-            idPrefix={'prefix-1'}
-          />
-        </TestProviders>
-      );
-      expect(screen.getByTestId('DefaultFieldRendererComponent').textContent).toEqual(
-        'item1,item2,item3,item4,item5  ,+2 More'
-      );
-    });
-  });
-
-  describe('MoreContainer', () => {
-    const idPrefix = 'prefix-1';
-    const rowItems = ['item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7'];
-
-    test('it should only render the items after overflowIndexStart', () => {
-      render(
-        <TestProviders>
-          <MoreContainer
-            fieldType="keyword"
-            idPrefix={idPrefix}
-            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-            overflowIndexStart={5}
-            values={rowItems}
-            fieldName="mock.attr"
-          />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('more-container').textContent).toEqual('item6item7');
-    });
-
-    test('it should render all the items when overflowIndexStart is zero', () => {
-      render(
-        <TestProviders>
-          <MoreContainer
-            fieldType="keyword"
-            idPrefix={idPrefix}
-            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-            overflowIndexStart={0}
-            values={rowItems}
-            fieldName="mock.attr"
-          />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('more-container').textContent).toEqual(
-        'item1item2item3item4item5item6item7'
-      );
-    });
-
-    test('it should have the eui-yScroll to enable scrolling when necessary', () => {
-      render(
-        <TestProviders>
-          <MoreContainer
-            fieldType="keyword"
-            idPrefix={idPrefix}
-            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-            overflowIndexStart={5}
-            values={rowItems}
-            fieldName="mock.attr"
-          />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('more-container')).toHaveClass('eui-yScroll');
-    });
-
-    test('it should use the moreMaxHeight prop as the value for the max-height style', () => {
-      render(
-        <TestProviders>
-          <MoreContainer
-            fieldType="keyword"
-            idPrefix={idPrefix}
-            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-            overflowIndexStart={5}
-            values={rowItems}
-            fieldName="mock.attr"
-          />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('more-container')).toHaveStyle(
-        `max-height: ${DEFAULT_MORE_MAX_HEIGHT}`
-      );
-    });
-
-    test('it should render with correct attrName prop', () => {
-      render(
-        <TestProviders>
-          <MoreContainer
-            fieldType="keyword"
-            idPrefix={idPrefix}
-            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-            overflowIndexStart={5}
-            values={rowItems}
-            fieldName="mock.attr"
-          />
-        </TestProviders>
-      );
-
-      screen
-        .getAllByTestId('cellActions-renderContent-mock.attr')
-        .forEach((element) => expect(element).toBeInTheDocument());
-    });
-
-    test('it should only invoke the optional render function when provided', () => {
-      const renderFn = jest.fn();
-
-      render(
-        <TestProviders>
-          <MoreContainer
-            fieldType="keyword"
-            idPrefix={idPrefix}
-            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-            overflowIndexStart={5}
-            render={renderFn}
-            values={rowItems}
-            fieldName="mock.attr"
-          />
-        </TestProviders>
-      );
-
-      expect(renderFn).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('DefaultFieldRendererOverflow', () => {
-    const idPrefix = 'prefix-1';
-    const rowItems = ['item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7'];
-
-    test('it should render the length of items after the overflowIndexStart', () => {
-      render(
-        <TestProviders>
-          <DefaultFieldRendererOverflow
-            fieldType="keyword"
-            idPrefix={idPrefix}
-            isAggregatable={true}
-            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-            overflowIndexStart={5}
-            rowItems={rowItems}
-            attrName={'mock.attr'}
-          />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('DefaultFieldRendererOverflow-button').textContent).toEqual(
-        '+2 More'
-      );
-      expect(screen.queryByTestId('more-container')).not.toBeInTheDocument();
-    });
-
-    test('it should render the items after overflowIndexStart in the popover', () => {
-      render(
-        <TestProviders>
-          <DefaultFieldRendererOverflow
-            fieldType="keyword"
-            idPrefix={idPrefix}
-            isAggregatable={true}
-            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-            overflowIndexStart={5}
-            rowItems={rowItems}
-            attrName={'mock.attr'}
-          />
-        </TestProviders>
-      );
-
-      userEvent.click(screen.getByTestId('DefaultFieldRendererOverflow-button'));
-
-      expect(
-        screen.getByText(
-          'You are in a dialog. Press Escape, or tap/click outside the dialog to close.'
-        )
-      ).toBeInTheDocument();
-      expect(screen.getByTestId('more-container').textContent).toEqual('item6item7');
     });
   });
 });

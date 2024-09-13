@@ -14,8 +14,11 @@ KBN_PATH_CONF=/home/kibana/config ./bin/kibana
 --
 
 The default host and port settings configure {kib} to run on `localhost:5601`. To change this behavior and allow remote users to connect, you'll need to update your `kibana.yml` file. You can also enable SSL and set a
-variety of other options. Finally, environment variables can be injected into
-configuration using `${MY_ENV_VAR}` syntax.
+variety of other options.
+
+Environment variables can be injected into configuration using `${MY_ENV_VAR}` syntax. By default, configuration validation
+will fail if an environment variable used in the config file is not present when Kibana starts. This behavior can be changed by using a default value
+for the environment variable, using the `${MY_ENV_VAR:defaultValue}` syntax.
 
 `console.ui.enabled`::
 Toggling this causes the server to regenerate assets on the next startup,
@@ -60,6 +63,9 @@ NOTE: The `frame-ancestors` directive can also be configured by using
 <<server-securityResponseHeaders-disableEmbedding, `server.securityResponseHeaders.disableEmbedding`>>. In that case, that takes precedence and any values in `csp.frame_ancestors`
 are ignored.
 
+`csp.report_only.form_action`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action[Content Security Policy `form-action` directive] in reporting mode.
+
 `csp.report_uri`::
 Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri[Content Security Policy `report-uri` directive].
 
@@ -79,10 +85,17 @@ enforce even rudimentary CSP rules, though {kib} is still accessible. This
 configuration is effectively ignored when <<csp-strict, `csp.strict`>> is enabled.
 *Default: `true`*
 
+`permissionsPolicy.report_to:`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[Permissions Policy `report-to` directive].
+
 [[elasticsearch-maxSockets]] `elasticsearch.maxSockets`::
 The maximum number of sockets that can be used for communications with {es}.
 *Default: `Infinity`*
 
+[[elasticsearch-maxResponseSize]] `elasticsearch.maxResponseSize`::
+Either `false` or a `byteSize` value. When set, responses from {es} with a size higher than the defined limit will be rejected.
+This is intended to be used as a circuit-breaker mechanism to avoid memory errors in case of unexpectedly high responses coming from {es}.
+*Default: `false`*
 
 [[elasticsearch-maxIdleSockets]] `elasticsearch.maxIdleSockets`::
 The maximum number of idle sockets to keep open between {kib} and {es}. If more sockets become idle, they will be closed.
@@ -104,6 +117,9 @@ listed here must be on the same cluster. *Default: `[ "http://localhost:9200" ]`
 To enable SSL/TLS for outbound connections to {es}, use the `https` protocol
 in this setting.
 
+[[elasticsearch-publicBaseUrl]] `elasticsearch.publicBaseUrl:`::
+The URL through which Elasticsearch is publicly accessible, if any. This will be shown to users in Kibana when they need connection details for your Elasticsearch cluster.
+
 [[elasticsearch-pingTimeout]] `elasticsearch.pingTimeout`::
 Time in milliseconds to wait for {es} to respond to pings.
 *Default: the value of the <<elasticsearch-requestTimeout, `elasticsearch.requestTimeout`>> setting*
@@ -113,7 +129,7 @@ List of {kib} client-side headers to send to {es}. To send *no* client-side
 headers, set this value to [] (an empty list). Removing the `authorization`
 header from being whitelisted means that you cannot use
 <<basic-authentication, basic authentication>> in {kib}.
-*Default: `[ 'authorization' ]`*
+*Default: `[ 'authorization', 'es-client-authentication' ]`*
 
 [[elasticsearch-requestTimeout]] `elasticsearch.requestTimeout`::
 Time in milliseconds to wait for responses from the back end or {es}.
@@ -229,9 +245,6 @@ If your {es} is protected with basic authentication, this token provides the cre
 that the {kib} server uses to perform maintenance on the {kib} index at startup. This setting
 is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 
-`interpreter.enableInVisualize`::
-Enables use of interpreter in Visualize. *Default: `true`*
-
 `unifiedSearch.autocomplete.valueSuggestions.timeout` {ess-icon}::
 Time in milliseconds to wait for autocomplete suggestions from {es}.
 This value must be a whole number greater than zero. *Default: `"1000"`*
@@ -326,8 +339,7 @@ run {kib} in different modes. Valid options are `background_tasks` and `ui`,
 or `*` to select all roles. *Default: `*`*
 
 `notifications.connectors.default.email`::
-Specifies the name of the connector that is used to send email notifications.
-In {ecloud}, the default value is `elastic-cloud-email`.
+ Choose the default email connector for user notifications. As of `8.6.0`, {kib} is shipping with a new notification mechanism that will send email notifications for various user actions, e.g. assigning a _Case_ to a user. To enable notifications, an email connector must be <<pre-configured-connectors,preconfigured>> in the system via `kibana.yml`, and the notifications plugin must be configured to point to the ID of that connector.
 
 [[path-data]] `path.data`::
 The path where {kib} stores persistent data
@@ -409,12 +421,20 @@ disable, set to `null`. *Default:* `"nosniff"`
 Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy[`Referrer-Policy`] header is used in all
 responses to the client from the {kib} server, and specifies what value is used. Allowed values are `no-referrer`,
 `no-referrer-when-downgrade`, `origin`, `origin-when-cross-origin`, `same-origin`, `strict-origin`, `strict-origin-when-cross-origin`,
-`unsafe-url`, or `null`. To disable, set to `null`. *Default:* `"no-referrer-when-downgrade"`
+`unsafe-url`, or `null`. To disable, set to `null`. *Default:* `"strict-origin-when-cross-origin"`
 
 [[server-securityResponseHeaders-permissionsPolicy]] `server.securityResponseHeaders.permissionsPolicy`::
-experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy[`Permissions-Policy`] header
+experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy`] header
 is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
-To disable, set to `null`. *Default:* `null`
+Refer to the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy` documentation] for defined
+directives, values, and text format. To disable, set to `null`.
+*Default:* `camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()`
+
+[[server-securityResponseHeaders-permissionsPolicyReportOnly]] `server.securityResponseHeaders.permissionsPolicyReportOnly`::
+experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy-Report-Only`] header
+is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
+Refer to the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy` documentation] for defined
+directives, values, and text format.
 
 [[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders.disableEmbedding`::
 Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
@@ -452,6 +472,14 @@ identifies this {kib} instance. *Default: `"your-hostname"`*
 {kib} is served by a back end server. This
 setting specifies the port to use. *Default: `5601`*
 
+`server.protocol`::
+experimental[] The http protocol to use, either `http1` or `http2`. Set to `http2` to enable `HTTP/2` support for the {kib} server.
+*Default: `http1`*
++
+NOTE: By default, enabling `http2` requires a valid `h2c` configuration, meaning that TLS must be enabled via <<server-ssl-enabled, `server.ssl.enabled`>>
+and <<server-ssl-supportedProtocols, `server.ssl.supportedProtocols`>>, if specified, must contain at least `TLSv1.2` or `TLSv1.3`. Strict validation of
+the `h2c` setup can be disabled by adding `server.http2.allowUnsecure: true` to the configuration.
+
 [[server-requestId-allowFromAnyIp]] `server.requestId.allowFromAnyIp`::
 Sets whether or not the `X-Opaque-Id` header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
 
@@ -468,6 +496,11 @@ default is `true`. *Default: `deprecated`*
 [[server-socketTimeout]] `server.socketTimeout`::
 The number of milliseconds to wait before closing an
 inactive socket. *Default: `"120000"`*
+
+[[server-payloadTimeout]] `server.payloadTimeout`::
+Sets the maximum time allowed for the client to transmit the request payload (body) before giving up
+and responding with a Request Timeout (408) error response.
+*Default: `"20000"`*
 
 [[server-ssl-cert-key]] `server.ssl.certificate` and `server.ssl.key`::
 Paths to a PEM-encoded X.509 server certificate and its corresponding private key. These
@@ -559,14 +592,13 @@ setting this to `true` enables unauthenticated users to access the {kib}
 server status API and status page. *Default: `false`*
 
 [[telemetry-allowChangingOptInStatus]] `telemetry.allowChangingOptInStatus`::
-When `true`, users are able to change the telemetry setting at a later time in
-<<advanced-options, Advanced Settings>>.  When `false`, users cannot change the opt-in status through *Advanced Settings*, and
+When `false`, users cannot change the opt-in status through <<advanced-options, Advanced Settings>>, and
 {kib} only looks at the value of <<settings-telemetry-optIn, `telemetry.optIn`>> to determine whether to send telemetry data or not. *Default: `true`*.
 
 [[settings-telemetry-optIn]] `telemetry.optIn`::
+Set to `false` to stop sending any telemetry data to Elastic.
 Reporting your cluster statistics helps
 us improve your user experience.
-Set to `true` to allow telemetry data to be sent to Elastic.
 When `false`, the telemetry data is never sent to Elastic. +
 +
 This setting can be changed at any time in <<advanced-options, Advanced Settings>>.
@@ -608,6 +640,8 @@ Set this value to false to disable the Remote Clusters UI.
 
 `xpack.rollup.ui.enabled`::
 Set this value to false to disable the Rollup Jobs UI. *Default: true*
++
+deprecated::[8.11.0,'Rollups are deprecated and will be removed in a future version. Use {ref}/downsampling.html[downsampling] instead.']
 
 `xpack.snapshot_restore.ui.enabled`::
 Set this value to false to disable the Snapshot and Restore UI. *Default: true*
@@ -617,24 +651,24 @@ Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 
 `i18n.locale` {ess-icon}::
 Set this value to change the {kib} interface language.
-Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
+Valid locales are: `en`, `zh-CN`, `ja-JP`, `fr-FR`. *Default: `en`*
 
-include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
-include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
-include::{kib-repo-dir}/settings/banners-settings.asciidoc[]
-include::{kib-repo-dir}/settings/cases-settings.asciidoc[leveloffset=+1]
-include::{kib-repo-dir}/settings/enterprise-search-settings.asciidoc[]
-include::{kib-repo-dir}/settings/fleet-settings.asciidoc[]
-include::{kib-repo-dir}/settings/i18n-settings.asciidoc[]
-include::{kib-repo-dir}/settings/logging-settings.asciidoc[]
-include::{kib-repo-dir}/settings/logs-ui-settings.asciidoc[]
-include::{kib-repo-dir}/settings/infrastructure-ui-settings.asciidoc[]
-include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]
-include::{kib-repo-dir}/settings/reporting-settings.asciidoc[]
-include::{kib-repo-dir}/settings/search-sessions-settings.asciidoc[]
+include::{kibana-root}/docs/settings/alert-action-settings.asciidoc[leveloffset=+1]
+include::{kibana-root}/docs/settings/apm-settings.asciidoc[]
+include::{kibana-root}/docs/settings/banners-settings.asciidoc[]
+include::{kibana-root}/docs/settings/cases-settings.asciidoc[leveloffset=+1]
+include::{kibana-root}/docs/settings/enterprise-search-settings.asciidoc[]
+include::{kibana-root}/docs/settings/fleet-settings.asciidoc[]
+include::{kibana-root}/docs/settings/i18n-settings.asciidoc[]
+include::{kibana-root}/docs/settings/logging-settings.asciidoc[]
+include::{kibana-root}/docs/settings/logs-ui-settings.asciidoc[]
+include::{kibana-root}/docs/settings/infrastructure-ui-settings.asciidoc[]
+include::{kibana-root}/docs/settings/monitoring-settings.asciidoc[]
+include::{kibana-root}/docs/settings/reporting-settings.asciidoc[]
+include::{kibana-root}/docs/settings/search-sessions-settings.asciidoc[]
 include::secure-settings.asciidoc[]
-include::{kib-repo-dir}/settings/security-settings.asciidoc[]
-include::{kib-repo-dir}/settings/spaces-settings.asciidoc[]
-include::{kib-repo-dir}/settings/task-manager-settings.asciidoc[]
-include::{kib-repo-dir}/settings/telemetry-settings.asciidoc[]
-include::{kib-repo-dir}/settings/url-drilldown-settings.asciidoc[]
+include::{kibana-root}/docs/settings/security-settings.asciidoc[]
+include::{kibana-root}/docs/settings/spaces-settings.asciidoc[]
+include::{kibana-root}/docs/settings/task-manager-settings.asciidoc[]
+include::{kibana-root}/docs/settings/telemetry-settings.asciidoc[]
+include::{kibana-root}/docs/settings/url-drilldown-settings.asciidoc[]

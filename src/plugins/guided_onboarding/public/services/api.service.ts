@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { HttpSetup } from '@kbn/core/public';
@@ -23,6 +24,7 @@ import type {
   GuideStep,
   GuideStepIds,
   GuideConfig,
+  GuideParams,
 } from '@kbn/guided-onboarding';
 
 import { API_BASE_PATH } from '../../common';
@@ -40,15 +42,15 @@ import {
 import { ConfigService } from './config.service';
 
 export class ApiService implements GuidedOnboardingApi {
-  private isCloudEnabled: boolean | undefined;
+  private _isEnabled: boolean = false;
   private client: HttpSetup | undefined;
   private pluginState$!: BehaviorSubject<PluginState | undefined>;
   public isLoading$ = new BehaviorSubject<boolean>(false);
   public isGuidePanelOpen$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private configService = new ConfigService();
 
-  public setup(httpClient: HttpSetup, isCloudEnabled: boolean) {
-    this.isCloudEnabled = isCloudEnabled;
+  public setup(httpClient: HttpSetup, isEnabled: boolean) {
+    this._isEnabled = isEnabled;
     this.client = httpClient;
     this.pluginState$ = new BehaviorSubject<PluginState | undefined>(undefined);
     this.isGuidePanelOpen$ = new BehaviorSubject<boolean>(false);
@@ -93,7 +95,7 @@ export class ApiService implements GuidedOnboardingApi {
    * Subsequently, the observable is updated automatically, when the state changes.
    */
   public fetchPluginState$(): Observable<PluginState | undefined> {
-    if (!this.isCloudEnabled) {
+    if (!this._isEnabled) {
       return of(undefined);
     }
     if (!this.client) {
@@ -117,7 +119,7 @@ export class ApiService implements GuidedOnboardingApi {
    * where all guides are displayed with their corresponding status.
    */
   public async fetchAllGuidesState(): Promise<{ state: GuideState[] } | undefined> {
-    if (!this.isCloudEnabled) {
+    if (!this._isEnabled) {
       return undefined;
     }
     if (!this.client) {
@@ -142,7 +144,7 @@ export class ApiService implements GuidedOnboardingApi {
     state: { status?: PluginStatus; guide?: GuideState },
     panelState: boolean
   ): Promise<{ pluginState: PluginState } | undefined> {
-    if (!this.isCloudEnabled) {
+    if (!this._isEnabled) {
       return undefined;
     }
     if (!this.client) {
@@ -360,7 +362,8 @@ export class ApiService implements GuidedOnboardingApi {
    */
   public async completeGuideStep(
     guideId: GuideId,
-    stepId: GuideStepIds
+    stepId: GuideStepIds,
+    params?: GuideParams
   ): Promise<{ pluginState: PluginState } | undefined> {
     const pluginState = await firstValueFrom(this.fetchPluginState$());
     // For now, returning undefined if consumer attempts to complete a step for a guide that isn't active
@@ -395,6 +398,7 @@ export class ApiService implements GuidedOnboardingApi {
         isActive: true,
         status,
         steps: updatedSteps,
+        params,
       };
 
       return await this.updatePluginState(
@@ -464,7 +468,7 @@ export class ApiService implements GuidedOnboardingApi {
    * @return {Promise} a promise with the guide config or undefined if the config is not found
    */
   public async getGuideConfig(guideId: GuideId): Promise<GuideConfig | undefined> {
-    if (!this.isCloudEnabled) {
+    if (!this._isEnabled) {
       return undefined;
     }
     if (!this.client) {
@@ -474,6 +478,10 @@ export class ApiService implements GuidedOnboardingApi {
     const config = await this.configService.getGuideConfig(guideId);
     this.isLoading$.next(false);
     return config;
+  }
+
+  public get isEnabled() {
+    return this._isEnabled;
   }
 }
 

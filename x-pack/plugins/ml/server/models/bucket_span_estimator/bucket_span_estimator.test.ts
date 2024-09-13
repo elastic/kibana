@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 
-import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
-import { BucketSpanEstimatorData } from '../../../common/types/job_service';
+import type { BucketSpanEstimatorData } from '../../../common/types/job_service';
 
 import { estimateBucketSpanFactory } from './bucket_span_estimator';
 

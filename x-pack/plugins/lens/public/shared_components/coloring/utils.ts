@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import chroma from 'chroma-js';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
-import { isColorDark } from '@elastic/eui';
 
 import {
   DataBounds,
@@ -18,8 +16,41 @@ import {
   reversePalette,
   getPaletteStops,
   CUSTOM_PALETTE,
+  enforceColorContrast,
+  ColorMapping,
+  getColorsFromMapping,
+  DEFAULT_FALLBACK_PALETTE,
 } from '@kbn/coloring';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { DataType } from '../../types';
+
+/**
+ * Returns array of colors for provided palette or colorMapping
+ */
+export function getColorStops(
+  paletteService: PaletteRegistry,
+  isDarkMode: boolean,
+  palette?: PaletteOutput<CustomPaletteParams>,
+  colorMapping?: ColorMapping.Config
+): string[] {
+  return colorMapping
+    ? getColorsFromMapping(isDarkMode, colorMapping)
+    : palette?.name === CUSTOM_PALETTE
+    ? palette?.params?.stops?.map(({ color }) => color) ?? []
+    : paletteService
+        .get(palette?.name || DEFAULT_FALLBACK_PALETTE)
+        .getCategoricalColors(10, palette);
+}
+
+/**
+ * Bucketed numerical columns should be treated as categorical
+ */
+export function shouldColorByTerms(
+  dataType?: DataType | DatatableColumnType,
+  isBucketed?: boolean
+) {
+  return isBucketed || dataType !== 'number';
+}
 
 export function getContrastColor(
   color: string,
@@ -35,16 +66,11 @@ export function getContrastColor(
   const backgroundColor = isDarkTheme
     ? euiDarkVars.euiPageBackgroundColor
     : euiLightVars.euiPageBackgroundColor;
-  const finalColor =
-    chroma(color).alpha() < 1 ? chroma.blend(backgroundColor, color, 'overlay') : chroma(color);
-  return isColorDark(...finalColor.rgb()) ? lightColor : darkColor;
+  return enforceColorContrast(color, backgroundColor) ? lightColor : darkColor;
 }
 
-export function getNumericValue(rowValue: number | number[] | undefined) {
-  if (rowValue == null || Array.isArray(rowValue)) {
-    return;
-  }
-  return rowValue;
+export function getNumericValue(rowValue?: unknown) {
+  return typeof rowValue === 'number' ? rowValue : undefined;
 }
 
 export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>(

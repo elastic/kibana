@@ -5,54 +5,85 @@
  * 2.0.
  */
 
-import { left } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
-
-import { PrebuiltRuleAsset } from './prebuilt_rule_asset';
+import { PrebuiltRuleAsset, TypeSpecificFields } from './prebuilt_rule_asset';
 import { getPrebuiltRuleMock, getPrebuiltThreatMatchRuleMock } from './prebuilt_rule_asset.mock';
+import { TypeSpecificCreatePropsInternal } from '../../../../../../common/api/detection_engine';
 
 describe('Prebuilt rule asset schema', () => {
+  it('can be of all rule types that are supported', () => {
+    // Check that the discriminated union TypeSpecificFields, which is used to create
+    // the PrebuiltRuleAsset schema, contains all the rule types that are supported.
+    const createPropsTypes = TypeSpecificCreatePropsInternal.options.map(
+      (option) => option.shape.type.value
+    );
+    const fieldsTypes = TypeSpecificFields.options.map((option) => option.shape.type.value);
+
+    expect(createPropsTypes).toHaveLength(fieldsTypes.length);
+    expect(new Set(createPropsTypes)).toEqual(new Set(fieldsTypes));
+  });
+
   test('empty objects do not validate', () => {
     const payload: Partial<PrebuiltRuleAsset> = {};
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "description"'
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 2 more"`
     );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "risk_score"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "name"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "severity"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "rule_id"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "version"'
-    );
-    expect(message.schema).toEqual({});
   });
 
-  test('made up values do not validate', () => {
+  test('made up values get omitted', () => {
     const payload: PrebuiltRuleAsset & { madeUp: string } = {
       ...getPrebuiltRuleMock(),
       madeUp: 'hi',
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeUp"']);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(getPrebuiltRuleMock());
+  });
+
+  describe('omitted fields from the rule schema are ignored', () => {
+    // The PrebuiltRuleAsset schema is built out of the rule schema,
+    // but the following fields are manually omitted.
+    // See: detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.ts
+    const omittedBaseFields = [
+      'actions',
+      'throttle',
+      'meta',
+      'output_index',
+      'namespace',
+      'alias_purpose',
+      'alias_target_id',
+      'outcome',
+    ];
+
+    test.each(omittedBaseFields)(
+      'ignores the base %s field since it`s an omitted field',
+      (field) => {
+        const payload: Partial<PrebuiltRuleAsset> & Record<string, unknown> = {
+          ...getPrebuiltRuleMock(),
+          [field]: 'some value',
+        };
+
+        const result = PrebuiltRuleAsset.safeParse(payload);
+        expectParseSuccess(result);
+        expect(result.data).toEqual(getPrebuiltRuleMock());
+      }
+    );
+
+    test('ignores the type specific response_actions field since it`s an omitted field', () => {
+      const payload: Partial<PrebuiltRuleAsset> & Record<string, unknown> = {
+        ...getPrebuiltRuleMock(),
+        response_actions: [{ action_type_id: `.osquery`, params: {} }],
+      };
+
+      const result = PrebuiltRuleAsset.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(getPrebuiltRuleMock());
+    });
   });
 
   test('[rule_id] does not validate', () => {
@@ -60,308 +91,11 @@ describe('Prebuilt rule asset schema', () => {
       rule_id: 'rule-1',
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "description"'
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"name: Required, description: Required, risk_score: Required, severity: Required, type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', and 1 more"`
     );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "risk_score"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "name"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "severity"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "version"'
-    );
-    expect(message.schema).toEqual({});
-  });
-
-  test('[rule_id, description] does not validate', () => {
-    const payload: Partial<PrebuiltRuleAsset> = {
-      rule_id: 'rule-1',
-      description: 'some description',
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "risk_score"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "name"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "severity"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "version"'
-    );
-    expect(message.schema).toEqual({});
-  });
-
-  test('[rule_id, description, from] does not validate', () => {
-    const payload: Partial<PrebuiltRuleAsset> = {
-      rule_id: 'rule-1',
-      description: 'some description',
-      from: 'now-5m',
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "risk_score"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "name"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "severity"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "version"'
-    );
-    expect(message.schema).toEqual({});
-  });
-
-  test('[rule_id, description, from, to] does not validate', () => {
-    const payload: Partial<PrebuiltRuleAsset> = {
-      rule_id: 'rule-1',
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "risk_score"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "name"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "severity"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "version"'
-    );
-    expect(message.schema).toEqual({});
-  });
-
-  test('[rule_id, description, from, to, name] does not validate', () => {
-    const payload: Partial<PrebuiltRuleAsset> = {
-      rule_id: 'rule-1',
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      name: 'some-name',
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "risk_score"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "severity"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "version"'
-    );
-    expect(message.schema).toEqual({});
-  });
-
-  test('[rule_id, description, from, to, name, severity] does not validate', () => {
-    const payload: Partial<PrebuiltRuleAsset> = {
-      rule_id: 'rule-1',
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      name: 'some-name',
-      severity: 'low',
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "risk_score"'
-    );
-    expect(getPaths(left(message.errors))).toContain(
-      'Invalid value "undefined" supplied to "version"'
-    );
-    expect(message.schema).toEqual({});
-  });
-
-  test('[rule_id, description, from, to, name, severity, type] does not validate', () => {
-    const payload: Partial<PrebuiltRuleAsset> = {
-      rule_id: 'rule-1',
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      name: 'some-name',
-      severity: 'low',
-      type: 'query',
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "version"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
-  test('[rule_id, description, from, to, name, severity, type, interval] does not validate', () => {
-    const payload: Partial<PrebuiltRuleAsset> = {
-      rule_id: 'rule-1',
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      name: 'some-name',
-      severity: 'low',
-      interval: '5m',
-      type: 'query',
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "version"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
-  test('[rule_id, description, from, to, name, severity, type, interval, index] does not validate', () => {
-    const payload: Partial<PrebuiltRuleAsset> = {
-      rule_id: 'rule-1',
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      name: 'some-name',
-      severity: 'low',
-      type: 'query',
-      interval: '5m',
-      index: ['index-1'],
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "version"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
-  test('[rule_id, description, from, to, name, severity, type, query, index, interval, version] does validate', () => {
-    const payload: PrebuiltRuleAsset = {
-      rule_id: 'rule-1',
-      risk_score: 50,
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      name: 'some-name',
-      severity: 'low',
-      type: 'query',
-      query: 'some query',
-      index: ['index-1'],
-      interval: '5m',
-      version: 1,
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-  });
-
-  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
-    const payload: Partial<PrebuiltRuleAsset> = {
-      rule_id: 'rule-1',
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      index: ['index-1'],
-      name: 'some-name',
-      severity: 'low',
-      interval: '5m',
-      type: 'query',
-      query: 'some query',
-      language: 'kuery',
-      risk_score: 50,
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "version"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
-  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, version] does validate', () => {
-    const payload: Partial<PrebuiltRuleAsset> = {
-      rule_id: 'rule-1',
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      index: ['index-1'],
-      name: 'some-name',
-      severity: 'low',
-      interval: '5m',
-      type: 'query',
-      query: 'some query',
-      language: 'kuery',
-      risk_score: 50,
-      version: 1,
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-  });
-
-  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does not validate', () => {
-    const payload: Partial<PrebuiltRuleAsset> & { output_index: string } = {
-      rule_id: 'rule-1',
-      output_index: '.siem-signals',
-      risk_score: 50,
-      description: 'some description',
-      from: 'now-5m',
-      to: 'now',
-      index: ['index-1'],
-      name: 'some-name',
-      severity: 'low',
-      interval: '5m',
-      type: 'query',
-      query: 'some query',
-      language: 'kuery',
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "version"',
-    ]);
-    expect(message.schema).toEqual({});
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, version] does validate', () => {
@@ -379,22 +113,9 @@ describe('Prebuilt rule asset schema', () => {
       version: 1,
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-  });
-
-  test('You can send in a namespace', () => {
-    const payload: PrebuiltRuleAsset = {
-      ...getPrebuiltRuleMock(),
-      namespace: 'a namespace',
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You can send in an empty array to threat', () => {
@@ -403,10 +124,9 @@ describe('Prebuilt rule asset schema', () => {
       threat: [],
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate', () => {
@@ -441,10 +161,9 @@ describe('Prebuilt rule asset schema', () => {
       version: 1,
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('allows references to be sent as valid', () => {
@@ -453,23 +172,20 @@ describe('Prebuilt rule asset schema', () => {
       references: ['index-1'],
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
-  test('immutable cannot be set in a pre-packaged rule', () => {
+  test('immutable is omitted from a pre-packaged rule', () => {
     const payload: PrebuiltRuleAsset & { immutable: boolean } = {
       ...getPrebuiltRuleMock(),
       immutable: true,
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys "immutable"']);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(getPrebuiltRuleMock());
   });
 
   test('rule_id is required', () => {
@@ -477,13 +193,9 @@ describe('Prebuilt rule asset schema', () => {
     // @ts-expect-error
     delete payload.rule_id;
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "rule_id"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"rule_id: Required"`);
   });
 
   test('references cannot be numbers', () => {
@@ -492,11 +204,11 @@ describe('Prebuilt rule asset schema', () => {
       references: [5],
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "references"']);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"references.0: Expected string, received number"`
+    );
   });
 
   test('indexes cannot be numbers', () => {
@@ -505,11 +217,11 @@ describe('Prebuilt rule asset schema', () => {
       index: [5],
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "index"']);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"index.0: Expected string, received number"`
+    );
   });
 
   test('saved_query type can have filters with it', () => {
@@ -518,10 +230,9 @@ describe('Prebuilt rule asset schema', () => {
       filters: [],
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('filters cannot be a string', () => {
@@ -530,13 +241,11 @@ describe('Prebuilt rule asset schema', () => {
       filters: 'some string',
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "some string" supplied to "filters"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"filters: Expected array, received string"`
+    );
   });
 
   test('language validates with kuery', () => {
@@ -545,10 +254,9 @@ describe('Prebuilt rule asset schema', () => {
       language: 'kuery',
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('language validates with lucene', () => {
@@ -557,10 +265,9 @@ describe('Prebuilt rule asset schema', () => {
       language: 'lucene',
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('language does not validate with something made up', () => {
@@ -569,13 +276,11 @@ describe('Prebuilt rule asset schema', () => {
       language: 'something-made-up',
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "something-made-up" supplied to "language"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up'"`
+    );
   });
 
   test('max_signals cannot be negative', () => {
@@ -584,13 +289,11 @@ describe('Prebuilt rule asset schema', () => {
       max_signals: -1,
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "-1" supplied to "max_signals"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"max_signals: Number must be greater than or equal to 1"`
+    );
   });
 
   test('max_signals cannot be zero', () => {
@@ -599,11 +302,11 @@ describe('Prebuilt rule asset schema', () => {
       max_signals: 0,
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to "max_signals"']);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"max_signals: Number must be greater than or equal to 1"`
+    );
   });
 
   test('max_signals can be 1', () => {
@@ -612,10 +315,9 @@ describe('Prebuilt rule asset schema', () => {
       max_signals: 1,
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You can optionally send in an array of tags', () => {
@@ -624,10 +326,9 @@ describe('Prebuilt rule asset schema', () => {
       tags: ['tag_1', 'tag_2'],
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You cannot send in an array of tags that are numbers', () => {
@@ -636,15 +337,11 @@ describe('Prebuilt rule asset schema', () => {
       tags: [0, 1, 2],
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "0" supplied to "tags"',
-      'Invalid value "1" supplied to "tags"',
-      'Invalid value "2" supplied to "tags"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"tags.0: Expected string, received number, tags.1: Expected string, received number, tags.2: Expected string, received number"`
+    );
   });
 
   test('You cannot send in an array of threat that are missing "framework"', () => {
@@ -670,13 +367,9 @@ describe('Prebuilt rule asset schema', () => {
       ],
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "threat,framework"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"threat.0.framework: Required"`);
   });
 
   test('You cannot send in an array of threat that are missing "tactic"', () => {
@@ -698,13 +391,9 @@ describe('Prebuilt rule asset schema', () => {
       ],
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "threat,tactic"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"threat.0.tactic: Required"`);
   });
 
   test('You can send in an array of threat that are missing "technique"', () => {
@@ -724,10 +413,9 @@ describe('Prebuilt rule asset schema', () => {
       ],
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You can optionally send in an array of false positives', () => {
@@ -736,10 +424,9 @@ describe('Prebuilt rule asset schema', () => {
       false_positives: ['false_1', 'false_2'],
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You cannot send in an array of false positives that are numbers', () => {
@@ -750,28 +437,24 @@ describe('Prebuilt rule asset schema', () => {
       false_positives: [5, 4],
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "5" supplied to "false_positives"',
-      'Invalid value "4" supplied to "false_positives"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"false_positives.0: Expected string, received number, false_positives.1: Expected string, received number"`
+    );
   });
+
   test('You cannot set the risk_score to 101', () => {
     const payload: PrebuiltRuleAsset = {
       ...getPrebuiltRuleMock(),
       risk_score: 101,
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "101" supplied to "risk_score"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"risk_score: Number must be less than or equal to 100"`
+    );
   });
 
   test('You cannot set the risk_score to -1', () => {
@@ -780,11 +463,11 @@ describe('Prebuilt rule asset schema', () => {
       risk_score: -1,
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to "risk_score"']);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"risk_score: Number must be greater than or equal to 0"`
+    );
   });
 
   test('You can set the risk_score to 0', () => {
@@ -793,10 +476,9 @@ describe('Prebuilt rule asset schema', () => {
       risk_score: 0,
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You can set the risk_score to 100', () => {
@@ -805,39 +487,9 @@ describe('Prebuilt rule asset schema', () => {
       risk_score: 100,
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-  });
-
-  test('You can set meta to any object you want', () => {
-    const payload: PrebuiltRuleAsset = {
-      ...getPrebuiltRuleMock(),
-      meta: {
-        somethingMadeUp: { somethingElse: true },
-      },
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-  });
-
-  test('You cannot create meta as a string', () => {
-    const payload: Omit<PrebuiltRuleAsset, 'meta'> & { meta: string } = {
-      ...getPrebuiltRuleMock(),
-      meta: 'should not work',
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "should not work" supplied to "meta"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('validates with timeline_id and timeline_title', () => {
@@ -847,10 +499,9 @@ describe('Prebuilt rule asset schema', () => {
       timeline_title: 'timeline-title',
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
@@ -859,93 +510,11 @@ describe('Prebuilt rule asset schema', () => {
       severity: 'junk',
     };
 
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "junk" supplied to "severity"']);
-    expect(message.schema).toEqual({});
-  });
-
-  test('You cannot send in an array of actions that are missing "group"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'group'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,group"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
-  test('You cannot send in an array of actions that are missing "id"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'id'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,id"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
-  test('You cannot send in an array of actions that are missing "action_type_id"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'action_type_id'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [{ group: 'group', id: 'id', params: {} }],
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,action_type_id"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
-  test('You cannot send in an array of actions that are missing "params"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'params'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,params"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
-  test('You cannot send in an array of actions that are including "actionTypeId"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'actions'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [
-        {
-          group: 'group',
-          id: 'id',
-          actionTypeId: 'actionTypeId',
-          params: {},
-        },
-      ],
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,action_type_id"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = PrebuiltRuleAsset.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk'"`
+    );
   });
 
   describe('note', () => {
@@ -955,10 +524,9 @@ describe('Prebuilt rule asset schema', () => {
         note: '# documentation markdown here',
       };
 
-      const decoded = PrebuiltRuleAsset.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
+      const result = PrebuiltRuleAsset.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('You can set note to an empty string', () => {
@@ -967,10 +535,9 @@ describe('Prebuilt rule asset schema', () => {
         note: '',
       };
 
-      const decoded = PrebuiltRuleAsset.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
+      const result = PrebuiltRuleAsset.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('You cannot create note as an object', () => {
@@ -981,13 +548,11 @@ describe('Prebuilt rule asset schema', () => {
         },
       };
 
-      const decoded = PrebuiltRuleAsset.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "{"somethingHere":"something else"}" supplied to "note"',
-      ]);
-      expect(message.schema).toEqual({});
+      const result = PrebuiltRuleAsset.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"note: Expected string, received object"`
+      );
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note] does validate', () => {
@@ -1006,10 +571,9 @@ describe('Prebuilt rule asset schema', () => {
         version: 1,
       };
 
-      const decoded = PrebuiltRuleAsset.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
+      const result = PrebuiltRuleAsset.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
   });
 
@@ -1032,10 +596,9 @@ describe('Prebuilt rule asset schema', () => {
         exceptions_list: getListArrayMock(),
       };
 
-      const decoded = PrebuiltRuleAsset.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
+      const result = PrebuiltRuleAsset.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, version, and empty exceptions_list] does validate', () => {
@@ -1056,10 +619,9 @@ describe('Prebuilt rule asset schema', () => {
         exceptions_list: [],
       };
 
-      const decoded = PrebuiltRuleAsset.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
+      const result = PrebuiltRuleAsset.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, version, and invalid exceptions_list] does NOT validate', () => {
@@ -1080,15 +642,11 @@ describe('Prebuilt rule asset schema', () => {
         exceptions_list: [{ id: 'uuid_here', namespace_type: 'not a namespace type' }],
       };
 
-      const decoded = PrebuiltRuleAsset.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "exceptions_list,list_id"',
-        'Invalid value "undefined" supplied to "exceptions_list,type"',
-        'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
-      ]);
-      expect(message.schema).toEqual({});
+      const result = PrebuiltRuleAsset.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"exceptions_list.0.list_id: Required, exceptions_list.0.type: Required, exceptions_list.0.namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'not a namespace type'"`
+      );
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, version, and non-existent exceptions_list] does validate with empty exceptions_list', () => {
@@ -1108,20 +666,18 @@ describe('Prebuilt rule asset schema', () => {
         note: '# some markdown',
       };
 
-      const decoded = PrebuiltRuleAsset.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
+      const result = PrebuiltRuleAsset.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
   });
 
   describe('threat_mapping', () => {
     test('You can set a threat query, index, mapping, filters on a pre-packaged rule', () => {
       const payload = getPrebuiltThreatMatchRuleMock();
-      const decoded = PrebuiltRuleAsset.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
+      const result = PrebuiltRuleAsset.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
   });
 });

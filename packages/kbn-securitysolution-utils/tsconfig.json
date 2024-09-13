@@ -11,7 +11,9 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/esql-utils",
+    "@kbn/esql-ast"
   ],
   "exclude": [
     "target/**/*",

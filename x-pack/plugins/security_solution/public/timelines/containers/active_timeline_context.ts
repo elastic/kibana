@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../common/types';
-import { TimelineTabs } from '../../../common/types/timeline';
 import type {
-  TimelineEqlRequestOptions,
-  TimelineEventsAllRequestOptions,
-} from '../../../common/search_strategy/timeline';
+  TimelineEventsAllOptionsInput,
+  TimelineEqlRequestOptionsInput,
+} from '@kbn/timelines-plugin/common';
 import type { TimelineArgs } from '.';
 
 /*
@@ -26,11 +24,10 @@ import type { TimelineArgs } from '.';
 
 class ActiveTimelineEvents {
   private _activePage: number = 0;
-  private _expandedDetail: ExpandedDetailTimeline = {};
   private _pageName: string = '';
-  private _request: TimelineEventsAllRequestOptions | null = null;
+  private _request: TimelineEventsAllOptionsInput | null = null;
   private _response: TimelineArgs | null = null;
-  private _eqlRequest: TimelineEqlRequestOptions | null = null;
+  private _eqlRequest: TimelineEqlRequestOptionsInput | null = null;
   private _eqlResponse: TimelineArgs | null = null;
 
   getActivePage() {
@@ -39,42 +36,6 @@ class ActiveTimelineEvents {
 
   setActivePage(activePage: number) {
     this._activePage = activePage;
-  }
-
-  getExpandedDetail() {
-    return this._expandedDetail;
-  }
-
-  toggleExpandedDetail(expandedDetail: ExpandedDetailType) {
-    const queryTab = TimelineTabs.query;
-    const currentExpandedDetail = this._expandedDetail[queryTab];
-    let isSameExpandedDetail;
-
-    // Check if the stored details matches the incoming detail
-    if (currentExpandedDetail?.panelView === 'eventDetail') {
-      isSameExpandedDetail =
-        expandedDetail?.panelView === 'eventDetail' &&
-        expandedDetail?.params?.eventId === currentExpandedDetail?.params?.eventId;
-    } else if (currentExpandedDetail?.panelView === 'hostDetail') {
-      isSameExpandedDetail =
-        expandedDetail?.panelView === 'hostDetail' &&
-        expandedDetail?.params?.hostName === currentExpandedDetail?.params?.hostName;
-    } else if (currentExpandedDetail?.panelView === 'networkDetail') {
-      isSameExpandedDetail =
-        expandedDetail?.panelView === 'networkDetail' &&
-        expandedDetail?.params?.ip === currentExpandedDetail?.params?.ip;
-    }
-
-    // if so, unset it, otherwise set it
-    if (isSameExpandedDetail) {
-      this._expandedDetail = {};
-    } else {
-      this._expandedDetail = { [queryTab]: { ...expandedDetail } };
-    }
-  }
-
-  setExpandedDetail(expandedDetail: ExpandedDetailTimeline) {
-    this._expandedDetail = expandedDetail;
   }
 
   getPageName() {
@@ -89,7 +50,7 @@ class ActiveTimelineEvents {
     return this._request;
   }
 
-  setRequest(req: TimelineEventsAllRequestOptions) {
+  setRequest(req: TimelineEventsAllOptionsInput) {
     this._request = req;
   }
 
@@ -105,7 +66,7 @@ class ActiveTimelineEvents {
     return this._eqlRequest;
   }
 
-  setEqlRequest(req: TimelineEqlRequestOptions) {
+  setEqlRequest(req: TimelineEqlRequestOptionsInput) {
     this._eqlRequest = req;
   }
 

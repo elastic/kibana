@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '../..';
@@ -392,6 +393,87 @@ describe('#validate', () => {
     expect(mockValidate).toHaveBeenCalledWith({
       key: 'not-number',
       value: 'some-string',
+    });
+  });
+});
+
+describe('#extendsDeep', () => {
+  describe('#equalType', () => {
+    const type = schema.object({
+      foo: schema.string(),
+      test: schema.conditional(
+        schema.siblingRef('foo'),
+        'test',
+        schema.object({
+          bar: schema.string(),
+        }),
+        schema.string()
+      ),
+    });
+
+    test('objects with unknown attributes are kept when extending with unknowns=allow', () => {
+      const result = type
+        .extendsDeep({ unknowns: 'allow' })
+        .validate({ foo: 'test', test: { bar: 'test', baz: 'test' } });
+      expect(result).toEqual({
+        foo: 'test',
+        test: { bar: 'test', baz: 'test' },
+      });
+    });
+
+    test('objects with unknown attributes are dropped when extending with unknowns=ignore', () => {
+      const result = type
+        .extendsDeep({ unknowns: 'ignore' })
+        .validate({ foo: 'test', test: { bar: 'test', baz: 'test' } });
+      expect(result).toEqual({
+        foo: 'test',
+        test: { bar: 'test' },
+      });
+    });
+    test('objects with unknown attributes fail validation when extending with unknowns=forbid', () => {
+      expect(() =>
+        type
+          .extendsDeep({ unknowns: 'forbid' })
+          .validate({ foo: 'test', test: { bar: 'test', baz: 'test' } })
+      ).toThrowErrorMatchingInlineSnapshot(`"[test.baz]: definition for this key is missing"`);
+    });
+  });
+
+  describe('#notEqualType', () => {
+    const type = schema.object({
+      foo: schema.string(),
+      test: schema.conditional(
+        schema.siblingRef('foo'),
+        'test',
+        schema.string(),
+        schema.object({
+          bar: schema.string(),
+        })
+      ),
+    });
+
+    test('objects with unknown attributes are kept when extending with unknowns=allow', () => {
+      const allowSchema = type.extendsDeep({ unknowns: 'allow' });
+      const result = allowSchema.validate({ foo: 'not-test', test: { bar: 'test', baz: 'test' } });
+      expect(result).toEqual({
+        foo: 'not-test',
+        test: { bar: 'test', baz: 'test' },
+      });
+    });
+
+    test('objects with unknown attributes are dropped when extending with unknowns=ignore', () => {
+      const ignoreSchema = type.extendsDeep({ unknowns: 'ignore' });
+      const result = ignoreSchema.validate({ foo: 'not-test', test: { bar: 'test', baz: 'test' } });
+      expect(result).toEqual({
+        foo: 'not-test',
+        test: { bar: 'test' },
+      });
+    });
+    test('objects with unknown attributes fail validation when extending with unknowns=forbid', () => {
+      const forbidSchema = type.extendsDeep({ unknowns: 'forbid' });
+      expect(() =>
+        forbidSchema.validate({ foo: 'not-test', test: { bar: 'test', baz: 'test' } })
+      ).toThrowErrorMatchingInlineSnapshot(`"[test.baz]: definition for this key is missing"`);
     });
   });
 });

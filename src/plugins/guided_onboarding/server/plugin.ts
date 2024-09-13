@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
 
 import type { GuideId, GuideConfig } from '@kbn/guided-onboarding';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { GUIDED_ONBOARDING_FEATURE } from './feature';
 import { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
 import { defineRoutes } from './routes';
 import { guideStateSavedObjects, pluginStateSavedObjects } from './saved_objects';
@@ -25,7 +28,7 @@ export class GuidedOnboardingPlugin
     this.guidesConfig = {} as GuidesConfig;
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: { features?: FeaturesPluginSetup }) {
     this.logger.debug('guidedOnboarding: Setup');
     const router = core.http.createRouter();
 
@@ -35,6 +38,8 @@ export class GuidedOnboardingPlugin
     // register saved objects
     core.savedObjects.registerType(guideStateSavedObjects);
     core.savedObjects.registerType(pluginStateSavedObjects);
+
+    plugins.features?.registerKibanaFeature(GUIDED_ONBOARDING_FEATURE);
 
     return {
       registerGuideConfig: (guideId: GuideId, guideConfig: GuideConfig) => {

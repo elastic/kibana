@@ -21,6 +21,21 @@ export enum FEATURE_FLAG_NAMES {
    * It resolves the URL that the button "Add Integrations" will point to.
    */
   'security-solutions.add-integrations-url' = 'security-solutions.add-integrations-url',
+  /**
+   * Used in cloud chat plugin to enable/disable the chat.
+   * The expectation that the chat is enabled by default and the flag is used as a runtime kill switch.
+   */
+  'cloud-chat.enabled' = 'cloud-chat.enabled',
+  /**
+   * Used in cloud chat plugin to switch between the chat variants.
+   * Options are: 'header' (the chat button appears as part of the kibana header) and 'bubble' (floating chat button at the bottom of the screen).
+   */
+  'cloud-chat.chat-variant' = 'cloud-chat.chat-variant',
+  /**
+   * Used in observability onboarding plugin to enable/disable the experimental onboarding flow.
+   * Options are: `true` and `false`.
+   */
+  'observability_onboarding.experimental_onboarding_flow_enabled' = 'observability_onboarding.experimental_onboarding_flow_enabled',
 }
 
 /**

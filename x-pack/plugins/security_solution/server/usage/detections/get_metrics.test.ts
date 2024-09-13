@@ -34,7 +34,7 @@ import {
 } from './rules/get_metrics.mocks';
 import { getInitialDetectionMetrics } from './get_initial_usage';
 import { getDetectionsMetrics } from './get_metrics';
-import { getInitialRulesUsage } from './rules/get_initial_usage';
+import { getInitialRulesUsage, initialAlertSuppression } from './rules/get_initial_usage';
 
 describe('Detections Usage and Metrics', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -99,6 +99,11 @@ describe('Detections Usage and Metrics', () => {
               updated_on: '2021-03-23T17:15:59.634Z',
               has_legacy_notification: false,
               has_notification: false,
+              has_legacy_investigation_field: false,
+              has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
+              has_alert_suppression_per_rule_execution: false,
+              has_alert_suppression_per_time_period: false,
+              alert_suppression_fields_count: 0,
             },
           ],
           detection_rule_usage: {
@@ -112,6 +117,8 @@ describe('Detections Usage and Metrics', () => {
               legacy_notifications_disabled: 0,
               notifications_enabled: 0,
               notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
             },
             elastic_total: {
               alerts: 3400,
@@ -122,6 +129,8 @@ describe('Detections Usage and Metrics', () => {
               legacy_notifications_disabled: 0,
               notifications_enabled: 0,
               notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
             },
           },
         },
@@ -163,6 +172,8 @@ describe('Detections Usage and Metrics', () => {
               legacy_notifications_disabled: 0,
               notifications_enabled: 0,
               notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
             },
             query: {
               alerts: 800,
@@ -173,6 +184,8 @@ describe('Detections Usage and Metrics', () => {
               legacy_notifications_disabled: 0,
               notifications_enabled: 0,
               notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
             },
           },
         },
@@ -206,6 +219,7 @@ describe('Detections Usage and Metrics', () => {
           detection_rule_detail: [
             {
               alert_count_daily: 0,
+              alert_suppression_fields_count: 0,
               cases_count_total: 1,
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
@@ -217,6 +231,10 @@ describe('Detections Usage and Metrics', () => {
               updated_on: '2021-03-23T17:15:59.634Z',
               has_legacy_notification: false,
               has_notification: false,
+              has_legacy_investigation_field: false,
+              has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
+              has_alert_suppression_per_rule_execution: false,
+              has_alert_suppression_per_time_period: false,
             },
           ],
           detection_rule_usage: {
@@ -230,6 +248,8 @@ describe('Detections Usage and Metrics', () => {
               legacy_notifications_disabled: 0,
               notifications_enabled: 0,
               notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
             },
             query: {
               alerts: 0,
@@ -240,6 +260,8 @@ describe('Detections Usage and Metrics', () => {
               legacy_notifications_disabled: 0,
               notifications_enabled: 0,
               notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
             },
           },
         },

@@ -1,13 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import { keyBy } from 'lodash';
+import { defer, from } from 'rxjs';
+import { rateLimitingForkJoin } from '../../common/data_views/utils';
 import type { QueryDslQueryContainer } from '../../common/types';
 
 import {
@@ -15,6 +19,7 @@ import {
   getCapabilitiesForRollupIndices,
   mergeCapabilitiesWithFields,
 } from './lib';
+import { DataViewType } from '../../common/types';
 
 export interface FieldDescriptor {
   aggregatable: boolean;
@@ -27,8 +32,9 @@ export interface FieldDescriptor {
   metadata_field?: boolean;
   fixedInterval?: string[];
   timeZone?: string[];
-  timeSeriesMetric?: 'histogram' | 'summary' | 'counter' | 'gauge';
+  timeSeriesMetric?: estypes.MappingTimeSeriesMetricType;
   timeSeriesDimension?: boolean;
+  defaultFormatter?: string;
 }
 
 interface FieldSubType {
@@ -36,13 +42,24 @@ interface FieldSubType {
   nested?: { path: string };
 }
 
-export class IndexPatternsFetcher {
-  private elasticsearchClient: ElasticsearchClient;
-  private allowNoIndices: boolean;
+interface IndexPatternsFetcherOptionalParams {
+  uiSettingsClient: IUiSettingsClient;
+  allowNoIndices?: boolean;
+  rollupsEnabled?: boolean;
+}
 
-  constructor(elasticsearchClient: ElasticsearchClient, allowNoIndices: boolean = false) {
-    this.elasticsearchClient = elasticsearchClient;
-    this.allowNoIndices = allowNoIndices;
+export class IndexPatternsFetcher {
+  private readonly uiSettingsClient?: IUiSettingsClient;
+  private readonly allowNoIndices: boolean;
+  private readonly rollupsEnabled: boolean;
+
+  constructor(
+    private readonly elasticsearchClient: ElasticsearchClient,
+    optionalParams?: IndexPatternsFetcherOptionalParams
+  ) {
+    this.uiSettingsClient = optionalParams?.uiSettingsClient;
+    this.allowNoIndices = optionalParams?.allowNoIndices || false;
+    this.rollupsEnabled = optionalParams?.rollupsEnabled || false;
   }
 
   /**
@@ -62,14 +79,28 @@ export class IndexPatternsFetcher {
     rollupIndex?: string;
     indexFilter?: QueryDslQueryContainer;
     fields?: string[];
+    allowHidden?: boolean;
+    fieldTypes?: string[];
+    includeEmptyFields?: boolean;
   }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
-    const { pattern, metaFields = [], fieldCapsOptions, type, rollupIndex, indexFilter } = options;
-    const allowNoIndices = fieldCapsOptions
-      ? fieldCapsOptions.allow_no_indices
-      : this.allowNoIndices;
+    const {
+      pattern,
+      metaFields = [],
+      fieldCapsOptions,
+      type,
+      rollupIndex,
+      indexFilter,
+      allowHidden,
+      fieldTypes,
+      includeEmptyFields,
+    } = options;
+    const allowNoIndices = fieldCapsOptions?.allow_no_indices || this.allowNoIndices;
+
+    const expandWildcards = allowHidden ? 'all' : 'open';
 
     const fieldCapsResponse = await getFieldCapabilities({
       callCluster: this.elasticsearchClient,
+      uiSettingsClient: this.uiSettingsClient,
       indices: pattern,
       metaFields,
       fieldCapsOptions: {
@@ -78,9 +109,12 @@ export class IndexPatternsFetcher {
       },
       indexFilter,
       fields: options.fields || ['*'],
+      expandWildcards,
+      fieldTypes,
+      includeEmptyFields,
     });
 
-    if (type === 'rollup' && rollupIndex) {
+    if (this.rollupsEnabled && type === DataViewType.ROLLUP && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
       const capabilityCheck = getCapabilitiesForRollupIndices(
         await this.elasticsearchClient.rollup.getRollupIndexCaps({
@@ -109,5 +143,38 @@ export class IndexPatternsFetcher {
       };
     }
     return fieldCapsResponse;
+  }
+
+  /**
+   * Get existing index pattern list by providing string array index pattern list.
+   * @param indices - index pattern list
+   * @returns index pattern list of index patterns that match indices
+   */
+  async getExistingIndices(indices: string[]): Promise<string[]> {
+    const indicesObs = indices.map((pattern) => {
+      // when checking a negative pattern, check if the positive pattern exists
+      const indexToQuery = pattern.trim().startsWith('-')
+        ? pattern.trim().substring(1)
+        : pattern.trim();
+      return defer(() =>
+        from(
+          this.getFieldsForWildcard({
+            // check one field to keep request fast/small
+            fields: ['_id'],
+            pattern: indexToQuery,
+          })
+        )
+      );
+    });
+
+    return new Promise<boolean[]>((resolve) => {
+      rateLimitingForkJoin(indicesObs, 3, { fields: [], indices: [] }).subscribe((value) => {
+        resolve(value.map((v) => v.indices.length > 0));
+      });
+    })
+      .then((allPatterns: boolean[]) =>
+        indices.filter((pattern, i, self) => self.indexOf(pattern) === i && allPatterns[i])
+      )
+      .catch(() => indices);
   }
 }

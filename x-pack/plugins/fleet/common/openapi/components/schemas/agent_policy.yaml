@@ -16,6 +16,10 @@ properties:
       enum:
         - metrics
         - logs
+  keep_monitoring_alive:
+    description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
+    type: boolean
+    nullable: true
   data_output_id:
     type: string
     nullable: true
@@ -29,11 +33,11 @@ properties:
     type: string
     nullable: true
   unenroll_timeout:
-    type: number
+    type: integer
   inactivity_timeout:
-    type: number
+    type: integer
   package_policies:
-    description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policy with the ?full=true parameter
+    description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter
     type: array
     items:
       $ref: ./package_policy.yaml
@@ -46,6 +50,8 @@ properties:
     type: number
   agents:
     type: number
+  unprivileged_agents:
+    type: number 
   agent_features:
     type: array
     items:
@@ -58,6 +64,29 @@ properties:
       required:
         - name
         - enabled
+  is_protected:
+    description: Indicates whether the agent policy has tamper protection enabled. Default false.
+    type: boolean
+  overrides:
+    type: object
+    description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
+    nullable: true
+  advanced_settings:
+    type: object
+    description: Advanced settings stored in the agent policy, e.g. agent_limits_go_max_procs
+    nullable: true
+  supports_agentless:
+    type: boolean
+    description: Indicates whether the agent policy supports agentless integrations. Only allowed in a serverless environment.
+  global_data_tags:
+    type: array
+    items:
+      type: object
+      additionalProperties:
+        oneOf:
+          - type: string
+          - type: number
+      description: User defined data tags that are added to all of the inputs. The values can be strings or numbers.
 required:
   - id
   - status

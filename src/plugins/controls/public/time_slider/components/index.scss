@@ -1,43 +1,34 @@
-.timeSlider__anchorOverride {
-  >div {
-    height: 100%;
-  }
-}
 
 .timeSlider__popoverOverride {
   width: 100%;
   max-inline-size: 100% !important;
-  max-width: 100%;
-  height: 100%;
 }
 
-.timeSlider__panelOverride {
-  min-width: $euiSizeXXL * 15;
-}
-
-.timeSlider-playToggle {
+.timeSlider-playToggle:enabled {
   background-color: $euiColorPrimary !important;
 }
 
 .timeSlider__anchor {
-  text-decoration: none;
   width: 100%;
-  background-color: $euiFormBackgroundColor;
-  box-shadow: none;
-  @include euiFormControlSideBorderRadius($euiFormControlBorderRadius, $side: 'right', $internal: true);
-  overflow: hidden;
   height: 100%;
-
-  &:enabled:focus {
-    background-color: $euiFormBackgroundColor;
-  }
+  box-shadow: none;
+  overflow: hidden;
+  @include euiFormControlSideBorderRadius($euiFormControlBorderRadius, $side: 'right', $internal: true);
 
   .euiText {
-    background-color: $euiFormBackgroundColor;
+    background-color: transparent !important;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:not(.euiFormControlLayoutDelimited__delimiter) {
+      cursor: pointer !important;
+    }
   }
 
   .timeSlider__anchorText {
-    font-weight: $euiFontWeightBold;
+    font-weight: $euiFontWeightMedium;
   }
 
   .timeSlider__anchorText--default {

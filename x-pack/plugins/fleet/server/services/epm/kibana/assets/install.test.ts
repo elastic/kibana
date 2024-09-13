@@ -10,16 +10,15 @@ import type {
   SavedObjectsImportSuccess,
   SavedObjectsImportResponse,
 } from '@kbn/core/server';
-
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import type { ArchiveAsset } from './install';
+import { type ArchiveAsset } from './install';
 
 jest.mock('timers/promises', () => ({
   async setTimeout() {},
 }));
 
-import { installKibanaSavedObjects } from './install';
+import { createSavedObjectKibanaAsset, installKibanaSavedObjects } from './install';
 
 const mockLogger = loggingSystemMock.createLogger();
 
@@ -93,7 +92,7 @@ describe('installKibanaSavedObjects', () => {
 
     mockImporter.import.mockResolvedValueOnce(errorResponse).mockResolvedValueOnce(successResponse);
 
-    expect(
+    await expect(
       installKibanaSavedObjects({
         savedObjectsImporter: mockImporter,
         logger: mockLogger,
@@ -120,5 +119,29 @@ describe('installKibanaSavedObjects', () => {
 
     expect(mockImporter.import).toHaveBeenCalledTimes(1);
     expect(mockImporter.resolveImportErrors).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('createSavedObjectKibanaAsset', () => {
+  it('should set migrationVersion as typeMigrationVersion in so', () => {
+    const asset = createAsset({
+      attributes: { hello: 'world' },
+      migrationVersion: { dashboard: '8.6.0' },
+    });
+    const result = createSavedObjectKibanaAsset(asset);
+
+    expect(result.typeMigrationVersion).toEqual('8.6.0');
+  });
+
+  it('should set coreMigrationVersion and typeMigrationVersion in so', () => {
+    const asset = createAsset({
+      attributes: { hello: 'world' },
+      typeMigrationVersion: '8.6.0',
+      coreMigrationVersion: '8.7.0',
+    });
+    const result = createSavedObjectKibanaAsset(asset);
+
+    expect(result.typeMigrationVersion).toEqual('8.6.0');
+    expect(result.coreMigrationVersion).toEqual('8.7.0');
   });
 });

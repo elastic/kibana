@@ -8,7 +8,7 @@
 import { Response } from 'superagent';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
-import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
+import { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 import { TimelineInput } from '@kbn/security-solution-plugin/common/search_strategy';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
@@ -58,6 +58,7 @@ export class TimelineTestService extends FtrService {
       await this.supertest
         .post(TIMELINE_DRAFT_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send({ timelineType: 'default' })
         .then(this.getHttpResponseFailureHandler())
         .then((response) => response.body as TimelineResponse)
@@ -90,6 +91,7 @@ export class TimelineTestService extends FtrService {
         eventCategoryField: 'event.category',
         timestampField: '@timestamp',
       },
+      savedSearchId: null,
     };
 
     // Update the timeline
@@ -111,6 +113,7 @@ export class TimelineTestService extends FtrService {
     return await this.supertest
       .patch(TIMELINE_URL)
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
       .send({
         timelineId,
         version,
@@ -125,6 +128,7 @@ export class TimelineTestService extends FtrService {
     await this.supertest
       .delete(TIMELINE_URL)
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
       .send({
         savedObjectIds: Array.isArray(id) ? id : [id],
       })
@@ -187,6 +191,7 @@ export class TimelineTestService extends FtrService {
             serializedQuery: JSON.stringify(esQuery),
           },
         },
+        savedSearchId: null,
       },
       newTimeline.data.persistTimeline.timeline.version
     );

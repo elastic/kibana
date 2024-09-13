@@ -74,6 +74,31 @@
             "path": "packages/core/status/core-status-common-internal/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-common-internal",
+            "id": "def-common.ServerVersion.build_flavor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "build_flavor",
+            "description": [],
+            "signature": [
+              "\"serverless\" | \"traditional\""
+            ],
+            "path": "packages/core/status/core-status-common-internal/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-common-internal",
+            "id": "def-common.ServerVersion.build_date",
+            "type": "string",
+            "tags": [],
+            "label": "build_date",
+            "description": [],
+            "path": "packages/core/status/core-status-common-internal/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -201,7 +226,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"degraded\" | \"unavailable\" | \"critical\" | \"available\""
+              "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
             ],
             "path": "packages/core/status/core-status-common-internal/src/status.ts",
             "deprecated": false,
@@ -294,9 +319,9 @@
               "Omit<",
               {
                 "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.OpsMetrics",
+                "section": "def-server.OpsMetrics",
                 "text": "OpsMetrics"
               },
               ", \"collected_at\"> & { last_updated: string; collection_interval_in_millis: number; requests: { status_codes: Record<number, number>; }; }"
@@ -322,9 +347,9 @@
           "Omit<",
           {
             "pluginId": "@kbn/core-metrics-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-common.OpsMetrics",
+            "section": "def-server.OpsMetrics",
             "text": "OpsMetrics"
           },
           ", \"collected_at\"> & { last_updated: string; collection_interval_in_millis: number; requests: { status_codes: Record<number, number>; }; }"

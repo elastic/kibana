@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ApmFields, Instance, apm } from '@kbn/apm-synthtrace-client';
 import { random } from 'lodash';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -18,7 +20,7 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
   const services = ['web', 'order-processing', 'api-backend'];
 
   return {
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const successfulTimestamps = range.ratePerMinute(60);
 
       const instances = services.map((serviceName, index) =>
@@ -78,10 +80,13 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
         return successfulTraceEvents;
       };
 
-      return logger.perf('generating_apm_events', () =>
-        instances
-          .flatMap((instance) => urls.map((url) => ({ instance, url })))
-          .map(({ instance, url }, index) => instanceSpans(instance, url, index))
+      return withClient(
+        apmEsClient,
+        logger.perf('generating_apm_events', () =>
+          instances
+            .flatMap((instance) => urls.map((url) => ({ instance, url })))
+            .map(({ instance, url }, index) => instanceSpans(instance, url, index))
+        )
       );
     },
   };

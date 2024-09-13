@@ -99,7 +99,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   ): boolean;
 }
 
-export class DynamicStyleProperty<T>
+export class DynamicStyleProperty<T extends object>
   extends AbstractStyleProperty<T>
   implements IDynamicStyleProperty<T>
 {
@@ -341,11 +341,12 @@ export class DynamicStyleProperty<T>
     // The exact case that spawned this fix is with ES_SEARCH sources and 8.0 where vector tiles switched
     // from vector tiles generated via Kibana server to vector tiles generated via Elasticsearch.
     // Kibana vector tiles supported fieldMeta from local while Elasticsearch vector tiles do not support fieldMeta from local.
-    if (this._field && !this._field.supportsFieldMetaFromLocalData()) {
-      fieldMetaOptions.isEnabled = true;
-    }
-
-    return fieldMetaOptions;
+    return this._field && !this._field.supportsFieldMetaFromLocalData()
+      ? {
+          ...fieldMetaOptions,
+          isEnabled: true,
+        }
+      : fieldMetaOptions;
   }
 
   getDataMappingFunction() {

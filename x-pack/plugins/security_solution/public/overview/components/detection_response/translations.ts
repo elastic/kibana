@@ -73,15 +73,24 @@ export const UPDATING = i18n.translate('xpack.securitySolution.detectionResponse
 export const UPDATED = i18n.translate('xpack.securitySolution.detectionResponse.updated', {
   defaultMessage: 'Updated',
 });
+
 export const CASES = (totalCases: number) =>
   i18n.translate('xpack.securitySolution.detectionResponse.casesByStatus.totalCases', {
     values: { totalCases },
     defaultMessage: 'total {totalCases, plural, =1 {case} other {cases}}',
   });
+
 export const CASES_BY_STATUS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.casesByStatusSectionTitle',
   {
     defaultMessage: 'Cases',
+  }
+);
+
+export const CASES_BY_STATUS_SECTION_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.casesByStatusSectionTooltip',
+  {
+    defaultMessage: 'The cases table is not filterable via the SIEM global KQL search.',
   }
 );
 
@@ -114,6 +123,14 @@ export const CASES_TABLE_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.caseSectionTitle',
   {
     defaultMessage: 'Recently created cases',
+  }
+);
+
+export const CASES_TABLE_SECTION_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.caseSectionTooltip',
+  {
+    defaultMessage:
+      'The recently created cases table is not filterable via the SIEM global KQL search.',
   }
 );
 
@@ -186,10 +203,10 @@ export const OPEN_ALL_ALERTS_BUTTON = i18n.translate(
   }
 );
 
-export const VIEW_RECENT_CASES = i18n.translate(
-  'xpack.securitySolution.detectionResponse.viewRecentCases',
+export const VIEW_ALL_CASES = i18n.translate(
+  'xpack.securitySolution.detectionResponse.viewAllCases',
   {
-    defaultMessage: 'View recent cases',
+    defaultMessage: 'View all cases',
   }
 );
 

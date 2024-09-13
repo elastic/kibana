@@ -1,23 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
+  EuiProvider,
   DefaultItemAction,
   EuiButton,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
+  EuiPageTemplate,
+  EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -86,6 +85,7 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
   const content = dataView ? (
     <>
       <EuiText data-test-subj="dataViewTitle">Data view: {dataView.title}</EuiText>
+      <EuiSpacer />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -118,11 +118,11 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <EuiInMemoryTable<DataViewField>
         items={fields}
         columns={columns}
         pagination={true}
-        hasActions={true}
         sorting={{
           sort: {
             field: 'name',
@@ -136,14 +136,12 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
   );
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageHeader>Data view field editor demo</EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody>{content}</EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <EuiProvider>
+      <EuiPageTemplate offset={0}>
+        <EuiPageTemplate.Header pageTitle="Data view field editor demo" />
+        <EuiPageTemplate.Section>{content}</EuiPageTemplate.Section>
+      </EuiPageTemplate>
+    </EuiProvider>
   );
 };
 

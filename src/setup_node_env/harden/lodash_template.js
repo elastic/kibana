@@ -1,33 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-var hook = require('require-in-the-middle');
 var isIterateeCall = require('lodash/_isIterateeCall');
-
-hook(['lodash'], function (lodash) {
-  // we use lodash.template here to harden third-party usage of this otherwise banned function.
-  // eslint-disable-next-line no-restricted-properties
-  lodash.template = createProxy(lodash.template);
-  return lodash;
-});
-
-hook(['lodash/template'], function (template) {
-  return createProxy(template);
-});
-
-hook(['lodash/fp'], function (fp) {
-  fp.template = createFpProxy(fp.template);
-  return fp;
-});
-
-hook(['lodash/fp/template'], function (template) {
-  return createFpProxy(template);
-});
 
 function createProxy(template) {
   return new Proxy(template, {
@@ -61,3 +41,5 @@ function createFpProxy(template) {
     },
   });
 }
+
+module.exports = { createProxy, createFpProxy };

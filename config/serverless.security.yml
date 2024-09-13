@@ -1,0 +1,107 @@
+# Security Project config
+
+## Disable plugins
+enterpriseSearch.enabled: false
+xpack.apm.enabled: false
+xpack.infra.enabled: false
+xpack.observabilityLogsExplorer.enabled: false
+xpack.observability.enabled: false
+xpack.observabilityAIAssistant.enabled: false
+xpack.search.notebooks.enabled: false
+
+## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
+xpack.features.overrides:
+  ### Dashboard feature is hidden in Role management since it's automatically granted by SIEM feature.
+  dashboard.hidden: true
+  ### Discover feature is hidden in Role management since it's automatically granted by SIEM feature.
+  discover.hidden: true
+  ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
+  ml:
+    category: "security"
+    order: 1101
+  ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
+  siem:
+    privileges:
+      ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
+      ### Visualize features.
+      all.composedOf:
+        - feature: "discover"
+          privileges: [ "all" ]
+        - feature: "dashboard"
+          privileges: [ "all" ]
+        - feature: "visualize"
+          privileges: [ "all" ]
+        - feature: "maps"
+          privileges: [ "all" ]
+      # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
+      # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
+      ### Dashboard, and Visualize apps.
+      read.composedOf:
+        - feature: "discover"
+          privileges: [ "read" ]
+        - feature: "dashboard"
+          privileges: [ "read" ]
+        - feature: "visualize"
+          privileges: [ "read" ]
+        - feature: "maps"
+          privileges: [ "read" ]
+
+## Cloud settings
+xpack.cloud.serverless.project_type: security
+
+## Enable the Security Solution Serverless plugin
+xpack.securitySolutionServerless.enabled: true
+xpack.securitySolutionServerless.productTypes:
+  [
+    { product_line: 'security', product_tier: 'complete' },
+    { product_line: 'endpoint', product_tier: 'complete' },
+    { product_line: 'cloud', product_tier: 'complete' },
+  ]
+
+xpack.securitySolution.offeringSettings: {
+  ILMEnabled: false, # Index Lifecycle Management (ILM) functionalities disabled, not supported by serverless Elasticsearch
+}
+
+newsfeed.enabled: true
+
+## Set the home route
+uiSettings.overrides.defaultRoute: /app/security/get_started
+
+## Set the dev project switcher current type
+xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'
+
+# Specify in telemetry the project type
+telemetry.labels.serverless: security
+
+# Fleet specific configuration
+xpack.fleet.internal.registry.capabilities: ['security']
+xpack.fleet.internal.registry.spec.min: '3.0'
+xpack.fleet.internal.registry.spec.max: '3.2'
+xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
+xpack.fleet.internal.registry.excludePackages: [
+    # Oblt integrations
+    'apm',
+    'synthetics',
+    'synthetics_dashboards',
+
+    # Removed in 8.11 integrations
+    'cisco',
+    'microsoft',
+    'symantec',
+    'cyberark',
+
+    # ML integrations
+    'dga',
+  ]
+# fleet_server package installed to publish agent metrics
+xpack.fleet.packages:
+  - name: fleet_server
+    version: latest
+
+xpack.ml.ad.enabled: true
+xpack.ml.dfa.enabled: true
+xpack.ml.nlp.enabled: true
+xpack.ml.compatibleModuleType: 'security'
+
+# Disable the embedded Dev Console
+console.ui.embeddedEnabled: false

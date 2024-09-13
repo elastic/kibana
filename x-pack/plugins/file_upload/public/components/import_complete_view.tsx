@@ -19,13 +19,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { CodeEditor, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { getDocLinks, getHttp, getUiSettings } from '../kibana_services';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
+import { getDocLinks, getHttp, getUiSettings, getSettings, getTheme } from '../kibana_services';
 import { ImportResults } from '../importer';
 import { getPartialImportMessage } from './utils';
 
 const services = {
   uiSettings: getUiSettings(),
+  settings: getSettings(),
+  theme: getTheme(),
 };
 
 interface Props {

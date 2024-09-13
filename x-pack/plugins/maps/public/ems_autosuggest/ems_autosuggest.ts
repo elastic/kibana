@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FileLayer } from '@elastic/ems-client';
+import type { FileLayer, FileLayerField } from '@elastic/ems-client';
 import { getEmsFileLayers } from '../util';
 
 export interface SampleValuesConfig {
@@ -22,12 +22,6 @@ export interface EMSTermJoinConfig {
 interface UniqueMatch {
   config: EMSTermJoinConfig;
   count: number;
-}
-interface FileLayerFieldShim {
-  id: string;
-  values?: string[];
-  regex?: string;
-  alias?: string[];
 }
 
 export async function suggestEMSTermJoinConfig(
@@ -94,8 +88,8 @@ function suggestByName(
 ): EMSTermJoinConfig[] {
   const matches: EMSTermJoinConfig[] = [];
   fileLayers.forEach((fileLayer) => {
-    const emsFields: FileLayerFieldShim[] = fileLayer.getFields();
-    emsFields.forEach((emsField: FileLayerFieldShim) => {
+    const emsFields: FileLayerField[] = fileLayer.getFields();
+    emsFields.forEach((emsField: FileLayerField) => {
       if (!emsField.alias || !emsField.alias.length) {
         return;
       }
@@ -148,8 +142,8 @@ function suggestByIdValues(
 ): EMSTermJoinConfig[] {
   const matches: EMSTermJoinConfig[] = [];
   fileLayers.forEach((fileLayer) => {
-    const emsFields: FileLayerFieldShim[] = fileLayer.getFields();
-    emsFields.forEach((emsField: FileLayerFieldShim) => {
+    const emsFields: FileLayerField[] = fileLayer.getFields();
+    emsFields.forEach((emsField: FileLayerField) => {
       if (!emsField.values || !emsField.values.length) {
         return;
       }

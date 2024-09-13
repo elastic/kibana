@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import { Header } from './header';
 
@@ -27,9 +29,9 @@ function mockProps() {
     breadcrumbs$: new BehaviorSubject([]),
     breadcrumbsAppendExtension$: new BehaviorSubject(undefined),
     homeHref: '/',
-    isVisible$: new BehaviorSubject(true),
     customBranding$: new BehaviorSubject({}),
     kibanaDocLink: '/docs',
+    docLinks: docLinksServiceMock.createStartContract(),
     navLinks$: new BehaviorSubject([]),
     customNavLink$: new BehaviorSubject(undefined),
     recentlyAccessed$: new BehaviorSubject([]),
@@ -56,11 +58,17 @@ describe('Header', () => {
   });
 
   it('renders', () => {
-    const isVisible$ = new BehaviorSubject(false);
     const breadcrumbs$ = new BehaviorSubject([{ text: 'test' }]);
     const isLocked$ = new BehaviorSubject(false);
     const navLinks$ = new BehaviorSubject([
-      { id: 'kibana', title: 'kibana', baseUrl: '', href: '', url: '' },
+      {
+        id: 'kibana',
+        title: 'kibana',
+        baseUrl: '',
+        href: '',
+        url: '',
+        visibleIn: ['globalSearch' as const],
+      },
     ]);
     const headerBanner$ = new BehaviorSubject(undefined);
     const customNavLink$ = new BehaviorSubject({
@@ -69,6 +77,7 @@ describe('Header', () => {
       baseUrl: '',
       url: '',
       href: '',
+      visibleIn: ['globalSearch' as const],
     });
     const recentlyAccessed$ = new BehaviorSubject([
       { link: '', label: 'dashboard', id: 'dashboard' },
@@ -79,7 +88,6 @@ describe('Header', () => {
     const component = mountWithIntl(
       <Header
         {...mockProps()}
-        isVisible$={isVisible$}
         breadcrumbs$={breadcrumbs$}
         navLinks$={navLinks$}
         recentlyAccessed$={recentlyAccessed$}
@@ -87,12 +95,9 @@ describe('Header', () => {
         customNavLink$={customNavLink$}
         breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
         headerBanner$={headerBanner$}
+        helpMenuLinks$={of([])}
       />
     );
-    expect(component.find('EuiHeader').exists()).toBeFalsy();
-
-    act(() => isVisible$.next(true));
-    component.update();
     expect(component.find('EuiHeader').exists()).toBeTruthy();
     expect(component.find('nav[aria-label="Primary"]').exists()).toBeFalsy();
 

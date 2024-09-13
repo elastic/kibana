@@ -6,8 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { UsersTabsProps } from './types';
@@ -17,7 +16,7 @@ import { AllUsersQueryTabBody, AuthenticationsQueryTabBody } from './navigation'
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { AnomaliesUserTable } from '../../../common/components/ml/tables/anomalies_user_table';
 
-import { UserRiskScoreQueryTabBody } from './navigation/user_risk_score_tab_body';
+import { UserRiskScoreQueryTabBody } from '../../../entity_analytics/components/user_risk_score_tab_body';
 import { EventsQueryTabBody } from '../../../common/components/events_tab';
 import { userNameExistsFilter } from './details/helpers';
 
@@ -33,9 +32,8 @@ export const UsersTabs = memo<UsersTabsProps>(
       startDate: from,
       type,
     };
-
     return (
-      <Switch>
+      <Routes>
         <Route path={`${USERS_PATH}/:tabName(${UsersTableType.allUsers})`}>
           <AllUsersQueryTabBody {...tabProps} />
         </Route>
@@ -55,7 +53,7 @@ export const UsersTabs = memo<UsersTabsProps>(
             {...tabProps}
           />
         </Route>
-      </Switch>
+      </Routes>
     );
   }
 );

@@ -23,11 +23,18 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
-import type { Direction, EntityType, RowRenderer } from '@kbn/timelines-plugin/common';
+import type {
+  ColumnHeaderOptions,
+  DeprecatedCellValueElementProps,
+  DeprecatedRowRenderer,
+  Direction,
+  EntityType,
+} from '@kbn/timelines-plugin/common';
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../../common/constants';
 import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type {
@@ -37,14 +44,15 @@ import type {
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../common/types';
+import type { RowRenderer } from '../../../../common/types/timeline';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { eventsViewerSelector } from './selectors';
-import type { SourcererScopeName } from '../../store/sourcerer/model';
-import { useSourcererDataView } from '../../containers/sourcerer';
+import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
@@ -53,7 +61,7 @@ import { useFieldBrowserOptions } from '../../../timelines/components/fields_bro
 import {
   useSessionViewNavigation,
   useSessionView,
-} from '../../../timelines/components/timeline/session_tab_content/use_session_view';
+} from '../../../timelines/components/timeline/tabs/session/use_session_view';
 import {
   EventsContainerLoading,
   FullScreenContainer,
@@ -73,6 +81,7 @@ import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
+import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
 
 const storage = new Storage(localStorage);
 
@@ -86,7 +95,7 @@ export interface EventsViewerProps {
   leadingControlColumns: ControlColumnProps[];
   sourcererScope: SourcererScopeName;
   start: string;
-  showTotalCount?: boolean;
+  showTotalCount?: boolean; // eslint-disable-line react/no-unused-prop-types
   pageFilters?: Filter[];
   currentFilter?: AlertWorkflowStatus;
   onRuleChange?: () => void;
@@ -172,11 +181,13 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     browserFields,
     dataViewId,
     indexPattern,
-    runtimeMappings,
+    sourcererDataView,
     selectedPatterns,
     dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(sourcererScope);
+
+  const getFieldSpec = useGetFieldSpec(sourcererScope);
 
   const { globalFullScreen } = useGlobalFullScreen();
 
@@ -210,8 +221,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     scopeId: tableId,
   });
 
-  const { DetailsPanel, SessionView } = useSessionView({
-    entityType,
+  const { SessionView } = useSessionView({
     scopeId: tableId,
   });
 
@@ -240,11 +250,12 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     sourcererScope,
     editorActionsRef,
     upsertColumn: useCallback(
-      (column, index) => dispatch(dataTableActions.upsertColumn({ column, id: tableId, index })),
+      (column: ColumnHeaderOptions, index: number) =>
+        dispatch(dataTableActions.upsertColumn({ column, id: tableId, index })),
       [dispatch, tableId]
     ),
     removeColumn: useCallback(
-      (columnId) => dispatch(dataTableActions.removeColumn({ columnId, id: tableId })),
+      (columnId: string) => dispatch(dataTableActions.removeColumn({ columnId, id: tableId })),
       [dispatch, tableId]
     ),
   });
@@ -307,7 +318,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       id: tableId,
       indexNames: indexNames ?? selectedPatterns,
       limit: itemsPerPage,
-      runtimeMappings,
+      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
       skip: !canQueryTimeline,
       sort: sortField,
       startDate: start,
@@ -319,7 +330,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   }, [dispatch, tableId, loading]);
 
   const deleteQuery = useCallback(
-    ({ id }) => dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id })),
+    ({ id }: { id: string }) =>
+      dispatch(inputsActions.deleteOneQuery({ inputId: InputsModelId.global, id })),
     [dispatch]
   );
 
@@ -366,7 +378,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   }, [nonDeletedEvents, dispatch, tableId]);
 
   const onChangeItemsPerPage = useCallback(
-    (itemsChangedPerPage) => {
+    (itemsChangedPerPage: number) => {
       dispatch(
         dataTableActions.updateItemsPerPage({ id: tableId, itemsPerPage: itemsChangedPerPage })
       );
@@ -375,7 +387,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   );
 
   const onChangePage = useCallback(
-    (page) => {
+    (page: number) => {
       loadPage(page);
     },
     [loadPage]
@@ -490,7 +502,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     tableId,
     data: nonDeletedEvents,
     totalItems: totalCountMinusDeleted,
-    indexNames: selectedPatterns,
     hasAlertsCrud: hasCrudPermissions,
     showCheckboxes,
     filterStatus: currentFilter,
@@ -580,8 +591,14 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                             data={nonDeletedEvents}
                             id={tableId}
                             loadPage={loadPage}
-                            renderCellValue={renderCellValue}
-                            rowRenderers={rowRenderers}
+                            // TODO: migrate away from deprecated type
+                            renderCellValue={
+                              renderCellValue as (
+                                props: DeprecatedCellValueElementProps
+                              ) => React.ReactNode
+                            }
+                            // TODO: migrate away from deprecated type
+                            rowRenderers={rowRenderers as unknown as DeprecatedRowRenderer[]}
                             totalItems={totalCountMinusDeleted}
                             bulkActions={bulkActions}
                             fieldBrowserOptions={fieldBrowserOptions}
@@ -591,6 +608,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                             isEventRenderedView={tableView === 'eventRenderedView'}
                             rowHeightsOptions={rowHeightsOptions}
                             getFieldBrowser={getFieldBrowser}
+                            getFieldSpec={getFieldSpec}
                           />
                         </StatefulEventContext.Provider>
                       </ScrollableFlexItem>
@@ -602,7 +620,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
           </StyledEuiPanel>
         </InspectButtonContainer>
       </FullScreenContainer>
-      {DetailsPanel}
     </>
   );
 };

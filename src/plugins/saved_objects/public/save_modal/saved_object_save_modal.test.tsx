@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('SavedObjectSaveModal', () => {
   it('should render matching snapshot', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <SavedObjectSaveModal
         onSave={() => void 0}
         onClose={() => void 0}
@@ -28,7 +31,7 @@ describe('SavedObjectSaveModal', () => {
   });
 
   it('should render matching snapshot when given options', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <SavedObjectSaveModal
         onSave={() => void 0}
         onClose={() => void 0}
@@ -44,7 +47,7 @@ describe('SavedObjectSaveModal', () => {
   });
 
   it('should render matching snapshot when custom isValid is set', () => {
-    const falseWrapper = shallow(
+    const falseWrapper = shallowWithIntl(
       <SavedObjectSaveModal
         onSave={() => void 0}
         onClose={() => void 0}
@@ -57,7 +60,7 @@ describe('SavedObjectSaveModal', () => {
     );
     expect(falseWrapper).toMatchSnapshot();
 
-    const trueWrapper = shallow(
+    const trueWrapper = shallowWithIntl(
       <SavedObjectSaveModal
         onSave={() => void 0}
         onClose={() => void 0}
@@ -72,19 +75,50 @@ describe('SavedObjectSaveModal', () => {
   });
 
   it('allows specifying custom save button label', () => {
-    const wrapper = mountWithIntl(
-      <SavedObjectSaveModal
-        onSave={() => void 0}
-        onClose={() => void 0}
-        title={'Saved Object title'}
-        showCopyOnSave={false}
-        objectType="visualization"
-        showDescription={true}
-        confirmButtonLabel="Save and done"
-      />
+    const confirmButtonLabel = 'Save and done';
+
+    render(
+      <I18nProvider>
+        <SavedObjectSaveModal
+          onSave={() => void 0}
+          onClose={() => void 0}
+          title={'Saved Object title'}
+          showCopyOnSave={false}
+          objectType="visualization"
+          showDescription={true}
+          confirmButtonLabel={confirmButtonLabel}
+        />
+      </I18nProvider>
     );
-    expect(wrapper.find('button[data-test-subj="confirmSaveSavedObjectButton"]').text()).toBe(
-      'Save and done'
+
+    expect(screen.queryByText(confirmButtonLabel)).toBeInTheDocument();
+  });
+
+  it('enforces copy on save', async () => {
+    const onSave = jest.fn();
+
+    render(
+      <I18nProvider>
+        <SavedObjectSaveModal
+          onSave={onSave}
+          onClose={() => void 0}
+          title={'Saved Object title'}
+          objectType="visualization"
+          showDescription={true}
+          showCopyOnSave={true}
+          mustCopyOnSaveMessage="You must save a copy of the object."
+        />
+      </I18nProvider>
     );
+
+    expect(onSave).not.toHaveBeenCalled();
+
+    expect(screen.getByTestId('saveAsNewCheckbox')).toBeDisabled();
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalled();
+      expect(onSave.mock.calls[0][0].newCopyOnSave).toBe(true);
+    });
   });
 });

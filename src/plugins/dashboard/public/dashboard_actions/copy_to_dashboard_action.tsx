@@ -1,96 +1,100 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
+import {
+  apiIsOfType,
+  apiHasUniqueId,
+  apiHasParentApi,
+  apiPublishesSavedObjectId,
+  HasType,
+  EmbeddableApiContext,
+  HasUniqueId,
+  HasParentApi,
+  PublishesSavedObjectId,
+} from '@kbn/presentation-publishing';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 
+import { DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
+import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
 import { pluginServices } from '../services/plugin_services';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
-import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 
 export const ACTION_COPY_TO_DASHBOARD = 'copyToDashboard';
-
-export interface CopyToDashboardActionContext {
-  embeddable: IEmbeddable;
-}
 
 export interface DashboardCopyToCapabilities {
   canCreateNew: boolean;
   canEditExisting: boolean;
 }
 
-function isDashboard(embeddable: IEmbeddable): embeddable is DashboardContainer {
-  return embeddable.type === DASHBOARD_CONTAINER_TYPE;
-}
+export type CopyToDashboardAPI = HasType &
+  HasUniqueId &
+  HasParentApi<
+    { type: typeof DASHBOARD_CONTAINER_TYPE } & PublishesSavedObjectId &
+      DashboardPluginInternalFunctions
+  >;
 
-export class CopyToDashboardAction implements Action<CopyToDashboardActionContext> {
+const apiIsCompatible = (api: unknown): api is CopyToDashboardAPI => {
+  return (
+    apiHasUniqueId(api) &&
+    apiHasParentApi(api) &&
+    apiIsOfType(api.parentApi, DASHBOARD_CONTAINER_TYPE) &&
+    apiPublishesSavedObjectId(api.parentApi)
+  );
+};
+
+export class CopyToDashboardAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_COPY_TO_DASHBOARD;
   public readonly id = ACTION_COPY_TO_DASHBOARD;
   public order = 1;
 
   private dashboardCapabilities;
-  private theme$;
   private openModal;
 
-  constructor(private PresentationUtilContext: PresentationUtilPluginStart['ContextProvider']) {
+  constructor(private core: CoreStart) {
     ({
       dashboardCapabilities: this.dashboardCapabilities,
       overlays: { openModal: this.openModal },
-      settings: {
-        theme: { theme$: this.theme$ },
-      },
     } = pluginServices.getServices());
   }
 
-  public getDisplayName({ embeddable }: CopyToDashboardActionContext) {
-    if (!embeddable.parent || !isDashboard(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
+  public getDisplayName({ embeddable }: EmbeddableApiContext) {
+    if (!apiIsCompatible(embeddable)) throw new IncompatibleActionError();
 
     return dashboardCopyToDashboardActionStrings.getDisplayName();
   }
 
-  public getIconType({ embeddable }: CopyToDashboardActionContext) {
-    if (!embeddable.parent || !isDashboard(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
+  public getIconType({ embeddable }: EmbeddableApiContext) {
+    if (!apiIsCompatible(embeddable)) throw new IncompatibleActionError();
     return 'exit';
   }
 
-  public async isCompatible({ embeddable }: CopyToDashboardActionContext) {
+  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    if (!apiIsCompatible(embeddable)) return false;
     const { createNew: canCreateNew, showWriteControls: canEditExisting } =
       this.dashboardCapabilities;
-
-    return Boolean(
-      embeddable.parent && isDashboard(embeddable.parent) && (canCreateNew || canEditExisting)
-    );
+    return Boolean(canCreateNew || canEditExisting);
   }
 
-  public async execute({ embeddable }: CopyToDashboardActionContext) {
-    if (!embeddable.parent || !isDashboard(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
+  public async execute({ embeddable }: EmbeddableApiContext) {
+    if (!apiIsCompatible(embeddable)) throw new IncompatibleActionError();
 
+    const { theme, i18n } = this.core;
     const session = this.openModal(
-      toMountPoint(
-        <CopyToDashboardModal
-          PresentationUtilContext={this.PresentationUtilContext}
-          closeModal={() => session.close()}
-          dashboardId={(embeddable.parent as DashboardContainer).getDashboardSavedObjectId()}
-          embeddable={embeddable}
-        />,
-        { theme$: this.theme$ }
-      ),
+      toMountPoint(<CopyToDashboardModal closeModal={() => session.close()} api={embeddable} />, {
+        theme,
+        i18n,
+      }),
       {
         maxWidth: 400,
         'data-test-subj': 'copyToDashboardPanel',

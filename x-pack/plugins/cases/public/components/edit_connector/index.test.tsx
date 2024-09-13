@@ -7,21 +7,23 @@
 
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import type { EditConnectorProps } from '.';
 import { EditConnector } from '.';
-import type { AppMockRenderer } from '../../common/mock';
+
 import {
+  type AppMockRenderer,
   createAppMockRenderer,
-  readCasesPermissions,
-  noPushCasesPermissions,
   TestProviders,
+  noConnectorsCasePermission,
+  noCasesPermissions,
 } from '../../common/mock';
 import { basicCase, connectorsMock } from '../../containers/mock';
-import type { CaseConnector } from '../../containers/configure/types';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import type { ReturnUsePushToService } from '../use_push_to_service';
+import { usePushToService } from '../use_push_to_service';
+import { ConnectorTypes } from '../../../common';
 
 const onSubmit = jest.fn();
 const caseConnectors = getCaseConnectorsMockResponse();
@@ -34,125 +36,95 @@ const defaultProps: EditConnectorProps = {
   onSubmit,
 };
 
+jest.mock('../use_push_to_service');
+
+const handlePushToService = jest.fn();
+const usePushToServiceMock = usePushToService as jest.Mock;
+
+const errorMsg = { id: 'test-error-msg', title: 'My error msg', description: 'My error desc' };
+
+const usePushToServiceMockRes: ReturnUsePushToService = {
+  errorsMsg: [],
+  hasErrorMessages: false,
+  needsToBePushed: true,
+  hasBeenPushed: true,
+  isLoading: false,
+  hasLicenseError: false,
+  hasPushPermissions: true,
+  handlePushToService,
+};
+
 describe('EditConnector ', () => {
+  let user: UserEvent;
   let appMockRender: AppMockRenderer;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
     appMockRender = createAppMockRenderer();
+    usePushToServiceMock.mockReturnValue(usePushToServiceMockRes);
   });
 
-  it('Renders the none connector', async () => {
+  it('renders an error message correctly', async () => {
+    usePushToServiceMock.mockReturnValue({
+      ...usePushToServiceMockRes,
+      errorsMsg: [errorMsg],
+      hasErrorMessages: true,
+    });
+
     render(
       <TestProviders>
         <EditConnector {...defaultProps} />
       </TestProviders>
     );
 
-    expect(
-      await screen.findByText(
-        'To create and update a case in an external system, select a connector.'
-      )
-    ).toBeInTheDocument();
-
-    userEvent.click(screen.getByTestId('connector-edit-button'));
-
-    await waitFor(() => {
-      expect(screen.getAllByTestId('dropdown-connector-no-connector').length).toBeGreaterThan(0);
-    });
+    expect(await screen.findByText(errorMsg.description)).toBeInTheDocument();
   });
 
-  it('Renders servicenow connector from case initially', async () => {
-    const serviceNowProps = {
-      ...defaultProps,
-      caseData: {
-        ...defaultProps.caseData,
-        connector: {
-          ...defaultProps.caseData.connector,
-          id: 'servicenow-1',
-        },
-      },
-    };
-
-    render(
-      <TestProviders>
-        <EditConnector {...serviceNowProps} />
-      </TestProviders>
-    );
-
-    expect(await screen.findByText('My SN connector')).toBeInTheDocument();
-  });
-
-  it('Renders no connector, and then edit', async () => {
+  it('calls onSubmit when changing connector', async () => {
     render(
       <TestProviders>
         <EditConnector {...defaultProps} />
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('connector-edit-button'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('caseConnectors')).toBeInTheDocument();
-    });
-
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await user.click(screen.getByTestId('connector-edit-button'));
+    await user.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('edit-connectors-submit')).toBeInTheDocument();
-    });
-  });
-
-  it('Edit external service on submit', async () => {
-    render(
-      <TestProviders>
-        <EditConnector {...defaultProps} />
-      </TestProviders>
-    );
-
-    userEvent.click(screen.getByTestId('connector-edit-button'));
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
-    });
-
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
-      skipPointerEventsCheck: true,
-    });
+    await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     expect(screen.getByTestId('edit-connectors-submit')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    await user.click(screen.getByTestId('edit-connectors-submit'));
 
     await waitFor(() =>
-      expect(onSubmit).toHaveBeenCalledWith(
-        {
-          fields: {
-            incidentTypes: null,
-            severityCode: null,
-          },
-          id: 'resilient-2',
-          name: 'My Resilient connector',
-          type: '.resilient',
+      expect(onSubmit).toHaveBeenCalledWith({
+        fields: {
+          incidentTypes: null,
+          severityCode: null,
         },
-        expect.anything(),
-        expect.anything()
-      )
+        id: 'resilient-2',
+        name: 'My Resilient connector',
+        type: '.resilient',
+      })
     );
   });
 
-  it('Revert to initial external service on error', async () => {
-    onSubmit.mockImplementation((connector, onError, onSuccess) => {
-      onError(new Error('An error has occurred'));
-    });
-
+  it('should call handlePushToService when pushing to an external service', async () => {
+    usePushToServiceMock.mockReturnValue({ ...usePushToServiceMockRes, needsToBePushed: true });
     const props = {
       ...defaultProps,
       caseData: {
@@ -170,23 +142,52 @@ describe('EditConnector ', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('connector-edit-button'));
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    expect(await screen.findByTestId('push-to-external-service')).toBeInTheDocument();
+    await user.click(screen.getByTestId('push-to-external-service'));
+
+    await waitFor(() => expect(handlePushToService).toHaveBeenCalled());
+  });
+
+  it('reverts to the initial selection if the caseData do not change', async () => {
+    const props = {
+      ...defaultProps,
+      caseData: {
+        ...defaultProps.caseData,
+        connector: {
+          ...defaultProps.caseData.connector,
+          id: 'servicenow-1',
+        },
+      },
+    };
+
+    render(
+      <TestProviders>
+        <EditConnector {...props} />
+      </TestProviders>
+    );
+
+    await user.click(screen.getByTestId('connector-edit-button'));
+    await user.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
-      skipPointerEventsCheck: true,
-    });
+    await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
-    userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    await user.click(screen.getByTestId('edit-connectors-submit'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('edit-connectors-submit')).not.toBeInTheDocument();
     });
 
+    /**
+     * As onSubmit do not change the case data
+     * and we did not rerender the component with
+     * new case data the initial selection should remain.
+     * This simulates the case where an error occurred
+     * when calling onSubmit.
+     */
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalled();
     });
@@ -196,7 +197,7 @@ describe('EditConnector ', () => {
     });
   });
 
-  it('Resets selector on cancel', async () => {
+  it('resets to the initial connector onCancel', async () => {
     const props = {
       ...defaultProps,
       caseData: {
@@ -214,21 +215,23 @@ describe('EditConnector ', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('connector-edit-button'));
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await user.click(screen.getByTestId('connector-edit-button'));
+    await user.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
-    userEvent.click(screen.getByTestId('edit-connectors-cancel'));
+    await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    await user.click(screen.getByTestId('edit-connectors-cancel'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('edit-connectors-submit')).not.toBeInTheDocument();
     });
 
-    expect(screen.getByText('My SN connector')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('My SN connector')).toBeInTheDocument();
+    });
   });
 
   it('disabled the edit button when is loading', async () => {
@@ -247,6 +250,7 @@ describe('EditConnector ', () => {
 
   it('does not shows the callouts when is loading', async () => {
     const props = { ...defaultProps, isLoading: true };
+    usePushToServiceMock.mockReturnValue({ ...usePushToServiceMockRes, errorsMsg: [errorMsg] });
 
     render(
       <TestProviders>
@@ -261,7 +265,7 @@ describe('EditConnector ', () => {
 
   it('does not allow the connector to be edited when the user does not have write permissions', async () => {
     render(
-      <TestProviders permissions={readCasesPermissions()}>
+      <TestProviders permissions={noCasesPermissions()}>
         <EditConnector {...defaultProps} />
       </TestProviders>
     );
@@ -275,98 +279,15 @@ describe('EditConnector ', () => {
     });
   });
 
-  it('display the callout message when none is selected', async () => {
-    // default props has the none connector as selected
-    const result = appMockRender.render(<EditConnector {...defaultProps} />);
-
-    await waitFor(() => {
-      expect(result.getByTestId('push-callouts')).toBeInTheDocument();
-    });
-  });
-
-  it('disables the save button until changes are done ', async () => {
-    const serviceNowProps = {
-      ...defaultProps,
-      caseData: {
-        ...defaultProps.caseData,
-        connector: {
-          ...defaultProps.caseData.connector,
-          id: 'servicenow-1',
-          fields: {
-            urgency: null,
-            severity: null,
-            impact: null,
-            category: null,
-            subcategory: null,
-          },
-        } as CaseConnector,
-      },
-    };
-    const result = render(
-      <TestProviders>
-        <EditConnector {...serviceNowProps} />
-      </TestProviders>
-    );
-
-    // the save button should be disabled
-    userEvent.click(result.getByTestId('connector-edit-button'));
-    expect(result.getByTestId('edit-connectors-submit')).toBeDisabled();
-
-    // simulate changing the connector
-    userEvent.click(result.getByTestId('dropdown-connectors'));
-
-    await waitForEuiPopoverOpen();
-
-    userEvent.click(result.getAllByTestId('dropdown-connector-no-connector')[0]);
-
-    await waitFor(() => {
-      expect(result.getByTestId('edit-connectors-submit')).toBeEnabled();
-    });
-  });
-
-  it('disables the save button when no connector is the default', async () => {
-    const noneConnector = {
-      ...defaultProps,
-      caseData: {
-        ...defaultProps.caseData,
-        connector: {
-          id: 'none',
-          fields: null,
-        } as CaseConnector,
-      },
-    };
-    const result = render(
-      <TestProviders>
-        <EditConnector {...noneConnector} />
-      </TestProviders>
-    );
-
-    // the save button should be disabled
-    userEvent.click(result.getByTestId('connector-edit-button'));
-    expect(result.getByTestId('edit-connectors-submit')).toBeDisabled();
-
-    // simulate changing the connector
-    userEvent.click(result.getByTestId('dropdown-connectors'));
-
-    await waitForEuiPopoverOpen();
-
-    userEvent.click(result.getAllByTestId('dropdown-connector-resilient-2')[0]);
-
-    await waitFor(() => {
-      expect(result.getByTestId('edit-connectors-submit')).toBeEnabled();
-    });
-  });
-
   it('shows the actions permission message if the user does not have read access to actions', async () => {
     appMockRender.coreStart.application.capabilities = {
       ...appMockRender.coreStart.application.capabilities,
       actions: { save: false, show: false },
     };
 
-    const result = appMockRender.render(<EditConnector {...defaultProps} />);
-    await waitFor(() => {
-      expect(result.getByTestId('edit-connector-permissions-error-msg')).toBeInTheDocument();
-    });
+    appMockRender.render(<EditConnector {...defaultProps} />);
+
+    expect(await screen.findByTestId('edit-connector-permissions-error-msg')).toBeInTheDocument();
   });
 
   it('does not show the actions permission message if the user has read access to actions', async () => {
@@ -375,24 +296,72 @@ describe('EditConnector ', () => {
       actions: { save: true, show: true },
     };
 
-    const result = appMockRender.render(<EditConnector {...defaultProps} />);
-    await waitFor(() => {
-      expect(result.queryByTestId('edit-connector-permissions-error-msg')).toBe(null);
-    });
+    appMockRender.render(<EditConnector {...defaultProps} />);
+
+    expect(screen.queryByTestId('edit-connector-permissions-error-msg')).not.toBeInTheDocument();
   });
 
   it('does not show the callout if the user does not have read access to actions', async () => {
+    const props = { ...defaultProps, connectors: [] };
+
+    appMockRender.coreStart.application.capabilities = {
+      ...appMockRender.coreStart.application.capabilities,
+      actions: { save: false, show: false },
+    };
+
+    appMockRender.render(<EditConnector {...props} />);
+
+    expect(await screen.findByTestId('edit-connector-permissions-error-msg')).toBeInTheDocument();
+    expect(screen.queryByTestId('push-callouts')).not.toBeInTheDocument();
+  });
+
+  it('does not show the callouts if the user does not have access to cases connectors', async () => {
+    usePushToServiceMock.mockReturnValue({ ...usePushToServiceMockRes, errorsMsg: [errorMsg] });
+    const props = { ...defaultProps, connectors: [] };
+
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
+
+    appMockRender.render(<EditConnector {...props} />);
+
+    expect(screen.queryByTestId('push-callouts')).toBe(null);
+  });
+
+  it('does not show the connectors previewer if the user does not have read access to actions', async () => {
     const props = { ...defaultProps, connectors: [] };
     appMockRender.coreStart.application.capabilities = {
       ...appMockRender.coreStart.application.capabilities,
       actions: { save: false, show: false },
     };
 
-    const result = appMockRender.render(<EditConnector {...props} />);
-    await waitFor(() => {
-      expect(result.getByTestId('edit-connector-permissions-error-msg')).toBeInTheDocument();
-      expect(result.queryByTestId('push-callouts')).toBe(null);
-    });
+    appMockRender.render(<EditConnector {...props} />);
+    expect(screen.queryByTestId('connector-fields-preview')).not.toBeInTheDocument();
+  });
+
+  it('does not show the connectors previewer if the user does not have access to cases connectors', async () => {
+    const props = { ...defaultProps, connectors: [] };
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
+
+    appMockRender.render(<EditConnector {...props} />);
+    expect(screen.queryByTestId('connector-fields-preview')).not.toBeInTheDocument();
+  });
+
+  it('does not show the connectors form if the user does not have read access to actions', async () => {
+    const props = { ...defaultProps, connectors: [] };
+    appMockRender.coreStart.application.capabilities = {
+      ...appMockRender.coreStart.application.capabilities,
+      actions: { save: false, show: false },
+    };
+
+    appMockRender.render(<EditConnector {...props} />);
+    expect(screen.queryByTestId('edit-connector-fields-form-flex-item')).not.toBeInTheDocument();
+  });
+
+  it('does not show the connectors form if the user does not have access to cases connectors', async () => {
+    const props = { ...defaultProps, connectors: [] };
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
+
+    appMockRender.render(<EditConnector {...props} />);
+    expect(screen.queryByTestId('edit-connector-fields-form-flex-item')).not.toBeInTheDocument();
   });
 
   it('does not show the push button if the user does not have read access to actions', async () => {
@@ -401,23 +370,45 @@ describe('EditConnector ', () => {
       actions: { save: false, show: false },
     };
 
-    const result = appMockRender.render(<EditConnector {...defaultProps} />);
-    await waitFor(() => {
-      expect(result.queryByTestId('push-to-external-service')).toBe(null);
-    });
+    appMockRender.render(<EditConnector {...defaultProps} />);
+
+    expect(screen.queryByTestId('push-to-external-service')).not.toBeInTheDocument();
   });
 
   it('does not show the push button if the user does not have push permissions', async () => {
-    appMockRender = createAppMockRenderer({ permissions: noPushCasesPermissions() });
-    const result = appMockRender.render(<EditConnector {...defaultProps} />);
+    usePushToServiceMock.mockReturnValue({ ...usePushToServiceMockRes, hasPushPermissions: false });
+    appMockRender.render(<EditConnector {...defaultProps} />);
 
-    await waitFor(() => {
-      expect(result.queryByTestId('push-to-external-service')).toBe(null);
-    });
+    expect(screen.queryByTestId('push-to-external-service')).not.toBeInTheDocument();
+  });
+
+  it('disable the push button when connector is invalid', async () => {
+    usePushToServiceMock.mockReturnValue({ ...usePushToServiceMockRes, needsToBePushed: true });
+
+    appMockRender.render(
+      <EditConnector
+        {...defaultProps}
+        caseData={{
+          ...defaultProps.caseData,
+          connector: { ...defaultProps.caseData.connector, id: 'not-exist' },
+        }}
+      />
+    );
+
+    expect(await screen.findByTestId('push-to-external-service')).toBeDisabled();
+  });
+
+  it('does not show the push button if the user does not have access to cases actions', async () => {
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
+
+    appMockRender.render(<EditConnector {...defaultProps} />);
+
+    expect(screen.queryByTestId('push-to-external-service')).not.toBeInTheDocument();
   });
 
   it('does not show the edit connectors pencil if the user does not have read access to actions', async () => {
     const props = { ...defaultProps, connectors: [] };
+
     appMockRender.coreStart.application.capabilities = {
       ...appMockRender.coreStart.application.capabilities,
       actions: { save: false, show: false },
@@ -425,21 +416,48 @@ describe('EditConnector ', () => {
 
     appMockRender.render(<EditConnector {...props} />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('connector-edit-header')).toBeInTheDocument();
-      expect(screen.queryByTestId('connector-edit-button')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('connector-edit-header')).toBeInTheDocument();
+    expect(screen.queryByTestId('connector-edit-button')).not.toBeInTheDocument();
+  });
+
+  it('does not show the edit connectors pencil if the user does not have access to case connectors', async () => {
+    const props = { ...defaultProps, connectors: [] };
+    appMockRender = createAppMockRenderer({
+      permissions: noConnectorsCasePermission(),
     });
+
+    appMockRender.render(<EditConnector {...props} />);
+
+    expect(await screen.findByTestId('connector-edit-header')).toBeInTheDocument();
+    expect(screen.queryByTestId('connector-edit-button')).not.toBeInTheDocument();
   });
 
   it('does not show the edit connectors pencil if the user does not have push permissions', async () => {
     const props = { ...defaultProps, connectors: [] };
-    appMockRender = createAppMockRenderer({ permissions: noPushCasesPermissions() });
+    usePushToServiceMock.mockReturnValue({ ...usePushToServiceMockRes, hasPushPermissions: false });
 
     appMockRender.render(<EditConnector {...props} />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('connector-edit-header')).toBeInTheDocument();
-      expect(screen.queryByTestId('connector-edit-button')).toBe(null);
-    });
+    expect(await screen.findByTestId('connector-edit-header')).toBeInTheDocument();
+    expect(screen.queryByTestId('connector-edit-button')).not.toBeInTheDocument();
+  });
+
+  it('should show the correct connector name on the push button', async () => {
+    const props = {
+      ...defaultProps,
+      caseData: {
+        ...defaultProps.caseData,
+        connector: {
+          id: 'resilient-2',
+          name: 'old name',
+          type: ConnectorTypes.resilient,
+          fields: null,
+        },
+      },
+    };
+
+    appMockRender.render(<EditConnector {...props} />);
+
+    expect(await screen.findByText('Update My Resilient connector incident')).toBeInTheDocument();
   });
 });

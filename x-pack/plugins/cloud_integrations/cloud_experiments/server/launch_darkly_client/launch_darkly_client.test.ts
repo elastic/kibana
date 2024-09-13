@@ -7,7 +7,7 @@
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { ldClientMock } from './launch_darkly_client.test.mock';
-import LaunchDarkly from 'launchdarkly-node-server-sdk';
+import LaunchDarkly from '@launchdarkly/node-server-sdk';
 import { LaunchDarklyClient, type LaunchDarklyClientConfig } from './launch_darkly_client';
 
 describe('LaunchDarklyClient - server', () => {
@@ -80,7 +80,7 @@ describe('LaunchDarklyClient - server', () => {
     });
 
     describe('updateUserMetadata', () => {
-      test('sets the top-level properties at the root (renaming userId to key) and the rest under `custom`', () => {
+      test('sets all properties at the root level, renaming userId to key (no nesting into custom)', () => {
         expect(client).toHaveProperty('launchDarklyUser', undefined);
 
         const topFields = {
@@ -91,6 +91,9 @@ describe('LaunchDarklyClient - server', () => {
           avatar: 'fake-blue-avatar',
           ip: 'my-weird-ip',
           country: 'distributed',
+          // intentionally adding this to make sure the code is overriding appropriately
+          kind: 'other kind',
+          key: 'other user',
         };
 
         const extraFields = {
@@ -101,9 +104,10 @@ describe('LaunchDarklyClient - server', () => {
         client.updateUserMetadata({ userId: 'fake-user-id', ...topFields, ...extraFields });
 
         expect(client).toHaveProperty('launchDarklyUser', {
-          key: 'fake-user-id',
           ...topFields,
-          custom: extraFields,
+          ...extraFields,
+          kind: 'user',
+          key: 'fake-user-id',
         });
       });
 
@@ -113,8 +117,9 @@ describe('LaunchDarklyClient - server', () => {
         client.updateUserMetadata({ userId: 'fake-user-id', kibanaVersion: 'version' });
 
         expect(client).toHaveProperty('launchDarklyUser', {
+          kind: 'user',
           key: 'fake-user-id',
-          custom: { kibanaVersion: 'version' },
+          kibanaVersion: 'version',
         });
       });
     });
@@ -132,7 +137,7 @@ describe('LaunchDarklyClient - server', () => {
         expect(ldClientMock.variation).toHaveBeenCalledTimes(1);
         expect(ldClientMock.variation).toHaveBeenCalledWith(
           'my-feature-flag',
-          { key: 'fake-user-id', custom: { kibanaVersion: 'version' } },
+          { kind: 'user', key: 'fake-user-id', kibanaVersion: 'version' },
           123
         );
       });
@@ -150,7 +155,7 @@ describe('LaunchDarklyClient - server', () => {
         expect(ldClientMock.track).toHaveBeenCalledTimes(1);
         expect(ldClientMock.track).toHaveBeenCalledWith(
           'my-feature-flag',
-          { key: 'fake-user-id', custom: { kibanaVersion: 'version' } },
+          { kind: 'user', key: 'fake-user-id', kibanaVersion: 'version' },
           {},
           123
         );
@@ -183,8 +188,9 @@ describe('LaunchDarklyClient - server', () => {
         });
         expect(ldClientMock.allFlagsState).toHaveBeenCalledTimes(1);
         expect(ldClientMock.allFlagsState).toHaveBeenCalledWith({
+          kind: 'user',
           key: 'fake-user-id',
-          custom: { kibanaVersion: 'version' },
+          kibanaVersion: 'version',
         });
       });
     });

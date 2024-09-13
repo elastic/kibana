@@ -24,33 +24,24 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 
-import { DuplicateDataViewError } from '@kbn/data-plugin/public';
-import type { RuntimeField } from '@kbn/data-views-plugin/common';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
-import {
-  isGetTransformsStatsResponseSchema,
-  isPutTransformsResponseSchema,
-  isStartTransformsResponseSchema,
-} from '../../../../../../common/api_schemas/type_guards';
+import type {
+  PutTransformsLatestRequestSchema,
+  PutTransformsPivotRequestSchema,
+} from '../../../../../../server/routes/api_schemas/transforms';
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { getTransformProgress } from '../../../../common';
-import { useApi } from '../../../../hooks/use_api';
+import { useCreateTransform, useGetTransformStats, useStartTransforms } from '../../../../hooks';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { ToastNotificationText } from '../../../../components';
-import {
-  PutTransformsLatestRequestSchema,
-  PutTransformsPivotRequestSchema,
-} from '../../../../../../common/api_schemas/transforms';
-import { isContinuousTransform, isLatestTransform } from '../../../../../../common/types/transform';
+import { isContinuousTransform } from '../../../../../../common/types/transform';
 import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting_flyout';
 
 export interface StepDetailsExposedState {
@@ -92,11 +83,9 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     );
     const [discoverLink, setDiscoverLink] = useState<string>();
 
-    const deps = useAppDependencies();
-    const { share } = deps;
-    const dataViews = deps.data.dataViews;
     const toastNotifications = useToastNotifications();
-    const isDiscoverAvailable = deps.application.capabilities.discover?.show ?? false;
+    const { application, share, ...startServices } = useAppDependencies();
+    const isDiscoverAvailable = application.capabilities.discover?.show ?? false;
 
     useEffect(() => {
       let unmounted = false;
@@ -128,217 +117,96 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [created, started, dataViewId]);
 
-    const { overlays, theme } = useAppDependencies();
-    const api = useApi();
+    const startTransforms = useStartTransforms();
+    const createTransform = useCreateTransform();
 
-    async function createTransform() {
+    function createTransformHandler(startAfterCreation = false) {
       setLoading(true);
 
-      const resp = await api.createTransform(transformId, transformConfig);
-
-      if (!isPutTransformsResponseSchema(resp) || resp.errors.length > 0) {
-        let respErrors:
-          | PutTransformsResponseSchema['errors']
-          | PutTransformsResponseSchema['errors'][number]
-          | undefined;
-
-        if (isPutTransformsResponseSchema(resp) && resp.errors.length > 0) {
-          respErrors = resp.errors.length === 1 ? resp.errors[0] : resp.errors;
-        }
-
-        toastNotifications.addDanger({
-          title: i18n.translate('xpack.transform.stepCreateForm.createTransformErrorMessage', {
-            defaultMessage: 'An error occurred creating the transform {transformId}:',
-            values: { transformId },
-          }),
-          text: toMountPoint(
-            <ToastNotificationText
-              overlays={overlays}
-              theme={theme}
-              text={getErrorMessage(isPutTransformsResponseSchema(resp) ? respErrors : resp)}
-            />,
-            { theme$: theme.theme$ }
-          ),
-        });
-        setCreated(false);
-        setLoading(false);
-        return false;
-      }
-
-      toastNotifications.addSuccess(
-        i18n.translate('xpack.transform.stepCreateForm.createTransformSuccessMessage', {
-          defaultMessage: 'Request to create transform {transformId} acknowledged.',
-          values: { transformId },
-        })
-      );
-      setCreated(true);
-      setLoading(false);
-
-      if (createDataView) {
-        createKibanaDataView();
-      }
-
-      return true;
-    }
-
-    async function startTransform() {
-      setLoading(true);
-
-      const resp = await api.startTransforms([{ id: transformId }]);
-
-      if (isStartTransformsResponseSchema(resp) && resp[transformId]?.success === true) {
-        toastNotifications.addSuccess(
-          i18n.translate('xpack.transform.stepCreateForm.startTransformSuccessMessage', {
-            defaultMessage: 'Request to start transform {transformId} acknowledged.',
-            values: { transformId },
-          })
-        );
-        setStarted(true);
-        setLoading(false);
-        return;
-      }
-
-      const errorMessage =
-        isStartTransformsResponseSchema(resp) && resp[transformId]?.success === false
-          ? resp[transformId].error
-          : resp;
-
-      toastNotifications.addDanger({
-        title: i18n.translate('xpack.transform.stepCreateForm.startTransformErrorMessage', {
-          defaultMessage: 'An error occurred starting the transform {transformId}:',
-          values: { transformId },
-        }),
-        text: toMountPoint(
-          <ToastNotificationText
-            overlays={overlays}
-            theme={theme}
-            text={getErrorMessage(errorMessage)}
-          />,
-          { theme$: theme.theme$ }
-        ),
-      });
-      setStarted(false);
-      setLoading(false);
-    }
-
-    async function createAndStartTransform() {
-      const acknowledged = await createTransform();
-      if (acknowledged) {
-        await startTransform();
-      }
-    }
-
-    const createKibanaDataView = async () => {
-      setLoading(true);
-      const dataViewName = transformConfig.dest.index;
-      const runtimeMappings = transformConfig.source.runtime_mappings as Record<
-        string,
-        RuntimeField
-      >;
-
-      try {
-        const newDataView = await dataViews.createAndSave(
-          {
-            title: dataViewName,
-            timeFieldName,
-            ...(isPopulatedObject(runtimeMappings) && isLatestTransform(transformConfig)
-              ? { runtimeFieldMap: runtimeMappings }
-              : {}),
-            allowNoIndex: true,
+      createTransform(
+        { transformId, transformConfig, createDataView, timeFieldName },
+        {
+          onError: () => setCreated(false),
+          onSuccess: (resp) => {
+            setCreated(true);
+            if (resp.dataViewsCreated.length === 1) {
+              setDataViewId(resp.dataViewsCreated[0].id);
+            }
+            if (startAfterCreation) {
+              startTransform();
+            }
           },
-          false,
-          true
-        );
-
-        toastNotifications.addSuccess(
-          i18n.translate('xpack.transform.stepCreateForm.createDataViewSuccessMessage', {
-            defaultMessage: 'Kibana data view {dataViewName} created successfully.',
-            values: { dataViewName },
-          })
-        );
-
-        setDataViewId(newDataView.id);
-        setLoading(false);
-        return true;
-      } catch (e) {
-        if (e instanceof DuplicateDataViewError) {
-          toastNotifications.addDanger(
-            i18n.translate('xpack.transform.stepCreateForm.duplicateDataViewErrorMessage', {
-              defaultMessage:
-                'An error occurred creating the Kibana data view {dataViewName}: The data view already exists.',
-              values: { dataViewName },
-            })
-          );
-        } else {
-          toastNotifications.addDanger({
-            title: i18n.translate('xpack.transform.stepCreateForm.createDataViewErrorMessage', {
-              defaultMessage: 'An error occurred creating the Kibana data view {dataViewName}:',
-              values: { dataViewName },
-            }),
-            text: toMountPoint(
-              <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(e)} />,
-              { theme$: theme.theme$ }
-            ),
-          });
-          setLoading(false);
-          return false;
+          onSettled: () => setLoading(false),
         }
-      }
-    };
+      );
+    }
+
+    function startTransform() {
+      setLoading(true);
+
+      startTransforms([{ id: transformId }], {
+        onError: () => setStarted(false),
+        onSuccess: (resp) => setStarted(resp[transformId]?.success === true),
+        onSettled: () => setLoading(false),
+      });
+    }
 
     const isBatchTransform = typeof transformConfig.sync === 'undefined';
 
-    if (
-      loading === false &&
-      started === true &&
-      progressPercentComplete === undefined &&
-      isBatchTransform
-    ) {
-      // wrapping in function so we can keep the interval id in local scope
-      function startProgressBar() {
-        const interval = setInterval(async () => {
-          const stats = await api.getTransformStats(transformId);
-
-          if (
-            isGetTransformsStatsResponseSchema(stats) &&
-            Array.isArray(stats.transforms) &&
-            stats.transforms.length > 0
-          ) {
-            const percent =
-              getTransformProgress({
-                id: transformId,
-                config: {
-                  ...transformConfig,
-                  id: transformId,
-                },
-                stats: stats.transforms[0],
-              }) || 0;
-            setProgressPercentComplete(percent);
-            if (percent >= 100) {
-              clearInterval(interval);
-            }
-          } else {
-            toastNotifications.addDanger({
-              title: i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
-                defaultMessage: 'An error occurred getting the progress percentage:',
-              }),
-              text: toMountPoint(
-                <ToastNotificationText
-                  overlays={overlays}
-                  theme={theme}
-                  text={getErrorMessage(stats)}
-                />,
-                { theme$: theme.theme$ }
-              ),
-            });
-            clearInterval(interval);
-          }
-        }, PROGRESS_REFRESH_INTERVAL_MS);
+    useEffect(() => {
+      if (
+        loading === false &&
+        started === true &&
+        progressPercentComplete === undefined &&
+        isBatchTransform
+      ) {
         setProgressPercentComplete(0);
       }
+    }, [loading, started, progressPercentComplete, isBatchTransform]);
 
-      startProgressBar();
-    }
+    const progressBarRefetchEnabled =
+      isBatchTransform &&
+      typeof progressPercentComplete === 'number' &&
+      progressPercentComplete < 100;
+    const progressBarRefetchInterval = progressBarRefetchEnabled
+      ? PROGRESS_REFRESH_INTERVAL_MS
+      : false;
+
+    const { data: stats } = useGetTransformStats(
+      transformId,
+      false,
+      progressBarRefetchEnabled,
+      progressBarRefetchInterval
+    );
+
+    useEffect(() => {
+      if (stats === undefined) {
+        return;
+      }
+
+      if (stats && Array.isArray(stats.transforms) && stats.transforms.length > 0) {
+        const percent =
+          getTransformProgress({
+            id: transformId,
+            config: {
+              ...transformConfig,
+              id: transformId,
+            },
+            stats: stats.transforms[0],
+          }) || 0;
+        setProgressPercentComplete(percent);
+      } else {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
+            defaultMessage: 'An error occurred getting the progress percentage:',
+          }),
+          text: toMountPoint(
+            <ToastNotificationText text={getErrorMessage(stats)} />,
+            startServices
+          ),
+        });
+      }
+    }, [stats, toastNotifications, transformConfig, transformId, startServices]);
 
     function getTransformConfigDevConsoleStatement() {
       return `PUT _transform/${transformId}\n${JSON.stringify(transformConfig, null, 2)}\n\n`;
@@ -362,7 +230,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                 <EuiButton
                   fill
                   isDisabled={loading || (created && started)}
-                  onClick={createAndStartTransform}
+                  onClick={() => createTransformHandler(true)}
                   data-test-subj="transformWizardCreateAndStartButton"
                 >
                   {i18n.translate('xpack.transform.stepCreateForm.createAndStartTransformButton', {
@@ -436,7 +304,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
             <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
               <EuiButton
                 isDisabled={loading || created}
-                onClick={createTransform}
+                onClick={() => createTransformHandler()}
                 data-test-subj="transformWizardCreateButton"
               >
                 {i18n.translate('xpack.transform.stepCreateForm.createTransformButton', {

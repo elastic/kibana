@@ -1,0 +1,27 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-inference-endpoints",
+  "owner": "@elastic/search-kibana",
+  "plugin": {
+    "id": "searchInferenceEndpoints",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchInferenceEndpoints"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "features",
+      "share",
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "console",
+      "ml"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

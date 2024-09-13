@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ICspConfig } from '@kbn/core-http-server';
-import { cspConfig, CspConfigType } from './config';
+import { CspAdditionalConfig, cspConfig, CspConfigType } from './config';
 import { CspDirectives } from './csp_directives';
 
 const DEFAULT_CONFIG = Object.freeze(cspConfig.schema.validate({}));
@@ -25,18 +26,22 @@ export class CspConfig implements ICspConfig {
   public readonly warnLegacyBrowsers: boolean;
   public readonly disableEmbedding: boolean;
   public readonly header: string;
+  public readonly reportOnlyHeader: string;
 
   /**
    * Returns the default CSP configuration when passed with no config
    * @internal
    */
-  constructor(rawCspConfig: CspConfigType) {
-    this.#directives = CspDirectives.fromConfig(rawCspConfig);
+  constructor(rawCspConfig: CspConfigType, ...moreConfigs: CspAdditionalConfig[]) {
+    this.#directives = CspDirectives.fromConfig(rawCspConfig, ...moreConfigs);
     if (rawCspConfig.disableEmbedding) {
       this.#directives.clearDirectiveValues('frame-ancestors');
       this.#directives.addDirectiveValue('frame-ancestors', `'self'`);
     }
-    this.header = this.#directives.getCspHeader();
+    const { enforceHeader, reportOnlyHeader } = this.#directives.getCspHeadersByDisposition();
+    this.header = enforceHeader;
+    this.reportOnlyHeader = reportOnlyHeader;
+
     this.strict = rawCspConfig.strict;
     this.disableUnsafeEval = rawCspConfig.disableUnsafeEval;
     this.warnLegacyBrowsers = rawCspConfig.warnLegacyBrowsers;

@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/router-utils",
+  "owner": "@elastic/obs-ux-logs-team"
+}

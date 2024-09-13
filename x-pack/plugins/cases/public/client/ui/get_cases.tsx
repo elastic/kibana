@@ -14,7 +14,9 @@ import { CasesProvider } from '../../components/cases_context';
 type GetCasesPropsInternal = CasesProps & CasesContextProps;
 export type GetCasesProps = Omit<
   GetCasesPropsInternal,
-  'externalReferenceAttachmentTypeRegistry' | 'persistableStateAttachmentTypeRegistry'
+  | 'externalReferenceAttachmentTypeRegistry'
+  | 'persistableStateAttachmentTypeRegistry'
+  | 'getFilesClient'
 >;
 
 const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../../components/app/routes'));
@@ -22,14 +24,15 @@ const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../../component
 export const getCasesLazy = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  getFilesClient,
   owner,
   permissions,
   basePath,
-  onComponentInitialized,
   actionsNavigation,
   ruleDetailsNavigation,
   showAlertDetails,
   useFetchAlertData,
+  onAlertsTableLoaded,
   refreshRef,
   timelineIntegration,
   features,
@@ -39,6 +42,7 @@ export const getCasesLazy = ({
     value={{
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
+      getFilesClient,
       owner,
       permissions,
       basePath,
@@ -48,11 +52,11 @@ export const getCasesLazy = ({
   >
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CasesRoutesLazy
-        onComponentInitialized={onComponentInitialized}
         actionsNavigation={actionsNavigation}
         ruleDetailsNavigation={ruleDetailsNavigation}
         showAlertDetails={showAlertDetails}
         useFetchAlertData={useFetchAlertData}
+        onAlertsTableLoaded={onAlertsTableLoaded}
         refreshRef={refreshRef}
         timelineIntegration={timelineIntegration}
       />

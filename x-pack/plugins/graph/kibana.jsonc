@@ -14,11 +14,11 @@
       "licensing",
       "data",
       "navigation",
-      "savedObjects",
       "unifiedSearch",
       "inspector",
       "savedObjectsManagement",
       "savedObjectsFinder",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "home",
@@ -26,9 +26,9 @@
       "spaces"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "kibanaUtils",
-      "kibanaReact"
+      "kibanaReact",
+      "savedObjects"
     ]
   }
 }

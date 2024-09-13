@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiTextAlign } from '@elastic/eui';
@@ -19,13 +20,7 @@ import {
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import {
-  ControlGroupContainerFactory,
-  OptionsListEmbeddableInput,
-  RangeSliderEmbeddableInput,
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-} from '..';
+import { ControlGroupContainerFactory, OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '..';
 
 import { decorators } from './decorators';
 import { ControlsPanels } from '../control_group/types';
@@ -35,7 +30,13 @@ import { injectStorybookDataView } from '../services/data_views/data_views.story
 import { replaceOptionsListMethod } from '../services/options_list/options_list.story';
 import { populateStorybookControlFactories } from './storybook_control_factories';
 import { replaceValueSuggestionMethod } from '../services/unified_search/unified_search.story';
-import { OptionsListResponse, OptionsListRequest } from '../../common/options_list/types';
+import {
+  OptionsListResponse,
+  OptionsListRequest,
+  OptionsListSuggestions,
+  OptionsListEmbeddableInput,
+} from '../../common/options_list/types';
+import { RangeSliderEmbeddableInput } from '../range_slider';
 
 export default {
   title: 'Controls',
@@ -56,9 +57,9 @@ const storybookStubOptionsListRequest = async (
         r({
           suggestions: getFlightSearchOptions(request.field.name, request.searchString).reduce(
             (o, current, index) => {
-              return { ...o, [current]: { doc_count: index } };
+              return [...o, { value: current, docCount: index }];
             },
-            {}
+            [] as OptionsListSuggestions
           ),
           totalCardinality: 100,
         }),

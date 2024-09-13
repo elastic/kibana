@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -17,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const esClient = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('fleet_unenroll_agent', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -24,8 +25,8 @@ export default function (providerContext: FtrProviderContext) {
     let outputAPIKeyId: string;
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
     });
-    setupFleetAndAgents(providerContext);
     beforeEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
@@ -149,7 +150,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(actionStatus.nbAgentsFailed).to.eql(2);
     });
 
-    it('/agents/bulk_unenroll should allow to unenroll multiple agents by id from an regular agent policy', async () => {
+    it('/agents/bulk_unenroll should allow to unenroll multiple agents by id from a regular agent policy', async () => {
       // set policy to regular
       await supertest
         .put(`/api/fleet/agent_policies/policy1`)
@@ -188,6 +189,78 @@ export default function (providerContext: FtrProviderContext) {
       expect(body.total).to.eql(0);
     });
 
+    it('/agents/bulk_unenroll should allow to unenroll active and inactive agents by kuery with includeInactive', async () => {
+      // Agent inactive
+      await esClient.update({
+        id: 'agent4',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            policy_id: 'policy1',
+            policy_revision_idx: 1,
+            last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
+          },
+        },
+      });
+      // unenroll all agents that had last checkin before "now"
+      await supertest
+        .post(`/api/fleet/agents/bulk_unenroll`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          agents: `last_checkin<="${new Date(Date.now()).toISOString()}"`,
+          revoke: true,
+          includeInactive: true,
+        })
+        .expect(200);
+
+      const { body } = await supertest.get(`/api/fleet/agents`);
+      expect(body.total).to.eql(0);
+    });
+    it('/agents/bulk_unenroll should allow to unenroll inactive agents that never had last checkin by kuery with includeInactive', async () => {
+      // Agent inactive
+      await esClient.update({
+        id: 'agent4',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            policy_id: 'policy1',
+            policy_revision_idx: 1,
+            last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
+          },
+        },
+      });
+      // agent inactive through enrolled_at as no last_checkin
+      await esClient.create({
+        id: 'agent5',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        document: {
+          active: true,
+          access_api_key_id: 'api-key-4',
+          policy_id: 'policy1',
+          type: 'PERMANENT',
+          local_metadata: { host: { hostname: 'host6' } },
+          user_provided_metadata: {},
+          enrolled_at: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
+        },
+      });
+      // unenroll all agents
+      await supertest
+        .post(`/api/fleet/agents/bulk_unenroll`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          agents: 'active: true',
+          revoke: true,
+          includeInactive: true,
+        })
+        .expect(200);
+
+      const { body } = await supertest.get(`/api/fleet/agents`);
+      expect(body.total).to.eql(0);
+    });
+
     it('/agents/bulk_unenroll should allow to unenroll multiple agents by kuery in batches async', async () => {
       const { body } = await supertest
         .post(`/api/fleet/agents/bulk_unenroll`)
@@ -204,9 +277,9 @@ export default function (providerContext: FtrProviderContext) {
       await new Promise((resolve, reject) => {
         let attempts = 0;
         const intervalId = setInterval(async () => {
-          if (attempts > 2) {
+          if (attempts > 3) {
             clearInterval(intervalId);
-            reject('action timed out');
+            reject(new Error('action timed out'));
           }
           ++attempts;
           const {

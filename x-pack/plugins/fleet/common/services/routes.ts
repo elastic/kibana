@@ -23,6 +23,8 @@ import {
   DOWNLOAD_SOURCE_API_ROUTES,
   FLEET_SERVER_HOST_API_ROUTES,
   FLEET_PROXY_API_ROUTES,
+  UNINSTALL_TOKEN_ROUTES,
+  FLEET_DEBUG_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -77,8 +79,29 @@ export const epmRouteService = {
       .replace(/\/$/, ''); // trim trailing slash
   },
 
+  getInstallKibanaAssetsPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN.replace('{pkgName}', pkgName)
+      .replace('{pkgVersion}', pkgVersion)
+      .replace(/\/$/, ''); // trim trailing slash
+  },
+
   getUpdatePath: (pkgName: string, pkgVersion: string) => {
     return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
+  },
+
+  getReauthorizeTransformsPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS.replace('{pkgName}', pkgName)
+      .replace('{pkgVersion}', pkgVersion)
+      .replace(/\/$/, ''); // trim trailing slash
+  },
+  getBulkAssetsPath: () => {
+    return EPM_API_ROUTES.BULK_ASSETS_PATTERN;
+  },
+  getInputsTemplatesPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INPUTS_PATTERN.replace('{pkgName}', pkgName).replace(
       '{pkgVersion}',
       pkgVersion
     );
@@ -220,6 +243,8 @@ export const agentRouteService = {
       '{fileName}',
       fileName
     ),
+  getAgentFileDeletePath: (fileId: string) =>
+    AGENT_API_ROUTES.DELETE_UPLOAD_FILE_PATTERN.replace('{fileId}', fileId),
   getAgentsByActionsPath: () => AGENT_API_ROUTES.LIST_PATTERN,
 };
 
@@ -232,6 +257,8 @@ export const outputRoutesService = {
     OUTPUT_API_ROUTES.DELETE_PATTERN.replace('{outputId}', outputId),
   getCreatePath: () => OUTPUT_API_ROUTES.CREATE_PATTERN,
   getCreateLogstashApiKeyPath: () => OUTPUT_API_ROUTES.LOGSTASH_API_KEY_PATTERN,
+  getOutputHealthPath: (outputId: string) =>
+    OUTPUT_API_ROUTES.GET_OUTPUT_HEALTH_PATTERN.replace('{outputId}', outputId),
 };
 
 export const fleetProxiesRoutesService = {
@@ -253,17 +280,21 @@ export const fleetServerHostsRoutesService = {
   getDeletePath: (itemId: string) =>
     FLEET_SERVER_HOST_API_ROUTES.DELETE_PATTERN.replace('{itemId}', itemId),
   getCreatePath: () => FLEET_SERVER_HOST_API_ROUTES.CREATE_PATTERN,
+  getPolicyStatusPath: () => FLEET_SERVER_HOST_API_ROUTES.POLICY_STATUS_PATTERN,
 };
 
 export const settingsRoutesService = {
   getInfoPath: () => SETTINGS_API_ROUTES.INFO_PATTERN,
   getUpdatePath: () => SETTINGS_API_ROUTES.UPDATE_PATTERN,
+  getEnrollmentInfoPath: () => SETTINGS_API_ROUTES.ENROLLMENT_INFO_PATTERN,
+  getSpaceInfoPath: () => SETTINGS_API_ROUTES.SPACE_INFO_PATTERN,
 };
 
 export const appRoutesService = {
   getCheckPermissionsPath: () => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
   getRegenerateServiceTokenPath: () => APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
   postHealthCheckPath: () => APP_API_ROUTES.HEALTH_CHECK_PATTERN,
+  getAgentPoliciesSpacesPath: () => APP_API_ROUTES.AGENT_POLICIES_SPACES,
 };
 
 export const enrollmentAPIKeyRouteService = {
@@ -272,6 +303,12 @@ export const enrollmentAPIKeyRouteService = {
   getInfoPath: (keyId: string) => ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN.replace('{keyId}', keyId),
   getDeletePath: (keyId: string) =>
     ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN.replace('{keyId}', keyId),
+};
+
+export const uninstallTokensRouteService = {
+  getListPath: () => UNINSTALL_TOKEN_ROUTES.LIST_PATTERN,
+  getInfoPath: (uninstallTokenId: string) =>
+    UNINSTALL_TOKEN_ROUTES.INFO_PATTERN.replace('{uninstallTokenId}', uninstallTokenId),
 };
 
 export const setupRouteService = {
@@ -287,4 +324,10 @@ export const downloadSourceRoutesService = {
   getDeletePath: (downloadSourceId: string) =>
     DOWNLOAD_SOURCE_API_ROUTES.DELETE_PATTERN.replace('{sourceId}', downloadSourceId),
   getCreatePath: () => DOWNLOAD_SOURCE_API_ROUTES.CREATE_PATTERN,
+};
+
+export const debugRoutesService = {
+  getIndexPath: () => FLEET_DEBUG_ROUTES.INDEX_PATTERN,
+  getSavedObjectsPath: () => FLEET_DEBUG_ROUTES.SAVED_OBJECTS_PATTERN,
+  getSavedObjectNamesPath: () => FLEET_DEBUG_ROUTES.SAVED_OBJECT_NAMES_PATTERN,
 };

@@ -29,6 +29,7 @@ describe('checkActionTypeEnabled', () => {
       enabled: true,
       enabledInConfig: true,
       enabledInLicense: true,
+      isSystemActionType: false,
     };
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
           Object {
@@ -46,6 +47,7 @@ describe('checkActionTypeEnabled', () => {
       enabled: false,
       enabledInConfig: true,
       enabledInLicense: false,
+      isSystemActionType: false,
     };
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
       Object {
@@ -61,10 +63,9 @@ describe('checkActionTypeEnabled', () => {
             href="https://www.elastic.co/subscriptions"
             target="_blank"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="View license options"
               id="xpack.triggersActionsUI.licenseCheck.actionTypeDisabledByLicenseLinkTitle"
-              values={Object {}}
             />
           </EuiLink>
         </EuiCard>,
@@ -81,6 +82,7 @@ describe('checkActionTypeEnabled', () => {
       enabled: false,
       enabledInConfig: false,
       enabledInLicense: true,
+      isSystemActionType: false,
     };
     expect(checkActionTypeEnabled(actionType)).toMatchInlineSnapshot(`
           Object {
@@ -102,6 +104,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       actionTypeId: '1',
       id: 'test1',
       isPreconfigured: true,
+      isSystemAction: false,
       isDeprecated: true,
       name: 'test',
       referencedByCount: 0,
@@ -111,6 +114,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       id: 'test2',
       isPreconfigured: true,
       isDeprecated: true,
+      isSystemAction: false,
       name: 'test',
       referencedByCount: 0,
     },
@@ -125,6 +129,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       enabled: true,
       enabledInConfig: false,
       enabledInLicense: true,
+      isSystemActionType: false,
     };
 
     expect(checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors))
@@ -144,6 +149,7 @@ describe('checkActionFormActionTypeEnabled', () => {
       enabled: true,
       enabledInConfig: false,
       enabledInLicense: true,
+      isSystemActionType: false,
     };
     expect(checkActionFormActionTypeEnabled(actionType, preconfiguredConnectors))
       .toMatchInlineSnapshot(`

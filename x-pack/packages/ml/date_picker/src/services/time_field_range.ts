@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import type { HttpStart } from '@kbn/core/public';
 
@@ -40,6 +40,8 @@ interface GetTimeFieldRangeOptions {
    * API path ('/internal/file_upload/time_field_range')
    */
   path: string;
+
+  signal?: AbortSignal;
 }
 
 /**
@@ -48,11 +50,13 @@ interface GetTimeFieldRangeOptions {
  * @returns GetTimeFieldRangeResponse
  */
 export async function getTimeFieldRange(options: GetTimeFieldRangeOptions) {
-  const { http, path, ...body } = options;
+  const { http, path, signal, ...body } = options;
 
   return await http.fetch<GetTimeFieldRangeResponse>({
     path,
     method: 'POST',
     body: JSON.stringify(body),
+    version: '1',
+    ...(signal ? { signal } : {}),
   });
 }

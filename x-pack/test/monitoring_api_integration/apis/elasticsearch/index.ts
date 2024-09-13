@@ -6,9 +6,13 @@
  */
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { installPackage } from '../../packages';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Elasticsearch', () => {
+export default function ({ loadTestFile, getService }: FtrProviderContext) {
+  // FLAKY: https://github.com/elastic/kibana/issues/184619
+  describe.skip('Elasticsearch', () => {
+    before(() => installPackage(getService('supertest'), 'elasticsearch'));
+
     loadTestFile(require.resolve('./ccr'));
     loadTestFile(require.resolve('./indices'));
     loadTestFile(require.resolve('./ml_jobs'));

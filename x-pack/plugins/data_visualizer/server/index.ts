@@ -5,7 +5,18 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-import { DataVisualizerPlugin } from './plugin';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { ConfigSchema } from '../common/app';
+import { configSchema } from './config_schema';
 
-export const plugin = (initializerContext: PluginInitializerContext) => new DataVisualizerPlugin();
+export const plugin = async (initializerContext: PluginInitializerContext<ConfigSchema>) => {
+  const { DataVisualizerPlugin } = await import('./plugin');
+  return new DataVisualizerPlugin(initializerContext);
+};
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  schema: configSchema,
+  exposeToBrowser: {
+    resultLinks: true,
+  },
+};

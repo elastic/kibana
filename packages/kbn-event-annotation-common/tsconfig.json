@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/data-plugin",
+    "@kbn/visualization-ui-components",
+    "@kbn/ui-theme",
+    "@kbn/i18n",
+    "@kbn/content-management-table-list-view-common",
+  ]
+}

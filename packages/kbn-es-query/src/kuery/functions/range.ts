@@ -1,20 +1,43 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { nodeTypes } from '../node_types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { buildNode as buildLiteralNode } from '../node_types/literal';
+import { type KqlFunctionNode, type KqlLiteralNode, nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { getRangeScript, RangeFilterParams } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getDataViewFieldSubtypeNested, getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import type { DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
+import type { DataViewBase, KueryQueryOptions } from '../../..';
 import type { KqlContext } from '../types';
+
+export const KQL_FUNCTION_RANGE = 'range';
+export const KQL_RANGE_OPERATOR_MAP = {
+  gt: '>',
+  gte: '>=',
+  lt: '<',
+  lte: '<=',
+};
+
+export interface KqlRangeFunctionNode extends KqlFunctionNode {
+  function: typeof KQL_FUNCTION_RANGE;
+  arguments: [
+    KqlLiteralNode,
+    keyof Pick<RangeFilterParams, 'gt' | 'gte' | 'lt' | 'lte'>,
+    KqlLiteralNode
+  ];
+}
+
+export function isNode(node: KqlFunctionNode): node is KqlRangeFunctionNode {
+  return node.function === KQL_FUNCTION_RANGE;
+}
 
 export function buildNodeParams(
   fieldName: string,
@@ -23,16 +46,16 @@ export function buildNodeParams(
 ) {
   // Run through the parser instead treating it as a literal because it may contain wildcards
   const fieldNameArg = ast.fromLiteralExpression(fieldName);
-  const valueArg = nodeTypes.literal.buildNode(value);
+  const valueArg = buildLiteralNode(value);
   return { arguments: [fieldNameArg, operator, valueArg] };
 }
 
 export function toElasticsearchQuery(
-  node: KueryNode,
+  node: KqlRangeFunctionNode,
   indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
   context: KqlContext = {}
-): estypes.QueryDslQueryContainer {
+): QueryDslQueryContainer {
   const [fieldNameArg, operatorArg, valueArg] = node.arguments;
   const fullFieldNameArg = getFullFieldNameNode(
     fieldNameArg,
@@ -113,4 +136,11 @@ export function toElasticsearchQuery(
       minimum_should_match: 1,
     },
   };
+}
+
+export function toKqlExpression(node: KqlRangeFunctionNode): string {
+  const [field, operator, value] = node.arguments;
+  return `${ast.toKqlExpression(field)} ${KQL_RANGE_OPERATOR_MAP[operator]} ${ast.toKqlExpression(
+    value
+  )}`;
 }

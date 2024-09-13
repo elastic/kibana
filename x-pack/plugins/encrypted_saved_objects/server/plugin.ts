@@ -12,8 +12,11 @@ import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/c
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import type { ConfigType } from './config';
-import type { CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
-import { getCreateMigration } from './create_migration';
+import {
+  type CreateEncryptedSavedObjectsMigrationFn,
+  getCreateMigration,
+} from './create_migration';
+import { type CreateEsoModelVersionFn, getCreateEsoModelVersion } from './create_model_version';
 import type { EncryptedSavedObjectTypeRegistration } from './crypto';
 import {
   EncryptedSavedObjectsService,
@@ -35,6 +38,7 @@ export interface EncryptedSavedObjectsPluginSetup {
   canEncrypt: boolean;
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
   createMigration: CreateEncryptedSavedObjectsMigrationFn;
+  createModelVersion: CreateEsoModelVersionFn;
 }
 
 export interface EncryptedSavedObjectsPluginStart {
@@ -56,7 +60,7 @@ export class EncryptedSavedObjectsPlugin
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, deps: PluginsSetup): EncryptedSavedObjectsPluginSetup {
+  public setup(core: CoreSetup, _deps: PluginsSetup): EncryptedSavedObjectsPluginSetup {
     const config = this.initializerContext.config.get<ConfigType>();
     const canEncrypt = config.encryptionKey !== undefined;
     if (!canEncrypt) {
@@ -71,6 +75,18 @@ export class EncryptedSavedObjectsPlugin
 
       this.logger.info(
         `Hashed 'xpack.encryptedSavedObjects.encryptionKey' for this instance: ${hashedEncryptionKey}`
+      );
+    }
+
+    const readOnlyKeys = config.keyRotation?.decryptionOnlyKeys;
+
+    if (readOnlyKeys !== undefined && readOnlyKeys.length > 0) {
+      const readOnlyKeyHashses = readOnlyKeys.map((readOnlyKey, i) =>
+        createHash('sha3-256').update(readOnlyKey).digest('base64')
+      );
+
+      this.logger.info(
+        `Hashed 'xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys' for this instance: ${readOnlyKeyHashses}`
       );
     }
 
@@ -91,10 +107,11 @@ export class EncryptedSavedObjectsPlugin
     this.savedObjectsSetup = setupSavedObjects({
       service,
       savedObjects: core.savedObjects,
-      security: deps.security,
       getStartServices: core.getStartServices,
     });
 
+    // Expose the key rotation route for both stateful and serverless environments
+    // The endpoint requires admin privileges, and is internal only in serverless
     defineRoutes({
       router: core.http.createRouter(),
       logger: this.initializerContext.logger.get('routes'),
@@ -103,10 +120,10 @@ export class EncryptedSavedObjectsPlugin
           logger: this.logger.get('key-rotation-service'),
           service,
           getStartServices: core.getStartServices,
-          security: deps.security,
         })
       ),
       config,
+      buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
     });
 
     return {
@@ -114,6 +131,18 @@ export class EncryptedSavedObjectsPlugin
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
         service.registerType(typeRegistration),
       createMigration: getCreateMigration(
+        service,
+        (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
+          const serviceForMigration = new EncryptedSavedObjectsService({
+            primaryCrypto,
+            decryptionOnlyCryptos,
+            logger: this.logger,
+          });
+          serviceForMigration.registerType(typeRegistration);
+          return serviceForMigration;
+        }
+      ),
+      createModelVersion: getCreateEsoModelVersion(
         service,
         (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
           const serviceForMigration = new EncryptedSavedObjectsService({

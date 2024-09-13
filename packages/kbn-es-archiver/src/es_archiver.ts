@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Fs from 'fs';
@@ -13,7 +14,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { KbnClient } from '@kbn/test';
-
+import type { LoadActionPerfOptions } from './lib';
 import {
   saveAction,
   loadAction,
@@ -22,7 +23,6 @@ import {
   emptyKibanaIndexAction,
   editAction,
 } from './actions';
-
 interface Options {
   client: Client;
   baseDir?: string;
@@ -89,7 +89,13 @@ export class EsArchiver {
       skipExisting = false,
       useCreate = false,
       docsOnly = false,
-    }: { skipExisting?: boolean; useCreate?: boolean; docsOnly?: boolean } = {}
+      performance,
+    }: {
+      skipExisting?: boolean;
+      useCreate?: boolean;
+      docsOnly?: boolean;
+      performance?: LoadActionPerfOptions;
+    } = {}
   ) {
     return await loadAction({
       inputDir: this.findArchive(path),
@@ -99,6 +105,7 @@ export class EsArchiver {
       client: this.client,
       log: this.log,
       kbnClient: this.kbnClient,
+      performance,
     });
   }
 
@@ -149,19 +156,17 @@ export class EsArchiver {
    *
    * @param name
    */
-  async loadIfNeeded(name: string) {
-    return await this.load(name, { skipExisting: true });
+  async loadIfNeeded(name: string, performance?: LoadActionPerfOptions) {
+    return await this.load(name, { skipExisting: true, performance });
   }
 
   /**
-   * Delete any Kibana indices, and initialize the Kibana index as Kibana would do
-   * on startup.
+   * Cleanup saved object indices, preserving the space:default saved object.
    */
   async emptyKibanaIndex() {
     return await emptyKibanaIndexAction({
       client: this.client,
       log: this.log,
-      kbnClient: this.kbnClient,
     });
   }
 

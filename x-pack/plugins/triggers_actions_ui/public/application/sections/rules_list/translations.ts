@@ -154,6 +154,13 @@ export const ALERT_WARNING_MAX_EXECUTABLE_ACTIONS_REASON = i18n.translate(
   }
 );
 
+export const ALERT_WARNING_MAX_QUEUED_ACTIONS_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonMaxQueuedActions',
+  {
+    defaultMessage: 'Queued action limit exceeded.',
+  }
+);
+
 export const ALERT_WARNING_MAX_ALERTS_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonMaxAlerts',
   {
@@ -165,6 +172,13 @@ export const ALERT_WARNING_UNKNOWN_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonUnknown',
   {
     defaultMessage: 'Unknown reason',
+  }
+);
+
+export const ALERT_WARNING_EXECUTION_REASON = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonExecution',
+  {
+    defaultMessage: 'Rule execution warning',
   }
 );
 
@@ -182,7 +196,9 @@ export const rulesErrorReasonTranslationsMapping = {
 export const rulesWarningReasonTranslationsMapping = {
   maxExecutableActions: ALERT_WARNING_MAX_EXECUTABLE_ACTIONS_REASON,
   maxAlerts: ALERT_WARNING_MAX_ALERTS_REASON,
+  maxQueuedActions: ALERT_WARNING_MAX_QUEUED_ACTIONS_REASON,
   unknown: ALERT_WARNING_UNKNOWN_REASON,
+  ruleExecution: ALERT_WARNING_EXECUTION_REASON,
 };
 
 export const SELECT_ALL_ARIA_LABEL = i18n.translate(
@@ -331,6 +347,13 @@ export const CANCEL_BUTTON_TEXT = i18n.translate(
     defaultMessage: 'Cancel',
   }
 );
+
+export const CLEAR_FILTERS = (numberOfFilters: number) => {
+  return i18n.translate('xpack.triggersActionsUI.sections.rulesList.clearFilterLink', {
+    values: { numberOfFilters },
+    defaultMessage: 'Clear {numberOfFilters, plural, =1 {filter} other {filters}}',
+  });
+};
 
 export const getConfirmDeletionModalText = (
   numIdsToDelete: number,

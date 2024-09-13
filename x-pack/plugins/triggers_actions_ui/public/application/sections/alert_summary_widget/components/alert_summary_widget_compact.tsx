@@ -7,43 +7,42 @@
 
 import React, { MouseEvent } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
-import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
+import {
+  Axis,
+  Chart,
+  CurveType,
+  LineSeries,
+  Position,
+  ScaleType,
+  Settings,
+  TooltipType,
+  Tooltip,
+} from '@elastic/charts';
 import { AlertStatus } from '@kbn/rule-data-utils';
+import { i18n } from '@kbn/i18n';
 import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, WIDGET_TITLE } from './constants';
-import { Alert, ChartProps } from '../types';
+import { Alert, ChartProps, DependencyProps } from '../types';
 
 export interface AlertSummaryWidgetCompactProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
-  chartProps: ChartProps;
+  chartProps?: ChartProps;
   recoveredAlertCount: number;
   timeRangeTitle?: JSX.Element | string;
   onClick: (status?: AlertStatus) => void;
+  dependencyProps: DependencyProps;
 }
 
 export const AlertSummaryWidgetCompact = ({
   activeAlertCount,
   activeAlerts,
-  chartProps: { theme, baseTheme },
+  chartProps: { themeOverrides } = {},
   recoveredAlertCount,
   timeRangeTitle,
   onClick,
+  dependencyProps: { baseTheme, sparklineTheme },
 }: AlertSummaryWidgetCompactProps) => {
-  const chartTheme = [
-    theme,
-    EUI_SPARKLINE_THEME_PARTIAL,
-    {
-      chartMargins: {
-        left: 10,
-        right: 10,
-        top: 10,
-        bottom: 10,
-      },
-    },
-  ];
-
   const handleClick = (
     event: MouseEvent<HTMLAnchorElement | HTMLDivElement>,
     status?: AlertStatus
@@ -55,13 +54,7 @@ export const AlertSummaryWidgetCompact = ({
   };
 
   return (
-    <EuiPanel
-      element="div"
-      data-test-subj="alertSummaryWidgetCompact"
-      hasShadow={false}
-      hasBorder
-      onClick={handleClick}
-    >
+    <EuiPanel element="div" data-test-subj="alertSummaryWidgetCompact" hasShadow={false} hasBorder>
       <EuiFlexGroup direction="column">
         {!!timeRangeTitle && (
           <EuiFlexItem>
@@ -79,7 +72,7 @@ export const AlertSummaryWidgetCompact = ({
           <AlertCounts
             activeAlertCount={activeAlertCount}
             recoveredAlertCount={recoveredAlertCount}
-            onActiveClick={handleClick}
+            handleClick={handleClick}
           />
         </EuiFlexItem>
 
@@ -87,8 +80,35 @@ export const AlertSummaryWidgetCompact = ({
           <EuiFlexGroup wrap>
             <EuiFlexItem style={{ minWidth: '200px' }}>
               <Chart size={{ height: 50 }}>
-                <Settings theme={chartTheme} baseTheme={baseTheme} tooltip={{ type: 'none' }} />
-                <Axis hide id="activeAlertsAxis" position={Position.Left} showGridLines={false} />
+                <Tooltip type={TooltipType.None} />
+                <Settings
+                  theme={[
+                    ...(themeOverrides
+                      ? Array.isArray(themeOverrides)
+                        ? themeOverrides
+                        : [themeOverrides]
+                      : []),
+                    sparklineTheme,
+                    {
+                      chartMargins: {
+                        left: 10,
+                        right: 10,
+                        top: 10,
+                        bottom: 10,
+                      },
+                    },
+                  ]}
+                  baseTheme={baseTheme}
+                  locale={i18n.getLocale()}
+                />
+                <Axis
+                  hide
+                  id="activeAlertsAxis"
+                  position={Position.Left}
+                  gridLine={{
+                    visible: false,
+                  }}
+                />
                 <LineSeries
                   id={'activeAlertsChart'}
                   xScaleType={ScaleType.Time}

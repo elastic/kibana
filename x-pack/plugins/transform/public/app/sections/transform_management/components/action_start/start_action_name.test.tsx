@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { TransformListRow } from '../../../../common';
-import { StartActionName, StartActionNameProps } from './start_action_name';
+import type { TransformListRow } from '../../../../common';
+import type { StartActionNameProps } from './start_action_name';
+import { StartActionName } from './start_action_name';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
+
+const queryClient = new QueryClient();
 
 describe('Transform: Transform List Actions <StartAction />', () => {
   test('Minimal initialization', () => {
@@ -26,8 +30,11 @@ describe('Transform: Transform List Actions <StartAction />', () => {
       transformNodes: 1,
     };
 
-    const wrapper = shallow(<StartActionName {...props} />);
-
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(
+      <QueryClientProvider client={queryClient}>
+        <StartActionName {...props} />
+      </QueryClientProvider>
+    );
+    expect(container.textContent).toBe('Start');
   });
 });

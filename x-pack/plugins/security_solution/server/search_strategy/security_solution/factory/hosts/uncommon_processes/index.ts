@@ -7,15 +7,12 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 
 import { processFieldsMap, userFieldsMap } from '@kbn/securitysolution-ecs';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type { HostsQueries } from '../../../../../../common/search_strategy/security_solution';
-import type {
-  HostsUncommonProcessesRequestOptions,
-  HostsUncommonProcessesStrategyResponse,
-} from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
+import type { HostsUncommonProcessesStrategyResponse } from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 
@@ -24,14 +21,14 @@ import { buildQuery } from './dsl/query.dsl';
 import { formatUncommonProcessesData, getHits } from './helpers';
 
 export const uncommonProcesses: SecuritySolutionFactory<HostsQueries.uncommonProcesses> = {
-  buildDsl: (options: HostsUncommonProcessesRequestOptions) => {
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildQuery(options);
   },
   parse: async (
-    options: HostsUncommonProcessesRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<HostsUncommonProcessesStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;

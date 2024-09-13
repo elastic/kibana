@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -14,7 +15,7 @@ import { AutocompleteFieldWildcardComponent } from '.';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
 import { fields, getField } from '../fields/index.mock';
 import { autocompleteStartMock } from '../autocomplete/index.mock';
-import { FILENAME_WILDCARD_WARNING, FILEPATH_WARNING } from '@kbn/securitysolution-utils';
+import { WILDCARD_WARNING, FILEPATH_WARNING } from '@kbn/securitysolution-utils';
 
 jest.mock('../hooks/use_field_value_autocomplete');
 jest.mock('../translations', () => ({
@@ -143,11 +144,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
       />
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="comboBoxInput"]')
-        .hasClass('euiComboBox__inputWrap-isClearable')
-    ).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="comboBoxClearButton"]`)).toBeTruthy();
   });
 
   test('it correctly displays selected value', () => {
@@ -172,7 +169,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="valuesAutocompleteWildcard"] EuiComboBoxPill').at(0).text()
+      wrapper.find('[data-test-subj="valuesAutocompleteWildcard"] input').at(0).props().value
     ).toEqual('/opt/*/app.dmg');
   });
 
@@ -372,7 +369,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue="invalid path"
-        warning={FILENAME_WILDCARD_WARNING}
+        warning={WILDCARD_WARNING}
       />
     );
 
@@ -388,7 +385,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
     const helpText = wrapper
       .find('[data-test-subj="valuesAutocompleteWildcardLabel"] div.euiFormHelpText')
       .at(0);
-    expect(helpText.text()).toEqual(FILENAME_WILDCARD_WARNING);
+    expect(helpText.text()).toEqual(WILDCARD_WARNING);
     expect(helpText.find('.euiToolTipAnchor')).toBeTruthy();
   });
   test('should show the warning helper text if the new value contains spaces when change', async () => {
@@ -416,7 +413,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue="invalid path"
-        warning={FILENAME_WILDCARD_WARNING}
+        warning={WILDCARD_WARNING}
       />
     );
 

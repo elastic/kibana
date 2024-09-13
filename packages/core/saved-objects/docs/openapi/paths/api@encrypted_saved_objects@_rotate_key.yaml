@@ -1,0 +1,64 @@
+post:
+  summary: Rotate a key for encrypted saved objects
+  operationId: rotateEncryptionKey
+  description: |
+    Superuser role required.
+
+    If a saved object cannot be decrypted using the primary encryption key, then Kibana will attempt to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
+
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  tags:
+    - saved objects
+  parameters:
+    - in: query
+      name: batch_size
+      schema:
+        type: number
+        default: 10000
+      required: false
+      description: |
+        Specifies a maximum number of saved objects that Kibana can process in a single batch. Bulk key rotation is an iterative process since Kibana may not be able to fetch and process all required saved objects in one go and splits processing into consequent batches. By default, the batch size is 10000, which is also a maximum allowed value.
+    - in: query
+      name: type
+      schema:
+        type: string
+      required: false
+      description: |
+        Limits encryption key rotation only to the saved objects with the specified type. By default, Kibana tries to rotate the encryption key for all saved object types that may contain encrypted attributes.
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: number
+                description: |
+                  Indicates the total number of all encrypted saved objects (optionally filtered by the requested `type`), regardless of the key Kibana used for encryption.
+              successful:
+                type: number
+                description: |
+                  Indicates the total number of all encrypted saved objects (optionally filtered by the requested `type`), regardless of the key Kibana used for encryption.
+
+                  NOTE: In most cases, `total` will be greater than `successful` even if `failed` is zero. The reason is that Kibana may not need or may not be able to rotate encryption keys for all encrypted saved objects.
+              failed:
+                type: number
+                description: |
+                    Indicates the number of the saved objects that were still encrypted with one of the old encryption keys that Kibana failed to re-encrypt with the primary key.
+          examples:
+            rotateEncryptionKeyResponse:
+              $ref: '../components/examples/key_rotation_response.yaml'
+    '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/400_response.yaml'
+    '429':
+      description: Already in progress.
+      content:
+        application/json:
+          schema:
+            type: object

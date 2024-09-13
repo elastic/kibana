@@ -6,14 +6,12 @@
  */
 
 import React, { useCallback } from 'react';
-import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
 import { Form, useForm, FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { act } from 'react-dom/test-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { ConnectorServices } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TriggersAndActionsUiServices } from '@kbn/triggers-actions-ui-plugin/public';
@@ -54,6 +52,21 @@ const ConnectorFormTestProviderComponent: React.FC<ConnectorFormTestProviderProp
 ConnectorFormTestProviderComponent.displayName = 'ConnectorFormTestProvider';
 export const ConnectorFormTestProvider = React.memo(ConnectorFormTestProviderComponent);
 
+const AuthFormTestProviderComponent: React.FC<FormTestProviderProps> = ({
+  children,
+  defaultValue,
+  onSubmit,
+}) => {
+  return (
+    <FormTestProviderComponent onSubmit={onSubmit} defaultValue={defaultValue}>
+      {children}
+    </FormTestProviderComponent>
+  );
+};
+
+AuthFormTestProviderComponent.displayName = 'AuthFormTestProvider';
+export const AuthFormTestProvider = React.memo(AuthFormTestProviderComponent);
+
 const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
   children,
   defaultValue,
@@ -93,13 +106,10 @@ export interface AppMockRenderer {
 
 export const createAppMockRenderer = (): AppMockRenderer => {
   const services = createStartServicesMock();
-  const theme$ = of({ darkMode: false });
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
-      </KibanaContextProvider>
+      <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
     </I18nProvider>
   );
   AppWrapper.displayName = 'AppWrapper';

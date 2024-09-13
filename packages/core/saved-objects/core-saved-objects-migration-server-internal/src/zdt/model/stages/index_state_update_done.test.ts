@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Either from 'fp-ts/lib/Either';
@@ -31,9 +32,9 @@ describe('Stage: indexStateUpdateDone', () => {
     context = createContextMock();
   });
 
-  it('INDEX_STATE_UPDATE_DONE -> DOCUMENTS_UPDATE_INIT when successful and newIndexCreation is false', () => {
+  it('INDEX_STATE_UPDATE_DONE -> DOCUMENTS_UPDATE_INIT when successful and skipDocumentMigration is false', () => {
     const state = createState({
-      newIndexCreation: false,
+      skipDocumentMigration: false,
     });
     const res = Either.right('noop') as StateActionResponse<'INDEX_STATE_UPDATE_DONE'>;
 
@@ -45,9 +46,9 @@ describe('Stage: indexStateUpdateDone', () => {
     });
   });
 
-  it('INDEX_STATE_UPDATE_DONE -> DONE when successful and newIndexCreation is true', () => {
+  it('INDEX_STATE_UPDATE_DONE -> DONE when successful and skipDocumentMigration is true', () => {
     const state = createState({
-      newIndexCreation: true,
+      skipDocumentMigration: true,
     });
     const res = Either.right('noop') as StateActionResponse<'INDEX_STATE_UPDATE_DONE'>;
 

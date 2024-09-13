@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { from, lastValueFrom } from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { toArray } from 'rxjs';
 
 import { IterableInput, AsyncMapFn, AsyncMapResult } from './types';
 import { mapWithLimit$ } from './observable';
@@ -58,5 +59,8 @@ export async function asyncMapWithLimit<T1, T2>(
 
   return results
     .sort(([a], [b]) => a - b)
-    .reduce((acc: T2[], [, result]) => acc.concat(result), []);
+    .reduce((acc: T2[], [, result]) => {
+      acc.push(...result);
+      return acc;
+    }, []);
 }

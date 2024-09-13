@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
@@ -135,15 +136,19 @@ export const applicationUsageSchema = {
   canvas: commonSchema,
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,
+  enterpriseSearchRelevance: commonSchema,
   enterpriseSearchAnalytics: commonSchema,
-  elasticsearch: commonSchema,
+  enterpriseSearchApplications: commonSchema,
+  enterpriseSearchAISearch: commonSchema,
+  enterpriseSearchSemanticSearch: commonSchema,
+  enterpriseSearchVectorSearch: commonSchema,
+  enterpriseSearchElasticsearch: commonSchema,
   appSearch: commonSchema,
   workplaceSearch: commonSchema,
   searchExperiences: commonSchema,
   graph: commonSchema,
   logs: commonSchema,
   metrics: commonSchema,
-  infra: commonSchema, // It's a forward app so we'll likely never report it
   fleet: commonSchema,
   integrations: commonSchema,
   ingestManager: commonSchema,
@@ -151,10 +156,15 @@ export const applicationUsageSchema = {
   maps: commonSchema,
   ml: commonSchema,
   monitoring: commonSchema,
+  'observability-log-explorer': commonSchema,
+  'observability-logs-explorer': commonSchema,
   'observability-overview': commonSchema,
+  observabilityOnboarding: commonSchema,
+  observabilityAIAssistant: commonSchema,
   'exploratory-view': commonSchema,
   osquery: commonSchema,
   profiling: commonSchema,
+  slo: commonSchema,
   security_account: commonSchema,
   reportingRedirect: commonSchema,
   security_access_agreement: commonSchema,

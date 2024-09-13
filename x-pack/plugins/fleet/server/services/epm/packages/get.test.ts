@@ -10,8 +10,13 @@ import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/co
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
-import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common/types';
+import {
+  ASSETS_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../../common';
+import type { RegistryPackage } from '../../../../common/types';
+import type { PackagePolicySOAttributes } from '../../../types';
 
 import { createAppContextStartContractMock } from '../../../mocks';
 import { appContextService } from '../../app_context';
@@ -22,7 +27,7 @@ import { auditLoggingService } from '../../audit_logging';
 
 import * as Registry from '../registry';
 
-import { getPackageInfo, getPackages, getPackageUsageStats } from './get';
+import { getInstalledPackages, getPackageInfo, getPackages, getPackageUsageStats } from './get';
 
 jest.mock('../registry');
 jest.mock('../../settings');
@@ -60,6 +65,7 @@ describe('When using EPM `get` services', () => {
             description: '',
             namespace: 'default',
             policy_id: '22222-22222-2222-2222',
+            policy_ids: ['22222-22222-2222-2222'],
             enabled: true,
             inputs: [],
             package: { name: 'system', title: 'System', version: '0.10.4' },
@@ -84,6 +90,7 @@ describe('When using EPM `get` services', () => {
             package: { name: 'system', title: 'System', version: '0.10.4' },
             enabled: true,
             policy_id: '11111-111111-11111-11111', // << duplicate id with plicy below
+            policy_ids: ['11111-111111-11111-11111'],
             inputs: [],
             revision: 1,
             created_at: '2020-12-21T19:22:04.902Z',
@@ -105,6 +112,7 @@ describe('When using EPM `get` services', () => {
             description: '',
             namespace: 'default',
             policy_id: '11111-111111-11111-11111',
+            policy_ids: ['11111-111111-11111-11111'],
             enabled: true,
             inputs: [],
             package: { name: 'system', title: 'System', version: '0.10.4' },
@@ -128,6 +136,7 @@ describe('When using EPM `get` services', () => {
             description: '',
             namespace: 'default',
             policy_id: '33333-33333-333333-333333',
+            policy_ids: ['33333-33333-333333-333333'],
             enabled: true,
             inputs: [],
             package: { name: 'system', title: 'System', version: '0.10.4' },
@@ -206,6 +215,24 @@ describe('When using EPM `get` services', () => {
           version: '1.0.0',
           title: 'Nginx',
         } as any,
+        {
+          id: 'profiler_symbolizer',
+          name: 'profiler_symbolizer',
+          version: '1.0.0',
+          title: 'Profiler Symbolizer',
+        } as any,
+        {
+          id: 'profiler_collector',
+          name: 'profiler_collector',
+          version: '1.0.0',
+          title: 'Profiler Collector',
+        } as any,
+        {
+          id: 'fleet_server',
+          name: 'fleet_server',
+          version: '1.0.0',
+          title: 'Fleet Server',
+        } as any,
       ]);
       MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
       MockRegistry.fetchInfo.mockResolvedValue({} as any);
@@ -245,6 +272,7 @@ description: Elasticsearch description`,
               name: 'elasticsearch',
               version: '0.0.1',
               install_source: 'upload',
+              install_status: 'installed',
               package_assets: [],
               data_utf8: `
             name: elasticsearch
@@ -297,8 +325,87 @@ owner: elastic`,
             },
           },
         },
+        { id: 'fleet_server', name: 'fleet_server', title: 'Fleet Server', version: '1.0.0' },
         { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
       ]);
+    });
+
+    it('should filter installed package that are not in registry and not valid packages', async () => {
+      const mockContract = createAppContextStartContractMock();
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'invalidpackage',
+            attributes: {
+              name: 'invalidpackage',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+          },
+        ],
+      } as any);
+      soClient.get.mockImplementation((type) => {
+        if (type === 'epm-packages-assets') {
+          return Promise.resolve({
+            attributes: {
+              data_utf8: `
+name: invalidpackage
+version: 0.0.1
+test: invalid manifest`,
+            },
+          } as any);
+        } else {
+          return Promise.resolve({
+            id: 'invalidpackage',
+            attributes: {
+              name: 'invalidpackage',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_status: 'installed',
+              package_assets: [],
+              data_utf8: `
+            name: invalidpackage
+            version: 0.0.1
+            title: Elastic
+            test: invalid manifest`,
+            },
+          });
+        }
+      });
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            references: [],
+            type: 'epm-package-assets',
+            attributes: {
+              asset_path: 'invalidpackage-0.0.1/manifest.yml',
+              data_utf8: `
+name: invalidpackage
+version: 0.0.1
+title: Elastic
+test: invalid manifest
+`,
+            },
+          },
+        ],
+      });
+      const packages = await getPackages({
+        savedObjectsClient: soClient,
+      });
+      expect(packages).toMatchObject([
+        { id: 'fleet_server', name: 'fleet_server', title: 'Fleet Server', version: '1.0.0' },
+        { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
+      ]);
+
+      expect(jest.mocked(appContextService.getLogger().warn)).toBeCalledTimes(1);
+      expect(jest.mocked(appContextService.getLogger().warn)).toBeCalledWith(
+        'Installed package invalidpackage 0.0.1 is not a valid package anymore'
+      );
     });
 
     it('should call audit logger', async () => {
@@ -313,6 +420,7 @@ owner: elastic`,
               version: '0.0.1',
               install_source: 'upload',
               install_version: '0.0.1',
+              install_status: 'installed',
             },
             score: 0,
             type: PACKAGES_SAVED_OBJECT_TYPE,
@@ -324,11 +432,54 @@ owner: elastic`,
         page: 1,
       });
 
-      soClient.get.mockResolvedValue({
-        id: 'elasticsearch',
-        attributes: {},
-        references: [],
-        type: PACKAGES_SAVED_OBJECT_TYPE,
+      soClient.get.mockImplementation((type) => {
+        if (type === 'epm-packages-assets') {
+          return Promise.resolve({
+            attributes: {
+              data_utf8: `
+name: elasticsearch
+version: 0.0.1
+title: Elastic
+description: Elasticsearch description`,
+            },
+          } as any);
+        } else {
+          return Promise.resolve({
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_status: 'installed',
+              install_source: 'upload',
+              package_assets: [],
+              data_utf8: `
+            name: elasticsearch
+            version: 0.0.1
+            title: Elastic
+            description: Elasticsearch description`,
+            },
+          });
+        }
+      });
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            references: [],
+            type: 'epm-package-assets',
+            attributes: {
+              asset_path: 'elasticsearch-0.0.1/manifest.yml',
+              data_utf8: `
+name: elasticsearch
+version: 0.0.1
+title: Elastic
+description: Elasticsearch description
+format_version: 0.0.1
+owner: elastic`,
+            },
+          },
+        ],
       });
 
       await getPackages({ savedObjectsClient: soClient });
@@ -337,6 +488,332 @@ owner: elastic`,
         action: 'get',
         id: 'elasticsearch',
         savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+      });
+    });
+
+    it('should hide profiling symbolizer', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'profiler_symbolizer',
+            attributes: {
+              name: 'profiler_symbolizer',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+          },
+        ],
+      } as any);
+      const packages = await getPackages({
+        savedObjectsClient: soClient,
+      });
+      expect(packages.find((item) => item.id === 'profiler_symbolizer')).toBeUndefined();
+    });
+
+    it('should hide profiling collector', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'profiler_collector',
+            attributes: {
+              name: 'profiler_collector',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+          },
+        ],
+      } as any);
+      const packages = await getPackages({
+        savedObjectsClient: soClient,
+      });
+      expect(packages.find((item) => item.id === 'profiler_collector')).toBeUndefined();
+    });
+
+    it('should hide fleet_server if internal.fleetServerStandalone', async () => {
+      const mockContract = createAppContextStartContractMock({
+        internal: {
+          fleetServerStandalone: true,
+        },
+      } as any);
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'fleet_server',
+            attributes: {
+              name: 'fleet_server',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+          },
+        ],
+      } as any);
+      const packages = await getPackages({
+        savedObjectsClient: soClient,
+      });
+      expect(packages.find((item) => item.id === 'fleet_server')).toBeUndefined();
+    });
+
+    it('should filter packages configured in xpack.fleet.internal.registry.excludePackages', async () => {
+      const mockContract = createAppContextStartContractMock({
+        internal: {
+          registry: {
+            excludePackages: ['nginx'],
+          },
+        },
+      } as any);
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'nginx',
+            attributes: {
+              name: 'nginx',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+          },
+        ],
+      } as any);
+      const packages = await getPackages({
+        savedObjectsClient: soClient,
+      });
+      expect(packages.find((item) => item.id === 'nginx')).toBeUndefined();
+    });
+  });
+
+  describe('getInstalledPackages', () => {
+    it('Passes the correct parameters to the SavedObjects client', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockImplementation(async (options) => {
+        if (options.type === PACKAGES_SAVED_OBJECT_TYPE) {
+          return {
+            total: 5,
+            saved_objects: [
+              {
+                type: 'epm-packages',
+                id: 'elastic_agent',
+                attributes: {
+                  es_index_patterns: {
+                    apm_server_logs: 'logs-elastic_agent.apm_server-*',
+                    apm_server_metrics: 'metrics-elastic_agent.apm_server-*',
+                  },
+                  name: 'elastic_agent',
+                  version: '1.7.0',
+                  install_status: 'installed',
+                },
+                references: [],
+                sort: ['elastic_agent'],
+              },
+            ],
+          } as any;
+        } else if (options.type === ASSETS_SAVED_OBJECT_TYPE) {
+          return {
+            total: 5,
+            saved_objects: [
+              {
+                type: 'epm-packages-assets',
+                id: '338b6f9e-e126-5f1e-abb9-afe017d4788b',
+                attributes: {
+                  package_name: 'elastic_agent',
+                  package_version: '1.8.0',
+                  install_source: 'upload',
+                  asset_path: 'elastic_agent-1.8.0/manifest.yml',
+                  media_type: 'text/yaml; charset=utf-8',
+                  data_utf8:
+                    'name: elastic_agent\ntitle: Elastic Agent\nversion: 1.8.0\ndescription: Collect logs and metrics from Elastic Agents.\ntype: integration\nformat_version: 1.0.0\nlicense: basic\ncategories: ["elastic_stack"]\nconditions:\n  kibana.version: "^8.7.1"\nowner:\n  github: elastic/elastic-agent\nicons:\n  - src: /img/logo_elastic_agent.svg\n    title: logo Elastic Agent\n    size: 64x64\n    type: image/svg+xml\nscreenshots:\n  - src: /img/elastic_agent_overview.png\n    title: Elastic Agent Overview\n    size: 2560×1234\n    type: image/png\n  - src: /img/elastic_agent_metrics.png\n    title: Elastic Agent Metrics\n    size: 2560×1234\n    type: image/png\n  - src: /img/elastic_agent_info.png\n    title: Elastic Agent Information\n    size: 2560×1234\n    type: image/png\n  - src: /img/elastic_agent_integrations.png\n    title: Elastic Agent Integrations\n    size: 2560×1234\n    type: image/png\n',
+                  data_base64: '',
+                },
+                references: [],
+              },
+            ],
+          } as any;
+        }
+      });
+
+      await getInstalledPackages({
+        savedObjectsClient: soClient,
+        dataStreamType: 'logs',
+        nameQuery: 'nginx',
+        searchAfter: ['system'],
+        perPage: 10,
+        sortOrder: 'asc',
+      });
+      expect(soClient.find).toHaveBeenCalledWith({
+        filter: {
+          arguments: [
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'epm-packages.attributes.install_status',
+                },
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'installed',
+                },
+              ],
+              function: 'is',
+              type: 'function',
+            },
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'epm-packages.attributes.installed_es',
+                },
+                {
+                  arguments: [
+                    {
+                      isQuoted: false,
+                      type: 'literal',
+                      value: 'type',
+                    },
+                    {
+                      isQuoted: false,
+                      type: 'literal',
+                      value: 'index_template',
+                    },
+                  ],
+                  function: 'is',
+                  type: 'function',
+                },
+              ],
+              function: 'nested',
+              type: 'function',
+            },
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'epm-packages.attributes.installed_es',
+                },
+                {
+                  arguments: [
+                    {
+                      isQuoted: false,
+                      type: 'literal',
+                      value: 'id',
+                    },
+                    {
+                      type: 'wildcard',
+                      value: 'logs-@kuery-wildcard@',
+                    },
+                  ],
+                  function: 'is',
+                  type: 'function',
+                },
+              ],
+              function: 'nested',
+              type: 'function',
+            },
+          ],
+          function: 'and',
+          type: 'function',
+        },
+        perPage: 10,
+        search: 'nginx* | nginx',
+        searchAfter: ['system'],
+        searchFields: ['name'],
+        sortField: 'name',
+        sortOrder: 'asc',
+        type: 'epm-packages',
+      });
+    });
+    it('Formats items correctly', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockImplementation(async (options) => {
+        if (options.type === PACKAGES_SAVED_OBJECT_TYPE) {
+          return {
+            total: 5,
+            saved_objects: [
+              {
+                type: 'epm-packages',
+                id: 'elastic_agent',
+                attributes: {
+                  es_index_patterns: {
+                    apm_server_logs: 'logs-elastic_agent.apm_server-*',
+                    apm_server_metrics: 'metrics-elastic_agent.apm_server-*',
+                  },
+                  name: 'elastic_agent',
+                  version: '1.8.0',
+                  install_status: 'installed',
+                },
+                references: [],
+                sort: ['elastic_agent'],
+              },
+            ],
+          } as any;
+        } else if (options.type === ASSETS_SAVED_OBJECT_TYPE) {
+          return {
+            total: 5,
+            saved_objects: [
+              {
+                type: 'epm-packages-assets',
+                id: '338b6f9e-e126-5f1e-abb9-afe017d4788b',
+                attributes: {
+                  package_name: 'elastic_agent',
+                  package_version: '1.8.0',
+                  install_source: 'upload',
+                  asset_path: 'elastic_agent-1.8.0/manifest.yml',
+                  media_type: 'text/yaml; charset=utf-8',
+                  data_utf8:
+                    'name: elastic_agent\ntitle: Elastic Agent\nversion: 1.8.0\ndescription: Collect logs and metrics from Elastic Agents.\ntype: integration\nformat_version: 1.0.0\nlicense: basic\ncategories: ["elastic_stack"]\nconditions:\n  kibana.version: "^8.7.1"\nowner:\n  github: elastic/elastic-agent\nicons:\n  - src: /img/logo_elastic_agent.svg\n    title: logo Elastic Agent\n    size: 64x64\n    type: image/svg+xml\nscreenshots:\n  - src: /img/elastic_agent_overview.png\n    title: Elastic Agent Overview\n    size: 2560×1234\n    type: image/png\n  - src: /img/elastic_agent_metrics.png\n    title: Elastic Agent Metrics\n    size: 2560×1234\n    type: image/png\n  - src: /img/elastic_agent_info.png\n    title: Elastic Agent Information\n    size: 2560×1234\n    type: image/png\n  - src: /img/elastic_agent_integrations.png\n    title: Elastic Agent Integrations\n    size: 2560×1234\n    type: image/png\n',
+                  data_base64: '',
+                },
+                references: [],
+              },
+            ],
+          } as any;
+        }
+      });
+
+      const results = await getInstalledPackages({
+        savedObjectsClient: soClient,
+        dataStreamType: 'logs',
+        nameQuery: 'nginx',
+        searchAfter: ['system'],
+        perPage: 10,
+        sortOrder: 'asc',
+      });
+
+      expect(results).toEqual({
+        items: [
+          {
+            dataStreams: [{ name: 'logs-elastic_agent.apm_server-*', title: 'apm_server_logs' }],
+            name: 'elastic_agent',
+            status: 'installed',
+            version: '1.8.0',
+            title: 'Elastic Agent',
+            description: 'Collect logs and metrics from Elastic Agents.',
+            icons: [
+              {
+                size: '64x64',
+                src: '/img/logo_elastic_agent.svg',
+                title: 'logo Elastic Agent',
+                type: 'image/svg+xml',
+              },
+            ],
+          },
+        ],
+        searchAfter: ['elastic_agent'],
+        total: 5,
       });
     });
   });
@@ -356,6 +833,7 @@ owner: elastic`,
       } as RegistryPackage);
       MockRegistry.getPackage.mockResolvedValue({
         paths: [],
+        assetsMap: new Map(),
         packageInfo: {
           name: 'my-package',
           version: '1.0.0',

@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { DeleteTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/delete_transforms';
+import { DeleteTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/delete_transforms';
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
-import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
     await transform.api.createTransform(transformId, config);
   }
 
-  describe('/api/transform/delete_transforms', function () {
+  describe('/internal/transform/delete_transforms', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
@@ -55,12 +55,12 @@ export default ({ getService }: FtrProviderContext) => {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
         };
         const { body, status } = await supertest
-          .post(`/api/transform/delete_transforms`)
+          .post(`/internal/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -76,12 +76,12 @@ export default ({ getService }: FtrProviderContext) => {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
         };
         const { body, status } = await supertest
-          .post(`/api/transform/delete_transforms`)
+          .post(`/internal/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(403, status, body);
 
@@ -96,12 +96,12 @@ export default ({ getService }: FtrProviderContext) => {
           transformsInfo: [{ id: 'invalid_transform_id', state: TRANSFORM_STATE.STOPPED }],
         };
         const { body, status } = await supertest
-          .post(`/api/transform/delete_transforms`)
+          .post(`/internal/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -134,12 +134,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should delete multiple transforms by transformIds', async () => {
         const { body, status } = await supertest
-          .post(`/api/transform/delete_transforms`)
+          .post(`/internal/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -158,12 +158,12 @@ export default ({ getService }: FtrProviderContext) => {
       it('should delete multiple transforms by transformIds, even if one of the transformIds is invalid', async () => {
         const invalidTransformId = 'invalid_transform_id';
         const { body, status } = await supertest
-          .post(`/api/transform/delete_transforms`)
+          .post(`/internal/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send({
             ...reqBody,
             transformsInfo: [
@@ -208,12 +208,12 @@ export default ({ getService }: FtrProviderContext) => {
           deleteDestIndex: true,
         };
         const { body, status } = await supertest
-          .post(`/api/transform/delete_transforms`)
+          .post(`/internal/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -232,12 +232,12 @@ export default ({ getService }: FtrProviderContext) => {
       before(async () => {
         await createTransform(transformId);
         await transform.api.createIndices(destinationIndex);
-        await transform.testResources.createIndexPatternIfNeeded(destinationIndex);
+        await transform.testResources.createDataViewIfNeeded(destinationIndex);
       });
 
       after(async () => {
         await transform.api.deleteIndices(destinationIndex);
-        await transform.testResources.deleteIndexPatternByTitle(destinationIndex);
+        await transform.testResources.deleteDataViewByTitle(destinationIndex);
       });
 
       it('should delete transform and destination index pattern', async () => {
@@ -247,12 +247,12 @@ export default ({ getService }: FtrProviderContext) => {
           deleteDestDataView: true,
         };
         const { body, status } = await supertest
-          .post(`/api/transform/delete_transforms`)
+          .post(`/internal/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -261,7 +261,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body[transformId].destDataViewDeleted.success).to.eql(true);
         await transform.api.waitForTransformNotToExist(transformId);
         await transform.api.waitForIndicesToExist(destinationIndex);
-        await transform.testResources.assertIndexPatternNotExist(destinationIndex);
+        await transform.testResources.assertDataViewNotExist(destinationIndex);
       });
     });
 
@@ -272,12 +272,12 @@ export default ({ getService }: FtrProviderContext) => {
       before(async () => {
         await createTransform(transformId);
         await transform.api.createIndices(destinationIndex);
-        await transform.testResources.createIndexPatternIfNeeded(destinationIndex);
+        await transform.testResources.createDataViewIfNeeded(destinationIndex);
       });
 
       after(async () => {
         await transform.api.deleteIndices(destinationIndex);
-        await transform.testResources.deleteIndexPatternByTitle(destinationIndex);
+        await transform.testResources.deleteDataViewByTitle(destinationIndex);
       });
 
       it('should delete transform, destination index, & destination index pattern', async () => {
@@ -287,12 +287,12 @@ export default ({ getService }: FtrProviderContext) => {
           deleteDestDataView: true,
         };
         const { body, status } = await supertest
-          .post(`/api/transform/delete_transforms`)
+          .post(`/internal/transform/delete_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -301,7 +301,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body[transformId].destDataViewDeleted.success).to.eql(true);
         await transform.api.waitForTransformNotToExist(transformId);
         await transform.api.waitForIndicesNotToExist(destinationIndex);
-        await transform.testResources.assertIndexPatternNotExist(destinationIndex);
+        await transform.testResources.assertDataViewNotExist(destinationIndex);
       });
     });
   });

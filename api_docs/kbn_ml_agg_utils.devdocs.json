@@ -26,7 +26,7 @@
         "tags": [],
         "label": "buildSamplerAggregation",
         "description": [
-          "\nWraps the supplied aggregations in a sampler aggregation.\nA supplied samplerShardSize (the shard_size parameter of the sampler aggregation)\nof less than 1 indicates no sampling, and the aggs are returned as-is."
+          "\nWraps the supplied aggregations in a sampler aggregation.\nA supplied samplerShardSize (the shard_size parameter of the sampler aggregation)\nof less than 1 indicates no sampling, and the aggs are returned as-is.\n"
         ],
         "signature": [
           "(aggs: any, shardSize: number) => Record<string, ",
@@ -43,7 +43,9 @@
             "type": "Any",
             "tags": [],
             "label": "aggs",
-            "description": [],
+            "description": [
+              "- The aggregations to be wrapped in the sampler aggregation."
+            ],
             "signature": [
               "any"
             ],
@@ -58,7 +60,9 @@
             "type": "number",
             "tags": [],
             "label": "shardSize",
-            "description": [],
+            "description": [
+              "- The shard size parameter for the sampler aggregation.\n  A value less than 1 indicates no sampling."
+            ],
             "signature": [
               "number"
             ],
@@ -68,7 +72,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The wrapped aggregations."
+        ],
         "initialIsOpen": false
       },
       {
@@ -78,30 +84,18 @@
         "tags": [],
         "label": "fetchAggIntervals",
         "description": [
-          "\nReturns aggregation intervals for the supplied document fields."
+          "\nAsynchronously fetches aggregation intervals from an Elasticsearch client.\n"
         ],
         "signature": [
-          "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "common",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-common.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
-          ", indexPattern: string, query: ",
-          "QueryDslQueryContainer",
-          ", fields: ",
+          "(params: ",
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.HistogramField",
-            "text": "HistogramField"
+            "section": "def-common.FetchAggIntervalsParams",
+            "text": "FetchAggIntervalsParams"
           },
-          "[], samplerShardSize: number, runtimeMappings?: ",
-          "MappingRuntimeFields",
-          " | undefined, abortSignal?: AbortSignal | undefined, randomSamplerProbability?: number | undefined, randomSamplerSeed?: number | undefined) => Promise<",
+          ") => Promise<",
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
@@ -120,152 +114,28 @@
             "id": "def-common.fetchAggIntervals.$1",
             "type": "Object",
             "tags": [],
-            "label": "client",
-            "description": [],
+            "label": "params",
+            "description": [
+              "- The parameters for fetching aggregation intervals."
+            ],
             "signature": [
               {
-                "pluginId": "@kbn/core-elasticsearch-server",
+                "pluginId": "@kbn/ml-agg-utils",
                 "scope": "common",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.ElasticsearchClient",
-                "text": "ElasticsearchClient"
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-common.FetchAggIntervalsParams",
+                "text": "FetchAggIntervalsParams"
               }
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchAggIntervals.$2",
-            "type": "string",
-            "tags": [],
-            "label": "indexPattern",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchAggIntervals.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "QueryDslQueryContainer"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchAggIntervals.$4",
-            "type": "Array",
-            "tags": [],
-            "label": "fields",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/ml-agg-utils",
-                "scope": "common",
-                "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.HistogramField",
-                "text": "HistogramField"
-              },
-              "[]"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchAggIntervals.$5",
-            "type": "number",
-            "tags": [],
-            "label": "samplerShardSize",
-            "description": [],
-            "signature": [
-              "number"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchAggIntervals.$6",
-            "type": "Object",
-            "tags": [],
-            "label": "runtimeMappings",
-            "description": [],
-            "signature": [
-              "MappingRuntimeFields",
-              " | undefined"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchAggIntervals.$7",
-            "type": "Object",
-            "tags": [],
-            "label": "abortSignal",
-            "description": [],
-            "signature": [
-              "AbortSignal | undefined"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchAggIntervals.$8",
-            "type": "number",
-            "tags": [],
-            "label": "randomSamplerProbability",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchAggIntervals.$9",
-            "type": "number",
-            "tags": [],
-            "label": "randomSamplerSeed",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A promise that resolves to a map of numeric column statistics."
+        ],
         "initialIsOpen": false
       },
       {
@@ -275,28 +145,10 @@
         "tags": [],
         "label": "fetchHistogramsForFields",
         "description": [
-          "\nFetches data to be used in mini histogram charts. Supports auto-identifying\nthe histogram interval and min/max values.\n"
+          "\nAsynchronously fetches histograms for specified fields from an Elasticsearch client.\n"
         ],
         "signature": [
-          "(client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "common",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-common.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
-          ", indexPattern: string, query: any, fields: ",
-          {
-            "pluginId": "@kbn/ml-agg-utils",
-            "scope": "common",
-            "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.FieldsForHistograms",
-            "text": "FieldsForHistograms"
-          },
-          ", samplerShardSize: number, runtimeMappings?: ",
-          "MappingRuntimeFields",
-          " | undefined, abortSignal?: AbortSignal | undefined, randomSamplerProbability?: number | undefined, randomSamplerSeed?: number | undefined) => Promise<(",
+          "(params: FetchHistogramsForFieldsParams) => Promise<(",
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
@@ -315,168 +167,21 @@
             "id": "def-common.fetchHistogramsForFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "client",
+            "label": "params",
             "description": [
-              "Elasticsearch Client"
+              "The parameters for fetching histograms."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "FetchHistogramsForFieldsParams"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchHistogramsForFields.$2",
-            "type": "string",
-            "tags": [],
-            "label": "indexPattern",
-            "description": [
-              "index pattern to be queried"
-            ],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchHistogramsForFields.$3",
-            "type": "Any",
-            "tags": [],
-            "label": "query",
-            "description": [
-              "Elasticsearch query"
-            ],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchHistogramsForFields.$4",
-            "type": "Array",
-            "tags": [],
-            "label": "fields",
-            "description": [
-              "the fields the histograms should be generated for"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/ml-agg-utils",
-                "scope": "common",
-                "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.FieldsForHistograms",
-                "text": "FieldsForHistograms"
-              }
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchHistogramsForFields.$5",
-            "type": "number",
-            "tags": [],
-            "label": "samplerShardSize",
-            "description": [
-              "shard_size parameter of the sampler aggregation"
-            ],
-            "signature": [
-              "number"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchHistogramsForFields.$6",
-            "type": "Object",
-            "tags": [],
-            "label": "runtimeMappings",
-            "description": [
-              "optional runtime mappings"
-            ],
-            "signature": [
-              "MappingRuntimeFields",
-              " | undefined"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchHistogramsForFields.$7",
-            "type": "Object",
-            "tags": [],
-            "label": "abortSignal",
-            "description": [],
-            "signature": [
-              "AbortSignal | undefined"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchHistogramsForFields.$8",
-            "type": "number",
-            "tags": [],
-            "label": "randomSamplerProbability",
-            "description": [
-              "optional random sampler probability"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.fetchHistogramsForFields.$9",
-            "type": "number",
-            "tags": [],
-            "label": "randomSamplerSeed",
-            "description": [
-              "optional random sampler seed"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [
-          "an array of histogram data for each supplied field"
+          "A promise that resolves with the fetched histograms."
         ],
         "initialIsOpen": false
       },
@@ -486,7 +191,9 @@
         "type": "Function",
         "tags": [],
         "label": "getSamplerAggregationsResponsePath",
-        "description": [],
+        "description": [
+          "\nReturns the path of aggregations in the Elasticsearch response as an array,\ndepending on whether sampling is being used.\n"
+        ],
         "signature": [
           "(samplerShardSize: number) => string[]"
         ],
@@ -500,7 +207,9 @@
             "type": "number",
             "tags": [],
             "label": "samplerShardSize",
-            "description": [],
+            "description": [
+              "- The shard size parameter of the sampler aggregation.\n  A value less than 1 indicates no sampling."
+            ],
             "signature": [
               "number"
             ],
@@ -510,7 +219,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "An array representing the path of aggregations in the response."
+        ],
         "initialIsOpen": false
       },
       {
@@ -623,12 +334,53 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.isSignificantTerm",
+        "id": "def-common.isMultiBucketAggregate",
+        "type": "Function",
+        "tags": [
+          "template"
+        ],
+        "label": "isMultiBucketAggregate",
+        "description": [
+          "\nType guard to validate multi bucket aggregate format.\n"
+        ],
+        "signature": [
+          "<TBucket = unknown>(arg: unknown) => arg is ",
+          "AggregationsMultiBucketAggregateBase",
+          "<TBucket>"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/is_multi_bucket_aggregate.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.isMultiBucketAggregate.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "- The item to be checked."
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/is_multi_bucket_aggregate.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.isSignificantItem",
         "type": "Function",
         "tags": [],
-        "label": "isSignificantTerm",
+        "label": "isSignificantItem",
         "description": [
-          "\nType guard for a significant term.\nNote this is used as a custom type within Explain Log Rate Spikes\nfor a p-value based variant, not a generic significant terms\naggregation type."
+          "\nType guard for a significant item.\nNote this is used as a custom type within Log Rate Analysis\nfor a p-value based variant, not a generic significant terms\naggregation type."
         ],
         "signature": [
           "(arg: unknown) => boolean"
@@ -639,7 +391,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.isSignificantTerm.$1",
+            "id": "def-common.isSignificantItem.$1",
             "type": "Unknown",
             "tags": [],
             "label": "arg",
@@ -656,7 +408,46 @@
           }
         ],
         "returnComment": [
-          "whether arg is of type SignificantTerm"
+          "Return whether arg is of type SignificantItem"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.isSignificantItemGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "isSignificantItemGroup",
+        "description": [
+          "\nType guard to check if the given argument is a SignificantItemGroup."
+        ],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/type_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.isSignificantItemGroup.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "The unknown type to be evaluated"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Return whether arg is of type SignificantItemGroup"
         ],
         "initialIsOpen": false
       },
@@ -664,13 +455,15 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.numberValidator",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "throws"
+        ],
         "label": "numberValidator",
         "description": [
-          "\nValidate if a number is greater than a specified minimum & lesser than specified maximum"
+          "\nValidate if a number is within specified minimum and maximum bounds.\n"
         ],
         "signature": [
-          "(conditions: { min?: number | undefined; max?: number | undefined; integerOnly?: boolean | undefined; } | undefined) => (value: number) => ",
+          "(conditions: NumberValidatorConditions | undefined) => ((value: number) => ",
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
@@ -678,7 +471,8 @@
             "section": "def-common.NumberValidationResult",
             "text": "NumberValidationResult"
           },
-          " | null"
+          " | null) & ",
+          "MemoizedFunction"
         ],
         "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
         "deprecated": false,
@@ -690,57 +484,21 @@
             "type": "Object",
             "tags": [],
             "label": "conditions",
-            "description": [],
+            "description": [
+              "- An optional object containing validation conditions."
+            ],
+            "signature": [
+              "NumberValidatorConditions | undefined"
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/ml-agg-utils",
-                "id": "def-common.numberValidator.$1.min",
-                "type": "number",
-                "tags": [],
-                "label": "min",
-                "description": [],
-                "signature": [
-                  "number | undefined"
-                ],
-                "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ml-agg-utils",
-                "id": "def-common.numberValidator.$1.max",
-                "type": "number",
-                "tags": [],
-                "label": "max",
-                "description": [],
-                "signature": [
-                  "number | undefined"
-                ],
-                "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ml-agg-utils",
-                "id": "def-common.numberValidator.$1.integerOnly",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "integerOnly",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "validation results."
+        ],
         "initialIsOpen": false
       }
     ],
@@ -749,7 +507,9 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.AggCardinality",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "interface"
+        ],
         "label": "AggCardinality",
         "description": [
           "\nInterface for cardinality aggregation."
@@ -764,11 +524,1343 @@
             "type": "CompoundType",
             "tags": [],
             "label": "cardinality",
-            "description": [],
+            "description": [
+              "The cardinality aggregation configuration"
+            ],
             "signature": [
               "FieldAggCardinality | ScriptAggCardinality"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.FetchAggIntervalsParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "FetchAggIntervalsParams",
+        "description": [
+          "\nInterface for the parameters required to fetch aggregation intervals."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.FetchAggIntervalsParams.esClient",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [
+              "The Elasticsearch client to use for the query."
+            ],
+            "signature": [
+              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "CreateRequest",
+              "<TDocument> | ",
+              "CreateRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; <TDocument = unknown>(this: That, params: ",
+              "CreateRequest",
+              "<TDocument> | ",
+              "CreateRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "WriteResponseBase",
+              ", unknown>>; <TDocument = unknown>(this: That, params: ",
+              "CreateRequest",
+              "<TDocument> | ",
+              "CreateRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument> | ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "UpdateResponse",
+              "<TDocumentR>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument> | ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "UpdateResponse",
+              "<TDocumentR>, unknown>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument> | ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "UpdateResponse",
+              "<TDocumentR>>; }; get: { <TDocument = unknown>(this: That, params: ",
+              "GetRequest",
+              " | ",
+              "GetRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "GetResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "GetRequest",
+              " | ",
+              "GetRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "GetResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "GetRequest",
+              " | ",
+              "GetRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "GetResponse",
+              "<TDocument>>; }; delete: { (this: That, params: ",
+              "DeleteRequest",
+              " | ",
+              "DeleteRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; (this: That, params: ",
+              "DeleteRequest",
+              " | ",
+              "DeleteRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "WriteResponseBase",
+              ", unknown>>; (this: That, params: ",
+              "DeleteRequest",
+              " | ",
+              "DeleteRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; }; helpers: ",
+              "default",
+              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "default",
+              "; child: (opts: ",
+              "ClientOptions",
+              ") => ",
+              "default",
+              "; asyncSearch: ",
+              "default",
+              "; autoscaling: ",
+              "default",
+              "; bulk: { <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
+              "BulkRequest",
+              "<TDocument, TPartialDocument> | ",
+              "BulkRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "BulkResponse",
+              ">; <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
+              "BulkRequest",
+              "<TDocument, TPartialDocument> | ",
+              "BulkRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "BulkResponse",
+              ", unknown>>; <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
+              "BulkRequest",
+              "<TDocument, TPartialDocument> | ",
+              "BulkRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "BulkResponse",
+              ">; }; capabilities: { (this: That, params?: ",
+              "TODO",
+              " | ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "TODO",
+              ">; (this: That, params?: ",
+              "TODO",
+              " | ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "TODO",
+              ", unknown>>; (this: That, params?: ",
+              "TODO",
+              " | ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "TODO",
+              ">; }; cat: ",
+              "default",
+              "; ccr: ",
+              "default",
+              "; clearScroll: { (this: That, params?: ",
+              "ClearScrollRequest",
+              " | ",
+              "ClearScrollRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "ClearScrollResponse",
+              ">; (this: That, params?: ",
+              "ClearScrollRequest",
+              " | ",
+              "ClearScrollRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "ClearScrollResponse",
+              ", unknown>>; (this: That, params?: ",
+              "ClearScrollRequest",
+              " | ",
+              "ClearScrollRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "ClearScrollResponse",
+              ">; }; closePointInTime: { (this: That, params: ",
+              "ClosePointInTimeRequest",
+              " | ",
+              "ClosePointInTimeRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "ClosePointInTimeResponse",
+              ">; (this: That, params: ",
+              "ClosePointInTimeRequest",
+              " | ",
+              "ClosePointInTimeRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "ClosePointInTimeResponse",
+              ", unknown>>; (this: That, params: ",
+              "ClosePointInTimeRequest",
+              " | ",
+              "ClosePointInTimeRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "ClosePointInTimeResponse",
+              ">; }; cluster: ",
+              "default",
+              "; connector: ",
+              "default",
+              "; count: { (this: That, params?: ",
+              "CountRequest",
+              " | ",
+              "CountRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "CountResponse",
+              ">; (this: That, params?: ",
+              "CountRequest",
+              " | ",
+              "CountRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "CountResponse",
+              ", unknown>>; (this: That, params?: ",
+              "CountRequest",
+              " | ",
+              "CountRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "CountResponse",
+              ">; }; danglingIndices: ",
+              "default",
+              "; deleteByQuery: { (this: That, params: ",
+              "DeleteByQueryRequest",
+              " | ",
+              "DeleteByQueryRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "DeleteByQueryResponse",
+              ">; (this: That, params: ",
+              "DeleteByQueryRequest",
+              " | ",
+              "DeleteByQueryRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "DeleteByQueryResponse",
+              ", unknown>>; (this: That, params: ",
+              "DeleteByQueryRequest",
+              " | ",
+              "DeleteByQueryRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "DeleteByQueryResponse",
+              ">; }; deleteByQueryRethrottle: { (this: That, params: ",
+              "DeleteByQueryRethrottleRequest",
+              " | ",
+              "DeleteByQueryRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "TasksTaskListResponseBase",
+              ">; (this: That, params: ",
+              "DeleteByQueryRethrottleRequest",
+              " | ",
+              "DeleteByQueryRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "TasksTaskListResponseBase",
+              ", unknown>>; (this: That, params: ",
+              "DeleteByQueryRethrottleRequest",
+              " | ",
+              "DeleteByQueryRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "TasksTaskListResponseBase",
+              ">; }; deleteScript: { (this: That, params: ",
+              "DeleteScriptRequest",
+              " | ",
+              "DeleteScriptRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "AcknowledgedResponseBase",
+              ">; (this: That, params: ",
+              "DeleteScriptRequest",
+              " | ",
+              "DeleteScriptRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "AcknowledgedResponseBase",
+              ", unknown>>; (this: That, params: ",
+              "DeleteScriptRequest",
+              " | ",
+              "DeleteScriptRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "AcknowledgedResponseBase",
+              ">; }; enrich: ",
+              "default",
+              "; eql: ",
+              "default",
+              "; esql: ",
+              "default",
+              "; exists: { (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<boolean>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<boolean, unknown>>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
+              "ExistsSourceRequest",
+              " | ",
+              "ExistsSourceRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<boolean>; (this: That, params: ",
+              "ExistsSourceRequest",
+              " | ",
+              "ExistsSourceRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<boolean, unknown>>; (this: That, params: ",
+              "ExistsSourceRequest",
+              " | ",
+              "ExistsSourceRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<boolean>; }; explain: { <TDocument = unknown>(this: That, params: ",
+              "ExplainRequest",
+              " | ",
+              "ExplainRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "ExplainResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "ExplainRequest",
+              " | ",
+              "ExplainRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "ExplainResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "ExplainRequest",
+              " | ",
+              "ExplainRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "ExplainResponse",
+              "<TDocument>>; }; features: ",
+              "default",
+              "; fieldCaps: { (this: That, params?: ",
+              "FieldCapsRequest",
+              " | ",
+              "FieldCapsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "FieldCapsResponse",
+              ">; (this: That, params?: ",
+              "FieldCapsRequest",
+              " | ",
+              "FieldCapsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "FieldCapsResponse",
+              ", unknown>>; (this: That, params?: ",
+              "FieldCapsRequest",
+              " | ",
+              "FieldCapsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "FieldCapsResponse",
+              ">; }; fleet: ",
+              "default",
+              "; getScript: { (this: That, params: ",
+              "GetScriptRequest",
+              " | ",
+              "GetScriptRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "GetScriptResponse",
+              ">; (this: That, params: ",
+              "GetScriptRequest",
+              " | ",
+              "GetScriptRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "GetScriptResponse",
+              ", unknown>>; (this: That, params: ",
+              "GetScriptRequest",
+              " | ",
+              "GetScriptRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "GetScriptResponse",
+              ">; }; getScriptContext: { (this: That, params?: ",
+              "GetScriptContextRequest",
+              " | ",
+              "GetScriptContextRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "GetScriptContextResponse",
+              ">; (this: That, params?: ",
+              "GetScriptContextRequest",
+              " | ",
+              "GetScriptContextRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "GetScriptContextResponse",
+              ", unknown>>; (this: That, params?: ",
+              "GetScriptContextRequest",
+              " | ",
+              "GetScriptContextRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "GetScriptContextResponse",
+              ">; }; getScriptLanguages: { (this: That, params?: ",
+              "GetScriptLanguagesRequest",
+              " | ",
+              "GetScriptLanguagesRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "GetScriptLanguagesResponse",
+              ">; (this: That, params?: ",
+              "GetScriptLanguagesRequest",
+              " | ",
+              "GetScriptLanguagesRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "GetScriptLanguagesResponse",
+              ", unknown>>; (this: That, params?: ",
+              "GetScriptLanguagesRequest",
+              " | ",
+              "GetScriptLanguagesRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "GetScriptLanguagesResponse",
+              ">; }; getSource: { <TDocument = unknown>(this: That, params: ",
+              "GetSourceRequest",
+              " | ",
+              "GetSourceRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<TDocument>; <TDocument = unknown>(this: That, params: ",
+              "GetSourceRequest",
+              " | ",
+              "GetSourceRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<TDocument, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "GetSourceRequest",
+              " | ",
+              "GetSourceRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<TDocument>; }; graph: ",
+              "default",
+              "; healthReport: { (this: That, params?: ",
+              "HealthReportRequest",
+              " | ",
+              "HealthReportRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "HealthReportResponse",
+              ">; (this: That, params?: ",
+              "HealthReportRequest",
+              " | ",
+              "HealthReportRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "HealthReportResponse",
+              ", unknown>>; (this: That, params?: ",
+              "HealthReportRequest",
+              " | ",
+              "HealthReportRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "HealthReportResponse",
+              ">; }; ilm: ",
+              "default",
+              "; index: { <TDocument = unknown>(this: That, params: ",
+              "IndexRequest",
+              "<TDocument> | ",
+              "IndexRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; <TDocument = unknown>(this: That, params: ",
+              "IndexRequest",
+              "<TDocument> | ",
+              "IndexRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "WriteResponseBase",
+              ", unknown>>; <TDocument = unknown>(this: That, params: ",
+              "IndexRequest",
+              "<TDocument> | ",
+              "IndexRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; }; indices: ",
+              "default",
+              "; inference: ",
+              "default",
+              "; info: { (this: That, params?: ",
+              "InfoRequest",
+              " | ",
+              "InfoRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "InfoResponse",
+              ">; (this: That, params?: ",
+              "InfoRequest",
+              " | ",
+              "InfoRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "InfoResponse",
+              ", unknown>>; (this: That, params?: ",
+              "InfoRequest",
+              " | ",
+              "InfoRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "InfoResponse",
+              ">; }; ingest: ",
+              "default",
+              "; knnSearch: { <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              " | ",
+              "KnnSearchRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "KnnSearchResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              " | ",
+              "KnnSearchRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "KnnSearchResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              " | ",
+              "KnnSearchRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "KnnSearchResponse",
+              "<TDocument>>; }; license: ",
+              "default",
+              "; logstash: ",
+              "default",
+              "; mget: { <TDocument = unknown>(this: That, params?: ",
+              "MgetRequest",
+              " | ",
+              "MgetRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "MgetResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params?: ",
+              "MgetRequest",
+              " | ",
+              "MgetRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "MgetResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params?: ",
+              "MgetRequest",
+              " | ",
+              "MgetRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "MgetResponse",
+              "<TDocument>>; }; migration: ",
+              "default",
+              "; ml: ",
+              "default",
+              "; monitoring: ",
+              "default",
+              "; msearch: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "MsearchRequest",
+              " | ",
+              "MsearchRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "MsearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "MsearchRequest",
+              " | ",
+              "MsearchRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "MsearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "MsearchRequest",
+              " | ",
+              "MsearchRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "MsearchResponse",
+              "<TDocument, TAggregations>>; }; msearchTemplate: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "MsearchTemplateRequest",
+              " | ",
+              "MsearchTemplateRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "MsearchTemplateResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "MsearchTemplateRequest",
+              " | ",
+              "MsearchTemplateRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "MsearchTemplateResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "MsearchTemplateRequest",
+              " | ",
+              "MsearchTemplateRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "MsearchTemplateResponse",
+              "<TDocument, TAggregations>>; }; mtermvectors: { (this: That, params?: ",
+              "MtermvectorsRequest",
+              " | ",
+              "MtermvectorsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "MtermvectorsResponse",
+              ">; (this: That, params?: ",
+              "MtermvectorsRequest",
+              " | ",
+              "MtermvectorsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "MtermvectorsResponse",
+              ", unknown>>; (this: That, params?: ",
+              "MtermvectorsRequest",
+              " | ",
+              "MtermvectorsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "MtermvectorsResponse",
+              ">; }; nodes: ",
+              "default",
+              "; openPointInTime: { (this: That, params: ",
+              "OpenPointInTimeRequest",
+              " | ",
+              "OpenPointInTimeRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "OpenPointInTimeResponse",
+              ">; (this: That, params: ",
+              "OpenPointInTimeRequest",
+              " | ",
+              "OpenPointInTimeRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "OpenPointInTimeResponse",
+              ", unknown>>; (this: That, params: ",
+              "OpenPointInTimeRequest",
+              " | ",
+              "OpenPointInTimeRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "OpenPointInTimeResponse",
+              ">; }; ping: { (this: That, params?: ",
+              "PingRequest",
+              " | ",
+              "PingRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<boolean>; (this: That, params?: ",
+              "PingRequest",
+              " | ",
+              "PingRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<boolean, unknown>>; (this: That, params?: ",
+              "PingRequest",
+              " | ",
+              "PingRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; putScript: { (this: That, params: ",
+              "PutScriptRequest",
+              " | ",
+              "PutScriptRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "AcknowledgedResponseBase",
+              ">; (this: That, params: ",
+              "PutScriptRequest",
+              " | ",
+              "PutScriptRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "AcknowledgedResponseBase",
+              ", unknown>>; (this: That, params: ",
+              "PutScriptRequest",
+              " | ",
+              "PutScriptRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "AcknowledgedResponseBase",
+              ">; }; queryRules: ",
+              "default",
+              "; rankEval: { (this: That, params: ",
+              "RankEvalRequest",
+              " | ",
+              "RankEvalRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "RankEvalResponse",
+              ">; (this: That, params: ",
+              "RankEvalRequest",
+              " | ",
+              "RankEvalRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "RankEvalResponse",
+              ", unknown>>; (this: That, params: ",
+              "RankEvalRequest",
+              " | ",
+              "RankEvalRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "RankEvalResponse",
+              ">; }; reindex: { (this: That, params: ",
+              "ReindexRequest",
+              " | ",
+              "ReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "ReindexResponse",
+              ">; (this: That, params: ",
+              "ReindexRequest",
+              " | ",
+              "ReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "ReindexResponse",
+              ", unknown>>; (this: That, params: ",
+              "ReindexRequest",
+              " | ",
+              "ReindexRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "ReindexResponse",
+              ">; }; reindexRethrottle: { (this: That, params: ",
+              "ReindexRethrottleRequest",
+              " | ",
+              "ReindexRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "ReindexRethrottleResponse",
+              ">; (this: That, params: ",
+              "ReindexRethrottleRequest",
+              " | ",
+              "ReindexRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "ReindexRethrottleResponse",
+              ", unknown>>; (this: That, params: ",
+              "ReindexRethrottleRequest",
+              " | ",
+              "ReindexRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "ReindexRethrottleResponse",
+              ">; }; renderSearchTemplate: { (this: That, params?: ",
+              "RenderSearchTemplateRequest",
+              " | ",
+              "RenderSearchTemplateRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "RenderSearchTemplateResponse",
+              ">; (this: That, params?: ",
+              "RenderSearchTemplateRequest",
+              " | ",
+              "RenderSearchTemplateRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "RenderSearchTemplateResponse",
+              ", unknown>>; (this: That, params?: ",
+              "RenderSearchTemplateRequest",
+              " | ",
+              "RenderSearchTemplateRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "RenderSearchTemplateResponse",
+              ">; }; rollup: ",
+              "default",
+              "; scriptsPainlessExecute: { <TResult = unknown>(this: That, params?: ",
+              "ScriptsPainlessExecuteRequest",
+              " | ",
+              "ScriptsPainlessExecuteRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "ScriptsPainlessExecuteResponse",
+              "<TResult>>; <TResult = unknown>(this: That, params?: ",
+              "ScriptsPainlessExecuteRequest",
+              " | ",
+              "ScriptsPainlessExecuteRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "ScriptsPainlessExecuteResponse",
+              "<TResult>, unknown>>; <TResult = unknown>(this: That, params?: ",
+              "ScriptsPainlessExecuteRequest",
+              " | ",
+              "ScriptsPainlessExecuteRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "ScriptsPainlessExecuteResponse",
+              "<TResult>>; }; scroll: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "ScrollRequest",
+              " | ",
+              "ScrollRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "ScrollResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "ScrollRequest",
+              " | ",
+              "ScrollRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "ScrollResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "ScrollRequest",
+              " | ",
+              "ScrollRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "ScrollResponse",
+              "<TDocument, TAggregations>>; }; searchApplication: ",
+              "default",
+              "; searchMvt: { (this: That, params: ",
+              "SearchMvtRequest",
+              " | ",
+              "SearchMvtRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<ArrayBuffer>; (this: That, params: ",
+              "SearchMvtRequest",
+              " | ",
+              "SearchMvtRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<ArrayBuffer, unknown>>; (this: That, params: ",
+              "SearchMvtRequest",
+              " | ",
+              "SearchMvtRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<ArrayBuffer>; }; searchShards: { (this: That, params?: ",
+              "SearchShardsRequest",
+              " | ",
+              "SearchShardsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchShardsResponse",
+              ">; (this: That, params?: ",
+              "SearchShardsRequest",
+              " | ",
+              "SearchShardsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchShardsResponse",
+              ", unknown>>; (this: That, params?: ",
+              "SearchShardsRequest",
+              " | ",
+              "SearchShardsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchShardsResponse",
+              ">; }; searchTemplate: { <TDocument = unknown>(this: That, params?: ",
+              "SearchTemplateRequest",
+              " | ",
+              "SearchTemplateRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchTemplateResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params?: ",
+              "SearchTemplateRequest",
+              " | ",
+              "SearchTemplateRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchTemplateResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params?: ",
+              "SearchTemplateRequest",
+              " | ",
+              "SearchTemplateRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchTemplateResponse",
+              "<TDocument>>; }; searchableSnapshots: ",
+              "default",
+              "; security: ",
+              "default",
+              "; shutdown: ",
+              "default",
+              "; simulate: ",
+              "default",
+              "; slm: ",
+              "default",
+              "; snapshot: ",
+              "default",
+              "; sql: ",
+              "default",
+              "; ssl: ",
+              "default",
+              "; synonyms: ",
+              "default",
+              "; tasks: ",
+              "default",
+              "; termsEnum: { (this: That, params: ",
+              "TermsEnumRequest",
+              " | ",
+              "TermsEnumRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "TermsEnumResponse",
+              ">; (this: That, params: ",
+              "TermsEnumRequest",
+              " | ",
+              "TermsEnumRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "TermsEnumResponse",
+              ", unknown>>; (this: That, params: ",
+              "TermsEnumRequest",
+              " | ",
+              "TermsEnumRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "TermsEnumResponse",
+              ">; }; termvectors: { <TDocument = unknown>(this: That, params: ",
+              "TermvectorsRequest",
+              "<TDocument> | ",
+              "TermvectorsRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "TermvectorsResponse",
+              ">; <TDocument = unknown>(this: That, params: ",
+              "TermvectorsRequest",
+              "<TDocument> | ",
+              "TermvectorsRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "TermvectorsResponse",
+              ", unknown>>; <TDocument = unknown>(this: That, params: ",
+              "TermvectorsRequest",
+              "<TDocument> | ",
+              "TermvectorsRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "TermvectorsResponse",
+              ">; }; textStructure: ",
+              "default",
+              "; transform: ",
+              "default",
+              "; updateByQuery: { (this: That, params: ",
+              "UpdateByQueryRequest",
+              " | ",
+              "UpdateByQueryRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "UpdateByQueryResponse",
+              ">; (this: That, params: ",
+              "UpdateByQueryRequest",
+              " | ",
+              "UpdateByQueryRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "UpdateByQueryResponse",
+              ", unknown>>; (this: That, params: ",
+              "UpdateByQueryRequest",
+              " | ",
+              "UpdateByQueryRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "UpdateByQueryResponse",
+              ">; }; updateByQueryRethrottle: { (this: That, params: ",
+              "UpdateByQueryRethrottleRequest",
+              " | ",
+              "UpdateByQueryRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "UpdateByQueryRethrottleResponse",
+              ">; (this: That, params: ",
+              "UpdateByQueryRethrottleRequest",
+              " | ",
+              "UpdateByQueryRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "UpdateByQueryRethrottleResponse",
+              ", unknown>>; (this: That, params: ",
+              "UpdateByQueryRethrottleRequest",
+              " | ",
+              "UpdateByQueryRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "UpdateByQueryRethrottleResponse",
+              ">; }; watcher: ",
+              "default",
+              "; xpack: ",
+              "default",
+              "; }"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.FetchAggIntervalsParams.abortSignal",
+            "type": "Object",
+            "tags": [],
+            "label": "abortSignal",
+            "description": [
+              "An optional abort signal to cancel the request."
+            ],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.FetchAggIntervalsParams.arguments",
+            "type": "Object",
+            "tags": [],
+            "label": "arguments",
+            "description": [
+              "The arguments for the aggregation query."
+            ],
+            "signature": [
+              "{ indexPattern: string; query: ",
+              "QueryDslQueryContainer",
+              "; fields: ",
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-common.HistogramField",
+                "text": "HistogramField"
+              },
+              "[]; samplerShardSize: number; runtimeMappings?: ",
+              "MappingRuntimeFields",
+              " | undefined; randomSamplerProbability?: number | undefined; randomSamplerSeed?: number | undefined; }"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -794,7 +1886,9 @@
             "type": "string",
             "tags": [],
             "label": "fieldName",
-            "description": [],
+            "description": [
+              "The field name."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -805,7 +1899,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fieldValue",
-            "description": [],
+            "description": [
+              "\nFor dynamic fieldValues we only identify fields as `string`,\nbut for example `http.response.status_code` which is part of\nof the list of predefined field candidates is of type long/number"
+            ],
             "signature": [
               "string | number"
             ],
@@ -820,10 +1916,12 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.HistogramField",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "interface"
+        ],
         "label": "HistogramField",
         "description": [
-          "\nParameters to identify which histogram data needs to be generated for a field."
+          "\nRepresents parameters used to identify which histogram data needs to be generated for a field."
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
@@ -835,7 +1933,9 @@
             "type": "string",
             "tags": [],
             "label": "fieldName",
-            "description": [],
+            "description": [
+              "\nThe name of the field for which histogram data is generated."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -846,7 +1946,9 @@
             "type": "Enum",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nThe type of the field, using Kibana field types."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/field-types",
@@ -865,11 +1967,119 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.NumberValidationResult",
+        "id": "def-common.ItemSet",
         "type": "Interface",
         "tags": [],
+        "label": "ItemSet",
+        "description": [
+          "\nRepresents an item set returned from `frequent_item_sets` augmented\nwith some metadata related to log rate analysis."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.ItemSet.set",
+            "type": "Array",
+            "tags": [],
+            "label": "set",
+            "description": [
+              "An array of field-value pairs representing the items in the set."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-common.FieldValuePair",
+                "text": "FieldValuePair"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.ItemSet.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [
+              "The size of the item set."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.ItemSet.maxPValue",
+            "type": "number",
+            "tags": [],
+            "label": "maxPValue",
+            "description": [
+              "The maximum p-value associated with the item set."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.ItemSet.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [
+              "The document count of the item set."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.ItemSet.support",
+            "type": "number",
+            "tags": [],
+            "label": "support",
+            "description": [
+              "The support value of the item set."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.ItemSet.total_doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "total_doc_count",
+            "description": [
+              "The total document count."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.NumberValidationResult",
+        "type": "Interface",
+        "tags": [
+          "interface"
+        ],
         "label": "NumberValidationResult",
-        "description": [],
+        "description": [
+          "\nRepresents the result of number validation."
+        ],
         "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -880,7 +2090,9 @@
             "type": "boolean",
             "tags": [],
             "label": "min",
-            "description": [],
+            "description": [
+              "The minimum allowed value."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -891,7 +2103,9 @@
             "type": "boolean",
             "tags": [],
             "label": "max",
-            "description": [],
+            "description": [
+              "The maximum allowed value."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -902,7 +2116,9 @@
             "type": "boolean",
             "tags": [],
             "label": "integerOnly",
-            "description": [],
+            "description": [
+              "Boolean flag to allow integer values only."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -914,10 +2130,12 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.NumericChartData",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "interface"
+        ],
         "label": "NumericChartData",
         "description": [
-          "\nInterface to describe the data structure returned for numeric based charts."
+          "\nInterface describing the data structure returned for numeric-based charts."
         ],
         "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
         "deprecated": false,
@@ -929,9 +2147,18 @@
             "type": "Array",
             "tags": [],
             "label": "data",
-            "description": [],
+            "description": [
+              "\nAn array of data points, each represented by a NumericDataItem."
+            ],
             "signature": [
-              "NumericDataItem[]"
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-common.NumericDataItem",
+                "text": "NumericDataItem"
+              },
+              "[]"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
@@ -943,7 +2170,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "\nThe identifier for the data set."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -954,7 +2183,9 @@
             "type": "number",
             "tags": [],
             "label": "interval",
-            "description": [],
+            "description": [
+              "\nThe interval value for the data."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -965,7 +2196,9 @@
             "type": "Object",
             "tags": [],
             "label": "stats",
-            "description": [],
+            "description": [
+              "\nAn array of statistics values, typically [min, max]."
+            ],
             "signature": [
               "[number, number]"
             ],
@@ -979,7 +2212,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nThe type of chart, which is 'numeric'."
+            ],
             "signature": [
               "\"numeric\""
             ],
@@ -994,10 +2229,12 @@
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.NumericColumnStats",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "interface"
+        ],
         "label": "NumericColumnStats",
         "description": [
-          "\nInterface to describe attributes used for histograms."
+          "\nInterface describing attributes used for numeric histograms."
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
@@ -1009,7 +2246,9 @@
             "type": "number",
             "tags": [],
             "label": "interval",
-            "description": [],
+            "description": [
+              "The interval value for the histogram."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1020,7 +2259,9 @@
             "type": "number",
             "tags": [],
             "label": "min",
-            "description": [],
+            "description": [
+              "The minimum value in the histogram."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1031,8 +2272,70 @@
             "type": "number",
             "tags": [],
             "label": "max",
-            "description": [],
+            "description": [
+              "The maximum value in the histogram."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.NumericDataItem",
+        "type": "Interface",
+        "tags": [
+          "interface"
+        ],
+        "label": "NumericDataItem",
+        "description": [
+          "\nRepresents an item in numeric data."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.NumericDataItem.key",
+            "type": "number",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "\nThe numeric key."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.NumericDataItem.key_as_string",
+            "type": "string",
+            "tags": [],
+            "label": "key_as_string",
+            "description": [
+              "\nAn optional string representation of the key."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.NumericDataItem.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [
+              "\nThe document count associated with the key."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1075,7 +2378,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nThe type of the numeric histogram field."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/field-types",
@@ -1103,20 +2408,23 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SignificantTerm",
+        "id": "def-common.SignificantItem",
         "type": "Interface",
-        "tags": [],
-        "label": "SignificantTerm",
+        "tags": [
+          "interface",
+          "extends"
+        ],
+        "label": "SignificantItem",
         "description": [
-          "\nSignificant term meta data for a field/value pair.\nNote this is used as a custom type within Explain Log Rate Spikes\nfor a p-value based variant, not a generic significant terms\naggregation type."
+          "\nRepresents significant item metadata for a field/value pair.\nThis interface is used as a custom type within Log Rate Analysis\nfor a p-value based variant, not related to the generic\nsignificant terms aggregation type.\n"
         ],
         "signature": [
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.SignificantTerm",
-            "text": "SignificantTerm"
+            "section": "def-common.SignificantItem",
+            "text": "SignificantItem"
           },
           " extends ",
           {
@@ -1133,66 +2441,107 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.doc_count",
+            "id": "def-common.SignificantItem.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "The key associated with the significant item."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantItem.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The type of the significant item."
+            ],
+            "signature": [
+              "\"keyword\" | \"log_pattern\""
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantItem.doc_count",
             "type": "number",
             "tags": [],
             "label": "doc_count",
-            "description": [],
+            "description": [
+              "The document count for the significant item."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.bg_count",
+            "id": "def-common.SignificantItem.bg_count",
             "type": "number",
             "tags": [],
             "label": "bg_count",
-            "description": [],
+            "description": [
+              "The background count for the significant item."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.total_doc_count",
+            "id": "def-common.SignificantItem.total_doc_count",
             "type": "number",
             "tags": [],
             "label": "total_doc_count",
-            "description": [],
+            "description": [
+              "The total document count for all items."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.total_bg_count",
+            "id": "def-common.SignificantItem.total_bg_count",
             "type": "number",
             "tags": [],
             "label": "total_bg_count",
-            "description": [],
+            "description": [
+              "The total background count for all items."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.score",
+            "id": "def-common.SignificantItem.score",
             "type": "number",
             "tags": [],
             "label": "score",
-            "description": [],
+            "description": [
+              "The score associated with the significant item."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.pValue",
+            "id": "def-common.SignificantItem.pValue",
             "type": "CompoundType",
             "tags": [],
             "label": "pValue",
-            "description": [],
+            "description": [
+              "The p-value for the significant item, or null if not available."
+            ],
             "signature": [
               "number | null"
             ],
@@ -1202,29 +2551,33 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.normalizedScore",
+            "id": "def-common.SignificantItem.normalizedScore",
             "type": "number",
             "tags": [],
             "label": "normalizedScore",
-            "description": [],
+            "description": [
+              "The normalized score for the significant item."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.histogram",
+            "id": "def-common.SignificantItem.histogram",
             "type": "Array",
             "tags": [],
             "label": "histogram",
-            "description": [],
+            "description": [
+              "An optional histogram for the significant item."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
                 "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.SignificantTermHistogramItem",
-                "text": "SignificantTermHistogramItem"
+                "section": "def-common.SignificantItemHistogramItem",
+                "text": "SignificantItemHistogramItem"
               },
               "[] | undefined"
             ],
@@ -1234,11 +2587,13 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.unique",
+            "id": "def-common.SignificantItem.unique",
             "type": "CompoundType",
             "tags": [],
             "label": "unique",
-            "description": [],
+            "description": [
+              "Indicates if the significant item is unique within a group."
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -1251,12 +2606,14 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SignificantTermGroup",
+        "id": "def-common.SignificantItemGroup",
         "type": "Interface",
-        "tags": [],
-        "label": "SignificantTermGroup",
+        "tags": [
+          "interface"
+        ],
+        "label": "SignificantItemGroup",
         "description": [
-          "\nTree leaves"
+          "\nRepresents a significant item group."
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
@@ -1264,29 +2621,33 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroup.id",
+            "id": "def-common.SignificantItemGroup.id",
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "The identifier for the item."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroup.group",
+            "id": "def-common.SignificantItemGroup.group",
             "type": "Array",
             "tags": [],
             "label": "group",
-            "description": [],
+            "description": [
+              "An array of significant item group items."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
                 "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.SignificantTermGroupItem",
-                "text": "SignificantTermGroupItem"
+                "section": "def-common.SignificantItemGroupItem",
+                "text": "SignificantItemGroupItem"
               },
               "[]"
             ],
@@ -1296,22 +2657,26 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroup.docCount",
+            "id": "def-common.SignificantItemGroup.docCount",
             "type": "number",
             "tags": [],
             "label": "docCount",
-            "description": [],
+            "description": [
+              "The document count associated with this item."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroup.pValue",
+            "id": "def-common.SignificantItemGroup.pValue",
             "type": "CompoundType",
             "tags": [],
             "label": "pValue",
-            "description": [],
+            "description": [
+              "The p-value for this item, or null if not available."
+            ],
             "signature": [
               "number | null"
             ],
@@ -1321,18 +2686,20 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroup.histogram",
+            "id": "def-common.SignificantItemGroup.histogram",
             "type": "Array",
             "tags": [],
             "label": "histogram",
-            "description": [],
+            "description": [
+              "An optional array of significant item histogram items."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
                 "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.SignificantTermHistogramItem",
-                "text": "SignificantTermHistogramItem"
+                "section": "def-common.SignificantItemHistogramItem",
+                "text": "SignificantItemHistogramItem"
               },
               "[] | undefined"
             ],
@@ -1345,12 +2712,14 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SignificantTermGroupHistogram",
+        "id": "def-common.SignificantItemGroupHistogram",
         "type": "Interface",
-        "tags": [],
-        "label": "SignificantTermGroupHistogram",
+        "tags": [
+          "interface"
+        ],
+        "label": "SignificantItemGroupHistogram",
         "description": [
-          "\nHistogram data for a group of field/value pairs."
+          "\nRepresents histogram data for a group of field/value pairs."
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
@@ -1358,29 +2727,33 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroupHistogram.id",
+            "id": "def-common.SignificantItemGroupHistogram.id",
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "The identifier for the group."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroupHistogram.histogram",
+            "id": "def-common.SignificantItemGroupHistogram.histogram",
             "type": "Array",
             "tags": [],
             "label": "histogram",
-            "description": [],
+            "description": [
+              "An array of significant item histogram items."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
                 "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.SignificantTermHistogramItem",
-                "text": "SignificantTermHistogramItem"
+                "section": "def-common.SignificantItemHistogramItem",
+                "text": "SignificantItemHistogramItem"
               },
               "[]"
             ],
@@ -1393,18 +2766,22 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SignificantTermGroupItem",
+        "id": "def-common.SignificantItemGroupItem",
         "type": "Interface",
-        "tags": [],
-        "label": "SignificantTermGroupItem",
-        "description": [],
+        "tags": [
+          "interface"
+        ],
+        "label": "SignificantItemGroupItem",
+        "description": [
+          "\nRepresents an item in a significant item group."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.SignificantTermGroupItem",
-            "text": "SignificantTermGroupItem"
+            "section": "def-common.SignificantItemGroupItem",
+            "text": "SignificantItemGroupItem"
           },
           " extends ",
           {
@@ -1421,22 +2798,55 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroupItem.docCount",
-            "type": "number",
+            "id": "def-common.SignificantItemGroupItem.key",
+            "type": "string",
             "tags": [],
-            "label": "docCount",
-            "description": [],
+            "label": "key",
+            "description": [
+              "The key associated with the significant item."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroupItem.pValue",
+            "id": "def-common.SignificantItemGroupItem.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The type of the significant item."
+            ],
+            "signature": [
+              "\"keyword\" | \"log_pattern\""
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantItemGroupItem.docCount",
+            "type": "number",
+            "tags": [],
+            "label": "docCount",
+            "description": [
+              "The document count associated with this item."
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantItemGroupItem.pValue",
             "type": "CompoundType",
             "tags": [],
             "label": "pValue",
-            "description": [],
+            "description": [
+              "The p-value for this item, or null if not available."
+            ],
             "signature": [
               "number | null"
             ],
@@ -1446,11 +2856,13 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroupItem.duplicate",
+            "id": "def-common.SignificantItemGroupItem.duplicate",
             "type": "number",
             "tags": [],
             "label": "duplicate",
-            "description": [],
+            "description": [
+              "An optional number of duplicates."
+            ],
             "signature": [
               "number | undefined"
             ],
@@ -1463,20 +2875,22 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SignificantTermHistogram",
+        "id": "def-common.SignificantItemHistogram",
         "type": "Interface",
-        "tags": [],
-        "label": "SignificantTermHistogram",
+        "tags": [
+          "interface"
+        ],
+        "label": "SignificantItemHistogram",
         "description": [
-          "\nHistogram data for a field/value pair."
+          "\nRepresents histogram data for a field/value pair."
         ],
         "signature": [
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.SignificantTermHistogram",
-            "text": "SignificantTermHistogram"
+            "section": "def-common.SignificantItemHistogram",
+            "text": "SignificantItemHistogram"
           },
           " extends ",
           {
@@ -1493,18 +2907,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermHistogram.histogram",
+            "id": "def-common.SignificantItemHistogram.histogram",
             "type": "Array",
             "tags": [],
             "label": "histogram",
-            "description": [],
+            "description": [
+              "An array of significant item histogram items."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
                 "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.SignificantTermHistogramItem",
-                "text": "SignificantTermHistogramItem"
+                "section": "def-common.SignificantItemHistogramItem",
+                "text": "SignificantItemHistogramItem"
               },
               "[]"
             ],
@@ -1517,12 +2933,22 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SignificantTermHistogramItem",
+        "id": "def-common.SignificantItemHistogramItem",
         "type": "Interface",
         "tags": [],
-        "label": "SignificantTermHistogramItem",
+        "label": "SignificantItemHistogramItem",
         "description": [
-          "\nSignificant term histogram data item."
+          "\nRepresents a data item in a significant term histogram."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-common.SignificantItemHistogramItem",
+            "text": "SignificantItemHistogramItem"
+          },
+          " extends SignificantItemHistogramItemBase"
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
@@ -1530,44 +2956,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermHistogramItem.doc_count_overall",
+            "id": "def-common.SignificantItemHistogramItem.doc_count_significant_item",
             "type": "number",
             "tags": [],
-            "label": "doc_count_overall",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermHistogramItem.doc_count_significant_term",
-            "type": "number",
-            "tags": [],
-            "label": "doc_count_significant_term",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermHistogramItem.key",
-            "type": "number",
-            "tags": [],
-            "label": "key",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermHistogramItem.key_as_string",
-            "type": "string",
-            "tags": [],
-            "label": "key_as_string",
-            "description": [],
+            "label": "doc_count_significant_item",
+            "description": [
+              "The document count for this histogram item in the significant item context."
+            ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1593,6 +2988,23 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.DEFAULT_SAMPLER_SHARD_SIZE",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_SAMPLER_SHARD_SIZE",
+        "description": [
+          "\nDefault sampler shard size used for field histograms"
+        ],
+        "signature": [
+          "5000"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/field_histograms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.FieldsForHistograms",
@@ -1642,8 +3054,43 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.SignificantItemType",
+        "type": "Type",
+        "tags": [],
+        "label": "SignificantItemType",
+        "description": [
+          "\nRepresents the type of significant item as determined by the SIGNIFICANT_ITEM_TYPE enumeration."
+        ],
+        "signature": [
+          "\"keyword\" | \"log_pattern\""
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.SIGNIFICANT_ITEM_TYPE",
+        "type": "Object",
+        "tags": [],
+        "label": "SIGNIFICANT_ITEM_TYPE",
+        "description": [
+          "\nEnumeration of significant item types."
+        ],
+        "signature": [
+          "{ readonly KEYWORD: \"keyword\"; readonly LOG_PATTERN: \"log_pattern\"; }"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

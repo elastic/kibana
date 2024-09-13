@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import type { PaletteOutput } from '@kbn/coloring';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type {
   SuggestionRequest,
@@ -17,15 +16,16 @@ import type {
   TableSuggestion,
   TableChangeType,
 } from '../../types';
+import { getColorMappingDefaults } from '../../utils';
 import {
   State,
   XYState,
-  visualizationTypes,
+  visualizationSubtypes,
   XYLayerConfig,
   XYDataLayerConfig,
   SeriesType,
 } from './types';
-import { getIconForSeries } from './state_helpers';
+import { flipSeriesType, getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
 
 const columnSortOrder = {
@@ -55,12 +55,13 @@ export function getSuggestions({
   subVisualizationId,
   mainPalette,
   isFromContext,
+  allowMixed,
 }: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
   const incompleteTable =
     !table.isMultiRow ||
     table.columns.length <= 1 ||
     table.columns.every((col) => col.operation.dataType !== 'number') ||
-    table.columns.some((col) => !columnSortOrder.hasOwnProperty(col.operation.dataType));
+    table.columns.some((col) => !Object.hasOwn(columnSortOrder, col.operation.dataType));
 
   if (
     (incompleteTable && state && !subVisualizationId) ||
@@ -79,10 +80,11 @@ export function getSuggestions({
     keptLayerIds,
     state,
     subVisualizationId as SeriesType | undefined,
-    mainPalette
+    mainPalette,
+    allowMixed
   );
 
-  if (suggestions && suggestions instanceof Array) {
+  if (Array.isArray(suggestions)) {
     return suggestions;
   }
 
@@ -94,7 +96,8 @@ function getSuggestionForColumns(
   keptLayerIds: string[],
   currentState?: State,
   seriesType?: SeriesType,
-  mainPalette?: PaletteOutput
+  mainPalette?: SuggestionRequest['mainPalette'],
+  allowMixed?: boolean
 ): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
   const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
 
@@ -111,6 +114,7 @@ function getSuggestionForColumns(
       keptLayerIds,
       requestedSeriesType: seriesType,
       mainPalette,
+      allowMixed,
     });
   } else if (buckets.length === 0) {
     const [yValues, [xValue, splitBy]] = partition(
@@ -128,24 +132,8 @@ function getSuggestionForColumns(
       keptLayerIds,
       requestedSeriesType: seriesType,
       mainPalette,
+      allowMixed,
     });
-  }
-}
-
-function flipSeriesType(seriesType: SeriesType) {
-  switch (seriesType) {
-    case 'bar_horizontal':
-      return 'bar';
-    case 'bar_horizontal_stacked':
-      return 'bar_stacked';
-    case 'bar':
-      return 'bar_horizontal';
-    case 'bar_horizontal_percentage_stacked':
-      return 'bar_percentage_stacked';
-    case 'bar_percentage_stacked':
-      return 'bar_horizontal_percentage_stacked';
-    default:
-      return 'bar_horizontal';
   }
 }
 
@@ -214,6 +202,7 @@ function getSuggestionsForLayer({
   keptLayerIds,
   requestedSeriesType,
   mainPalette,
+  allowMixed,
 }: {
   layerId: string;
   changeType: TableChangeType;
@@ -224,7 +213,8 @@ function getSuggestionsForLayer({
   tableLabel?: string;
   keptLayerIds: string[];
   requestedSeriesType?: SeriesType;
-  mainPalette?: PaletteOutput;
+  mainPalette?: SuggestionRequest['mainPalette'];
+  allowMixed?: boolean;
 }): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
   const seriesType: SeriesType =
@@ -242,12 +232,13 @@ function getSuggestionsForLayer({
     keptLayerIds,
     // only use palette if there is a breakdown by dimension
     mainPalette: splitBy ? mainPalette : undefined,
+    allowMixed,
   };
 
   // handles the simplest cases, acting as a chart switcher
   if (!currentState && changeType === 'unchanged') {
     // Chart switcher needs to include every chart type
-    return visualizationTypes
+    return visualizationSubtypes
       .map((visType) => {
         return {
           ...buildSuggestion({
@@ -287,30 +278,19 @@ function getSuggestionsForLayer({
       buildSuggestion({
         ...options,
         seriesType: newSeriesType,
-        title: newSeriesType.startsWith('bar')
-          ? i18n.translate('xpack.lens.xySuggestions.barChartTitle', {
-              defaultMessage: 'Bar chart',
-            })
-          : i18n.translate('xpack.lens.xySuggestions.lineChartTitle', {
-              defaultMessage: 'Line chart',
-            }),
+        title: seriesTypeLabels(newSeriesType),
       })
     );
   }
 
   if (seriesType !== 'line' && splitBy && !seriesType.includes('percentage')) {
     // flip between stacked/unstacked
+    const suggestedSeriesType = toggleStackSeriesType(seriesType);
     sameStateSuggestions.push(
       buildSuggestion({
         ...options,
-        seriesType: toggleStackSeriesType(seriesType),
-        title: seriesType.endsWith('stacked')
-          ? i18n.translate('xpack.lens.xySuggestions.unstackedChartTitle', {
-              defaultMessage: 'Unstacked',
-            })
-          : i18n.translate('xpack.lens.xySuggestions.stackedChartTitle', {
-              defaultMessage: 'Stacked',
-            }),
+        seriesType: suggestedSeriesType,
+        title: seriesTypeLabels(suggestedSeriesType),
       })
     );
   }
@@ -325,23 +305,22 @@ function getSuggestionsForLayer({
       percentageOptions.splitBy = percentageOptions.xValue;
       delete percentageOptions.xValue;
     }
+    const suggestedSeriesType = asPercentageSeriesType(seriesType);
     // percentage suggestion
     sameStateSuggestions.push(
       buildSuggestion({
         ...options,
         // hide the suggestion if split by is missing
         hide: !percentageOptions.splitBy,
-        seriesType: asPercentageSeriesType(seriesType),
-        title: i18n.translate('xpack.lens.xySuggestions.asPercentageTitle', {
-          defaultMessage: 'Percentage',
-        }),
+        seriesType: suggestedSeriesType,
+        title: seriesTypeLabels(suggestedSeriesType),
       })
     );
   }
 
   // Combine all pre-built suggestions with hidden suggestions for remaining chart types
   return sameStateSuggestions.concat(
-    visualizationTypes
+    visualizationSubtypes
       .filter((visType) => {
         return !sameStateSuggestions.find(
           (suggestion) => suggestion.state.preferredSeriesType === visType.id
@@ -354,6 +333,53 @@ function getSuggestionsForLayer({
         };
       })
   );
+}
+
+function seriesTypeLabels(seriesType: SeriesType) {
+  switch (seriesType) {
+    case 'line':
+      return i18n.translate('xpack.lens.xySuggestions.lineChartTitle', {
+        defaultMessage: 'Line chart',
+      });
+    case 'area':
+      return i18n.translate('xpack.lens.xySuggestions.areaChartTitle', {
+        defaultMessage: 'Area chart',
+      });
+    case 'area_stacked':
+      return i18n.translate('xpack.lens.xySuggestions.areaStackedChartTitle', {
+        defaultMessage: 'Area stacked',
+      });
+    case 'area_percentage_stacked':
+      return i18n.translate('xpack.lens.xySuggestions.areaPercentageStackedChartTitle', {
+        defaultMessage: 'Area percentage',
+      });
+    case 'bar':
+      return i18n.translate('xpack.lens.xySuggestions.verticalBarChartTitle', {
+        defaultMessage: 'Bar vertical',
+      });
+    case 'bar_horizontal':
+      return i18n.translate('xpack.lens.xySuggestions.horizontalBarChartTitle', {
+        defaultMessage: 'Bar horizontal',
+      });
+    case 'bar_stacked':
+      return i18n.translate('xpack.lens.xySuggestions.verticalBarStackedChartTitle', {
+        defaultMessage: 'Bar vertical stacked',
+      });
+    case 'bar_horizontal_stacked':
+      return i18n.translate('xpack.lens.xySuggestions.horizontalBarStackedChartTitle', {
+        defaultMessage: 'Bar horizontal stacked',
+      });
+    case 'bar_percentage_stacked':
+      return i18n.translate('xpack.lens.xySuggestions.verticalBarPercentageChartTitle', {
+        defaultMessage: 'Bar percentage',
+      });
+    case 'bar_horizontal_percentage_stacked':
+      return i18n.translate('xpack.lens.xySuggestions.horizontalBarPercentageChartTitle', {
+        defaultMessage: 'Bar horizontal percentage',
+      });
+    default:
+      return seriesType;
+  }
 }
 
 function toggleStackSeriesType(oldSeriesType: SeriesType) {
@@ -473,6 +499,7 @@ function buildSuggestion({
   keptLayerIds,
   hide,
   mainPalette,
+  allowMixed,
 }: {
   currentState: XYState | undefined;
   seriesType: SeriesType;
@@ -484,7 +511,8 @@ function buildSuggestion({
   changeType: TableChangeType;
   keptLayerIds: string[];
   hide?: boolean;
-  mainPalette?: PaletteOutput;
+  mainPalette?: SuggestionRequest['mainPalette'];
+  allowMixed?: boolean;
 }) {
   if (seriesType.includes('percentage') && xValue?.operation.scale === 'ordinal' && !splitBy) {
     splitBy = xValue;
@@ -495,10 +523,11 @@ function buildSuggestion({
   const newLayer: XYDataLayerConfig = {
     ...(existingLayer || {}),
     palette:
-      mainPalette ||
-      (existingLayer && 'palette' in existingLayer
+      mainPalette?.type === 'legacyPalette'
+        ? mainPalette.value
+        : existingLayer && 'palette' in existingLayer
         ? (existingLayer as XYDataLayerConfig).palette
-        : undefined),
+        : undefined,
     layerId,
     seriesType,
     xAccessor: xValue?.columnId,
@@ -509,6 +538,11 @@ function buildSuggestion({
         ? existingLayer.yConfig.filter(({ forAccessor }) => accessors.indexOf(forAccessor) !== -1)
         : undefined,
     layerType: LayerTypes.DATA,
+    colorMapping: !mainPalette
+      ? getColorMappingDefaults()
+      : mainPalette?.type === 'colorMapping'
+      ? mainPalette.value
+      : undefined,
   };
 
   const hasDateHistogramDomain =
@@ -526,10 +560,14 @@ function buildSuggestion({
         // Update in place
         .map((layer) => (layer.layerId === layerId ? newLayer : layer))
         // Replace the seriesType on all previous layers
-        .map((layer) => ({
-          ...layer,
-          seriesType,
-        }))
+        .map((layer) =>
+          allowMixed
+            ? layer
+            : {
+                ...layer,
+                seriesType,
+              }
+        )
     : [];
 
   const state: State = {
@@ -543,7 +581,6 @@ function buildSuggestion({
     yRightTitle: currentState?.yRightTitle,
     hideEndzones: currentState?.hideEndzones,
     showCurrentTimeMarker: currentState?.showCurrentTimeMarker,
-    valuesInLegend: currentState?.valuesInLegend,
     yLeftExtent: currentState?.yLeftExtent,
     yRightExtent: currentState?.yRightExtent,
     yLeftScale: currentState?.yLeftScale,
@@ -607,7 +644,7 @@ function getScore(
       ? 0.5
       : 1;
   // chart with multiple y values and split series will have a score of 1, single y value and no split series reduce score
-  return (((yValues.length > 1 ? 2 : 1) + (splitBy ? 1 : 0)) / 3) * changeFactor;
+  return (((yValues.length > 1 ? 3 : 2) + (splitBy ? 1 : 0)) / 4) * changeFactor;
 }
 
 function getExistingLayer(currentState: XYState | undefined, layerId: string) {

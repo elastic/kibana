@@ -29,6 +29,7 @@ paths-ignore:
   - packages/kbn-eslint-plugin-disable
   - packages/kbn-eslint-plugin-eslint
   - packages/kbn-eslint-plugin-imports
+  - packages/*/scripts
   - packages/kbn-expect
   - packages/kbn-failed-test-reporter-cli
   - packages/kbn-find-used-node-modules
@@ -61,6 +62,7 @@ paths-ignore:
   - packages/kbn-telemetry-tools
   - packages/kbn-test
   - packages/kbn-test-jest-helpers
+  - packages/kbn-test-eui-helpers
   - packages/kbn-test-subj-selector
   - packages/kbn-tooling-log
   - packages/kbn-ts-project-linter
@@ -69,5 +71,20 @@ paths-ignore:
   - packages/kbn-ts-type-check-cli
   - packages/kbn-web-worker-stub
   - packages/kbn-yarn-lock-validator
+  - scripts
   - test
+  - x-pack/plugins/canvas/scripts
+  - x-pack/plugins/cloud_security_posture/common/scripts
+  - x-pack/plugins/elastic_assistant/scripts
+  - x-pack/plugins/event_log/scripts
+  - x-pack/plugins/fleet/scripts
+  - x-pack/plugins/lists/scripts
+  - x-pack/plugins/lists/server/scripts
+  - x-pack/plugins/ml/scripts
+  - x-pack/plugins/observability_solution/*/scripts
+  - x-pack/plugins/osquery/scripts
+  - x-pack/plugins/rule_registry/scripts
+  - x-pack/plugins/security_solution/scripts
+  - x-pack/plugins/threat_intelligence/scripts
+  - x-pack/scripts
   - x-pack/test

@@ -6,30 +6,35 @@
  */
 
 import { rgba } from 'polished';
-import React, { useMemo } from 'react';
+import { useDispatch } from 'react-redux';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
+import { EuiToolTip, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../../../common/components/drag_and_drop/helpers';
 
 import { Empty } from './empty';
 import { Providers } from './providers';
-import { timelineSelectors } from '../../../store/timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineSelectors } from '../../../store';
+import { timelineDefaults } from '../../../store/defaults';
 
 import * as i18n from './translations';
+import { options } from '../search_or_filter/helpers';
+import type { KqlMode } from '../../../store/model';
+import { updateKqlMode } from '../../../store/actions';
 
 interface Props {
   timelineId: string;
 }
 
 const DropTargetDataProvidersContainer = styled.div`
-  padding: 2px 0 4px 0;
+  position: relative;
 
   .${IS_DRAGGING_CLASS_NAME} & .drop-target-data-providers {
     background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.1)};
@@ -49,12 +54,11 @@ const DropTargetDataProviders = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding-bottom: 2px;
   position: relative;
   border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorMediumShade};
   border-radius: 5px;
-  padding: ${({ theme }) => theme.eui.euiSizeXS} 0;
-  margin: 2px 0 2px 0;
+  padding: ${({ theme }) => theme.eui.euiSizeS} 0;
+  margin: 0px 0 0px 0;
   max-height: 33vh;
   min-height: 100px;
   overflow: auto;
@@ -84,7 +88,24 @@ const getDroppableId = (id: string): string =>
  * the user to drop anything with a facet count into
  * the data pro section.
  */
+
+const timelineSelectModeItemsClassName = 'timelineSelectModeItemsClassName';
+
+const searchOrFilterPopoverClassName = 'searchOrFilterPopover';
+const searchOrFilterPopoverWidth = 350;
+
+const popoverProps = {
+  className: searchOrFilterPopoverClassName,
+  panelClassName: searchOrFilterPopoverClassName,
+  panelMinWidth: searchOrFilterPopoverWidth,
+};
+
+const CustomTooltipDiv = styled.div`
+  position: relative;
+`;
+
 export const DataProviders = React.memo<Props>(({ timelineId }) => {
+  const dispatch = useDispatch();
   const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
@@ -96,28 +117,65 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
   );
   const droppableId = useMemo(() => getDroppableId(timelineId), [timelineId]);
 
+  const kqlMode = useDeepEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).kqlMode
+  );
+
+  const handleChange = useCallback(
+    (mode: KqlMode) => {
+      dispatch(updateKqlMode({ id: timelineId, kqlMode: mode }));
+    },
+    [timelineId, dispatch]
+  );
+
   return (
-    <DropTargetDataProvidersContainer
-      aria-label={i18n.QUERY_AREA_ARIA_LABEL}
-      className="drop-target-data-providers-container"
-    >
-      <DropTargetDataProviders
-        className="drop-target-data-providers"
-        data-test-subj="dataProviders"
+    <>
+      <DropTargetDataProvidersContainer
+        aria-label={i18n.QUERY_AREA_ARIA_LABEL}
+        className="drop-target-data-providers-container"
       >
-        {dataProviders != null && dataProviders.length ? (
-          <Providers
-            browserFields={browserFields}
-            timelineId={timelineId}
-            dataProviders={dataProviders}
-          />
-        ) : (
-          <DroppableWrapper isDropDisabled={isLoading} droppableId={droppableId}>
-            <Empty browserFields={browserFields} timelineId={timelineId} />
-          </DroppableWrapper>
-        )}
-      </DropTargetDataProviders>
-    </DropTargetDataProvidersContainer>
+        <EuiFlexGroup direction={'row'} justifyContent="flexStart" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <CustomTooltipDiv>
+              <EuiToolTip
+                className="timeline-select-search-filter-tooltip"
+                content={i18n.FILTER_OR_SEARCH_WITH_KQL}
+              >
+                <EuiSuperSelect
+                  className="timeline-select-search-or-filter"
+                  data-test-subj="timeline-select-search-or-filter"
+                  hasDividers={true}
+                  itemLayoutAlign="top"
+                  itemClassName={timelineSelectModeItemsClassName}
+                  onChange={handleChange}
+                  options={options}
+                  popoverProps={popoverProps}
+                  valueOfSelected={kqlMode}
+                />
+              </EuiToolTip>
+            </CustomTooltipDiv>
+          </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <DropTargetDataProviders
+              className="drop-target-data-providers"
+              data-test-subj="dataProviders"
+            >
+              {dataProviders != null && dataProviders.length ? (
+                <Providers
+                  browserFields={browserFields}
+                  timelineId={timelineId}
+                  dataProviders={dataProviders}
+                />
+              ) : (
+                <DroppableWrapper isDropDisabled={isLoading} droppableId={droppableId}>
+                  <Empty browserFields={browserFields} timelineId={timelineId} />
+                </DroppableWrapper>
+              )}
+            </DropTargetDataProviders>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </DropTargetDataProvidersContainer>
+    </>
   );
 });
 

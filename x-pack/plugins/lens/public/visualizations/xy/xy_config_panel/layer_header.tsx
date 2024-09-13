@@ -5,29 +5,25 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiIcon,
-  EuiPopover,
-  EuiSelectable,
-  EuiText,
-  EuiPopoverTitle,
-  useEuiTheme,
-} from '@elastic/eui';
-import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
+import { useEuiTheme, EuiIconTip } from '@elastic/eui';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
+import { getIgnoreGlobalFilterIcon } from '../../../shared_components/ignore_global_filter/data_view_picker_icon';
 import type {
   VisualizationLayerHeaderContentProps,
   VisualizationLayerWidgetProps,
-  VisualizationType,
 } from '../../../types';
-import { State, visualizationTypes, SeriesType, XYAnnotationLayerConfig } from '../types';
-import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
+import { State, XYAnnotationLayerConfig } from '../types';
+import { annotationLayerHasUnsavedChanges } from '../state_helpers';
 import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
-import { updateLayer } from '.';
-import { isAnnotationsLayer, isDataLayer, isReferenceLayer } from '../visualization_helpers';
+import {
+  getAnnotationLayerTitle,
+  isAnnotationsLayer,
+  isReferenceLayer,
+} from '../visualization_helpers';
 
 export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   const layer = props.state.layers.find((l) => l.layerId === props.layerId);
@@ -38,9 +34,14 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
     return <ReferenceLayerHeader />;
   }
   if (isAnnotationsLayer(layer)) {
-    return <AnnotationsLayerHeader />;
+    return (
+      <AnnotationsLayerHeader
+        title={getAnnotationLayerTitle(layer)}
+        hasUnsavedChanges={annotationLayerHasUnsavedChanges(layer)}
+      />
+    );
   }
-  return <DataLayerHeader {...props} />;
+  return null;
 }
 
 export function LayerHeaderContent(props: VisualizationLayerHeaderContentProps<State>) {
@@ -51,7 +52,7 @@ export function LayerHeaderContent(props: VisualizationLayerHeaderContentProps<S
   return null;
 }
 
-function ReferenceLayerHeader() {
+export function ReferenceLayerHeader() {
   return (
     <StaticHeader
       icon={IconChartBarReferenceLine}
@@ -62,13 +63,40 @@ function ReferenceLayerHeader() {
   );
 }
 
-function AnnotationsLayerHeader() {
+export function AnnotationsLayerHeader({
+  title,
+  hasUnsavedChanges,
+}: {
+  title: string | undefined;
+  hasUnsavedChanges: boolean;
+}) {
   return (
     <StaticHeader
       icon={IconChartBarAnnotations}
-      label={i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
-        defaultMessage: 'Annotations',
-      })}
+      label={
+        title ||
+        i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
+          defaultMessage: 'Annotations',
+        })
+      }
+      indicator={
+        hasUnsavedChanges && (
+          <div
+            css={css`
+              padding-bottom: 3px;
+              padding-left: 4px;
+            `}
+          >
+            <EuiIconTip
+              content={i18n.translate('xpack.lens.xyChart.unsavedChanges', {
+                defaultMessage: 'Unsaved changes',
+              })}
+              type="dot"
+              color={euiThemeVars.euiColorSuccess}
+            />
+          </div>
+        )
+      }
     />
   );
 }
@@ -87,25 +115,6 @@ function AnnotationLayerHeaderContent({
   const layer = state.layers[layerIndex] as XYAnnotationLayerConfig;
   const currentIndexPattern = frame.dataViews.indexPatterns[layer.indexPatternId];
 
-  const extraIconLabelProps = !layer.ignoreGlobalFilters
-    ? {}
-    : {
-        icon: {
-          component: (
-            <EuiIcon
-              type={'filterIgnore'}
-              color={euiTheme.colors.disabledText}
-              css={css`
-                margin-top: 15px;
-              `}
-            />
-          ),
-          tooltipValue: i18n.translate('xpack.lens.layerPanel.ignoreGlobalFilters', {
-            defaultMessage: 'Ignore global filters',
-          }),
-          'data-test-subj': 'lnsChangeIndexPatternIgnoringFilters',
-        },
-      };
   return (
     <ChangeIndexPattern
       data-test-subj="indexPattern-switcher"
@@ -115,7 +124,14 @@ function AnnotationLayerHeaderContent({
         'data-test-subj': 'lns_layerIndexPatternLabel',
         size: 's',
         fontWeight: 'normal',
-        ...extraIconLabelProps,
+        extraIcons: layer.ignoreGlobalFilters
+          ? [
+              getIgnoreGlobalFilterIcon({
+                color: euiTheme.colors.disabledText,
+                dataTestSubj: 'lnsChangeIndexPatternIgnoringFilters',
+              }),
+            ]
+          : undefined,
       }}
       indexPatternId={layer.indexPatternId}
       indexPatternRefs={frame.dataViews.indexPatternRefs}
@@ -124,92 +140,3 @@ function AnnotationLayerHeaderContent({
     />
   );
 }
-
-function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
-  const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const { state, layerId } = props;
-  const layers = state.layers.filter(isDataLayer);
-  const layer = layers.find((l) => l.layerId === layerId)!;
-  const index = state.layers.findIndex((l) => l === layer)!;
-  const currentVisType = visualizationTypes.find(({ id }) => id === layer.seriesType)!;
-  const horizontalOnly = isHorizontalChart(state.layers);
-
-  return (
-    <EuiPopover
-      panelClassName="lnsChangeIndexPatternPopover"
-      button={
-        <DataLayerHeaderTrigger
-          onClick={() => setPopoverIsOpen(!isPopoverOpen)}
-          currentVisType={currentVisType}
-        />
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setPopoverIsOpen(false)}
-      display="block"
-      panelPaddingSize="s"
-      ownFocus
-    >
-      <EuiPopoverTitle>
-        {i18n.translate('xpack.lens.layerPanel.layerVisualizationType', {
-          defaultMessage: 'Layer visualization type',
-        })}
-      </EuiPopoverTitle>
-      <div>
-        <EuiSelectable<{
-          key?: string;
-          label: string;
-          value?: string;
-          checked?: 'on' | 'off';
-        }>
-          singleSelection="always"
-          options={visualizationTypes
-            .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
-            .map((t) => ({
-              value: t.id,
-              key: t.id,
-              checked: t.id === currentVisType.id ? 'on' : undefined,
-              prepend: <EuiIcon type={t.icon} />,
-              label: t.fullLabel || t.label,
-              'data-test-subj': `lnsXY_seriesType-${t.id}`,
-            }))}
-          onChange={(newOptions) => {
-            const chosenType = newOptions.find(({ checked }) => checked === 'on');
-            if (!chosenType) {
-              return;
-            }
-            const id = chosenType.value!;
-            props.setState(updateLayer(state, { ...layer, seriesType: id as SeriesType }, index));
-            setPopoverIsOpen(false);
-          }}
-        >
-          {(list) => <>{list}</>}
-        </EuiSelectable>
-      </div>
-    </EuiPopover>
-  );
-}
-
-const DataLayerHeaderTrigger = function ({
-  currentVisType,
-  onClick,
-}: {
-  currentVisType: VisualizationType;
-  onClick: () => void;
-}) {
-  return (
-    <ToolbarButton
-      data-test-subj="lns_layer_settings"
-      title={currentVisType.fullLabel || currentVisType.label}
-      onClick={onClick}
-      fullWidth
-      size="s"
-    >
-      <>
-        <EuiIcon type={currentVisType.icon} />
-        <EuiText size="s" className="lnsLayerPanelChartSwitch_title">
-          {currentVisType.fullLabel || currentVisType.label}
-        </EuiText>
-      </>
-    </ToolbarButton>
-  );
-};

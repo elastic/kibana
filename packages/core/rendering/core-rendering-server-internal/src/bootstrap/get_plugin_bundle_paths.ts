@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
@@ -16,11 +17,11 @@ export interface PluginInfo {
 
 export const getPluginsBundlePaths = ({
   uiPlugins,
-  regularBundlePath,
+  bundlesHref,
   isAnonymousPage,
 }: {
   uiPlugins: UiPlugins;
-  regularBundlePath: string;
+  bundlesHref: string;
   isAnonymousPage: boolean;
 }) => {
   const pluginBundlePaths = new Map<string, PluginInfo>();
@@ -35,8 +36,8 @@ export const getPluginsBundlePaths = ({
     const { version } = plugin;
 
     pluginBundlePaths.set(pluginId, {
-      publicPath: `${regularBundlePath}/plugin/${pluginId}/${version}/`,
-      bundlePath: `${regularBundlePath}/plugin/${pluginId}/${version}/${pluginId}.plugin.js`,
+      publicPath: `${bundlesHref}/plugin/${pluginId}/${version}/`,
+      bundlePath: `${bundlesHref}/plugin/${pluginId}/${version}/${pluginId}.plugin.js`,
     });
 
     const pluginBundleIds = uiPlugins.internal.get(pluginId)?.requiredBundles ?? [];

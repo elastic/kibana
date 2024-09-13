@@ -3,7 +3,11 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n-react",
@@ -19,6 +23,8 @@
     "@kbn/utils",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-preboot-server",
+    "@kbn/security-hardening",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

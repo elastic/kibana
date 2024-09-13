@@ -8,31 +8,34 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
+import { bundlePackage, removeBundledPackages } from './install_bundled';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   // use function () {} and not () => {} here
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
-  describe('EPM - list', async function () {
+  describe('EPM - list', function () {
     skipIfNoDockerRegistry(providerContext);
+    const log = getService('log');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
     });
-    setupFleetAndAgents(providerContext);
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await removeBundledPackages(log);
     });
 
-    describe('list api tests', async () => {
+    describe('list api tests', () => {
       it('lists all packages from the registry', async function () {
         const fetchPackageList = async () => {
           const response = await supertest
@@ -46,6 +49,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('lists all limited packages from the registry', async function () {
+        await bundlePackage('endpoint-8.6.1');
         const fetchLimitedPackageList = async () => {
           const response = await supertest
             .get('/api/fleet/epm/packages/limited')

@@ -5,22 +5,19 @@
   "description": "Example app that shows how to register custom embeddables",
   "plugin": {
     "id": "embeddableExamples",
-    "server": true,
+    "server": false,
     "browser": true,
     "requiredPlugins": [
+      "dataViews",
       "embeddable",
       "uiActions",
-      "savedObjects",
       "dashboard",
-      "kibanaUtils"
+      "data",
+      "charts",
+      "fieldFormats",
+      "developerExamples",
+      "dataViewFieldEditor"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
-    "extraPublicDirs": [
-      "public/todo",
-      "public/hello_world",
-      "public/todo/todo_ref_embeddable"
-    ]
+    "requiredBundles": ["dashboard", "presentationUtil", "kibanaUtils", "kibanaReact"]
   }
 }

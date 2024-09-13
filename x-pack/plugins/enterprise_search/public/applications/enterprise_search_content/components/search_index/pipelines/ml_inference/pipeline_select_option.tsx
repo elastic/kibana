@@ -7,82 +7,71 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
 
 import { MLModelTypeBadge } from '../ml_model_type_badge';
 
-import { MLInferencePipelineOption } from './ml_inference_logic';
-import { EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD, MODEL_REDACTED_VALUE } from './utils';
+import { MLInferencePipelineOption } from './pipeline_select_logic';
+import { EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS, MODEL_REDACTED_VALUE } from './utils';
 
 export interface PipelineSelectOptionProps {
+  checked?: 'on';
+  disabled?: boolean;
+  label: string;
   pipeline: MLInferencePipelineOption;
 }
+
+// TODO: Make disabledReason required and remove EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS call without args
+export const PipelineSelectOptionDisabled: React.FC<{ disabledReason?: string }> = ({
+  disabledReason,
+}) => {
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="warning" color="warning" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiTextColor color="warning">
+          {disabledReason ?? EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS}
+        </EuiTextColor>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipeline }) => {
   const modelIdDisplay = pipeline.modelId.length > 0 ? pipeline.modelId : MODEL_REDACTED_VALUE;
   return (
+    // TODO: Add model state & pipeline info link. Make sure to check mobile rendering when doing this!
     <EuiFlexGroup direction="column" gutterSize="xs">
-      {pipeline.disabled && (
-        <EuiFlexItem>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="warning" color="warning" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTextColor color="default">
-                {pipeline.disabledReason ?? EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD}
-              </EuiTextColor>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      )}
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h4>{pipeline.pipelineName}</h4>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
-          <EuiFlexItem>
-            {pipeline.disabled ? (
-              modelIdDisplay
-            ) : (
-              <EuiTextColor color="subdued">{modelIdDisplay}</EuiTextColor>
-            )}
+        <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
+          <EuiFlexItem grow={pipeline.modelType.length === 0}>
+            <EuiText size="s" color="subdued">
+              {modelIdDisplay}
+            </EuiText>
           </EuiFlexItem>
           {pipeline.modelType.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <MLModelTypeBadge type={pipeline.modelType} />
+            <EuiFlexItem>
+              {/* Wrap in a span to prevent the badge from growing to a whole row on mobile*/}
+              <span>
+                <MLModelTypeBadge type={pipeline.modelType} />
+              </span>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <strong>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.sourceField',
-                { defaultMessage: 'Source field' }
-              )}
-            </strong>
-          </EuiFlexItem>
-          <EuiFlexItem>{pipeline.sourceField}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <strong>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.destinationField',
-                { defaultMessage: 'Destination field' }
-              )}
-            </strong>
-          </EuiFlexItem>
-          <EuiFlexItem>{pipeline.destinationField}</EuiFlexItem>
-        </EuiFlexGroup>
+        {pipeline.disabled ? (
+          <PipelineSelectOptionDisabled disabledReason={pipeline.disabledReason} />
+        ) : (
+          <EuiText size="s">{pipeline.sourceFields.join(', ')}</EuiText>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

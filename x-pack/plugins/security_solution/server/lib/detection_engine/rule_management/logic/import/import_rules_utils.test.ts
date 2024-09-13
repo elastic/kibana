@@ -5,50 +5,34 @@
  * 2.0.
  */
 
-import { getImportRulesSchemaMock } from '../../../../../../common/detection_engine/rule_management/mocks';
-import { getQueryRuleParams } from '../../../rule_schema/mocks';
-
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
+import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { requestContextMock } from '../../../routes/__mocks__';
-import {
-  getRuleMock,
-  getEmptyFindResult,
-  getFindResultWithSingleHit,
-} from '../../../routes/__mocks__/request_responses';
 
-import { createRules } from '../crud/create_rules';
-import { patchRules } from '../crud/patch_rules';
 import { importRules } from './import_rules_utils';
-
-jest.mock('../crud/create_rules');
-jest.mock('../crud/patch_rules');
+import { createBulkErrorObject } from '../../../routes/utils';
 
 describe('importRules', () => {
-  const mlAuthz = {
-    validateRuleType: jest
-      .fn()
-      .mockResolvedValue({ valid: true, message: 'mocked validation message' }),
-  };
   const { clients, context } = requestContextMock.createTools();
+  const ruleToImport = getImportRulesSchemaMock();
+
+  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
-    clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-    clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-    clients.actionsClient.getAll.mockResolvedValue([]);
-
     jest.clearAllMocks();
+
+    savedObjectsClient = savedObjectsClientMock.create();
   });
 
-  it('returns rules response if no rules to import', async () => {
+  it('returns an empty rules response if no rules to import', async () => {
     const result = await importRules({
       ruleChunks: [],
       rulesResponseAcc: [],
-      mlAuthz,
       overwriteRules: false,
-      savedObjectsClient: context.core.savedObjects.client,
-      rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
-      existingLists: {},
+      detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
+      savedObjectsClient,
     });
 
     expect(result).toEqual([]);
@@ -58,13 +42,9 @@ describe('importRules', () => {
     const result = await importRules({
       ruleChunks: [[new Error('error importing')]],
       rulesResponseAcc: [],
-      mlAuthz,
       overwriteRules: false,
-      savedObjectsClient: context.core.savedObjects.client,
-      rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
-      existingLists: {},
+      detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
+      savedObjectsClient,
     });
 
     expect(result).toEqual([
@@ -78,189 +58,50 @@ describe('importRules', () => {
     ]);
   });
 
+  it('returns 409 error if DetectionRulesClient throws with 409 - existing rule', async () => {
+    clients.detectionRulesClient.importRule.mockImplementationOnce(async () => {
+      throw createBulkErrorObject({
+        ruleId: ruleToImport.rule_id,
+        statusCode: 409,
+        message: `rule_id: "${ruleToImport.rule_id}" already exists`,
+      });
+    });
+
+    const ruleChunk = [ruleToImport];
+    const result = await importRules({
+      ruleChunks: [ruleChunk],
+      rulesResponseAcc: [],
+      overwriteRules: false,
+      detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
+      savedObjectsClient,
+    });
+
+    expect(result).toEqual([
+      {
+        error: {
+          message: `rule_id: "${ruleToImport.rule_id}" already exists`,
+          status_code: 409,
+        },
+        rule_id: ruleToImport.rule_id,
+      },
+    ]);
+  });
+
   it('creates rule if no matching existing rule found', async () => {
+    clients.detectionRulesClient.importRule.mockResolvedValue({
+      ...getRulesSchemaMock(),
+      rule_id: ruleToImport.rule_id,
+    });
+
+    const ruleChunk = [ruleToImport];
     const result = await importRules({
-      ruleChunks: [
-        [
-          {
-            ...getImportRulesSchemaMock(),
-            rule_id: 'rule-1',
-          },
-        ],
-      ],
+      ruleChunks: [ruleChunk],
       rulesResponseAcc: [],
-      mlAuthz,
       overwriteRules: false,
-      savedObjectsClient: context.core.savedObjects.client,
-      rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
-      existingLists: {},
+      detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
+      savedObjectsClient,
     });
 
-    expect(result).toEqual([{ rule_id: 'rule-1', status_code: 200 }]);
-    expect(createRules).toHaveBeenCalled();
-    expect(patchRules).not.toHaveBeenCalled();
-  });
-
-  it('reports error if "overwriteRules" is "false" and matching rule found', async () => {
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-
-    const result = await importRules({
-      ruleChunks: [
-        [
-          {
-            ...getImportRulesSchemaMock(),
-            rule_id: 'rule-1',
-          },
-        ],
-      ],
-      rulesResponseAcc: [],
-      mlAuthz,
-      overwriteRules: false,
-      savedObjectsClient: context.core.savedObjects.client,
-      rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
-      existingLists: {},
-    });
-
-    expect(result).toEqual([
-      {
-        error: { message: 'rule_id: "rule-1" already exists', status_code: 409 },
-        rule_id: 'rule-1',
-      },
-    ]);
-    expect(createRules).not.toHaveBeenCalled();
-    expect(patchRules).not.toHaveBeenCalled();
-  });
-
-  it('patches rule if "overwriteRules" is "true" and matching rule found', async () => {
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-
-    const result = await importRules({
-      ruleChunks: [
-        [
-          {
-            ...getImportRulesSchemaMock(),
-            rule_id: 'rule-1',
-          },
-        ],
-      ],
-      rulesResponseAcc: [],
-      mlAuthz,
-      overwriteRules: true,
-      savedObjectsClient: context.core.savedObjects.client,
-      rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
-      existingLists: {},
-    });
-
-    expect(result).toEqual([{ rule_id: 'rule-1', status_code: 200 }]);
-    expect(createRules).not.toHaveBeenCalled();
-    expect(patchRules).toHaveBeenCalled();
-  });
-
-  it('reports error if rulesClient throws', async () => {
-    clients.rulesClient.find.mockRejectedValue(new Error('error reading rule'));
-
-    const result = await importRules({
-      ruleChunks: [
-        [
-          {
-            ...getImportRulesSchemaMock(),
-            rule_id: 'rule-1',
-          },
-        ],
-      ],
-      rulesResponseAcc: [],
-      mlAuthz,
-      overwriteRules: true,
-      savedObjectsClient: context.core.savedObjects.client,
-      rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
-      existingLists: {},
-    });
-
-    expect(result).toEqual([
-      {
-        error: {
-          message: 'error reading rule',
-          status_code: 400,
-        },
-        rule_id: 'rule-1',
-      },
-    ]);
-    expect(createRules).not.toHaveBeenCalled();
-    expect(patchRules).not.toHaveBeenCalled();
-  });
-
-  it('reports error if "createRules" throws', async () => {
-    (createRules as jest.Mock).mockRejectedValue(new Error('error creating rule'));
-
-    const result = await importRules({
-      ruleChunks: [
-        [
-          {
-            ...getImportRulesSchemaMock(),
-            rule_id: 'rule-1',
-          },
-        ],
-      ],
-      rulesResponseAcc: [],
-      mlAuthz,
-      overwriteRules: false,
-      savedObjectsClient: context.core.savedObjects.client,
-      rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
-      existingLists: {},
-    });
-
-    expect(result).toEqual([
-      {
-        error: {
-          message: 'error creating rule',
-          status_code: 400,
-        },
-        rule_id: 'rule-1',
-      },
-    ]);
-  });
-
-  it('reports error if "patchRules" throws', async () => {
-    (patchRules as jest.Mock).mockRejectedValue(new Error('error patching rule'));
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-
-    const result = await importRules({
-      ruleChunks: [
-        [
-          {
-            ...getImportRulesSchemaMock(),
-            rule_id: 'rule-1',
-          },
-        ],
-      ],
-      rulesResponseAcc: [],
-      mlAuthz,
-      overwriteRules: true,
-      savedObjectsClient: context.core.savedObjects.client,
-      rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
-      existingLists: {},
-    });
-
-    expect(result).toEqual([
-      {
-        error: {
-          message: 'error patching rule',
-          status_code: 400,
-        },
-        rule_id: 'rule-1',
-      },
-    ]);
+    expect(result).toEqual([{ rule_id: ruleToImport.rule_id, status_code: 200 }]);
   });
 });

@@ -8,13 +8,14 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
 import {
   checkAAD,
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  createWaitForExecutionCount,
+  getEventLog,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -34,10 +35,8 @@ const getSnoozeSchedule = () => {
 export default function createUpdateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
-  const waitForExecutionCount = createWaitForExecutionCount(supertest, Spaces.space1.id);
 
-  // Failing: See https://github.com/elastic/kibana/issues/138050
-  describe.skip('bulkEdit', () => {
+  describe('bulkEdit', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -83,7 +82,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdRule.id,
       });
     });
@@ -185,7 +184,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdRule.id,
       });
     });
@@ -231,7 +230,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdRule.id,
       });
     });
@@ -277,7 +276,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdRule.id,
       });
     });
@@ -342,7 +341,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdRule.id,
       });
     });
@@ -419,82 +418,45 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdRule.id,
       });
     });
 
-    it('should ignore bulk snooze and snooze schedule rule for SIEM rules', async () => {
-      const { body: createdRule } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData({ enabled: false, consumer: 'siem' }));
+    describe('bulk update API key with apiKey operation', function () {
+      this.tags('skipFIPS');
+      it('should not bulk update API key with apiKey operation', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+            })
+          );
 
-      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      const payload = {
-        ids: [createdRule.id],
-        operations: [
-          {
-            operation: 'set',
-            field: 'snoozeSchedule',
-            value: getSnoozeSchedule(),
-          },
-        ],
-      };
+        const payload = {
+          ids: [createdRule.id],
+          operations: [
+            {
+              operation: 'set',
+              field: 'apiKey',
+            },
+          ],
+        };
 
-      const bulkSnoozeResponse = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
-        .set('kbn-xsrf', 'foo')
-        .send(payload);
+        const bulkApiKeyResponse = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+          .set('kbn-xsrf', 'foo')
+          .send(payload);
 
-      expect(bulkSnoozeResponse.body.errors).to.have.length(0);
-      expect(bulkSnoozeResponse.body.rules).to.have.length(1);
-      expect(bulkSnoozeResponse.body.rules[0].snooze_schedule).empty();
-      // Ensure revision is NOT updated
-      expect(bulkSnoozeResponse.body.rules[0].revision).to.eql(0);
-
-      // Ensure AAD isn't broken
-      await checkAAD({
-        supertest,
-        spaceId: Spaces.space1.id,
-        type: 'alert',
-        id: createdRule.id,
+        expect(bulkApiKeyResponse.body.errors).to.have.length(0);
+        expect(bulkApiKeyResponse.body.rules).to.have.length(1);
+        expect(bulkApiKeyResponse.body.rules[0].api_key_owner).to.eql(null);
+        expect(bulkApiKeyResponse.body.rules[0].revision).to.eql(0);
       });
-    });
-
-    it('should bulk update API key with apiKey operation', async () => {
-      const { body: createdRule } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            enabled: false,
-          })
-        );
-
-      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
-
-      const payload = {
-        ids: [createdRule.id],
-        operations: [
-          {
-            operation: 'set',
-            field: 'apiKey',
-          },
-        ],
-      };
-
-      const bulkApiKeyResponse = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
-        .set('kbn-xsrf', 'foo')
-        .send(payload);
-
-      expect(bulkApiKeyResponse.body.errors).to.have.length(0);
-      expect(bulkApiKeyResponse.body.rules).to.have.length(1);
-      expect(bulkApiKeyResponse.body.rules[0].api_key_owner).to.eql(null);
-      // Ensure revision is updated
-      expect(bulkApiKeyResponse.body.rules[0].revision).to.eql(1);
     });
 
     it(`shouldn't bulk edit rule from another space`, async () => {
@@ -520,7 +482,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.other.id)}/internal/alerting/rules/_bulk_edit`)
         .set('kbn-xsrf', 'foo')
         .send(payload)
-        .expect(200, { rules: [], errors: [], total: 0 });
+        .expect(200, { rules: [], errors: [], skipped: [], total: 0 });
     });
 
     it('should return mapped params after bulk edit', async () => {
@@ -575,7 +537,16 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      await waitForExecutionCount(1, createdRule.id);
+      await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdRule.id,
+          provider: 'alerting',
+          actions: new Map([['execute', { equal: 1 }]]),
+        });
+      });
 
       const monitoringData = (
         await supertest.get(
@@ -583,8 +554,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         )
       ).body.monitoring;
 
-      // single rule execution is recorded in monitoring history
-      expect(monitoringData.execution.history).to.have.length(1);
+      // single rule run is recorded in monitoring history
+      expect(monitoringData.run.history).to.have.length(1);
 
       const payload = {
         ids: [createdRule.id],

@@ -34,6 +34,7 @@ import {
   commonMigratePartitionChartGroups,
   commonMigratePartitionMetrics,
   commonMigrateIndexPatternDatasource,
+  commonMigrateMetricFormatter,
 } from '../migrations/common_migrations';
 import {
   CustomVisualizationMigrations,
@@ -42,6 +43,7 @@ import {
   LensDocShape810,
   LensDocShape850,
   LensDocShapePre712,
+  LensDocShape860,
   VisState716,
   VisState810,
   VisState850,
@@ -166,6 +168,13 @@ export const makeLensEmbeddableFactory =
                 return {
                   ...lensState,
                   attributes: migratedLensState,
+                } as unknown as SerializableRecord;
+              },
+              '8.9.0': (state) => {
+                const lensState = state as unknown as SavedObject<LensDocShape860>;
+                return {
+                  ...lensState,
+                  attributes: commonMigrateMetricFormatter(lensState.attributes),
                 } as unknown as SerializableRecord;
               },
               // FOLLOW THESE GUIDELINES IF YOU ARE ADDING A NEW MIGRATION!

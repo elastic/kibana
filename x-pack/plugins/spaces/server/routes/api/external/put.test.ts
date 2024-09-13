@@ -16,7 +16,9 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
+import { initPutSpacesApi } from './put';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -27,7 +29,6 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { initPutSpacesApi } from './put';
 
 describe('PUT /api/spaces/space', () => {
   const spacesSavedObjects = createSpaces();
@@ -42,7 +43,7 @@ describe('PUT /api/spaces/space', () => {
 
     const log = loggingSystemMock.create().get('spaces');
 
-    const clientService = new SpacesClientService(jest.fn());
+    const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -52,9 +53,13 @@ describe('PUT /api/spaces/space', () => {
       basePath: httpService.basePath,
     });
 
+    const featuresPluginMockStart = featuresPluginMock.createStart();
+
+    featuresPluginMockStart.getKibanaFeatures.mockReturnValue([]);
+
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMockStart);
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
@@ -62,11 +67,12 @@ describe('PUT /api/spaces/space', () => {
     });
 
     initPutSpacesApi({
-      externalRouter: router,
+      router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
+      isServerless: false,
     });
 
     const [routeDefinition, routeHandler] = router.put.mock.calls[0];
@@ -175,6 +181,7 @@ describe('PUT /api/spaces/space', () => {
       id: 'a-new-space',
       name: 'my new space',
       description: 'with a description',
+      disabledFeatures: [],
     };
 
     const { routeHandler } = await setup();

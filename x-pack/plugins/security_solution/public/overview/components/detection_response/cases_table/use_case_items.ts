@@ -7,10 +7,10 @@
 
 import { useState, useEffect, useMemo } from 'react';
 
-import type { CaseStatuses } from '@kbn/cases-plugin/common';
-import type { Cases } from '@kbn/cases-plugin/common/ui';
+import type { CasesFindResponseUI } from '@kbn/cases-plugin/common';
 
 import { v4 as uuidv4 } from 'uuid';
+import type { CaseStatuses } from '@kbn/cases-components';
 import { APP_ID } from '../../../../../common/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -58,7 +58,7 @@ export const useCaseItems: UseCaseItems = ({ skip }) => {
           from,
           to,
           owner: APP_ID,
-          sortField: 'create_at',
+          sortField: 'createdAt',
           sortOrder: 'desc',
           page: 1,
           perPage: 4,
@@ -103,7 +103,7 @@ export const useCaseItems: UseCaseItems = ({ skip }) => {
   return { items, isLoading, updatedAt };
 };
 
-function parseCases(casesResponse: Cases): CaseItem[] {
+function parseCases(casesResponse: CasesFindResponseUI): CaseItem[] {
   const allCases = casesResponse.cases || [];
 
   return allCases.reduce<CaseItem[]>((accumulated, currentCase) => {

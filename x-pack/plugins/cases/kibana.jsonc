@@ -12,31 +12,36 @@
       "cases"
     ],
     "requiredPlugins": [
+      "alerting",
       "actions",
       "data",
       "embeddable",
-      "esUiShared",
       "lens",
       "licensing",
       "features",
-      "kibanaReact",
-      "kibanaUtils",
       "triggersActionsUi",
+      "fieldFormats",
       "management",
       "security",
       "notifications",
       "ruleRegistry",
       "files",
-      "savedObjectsFinder",
-      "savedObjectsManagement"
+      "contentManagement",
+      "uiActions",
     ],
     "optionalPlugins": [
       "home",
       "taskManager",
       "usageCollection",
-      "spaces"
+      "spaces",
+      "serverless",
     ],
-    "requiredBundles": [],
+    "requiredBundles": [
+      "esUiShared",
+      "kibanaReact",
+      "kibanaUtils",
+      "savedObjectsFinder",
+    ],
     "extraPublicDirs": [
       "common"
     ]

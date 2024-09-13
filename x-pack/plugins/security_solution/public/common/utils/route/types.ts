@@ -11,7 +11,6 @@ import type React from 'react';
 import type { AllRulesTabs } from '../../../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
 import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { NetworkRouteType } from '../../../explore/network/pages/navigation/types';
-import type { AlertDetailRouteType } from '../../../detections/pages/alert_details/types';
 import type { AdministrationSubTab as AdministrationType } from '../../../management/types';
 import type { FlowTarget } from '../../../../common/search_strategy';
 import type { UsersTableType } from '../../../explore/users/store/model';
@@ -32,7 +31,6 @@ export type RouteSpyState =
   | GenericRouteSpyState<SecurityPageName.hosts, HostsTableType>
   | GenericRouteSpyState<SecurityPageName.users, UsersTableType>
   | GenericRouteSpyState<SecurityPageName.network, NetworkRouteType>
-  | GenericRouteSpyState<SecurityPageName.alerts, AlertDetailRouteType>
   | GenericRouteSpyState<SecurityPageName.administration, AdministrationType>
   | GenericRouteSpyState<SecurityPageName.rules, AllRulesTabs>
   | GenericRouteSpyState<SecurityPageName.dashboards>
@@ -52,15 +50,10 @@ export type RouteSpyState =
 export type HostRouteSpyState = GenericRouteSpyState<SecurityPageName.hosts, HostsTableType>;
 export type UsersRouteSpyState = GenericRouteSpyState<SecurityPageName.users, UsersTableType>;
 export type NetworkRouteSpyState = GenericRouteSpyState<SecurityPageName.network, NetworkRouteType>;
-export type AlertDetailRouteSpyState = GenericRouteSpyState<
-  SecurityPageName.alerts,
-  AlertDetailRouteType
->;
 export type AdministrationRouteSpyState = GenericRouteSpyState<
   SecurityPageName.administration,
   AdministrationType
 >;
-export type DashboardsRouteSpyState = GenericRouteSpyState<SecurityPageName.dashboards>;
 
 export type RouteSpyAction =
   | {

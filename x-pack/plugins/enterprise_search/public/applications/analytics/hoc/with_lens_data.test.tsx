@@ -13,9 +13,9 @@ import { mount, shallow } from 'enzyme';
 
 import { act } from 'react-dom/test-utils';
 
-import { DataView } from '@kbn/data-views-plugin/common';
-
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+
+import { findOrCreateDataView } from '../utils/find_or_create_data_view';
 
 import { withLensData } from './with_lens_data';
 
@@ -28,6 +28,20 @@ interface MockComponentLensProps {
 }
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+
+const mockCollection = {
+  event_retention_day_length: 180,
+  events_datastream: 'analytics-events-example2',
+  id: 'example2',
+  name: 'example2',
+};
+const mockDataView = { id: 'test-data-view-id' };
+
+jest.mock('../utils/find_or_create_data_view', () => {
+  return {
+    findOrCreateDataView: jest.fn(),
+  };
+});
 
 describe('withLensData', () => {
   const MockComponent: React.FC<MockComponentProps> = ({ name }) => <div>{name}</div>;
@@ -48,85 +62,91 @@ describe('withLensData', () => {
           return { data: 'initial data' };
         }),
         getAttributes: jest.fn(),
-        getDataViewQuery: jest.fn(),
         initialValues: { data: 'initial data' },
       }
     );
 
-    const props = { name: 'John Doe' };
+    const props = { collection: mockCollection, name: 'John Doe' };
     const wrapper = shallow(
       <WrappedComponent id={'id'} timeRange={{ from: 'now-10d', to: 'now' }} {...props} />
     );
     expect(wrapper.find(MockComponent).prop('data')).toEqual('initial data');
   });
 
-  it('should call getDataViewQuery with props', async () => {
-    const getDataViewQuery = jest.fn();
-    getDataViewQuery.mockReturnValue('title-collection');
-    const findMock = jest.spyOn(mockKibanaValues.data.dataViews, 'find').mockResolvedValueOnce([]);
+  it('should call findOrCreateDataView with collection', async () => {
     const WrappedComponent = withLensData<MockComponentProps, MockComponentLensProps>(
       MockComponent,
       {
         dataLoadTransform: jest.fn(),
         getAttributes: jest.fn(),
-        getDataViewQuery,
         initialValues: { data: 'initial data' },
       }
     );
 
-    const props = { id: 'id', name: 'John Doe', timeRange: { from: 'now-10d', to: 'now' } };
+    const props = {
+      collection: mockCollection,
+      id: 'id',
+      name: 'John Doe',
+      timeRange: { from: 'now-10d', to: 'now' },
+    };
     mount(<WrappedComponent {...props} />);
     await act(async () => {
       await flushPromises();
     });
 
-    expect(getDataViewQuery).toHaveBeenCalledWith(props);
-    expect(findMock).toHaveBeenCalledWith('title-collection', 1);
+    expect(findOrCreateDataView).toHaveBeenCalledWith(mockCollection);
   });
 
   it('should call getAttributes with the correct arguments when dataView and formula are available', async () => {
     const getAttributes = jest.fn();
-    const dataView = {} as DataView;
     const formula = {} as FormulaPublicApi;
     mockKibanaValues.lens.stateHelperApi = jest.fn().mockResolvedValueOnce({ formula });
-    jest.spyOn(mockKibanaValues.data.dataViews, 'find').mockResolvedValueOnce([dataView]);
+    (findOrCreateDataView as jest.Mock).mockResolvedValueOnce(mockDataView);
 
     const WrappedComponent = withLensData<MockComponentProps, MockComponentLensProps>(
       MockComponent,
       {
         dataLoadTransform: jest.fn(),
         getAttributes,
-        getDataViewQuery: jest.fn(),
         initialValues: { data: 'initial data' },
       }
     );
 
-    const props = { id: 'id', name: 'John Doe', timeRange: { from: 'now-10d', to: 'now' } };
+    const props = {
+      collection: mockCollection,
+      id: 'id',
+      name: 'John Doe',
+      timeRange: { from: 'now-10d', to: 'now' },
+    };
     mount(<WrappedComponent {...props} />);
     await act(async () => {
       await flushPromises();
     });
 
-    expect(getAttributes).toHaveBeenCalledWith(dataView, formula, props);
+    expect(getAttributes).toHaveBeenCalledWith(mockDataView, formula, props);
   });
 
   it('should not call getAttributes when dataView is not available', async () => {
     const getAttributes = jest.fn();
     const formula = {} as FormulaPublicApi;
     mockKibanaValues.lens.stateHelperApi = jest.fn().mockResolvedValueOnce({ formula });
-    jest.spyOn(mockKibanaValues.data.dataViews, 'find').mockResolvedValueOnce([]);
+    (findOrCreateDataView as jest.Mock).mockResolvedValueOnce(undefined);
 
     const WrappedComponent = withLensData<MockComponentProps, MockComponentLensProps>(
       MockComponent,
       {
         dataLoadTransform: jest.fn(),
         getAttributes,
-        getDataViewQuery: jest.fn(),
         initialValues: { data: 'initial data' },
       }
     );
 
-    const props = { id: 'id', name: 'John Doe', timeRange: { from: 'now-10d', to: 'now' } };
+    const props = {
+      collection: mockCollection,
+      id: 'id',
+      name: 'John Doe',
+      timeRange: { from: 'now-10d', to: 'now' },
+    };
     mount(<WrappedComponent {...props} />);
     await act(async () => {
       await flushPromises();

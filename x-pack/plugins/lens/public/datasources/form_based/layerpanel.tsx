@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
-import { DatasourceLayerPanelProps } from '../../types';
-import { FormBasedPrivateState } from './types';
+import { RandomSamplingIcon } from '@kbn/random-sampling';
+import type { DatasourceLayerPanelProps } from '../../types';
+import type { FormBasedPrivateState } from './types';
 import { ChangeIndexPattern } from '../../shared_components/dataview_picker/dataview_picker';
 import { getSamplingValue } from './utils';
-import { RandomSamplingIcon } from './sampling_icon';
+import { getIgnoreGlobalFilterIcon } from '../../shared_components/ignore_global_filter';
 
 export interface FormBasedLayerPanelProps extends DatasourceLayerPanelProps<FormBasedPrivateState> {
   state: FormBasedPrivateState;
@@ -42,42 +42,44 @@ export function LayerPanel({
   });
 
   const samplingValue = getSamplingValue(layer);
-  const extraIconLabelProps =
-    samplingValue !== 1
-      ? {
-          icon: {
-            component: (
-              <RandomSamplingIcon color={euiTheme.colors.disabledText} fill="currentColor" />
-            ),
-            value: `${samplingValue * 100}%`,
-            tooltipValue: i18n.translate('xpack.lens.indexPattern.randomSamplingInfo', {
-              defaultMessage: '{value}% sampling',
-              values: {
-                value: samplingValue * 100,
-              },
-            }),
-            'data-test-subj': 'lnsChangeIndexPatternSamplingInfo',
-          },
-        }
-      : {};
+  const extraIcons = [];
+  if (layer.ignoreGlobalFilters) {
+    extraIcons.push(
+      getIgnoreGlobalFilterIcon({
+        color: euiTheme.colors.disabledText,
+        dataTestSubj: 'lnsChangeIndexPatternIgnoringFilters',
+      })
+    );
+  }
+  if (samplingValue !== 1) {
+    extraIcons.push({
+      component: <RandomSamplingIcon color={euiTheme.colors.disabledText} fill="currentColor" />,
+      value: `${samplingValue * 100}%`,
+      tooltipValue: i18n.translate('xpack.lens.indexPattern.randomSamplingInfo', {
+        defaultMessage: '{value}% sampling',
+        values: {
+          value: samplingValue * 100,
+        },
+      }),
+      'data-test-subj': 'lnsChangeIndexPatternSamplingInfo',
+    });
+  }
 
   return (
-    <I18nProvider>
-      <ChangeIndexPattern
-        data-test-subj="indexPattern-switcher"
-        trigger={{
-          label: indexPattern?.name || notFoundTitleLabel,
-          title: indexPattern?.title || notFoundTitleLabel,
-          'data-test-subj': 'lns_layerIndexPatternLabel',
-          size: 's',
-          fontWeight: 'normal',
-          ...extraIconLabelProps,
-        }}
-        indexPatternId={layer.indexPatternId}
-        indexPatternRefs={indexPatternRefs}
-        isMissingCurrent={!indexPattern}
-        onChangeIndexPattern={onChangeIndexPattern}
-      />
-    </I18nProvider>
+    <ChangeIndexPattern
+      data-test-subj="indexPattern-switcher"
+      trigger={{
+        label: indexPattern?.name || notFoundTitleLabel,
+        title: indexPattern?.title || notFoundTitleLabel,
+        'data-test-subj': 'lns_layerIndexPatternLabel',
+        size: 's',
+        fontWeight: 'normal',
+        extraIcons,
+      }}
+      indexPatternId={layer.indexPatternId}
+      indexPatternRefs={indexPatternRefs}
+      isMissingCurrent={!indexPattern}
+      onChangeIndexPattern={onChangeIndexPattern}
+    />
   );
 }

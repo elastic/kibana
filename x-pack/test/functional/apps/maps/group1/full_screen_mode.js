@@ -8,48 +8,53 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['maps', 'common']);
+  const { maps, common } = getPageObjects(['maps', 'common']);
   const retry = getService('retry');
   const security = getService('security');
+  const testSubjects = getService('testSubjects');
 
   describe('maps full screen mode', () => {
     before(async () => {
       await security.testUser.setRoles(['global_maps_all']);
-      await PageObjects.maps.openNewMap();
+      await maps.openNewMap();
     });
     after(async () => {
       await security.testUser.restoreDefaults();
     });
 
     it('full screen button should exist', async () => {
-      const exists = await PageObjects.maps.fullScreenModeMenuItemExists();
+      const exists = await maps.fullScreenModeMenuItemExists();
       expect(exists).to.be(true);
     });
 
     it('hides the chrome', async () => {
-      const isChromeVisible = await PageObjects.common.isChromeVisible();
+      const isChromeVisible = await common.isChromeVisible();
       expect(isChromeVisible).to.be(true);
 
-      await PageObjects.maps.clickFullScreenMode();
+      await maps.clickFullScreenMode();
 
       await retry.try(async () => {
-        const isChromeHidden = await PageObjects.common.isChromeHidden();
+        const isChromeHidden = await common.isChromeHidden();
         expect(isChromeHidden).to.be(true);
       });
     });
 
+    it('layer control is visible', async () => {
+      expect(await testSubjects.isDisplayed('addLayerButton')).to.be(true);
+    });
+
     it('displays exit full screen logo button', async () => {
-      const exists = await PageObjects.maps.exitFullScreenLogoButtonExists();
+      const exists = await maps.exitFullScreenLogoButtonExists();
       expect(exists).to.be(true);
     });
 
     it('exits when the text button is clicked on', async () => {
-      const logoButton = await PageObjects.maps.getExitFullScreenLogoButton();
+      const logoButton = await maps.getExitFullScreenLogoButton();
       await logoButton.moveMouseTo();
-      await PageObjects.maps.clickExitFullScreenTextButton();
+      await maps.clickExitFullScreenTextButton();
 
       await retry.try(async () => {
-        const isChromeVisible = await PageObjects.common.isChromeVisible();
+        const isChromeVisible = await common.isChromeVisible();
         expect(isChromeVisible).to.be(true);
       });
     });

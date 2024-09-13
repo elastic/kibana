@@ -6,6 +6,7 @@
  */
 
 import _ from 'lodash';
+import type { TopLeftBottomRightGeoBounds } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { Feature, FeatureCollection, Geometry, Polygon, Point, Position } from 'geojson';
 import { BBox } from '@turf/helpers';
@@ -18,7 +19,16 @@ import {
   LAT_INDEX,
 } from '../constants';
 import { MapExtent } from '../descriptor_types';
-import { Coordinates, ESBBox, ESGeometry } from './types';
+
+type Coordinates = Position | Position[] | Position[][] | Position[][][];
+
+// Elasticsearch stores more then just standarized GeoJSON.
+// 1) geometry.type as lower case string
+// 2) circle and envelope types
+interface ESGeometry {
+  type: string;
+  coordinates: Coordinates;
+}
 
 function ensureGeoField(type: string) {
   const expectedTypes = [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE];
@@ -199,7 +209,12 @@ export function geoShapeToGeometry(
   }
 }
 
-export function makeESBbox({ maxLat, maxLon, minLat, minLon }: MapExtent): ESBBox {
+export function makeESBbox({
+  maxLat,
+  maxLon,
+  minLat,
+  minLon,
+}: MapExtent): TopLeftBottomRightGeoBounds {
   const bottom = clampToLatBounds(minLat);
   const top = clampToLatBounds(maxLat);
   let esBbox;

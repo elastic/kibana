@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Fs from 'fs';
@@ -13,7 +14,7 @@ import stripAnsi from 'strip-ansi';
 
 import execa from 'execa';
 import * as Rx from 'rxjs';
-import { tap, share, take, mergeMap, map, ignoreElements } from 'rxjs/operators';
+import { tap, share, take, mergeMap, map, ignoreElements, filter } from 'rxjs';
 import chalk from 'chalk';
 import treeKill from 'tree-kill';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -87,13 +88,23 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
 
   const outcome$: Rx.Observable<number | null> = Rx.race(
     // observe first exit event
-    Rx.fromEvent<[number]>(childProcess, 'exit').pipe(
+    Rx.fromEvent<[number, string]>(childProcess, 'exit').pipe(
+      filter(([code]) => {
+        if (stopCalled) {
+          // when stop was already called, that's a graceful exit, let those events pass.
+          return true;
+        } else {
+          // filtering out further interruption events to prevent `take()` from closing the stream.
+          return code !== null;
+        }
+      }),
       take(1),
       map(([code]) => {
         if (stopCalled) {
           return null;
         }
-        // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
+
+        // JVM exits with 143 on SIGTERM and 130 on SIGINT, don't treat them as errors
         if (code > 0 && !(code === 143 || code === 130)) {
           throw createFailError(`[${name}] exited with code ${code}`, {
             exitCode: code,
@@ -106,6 +117,12 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
 
     // observe first error event
     Rx.fromEvent(childProcess, 'error').pipe(
+      take(1),
+      mergeMap((err) => Rx.throwError(err))
+    ),
+
+    // observe a promise rejection
+    Rx.from(childProcess).pipe(
       take(1),
       mergeMap((err) => Rx.throwError(err))
     )
@@ -132,7 +149,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     share()
   );
 
-  const outcomePromise = Rx.merge(lines$.pipe(ignoreElements()), outcome$).toPromise();
+  const outcomePromise = Rx.firstValueFrom(Rx.merge(lines$.pipe(ignoreElements()), outcome$));
 
   async function stop(signal: NodeJS.Signals) {
     if (stopCalled) {

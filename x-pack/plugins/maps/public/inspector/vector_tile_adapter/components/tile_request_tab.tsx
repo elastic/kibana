@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { compressToEncodedURIComponent } from 'lz-string';
 import {
   getDevToolsCapabilities,
@@ -121,7 +121,7 @@ export function TileRequestTab(props: Props) {
       >
         <p>
           {i18n.translate('xpack.maps.inspector.vectorTileRequest.errorTitle', {
-            defaultMessage: `Could not convert tile request, '{tileUrl}', to Elasticesarch vector tile search request, error: {error}`,
+            defaultMessage: `Could not convert tile request, ''{tileUrl}'', to Elasticesarch vector tile search request, error: {error}`,
             values: {
               tileUrl: props.tileRequest.tileUrl,
               error: e.message,

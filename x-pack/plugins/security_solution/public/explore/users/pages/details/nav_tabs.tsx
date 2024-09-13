@@ -10,19 +10,23 @@ import * as i18n from '../translations';
 import type { UsersDetailsNavTab } from './types';
 import { UsersTableType } from '../../store/model';
 import { USERS_PATH } from '../../../../../common/constants';
-import { TECHNICAL_PREVIEW } from '../../../../overview/pages/translations';
 
 const getTabsOnUsersDetailsUrl = (userName: string, tabName: UsersTableType) =>
   `${USERS_PATH}/name/${userName}/${tabName}`;
 
 export const navTabsUsersDetails = (
   userName: string,
-  hasMlUserPermissions: boolean,
-  isRiskyUserEnabled: boolean
+  hasMlUserPermissions: boolean
 ): UsersDetailsNavTab => {
   const hiddenTabs = [];
 
   const userDetailsNavTabs = {
+    [UsersTableType.events]: {
+      id: UsersTableType.events,
+      name: i18n.NAVIGATION_EVENTS_TITLE,
+      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.events),
+      disabled: false,
+    },
     [UsersTableType.authentications]: {
       id: UsersTableType.authentications,
       name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
@@ -35,30 +39,16 @@ export const navTabsUsersDetails = (
       href: getTabsOnUsersDetailsUrl(userName, UsersTableType.anomalies),
       disabled: false,
     },
-    [UsersTableType.events]: {
-      id: UsersTableType.events,
-      name: i18n.NAVIGATION_EVENTS_TITLE,
-      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.events),
-      disabled: false,
-    },
     [UsersTableType.risk]: {
       id: UsersTableType.risk,
       name: i18n.NAVIGATION_RISK_TITLE,
       href: getTabsOnUsersDetailsUrl(userName, UsersTableType.risk),
       disabled: false,
-      isBeta: true,
-      betaOptions: {
-        text: TECHNICAL_PREVIEW,
-      },
     },
   };
 
   if (!hasMlUserPermissions) {
     hiddenTabs.push(UsersTableType.anomalies);
-  }
-
-  if (!isRiskyUserEnabled) {
-    hiddenTabs.push(UsersTableType.risk);
   }
 
   return omit(hiddenTabs, userDetailsNavTabs);

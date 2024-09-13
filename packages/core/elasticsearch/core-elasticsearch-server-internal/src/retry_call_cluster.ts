@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { defer, throwError, iif, timer } from 'rxjs';
-import { concatMap, retryWhen } from 'rxjs/operators';
-import type { Logger } from '@kbn/logging';
+import { concatMap, retryWhen } from 'rxjs';
 
 const retryResponseStatuses = [
   503, // ServiceUnavailable
@@ -48,7 +48,7 @@ export const retryCallCluster = <T extends Promise<unknown>>(apiCaller: () => T)
  * Retries the provided Elasticsearch API call when an error such as
  * `AuthenticationException` `NoConnections`, `ConnectionFault`,
  * `ServiceUnavailable` or `RequestTimeout` are encountered. The API call will
- * be retried once a second, indefinitely, until a successful response or a
+ * be retried once every `delay` millis, indefinitely, until a successful response or a
  * different error is received.
  *
  * @example
@@ -60,7 +60,6 @@ export const retryCallCluster = <T extends Promise<unknown>>(apiCaller: () => T)
  */
 export const migrationRetryCallCluster = <T extends Promise<unknown>>(
   apiCaller: () => T,
-  log: Logger,
   delay: number = 2500
 ): T => {
   const previousErrors: string[] = [];
@@ -70,7 +69,6 @@ export const migrationRetryCallCluster = <T extends Promise<unknown>>(
         errors.pipe(
           concatMap((error) => {
             if (!previousErrors.includes(error.message)) {
-              log.warn(`Unable to connect to Elasticsearch. Error: ${error.message}`);
               previousErrors.push(error.message);
             }
             return iif(

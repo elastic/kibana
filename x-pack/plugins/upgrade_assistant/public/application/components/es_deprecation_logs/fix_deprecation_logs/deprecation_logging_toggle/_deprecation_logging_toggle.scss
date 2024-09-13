@@ -3,5 +3,5 @@
 // them. With this selector we offset the difference so that the content
 // of the page doesnt jump when toggling between states.
 .upgToggleLoading > .upgLoadingItem {
-  margin: $euiSizeM / 2;
+  margin: calc($euiSizeM / 2);
 }

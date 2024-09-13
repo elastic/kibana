@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { AsyncLocalStorage } from 'async_hooks';
 import type apm from 'elastic-apm-node';
 import { isUndefined, omitBy } from 'lodash';
@@ -118,7 +120,9 @@ export class ExecutionContextService
     // we have to use enterWith since Hapi lifecycle model is built on event emitters.
     // therefore if we wrapped request handler in asyncLocalStorage.run(), we would lose context in other lifecycles.
     this.contextStore.enterWith(contextContainer);
-    this.log.debug(JSON.stringify(contextContainer));
+    if (this.log.isLevelEnabled('debug')) {
+      this.log.debug(JSON.stringify(contextContainer));
+    }
   }
 
   private withContext<R>(
@@ -130,7 +134,9 @@ export class ExecutionContextService
     }
     const parent = this.contextStore.getStore();
     const contextContainer = new ExecutionContextContainer(context, parent);
-    this.log.debug(JSON.stringify(contextContainer));
+    if (this.log.isLevelEnabled('debug')) {
+      this.log.debug(JSON.stringify(contextContainer));
+    }
 
     return this.contextStore.run(contextContainer, fn);
   }

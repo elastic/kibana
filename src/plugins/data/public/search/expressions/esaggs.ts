@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { get } from 'lodash';
 import { defer } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs';
 import { StartServicesAccessor } from '@kbn/core/public';
 import {
   EsaggsExpressionFunctionDefinition,
@@ -61,20 +62,20 @@ export function getFunctionDefinition({
         return { aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest };
       }).pipe(
         switchMap(({ aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest }) => {
-          const { disableShardWarnings } = getSearchContext();
+          const { disableWarningToasts } = getSearchContext();
 
           return handleEsaggsRequest({
             abortSignal,
             aggs: aggConfigs,
-            filters: get(input, 'filters', undefined),
+            filters: args.ignoreGlobalFilters ? undefined : get(input, 'filters', undefined),
             indexPattern,
             inspectorAdapters,
-            query: get(input, 'query', undefined) as any,
+            query: args.ignoreGlobalFilters ? undefined : (get(input, 'query', undefined) as any),
             searchSessionId: getSearchSessionId(),
             searchSourceService: searchSource,
             timeFields: args.timeFields,
             timeRange: get(input, 'timeRange', undefined),
-            disableShardWarnings: (disableShardWarnings || false) as boolean,
+            disableWarningToasts: (disableWarningToasts || false) as boolean,
             getNow,
             executionContext: getExecutionContext(),
           });

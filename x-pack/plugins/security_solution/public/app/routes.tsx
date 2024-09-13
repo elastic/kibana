@@ -8,14 +8,12 @@
 import type { History } from 'history';
 import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
-import { Router, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
-import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
 import { APP_ID } from '../../common/constants';
 import { RouteCapture } from '../common/components/endpoint/route_capture';
-import { useGetUserCasesPermissions, useKibana } from '../common/lib/kibana';
+import { useKibana } from '../common/lib/kibana';
 import type { AppAction } from '../common/store/actions';
 import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
 import { NotFoundPage } from './404';
@@ -24,19 +22,12 @@ import { HomePage } from './home';
 interface RouterProps {
   children: React.ReactNode;
   history: History;
-  onAppLeave: (handler: AppLeaveHandler) => void;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-const PageRouterComponent: FC<RouterProps> = ({
-  children,
-  history,
-  onAppLeave,
-  setHeaderActionMenu,
-}) => {
+const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
   const { cases } = useKibana().services;
   const CasesContext = cases.ui.getCasesContext();
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch<(action: AppAction) => void>();
   useEffect(() => {
     return () => {
@@ -53,16 +44,16 @@ const PageRouterComponent: FC<RouterProps> = ({
     <ManageRoutesSpy>
       <Router history={history}>
         <RouteCapture>
-          <Switch>
+          <Routes>
             <Route path="/">
               <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
-                <HomePage setHeaderActionMenu={setHeaderActionMenu}>{children}</HomePage>
+                <HomePage>{children}</HomePage>
               </CasesContext>
             </Route>
             <Route>
               <NotFoundPage />
             </Route>
-          </Switch>
+          </Routes>
         </RouteCapture>
       </Router>
     </ManageRoutesSpy>

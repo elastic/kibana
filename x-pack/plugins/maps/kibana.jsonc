@@ -24,10 +24,8 @@
       "navigation",
       "expressions",
       "visualizations",
-      "dashboard",
       "embeddable",
       "mapsEms",
-      "savedObjects",
       "share",
       "presentationUtil",
       "contentManagement"
@@ -35,19 +33,24 @@
     "optionalPlugins": [
       "cloud",
       "customIntegrations",
+      "embeddableEnhanced",
       "home",
       "savedObjectsTagging",
       "charts",
       "screenshotMode",
       "security",
       "spaces",
-      "usageCollection"
+      "usageCollection",
+      "serverless"
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
       "usageCollection",
-      "unifiedSearch"
+      "unifiedSearch",
+      "fieldFormats",
+      "esql",
+      "savedObjects",
     ],
     "extraPublicDirs": [
       "common"

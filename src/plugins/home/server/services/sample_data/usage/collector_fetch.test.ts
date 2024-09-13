@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
@@ -19,8 +20,10 @@ const getMockFetchClients = (hits?: unknown[]) => {
 describe('Sample Data Fetch', () => {
   let collectorFetchContext: CollectorFetchContext;
 
+  const getIndexForType = (index: string) => (type: string) => Promise.resolve(index);
+
   test('uninitialized .kibana', async () => {
-    const fetch = fetchProvider('index');
+    const fetch = fetchProvider(getIndexForType('index'));
     collectorFetchContext = getMockFetchClients();
     const telemetry = await fetch(collectorFetchContext);
 
@@ -28,7 +31,7 @@ describe('Sample Data Fetch', () => {
   });
 
   test('installed data set', async () => {
-    const fetch = fetchProvider('index');
+    const fetch = fetchProvider(getIndexForType('index'));
     collectorFetchContext = getMockFetchClients([
       {
         _id: 'sample-data-telemetry:test1',
@@ -55,7 +58,7 @@ Object {
   });
 
   test('multiple installed data sets', async () => {
-    const fetch = fetchProvider('index');
+    const fetch = fetchProvider(getIndexForType('index'));
     collectorFetchContext = getMockFetchClients([
       {
         _id: 'sample-data-telemetry:test1',
@@ -90,7 +93,7 @@ Object {
   });
 
   test('installed data set, missing counts', async () => {
-    const fetch = fetchProvider('index');
+    const fetch = fetchProvider(getIndexForType('index'));
     collectorFetchContext = getMockFetchClients([
       {
         _id: 'sample-data-telemetry:test1',
@@ -112,7 +115,7 @@ Object {
   });
 
   test('installed and uninstalled data sets', async () => {
-    const fetch = fetchProvider('index');
+    const fetch = fetchProvider(getIndexForType('index'));
     collectorFetchContext = getMockFetchClients([
       {
         _id: 'sample-data-telemetry:test0',

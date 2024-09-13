@@ -1,22 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import '../control_group.scss';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
 import classNames from 'classnames';
-import {
-  arrayMove,
-  SortableContext,
-  rectSortingStrategy,
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable';
+import React, { useEffect, useMemo, useState } from 'react';
+
 import {
   closestCenter,
   DndContext,
@@ -24,32 +19,58 @@ import {
   DragOverlay,
   KeyboardSensor,
   PointerSensor,
+  MeasuringStrategy,
   useSensor,
   useSensors,
-  LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
-
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  EuiToolTip,
+  EuiTourStep,
+} from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { ControlClone, SortableControl } from './control_group_sortable_item';
-import { useControlGroupContainerContext } from '../control_group_renderer';
+
 import { ControlGroupStrings } from '../control_group_strings';
+import {
+  controlGroupSelector,
+  useControlGroupContainer,
+} from '../embeddable/control_group_container';
+import { ControlClone, SortableControl } from './control_group_sortable_item';
 
 export const ControlGroup = () => {
-  // Redux embeddable container Context
-  const reduxContext = useControlGroupContainerContext();
-  const {
-    embeddableInstance: controlGroup,
-    actions: { setControlOrders },
-    useEmbeddableSelector: select,
-    useEmbeddableDispatch,
-  } = reduxContext;
-  const dispatch = useEmbeddableDispatch();
+  const controlGroup = useControlGroupContainer();
 
   // current state
-  const panels = select((state) => state.explicitInput.panels);
-  const viewMode = select((state) => state.explicitInput.viewMode);
-  const controlStyle = select((state) => state.explicitInput.controlStyle);
-  const showAddButton = select((state) => state.componentState.showAddButton);
+  const panels = controlGroupSelector((state) => state.explicitInput.panels);
+  const viewMode = controlGroupSelector((state) => state.explicitInput.viewMode);
+  const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
+  const showApplySelections = controlGroupSelector(
+    (state) => state.explicitInput.showApplySelections
+  );
+  const showAddButton = controlGroupSelector((state) => state.componentState.showAddButton);
+  const unpublishedFilters = controlGroupSelector(
+    (state) => state.componentState.unpublishedFilters
+  );
+  const controlWithInvalidSelectionsId = controlGroupSelector(
+    (state) => state.componentState.controlWithInvalidSelectionsId
+  );
+
+  const [tourStepOpen, setTourStepOpen] = useState<boolean>(true);
+  const [suppressTourChecked, setSuppressTourChecked] = useState<boolean>(false);
+  const [renderTourStep, setRenderTourStep] = useState(false);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -64,6 +85,126 @@ export const ControlGroup = () => {
     [panels]
   );
 
+  useEffect(() => {
+    /**
+     * This forces the tour step to get unmounted so that it can attach to the new invalid
+     * control - otherwise, the anchor will remain attached to the old invalid control
+     */
+    let mounted = true;
+    setRenderTourStep(false);
+    setTimeout(() => {
+      if (mounted) {
+        setRenderTourStep(true);
+      }
+    }, 100);
+    return () => {
+      mounted = false;
+    };
+  }, [controlWithInvalidSelectionsId]);
+
+  const applyButtonEnabled = useMemo(() => {
+    /**
+     * this is undefined if there are no unpublished filters / timeslice; note that an empty filter array counts
+     * as unpublished filters and so the apply button should still be enabled in this case
+     */
+    return Boolean(unpublishedFilters);
+  }, [unpublishedFilters]);
+
+  const showAppendedButtonGroup = useMemo(
+    () => showAddButton || showApplySelections,
+    [showAddButton, showApplySelections]
+  );
+
+  const ApplyButtonComponent = useMemo(() => {
+    return (
+      <EuiButtonIcon
+        size="m"
+        disabled={!applyButtonEnabled}
+        iconSize="m"
+        display="fill"
+        color={'success'}
+        iconType={'check'}
+        data-test-subj="controlGroup--applyFiltersButton"
+        aria-label={ControlGroupStrings.management.getApplyButtonTitle(applyButtonEnabled)}
+        onClick={() => {
+          if (unpublishedFilters) controlGroup.publishFilters(unpublishedFilters);
+        }}
+      />
+    );
+  }, [applyButtonEnabled, unpublishedFilters, controlGroup]);
+
+  const tourStep = useMemo(() => {
+    if (
+      !renderTourStep ||
+      !controlGroup.canShowInvalidSelectionsWarning() ||
+      !tourStepOpen ||
+      !controlWithInvalidSelectionsId ||
+      !panels[controlWithInvalidSelectionsId]
+    ) {
+      return null;
+    }
+    const invalidControlType = panels[controlWithInvalidSelectionsId].type;
+
+    return (
+      <EuiTourStep
+        step={1}
+        stepsTotal={1}
+        minWidth={300}
+        maxWidth={300}
+        display="block"
+        isStepOpen={true}
+        repositionOnScroll
+        onFinish={() => {}}
+        panelPaddingSize="m"
+        anchorPosition="downCenter"
+        panelClassName="controlGroup--invalidSelectionsTour"
+        anchor={`#controlFrame--${controlWithInvalidSelectionsId}`}
+        title={
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="warning" color="warning" />
+            </EuiFlexItem>
+            <EuiFlexItem>{ControlGroupStrings.invalidControlWarning.getTourTitle()}</EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        content={ControlGroupStrings.invalidControlWarning.getTourContent(invalidControlType)}
+        footerAction={[
+          <EuiCheckbox
+            checked={suppressTourChecked}
+            id={'controlGroup--suppressTourCheckbox'}
+            className="controlGroup--suppressTourCheckbox"
+            onChange={(e) => setSuppressTourChecked(e.target.checked)}
+            label={
+              <EuiText size="xs" className="controlGroup--suppressTourCheckboxLabel">
+                {ControlGroupStrings.invalidControlWarning.getSuppressTourLabel()}
+              </EuiText>
+            }
+          />,
+          <EuiButtonEmpty
+            size="xs"
+            flush="right"
+            color="text"
+            onClick={() => {
+              setTourStepOpen(false);
+              if (suppressTourChecked) {
+                controlGroup.suppressInvalidSelectionsWarning();
+              }
+            }}
+          >
+            {ControlGroupStrings.invalidControlWarning.getDismissButton()}
+          </EuiButtonEmpty>,
+        ]}
+      />
+    );
+  }, [
+    panels,
+    controlGroup,
+    tourStepOpen,
+    renderTourStep,
+    suppressTourChecked,
+    controlWithInvalidSelectionsId,
+  ]);
+
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const draggingIndex = useMemo(
     () => (draggingId ? idsInOrder.indexOf(draggingId) : -1),
@@ -77,12 +218,15 @@ export const ControlGroup = () => {
 
   const onDragEnd = ({ over }: DragEndEvent) => {
     if (over) {
-      const overIndex = idsInOrder.indexOf(over.id);
+      const overIndex = idsInOrder.indexOf(`${over.id}`);
       if (draggingIndex !== overIndex) {
         const newIndex = overIndex;
-        dispatch(setControlOrders({ ids: arrayMove([...idsInOrder], draggingIndex, newIndex) }));
+        controlGroup.dispatch.setControlOrders({
+          ids: arrayMove([...idsInOrder], draggingIndex, newIndex),
+        });
       }
     }
+    (document.activeElement as HTMLElement)?.blur();
     setDraggingId(null);
   };
 
@@ -111,22 +255,26 @@ export const ControlGroup = () => {
         >
           <EuiFlexGroup
             wrap={false}
-            gutterSize="m"
+            gutterSize="s"
             direction="row"
             responsive={false}
-            alignItems="center"
+            alignItems="stretch"
+            justifyContent="center"
             data-test-subj="controls-group"
           >
+            {tourStep}
             <EuiFlexItem>
               <DndContext
-                onDragStart={({ active }) => setDraggingId(active.id)}
+                onDragStart={({ active }) => setDraggingId(`${active.id}`)}
                 onDragEnd={onDragEnd}
                 onDragCancel={() => setDraggingId(null)}
                 sensors={sensors}
-                collisionDetection={closestCenter}
-                layoutMeasuring={{
-                  strategy: LayoutMeasuringStrategy.Always,
+                measuring={{
+                  droppable: {
+                    strategy: MeasuringStrategy.Always,
+                  },
                 }}
+                collisionDetection={closestCenter}
               >
                 <SortableContext items={idsInOrder} strategy={rectSortingStrategy}>
                   <EuiFlexGroup
@@ -156,16 +304,42 @@ export const ControlGroup = () => {
                 </DragOverlay>
               </DndContext>
             </EuiFlexItem>
-            {showAddButton && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  size="s"
-                  iconSize="m"
-                  display="base"
-                  iconType={'plusInCircle'}
-                  aria-label={ControlGroupStrings.management.getAddControlTitle()}
-                  onClick={() => controlGroup.openAddDataControlFlyout()}
-                />
+            {showAppendedButtonGroup && (
+              <EuiFlexItem
+                grow={false}
+                className="controlGroup--endButtonGroup"
+                data-test-subj="controlGroup--endButtonGroup"
+              >
+                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                  {showAddButton && (
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
+                        <EuiButtonIcon
+                          size="m"
+                          iconSize="m"
+                          display="base"
+                          iconType={'plusInCircle'}
+                          data-test-subj="controlGroup--addControlButton"
+                          aria-label={ControlGroupStrings.management.getAddControlTitle()}
+                          onClick={() => controlGroup.openAddDataControlFlyout()}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  )}
+                  {showApplySelections && (
+                    <EuiFlexItem grow={false}>
+                      {applyButtonEnabled ? (
+                        ApplyButtonComponent
+                      ) : (
+                        <EuiToolTip
+                          content={ControlGroupStrings.management.getApplyButtonTitle(false)}
+                        >
+                          {ApplyButtonComponent}
+                        </EuiToolTip>
+                      )}
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

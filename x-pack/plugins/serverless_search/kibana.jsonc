@@ -1,0 +1,41 @@
+{
+  "type": "plugin",
+  "id": "@kbn/serverless-search",
+  "owner": "@elastic/search-kibana",
+  "description": "Serverless customizations for search.",
+  "plugin": {
+    "id": "serverlessSearch",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "serverless",
+      "search"
+    ],
+    "requiredPlugins": [
+      "cloud",
+      "console",
+      "dataViews",
+      "dashboard",
+      "devTools",
+      "discover",
+      "management",
+      "searchprofiler",
+      "security",
+      "serverless",
+      "share",
+      "visualizations"
+    ],
+    "optionalPlugins": [
+      "indexManagement",
+      "searchConnectors",
+      "searchHomepage",
+      "searchIndices",
+      "searchInferenceEndpoints",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

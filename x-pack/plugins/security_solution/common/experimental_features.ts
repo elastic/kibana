@@ -12,36 +12,21 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  tGridEnabled: true,
-  tGridEventRenderedViewEnabled: true,
+  // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
+
   kubernetesEnabled: true,
-  disableIsolationUIPendingStatuses: false,
-  pendingActionResponsesWithAck: true,
-  policyListEnabled: true,
-  policyResponseInFleetEnabled: true,
-  chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
-  alertsPreviewChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 9
+
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
    * we don't want people to be able to violate security by getting access to whole documents
    * around telemetry they should not.
    * @see telemetry_detection_rules_preview_route.ts
-   * @see test/detection_engine_api_integration/security_and_spaces/tests/telemetry/README.md
+   * @see test/security_solution_api_integration/test_suites/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
-
-  /**
-   * Enables the Endpoint response actions console in various areas of the app
-   */
-  responseActionsConsoleEnabled: true,
-
-  /**
-   * Enables the insights module for related alerts by process ancestry
-   */
-  insightsRelatedAlertsByProcessAncestry: true,
 
   /**
    * Enables extended rule execution logging to Event Log. When this setting is enabled:
@@ -53,82 +38,196 @@ export const allowedExperimentalValues = Object.freeze({
   extendedRuleExecutionLoggingEnabled: false,
 
   /**
-   * Enables the new API and UI for https://github.com/elastic/security-team/issues/1974.
-   * It's a temporary feature flag that will be removed once the feature gets a basic production-ready implementation.
-   */
-  prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: false,
-
-  /**
    * Enables the SOC trends timerange and stats on D&R page
    */
   socTrendsEnabled: false,
 
   /**
-   * Enables the automated response actions in rule + alerts
+   * Enables the `upload` endpoint response action (v8.9)
    */
-  responseActionsEnabled: true,
+  responseActionUploadEnabled: true,
 
   /**
-   * Enables the automated endpoint response action in rule + alerts
+   * Enables Automated Endpoint Process actions
    */
-  endpointResponseActionsEnabled: false,
+  automatedProcessActionsEnabled: true,
 
   /**
-   * Enables endpoint package level rbac
-   */
-  endpointRbacEnabled: true,
-
-  /**
-   * Enables endpoint package level rbac for response actions only.
-   * if endpointRbacEnabled is enabled, it will take precedence.
-   */
-  endpointRbacV1Enabled: true,
-  /**
-   * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
-   */
-  alertDetailsPageEnabled: false,
-
-  /**
-   * Enables the `get-file` endpoint response action
-   */
-  responseActionGetFileEnabled: true,
-
-  /**
-   * Enables the `execute` endpoint response action
-   */
-  responseActionExecuteEnabled: false,
-
-  /**
-   * Enables top charts on Alerts Page
-   */
-  alertsPageChartsEnabled: true,
-  alertTypeEnabled: false,
-  /**
-   * Enables the new security flyout over the current alert details flyout
-   */
-  securityFlyoutEnabled: false,
-
-  /**
-   * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.
-   * https://www.elastic.co/guide/en/security/current/user-risk-score.html
-   * https://www.elastic.co/guide/en/security/current/host-risk-score.html
+   * Enables the ability to send Response actions to SentinelOne and persist the results
+   * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
+   * response actions in Response Console.
    *
-   * Issue: https://github.com/elastic/kibana/issues/146777
+   * Release: v8.13.0
    */
-  riskyHostsEnabled: false, // DEPRECATED
-  riskyUsersEnabled: false, // DEPRECATED
+  responseActionsSentinelOneV1Enabled: true,
+
+  /**
+   * Enables use of SentinelOne response actions that complete asynchronously
+   *
+   * Release: v8.14.0
+   */
+  responseActionsSentinelOneV2Enabled: true,
+
+  /** Enables the `get-file` response action for SentinelOne */
+  responseActionsSentinelOneGetFileEnabled: true,
+
+  /** Enables the `kill-process` response action for SentinelOne */
+  responseActionsSentinelOneKillProcessEnabled: true,
+
+  /** Enable the `processes` response actions for SentinelOne */
+  responseActionsSentinelOneProcessesEnabled: true,
+
+  /**
+   * Enables the ability to send Response actions to Crowdstrike and persist the results
+   * in ES.
+   */
+  responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+
+  /**
+   * Enables new notes
+   */
+  securitySolutionNotesEnabled: false,
+
+  /**
+   * Disables entity and alert previews
+   */
+  entityAlertPreviewDisabled: false,
+
+  /**
+   * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
+   */
+  assistantModelEvaluation: false,
+
+  /**
+   * Enables new Knowledge Base Entries features, introduced in `8.15.0`.
+   */
+  assistantKnowledgeBaseByDefault: false,
+
+  /**
+   * Enables the Assistant BedrockChat Langchain model, introduced in `8.15.0`.
+   */
+  assistantBedrockChat: true,
+
+  /**
+   * Enables the Managed User section inside the new user details flyout.
+   */
+  newUserDetailsFlyoutManagedUser: false,
+
+  /**
+   * Enable risk engine client and initialisation of datastream, component templates and mappings
+   */
+  riskScoringPersistence: true,
+
+  /**
+   * Enables experimental Entity Analytics HTTP endpoints
+   */
+  riskScoringRoutesEnabled: true,
+
+  /**
+   * disables ES|QL rules
+   */
+  esqlRulesDisabled: false,
+
+  /**
+   * Enables Protection Updates tab in the Endpoint Policy Details page
+   */
+  protectionUpdatesEnabled: true,
+
+  /**
+   * Disables the timeline save tour.
+   * This flag is used to disable the tour in cypress tests.
+   */
+  disableTimelineSaveTour: false,
+
+  /**
+   * Enables the risk engine privileges route
+   * and associated callout in the UI
+   */
+  riskEnginePrivilegesRouteEnabled: true,
+
+  /**
+   * Enables experimental Experimental S1 integration data to be available in Analyzer
+   */
+  sentinelOneDataInAnalyzerEnabled: true,
+
+  /**
+   * Enables SentinelOne manual host isolation response actions directly through the connector
+   * sub-actions framework.
+   * v8.12.0
+   */
+  sentinelOneManualHostActionsEnabled: true,
+
+  /**
+   * Enables experimental Crowdstrike integration data to be available in Analyzer
+   */
+  crowdstrikeDataInAnalyzerEnabled: true,
+
+  /**
+   * Enables experimental JAMF integration data to be available in Analyzer
+   */
+  jamfDataInAnalyzerEnabled: true,
 
   /*
-   * Enables new Set of filters on the Alerts page.
+   * Disables discover esql tab within timeline
    *
-   **/
-  alertsPageFiltersEnabled: true,
+   */
+  timelineEsqlTabDisabled: false,
+  /*
+   * Disables experimental Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
+   */
+  unifiedComponentsInTimelineDisabled: false,
+
+  /*
+   * Disables date pickers and sourcerer in analyzer if needed.
+   *
+   */
+  analyzerDatePickersAndSourcererDisabled: false,
+
+  /**
+   * Enables an ability to customize Elastic prebuilt rules.
+   *
+   * Ticket: https://github.com/elastic/kibana/issues/174168
+   * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
+   * Added: on Jun 24, 2024 in https://github.com/elastic/kibana/pull/186823
+   * Turned: TBD
+   * Expires: TBD
+   */
+  prebuiltRulesCustomizationEnabled: false,
+
+  /**
+   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
+   */
+  malwareOnWriteScanOptionAvailable: true,
+
+  /**
+   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
+   */
+  unifiedManifestEnabled: true,
+
+  /**
+   * Enables the new modal for the value list items
+   */
+  valueListItemsModalEnabled: true,
+
+  /**
+   * Enables the manual rule run
+   */
+  manualRuleRunEnabled: false,
+
+  /**
+   * Adds a new option to filter descendants of a process for Management / Event Filters
+   */
+  filterProcessDescendantsForEventFiltersEnabled: true,
+
+  /**
+   * Enables the new data ingestion hub
+   */
+  dataIngestionHubEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
-const SecuritySolutionInvalidExperimentalValue = class extends Error {};
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;
 
 /**
@@ -138,25 +237,27 @@ const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<Experimen
  * @param configValue
  * @throws SecuritySolutionInvalidExperimentalValue
  */
-export const parseExperimentalConfigValue = (configValue: string[]): ExperimentalFeatures => {
+export const parseExperimentalConfigValue = (
+  configValue: string[]
+): { features: ExperimentalFeatures; invalid: string[] } => {
   const enabledFeatures: Mutable<Partial<ExperimentalFeatures>> = {};
+  const invalidKeys: string[] = [];
 
   for (const value of configValue) {
-    if (!isValidExperimentalValue(value)) {
-      throw new SecuritySolutionInvalidExperimentalValue(`[${value}] is not valid.`);
+    if (!allowedKeys.includes(value as keyof ExperimentalFeatures)) {
+      invalidKeys.push(value);
+    } else {
+      enabledFeatures[value as keyof ExperimentalFeatures] = true;
     }
-
-    enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 
   return {
-    ...allowedExperimentalValues,
-    ...enabledFeatures,
+    features: {
+      ...allowedExperimentalValues,
+      ...enabledFeatures,
+    },
+    invalid: invalidKeys,
   };
-};
-
-export const isValidExperimentalValue = (value: string): value is keyof ExperimentalFeatures => {
-  return allowedKeys.includes(value as keyof ExperimentalFeatures);
 };
 
 export const getExperimentalAllowedValues = (): string[] => [...allowedKeys];

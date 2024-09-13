@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
@@ -20,8 +21,8 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
   describe(`with disableUnsafeEval=${disableUnsafeEval}`, () => {
     let root: ReturnType<typeof createRoot>;
     const defaultCspRules = disableUnsafeEval
-      ? `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-      : `script-src 'self' 'unsafe-eval'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`;
+      ? `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`
+      : `script-src 'report-sample' 'self' 'unsafe-eval'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`;
     beforeEach(async () => {
       root = createRoot({
         csp: { disableUnsafeEval },

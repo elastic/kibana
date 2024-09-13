@@ -29,7 +29,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       describe('when there are multiple service versions', () => {
-        let response: APIReturnType<'GET /api/apm/services/{serviceName}/annotation/search'>;
+        let response: APIReturnType<'GET /api/apm/services/{serviceName}/annotation/search 2023-10-31'>;
 
         before(async () => {
           const indexExists = await es.indices.exists({ index: indexName });
@@ -119,7 +119,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
 
           response = (
             await apmApiClient.readUser({
-              endpoint: 'GET /api/apm/services/{serviceName}/annotation/search',
+              endpoint: 'GET /api/apm/services/{serviceName}/annotation/search 2023-10-31',
               params: {
                 path: {
                   serviceName: 'opbeans-java',

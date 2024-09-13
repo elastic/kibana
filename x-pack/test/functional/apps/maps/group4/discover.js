@@ -9,7 +9,13 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'maps', 'timePicker']);
+  const { common, discover, header, maps, unifiedFieldList } = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'maps',
+    'unifiedFieldList',
+  ]);
   const security = getService('security');
   const from = 'Sep 22, 2015 @ 00:00:00.000';
   const to = 'Sep 22, 2015 @ 04:00:00.000';
@@ -23,44 +29,44 @@ export default function ({ getService, getPageObjects }) {
         'global_discover_read',
         'global_visualize_read',
       ]);
-      await PageObjects.common.setTime({ from, to });
-      await PageObjects.common.navigateToApp('discover');
+      await common.setTime({ from, to });
+      await common.navigateToApp('discover');
     });
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await PageObjects.common.unsetTime();
+      await common.unsetTime();
     });
 
     it('should link geo_shape fields to Maps application', async () => {
-      await PageObjects.discover.selectIndexPattern('geo_shapes*');
-      await PageObjects.discover.clickFieldListItemVisualize('geometry');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.maps.waitForLayersToLoad();
-      const doesLayerExist = await PageObjects.maps.doesLayerExist('geo_shapes*');
+      await discover.selectIndexPattern('geo_shapes*');
+      await unifiedFieldList.clickFieldListItemVisualize('geometry');
+      await header.waitUntilLoadingHasFinished();
+      await maps.waitForLayersToLoad();
+      const doesLayerExist = await maps.doesLayerExist('geo_shapes*');
       expect(doesLayerExist).to.equal(true);
-      const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg('geo_shapes*');
+      const tooltipText = await maps.getLayerTocTooltipMsg('geo_shapes*');
       expect(tooltipText).to.equal('geo_shapes*\nFound ~8 documents. This count is approximate.');
-      await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
+      await maps.refreshAndClearUnsavedChangesWarning();
     });
 
     it('should link geo_point fields to Maps application with time and query context', async () => {
-      await PageObjects.discover.selectIndexPattern('logstash-*');
+      await discover.selectIndexPattern('logstash-*');
 
       await queryBar.setQuery('machine.os.raw : "ios"');
       await queryBar.submitQuery();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
-      await PageObjects.discover.clickFieldListItemVisualize('geo.coordinates');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.maps.waitForLayersToLoad();
-      const doesLayerExist = await PageObjects.maps.doesLayerExist('logstash-*');
+      await unifiedFieldList.clickFieldListItemVisualize('geo.coordinates');
+      await header.waitUntilLoadingHasFinished();
+      await maps.waitForLayersToLoad();
+      const doesLayerExist = await maps.doesLayerExist('logstash-*');
       expect(doesLayerExist).to.equal(true);
-      const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg('logstash-*');
+      const tooltipText = await maps.getLayerTocTooltipMsg('logstash-*');
       expect(tooltipText).to.equal(
         'logstash-*\nFound 7 documents.\nResults narrowed by global search\nResults narrowed by global time'
       );
-      await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
+      await maps.refreshAndClearUnsavedChangesWarning();
     });
   });
 }

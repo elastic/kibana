@@ -11,7 +11,7 @@ import { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector, ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
   ExecutorParamsSchemaITSM,
   ExecutorSubActionCommonFieldsParamsSchema,
@@ -26,6 +26,7 @@ import {
   ExecutorParamsSchemaITOM,
   ExecutorSubActionAddEventParamsSchema,
   ExternalIncidentServiceConfigurationBaseSchema,
+  ExecutorSubActionCloseIncidentParamsSchema,
 } from './schema';
 import { SNProductsConfigValue } from '../../../../common/servicenow_config';
 
@@ -104,17 +105,26 @@ export interface ExternalServiceParamsUpdate {
   incident: PartialIncident & Record<string, unknown>;
 }
 
+export interface ExternalServiceParamsClose {
+  incidentId: string | null;
+  correlationId: string | null;
+}
+
 export interface ExternalService {
   getChoices: (fields: string[]) => Promise<GetChoicesResponse>;
   getIncident: (id: string) => Promise<ServiceNowIncident>;
   getFields: () => Promise<GetCommonFieldsResponse>;
   createIncident: (params: ExternalServiceParamsCreate) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: ExternalServiceParamsUpdate) => Promise<ExternalServiceIncidentResponse>;
+  closeIncident: (
+    params: ExternalServiceParamsClose
+  ) => Promise<ExternalServiceIncidentResponse | null>;
   findIncidents: (params?: Record<string, string>) => Promise<ServiceNowIncident>;
   getUrl: () => string;
   checkInstance: (res: AxiosResponse) => void;
   getApplicationInformation: () => Promise<GetApplicationInfoResponse>;
   checkIfApplicationIsInstalled: () => Promise<void>;
+  getIncidentByCorrelationId: (correlationId: string) => Promise<ServiceNowIncident | null>;
 }
 
 export type PushToServiceApiParams = ExecutorSubActionPushParams;
@@ -132,6 +142,10 @@ export type ExecutorSubActionGetIncidentParams = TypeOf<
 
 export type ExecutorSubActionHandshakeParams = TypeOf<
   typeof ExecutorSubActionHandshakeParamsSchema
+>;
+
+export type ExecutorSubActionCloseIncidentParams = TypeOf<
+  typeof ExecutorSubActionCloseIncidentParamsSchema
 >;
 
 export type ServiceNowITSMIncident = Omit<
@@ -153,6 +167,10 @@ export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerAr
 
 export interface GetIncidentApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: ExecutorSubActionGetIncidentParams;
+}
+
+export interface CloseIncidentApiHandlerArgs extends ExternalServiceApiHandlerArgs {
+  params: ExecutorSubActionCloseIncidentParams;
 }
 
 export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
@@ -199,6 +217,9 @@ export interface ExternalServiceAPI {
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<ServiceNowIncident>;
+  closeIncident: (
+    args: CloseIncidentApiHandlerArgs
+  ) => Promise<ExternalServiceIncidentResponse | null>;
 }
 
 export interface ExternalServiceCommentResponse {
@@ -284,6 +305,7 @@ interface ServiceFactoryOpts {
   configurationUtilities: ActionsConfigurationUtilities;
   serviceConfig: SNProductsConfigValue;
   axiosInstance: AxiosInstance;
+  connectorUsageCollector: ConnectorUsageCollector;
 }
 
 export type ServiceFactory<T = ExternalService> = ({
@@ -292,6 +314,7 @@ export type ServiceFactory<T = ExternalService> = ({
   configurationUtilities,
   serviceConfig,
   axiosInstance,
+  connectorUsageCollector,
 }: ServiceFactoryOpts) => T;
 
 /**

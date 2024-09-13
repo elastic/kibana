@@ -8,16 +8,16 @@
 /*
  * React component for rendering a select element with threshold levels.
  */
-import React, { Fragment, FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useMemo } from 'react';
 
-import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText, EuiSuperSelectProps } from '@elastic/eui';
+import type { EuiSuperSelectProps } from '@elastic/eui';
+import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
-
-import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
-import { ANOMALY_THRESHOLD } from '../../../../../common';
+import { getSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 
 const warningLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
   defaultMessage: 'warning',
@@ -33,10 +33,10 @@ const criticalLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.c
 });
 
 const optionsMap = {
-  [warningLabel]: ANOMALY_THRESHOLD.LOW,
-  [minorLabel]: ANOMALY_THRESHOLD.MINOR,
-  [majorLabel]: ANOMALY_THRESHOLD.MAJOR,
-  [criticalLabel]: ANOMALY_THRESHOLD.CRITICAL,
+  [warningLabel]: ML_ANOMALY_THRESHOLD.LOW,
+  [minorLabel]: ML_ANOMALY_THRESHOLD.MINOR,
+  [majorLabel]: ML_ANOMALY_THRESHOLD.MAJOR,
+  [criticalLabel]: ML_ANOMALY_THRESHOLD.CRITICAL,
 };
 
 export interface TableSeverityPageUrlState {
@@ -52,24 +52,24 @@ export interface TableSeverity {
 
 export const SEVERITY_OPTIONS: TableSeverity[] = [
   {
-    val: ANOMALY_THRESHOLD.LOW,
+    val: ML_ANOMALY_THRESHOLD.LOW,
     display: warningLabel,
-    color: getSeverityColor(ANOMALY_THRESHOLD.LOW),
+    color: getSeverityColor(ML_ANOMALY_THRESHOLD.LOW),
   },
   {
-    val: ANOMALY_THRESHOLD.MINOR,
+    val: ML_ANOMALY_THRESHOLD.MINOR,
     display: minorLabel,
-    color: getSeverityColor(ANOMALY_THRESHOLD.MINOR),
+    color: getSeverityColor(ML_ANOMALY_THRESHOLD.MINOR),
   },
   {
-    val: ANOMALY_THRESHOLD.MAJOR,
+    val: ML_ANOMALY_THRESHOLD.MAJOR,
     display: majorLabel,
-    color: getSeverityColor(ANOMALY_THRESHOLD.MAJOR),
+    color: getSeverityColor(ML_ANOMALY_THRESHOLD.MAJOR),
   },
   {
-    val: ANOMALY_THRESHOLD.CRITICAL,
+    val: ML_ANOMALY_THRESHOLD.CRITICAL,
     display: criticalLabel,
-    color: getSeverityColor(ANOMALY_THRESHOLD.CRITICAL),
+    color: getSeverityColor(ML_ANOMALY_THRESHOLD.CRITICAL),
   },
 ];
 

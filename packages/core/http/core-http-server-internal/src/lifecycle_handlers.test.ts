@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -13,14 +14,22 @@ import type {
   OnPreResponseToolkit,
   OnPostAuthToolkit,
   OnPreRoutingToolkit,
+  OnPostAuthHandler,
+  OnPreResponseInfo,
 } from '@kbn/core-http-server';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import {
+  createBuildNrMismatchLoggerPreResponseHandler,
   createCustomHeadersPreResponseHandler,
+  createRestrictInternalRoutesPostAuthHandler,
   createVersionCheckPostAuthHandler,
   createXsrfPostAuthHandler,
 } from './lifecycle_handlers';
+
 import { HttpConfig } from './http_config';
+import { loggerMock } from '@kbn/logging-mocks';
+import { Logger } from '@kbn/logging';
+import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
 
 type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit>;
 
@@ -36,22 +45,34 @@ const createToolkit = (): ToolkitMock => {
 
 const forgeRequest = ({
   headers = {},
+  query = {},
   path = '/',
   method = 'get',
   kibanaRouteOptions,
+  buildNr,
 }: Partial<{
   headers: Record<string, string>;
+  query: Record<string, string>;
   path: string;
   method: RouteMethod;
   kibanaRouteOptions: KibanaRouteOptions;
+  buildNr: undefined | string;
 }>): KibanaRequest => {
+  if (buildNr) {
+    headers[KIBANA_BUILD_NR_HEADER] = buildNr;
+  }
   return mockRouter.createKibanaRequest({
     headers,
     path,
+    query,
     method,
     kibanaRouteOptions,
   });
 };
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('xsrf post-auth handler', () => {
   let toolkit: ToolkitMock;
@@ -167,7 +188,7 @@ describe('xsrf post-auth handler', () => {
         path: '/some-path',
         kibanaRouteOptions: {
           xsrfRequired: false,
-          access: 'public',
+          access: 'internal',
         },
       });
 
@@ -242,6 +263,129 @@ describe('versionCheck post-auth handler', () => {
   });
 });
 
+describe('restrictInternal post-auth handler', () => {
+  let toolkit: ToolkitMock;
+  let responseFactory: ReturnType<typeof mockRouter.createResponseFactory>;
+
+  beforeEach(() => {
+    toolkit = createToolkit();
+    responseFactory = mockRouter.createResponseFactory();
+  });
+  const createForgeRequest = (
+    access: 'internal' | 'public',
+    headers: Record<string, string> | undefined = {},
+    query: Record<string, string> | undefined = {}
+  ) => {
+    return forgeRequest({
+      method: 'get',
+      headers,
+      query,
+      path: `/${access}/some-path`,
+      kibanaRouteOptions: {
+        xsrfRequired: false,
+        access,
+      },
+    });
+  };
+
+  const createForwardSuccess = (handler: OnPostAuthHandler, request: KibanaRequest) => {
+    toolkit.next.mockReturnValue('next' as any);
+    const result = handler(request, responseFactory, toolkit);
+
+    expect(toolkit.next).toHaveBeenCalledTimes(1);
+    expect(responseFactory.badRequest).not.toHaveBeenCalled();
+    expect(result).toBe('next');
+  };
+
+  describe('when restriction is enabled', () => {
+    const config = createConfig({
+      name: 'my-server-name',
+      restrictInternalApis: true,
+    });
+
+    it('returns a bad request if called without internal origin header for internal API', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('internal');
+
+      responseFactory.badRequest.mockReturnValue('badRequest' as any);
+
+      const result = handler(request, responseFactory, toolkit);
+
+      expect(toolkit.next).not.toHaveBeenCalled();
+      expect(responseFactory.badRequest.mock.calls[0][0]?.body).toMatchInlineSnapshot(
+        `"uri [/internal/some-path] with method [get] exists but is not available with the current configuration"`
+      );
+      expect(result).toBe('badRequest');
+    });
+
+    it('forward the request to the next interceptor if called with internal origin header for internal API', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('internal', { 'x-elastic-internal-origin': 'Kibana' });
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called with internal origin header for public APIs', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('public', { 'x-elastic-internal-origin': 'Kibana' });
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called without internal origin header for public APIs', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('public');
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called with internal origin query param for internal API', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('internal', undefined, { elasticInternalOrigin: 'true' });
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called with internal origin query param for public APIs', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('internal', undefined, { elasticInternalOrigin: 'true' });
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called without internal origin query param for public APIs', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('public');
+      createForwardSuccess(handler, request);
+    });
+  });
+
+  describe('when restriction is not enabled', () => {
+    const config = createConfig({
+      name: 'my-server-name',
+      restrictInternalApis: false,
+    });
+    it('forward the request to the next interceptor if called without internal origin header for internal APIs', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('internal');
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called with internal origin header for internal API', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('internal', { 'x-elastic-internal-origin': 'Kibana' });
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called without internal origin header for public APIs', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('public');
+      createForwardSuccess(handler, request);
+    });
+
+    it('forward the request to the next interceptor if called with internal origin header for public APIs', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const request = createForgeRequest('public', { 'x-elastic-internal-origin': 'Kibana' });
+      createForwardSuccess(handler, request);
+    });
+  });
+});
+
 describe('customHeaders pre-response handler', () => {
   let toolkit: ToolkitMock;
 
@@ -252,7 +396,13 @@ describe('customHeaders pre-response handler', () => {
   it('adds the kbn-name and Content-Security-Policy headers to the response', () => {
     const config = createConfig({
       name: 'my-server-name',
-      csp: { strict: true, warnLegacyBrowsers: true, disableEmbedding: true, header: 'foo' },
+      csp: {
+        strict: true,
+        warnLegacyBrowsers: true,
+        disableEmbedding: true,
+        header: 'foo',
+        reportOnlyHeader: 'bar',
+      },
     });
     const handler = createCustomHeadersPreResponseHandler(config as HttpConfig);
 
@@ -262,6 +412,7 @@ describe('customHeaders pre-response handler', () => {
     expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
         'Content-Security-Policy': 'foo',
+        'Content-Security-Policy-Report-Only': 'bar',
         'kbn-name': 'my-server-name',
       },
     });
@@ -270,7 +421,13 @@ describe('customHeaders pre-response handler', () => {
   it('adds the security headers and custom headers defined in the configuration', () => {
     const config = createConfig({
       name: 'my-server-name',
-      csp: { strict: true, warnLegacyBrowsers: true, disableEmbedding: true, header: 'foo' },
+      csp: {
+        strict: true,
+        warnLegacyBrowsers: true,
+        disableEmbedding: true,
+        header: 'foo',
+        reportOnlyHeader: 'bar',
+      },
       securityResponseHeaders: {
         headerA: 'value-A',
         headerB: 'value-B', // will be overridden by the custom response header below
@@ -287,6 +444,7 @@ describe('customHeaders pre-response handler', () => {
     expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
         'Content-Security-Policy': 'foo',
+        'Content-Security-Policy-Report-Only': 'bar',
         'kbn-name': 'my-server-name',
         headerA: 'value-A',
         headerB: 'x',
@@ -297,10 +455,17 @@ describe('customHeaders pre-response handler', () => {
   it('do not allow overwrite of the kbn-name and Content-Security-Policy headers if defined in custom headders ', () => {
     const config = createConfig({
       name: 'my-server-name',
-      csp: { strict: true, warnLegacyBrowsers: true, disableEmbedding: true, header: 'foo' },
+      csp: {
+        strict: true,
+        warnLegacyBrowsers: true,
+        disableEmbedding: true,
+        header: 'foo',
+        reportOnlyHeader: 'bar',
+      },
       customResponseHeaders: {
         'kbn-name': 'custom-name',
         'Content-Security-Policy': 'custom-csp',
+        'Content-Security-Policy-Report-Only': 'bar',
         headerA: 'value-A',
         headerB: 'value-B',
       },
@@ -314,9 +479,86 @@ describe('customHeaders pre-response handler', () => {
       headers: {
         'kbn-name': 'my-server-name',
         'Content-Security-Policy': 'foo',
+        'Content-Security-Policy-Report-Only': 'bar',
         headerA: 'value-A',
         headerB: 'value-B',
       },
     });
   });
+});
+
+describe('build number mismatch logger on error pre-response handler', () => {
+  let logger: jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    logger = loggerMock.create();
+  });
+
+  it('injects a logger prefix', () => {
+    createBuildNrMismatchLoggerPreResponseHandler(123, logger);
+    expect(logger.get).toHaveBeenCalledTimes(1);
+    expect(logger.get).toHaveBeenCalledWith(`kbn-build-number-mismatch`);
+  });
+
+  it('does not log for same server-client build', () => {
+    const handler = createBuildNrMismatchLoggerPreResponseHandler(123, logger);
+    const request = forgeRequest({ buildNr: '123' });
+    const response: OnPreResponseInfo = { statusCode: 500 }; // should log for errors, but not this time bc same build nr
+    handler(request, response, createToolkit());
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  const badStatusCodeTestCases = [
+    /** just test a few common ones */
+    [400],
+    [401],
+    [403],
+    [499],
+    [500],
+    [502],
+    [999] /* and not so common... */,
+  ];
+  it.each(badStatusCodeTestCases)(
+    'logs for %p responses and newer client builds',
+    (responseStatusCode) => {
+      const handler = createBuildNrMismatchLoggerPreResponseHandler(123, logger);
+      const request = forgeRequest({ buildNr: '124' });
+      const response: OnPreResponseInfo = { statusCode: responseStatusCode };
+      handler(request, response, createToolkit());
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Client build (124) is newer than this Kibana server build (123). The [${responseStatusCode}] error status in req id [123] may be due to client-server incompatibility!`
+      );
+    }
+  );
+
+  it.each(badStatusCodeTestCases)('logs for %p responses and older client builds', (statusCode) => {
+    const handler = createBuildNrMismatchLoggerPreResponseHandler(123, logger);
+    const request = forgeRequest({ buildNr: '122' });
+    const response: OnPreResponseInfo = { statusCode };
+    handler(request, response, createToolkit());
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Client build (122) is older than this Kibana server build (123). The [${statusCode}] error status in req id [123] may be due to client-server incompatibility!`
+    );
+  });
+
+  it.each([[200], [201], [301], [302]])('does not log for %p responses', (statusCode) => {
+    const handler = createBuildNrMismatchLoggerPreResponseHandler(123, logger);
+    const request = forgeRequest({ buildNr: '124' });
+    const response: OnPreResponseInfo = { statusCode };
+    handler(request, response, createToolkit());
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it.each([['foo'], [['yes']], [true], [null], [[]], [undefined]])(
+    'ignores bogus client build numbers like %p',
+    (bogusBuild) => {
+      const handler = createBuildNrMismatchLoggerPreResponseHandler(123, logger);
+      const request = forgeRequest({ buildNr: bogusBuild as any });
+      const response: OnPreResponseInfo = { statusCode: 500 };
+      handler(request, response, createToolkit());
+      expect(logger.warn).not.toHaveBeenCalled();
+    }
+  );
 });

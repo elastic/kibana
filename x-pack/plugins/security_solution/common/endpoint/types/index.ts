@@ -12,6 +12,9 @@ import type { ManifestSchema } from '../schema/manifest';
 export * from './actions';
 export * from './os';
 export * from './trusted_apps';
+export * from './utility_types';
+export * from './agents';
+export * from './sentinel_one';
 export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
 
 /**
@@ -146,6 +149,7 @@ export interface ResolverNode {
   parent?: string | number;
   name?: string;
   stats: EventStats;
+  agentId?: string;
 }
 
 /**
@@ -371,6 +375,7 @@ export type AlertEvent = Partial<{
         sid: ECSField<string>;
         integrity_level: ECSField<number>;
         integrity_level_name: ECSField<string>;
+        elevation_level: ECSField<string>;
         // Using ECSField as the outer because the object is expected to be an array
         privileges: ECSField<
           Partial<{
@@ -402,6 +407,8 @@ export type AlertEvent = Partial<{
     Ext: Partial<{
       malware_classification: MalwareClassification;
       temp_file_path: ECSField<string>;
+      quarantine_result: ECSField<boolean>;
+      quarantine_message: ECSField<string>;
       // Using ECSField as the outer because the object is expected to be an array
       code_signature: ECSField<
         Partial<{
@@ -473,8 +480,10 @@ export type PolicyInfo = Immutable<{
   id: string;
 }>;
 
-export type HostInfo = Immutable<{
-  metadata: HostMetadata;
+// Host Information as returned by the Host Details API.
+// NOTE:The `HostInfo` type is the original and defined as Immutable.
+export interface HostInfoInterface {
+  metadata: HostMetadataInterface;
   host_status: HostStatus;
   policy_info?: {
     agent: {
@@ -483,7 +492,7 @@ export type HostInfo = Immutable<{
        */
       configured: PolicyInfo;
       /**
-       * Last reported running in agent (may lag behind configured)
+       * Last reported running in agent (might lag behind configured)
        */
       applied: PolicyInfo;
     };
@@ -492,12 +501,22 @@ export type HostInfo = Immutable<{
      */
     endpoint: PolicyInfo;
   };
-}>;
+  /**
+   * The time when the Elastic Agent associated with this Endpoint host checked in with fleet
+   * Conceptually the value is the same as Agent['last_checkin'] if present, but we fall back to
+   * UnitedAgentMetadataPersistedData['united']['endpoint']['metadata']['@timestamp']
+   * if `Agent.last_checkin` value is `undefined`
+   */
+  last_checkin: string;
+}
+
+export type HostInfo = Immutable<HostInfoInterface>;
 
 // Host metadata document streamed up to ES by the Endpoint running on host machines.
-// NOTE:  `HostMetadata` type is the original and defined as Immutable. If needing to
+// NOTE: The `HostMetadata` type is the original and defined as Immutable. If you need to
 //        work with metadata that is not mutable, use `HostMetadataInterface`
 export type HostMetadata = Immutable<HostMetadataInterface>;
+
 export interface HostMetadataInterface {
   '@timestamp': number;
   event: {
@@ -552,7 +571,10 @@ export interface HostMetadataInterface {
   data_stream: DataStream;
 }
 
-export type UnitedAgentMetadata = Immutable<{
+/**
+ * The persisted data (to the index) for both endpoint and agent data.
+ * */
+export type UnitedAgentMetadataPersistedData = Immutable<{
   agent: {
     id: string;
   };
@@ -699,6 +721,7 @@ export type SafeEndpointEvent = Partial<{
   }>;
   event: Partial<{
     category: ECSField<string>;
+    outcome: ECSField<string>;
     type: ECSField<string>;
     id: ECSField<string>;
     kind: ECSField<string>;
@@ -767,6 +790,7 @@ export type SafeEndpointEvent = Partial<{
       entity_id: ECSField<string>;
       name: ECSField<string>;
       pid: ECSField<number>;
+      start: ECSField<string[]>;
     }>;
     group_leader: Partial<{
       entity_id: ECSField<string>;
@@ -844,6 +868,11 @@ export interface ResolverSchema {
    * parent represents the field that is the edge between two nodes.
    */
   parent: string;
+
+  /**
+   * agent id is required for endpoint because entity_id might not include agent.id soon
+   */
+  agentId?: string;
 }
 
 /**
@@ -863,6 +892,11 @@ export type ResolverEntityIndex = Array<{
    * Unique ID value for the requested document using the `_id` field passed to the /entity route
    */
   id: string;
+
+  /**
+   * Agent id is required for endpoint because entity_id might not include agent.id soon
+   */
+  agentId?: string;
 }>;
 
 /**
@@ -924,7 +958,15 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
 export interface PolicyConfig {
   meta: {
     license: string;
+    cloud: boolean;
+    license_uuid: string;
+    cluster_uuid: string;
+    cluster_name: string;
+    serverless: boolean;
+    billable?: boolean;
+    heartbeatinterval?: number;
   };
+  global_manifest_version: 'latest' | string;
   windows: {
     advanced?: {
       [key: string]: unknown;
@@ -947,9 +989,9 @@ export interface PolicyConfig {
       registry: boolean;
       security: boolean;
     };
-    malware: ProtectionFields & BlocklistFields;
+    malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     memory_protection: ProtectionFields & SupportedFields;
-    behavior_protection: ProtectionFields & SupportedFields;
+    behavior_protection: BehaviorProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;
@@ -973,6 +1015,7 @@ export interface PolicyConfig {
       };
     };
     antivirus_registration: {
+      mode: AntivirusRegistrationModes;
       enabled: boolean;
     };
     attack_surface_reduction: {
@@ -988,8 +1031,8 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
-    malware: ProtectionFields & BlocklistFields;
-    behavior_protection: ProtectionFields & SupportedFields;
+    malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
+    behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
@@ -1018,8 +1061,8 @@ export interface PolicyConfig {
       session_data: boolean;
       tty_io: boolean;
     };
-    malware: ProtectionFields & BlocklistFields;
-    behavior_protection: ProtectionFields & SupportedFields;
+    malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
+    behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
@@ -1081,6 +1124,10 @@ export interface ProtectionFields {
   mode: ProtectionModes;
 }
 
+export interface BehaviorProtectionFields extends ProtectionFields {
+  reputation_service: boolean;
+}
+
 /** Policy:  Supported fields */
 export interface SupportedFields {
   supported: boolean;
@@ -1090,11 +1137,21 @@ export interface BlocklistFields {
   blocklist: boolean;
 }
 
+export interface OnWriteScanFields {
+  on_write_scan: boolean;
+}
+
 /** Policy protection mode options */
 export enum ProtectionModes {
   detect = 'detect',
   prevent = 'prevent',
   off = 'off',
+}
+
+export enum AntivirusRegistrationModes {
+  enabled = 'enabled',
+  disabled = 'disabled',
+  sync = 'sync_with_malware_prevent',
 }
 
 /**
@@ -1171,6 +1228,9 @@ export interface HostPolicyResponseAppliedAction {
 export type HostPolicyResponseConfiguration =
   HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
 
+export type HostPolicyResponseArtifacts =
+  HostPolicyResponse['Endpoint']['policy']['applied']['artifacts'];
+
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;
   concerned_actions: HostPolicyActionName[];
@@ -1179,7 +1239,7 @@ interface HostPolicyResponseConfigurationStatus {
 /**
  * Host Policy Response Applied Artifact
  */
-interface HostPolicyResponseAppliedArtifact {
+export interface HostPolicyResponseAppliedArtifact {
   name: string;
   sha256: string;
 }
@@ -1300,25 +1360,40 @@ export interface ListPageRouteState {
   backButtonLabel?: string;
 }
 
-/**
- * REST API standard base response for list types
- */
-interface BaseListResponse<D = unknown> {
-  data: D[];
-  page: number;
-  pageSize: number;
-  total: number;
-}
-
 export interface AdditionalOnSwitchChangeParams {
   value: boolean;
   policyConfigData: UIPolicyConfig;
   protectionOsList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
 }
 
+/** Allowed fields for sorting in the EndpointList table.
+ * These are the column fields in the EndpointList table, based on the
+ * returned `HostInfoInterface` data type (and not on the internal data structure).
+ */
+export enum EndpointSortableField {
+  ENROLLED_AT = 'enrolled_at',
+  HOSTNAME = 'metadata.host.hostname',
+  HOST_STATUS = 'host_status',
+  POLICY_NAME = 'metadata.Endpoint.policy.applied.name',
+  POLICY_STATUS = 'metadata.Endpoint.policy.applied.status',
+  HOST_OS_NAME = 'metadata.host.os.name',
+  HOST_IP = 'metadata.host.ip',
+  AGENT_VERSION = 'metadata.agent.version',
+  LAST_SEEN = 'last_checkin',
+}
+
 /**
  * Returned by the server via GET /api/endpoint/metadata
  */
-export type MetadataListResponse = BaseListResponse<HostInfo>;
+export interface MetadataListResponse {
+  data: HostInfo[];
+  page: number;
+  pageSize: number;
+  total: number;
+  sortField: EndpointSortableField;
+  sortDirection: 'asc' | 'desc';
+}
 
 export type { EndpointPrivileges } from './authz';
+
+export type { EndpointHeartbeat } from './heartbeat';

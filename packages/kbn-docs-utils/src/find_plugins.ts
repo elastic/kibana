@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -19,6 +20,7 @@ function toApiScope(pkg: Package): ApiScope {
       return ApiScope.CLIENT;
     case 'shared-server':
       return ApiScope.SERVER;
+    case 'core':
     case 'test-helper':
     case 'functional-tests':
     case 'shared-common':
@@ -33,7 +35,7 @@ function toApiScope(pkg: Package): ApiScope {
 }
 
 function toPluginOrPackage(pkg: Package): PluginOrPackage {
-  return {
+  const result = {
     id: pkg.isPlugin() ? pkg.manifest.plugin.id : pkg.manifest.id,
     directory: Path.resolve(REPO_ROOT, pkg.normalizedRepoRelativeDir),
     manifestPath: Path.resolve(REPO_ROOT, pkg.normalizedRepoRelativeDir, 'kibana.jsonc'),
@@ -50,9 +52,23 @@ function toPluginOrPackage(pkg: Package): PluginOrPackage {
     },
     scope: toApiScope(pkg),
   };
+
+  if (pkg.isPlugin()) {
+    return {
+      ...result,
+      manifest: {
+        ...result.manifest,
+        requiredPlugins: pkg.manifest.plugin.requiredPlugins || [],
+        optionalPlugins: pkg.manifest.plugin.optionalPlugins || [],
+        requiredBundles: pkg.manifest.plugin.requiredBundles || [],
+      },
+    };
+  }
+
+  return result;
 }
 
-export function findPlugins(): PluginOrPackage[] {
+export function findPlugins(pluginOrPackageFilter?: string[]): PluginOrPackage[] {
   const packages = getPackages(REPO_ROOT);
   const plugins = packages.filter(
     getPluginPackagesFilter({
@@ -66,14 +82,42 @@ export function findPlugins(): PluginOrPackage[] {
     throw new Error('unable to find @kbn/core');
   }
 
-  return [...[core, ...plugins].map(toPluginOrPackage), ...findPackages()];
+  if (!pluginOrPackageFilter) {
+    return [...[core, ...plugins].map(toPluginOrPackage), ...findPackages()];
+  } else {
+    return [
+      ...plugins
+        .filter((p) => pluginOrPackageFilter.includes(p.manifest.plugin.id))
+        .map(toPluginOrPackage),
+      ...findPackages(pluginOrPackageFilter),
+    ];
+  }
+}
+
+export function findTeamPlugins(team: string): PluginOrPackage[] {
+  const packages = getPackages(REPO_ROOT);
+  const plugins = packages.filter(
+    getPluginPackagesFilter({
+      examples: false,
+      testPlugins: false,
+    })
+  );
+
+  return [...plugins.filter((p) => p.manifest.owner.includes(team)).map(toPluginOrPackage)];
 }
 
 /**
  * Helper to find packages.
  */
-export function findPackages(): PluginOrPackage[] {
+export function findPackages(packageFilter?: string[]): PluginOrPackage[] {
   return getPackages(REPO_ROOT)
     .filter((p) => !p.isPlugin())
+    .filter((p) => {
+      if (!Array.isArray(packageFilter)) {
+        return true;
+      } else {
+        return packageFilter.includes(p.manifest.id);
+      }
+    })
     .map(toPluginOrPackage);
 }

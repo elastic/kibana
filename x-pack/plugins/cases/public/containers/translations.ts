@@ -21,6 +21,10 @@ export const ERROR_DELETING = i18n.translate('xpack.cases.containers.errorDeleti
   defaultMessage: 'Error deleting data',
 });
 
+export const ERROR_DELETING_FILE = i18n.translate('xpack.cases.containers.errorDeletingFile', {
+  defaultMessage: 'Error deleting file',
+});
+
 export const ERROR_UPDATING = i18n.translate('xpack.cases.containers.errorUpdatingTitle', {
   defaultMessage: 'Error updating data',
 });
@@ -51,5 +55,16 @@ export const STATUS_CHANGED_TOASTER_TEXT = i18n.translate(
   'xpack.cases.containers.statusChangeToasterText',
   {
     defaultMessage: 'Updated the statuses of attached alerts.',
+  }
+);
+
+export const FILE_DELETE_SUCCESS = i18n.translate('xpack.cases.containers.deleteSuccess', {
+  defaultMessage: 'File deleted successfully',
+});
+
+export const CATEGORIES_ERROR_TITLE = i18n.translate(
+  'xpack.cases.containers.categoriesErrorTitle',
+  {
+    defaultMessage: 'Error fetching categories',
   }
 );

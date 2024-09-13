@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { gt, valid } from 'semver';
@@ -17,6 +18,10 @@ import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { AliasAction, FetchIndexResponse } from '../actions';
 import type { BulkIndexOperationTuple } from './create_batches';
+import type { BaseState, OutdatedDocumentsSearchRead, ReindexSourceToTempRead } from '../state';
+
+/** @internal */
+export const REINDEX_TEMP_SUFFIX = '_reindex_temp';
 
 /** @internal */
 export type Aliases = Partial<Record<string, string>>;
@@ -40,35 +45,35 @@ export function throwBadResponse(state: { controlState: string }, res: unknown):
 }
 
 /**
- * Merge the _meta.migrationMappingPropertyHashes mappings of an index with
- * the given target mappings.
+ * Merge the mappings._meta information of an index with the given target mappings.
  *
  * @remarks When another instance already completed a migration, the existing
  * target index might contain documents and mappings created by a plugin that
  * is disabled in the current Kibana instance performing this migration.
  * Mapping updates are commutative (deeply merged) by Elasticsearch, except
- * for the `_meta` key. By merging the `_meta.migrationMappingPropertyHashes`
- * mappings from the existing target index index into the targetMappings we
- * ensure that any `migrationPropertyHashes` for disabled plugins aren't lost.
- *
- * Right now we don't use these `migrationPropertyHashes` but it could be used
- * in the future to detect if mappings were changed. If mappings weren't
- * changed we don't need to reindex but can clone the index to save disk space.
+ * for the `_meta` key. By merging the `_meta` from the existing target index
+ * into the targetMappings we ensure that any versions for disabled plugins aren't lost.
  *
  * @param targetMappings
  * @param indexMappings
  */
-export function mergeMigrationMappingPropertyHashes(
-  targetMappings: IndexMapping,
-  indexMappings: IndexMapping
-) {
+export function mergeMappingMeta(targetMappings: IndexMapping, indexMappings: IndexMapping) {
+  const mappingVersions = {
+    ...indexMappings._meta?.mappingVersions,
+    ...targetMappings._meta?.mappingVersions,
+  };
+
+  const migrationMappingPropertyHashes = {
+    ...indexMappings._meta?.migrationMappingPropertyHashes,
+    ...targetMappings._meta?.migrationMappingPropertyHashes,
+  };
+
   return {
     ...targetMappings,
     _meta: {
-      migrationMappingPropertyHashes: {
-        ...indexMappings._meta?.migrationMappingPropertyHashes,
-        ...targetMappings._meta?.migrationMappingPropertyHashes,
-      },
+      ...targetMappings._meta,
+      ...(Object.keys(mappingVersions).length && { mappingVersions }),
+      ...(Object.keys(migrationMappingPropertyHashes).length && { migrationMappingPropertyHashes }),
     },
   };
 }
@@ -89,6 +94,22 @@ export function versionMigrationCompleted(
 export function indexBelongsToLaterVersion(kibanaVersion: string, indexName?: string): boolean {
   const version = valid(indexVersion(indexName));
   return version != null ? gt(version, kibanaVersion) : false;
+}
+
+export function hasLaterVersionAlias(
+  kibanaVersion: string,
+  aliases?: Partial<Record<string, string>>
+): string | undefined {
+  const mostRecentAlias = Object.keys(aliases ?? {})
+    .filter(aliasVersion)
+    .sort()
+    .pop();
+
+  const mostRecentAliasVersion = valid(aliasVersion(mostRecentAlias));
+
+  return mostRecentAliasVersion != null && gt(mostRecentAliasVersion, kibanaVersion)
+    ? mostRecentAlias
+    : undefined;
 }
 
 /**
@@ -168,6 +189,14 @@ export function indexVersion(indexName?: string): string | undefined {
   return (indexName?.match(/.+_(\d+\.\d+\.\d+)_\d+/) || [])[1];
 }
 
+/**
+ * Extracts the version number from a >= 7.11 index alias
+ * @param indexName A >= v7.11 index alias
+ */
+export function aliasVersion(alias?: string): string | undefined {
+  return (alias?.match(/.+_(\d+\.\d+\.\d+)/) || [])[1];
+}
+
 /** @internal */
 export interface MultipleIndicesPerAlias {
   type: 'multiple_indices_per_alias';
@@ -218,11 +247,17 @@ export function buildRemoveAliasActions(
 /**
  * Given a document, creates a valid body to index the document using the Bulk API.
  */
-export const createBulkIndexOperationTuple = (doc: SavedObjectsRawDoc): BulkIndexOperationTuple => {
+export const createBulkIndexOperationTuple = (
+  doc: SavedObjectsRawDoc,
+  typeIndexMap: Record<string, string> = {}
+): BulkIndexOperationTuple => {
   return [
     {
       index: {
         _id: doc._id,
+        ...(typeIndexMap[doc._source.type] && {
+          _index: typeIndexMap[doc._source.type],
+        }),
         // use optimistic concurrency control to ensure that outdated
         // documents are only overwritten once with the latest version
         ...(typeof doc._seq_no !== 'undefined' && { if_seq_no: doc._seq_no }),
@@ -271,3 +306,24 @@ export function getMigrationType({
 
   return MigrationType.Invalid;
 }
+
+/**
+ * Generate a temporary index name, to reindex documents into it
+ * @param index The name of the SO index
+ * @param kibanaVersion The current kibana version
+ * @returns A temporary index name to reindex documents
+ */
+export const getTempIndexName = (indexPrefix: string, kibanaVersion: string): string =>
+  `${indexPrefix}_${kibanaVersion}${REINDEX_TEMP_SUFFIX}`;
+
+/** Increase batchSize by 20% until a maximum of maxBatchSize */
+export const increaseBatchSize = (
+  stateP: OutdatedDocumentsSearchRead | ReindexSourceToTempRead
+) => {
+  const increasedBatchSize = Math.floor(stateP.batchSize * 1.2);
+  return increasedBatchSize > stateP.maxBatchSize ? stateP.maxBatchSize : increasedBatchSize;
+};
+
+export const getIndexTypes = (state: BaseState): string[] => {
+  return state.indexTypesMap[state.indexPrefix];
+};

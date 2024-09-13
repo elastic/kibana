@@ -9,7 +9,7 @@ import path from 'path';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'settings', 'savedObjects']);
+  const { settings, savedObjects } = getPageObjects(['settings', 'savedObjects']);
 
   describe('migration smoke test', function () {
     it('imports an 8.2 workpad', async function () {
@@ -22,14 +22,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         This smoke test is intended to import an 8.2 workpad to ensure that we don't hit a similar scenario in the future
       */
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSavedObjects();
-      await PageObjects.savedObjects.waitTableIsLoaded();
-      await PageObjects.savedObjects.importFile(
-        path.join(__dirname, 'exports', '8.2.workpad.ndjson')
-      );
-      await PageObjects.savedObjects.checkImportSucceeded();
-      await PageObjects.savedObjects.clickImportDone();
+      await settings.navigateTo();
+      await settings.clickKibanaSavedObjects();
+      await savedObjects.waitTableIsLoaded();
+      await savedObjects.importFile(path.join(__dirname, 'exports', '8.2.workpad.ndjson'));
+      await savedObjects.checkImportSucceeded();
+      await savedObjects.clickImportDone();
     });
 
     it('migrates a workpad from 8.1', async function () {
@@ -37,14 +35,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         This is a smoke test to make sure migrations don't fail.
         This workpad from 8.1 has both by-val and by-ref embeddables
       */
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSavedObjects();
-      await PageObjects.savedObjects.waitTableIsLoaded();
-      await PageObjects.savedObjects.importFile(
-        path.join(__dirname, 'exports', '8.1.embeddable_test.ndjson')
-      );
-      await PageObjects.savedObjects.checkImportSucceeded();
-      await PageObjects.savedObjects.clickImportDone();
+      await settings.navigateTo();
+      await settings.clickKibanaSavedObjects();
+      await savedObjects.waitTableIsLoaded();
+      await savedObjects.importFile(path.join(__dirname, 'exports', '8.1.embeddable_test.ndjson'));
+      await savedObjects.checkImportSucceeded();
+      await savedObjects.clickImportDone();
     });
   });
 }

@@ -7,10 +7,13 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference } from '../../../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
 import { appContextService } from '../../../app_context';
+
+import { retryTransientEsErrors } from '../retry';
 
 export const stopTransforms = async (transformIds: string[], esClient: ElasticsearchClient) => {
   for (const transformId of transformIds) {
@@ -24,7 +27,8 @@ export const stopTransforms = async (transformIds: string[], esClient: Elasticse
 export const deleteTransforms = async (
   esClient: ElasticsearchClient,
   transformIds: string[],
-  deleteDestinationIndices = false
+  deleteDestinationIndices = false,
+  secondaryAuth?: SecondaryAuthorizationHeader
 ) => {
   const logger = appContextService.getLogger();
   if (transformIds.length) {
@@ -32,34 +36,18 @@ export const deleteTransforms = async (
   }
   await Promise.all(
     transformIds.map(async (transformId) => {
-      // get the index the transform
-      const transformResponse = await esClient.transform.getTransform(
-        { transform_id: transformId },
-        { ignore: [404] }
-      );
-
       await stopTransforms([transformId], esClient);
-      await esClient.transform.deleteTransform(
-        { force: true, transform_id: transformId },
-        { ignore: [404] }
+      await retryTransientEsErrors(() =>
+        esClient.transform.deleteTransform(
+          {
+            force: true,
+            transform_id: transformId,
+            delete_dest_index: deleteDestinationIndices,
+          },
+          { ...(secondaryAuth ? secondaryAuth : {}), ignore: [404] }
+        )
       );
       logger.info(`Deleted: ${transformId}`);
-      if (deleteDestinationIndices && transformResponse?.transforms) {
-        // expect this to be 1
-        for (const transform of transformResponse.transforms) {
-          await esClient.transport.request(
-            {
-              method: 'DELETE',
-              path: `/${transform?.dest?.index}`,
-            },
-            {
-              ignore: [404],
-            }
-          );
-        }
-      } else {
-        logger.warn(`cannot find transform for ${transformId}`);
-      }
     })
   );
 };

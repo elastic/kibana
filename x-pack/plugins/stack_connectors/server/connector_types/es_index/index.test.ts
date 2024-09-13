@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { validateConfig, validateParams } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
   ActionParamsType,
@@ -27,11 +28,16 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: ESIndexConnectorType;
 let configurationUtilities: ActionsConfigurationUtilities;
+let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {
   jest.resetAllMocks();
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
+  connectorUsageCollector = new ConnectorUsageCollector({
+    logger: mockedLogger,
+    connectorId: 'test-connector-id',
+  });
 });
 
 describe('connector registration', () => {
@@ -185,6 +191,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     const scopedClusterClient = elasticsearchClientMock
       .createClusterClient()
@@ -230,6 +237,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     scopedClusterClient.bulk.mockClear();
     await connectorType.executor({
@@ -280,6 +288,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
 
     scopedClusterClient.bulk.mockClear();
@@ -324,6 +333,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     scopedClusterClient.bulk.mockClear();
     await connectorType.executor({
@@ -371,6 +381,7 @@ describe('execute()', () => {
       who: 'world',
     };
     const renderedParams = connectorType.renderParameterTemplates!(
+      mockedLogger,
       paramsWithTemplates,
       variables,
       'action-type-id'
@@ -397,6 +408,7 @@ describe('execute()', () => {
       who: 'world',
     };
     const renderedParams = connectorType.renderParameterTemplates!(
+      mockedLogger,
       paramsWithTemplates,
       variables,
       'action-type-id'
@@ -446,6 +458,7 @@ describe('execute()', () => {
       },
     };
     const renderedParams = connectorType.renderParameterTemplates!(
+      mockedLogger,
       paramsWithTemplates,
       variables,
       AlertHistoryEsIndexConnectorId
@@ -526,6 +539,7 @@ describe('execute()', () => {
       },
     };
     const renderedParams = connectorType.renderParameterTemplates!(
+      mockedLogger,
       paramsWithTemplates,
       variables,
       AlertHistoryEsIndexConnectorId
@@ -583,6 +597,7 @@ describe('execute()', () => {
 
     expect(() =>
       connectorType.renderParameterTemplates!(
+        mockedLogger,
         paramsWithTemplates,
         variables,
         AlertHistoryEsIndexConnectorId
@@ -610,6 +625,21 @@ describe('execute()', () => {
       errors: true,
       items: [
         {
+          create: {
+            _index: 'indexme',
+            _id: '7buTjHQB0SuNSiS9Hayt',
+            status: 400,
+            error: {
+              type: 'document_parsing_exception',
+              reason: `[1:10] failed to parse field [bytes] of type [long] in document with id '39XQLIoB8kAjguvyIMeJ'. Preview of field's value: 'foo'`,
+              caused_by: {
+                type: 'illegal_argument_exception',
+                reason: `For input string: \"foo\"`,
+              },
+            },
+          },
+        },
+        {
           index: {
             _index: 'indexme',
             _id: '7buTjHQB0SuNSiS9Hayt',
@@ -633,15 +663,187 @@ describe('execute()', () => {
         config,
         secrets,
         params,
-        services,
+        services: { ...services, scopedClusterClient },
         configurationUtilities,
         logger: mockedLogger,
+        connectorUsageCollector,
       })
     ).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
         "message": "error indexing documents",
-        "serviceMessage": "Cannot read properties of undefined (reading 'items')",
+        "serviceMessage": "[1:10] failed to parse field [bytes] of type [long] in document with id '39XQLIoB8kAjguvyIMeJ'. Preview of field's value: 'foo';failed to parse (For input string: \\"foo\\";field name cannot be an empty string)",
+        "status": "error",
+      }
+    `);
+  });
+
+  test('resolves with an error when an error occurs in the indexing operation - malformed response', async () => {
+    const secrets = {};
+    // minimal params
+    const config = { index: 'index-value', refresh: false, executionTimeField: null };
+    const params = {
+      documents: [{ '': 'bob' }],
+      indexOverride: null,
+    };
+
+    const actionId = 'some-id';
+    const scopedClusterClient = elasticsearchClientMock
+      .createClusterClient()
+      .asScoped().asCurrentUser;
+    // @ts-expect-error
+    scopedClusterClient.bulk.mockResponse({
+      took: 0,
+      errors: true,
+    });
+
+    expect(
+      await connectorType.executor({
+        actionId,
+        config,
+        secrets,
+        params,
+        services: { ...services, scopedClusterClient },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "error indexing documents",
+        "serviceMessage": "Indexing error but no reason returned.",
+        "status": "error",
+      }
+    `);
+  });
+
+  test('resolves with an error when an error occurs in the indexing operation - malformed error response', async () => {
+    const secrets = {};
+    // minimal params
+    const config = { index: 'index-value', refresh: false, executionTimeField: null };
+    const params = {
+      documents: [{ '': 'bob' }],
+      indexOverride: null,
+    };
+
+    const actionId = 'some-id';
+    const scopedClusterClient = elasticsearchClientMock
+      .createClusterClient()
+      .asScoped().asCurrentUser;
+    scopedClusterClient.bulk.mockResponse({
+      took: 0,
+      errors: true,
+      items: [
+        {
+          create: {
+            _index: 'indexme',
+            _id: '7buTjHQB0SuNSiS9Hayt',
+            status: 400,
+            error: {
+              type: 'document_parsing_exception',
+              reason: `[1:10] failed to parse field [bytes] of type [long] in document with id '39XQLIoB8kAjguvyIMeJ'. Preview of field's value: 'foo'`,
+              caused_by: {
+                type: 'illegal_argument_exception',
+                reason: `For input string: \"foo\"`,
+              },
+            },
+          },
+        },
+        {
+          index: {
+            _index: 'indexme',
+            _id: '7buTjHQB0SuNSiS9Hayt',
+            status: 400,
+          },
+        },
+      ],
+    });
+
+    expect(
+      await connectorType.executor({
+        actionId,
+        config,
+        secrets,
+        params,
+        services: { ...services, scopedClusterClient },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "error indexing documents",
+        "serviceMessage": "[1:10] failed to parse field [bytes] of type [long] in document with id '39XQLIoB8kAjguvyIMeJ'. Preview of field's value: 'foo' (For input string: \\"foo\\")",
+        "status": "error",
+      }
+    `);
+  });
+
+  test('resolves with an error when an error occurs in the indexing operation - error with no reason', async () => {
+    const secrets = {};
+    // minimal params
+    const config = { index: 'index-value', refresh: false, executionTimeField: null };
+    const params = {
+      documents: [{ '': 'bob' }],
+      indexOverride: null,
+    };
+
+    const actionId = 'some-id';
+    const scopedClusterClient = elasticsearchClientMock
+      .createClusterClient()
+      .asScoped().asCurrentUser;
+    scopedClusterClient.bulk.mockResponse({
+      took: 0,
+      errors: true,
+      items: [
+        {
+          create: {
+            _index: 'indexme',
+            _id: '7buTjHQB0SuNSiS9Hayt',
+            status: 400,
+            error: {
+              type: 'document_parsing_exception',
+              caused_by: {
+                type: 'illegal_argument_exception',
+              },
+            },
+          },
+        },
+        {
+          index: {
+            _index: 'indexme',
+            _id: '7buTjHQB0SuNSiS9Hayt',
+            status: 400,
+            error: {
+              type: 'mapper_parsing_exception',
+              reason: 'failed to parse',
+              caused_by: {
+                type: 'illegal_argument_exception',
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    expect(
+      await connectorType.executor({
+        actionId,
+        config,
+        secrets,
+        params,
+        services: { ...services, scopedClusterClient },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "error indexing documents",
+        "serviceMessage": "failed to parse",
         "status": "error",
       }
     `);

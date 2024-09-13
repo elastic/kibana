@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { httpServerMock, httpServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import {
-  policiesQueryParamsSchema,
-  DEFAULT_POLICIES_PER_PAGE,
-} from '../../../common/schemas/policy';
+import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { policiesQueryParamsSchema } from '../../../common';
+import { DEFAULT_POLICIES_PER_PAGE } from '../../../common/constants';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   getCloudDefendPackagePolicies,
@@ -30,21 +29,21 @@ describe('policies API', () => {
   });
 
   it('validate the API route path', async () => {
-    const router = httpServiceMock.createRouter();
+    const router = mockRouter.create();
 
     defineGetPoliciesRoute(router);
 
-    const [config] = router.get.mock.calls[0];
+    const [config] = (router.versioned.get as jest.Mock).mock.calls[0];
 
     expect(config.path).toEqual('/internal/cloud_defend/policies');
   });
 
   it('should accept to a user with fleet.all privilege', async () => {
-    const router = httpServiceMock.createRouter();
+    const router = mockRouter.create();
 
-    defineGetPoliciesRoute(router);
+    const route = defineGetPoliciesRoute(router);
 
-    const [_, handler] = router.get.mock.calls[0];
+    const [_, handler] = (route.addVersion as jest.Mock).mock.calls[0];
 
     const mockContext = createCloudDefendRequestHandlerContextMock();
     const mockResponse = httpServerMock.createResponseFactory();
@@ -57,11 +56,11 @@ describe('policies API', () => {
   });
 
   it('should reject to a user without fleet.all privilege', async () => {
-    const router = httpServiceMock.createRouter();
+    const router = mockRouter.create();
 
-    defineGetPoliciesRoute(router);
+    const route = defineGetPoliciesRoute(router);
 
-    const [_, handler] = router.get.mock.calls[0];
+    const [_, handler] = (route.addVersion as jest.Mock).mock.calls[0];
 
     const mockContext = createCloudDefendRequestHandlerContextMock();
     mockContext.fleet.authz.fleet.all = false;
@@ -249,7 +248,7 @@ describe('policies API', () => {
 
         const packagePolicy1 = createPackagePolicyMock();
         const packagePolicy2 = createPackagePolicyMock();
-        packagePolicy2.policy_id = 'AnotherId';
+        packagePolicy2.policy_ids = ['AnotherId'];
         const packagePolicies = [packagePolicy1, packagePolicy2];
 
         await getCloudDefendAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);

@@ -17,12 +17,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   useKibana,
+  JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { JiraActionParams } from './types';
 import { useGetIssueTypes } from './use_get_issue_types';
@@ -94,7 +97,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     [comments, editAction, incident, index]
   );
   const editComment = useCallback(
-    (key, value) => {
+    (key: string, value: string) => {
       editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]
@@ -104,10 +107,10 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     () =>
       fields != null
         ? {
-            hasLabels: Object.prototype.hasOwnProperty.call(fields, 'labels'),
-            hasDescription: Object.prototype.hasOwnProperty.call(fields, 'description'),
-            hasPriority: Object.prototype.hasOwnProperty.call(fields, 'priority'),
-            hasParent: Object.prototype.hasOwnProperty.call(fields, 'parent'),
+            hasLabels: Object.hasOwn(fields, 'labels'),
+            hasDescription: Object.hasOwn(fields, 'description'),
+            hasPriority: Object.hasOwn(fields, 'priority'),
+            hasParent: Object.hasOwn(fields, 'parent'),
           }
         : { hasLabels: false, hasDescription: false, hasPriority: false, hasParent: false },
     [fields]
@@ -192,7 +195,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   const areLabelsInvalid =
     errors['subActionParams.incident.labels'] != null &&
     errors['subActionParams.incident.labels'] !== undefined &&
-    errors['subActionParams.incident.labels'].length > 0 &&
+    Number(errors['subActionParams.incident.labels'].length) > 0 &&
     incident.labels !== undefined;
 
   return (
@@ -276,15 +279,22 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
         <EuiFormRow
           data-test-subj="summary-row"
           fullWidth
-          error={errors['subActionParams.incident.summary']}
+          error={errors['subActionParams.incident.summary'] as string}
           isInvalid={
             errors['subActionParams.incident.summary'] !== undefined &&
-            errors['subActionParams.incident.summary'].length > 0 &&
+            Number(errors['subActionParams.incident.summary'].length) > 0 &&
             incident.summary !== undefined
           }
           label={i18n.translate('xpack.stackConnectors.components.jira.summaryFieldLabel', {
-            defaultMessage: 'Summary (required)',
+            defaultMessage: 'Summary',
           })}
+          labelAppend={
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.stackConnectors.components.jira.summaryFieldRequiredLabel', {
+                defaultMessage: 'Required',
+              })}
+            </EuiText>
+          }
         >
           <TextFieldWithMessageVariables
             index={index}
@@ -373,6 +383,51 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             }
           )}
         />
+        <EuiFormRow
+          fullWidth
+          error={errors['subActionParams.incident.otherFields'] as string}
+          isInvalid={
+            errors['subActionParams.incident.otherFields'] !== undefined &&
+            Number(errors['subActionParams.incident.otherFields'].length) > 0
+          }
+        >
+          <JsonEditorWithMessageVariables
+            messageVariables={messageVariables}
+            paramsProperty={'otherFields'}
+            inputTargetValue={actionParams.subActionParams?.incident?.otherFields}
+            errors={errors.otherFields as string[]}
+            label={
+              <>
+                {i18n.translate('xpack.stackConnectors.components.jira.otherFieldsFieldLabel', {
+                  defaultMessage: 'Additional fields',
+                })}
+                <EuiIconTip
+                  size="s"
+                  color="subdued"
+                  type="questionInCircle"
+                  className="eui-alignTop"
+                  data-test-subj="otherFieldsHelpTooltip"
+                  aria-label={i18n.translate(
+                    'xpack.stackConnectors.components.jira.otherFieldsHelpTooltip',
+                    {
+                      defaultMessage: 'Additional fields help',
+                    }
+                  )}
+                  content={i18n.translate(
+                    'xpack.stackConnectors.components.jira.otherFieldsHelpText',
+                    {
+                      defaultMessage:
+                        'Additional fields are not validated by the connector. To avoid failed actions, ensure compliance with your Jira policies.',
+                    }
+                  )}
+                />
+              </>
+            }
+            onDocumentsChange={(json: string) => {
+              editSubActionProperty('otherFields', json === '' ? null : json);
+            }}
+          />
+        </EuiFormRow>
       </>
     </>
   );

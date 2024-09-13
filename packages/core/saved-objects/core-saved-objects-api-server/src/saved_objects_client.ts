@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObject } from '..';
@@ -275,6 +276,13 @@ export interface SavedObjectsClientContract {
 
   /**
    * Bulk Updates multiple SavedObject at once
+   *
+   * The savedObjects `bulkUpdate` API will update documents client-side and then reindex the updated documents.
+   * These update operations are done in-memory, and cause memory constraint issues when
+   * updating many objects with large `json` blobs stored in some fields. As such, we recommend against using
+   * `bulkUpdate` for savedObjects that:
+   * - use arrays (as these tend to be large objects)
+   * - store large `json` blobs in some fields
    *
    * @param objects - array of objects to update (contains ID, type, attributes, and optional namespace)
    * @param options {@link SavedObjectsBulkUpdateOptions} - options for the bulkUpdate operation

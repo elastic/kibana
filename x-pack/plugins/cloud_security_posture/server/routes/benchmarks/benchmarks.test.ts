@@ -8,20 +8,12 @@ import { httpServerMock, httpServiceMock, savedObjectsClientMock } from '@kbn/co
 import {
   benchmarksQueryParamsSchema,
   DEFAULT_BENCHMARKS_PER_PAGE,
-} from '../../../common/schemas/benchmark';
-import {
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  getCspPackagePolicies,
-  getCspAgentPolicies,
-} from '../../lib/fleet_util';
-import { POSTURE_TYPE_ALL } from '../../../common/constants';
-import { defineGetBenchmarksRoute, getRulesCountForPolicy } from './benchmarks';
-
+} from '../../../common/types/benchmarks/v1';
+import { getCspAgentPolicies } from '../../lib/fleet_util';
+import { defineGetBenchmarksRoute } from './benchmarks';
+import { getRulesCountForPolicy } from './utilities';
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
-import {
-  createMockAgentPolicyService,
-  createPackagePolicyServiceMock,
-} from '@kbn/fleet-plugin/server/mocks';
+import { createMockAgentPolicyService } from '@kbn/fleet-plugin/server/mocks';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { createCspRequestHandlerContextMock } from '../../mocks';
 
@@ -35,7 +27,7 @@ describe('benchmarks API', () => {
 
     defineGetBenchmarksRoute(router);
 
-    const [config] = router.get.mock.calls[0];
+    const [config] = router.versioned.get.mock.calls[0];
 
     expect(config.path).toEqual('/internal/cloud_security_posture/benchmarks');
   });
@@ -45,7 +37,9 @@ describe('benchmarks API', () => {
 
     defineGetBenchmarksRoute(router);
 
-    const [_, handler] = router.get.mock.calls[0];
+    const versionedRouter = router.versioned.get.mock.results[0].value;
+
+    const handler = versionedRouter.addVersion.mock.calls[0][1];
 
     const mockContext = createCspRequestHandlerContextMock();
     const mockResponse = httpServerMock.createResponseFactory();
@@ -62,7 +56,8 @@ describe('benchmarks API', () => {
 
     defineGetBenchmarksRoute(router);
 
-    const [_, handler] = router.get.mock.calls[0];
+    const versionedRouter = router.versioned.get.mock.results[0].value;
+    const handler = versionedRouter.addVersion.mock.calls[0][1];
 
     const mockContext = createCspRequestHandlerContextMock();
     mockContext.fleet.authz.fleet.all = false;
@@ -86,15 +81,15 @@ describe('benchmarks API', () => {
       });
     });
 
-    it('expect to find benchmark_name', async () => {
+    it('expect to find package_policy_name', async () => {
       const validatedQuery = benchmarksQueryParamsSchema.validate({
-        benchmark_name: 'my_cis_benchmark',
+        package_policy_name: 'my_cis_benchmark',
       });
 
       expect(validatedQuery).toMatchObject({
         page: 1,
         per_page: DEFAULT_BENCHMARKS_PER_PAGE,
-        benchmark_name: 'my_cis_benchmark',
+        package_policy_name: 'my_cis_benchmark',
       });
     });
 
@@ -154,111 +149,6 @@ describe('benchmarks API', () => {
       mockSoClient = savedObjectsClientMock.create();
     });
 
-    describe('test getPackagePolicies', () => {
-      it('should format request by package name', async () => {
-        const mockPackagePolicyService = createPackagePolicyServiceMock();
-
-        await getCspPackagePolicies(
-          mockSoClient,
-          mockPackagePolicyService,
-          'myPackage',
-          {
-            page: 1,
-            per_page: 100,
-            sort_order: 'desc',
-          },
-          POSTURE_TYPE_ALL
-        );
-
-        expect(mockPackagePolicyService.list.mock.calls[0][1]).toMatchObject(
-          expect.objectContaining({
-            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage`,
-            page: 1,
-            perPage: 100,
-          })
-        );
-      });
-
-      it('should build sort request by `sort_field` and default `sort_order`', async () => {
-        const mockAgentPolicyService = createPackagePolicyServiceMock();
-
-        await getCspPackagePolicies(
-          mockSoClient,
-          mockAgentPolicyService,
-          'myPackage',
-          {
-            page: 1,
-            per_page: 100,
-            sort_field: 'package_policy.name',
-            sort_order: 'desc',
-          },
-          POSTURE_TYPE_ALL
-        );
-
-        expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
-          expect.objectContaining({
-            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage`,
-            page: 1,
-            perPage: 100,
-            sortField: 'name',
-            sortOrder: 'desc',
-          })
-        );
-      });
-
-      it('should build sort request by `sort_field` and asc `sort_order`', async () => {
-        const mockAgentPolicyService = createPackagePolicyServiceMock();
-
-        await getCspPackagePolicies(
-          mockSoClient,
-          mockAgentPolicyService,
-          'myPackage',
-          {
-            page: 1,
-            per_page: 100,
-            sort_field: 'package_policy.name',
-            sort_order: 'asc',
-          },
-          POSTURE_TYPE_ALL
-        );
-
-        expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
-          expect.objectContaining({
-            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage`,
-            page: 1,
-            perPage: 100,
-            sortField: 'name',
-            sortOrder: 'asc',
-          })
-        );
-      });
-    });
-
-    it('should format request by benchmark_name', async () => {
-      const mockAgentPolicyService = createPackagePolicyServiceMock();
-
-      await getCspPackagePolicies(
-        mockSoClient,
-        mockAgentPolicyService,
-        'myPackage',
-        {
-          page: 1,
-          per_page: 100,
-          sort_order: 'desc',
-          benchmark_name: 'my_cis_benchmark',
-        },
-        POSTURE_TYPE_ALL
-      );
-
-      expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
-        expect.objectContaining({
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *my_cis_benchmark*`,
-          page: 1,
-          perPage: 100,
-        })
-      );
-    });
-
     describe('test getAgentPolicies', () => {
       it('should return one agent policy id when there is duplication', async () => {
         const agentPolicyService = createMockAgentPolicyService();
@@ -274,7 +164,7 @@ describe('benchmarks API', () => {
 
         const packagePolicy1 = createPackagePolicyMock();
         const packagePolicy2 = createPackagePolicyMock();
-        packagePolicy2.policy_id = 'AnotherId';
+        packagePolicy2.policy_ids = ['AnotherId'];
         const packagePolicies = [packagePolicy1, packagePolicy2];
 
         await getCspAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
@@ -283,7 +173,7 @@ describe('benchmarks API', () => {
       });
     });
 
-    describe('test addPackagePolicyCspRuleTemplates', () => {
+    describe('test addPackagePolicyCspBenchmarkRule', () => {
       it('should retrieve the rules count by the filtered benchmark type', async () => {
         const benchmark = 'cis_k8s';
         mockSoClient.find.mockResolvedValueOnce({

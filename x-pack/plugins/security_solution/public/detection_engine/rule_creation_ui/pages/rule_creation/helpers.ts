@@ -7,7 +7,7 @@
 
 /* eslint-disable complexity */
 
-import { has, isEmpty } from 'lodash/fp';
+import { has, isEmpty, get } from 'lodash/fp';
 import type { Unit } from '@kbn/datemath';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
@@ -25,11 +25,18 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../common/constants';
+import type {
+  RuleAction as AlertingRuleAction,
+  RuleSystemAction as AlertingRuleSystemAction,
+} from '@kbn/alerting-plugin/common';
+
+import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
   transformAlertToRuleAction,
   transformAlertToRuleResponseAction,
+  transformAlertToRuleSystemAction,
 } from '../../../../../common/detection_engine/transform_actions';
 
 import type {
@@ -41,15 +48,18 @@ import type {
   ScheduleStepRuleJson,
   AboutStepRuleJson,
   ActionsStepRuleJson,
-  RuleStepsFormData,
-  RuleStep,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import {
   DataSourceType,
   GroupByOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
-import { stepActionsDefaultValue } from '../../../../detections/components/rules/step_rule_actions';
+import type {
+  RuleCreateProps,
+  AlertSuppression,
+  RequiredFieldInput,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
   const timeObj: { unit: Unit; value: number } = {
@@ -64,29 +74,12 @@ export const getTimeTypeValue = (time: string): { unit: Unit; value: number } =>
   if (
     !isEmpty(filterTimeType) &&
     filterTimeType != null &&
-    ['s', 'm', 'h'].includes(filterTimeType[0])
+    ['s', 'm', 'h', 'd'].includes(filterTimeType[0])
   ) {
     timeObj.unit = filterTimeType[0] as Unit;
   }
   return timeObj;
 };
-
-export const stepIsValid = <T extends RuleStepsFormData[keyof RuleStepsFormData]>(
-  formData?: T
-): formData is { [K in keyof T]: Exclude<T[K], undefined> } =>
-  !!formData?.isValid && !!formData.data;
-
-export const isDefineStep = (input: unknown): input is RuleStepsFormData[RuleStep.defineRule] =>
-  has('data.ruleType', input);
-
-export const isAboutStep = (input: unknown): input is RuleStepsFormData[RuleStep.aboutRule] =>
-  has('data.name', input);
-
-export const isScheduleStep = (input: unknown): input is RuleStepsFormData[RuleStep.scheduleRule] =>
-  has('data.interval', input);
-
-export const isActionsStep = (input: unknown): input is RuleStepsFormData[RuleStep.ruleActions] =>
-  has('data.actions', input);
 
 export interface RuleFields {
   anomalyThreshold: unknown;
@@ -170,6 +163,20 @@ type NewTermsRuleFields<T> = Omit<
   | 'threatMapping'
   | 'eqlOptions'
 >;
+type EsqlRuleFields<T> = Omit<
+  T,
+  | 'anomalyThreshold'
+  | 'machineLearningJobId'
+  | 'threshold'
+  | 'threatIndex'
+  | 'threatQueryBar'
+  | 'threatMapping'
+  | 'eqlOptions'
+  | 'index'
+  | 'newTermsFields'
+  | 'historyWindowSize'
+  | 'dataViewId'
+>;
 
 const isMlFields = <T>(
   fields:
@@ -179,6 +186,7 @@ const isMlFields = <T>(
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
 ): fields is MlRuleFields<T> => has('anomalyThreshold', fields);
 
 const isThresholdFields = <T>(
@@ -189,6 +197,7 @@ const isThresholdFields = <T>(
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
 ): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
 const isThreatMatchFields = <T>(
@@ -199,6 +208,7 @@ const isThreatMatchFields = <T>(
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
 ): fields is ThreatMatchRuleFields<T> => has('threatIndex', fields);
 
 const isNewTermsFields = <T>(
@@ -209,6 +219,7 @@ const isNewTermsFields = <T>(
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
 ): fields is NewTermsRuleFields<T> => has('newTermsFields', fields);
 
 const isEqlFields = <T>(
@@ -219,7 +230,19 @@ const isEqlFields = <T>(
     | ThresholdRuleFields<T>
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
 ): fields is EqlQueryRuleFields<T> => has('eqlOptions', fields);
+
+const isEsqlFields = <T>(
+  fields:
+    | QueryRuleFields<T>
+    | EqlQueryRuleFields<T>
+    | MlRuleFields<T>
+    | ThresholdRuleFields<T>
+    | ThreatMatchRuleFields<T>
+    | NewTermsRuleFields<T>
+    | EsqlRuleFields<T>
+): fields is EsqlRuleFields<T> => get('queryBar.query.language', fields) === 'esql';
 
 export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   fields: T,
@@ -230,6 +253,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   | MlRuleFields<T>
   | ThresholdRuleFields<T>
   | ThreatMatchRuleFields<T>
+  | EsqlRuleFields<T>
   | NewTermsRuleFields<T> => {
   switch (type) {
     case 'machine_learning':
@@ -298,6 +322,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         ...eqlRuleFields
       } = fields;
       return eqlRuleFields;
+
     case 'new_terms':
       const {
         anomalyThreshold: ___a,
@@ -310,6 +335,23 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         ...newTermsRuleFields
       } = fields;
       return newTermsRuleFields;
+
+    case 'esql':
+      const {
+        anomalyThreshold: _esql_a,
+        machineLearningJobId: _esql_m,
+        threshold: _esql_t,
+        threatIndex: _esql_removedThreatIndex,
+        threatQueryBar: _esql_removedThreatQueryBar,
+        threatMapping: _esql_removedThreatMapping,
+        newTermsFields: _esql_removedNewTermsFields,
+        historyWindowSize: _esql_removedHistoryWindowSize,
+        eqlOptions: _esql__eqlOptions,
+        index: _esql_index,
+        dataViewId: _esql_dataViewId,
+        ...esqlRuleFields
+      } = fields;
+      return esqlRuleFields;
   }
   assertUnreachable(type);
 };
@@ -362,6 +404,12 @@ export const getStepDataDataSource = (
   return copiedStepData;
 };
 
+/**
+ * Strips away form rows that were not filled out by the user
+ */
+const removeEmptyRequiredFields = (requiredFields: RequiredFieldInput[]): RequiredFieldInput[] =>
+  requiredFields.filter((field) => field.name !== '' && field.type !== '');
+
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
   const stepData = getStepDataDataSource(defineStepData);
 
@@ -370,6 +418,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
 
   const baseFields = {
     type: ruleType,
+    related_integrations: defineStepData.relatedIntegrations?.filter((ri) => !isEmpty(ri.package)),
     ...(timeline.id != null &&
       timeline.title != null && {
         timeline_id: timeline.id,
@@ -377,10 +426,28 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
       }),
   };
 
+  const alertSuppressionFields =
+    ruleFields.groupByFields.length > 0
+      ? {
+          alert_suppression: {
+            group_by: ruleFields.groupByFields,
+            duration:
+              ruleFields.groupByRadioSelection === GroupByOptions.PerTimePeriod
+                ? ruleFields.groupByDuration
+                : undefined,
+            missing_fields_strategy: (ruleFields.suppressionMissingFields ||
+              DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) as AlertSuppression['missing_fields_strategy'],
+          },
+        }
+      : {};
+
+  const requiredFields = removeEmptyRequiredFields(defineStepData.requiredFields ?? []);
+
   const typeFields = isMlFields(ruleFields)
     ? {
         anomaly_threshold: ruleFields.anomalyThreshold,
         machine_learning_job_id: ruleFields.machineLearningJobId,
+        ...alertSuppressionFields,
       }
     : isThresholdFields(ruleFields)
     ? {
@@ -389,6 +456,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: ruleFields.queryBar?.saved_id ?? undefined,
+        required_fields: requiredFields,
         ...(ruleType === 'threshold' && {
           threshold: {
             field: ruleFields.threshold?.field ?? [],
@@ -404,6 +472,9 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
                   ]
                 : [],
           },
+          ...(ruleFields.enableThresholdSuppression && {
+            alert_suppression: { duration: ruleFields.groupByDuration },
+          }),
         }),
       }
     : isThreatMatchFields(ruleFields)
@@ -413,11 +484,13 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: ruleFields.queryBar?.saved_id ?? undefined,
+        required_fields: requiredFields,
         threat_index: ruleFields.threatIndex,
         threat_query: ruleFields.threatQueryBar?.query?.query as string,
         threat_filters: ruleFields.threatQueryBar?.filters,
         threat_mapping: ruleFields.threatMapping,
         threat_language: ruleFields.threatQueryBar?.query?.language,
+        ...alertSuppressionFields,
       }
     : isEqlFields(ruleFields)
     ? {
@@ -426,9 +499,11 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: ruleFields.queryBar?.saved_id ?? undefined,
+        required_fields: requiredFields,
         timestamp_field: ruleFields.eqlOptions?.timestampField,
         event_category_override: ruleFields.eqlOptions?.eventCategoryField,
         tiebreaker_field: ruleFields.eqlOptions?.tiebreakerField,
+        ...alertSuppressionFields,
       }
     : isNewTermsFields(ruleFields)
     ? {
@@ -436,26 +511,26 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
+        required_fields: requiredFields,
         new_terms_fields: ruleFields.newTermsFields,
         history_window_start: `now-${ruleFields.historyWindowSize}`,
+        ...alertSuppressionFields,
+      }
+    : isEsqlFields(ruleFields) && !('index' in ruleFields)
+    ? {
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        required_fields: requiredFields,
+        ...alertSuppressionFields,
       }
     : {
-        ...(ruleFields.groupByFields.length > 0
-          ? {
-              alert_suppression: {
-                group_by: ruleFields.groupByFields,
-                duration:
-                  ruleFields.groupByRadioSelection === GroupByOptions.PerTimePeriod
-                    ? ruleFields.groupByDuration
-                    : undefined,
-              },
-            }
-          : {}),
+        ...alertSuppressionFields,
         index: ruleFields.index,
         filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: undefined,
+        required_fields: requiredFields,
         type: 'query' as const,
         // rule only be updated as saved_query type if it has saved_id and shouldLoadQueryDynamically checkbox checked
         ...(['query', 'saved_query'].includes(ruleType) &&
@@ -467,10 +542,11 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
             saved_id: ruleFields.queryBar.saved_id,
           }),
       };
+
   return {
     ...baseFields,
     ...typeFields,
-    data_view_id: ruleFields.dataViewId,
+    ...('dataViewId' in ruleFields ? { data_view_id: ruleFields.dataViewId } : {}),
   };
 };
 
@@ -501,12 +577,14 @@ export const formatAboutStepData = (
   const {
     author,
     falsePositives,
+    investigationFields,
     references,
     riskScore,
     severity,
     threat,
     isAssociatedToEndpointList,
     isBuildingBlock,
+    maxSignals,
     note,
     ruleNameOverride,
     threatIndicatorPath,
@@ -517,6 +595,7 @@ export const formatAboutStepData = (
 
   const detectionExceptionLists =
     exceptionsList != null ? exceptionsList.filter((list) => list.type !== 'endpoint') : [];
+  const isinvestigationFieldsEmpty = investigationFields.every((item) => isEmpty(item.trim()));
 
   const resp = {
     author: author.filter((item) => !isEmpty(item)),
@@ -540,6 +619,9 @@ export const formatAboutStepData = (
       : {}),
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
+    investigation_fields: isinvestigationFieldsEmpty
+      ? undefined
+      : { field_names: investigationFields },
     risk_score: riskScore.value,
     risk_score_mapping: riskScore.isMappingChecked
       ? riskScore.mapping.filter((m) => m.field != null && m.field !== '')
@@ -557,25 +639,31 @@ export const formatAboutStepData = (
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     timestamp_override_fallback_disabled: timestampOverrideFallbackDisabled,
     ...(!isEmpty(note) ? { note } : {}),
+    max_signals: Number.isSafeInteger(maxSignals) ? maxSignals : undefined,
     ...rest,
   };
   return resp;
 };
 
-export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
-  const {
-    actions = [],
-    responseActions,
-    enabled,
-    kibanaSiemAppUrl,
-    throttle = NOTIFICATION_THROTTLE_NO_ACTIONS,
-  } = actionsStepData;
+export const isRuleAction = (
+  action: AlertingRuleAction | AlertingRuleSystemAction,
+  actionTypeRegistry: ActionTypeRegistryContract
+): action is AlertingRuleAction => !actionTypeRegistry.get(action.actionTypeId).isSystemActionType;
+
+export const formatActionsStepData = (
+  actionsStepData: ActionsStepRule,
+  actionTypeRegistry: ActionTypeRegistryContract
+): ActionsStepRuleJson => {
+  const { actions = [], responseActions, enabled, kibanaSiemAppUrl } = actionsStepData;
 
   return {
-    actions: actions.map(transformAlertToRuleAction),
+    actions: actions.map((action) =>
+      isRuleAction(action, actionTypeRegistry)
+        ? transformAlertToRuleAction(action)
+        : transformAlertToRuleSystemAction(action)
+    ),
     response_actions: responseActions?.map(transformAlertToRuleResponseAction),
     enabled,
-    throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
     meta: {
       kibana_siem_app_url: kibanaSiemAppUrl,
     },
@@ -590,13 +678,14 @@ export const formatRule = <T>(
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
   actionsData: ActionsStepRule,
+  actionTypeRegistry: ActionTypeRegistryContract,
   exceptionsList?: List[]
 ): T =>
   deepmerge.all([
     formatDefineStepData(defineStepData),
     formatAboutStepData(aboutStepData, exceptionsList),
     formatScheduleStepData(scheduleData),
-    formatActionsStepData(actionsData),
+    formatActionsStepData(actionsData, actionTypeRegistry),
   ]) as unknown as T;
 
 export const formatPreviewRule = ({
@@ -604,10 +693,12 @@ export const formatPreviewRule = ({
   aboutRuleData,
   scheduleRuleData,
   exceptionsList,
+  actionTypeRegistry,
 }: {
   defineRuleData: DefineStepRule;
   aboutRuleData: AboutStepRule;
   scheduleRuleData: ScheduleStepRule;
+  actionTypeRegistry: ActionTypeRegistryContract;
   exceptionsList?: List[];
 }): RuleCreateProps => {
   const aboutStepData = {
@@ -621,6 +712,7 @@ export const formatPreviewRule = ({
       aboutStepData,
       scheduleRuleData,
       stepActionsDefaultValue,
+      actionTypeRegistry,
       exceptionsList
     ),
   };

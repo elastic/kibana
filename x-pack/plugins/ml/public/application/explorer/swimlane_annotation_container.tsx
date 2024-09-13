@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useEffect } from 'react';
 import d3 from 'd3';
 import { scaleTime } from 'd3-scale';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { useCurrentThemeVars } from '../contexts/kibana';
 import type { Annotation, AnnotationsTable } from '../../../common/types/annotations';
-import { ChartTooltipService } from '../components/chart_tooltip';
-import { useCurrentEuiTheme } from '../components/color_range_legend';
+import type { ChartTooltipService } from '../components/chart_tooltip';
+import { Y_AXIS_LABEL_PADDING, Y_AXIS_LABEL_WIDTH } from './constants';
 
-export const Y_AXIS_LABEL_WIDTH = 170;
-export const Y_AXIS_LABEL_PADDING = 8;
 const ANNOTATION_CONTAINER_HEIGHT = 12;
 const ANNOTATION_MIN_WIDTH = 8;
 
@@ -36,8 +36,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
   tooltipService,
 }) => {
   const canvasRef = React.useRef<HTMLDivElement | null>(null);
-
-  const { euiTheme } = useCurrentEuiTheme();
+  const { euiTheme } = useCurrentThemeVars();
 
   useEffect(() => {
     if (canvasRef.current !== null && Array.isArray(annotationsData)) {

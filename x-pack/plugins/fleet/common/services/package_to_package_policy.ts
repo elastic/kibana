@@ -199,15 +199,18 @@ export const packageToPackagePolicyInputs = (
  */
 export const packageToPackagePolicy = (
   packageInfo: PackageInfo,
-  agentPolicyId: string,
+  agentPolicyIds: string | string[],
   namespace: string = '',
   packagePolicyName?: string,
   description?: string,
   integrationToEnable?: string
 ): NewPackagePolicy => {
+  if (!Array.isArray(agentPolicyIds)) {
+    agentPolicyIds = [agentPolicyIds];
+  }
   const experimentalDataStreamFeatures =
-    'savedObject' in packageInfo
-      ? packageInfo.savedObject?.attributes?.experimental_data_stream_features
+    'installationInfo' in packageInfo
+      ? packageInfo.installationInfo?.experimental_data_stream_features
       : undefined;
 
   const packagePolicy: NewPackagePolicy = {
@@ -223,7 +226,8 @@ export const packageToPackagePolicy = (
         : undefined),
     },
     enabled: true,
-    policy_id: agentPolicyId,
+    policy_id: agentPolicyIds[0],
+    policy_ids: agentPolicyIds,
     inputs: packageToPackagePolicyInputs(packageInfo, integrationToEnable),
     vars: undefined,
   };

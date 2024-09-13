@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -19,11 +20,17 @@ import {
 } from '@kbn/repo-packages';
 
 import { getVersionInfo, VersionInfo } from './version_info';
-import { PlatformName, PlatformArchitecture, ALL_PLATFORMS } from './platform';
+import {
+  PlatformName,
+  PlatformArchitecture,
+  ALL_PLATFORMS,
+  SERVERLESS_PLATFORMS,
+} from './platform';
 
 interface Options {
   isRelease: boolean;
   targetAllPlatforms: boolean;
+  targetServerlessPlatforms: boolean;
   versionQualifier?: string;
   dockerContextUseLocalArtifact: boolean | null;
   dockerCrossCompile: boolean;
@@ -45,6 +52,7 @@ export class Config {
 
     return new Config(
       opts.targetAllPlatforms,
+      opts.targetServerlessPlatforms,
       kibanaPackageJson,
       nodeVersion,
       REPO_ROOT,
@@ -72,6 +80,7 @@ export class Config {
 
   constructor(
     private readonly targetAllPlatforms: boolean,
+    private readonly targetServerlessPlatforms: boolean,
     private readonly pkg: KibanaPackageJson,
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
@@ -164,6 +173,9 @@ export class Config {
    * specified only the platform for this OS will be returned
    */
   getTargetPlatforms() {
+    if (this.targetServerlessPlatforms) {
+      return SERVERLESS_PLATFORMS;
+    }
     if (this.targetAllPlatforms) {
       return ALL_PLATFORMS;
     }
@@ -177,6 +189,9 @@ export class Config {
    * reliably get the LICENSE file, which isn't included in the windows version
    */
   getNodePlatforms() {
+    if (this.targetServerlessPlatforms) {
+      return SERVERLESS_PLATFORMS;
+    }
     if (this.targetAllPlatforms) {
       return ALL_PLATFORMS;
     }
@@ -229,6 +244,20 @@ export class Config {
   }
 
   /**
+   * Get the first 12 digits of the git sha for this build
+   */
+  getBuildShaShort() {
+    return this.versionInfo.buildShaShort;
+  }
+
+  /**
+   * Get the ISO 8601 date for this build
+   */
+  getBuildDate() {
+    return this.versionInfo.buildDate;
+  }
+
+  /**
    * Resolve a set of paths based from the target directory for this build.
    */
   resolveFromTarget(...subPaths: string[]) {
@@ -239,11 +268,11 @@ export class Config {
     return getPackages(this.repoRoot).filter(
       (p) =>
         (this.pluginSelector.testPlugins || !p.isDevOnly()) &&
-        (!p.isPlugin() || this.pluginFilter(p))
+        (!p.isPlugin() || (this.pluginFilter(p) && !p.isDevOnly()))
     );
   }
 
   getDistPluginsFromRepo() {
-    return getPackages(this.repoRoot).filter(this.pluginFilter);
+    return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
   }
 }

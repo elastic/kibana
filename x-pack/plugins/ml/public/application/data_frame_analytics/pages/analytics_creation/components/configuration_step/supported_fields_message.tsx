@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
-import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
-import { OMIT_FIELDS } from '../../../../../../../common/constants/field_types';
-import { BASIC_NUMERICAL_TYPES, EXTENDED_NUMERICAL_TYPES } from '../../../../common/fields';
+import { type Field, EVENT_RATE_FIELD_ID, OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
+import {
+  type DataFrameAnalysisConfigType,
+  ANALYSIS_CONFIG_TYPE,
+  BASIC_NUMERICAL_TYPES,
+  EXTENDED_NUMERICAL_TYPES,
+} from '@kbn/ml-data-frame-analytics-utils';
+import type { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { CATEGORICAL_TYPES } from './form_options_validation';
-import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import { useNewJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
 const containsClassificationFieldsCb = ({ name, type }: Field) =>
   !OMIT_FIELDS.includes(name) &&
@@ -71,7 +73,7 @@ export const SupportedFieldsMessage: FC<Props> = ({ jobType }) => {
   const [sourceIndexContainsSupportedFields, setSourceIndexContainsSupportedFields] =
     useState<boolean>(true);
   const [sourceIndexFieldsCheckFailed, setSourceIndexFieldsCheckFailed] = useState<boolean>(false);
-  const { fields } = newJobCapsServiceAnalytics;
+  const { fields } = useNewJobCapsServiceAnalytics();
 
   // Find out if data view contains supported fields for job type. Provides a hint in the form
   // that job may not run correctly if no supported fields are found.

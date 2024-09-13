@@ -1,13 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
+import {
+  addIdToItem,
+  removeIdFromItem,
+  validateHasWildcardWithWrongOperator,
+} from '@kbn/securitysolution-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   CreateExceptionListItemSchema,
@@ -19,7 +24,6 @@ import {
   NamespaceType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
-  OsTypeArray,
   createExceptionListItemSchema,
   entriesList,
   entriesNested,
@@ -49,6 +53,8 @@ import {
   isNotOneOfOperator,
   isInListOperator,
   isNotInListOperator,
+  matchesOperator,
+  doesNotMatchOperator,
 } from '../autocomplete_operators';
 
 import {
@@ -302,18 +308,13 @@ export const getUpdatedEntriesOnDelete = (
  */
 export const getFilteredIndexPatterns = (
   patterns: DataViewBase,
-  item: FormattedBuilderEntry,
-  type: ExceptionListType,
-  preFilter?: (i: DataViewBase, t: ExceptionListType, o?: OsTypeArray) => DataViewBase,
-  osTypes?: OsTypeArray
+  item: FormattedBuilderEntry
 ): DataViewBase => {
-  const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;
-
   if (item.nested === 'child' && item.parent != null) {
     // when user has selected a nested entry, only fields with the common parent are shown
     return {
-      ...indexPatterns,
-      fields: indexPatterns.fields
+      ...patterns,
+      fields: patterns.fields
         .filter((indexField) => {
           const subTypeNested = getDataViewFieldSubtypeNested(indexField);
           const fieldHasCommonParentPath =
@@ -330,15 +331,15 @@ export const getFilteredIndexPatterns = (
     };
   } else if (item.nested === 'parent' && item.field != null) {
     // when user has selected a nested entry, right above it we show the common parent
-    return { ...indexPatterns, fields: [item.field] };
+    return { ...patterns, fields: [item.field] };
   } else if (item.nested === 'parent' && item.field == null) {
     // when user selects to add a nested entry, only nested fields are shown as options
     return {
-      ...indexPatterns,
-      fields: indexPatterns.fields.filter((field) => isDataViewFieldSubtypeNested(field)),
+      ...patterns,
+      fields: patterns.fields.filter((field) => isDataViewFieldSubtypeNested(field)),
     };
   } else {
-    return indexPatterns;
+    return patterns;
   }
 };
 
@@ -702,8 +703,14 @@ export const getOperatorOptions = (
 ): OperatorOption[] => {
   if (item.nested === 'parent' || item.field == null) {
     return [isOperator];
-  } else if ((item.nested != null && listType === 'endpoint') || listType === 'endpoint') {
-    return isBoolean ? [isOperator] : [isOperator, isOneOfOperator];
+  } else if (listType === 'endpoint') {
+    if (isBoolean) {
+      return [isOperator];
+    } else {
+      return fieldSupportsMatches(item.field)
+        ? [isOperator, isOneOfOperator, matchesOperator, doesNotMatchOperator]
+        : [isOperator, isOneOfOperator];
+    }
   } else if (item.nested != null && listType === 'detection') {
     return isBoolean ? [isOperator, existsOperator] : [isOperator, isOneOfOperator, existsOperator];
   } else if (isBoolean) {
@@ -1018,4 +1025,30 @@ export const getMappingConflictsInfo = (field: DataViewField): FieldConflictsInf
     });
   }
   return conflicts;
+};
+
+/**
+ * Given an exceptions list, determine if any entries have an "IS" operator with a wildcard value
+ */
+export const hasWrongOperatorWithWildcard = (
+  items: ExceptionsBuilderReturnExceptionItem[]
+): boolean => {
+  // flattens array of multiple entries added with OR
+  const multipleEntries = items.flatMap((item) => item.entries);
+  // flattens nested entries
+  const allEntries = multipleEntries.flatMap((item) => {
+    if (item.type === 'nested') {
+      return item.entries;
+    }
+    return item;
+  });
+
+  return allEntries.some((e) => {
+    if (e.type !== 'list' && 'value' in e) {
+      return validateHasWildcardWithWrongOperator({
+        operator: e.type,
+        value: e.value,
+      });
+    }
+  });
 };

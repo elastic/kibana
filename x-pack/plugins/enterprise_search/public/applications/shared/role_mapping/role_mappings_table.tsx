@@ -170,7 +170,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
       search={search}
       pagination={pagination}
       message={ROLE_MAPPINGS_NO_RESULTS_MESSAGE}
-      responsive={false}
+      responsiveBreakpoint={false}
     />
   );
 };

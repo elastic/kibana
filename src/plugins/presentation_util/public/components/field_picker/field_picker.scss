@@ -1,14 +1,11 @@
-
-.presFieldPickerFieldButtonActive {
-  background-color: transparentize($euiColorPrimary, .9);
-}
-
 .fieldPickerSelectable {
   height: $euiSizeXXL * 9; // 40 * 9 = 360px
 
-  &.fieldPickerSelectableLoading {
-    .euiSelectableMessage {
-      height: 100%;
-    }
+  .presFieldPicker__fieldButton[aria-checked='true'] {
+    background-color: transparentize($euiColorPrimary, .9);
+  }
+
+  .euiSelectableMessage {
+    height: 100%;
   }
 }

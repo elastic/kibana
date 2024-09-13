@@ -1,23 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n-react';
-import { EuiWrappingPopover } from '@elastic/eui';
-
-import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { ShareContextMenu } from '../components/share_context_menu';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { CoreStart, ThemeServiceStart, ToastsSetup } from '@kbn/core/public';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
+import { ShareMenu } from '../components/share_tabs';
 
 export class ShareMenuManager {
   private isOpen = false;
@@ -28,6 +26,7 @@ export class ShareMenuManager {
     core: CoreStart,
     urlService: BrowserUrlService,
     shareRegistry: ShareMenuRegistryStart,
+    disableEmbed: boolean,
     anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
   ) {
     return {
@@ -45,11 +44,15 @@ export class ShareMenuManager {
         const anonymousAccess = anonymousAccessServiceProvider?.();
         this.toggleShareContextMenu({
           ...options,
+          allowEmbed: disableEmbed ? false : options.allowEmbed,
           onClose,
           menuItems,
           urlService,
           anonymousAccess,
           theme: core.theme,
+          i18n: core.i18n,
+          toasts: core.notifications.toasts,
+          publicAPIEnabled: !disableEmbed,
         });
       },
     };
@@ -66,10 +69,11 @@ export class ShareMenuManager {
     allowShortUrl,
     objectId,
     objectType,
+    objectTypeMeta,
     sharingData,
     menuItems,
     shareableUrl,
-    shareableUrlForSavedObject,
+    shareableUrlLocatorParams,
     embedUrlParamExtensions,
     theme,
     showPublicUrlSwitch,
@@ -77,57 +81,76 @@ export class ShareMenuManager {
     anonymousAccess,
     snapshotShareWarning,
     onClose,
-    objectTypeTitle,
     disabledShareUrl,
+    i18n,
+    isDirty,
+    toasts,
+    delegatedShareUrlHandler,
+    publicAPIEnabled,
   }: ShowShareMenuOptions & {
+    anchorElement: HTMLElement;
     menuItems: ShareMenuItem[];
     urlService: BrowserUrlService;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
     theme: ThemeServiceStart;
     onClose: () => void;
+    i18n: CoreStart['i18n'];
+    isDirty: boolean;
+    toasts: ToastsSetup;
   }) {
     if (this.isOpen) {
       onClose();
       return;
     }
 
-    this.isOpen = true;
-
     document.body.appendChild(this.container);
-    const element = (
-      <I18nProvider>
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <EuiWrappingPopover
-            id="sharePopover"
-            button={anchorElement}
-            isOpen={true}
-            closePopover={onClose}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <ShareContextMenu
-              allowEmbed={allowEmbed}
-              allowShortUrl={allowShortUrl}
-              objectId={objectId}
-              objectType={objectType}
-              objectTypeTitle={objectTypeTitle}
-              shareMenuItems={menuItems}
-              sharingData={sharingData}
-              shareableUrl={shareableUrl}
-              shareableUrlForSavedObject={shareableUrlForSavedObject}
-              onClose={onClose}
-              embedUrlParamExtensions={embedUrlParamExtensions}
-              anonymousAccess={anonymousAccess}
-              showPublicUrlSwitch={showPublicUrlSwitch}
-              urlService={urlService}
-              snapshotShareWarning={snapshotShareWarning}
-              disabledShareUrl={disabledShareUrl}
-            />
-          </EuiWrappingPopover>
-        </KibanaThemeProvider>
-      </I18nProvider>
+
+    // initialize variable that will hold reference for unmount
+    let unmount: ReturnType<ReturnType<typeof toMountPoint>>;
+
+    const mount = toMountPoint(
+      <ShareMenu
+        shareContext={{
+          publicAPIEnabled,
+          anchorElement,
+          allowEmbed,
+          allowShortUrl,
+          objectId,
+          objectType,
+          objectTypeMeta,
+          sharingData,
+          shareableUrl,
+          shareableUrlLocatorParams,
+          delegatedShareUrlHandler,
+          embedUrlParamExtensions,
+          anonymousAccess,
+          showPublicUrlSwitch,
+          urlService,
+          snapshotShareWarning,
+          disabledShareUrl,
+          isDirty,
+          isEmbedded: allowEmbed,
+          shareMenuItems: menuItems,
+          toasts,
+          onClose: () => {
+            onClose();
+            unmount();
+          },
+          theme,
+          i18n,
+        }}
+      />,
+      { i18n, theme }
     );
-    ReactDOM.render(element, this.container);
+
+    const openModal = () => {
+      unmount = mount(this.container);
+      this.isOpen = true;
+    };
+
+    // @ts-ignore openModal() returns void
+    anchorElement.onclick!(openModal());
   }
 }
+
 export type ShareMenuManagerStart = ReturnType<ShareMenuManager['start']>;

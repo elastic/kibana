@@ -5,40 +5,33 @@
  * 2.0.
  */
 
-import $ from 'jquery';
-
 // Kibana wrapper
 import d3 from 'd3';
+import { getIcon } from '../../helpers/style_choices';
 
 // Pluggable function to handle the comms with a server. Default impl here is
 // for use outside of Kibana server with direct access to elasticsearch
 let graphExplorer = function (indexName, typeName, request, responseHandler) {
   const dataForServer = JSON.stringify(request);
-  $.ajax({
-    type: 'POST',
-    url: 'http://localhost:9200/' + indexName + '/_graph/explore',
+  fetch(`http://localhost:9200/${indexName}/_graph/explore`, {
+    method: 'POST',
     dataType: 'json',
     contentType: 'application/json;charset=utf-8',
-    async: true,
     data: dataForServer,
-    success: function (data) {
-      responseHandler(data);
-    },
-  });
+  })
+    .then((response) => response.json())
+    .then(responseHandler);
 };
 let searcher = function (indexName, request, responseHandler) {
   const dataForServer = JSON.stringify(request);
-  $.ajax({
-    type: 'POST',
-    url: 'http://localhost:9200/' + indexName + '/_search?rest_total_hits_as_int=true',
+  fetch(`http://localhost:9200/${indexName}/_search?rest_total_hits_as_int=true`, {
+    method: 'POST',
     dataType: 'json',
-    contentType: 'application/json;charset=utf-8', //Not sure why this was necessary - worked without elsewhere
-    async: true,
+    contentType: 'application/json;charset=utf-8',
     data: dataForServer,
-    success: function (data) {
-      responseHandler(data);
-    },
-  });
+  })
+    .then((response) => response.json())
+    .then(responseHandler);
 };
 
 // ====== Undo operations =============
@@ -476,7 +469,7 @@ function GraphWorkspace(options) {
       },
     };
     for (const field in termsByField) {
-      if (termsByField.hasOwnProperty(field)) {
+      if (Object.hasOwn(termsByField, field)) {
         const tq = {};
         tq[field] = termsByField[field];
         q.bool.should.push({
@@ -536,7 +529,7 @@ function GraphWorkspace(options) {
     });
 
     for (const n in allNodes) {
-      if (!allNodes.hasOwnProperty(n)) {
+      if (!Object.hasOwn(allNodes, n)) {
         continue;
       }
       let node = allNodes[n];
@@ -849,7 +842,7 @@ function GraphWorkspace(options) {
         id: dedupedNode.id,
         label: label,
         color: dedupedNode.color,
-        icon: dedupedNode.icon,
+        icon: getIcon(dedupedNode.icon),
         data: dedupedNode,
       };
       //        node.scaledSize = sizeScale(node.data.weight);
@@ -1001,7 +994,7 @@ function GraphWorkspace(options) {
     const primaryVertices = [];
     const secondaryVertices = [];
     for (const fieldName in nodesByField) {
-      if (nodesByField.hasOwnProperty(fieldName)) {
+      if (Object.hasOwn(nodesByField, fieldName)) {
         primaryVertices.push({
           field: fieldName,
           include: nodesByField[fieldName],
@@ -1047,7 +1040,7 @@ function GraphWorkspace(options) {
         targetFields.some((fieldDef) => {
           if (node.field === fieldDef.name) {
             node.color = fieldDef.color;
-            node.icon = fieldDef.icon;
+            node.icon = getIcon(fieldDef.icon);
             node.fieldDef = fieldDef;
             return true;
           }
@@ -1334,7 +1327,7 @@ function GraphWorkspace(options) {
       txtsByFieldType[node.data.field] = txt;
     });
     for (const field in txtsByFieldType) {
-      if (txtsByFieldType.hasOwnProperty(field)) {
+      if (Object.hasOwn(txtsByFieldType, field)) {
         likeQueries.push({
           more_like_this: {
             like: txtsByFieldType[field],
@@ -1563,7 +1556,7 @@ function GraphWorkspace(options) {
         self.options.vertex_fields.some((fieldDef) => {
           if (node.field === fieldDef.name) {
             node.color = fieldDef.color;
-            node.icon = fieldDef.icon;
+            node.icon = getIcon(fieldDef.icon);
             node.fieldDef = fieldDef;
             return true;
           }

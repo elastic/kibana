@@ -49,6 +49,7 @@ import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { BuildReasonMessage } from './reason_formatters';
 import type { QueryRuleParams } from '../../rule_schema';
 import { SERVER_APP_ID } from '../../../../../common/constants';
+import type { PluginSetupContract } from '@kbn/alerting-plugin/server';
 
 describe('searchAfterAndBulkCreate', () => {
   let mockService: RuleExecutorServicesMock;
@@ -58,6 +59,7 @@ describe('searchAfterAndBulkCreate', () => {
   let wrapHits: WrapHits;
   let inputIndexPattern: string[] = [];
   let listClient = listMock.getListClient();
+  let alerting: PluginSetupContract;
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
   const someGuids = Array.from({ length: 13 }).map(() => uuidv4());
   const sampleParams = getQueryRuleParams();
@@ -82,22 +84,27 @@ describe('searchAfterAndBulkCreate', () => {
   sampleParams.maxSignals = 30;
   let tuple: RuleRangeTuple;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
     buildReasonMessage = jest.fn().mockResolvedValue('some alert reason message');
     listClient = listMock.getListClient();
     listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
     inputIndexPattern = ['auditbeat-*'];
     mockService = alertsMock.createRuleExecutorServices();
-    tuple = getRuleRangeTuples({
-      previousStartedAt: new Date(),
-      startedAt: new Date(),
-      from: sampleParams.from,
-      to: sampleParams.to,
-      interval: '5m',
-      maxSignals: sampleParams.maxSignals,
-      ruleExecutionLogger,
-    }).tuples[0];
+    alerting = alertsMock.createSetup();
+    alerting.getConfig = jest.fn().mockReturnValue({ run: { alerts: { max: 1000 } } });
+    tuple = (
+      await getRuleRangeTuples({
+        previousStartedAt: new Date(),
+        startedAt: new Date(),
+        from: sampleParams.from,
+        to: sampleParams.to,
+        interval: '5m',
+        maxSignals: sampleParams.maxSignals,
+        ruleExecutionLogger,
+        alerting,
+      })
+    ).tuples[0];
     mockPersistenceServices = createPersistenceServicesMock();
     bulkCreate = bulkCreateFactory(
       mockPersistenceServices.alertWithPersistence,
@@ -112,6 +119,7 @@ describe('searchAfterAndBulkCreate', () => {
       indicesToQuery: inputIndexPattern,
       alertTimestampOverride: undefined,
       ruleExecutionLogger,
+      publicBaseUrl: 'http://testkibanabaseurl.com',
     });
   });
 

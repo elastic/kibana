@@ -36,22 +36,26 @@ spec:
       # Uncomment if using hints feature
       #initContainers:
       #  - name: k8s-templates-downloader
-      #    image: busybox:1.28
-      #    command: ['sh']
+      #    image: docker.elastic.co/beats/elastic-agent:VERSION
+      #    command: ['bash']
       #    args:
       #      - -c
       #      - >-
-      #        mkdir -p /etc/elastic-agent/inputs.d &&
-      #        wget -O - https://github.com/elastic/elastic-agent/archive/main.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-main/deploy/kubernetes/elastic-agent/templates.d"
+      #        mkdir -p /usr/share/elastic-agent/state/inputs.d &&
+      #        curl -sL https://github.com/elastic/elastic-agent/archive/8.16.tar.gz | tar xz -C /usr/share/elastic-agent/state/inputs.d --strip=5 "elastic-agent-8.16/deploy/kubernetes/elastic-agent-standalone/templates.d"
+      #    securityContext:
+      #      runAsUser: 0
       #    volumeMounts:
-      #      - name: external-inputs
-      #        mountPath: /etc/elastic-agent/inputs.d
+      #      - name: elastic-agent-state
+      #        mountPath: /usr/share/elastic-agent/state
       containers:
         - name: elastic-agent
           image: docker.elastic.co/beats/elastic-agent:VERSION
           args: ["-c", "/etc/elastic-agent/agent.yml", "-e"]
           env:
-            # The basic authentication username used to connect to Elasticsearch
+            # The API Key with access privilleges to connect to Elasticsearch. https://www.elastic.co/guide/en/fleet/current/grant-access-to-elasticsearch.html#create-api-key-standalone-agent
+            - name: API_KEY
+            # The basic authentication username used to connect to Elasticsearch. Alternative to API_KEY access.
             # This user needs the privileges required to publish events to Elasticsearch.
             - name: ES_USERNAME
               value: "elastic"
@@ -66,17 +70,28 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            - name: STATE_PATH
-              value: "/etc/elastic-agent"
+            # The following ELASTIC_NETINFO:false variable will disable the netinfo.enabled option of add-host-metadata processor. This will remove fields host.ip and host.mac.
+            # For more info: https://www.elastic.co/guide/en/beats/metricbeat/current/add-host-metadata.html
+            - name: ELASTIC_NETINFO
+              value: "false"
           securityContext:
             runAsUser: 0
-            capabilities:
-              add:
-                # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
-                # If you are not using this integration, then these capabilites can be removed.
-                - BPF # (since Linux 5.8) allows loading of BPF programs, create most map types, load BTF, iterate programs and maps.
-                - PERFMON # (since Linux 5.8) allows attaching of BPF programs used for performance metrics and observability operations.
-                - SYS_RESOURCE # Allow use of special resources or raising of resource limits. Used by 'Defend for containers' to modify 'rlimit_memlock'
+            # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
+            # If you are using this integration, please uncomment these lines before applying.
+            #capabilities:
+            #  add:
+            #    - BPF # (since Linux 5.8) allows loading of BPF programs, create most map types, load BTF, iterate programs and maps.
+            #    - PERFMON # (since Linux 5.8) allows attaching of BPF programs used for performance metrics and observability operations.
+            #    - SYS_RESOURCE # Allow use of special resources or raising of resource limits. Used by 'Defend for Containers' to modify 'rlimit_memlock'
+            ########################################################################################
+            # The following capabilities are needed for Universal Profiling.
+            # More fine graded capabilities are only available for newer Linux kernels.
+            # If you are using the Universal Profiling integration, please uncomment these lines before applying.
+            #procMount: "Unmasked"
+            #privileged: true
+            #capabilities:
+            #  add:
+            #    - SYS_ADMIN
           resources:
             limits:
               memory: 700Mi
@@ -88,9 +103,6 @@ spec:
               mountPath: /etc/elastic-agent/agent.yml
               readOnly: true
               subPath: agent.yml
-            # Uncomment if using hints feature
-            #- name: external-inputs
-            #  mountPath: /etc/elastic-agent/inputs.d
             - name: proc
               mountPath: /hostfs/proc
               readOnly: true
@@ -111,14 +123,13 @@ spec:
               readOnly: true
             - name: sys-kernel-debug
               mountPath: /sys/kernel/debug
+            - name: elastic-agent-state
+              mountPath: /usr/share/elastic-agent/state
       volumes:
         - name: datastreams
           configMap:
-            defaultMode: 0640
+            defaultMode: 0644
             name: agent-node-datastreams
-        # Uncomment if using hints feature
-        #- name: external-inputs
-        #  emptyDir: {}
         - name: proc
           hostPath:
             path: /proc
@@ -140,12 +151,18 @@ spec:
         - name: var-lib
           hostPath:
             path: /var/lib
-        # Needed for 'Defend for containers' integration (cloud-defend)
-        # If you are not using this integration, then these volumes and the corresponding
+        # Needed for 'Defend for containers' integration (cloud-defend) and Universal Profiling
+        # If you are not using one of these integrations, then these volumes and the corresponding
         # mounts can be removed.
         - name: sys-kernel-debug
           hostPath:
             path: /sys/kernel/debug
+        # Mount /var/lib/elastic-agent-managed/kube-system/state to store elastic-agent state
+        # Update 'kube-system' with the namespace of your agent installation
+        - name: elastic-agent-state
+          hostPath:
+            path: /var/lib/elastic-agent/kube-system/state
+            type: DirectoryOrCreate
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -325,9 +342,6 @@ spec:
           effect: NoSchedule
       serviceAccountName: elastic-agent
       hostNetwork: true
-      # 'hostPID: true' enables the Elastic Security integration to observe all process exec events on the host.
-      # Sharing the host process ID namespace gives visibility of all processes running on the same host.
-      hostPID: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: elastic-agent
@@ -338,7 +352,7 @@ spec:
               value: "1"
             # Set to true to communicate with Fleet with either insecure HTTP or unverified HTTPS
             - name: FLEET_INSECURE
-              value: "true"
+              value: "false"
             # Fleet Server URL to enroll the Elastic Agent into
             # FLEET_URL can be found in Kibana, go to Management > Fleet > Settings
             - name: FLEET_URL
@@ -363,15 +377,28 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+            # The following ELASTIC_NETINFO:false variable will disable the netinfo.enabled option of add-host-metadata processor. This will remove fields host.ip and host.mac.
+            # For more info: https://www.elastic.co/guide/en/beats/metricbeat/current/add-host-metadata.html
+            - name: ELASTIC_NETINFO
+              value: "false"
           securityContext:
             runAsUser: 0
-            capabilities:
-              add:
-                # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
-                # If you are not using this integration, then these capabilites can be removed.
-                - BPF # (since Linux 5.8) allows loading of BPF programs, create most map types, load BTF, iterate programs and maps.
-                - PERFMON # (since Linux 5.8) allows attaching of BPF programs used for performance metrics and observability operations.
-                - SYS_RESOURCE # Allow use of special resources or raising of resource limits. Used by 'Defend for Containers' to modify 'rlimit_memlock'
+            # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
+            # If you are using this integration, please uncomment these lines before applying.
+            #capabilities:
+            #  add:
+            #    - BPF # (since Linux 5.8) allows loading of BPF programs, create most map types, load BTF, iterate programs and maps.
+            #    - PERFMON # (since Linux 5.8) allows attaching of BPF programs used for performance metrics and observability operations.
+            #    - SYS_RESOURCE # Allow use of special resources or raising of resource limits. Used by 'Defend for Containers' to modify 'rlimit_memlock'
+            ########################################################################################
+            # The following capabilities are needed for Universal Profiling.
+            # More fine graded capabilities are only available for newer Linux kernels.
+            # If you are using the Universal Profiling integration, please uncomment these lines before applying.
+            #procMount: "Unmasked"
+            #privileged: true
+            #capabilities:
+            #  add:
+            #    - SYS_ADMIN
           resources:
             limits:
               memory: 700Mi
@@ -402,6 +429,8 @@ spec:
               readOnly: true
             - name: sys-kernel-debug
               mountPath: /sys/kernel/debug
+            - name: elastic-agent-state
+              mountPath: /usr/share/elastic-agent/state
       volumes:
         - name: proc
           hostPath:
@@ -425,17 +454,23 @@ spec:
           hostPath:
             path: /var/lib
         # Mount /etc/machine-id from the host to determine host ID
-        # Needed for Elastic Security integration
+        # Needed for Kubernetes node autodiscovery
         - name: etc-mid
           hostPath:
             path: /etc/machine-id
             type: File
-        # Needed for 'Defend for containers' integration (cloud-defend)
-        # If you are not using this integration, then these volumes and the corresponding
+        # Needed for 'Defend for containers' integration (cloud-defend) and Universal Profiling
+        # If you are not using one of these integrations, then these volumes and the corresponding
         # mounts can be removed.
         - name: sys-kernel-debug
           hostPath:
             path: /sys/kernel/debug
+        # Mount /var/lib/elastic-agent-managed/kube-system/state to store elastic-agent state
+        # Update 'kube-system' with the namespace of your agent installation
+        - name: elastic-agent-state
+          hostPath:
+            path: /var/lib/elastic-agent-managed/kube-system/state
+            type: DirectoryOrCreate
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

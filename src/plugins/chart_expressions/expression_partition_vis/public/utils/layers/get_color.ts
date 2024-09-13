@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { ArrayNode } from '@elastic/charts';
 import { isEqual } from 'lodash';
 import type { PaletteRegistry, SeriesLayer, PaletteOutput, PaletteDefinition } from '@kbn/coloring';
@@ -21,12 +23,22 @@ const isTreemapOrMosaicChart = (shape: ChartTypes) =>
 
 export const byDataColorPaletteMap = (
   rows: Datatable['rows'],
-  columnId: string,
+  column: Partial<BucketColumns>,
   paletteDefinition: PaletteDefinition,
-  { params }: PaletteOutput
+  { params }: PaletteOutput,
+  formatters: Record<string, FieldFormat | undefined>,
+  formatter: FieldFormatsStart
 ) => {
   const colorMap = new Map<string, string | undefined>(
-    rows.map((item) => [String(item[columnId]), undefined])
+    rows.map((item) => {
+      const formattedName = getNodeLabel(
+        item[column.id ?? ''],
+        column,
+        formatters,
+        formatter.deserialize
+      );
+      return [formattedName, undefined];
+    })
   );
   let rankAtDepth = 0;
 
@@ -69,13 +81,13 @@ const getDistinctColor = (
   formattedCategoricalKey: string
 ) => {
   // TODO move away from Record to a Map to avoid issues with reserved JS keywords
-  if (overwriteColors.hasOwnProperty(categoricalKey)) {
+  if (Object.hasOwn(overwriteColors, categoricalKey)) {
     return overwriteColors[categoricalKey];
   }
   // this is for supporting old visualizations (created by vislib plugin)
   // it seems that there for some aggs, the uiState saved from vislib is
   // different from how es-charts handles it
-  if (overwriteColors.hasOwnProperty(formattedCategoricalKey)) {
+  if (Object.hasOwn(overwriteColors, formattedCategoricalKey)) {
     return overwriteColors[formattedCategoricalKey];
   }
 
@@ -135,7 +147,7 @@ const createSeriesLayers = (
   column: Partial<BucketColumns>
 ): SeriesLayer[] => {
   const seriesLayers: SeriesLayer[] = [];
-  let tempParent: typeof arrayNode | typeof arrayNode['parent'] = arrayNode;
+  let tempParent: typeof arrayNode | (typeof arrayNode)['parent'] = arrayNode;
   while (tempParent.parent && tempParent.depth > 0) {
     const nodeKey = tempParent.parent.children[tempParent.sortIndex][0];
     const seriesName = String(nodeKey);
@@ -171,7 +183,7 @@ const overrideColors = (
 ) => {
   let overwriteColor;
 
-  if (overwriteColors.hasOwnProperty(name)) {
+  if (Object.hasOwn(overwriteColors, name)) {
     overwriteColor = overwriteColors[name];
   }
 

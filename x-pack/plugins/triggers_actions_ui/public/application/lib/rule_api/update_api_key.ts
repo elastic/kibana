@@ -6,12 +6,12 @@
  */
 import { HttpSetup } from '@kbn/core/public';
 import { KueryNode } from '@kbn/es-query';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+import { BASE_ALERTING_API_PATH, INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { BulkEditResponse } from '../../../types';
 
 export async function updateAPIKey({ id, http }: { id: string; http: HttpSetup }): Promise<string> {
   return http.post<string>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}/_update_api_key`
+    `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}/_update_api_key`
   );
 }
 

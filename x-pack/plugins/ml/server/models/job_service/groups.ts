@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UpdateGroupsRequest } from '../../../common/types/job_service';
 import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import type { Group } from '../../../common/types/groups';
@@ -21,8 +22,8 @@ export function groupsProvider(mlClient: MlClient) {
   const calMngr = new CalendarManager(mlClient);
 
   async function getAllGroups() {
-    const groups: { [id: string]: Group } = {};
-    const jobIds: { [id: string]: undefined | null } = {};
+    const groups: { [id: string]: Group } = Object.create(null);
+    const jobIds: { [id: string]: undefined | null } = Object.create(null);
     const [body, calendars] = await Promise.all([mlClient.getJobs(), calMngr.getAllCalendars()]);
 
     const { jobs } = body;
@@ -68,8 +69,8 @@ export function groupsProvider(mlClient: MlClient) {
       .map((g) => groups[g]);
   }
 
-  async function updateGroups(jobs: Array<{ jobId: string; groups: string[] }>) {
-    const results: Results = {};
+  async function updateGroups(jobs: UpdateGroupsRequest['jobs']) {
+    const results: Results = Object.create(null);
     for (const job of jobs) {
       const { jobId, groups } = job;
       try {

@@ -1,0 +1,43 @@
+/* Editor styles for any layout mode */
+/* NOTE: Much of this is overriding Monaco styles so the specificity is intentional */
+
+.TextBasedLangEditor .monaco-editor .monaco-hover {
+  display: block !important;
+}
+
+.TextBasedLangEditor .monaco-editor .margin-view-overlays .line-numbers {
+  color: $euiColorDisabledText;
+}
+
+// Currently focused line(s)
+.TextBasedLangEditor .monaco-editor .current-line ~ .line-numbers {
+  color: $euiTextSubduedColor;
+}
+
+// Suggest (autocomplete) menu
+.TextBasedLangEditor .monaco-editor .suggest-widget, .TextBasedLangEditor .monaco-editor .suggest-details-container {
+  @include euiBottomShadow;
+  border-radius: $euiBorderRadius;
+}
+
+.TextBasedLangEditor .monaco-editor .suggest-details-container {
+  background-color: $euiColorEmptyShade;
+  line-height: 1.5rem;
+}
+
+.TextBasedLangEditor_errorMessage {
+  @include euiTextBreakWord;
+}
+
+// All scrollable containers (e.g. main container and suggest menu)
+.TextBasedLangEditor .monaco-editor .monaco-scrollable-element {
+  margin-left: $euiSizeS;
+}
+
+.TextBasedLangEditor .monaco-editor .monaco-list .monaco-scrollable-element {
+  margin-left: 0;
+
+  .monaco-list-row.focused {
+    border-radius: $euiBorderRadius;
+  }
+}

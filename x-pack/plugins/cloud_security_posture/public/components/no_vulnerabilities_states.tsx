@@ -11,26 +11,29 @@ import {
   EuiEmptyPrompt,
   EuiIcon,
   EuiMarkdownFormat,
-  EuiLink,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
+  EuiLink,
 } from '@elastic/eui';
-import { FormattedHTMLMessage, FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { IndexDetails } from '@kbn/cloud-security-posture-common';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../common/constants';
 import { FullSizeCenteredPage } from './full_size_centered_page';
+import { CloudPosturePage } from './cloud_posture_page';
 import {
-  CloudPosturePage,
-  VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
-} from './cloud_posture_page';
-import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import type { IndexDetails } from '../../common/types';
-import { NO_VULNERABILITIES_STATUS_TEST_SUBJ } from './test_subjects';
+  NO_VULNERABILITIES_STATUS_TEST_SUBJ,
+  CNVM_NOT_INSTALLED_ACTION_SUBJ,
+} from './test_subjects';
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
+import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
+import { PostureTypes } from '../../common/types_old';
 
 const REFETCH_INTERVAL_MS = 20000;
 
@@ -43,7 +46,7 @@ const ScanningVulnerabilitiesEmptyPrompt = () => (
       <h2>
         <FormattedMessage
           id="xpack.csp.noVulnerabilitiesStates.scanningVulnerabilitiesEmptyPrompt.indexingButtonTitle"
-          defaultMessage="Scanning your cloud environment for vulnerabilities"
+          defaultMessage="Scanning your environment"
         />
       </h2>
     }
@@ -51,28 +54,31 @@ const ScanningVulnerabilitiesEmptyPrompt = () => (
       <p>
         <FormattedMessage
           id="xpack.csp.noVulnerabilitiesStates.scanningVulnerabilitiesEmptyPrompt.indexingDescription"
-          defaultMessage="Results should start to appear within a minute"
+          defaultMessage="Results will appear here as soon as they are available."
         />
       </p>
     }
   />
 );
 
-const VulnerabilitiesFindingsInstalledEmptyPrompt = ({
+const CnvmIntegrationNotInstalledEmptyPrompt = ({
   vulnMgmtIntegrationLink,
 }: {
   vulnMgmtIntegrationLink?: string;
 }) => {
   return (
     <EuiEmptyPrompt
-      data-test-subj={VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT}
-      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
+      data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED}
+      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="" role="presentation" />}
       title={
         <h2>
-          <FormattedHTMLMessage
-            tagName="h2"
+          <FormattedMessage
             id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.promptTitle"
-            defaultMessage="Detect vulnerabilities <br/> in your cloud assets!"
+            defaultMessage="Detect vulnerabilities in your {lineBreak} cloud assets"
+            ignoreTag
+            values={{
+              lineBreak: <br />,
+            }}
           />
         </h2>
       }
@@ -82,29 +88,32 @@ const VulnerabilitiesFindingsInstalledEmptyPrompt = ({
         <p>
           <FormattedMessage
             id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.promptDescription"
-            defaultMessage="Add the Elastic Vulnerability Management Integration to begin. {learnMore}."
-            values={{
-              learnMore: (
-                <EuiLink href={''} target="_blank">
-                  <FormattedMessage
-                    id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.learnMoreTitle"
-                    defaultMessage="Learn more about Elastic Vulnerability Management(VM) for Cloud"
-                  />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="Add the Cloud Native Vulnerability Management integration to begin"
           />
         </p>
       }
       actions={
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton color="primary" fill href={vulnMgmtIntegrationLink}>
+            <EuiButton
+              color="primary"
+              fill
+              href={vulnMgmtIntegrationLink}
+              data-test-subj={CNVM_NOT_INSTALLED_ACTION_SUBJ}
+            >
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.addVulMngtIntegrationButtonTitle"
-                defaultMessage="Install Elastic Vulnerability Management for Cloud"
+                defaultMessage="Install Cloud Native Vulnerability Management"
               />
             </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty color="primary" href={'https://ela.st/cnvm'} target="_blank">
+              <FormattedMessage
+                id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.learnMoreButtonTitle"
+                defaultMessage="Learn more"
+              />
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
@@ -112,7 +121,7 @@ const VulnerabilitiesFindingsInstalledEmptyPrompt = ({
   );
 };
 
-const IndexTimeout = () => (
+const CnvmIndexTimeout = () => (
   <EuiEmptyPrompt
     data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT}
     color="plain"
@@ -129,13 +138,13 @@ const IndexTimeout = () => (
       <p>
         <FormattedMessage
           id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDescription"
-          defaultMessage="Collecting findings is taking longer than expected, please review our {docs} or reach out to support"
+          defaultMessage="Scanning workloads is taking longer than expected. Please check {docs}"
           values={{
             docs: (
-              <EuiLink href="https://ela.st/findings" target="_blank">
+              <EuiLink href="https://ela.st/cnvm-faq" target="_blank">
                 <FormattedMessage
                   id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDocLink"
-                  defaultMessage="docs"
+                  defaultMessage="CNVM FAQ"
                 />
               </EuiLink>
             ),
@@ -185,6 +194,43 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
     }
   />
 );
+const AgentNotDeployedEmptyPrompt = ({ postureType }: { postureType: PostureTypes }) => {
+  const integrationPoliciesLink = useCISIntegrationPoliciesLink({
+    postureType,
+  });
+
+  return (
+    <EuiEmptyPrompt
+      data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_DEPLOYED}
+      color="plain"
+      iconType="fleetApp"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.csp.noVulnerabilitiesStates.noAgentsDeployed.noAgentsDeployedTitle"
+            defaultMessage="No Agents Installed"
+          />
+        </h2>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.csp.noVulnerabilitiesStates.noAgentsDeployed.noAgentsDeployedDescription"
+            defaultMessage="In order to begin detecting vulnerabilities, you'll need to deploy elastic-agent into the cloud account or Kubernetes cluster you want to monitor."
+          />
+        </p>
+      }
+      actions={[
+        <EuiButton fill href={integrationPoliciesLink} isDisabled={!integrationPoliciesLink}>
+          <FormattedMessage
+            id="xpack.csp.noVulnerabilitiesStates.noAgentsDeployed.noAgentsDeployedButtonTitle"
+            defaultMessage="Install Agent"
+          />
+        </EuiButton>,
+      ]}
+    />
+  );
+};
 
 /**
  * This component will return the render states based on cloud posture setup status API
@@ -206,15 +252,15 @@ export const NoVulnerabilitiesStates = () => {
       .sort((a, b) => a.localeCompare(b));
 
   const render = () => {
-    if (status === 'not-deployed' || status === 'indexing' || status === 'waiting_for_results')
-      return <ScanningVulnerabilitiesEmptyPrompt />; // integration installed, but no agents added
-    if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
+    if (status === 'indexing' || status === 'waiting_for_results')
+      return <ScanningVulnerabilitiesEmptyPrompt />; // integration installed, but no agents added// agent added, index timeout has passed
+    if (status === 'index-timeout') return <CnvmIndexTimeout />;
     if (status === 'not-installed')
       return (
-        <VulnerabilitiesFindingsInstalledEmptyPrompt
-          vulnMgmtIntegrationLink={vulnMgmtIntegrationLink}
-        />
+        <CnvmIntegrationNotInstalledEmptyPrompt vulnMgmtIntegrationLink={vulnMgmtIntegrationLink} />
       );
+    if (status === 'not-deployed')
+      return <AgentNotDeployedEmptyPrompt postureType={VULN_MGMT_POLICY_TEMPLATE} />;
     if (status === 'unprivileged')
       return <Unprivileged unprivilegedIndices={unprivilegedIndices || []} />; // user has no privileges for our indices
   };

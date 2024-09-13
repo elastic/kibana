@@ -10,11 +10,12 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/cor
 import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
-import { loadRule, loadRuleType } from './services/alert_api';
-import { ENABLE_MAINTENANCE_WINDOWS, Rule } from '../common';
-import { MAINTENANCE_WINDOWS_APP_ID } from './config';
+import { loadRule, loadRuleType } from './services/rule_api';
+import { ENABLE_MAINTENANCE_WINDOWS, Rule, MAINTENANCE_WINDOWS_APP_ID } from '../common';
 
 export interface PluginSetupContract {
   /**
@@ -56,6 +57,7 @@ export interface PluginSetupContract {
 }
 export interface PluginStartContract {
   getNavigation: (ruleId: Rule['id']) => Promise<string | undefined>;
+  getMaxAlertsPerRun: () => number;
 }
 export interface AlertingPluginSetup {
   management: ManagementSetup;
@@ -64,6 +66,18 @@ export interface AlertingPluginSetup {
 export interface AlertingPluginStart {
   licensing: LicensingPluginStart;
   spaces: SpacesPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  data: DataPublicPluginStart;
+}
+
+export interface AlertingUIConfig {
+  rules: {
+    run: {
+      alerts: {
+        max: number;
+      };
+    };
+  };
 }
 
 export class AlertingPublicPlugin
@@ -71,8 +85,13 @@ export class AlertingPublicPlugin
     Plugin<PluginSetupContract, PluginStartContract, AlertingPluginSetup, AlertingPluginStart>
 {
   private alertNavigationRegistry?: AlertNavigationRegistry;
+  private config: AlertingUIConfig;
+  readonly maxAlertsPerRun: number;
 
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.config = this.initContext.config.get<AlertingUIConfig>();
+    this.maxAlertsPerRun = this.config.rules.run.alerts.max;
+  }
 
   public setup(core: CoreSetup, plugins: AlertingPluginSetup) {
     this.alertNavigationRegistry = new AlertNavigationRegistry();
@@ -139,12 +158,16 @@ export class AlertingPublicPlugin
 
         if (this.alertNavigationRegistry!.has(rule.consumer, ruleType)) {
           const navigationHandler = this.alertNavigationRegistry!.get(rule.consumer, ruleType);
-          return navigationHandler(rule);
+          const navUrl = navigationHandler(rule);
+          if (navUrl) return navUrl;
         }
 
         if (rule.viewInAppRelativeUrl) {
           return rule.viewInAppRelativeUrl;
         }
+      },
+      getMaxAlertsPerRun: () => {
+        return this.maxAlertsPerRun;
       },
     };
   }

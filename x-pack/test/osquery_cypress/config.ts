@@ -11,7 +11,7 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
     require.resolve('../functional/config.base.js')
@@ -19,6 +19,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
+
+    servers: {
+      ...kibanaCommonTestsConfig.get('servers'),
+      fleetserver: {
+        protocol: 'https',
+        hostname: 'host.docker.internal',
+        port: 8220,
+      },
+    },
 
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),

@@ -31,13 +31,13 @@ export const AnalyticsCollectionNoEventsCallout: React.FC<
 > = ({ analyticsCollection }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const { analyticsEventsExist } = useActions(AnalyticsCollectionNoEventsCalloutLogic);
-  const { hasEvents } = useValues(AnalyticsCollectionNoEventsCalloutLogic);
+  const { hasEvents, isLoading } = useValues(AnalyticsCollectionNoEventsCalloutLogic);
 
   useEffect(() => {
-    analyticsEventsExist(analyticsCollection.name);
+    analyticsEventsExist(analyticsCollection.events_datastream);
   }, []);
 
-  return hasEvents ? null : (
+  return hasEvents || isLoading ? null : (
     <EuiCallOut
       color="primary"
       iconType="download"

@@ -29,13 +29,12 @@ Object {
       },
     },
     "composite": Object {
-      "size": 100,
+      "size": 101,
       "sources": Array [
         Object {
           "host.name": Object {
             "terms": Object {
               "field": "host.name",
-              "missing_bucket": true,
             },
           },
         },

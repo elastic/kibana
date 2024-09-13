@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import get from 'lodash/get';
+import { get } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -31,6 +31,11 @@ interface AggHistogram {
   histogram: {
     field: string;
     interval: number;
+    min_doc_count?: number;
+    extended_bounds?: {
+      min: number;
+      max: number;
+    };
   };
 }
 
@@ -41,20 +46,55 @@ interface AggTerms {
   };
 }
 
-interface NumericDataItem {
+/**
+ * Represents an item in numeric data.
+ * @interface
+ */
+export interface NumericDataItem {
+  /**
+   * The numeric key.
+   */
   key: number;
+
+  /**
+   * An optional string representation of the key.
+   */
   key_as_string?: string;
+
+  /**
+   * The document count associated with the key.
+   */
   doc_count: number;
 }
 
 /**
- * Interface to describe the data structure returned for numeric based charts.
+ * Interface describing the data structure returned for numeric-based charts.
+ * @interface
  */
 export interface NumericChartData {
+  /**
+   * An array of data points, each represented by a NumericDataItem.
+   */
   data: NumericDataItem[];
+
+  /**
+   * The identifier for the data set.
+   */
   id: string;
+
+  /**
+   * The interval value for the data.
+   */
   interval: number;
+
+  /**
+   * An array of statistics values, typically [min, max].
+   */
   stats: [number, number];
+
+  /**
+   * The type of chart, which is 'numeric'.
+   */
   type: 'numeric';
 }
 
@@ -62,6 +102,9 @@ export interface NumericChartData {
  * Numeric based histogram field interface, limited to `date` and `number`.
  */
 export interface NumericHistogramField extends HistogramField {
+  /**
+   * The type of the numeric histogram field.
+   */
   type: KBN_FIELD_TYPES.DATE | KBN_FIELD_TYPES.NUMBER;
 }
 type NumericHistogramFieldWithColumnStats = NumericHistogramField & NumericColumnStats;
@@ -129,31 +172,48 @@ export type FieldsForHistograms = Array<
   | UnsupportedHistogramField
 >;
 
+interface FetchHistogramsForFieldsParams {
+  /** The Elasticsearch client to use for the query. */
+  esClient: ElasticsearchClient;
+  /** An optional abort signal to cancel the request. */
+  abortSignal?: AbortSignal;
+  /** The arguments for the aggregation query. */
+  arguments: {
+    /** The index pattern to query against. */
+    indexPattern: string;
+    /** The query to filter documents. */
+    query: any;
+    /** The fields for which histograms are to be fetched. */
+    fields: FieldsForHistograms;
+    /** The size of the sampler shard. */
+    samplerShardSize: number;
+    /** Optional runtime mappings for the query. */
+    runtimeMappings?: estypes.MappingRuntimeFields;
+    /** Optional probability for random sampling. */
+    randomSamplerProbability?: number;
+    /** Optional seed for random sampling. */
+    randomSamplerSeed?: number;
+  };
+}
+
 /**
- * Fetches data to be used in mini histogram charts. Supports auto-identifying
- * the histogram interval and min/max values.
+ * Asynchronously fetches histograms for specified fields from an Elasticsearch client.
  *
- * @param client Elasticsearch Client
- * @param indexPattern index pattern to be queried
- * @param query Elasticsearch query
- * @param fields the fields the histograms should be generated for
- * @param samplerShardSize shard_size parameter of the sampler aggregation
- * @param runtimeMappings optional runtime mappings
- * @param randomSamplerProbability optional random sampler probability
- * @param randomSamplerSeed optional random sampler seed
- * @returns an array of histogram data for each supplied field
+ * @param params The parameters for fetching histograms.
+ * @returns A promise that resolves with the fetched histograms.
  */
-export const fetchHistogramsForFields = async (
-  client: ElasticsearchClient,
-  indexPattern: string,
-  query: any,
-  fields: FieldsForHistograms,
-  samplerShardSize: number,
-  runtimeMappings?: estypes.MappingRuntimeFields,
-  abortSignal?: AbortSignal,
-  randomSamplerProbability?: number,
-  randomSamplerSeed?: number
-) => {
+export const fetchHistogramsForFields = async (params: FetchHistogramsForFieldsParams) => {
+  const { esClient, abortSignal, arguments: args } = params;
+  const {
+    indexPattern,
+    query,
+    fields,
+    samplerShardSize,
+    runtimeMappings,
+    randomSamplerProbability,
+    randomSamplerSeed,
+  } = args;
+
   if (
     samplerShardSize >= 1 &&
     randomSamplerProbability !== undefined &&
@@ -163,17 +223,19 @@ export const fetchHistogramsForFields = async (
   }
 
   const aggIntervals = {
-    ...(await fetchAggIntervals(
-      client,
-      indexPattern,
-      query,
-      fields.filter((f) => !isNumericHistogramFieldWithColumnStats(f)),
-      samplerShardSize,
-      runtimeMappings,
+    ...(await fetchAggIntervals({
+      esClient,
       abortSignal,
-      randomSamplerProbability,
-      randomSamplerSeed
-    )),
+      arguments: {
+        indexPattern,
+        query,
+        fields: fields.filter((f) => !isNumericHistogramFieldWithColumnStats(f)),
+        samplerShardSize,
+        runtimeMappings,
+        randomSamplerProbability,
+        randomSamplerSeed,
+      },
+    })),
     ...fields.filter(isNumericHistogramFieldWithColumnStats).reduce((p, field) => {
       const { interval, min, max, fieldName } = field;
       p[stringHash(fieldName)] = { interval, min, max };
@@ -220,7 +282,7 @@ export const fetchHistogramsForFields = async (
     seed: randomSamplerSeed,
   });
 
-  const body = await client.search(
+  const body = await esClient.search(
     {
       index: indexPattern,
       size: 0,

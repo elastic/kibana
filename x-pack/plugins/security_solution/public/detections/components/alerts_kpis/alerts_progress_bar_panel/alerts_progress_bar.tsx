@@ -18,9 +18,10 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { TableId } from '@kbn/securitysolution-data-table';
 import type { AlertsProgressBarData, GroupBySelection } from './types';
 import type { AddFilterProps } from '../common/types';
-import { getNonEmptyPercent } from './helpers';
+import { getAggregateData } from './helpers';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import * as i18n from './translations';
 
@@ -61,7 +62,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const validPercent = getNonEmptyPercent(data);
+  const [nonEmpty, formattedNonEmptyPercent] = getAggregateData(data);
 
   const dataStatsButton = (
     <EuiButtonIcon
@@ -75,7 +76,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
 
   const dataStatsMessage = (
     <DataStatsWrapper>
-      <EuiPopoverTitle>{i18n.DATA_STATISTICS_TITLE(validPercent.toString())}</EuiPopoverTitle>
+      <EuiPopoverTitle>{i18n.DATA_STATISTICS_TITLE(formattedNonEmptyPercent)}</EuiPopoverTitle>
       <EuiText size="s">
         {i18n.DATA_STATISTICS_MESSAGE(groupBySelection)}
         <EuiLink
@@ -103,6 +104,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
         value={key}
         queryValue={key}
         tooltipContent={null}
+        scopeId={TableId.alertsOnAlertsPage}
       >
         <EuiText size="xs" className="eui-textTruncate">
           {key}
@@ -137,7 +139,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
         <>
           <StyledEuiHorizontalRule />
           <ProgressWrapper data-test-subj="progress-bar" className="eui-yScroll">
-            {validPercent === 0 ? (
+            {nonEmpty === 0 ? (
               <>
                 <EuiText size="s" textAlign="center" data-test-subj="empty-proress-bar">
                   {i18n.EMPTY_DATA_MESSAGE}
@@ -153,10 +155,10 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
                         <EuiProgress
                           valueText={
                             <EuiText size="xs" color="default">
-                              <strong>{`${item.percentage}%`}</strong>
+                              <strong>{item.percentageLabel}</strong>
                             </EuiText>
                           }
-                          max={100}
+                          max={1}
                           color={`vis9`}
                           size="s"
                           value={item.percentage}

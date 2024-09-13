@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { constant, noop, identity } from 'lodash';
@@ -30,7 +31,7 @@ type PostFlightRequestFn<TAggConfig> = (
   inspectorRequestAdapter?: RequestAdapter,
   abortSignal?: AbortSignal,
   searchSessionId?: string,
-  disableShardFailureWarning?: boolean
+  disableWarningToasts?: boolean
 ) => Promise<estypes.SearchResponse<any>>;
 
 export interface AggTypeConfig<
@@ -48,7 +49,7 @@ export interface AggTypeConfig<
   hasNoDsl?: boolean;
   hasNoDslParams?: boolean;
   params?: Array<Partial<TParam>>;
-  valueType?: DatatableColumnType;
+  getValueType?: (aggConfig: TAggConfig) => DatatableColumnType;
   getRequestAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   getResponseAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   customLabels?: boolean;
@@ -105,7 +106,7 @@ export class AggType<
    * The type the values produced by this agg will have in the final data table.
    * If not specified, the type of the field is used.
    */
-  valueType?: DatatableColumnType;
+  getValueType?: (aggConfig: TAggConfig) => DatatableColumnType;
   /**
    * a function that will be called when this aggType is assigned to
    * an aggConfig, and that aggConfig is being rendered (in a form, chart, etc.).
@@ -261,7 +262,7 @@ export class AggType<
     this.dslName = config.dslName || config.name;
     this.expressionName = config.expressionName;
     this.title = config.title;
-    this.valueType = config.valueType;
+    this.getValueType = config.getValueType;
     this.makeLabel = config.makeLabel || constant(this.name);
     this.ordered = config.ordered;
     this.hasNoDsl = !!config.hasNoDsl;

@@ -10,7 +10,8 @@ import type { GetLensAttributes } from '../../types';
 const layerId = uuidv4();
 
 export const getEventsHistogramLensAttributes: GetLensAttributes = (
-  stackByField = 'event.action'
+  stackByField = 'event.action',
+  extraOptions = {}
 ) => {
   return {
     title: 'Events',
@@ -21,8 +22,9 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
         title: 'Empty XY chart',
         legend: {
           isVisible: true,
-          position: 'left',
+          position: 'right',
           legendSize: 'xlarge',
+          legendStats: ['currentAndLastValue'],
         },
         valueLabels: 'hide',
         preferredSeriesType: 'bar_stacked',
@@ -54,7 +56,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
         query: '',
         language: 'kuery',
       },
-      filters: [],
+      filters: extraOptions.filters ?? [],
       datasourceStates: {
         formBased: {
           layers: {
@@ -69,6 +71,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
                   scale: 'interval',
                   params: {
                     interval: 'auto',
+                    includeEmptyRows: true,
                   },
                 },
                 'e09e0380-0740-4105-becc-0a4ca12e3944': {
@@ -78,6 +81,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
                   isBucketed: false,
                   scale: 'ratio',
                   sourceField: '___records___',
+                  params: { emptyAsNull: true },
                 },
                 '34919782-4546-43a5-b668-06ac934d3acd': {
                   label: `Top values of ${stackByField}`,

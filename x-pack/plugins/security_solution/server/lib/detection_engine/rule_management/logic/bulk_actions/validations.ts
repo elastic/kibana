@@ -6,11 +6,16 @@
  */
 
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ExperimentalFeatures } from '../../../../../../common';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
+import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
 import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type {
+  BulkActionEditPayload,
+  BulkActionEditType,
+} from '../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
 import { isIndexPatternsBulkEditAction } from './utils';
 import { throwDryRunError } from './dry_run';
@@ -27,12 +32,18 @@ interface BulkEditBulkActionsValidationArgs {
   mlAuthz: MlAuthz;
   edit: BulkActionEditPayload[];
   immutable: boolean;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 interface DryRunBulkEditBulkActionsValidationArgs {
   rule: RuleAlertType;
   mlAuthz: MlAuthz;
   edit: BulkActionEditPayload[];
+  experimentalFeatures: ExperimentalFeatures;
+}
+
+interface DryRunManualRuleRunBulkActionsValidationArgs extends BulkActionsValidationArgs {
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -51,9 +62,7 @@ const throwMlAuthError = (mlAuthz: MlAuthz, ruleType: RuleType) =>
  * @param params - {@link BulkActionsValidationArgs}
  */
 export const validateBulkEnableRule = async ({ rule, mlAuthz }: BulkActionsValidationArgs) => {
-  if (!rule.enabled) {
-    await throwMlAuthError(mlAuthz, rule.params.type);
-  }
+  await throwMlAuthError(mlAuthz, rule.params.type);
 };
 
 /**
@@ -61,9 +70,7 @@ export const validateBulkEnableRule = async ({ rule, mlAuthz }: BulkActionsValid
  * @param params - {@link BulkActionsValidationArgs}
  */
 export const validateBulkDisableRule = async ({ rule, mlAuthz }: BulkActionsValidationArgs) => {
-  if (rule.enabled) {
-    await throwMlAuthError(mlAuthz, rule.params.type);
-  }
+  await throwMlAuthError(mlAuthz, rule.params.type);
 };
 
 /**
@@ -75,6 +82,27 @@ export const validateBulkDuplicateRule = async ({ rule, mlAuthz }: BulkActionsVa
 };
 
 /**
+ * runs validation for bulk schedule backfill for a single rule
+ * @param params - {@link DryRunManualRuleRunBulkActionsValidationArgs}
+ */
+export const validateBulkScheduleBackfill = async ({
+  rule,
+  experimentalFeatures,
+}: DryRunManualRuleRunBulkActionsValidationArgs) => {
+  // check whether "manual rule run" feature is enabled
+  await throwDryRunError(
+    () =>
+      invariant(experimentalFeatures?.manualRuleRunEnabled, 'Manual rule run feature is disabled.'),
+    BulkActionsDryRunErrCode.MANUAL_RULE_RUN_FEATURE
+  );
+
+  await throwDryRunError(
+    () => invariant(rule.enabled, 'Cannot schedule manual rule run for a disabled rule'),
+    BulkActionsDryRunErrCode.MANUAL_RULE_RUN_DISABLED_RULE
+  );
+};
+
+/**
  * runs validation for bulk edit for a single rule
  * @param params - {@link BulkActionsValidationArgs}
  */
@@ -83,24 +111,29 @@ export const validateBulkEditRule = async ({
   mlAuthz,
   edit,
   immutable,
+  experimentalFeatures,
 }: BulkEditBulkActionsValidationArgs) => {
   await throwMlAuthError(mlAuthz, ruleType);
 
-  // if rule can't be edited error will be thrown
-  const canRuleBeEdited = !immutable || istEditApplicableToImmutableRule(edit);
-  await throwDryRunError(
-    () => invariant(canRuleBeEdited, "Elastic rule can't be edited"),
-    BulkActionsDryRunErrCode.IMMUTABLE
-  );
+  if (!experimentalFeatures.prebuiltRulesCustomizationEnabled) {
+    // if rule can't be edited error will be thrown
+    const canRuleBeEdited = !immutable || istEditApplicableToImmutableRule(edit);
+    await throwDryRunError(
+      () => invariant(canRuleBeEdited, "Elastic rule can't be edited"),
+      BulkActionsDryRunErrCode.IMMUTABLE
+    );
+  }
 };
 
 /**
  * add_rule_actions, set_rule_actions can be applied to prebuilt/immutable rules
  */
 const istEditApplicableToImmutableRule = (edit: BulkActionEditPayload[]): boolean => {
-  return edit.every(({ type }) =>
-    [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].includes(type)
-  );
+  const applicableActions: BulkActionEditType[] = [
+    BulkActionEditTypeEnum.set_rule_actions,
+    BulkActionEditTypeEnum.add_rule_actions,
+  ];
+  return edit.every(({ type }) => applicableActions.includes(type));
 };
 
 /**
@@ -111,12 +144,14 @@ export const dryRunValidateBulkEditRule = async ({
   rule,
   edit,
   mlAuthz,
+  experimentalFeatures,
 }: DryRunBulkEditBulkActionsValidationArgs) => {
   await validateBulkEditRule({
     ruleType: rule.params.type,
     mlAuthz,
     edit,
     immutable: rule.params.immutable,
+    experimentalFeatures,
   });
 
   // if rule is machine_learning, index pattern action can't be applied to it
@@ -128,5 +163,16 @@ export const dryRunValidateBulkEditRule = async ({
         "Machine learning rule doesn't have index patterns"
       ),
     BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN
+  );
+
+  // if rule is es|ql, index pattern action can't be applied to it
+  await throwDryRunError(
+    () =>
+      invariant(
+        !isEsqlRule(rule.params.type) ||
+          !edit.some((action) => isIndexPatternsBulkEditAction(action.type)),
+        "ES|QL rule doesn't have index patterns"
+      ),
+    BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN
   );
 };

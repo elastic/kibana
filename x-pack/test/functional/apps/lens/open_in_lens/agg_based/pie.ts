@@ -75,7 +75,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('partitionVisChart');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -97,7 +97,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('partitionVisChart');
 
       const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel', 0);
@@ -119,12 +119,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('partitionVisChart');
 
       let chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
       let type = await chartSwitcher.getVisibleText();
-      expect(type).to.be('Donut');
+      expect(type).to.be('Pie');
+      expect(await lens.getDonutHoleSize()).to.equal('Small');
 
       const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
       await goBackBtn.click();
@@ -135,12 +136,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('partitionVisChart');
 
       chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
       type = await chartSwitcher.getVisibleText();
       expect(type).to.be('Pie');
+      expect(await lens.getDonutHoleSize()).to.equal('None');
     });
   });
 }

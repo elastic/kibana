@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { parse } from 'query-string';
-
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-
+import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '../../../../locator';
-import { NavigateToPath } from '../../../contexts/kibana';
-
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-import { IndexDataVisualizerPage as Page } from '../../../datavisualizer/index_based/index_data_visualizer';
-
-import { checkBasicLicense } from '../../../license';
-import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
-import { cacheDataViewsContract } from '../../../util/index_utils';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import type { MlRoute } from '../../router';
+import { createPath, PageLoader } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { DataSourceContextProvider } from '../../../contexts/ml';
+
+const Page = dynamic(async () => ({
+  default: (await import('../../../datavisualizer/index_based/index_data_visualizer'))
+    .IndexDataVisualizerPage,
+}));
 
 export const indexBasedRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -31,7 +31,7 @@ export const indexBasedRouteFactory = (
   title: i18n.translate('xpack.ml.dataVisualizer.dataView.docTitle', {
     defaultMessage: 'Index Data Visualizer',
   }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper esql={false} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
@@ -43,27 +43,35 @@ export const indexBasedRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { redirectToMlAccessDeniedPage } = deps;
-
-  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context } = useResolver(
-    index,
-    savedSearchId,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
+export const indexESQLBasedRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
+  id: 'data_view_datavisualizer_esql',
+  path: createPath(ML_PAGES.DATA_VISUALIZER_ESQL),
+  title: i18n.translate('xpack.ml.dataVisualizer.esql.docTitle', {
+    defaultMessage: 'Index Data Visualizer (ES|QL)',
+  }),
+  render: () => <PageWrapper esql={true} />,
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
     {
-      checkBasicLicense,
-      cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
-      checkGetJobsCapabilities: () =>
-        checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    }
-  );
+      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.esqlLabel', {
+        defaultMessage: 'Index Data Visualizer (ES|QL)',
+      }),
+    },
+  ],
+});
+
+const PageWrapper: FC<{ esql: boolean }> = ({ esql }) => {
+  const { context } = useRouteResolver('basic', []);
 
   return (
     <PageLoader context={context}>
-      <Page />
+      <DataSourceContextProvider>
+        <Page esql={esql} />
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };

@@ -18,9 +18,8 @@ import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import { FilterListsHeader } from './header';
 import { FilterListsTable } from './table';
-import { ml } from '../../../services/ml_api_service';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 
-import { getDocLinks } from '../../../util/dependency_cache';
 import { HelpMenu } from '../../../components/help_menu';
 
 export class FilterListsUI extends Component {
@@ -63,16 +62,27 @@ export class FilterListsUI extends Component {
   };
 
   refreshFilterLists = () => {
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
     // Load the list of filters.
-    ml.filters
+    mlApi.filters
       .filtersStats()
       .then((filterLists) => {
         this.setFilterLists(filterLists);
       })
-      .catch((resp) => {
-        console.log('Error loading list of filters:', resp);
+      .catch((error) => {
+        console.log('Error loading list of filters:', error);
         const { toasts } = this.props.kibana.services.notifications;
         toasts.addDanger(
+          i18n.translate(
+            'xpack.ml.settings.filterLists.filterLists.loadingFilterListsErrorMessage',
+            {
+              defaultMessage: 'An error occurred loading the filter lists',
+            }
+          )
+        );
+        const toastNotificationService = toastNotificationServiceProvider(toasts);
+        toastNotificationService.displayErrorToast(
+          error,
           i18n.translate(
             'xpack.ml.settings.filterLists.filterLists.loadingFilterListsErrorMessage',
             {
@@ -86,7 +96,7 @@ export class FilterListsUI extends Component {
   render() {
     const { filterLists, selectedFilterLists } = this.state;
     const { canCreateFilter, canDeleteFilter } = this.props;
-    const helpLink = getDocLinks().links.ml.customRules;
+    const helpLink = this.props.kibana.services.docLinks.links.ml.customRules;
 
     return (
       <>

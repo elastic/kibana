@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -69,13 +70,13 @@ export const createGridColumns = (
             const filterForText = i18n.translate(
               'visTypeTable.tableCellFilter.filterForValueText',
               {
-                defaultMessage: 'Filter for value',
+                defaultMessage: 'Filter for',
               }
             );
             const filterForAriaLabel = i18n.translate(
               'visTypeTable.tableCellFilter.filterForValueAriaLabel',
               {
-                defaultMessage: 'Filter for value: {cellContent}',
+                defaultMessage: 'Filter for: {cellContent}',
                 values: {
                   cellContent,
                 },
@@ -105,13 +106,13 @@ export const createGridColumns = (
             const filterOutText = i18n.translate(
               'visTypeTable.tableCellFilter.filterOutValueText',
               {
-                defaultMessage: 'Filter out value',
+                defaultMessage: 'Filter out',
               }
             );
             const filterOutAriaLabel = i18n.translate(
               'visTypeTable.tableCellFilter.filterOutValueAriaLabel',
               {
-                defaultMessage: 'Filter out value: {cellContent}',
+                defaultMessage: 'Filter out: {cellContent}',
                 values: {
                   cellContent,
                 },

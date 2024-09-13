@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { registryMock, environmentMock, tutorialMock } from './plugin.test.mocks';
@@ -29,6 +30,7 @@ describe('HomePublicPlugin', () => {
       const setup = new HomePublicPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
         share: mockShare,
         urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        cloud: cloudMock.createSetup(),
       });
       expect(setup).toHaveProperty('featureCatalogue');
       expect(setup.featureCatalogue.register).toHaveBeenCalledTimes(1);
@@ -46,6 +48,7 @@ describe('HomePublicPlugin', () => {
       const setup = new HomePublicPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
         share: mockShare,
         urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        cloud: cloudMock.createSetup(),
       });
       expect(setup).toHaveProperty('featureCatalogue');
       expect(setup.featureCatalogue).toHaveProperty('register');
@@ -55,6 +58,7 @@ describe('HomePublicPlugin', () => {
       const setup = new HomePublicPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
         share: {} as SharePluginSetup,
         urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        cloud: cloudMock.createSetup(),
       });
       expect(setup).toHaveProperty('environment');
       expect(setup.environment).toHaveProperty('update');
@@ -64,6 +68,7 @@ describe('HomePublicPlugin', () => {
       const setup = new HomePublicPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
         share: mockShare,
         urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        cloud: cloudMock.createSetup(),
       });
       expect(setup).toHaveProperty('tutorials');
       expect(setup.tutorials).toHaveProperty('setVariable');
@@ -73,6 +78,7 @@ describe('HomePublicPlugin', () => {
       const setup = new HomePublicPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
         share: mockShare,
         urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        cloud: cloudMock.createSetup(),
       });
       expect(setup).toHaveProperty('welcomeScreen');
       expect(setup.welcomeScreen).toHaveProperty('registerOnRendered');

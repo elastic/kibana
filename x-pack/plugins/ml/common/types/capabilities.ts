@@ -18,6 +18,12 @@ export const apmUserMlCapabilities = {
   canGetJobs: false,
 };
 
+export const featureMlCapabilities = {
+  isADEnabled: true,
+  isDFAEnabled: true,
+  isNLPEnabled: true,
+};
+
 export const userMlCapabilities = {
   // Anomaly Detection
   canGetJobs: false,
@@ -39,6 +45,8 @@ export const userMlCapabilities = {
   canTestTrainedModels: false,
   canGetFieldInfo: false,
   canGetMlInfo: false,
+  // AIOps
+  canUseAiops: false,
 };
 
 export const adminMlCapabilities = {
@@ -76,21 +84,25 @@ export const adminMlCapabilities = {
   canCreateTrainedModels: false,
   canDeleteTrainedModels: false,
   canStartStopTrainedModels: false,
+  // Inference models
+  canCreateInferenceEndpoint: false,
 };
 
+export type FeatureMlCapabilities = typeof featureMlCapabilities;
 export type UserMlCapabilities = typeof userMlCapabilities;
 export type AdminMlCapabilities = typeof adminMlCapabilities;
-export type MlCapabilities = UserMlCapabilities & AdminMlCapabilities;
+export type MlCapabilities = FeatureMlCapabilities & UserMlCapabilities & AdminMlCapabilities;
 export type MlCapabilitiesKey = keyof MlCapabilities;
 
-export const basicLicenseMlCapabilities = [
+export const basicLicenseMlCapabilities: MlCapabilitiesKey[] = [
   'canFindFileStructure',
   'canGetFieldInfo',
   'canGetMlInfo',
-] as Array<keyof MlCapabilities>;
+];
 
 export function getDefaultCapabilities(): MlCapabilities {
   return {
+    ...featureMlCapabilities,
     ...userMlCapabilities,
     ...adminMlCapabilities,
   };
@@ -99,8 +111,13 @@ export function getDefaultCapabilities(): MlCapabilities {
 export function getPluginPrivileges() {
   const apmUserMlCapabilitiesKeys = Object.keys(apmUserMlCapabilities);
   const userMlCapabilitiesKeys = Object.keys(userMlCapabilities);
+  const featureMlCapabilitiesKeys = Object.keys(featureMlCapabilities);
   const adminMlCapabilitiesKeys = Object.keys(adminMlCapabilities);
-  const allMlCapabilitiesKeys = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
+  const allMlCapabilitiesKeys = [
+    ...featureMlCapabilitiesKeys,
+    ...adminMlCapabilitiesKeys,
+    ...userMlCapabilitiesKeys,
+  ];
 
   const savedObjects = [
     'index-pattern',
@@ -115,7 +132,7 @@ export function getPluginPrivileges() {
     app: [PLUGIN_ID, 'kibana'],
     excludeFromBasePrivileges: false,
     management: {
-      insightsAndAlerting: ['jobsListLink'],
+      insightsAndAlerting: ['jobsListLink', 'triggersActions'],
     },
     catalogue: [PLUGIN_ID],
   };
@@ -141,10 +158,13 @@ export function getPluginPrivileges() {
     },
     user: {
       ...privilege,
-      api: ['fileUpload:analyzeFile', ...userMlCapabilitiesKeys.map((k) => `ml:${k}`)],
+      api: [
+        'fileUpload:analyzeFile',
+        ...[...featureMlCapabilitiesKeys, ...userMlCapabilitiesKeys].map((k) => `ml:${k}`),
+      ],
       catalogue: [PLUGIN_ID],
-      management: { insightsAndAlerting: [] },
-      ui: userMlCapabilitiesKeys,
+      management: { insightsAndAlerting: ['triggersActions'] },
+      ui: [...featureMlCapabilitiesKeys, ...userMlCapabilitiesKeys],
       savedObject: {
         all: [],
         read: savedObjects,
@@ -180,3 +200,51 @@ export interface MlCapabilitiesResponse {
 }
 
 export type ResolveMlCapabilities = (request: KibanaRequest) => Promise<MlCapabilities | null>;
+
+interface FeatureCapabilities {
+  ad: MlCapabilitiesKey[];
+  dfa: MlCapabilitiesKey[];
+  nlp: MlCapabilitiesKey[];
+}
+
+export const featureCapabilities: FeatureCapabilities = {
+  ad: [
+    'canGetJobs',
+    'canGetDatafeeds',
+    'canGetCalendars',
+    'canGetAnnotations',
+    'canCreateAnnotation',
+    'canDeleteAnnotation',
+    'canCreateJob',
+    'canDeleteJob',
+    'canOpenJob',
+    'canCloseJob',
+    'canResetJob',
+    'canUpdateJob',
+    'canForecastJob',
+    'canCreateDatafeed',
+    'canDeleteDatafeed',
+    'canStartStopDatafeed',
+    'canUpdateDatafeed',
+    'canPreviewDatafeed',
+    'canGetFilters',
+    'canCreateCalendar',
+    'canDeleteCalendar',
+    'canCreateFilter',
+    'canDeleteFilter',
+  ],
+  dfa: [
+    'canGetDataFrameAnalytics',
+    'canCreateDataFrameAnalytics',
+    'canDeleteDataFrameAnalytics',
+    'canStartStopDataFrameAnalytics',
+  ],
+  nlp: [
+    'canGetTrainedModels',
+    'canTestTrainedModels',
+    'canCreateTrainedModels',
+    'canDeleteTrainedModels',
+    'canStartStopTrainedModels',
+    'canCreateInferenceEndpoint',
+  ],
+};

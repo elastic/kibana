@@ -12,21 +12,21 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { PLUGIN_ID, setFieldFormats, type ReportingConfigType } from '@kbn/reporting-server';
 import { ReportingCore } from '.';
-import { PLUGIN_ID } from '../common/constants';
-import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
+import { registerUiSettings } from './config';
 import { registerDeprecations } from './deprecations';
 import { ReportingStore } from './lib';
 import { registerRoutes } from './routes';
-import { setFieldFormats } from './services';
 import type {
-  ReportingRequestHandlerContext,
   ReportingSetup,
   ReportingSetupDeps,
   ReportingStart,
   ReportingStartDeps,
 } from './types';
-import { registerReportingUsageCollector } from './usage';
+import { ReportingRequestHandlerContext } from './types';
+import { registerReportingEventTypes, registerReportingUsageCollector } from './usage';
+import { registerFeatures } from './features';
 
 /*
  * @internal
@@ -43,7 +43,8 @@ export class ReportingPlugin
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
     const { http, status } = core;
-    const reportingCore = new ReportingCore(this.logger, this.initContext);
+    const reportingCore = new ReportingCore(core, this.logger, this.initContext);
+    this.reportingCore = reportingCore;
 
     // prevent throwing errors in route handlers about async deps not being initialized
     // @ts-expect-error null is not assignable to object. use a boolean property to ensure reporting API is enabled.
@@ -72,23 +73,26 @@ export class ReportingPlugin
     registerUiSettings(core);
     registerDeprecations({ core, reportingCore });
     registerReportingUsageCollector(reportingCore, plugins.usageCollection);
+    registerReportingEventTypes(core);
 
     // Routes
     registerRoutes(reportingCore, this.logger);
 
     // async background setup
     (async () => {
-      const config = await buildConfig(this.initContext, core, this.logger);
-      reportingCore.setConfig(config);
-      // Feature registration relies on config, so it cannot be setup before here.
-      reportingCore.registerFeature();
+      // Feature registration relies on config, depending on whether deprecated roles are enabled, so it cannot be setup before here.
+      registerFeatures({
+        features: plugins.features,
+        deprecatedRoles: reportingCore.getDeprecatedAllowedRoles(),
+        isServerless: this.initContext.env.packageInfo.buildFlavor === 'serverless',
+        logger: this.logger,
+      });
       this.logger.debug('Setup complete');
     })().catch((e) => {
       this.logger.error(`Error in Reporting setup, reporting may not function properly`);
       this.logger.error(e);
     });
 
-    this.reportingCore = reportingCore;
     return reportingCore.getContract();
   }
 
@@ -109,9 +113,11 @@ export class ReportingPlugin
       await reportingCore.pluginStart({
         logger,
         esClient: elasticsearch.client,
+        analytics: core.analytics,
         savedObjects,
         uiSettings,
         store,
+        securityService: core.security,
         ...plugins,
       });
 

@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/mock-idp-plugin",
+  "owner": "@elastic/kibana-security",
+  "devOnly": true,
+  "plugin": {
+    "id": "mockIdpPlugin",
+    "server": true,
+    "browser": true,
+    "enabledOnAnonymousPages": true,
+    "requiredPlugins": [
+      "cloud"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

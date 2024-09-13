@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import type { EuiSelectableProps } from '@elastic/eui';
-import type { DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewsList } from './dataview_list';
 import { IUnifiedSearchPluginServices } from '../types';
@@ -19,10 +20,9 @@ export interface DataViewSelectorProps {
   searchListInputId?: string;
   dataViewsList: DataViewListItem[];
   selectableProps?: EuiSelectableProps;
-  isTextBasedLangSelected: boolean;
   setPopoverIsOpen: (isOpen: boolean) => void;
   onChangeDataView: (dataViewId: string) => void;
-  onCreateDefaultAdHocDataView?: (pattern: string) => void;
+  onCreateDefaultAdHocDataView?: (dataViewSpec: DataViewSpec) => void;
 }
 
 export const DataViewSelector = ({
@@ -30,7 +30,6 @@ export const DataViewSelector = ({
   searchListInputId,
   dataViewsList,
   selectableProps,
-  isTextBasedLangSelected,
   setPopoverIsOpen,
   onChangeDataView,
   onCreateDefaultAdHocDataView,
@@ -83,7 +82,6 @@ export const DataViewSelector = ({
           },
         }}
         searchListInputId={searchListInputId}
-        isTextBasedLangSelected={isTextBasedLangSelected}
       />
       <ExploreMatchingButton
         noDataViewMatches={noDataViewMatches}

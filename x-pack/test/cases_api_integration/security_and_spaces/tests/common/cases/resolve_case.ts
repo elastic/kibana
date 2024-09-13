@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
+import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -18,7 +18,7 @@ import {
   getPostCaseRequest,
 } from '../../../../common/lib/mock';
 import {
-  deleteCasesByESQuery,
+  deleteAllCaseItems,
   createCase,
   resolveCase,
   createComment,
@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('resolve_case', () => {
     afterEach(async () => {
-      await deleteCasesByESQuery(es);
+      await deleteAllCaseItems(es);
     });
 
     it('should resolve a case with no comments', async () => {
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const comment = removeServerGeneratedPropertiesFromSavedObject(
-        resolvedCase.case.comments![0] as AttributesTypeUser
+        resolvedCase.case.comments![0] as UserCommentAttachmentAttributes
       );
 
       expect(resolvedCase.case.comments?.length).to.eql(1);
@@ -150,7 +150,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const comment = removeServerGeneratedPropertiesFromSavedObject(
-          resolvedCase.case.comments![0] as AttributesTypeUser
+          resolvedCase.case.comments![0] as UserCommentAttachmentAttributes
         );
 
         expect(resolvedCase.case.comments?.length).to.eql(1);

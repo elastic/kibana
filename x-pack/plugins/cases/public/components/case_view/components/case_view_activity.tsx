@@ -7,18 +7,25 @@
 
 /* eslint-disable complexity */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { useGetCaseUsers } from '../../../containers/use_get_case_users';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
-import type { CaseSeverity } from '../../../../common/api';
-import type { CaseUsers, UseFetchAlertData } from '../../../../common/ui/types';
-import type { Case, CaseStatuses } from '../../../../common';
+import type { CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
+import type { CaseUICustomField, UseFetchAlertData } from '../../../../common/ui/types';
+import type { CaseUI } from '../../../../common';
+import type { EditConnectorProps } from '../../edit_connector';
 import { EditConnector } from '../../edit_connector';
 import type { CasesNavigation } from '../../links';
 import { StatusActionButton } from '../../status/button';
@@ -33,45 +40,14 @@ import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_use
 import { AssignUsers } from './assign_users';
 import { UserActionsActivityBar } from '../../user_actions_activity_bar';
 import type { Assignee } from '../../user_profiles/types';
-import { convertToCaseUserWithProfileInfo } from '../../user_profiles/user_converter';
 import type { UserActivityParams } from '../../user_actions_activity_bar/types';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { CaseViewTabs } from '../case_view_tabs';
-import { DescriptionWrapper } from '../../description/description_wrapper';
-
-const buildUserProfilesMap = (users?: CaseUsers): Map<string, UserProfileWithAvatar> => {
-  const userProfiles = new Map();
-
-  if (!users) {
-    return userProfiles;
-  }
-
-  for (const user of [
-    ...users.assignees,
-    ...users.participants,
-    users.reporter,
-    ...users.unassignedUsers,
-  ]) {
-    /**
-     * If the user has a valid profile UID and a valid username
-     * then the backend successfully fetched the user profile
-     * information from the security plugin. Checking only for the
-     * profile UID is not enough as a user can use our API to add
-     * an assignee with a non existing UID.
-     */
-    if (user.uid != null && user.user.username != null) {
-      userProfiles.set(user.uid, {
-        uid: user.uid,
-        user: user.user,
-        data: {
-          avatar: user.avatar,
-        },
-      });
-    }
-  }
-
-  return userProfiles;
-};
+import { Description } from '../../description';
+import { EditCategory } from './edit_category';
+import { parseCaseUsers } from '../../utils';
+import { CustomFields } from './custom_fields';
+import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -81,7 +57,7 @@ export const CaseViewActivity = ({
   useFetchAlertData,
 }: {
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
-  caseData: Case;
+  caseData: CaseUI;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
@@ -106,7 +82,12 @@ export const CaseViewActivity = ({
 
   const { data: caseUsers, isLoading: isLoadingCaseUsers } = useGetCaseUsers(caseData.id);
 
-  const userProfiles = buildUserProfilesMap(caseUsers);
+  const { data: casesConfiguration } = useGetCaseConfiguration();
+
+  const { userProfiles, reporterAsArray } = parseCaseUsers({
+    caseUsers,
+    createdBy: caseData.createdBy,
+  });
 
   const assignees = useMemo(
     () => caseData.assignees.map((assignee) => assignee.uid),
@@ -116,18 +97,11 @@ export const CaseViewActivity = ({
   const { data: currentUserProfile, isFetching: isLoadingCurrentUserProfile } =
     useGetCurrentUserProfile();
 
-  const onShowAlertDetails = useCallback(
-    (alertId: string, index: string) => {
-      if (showAlertDetails) {
-        showAlertDetails(alertId, index);
-      }
-    },
-    [showAlertDetails]
-  );
-
   const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
     caseData,
   });
+
+  const { isLoading: isUpdatingCustomField, mutate: replaceCustomField } = useReplaceCustomField();
 
   const isLoadingAssigneeData =
     (isLoading && loadingKey === 'assignees') || isLoadingCaseUsers || isLoadingCurrentUserProfile;
@@ -142,7 +116,12 @@ export const CaseViewActivity = ({
   );
 
   const onSubmitTags = useCallback(
-    (newTags) => onUpdateField({ key: 'tags', value: newTags }),
+    (newTags: string[]) => onUpdateField({ key: 'tags', value: newTags }),
+    [onUpdateField]
+  );
+
+  const onSubmitCategory = useCallback(
+    (newCategory: string | null) => onUpdateField({ key: 'category', value: newCategory }),
     [onUpdateField]
   );
 
@@ -164,16 +143,26 @@ export const CaseViewActivity = ({
   const { isLoading: isLoadingAllAvailableConnectors, data: supportedActionConnectors } =
     useGetSupportedActionConnectors();
 
-  const onSubmitConnector = useCallback(
-    (connector, onError, onSuccess) => {
+  const onSubmitConnector = useCallback<EditConnectorProps['onSubmit']>(
+    (connector) => {
       onUpdateField({
         key: 'connector',
         value: connector,
-        onSuccess,
-        onError,
       });
     },
     [onUpdateField]
+  );
+
+  const onSubmitCustomField = useCallback(
+    (customField: CaseUICustomField) => {
+      replaceCustomField({
+        caseId: caseData.id,
+        customFieldId: customField.key,
+        customFieldValue: customField.value,
+        caseVersion: caseData.version,
+      });
+    },
+    [replaceCustomField, caseData]
   );
 
   const handleUserActionsActivityChanged = useCallback(
@@ -199,21 +188,15 @@ export const CaseViewActivity = ({
   const showConnectorSidebar =
     pushToServiceAuthorized && caseConnectors && supportedActionConnectors;
 
-  const reporterAsArray =
-    caseUsers?.reporter != null
-      ? [caseUsers.reporter]
-      : [convertToCaseUserWithProfileInfo(caseData.createdBy)];
-
   const isLoadingDescription = isLoading && loadingKey === 'description';
 
   return (
     <>
       <EuiFlexItem grow={6}>
         <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
-        <DescriptionWrapper
+        <Description
           isLoadingDescription={isLoadingDescription}
-          data={caseData}
-          userProfiles={userProfiles}
+          caseData={caseData}
           onUpdateField={onUpdateField}
         />
         <EuiSpacer size="l" />
@@ -239,8 +222,9 @@ export const CaseViewActivity = ({
                 onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                 caseConnectors={caseConnectors}
                 data={caseData}
+                casesConfiguration={casesConfiguration}
                 actionsNavigation={actionsNavigation}
-                onShowAlertDetails={onShowAlertDetails}
+                onShowAlertDetails={showAlertDetails}
                 onUpdateField={onUpdateField}
                 statusActionButton={
                   permissions.update ? (
@@ -259,7 +243,10 @@ export const CaseViewActivity = ({
           </EuiFlexGroup>
         ) : null}
       </EuiFlexItem>
-      <EuiFlexItem grow={2}>
+      <EuiFlexItem grow={2} data-test-subj="case-view-page-sidebar">
+        <EuiScreenReaderOnly>
+          <h2>{i18n.CASE_SETTINGS}</h2>
+        </EuiScreenReaderOnly>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
           {caseAssignmentAuthorized ? (
             <>
@@ -274,7 +261,7 @@ export const CaseViewActivity = ({
           ) : null}
           <SeveritySidebarSelector
             isDisabled={!permissions.update}
-            isLoading={isLoading}
+            isLoading={isLoading && loadingKey === 'severity'}
             selectedSeverity={caseData.severity}
             onSeverityChange={onUpdateSeverity}
           />
@@ -300,6 +287,11 @@ export const CaseViewActivity = ({
             onSubmit={onSubmitTags}
             isLoading={isLoading && loadingKey === 'tags'}
           />
+          <EditCategory
+            category={caseData.category}
+            onSubmit={onSubmitCategory}
+            isLoading={isLoading && loadingKey === 'category'}
+          />
           {showConnectorSidebar ? (
             <EditConnector
               caseData={caseData}
@@ -312,6 +304,12 @@ export const CaseViewActivity = ({
               key={caseData.connector.id}
             />
           ) : null}
+          <CustomFields
+            isLoading={(isLoading && loadingKey === 'customFields') || isUpdatingCustomField}
+            customFields={caseData.customFields}
+            customFieldsConfiguration={casesConfiguration.customFields}
+            onSubmit={onSubmitCustomField}
+          />
         </EuiFlexGroup>
       </EuiFlexItem>
     </>

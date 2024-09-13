@@ -1,6 +1,6 @@
 closure_type:
   $ref: 'closure_types.yaml'
-connector: 
+connector:
   type: object
   properties:
     $ref: 'case_configure_connector_properties.yaml'
@@ -10,8 +10,19 @@ created_at:
   example: 2022-06-01T17:07:17.767Z
 created_by:
   type: object
+  required:
+    - email
+    - full_name
+    - username
   properties:
     $ref: 'user_properties.yaml'
+customFields:
+  type: array
+  description: Custom fields configuration details.
+  items:
+    type: object
+    properties:
+      $ref: 'case_configure_customfields.yaml'
 error:
   type: string
   nullable: true
@@ -35,6 +46,8 @@ mappings:
         example: summary
 owner:
   $ref: 'owners.yaml'
+templates:
+  $ref: 'templates.yaml'
 updated_at:
   type: string
   format: date-time
@@ -42,6 +55,10 @@ updated_at:
   example: 2022-06-01T19:58:48.169Z
 updated_by:
   type: object
+  required:
+    - email
+    - full_name
+    - username
   properties:
     $ref: 'user_properties.yaml'
   nullable: true

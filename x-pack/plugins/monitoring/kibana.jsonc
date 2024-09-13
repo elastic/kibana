@@ -1,25 +1,25 @@
 {
   "type": "plugin",
   "id": "@kbn/monitoring-plugin",
-  "owner": "@elastic/infra-monitoring-ui",
+  "owner": "@elastic/stack-monitoring",
   "plugin": {
     "id": "monitoring",
     "server": true,
     "browser": true,
-    "configPath": [
-      "monitoring"
-    ],
+    "configPath": ["monitoring"],
     "requiredPlugins": [
       "licensing",
       "features",
       "data",
       "navigation",
       "observability",
+      "observabilityShared",
       "dataViews",
       "unifiedSearch"
     ],
     "optionalPlugins": [
       "infra",
+      "logsShared",
       "usageCollection",
       "home",
       "cloud",
@@ -30,10 +30,6 @@
       "dashboard",
       "fleet"
     ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "alerting",
-      "kibanaReact"
-    ]
+    "requiredBundles": ["kibanaUtils", "alerting", "kibanaReact"]
   }
 }

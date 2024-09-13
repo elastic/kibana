@@ -7,14 +7,15 @@
 
 import expect from '@kbn/expect';
 
-import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
 import { TransformState, TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import type { TransformStats } from '@kbn/transform-plugin/common/types/transform_stats';
 
-import { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
-import { PostTransformsUpdateRequestSchema } from '@kbn/transform-plugin/common/api_schemas/update_transforms';
-import { TransformPivotConfig } from '@kbn/transform-plugin/common/types/transform';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
+import type { PostTransformsUpdateRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/update_transforms';
+import type { TransformPivotConfig } from '@kbn/transform-plugin/common/types/transform';
+import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export async function asyncForEach(array: any[], callback: Function) {
   for (let index = 0; index < array.length; index++) {
@@ -39,14 +40,17 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
-    async createIndices(indices: string) {
+    async createIndices(
+      indices: string,
+      params: IndicesCreateRequest['body'] = {} as NonNullable<IndicesCreateRequest['body']>
+    ) {
       log.debug(`Creating indices: '${indices}'...`);
       if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === true) {
         log.debug(`Indices '${indices}' already exist. Nothing to create.`);
         return;
       }
 
-      const createResponse = await es.indices.create({ index: indices });
+      const createResponse = await es.indices.create({ index: indices, ...params });
       expect(createResponse)
         .to.have.property('acknowledged')
         .eql(true, 'Response for create request indices should be acknowledged.');
@@ -218,13 +222,33 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
     async createTransform(
       transformId: string,
       transformConfig: PutTransformsRequestSchema,
-      deferValidation?: boolean
+      options: {
+        deferValidation?: boolean;
+        headers?: object;
+      } = {}
     ) {
-      log.debug(`Creating transform with id '${transformId}'...`);
-      const { body, status } = await esSupertest
-        .put(`/_transform/${transformId}${deferValidation ? '?defer_validation=true' : ''}`)
-        .send(transformConfig);
-      this.assertResponseStatusCode(200, status, body);
+      const { deferValidation, headers } = options;
+
+      if (headers) {
+        log.debug(
+          `Creating transform with id '${transformId}' with headers ${JSON.stringify(
+            headers
+          )} and defer_validation:${deferValidation}...`
+        );
+        const { body, status } = await esSupertest
+          .put(`/_transform/${transformId}${deferValidation ? '?defer_validation=true' : ''}`)
+          .set(headers as Record<string, string>)
+          .send(transformConfig);
+        this.assertResponseStatusCode(200, status, body);
+      } else {
+        log.debug(
+          `Creating transform with id '${transformId}' and defer_validation:${deferValidation}...`
+        );
+        const { body, status } = await esSupertest
+          .put(`/_transform/${transformId}${deferValidation ? '?defer_validation=true' : ''}`)
+          .send(transformConfig);
+        this.assertResponseStatusCode(200, status, body);
+      }
 
       await this.waitForTransformToExist(
         transformId,
@@ -252,10 +276,13 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async startTransform(transformId: string) {
+    async startTransform(transformId: string, assertSuccess = true) {
       log.debug(`Starting transform '${transformId}' ...`);
       const { body, status } = await esSupertest.post(`/_transform/${transformId}/_start`);
-      this.assertResponseStatusCode(200, status, body);
+
+      if (assertSuccess) {
+        this.assertResponseStatusCode(200, status, body);
+      }
     },
 
     async stopTransform(transformId: string) {
@@ -264,8 +291,12 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, body);
     },
 
-    async createAndRunTransform(transformId: string, transformConfig: PutTransformsRequestSchema) {
-      await this.createTransform(transformId, transformConfig);
+    async createAndRunTransform(
+      transformId: string,
+      transformConfig: PutTransformsRequestSchema,
+      options: { headers?: object } = {}
+    ) {
+      await this.createTransform(transformId, transformConfig, { headers: options.headers });
       await this.startTransform(transformId);
       if (transformConfig.sync === undefined) {
         // batch mode

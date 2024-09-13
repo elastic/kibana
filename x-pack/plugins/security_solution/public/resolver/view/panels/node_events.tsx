@@ -5,47 +5,42 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSelector } from 'react-redux';
+import { FormattedCount } from '../../../common/components/formatted_number';
 import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
 import type { EventStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
-import type { ResolverState } from '../../types';
-import { StyledPanel } from '../styles';
 import { PanelLoading } from './panel_loading';
 import { useLinkProps } from '../use_link_props';
 import * as nodeDataModel from '../../models/node_data';
+import type { State } from '../../../common/store/types';
 
-export function NodeEvents({ nodeID }: { nodeID: string }) {
-  const processEvent = useSelector((state: ResolverState) =>
-    nodeDataModel.firstEvent(selectors.nodeDataForID(state)(nodeID))
+export function NodeEvents({ id, nodeID }: { id: string; nodeID: string }) {
+  const processEvent = useSelector((state: State) =>
+    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
   );
-  const nodeStats = useSelector((state: ResolverState) => selectors.nodeStats(state)(nodeID));
+  const nodeStats = useSelector((state: State) => selectors.nodeStats(state.analyzer[id])(nodeID));
 
   if (processEvent === undefined || nodeStats === undefined) {
-    return (
-      <StyledPanel hasBorder>
-        <PanelLoading />
-      </StyledPanel>
-    );
+    return <PanelLoading id={id} />;
   } else {
     return (
-      <StyledPanel hasBorder>
+      <>
         <NodeEventsBreadcrumbs
+          id={id}
           nodeName={event.processNameSafeVersion(processEvent)}
           nodeID={nodeID}
           totalEventCount={nodeStats.total}
         />
         <EuiSpacer size="l" />
-        <EventCategoryLinks nodeID={nodeID} relatedStats={nodeStats} />
-      </StyledPanel>
+        <EventCategoryLinks id={id} nodeID={nodeID} relatedStats={nodeStats} />
+      </>
     );
   }
 }
@@ -61,10 +56,13 @@ export function NodeEvents({ nodeID }: { nodeID: string }) {
  * | 2                      | Network                    |
  *
  */
+// eslint-disable-next-line react/display-name
 const EventCategoryLinks = memo(function ({
+  id,
   nodeID,
   relatedStats,
 }: {
+  id: string;
   nodeID: string;
   relatedStats: EventStats;
 }) {
@@ -92,35 +90,45 @@ const EventCategoryLinks = memo(function ({
           defaultMessage: 'Count',
         }),
         'data-test-subj': 'resolver:panel:node-events:event-type-count',
-        width: '20%',
+        width: '25%',
         sortable: true,
+        render(count: number) {
+          return (
+            <EuiToolTip position="top" content={count}>
+              <FormattedCount count={count} />
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'eventType',
         name: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.table.row.eventType', {
           defaultMessage: 'Event Type',
         }),
-        width: '80%',
+        width: '75%',
         sortable: true,
         render(eventType: string) {
           return (
-            <NodeEventsLink nodeID={nodeID} eventType={eventType}>
+            <NodeEventsLink id={id} nodeID={nodeID} eventType={eventType}>
               {eventType}
             </NodeEventsLink>
           );
         },
       },
     ],
-    [nodeID]
+    [nodeID, id]
   );
   return <EuiInMemoryTable<EventCountsTableView> items={rows} columns={columns} sorting />;
 });
 
+// eslint-disable-next-line react/display-name
 const NodeEventsBreadcrumbs = memo(function ({
+  id,
   nodeID,
   nodeName,
   totalEventCount,
 }: {
+  id: string;
   nodeID: string;
   nodeName: React.ReactNode;
   totalEventCount: number;
@@ -135,13 +143,13 @@ const NodeEventsBreadcrumbs = memo(function ({
               defaultMessage: 'Events',
             }
           ),
-          ...useLinkProps({
+          ...useLinkProps(id, {
             panelView: 'nodes',
           }),
         },
         {
           text: nodeName,
-          ...useLinkProps({
+          ...useLinkProps(id, {
             panelView: 'nodeDetail',
             panelParameters: { nodeID },
           }),
@@ -154,7 +162,7 @@ const NodeEventsBreadcrumbs = memo(function ({
               defaultMessage="{totalCount} Events"
             />
           ),
-          ...useLinkProps({
+          ...useLinkProps(id, {
             panelView: 'nodeEvents',
             panelParameters: { nodeID },
           }),
@@ -164,17 +172,20 @@ const NodeEventsBreadcrumbs = memo(function ({
   );
 });
 
+// eslint-disable-next-line react/display-name
 const NodeEventsLink = memo(
   ({
+    id,
     nodeID,
     eventType,
     children,
   }: {
+    id: string;
     nodeID: string;
     eventType: string;
     children: React.ReactNode;
   }) => {
-    const props = useLinkProps({
+    const props = useLinkProps(id, {
       panelView: 'nodeEventsInCategory',
       panelParameters: {
         nodeID,

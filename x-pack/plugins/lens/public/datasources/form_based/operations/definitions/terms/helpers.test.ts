@@ -7,7 +7,7 @@
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
-import type { FrameDatasourceAPI } from '../../../../../types';
+import type { FramePublicAPI } from '../../../../../types';
 import type { CountIndexPatternColumn } from '..';
 import type { TermsIndexPatternColumn } from './types';
 import type { GenericIndexPatternColumn } from '../../../form_based';
@@ -16,13 +16,14 @@ import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
   isSortableByColumn,
+  getOtherBucketSwitchDefault,
 } from './helpers';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
 import { MovingAverageIndexPatternColumn } from '../calculations';
 
-jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
+jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
     topValues: {
       buckets: [
@@ -92,52 +93,58 @@ function getCountOperationColumn(
 
 describe('getMultiTermsScriptedFieldErrorMessage()', () => {
   it('should return no error message for a single field', () => {
-    expect(
-      getMultiTermsScriptedFieldErrorMessage(getLayer(), 'col1', indexPattern)
-    ).toBeUndefined();
+    expect(getMultiTermsScriptedFieldErrorMessage(getLayer(), 'col1', indexPattern)).toHaveLength(
+      0
+    );
   });
 
   it('should return no error message for a scripted field when single', () => {
     const col = getStringBasedOperationColumn('scripted');
     expect(
       getMultiTermsScriptedFieldErrorMessage(getLayer(col), 'col1', indexPattern)
-    ).toBeUndefined();
+    ).toHaveLength(0);
   });
 
   it('should return an error message for a scripted field when there are multiple fields', () => {
     const col = getStringBasedOperationColumn('scripted', { secondaryFields: ['bytes'] });
-    expect(getMultiTermsScriptedFieldErrorMessage(getLayer(col), 'col1', indexPattern)).toBe(
-      'Scripted fields are not supported when using multiple fields, found scripted'
-    );
+    expect(
+      getMultiTermsScriptedFieldErrorMessage(getLayer(col), 'col1', indexPattern).map(
+        (e) => e.message
+      )
+    ).toEqual(['Scripted fields are not supported when using multiple fields, found scripted']);
   });
 
   it('should return no error message for multiple "native" fields', () => {
     const col = getStringBasedOperationColumn('source', { secondaryFields: ['dest'] });
     expect(
       getMultiTermsScriptedFieldErrorMessage(getLayer(col), 'col1', indexPattern)
-    ).toBeUndefined();
+    ).toHaveLength(0);
   });
 
   it('should list all scripted fields in the error message', () => {
     const col = getStringBasedOperationColumn('scripted', {
       secondaryFields: ['scripted', 'scripted', 'scripted'],
     });
-    expect(getMultiTermsScriptedFieldErrorMessage(getLayer(col), 'col1', indexPattern)).toBe(
-      'Scripted fields are not supported when using multiple fields, found scripted, scripted, scripted, scripted'
-    );
+    expect(
+      getMultiTermsScriptedFieldErrorMessage(getLayer(col), 'col1', indexPattern).map(
+        (e) => e.message
+      )
+    ).toEqual([
+      'Scripted fields are not supported when using multiple fields, found scripted, scripted, scripted, scripted',
+    ]);
   });
 });
 
 describe('getDisallowedTermsMessage()', () => {
   it('should return no error if no shifted dimensions are defined', () => {
-    expect(getDisallowedTermsMessage(getLayer(), 'col1', indexPattern)).toBeUndefined();
+    expect(getDisallowedTermsMessage(getLayer(), 'col1', indexPattern)).toHaveLength(0);
     expect(
       getDisallowedTermsMessage(
         getLayer(getStringBasedOperationColumn(), [getCountOperationColumn()]),
         'col1',
         indexPattern
       )
-    ).toBeUndefined();
+    ).toHaveLength(0);
   });
 
   it('should return no error for a single dimension shifted', () => {
@@ -147,7 +154,7 @@ describe('getDisallowedTermsMessage()', () => {
         'col1',
         indexPattern
       )
-    ).toBeUndefined();
+    ).toHaveLength(0);
   });
 
   it('should return no error for a single dimension shifted which is wrapped in a referencing column', () => {
@@ -173,18 +180,18 @@ describe('getDisallowedTermsMessage()', () => {
         'col1',
         indexPattern
       )
-    ).toBeUndefined();
+    ).toHaveLength(0);
   });
 
   it('should return no for multiple fields with no shifted dimensions', () => {
-    expect(getDisallowedTermsMessage(getLayer(), 'col1', indexPattern)).toBeUndefined();
+    expect(getDisallowedTermsMessage(getLayer(), 'col1', indexPattern)).toHaveLength(0);
     expect(
       getDisallowedTermsMessage(
         getLayer(getStringBasedOperationColumn(), [getCountOperationColumn()]),
         'col1',
         indexPattern
       )
-    ).toBeUndefined();
+    ).toHaveLength(0);
   });
 
   it('should return an error for multiple dimensions shifted for a single term', () => {
@@ -196,7 +203,7 @@ describe('getDisallowedTermsMessage()', () => {
         ]),
         'col1',
         indexPattern
-      )
+      )[0]
     ).toEqual(
       expect.objectContaining({
         message:
@@ -215,7 +222,7 @@ describe('getDisallowedTermsMessage()', () => {
         ]),
         'col1',
         indexPattern
-      )
+      )[0]
     ).toEqual(
       expect.objectContaining({
         message:
@@ -233,7 +240,7 @@ describe('getDisallowedTermsMessage()', () => {
       ]),
       'col1',
       indexPattern
-    )!.fixAction.newState;
+    )[0]!.fixAction!.newState;
     const newLayer = await fixAction(
       dataMock,
       coreMock,
@@ -244,7 +251,7 @@ describe('getDisallowedTermsMessage()', () => {
           fromDate: '2020',
           toDate: '2021',
         },
-      } as unknown as FrameDatasourceAPI,
+      } as unknown as FramePublicAPI,
       'first'
     );
 
@@ -281,7 +288,7 @@ describe('getDisallowedTermsMessage()', () => {
       ]),
       'col1',
       indexPattern
-    )!.fixAction.newState;
+    )[0]!.fixAction!.newState;
     const newLayer = await fixAction(
       dataMock,
       coreMock,
@@ -298,7 +305,7 @@ describe('getDisallowedTermsMessage()', () => {
             rows: [{ col1: 'myTerm' }, { col1: 'myOtherTerm' }],
           },
         },
-      } as unknown as FrameDatasourceAPI,
+      } as unknown as FramePublicAPI,
       'first'
     );
 
@@ -323,7 +330,7 @@ describe('getDisallowedTermsMessage()', () => {
       ]),
       'col1',
       indexPattern
-    )!.fixAction.newState;
+    )[0]!.fixAction!.newState;
     const newLayer = await fixAction(
       dataMock,
       coreMock,
@@ -334,7 +341,7 @@ describe('getDisallowedTermsMessage()', () => {
           fromDate: '2020',
           toDate: '2021',
         },
-      } as unknown as FrameDatasourceAPI,
+      } as unknown as FramePublicAPI,
       'first'
     );
 
@@ -364,7 +371,7 @@ describe('getDisallowedTermsMessage()', () => {
       ]),
       'col1',
       indexPattern
-    )!.fixAction.newState;
+    )[0]!.fixAction!.newState;
     const newLayer = await fixAction(
       dataMock,
       coreMock,
@@ -384,7 +391,7 @@ describe('getDisallowedTermsMessage()', () => {
             ],
           },
         },
-      } as unknown as FrameDatasourceAPI,
+      } as unknown as FramePublicAPI,
       'first'
     );
 
@@ -599,6 +606,91 @@ describe('isSortableByColumn()', () => {
           'col2'
         )
       ).toBeTruthy();
+    });
+  });
+
+  describe('other bucket defaults', () => {
+    it('should default to true if size < 1000 and previous otherBucket is not set', () => {
+      const column = {
+        label: `Top value of test`,
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+        },
+        sourceField: 'test',
+      } as TermsIndexPatternColumn;
+      expect(getOtherBucketSwitchDefault(column, 10)).toBeTruthy();
+    });
+
+    it('should default to false if size > 1000 and previous otherBucket is not set', () => {
+      const column = {
+        label: `Top value of test`,
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+        },
+        sourceField: 'test',
+      } as TermsIndexPatternColumn;
+      expect(getOtherBucketSwitchDefault(column, 1000)).toBeFalsy();
+    });
+
+    it('should default to true if size < 1000 and previous otherBucket is set to true', () => {
+      const column = {
+        label: `Top value of test`,
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+          otherBucket: true,
+        },
+        sourceField: 'test',
+      } as TermsIndexPatternColumn;
+      expect(getOtherBucketSwitchDefault(column, 10)).toBeTruthy();
+    });
+
+    it('should default to false if size > 1000 and previous otherBucket is set to true', () => {
+      const column = {
+        label: `Top value of test`,
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 3,
+          orderDirection: 'asc',
+          otherBucket: true,
+        },
+        sourceField: 'test',
+      } as TermsIndexPatternColumn;
+      expect(getOtherBucketSwitchDefault(column, 1001)).toBeFalsy();
+    });
+
+    it('should default to false if size < 1000 and previous otherBucket is set to false', () => {
+      const column = {
+        label: `Top value of test`,
+        dataType: 'string',
+        isBucketed: true,
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          size: 1005,
+          orderDirection: 'asc',
+          otherBucket: false,
+        },
+        sourceField: 'test',
+      } as TermsIndexPatternColumn;
+      expect(getOtherBucketSwitchDefault(column, 6)).toBeFalsy();
     });
   });
 });

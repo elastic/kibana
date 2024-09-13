@@ -6,8 +6,8 @@
  */
 
 import { defaultHeaders } from './default_timeline_headers';
-import type { SavedTimeline } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import type { SavedTimeline } from '../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import { Direction } from '../../../../common/search_strategy';
 
 export const draftTimelineDefaults: SavedTimeline = {
@@ -17,7 +17,7 @@ export const draftTimelineDefaults: SavedTimeline = {
   eventType: 'all',
   filters: [],
   kqlMode: 'filter',
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   kqlQuery: {
     filterQuery: null,
   },
@@ -26,5 +26,5 @@ export const draftTimelineDefaults: SavedTimeline = {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   },
-  status: TimelineStatus.draft,
+  status: TimelineStatusEnum.draft,
 };

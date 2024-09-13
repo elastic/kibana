@@ -10,7 +10,7 @@ import moment from 'moment';
 import { EuiLink } from '@elastic/eui';
 import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import { useHistory } from 'react-router-dom';
-import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { getRuleDetailsRoute as internalGetRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { formatRuleAlertCount } from '../../../../../common/lib/format_rule_alert_count';
 import { useKibana, useSpacesData } from '../../../../../common/lib/kibana';
 import { EventLogListStatus } from './event_log_list_status';
@@ -25,8 +25,8 @@ import {
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 export type ColumnId =
-  | typeof RULE_EXECUTION_LOG_COLUMN_IDS[number]
-  | typeof CONNECTOR_EXECUTION_LOG_COLUMN_IDS[number];
+  | (typeof RULE_EXECUTION_LOG_COLUMN_IDS)[number]
+  | (typeof CONNECTOR_EXECUTION_LOG_COLUMN_IDS)[number];
 
 interface EventLogListCellRendererProps {
   columnId: ColumnId;
@@ -36,6 +36,7 @@ interface EventLogListCellRendererProps {
   ruleId?: string;
   spaceIds?: string[];
   useExecutionStatus?: boolean;
+  getRuleDetailsRoute?: (ruleId: string) => string;
 }
 
 export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) => {
@@ -47,6 +48,7 @@ export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) =
     ruleId,
     spaceIds,
     useExecutionStatus = true,
+    getRuleDetailsRoute,
   } = props;
   const spacesData = useSpacesData();
   const { http } = useKibana().services;
@@ -66,7 +68,9 @@ export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) =
   const ruleNamePathname = useMemo(() => {
     if (!ruleId) return '';
 
-    const ruleRoute = getRuleDetailsRoute(ruleId);
+    const ruleRoute = getRuleDetailsRoute
+      ? getRuleDetailsRoute(ruleId)
+      : internalGetRuleDetailsRoute(ruleId);
 
     if (ruleOnDifferentSpace) {
       const [linkedSpaceId] = spaceIds ?? [];
@@ -82,7 +86,7 @@ export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) =
       return newPathname;
     }
     return ruleRoute;
-  }, [ruleId, ruleOnDifferentSpace, history, activeSpace, http, spaceIds]);
+  }, [ruleId, ruleOnDifferentSpace, history, activeSpace, http, spaceIds, getRuleDetailsRoute]);
 
   const onClickRuleName = useCallback(() => {
     if (!ruleId) return;
@@ -134,6 +138,10 @@ export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) =
 
   if (columnId === 'timed_out') {
     return <>{value ? 'true' : 'false'}</>;
+  }
+
+  if (columnId === 'maintenance_window_ids') {
+    return <>{Array.isArray(value) ? value.join(', ') : ''}</>;
   }
 
   return <>{value}</>;

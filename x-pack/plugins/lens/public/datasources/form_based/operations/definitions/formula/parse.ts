@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { isObject } from 'lodash';
 import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
+import { nonNullable } from '../../../../../utils';
 import type { DateRange } from '../../../../../../common/types';
 import type { IndexPattern } from '../../../../../types';
 import {
@@ -26,7 +27,6 @@ import {
   getOperationParams,
   groupArgsByType,
   mergeWithGlobalFilters,
-  nonNullable,
 } from './util';
 import { FormulaIndexPatternColumn, isFormulaIndexPatternColumn } from './formula';
 import { getColumnOrder } from '../../layer_helpers';
@@ -45,13 +45,13 @@ function parseAndExtract(
   dateRange: DateRange | undefined,
   label?: string
 ) {
-  const { root, error } = tryToParse(text, operations);
-  if (error || root == null) {
+  const parseResponse = tryToParse(text, operations);
+  if ('error' in parseResponse) {
     return { extracted: [], isValid: false };
   }
   // before extracting the data run the validation task and throw if invalid
   const errors = runASTValidation(
-    root,
+    parseResponse.root,
     layer,
     indexPattern,
     operations,
@@ -67,13 +67,14 @@ function parseAndExtract(
   const extracted = extractColumns(
     columnId,
     operations,
-    root,
+    parseResponse.root,
     layer,
     indexPattern,
     i18n.translate('xpack.lens.indexPattern.formulaPartLabel', {
       defaultMessage: 'Part of {label}',
       values: { label: label || text },
-    })
+    }),
+    dateRange
   );
   return { extracted, isValid: true };
 }
@@ -84,7 +85,8 @@ function extractColumns(
   ast: TinymathAST,
   layer: FormBasedLayer,
   indexPattern: IndexPattern,
-  label: string
+  label: string,
+  dateRange: DateRange | undefined
 ): Array<{ column: GenericIndexPatternColumn; location?: TinymathLocation }> {
   const columns: Array<{ column: GenericIndexPatternColumn; location?: TinymathLocation }> = [];
   const { filter: globalFilter, reducedTimeRange: globalReducedTimeRange } =
@@ -187,6 +189,21 @@ function extractColumns(
         },
         mappedParams
       );
+      const newColId = getManagedId(idPrefix, columns.length);
+      newCol.customLabel = true;
+      newCol.label = label;
+      columns.push({ column: newCol, location: node.location });
+      // replace by new column id
+      return newColId;
+    }
+
+    if (nodeOperation.input === 'managedReference' && nodeOperation.usedInMath) {
+      const newCol = (
+        nodeOperation as OperationDefinition<GenericIndexPatternColumn, 'managedReference'>
+      ).buildColumn({
+        layer,
+        indexPattern,
+      });
       const newColId = getManagedId(idPrefix, columns.length);
       newCol.customLabel = true;
       newCol.label = label;

@@ -6,7 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
+import {
+  CaseSeverity,
+  ConnectorTypes,
+  CustomFieldTypes,
+} from '@kbn/cases-plugin/common/types/domain';
+import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -50,6 +55,158 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const data = removeServerGeneratedPropertiesFromSavedObject(configuration);
       expect(data).to.eql(getConfigurationOutput());
+    });
+
+    it('should create a configuration with no customFields', async () => {
+      const { customFields, ...configurationRequest } = getConfigurationRequest();
+      const configuration = await createConfiguration(supertest, configurationRequest);
+
+      expect(configuration.customFields).to.eql([]);
+    });
+
+    it('should create a configuration with customFields', async () => {
+      const customFields = {
+        customFields: [
+          { key: 'text_1', label: 'text 1', type: CustomFieldTypes.TEXT, required: false },
+          {
+            key: 'toggle_1',
+            label: 'toggle 1',
+            type: CustomFieldTypes.TOGGLE,
+            required: true,
+            defaultValue: false,
+          },
+          {
+            key: 'text_2',
+            label: 'text 2',
+            type: CustomFieldTypes.TEXT,
+            required: true,
+          },
+          {
+            key: 'toggle_2',
+            label: 'toggle 2',
+            type: CustomFieldTypes.TOGGLE,
+            required: false,
+            defaultValue: true,
+          },
+        ],
+      };
+
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          overrides: customFields,
+        })
+      );
+
+      const data = removeServerGeneratedPropertiesFromSavedObject(configuration);
+      expect(data).to.eql(getConfigurationOutput(false, customFields));
+    });
+
+    it('should create a configuration with templates', async () => {
+      const customFields = [
+        {
+          key: 'text_field_1',
+          type: CustomFieldTypes.TEXT,
+          label: 'Text field 1',
+          required: true,
+        },
+        {
+          key: 'toggle_field_1',
+          label: '#2',
+          type: CustomFieldTypes.TOGGLE,
+          required: false,
+        },
+      ];
+
+      const templates = [
+        {
+          key: 'test_template_1',
+          name: 'First test template',
+          description: 'This is a first test template',
+          caseFields: {
+            customFields: [
+              {
+                key: 'text_field_1',
+                type: CustomFieldTypes.TEXT,
+                value: null,
+              },
+              {
+                key: 'toggle_field_1',
+                value: false,
+                type: CustomFieldTypes.TOGGLE,
+              },
+            ],
+          },
+        },
+        {
+          key: 'test_template_2',
+          name: 'Second test template',
+          description: 'This is a second test template',
+          tags: ['foo', 'bar'],
+          caseFields: {
+            title: 'Case with sample template 2',
+            description: 'case desc',
+            severity: CaseSeverity.LOW,
+            category: null,
+            tags: ['sample-4'],
+            assignees: [],
+            customFields: [
+              {
+                key: 'text_field_1',
+                type: CustomFieldTypes.TEXT,
+                value: 'this is a text field value',
+              },
+              {
+                key: 'toggle_field_1',
+                value: true,
+                type: CustomFieldTypes.TOGGLE,
+              },
+            ],
+            connector: {
+              id: 'none',
+              name: 'My Connector',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+          },
+        },
+        {
+          key: 'test_template_3',
+          name: 'Third test template',
+          description: 'This is a third test template',
+          tags: ['foobar'],
+          caseFields: {
+            title: 'Case with sample template 3',
+            tags: ['sample-3'],
+            customFields: [
+              {
+                key: 'text_field_1',
+                type: CustomFieldTypes.TEXT,
+                value: null,
+              },
+              {
+                key: 'toggle_field_1',
+                value: false,
+                type: CustomFieldTypes.TOGGLE,
+              },
+            ],
+          },
+        },
+      ];
+
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          overrides: { customFields, templates },
+        })
+      );
+
+      const data = removeServerGeneratedPropertiesFromSavedObject(configuration);
+      expect(data).to.eql({
+        ...getConfigurationOutput(false),
+        customFields,
+        templates,
+      });
     });
 
     it('should keep only the latest configuration', async () => {
@@ -194,126 +351,260 @@ export default ({ getService }: FtrProviderContext): void => {
       ]);
     });
 
-    it('should not create a configuration when missing connector.id', async () => {
-      await createConfiguration(
-        supertest,
-        {
-          // @ts-expect-error
-          connector: {
-            name: 'Connector',
-            type: ConnectorTypes.none,
-            fields: null,
-          },
-          closure_type: 'close-by-user',
-        },
-        400
-      );
-    });
-
-    it('should not create a configuration when missing connector.name', async () => {
-      await createConfiguration(
-        supertest,
-        {
-          // @ts-expect-error
-          connector: {
-            id: 'test-id',
-            type: ConnectorTypes.none,
-            fields: null,
-          },
-          closure_type: 'close-by-user',
-        },
-        400
-      );
-    });
-
-    it('should not create a configuration when missing connector.type', async () => {
-      await createConfiguration(
-        supertest,
-        {
-          // @ts-expect-error
-          connector: {
-            id: 'test-id',
-            name: 'Connector',
-            fields: null,
-          },
-          closure_type: 'close-by-user',
-        },
-        400
-      );
-    });
-
-    it('should not create a configuration when missing connector.fields', async () => {
-      await createConfiguration(
-        supertest,
-        {
-          // @ts-expect-error
-          connector: {
-            id: 'test-id',
-            type: ConnectorTypes.none,
-            name: 'Connector',
-          },
-          closure_type: 'close-by-user',
-        },
-        400
-      );
-    });
-
-    it('should not create a configuration when when missing closure_type', async () => {
-      await createConfiguration(
-        supertest,
-        // @ts-expect-error
-        {
-          connector: {
-            id: 'test-id',
-            type: ConnectorTypes.none,
-            name: 'Connector',
-            fields: null,
-          },
-        },
-        400
-      );
-    });
-
-    it('should not create a configuration when missing connector', async () => {
-      await createConfiguration(
-        supertest,
-        // @ts-expect-error
-        {
-          closure_type: 'close-by-user',
-        },
-        400
-      );
-    });
-
-    it('should not create a configuration when fields are not null', async () => {
-      await createConfiguration(
-        supertest,
-        {
-          connector: {
-            id: 'test-id',
-            type: ConnectorTypes.none,
-            name: 'Connector',
+    describe('validation', () => {
+      it('should not create a configuration when missing connector.id', async () => {
+        await createConfiguration(
+          supertest,
+          {
             // @ts-expect-error
-            fields: {},
+            connector: {
+              name: 'Connector',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+            closure_type: 'close-by-user',
           },
-          closure_type: 'close-by-user',
-        },
-        400
-      );
-    });
+          400
+        );
+      });
 
-    it('should not create a configuration with unsupported connector type', async () => {
-      // @ts-expect-error
-      await createConfiguration(supertest, getConfigurationRequest({ type: '.unsupported' }), 400);
-    });
+      it('should not create a configuration when missing connector.name', async () => {
+        await createConfiguration(
+          supertest,
+          {
+            // @ts-expect-error
+            connector: {
+              id: 'test-id',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+            closure_type: 'close-by-user',
+          },
+          400
+        );
+      });
 
-    it('should not create a configuration with unsupported connector fields', async () => {
-      await createConfiguration(
-        supertest,
-        // @ts-expect-error
-        getConfigurationRequest({ type: '.jira', fields: { unsupported: 'value' } }),
-        400
-      );
+      it('should not create a configuration when missing connector.type', async () => {
+        await createConfiguration(
+          supertest,
+          {
+            // @ts-expect-error
+            connector: {
+              id: 'test-id',
+              name: 'Connector',
+              fields: null,
+            },
+            closure_type: 'close-by-user',
+          },
+          400
+        );
+      });
+
+      it('should not create a configuration when missing connector.fields', async () => {
+        await createConfiguration(
+          supertest,
+          {
+            // @ts-expect-error
+            connector: {
+              id: 'test-id',
+              type: ConnectorTypes.none,
+              name: 'Connector',
+            },
+            closure_type: 'close-by-user',
+          },
+          400
+        );
+      });
+
+      it('should not create a configuration when when missing closure_type', async () => {
+        await createConfiguration(
+          supertest,
+          // @ts-expect-error
+          {
+            connector: {
+              id: 'test-id',
+              type: ConnectorTypes.none,
+              name: 'Connector',
+              fields: null,
+            },
+          },
+          400
+        );
+      });
+
+      it('should not create a configuration when missing connector', async () => {
+        await createConfiguration(
+          supertest,
+          // @ts-expect-error
+          {
+            closure_type: 'close-by-user',
+          },
+          400
+        );
+      });
+
+      it('should not create a configuration when fields are not null', async () => {
+        await createConfiguration(
+          supertest,
+          {
+            connector: {
+              id: 'test-id',
+              type: ConnectorTypes.none,
+              name: 'Connector',
+              // @ts-expect-error
+              fields: {},
+            },
+            closure_type: 'close-by-user',
+          },
+          400
+        );
+      });
+
+      it('should not create a configuration with unsupported connector type', async () => {
+        await createConfiguration(
+          supertest,
+          // @ts-expect-error
+          getConfigurationRequest({ type: '.unsupported' }),
+          400
+        );
+      });
+
+      it('should not create a configuration with unsupported connector fields', async () => {
+        await createConfiguration(
+          supertest,
+          // @ts-expect-error
+          getConfigurationRequest({ type: '.jira', fields: { unsupported: 'value' } }),
+          400
+        );
+      });
+
+      it('should not create a configuration when customField label is too long', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'hello',
+                  label: '#'.repeat(MAX_CUSTOM_FIELD_LABEL_LENGTH + 1),
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+            },
+          }),
+          400
+        );
+      });
+
+      it('should not create a configuration with duplicated keys', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'duplicated_key',
+                  label: '#1',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+                {
+                  key: 'duplicated_key',
+                  label: '#2',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+            },
+          }),
+          400
+        );
+      });
+
+      it('should not create a configuration with duplicated template keys', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              templates: [
+                {
+                  key: 'test_template_1',
+                  name: 'First test template',
+                  description: 'This is a first test template',
+                  caseFields: null,
+                },
+                {
+                  key: 'test_template_1',
+                  name: 'Third test template',
+                  description: 'This is a third test template',
+                  caseFields: {
+                    title: 'Case with sample template 3',
+                    tags: ['sample-3'],
+                  },
+                },
+              ],
+            },
+          }),
+          400
+        );
+      });
+
+      it("should not create a configuration when templates have custom fields and custom fields don't exist in the configuration", async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [],
+              templates: [
+                {
+                  key: 'test_template_1',
+                  name: 'First test template',
+                  description: 'This is a first test template',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'random_key',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'Test',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          }),
+          400
+        );
+      });
+
+      it('should not create a configuration when templates do not have custom fields and custom fields exist in the configuration', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'random_key',
+                  type: CustomFieldTypes.TEXT,
+                  label: 'New custom field',
+                  defaultValue: 'Test',
+                  required: true,
+                },
+              ],
+              templates: [
+                {
+                  key: 'test_template_1',
+                  name: 'First test template',
+                  description: 'This is a first test template',
+                  caseFields: null,
+                },
+              ],
+            },
+          }),
+          400
+        );
+      });
     });
 
     describe('rbac', () => {

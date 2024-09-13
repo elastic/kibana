@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useMemo } from 'react';
@@ -12,14 +13,14 @@ import { useEuiTheme } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../dashboard_constants';
-import { useDashboardContainerContext } from '../../dashboard_container_context';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
 export const useDashboardGridSettings = (panelsInOrder: string[]) => {
-  const { useEmbeddableSelector: select } = useDashboardContainerContext();
+  const dashboard = useDashboardContainer();
   const { euiTheme } = useEuiTheme();
 
-  const panels = select((state) => state.explicitInput.panels);
-  const viewMode = select((state) => state.explicitInput.viewMode);
+  const panels = dashboard.select((state) => state.explicitInput.panels);
+  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
 
   const layouts = useMemo(() => {
     return {

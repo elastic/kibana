@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom, of } from 'rxjs';
 import { PathConfigType, config as pathConfigDef } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
-import { CoreContext, coreConfigPaths } from '@kbn/core-base-server-internal';
+import { CoreContext, coreConfigPaths, CriticalError } from '@kbn/core-base-server-internal';
 import type { AnalyticsServicePreboot } from '@kbn/core-analytics-server';
 import { HttpConfigType } from './types';
 import { PidConfigType, pidConfig as pidConfigDef } from './pid_config';
@@ -46,19 +47,17 @@ export type InternalEnvironmentServiceSetup = InternalEnvironmentServicePreboot;
 /** @internal */
 export class EnvironmentService {
   private readonly log: Logger;
-  private readonly processLogger: Logger;
   private readonly configService: IConfigService;
   private uuid: string = '';
 
   constructor(core: CoreContext) {
     this.log = core.logger.get('environment');
-    this.processLogger = core.logger.get('process');
     this.configService = core.configService;
   }
 
   public async preboot({ analytics }: EnvironmentServicePrebootDeps) {
     // IMPORTANT: This code is based on the assumption that none of the configuration values used
-    // here is supposed to change during preboot phase and it's safe to read them only once.
+    // here is supposed to change during preboot phase, and it's safe to read them only once.
     const [pathConfig, serverConfig, pidConfig] = await Promise.all([
       firstValueFrom(this.configService.atPath<PathConfigType>(pathConfigDef.path)),
       firstValueFrom(this.configService.atPath<HttpConfigType>(coreConfigPaths.http)),
@@ -70,13 +69,13 @@ export class EnvironmentService {
       const message = (reason as Error)?.stack ?? JSON.stringify(reason);
       this.log.warn(`Detected an unhandled Promise rejection: ${message}`);
     });
-
-    process.on('warning', (warning) => {
-      // deprecation warnings do no reflect a current problem for the user and should be filtered out.
-      if (warning.name === 'DeprecationWarning') {
-        return;
+    // Log uncaughtExceptions in our logger before crashing the process: https://github.com/elastic/kibana/issues/183182
+    process.on('uncaughtExceptionMonitor', (error, origin) => {
+      // CriticalErrors are handled in a different path
+      if (!(error instanceof CriticalError)) {
+        const message = error?.stack ?? JSON.stringify(error);
+        this.log.warn(`Detected an ${origin}: ${message}`);
       }
-      this.processLogger.warn(warning);
     });
 
     await createDataFolder({ pathConfig, logger: this.log });

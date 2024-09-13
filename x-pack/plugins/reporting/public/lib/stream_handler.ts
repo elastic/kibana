@@ -5,32 +5,30 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { NotificationsSetup, ThemeServiceStart, DocLinksStart } from '@kbn/core/public';
-import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JOB_STATUSES } from '../../common/constants';
-import { JobId, JobSummary, JobSummarySet } from '../../common/types';
+import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs';
+
+import { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { JOB_STATUS } from '@kbn/reporting-common';
+import { JobId } from '@kbn/reporting-common/types';
+
+import { Job, ReportingAPIClient, jobCompletionNotifications } from '@kbn/reporting-public';
 import {
   getFailureToast,
-  getWarningToast,
-  getSuccessToast,
   getGeneralErrorToast,
-  getWarningMaxSizeToast,
+  getSuccessToast,
   getWarningFormulasToast,
+  getWarningMaxSizeToast,
+  getWarningToast,
 } from '../notifier';
-import { Job } from './job';
-import { ReportingAPIClient } from './reporting_api_client';
+import { JobSummary, JobSummarySet } from '../types';
 
 /**
  * @todo Replace with `Infinity` once elastic/eui#5945 is resolved.
  * @see https://github.com/elastic/eui/issues/5945
  */
 const COMPLETED_JOB_TOAST_TIMEOUT = 24 * 60 * 60 * 1000; // 24 hours
-
-function updateStored(jobIds: JobId[]): void {
-  sessionStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobIds));
-}
 
 function getReportStatus(src: Job): JobSummary {
   return {
@@ -44,80 +42,89 @@ function getReportStatus(src: Job): JobSummary {
   };
 }
 
+function handleError(core: CoreStart, err: Error): Rx.Observable<JobSummarySet> {
+  core.notifications.toasts.addDanger(
+    getGeneralErrorToast(
+      i18n.translate('xpack.reporting.publicNotifier.pollingErrorMessage', {
+        defaultMessage: 'Reporting notifier error!',
+      }),
+      err,
+      core
+    )
+  );
+  window.console.error(err);
+  return Rx.of({ completed: [], failed: [] });
+}
+
 export class ReportingNotifierStreamHandler {
-  constructor(
-    private notifications: NotificationsSetup,
-    private apiClient: ReportingAPIClient,
-    private theme: ThemeServiceStart,
-    private docLinks: DocLinksStart
-  ) {}
+  private jobCompletionNotifications = jobCompletionNotifications();
+
+  constructor(private apiClient: ReportingAPIClient, private core: CoreStart) {}
+
+  public startPolling(interval: number, stop$: Rx.Observable<void>) {
+    Rx.timer(0, interval)
+      .pipe(
+        takeUntil(stop$), // stop the interval when stop method is called
+        map(this.jobCompletionNotifications.getPendingJobIds), // read all pending job IDs from session storage
+        filter((previousPending) => previousPending.length > 0), // stop the pipeline here if there are none pending
+        mergeMap((previousPending) => this.findChangedStatusJobs(previousPending)), // look up the latest status of all pending jobs on the server
+        mergeMap(({ completed, failed }) => this.showNotifications({ completed, failed })),
+        catchError((err) => {
+          // eslint-disable-next-line no-console
+          console.error(err);
+          return handleError(this.core, err);
+        })
+      )
+      .subscribe();
+  }
 
   /*
    * Use Kibana Toast API to show our messages
    */
-  public showNotifications({
+  protected showNotifications({
     completed: completedJobs,
     failed: failedJobs,
   }: JobSummarySet): Rx.Observable<JobSummarySet> {
+    const notifications = this.core.notifications;
+    const apiClient = this.apiClient;
+    const core = this.core;
+    const docLinks = this.core.docLinks;
+    const getManagementLink = apiClient.getManagementLink.bind(apiClient);
+    const getDownloadLink = apiClient.getDownloadLink.bind(apiClient);
+
     const showNotificationsAsync = async () => {
       const completedOptions = { toastLifeTimeMs: COMPLETED_JOB_TOAST_TIMEOUT };
 
       // notifications with download link
-      for (const job of completedJobs) {
+      for (const job of completedJobs ?? []) {
         if (job.csvContainsFormulas) {
-          this.notifications.toasts.addWarning(
-            getWarningFormulasToast(
-              job,
-              this.apiClient.getManagementLink,
-              this.apiClient.getDownloadLink,
-              this.theme
-            ),
+          notifications.toasts.addWarning(
+            getWarningFormulasToast(job, getManagementLink, getDownloadLink, core),
             completedOptions
           );
         } else if (job.maxSizeReached) {
-          this.notifications.toasts.addWarning(
-            getWarningMaxSizeToast(
-              job,
-              this.apiClient.getManagementLink,
-              this.apiClient.getDownloadLink,
-              this.theme
-            ),
+          notifications.toasts.addWarning(
+            getWarningMaxSizeToast(job, getManagementLink, getDownloadLink, core),
             completedOptions
           );
-        } else if (job.status === JOB_STATUSES.WARNINGS) {
-          this.notifications.toasts.addWarning(
-            getWarningToast(
-              job,
-              this.apiClient.getManagementLink,
-              this.apiClient.getDownloadLink,
-              this.theme
-            ),
+        } else if (job.status === JOB_STATUS.WARNINGS) {
+          notifications.toasts.addWarning(
+            getWarningToast(job, getManagementLink, getDownloadLink, core),
             completedOptions
           );
         } else {
-          this.notifications.toasts.addSuccess(
-            getSuccessToast(
-              job,
-              this.apiClient.getManagementLink,
-              this.apiClient.getDownloadLink,
-              this.theme
-            ),
+          notifications.toasts.addSuccess(
+            getSuccessToast(job, getManagementLink, getDownloadLink, core),
             completedOptions
           );
         }
       }
 
       // no download link available
-      for (const job of failedJobs) {
-        const errorText = await this.apiClient.getError(job.id);
-        this.notifications.toasts.addDanger(
-          getFailureToast(
-            errorText,
-            job,
-            this.apiClient.getManagementLink,
-            this.theme,
-            this.docLinks
-          )
+      for (const job of failedJobs ?? []) {
+        const errorText = await apiClient.getError(job.id);
+        notifications.toasts.addDanger(
+          getFailureToast(errorText, job, getManagementLink, docLinks, core)
         );
       }
       return { completed: completedJobs, failed: failedJobs };
@@ -130,43 +137,49 @@ export class ReportingNotifierStreamHandler {
    * An observable that finds jobs that are known to be "processing" (stored in
    * session storage) but have non-processing job status on the server
    */
-  public findChangedStatusJobs(storedJobs: JobId[]): Rx.Observable<JobSummarySet> {
-    return Rx.from(this.apiClient.findForJobIds(storedJobs)).pipe(
-      map((jobs) => {
-        const completedJobs: JobSummary[] = [];
-        const failedJobs: JobSummary[] = [];
-        const pending: JobId[] = [];
+  protected findChangedStatusJobs(previousPending: JobId[]): Rx.Observable<JobSummarySet> {
+    return Rx.from(this.apiClient.findForJobIds(previousPending)).pipe(
+      mergeMap(async (jobs) => {
+        const newCompleted: JobSummary[] = [];
+        const newFailed: JobSummary[] = [];
+        const newPending: JobId[] = [];
 
-        // add side effects to storage
-        for (const job of jobs) {
-          const { id: jobId, status: jobStatus } = job;
-          if (storedJobs.includes(jobId)) {
-            if (jobStatus === JOB_STATUSES.COMPLETED || jobStatus === JOB_STATUSES.WARNINGS) {
-              completedJobs.push(getReportStatus(job));
-            } else if (jobStatus === JOB_STATUSES.FAILED) {
-              failedJobs.push(getReportStatus(job));
-            } else {
-              pending.push(jobId);
-            }
+        for (const pendingJobId of previousPending) {
+          const updatedJob = jobs.find(({ id }) => id === pendingJobId);
+          if (
+            updatedJob?.status === JOB_STATUS.COMPLETED ||
+            updatedJob?.status === JOB_STATUS.WARNINGS
+          ) {
+            newCompleted.push(getReportStatus(updatedJob));
+          } else if (updatedJob?.status === JOB_STATUS.FAILED) {
+            newFailed.push(getReportStatus(updatedJob));
+          } else {
+            // Keep job tracked in storage if is pending. It also
+            // may not be present in apiClient.findForJobIds
+            // response if index refresh is slow
+            newPending.push(pendingJobId);
           }
         }
-        updateStored(pending); // refresh the storage of pending job IDs, minus completed and failed job IDs
 
-        return { completed: completedJobs, failed: failedJobs };
+        // refresh the storage of pending job IDs, minus
+        // the newly completed and failed jobs
+        this.jobCompletionNotifications.setPendingJobIds(newPending);
+
+        return { completed: newCompleted, failed: newFailed };
       }),
       catchError((err) => {
         // show connection refused toast
-        this.notifications.toasts.addDanger(
+        this.core.notifications.toasts.addDanger(
           getGeneralErrorToast(
             i18n.translate('xpack.reporting.publicNotifier.httpErrorMessage', {
               defaultMessage: 'Could not check Reporting job status!',
             }),
             err,
-            this.theme
+            this.core
           )
-        ); // prettier-ignore
+        );
         window.console.error(err);
-        return Rx.of({ completed: [], failed: [] }); // log the error and resume
+        return Rx.of({});
       })
     );
   }

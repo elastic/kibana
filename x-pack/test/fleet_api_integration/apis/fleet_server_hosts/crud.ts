@@ -8,25 +8,24 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const fleetAndAgents = getService('fleetAndAgents');
 
-  describe('fleet_fleet_server_hosts_crud', async function () {
+  describe('fleet_fleet_server_hosts_crud', function () {
+    let defaultFleetServerHostId: string;
+
     skipIfNoDockerRegistry(providerContext);
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
-    });
-    setupFleetAndAgents(providerContext);
+      await fleetAndAgents.setup();
 
-    let defaultFleetServerHostId: string;
-
-    before(async function () {
       await kibanaServer.savedObjects.clean({
         types: ['fleet-fleet-server-host'],
       });
@@ -115,6 +114,61 @@ export default function (providerContext: FtrProviderContext) {
             name: 'new host1',
           })
           .expect(404);
+      });
+    });
+
+    describe('POST /fleet_server_hosts', () => {
+      it('should allow to create a default fleet server host with id', async function () {
+        const id = `test-${Date.now()}`;
+
+        await supertest
+          .post(`/api/fleet/fleet_server_hosts`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Default ${Date.now()}`,
+            host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
+            is_default: true,
+            id,
+          })
+          .expect(200);
+
+        const {
+          body: { item: fleetServerHost },
+        } = await supertest.get(`/api/fleet/fleet_server_hosts/${id}`).expect(200);
+
+        expect(fleetServerHost.is_default).to.be(true);
+      });
+
+      it('should not unset default fleet server host on id conflict', async function () {
+        const id = `test-${Date.now()}`;
+
+        await supertest
+          .post(`/api/fleet/fleet_server_hosts`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Default ${Date.now()}`,
+            host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
+            is_default: true,
+            id,
+          })
+          .expect(200);
+
+        await supertest
+          .post(`/api/fleet/fleet_server_hosts`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Default ${Date.now()}`,
+            host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
+            is_default: true,
+            id,
+          })
+          .expect(409);
+
+        const {
+          body: { item: fleetServerHost },
+        } = await supertest.get(`/api/fleet/fleet_server_hosts/${id}`).expect(200);
+
+        expect(fleetServerHost.is_default).to.be(true);
       });
     });
   });

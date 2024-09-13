@@ -12,7 +12,6 @@
       "canvas"
     ],
     "requiredPlugins": [
-      "bfetch",
       "charts",
       "data",
       "dataViews",
@@ -30,7 +29,7 @@
       "visualizations",
       "uiActions",
       "share",
-      "savedObjectsManagement",
+      "contentManagement",
       "savedObjectsFinder"
     ],
     "optionalPlugins": [
@@ -38,10 +37,8 @@
       "reporting",
       "spaces",
       "usageCollection",
-      "savedObjects",
     ],
     "requiredBundles": [
-      "discover",
       "kibanaReact",
       "kibanaUtils",
       "lens",

@@ -22,11 +22,11 @@ export const DELETE_CASE = (quantity: number = 1) =>
   });
 
 export const COPY_ID_ACTION_LABEL = i18n.translate('xpack.cases.caseView.copyID', {
-  defaultMessage: 'Copy Case ID',
+  defaultMessage: 'Copy case ID',
 });
 
 export const COPY_ID_ACTION_SUCCESS = i18n.translate('xpack.cases.caseView.copyIDSuccess', {
-  defaultMessage: 'Copied Case ID to clipboard',
+  defaultMessage: 'Copied case ID to clipboard',
 });
 
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
@@ -137,6 +137,14 @@ export const TAGS = i18n.translate('xpack.cases.caseView.tags', {
   defaultMessage: 'Tags',
 });
 
+export const CATEGORY = i18n.translate('xpack.cases.caseView.category', {
+  defaultMessage: 'Category',
+});
+
+export const CATEGORIES = i18n.translate('xpack.cases.caseView.categories', {
+  defaultMessage: 'Categories',
+});
+
 export const SOLUTION = i18n.translate('xpack.cases.caseView.solution', {
   defaultMessage: 'Solution',
 });
@@ -145,6 +153,14 @@ export const ACTIONS = i18n.translate('xpack.cases.allCases.actions', {
   defaultMessage: 'Actions',
 });
 
+export const ACTIONS_BUTTON_ARIA_LABEL = (title: string) =>
+  i18n.translate('xpack.cases.allCases.actions.button.ariaLabel', {
+    defaultMessage: 'Actions for "{title}" column',
+    values: {
+      title,
+    },
+  });
+
 export const NO_TAGS_AVAILABLE = i18n.translate('xpack.cases.allCases.noTagsAvailable', {
   defaultMessage: 'No tags available',
 });
@@ -152,6 +168,13 @@ export const NO_TAGS_AVAILABLE = i18n.translate('xpack.cases.allCases.noTagsAvai
 export const NO_REPORTERS_AVAILABLE = i18n.translate('xpack.cases.caseView.noReportersAvailable', {
   defaultMessage: 'No reporters available.',
 });
+
+export const NO_CATEGORIES_AVAILABLE = i18n.translate(
+  'xpack.cases.allCases.noCategoriesAvailable',
+  {
+    defaultMessage: 'No categories available',
+  }
+);
 
 export const COMMENTS = i18n.translate('xpack.cases.allCases.comments', {
   defaultMessage: 'Comments',
@@ -169,16 +192,16 @@ export const NO_TAGS = i18n.translate('xpack.cases.caseView.noTags', {
   defaultMessage: 'No tags are added',
 });
 
+export const NO_CATEGORIES = i18n.translate('xpack.cases.caseView.noCategories', {
+  defaultMessage: 'No category is added',
+});
+
 export const TITLE_REQUIRED = i18n.translate('xpack.cases.createCase.titleFieldRequiredError', {
   defaultMessage: 'A name is required.',
 });
 
-export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate('xpack.cases.configureCases.headerTitle', {
-  defaultMessage: 'Configure cases',
-});
-
 export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.cases.configureCasesButton', {
-  defaultMessage: 'Edit external connection',
+  defaultMessage: 'Settings',
 });
 
 export const ADD_COMMENT = i18n.translate('xpack.cases.caseView.comment.addComment', {
@@ -210,6 +233,14 @@ export const UNKNOWN = i18n.translate('xpack.cases.caseView.unknown', {
 
 export const MARKED_CASE_AS = i18n.translate('xpack.cases.caseView.markedCaseAs', {
   defaultMessage: 'marked case as',
+});
+
+export const ADD_CATEGORY = i18n.translate('xpack.cases.caseView.addCategory', {
+  defaultMessage: 'added the category',
+});
+
+export const REMOVE_CATEGORY = i18n.translate('xpack.cases.caseView.userAction.removeCategory', {
+  defaultMessage: 'removed the category',
 });
 
 export const SET_SEVERITY_TO = i18n.translate('xpack.cases.caseView.setSeverityTo', {
@@ -265,7 +296,14 @@ export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.cas
 export const MAX_LENGTH_ERROR = (field: string, length: number) =>
   i18n.translate('xpack.cases.createCase.maxLengthError', {
     values: { field, length },
-    defaultMessage: 'The length of the {field} is too long. The maximum length is {length}.',
+    defaultMessage:
+      'The length of the {field} is too long. The maximum length is {length} characters.',
+  });
+
+export const MAX_TAGS_ERROR = (length: number) =>
+  i18n.translate('xpack.cases.createCase.maxTagsError', {
+    values: { length },
+    defaultMessage: 'Too many tags. The maximum number of allowed tags is {length}',
   });
 
 export const LINK_APPROPRIATE_LICENSE = i18n.translate('xpack.cases.common.appropriateLicense', {
@@ -323,6 +361,12 @@ export const ADD_TAG_CUSTOM_OPTION_LABEL = (searchValue: string) =>
     values: { searchValue },
   });
 
+export const ADD_CATEGORY_CUSTOM_OPTION_LABEL = (searchValue: string) =>
+  i18n.translate('xpack.cases.configure.addCategoryCustomOptionLabel', {
+    defaultMessage: 'Add {searchValue} as a category',
+    values: { searchValue },
+  });
+
 export const VERSION_CONFLICT_WARNING = (markdownId: string) =>
   i18n.translate('xpack.cases.configure.commentVersionConflictWarning', {
     defaultMessage:
@@ -337,3 +381,15 @@ export const VERSION_CONFLICT_WARNING = (markdownId: string) =>
  * with i18n.
  */
 export const ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX = ADD_TAG_CUSTOM_OPTION_LABEL('{searchValue}');
+
+export const ADD_CATEGORY_CUSTOM_OPTION_LABEL_COMBO_BOX =
+  ADD_CATEGORY_CUSTOM_OPTION_LABEL('{searchValue}');
+
+export const EXPERIMENTAL_LABEL = i18n.translate('xpack.cases.badge.experimentalLabel', {
+  defaultMessage: 'Technical preview',
+});
+
+export const EXPERIMENTAL_DESC = i18n.translate('xpack.cases.badge.experimentalDesc', {
+  defaultMessage:
+    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+});

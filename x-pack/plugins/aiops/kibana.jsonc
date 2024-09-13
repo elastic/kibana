@@ -12,15 +12,26 @@
       "data",
       "lens",
       "licensing",
-      "unifiedFieldList",
+      "uiActions",
+      "embeddable",
+      "presentationUtil",
+      "dashboard",
+      "fieldFormats",
+      "unifiedSearch",
+      "share"
+    ],
+    "optionalPlugins": [
+      "cases",
+      "observabilityAIAssistant",
+      "usageCollection"
     ],
     "requiredBundles": [
+      "dataViews",
       "fieldFormats",
       "kibanaReact",
-      "kibanaUtils"
-    ],
-    "extraPublicDirs": [
-      "common"
+      "kibanaUtils",
+      "embeddable",
+      "cases",
     ]
   }
 }

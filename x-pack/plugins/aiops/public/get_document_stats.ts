@@ -5,25 +5,19 @@
  * 2.0.
  */
 
-import { each, get } from 'lodash';
+import { get } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import dateMath from '@kbn/datemath';
+import { getExtendedChangePoint, type DocumentCountStats } from '@kbn/aiops-log-rate-analysis';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
 import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
 
 import { buildExtendedBaseFilterCriteria } from './application/utils/build_extended_base_filter_criteria';
-import { GroupTableItem } from './components/spike_analysis_table/types';
-
-export interface DocumentCountStats {
-  interval?: number;
-  buckets?: { [key: string]: number };
-  timeRangeEarliest?: number;
-  timeRangeLatest?: number;
-  totalCount: number;
-}
 
 export interface DocumentStatsSearchStrategyParams {
   earliest?: number;
@@ -34,8 +28,8 @@ export interface DocumentStatsSearchStrategyParams {
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   fieldsToFetch?: string[];
-  selectedSignificantTerm?: SignificantTerm;
-  includeSelectedSignificantTerm?: boolean;
+  selectedSignificantItem?: SignificantItem;
+  includeSelectedSignificantItem?: boolean;
   selectedGroup?: GroupTableItem | null;
   trackTotalHits?: boolean;
 }
@@ -43,7 +37,8 @@ export interface DocumentStatsSearchStrategyParams {
 export const getDocumentCountStatsRequest = (
   params: DocumentStatsSearchStrategyParams,
   randomSamplerWrapper?: RandomSamplerWrapper,
-  skipAggs = false
+  skipAggs = false,
+  changePoints = false
 ) => {
   const {
     index,
@@ -54,20 +49,19 @@ export const getDocumentCountStatsRequest = (
     searchQuery,
     intervalMs,
     fieldsToFetch,
-    selectedSignificantTerm,
-    includeSelectedSignificantTerm,
+    selectedSignificantItem,
+    includeSelectedSignificantItem,
     selectedGroup,
     trackTotalHits,
   } = params;
 
-  const size = 0;
   const filterCriteria = buildExtendedBaseFilterCriteria(
     timeFieldName,
     earliestMs,
     latestMs,
     searchQuery,
-    selectedSignificantTerm,
-    includeSelectedSignificantTerm,
+    selectedSignificantItem,
+    includeSelectedSignificantItem,
     selectedGroup
   );
 
@@ -87,27 +81,47 @@ export const getDocumentCountStatsRequest = (
           : {}),
       },
     },
+    ...(changePoints
+      ? {
+          change_point_request: {
+            // @ts-expect-error missing from ES spec
+            change_point: {
+              buckets_path: 'eventRate>_count',
+            },
+          },
+        }
+      : {}),
   };
 
   const aggs = randomSamplerWrapper ? randomSamplerWrapper.wrap(rawAggs) : rawAggs;
 
-  const searchBody = {
+  const searchBody: estypes.MsearchMultisearchBody = {
     query: {
       bool: {
         filter: filterCriteria,
       },
     },
-    ...(!fieldsToFetch &&
+    track_total_hits: trackTotalHits === true,
+    size: 0,
+  };
+
+  if (isPopulatedObject(runtimeFieldMap)) {
+    searchBody.runtime_mappings = runtimeFieldMap;
+  }
+
+  if (
+    !fieldsToFetch &&
     !skipAggs &&
     timeFieldName !== undefined &&
     intervalMs !== undefined &&
     intervalMs > 0
-      ? { aggs }
-      : {}),
-    ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
-    track_total_hits: trackTotalHits === true,
-    size,
-  };
+  ) {
+    searchBody.aggs = aggs;
+    searchBody.sort = { [timeFieldName]: 'desc' };
+    searchBody.fields = [timeFieldName];
+    searchBody.size = 1;
+  }
+
   return {
     index,
     body: searchBody,
@@ -132,7 +146,7 @@ export const processDocumentCountStats = (
       totalCount,
     };
   }
-  const buckets: { [key: string]: number } = {};
+
   const dataByTimeBucket: Array<{ key: string; doc_count: number }> = get(
     randomSamplerWrapper && body.aggregations !== undefined
       ? randomSamplerWrapper.unwrap(body.aggregations)
@@ -140,10 +154,27 @@ export const processDocumentCountStats = (
     ['eventRate', 'buckets'],
     []
   );
-  each(dataByTimeBucket, (dataForTime) => {
-    const time = dataForTime.key;
-    buckets[time] = dataForTime.doc_count;
-  });
+
+  const changePointRaw = get(
+    randomSamplerWrapper && body.aggregations !== undefined
+      ? randomSamplerWrapper.unwrap(body.aggregations)
+      : body.aggregations,
+    ['change_point_request']
+  );
+
+  const changePointBase =
+    changePointRaw && changePointRaw.bucket && Object.keys(changePointRaw.type).length > 0
+      ? { key: Date.parse(changePointRaw.bucket.key), type: Object.keys(changePointRaw.type)[0] }
+      : undefined;
+
+  const buckets = dataByTimeBucket.reduce<Record<string, number>>((acc, cur) => {
+    acc[cur.key] = cur.doc_count;
+    return acc;
+  }, {});
+
+  const lastDocTimeStamp: string = Object.values(body.hits.hits[0]?.fields ?? [[]])[0][0];
+  const lastDocTimeStampMs =
+    lastDocTimeStamp === undefined ? undefined : dateMath.parse(lastDocTimeStamp)?.valueOf();
 
   return {
     interval: params.intervalMs,
@@ -151,5 +182,14 @@ export const processDocumentCountStats = (
     timeRangeEarliest: params.earliest,
     timeRangeLatest: params.latest,
     totalCount,
+    lastDocTimeStampMs,
+    ...(changePointBase
+      ? {
+          changePoint: {
+            ...changePointBase,
+            ...getExtendedChangePoint(buckets, changePointBase?.key),
+          },
+        }
+      : {}),
   };
 };

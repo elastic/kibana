@@ -13,8 +13,7 @@ import type {
 } from '@kbn/data-plugin/server';
 
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { PluginSetupContract } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   TaskManagerSetupContract as TaskManagerPluginSetup,
@@ -22,29 +21,26 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
-import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import type { CasesSetup } from '@kbn/cases-plugin/server';
-import type { CreateLiveQueryRequestBodySchema } from '../common/schemas/routes/live_query';
+import type { CasesServerSetup } from '@kbn/cases-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { createActionService } from './handlers/action/create_action_service';
 
 export interface OsqueryPluginSetup {
-  osqueryCreateAction: (
-    payload: CreateLiveQueryRequestBodySchema,
-    alertData?: ParsedTechnicalFields
-  ) => void;
+  createActionService: ReturnType<typeof createActionService>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginStart {}
 
 export interface SetupPlugins {
-  usageCollection?: UsageCollectionSetup;
   actions: ActionsPlugin['setup'];
-  cases: CasesSetup;
+  cases: CasesServerSetup;
   data: DataPluginSetup;
-  features: PluginSetupContract;
+  features: FeaturesPluginSetup;
   security: SecurityPluginStart;
   taskManager?: TaskManagerPluginSetup;
   telemetry?: TelemetryPluginSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export interface StartPlugins {

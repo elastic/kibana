@@ -94,255 +94,643 @@ Array [
 ]
 `;
 
-exports[`extend index management ilm summary extension should return extension when index has lifecycle error 1`] = `
-Array [
-  <h3
-    class="euiTitle emotion-euiTitle-s"
-  >
-    Index lifecycle management
-  </h3>,
+exports[`extend index management ilm summary extension should render a phase definition panel when lifecycle has phase definition 1`] = `
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+>
   <div
-    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-  />,
-  <div
-    class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger emotion-euiPanel-none-m-danger-euiCallOut"
-  >
-    <p
-      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-    >
-      <span
-        aria-hidden="true"
-        class="emotion-euiCallOut__icon"
-        color="inherit"
-        data-euiicon-type="cross"
-      />
-      Index lifecycle error
-    </p>
-    <div
-      class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
-    >
-      illegal_argument_exception: setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined
-    </div>
-  </div>,
-  <div
-    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-  />,
-  <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
     <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
+      class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain-hasBorder"
+      data-test-subj="policyPropertiesPanel"
     >
-      <dl
-        class="euiDescriptionList emotion-euiDescriptionList-column-left"
-        data-type="column"
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-center-row"
       >
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
-        >
-          <strong>
-            Lifecycle policy
-          </strong>
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
-        >
-          <a
-            class="euiLink emotion-euiLink-primary"
-            href="management/data/index_lifecycle_management//policies/edit/testy"
-            rel="noreferrer"
-          >
-            testy
-          </a>
-        </dd>
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
-        >
-          <strong>
-            Current action
-          </strong>
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
-        >
-          rollover
-        </dd>
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
-        >
-          <strong>
-            Failed step
-          </strong>
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
-        >
-          check-rollover-ready
-        </dd>
-      </dl>
-    </div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
-    >
-      <dl
-        class="euiDescriptionList emotion-euiDescriptionList-column-left"
-        data-type="column"
-      >
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
-        >
-          <strong>
-            Current phase
-          </strong>
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
-        >
-          hot
-        </dd>
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
-        >
-          <strong>
-            Current action time
-          </strong>
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
-        >
-          2018-12-07 13:02:55
-        </dd>
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
-        >
-          <strong>
-            Phase definition
-          </strong>
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiPopover emotion-euiPopover"
-            id="phaseExecutionPopover"
+            class="euiText emotion-euiText-xs"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
-            >
-              <button
-                class="euiLink emotion-euiLink-primary"
-                type="button"
-              >
-                Show definition
-              </button>
-            </div>
+            <h3>
+              Lifecycle policy
+            </h3>
           </div>
-        </dd>
-      </dl>
-    </div>
-  </div>,
-]
-`;
-
-exports[`extend index management ilm summary extension should return extension when index has lifecycle policy 1`] = `
-Array [
-  <h3
-    class="euiTitle emotion-euiTitle-s"
-  >
-    Index lifecycle management
-  </h3>,
-  <div
-    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
-  />,
-  <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
-  >
-    <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
-    >
-      <dl
-        class="euiDescriptionList emotion-euiDescriptionList-column-left"
-        data-type="column"
-      >
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
-        >
-          <strong>
-            Lifecycle policy
-          </strong>
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <a
             class="euiLink emotion-euiLink-primary"
             href="management/data/index_lifecycle_management//policies/edit/testy"
-            rel="noreferrer"
+            rel="noopener noreferrer"
+            target="_blank"
           >
-            testy
+            Edit policy in ILM
+            <span
+              class="emotion-EuiExternalLinkIcon"
+              data-euiicon-type="popout"
+            >
+              External link
+            </span>
+            <span
+              class="emotion-euiScreenReaderOnly"
+            >
+              (opens in a new tab or window)
+            </span>
           </a>
-        </dd>
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
-        >
-          <strong>
-            Current action
-          </strong>
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
-        >
-          complete
-        </dd>
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
-        >
-          <strong>
-            Failed step
-          </strong>
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
-        >
-          -
-        </dd>
-      </dl>
-    </div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
-    >
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+      />
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-column-left"
-        data-type="column"
+        class="euiDescriptionList emotion-euiDescriptionList-column-left-m-s"
+        data-type="responsiveColumn"
+        style="grid-template-columns: 1fr 1fr;"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
         >
-          <strong>
-            Current phase
-          </strong>
+          Policy name
         </dt>
         <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
         >
-          new
+          testy
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
         >
-          <strong>
-            Current action time
-          </strong>
+          Current phase
         </dt>
         <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal-m"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          <span
+            class="euiBadge emotion-euiBadge"
+            style="--euiBadgeBackgroundColor: #e7664c; --euiBadgeTextColor: #000;"
+            title="Hot"
+          >
+            <span
+              class="euiBadge__content emotion-euiBadge__content"
+            >
+              <span
+                class="euiBadge__text emotion-euiBadge__text"
+              >
+                Hot
+              </span>
+            </span>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Current action
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          <code>
+            rollover
+          </code>
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Current action time
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
         >
           2018-12-07 13:02:55
         </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Current step
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          <code>
+            test
+          </code>
+        </dd>
       </dl>
     </div>
-  </div>,
-]
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-3"
+  >
+    <div
+      class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain-hasBorder"
+      data-test-subj="phaseDefinitionPanel"
+    >
+      <div
+        class="euiText emotion-euiText-xs"
+      >
+        <h3>
+          Current phase definition
+        </h3>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+      />
+      <div>
+        <pre>
+          <code
+            data-code-language="json"
+          >
+            {
+  "policy": "testy",
+  "phase_definition": {
+    "min_age": "0s",
+    "actions": {
+      "rollover": {
+        "max_size": "1gb"
+      }
+    }
+  },
+  "version": 1,
+  "modified_date_in_millis": 1544031699844
+}
+          </code>
+        </pre>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`extend index management ilm summary extension should render a step info panel when lifecycle is waiting for a step completion 1`] = `
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <div
+      class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain-hasBorder"
+      data-test-subj="policyPropertiesPanel"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-center-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiText emotion-euiText-xs"
+          >
+            <h3>
+              Lifecycle policy
+            </h3>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <a
+            class="euiLink emotion-euiLink-primary"
+            href="management/data/index_lifecycle_management//policies/edit/testy"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Edit policy in ILM
+            <span
+              class="emotion-EuiExternalLinkIcon"
+              data-euiicon-type="popout"
+            >
+              External link
+            </span>
+            <span
+              class="emotion-euiScreenReaderOnly"
+            >
+              (opens in a new tab or window)
+            </span>
+          </a>
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+      />
+      <dl
+        class="euiDescriptionList emotion-euiDescriptionList-column-left-m-s"
+        data-type="responsiveColumn"
+        style="grid-template-columns: 1fr 1fr;"
+      >
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Policy name
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          testy
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Current phase
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          <span
+            class="euiBadge emotion-euiBadge"
+            style="--euiBadgeBackgroundColor: #e7664c; --euiBadgeTextColor: #000;"
+            title="Hot"
+          >
+            <span
+              class="euiBadge__content emotion-euiBadge__content"
+            >
+              <span
+                class="euiBadge__text emotion-euiBadge__text"
+              >
+                Hot
+              </span>
+            </span>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Current action
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          <code>
+            rollover
+          </code>
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Current action time
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          2018-12-07 13:02:55
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Current step
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          <code>
+            test
+          </code>
+        </dd>
+      </dl>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-3"
+  >
+    <div
+      class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain-hasBorder"
+      data-test-subj="policyStepPanel"
+    >
+      <div
+        class="euiText emotion-euiText-xs"
+      >
+        <h3>
+          Current step info
+        </h3>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <div>
+          <pre>
+            <code
+              data-code-language="json"
+            >
+              {
+  "message": "Waiting for all shard copies to be active",
+  "shards_left_to_allocate": -1,
+  "all_shards_active": false,
+  "number_of_replicas": 2
+}
+            </code>
+          </pre>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+    />
+  </div>
+</div>
+`;
+
+exports[`extend index management ilm summary extension should render an error panel when index has lifecycle error 1`] = `
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <div
+      class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain-hasBorder"
+      data-test-subj="policyPropertiesPanel"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-center-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiText emotion-euiText-xs"
+          >
+            <h3>
+              Lifecycle policy
+            </h3>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <a
+            class="euiLink emotion-euiLink-primary"
+            href="management/data/index_lifecycle_management//policies/edit/testy"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Edit policy in ILM
+            <span
+              class="emotion-EuiExternalLinkIcon"
+              data-euiicon-type="popout"
+            >
+              External link
+            </span>
+            <span
+              class="emotion-euiScreenReaderOnly"
+            >
+              (opens in a new tab or window)
+            </span>
+          </a>
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+      />
+      <dl
+        class="euiDescriptionList emotion-euiDescriptionList-column-left-m-s"
+        data-type="responsiveColumn"
+        style="grid-template-columns: 1fr 1fr;"
+      >
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Policy name
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          testy
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Current phase
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          <span
+            class="euiBadge emotion-euiBadge"
+            style="--euiBadgeBackgroundColor: #e7664c; --euiBadgeTextColor: #000;"
+            title="Hot"
+          >
+            <span
+              class="euiBadge__content emotion-euiBadge__content"
+            >
+              <span
+                class="euiBadge__text emotion-euiBadge__text"
+              >
+                Hot
+              </span>
+            </span>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Current action
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          <code>
+            rollover
+          </code>
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Current action time
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          2018-12-07 13:02:55
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Current step
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          <code>
+            ERROR
+          </code>
+        </dd>
+      </dl>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-3"
+  >
+    <div
+      class="euiPanel euiPanel--danger euiPanel--paddingMedium emotion-euiPanel-m-m-danger"
+      data-test-subj="policyErrorPanel"
+    >
+      <div
+        class="euiText emotion-euiText-xs"
+      >
+        <h3>
+          Lifecycle error
+        </h3>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <div>
+          <pre>
+            <code
+              data-code-language="json"
+            >
+              {
+  "failed_step": "check-rollover-ready",
+  "step_info": {
+    "type": "illegal_argument_exception",
+    "reason": "setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined"
+  }
+}
+            </code>
+          </pre>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+    />
+  </div>
+</div>
+`;
+
+exports[`extend index management ilm summary extension should render the tab when index has lifecycle policy 1`] = `
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <div
+      class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain-hasBorder"
+      data-test-subj="policyPropertiesPanel"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-center-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiText emotion-euiText-xs"
+          >
+            <h3>
+              Lifecycle policy
+            </h3>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <a
+            class="euiLink emotion-euiLink-primary"
+            href="management/data/index_lifecycle_management//policies/edit/testy"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Edit policy in ILM
+            <span
+              class="emotion-EuiExternalLinkIcon"
+              data-euiicon-type="popout"
+            >
+              External link
+            </span>
+            <span
+              class="emotion-euiScreenReaderOnly"
+            >
+              (opens in a new tab or window)
+            </span>
+          </a>
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+      />
+      <dl
+        class="euiDescriptionList emotion-euiDescriptionList-column-left-m-s"
+        data-type="responsiveColumn"
+        style="grid-template-columns: 1fr 1fr;"
+      >
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Policy name
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          testy
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Current phase
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          <span
+            class="euiBadge emotion-euiBadge-default"
+            title="new"
+          >
+            <span
+              class="euiBadge__content emotion-euiBadge__content"
+            >
+              <span
+                class="euiBadge__text emotion-euiBadge__text"
+              >
+                new
+              </span>
+            </span>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Current action
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          <code>
+            complete
+          </code>
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Current action time
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          2018-12-07 13:02:55
+        </dd>
+        <dt
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-column-normal"
+        >
+          Current step
+        </dt>
+        <dd
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-column-normal"
+        >
+          <code>
+            complete
+          </code>
+        </dd>
+      </dl>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-3"
+  />
+</div>
 `;
 
 exports[`extend index management remove lifecycle action extension should return extension when all indices have lifecycle policy 1`] = `

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import v8, { HeapInfo } from 'v8';
@@ -30,10 +31,10 @@ describe('ProcessMetricsCollector', () => {
     });
 
     it('collects event loop delay', () => {
-      mockEventLoopDelayMonitor.collect.mockReturnValueOnce({ mean: 13 });
+      mockEventLoopDelayMonitor.collect.mockReturnValueOnce({ mean: 13, max: 18 });
       const metrics = collector.collect();
       expect(metrics).toHaveLength(1);
-      expect(metrics[0].event_loop_delay).toBe(13);
+      expect(metrics[0].event_loop_delay).toBe(18);
       expect(mockEventLoopDelayMonitor.collect).toBeCalledTimes(1);
     });
 
@@ -61,12 +62,15 @@ describe('ProcessMetricsCollector', () => {
       const heapUsed = 4688;
       const heapSizeLimit = 5788;
       const rss = 5865;
+      const external = 9001;
+      const arrayBuffers = 42;
+
       jest.spyOn(process, 'memoryUsage').mockImplementation(() => ({
         rss,
         heapTotal,
         heapUsed,
-        external: 0,
-        arrayBuffers: 0,
+        external,
+        arrayBuffers,
       }));
 
       jest.spyOn(v8, 'getHeapStatistics').mockImplementation(
@@ -83,6 +87,8 @@ describe('ProcessMetricsCollector', () => {
       expect(metrics[0].memory.heap.used_in_bytes).toEqual(heapUsed);
       expect(metrics[0].memory.heap.size_limit).toEqual(heapSizeLimit);
       expect(metrics[0].memory.resident_set_size_in_bytes).toEqual(rss);
+      expect(metrics[0].memory.external_in_bytes).toEqual(external);
+      expect(metrics[0].memory.array_buffers_in_bytes).toEqual(arrayBuffers);
     });
   });
 

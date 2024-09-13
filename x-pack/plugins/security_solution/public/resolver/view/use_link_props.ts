@@ -10,9 +10,8 @@ import type { MouseEventHandler } from 'react';
 import { useNavigateOrReplace } from './use_navigate_or_replace';
 
 import * as selectors from '../store/selectors';
-import type { PanelViewAndParameters, ResolverState } from '../types';
-
-type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
+import type { PanelViewAndParameters } from '../types';
+import type { State } from '../../common/store/types';
 
 /**
  * Get an `onClick` function and an `href` string. Use these as props for `<a />` elements.
@@ -20,12 +19,15 @@ type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElem
  * the `href` points to `panelViewAndParameters`.
  * Existing `search` parameters are maintained.
  */
-export function useLinkProps(panelViewAndParameters: PanelViewAndParameters): {
+export function useLinkProps(
+  id: string,
+  panelViewAndParameters: PanelViewAndParameters
+): {
   href: string;
-  onClick: EventHandlerCallback;
+  onClick: MouseEventHandler;
 } {
-  const search = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)(panelViewAndParameters)
+  const search = useSelector((state: State) =>
+    selectors.relativeHref(state.analyzer[id])(panelViewAndParameters)
   );
 
   return useNavigateOrReplace({

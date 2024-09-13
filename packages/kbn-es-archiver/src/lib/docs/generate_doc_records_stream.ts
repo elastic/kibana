@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Transform } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
@@ -78,7 +80,9 @@ export function createGenerateDocRecordsStream({
                 // if keepIndexNames is false, rewrite the .kibana_* index to .kibana_1 so that
                 // when it is loaded it can skip migration, if possible
                 index:
-                  hit._index.startsWith('.kibana') && !keepIndexNames ? '.kibana_1' : hit._index,
+                  hit._index.startsWith(MAIN_SAVED_OBJECT_INDEX) && !keepIndexNames
+                    ? `${MAIN_SAVED_OBJECT_INDEX}_1`
+                    : hit._index,
                 data_stream: dataStream,
                 id: hit._id,
                 source: hit._source,

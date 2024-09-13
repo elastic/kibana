@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -29,6 +30,7 @@ interface OperatorState {
   operatorOptions?: OperatorOption[];
   placeholder: string;
   selectedField: DataViewFieldBase | undefined;
+  'aria-label'?: string;
 }
 
 export const OperatorComponent: React.FC<OperatorState> = ({
@@ -41,8 +43,9 @@ export const OperatorComponent: React.FC<OperatorState> = ({
   operatorInputWidth = 150,
   placeholder,
   selectedField,
+  'aria-label': ariaLabel,
 }): JSX.Element => {
-  const getLabel = useCallback(({ message }): string => message, []);
+  const getLabel = useCallback(({ message }: OperatorOption): string => message, []);
   const optionsMemo = useMemo(
     (): OperatorOption[] =>
       operatorOptions != null && operatorOptions.length > 0
@@ -90,6 +93,7 @@ export const OperatorComponent: React.FC<OperatorState> = ({
       singleSelection={AS_PLAIN_TEXT}
       data-test-subj="operatorAutocompleteComboBox"
       style={inputWidth}
+      aria-label={ariaLabel}
     />
   );
 };

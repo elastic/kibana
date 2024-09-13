@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { join } from 'path';
@@ -47,6 +48,7 @@ export class PluginWrapper<
   public readonly configPath: PluginManifest['configPath'];
   public readonly requiredPlugins: PluginManifest['requiredPlugins'];
   public readonly optionalPlugins: PluginManifest['optionalPlugins'];
+  public readonly runtimePluginDependencies: PluginManifest['runtimePluginDependencies'];
   public readonly requiredBundles: PluginManifest['requiredBundles'];
   public readonly includesServerPlugin: PluginManifest['server'];
   public readonly includesUiPlugin: PluginManifest['ui'];
@@ -81,8 +83,13 @@ export class PluginWrapper<
     this.requiredPlugins = params.manifest.requiredPlugins;
     this.optionalPlugins = params.manifest.optionalPlugins;
     this.requiredBundles = params.manifest.requiredBundles;
+    this.runtimePluginDependencies = params.manifest.runtimePluginDependencies;
     this.includesServerPlugin = params.manifest.server;
     this.includesUiPlugin = params.manifest.ui;
+  }
+
+  public async init() {
+    this.instance = await this.createPluginInstance();
   }
 
   /**
@@ -96,7 +103,9 @@ export class PluginWrapper<
     setupContext: CoreSetup<TPluginsStart> | CorePreboot,
     plugins: TPluginsSetup
   ): TSetup | Promise<TSetup> {
-    this.instance = this.createPluginInstance();
+    if (!this.instance) {
+      throw new Error('The plugin is not initialized. Call the init method first.');
+    }
 
     if (this.isPrebootPluginInstance(this.instance)) {
       return this.instance.setup(setupContext as CorePreboot, plugins);
@@ -168,7 +177,7 @@ export class PluginWrapper<
     return configDescriptor;
   }
 
-  private createPluginInstance() {
+  private async createPluginInstance() {
     this.log.debug('Initializing plugin');
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -184,7 +193,7 @@ export class PluginWrapper<
       throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
     }
 
-    const instance = initializer(this.initializerContext);
+    const instance = await initializer(this.initializerContext);
     if (!instance || typeof instance !== 'object') {
       throw new Error(
         `Initializer for plugin "${

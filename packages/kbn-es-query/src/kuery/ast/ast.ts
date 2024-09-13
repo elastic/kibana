@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { JsonObject } from '@kbn/utility-types';
@@ -55,6 +56,18 @@ export const fromKueryExpression = (
     }
   }
 };
+
+/**
+ * Given a KQL AST node, generate the corresponding KQL expression.
+ * @public
+ * @param node
+ */
+export function toKqlExpression(node: KueryNode): string {
+  if (nodeTypes.function.isNode(node)) return nodeTypes.function.toKqlExpression(node);
+  if (nodeTypes.literal.isNode(node)) return nodeTypes.literal.toKqlExpression(node);
+  if (nodeTypes.wildcard.isNode(node)) return nodeTypes.wildcard.toKqlExpression(node);
+  throw new Error(`Unknown KQL node type: "${node.type}"`);
+}
 
 /**
  * @params {String} indexPattern

@@ -20,10 +20,7 @@ import type {
   GetSettingsResponse,
   GetVerificationKeyIdResponse,
 } from '../../../../../../../common/types/rest_spec';
-import type {
-  DetailViewPanelName,
-  KibanaAssetType,
-} from '../../../../../../../common/types/models';
+import type { KibanaAssetType } from '../../../../../../../common/types/models';
 import {
   agentPolicyRouteService,
   appRoutesService,
@@ -36,9 +33,11 @@ import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 
 import { ExperimentalFeaturesService } from '../../../../services';
 
+import type { DetailViewPanelName } from '.';
+import { Detail } from '.';
+
 // @ts-ignore this saves us having to define all experimental features
 ExperimentalFeaturesService.init({});
-import { Detail } from '.';
 
 describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
@@ -46,6 +45,7 @@ describe('when on integration detail', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   let mockedApi: MockedApi<EpmPackageDetailsResponseProvidersMock>;
+
   const render = async () => {
     await act(async () => {
       renderResult = testRenderer.render(
@@ -67,16 +67,20 @@ describe('when on integration detail', () => {
   });
 
   describe('and the package is installed', () => {
-    beforeEach(async () => render());
+    beforeEach(async () => {
+      await render();
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    });
 
     it('should display agent policy usage count', async () => {
-      await act(() => mockedApi.waitForApi());
-
       expect(renderResult.queryByTestId('agentPolicyCount')).not.toBeNull();
     });
 
     it('should show the Policies tab', async () => {
-      await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('tab-policies')).not.toBeNull();
     });
   });
@@ -85,6 +89,7 @@ describe('when on integration detail', () => {
     const unInstalledPackage = mockedApi.responseProvider.epmGetInfo('nginx');
     unInstalledPackage.item.status = 'not_installed';
     unInstalledPackage.item.version = pkgVersion;
+
     mockedApi.responseProvider.epmGetInfo.mockImplementation((name, version, query) => {
       if (query?.prerelease === false) {
         const gaPackage = { item: { ...unInstalledPackage.item } };
@@ -97,29 +102,33 @@ describe('when on integration detail', () => {
 
   describe('and the package is not installed and prerelease enabled', () => {
     beforeEach(async () => {
+      mockedApi.responseProvider.getSettings.mockReturnValue({
+        item: { prerelease_integrations_enabled: true, id: '', fleet_server_hosts: [] },
+      });
       mockGAAndPrereleaseVersions('1.0.0-beta');
       await render();
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
     });
 
     it('should NOT display agent policy usage count', async () => {
-      await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
     });
 
     it('should NOT display the Policies tab', async () => {
-      await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
 
     it('should display version select if prerelease setting enabled and prererelase version available', async () => {
-      await mockedApi.waitForApi();
       const versionSelect = renderResult.queryByTestId('versionSelect');
       expect(versionSelect?.textContent).toEqual('1.0.0-beta1.0.0');
       expect((versionSelect as any)?.value).toEqual('1.0.0-beta');
     });
 
     it('should display prerelease callout if prerelease setting enabled and prerelease version available', async () => {
-      await mockedApi.waitForApi();
       const calloutTitle = renderResult.getByTestId('prereleaseCallout');
       expect(calloutTitle).toBeInTheDocument();
       const calloutGABtn = renderResult.getByTestId('switchToGABtn');
@@ -136,20 +145,22 @@ describe('when on integration detail', () => {
         item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
       });
       await render();
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
     });
 
     it('should NOT display agent policy usage count', async () => {
-      await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
     });
 
     it('should NOT display the Policies tab', async () => {
-      await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
 
     it('should display version text and no callout if prerelease setting disabled', async () => {
-      await mockedApi.waitForApi();
       expect((renderResult.queryByTestId('versionText') as any)?.textContent).toEqual('1.0.0');
       expect(renderResult.queryByTestId('prereleaseCallout')).toBeNull();
     });
@@ -157,7 +168,15 @@ describe('when on integration detail', () => {
 
   describe('and a custom UI extension is NOT registered', () => {
     beforeEach(async () => {
+      mockedApi.responseProvider.getSettings.mockReturnValue({
+        item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
+      });
       await render();
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
     });
 
     it('should show overview and settings tabs', () => {
@@ -188,6 +207,9 @@ describe('when on integration detail', () => {
 
     beforeEach(async () => {
       let setWasRendered: () => void;
+      mockedApi.responseProvider.getSettings.mockReturnValue({
+        item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
+      });
       lazyComponentWasRendered = new Promise((resolve) => {
         setWasRendered = resolve;
       });
@@ -255,6 +277,12 @@ describe('when on integration detail', () => {
       });
 
       await render();
+
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
     });
 
     afterEach(() => {
@@ -262,7 +290,7 @@ describe('when on integration detail', () => {
       lazyComponentWasRendered = undefined;
     });
 
-    it('should display "assets" tab in navigation', () => {
+    it('should display "assets" tab in navigation', async () => {
       expect(renderResult.getByTestId('tab-assets'));
     });
 
@@ -280,6 +308,11 @@ describe('when on integration detail', () => {
   describe('and the Add integration button is clicked', () => {
     beforeEach(async () => {
       await render();
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
     });
 
     it('should link to the create page', () => {
@@ -613,6 +646,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         description: '',
         namespace: 'default',
         policy_id: '521c1b70-3976-11eb-ad1c-3baa423084d9',
+        policy_ids: ['521c1b70-3976-11eb-ad1c-3baa423084d9'],
         enabled: true,
         inputs: [
           {
@@ -691,6 +725,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         description: '',
         namespace: 'default',
         policy_id: '125c1b70-3976-11eb-ad1c-3baa423085y6',
+        policy_ids: ['125c1b70-3976-11eb-ad1c-3baa423085y6'],
         enabled: true,
         inputs: [
           {
@@ -783,6 +818,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         updated_at: '2020-12-09T13:46:31.840Z',
         updated_by: 'elastic',
         agents: 0,
+        is_protected: false,
       },
       {
         id: '125c1b70-3976-11eb-ad1c-3baa423085y6',
@@ -797,6 +833,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         updated_at: '2020-12-09T13:46:31.840Z',
         updated_by: 'elastic',
         agents: 100,
+        is_protected: false,
       },
     ],
     total: 2,

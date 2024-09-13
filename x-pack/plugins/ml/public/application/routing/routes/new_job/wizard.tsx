@@ -6,17 +6,19 @@
  */
 
 import { parse } from 'query-string';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
-import { NavigateToPath } from '../../../contexts/kibana';
-
+import { dynamic } from '@kbn/shared-ux-utility';
+import { DataSourceContextProvider } from '../../../contexts/ml/data_source_context';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import { useMlKibana } from '../../../contexts/kibana';
 import { basicResolvers } from '../../resolvers';
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-import { Page } from '../../../jobs/new_job/pages/new_job';
+import type { MlRoute, PageProps } from '../../router';
+import { createPath, PageLoader } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
-import { mlJobService } from '../../../services/job_service';
 import {
   loadNewJobCapabilities,
   ANOMALY_DETECTOR,
@@ -29,6 +31,10 @@ import { ML_PAGES } from '../../../../../common/constants/locator';
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;
 }
+
+const Page = dynamic(async () => ({
+  default: (await import('../../../jobs/new_job/pages/new_job')).Page,
+}));
 
 const getBaseBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
   getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
@@ -188,30 +194,43 @@ export const geoRouteFactory = (navigateToPath: NavigateToPath, basePath: string
   breadcrumbs: getGeoBreadcrumbs(navigateToPath, basePath),
 });
 
-const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
+const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
   const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
   );
 
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context, results } = useResolver(
-    index,
-    savedSearchId,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    {
-      ...basicResolvers(deps),
-      privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),
-      jobCaps: () =>
-        loadNewJobCapabilities(index, savedSearchId, deps.dataViewsContract, ANOMALY_DETECTOR),
-      existingJobsAndGroups: mlJobService.getJobAndGroupIds,
-    }
-  );
+
+  const {
+    services: {
+      data: { dataViews: dataViewsService },
+      savedSearch: savedSearchService,
+      mlServices: { mlApi },
+    },
+  } = useMlKibana();
+  const { context, results } = useRouteResolver('full', ['canGetJobs', 'canCreateJob'], {
+    ...basicResolvers(),
+    // TODO useRouteResolver should be responsible for the redirect
+    privileges: () => checkCreateJobsCapabilitiesResolver(mlApi, redirectToJobsManagementPage),
+    jobCaps: () =>
+      loadNewJobCapabilities(
+        index,
+        savedSearchId,
+        mlApi,
+        dataViewsService,
+        savedSearchService,
+        ANOMALY_DETECTOR
+      ),
+    existingJobsAndGroups: () => mlApi.jobs.getAllJobAndGroupIds(),
+  });
 
   return (
     <PageLoader context={context}>
-      <Page jobType={jobType} existingJobsAndGroups={results.existingJobsAndGroups} />
+      <DataSourceContextProvider>
+        {results ? (
+          <Page jobType={jobType} existingJobsAndGroups={results.existingJobsAndGroups} />
+        ) : null}
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };

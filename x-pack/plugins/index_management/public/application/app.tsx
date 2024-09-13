@@ -8,15 +8,16 @@
 import React, { useEffect } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Router, Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { ScopedHistory } from '@kbn/core/public';
 
-import { UIM_APP_LOAD } from '../../common/constants';
+import { UIM_APP_LOAD, Section } from '../../common/constants';
 import { IndexManagementHome, homeSections } from './sections/home';
 import { TemplateCreate } from './sections/template_create';
 import { TemplateClone } from './sections/template_clone';
 import { TemplateEdit } from './sections/template_edit';
+import { EnrichPolicyCreate } from './sections/enrich_policy_create';
 import { useAppContext } from './app_context';
 import {
   ComponentTemplateCreate,
@@ -40,7 +41,7 @@ export const App = ({ history }: { history: ScopedHistory }) => {
 
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
-  <Switch>
+  <Routes>
     <Route exact path="/create_template" component={TemplateCreate} />
     <Route exact path="/clone_template/:name*" component={TemplateClone} />
     <Route exact path="/edit_template/:name*" component={TemplateEdit} />
@@ -51,7 +52,8 @@ export const AppWithoutRouter = () => (
       component={ComponentTemplateClone}
     />
     <Route exact path="/edit_component_template/:name*" component={ComponentTemplateEdit} />
+    <Route exact path="/enrich_policies/create" component={EnrichPolicyCreate} />
     <Route path={`/:section(${homeSections.join('|')})`} component={IndexManagementHome} />
-    <Redirect from={`/`} to={`/indices`} />
-  </Switch>
+    <Redirect from={`/`} to={`/${Section.Indices}`} />
+  </Routes>
 );

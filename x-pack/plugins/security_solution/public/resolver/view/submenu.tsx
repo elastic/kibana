@@ -10,22 +10,23 @@ import { useDispatch } from 'react-redux';
 import type { EventStats } from '../../../common/endpoint/types';
 import { useColors } from './use_colors';
 import { useLinkProps } from './use_link_props';
-import type { ResolverAction } from '../store/actions';
 import { SideEffectContext } from './side_effect_context';
 import { FormattedCount } from '../../common/components/formatted_number';
-
-/* eslint-disable react/display-name */
+import { userSelectedResolverNode } from '../store/actions';
 
 /**
  * A Submenu that displays a collection of "pills" for each related event
  * category it has events for.
  */
+// eslint-disable-next-line react/display-name
 export const NodeSubMenuComponents = React.memo(
   ({
+    id,
     className,
     nodeID,
     nodeStats,
   }: {
+    id: string;
     className?: string;
     // eslint-disable-next-line react/no-unused-prop-types
     buttonFill: string;
@@ -60,7 +61,7 @@ export const NodeSubMenuComponents = React.memo(
             return opta.category.localeCompare(optb.category);
           })
           .map((pill) => {
-            return <NodeSubmenuPill pill={pill} nodeID={nodeID} key={pill.category} />;
+            return <NodeSubmenuPill id={id} pill={pill} nodeID={nodeID} key={pill.category} />;
           })}
       </ul>
     );
@@ -68,13 +69,15 @@ export const NodeSubMenuComponents = React.memo(
 );
 
 const NodeSubmenuPill = ({
+  id,
   pill,
   nodeID,
 }: {
+  id: string;
   pill: { prefix: JSX.Element; category: string };
   nodeID: string;
 }) => {
-  const linkProps = useLinkProps({
+  const linkProps = useLinkProps(id, {
     panelView: 'nodeEventsInCategory',
     panelParameters: { nodeID, eventCategory: pill.category },
   });
@@ -86,21 +89,21 @@ const NodeSubmenuPill = ({
     };
   }, [pillBorderStroke, pillFill]);
 
-  const dispatch: (action: ResolverAction) => void = useDispatch();
+  const dispatch = useDispatch();
   const { timestamp } = useContext(SideEffectContext);
 
   const handleOnClick = useCallback(
     (mouseEvent: React.MouseEvent<HTMLButtonElement>) => {
       linkProps.onClick(mouseEvent);
-      dispatch({
-        type: 'userSelectedResolverNode',
-        payload: {
+      dispatch(
+        userSelectedResolverNode({
+          id,
           nodeID,
           time: timestamp(),
-        },
-      });
+        })
+      );
     },
-    [timestamp, linkProps, dispatch, nodeID]
+    [timestamp, linkProps, dispatch, nodeID, id]
   );
   return (
     <li

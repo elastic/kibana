@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
@@ -15,7 +16,7 @@ import {
   getIsEnterprisePlus,
 } from './kibana_services';
 import type { MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart } from '.';
-import type { MapConfig } from '../config';
+import type { MapConfig } from '../server/config';
 import { createEMSSettings } from '../common/ems_settings';
 import { createEMSClientLazy } from './lazy_load_bundle';
 
@@ -35,10 +36,11 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
   }
 
   public start(code: CoreStart, plugins: MapsEmsStartPublicDependencies) {
-    const mapConfig = this._initializerContext.config.get<MapConfig>();
-    const kibanaVersion = this._initializerContext.env.packageInfo.version;
+    const context = this._initializerContext;
+    const mapConfig = context.config.get<MapConfig>();
+    const { buildFlavor, version } = context.env.packageInfo;
 
-    setKibanaVersion(kibanaVersion);
+    setKibanaVersion(version);
     setMapConfig(mapConfig);
 
     if (plugins.licensing) {
@@ -51,7 +53,7 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
       },
       createEMSClient: async () => {
         const emsSettings = createEMSSettings(mapConfig, getIsEnterprisePlus);
-        return createEMSClientLazy(emsSettings, kibanaVersion);
+        return createEMSClientLazy(emsSettings, version, buildFlavor);
       },
     };
   }

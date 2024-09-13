@@ -275,53 +275,6 @@
       },
       {
         "parentPluginId": "esUiShared",
-        "id": "def-public.EuiCodeEditor",
-        "type": "Function",
-        "tags": [],
-        "label": "EuiCodeEditor",
-        "description": [],
-        "signature": [
-          "(props: ",
-          {
-            "pluginId": "esUiShared",
-            "scope": "public",
-            "docId": "kibEsUiSharedPluginApi",
-            "section": "def-public.EuiCodeEditorProps",
-            "text": "EuiCodeEditorProps"
-          },
-          ") => JSX.Element"
-        ],
-        "path": "src/plugins/es_ui_shared/public/components/code_editor/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "esUiShared",
-            "id": "def-public.EuiCodeEditor.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "esUiShared",
-                "scope": "public",
-                "docId": "kibEsUiSharedPluginApi",
-                "section": "def-public.EuiCodeEditorProps",
-                "text": "EuiCodeEditorProps"
-              }
-            ],
-            "path": "src/plugins/es_ui_shared/public/components/code_editor/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "esUiShared",
         "id": "def-public.extractQueryParams",
         "type": "Function",
         "tags": [],
@@ -363,7 +316,7 @@
         "label": "JsonEditor",
         "description": [],
         "signature": [
-          "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, euiCodeEditorProps, error: propsError, }: Props<T>) => JSX.Element"
+          "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, codeEditorProps, error: propsError, ...rest }: Props<T>) => JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
         "deprecated": false,
@@ -395,7 +348,7 @@
         "label": "NotAuthorizedSection",
         "description": [],
         "signature": [
-          "({ title, message }: Props) => JSX.Element"
+          "({ title, message, dataTestSubj }: Props) => JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
         "deprecated": false,
@@ -406,7 +359,7 @@
             "id": "def-public.NotAuthorizedSection.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, message }",
+            "label": "{ title, message, dataTestSubj }",
             "description": [],
             "signature": [
               "Props"
@@ -527,7 +480,7 @@
         "label": "SectionLoading",
         "description": [],
         "signature": [
-          "({ inline, children, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ inline, \"data-test-subj\": dataTestSubj, children, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
         ],
         "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
         "deprecated": false,
@@ -538,7 +491,7 @@
             "id": "def-public.SectionLoading.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ inline, children, ...rest }",
+            "label": "{\n  inline,\n  'data-test-subj': dataTestSubj,\n  children,\n  ...rest\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<Props>"
@@ -563,12 +516,12 @@
           "<D = any, E = any>(httpClient: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
-          ", { path, method, body, query, asSystemRequest }: ",
+          ", { path, method, body, query, version, asSystemRequest }: ",
           {
             "pluginId": "esUiShared",
             "scope": "public",
@@ -600,9 +553,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -616,7 +569,7 @@
             "id": "def-public.sendRequest.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ path, method, body, query, asSystemRequest }",
+            "label": "{ path, method, body, query, version, asSystemRequest }",
             "description": [],
             "signature": [
               {
@@ -665,12 +618,12 @@
           "<D = any, E = Error>(httpClient: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
-          ", { path, method, query, body, pollIntervalMs, initialData, deserializer }: ",
+          ", { path, method, query, body, pollIntervalMs, initialData, deserializer, version, }: ",
           {
             "pluginId": "esUiShared",
             "scope": "public",
@@ -702,9 +655,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -718,7 +671,7 @@
             "id": "def-public.useRequest.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ path, method, query, body, pollIntervalMs, initialData, deserializer }",
+            "label": "{\n    path,\n    method,\n    query,\n    body,\n    pollIntervalMs,\n    initialData,\n    deserializer,\n    version,\n  }",
             "description": [],
             "signature": [
               {
@@ -921,230 +874,6 @@
       },
       {
         "parentPluginId": "esUiShared",
-        "id": "def-public.EuiCodeEditorProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "EuiCodeEditorProps",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "esUiShared",
-            "scope": "public",
-            "docId": "kibEsUiSharedPluginApi",
-            "section": "def-public.EuiCodeEditorProps",
-            "text": "EuiCodeEditorProps"
-          },
-          " extends SupportedAriaAttributes,Omit<",
-          "IAceEditorProps",
-          ", \"mode\">"
-        ],
-        "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "esUiShared",
-            "id": "def-public.EuiCodeEditorProps.width",
-            "type": "string",
-            "tags": [],
-            "label": "width",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "esUiShared",
-            "id": "def-public.EuiCodeEditorProps.height",
-            "type": "string",
-            "tags": [],
-            "label": "height",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "esUiShared",
-            "id": "def-public.EuiCodeEditorProps.onBlur",
-            "type": "Function",
-            "tags": [],
-            "label": "onBlur",
-            "description": [],
-            "signature": [
-              "((event: any, editor?: ",
-              "AceEditorClass",
-              " | undefined) => void) | undefined"
-            ],
-            "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "esUiShared",
-            "id": "def-public.EuiCodeEditorProps.onFocus",
-            "type": "Function",
-            "tags": [],
-            "label": "onFocus",
-            "description": [],
-            "signature": [
-              "((event: any, editor?: ",
-              "AceEditorClass",
-              " | undefined) => void) | undefined"
-            ],
-            "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "esUiShared",
-            "id": "def-public.EuiCodeEditorProps.isReadOnly",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isReadOnly",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "esUiShared",
-            "id": "def-public.EuiCodeEditorProps.setOptions",
-            "type": "Object",
-            "tags": [],
-            "label": "setOptions",
-            "description": [],
-            "signature": [
-              "IAceOptions",
-              " | undefined"
-            ],
-            "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "esUiShared",
-            "id": "def-public.EuiCodeEditorProps.cursorStart",
-            "type": "number",
-            "tags": [],
-            "label": "cursorStart",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "esUiShared",
-            "id": "def-public.EuiCodeEditorProps.datatestsubj",
-            "type": "string",
-            "tags": [],
-            "label": "'data-test-subj'",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "esUiShared",
-            "id": "def-public.EuiCodeEditorProps.theme",
-            "type": "string",
-            "tags": [],
-            "label": "theme",
-            "description": [
-              "\nSelect the `brace` theme\nThe matching theme file must also be imported from `brace` (e.g., `import 'brace/theme/github';`)"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "esUiShared",
-            "id": "def-public.EuiCodeEditorProps.mode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "mode",
-            "description": [
-              "\nUse string for a built-in mode or object for a custom mode"
-            ],
-            "signature": [
-              "string | object | undefined"
-            ],
-            "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "esUiShared",
-            "id": "def-public.EuiCodeEditorProps.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "esUiShared",
-            "id": "def-public.EuiCodeEditorProps.onAceEditorRef",
-            "type": "Function",
-            "tags": [],
-            "label": "onAceEditorRef",
-            "description": [],
-            "signature": [
-              "((editor: ",
-              "default",
-              " | null) => void) | undefined"
-            ],
-            "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "esUiShared",
-                "id": "def-public.EuiCodeEditorProps.onAceEditorRef.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "editor",
-                "description": [],
-                "signature": [
-                  "default",
-                  " | null"
-                ],
-                "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "esUiShared",
         "id": "def-public.JsonEditorState",
         "type": "Interface",
         "tags": [],
@@ -1330,9 +1059,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpFetchQuery",
+                "section": "def-public.HttpFetchQuery",
                 "text": "HttpFetchQuery"
               },
               " | undefined"
@@ -1366,6 +1095,20 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.SendRequestConfig.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
@@ -1826,9 +1569,9 @@
           "({ error, response, handleCustomError, }: EsErrorHandlerParams) => ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IKibanaResponse",
+            "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
           "<any>"

@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['visualize', 'header', 'maps']);
-
+  const { visualize, header, maps } = getPageObjects(['visualize', 'header', 'maps']);
+  const listingTable = getService('listingTable');
   const security = getService('security');
 
   describe('visualize create menu', () => {
@@ -23,23 +23,24 @@ export default function ({ getService, getPageObjects }) {
             }
           );
 
-          await PageObjects.visualize.navigateToNewVisualization();
+          await visualize.navigateToNewVisualization();
         });
 
         it('should show maps application in create menu', async () => {
-          const hasMapsApp = await PageObjects.visualize.hasMapsApp();
+          const hasMapsApp = await visualize.hasMapsApp();
           expect(hasMapsApp).to.equal(true);
         });
 
         it('should take users to Maps application when Maps is clicked', async () => {
-          await PageObjects.visualize.clickMapsApp();
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          const onMapPage = await PageObjects.maps.onMapPage();
+          await visualize.clickMapsApp();
+          await header.waitUntilLoadingHasFinished();
+          const onMapPage = await maps.onMapPage();
           expect(onMapPage).to.equal(true);
         });
       });
 
-      describe('without write permission', () => {
+      describe('without write permission', function () {
+        this.tags('skipFIPS');
         before(async () => {
           await security.testUser.setRoles(
             ['global_maps_read', 'global_visualize_all', 'test_logstash_reader'],
@@ -48,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
             }
           );
 
-          await PageObjects.visualize.navigateToNewVisualization();
+          await visualize.navigateToNewVisualization();
         });
 
         after(async () => {
@@ -56,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('should not show maps application in create menu', async () => {
-          const hasMapsApp = await PageObjects.visualize.hasMapsApp();
+          const hasMapsApp = await visualize.hasMapsApp();
           expect(hasMapsApp).to.equal(false);
         });
       });
@@ -68,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
           skipBrowserRefresh: true,
         });
 
-        await PageObjects.visualize.navigateToNewAggBasedVisualization();
+        await visualize.navigateToNewAggBasedVisualization();
       });
 
       after(async () => {
@@ -76,13 +77,45 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not show legacy region map visualizion in create menu', async () => {
-        const hasLegecyViz = await PageObjects.visualize.hasVisType('region_map');
+        const hasLegecyViz = await visualize.hasVisType('region_map');
         expect(hasLegecyViz).to.equal(false);
       });
 
       it('should not show legacy tilemap map visualizion in create menu', async () => {
-        const hasLegecyViz = await PageObjects.visualize.hasVisType('tile_map');
+        const hasLegecyViz = await visualize.hasVisType('tile_map');
         expect(hasLegecyViz).to.equal(false);
+      });
+    });
+    describe('edit meta-data', () => {
+      before(async () => {
+        await security.testUser.setRoles(
+          ['global_maps_all', 'global_visualize_all', 'test_logstash_reader'],
+          {
+            skipBrowserRefresh: true,
+          }
+        );
+
+        await visualize.navigateToNewAggBasedVisualization();
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
+      it('should allow to change meta-data on a map visualization', async () => {
+        await visualize.navigateToNewVisualization();
+        await visualize.clickMapsApp();
+        await maps.waitForLayersToLoad();
+        await maps.saveMap('myTestMap');
+        await visualize.gotoVisualizationLandingPage();
+        await listingTable.searchForItemWithName('myTestMap');
+        await listingTable.inspectVisualization();
+        await listingTable.editVisualizationDetails({
+          title: 'AnotherTestMap',
+          description: 'new description',
+        });
+        await listingTable.searchForItemWithName('AnotherTestMap');
+        await listingTable.expectItemsCount('visualize', 1);
       });
     });
   });

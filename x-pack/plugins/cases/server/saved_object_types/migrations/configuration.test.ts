@@ -7,15 +7,15 @@
 
 import type { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { CasesConfigureAttributes } from '../../../common/api';
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import type { ESCaseConnectorWithId } from '../../services/test_utils';
-import type { ESCasesConfigureAttributes } from '../../services/configure/types';
 import type { UnsanitizedConfigureConnector } from './configuration';
 import { createConnectorAttributeMigration, configureConnectorIdMigration } from './configuration';
+import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
+import type { ConfigurationAttributes } from '../../../common/types/domain';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const create_7_14_0_configSchema = (connector?: ESCaseConnectorWithId) => ({
@@ -99,7 +99,7 @@ describe('configuration migrations', () => {
     it('does not modify the other attributes of the saved object', () => {
       const config = createConnectorAttributeMigration(create_7_9_0_configSchema());
 
-      const configAttributes = config as SavedObjectSanitizedDoc<CasesConfigureAttributes>;
+      const configAttributes = config as SavedObjectSanitizedDoc<ConfigurationAttributes>;
       expect(configAttributes.attributes.created_by.email).toEqual('test@test.com');
     });
 
@@ -135,7 +135,7 @@ describe('configuration migrations', () => {
 
       const migratedConnector = configureConnectorIdMigration(
         configureSavedObject
-      ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
+      ) as SavedObjectSanitizedDoc<ConfigurationPersistedAttributes>;
 
       expect(migratedConnector.references.length).toBe(0);
       expect(migratedConnector.attributes.connector).not.toHaveProperty('id');
@@ -146,7 +146,7 @@ describe('configuration migrations', () => {
 
       const migratedConnector = configureConnectorIdMigration(
         configureSavedObject
-      ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
+      ) as SavedObjectSanitizedDoc<ConfigurationPersistedAttributes>;
 
       expect(migratedConnector.references.length).toBe(0);
       expect(migratedConnector.attributes.connector).toMatchInlineSnapshot(`
@@ -168,7 +168,7 @@ describe('configuration migrations', () => {
 
       const migratedConnector = configureConnectorIdMigration(
         configureSavedObject
-      ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
+      ) as SavedObjectSanitizedDoc<ConfigurationPersistedAttributes>;
 
       expect(migratedConnector.references).toEqual([
         { id: '123', type: ACTION_SAVED_OBJECT_TYPE, name: CONNECTOR_ID_REFERENCE_NAME },
@@ -181,7 +181,7 @@ describe('configuration migrations', () => {
 
       const migratedConnector = configureConnectorIdMigration(
         configureSavedObject
-      ) as SavedObjectSanitizedDoc<ESCasesConfigureAttributes>;
+      ) as SavedObjectSanitizedDoc<ConfigurationPersistedAttributes>;
 
       expect(migratedConnector).toMatchInlineSnapshot(`
         Object {

@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { mockStorage } from '../../storage/hashed_item_store/mock';
 import { createKbnUrlStateStorage, IKbnUrlStateStorage } from './create_kbn_url_state_storage';
 import { History, createBrowserHistory } from 'history';
-import { takeUntil, toArray } from 'rxjs/operators';
+import { takeUntil, toArray } from 'rxjs';
 import { Subject } from 'rxjs';
 import { CoreScopedHistory } from '@kbn/core/public';
 import { withNotifyOnErrors, flushNotifyOnErrors } from '../../state_management/url';

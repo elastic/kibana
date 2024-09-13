@@ -5,38 +5,41 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 import type { SingleCaseMetricsFeature } from '../../common/ui';
 import { useGetCaseMetrics } from './use_get_case_metrics';
 import { basicCase } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
+import { CaseMetricsFeature } from '../../common/types/api';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-const wrapper: React.FC<string> = ({ children }) => <TestProviders>{children}</TestProviders>;
+const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
+  <TestProviders>{children}</TestProviders>
+);
 
 describe('useGetCaseMetrics', () => {
   const abortCtrl = new AbortController();
-  const features: SingleCaseMetricsFeature[] = ['alerts.count'];
+  const features: SingleCaseMetricsFeature[] = [CaseMetricsFeature.ALERTS_COUNT];
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('calls getSingleCaseMetrics with correct arguments', async () => {
     const spyOnGetCaseMetrics = jest.spyOn(api, 'getSingleCaseMetrics');
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
-        wrapper,
-      });
-      await waitForNextUpdate();
-      expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
+
+    const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
+      wrapper,
     });
+
+    await waitForNextUpdate();
+    expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
   });
 
   it('shows an error toast when getSingleCaseMetrics throws', async () => {
@@ -51,7 +54,9 @@ describe('useGetCaseMetrics', () => {
     const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
       wrapper,
     });
+
     await waitForNextUpdate();
+
     expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
     expect(addError).toHaveBeenCalled();
   });

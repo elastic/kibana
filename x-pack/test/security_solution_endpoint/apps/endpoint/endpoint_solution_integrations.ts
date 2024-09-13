@@ -6,11 +6,12 @@
  */
 
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
+import { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { type IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
+import { targetTags } from '../../target_tags';
 
 /**
  * Test suite is meant to cover usages of endpoint functionality or access to endpoint
@@ -24,7 +25,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'timeline']);
 
-  describe('App level Endpoint functionality', () => {
+  describe('App level Endpoint functionality', function () {
+    targetTags(this, ['@ess']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     let indexedAlerts: IndexedEndpointRuleAlerts;
     let endpointAgentId: string;
@@ -59,10 +62,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
     });
 
-    describe('from Timeline', () => {
+    // failing tests: https://github.com/elastic/kibana/issues/170705
+    describe.skip('from Timeline', () => {
       let timeline: TimelineResponse;
 
       before(async () => {
+        log.info(
+          `Creating timeline for events from host: ${indexedData.hosts[0].host.hostname} (agent id: ${indexedData.hosts[0].agent.id})`
+        );
         timeline = await timelineTestService.createTimelineForEndpointAlerts(
           'endpoint in timeline',
           {
@@ -83,7 +90,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           timeline.data.persistTimeline.timeline.savedObjectId
         );
         await pageObjects.timeline.setDateRange('Last 1 year');
-        await pageObjects.timeline.waitForEvents(60_000);
+        await pageObjects.timeline.waitForEvents(60_000 * 2);
       });
 
       after(async () => {
@@ -99,7 +106,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should show Isolation action in alert details', async () => {
         await pageObjects.timeline.showEventDetails();
-        await testSubjects.click('take-action-dropdown-btn');
+        await testSubjects.click('securitySolutionFlyoutFooterDropdownButton');
         await testSubjects.clickWhenNotDisabled('isolate-host-action-item');
         await testSubjects.existOrFail('endpointHostIsolationForm');
         await testSubjects.click('hostIsolateCancelButton');

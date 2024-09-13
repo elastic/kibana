@@ -23,14 +23,13 @@ import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { CanvasAppLocatorDefinition } from '../common/locator';
 import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
@@ -38,6 +37,7 @@ import { getSessionStorage } from './lib/storage';
 import { initLoadingIndicator } from './lib/loading_indicator';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
+import { addCanvasElementTrigger } from './state/triggers/add_canvas_element_trigger';
 
 export type { CoreStart, CoreSetup };
 
@@ -52,8 +52,8 @@ export interface CanvasSetupDeps {
   expressions: ExpressionsSetup;
   home?: HomePublicPluginSetup;
   usageCollection?: UsageCollectionSetup;
-  bfetch: BfetchPublicSetup;
   charts: ChartsPluginSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface CanvasStartDeps {
@@ -68,7 +68,7 @@ export interface CanvasStartDeps {
   presentationUtil: PresentationUtilPluginStart;
   visualizations: VisualizationsStart;
   spaces?: SpacesPluginStart;
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 /**
@@ -181,6 +181,8 @@ export class CanvasPlugin
       const { transitions } = await import('./transitions');
       return transitions;
     });
+
+    setupPlugins.uiActions.registerTrigger(addCanvasElementTrigger);
 
     return {
       ...canvasApi,

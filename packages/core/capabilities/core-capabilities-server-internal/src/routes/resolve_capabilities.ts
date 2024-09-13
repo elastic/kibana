@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
@@ -39,7 +40,12 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
     async (ctx, req, res) => {
       const { useDefaultCapabilities } = req.query;
       const { applications } = req.body;
-      const capabilities = await resolver(req, applications, useDefaultCapabilities);
+      const capabilities = await resolver({
+        request: req,
+        applications,
+        useDefaultCapabilities,
+        capabilityPath: ['*'],
+      });
       return res.ok({
         body: capabilities,
       });

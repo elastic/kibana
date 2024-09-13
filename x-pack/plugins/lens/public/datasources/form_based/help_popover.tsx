@@ -17,6 +17,8 @@ import {
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { StartServices } from '../../types';
 import './help_popover.scss';
 
 export const HelpPopoverButton = ({
@@ -79,6 +81,7 @@ export const WrappingHelpPopover = ({
   closePopover,
   isOpen,
   title,
+  startServices,
 }: {
   anchorPosition?: EuiWrappingPopoverProps['anchorPosition'];
   button: EuiWrappingPopoverProps['button'];
@@ -86,23 +89,26 @@ export const WrappingHelpPopover = ({
   closePopover: EuiWrappingPopoverProps['closePopover'];
   isOpen: EuiWrappingPopoverProps['isOpen'];
   title?: string;
+  startServices: StartServices;
 }) => {
   return (
-    <EuiWrappingPopover
-      anchorPosition={anchorPosition}
-      button={button}
-      className="lnsHelpPopover"
-      closePopover={closePopover}
-      isOpen={isOpen}
-      ownFocus
-      panelClassName="lnsHelpPopover__panel"
-      panelPaddingSize="none"
-    >
-      {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
+    <KibanaRenderContextProvider {...startServices}>
+      <EuiWrappingPopover
+        anchorPosition={anchorPosition}
+        button={button}
+        className="lnsHelpPopover"
+        closePopover={closePopover}
+        isOpen={isOpen}
+        ownFocus
+        panelClassName="lnsHelpPopover__panel"
+        panelPaddingSize="none"
+      >
+        {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
 
-      <EuiText className="lnsHelpPopover__content" size="s">
-        {children}
-      </EuiText>
-    </EuiWrappingPopover>
+        <EuiText className="lnsHelpPopover__content" size="s">
+          {children}
+        </EuiText>
+      </EuiWrappingPopover>
+    </KibanaRenderContextProvider>
   );
 };

@@ -23,8 +23,8 @@ import {
   HOST_METADATA_LIST_ROUTE,
   METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../common/endpoint/constants';
-import type { PendingActionsHttpMockInterface } from '../../../common/lib/endpoint_pending_actions/mocks';
-import { pendingActionsHttpMock } from '../../../common/lib/endpoint_pending_actions/mocks';
+import type { PendingActionsHttpMockInterface } from '../../../common/lib/endpoint/endpoint_pending_actions/mocks';
+import { pendingActionsHttpMock } from '../../../common/lib/endpoint/endpoint_pending_actions/mocks';
 import { TRANSFORM_STATES } from '../../../../common/constants';
 import type { TransformStatsResponse } from './types';
 import type {
@@ -45,7 +45,7 @@ import {
   fleetGetPackagePoliciesListHttpMock,
 } from '../../mocks';
 
-type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
+export type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
   metadataList: () => MetadataListResponse;
   metadataDetails: () => HostInfo;
 }>;

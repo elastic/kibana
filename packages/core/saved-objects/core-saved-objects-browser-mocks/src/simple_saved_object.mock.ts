@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -26,6 +27,7 @@ const simpleSavedObjectMockDefaults: Partial<SimpleSavedObject<T>> = {
   updatedAt: '',
   createdAt: '',
   namespaces: undefined,
+  managed: false,
 };
 
 const createSimpleSavedObjectMock = (
@@ -40,10 +42,13 @@ const createSimpleSavedObjectMock = (
     migrationVersion: savedObject.migrationVersion,
     coreMigrationVersion: savedObject.coreMigrationVersion,
     typeMigrationVersion: savedObject.typeMigrationVersion,
+    managed: savedObject.managed,
     error: savedObject.error,
     references: savedObject.references,
     updatedAt: savedObject.updated_at,
+    updatedBy: savedObject.updated_by,
     createdAt: savedObject.created_at,
+    createdBy: savedObject.created_by,
     namespaces: savedObject.namespaces,
     get: jest.fn(),
     set: jest.fn(),

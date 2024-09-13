@@ -1,15 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Either from 'fp-ts/lib/Either';
 import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
-import { createBulkDeleteOperationBody, createBulkIndexOperationTuple } from './helpers';
+import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  createBulkDeleteOperationBody,
+  createBulkIndexOperationTuple,
+  getTempIndexName,
+} from './helpers';
 import type { TransformErrorObjects } from '../core';
 
 export type BulkIndexOperationTuple = [BulkOperationContainer, SavedObjectsRawDocSource];
@@ -21,6 +27,12 @@ export interface CreateBatchesParams {
   corruptDocumentIds?: string[];
   transformErrors?: TransformErrorObjects[];
   maxBatchSizeBytes: number;
+  /** This map holds a list of temporary index names for each SO type, e.g.:
+   * 'cases': '.kibana_cases_8.8.0_reindex_temp'
+   * 'task': '.kibana_task_manager_8.8.0_reindex_temp'
+   * ...
+   */
+  typeIndexMap?: Record<string, string>;
 }
 
 export interface DocumentExceedsBatchSize {
@@ -28,6 +40,32 @@ export interface DocumentExceedsBatchSize {
   type: 'document_exceeds_batch_size_bytes';
   docSizeBytes: number;
   maxBatchSizeBytes: number;
+}
+
+/**
+ * Build a relationship of temporary index names for each SO type, e.g.:
+ *  'cases': '.kibana_cases_8.8.0_reindex_temp'
+ *  'task': '.kibana_task_manager_8.8.0_reindex_temp'
+ *   ...
+ *
+ * @param indexTypesMap information about which types are stored in each index
+ * @param kibanaVersion the target version of the indices
+ */
+export function buildTempIndexMap(
+  indexTypesMap: IndexTypesMap,
+  kibanaVersion: string
+): Record<string, string> {
+  return Object.entries(indexTypesMap || {}).reduce<Record<string, string>>(
+    (acc, [indexAlias, types]) => {
+      const tempIndex = getTempIndexName(indexAlias, kibanaVersion!) + '_alias';
+
+      types.forEach((type) => {
+        acc[type] = tempIndex;
+      });
+      return acc;
+    },
+    {}
+  );
 }
 
 /**
@@ -39,6 +77,7 @@ export function createBatches({
   corruptDocumentIds = [],
   transformErrors = [],
   maxBatchSizeBytes,
+  typeIndexMap,
 }: CreateBatchesParams): Either.Either<DocumentExceedsBatchSize, BulkOperation[][]> {
   /* To build up the NDJSON request body we construct an array of objects like:
    * [
@@ -92,7 +131,7 @@ export function createBatches({
 
   // create index (update) operations for all transformed documents
   for (const document of documents) {
-    const bulkIndexOperationBody = createBulkIndexOperationTuple(document);
+    const bulkIndexOperationBody = createBulkIndexOperationTuple(document, typeIndexMap);
     // take into account that this tuple's surrounding brackets `[]` won't be present in the NDJSON
     const docSizeBytes =
       Buffer.byteLength(JSON.stringify(bulkIndexOperationBody), 'utf8') - BRACKETS_BYTES;

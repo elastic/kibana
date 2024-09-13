@@ -9,7 +9,7 @@ We aren't using EUI or another library, due to the fact that Lens visualizations
 First, place a RootDragDropProvider at the root of your application.
 
 ```js
-<RootDragDropProvider onTrackUICounterEvent={...}>
+<RootDragDropProvider customMiddleware={...}>
   ... your app here ...
 </RootDragDropProvider>
 ```
@@ -17,15 +17,13 @@ First, place a RootDragDropProvider at the root of your application.
 If you have a child React application (e.g. a visualization), you will need to pass the drag / drop context down into it. This can be obtained like so:
 
 ```js
-const context = useContext(DragContext);
+const context = useDragDropContext();
 ```
 
-In your child application, place a `ChildDragDropProvider` at the root of that, and spread the context into it:
+In your child application, place a `ChildDragDropProvider` at the root of that, and assign the context into it:
 
 ```js
-<ChildDragDropProvider {...context}>
-  ... your child app here ...
-</ChildDragDropProvider>
+<ChildDragDropProvider value={context}>... your child app here ...</ChildDragDropProvider>
 ```
 
 This enables your child application to share the same drag / drop context as the root application.
@@ -34,27 +32,27 @@ This enables your child application to share the same drag / drop context as the
 
 An item can be both draggable and droppable at the same time, but for simplicity's sake, we'll treat these two cases separately.
 
-To enable dragging an item, use `DragDrop` with both a `draggable` and a `value` attribute. Property `value` has to be of a type object with a unique `id` property.
+To enable dragging an item, use `Draggable` with a `value` attribute. Property `value` has to be of a type object with a unique `id` property.
 
 ```js
 <div className="field-list">
   {fields.map((f) => (
-    <DragDrop key={f.id} className="field-list-item" value={f} draggable>
+    <Draggable key={f.id} className="field-list-item" value={f}>
       {f.name}
-    </DragDrop>
+    </Draggable>
   ))}
 </div>
 ```
 
 ## Dropping
 
-To enable dropping, use `DragDrop` with both a `dropTypes` attribute that should be an array with at least one value and an `onDrop` handler attribute. `dropType` should only be truthy if is an item being dragged, and if a drop of the dragged item is supported.
+To enable dropping, use `Droppable` with both a `dropTypes` attribute that should be an array with at least one value and an `onDrop` handler attribute. `dropType` should only be truthy if is an item being dragged, and if a drop of the dragged item is supported.
 
 ```js
-const { dragging } = useContext(DragContext);
+const [ dndState ] = useDragDropContext()
 
 return (
-  <DragDrop
+  <Droppable
     className="axis"
     dropTypes=['truthyValue']
     onDrop={(item) => onChange([...items, item])}
@@ -62,44 +60,49 @@ return (
     {items.map((x) => (
       <div>{x.name}</div>
     ))}
-  </DragDrop>
+  </Droppable>
 );
 ```
 
 ### Reordering
 
-To create a reordering group, surround the elements from the same group with a `ReorderProvider`:
+To create a reordering group, the elements has to be surrounded with a `ReorderProvider`. They also need to be surrounded with draggable and droppable at the same time.
 
 ```js
-<ReorderProvider id="groupId">
-  ... elements from one group here ...
-</ReorderProvider>
+<ReorderProvider>... elements from one group here ...</ReorderProvider>
 ```
 
-The children `DragDrop` components must have props defined as in the example:
+The children `Draggable`/`Droppable` components must have props defined as in the example:
 
 ```js
-<ReorderProvider id="groupId">
+<ReorderProvider>
   <div className="field-list">
     {fields.map((f) => (
-      <DragDrop
+      <Draggable
         key={f.id}
-        draggable
-        dragTypes={["move"]}
-        dropType="reorder"
-        reorderableGroup={fields} // consists all reorderable elements in the group, eg. [{id:'3'}, {id:'5'}, {id:'1'}]
+        dragType="move"
         value={{
           id: f.id,
           humanData: {
             label: 'Label'
           }
         }}
-        onDrop={/*handler*/}
-      >
-        {f.name}
-      </DragDrop>
+        >
+        <Droppable
+          dropTypes={["reorder"]} // generally shouldn't be set until a drag operation has started
+          reorderableGroup={fields} // consists all reorderable elements in the group, eg. [{id:'3'}, {id:'5'}, {id:'1'}]
+          value={{
+            id: f.id,
+            humanData: {
+              label: 'Label'
+            }
+          }}
+          onDrop={/*handler*/}
+        >
+          {f.name}
+        </Droppable>
+      </Draggable>
     ))}
   </div>
 </ReorderProvider>
 ```
-

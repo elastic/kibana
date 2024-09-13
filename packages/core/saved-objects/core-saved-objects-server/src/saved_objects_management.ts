@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObject } from '..';
@@ -56,14 +57,16 @@ export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
    * Function returning the url to use to redirect to this object from the management section.
    * If not defined, redirecting to the object will not be allowed.
    *
-   * @returns an object containing a `path` and `uiCapabilitiesPath` properties. the `path` is the path to
+   * @returns undefined or an object containing a `path` and `uiCapabilitiesPath` properties. the `path` is the path to
    *          the object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the
    *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
    */
-  getInAppUrl?: (savedObject: SavedObject<Attributes>) => {
-    path: string;
-    uiCapabilitiesPath: string;
-  };
+  getInAppUrl?: (savedObject: SavedObject<Attributes>) =>
+    | {
+        path: string;
+        uiCapabilitiesPath: string;
+      }
+    | undefined;
   /**
    * An optional export transform function that can be used transform the objects of the registered type during
    * the export process.

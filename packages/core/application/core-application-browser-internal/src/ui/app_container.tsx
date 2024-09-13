@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './app_container.scss';
@@ -22,6 +23,7 @@ import {
   type AppUnmount,
   type ScopedHistory,
 } from '@kbn/core-application-browser';
+import { ThrowIfError } from '@kbn/shared-ux-error-boundary';
 import type { Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 
@@ -51,6 +53,7 @@ export const AppContainer: FC<Props> = ({
   theme$,
   showPlainSpinner,
 }: Props) => {
+  const [error, setError] = useState<Error | null>(null);
   const [showSpinner, setShowSpinner] = useState(true);
   const [appNotFound, setAppNotFound] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
@@ -87,14 +90,14 @@ export const AppContainer: FC<Props> = ({
             setHeaderActionMenu: (menuMount) => setAppActionMenu(appId, menuMount),
           })) || null;
       } catch (e) {
-        // TODO: add error UI
+        setError(e);
         // eslint-disable-next-line no-console
         console.error(e);
       } finally {
         if (elementRef.current) {
           setShowSpinner(false);
-          setIsMounting(false);
         }
+        setIsMounting(false);
       }
     };
 
@@ -115,6 +118,7 @@ export const AppContainer: FC<Props> = ({
 
   return (
     <Fragment>
+      <ThrowIfError error={error} />
       {appNotFound && <AppNotFound />}
       {showSpinner && !appNotFound && (
         <AppLoadingPlaceholder showPlainSpinner={Boolean(showPlainSpinner)} />
@@ -131,7 +135,7 @@ const AppLoadingPlaceholder: FC<{ showPlainSpinner: boolean }> = ({ showPlainSpi
         size={'xxl'}
         className="appContainer__loading"
         data-test-subj="appContainer-loadingSpinner"
-        aria-label={i18n.translate('core.application.appContainer.loadingAriaLabel', {
+        aria-label={i18n.translate('core.application.appContainer.plainSpinner.loadingAriaLabel', {
           defaultMessage: 'Loading application',
         })}
       />

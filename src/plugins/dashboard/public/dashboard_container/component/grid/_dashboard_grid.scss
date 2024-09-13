@@ -36,10 +36,12 @@
 }
 
 /**
- * When a single panel is expanded, all the other panels are hidden in the grid.
+ * When a single panel is expanded, all the other panels moved offscreen.
+ * Shifting the rendered panels offscreen prevents a quick flash when redrawing the panels on minimize
  */
 .dshDashboardGrid__item--hidden {
-  display: none;
+  top: -9999px;
+  left: -9999px;
 }
 
 /**
@@ -53,11 +55,12 @@
  * 1. We need to mark this as important because react grid layout sets the width and height of the panels inline.
  */
 .dshDashboardGrid__item--expanded {
+  position: absolute;
   height: 100% !important; /* 1 */
   width: 100% !important; /* 1 */
   top: 0 !important; /* 1 */
   left: 0 !important; /* 1 */
-  transform: translate(0, 0) !important; /* 1 */
+  transform: none !important;
   padding: $euiSizeS;
 
   // Altered panel styles can be found in ../panel
@@ -85,7 +88,7 @@
 
     &:hover,
     &:focus {
-      background-color: $embEditingModeHoverColor;
+      background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
     }
   }
 

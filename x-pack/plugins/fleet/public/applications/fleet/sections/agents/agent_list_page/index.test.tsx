@@ -10,8 +10,8 @@ import React from 'react';
 import type { RenderResult } from '@testing-library/react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 
+import type { GetAgentPoliciesResponse } from '../../../../../../common';
 import { createFleetTestRendererMock } from '../../../../../mock';
-
 import { sendGetAgents, sendGetAgentStatus } from '../../../hooks';
 
 import { AgentListPage } from '.';
@@ -19,6 +19,11 @@ import { AgentListPage } from '.';
 jest.mock('../../../../integrations/hooks/use_confirm_force_install', () => ({
   useConfirmForceInstall: () => <>confirmForceInstall</>,
 }));
+
+jest.mock('./hooks/use_missing_encryption_key_callout', () => ({
+  useMissingEncryptionKeyCallout: jest.fn().mockReturnValue([true, jest.fn()]),
+}));
+
 jest.mock('../../../hooks', () => ({
   ...jest.requireActual('../../../hooks'),
   UIExtensionsContext: {
@@ -28,7 +33,12 @@ jest.mock('../../../hooks', () => ({
   },
   sendGetAgents: jest.fn(),
   useGetAgentPolicies: jest.fn().mockReturnValue({
-    data: { items: [{ id: 'policy1' }] },
+    data: {
+      items: [
+        { id: 'policy1', is_managed: false },
+        { id: 'managed_policy', is_managed: true },
+      ],
+    } as GetAgentPoliciesResponse,
     isLoading: false,
     resendRequest: jest.fn(),
   }),
@@ -37,8 +47,19 @@ jest.mock('../../../hooks', () => ({
   },
   useFleetStatus: jest.fn().mockReturnValue({}),
   sendGetAgentStatus: jest.fn(),
+  sendBulkGetAgentPolicies: jest.fn().mockResolvedValue({
+    data: {
+      items: [
+        { id: 'policy1', is_managed: false },
+        { id: 'managed_policy', is_managed: true },
+      ],
+    },
+  }),
+  sendGetAgentPolicies: jest.fn().mockResolvedValue({ data: { items: [] } }),
   sendGetAgentTags: jest.fn().mockReturnValue({ data: { items: ['tag1', 'tag2'] } }),
-  useAuthz: jest.fn().mockReturnValue({ fleet: { all: true } }),
+  useAuthz: jest
+    .fn()
+    .mockReturnValue({ fleet: { all: true, allAgents: true, readAgents: true }, integrations: {} }),
   useStartServices: jest.fn().mockReturnValue({
     notifications: {
       toasts: {
@@ -47,6 +68,7 @@ jest.mock('../../../hooks', () => ({
     },
     cloud: {},
     data: { dataViews: { getFieldsForWildcard: jest.fn() } },
+    docLinks: { links: { kibana: { secureSavedObject: 'my-link' } } },
   }),
   useBreadcrumbs: jest.fn(),
   useLink: jest.fn().mockReturnValue({ getHref: jest.fn() }),
@@ -94,18 +116,63 @@ describe('agent_list_page', () => {
 
   let utils: RenderResult;
 
-  beforeEach(async () => {
-    mockedSendGetAgents
-      .mockResolvedValueOnce({
-        data: {
-          items: mapAgents(['agent1', 'agent2', 'agent3', 'agent4', 'agent5']),
-          total: 6,
-          statusSummary: {
-            online: 6,
+  describe('handling slow agent status request', () => {
+    beforeEach(async () => {
+      mockedSendGetAgents
+        .mockResolvedValueOnce({
+          data: {
+            items: mapAgents(['agent1', 'agent2', 'agent3', 'agent4', 'agent5']),
+            total: 6,
+            statusSummary: {
+              online: 6,
+            },
           },
-        },
-      })
-      .mockResolvedValueOnce({
+        })
+        .mockResolvedValueOnce({
+          data: {
+            items: mapAgents(['agent1', 'agent2', 'agent3', 'agent4', 'agent6']),
+            total: 6,
+            statusSummary: {
+              online: 6,
+            },
+          },
+        });
+      jest.useFakeTimers({ legacyFakeTimers: true });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should not send another agents status request if first one takes longer', () => {
+      mockedSendGetAgentStatus.mockImplementation(async () => {
+        const sleep = () => {
+          return new Promise((res) => {
+            setTimeout(() => res({}), 35000);
+          });
+        };
+        await sleep();
+        return {
+          data: {
+            results: {
+              inactive: 0,
+            },
+          },
+        };
+      });
+      ({ utils } = renderAgentList());
+
+      act(() => {
+        jest.advanceTimersByTime(65000);
+      });
+
+      expect(mockedSendGetAgentStatus).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('selection change', () => {
+    beforeEach(async () => {
+      mockedSendGetAgents.mockResolvedValue({
         data: {
           items: mapAgents(['agent1', 'agent2', 'agent3', 'agent4', 'agent6']),
           total: 6,
@@ -114,40 +181,6 @@ describe('agent_list_page', () => {
           },
         },
       });
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  it('should not send another agents status request if first one takes longer', () => {
-    mockedSendGetAgentStatus.mockImplementation(async () => {
-      const sleep = () => {
-        return new Promise((res) => {
-          setTimeout(() => res({}), 35000);
-        });
-      };
-      await sleep();
-      return {
-        data: {
-          results: {
-            inactive: 0,
-          },
-        },
-      };
-    });
-    ({ utils } = renderAgentList());
-
-    act(() => {
-      jest.advanceTimersByTime(65000);
-    });
-
-    expect(mockedSendGetAgentStatus).toHaveBeenCalledTimes(1);
-  });
-
-  describe('selection change', () => {
-    beforeEach(async () => {
       mockedSendGetAgentStatus.mockResolvedValue({
         data: {
           results: {
@@ -162,18 +195,14 @@ describe('agent_list_page', () => {
         expect(utils.getByText('Showing 6 agents')).toBeInTheDocument();
       });
 
-      act(() => {
-        const selectAll = utils.container.querySelector('[data-test-subj="checkboxSelectAll"]');
-        fireEvent.click(selectAll!);
-      });
+      const selectAll = utils.container.querySelector('[data-test-subj="checkboxSelectAll"]');
+      fireEvent.click(selectAll!);
 
       await waitFor(() => {
         utils.getByText('5 agents selected');
       });
 
-      act(() => {
-        fireEvent.click(utils.getByText('Select everything on all pages'));
-      });
+      fireEvent.click(utils.getByText('Select everything on all pages'));
       utils.getByText('All agents selected');
     });
 
@@ -198,17 +227,13 @@ describe('agent_list_page', () => {
     });
 
     it('should set selection mode when agent selection changed manually', async () => {
-      act(() => {
-        fireEvent.click(utils.getAllByRole('checkbox')[3]);
-      });
+      fireEvent.click(utils.getAllByRole('checkbox')[3]);
 
       utils.getByText('4 agents selected');
     });
 
     it('should pass sort parameters on table sort', () => {
-      act(() => {
-        fireEvent.click(utils.getByTitle('Last activity'));
-      });
+      fireEvent.click(utils.getByTitle('Last activity'));
 
       expect(mockedSendGetAgents).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -219,9 +244,7 @@ describe('agent_list_page', () => {
     });
 
     it('should pass keyword field on table sort on version', () => {
-      act(() => {
-        fireEvent.click(utils.getByTitle('Version'));
-      });
+      fireEvent.click(utils.getByTitle('Version'));
 
       expect(mockedSendGetAgents).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -232,9 +255,7 @@ describe('agent_list_page', () => {
     });
 
     it('should pass keyword field on table sort on hostname', () => {
-      act(() => {
-        fireEvent.click(utils.getByTitle('Host'));
-      });
+      fireEvent.click(utils.getByTitle('Host'));
 
       expect(mockedSendGetAgents).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -242,6 +263,71 @@ describe('agent_list_page', () => {
           sortOrder: 'asc',
         })
       );
+    });
+  });
+
+  describe('Uninstall agent', () => {
+    let renderResult: RenderResult;
+
+    beforeEach(async () => {
+      mockedSendGetAgents.mockResolvedValue({
+        data: {
+          items: [
+            {
+              id: 'agent1',
+              active: true,
+              policy_id: 'policy1',
+              local_metadata: { host: { hostname: 'agent1' } },
+            },
+            {
+              id: 'agent2',
+              active: true,
+              policy_id: 'managed_policy',
+              local_metadata: { host: { hostname: 'agent2' } },
+            },
+          ],
+          total: 2,
+          statusSummary: {
+            online: 2,
+          },
+        },
+      });
+      mockedSendGetAgentStatus.mockResolvedValue({
+        data: { results: { inactive: 0 }, totalInactive: 0 },
+      });
+
+      const renderer = createFleetTestRendererMock();
+
+      renderResult = renderer.render(<AgentListPage />);
+
+      await waitFor(() => {
+        expect(renderResult.queryByText('Showing 2 agents')).toBeInTheDocument();
+      });
+    });
+
+    it('should not render "Uninstall agent" menu item for managed Agent', async () => {
+      expect(renderResult.queryByTestId('uninstallAgentMenuItem')).not.toBeInTheDocument();
+
+      fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[1]);
+
+      expect(renderResult.queryByTestId('uninstallAgentMenuItem')).not.toBeInTheDocument();
+    });
+
+    it('should render "Uninstall agent" menu item for not managed Agent', async () => {
+      expect(renderResult.queryByTestId('uninstallAgentMenuItem')).not.toBeInTheDocument();
+
+      fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[0]);
+
+      expect(renderResult.queryByTestId('uninstallAgentMenuItem')).toBeInTheDocument();
+    });
+
+    it('should open uninstall commands flyout when clicking on "Uninstall agent"', () => {
+      fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[0]);
+      expect(renderResult.queryByTestId('uninstall-command-flyout')).not.toBeInTheDocument();
+
+      fireEvent.click(renderResult.getByTestId('uninstallAgentMenuItem'));
+
+      expect(renderResult.queryByTestId('uninstall-command-flyout')).toBeInTheDocument();
     });
   });
 });

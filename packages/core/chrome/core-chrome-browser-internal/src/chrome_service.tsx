@@ -1,20 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
-import { flatMap, map, takeUntil } from 'rxjs/operators';
+import { mergeMap, map, takeUntil, filter } from 'rxjs';
 import { parse } from 'url';
-import { EuiLink } from '@elastic/eui';
+import { setEuiDevProviderWarning } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
+
+import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { type DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
@@ -26,15 +31,27 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeUserBanner,
+  ChromeStyle,
+  ChromeSetProjectBreadcrumbsParams,
+  NavigationTreeDefinition,
+  AppDeepLinkId,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import { KIBANA_ASK_ELASTIC_LINK } from './constants';
+import type {
+  SideNavComponent as ISideNavComponent,
+  ChromeHelpMenuLink,
+} from '@kbn/core-chrome-browser';
+import { RecentlyAccessedService } from '@kbn/recently-accessed';
+
+import { Logger } from '@kbn/logging';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
-import { RecentlyAccessedService } from './recently_accessed';
-import { Header } from './ui';
+import { ProjectNavigationService } from './project_navigation';
+import { Header, LoadingIndicator, ProjectHeader } from './ui';
+import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeStart } from './types';
+import { HeaderTopBanner } from './ui/header/header_top_banner';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -42,12 +59,17 @@ const SNAPSHOT_REGEX = /-snapshot/i;
 interface ConstructorParams {
   browserSupportsCsp: boolean;
   kibanaVersion: string;
+  coreContext: CoreContext;
+}
+
+export interface SetupDeps {
+  analytics: AnalyticsServiceSetup;
 }
 
 export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
-  http: HttpStart;
+  http: InternalHttpStart;
   injectedMetadata: InternalInjectedMetadataStart;
   notifications: NotificationsStart;
   customBranding: CustomBrandingStart;
@@ -62,8 +84,17 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
+  private readonly projectNavigation: ProjectNavigationService;
+  private mutationObserver: MutationObserver | undefined;
+  private readonly isSideNavCollapsed$ = new BehaviorSubject<boolean>(true);
+  private logger: Logger;
+  private isServerless = false;
 
-  constructor(private readonly params: ConstructorParams) {}
+  constructor(private readonly params: ConstructorParams) {
+    this.logger = params.coreContext.logger.get('chrome-browser');
+    this.isServerless = params.coreContext.env.packageInfo.buildFlavor === 'serverless';
+    this.projectNavigation = new ProjectNavigationService(this.isServerless);
+  }
 
   /**
    * These observables allow consumers to toggle the chrome visibility via either:
@@ -82,7 +113,7 @@ export class ChromeService {
       // in the sense that the chrome UI should not be displayed until a non-chromeless app is mounting or mounted
       of(true),
       application.currentAppId$.pipe(
-        flatMap((appId) =>
+        mergeMap((appId) =>
           application.applications$.pipe(
             map((applications) => {
               return !!appId && applications.has(appId) && !!applications.get(appId)!.chromeless;
@@ -97,6 +128,102 @@ export class ChromeService {
     );
   }
 
+  private setIsVisible = (isVisible: boolean) => this.isForceHidden$.next(!isVisible);
+
+  /**
+   * Some EUI component can be toggled in Full screen (e.g. the EuiDataGrid). When they are toggled in full
+   * screen we want to hide the chrome, and when they are toggled back to normal we want to show the chrome.
+   */
+  private handleEuiFullScreenChanges = () => {
+    const { body } = document;
+    // HTML class names that are added to the body when Eui components are toggled in full screen
+    const classesOnBodyWhenEuiFullScreen = ['euiDataGrid__restrictBody'];
+
+    let isChromeHiddenForEuiFullScreen = false;
+    let isChromeVisible = false;
+
+    this.isVisible$.pipe(takeUntil(this.stop$)).subscribe((isVisible) => {
+      isChromeVisible = isVisible;
+    });
+
+    const onBodyClassesChange = () => {
+      const { className } = body;
+      if (
+        classesOnBodyWhenEuiFullScreen.some((name) => className.includes(name)) &&
+        isChromeVisible
+      ) {
+        isChromeHiddenForEuiFullScreen = true;
+        this.setIsVisible(false);
+      } else if (
+        classesOnBodyWhenEuiFullScreen.every((name) => !className.includes(name)) &&
+        !isChromeVisible &&
+        isChromeHiddenForEuiFullScreen
+      ) {
+        isChromeHiddenForEuiFullScreen = false;
+        this.setIsVisible(true);
+      }
+    };
+
+    this.mutationObserver = new MutationObserver((mutationList) => {
+      mutationList.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          onBodyClassesChange();
+        }
+      });
+    });
+
+    this.mutationObserver.observe(body, { attributes: true });
+  };
+
+  // Ensure developers are notified if working in a context that lacks the EUI Provider.
+  private handleEuiDevProviderWarning = (notifications: NotificationsStart) => {
+    const isDev = this.params.coreContext.env.mode.name === 'development';
+    if (isDev) {
+      setEuiDevProviderWarning((providerError) => {
+        const errorObject = new Error(providerError.toString());
+        // 1. show a stack trace in the console
+        // eslint-disable-next-line no-console
+        console.error(errorObject);
+
+        // 2. store error in sessionStorage so it can be detected in testing
+        const storedError = {
+          message: providerError.toString(),
+          stack: errorObject.stack ?? 'undefined',
+          pageHref: window.location.href,
+          pageTitle: document.title,
+        };
+        sessionStorage.setItem('dev.euiProviderWarning', JSON.stringify(storedError));
+
+        // 3. error toast / popup
+        notifications.toasts.addDanger({
+          title: '`EuiProvider` is missing',
+          text: mountReactNode(
+            <p>
+              <FormattedMessage
+                id="core.chrome.euiDevProviderWarning"
+                defaultMessage="Kibana components must be wrapped in a React Context provider for full functionality and proper theming support. See {link}."
+                values={{
+                  link: (
+                    <a href="https://docs.elastic.dev/kibana-dev-docs/react-context">
+                      https://docs.elastic.dev/kibana-dev-docs/react-context
+                    </a>
+                  ),
+                }}
+              />
+            </p>
+          ),
+          'data-test-subj': 'core-chrome-euiDevProviderWarning-toast',
+          toastLifeTimeMs: 60 * 60 * 1000, // keep message visible for up to an hour
+        });
+      });
+    }
+  };
+
+  public setup({ analytics }: SetupDeps) {
+    const docTitle = this.docTitle.setup({ document: window.document });
+    registerAnalyticsContextProvider(analytics, docTitle.title$);
+  }
+
   public async start({
     application,
     docLinks,
@@ -106,6 +233,8 @@ export class ChromeService {
     customBranding,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
+    this.handleEuiFullScreenChanges();
+    this.handleEuiDevProviderWarning(notifications);
 
     const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
       []
@@ -117,8 +246,12 @@ export class ChromeService {
     >(undefined);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
-    const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
+    const helpSupportUrl$ = new BehaviorSubject<string>(docLinks.links.kibana.askElastic);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
+    // ChromeStyle is set to undefined by default, which means that no header will be rendered until
+    // setChromeStyle(). This is to avoid a flickering between the "classic" and "project" header meanwhile
+    // we load the user profile to check if the user opted out of the new solution navigation.
+    const chromeStyleSubject$ = new BehaviorSubject<ChromeStyle | undefined>(undefined);
 
     const getKbnVersionClass = () => {
       // we assume that the version is valid and has the form 'X.X.X'
@@ -130,23 +263,46 @@ export class ChromeService {
       return `kbnVersion-${formattedVersionClass}`;
     };
 
+    const chromeStyle$ = chromeStyleSubject$.pipe(
+      filter((style): style is ChromeStyle => style !== undefined),
+      takeUntil(this.stop$)
+    );
+    const setChromeStyle = (style: ChromeStyle) => {
+      if (style === chromeStyleSubject$.getValue()) return;
+      chromeStyleSubject$.next(style);
+    };
+
     const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
-    const bodyClasses$ = combineLatest([headerBanner$, this.isVisible$!]).pipe(
-      map(([headerBanner, isVisible]) => {
+    const bodyClasses$ = combineLatest([
+      headerBanner$,
+      this.isVisible$!,
+      chromeStyleSubject$,
+      application.currentActionMenu$,
+    ]).pipe(
+      map(([headerBanner, isVisible, chromeStyle, actionMenu]) => {
         return [
           'kbnBody',
           headerBanner ? 'kbnBody--hasHeaderBanner' : 'kbnBody--noHeaderBanner',
           isVisible ? 'kbnBody--chromeVisible' : 'kbnBody--chromeHidden',
+          chromeStyle === 'project' && actionMenu ? 'kbnBody--hasProjectActionMenu' : '',
           getKbnVersionClass(),
-        ];
+        ].filter((className) => !!className);
       })
     );
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
-    const recentlyAccessed = await this.recentlyAccessed.start({ http });
-    const docTitle = this.docTitle.start({ document: window.document });
+    const projectNavigation = this.projectNavigation.start({
+      application,
+      navLinksService: navLinks,
+      http,
+      chromeBreadcrumbs$: breadcrumbs$,
+      logger: this.logger,
+    });
+    const recentlyAccessed = this.recentlyAccessed.start({ http, key: 'recentlyAccessed' });
+    const docTitle = this.docTitle.start();
     const { customBranding$ } = customBranding;
+    const helpMenuLinks$ = navControls.getHelpMenuLinks$();
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -163,12 +319,45 @@ export class ChromeService {
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
 
-    const isIE = () => {
-      const ua = window.navigator.userAgent;
-      const msie = ua.indexOf('MSIE '); // IE 10 or older
-      const trident = ua.indexOf('Trident/'); // IE 11
+    const validateChromeStyle = () => {
+      const chromeStyle = chromeStyleSubject$.getValue();
+      if (chromeStyle !== 'project') {
+        // Helps ensure callers go through the serverless plugin to get here.
+        throw new Error(
+          `Invalid ChromeStyle value of "${chromeStyle}". This method requires ChromeStyle set to "project".`
+        );
+      }
+    };
 
-      return msie > 0 || trident > 0;
+    const setProjectSideNavComponent = (component: ISideNavComponent | null) => {
+      validateChromeStyle();
+      projectNavigation.setSideNavComponent(component);
+    };
+
+    function initProjectNavigation<
+      LinkId extends AppDeepLinkId = AppDeepLinkId,
+      Id extends string = string,
+      ChildrenId extends string = Id
+    >(id: string, navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
+      validateChromeStyle();
+      projectNavigation.initNavigation(id, navigationTree$);
+    }
+
+    const setProjectBreadcrumbs = (
+      breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
+      params?: ChromeSetProjectBreadcrumbsParams
+    ) => {
+      projectNavigation.setProjectBreadcrumbs(breadcrumbs, params);
+    };
+
+    const setProjectHome = (homeHref: string) => {
+      validateChromeStyle();
+      projectNavigation.setProjectHome(homeHref);
+    };
+
+    const setProjectName = (projectName: string) => {
+      validateChromeStyle();
+      projectNavigation.setProjectName(projectName);
     };
 
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
@@ -182,66 +371,123 @@ export class ChromeService {
       });
     }
 
-    if (isIE()) {
-      notifications.toasts.addWarning({
-        title: mountReactNode(
-          <FormattedMessage
-            id="core.chrome.browserDeprecationWarning"
-            defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
-            values={{
-              link: (
-                <EuiLink target="_blank" href="https://www.elastic.co/support/matrix" external>
-                  <FormattedMessage
-                    id="core.chrome.browserDeprecationLink"
-                    defaultMessage="the support matrix on our website"
-                  />
-                </EuiLink>
-              ),
-            }}
+    const getHeaderComponent = () => {
+      const defaultChromeStyle = chromeStyleSubject$.getValue();
+
+      const HeaderComponent = () => {
+        const isVisible = useObservable(this.isVisible$);
+        const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
+
+        if (!isVisible) {
+          return (
+            <div data-test-subj="kibanaHeaderChromeless">
+              <LoadingIndicator loadingCount$={http.getLoadingCount$()} showAsBar />
+              <HeaderTopBanner headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))} />
+            </div>
+          );
+        }
+
+        if (chromeStyle === undefined) return null;
+
+        // render header
+        if (chromeStyle === 'project') {
+          const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
+          const projectBreadcrumbs$ = projectNavigation
+            .getProjectBreadcrumbs$()
+            .pipe(takeUntil(this.stop$));
+          const activeNodes$ = projectNavigation.getActiveNodes$();
+
+          const ProjectHeaderWithNavigationComponent = () => {
+            const CustomSideNavComponent = useObservable(projectNavigationComponent$, {
+              current: null,
+            });
+            const activeNodes = useObservable(activeNodes$, []);
+
+            const currentProjectBreadcrumbs$ = projectBreadcrumbs$;
+
+            const SideNavComponent = useMemo<ISideNavComponent>(() => {
+              if (CustomSideNavComponent.current) {
+                return CustomSideNavComponent.current;
+              }
+              return () => null;
+            }, [CustomSideNavComponent]);
+
+            return (
+              <ProjectHeader
+                application={application}
+                globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
+                actionMenu$={application.currentActionMenu$}
+                breadcrumbs$={currentProjectBreadcrumbs$}
+                customBranding$={customBranding$}
+                helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
+                helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
+                helpMenuLinks$={helpMenuLinks$}
+                navControlsLeft$={navControls.getLeft$()}
+                navControlsCenter$={navControls.getCenter$()}
+                navControlsRight$={navControls.getRight$()}
+                loadingCount$={http.getLoadingCount$()}
+                headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
+                homeHref$={projectNavigation.getProjectHome$()}
+                docLinks={docLinks}
+                kibanaVersion={injectedMetadata.getKibanaVersion()}
+                prependBasePath={http.basePath.prepend}
+                toggleSideNav={(isCollapsed) => {
+                  this.isSideNavCollapsed$.next(isCollapsed);
+                }}
+              >
+                <SideNavComponent activeNodes={activeNodes} />
+              </ProjectHeader>
+            );
+          };
+
+          return <ProjectHeaderWithNavigationComponent />;
+        }
+
+        return (
+          <Header
+            loadingCount$={http.getLoadingCount$()}
+            application={application}
+            headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
+            badge$={badge$.pipe(takeUntil(this.stop$))}
+            basePath={http.basePath}
+            breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+            breadcrumbsAppendExtension$={breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$))}
+            customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
+            kibanaDocLink={docLinks.links.kibana.guide}
+            docLinks={docLinks}
+            forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
+            globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
+            helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
+            helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
+            helpMenuLinks$={helpMenuLinks$}
+            homeHref={http.basePath.prepend('/app/home')}
+            kibanaVersion={injectedMetadata.getKibanaVersion()}
+            navLinks$={navLinks.getNavLinks$()}
+            recentlyAccessed$={recentlyAccessed.get$()}
+            navControlsLeft$={navControls.getLeft$()}
+            navControlsCenter$={navControls.getCenter$()}
+            navControlsRight$={navControls.getRight$()}
+            navControlsExtension$={navControls.getExtension$()}
+            onIsLockedUpdate={setIsNavDrawerLocked}
+            isLocked$={getIsNavDrawerLocked$}
+            customBranding$={customBranding$}
           />
-        ),
-      });
-    }
+        );
+      };
+
+      return <HeaderComponent />;
+    };
 
     return {
       navControls,
       navLinks,
       recentlyAccessed,
       docTitle,
-
-      getHeaderComponent: () => (
-        <Header
-          loadingCount$={http.getLoadingCount$()}
-          application={application}
-          headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
-          badge$={badge$.pipe(takeUntil(this.stop$))}
-          basePath={http.basePath}
-          breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-          breadcrumbsAppendExtension$={breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$))}
-          customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
-          kibanaDocLink={docLinks.links.kibana.guide}
-          forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
-          globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
-          helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
-          helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
-          homeHref={http.basePath.prepend('/app/home')}
-          isVisible$={this.isVisible$}
-          kibanaVersion={injectedMetadata.getKibanaVersion()}
-          navLinks$={navLinks.getNavLinks$()}
-          recentlyAccessed$={recentlyAccessed.get$()}
-          navControlsLeft$={navControls.getLeft$()}
-          navControlsCenter$={navControls.getCenter$()}
-          navControlsRight$={navControls.getRight$()}
-          navControlsExtension$={navControls.getExtension$()}
-          onIsLockedUpdate={setIsNavDrawerLocked}
-          isLocked$={getIsNavDrawerLocked$}
-          customBranding$={customBranding$}
-        />
-      ),
+      getHeaderComponent,
 
       getIsVisible$: () => this.isVisible$,
 
-      setIsVisible: (isVisible: boolean) => this.isForceHidden$.next(!isVisible),
+      setIsVisible: this.setIsVisible.bind(this),
 
       getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
 
@@ -282,12 +528,18 @@ export class ChromeService {
 
       setHelpSupportUrl: (url: string) => helpSupportUrl$.next(url),
 
+      getHelpSupportUrl$: () => helpSupportUrl$.pipe(takeUntil(this.stop$)),
+
       getIsNavDrawerLocked$: () => getIsNavDrawerLocked$,
 
       getCustomNavLink$: () => customNavLink$.pipe(takeUntil(this.stop$)),
 
       setCustomNavLink: (customNavLink?: ChromeNavLink) => {
         customNavLink$.next(customNavLink);
+      },
+
+      setHelpMenuLinks: (helpMenuLinks: ChromeHelpMenuLink[]) => {
+        navControls.setHelpMenuLinks(helpMenuLinks);
       },
 
       setHeaderBanner: (headerBanner?: ChromeUserBanner) => {
@@ -302,11 +554,29 @@ export class ChromeService {
       },
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
+      setChromeStyle,
+      getChromeStyle$: () => chromeStyle$,
+      getIsSideNavCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
+      getActiveSolutionNavId$: () => projectNavigation.getActiveSolutionNavId$(),
+      project: {
+        setHome: setProjectHome,
+        setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
+        setProjectName,
+        initNavigation: initProjectNavigation,
+        getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
+        setSideNavComponent: setProjectSideNavComponent,
+        setBreadcrumbs: setProjectBreadcrumbs,
+        getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
+        updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
+        changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
+      },
     };
   }
 
   public stop() {
     this.navLinks.stop();
+    this.projectNavigation.stop();
     this.stop$.next();
+    this.mutationObserver?.disconnect();
   }
 }

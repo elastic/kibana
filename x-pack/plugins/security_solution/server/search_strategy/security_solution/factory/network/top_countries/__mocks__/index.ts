@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import type { NetworkTopCountriesRequestOptions } from '../../../../../../../common/api/search_strategy';
 
-import type { NetworkTopCountriesRequestOptions } from '../../../../../../../common/search_strategy';
 import {
   Direction,
   FlowTargetSourceDest,
@@ -104,8 +104,8 @@ export const formattedSearchStrategyResponse = {
                 ],
               },
             },
+            size: 0,
           },
-          size: 0,
           track_total_hits: false,
         },
         null,
@@ -160,7 +160,7 @@ export const expectedDsl = {
         ],
       },
     },
+    size: 0,
   },
-  size: 0,
   track_total_hits: false,
 };

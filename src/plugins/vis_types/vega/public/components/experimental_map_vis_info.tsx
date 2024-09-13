@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -21,7 +22,7 @@ export const ExperimentalMapLayerInfo = () => (
       <FormattedMessage
         id="visTypeVega.mapView.experimentalMapLayerInfo"
         defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release.
-        Elastic will take a best effort approach to fix any issues, but features in technical preview are
+        Elastic will work to fix any issues, but features in technical preview are
         are not subject to the support SLA of official GA features.
         For feedback, please create an issue in {githubLink}."
         values={{

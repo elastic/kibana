@@ -11,33 +11,39 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { ToastInputFields } from '@kbn/core/public';
-import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+import { builderMap as customFieldsBuilder } from '../components/custom_fields/builder';
+import {
+  AttachmentType,
+  CaseRt,
+  CasesRt,
+  ConfigurationRt,
+  ConfigurationsRt,
+  UserActionsRt,
+} from '../../common/types/domain';
 import type {
-  CaseResponse,
-  CasesResponse,
-  CasesConfigurationsResponse,
-  CasesConfigureResponse,
-  CaseUserActionsResponse,
   CasePatchRequest,
   CaseResolveResponse,
-  SingleCaseMetricsResponse,
-  User,
   CaseUserActionStatsResponse,
-} from '../../common/api';
+  SingleCaseMetricsResponse,
+} from '../../common/types/api';
 import {
-  CaseResponseRt,
-  CasesResponseRt,
-  throwErrors,
-  CaseConfigurationsResponseRt,
-  CaseConfigureResponseRt,
-  CaseUserActionsResponseRt,
-  CommentType,
   CaseResolveResponseRt,
-  SingleCaseMetricsResponseRt,
   CaseUserActionStatsResponseRt,
-} from '../../common/api';
-import type { Case, FilterOptions, UpdateByKey } from './types';
+  SingleCaseMetricsResponseRt,
+} from '../../common/types/api';
+import type {
+  Case,
+  Cases,
+  Configuration,
+  Configurations,
+  User,
+  UserActions,
+} from '../../common/types/domain';
+import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+import { throwErrors } from '../../common/api';
+import type { CaseUI, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
+import type { CustomFieldFactoryFilterOption } from '../components/custom_fields/types';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
@@ -49,8 +55,8 @@ export const covertToSnakeCase = (obj: Record<string, unknown>) =>
 
 export const createToasterPlainError = (message: string) => new ToasterError([message]);
 
-export const decodeCaseResponse = (respCase?: CaseResponse) =>
-  pipe(CaseResponseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
+export const decodeCaseResponse = (respCase?: Case) =>
+  pipe(CaseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseResolveResponse = (respCase?: CaseResolveResponse) =>
   pipe(
@@ -64,27 +70,21 @@ export const decodeSingleCaseMetricsResponse = (respCase?: SingleCaseMetricsResp
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-export const decodeCasesResponse = (respCase?: CasesResponse) =>
-  pipe(CasesResponseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
+export const decodeCasesResponse = (respCase?: Cases) =>
+  pipe(CasesRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
-export const decodeCaseConfigurationsResponse = (respCase?: CasesConfigurationsResponse) => {
+export const decodeCaseConfigurationsResponse = (respCase?: Configurations) => {
   return pipe(
-    CaseConfigurationsResponseRt.decode(respCase),
+    ConfigurationsRt.decode(respCase),
     fold(throwErrors(createToasterPlainError), identity)
   );
 };
 
-export const decodeCaseConfigureResponse = (respCase?: CasesConfigureResponse) =>
-  pipe(
-    CaseConfigureResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+export const decodeCaseConfigureResponse = (respCase?: Configuration) =>
+  pipe(ConfigurationRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
-export const decodeCaseUserActionsResponse = (respUserActions?: CaseUserActionsResponse) =>
-  pipe(
-    CaseUserActionsResponseRt.decode(respUserActions),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+export const decodeCaseUserActionsResponse = (respUserActions?: UserActions) =>
+  pipe(UserActionsRt.decode(respUserActions), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseUserActionStatsResponse = (
   caseUserActionsStats: CaseUserActionStatsResponse
@@ -114,13 +114,13 @@ export class ToasterError extends Error {
   }
 }
 export const createUpdateSuccessToaster = (
-  caseBeforeUpdate: Case,
-  caseAfterUpdate: Case,
+  caseBeforeUpdate: CaseUI,
+  caseAfterUpdate: CaseUI,
   key: UpdateByKey['updateKey'],
   value: UpdateByKey['updateValue']
 ): ToastInputFields => {
   const caseHasAlerts = caseBeforeUpdate.comments.some(
-    (comment) => comment.type === CommentType.alert
+    (comment) => comment.type === AttachmentType.alert
   );
 
   const toast: ToastInputFields = {
@@ -148,12 +148,11 @@ export const createUpdateSuccessToaster = (
 export const constructAssigneesFilter = (
   assignees: FilterOptions['assignees']
 ): { assignees?: string | string[] } =>
-  assignees === null || assignees.length > 0
+  assignees.length > 0
     ? {
-        assignees:
-          assignees?.map((assignee) =>
-            assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
-          ) ?? NO_ASSIGNEES_FILTERING_KEYWORD,
+        assignees: assignees?.map((assignee) =>
+          assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
+        ) ?? [NO_ASSIGNEES_FILTERING_KEYWORD],
       }
     : {};
 
@@ -169,6 +168,43 @@ export const constructReportersFilter = (reporters: User[]) => {
             return reporter.username ?? '';
           })
           .filter((reporterID) => !isEmpty(reporterID)),
+      }
+    : {};
+};
+
+export const constructCustomFieldsFilter = (
+  optionKeysByCustomFieldKey: FilterOptions['customFields']
+) => {
+  if (!optionKeysByCustomFieldKey || Object.keys(optionKeysByCustomFieldKey).length === 0) {
+    return {};
+  }
+
+  const valuesByCustomFieldKey: {
+    [key in string]: Array<CustomFieldFactoryFilterOption['value']>;
+  } = {};
+
+  for (const [customFieldKey, customField] of Object.entries(optionKeysByCustomFieldKey)) {
+    const { type, options: selectedOptions } = customField;
+    if (customFieldsBuilder[type]) {
+      const { filterOptions: customFieldFilterOptionsConfig = [] } = customFieldsBuilder[type]();
+      const values = selectedOptions
+        .map((selectedOption) => {
+          const filterOptionConfig = customFieldFilterOptionsConfig.find(
+            (filterOption) => filterOption.key === selectedOption
+          );
+          return filterOptionConfig ? filterOptionConfig.value : undefined;
+        })
+        .filter((option) => option !== undefined) as Array<CustomFieldFactoryFilterOption['value']>;
+
+      if (values.length > 0) {
+        valuesByCustomFieldKey[customFieldKey] = values;
+      }
+    }
+  }
+
+  return Object.keys(valuesByCustomFieldKey).length
+    ? {
+        customFields: valuesByCustomFieldKey,
       }
     : {};
 };

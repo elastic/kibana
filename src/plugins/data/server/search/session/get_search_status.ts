@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -20,7 +21,6 @@ export async function getSearchStatus(
   // TODO: Handle strategies other than the default one
   // https://github.com/elastic/kibana/issues/127880
   try {
-    // @ts-expect-error start_time_in_millis: EpochMillis is string | number
     const apiResponse: TransportResult<AsyncSearchStatusResponse> =
       await internalClient.asyncSearch.status(
         {
@@ -29,7 +29,7 @@ export async function getSearchStatus(
         { meta: true }
       );
     const response = apiResponse.body;
-    if ((response.is_partial && !response.is_running) || response.completion_status >= 400) {
+    if (response.completion_status! >= 400) {
       return {
         status: SearchStatus.ERROR,
         error: i18n.translate('data.search.statusError', {
@@ -37,7 +37,7 @@ export async function getSearchStatus(
           values: { searchId: asyncId, errorCode: response.completion_status },
         }),
       };
-    } else if (!response.is_partial && !response.is_running) {
+    } else if (!response.is_running) {
       return {
         status: SearchStatus.COMPLETE,
         error: undefined,

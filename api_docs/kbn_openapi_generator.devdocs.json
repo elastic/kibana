@@ -1,0 +1,268 @@
+{
+  "id": "@kbn/openapi-generator",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/openapi-generator",
+        "id": "def-common.generate",
+        "type": "Function",
+        "tags": [],
+        "label": "generate",
+        "description": [],
+        "signature": [
+          "(config: ",
+          {
+            "pluginId": "@kbn/openapi-generator",
+            "scope": "common",
+            "docId": "kibKbnOpenapiGeneratorPluginApi",
+            "section": "def-common.GeneratorConfig",
+            "text": "GeneratorConfig"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/openapi-generator",
+            "id": "def-common.generate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/openapi-generator",
+                "scope": "common",
+                "docId": "kibKbnOpenapiGeneratorPluginApi",
+                "section": "def-common.GeneratorConfig",
+                "text": "GeneratorConfig"
+              }
+            ],
+            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/openapi-generator",
+        "id": "def-common.lint",
+        "type": "Function",
+        "tags": [],
+        "label": "lint",
+        "description": [],
+        "signature": [
+          "(config: ",
+          {
+            "pluginId": "@kbn/openapi-generator",
+            "scope": "common",
+            "docId": "kibKbnOpenapiGeneratorPluginApi",
+            "section": "def-common.LinterConfig",
+            "text": "LinterConfig"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "packages/kbn-openapi-generator/src/openapi_linter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/openapi-generator",
+            "id": "def-common.lint.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/openapi-generator",
+                "scope": "common",
+                "docId": "kibKbnOpenapiGeneratorPluginApi",
+                "section": "def-common.LinterConfig",
+                "text": "LinterConfig"
+              }
+            ],
+            "path": "packages/kbn-openapi-generator/src/openapi_linter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/openapi-generator",
+        "id": "def-common.runCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runCli",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-openapi-generator/src/cli.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/openapi-generator",
+        "id": "def-common.GeneratorConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "GeneratorConfig",
+        "description": [],
+        "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/openapi-generator",
+            "id": "def-common.GeneratorConfig.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/openapi-generator",
+            "id": "def-common.GeneratorConfig.rootDir",
+            "type": "string",
+            "tags": [],
+            "label": "rootDir",
+            "description": [],
+            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/openapi-generator",
+            "id": "def-common.GeneratorConfig.sourceGlob",
+            "type": "string",
+            "tags": [],
+            "label": "sourceGlob",
+            "description": [],
+            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/openapi-generator",
+            "id": "def-common.GeneratorConfig.templateName",
+            "type": "string",
+            "tags": [],
+            "label": "templateName",
+            "description": [],
+            "signature": [
+              "\"zod_operation_schema\""
+            ],
+            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/openapi-generator",
+            "id": "def-common.GeneratorConfig.skipLinting",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "skipLinting",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/openapi-generator",
+            "id": "def-common.GeneratorConfig.bundle",
+            "type": "Object",
+            "tags": [],
+            "label": "bundle",
+            "description": [],
+            "signature": [
+              "{ outFile: string; } | undefined"
+            ],
+            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/openapi-generator",
+        "id": "def-common.LinterConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "LinterConfig",
+        "description": [],
+        "path": "packages/kbn-openapi-generator/src/openapi_linter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/openapi-generator",
+            "id": "def-common.LinterConfig.rootDir",
+            "type": "string",
+            "tags": [],
+            "label": "rootDir",
+            "description": [],
+            "path": "packages/kbn-openapi-generator/src/openapi_linter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/openapi-generator",
+            "id": "def-common.LinterConfig.sourceGlob",
+            "type": "string",
+            "tags": [],
+            "label": "sourceGlob",
+            "description": [],
+            "path": "packages/kbn-openapi-generator/src/openapi_linter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

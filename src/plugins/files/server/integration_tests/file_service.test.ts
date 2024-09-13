@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, ElasticsearchClient } from '@kbn/core/server';
+import assert from 'assert';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import {
   createTestServers,
   createRootWithCorePlugins,
@@ -38,20 +41,19 @@ describe('FileService', () => {
   let fileService: FileServiceStart;
   let blobStorageService: BlobStorageService;
   let esClient: ElasticsearchClient;
-  let coreStart: CoreStart;
+  let coreStart: InternalCoreStart;
   let fileServiceFactory: FileServiceFactory;
   let security: ReturnType<typeof securityMock.createSetup>;
   let auditLogger: AuditLogger;
+  let fileKindsRegistry: ReturnType<typeof getFileKindsRegistry>;
 
   beforeAll(async () => {
-    const { startES } = createTestServers({ adjustTimeout: jest.setTimeout });
-    manageES = await startES();
-    kbnRoot = createRootWithCorePlugins();
-    await kbnRoot.preboot();
-    await kbnRoot.setup();
-    coreStart = await kbnRoot.start();
+    const { startES, startKibana } = createTestServers({ adjustTimeout: jest.setTimeout });
+    const testServers = await Promise.all([startES(), startKibana()]);
+    manageES = testServers[0];
+    ({ root: kbnRoot, coreStart } = testServers[1]);
     setFileKindsRegistry(new FileKindsRegistryImpl());
-    const fileKindsRegistry = getFileKindsRegistry();
+    fileKindsRegistry = getFileKindsRegistry();
     fileKindsRegistry.register({
       id: fileKind,
       http: {},
@@ -68,10 +70,16 @@ describe('FileService', () => {
       },
       http: {},
     });
+
     esClient = coreStart.elasticsearch.client.asInternalUser;
   });
 
   afterAll(async () => {
+    assert.strictEqual(
+      await esClient.ping(),
+      true,
+      'Unable to reach ES, Initial test setup failed!'
+    );
     await kbnRoot.shutdown();
     await manageES.stop();
   });
@@ -86,20 +94,22 @@ describe('FileService', () => {
       coreStart.savedObjects,
       blobStorageService,
       security,
-      getFileKindsRegistry(),
+      fileKindsRegistry,
       kbnRoot.logger.get('test-file-service')
     );
     fileService = fileServiceFactory.asInternal();
   });
 
   let disposables: File[] = [];
+
   async function createDisposableFile<M = unknown>(args: CreateFileArgs<M>) {
     const file = await fileService.create(args);
     disposables.push(file);
     return file;
   }
+
   afterEach(async () => {
-    await Promise.all(disposables.map((file) => file.delete()));
+    await fileService.bulkDelete({ ids: disposables.map((d) => d.id) });
     const { files } = await fileService.find({ kind: [fileKind] });
     expect(files.length).toBe(0);
     disposables = [];
@@ -140,6 +150,56 @@ describe('FileService', () => {
     expect(myFile?.id).toMatch(id);
   });
 
+  it('retrieves a file using the bulk method', async () => {
+    const { id } = await createDisposableFile({ fileKind, name: 'test' });
+    const [myFile] = await fileService.bulkGetById({ ids: [id] });
+    expect(myFile?.id).toMatch(id);
+  });
+
+  it('retrieves multiple files using the bulk method', async () => {
+    const file1 = await createDisposableFile({ fileKind, name: 'test' });
+    const file2 = await createDisposableFile({ fileKind, name: 'test' });
+    const [myFile1, myFile2] = await fileService.bulkGetById({ ids: [file1.id, file2.id] });
+    expect(myFile1?.id).toMatch(file1.id);
+    expect(myFile2?.id).toMatch(file2.id);
+  });
+
+  it('throws if one of the file does not exists', async () => {
+    const file1 = await createDisposableFile({ fileKind, name: 'test' });
+    const unknownID = 'foo';
+
+    await expect(async () => {
+      await fileService.bulkGetById({ ids: [file1.id, unknownID] });
+    }).rejects.toThrowError(`File [${unknownID}] not found`);
+  });
+
+  it('does not throw if one of the file does not exists', async () => {
+    const file1 = await createDisposableFile({ fileKind, name: 'test' });
+    const unknownID = 'foo';
+
+    const [myFile1, myFile2] = await fileService.bulkGetById({
+      ids: [file1.id, unknownID],
+      throwIfNotFound: false,
+    });
+
+    expect(myFile1?.id).toBe(file1?.id);
+    expect(myFile2).toBe(null);
+  });
+
+  it('returns the files under a map of id/File', async () => {
+    const file1 = await createDisposableFile({ fileKind, name: 'test' });
+    const unknownID = 'foo';
+
+    const myFiles = await fileService.bulkGetById({
+      ids: [file1.id, unknownID],
+      throwIfNotFound: false,
+      format: 'map',
+    });
+
+    expect(myFiles[file1?.id]?.id).toBe(file1?.id);
+    expect(myFiles[unknownID]).toBe(null);
+  });
+
   it('lists files', async () => {
     await Promise.all([
       createDisposableFile({ fileKind, name: 'test-1' }),
@@ -157,26 +217,39 @@ describe('FileService', () => {
       createDisposableFile({ fileKind, name: 'foo-2' }),
       createDisposableFile({ fileKind, name: 'foo-3' }),
       createDisposableFile({ fileKind, name: 'test-3' }),
+      createDisposableFile({ fileKind: fileKindNonDefault, name: 'foo-1' }),
     ]);
     {
       const { files, total } = await fileService.find({
-        kind: [fileKind],
+        kind: [fileKind, fileKindNonDefault],
         name: ['foo*'],
         perPage: 2,
         page: 1,
       });
       expect(files.length).toBe(2);
-      expect(total).toBe(3);
+      expect(total).toBe(4);
     }
 
     {
       const { files, total } = await fileService.find({
-        kind: [fileKind],
+        kind: [fileKind, fileKindNonDefault],
         name: ['foo*'],
         perPage: 2,
         page: 2,
       });
-      expect(files.length).toBe(1);
+      expect(files.length).toBe(2);
+      expect(total).toBe(4);
+    }
+
+    // Filter out fileKind
+    {
+      const { files, total } = await fileService.find({
+        kindToExclude: [fileKindNonDefault],
+        name: ['foo*'],
+        perPage: 10,
+        page: 1,
+      });
+      expect(files.length).toBe(3); // foo-1 from fileKindNonDefault not returned
       expect(total).toBe(3);
     }
   });
@@ -233,7 +306,7 @@ describe('FileService', () => {
     expect(result3.files.length).toBe(2);
   });
 
-  it('deletes files', async () => {
+  it('deletes a single file', async () => {
     const file = await fileService.create({ fileKind, name: 'test' });
     const result = await fileService.find({ kind: [fileKind] });
     expect(result.files.length).toBe(1);
@@ -241,9 +314,29 @@ describe('FileService', () => {
     expect(await fileService.find({ kind: [fileKind] })).toEqual({ files: [], total: 0 });
   });
 
+  it('deletes a single file using the bulk method', async () => {
+    const file = await fileService.create({ fileKind, name: 'test' });
+    const result = await fileService.find({ kind: [fileKind] });
+    expect(result.files.length).toBe(1);
+    await fileService.bulkDelete({ ids: [file.id] });
+    expect(await fileService.find({ kind: [fileKind] })).toEqual({ files: [], total: 0 });
+  });
+
+  it('deletes multiple files using the bulk method', async () => {
+    const promises = Array.from({ length: 15 }, (v, i) =>
+      fileService.create({ fileKind, name: 'test ' + i })
+    );
+    const files = await Promise.all(promises);
+    const result = await fileService.find({ kind: [fileKind] });
+    expect(result.files.length).toBe(15);
+    await fileService.bulkDelete({ ids: files.map((file) => file.id) });
+    expect(await fileService.find({ kind: [fileKind] })).toEqual({ files: [], total: 0 });
+  });
+
   interface CustomMeta {
     some: string;
   }
+
   it('updates files', async () => {
     const file = await createDisposableFile<CustomMeta>({ fileKind, name: 'test' });
     const updatableFields = {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { errors } from '@elastic/elasticsearch';
@@ -15,11 +16,11 @@ import type { NodesVersionCompatibility } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { ElasticsearchConnectionStatus } from '../common';
 import { ConfigSchema } from './config';
 import type { ElasticsearchServiceSetup } from './elasticsearch_service';
 import { ElasticsearchService } from './elasticsearch_service';
 import { interactiveSetupMock } from './mocks';
+import { ElasticsearchConnectionStatus } from '../common';
 
 jest.mock('tls');
 jest.mock('@kbn/core/server', () => ({

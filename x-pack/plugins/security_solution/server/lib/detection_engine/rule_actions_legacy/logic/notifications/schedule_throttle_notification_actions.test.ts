@@ -64,6 +64,7 @@ describe('schedule_throttle_notification_actions', () => {
       requiredFields: [],
       setup: '',
       alertSuppression: undefined,
+      investigationFields: undefined,
     };
   });
 
@@ -245,11 +246,11 @@ describe('schedule_throttle_notification_actions', () => {
       logger,
       signals: [],
     });
+
+    const debugMessages = loggingSystemMock.collect(logger).debug.map((values) => values[0]);
     // We only test the first part since it has date math using math
-    expect(logger.debug.mock.calls[0][0]).toMatch(
-      /The notification throttle resultsLink created is/
-    );
-    expect(logger.debug.mock.calls[1][0]).toEqual(
+    expect(debugMessages[0]).toMatch(/The notification throttle resultsLink created is/);
+    expect(debugMessages[1]).toEqual(
       'The notification throttle query result size before deconflicting duplicates is: 1. The notification throttle passed in signals size before deconflicting duplicates is: 0. The deconflicted size and size of the signals sent into throttle notification is: 1. The signals count from results size is: 1. The final signals count being sent to the notification is: 1.'
     );
     // error should not have been called in this case.

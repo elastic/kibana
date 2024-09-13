@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiAutoRefreshButton } from '@elastic/eui';
+import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
 
 interface RulesListAutoRefreshProps {
   lastUpdate: string;
@@ -29,7 +30,7 @@ const getLastUpdateText = (lastUpdate: string) => {
     {
       defaultMessage: 'Updated {lastUpdateText}',
       values: {
-        lastUpdateText: moment(lastUpdate).fromNow(),
+        lastUpdateText: moment(lastUpdate).locale(i18n.getLocale()).fromNow(),
       },
     }
   );
@@ -95,7 +96,7 @@ export const RulesListAutoRefresh = (props: RulesListAutoRefreshProps) => {
   }, [isPaused, refreshInterval]);
 
   const onRefreshChange = useCallback(
-    ({ isPaused: newIsPaused, refreshInterval: newRefreshInterval }) => {
+    ({ isPaused: newIsPaused, refreshInterval: newRefreshInterval }: OnRefreshChangeProps) => {
       setIsPaused(newIsPaused);
       setRefreshInterval(newRefreshInterval);
     },

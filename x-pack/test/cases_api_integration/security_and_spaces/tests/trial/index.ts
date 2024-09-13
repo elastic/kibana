@@ -33,6 +33,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/assignees'));
     loadTestFile(require.resolve('./cases/find_cases'));
     loadTestFile(require.resolve('./configure'));
+    loadTestFile(require.resolve('./attachments_framework/registered_persistable_state_trial'));
     // sub privileges are only available with a license above basic
     loadTestFile(require.resolve('./delete_sub_privilege'));
     loadTestFile(require.resolve('./user_profiles/get_current'));
@@ -44,10 +45,16 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/user_actions_get_users'));
     loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
 
+    // Connectors
+    loadTestFile(require.resolve('./connectors/cases/cases_connector'));
+
     // Common
     loadTestFile(require.resolve('../common'));
 
     // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
     loadTestFile(require.resolve('../common/migrations'));
+
+    // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
+    loadTestFile(require.resolve('../common/kibana_alerting_cases_index'));
   });
 };

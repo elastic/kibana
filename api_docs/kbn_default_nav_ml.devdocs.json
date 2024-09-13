@@ -1,0 +1,198 @@
+{
+  "id": "@kbn/default-nav-ml",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/default-nav-ml",
+        "id": "def-common.MlNodeDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "MlNodeDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.NodeDefinition",
+            "text": "NodeDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/deeplinks-ml",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksMlPluginApi",
+            "section": "def-common.DeepLinkId",
+            "text": "DeepLinkId"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-ml",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavMlPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-ml",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavMlPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          "> & { children: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.NodeDefinition",
+            "text": "NodeDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/deeplinks-ml",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksMlPluginApi",
+            "section": "def-common.DeepLinkId",
+            "text": "DeepLinkId"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-ml",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavMlPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-ml",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavMlPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          ">[]; }"
+        ],
+        "path": "packages/default-nav/ml/default_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/default-nav-ml",
+        "id": "def-common.NavigationID",
+        "type": "Type",
+        "tags": [],
+        "label": "NavigationID",
+        "description": [],
+        "signature": [
+          "\"data_frame_analytics\" | \"root\" | \"rootNav:ml\" | \"anomaly_detection\" | \"model_management\" | \"data_visualizer\" | \"aiops_labs\""
+        ],
+        "path": "packages/default-nav/ml/default_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/default-nav-ml",
+        "id": "def-common.defaultNavigation",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultNavigation",
+        "description": [],
+        "path": "packages/default-nav/ml/default_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/default-nav-ml",
+            "id": "def-common.defaultNavigation.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"rootNav:ml\""
+            ],
+            "path": "packages/default-nav/ml/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-ml",
+            "id": "def-common.defaultNavigation.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "packages/default-nav/ml/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-ml",
+            "id": "def-common.defaultNavigation.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "path": "packages/default-nav/ml/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-ml",
+            "id": "def-common.defaultNavigation.children",
+            "type": "Array",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "({ link: \"ml:overview\"; } | { link: \"ml:notifications\"; } | { link: \"ml:memoryUsage\"; } | { title: string; link: \"ml:anomalyDetection\"; renderAs: \"accordion\"; children: ({ title: string; link: \"ml:anomalyDetection\"; breadcrumbStatus: \"hidden\"; } | { link: \"ml:anomalyExplorer\"; } | { link: \"ml:singleMetricViewer\"; } | { link: \"ml:suppliedConfigurations\"; } | { link: \"ml:settings\"; })[]; } | { link: \"ml:dataFrameAnalytics\"; title: string; renderAs: \"accordion\"; children: ({ title: string; link: \"ml:dataFrameAnalytics\"; breadcrumbStatus: \"hidden\"; } | { link: \"ml:resultExplorer\"; } | { link: \"ml:analyticsMap\"; })[]; } | { id: \"model_management\"; title: string; renderAs: \"accordion\"; children: ({ link: \"ml:nodesOverview\"; } | { link: \"ml:nodes\"; })[]; } | { id: \"data_visualizer\"; title: string; renderAs: \"accordion\"; children: ({ title: string; link: \"ml:fileUpload\"; } | { title: string; link: \"ml:indexDataVisualizer\"; getIsActive: ({ pathNameSerialized, prepend }: { pathNameSerialized: string; location: ",
+              "Location",
+              "<unknown>; prepend: (path: string) => string; }) => boolean; } | { title: string; link: \"ml:esqlDataVisualizer\"; getIsActive: ({ pathNameSerialized, prepend }: { pathNameSerialized: string; location: ",
+              "Location",
+              "<unknown>; prepend: (path: string) => string; }) => boolean; } | { title: string; link: \"ml:dataDrift\"; getIsActive: ({ pathNameSerialized, prepend }: { pathNameSerialized: string; location: ",
+              "Location",
+              "<unknown>; prepend: (path: string) => string; }) => boolean; })[]; } | { id: \"aiops_labs\"; title: string; renderAs: \"accordion\"; children: ({ link: \"ml:logRateAnalysis\"; getIsActive: ({ pathNameSerialized, prepend }: { pathNameSerialized: string; location: ",
+              "Location",
+              "<unknown>; prepend: (path: string) => string; }) => boolean; } | { link: \"ml:logPatternAnalysis\"; getIsActive: ({ pathNameSerialized, prepend }: { pathNameSerialized: string; location: ",
+              "Location",
+              "<unknown>; prepend: (path: string) => string; }) => boolean; } | { link: \"ml:changePointDetections\"; getIsActive: ({ pathNameSerialized, prepend }: { pathNameSerialized: string; location: ",
+              "Location",
+              "<unknown>; prepend: (path: string) => string; }) => boolean; })[]; })[]"
+            ],
+            "path": "packages/default-nav/ml/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

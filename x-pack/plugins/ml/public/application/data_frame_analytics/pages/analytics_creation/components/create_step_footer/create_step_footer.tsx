@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
-  getDataFrameAnalyticsProgressPhase,
+  type DataFrameAnalysisConfigType,
   DATA_FRAME_TASK_STATE,
-} from '../../../analytics_management/components/analytics_list/common';
+} from '@kbn/ml-data-frame-analytics-utils';
+import { getDataFrameAnalyticsProgressPhase } from '../../../analytics_management/components/analytics_list/common';
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
-import { useMlKibana } from '../../../../../contexts/kibana';
-import { ml } from '../../../../../services/ml_api_service';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import { BackToListPanel } from '../back_to_list_panel';
 import { ViewResultsPanel } from '../view_results_panel';
 import { ProgressStats } from './progress_stats';
-import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 
 export const PROGRESS_REFRESH_INTERVAL_MS = 1000;
@@ -48,6 +48,7 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
   const {
     services: { notifications },
   } = useMlKibana();
+  const mlApi = useMlApi();
 
   useEffect(() => {
     setInitialized(true);
@@ -58,7 +59,7 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
 
     const interval = setInterval(async () => {
       try {
-        const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
+        const analyticsStats = await mlApi.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
         const jobStats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? analyticsStats.data_frame_analytics[0]
           : undefined;

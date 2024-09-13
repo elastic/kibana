@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import { useGetCase } from '../../containers/use_get_case';
@@ -19,26 +18,22 @@ import { generateCaseViewPath, useCaseViewParams } from '../../common/navigation
 import { CaseViewPage } from './case_view_page';
 import type { CaseViewProps } from './types';
 
-const MyEuiFlexGroup = styled(EuiFlexGroup)`
-  height: 100%;
-`;
-
 export const CaseViewLoading = () => (
-  <MyEuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
+  <EuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner data-test-subj="case-view-loading" size="xl" />
     </EuiFlexItem>
-  </MyEuiFlexGroup>
+  </EuiFlexGroup>
 );
 
 export const CaseView = React.memo(
   ({
-    onComponentInitialized,
     actionsNavigation,
     ruleDetailsNavigation,
     showAlertDetails,
     timelineIntegration,
     useFetchAlertData,
+    onAlertsTableLoaded,
     refreshRef,
   }: CaseViewProps) => {
     const { spaces: spacesApi } = useKibana().services;
@@ -86,13 +81,12 @@ export const CaseView = React.memo(
         {getLegacyUrlConflictCallout()}
         <CaseViewPage
           caseData={data.case}
-          caseId={caseId}
           fetchCase={refetch}
-          onComponentInitialized={onComponentInitialized}
           actionsNavigation={actionsNavigation}
           ruleDetailsNavigation={ruleDetailsNavigation}
           showAlertDetails={showAlertDetails}
           useFetchAlertData={useFetchAlertData}
+          onAlertsTableLoaded={onAlertsTableLoaded}
           refreshRef={refreshRef}
         />
       </CasesTimelineIntegrationProvider>

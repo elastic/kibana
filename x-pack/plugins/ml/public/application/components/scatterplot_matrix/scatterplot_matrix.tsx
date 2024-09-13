@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useState, FC, useCallback } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import rison from '@kbn/rison';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -23,20 +23,20 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
+import rison from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
-import { Query } from '@kbn/data-plugin/common/query';
-
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { Query } from '@kbn/data-plugin/common/query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { stringHash } from '@kbn/ml-string-hash';
-import { extractErrorMessage } from '../../../../common';
-import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
-import { RuntimeMappings } from '../../../../common/types/fields';
-import { getCombinedRuntimeMappings } from '../data_grid';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import {
+  getCombinedRuntimeMappings,
+  isRuntimeMappings,
+  type RuntimeMappings,
+} from '@kbn/ml-runtime-field-utils';
+import { getProcessedFields } from '@kbn/ml-data-grid';
 
-import { useMlApiContext, useMlKibana } from '../../contexts/kibana';
-
-import { getProcessedFields } from '../data_grid';
-import { useCurrentEuiTheme } from '../color_range_legend';
+import { useCurrentThemeVars, useMlApi, useMlKibana } from '../../contexts/kibana';
 
 // Separate imports for lazy loadable VegaChart and related code
 import { VegaChart } from '../vega_chart';
@@ -102,7 +102,7 @@ export interface ScatterplotMatrixProps {
   legendType?: LegendType;
   searchQuery?: estypes.QueryDslQueryContainer;
   runtimeMappings?: RuntimeMappings;
-  indexPattern?: DataView;
+  dataView?: DataView;
   query?: Query;
 }
 
@@ -114,10 +114,10 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   legendType,
   searchQuery,
   runtimeMappings,
-  indexPattern,
+  dataView,
   query,
 }) => {
-  const { esSearch } = useMlApiContext();
+  const { esSearch } = useMlApi();
   const kibana = useMlKibana();
   const {
     services: { application, data },
@@ -149,7 +149,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     { items: any[]; backgroundItems: any[]; columns: string[]; messages: string[] } | undefined
   >();
 
-  const { euiTheme } = useCurrentEuiTheme();
+  const { euiTheme } = useCurrentThemeVars();
 
   // formats the array of field names for EuiComboBox
   const fieldOptions = useMemo(
@@ -211,9 +211,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     vegaSpec.data = {
       url: {
         '%context%': true,
-        ...(indexPattern?.timeFieldName
-          ? { ['%timefield%']: `${indexPattern?.timeFieldName}` }
-          : {}),
+        ...(dataView?.timeFieldName ? { ['%timefield%']: `${dataView?.timeFieldName}` } : {}),
         index,
         body: {
           fields: fieldsToFetch,
@@ -301,7 +299,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
         }
 
         const combinedRuntimeMappings =
-          indexPattern && getCombinedRuntimeMappings(indexPattern, runtimeMappings);
+          dataView && getCombinedRuntimeMappings(dataView, runtimeMappings);
 
         const body = {
           fields: queryFields,
@@ -413,7 +411,10 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       {splom === undefined || vegaSpec === undefined ? (
         <VegaChartLoading />
       ) : (
-        <div data-test-subj={`mlScatterplotMatrix ${isLoading ? 'loading' : 'loaded'}`}>
+        <div
+          data-test-subj={`mlScatterplotMatrix ${isLoading ? 'loading' : 'loaded'}`}
+          className="mlScatterplotMatrix"
+        >
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow

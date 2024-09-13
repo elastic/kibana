@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -84,9 +85,9 @@ export default function ({ getService }: FtrProviderContext) {
               success: true,
               successCount: 3,
               successResults: [
-                { ...indexPattern, overwrite: true },
-                { ...visualization, overwrite: true },
-                { ...dashboard, overwrite: true },
+                { ...indexPattern, overwrite: true, managed: false },
+                { ...visualization, overwrite: true, managed: false },
+                { ...dashboard, overwrite: true, managed: false },
               ],
               warnings: [],
             });
@@ -112,7 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               success: true,
               successCount: 1,
-              successResults: [{ ...visualization, overwrite: true }],
+              successResults: [{ ...visualization, overwrite: true, managed: false }],
               warnings: [],
             });
           });
@@ -163,6 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
                   type: 'visualization',
                   id: '1',
                   meta: { title: 'My favorite vis', icon: 'visualizeApp' },
+                  managed: false,
                 },
               ],
               warnings: [],

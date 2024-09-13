@@ -9,6 +9,7 @@ import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eu
 import { IFieldSubType } from '@kbn/es-query';
 import { ReactNode } from 'react';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
@@ -72,13 +73,14 @@ export type ColumnHeaderOptions = Pick<
   | 'schema'
 > & {
   aggregatable?: boolean;
+  searchable?: boolean;
   dataTableCellActions?: DataTableCellAction[];
   category?: string;
   columnHeaderType: ColumnHeaderType;
   description?: string | null;
   esTypes?: string[];
   example?: string | number | null;
-  format?: string;
+  format?: SerializedFieldFormat;
   linkField?: string;
   placeholder?: string;
   subType?: IFieldSubType;

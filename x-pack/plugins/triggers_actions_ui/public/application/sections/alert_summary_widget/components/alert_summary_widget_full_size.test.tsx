@@ -14,6 +14,13 @@ import {
   AlertSummaryWidgetFullSizeProps,
 } from './alert_summary_widget_full_size';
 import { ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ, TOTAL_ALERT_COUNT_DATA_TEST_SUBJ } from './constants';
+import { DependencyProps } from '../types';
+import { LIGHT_THEME } from '@elastic/charts';
+
+const dependencyProps: DependencyProps = {
+  baseTheme: LIGHT_THEME,
+  sparklineTheme: {},
+};
 
 describe('AlertSummaryWidgetFullSize', () => {
   const renderComponent = (props: Partial<AlertSummaryWidgetFullSizeProps> = {}) =>
@@ -21,6 +28,8 @@ describe('AlertSummaryWidgetFullSize', () => {
       <IntlProvider locale="en">
         <AlertSummaryWidgetFullSize
           chartProps={mockedChartProps}
+          dependencyProps={dependencyProps}
+          timeZone="UTC"
           {...mockedAlertSummaryResponse}
           {...props}
         />
@@ -55,5 +64,27 @@ describe('AlertSummaryWidgetFullSize', () => {
     expect(alertSummaryWidget.queryByTestId(TOTAL_ALERT_COUNT_DATA_TEST_SUBJ)).toHaveTextContent(
       '2.02k'
     );
+  });
+
+  it('should render AlertSummaryWidgetFullSize without a chart', async () => {
+    const alertSummaryWidget = renderComponent({
+      hideChart: true,
+    });
+
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSize')).toBeTruthy();
+    expect(
+      alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSizeChartContainer')
+    ).not.toBeInTheDocument();
+  });
+
+  it('should render AlertSummaryWidgetFullSize without stats', async () => {
+    const alertSummaryWidget = renderComponent({
+      hideStats: true,
+    });
+
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSize')).toBeTruthy();
+    expect(
+      alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSizeStats')
+    ).not.toBeInTheDocument();
   });
 });

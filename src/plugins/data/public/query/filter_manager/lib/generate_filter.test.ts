@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { generateFilters } from './generate_filters';
@@ -135,6 +136,33 @@ describe('Generate filters', () => {
     });
   });
 
+  it('should create negated range filter when provided complex range datatype', () => {
+    const filters = generateFilters(
+      mockFilterManager,
+      {
+        name: 'my-field',
+        type: 'ip_range',
+      } as DataViewFieldBase,
+      {
+        gt: '192.168.0.0',
+        lte: '192.168.255.255',
+      },
+      '-',
+      MOCKED_INDEX
+    ) as RangeFilter[];
+    expect(filters).toHaveLength(1);
+    const [filter] = filters;
+    expect(filter.meta.index === INDEX_NAME);
+    expect(filter.meta.negate).toBeTruthy();
+    expect(isRangeFilter(filter)).toBeTruthy();
+    expect(filter.query.range).toEqual({
+      [FIELD.name]: {
+        gt: '192.168.0.0',
+        lte: '192.168.255.255',
+      },
+    });
+  });
+
   it('should create a phrase filter on a simple range datatype', () => {
     const filters = generateFilters(
       mockFilterManager,
@@ -219,8 +247,34 @@ describe('Generate filters', () => {
     expect(filter.query.range).toEqual({
       [FIELD.name]: {
         format: 'date_time',
-        gte: expect.stringContaining('2022-08-01T00:00:00'),
-        lte: expect.stringContaining('2022-08-01T00:00:00'),
+        gte: expect.stringContaining('2022-08-01'),
+        lte: expect.stringContaining('2022-08-01'),
+      },
+    });
+  });
+
+  it('should genereate a range filter when date_nanos type field is provided', () => {
+    const filters = generateFilters(
+      mockFilterManager,
+      {
+        ...FIELD,
+        type: 'date',
+        esTypes: ['date_nanos'],
+      } as DataViewFieldBase,
+      '2023-04-27T18:49:15.948123456Z',
+      '+',
+      MOCKED_INDEX
+    ) as RangeFilter[];
+    expect(filters).toHaveLength(1);
+    const [filter] = filters;
+    expect(filter.meta.index === INDEX_NAME);
+    expect(filter.meta.negate).toBeFalsy();
+    expect(isRangeFilter(filter)).toBeTruthy();
+    expect(filter.query.range).toEqual({
+      [FIELD.name]: {
+        format: 'strict_date_optional_time_nanos',
+        gte: expect.stringContaining('2023-04-27T18:49:15.948123456Z'),
+        lte: expect.stringContaining('2023-04-27T18:49:15.948123456Z'),
       },
     });
   });

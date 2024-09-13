@@ -7,7 +7,7 @@
 
 import { getAdminCapabilities, getUserCapabilities } from './__mocks__/ml_capabilities';
 import { capabilitiesProvider } from './check_capabilities';
-import { MlLicense } from '../../../common/license';
+import type { MlLicense } from '../../../common/license';
 import { getDefaultCapabilities } from '../../../common/types/capabilities';
 import type { MlClient } from '../ml_client';
 
@@ -47,7 +47,7 @@ describe('check_capabilities', () => {
       );
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(38);
+      expect(count).toBe(43);
     });
   });
 
@@ -67,6 +67,7 @@ describe('check_capabilities', () => {
 
       expect(capabilities.canGetFieldInfo).toBe(true);
       expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -102,8 +103,13 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canCreateInferenceEndpoint).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+
+      expect(capabilities.isADEnabled).toBe(true);
+      expect(capabilities.isDFAEnabled).toBe(true);
+      expect(capabilities.isNLPEnabled).toBe(true);
     });
 
     test('full capabilities', async () => {
@@ -121,6 +127,7 @@ describe('check_capabilities', () => {
 
       expect(capabilities.canGetFieldInfo).toBe(true);
       expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -156,8 +163,13 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(true);
       expect(capabilities.canViewMlNodes).toBe(true);
       expect(capabilities.canCreateTrainedModels).toBe(true);
+      expect(capabilities.canCreateInferenceEndpoint).toBe(true);
       expect(capabilities.canDeleteTrainedModels).toBe(true);
       expect(capabilities.canStartStopTrainedModels).toBe(true);
+
+      expect(capabilities.isADEnabled).toBe(true);
+      expect(capabilities.isDFAEnabled).toBe(true);
+      expect(capabilities.isNLPEnabled).toBe(true);
     });
 
     test('upgrade in progress with full capabilities', async () => {
@@ -175,6 +187,7 @@ describe('check_capabilities', () => {
 
       expect(capabilities.canGetFieldInfo).toBe(true);
       expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -210,8 +223,13 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canCreateInferenceEndpoint).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+
+      expect(capabilities.isADEnabled).toBe(true);
+      expect(capabilities.isDFAEnabled).toBe(true);
+      expect(capabilities.isNLPEnabled).toBe(true);
     });
 
     test('upgrade in progress with partial capabilities', async () => {
@@ -229,6 +247,7 @@ describe('check_capabilities', () => {
 
       expect(capabilities.canGetFieldInfo).toBe(true);
       expect(capabilities.canGetMlInfo).toBe(true);
+      expect(capabilities.canUseAiops).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
@@ -264,8 +283,13 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canCreateInferenceEndpoint).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+
+      expect(capabilities.isADEnabled).toBe(true);
+      expect(capabilities.isDFAEnabled).toBe(true);
+      expect(capabilities.isNLPEnabled).toBe(true);
     });
 
     test('full capabilities, ml disabled in space', async () => {
@@ -283,6 +307,7 @@ describe('check_capabilities', () => {
 
       expect(capabilities.canGetFieldInfo).toBe(false);
       expect(capabilities.canGetMlInfo).toBe(false);
+      expect(capabilities.canUseAiops).toBe(false);
       expect(capabilities.canGetJobs).toBe(false);
       expect(capabilities.canGetDatafeeds).toBe(false);
       expect(capabilities.canGetCalendars).toBe(false);
@@ -318,8 +343,13 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canCreateInferenceEndpoint).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+
+      expect(capabilities.isADEnabled).toBe(true);
+      expect(capabilities.isDFAEnabled).toBe(true);
+      expect(capabilities.isNLPEnabled).toBe(true);
     });
   });
 
@@ -374,7 +404,12 @@ describe('check_capabilities', () => {
     expect(capabilities.canCreateMlAlerts).toBe(false);
     expect(capabilities.canViewMlNodes).toBe(false);
     expect(capabilities.canCreateTrainedModels).toBe(false);
+    expect(capabilities.canCreateInferenceEndpoint).toBe(false);
     expect(capabilities.canDeleteTrainedModels).toBe(false);
     expect(capabilities.canStartStopTrainedModels).toBe(false);
+
+    expect(capabilities.isADEnabled).toBe(true);
+    expect(capabilities.isDFAEnabled).toBe(true);
+    expect(capabilities.isNLPEnabled).toBe(true);
   });
 });

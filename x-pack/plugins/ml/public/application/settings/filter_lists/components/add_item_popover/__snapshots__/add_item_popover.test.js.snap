@@ -14,10 +14,9 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
         onClick={[Function]}
         size="s"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Add item"
           id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     }
@@ -30,22 +29,19 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
     ownFocus={true}
     panelClassName="ml-add-filter-item-popover"
     panelPaddingSize="m"
+    repositionToCrossAxis={true}
   >
-    <EuiForm>
+    <EuiForm
+      data-test-subj="mlFilterListAddItemPopoverContent"
+    >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         id="filter_list_add_item_input_row"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Items"
             id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
-            values={Object {}}
           />
         }
-        labelType="label"
       >
         <EuiTextArea
           data-test-subj="mlFilterListAddItemTextArea"
@@ -57,10 +53,9 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
     <EuiText
       size="xs"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Enter one item per line"
         id="xpack.ml.settings.filterLists.addItemPopover.enterItemPerLineDescription"
-        values={Object {}}
       />
     </EuiText>
     <EuiSpacer
@@ -73,16 +68,13 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="mlFilterListAddItemsButton"
           disabled={true}
           onClick={[Function]}
-          size="m"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Add"
             id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -105,10 +97,9 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
         onClick={[Function]}
         size="s"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Add item"
           id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     }
@@ -121,22 +112,19 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
     ownFocus={true}
     panelClassName="ml-add-filter-item-popover"
     panelPaddingSize="m"
+    repositionToCrossAxis={true}
   >
-    <EuiForm>
+    <EuiForm
+      data-test-subj="mlFilterListAddItemPopoverContent"
+    >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         id="filter_list_add_item_input_row"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Items"
             id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
-            values={Object {}}
           />
         }
-        labelType="label"
       >
         <EuiTextArea
           data-test-subj="mlFilterListAddItemTextArea"
@@ -148,10 +136,9 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
     <EuiText
       size="xs"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Enter one item per line"
         id="xpack.ml.settings.filterLists.addItemPopover.enterItemPerLineDescription"
-        values={Object {}}
       />
     </EuiText>
     <EuiSpacer
@@ -164,16 +151,13 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="mlFilterListAddItemsButton"
           disabled={true}
           onClick={[Function]}
-          size="m"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Add"
             id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -196,10 +180,9 @@ exports[`AddItemPopover renders the popover 1`] = `
         onClick={[Function]}
         size="s"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Add item"
           id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     }
@@ -212,22 +195,19 @@ exports[`AddItemPopover renders the popover 1`] = `
     ownFocus={true}
     panelClassName="ml-add-filter-item-popover"
     panelPaddingSize="m"
+    repositionToCrossAxis={true}
   >
-    <EuiForm>
+    <EuiForm
+      data-test-subj="mlFilterListAddItemPopoverContent"
+    >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         id="filter_list_add_item_input_row"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Items"
             id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
-            values={Object {}}
           />
         }
-        labelType="label"
       >
         <EuiTextArea
           data-test-subj="mlFilterListAddItemTextArea"
@@ -239,10 +219,9 @@ exports[`AddItemPopover renders the popover 1`] = `
     <EuiText
       size="xs"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Enter one item per line"
         id="xpack.ml.settings.filterLists.addItemPopover.enterItemPerLineDescription"
-        values={Object {}}
       />
     </EuiText>
     <EuiSpacer
@@ -255,16 +234,13 @@ exports[`AddItemPopover renders the popover 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="mlFilterListAddItemsButton"
           disabled={true}
           onClick={[Function]}
-          size="m"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Add"
             id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>

@@ -7,7 +7,7 @@
 
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { inferTimeField, renewIDs } from './utils';
+import { getUniqueLabelGenerator, inferTimeField, isLensRange, renewIDs } from './utils';
 
 const datatableUtilities = createDatatableUtilitiesMock();
 
@@ -56,9 +56,12 @@ describe('utils', () => {
     test('infer time field for brush event', () => {
       expect(
         inferTimeField(datatableUtilities, {
-          table,
-          column: 0,
-          range: [1, 2],
+          name: 'brush',
+          data: {
+            table,
+            column: 0,
+            range: [1, 2],
+          },
         })
       ).toEqual('abc');
     });
@@ -66,9 +69,12 @@ describe('utils', () => {
     test('do not return time field if time range is not bound', () => {
       expect(
         inferTimeField(datatableUtilities, {
-          table: tableWithoutAppliedTimeRange,
-          column: 0,
-          range: [1, 2],
+          name: 'brush',
+          data: {
+            table: tableWithoutAppliedTimeRange,
+            column: 0,
+            range: [1, 2],
+          },
         })
       ).toEqual(undefined);
     });
@@ -76,14 +82,17 @@ describe('utils', () => {
     test('infer time field for click event', () => {
       expect(
         inferTimeField(datatableUtilities, {
-          data: [
-            {
-              table,
-              column: 0,
-              row: 0,
-              value: 1,
-            },
-          ],
+          name: 'filter',
+          data: {
+            data: [
+              {
+                table,
+                column: 0,
+                row: 0,
+                value: 1,
+              },
+            ],
+          },
         })
       ).toEqual('abc');
     });
@@ -91,15 +100,18 @@ describe('utils', () => {
     test('do not return time field for negated click event', () => {
       expect(
         inferTimeField(datatableUtilities, {
-          data: [
-            {
-              table,
-              column: 0,
-              row: 0,
-              value: 1,
-            },
-          ],
-          negate: true,
+          name: 'filter',
+          data: {
+            data: [
+              {
+                table,
+                column: 0,
+                row: 0,
+                value: 1,
+              },
+            ],
+            negate: true,
+          },
         })
       ).toEqual(undefined);
     });
@@ -107,14 +119,17 @@ describe('utils', () => {
     test('do not return time field for click event without bound time field', () => {
       expect(
         inferTimeField(datatableUtilities, {
-          data: [
-            {
-              table: tableWithoutAppliedTimeRange,
-              column: 0,
-              row: 0,
-              value: 1,
-            },
-          ],
+          name: 'filter',
+          data: {
+            data: [
+              {
+                table: tableWithoutAppliedTimeRange,
+                column: 0,
+                row: 0,
+                value: 1,
+              },
+            ],
+          },
         })
       ).toEqual(undefined);
     });
@@ -155,6 +170,41 @@ describe('utils', () => {
           "r2_test": "r3_test",
         }
       `);
+    });
+  });
+  describe('getUniqueLabelGenerator', () => {
+    it('should handle empty labels', () => {
+      expect(getUniqueLabelGenerator()(' ')).toBe('[Untitled]');
+    });
+
+    it('should add a counter for multiple hits of the same label', () => {
+      const labelGenerator = getUniqueLabelGenerator();
+      expect(['myLabel', 'myLabel'].map(labelGenerator)).toEqual(['myLabel', 'myLabel [1]']);
+    });
+
+    it('should add a counter for multiple empty labels', () => {
+      const labelGenerator = getUniqueLabelGenerator();
+      expect([' ', ' '].map(labelGenerator)).toEqual(['[Untitled]', '[Untitled] [1]']);
+    });
+  });
+
+  describe('isRange', () => {
+    it.each<[expected: boolean, input: unknown]>([
+      [true, { from: 0, to: 100, label: '' }],
+      [true, { from: 0, to: null, label: '' }],
+      [true, { from: null, to: 100, label: '' }],
+      [false, { from: 0, to: 100 }],
+      [false, { from: 0, to: null }],
+      [false, { from: null, to: 100 }],
+      [false, { from: 0 }],
+      [false, { to: 100 }],
+      [false, null],
+      [false, undefined],
+      [false, 123],
+      [false, 'string'],
+      [false, {}],
+    ])('should return %s for %j', (expected, input) => {
+      expect(isLensRange(input)).toBe(expected);
     });
   });
 });

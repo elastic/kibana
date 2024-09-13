@@ -19,6 +19,8 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
+  EuiText,
 } from '@elastic/eui';
 import type {
   OpsgenieActionParams,
@@ -48,7 +50,7 @@ const FormView: React.FC<FormViewProps> = ({
 }) => {
   const isMessageInvalid =
     (errors['subActionParams.message'] !== undefined &&
-      errors['subActionParams.message'].length > 0 &&
+      Number(errors['subActionParams.message'].length) > 0 &&
       subActionParams?.message !== undefined) ||
     showSaveError;
 
@@ -57,9 +59,14 @@ const FormView: React.FC<FormViewProps> = ({
       <EuiFormRow
         data-test-subj="opsgenie-message-row"
         fullWidth
-        error={errors['subActionParams.message']}
+        error={errors['subActionParams.message'] as string}
         label={i18n.MESSAGE_FIELD_LABEL}
         isInvalid={isMessageInvalid}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {i18n.REQUIRED_LABEL}
+          </EuiText>
+        }
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -137,7 +144,7 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
   const [showJsonEditor, setShowJsonEditor] = useState<boolean>(false);
 
   const toggleShowJsonEditor = useCallback(
-    (event) => {
+    (event: EuiSwitchEvent) => {
       if (!event.target.checked) {
         // when the user switches back remove the json editor error if there was one
         // must mark as undefined to remove the field so it is not sent to the server side

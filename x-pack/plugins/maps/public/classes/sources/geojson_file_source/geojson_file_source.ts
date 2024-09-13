@@ -13,7 +13,6 @@ import {
   GeojsonFileSourceDescriptor,
   MapExtent,
 } from '../../../../common/descriptor_types';
-import { registerSource } from '../source_registry';
 import { IField } from '../../fields/field';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
 import { InlineField } from '../../fields/inline_field';
@@ -59,42 +58,31 @@ export class GeoJsonFileSource extends AbstractVectorSource {
     super(normalizedDescriptor);
   }
 
-  _getFields(): InlineFieldDescriptor[] {
+  private _getFieldDescriptors(): InlineFieldDescriptor[] {
     const fields = (this._descriptor as GeojsonFileSourceDescriptor).__fields;
     return fields ? fields : [];
   }
 
-  createField({ fieldName }: { fieldName: string }): IField {
-    const fields = this._getFields();
-    const descriptor: InlineFieldDescriptor | undefined = fields.find((field) => {
-      return field.name === fieldName;
-    });
-
-    if (!descriptor) {
-      throw new Error(
-        `Cannot find corresponding field ${fieldName} in __fields array ${JSON.stringify(
-          this._getFields()
-        )} `
-      );
-    }
+  private _createField(fieldDescriptor: InlineFieldDescriptor): IField {
     return new InlineField<GeoJsonFileSource>({
-      fieldName: descriptor.name,
+      fieldName: fieldDescriptor.name,
       source: this,
       origin: FIELD_ORIGIN.SOURCE,
-      dataType: descriptor.type,
+      dataType: fieldDescriptor.type,
     });
   }
 
   async getFields(): Promise<IField[]> {
-    const fields = this._getFields();
-    return fields.map((field: InlineFieldDescriptor) => {
-      return new InlineField<GeoJsonFileSource>({
-        fieldName: field.name,
-        source: this,
-        origin: FIELD_ORIGIN.SOURCE,
-        dataType: field.type,
-      });
+    return this._getFieldDescriptors().map((fieldDescriptor: InlineFieldDescriptor) => {
+      return this._createField(fieldDescriptor);
     });
+  }
+
+  getFieldByName(fieldName: string): IField | null {
+    const fieldDescriptor = this._getFieldDescriptors().find((findFieldDescriptor) => {
+      return findFieldDescriptor.name === fieldName;
+    });
+    return fieldDescriptor ? this._createField(fieldDescriptor) : null;
   }
 
   isBoundsAware(): boolean {
@@ -135,8 +123,3 @@ export class GeoJsonFileSource extends AbstractVectorSource {
     return (this._descriptor as GeojsonFileSourceDescriptor).__featureCollection;
   }
 }
-
-registerSource({
-  ConstructorFunction: GeoJsonFileSource,
-  type: SOURCE_TYPES.GEOJSON_FILE,
-});

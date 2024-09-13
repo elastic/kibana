@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTlsConfigMock } from './http_server.test.mocks';
 import { Server } from 'http';
 import { rm, mkdtemp, readFile, writeFile } from 'fs/promises';
 import supertest from 'supertest';
 import { omit } from 'lodash';
 import { join } from 'path';
-
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type {
@@ -22,13 +23,23 @@ import type {
   RouteValidationFunction,
   RequestHandlerContextBase,
 } from '@kbn/core-http-server';
-import { Router } from '@kbn/core-http-router-server-internal';
+import { Router, type RouterOptions } from '@kbn/core-http-router-server-internal';
+import { createServer } from '@kbn/server-http-tools';
 import { HttpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import moment from 'moment';
-import { of } from 'rxjs';
+import { of, Observable, BehaviorSubject } from 'rxjs';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+
+const routerOptions: RouterOptions = {
+  isDev: false,
+  versionedRouterOptions: {
+    defaultHandlerResolutionStrategy: 'oldest',
+    useVersionResolutionStrategyForInternalPaths: [],
+  },
+};
 
 const cookieOptions = {
   name: 'sid',
@@ -38,11 +49,16 @@ const cookieOptions = {
 };
 
 let server: HttpServer;
-let config: HttpConfig;
-let configWithSSL: HttpConfig;
 
-const loggingService = loggingSystemMock.create();
-const logger = loggingService.get();
+let config: HttpConfig;
+let config$: Observable<HttpConfig>;
+
+let configWithSSL: HttpConfig;
+let configWithSSL$: Observable<HttpConfig>;
+
+const coreContext = mockCoreContext.create();
+const loggingService = coreContext.logger;
+const logger = coreContext.logger.get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
 let certificate: string;
@@ -68,8 +84,13 @@ beforeEach(() => {
     cors: {
       enabled: false,
     },
+    csp: {
+      disableEmbedding: true,
+    },
+    cdn: {},
     shutdownTimeout: moment.duration(500, 'ms'),
   } as any;
+  config$ = of(config);
 
   configWithSSL = {
     ...config,
@@ -82,8 +103,9 @@ beforeEach(() => {
       redirectHttpFromPort: config.port + 1,
     },
   } as HttpConfig;
+  configWithSSL$ = of(configWithSSL);
 
-  server = new HttpServer(loggingService, 'tests', of(config.shutdownTimeout));
+  server = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));
 });
 
 afterEach(async () => {
@@ -94,7 +116,7 @@ afterEach(async () => {
 test('log listening address after started', async () => {
   expect(server.isListening()).toBe(false);
 
-  await server.setup(config);
+  await server.setup({ config$ });
   await server.start();
 
   expect(server.isListening()).toBe(true);
@@ -110,7 +132,7 @@ test('log listening address after started', async () => {
 test('log listening address after started when configured with BasePath and rewriteBasePath = false', async () => {
   expect(server.isListening()).toBe(false);
 
-  await server.setup({ ...config, basePath: '/bar', rewriteBasePath: false });
+  await server.setup({ config$: of({ ...config, basePath: '/bar', rewriteBasePath: false }) });
   await server.start();
 
   expect(server.isListening()).toBe(true);
@@ -126,7 +148,7 @@ test('log listening address after started when configured with BasePath and rewr
 test('log listening address after started when configured with BasePath and rewriteBasePath = true', async () => {
   expect(server.isListening()).toBe(false);
 
-  await server.setup({ ...config, basePath: '/bar', rewriteBasePath: true });
+  await server.setup({ config$: of({ ...config, basePath: '/bar', rewriteBasePath: true }) });
   await server.start();
 
   expect(server.isListening()).toBe(true);
@@ -142,16 +164,16 @@ test('log listening address after started when configured with BasePath and rewr
 test('does not allow router registration after server is listening', async () => {
   expect(server.isListening()).toBe(false);
 
-  const { registerRouter } = await server.setup(config);
+  const { registerRouter } = await server.setup({ config$ });
 
-  const router1 = new Router('/foo', logger, enhanceWithContext);
+  const router1 = new Router('/foo', logger, enhanceWithContext, routerOptions);
   expect(() => registerRouter(router1)).not.toThrowError();
 
   await server.start();
 
   expect(server.isListening()).toBe(true);
 
-  const router2 = new Router('/bar', logger, enhanceWithContext);
+  const router2 = new Router('/bar', logger, enhanceWithContext, routerOptions);
   expect(() => registerRouter(router2)).toThrowErrorMatchingInlineSnapshot(
     `"Routers can be registered only when HTTP server is stopped."`
   );
@@ -160,21 +182,21 @@ test('does not allow router registration after server is listening', async () =>
 test('allows router registration after server is listening via `registerRouterAfterListening`', async () => {
   expect(server.isListening()).toBe(false);
 
-  const { registerRouterAfterListening } = await server.setup(config);
+  const { registerRouterAfterListening } = await server.setup({ config$ });
 
-  const router1 = new Router('/foo', logger, enhanceWithContext);
+  const router1 = new Router('/foo', logger, enhanceWithContext, routerOptions);
   expect(() => registerRouterAfterListening(router1)).not.toThrowError();
 
   await server.start();
 
   expect(server.isListening()).toBe(true);
 
-  const router2 = new Router('/bar', logger, enhanceWithContext);
+  const router2 = new Router('/bar', logger, enhanceWithContext, routerOptions);
   expect(() => registerRouterAfterListening(router2)).not.toThrowError();
 });
 
 test('valid params', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
 
   router.get(
     {
@@ -190,7 +212,7 @@ test('valid params', async () => {
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
   registerRouter(router);
 
   await server.start();
@@ -204,7 +226,7 @@ test('valid params', async () => {
 });
 
 test('invalid params', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
 
   router.get(
     {
@@ -220,7 +242,7 @@ test('invalid params', async () => {
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
   registerRouter(router);
 
   await server.start();
@@ -238,7 +260,7 @@ test('invalid params', async () => {
 });
 
 test('valid query', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
 
   router.get(
     {
@@ -255,7 +277,7 @@ test('valid query', async () => {
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
   registerRouter(router);
 
   await server.start();
@@ -269,7 +291,7 @@ test('valid query', async () => {
 });
 
 test('invalid query', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
 
   router.get(
     {
@@ -285,7 +307,7 @@ test('invalid query', async () => {
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
   registerRouter(router);
 
   await server.start();
@@ -303,7 +325,7 @@ test('invalid query', async () => {
 });
 
 test('valid body', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
 
   router.post(
     {
@@ -320,7 +342,7 @@ test('valid body', async () => {
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
   registerRouter(router);
 
   await server.start();
@@ -338,7 +360,7 @@ test('valid body', async () => {
 });
 
 test('valid body with validate function', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
 
   router.post(
     {
@@ -358,7 +380,7 @@ test('valid body with validate function', async () => {
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
   registerRouter(router);
 
   await server.start();
@@ -376,7 +398,7 @@ test('valid body with validate function', async () => {
 });
 
 test('not inline validation - specifying params', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
 
   const bodyValidation = (
     { bar, baz }: any = {},
@@ -401,7 +423,7 @@ test('not inline validation - specifying params', async () => {
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
   registerRouter(router);
 
   await server.start();
@@ -419,7 +441,7 @@ test('not inline validation - specifying params', async () => {
 });
 
 test('not inline validation - specifying validation handler', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
 
   const bodyValidation: RouteValidationFunction<{ bar: string; baz: number }> = (
     { bar, baz } = {},
@@ -444,7 +466,7 @@ test('not inline validation - specifying validation handler', async () => {
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
   registerRouter(router);
 
   await server.start();
@@ -463,7 +485,7 @@ test('not inline validation - specifying validation handler', async () => {
 
 // https://github.com/elastic/kibana/issues/47047
 test('not inline handler - KibanaRequest', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
 
   const handler = (
     context: RequestHandlerContextBase,
@@ -494,7 +516,7 @@ test('not inline handler - KibanaRequest', async () => {
     handler
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
   registerRouter(router);
 
   await server.start();
@@ -512,7 +534,7 @@ test('not inline handler - KibanaRequest', async () => {
 });
 
 test('not inline handler - RequestHandler', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
 
   const handler: RequestHandler<unknown, unknown, { bar: string; baz: number }> = (
     context,
@@ -543,7 +565,7 @@ test('not inline handler - RequestHandler', async () => {
     handler
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
   registerRouter(router);
 
   await server.start();
@@ -561,7 +583,7 @@ test('not inline handler - RequestHandler', async () => {
 });
 
 test('invalid body', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
 
   router.post(
     {
@@ -577,7 +599,7 @@ test('invalid body', async () => {
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
   registerRouter(router);
 
   await server.start();
@@ -596,7 +618,7 @@ test('invalid body', async () => {
 });
 
 test('handles putting', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
 
   router.put(
     {
@@ -612,7 +634,7 @@ test('handles putting', async () => {
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
   registerRouter(router);
 
   await server.start();
@@ -627,7 +649,7 @@ test('handles putting', async () => {
 });
 
 test('handles deleting', async () => {
-  const router = new Router('/foo', logger, enhanceWithContext);
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
 
   router.delete(
     {
@@ -643,7 +665,7 @@ test('handles deleting', async () => {
     }
   );
 
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
   registerRouter(router);
 
   await server.start();
@@ -667,13 +689,15 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
       rewriteBasePath: false,
     } as HttpConfig;
 
-    const router = new Router('/', logger, enhanceWithContext);
+    const router = new Router('/', logger, enhanceWithContext, routerOptions);
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
     router.get({ path: '/foo', validate: false }, (context, req, res) =>
       res.ok({ body: 'value:/foo' })
     );
 
-    const { registerRouter, server: innerServer } = await server.setup(configWithBasePath);
+    const { registerRouter, server: innerServer } = await server.setup({
+      config$: of(configWithBasePath),
+    });
     registerRouter(router);
 
     await server.start();
@@ -722,13 +746,15 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
       rewriteBasePath: true,
     } as HttpConfig;
 
-    const router = new Router('/', logger, enhanceWithContext);
+    const router = new Router('/', logger, enhanceWithContext, routerOptions);
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
     router.get({ path: '/foo', validate: false }, (context, req, res) =>
       res.ok({ body: 'value:/foo' })
     );
 
-    const { registerRouter, server: innerServer } = await server.setup(configWithBasePath);
+    const { registerRouter, server: innerServer } = await server.setup({
+      config$: of(configWithBasePath),
+    });
     registerRouter(router);
 
     await server.start();
@@ -772,10 +798,10 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
 });
 
 test('with defined `redirectHttpFromPort`', async () => {
-  const router = new Router('/', logger, enhanceWithContext);
+  const router = new Router('/', logger, enhanceWithContext, routerOptions);
   router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
 
-  const { registerRouter } = await server.setup(configWithSSL);
+  const { registerRouter } = await server.setup({ config$: configWithSSL$ });
   registerRouter(router);
 
   await server.start();
@@ -786,7 +812,7 @@ test('returns server and connection options on start', async () => {
     ...config,
     port: 12345,
   };
-  const { server: innerServer } = await server.setup(configWithPort);
+  const { server: innerServer } = await server.setup({ config$: of(configWithPort) });
 
   expect(innerServer).toBeDefined();
   expect(innerServer).toBe((server as any).server);
@@ -800,9 +826,9 @@ test('throws an error if starts without set up', async () => {
 
 test('allows attaching metadata to attach meta-data tag strings to a route', async () => {
   const tags = ['my:tag'];
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
-  const router = new Router('', logger, enhanceWithContext);
+  const router = new Router('', logger, enhanceWithContext, routerOptions);
   router.get({ path: '/with-tags', validate: false, options: { tags } }, (context, req, res) =>
     res.ok({ body: { tags: req.route.options.tags } })
   );
@@ -819,9 +845,9 @@ test('allows attaching metadata to attach meta-data tag strings to a route', asy
 
 test('allows declaring route access to flag a route as public or internal', async () => {
   const access = 'internal';
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
-  const router = new Router('', logger, enhanceWithContext);
+  const router = new Router('', logger, enhanceWithContext, routerOptions);
   router.get({ path: '/with-access', validate: false, options: { access } }, (context, req, res) =>
     res.ok({ body: { access: req.route.options.access } })
   );
@@ -831,15 +857,15 @@ test('allows declaring route access to flag a route as public or internal', asyn
   registerRouter(router);
 
   await server.start();
-  await supertest(innerServer.listener).get('/with-access').expect(200, { access });
+  await supertest(innerServer.listener).get('/with-access').expect(200, { access: 'internal' });
 
-  await supertest(innerServer.listener).get('/without-access').expect(200, { access: 'public' });
+  await supertest(innerServer.listener).get('/without-access').expect(200, { access: 'internal' });
 });
 
-test('infers access flag from path if not defined', async () => {
-  const { registerRouter, server: innerServer } = await server.setup(config);
+test(`sets access flag to 'internal' if not defined`, async () => {
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
-  const router = new Router('', logger, enhanceWithContext);
+  const router = new Router('', logger, enhanceWithContext, routerOptions);
   router.get({ path: '/internal/foo', validate: false }, (context, req, res) =>
     res.ok({ body: { access: req.route.options.access } })
   );
@@ -858,19 +884,19 @@ test('infers access flag from path if not defined', async () => {
   await server.start();
   await supertest(innerServer.listener).get('/internal/foo').expect(200, { access: 'internal' });
 
-  await supertest(innerServer.listener).get('/random/foo').expect(200, { access: 'public' });
+  await supertest(innerServer.listener).get('/random/foo').expect(200, { access: 'internal' });
   await supertest(innerServer.listener)
     .get('/random/internal/foo')
-    .expect(200, { access: 'public' });
+    .expect(200, { access: 'internal' });
   await supertest(innerServer.listener)
     .get('/api/foo/internal/my-foo')
-    .expect(200, { access: 'public' });
+    .expect(200, { access: 'internal' });
 });
 
 test('exposes route details of incoming request to a route handler', async () => {
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
-  const router = new Router('', logger, enhanceWithContext);
+  const router = new Router('', logger, enhanceWithContext, routerOptions);
   router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: req.route }));
   registerRouter(router);
 
@@ -883,7 +909,7 @@ test('exposes route details of incoming request to a route handler', async () =>
       options: {
         authRequired: true,
         xsrfRequired: false,
-        access: 'public',
+        access: 'internal',
         tags: [],
         timeout: {},
       },
@@ -892,8 +918,10 @@ test('exposes route details of incoming request to a route handler', async () =>
 
 describe('conditional compression', () => {
   async function setupServer(innerConfig: HttpConfig) {
-    const { registerRouter, server: innerServer } = await server.setup(innerConfig);
-    const router = new Router('', logger, enhanceWithContext);
+    const { registerRouter, server: innerServer } = await server.setup({
+      config$: of(innerConfig),
+    });
+    const router = new Router('', logger, enhanceWithContext, routerOptions);
     // we need the large body here so that compression would normally be used
     const largeRequest = {
       body: 'hello'.repeat(500),
@@ -997,11 +1025,13 @@ describe('conditional compression', () => {
 describe('response headers', () => {
   test('allows to configure "keep-alive" header', async () => {
     const { registerRouter, server: innerServer } = await server.setup({
-      ...config,
-      keepaliveTimeout: 100_000,
+      config$: of({
+        ...config,
+        keepaliveTimeout: 100_000,
+      }),
     });
 
-    const router = new Router('', logger, enhanceWithContext);
+    const router = new Router('', logger, enhanceWithContext, routerOptions);
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: req.route }));
     registerRouter(router);
 
@@ -1016,9 +1046,9 @@ describe('response headers', () => {
   });
 
   test('default headers', async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
+    const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
-    const router = new Router('', logger, enhanceWithContext);
+    const router = new Router('', logger, enhanceWithContext, routerOptions);
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: req.route }));
     registerRouter(router);
 
@@ -1038,9 +1068,9 @@ describe('response headers', () => {
 });
 
 test('exposes route details of incoming request to a route handler (POST + payload options)', async () => {
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
-  const router = new Router('', logger, enhanceWithContext);
+  const router = new Router('', logger, enhanceWithContext, routerOptions);
   router.post(
     {
       path: '/',
@@ -1061,7 +1091,7 @@ test('exposes route details of incoming request to a route handler (POST + paylo
       options: {
         authRequired: true,
         xsrfRequired: true,
-        access: 'public',
+        access: 'internal',
         tags: [],
         timeout: {
           payload: 10000,
@@ -1078,9 +1108,9 @@ test('exposes route details of incoming request to a route handler (POST + paylo
 
 describe('body options', () => {
   test('should reject the request because the Content-Type in the request is not valid', async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
+    const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
-    const router = new Router('', logger, enhanceWithContext);
+    const router = new Router('', logger, enhanceWithContext, routerOptions);
     router.post(
       {
         path: '/',
@@ -1100,9 +1130,9 @@ describe('body options', () => {
   });
 
   test('should reject the request because the payload is too large', async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
+    const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
-    const router = new Router('', logger, enhanceWithContext);
+    const router = new Router('', logger, enhanceWithContext, routerOptions);
     router.post(
       {
         path: '/',
@@ -1122,9 +1152,9 @@ describe('body options', () => {
   });
 
   test('should not parse the content in the request', async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
+    const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
-    const router = new Router('', logger, enhanceWithContext);
+    const router = new Router('', logger, enhanceWithContext, routerOptions);
     router.post(
       {
         path: '/',
@@ -1151,9 +1181,9 @@ describe('body options', () => {
 describe('timeout options', () => {
   describe('payload timeout', () => {
     test('POST routes set the payload timeout', async () => {
-      const { registerRouter, server: innerServer } = await server.setup(config);
+      const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
-      const router = new Router('', logger, enhanceWithContext);
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
       router.post(
         {
           path: '/',
@@ -1185,9 +1215,9 @@ describe('timeout options', () => {
     });
 
     test('DELETE routes set the payload timeout', async () => {
-      const { registerRouter, server: innerServer } = await server.setup(config);
+      const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
-      const router = new Router('', logger, enhanceWithContext);
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
       router.delete(
         {
           path: '/',
@@ -1218,9 +1248,9 @@ describe('timeout options', () => {
     });
 
     test('PUT routes set the payload timeout and automatically adjusts the idle socket timeout', async () => {
-      const { registerRouter, server: innerServer } = await server.setup(config);
+      const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
-      const router = new Router('', logger, enhanceWithContext);
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
       router.put(
         {
           path: '/',
@@ -1251,9 +1281,9 @@ describe('timeout options', () => {
     });
 
     test('PATCH routes set the payload timeout and automatically adjusts the idle socket timeout', async () => {
-      const { registerRouter, server: innerServer } = await server.setup(config);
+      const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
-      const router = new Router('', logger, enhanceWithContext);
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
       router.patch(
         {
           path: '/',
@@ -1287,11 +1317,13 @@ describe('timeout options', () => {
   describe('idleSocket timeout', () => {
     test('uses server socket timeout when not specified in the route', async () => {
       const { registerRouter, server: innerServer } = await server.setup({
-        ...config,
-        socketTimeout: 11000,
+        config$: of({
+          ...config,
+          socketTimeout: 11000,
+        }),
       });
 
-      const router = new Router('', logger, enhanceWithContext);
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
       router.get(
         {
           path: '/',
@@ -1320,11 +1352,13 @@ describe('timeout options', () => {
 
     test('sets the socket timeout when specified in the route', async () => {
       const { registerRouter, server: innerServer } = await server.setup({
-        ...config,
-        socketTimeout: 11000,
+        config$: of({
+          ...config,
+          socketTimeout: 11000,
+        }),
       });
 
-      const router = new Router('', logger, enhanceWithContext);
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
       router.get(
         {
           path: '/',
@@ -1353,9 +1387,9 @@ describe('timeout options', () => {
     });
 
     test('idleSocket timeout can be smaller than the payload timeout', async () => {
-      const { registerRouter } = await server.setup(config);
+      const { registerRouter } = await server.setup({ config$ });
 
-      const router = new Router('', logger, enhanceWithContext);
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
       router.post(
         {
           path: '/',
@@ -1380,9 +1414,9 @@ describe('timeout options', () => {
 });
 
 test('should return a stream in the body', async () => {
-  const { registerRouter, server: innerServer } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
-  const router = new Router('', logger, enhanceWithContext);
+  const router = new Router('', logger, enhanceWithContext, routerOptions);
   router.put(
     {
       path: '/',
@@ -1406,10 +1440,12 @@ test('should return a stream in the body', async () => {
 
 test('closes sockets on timeout', async () => {
   const { registerRouter, server: innerServer } = await server.setup({
-    ...config,
-    socketTimeout: 1000,
+    config$: of({
+      ...config,
+      socketTimeout: 1000,
+    }),
   });
-  const router = new Router('', logger, enhanceWithContext);
+  const router = new Router('', logger, enhanceWithContext, routerOptions);
 
   router.get({ path: '/a', validate: false }, async (context, req, res) => {
     await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -1431,14 +1467,14 @@ test('closes sockets on timeout', async () => {
 describe('setup contract', () => {
   describe('#createSessionStorage', () => {
     test('creates session storage factory', async () => {
-      const { createCookieSessionStorageFactory } = await server.setup(config);
+      const { createCookieSessionStorageFactory } = await server.setup({ config$ });
       const sessionStorageFactory = await createCookieSessionStorageFactory(cookieOptions);
 
       expect(sessionStorageFactory.asScoped).toBeDefined();
     });
 
     test('creates session storage factory only once', async () => {
-      const { createCookieSessionStorageFactory } = await server.setup(config);
+      const { createCookieSessionStorageFactory } = await server.setup({ config$ });
       const create = async () => await createCookieSessionStorageFactory(cookieOptions);
 
       await create();
@@ -1446,7 +1482,7 @@ describe('setup contract', () => {
     });
 
     test('does not throw if called after stop', async () => {
-      const { createCookieSessionStorageFactory } = await server.setup(config);
+      const { createCookieSessionStorageFactory } = await server.setup({ config$ });
       await server.stop();
       expect(() => {
         createCookieSessionStorageFactory(cookieOptions);
@@ -1456,7 +1492,7 @@ describe('setup contract', () => {
 
   describe('#getServerInfo', () => {
     test('returns correct information', async () => {
-      let { getServerInfo } = await server.setup(config);
+      let { getServerInfo } = await server.setup({ config$ });
 
       expect(getServerInfo()).toEqual({
         hostname: '127.0.0.1',
@@ -1466,10 +1502,12 @@ describe('setup contract', () => {
       });
 
       ({ getServerInfo } = await server.setup({
-        ...config,
-        port: 12345,
-        name: 'custom-name',
-        host: 'localhost',
+        config$: of({
+          ...config,
+          port: 12345,
+          name: 'custom-name',
+          host: 'localhost',
+        }),
       }));
 
       expect(getServerInfo()).toEqual({
@@ -1481,7 +1519,7 @@ describe('setup contract', () => {
     });
 
     test('returns correct protocol when ssl is enabled', async () => {
-      const { getServerInfo } = await server.setup(configWithSSL);
+      const { getServerInfo } = await server.setup({ config$: configWithSSL$ });
 
       expect(getServerInfo().protocol).toEqual('https');
     });
@@ -1501,8 +1539,31 @@ describe('setup contract', () => {
       }
     });
 
+    test('registers routes with expected options', async () => {
+      const { registerStaticDir } = await server.setup({ config$ });
+      expect(createServer).toHaveBeenCalledTimes(1);
+      const [{ value: myServer }] = (createServer as jest.Mock).mock.results;
+      jest.spyOn(myServer, 'route');
+      expect(myServer.route).toHaveBeenCalledTimes(0);
+      registerStaticDir('/static/{path*}', assetFolder);
+      expect(myServer.route).toHaveBeenCalledTimes(1);
+      expect(myServer.route).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          options: {
+            app: { access: 'public' },
+            auth: false,
+            cache: {
+              privacy: 'public',
+              otherwise: 'must-revalidate',
+            },
+          },
+        })
+      );
+    });
+
     test('does not throw if called after stop', async () => {
-      const { registerStaticDir } = await server.setup(config);
+      const { registerStaticDir } = await server.setup({ config$ });
       await server.stop();
       expect(() => {
         registerStaticDir('/path1/{path*}', '/path/to/resource');
@@ -1510,7 +1571,7 @@ describe('setup contract', () => {
     });
 
     test('returns correct headers for static assets', async () => {
-      const { registerStaticDir, server: innerServer } = await server.setup(config);
+      const { registerStaticDir, server: innerServer } = await server.setup({ config$ });
 
       registerStaticDir('/static/{path*}', assetFolder);
 
@@ -1524,7 +1585,7 @@ describe('setup contract', () => {
     });
 
     test('returns compressed version if present', async () => {
-      const { registerStaticDir, server: innerServer } = await server.setup(config);
+      const { registerStaticDir, server: innerServer } = await server.setup({ config$ });
 
       registerStaticDir('/static/{path*}', assetFolder);
 
@@ -1540,7 +1601,7 @@ describe('setup contract', () => {
     });
 
     test('returns uncompressed version if compressed asset is not available', async () => {
-      const { registerStaticDir, server: innerServer } = await server.setup(config);
+      const { registerStaticDir, server: innerServer } = await server.setup({ config$ });
 
       registerStaticDir('/static/{path*}', assetFolder);
 
@@ -1556,7 +1617,7 @@ describe('setup contract', () => {
     });
 
     test('returns a 304 if etag value matches', async () => {
-      const { registerStaticDir, server: innerServer } = await server.setup(config);
+      const { registerStaticDir, server: innerServer } = await server.setup({ config$ });
 
       registerStaticDir('/static/{path*}', assetFolder);
 
@@ -1565,7 +1626,7 @@ describe('setup contract', () => {
         .get('/static/some_json.json')
         .expect(200);
 
-      const etag = response.get('etag');
+      const etag = response.get('etag')!;
       expect(etag).not.toBeUndefined();
 
       await supertest(innerServer.listener)
@@ -1575,7 +1636,7 @@ describe('setup contract', () => {
     });
 
     test('serves content if etag values does not match', async () => {
-      const { registerStaticDir, server: innerServer } = await server.setup(config);
+      const { registerStaticDir, server: innerServer } = await server.setup({ config$ });
 
       registerStaticDir('/static/{path*}', assetFolder);
 
@@ -1590,7 +1651,7 @@ describe('setup contract', () => {
     test('dynamically updates depending on the content of the file', async () => {
       const tempFile = join(tempDir, 'some_file.json');
 
-      const { registerStaticDir, server: innerServer } = await server.setup(config);
+      const { registerStaticDir, server: innerServer } = await server.setup({ config$ });
       registerStaticDir('/static/{path*}', tempDir);
 
       await server.start();
@@ -1617,7 +1678,7 @@ describe('setup contract', () => {
 
   describe('#registerOnPreRouting', () => {
     test('does not throw if called after stop', async () => {
-      const { registerOnPreRouting } = await server.setup(config);
+      const { registerOnPreRouting } = await server.setup({ config$ });
       await server.stop();
       expect(() => {
         registerOnPreRouting((req, res) => res.unauthorized());
@@ -1627,7 +1688,7 @@ describe('setup contract', () => {
 
   describe('#registerOnPreAuth', () => {
     test('does not throw if called after stop', async () => {
-      const { registerOnPreAuth } = await server.setup(config);
+      const { registerOnPreAuth } = await server.setup({ config$ });
       await server.stop();
       expect(() => {
         registerOnPreAuth((req, res) => res.unauthorized());
@@ -1637,7 +1698,7 @@ describe('setup contract', () => {
 
   describe('#registerOnPostAuth', () => {
     test('does not throw if called after stop', async () => {
-      const { registerOnPostAuth } = await server.setup(config);
+      const { registerOnPostAuth } = await server.setup({ config$ });
       await server.stop();
       expect(() => {
         registerOnPostAuth((req, res) => res.unauthorized());
@@ -1647,7 +1708,7 @@ describe('setup contract', () => {
 
   describe('#registerOnPreResponse', () => {
     test('does not throw if called after stop', async () => {
-      const { registerOnPreResponse } = await server.setup(config);
+      const { registerOnPreResponse } = await server.setup({ config$ });
       await server.stop();
       expect(() => {
         registerOnPreResponse((req, res, t) => t.next());
@@ -1657,11 +1718,60 @@ describe('setup contract', () => {
 
   describe('#registerAuth', () => {
     test('does not throw if called after stop', async () => {
-      const { registerAuth } = await server.setup(config);
+      const { registerAuth } = await server.setup({ config$ });
       await server.stop();
       expect(() => {
         registerAuth((req, res) => res.unauthorized());
       }).not.toThrow();
     });
+  });
+});
+
+describe('configuration change', () => {
+  it('logs a warning in case of incompatible config change', async () => {
+    const configSubject = new BehaviorSubject(configWithSSL);
+
+    await server.setup({ config$: configSubject });
+    await server.start();
+
+    const nextConfig = {
+      ...configWithSSL,
+      ssl: {
+        ...configWithSSL.ssl,
+        getSecureOptions: () => 0,
+        enabled: false,
+      },
+    } as HttpConfig;
+
+    configSubject.next(nextConfig);
+
+    expect(loggingService.get().warn).toHaveBeenCalledWith(
+      'Incompatible TLS config change detected - TLS cannot be toggled without a full server reboot.'
+    );
+  });
+
+  it('calls setTlsConfig and logs an info message when config changes', async () => {
+    const configSubject = new BehaviorSubject(configWithSSL);
+
+    const { server: innerServer } = await server.setup({ config$: configSubject });
+    await server.start();
+
+    const nextConfig = {
+      ...configWithSSL,
+      ssl: {
+        ...configWithSSL.ssl,
+        isEqualTo: () => false,
+        getSecureOptions: () => 0,
+      },
+    } as HttpConfig;
+
+    configSubject.next(nextConfig);
+
+    expect(setTlsConfigMock).toHaveBeenCalledTimes(1);
+    expect(setTlsConfigMock).toHaveBeenCalledWith(innerServer, nextConfig.ssl);
+
+    expect(loggingService.get().info).toHaveBeenCalledWith(
+      'TLS configuration change detected - reloading TLS configuration.'
+    );
   });
 });

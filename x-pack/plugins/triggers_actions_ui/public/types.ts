@@ -14,9 +14,6 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
-  IconType,
-  EuiFlyoutSize,
-  RecursivePartial,
   EuiDataGridCellValueElementProps,
   EuiDataGridToolBarAdditionalControlsOptions,
   EuiDataGridProps,
@@ -24,7 +21,12 @@ import type {
   EuiDataGridColumnCellAction,
   EuiDataGridToolBarVisibilityOptions,
   EuiSuperSelectOption,
+  EuiDataGridOnColumnResizeHandler,
+  EuiDataGridCellProps,
+  RenderCellValue,
+  EuiDataGridCellPopoverElementProps,
 } from '@elastic/eui';
+import type { RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
 import { KueryNode } from '@kbn/es-query';
@@ -38,32 +40,42 @@ import {
 } from '@kbn/actions-plugin/common';
 import {
   ActionGroup,
-  RuleActionParam,
   SanitizedRule as AlertingSanitizedRule,
   ResolvedSanitizedRule,
-  RuleAction,
+  RuleSystemAction,
   RuleTaskState,
   AlertSummary as RuleSummary,
   ExecutionDuration,
   AlertStatus,
   RawAlertInstance,
-  AlertingFrameworkHealth,
   RuleNotifyWhenType,
   RuleTypeParams,
-  ActionVariable,
-  RuleType as CommonRuleType,
+  RuleTypeMetaData,
   RuleLastRun,
+  MaintenanceWindow,
+  SanitizedRuleAction as RuleAction,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
-import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import type {
+  RuleRegistrySearchRequestPagination,
+  EcsFieldsResponse,
+} from '@kbn/rule-registry-plugin/common';
 import {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React from 'react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { TypeRegistry } from './application/type_registry';
+import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
+import {
+  ValidationResult,
+  UserConfiguredActionConnector,
+  ActionConnector,
+  ActionTypeRegistryContract,
+  EsQuerySnapshot,
+} from '@kbn/alerts-ui-shared/src/common/types';
+import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
@@ -76,6 +88,7 @@ import type {
   RuleEventLogListProps,
   RuleEventLogListOptions,
 } from './application/sections/rule_details/components/rule_event_log_list';
+import type { GlobalRuleEventLogListProps } from './application/sections/rule_details/components/global_rule_event_log_list';
 import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
@@ -89,32 +102,70 @@ import type {
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
 import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
-import { Case } from './application/sections/alerts_table/hooks/api';
+import { Case } from './application/sections/alerts_table/hooks/apis/bulk_get_cases';
+import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
+
+export type {
+  GenericValidationResult,
+  ValidationResult,
+  ConnectorValidationError,
+  ConnectorValidationFunc,
+  ActionConnectorFieldsProps,
+  ActionConnectorProps,
+  SystemAction,
+  PreConfiguredActionConnector,
+  UserConfiguredActionConnector,
+  ActionConnector,
+  ActionParamsProps,
+  ActionReadOnlyElementProps,
+  CustomConnectorSelectionItem,
+  ActionTypeModel,
+  ActionTypeRegistryContract,
+} from '@kbn/alerts-ui-shared/src/common/types';
+
+export { ActionConnectorMode } from '@kbn/alerts-ui-shared/src/common/types';
+
+export type { ActionVariables, RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
+
+export {
+  REQUIRED_ACTION_VARIABLES,
+  CONTEXT_ACTION_VARIABLES,
+  OPTIONAL_ACTION_VARIABLES,
+} from '@kbn/triggers-actions-ui-types';
+
+type RuleUiAction = RuleAction | RuleSystemAction;
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   AlertingSanitizedRule<Params>,
-  'alertTypeId'
+  'alertTypeId' | 'actions' | 'systemActions'
 > & {
   ruleTypeId: AlertingSanitizedRule['alertTypeId'];
+  actions: RuleUiAction[];
 };
 type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
-type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> & {
+type ResolvedRule = Omit<
+  ResolvedSanitizedRule<RuleTypeParams>,
+  'alertTypeId' | 'actions' | 'systemActions'
+> & {
   ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
+  actions: RuleUiAction[];
 };
 
 export type {
   Rule,
   RuleAction,
+  RuleSystemAction,
+  RuleUiAction,
   RuleTaskState,
   RuleSummary,
   ExecutionDuration,
   AlertStatus,
   RawAlertInstance,
-  AlertingFrameworkHealth,
   RuleNotifyWhenType,
   RuleTypeParams,
+  RuleTypeMetaData,
   ResolvedRule,
   SanitizedRule,
   RuleStatusDropdownProps,
@@ -125,6 +176,7 @@ export type {
   RuleTagBadgeOptions,
   RuleEventLogListProps,
   RuleEventLogListOptions,
+  GlobalRuleEventLogListProps,
   RulesListProps,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
@@ -146,26 +198,8 @@ export {
 };
 
 export type ActionTypeIndex = Record<string, ActionType>;
-export type RuleTypeIndex = Map<string, RuleType>;
-export type ActionTypeRegistryContract<
-  ActionConnector = unknown,
-  ActionParams = unknown
-> = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
-export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<
-  TypeRegistry<AlertsTableConfigurationRegistry>
->;
-
-export interface ConnectorValidationError {
-  message: ReactNode;
-}
-
-export type ConnectorValidationFunc = () => Promise<ConnectorValidationError | void | undefined>;
-export interface ActionConnectorFieldsProps {
-  readOnly: boolean;
-  isEdit: boolean;
-  registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
-}
+export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<AlertTableConfigRegistry>;
 
 export enum RuleFlyoutCloseReason {
   SAVED,
@@ -176,11 +210,6 @@ export interface BulkEditResponse {
   rules: Rule[];
   errors: BulkOperationError[];
   total: number;
-}
-
-export enum ActionConnectorMode {
-  Test = 'test',
-  ActionForm = 'actionForm',
 }
 
 export interface BulkOperationResponse {
@@ -205,21 +234,13 @@ export type BulkOperationAttributes = BulkOperationAttributesWithoutHttp & {
   http: HttpSetup;
 };
 
-export interface ActionParamsProps<TParams> {
-  actionParams: Partial<TParams>;
-  index: number;
-  editAction: (key: string, value: RuleActionParam, index: number) => void;
-  errors: IErrorObject;
-  messageVariables?: ActionVariable[];
-  defaultMessage?: string;
-  useDefaultMessage?: boolean;
-  actionConnector?: ActionConnector;
-  isLoading?: boolean;
-  isDisabled?: boolean;
-  showEmailSubjectAndMessage?: boolean;
-  executionMode?: ActionConnectorMode;
-  onBlur?: (field?: string) => void;
-}
+export type BulkDisableParamsWithoutHttp = BulkOperationAttributesWithoutHttp & {
+  untrack: boolean;
+};
+
+export type BulkDisableParams = BulkDisableParamsWithoutHttp & {
+  http: HttpSetup;
+};
 
 export interface Pagination {
   index: number;
@@ -231,69 +252,6 @@ export interface Sorting {
   direction: string;
 }
 
-interface CustomConnectorSelectionItem {
-  getText: (actionConnector: ActionConnector) => string;
-  getComponent: (
-    actionConnector: ActionConnector
-  ) => React.LazyExoticComponent<ComponentType<{ actionConnector: ActionConnector }>> | undefined;
-}
-
-export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
-  id: string;
-  iconClass: IconType;
-  selectMessage: string;
-  actionTypeTitle?: string;
-  validateParams: (
-    actionParams: ActionParams
-  ) => Promise<GenericValidationResult<Partial<ActionParams> | unknown>>;
-  actionConnectorFields: React.LazyExoticComponent<
-    ComponentType<ActionConnectorFieldsProps>
-  > | null;
-  actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
-  defaultActionParams?: RecursivePartial<ActionParams>;
-  defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
-  customConnectorSelectItem?: CustomConnectorSelectionItem;
-  isExperimental?: boolean;
-}
-
-export interface GenericValidationResult<T> {
-  errors: Record<Extract<keyof T, string>, string[] | unknown>;
-}
-
-export interface ValidationResult {
-  errors: Record<string, any>;
-}
-
-export interface ActionConnectorProps<Config, Secrets> {
-  secrets: Secrets;
-  id: string;
-  actionTypeId: string;
-  name: string;
-  referencedByCount?: number;
-  config: Config;
-  isPreconfigured: boolean;
-  isDeprecated: boolean;
-  isMissingSecrets?: boolean;
-}
-
-export type PreConfiguredActionConnector = Omit<
-  ActionConnectorProps<never, never>,
-  'config' | 'secrets'
-> & {
-  isPreconfigured: true;
-};
-
-export type UserConfiguredActionConnector<Config, Secrets> = ActionConnectorProps<
-  Config,
-  Secrets
-> & {
-  isPreconfigured: false;
-};
-
-export type ActionConnector<Config = Record<string, unknown>, Secrets = Record<string, unknown>> =
-  | PreConfiguredActionConnector
-  | UserConfiguredActionConnector<Config, Secrets>;
-
 export type ActionConnectorWithoutId<
   Config = Record<string, unknown>,
   Secrets = Record<string, unknown>
@@ -304,40 +262,14 @@ export type ActionConnectorTableItem = ActionConnector & {
   compatibility: string[];
 };
 
-type AsActionVariables<Keys extends string> = {
-  [Req in Keys]: ActionVariable[];
-};
-export const REQUIRED_ACTION_VARIABLES = ['params'] as const;
-export const CONTEXT_ACTION_VARIABLES = ['context'] as const;
-export const OPTIONAL_ACTION_VARIABLES = [...CONTEXT_ACTION_VARIABLES, 'state'] as const;
-export type ActionVariables = AsActionVariables<typeof REQUIRED_ACTION_VARIABLES[number]> &
-  Partial<AsActionVariables<typeof OPTIONAL_ACTION_VARIABLES[number]>>;
-
-export interface RuleType<
-  ActionGroupIds extends string = string,
-  RecoveryActionGroupId extends string = string
-> extends Pick<
-    CommonRuleType<ActionGroupIds, RecoveryActionGroupId>,
-    | 'id'
-    | 'name'
-    | 'actionGroups'
-    | 'producer'
-    | 'minimumLicenseRequired'
-    | 'recoveryActionGroup'
-    | 'defaultActionGroupId'
-    | 'ruleTaskTimeout'
-    | 'defaultScheduleInterval'
-    | 'doesSetRecoveryContext'
-  > {
-  actionVariables: ActionVariables;
-  authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
-  enabledInLicense: boolean;
-  hasGetSummarizedAlerts?: boolean;
-}
-
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
 
 export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus' | 'lastRun' | 'nextRun'>;
+
+export type RuleSnoozeSettings = Pick<
+  Rule,
+  'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'snoozeSchedule' | 'name'
+>;
 
 export interface RuleTableItem extends Rule {
   ruleType: RuleType['name'];
@@ -346,7 +278,6 @@ export interface RuleTableItem extends Rule {
   isEditable: boolean;
   enabledInLicense: boolean;
   showIntervalWarning?: boolean;
-  activeSnoozes?: string[];
 }
 
 export interface RuleTypeParamsExpressionProps<
@@ -354,6 +285,7 @@ export interface RuleTypeParamsExpressionProps<
   MetaData = Record<string, unknown>,
   ActionGroupIds extends string = string
 > {
+  id?: string;
   ruleParams: Params;
   ruleInterval: string;
   ruleThrottle: string;
@@ -374,12 +306,17 @@ export interface RuleTypeParamsExpressionProps<
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
+export type RuleParamsForRules = Record<
+  string,
+  Array<{ label: string; value: string | number | object }>
+>;
+
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
   description: string;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
-  validate: (ruleParams: Params) => ValidationResult;
+  validate: (ruleParams: Params, isServerless?: boolean) => ValidationResult;
   ruleParamsExpression:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<RuleTypeParamsExpressionProps<Params>>>;
@@ -399,10 +336,14 @@ export interface IErrorObject {
 export enum EditConnectorTabs {
   Configuration = 'configuration',
   Test = 'test',
+  Rules = 'rules',
 }
 
-export interface RuleEditProps<MetaData = Record<string, any>> {
-  initialRule: Rule;
+export interface RuleEditProps<
+  Params extends RuleTypeParams = RuleTypeParams,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+> {
+  initialRule: Rule<Params>;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
@@ -414,24 +355,41 @@ export interface RuleEditProps<MetaData = Record<string, any>> {
   ruleType?: RuleType<string, string>;
 }
 
-export interface RuleAddProps<MetaData = Record<string, any>> {
+export interface RuleAddProps<
+  Params extends RuleTypeParams = RuleTypeParams,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+> {
+  /**
+   * ID of the feature this rule should be created for.
+   *
+   * Notes:
+   * - The feature needs to be registered using `featuresPluginSetup.registerKibanaFeature()` API during your plugin's setup phase.
+   * - The user needs to have permission to access the feature in order to create the rule.
+   * */
   consumer: string;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   ruleTypeId?: string;
+  /**
+   * Determines whether the user should be able to change the rule type in the UI.
+   */
   canChangeTrigger?: boolean;
-  initialValues?: Partial<Rule>;
+  initialValues?: Partial<Rule<Params>>;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
+  hideGrouping?: boolean;
   hideInterval?: boolean;
   onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
   filteredRuleTypes?: string[];
+  validConsumers?: RuleCreationValidConsumer[];
+  useRuleProducer?: boolean;
+  initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
-export interface RuleDefinitionProps {
-  rule: Rule;
+export interface RuleDefinitionProps<Params extends RuleTypeParams = RuleTypeParams> {
+  rule: Rule<Params>;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onEditRule: () => Promise<void>;
@@ -498,39 +456,78 @@ export type AlertsTableProps = {
     data: Map<string, Case>;
     isLoading: boolean;
   };
+  maintenanceWindows: {
+    data: Map<string, MaintenanceWindow>;
+    isLoading: boolean;
+  };
   columns: EuiDataGridColumn[];
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
-  flyoutSize?: EuiFlyoutSize;
-  pageSize: number;
   pageSizeOptions: number[];
   id?: string;
-  leadingControlColumns: EuiDataGridControlColumn[];
-  showExpandToDetails: boolean;
+  leadingControlColumns?: EuiDataGridControlColumn[];
   showAlertStatusWithFlapping?: boolean;
-  trailingControlColumns: EuiDataGridControlColumn[];
-  useFetchAlertsData: () => FetchAlertData;
+  trailingControlColumns?: EuiDataGridControlColumn[];
+  cellContext?: EuiDataGridCellProps['cellContext'];
   visibleColumns: string[];
   'data-test-subj': string;
-  updatedAt: number;
   browserFields: any;
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
-  onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onChangeVisibleColumns: (newColumns: string[]) => void;
+  onColumnResize?: EuiDataGridOnColumnResizeHandler;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
   showInspectButton?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
+  /**
+   * Allows to consumers of the table to decide to highlight a row based on the current alert.
+   */
+  shouldHighlightRow?: (alert: Alert) => boolean;
+  /**
+   * Enable when rows may have variable heights (disables virtualization)
+   */
+  dynamicRowHeight?: boolean;
+  featureIds?: ValidFeatureId[];
+  pageIndex: number;
+  pageSize: number;
+  sort: SortCombinations[];
+  isLoading: boolean;
+  alerts: Alerts;
+  oldAlertsData: FetchAlertData['oldAlertsData'];
+  ecsAlertsData: FetchAlertData['ecsAlertsData'];
+  querySnapshot?: EsQuerySnapshot;
+  refetchAlerts: () => void;
+  alertsCount: number;
+  onSortChange: (sort: EuiDataGridSorting['columns']) => void;
+  onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
+  renderCellPopover?: ReturnType<GetRenderCellPopover>;
+  fieldFormats: FieldFormatsStart;
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
-// TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
-export type GetRenderCellValue = ({
-  setFlyoutAlert,
+export type SetFlyoutAlert = (alertId: string) => void;
+
+export interface TimelineNonEcsData {
+  field: string;
+  value?: string[] | null;
+}
+
+export type GetRenderCellPopover<T = unknown> = ({
+  context,
 }: {
-  setFlyoutAlert?: (data: unknown) => void;
-}) => (props: unknown) => React.ReactNode;
+  context?: T;
+}) => (
+  props: EuiDataGridCellPopoverElementProps & { alert: Alert }
+) => React.ReactNode | JSX.Element;
+
+export type PreFetchPageContext<T = unknown> = ({
+  alerts,
+  columns,
+}: {
+  alerts: Alerts;
+  columns: EuiDataGridColumn[];
+}) => T;
 
 export type AlertTableFlyoutComponent =
   | React.FunctionComponent<AlertsTableFlyoutBaseProps>
@@ -549,18 +546,47 @@ export interface BulkActionsConfig {
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
-  onClick: (
+  onClick?: (
     selectedIds: TimelineItem[],
     isAllSelected: boolean,
     setIsBulkActionsLoading: (isLoading: boolean) => void,
     clearSelection: () => void,
     refresh: () => void
   ) => void;
+  panel?: number;
 }
 
+interface PanelConfig {
+  id: number;
+  title?: JSX.Element | string;
+  'data-test-subj'?: string;
+}
+
+export interface RenderContentPanelProps {
+  alertItems: TimelineItem[];
+  setIsBulkActionsLoading: (isLoading: boolean) => void;
+  isAllSelected?: boolean;
+  clearSelection?: () => void;
+  refresh?: () => void;
+  closePopoverMenu: () => void;
+}
+
+interface ContentPanelConfig extends PanelConfig {
+  renderContent: (args: RenderContentPanelProps) => JSX.Element;
+  items?: never;
+}
+
+interface ItemsPanelConfig extends PanelConfig {
+  content?: never;
+  items: BulkActionsConfig[];
+}
+
+export type BulkActionsPanelConfig = ItemsPanelConfig | ContentPanelConfig;
+
 export type UseBulkActionsRegistry = (
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>
-) => BulkActionsConfig[];
+  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>,
+  refresh: () => void
+) => BulkActionsPanelConfig[];
 
 export type UseCellActions = (props: {
   columns: EuiDataGridColumn[];
@@ -568,6 +594,7 @@ export type UseCellActions = (props: {
   dataGridRef: RefObject<EuiDataGridRefProps>;
   ecsData: unknown[];
   pageSize: number;
+  pageIndex: number;
 }) => {
   // getCellAction function for system to return cell actions per Id
   getCellActions: (columnId: string, columnIndex: number) => EuiDataGridColumnCellAction[];
@@ -581,11 +608,24 @@ export interface RenderCustomActionsRowArgs {
   rowIndex: number;
   cveProps: EuiDataGridCellValueElementProps;
   alert: Alert;
-  setFlyoutAlert: (data: unknown) => void;
+  setFlyoutAlert: (alertId: string) => void;
   id?: string;
   setIsActionLoading?: (isLoading: boolean) => void;
   refresh: () => void;
   clearSelection: () => void;
+}
+
+export interface AlertActionsProps extends RenderCustomActionsRowArgs {
+  onActionExecuted?: () => void;
+  isAlertDetailsEnabled?: boolean;
+  /**
+   * Implement this to resolve your app's specific rule page path, return null to avoid showing the link
+   */
+  resolveRulePagePath?: (ruleId: string, currentPageId: string) => string | null;
+  /**
+   * Implement this to resolve your app's specific alert page path, return null to avoid showing the link
+   */
+  resolveAlertPagePath?: (alertId: string, currentPageId: string) => string | null;
 }
 
 export type UseActionsColumnRegistry = () => {
@@ -604,6 +644,7 @@ export interface AlertsTableConfigurationRegistry {
   cases?: {
     featureId: string;
     owner: string[];
+    appId?: string;
     syncAlerts?: boolean;
   };
   columns: EuiDataGridColumn[];
@@ -613,7 +654,8 @@ export interface AlertsTableConfigurationRegistry {
     footer: AlertTableFlyoutComponent;
   };
   sort?: SortCombinations[];
-  getRenderCellValue?: GetRenderCellValue;
+  getRenderCellValue?: RenderCellValue;
+  getRenderCellPopover?: GetRenderCellPopover;
   useActionsColumn?: UseActionsColumnRegistry;
   useBulkActions?: UseBulkActionsRegistry;
   useCellActions?: UseCellActions;
@@ -622,6 +664,12 @@ export interface AlertsTableConfigurationRegistry {
   };
   useFieldBrowserOptions?: UseFieldBrowserOptions;
   showInspectButton?: boolean;
+  hideBulkActions?: boolean;
+  ruleTypeIds?: string[];
+  useFetchPageContext?: PreFetchPageContext;
+  actions?: {
+    toggleColumn: (columnId: string) => void;
+  };
 }
 
 export enum BulkActionsVerbs {
@@ -647,6 +695,7 @@ export interface BulkActionsState {
   isAllSelected: boolean;
   areAllVisibleRowsSelected: boolean;
   rowCount: number;
+  updatedAt: number;
 }
 
 export type RowSelection = Map<number, RowSelectionState>;
@@ -688,13 +737,15 @@ export interface ConnectorServices {
 }
 
 export interface RulesListFilters {
-  searchText: string;
-  types: string[];
-  actionTypes: string[];
-  ruleExecutionStatuses: string[];
-  ruleLastRunOutcomes: string[];
-  ruleStatuses: RuleStatus[];
-  tags: string[];
+  actionTypes?: string[];
+  ruleExecutionStatuses?: string[];
+  ruleLastRunOutcomes?: string[];
+  ruleParams?: Record<string, string | number | object>;
+  ruleStatuses?: RuleStatus[];
+  searchText?: string;
+  tags?: string[];
+  types?: string[];
+  kueryNode?: KueryNode;
 }
 
 export type UpdateFiltersProps =
@@ -709,6 +760,14 @@ export type UpdateFiltersProps =
   | {
       filter: 'types' | 'actionTypes' | 'ruleExecutionStatuses' | 'ruleLastRunOutcomes' | 'tags';
       value: string[];
+    }
+  | {
+      filter: 'ruleParams';
+      value: Record<string, string | number | object>;
+    }
+  | {
+      filter: 'kueryNode';
+      value: KueryNode;
     };
 
 export interface RulesPageContainerState {
@@ -745,3 +804,5 @@ export interface NotifyWhenSelectOptions {
   isForEachAlertOption?: boolean;
   value: EuiSuperSelectOption<RuleNotifyWhenType>;
 }
+
+export type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';

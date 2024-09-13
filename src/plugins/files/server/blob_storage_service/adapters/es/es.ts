@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import assert from 'assert';
-import { once } from 'lodash';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Semaphore } from '@kbn/std';
 import { Readable, Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
-import { lastValueFrom, defer } from 'rxjs';
+import { lastValueFrom, defer, firstValueFrom } from 'rxjs';
 import { PerformanceMetricEvent, reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { memoize } from 'lodash';
 import { FilesPlugin } from '../../../plugin';
 import { FILE_UPLOAD_PERFORMANCE_EVENT_NAME } from '../../../performance';
 import type { BlobStorageClient } from '../../types';
@@ -38,14 +39,21 @@ interface UploadOptions {
 }
 
 export class ElasticsearchBlobStorageClient implements BlobStorageClient {
-  private static defaultSemaphore: Semaphore;
+  private static defaultUploadSemaphore: Semaphore;
+  private static defaultDownloadSemaphore: Semaphore;
 
   /**
-   * Call this function once to globally set a concurrent upload limit for
+   * Call this function once to globally set the concurrent transfer (upload/download) limit for
    * all {@link ElasticsearchBlobStorageClient} instances.
    */
-  public static configureConcurrentUpload(capacity: number) {
-    this.defaultSemaphore = new Semaphore(capacity);
+  public static configureConcurrentTransfers(capacity: number | [number, number]) {
+    if (Array.isArray(capacity)) {
+      this.defaultUploadSemaphore = new Semaphore(capacity[0]);
+      this.defaultDownloadSemaphore = new Semaphore(capacity[1]);
+    } else {
+      this.defaultUploadSemaphore = new Semaphore(capacity);
+      this.defaultDownloadSemaphore = new Semaphore(capacity);
+    }
   }
 
   constructor(
@@ -57,31 +65,49 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
      * Override the default concurrent upload limit by passing in a different
      * semaphore
      */
-    private readonly uploadSemaphore = ElasticsearchBlobStorageClient.defaultSemaphore,
+    private readonly uploadSemaphore = ElasticsearchBlobStorageClient.defaultUploadSemaphore,
+    /**
+     * Override the default concurrent download limit by passing in a different
+     * semaphore
+     */
+    private readonly downloadSemaphore = ElasticsearchBlobStorageClient.defaultDownloadSemaphore,
     /** Indicates that the index provided is an alias (changes how content is retrieved internally) */
     private readonly indexIsAlias: boolean = false
   ) {
-    assert(this.uploadSemaphore, `No default semaphore provided and no semaphore was passed in.`);
+    assert(
+      this.uploadSemaphore,
+      `No default semaphore provided and no semaphore was passed in for uploads.`
+    );
+    assert(
+      this.downloadSemaphore,
+      `No default semaphore provided and no semaphore was passed in for downloads.`
+    );
   }
 
   /**
-   * This function acts as a singleton i.t.o. execution: it can only be called once.
-   * Subsequent calls should not re-execute it.
-   *
-   * There is a known issue where calling this function simultaneously can result
-   * in a race condition where one of the calls will fail because the index is already
-   * being created. This is only an issue for the very first time the index is being
-   * created.
+   * This function acts as a singleton i.t.o. execution: it can only be called once per index.
+   * Subsequent calls for the same index should not re-execute it.
    */
-  private static createIndexIfNotExists = once(
-    async (index: string, esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
+  protected static createIndexIfNotExists = memoize(
+    async (
+      index: string,
+      esClient: ElasticsearchClient,
+      logger: Logger,
+      indexIsAlias: boolean
+    ): Promise<void> => {
+      // We don't attempt to create the index if it is an Alias/DS
+      if (indexIsAlias) {
+        logger.debug(`No need to create index [${index}] as it is an Alias or DS.`);
+        return;
+      }
+
       try {
         if (await esClient.indices.exists({ index })) {
-          logger.debug(`${index} already exists.`);
+          logger.debug(`[${index}] already exists. Nothing to do`);
           return;
         }
 
-        logger.info(`Creating ${index} for Elasticsearch blob store.`);
+        logger.info(`Creating [${index}] index for Elasticsearch blob store.`);
 
         await esClient.indices.create({
           index,
@@ -96,7 +122,9 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
         });
       } catch (e) {
         if (e instanceof errors.ResponseError && e.statusCode === 400) {
-          logger.warn('Unable to create blob storage index, it may have been created already.');
+          logger.warn(
+            `Unable to create blob storage index [${index}], it may have been created already.`
+          );
         }
         // best effort
       }
@@ -109,7 +137,8 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
     await ElasticsearchBlobStorageClient.createIndexIfNotExists(
       this.index,
       this.esClient,
-      this.logger
+      this.logger,
+      this.indexIsAlias
     );
 
     const processUpload = async () => {
@@ -123,6 +152,7 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
           parameters: {
             maxChunkSize: this.chunkSize,
           },
+          indexIsAlias: this.indexIsAlias,
         });
 
         const start = performance.now();
@@ -173,16 +203,29 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
   }
 
   public async download({ id, size }: { id: string; size?: number }): Promise<Readable> {
-    return this.getReadableContentStream(id, size);
+    // The refresh interval is set to 10s. To avoid throwing an error if the user tries to download a file
+    // right after uploading it, we refresh the index before downloading the file.
+    await this.esClient.indices.refresh({ index: this.index });
+
+    return firstValueFrom(
+      defer(() => Promise.resolve(this.getReadableContentStream(id, size))).pipe(
+        this.downloadSemaphore.acquire()
+      )
+    );
   }
 
   public async delete(id: string): Promise<void> {
     try {
+      // The refresh interval is set to 10s. To avoid throwing an error if the user tries to delete a file
+      // right after uploading it, we refresh the index before deleting the file.
+      await this.esClient.indices.refresh({ index: this.index });
+
       const dest = getWritableContentStream({
         id,
         client: this.esClient,
         index: this.index,
         logger: this.logger.get('content-stream-delete'),
+        indexIsAlias: this.indexIsAlias,
       });
       /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
       await promisify(dest.end.bind(dest, '', 'utf8'))();

@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import type { GetInstalledIntegrationsResponse } from '../../../../common/detection_engine/fleet_integrations';
+import type {
+  GetInstalledIntegrationsResponse,
+  GetAllIntegrationsResponse,
+} from '../../../../common/api/detection_engine/fleet_integrations';
 
 export interface IFleetIntegrationsApiClient {
+  /**
+   * Fetch all integrations with installed and enabled statuses
+   *
+   * @throws An error if response is not OK
+   */
+  fetchAllIntegrations(args: FetchAllIntegrationsArgs): Promise<GetAllIntegrationsResponse>;
+
   /**
    * Fetch all installed integrations.
    * @throws An error if response is not OK
@@ -15,6 +25,13 @@ export interface IFleetIntegrationsApiClient {
   fetchInstalledIntegrations(
     args: FetchInstalledIntegrationsArgs
   ): Promise<GetInstalledIntegrationsResponse>;
+}
+
+export interface FetchAllIntegrationsArgs {
+  /**
+   * Optional signal for cancelling the request.
+   */
+  signal?: AbortSignal;
 }
 
 export interface FetchInstalledIntegrationsArgs {

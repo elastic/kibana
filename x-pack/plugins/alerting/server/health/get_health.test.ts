@@ -6,7 +6,9 @@
  */
 
 import { savedObjectsRepositoryMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
-import { RuleExecutionStatusErrorReasons, HealthStatus } from '../types';
+import { HealthStatus } from '@kbn/alerting-types';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { RuleExecutionStatusErrorReasons } from '../types';
 import { getAlertingHealthStatus, getHealth } from './get_health';
 
 const savedObjectsRepository = savedObjectsRepositoryMock.create();
@@ -22,7 +24,7 @@ describe('getHealth()', () => {
       saved_objects: [
         {
           id: '1',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
             alertTypeId: 'myType',
             schedule: { interval: '10s' },
@@ -80,7 +82,7 @@ describe('getHealth()', () => {
       saved_objects: [
         {
           id: '2',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
             alertTypeId: 'myType',
             schedule: { interval: '1s' },
@@ -134,7 +136,7 @@ describe('getHealth()', () => {
       saved_objects: [
         {
           id: '1',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
             alertTypeId: 'myType',
             schedule: { interval: '10s' },
@@ -185,7 +187,7 @@ describe('getHealth()', () => {
       saved_objects: [
         {
           id: '2',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
             alertTypeId: 'myType',
             schedule: { interval: '1s' },
@@ -233,7 +235,7 @@ describe('getAlertingHealthStatus()', () => {
       saved_objects: [
         {
           id: '1',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
             alertTypeId: 'myType',
             schedule: { interval: '10s' },

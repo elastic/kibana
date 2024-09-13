@@ -1,26 +1,29 @@
 {
   "text_structure.find_structure": {
     "url_params": {
-      "lines_to_sample": 0,
-      "line_merge_size_limit": 0,
-      "timeout": "",
       "charset": "",
-      "format": [
-        "ndjson",
-        "xml",
-        "delimited",
-        "semi_structured_text"
-      ],
-      "has_header_row": "__flag__",
-      "column_names": [],
+      "column_names": "",
       "delimiter": "",
+      "ecs_compatibility": "",
+      "explain": "__flag__",
+      "format": "",
+      "grok_pattern": "",
+      "has_header_row": "__flag__",
+      "line_merge_size_limit": [
+        "10000"
+      ],
+      "lines_to_sample": [
+        "1000"
+      ],
       "quote": "",
       "should_trim_fields": "__flag__",
-      "grok_pattern": "",
-      "ecs_compatibility": "",
+      "timeout": [
+        "25s",
+        "-1",
+        "0"
+      ],
       "timestamp_field": "",
-      "timestamp_format": "",
-      "explain": "__flag__"
+      "timestamp_format": ""
     },
     "methods": [
       "POST"
@@ -28,6 +31,10 @@
     "patterns": [
       "_text_structure/find_structure"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/find-structure.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/find-structure.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

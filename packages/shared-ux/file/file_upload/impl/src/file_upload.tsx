@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFilePicker } from '@elastic/eui';
 import React, { type FunctionComponent, useRef, useEffect, useMemo } from 'react';
+import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
 
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
@@ -19,7 +20,7 @@ import { context } from './context';
 /**
  * An object representing an uploaded file
  */
-interface UploadedFile<Meta = unknown> {
+export interface UploadedFile<Meta = unknown> {
   /**
    * The ID that was generated for the uploaded file
    */
@@ -136,7 +137,7 @@ export const FileUpload = <Kind extends string = string>({
   className,
 }: Props<Kind>): ReturnType<FunctionComponent> => {
   const { client } = useFilesContext();
-  const ref = useRef<null | EuiFilePicker>(null);
+  const ref = useRef<null | EuiFilePickerClass>(null);
   const fileKind = client.getFileKind(kindId);
   const repeatedUploads = compressed || allowRepeatedUploads;
   const uploadState = useMemo(

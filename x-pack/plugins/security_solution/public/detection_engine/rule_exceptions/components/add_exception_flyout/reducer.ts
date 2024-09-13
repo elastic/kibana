@@ -21,6 +21,7 @@ export interface State {
   initialItems: ExceptionsBuilderExceptionItem[];
   exceptionItems: ExceptionsBuilderReturnExceptionItem[];
   newComment: string;
+  commentErrorExists: boolean;
   addExceptionToRadioSelection: string;
   itemConditionValidationErrorExists: boolean;
   closeSingleAlert: boolean;
@@ -33,6 +34,7 @@ export interface State {
   errorSubmitting: Error | null;
   expireTime: Moment | undefined;
   expireErrorExists: boolean;
+  wildcardWarningExists: boolean;
 }
 
 export const initialState: State = {
@@ -40,6 +42,7 @@ export const initialState: State = {
   exceptionItems: [],
   exceptionItemMeta: { name: '' },
   newComment: '',
+  commentErrorExists: false,
   itemConditionValidationErrorExists: false,
   closeSingleAlert: false,
   bulkCloseAlerts: false,
@@ -53,6 +56,7 @@ export const initialState: State = {
   errorSubmitting: null,
   expireTime: undefined,
   expireErrorExists: false,
+  wildcardWarningExists: false,
 };
 
 export type Action =
@@ -75,6 +79,10 @@ export type Action =
   | {
       type: 'setComment';
       comment: string;
+    }
+  | {
+      type: 'setCommentError';
+      errorExists: boolean;
     }
   | {
       type: 'setCloseSingleAlert';
@@ -123,10 +131,15 @@ export type Action =
   | {
       type: 'setExpireError';
       errorExists: boolean;
+    }
+  | {
+      type: 'setWildcardWithWrongOperator';
+      warningExists: boolean;
     };
 
 export const createExceptionItemsReducer =
   () =>
+  /* eslint complexity: ["error", 22]*/
   (state: State, action: Action): State => {
     switch (action.type) {
       case 'setExceptionItemMeta': {
@@ -164,12 +177,27 @@ export const createExceptionItemsReducer =
           itemConditionValidationErrorExists: errorExists,
         };
       }
+      case 'setWildcardWithWrongOperator': {
+        const { warningExists } = action;
+        return {
+          ...state,
+          wildcardWarningExists: warningExists,
+        };
+      }
       case 'setComment': {
         const { comment } = action;
 
         return {
           ...state,
           newComment: comment,
+        };
+      }
+      case 'setCommentError': {
+        const { errorExists } = action;
+
+        return {
+          ...state,
+          commentErrorExists: errorExists,
         };
       }
       case 'setCloseSingleAlert': {
@@ -235,7 +263,6 @@ export const createExceptionItemsReducer =
       }
       case 'setListType': {
         const { listType } = action;
-
         return {
           ...state,
           listType,

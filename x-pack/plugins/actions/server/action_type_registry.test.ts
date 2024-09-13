@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
@@ -36,7 +37,7 @@ describe('actionTypeRegistry', () => {
       ),
       actionsConfigUtils: mockedActionsConfig,
       licenseState: mockedLicenseState,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           actionTypeId: 'foo',
           config: {},
@@ -45,6 +46,17 @@ describe('actionTypeRegistry', () => {
           secrets: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
+        },
+        {
+          actionTypeId: 'test.system-action',
+          config: {},
+          id: 'system-connector-test.system-action',
+          name: 'System action: test.system-action',
+          secrets: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
         },
       ],
     };
@@ -71,17 +83,18 @@ describe('actionTypeRegistry', () => {
       });
       expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "actions:my-action-type": Object {
-            "createTaskRunner": [Function],
-            "maxAttempts": 3,
-            "title": "My action type",
+      expect(mockTaskManager.registerTaskDefinitions.mock.calls[0]).toEqual(
+        expect.objectContaining([
+          {
+            'actions:my-action-type': {
+              createTaskRunner: expect.any(Function),
+              maxAttempts: 3,
+              cost: TaskCost.Tiny,
+              title: 'My action type',
+            },
           },
-        },
-      ]
-    `);
+        ])
+      );
       expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
         'Connector: My action type',
         'gold'
@@ -215,6 +228,49 @@ describe('actionTypeRegistry', () => {
       });
       expect(actionTypeRegistryParams.licensing.featureUsage.register).not.toHaveBeenCalled();
     });
+
+    test('allows registering system actions', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(() =>
+        actionTypeRegistry.register({
+          id: 'my-action-type',
+          name: 'My action type',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          isSystemActionType: true,
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        })
+      ).not.toThrow();
+    });
+
+    test('throws if the kibana privileges are defined but the action type is not a system action type', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(() =>
+        actionTypeRegistry.register({
+          id: 'my-action-type',
+          name: 'My action type',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          getKibanaPrivileges: jest.fn(),
+          isSystemActionType: false,
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Kibana privilege authorization is only supported for system action types"`
+      );
+    });
   });
 
   describe('get()', () => {
@@ -281,6 +337,7 @@ describe('actionTypeRegistry', () => {
           enabledInLicense: true,
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
+          isSystemActionType: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -324,10 +381,45 @@ describe('actionTypeRegistry', () => {
           enabledInLicense: true,
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
+          isSystemActionType: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
       expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
+    });
+
+    test('sets the isSystemActionType correctly for system actions', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      actionTypeRegistry.register({
+        id: 'test.system-action',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      const actionTypes = actionTypeRegistry.list();
+
+      expect(actionTypes).toEqual([
+        {
+          id: 'test.system-action',
+          name: 'Cases',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['alerting'],
+          isSystemActionType: true,
+        },
+      ]);
     });
   });
 
@@ -357,6 +449,7 @@ describe('actionTypeRegistry', () => {
 
   describe('isActionTypeEnabled', () => {
     let actionTypeRegistry: ActionTypeRegistry;
+
     const fooActionType: ActionType = {
       id: 'foo',
       name: 'Foo',
@@ -372,9 +465,17 @@ describe('actionTypeRegistry', () => {
       },
     };
 
+    const systemActionType: ActionType = {
+      ...fooActionType,
+      id: 'system-action-type',
+      name: 'System action type',
+      isSystemActionType: true,
+    };
+
     beforeEach(() => {
       actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       actionTypeRegistry.register(fooActionType);
+      actionTypeRegistry.register(systemActionType);
     });
 
     test('should call isActionTypeEnabled of the actions config', async () => {
@@ -394,6 +495,18 @@ describe('actionTypeRegistry', () => {
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 
       expect(actionTypeRegistry.isActionExecutable('my-slack1', 'foo')).toEqual(true);
+    });
+
+    test('should return true when isActionTypeEnabled is false and isLicenseValidForActionType is true and it has system connectors', async () => {
+      mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+      expect(
+        actionTypeRegistry.isActionExecutable(
+          'system-connector-test.system-action',
+          'system-action-type'
+        )
+      ).toEqual(true);
     });
 
     test('should call isLicenseValidForActionType of the license state with notifyUsage false by default', async () => {
@@ -499,6 +612,26 @@ describe('actionTypeRegistry', () => {
     beforeEach(() => {
       actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       actionTypeRegistry.register(fooActionType);
+      // @ts-expect-error accessing private property for testing
+      actionTypeRegistry.inMemoryConnectors.push({
+        ...fooActionType,
+        id: 'foo-preconfig',
+        name: 'Foo-preconfig',
+        actionTypeId: 'foo',
+        isPreconfigured: true,
+        config: {},
+        secrets: {},
+      });
+      // @ts-expect-error accessing private property for testing
+      actionTypeRegistry.inMemoryConnectors.push({
+        ...fooActionType,
+        id: 'foo-system',
+        name: 'Foo-system',
+        actionTypeId: 'foo',
+        isSystemAction: true,
+        config: {},
+        secrets: {},
+      });
     });
 
     test('should call isLicenseValidForActionType of the license state with notifyUsage false by default', async () => {
@@ -515,6 +648,35 @@ describe('actionTypeRegistry', () => {
       expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
         notifyUsage: true,
       });
+    });
+
+    test('should return true for enabled type', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const result = actionTypeRegistry.isActionExecutable('123', 'foo');
+      expect(result).toEqual(true);
+    });
+
+    test('should return false when license invalid', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({
+        isValid: false,
+        reason: 'invalid',
+      });
+      const result = actionTypeRegistry.isActionExecutable('123', 'foo');
+      expect(result).toEqual(false);
+    });
+
+    test('should return true for disabled type, but preconfigured connector', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
+      const result = actionTypeRegistry.isActionExecutable('foo-preconfig', 'foo');
+      expect(result).toEqual(true);
+    });
+
+    test('should return true for disabled type, but system connector', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
+      const result = actionTypeRegistry.isActionExecutable('foo-system', 'foo');
+      expect(result).toEqual(true);
     });
   });
 
@@ -544,6 +706,152 @@ describe('actionTypeRegistry', () => {
       });
       const result = registry.getAllTypes();
       expect(result).toEqual(['foo']);
+    });
+  });
+
+  describe('isSystemActionType()', () => {
+    it('should return true if the action type is a system action type', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: 'test.system-action',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      const result = registry.isSystemActionType('test.system-action');
+      expect(result).toBe(true);
+    });
+
+    it('should return false if the action type is not a system action type', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: 'foo',
+        name: 'Foo',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        executor,
+      });
+
+      const allTypes = registry.getAllTypes();
+      expect(allTypes.length).toBe(1);
+
+      const result = registry.isSystemActionType('foo');
+      expect(result).toBe(false);
+    });
+
+    it('should return false if the action type does not exists', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      const allTypes = registry.getAllTypes();
+      expect(allTypes.length).toBe(0);
+
+      const result = registry.isSystemActionType('not-exist');
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('getSystemActionKibanaPrivileges()', () => {
+    it('should get the kibana privileges correctly for system actions', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: 'test.system-action',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        getKibanaPrivileges: () => ['test/create'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      const result = registry.getSystemActionKibanaPrivileges('test.system-action');
+      expect(result).toEqual(['test/create']);
+    });
+
+    it('should return an empty array if the system action does not define any kibana privileges', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: 'test.system-action',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      const result = registry.getSystemActionKibanaPrivileges('test.system-action');
+      expect(result).toEqual([]);
+    });
+
+    it('should return an empty array if the action type is not a system action', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: 'foo',
+        name: 'Foo',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        executor,
+      });
+
+      const result = registry.getSystemActionKibanaPrivileges('foo');
+      expect(result).toEqual([]);
+    });
+
+    it('should pass the params correctly', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);
+
+      registry.register({
+        id: 'test.system-action',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        getKibanaPrivileges,
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      registry.getSystemActionKibanaPrivileges('test.system-action', { foo: 'bar' });
+      expect(getKibanaPrivileges).toHaveBeenCalledWith({ params: { foo: 'bar' } });
     });
   });
 });

@@ -75,10 +75,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
   const remoteName = 'ftr-remote:';
-  const indexPatternName = 'ft_farequote';
-  const indexPatternString = config.get('esTestCluster.ccs')
-    ? remoteName + indexPatternName
-    : indexPatternName;
+  const esIndexPatternName = 'ft_farequote';
+  const esIndexPatternString = config.get('esTestCluster.ccs')
+    ? remoteName + esIndexPatternName
+    : esIndexPatternName;
 
   const fieldStatsEntries = [
     {
@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
     before(async () => {
       await esNode.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded(indexPatternString, '@timestamp');
+      await ml.testResources.createDataViewIfNeeded(esIndexPatternString, '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createCalendar(calendarId);
@@ -101,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle(indexPatternString);
+      await ml.testResources.deleteDataViewByTitle(esIndexPatternString);
     });
 
     it('job creation loads the single metric wizard for the source data', async () => {
@@ -113,7 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobManagement.navigateToNewJobSourceSelection();
 
       await ml.testExecution.logTestStep('job creation loads the job type selection page');
-      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(indexPatternString);
+      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(esIndexPatternString);
 
       await ml.testExecution.logTestStep('job creation loads the single metric job wizard page');
       await ml.jobTypeSelection.selectSingleMetricJob();
@@ -122,6 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('job creation navigates through the single metric wizard and sets all needed fields', async () => {
       await ml.testExecution.logTestStep('job creation displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
+      await ml.commonUI.assertDatePickerDataTierOptionsVisible(true);
 
       await ml.testExecution.logTestStep('job creation sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
@@ -228,22 +229,26 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.assertDetectorResultsExist(jobId, 0);
     });
 
-    it('job cloning fails in the single metric wizard if a matching data view does not exist', async () => {
+    it('job cloning creates a temporary data view and opens the single metric wizard if a matching data view does not exist', async () => {
       await ml.testExecution.logTestStep('delete data view used by job');
-      await ml.testResources.deleteIndexPatternByTitle(indexPatternString);
+      await ml.testResources.deleteDataViewByTitle(esIndexPatternString);
 
       // Refresh page to ensure page has correct cache of data views
       await browser.refresh();
 
       await ml.testExecution.logTestStep(
-        'job cloning clicks the clone action and displays an error toast'
+        'job cloning clicks the clone action and loads the single metric wizard'
       );
-      await ml.jobTable.clickCloneJobActionWhenNoDataViewExists(jobId);
+      await ml.jobTable.clickCloneJobAction(jobId);
+      await ml.jobTypeSelection.assertSingleMetricJobWizardOpen();
     });
 
     it('job cloning opens the existing job in the single metric wizard', async () => {
       await ml.testExecution.logTestStep('recreate data view used by job');
-      await ml.testResources.createIndexPatternIfNeeded(indexPatternString, '@timestamp');
+      await ml.testResources.createDataViewIfNeeded(esIndexPatternString, '@timestamp');
+
+      await ml.navigation.navigateToMl();
+      await ml.navigation.navigateToJobManagement();
 
       // Refresh page to ensure page has correct cache of data views
       await browser.refresh();
@@ -382,6 +387,91 @@ export default function ({ getService }: FtrProviderContext) {
         'job deletion does not have results for the deleted job any more'
       );
       await ml.api.assertNoJobResultsExist(jobIdClone);
+    });
+
+    it('job cloning with too short of a job creation time range results in validation callouts', async () => {
+      await ml.testExecution.logTestStep('job cloning loads the job management page');
+      await ml.navigation.navigateToMl();
+      await ml.navigation.navigateToJobManagement();
+
+      await ml.testExecution.logTestStep(`cloning job: [${jobId}]`);
+      await ml.jobTable.clickCloneJobAction(jobId);
+
+      await ml.testExecution.logTestStep('job cloning displays the time range step');
+      await ml.jobWizardCommon.assertTimeRangeSectionExists();
+
+      await ml.testExecution.logTestStep('job cloning sets the time range');
+      await ml.jobWizardCommon.clickUseFullDataButton(
+        'Feb 7, 2016 @ 00:00:00.000',
+        'Feb 11, 2016 @ 23:59:54.000'
+      );
+
+      await ml.jobWizardCommon.goToTimeRangeStep();
+
+      const { startDate: origStartDate } = await ml.jobWizardCommon.getSelectedDateRange();
+
+      await ml.testExecution.logTestStep('calculate the new end date');
+      const shortDurationEndDate: string = `${origStartDate?.split(':', 1)[0]}:01:00.000`;
+
+      await ml.testExecution.logTestStep('set the new end date');
+      await ml.jobWizardCommon.setTimeRange({ endTime: shortDurationEndDate });
+
+      // assert time is set as expected
+      await ml.jobWizardCommon.assertDateRangeSelection(
+        origStartDate as string,
+        shortDurationEndDate
+      );
+
+      await ml.jobWizardCommon.advanceToPickFieldsSection();
+      await ml.jobWizardCommon.advanceToJobDetailsSection();
+      await ml.jobWizardCommon.assertJobIdInputExists();
+      await ml.jobWizardCommon.setJobId(`${jobIdClone}-again`);
+      await ml.jobWizardCommon.advanceToValidationSection();
+      await ml.jobWizardCommon.assertValidationCallouts([
+        'mlValidationCallout warning',
+        'mlValidationCallout error',
+      ]);
+      await ml.jobWizardCommon.assertCalloutText(
+        'mlValidationCallout warning',
+        /Time range\s*The selected or available time range might be too short/
+      );
+
+      await ml.jobWizardCommon.goToTimeRangeStep();
+      await ml.jobWizardCommon.clickUseFullDataButton(
+        'Feb 7, 2016 @ 00:00:00.000',
+        'Feb 11, 2016 @ 23:59:54.000'
+      );
+      await ml.jobWizardCommon.goToValidationStep();
+      await ml.jobWizardCommon.assertValidationCallouts(['mlValidationCallout success']);
+      await ml.jobWizardCommon.assertCalloutText(
+        'mlValidationCallout success',
+        /Time range\s*Valid and long enough to model patterns in the data/
+      );
+    });
+
+    it('job creation and toggling model change annotation triggers enable annotation recommendation callout', async () => {
+      await ml.jobWizardCommon.goToJobDetailsStep();
+      await ml.jobWizardCommon.ensureAdvancedSectionOpen();
+
+      await ml.commonUI.toggleSwitchIfNeeded('mlJobWizardSwitchAnnotations', false);
+      await ml.jobWizardCommon.assertAnnotationRecommendationCalloutVisible();
+
+      await ml.commonUI.toggleSwitchIfNeeded('mlJobWizardSwitchAnnotations', true);
+      await ml.jobWizardCommon.assertAnnotationRecommendationCalloutVisible(false);
+    });
+
+    it('job creation memory limit too large results in validation callout', async () => {
+      await ml.jobWizardCommon.goToJobDetailsStep();
+
+      const tooLarge = '100000000MB';
+      await ml.jobWizardCommon.setModelMemoryLimit(tooLarge);
+
+      await ml.jobWizardCommon.advanceToValidationSection();
+      await ml.jobWizardCommon.assertValidationCallouts(['mlValidationCallout warning']);
+      await ml.jobWizardCommon.assertCalloutText(
+        'mlValidationCallout warning',
+        /Job will not be able to run in the current cluster because model memory limit is higher than/
+      );
     });
   });
 }

@@ -23,34 +23,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await rules.common.clickCreateAlertButton();
-      await testSubjects.setValue('ruleNameInput', ruleName);
-      await testSubjects.click('tagsComboBox');
-      await testSubjects.setValue('tagsComboBox', 'sample-data');
-      await testSubjects.click('solutionsFilterButton');
-      await testSubjects.click('solutionstackAlertsFilterOption');
-      await testSubjects.setValue('solutionsFilterButton', 'solutionstackAlertsFilterOption');
-      await commonScreenshots.takeScreenshot(
-        'rule-types-index-threshold-select',
-        screenshotDirectories,
-        1400,
-        1024
-      );
-
       await testSubjects.click('.index-threshold-SelectOption');
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot(
         'rule-types-index-threshold-conditions',
         screenshotDirectories,
         1400,
-        1024
+        1300
       );
-
+      await testSubjects.setValue('ruleNameInput', ruleName);
+      await testSubjects.click('tagsComboBox');
+      await testSubjects.setValue('tagsComboBox', 'sample-data');
       await testSubjects.scrollIntoView('selectIndexExpression');
       await testSubjects.click('selectIndexExpression');
-      const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
-      await indexComboBox.click();
-      await indexComboBox.type('kibana_sample_data_logs ');
-      const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-      await filterSelectItem.click();
+      await comboBox.set('thresholdIndexesComboBox', 'kibana_sample_data_logs ');
       await testSubjects.click('thresholdAlertTimeFieldSelect');
       await testSubjects.setValue('thresholdAlertTimeFieldSelect', '@timestamp');
       await commonScreenshots.takeScreenshot(
@@ -71,19 +57,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'rule-types-index-threshold-example-aggregation',
         screenshotDirectories,
         1400,
-        1024
+        1300
       );
       await ofComboBox.type('bytes');
-      const ofOptionsString = await comboBox.getOptionsList('availablefieldsOptionsComboBox');
+      const ofOptionsString = await comboBox.getOptionsList('availableFieldsOptionsComboBox');
       const ofOptions = ofOptionsString.trim().split('\n');
       expect(ofOptions.length > 0).to.be(true);
-      await comboBox.set('availablefieldsOptionsComboBox', ofOptions[0]);
+      await comboBox.set('availableFieldsOptionsComboBox', ofOptions[0]);
 
       await testSubjects.click('groupByExpression');
       await testSubjects.click('overExpressionSelect');
       await testSubjects.setValue('overExpressionSelect', 'top');
       await testSubjects.setValue('fieldsNumberSelect', '4');
-      await testSubjects.setValue('fieldsExpressionSelect', 'host.keyword');
+      await comboBox.set('fieldsExpressionSelect', 'host.keyword');
       await commonScreenshots.takeScreenshot(
         'rule-types-index-threshold-example-grouping',
         screenshotDirectories,
@@ -107,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'rule-types-index-threshold-example-threshold',
         screenshotDirectories,
         1400,
-        1024
+        1300
       );
 
       await testSubjects.setValue('intervalInput', '4');
@@ -127,6 +113,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.scrollIntoView('addAlertActionButton');
       await commonScreenshots.takeScreenshot(
         'rule-types-index-threshold-example-action',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+
+      const actionFrequency = await testSubjects.find('summaryOrPerRuleSelect');
+      await actionFrequency.click();
+      const actionSummary = await testSubjects.find('actionNotifyWhen-option-summary');
+      await actionSummary.click();
+      const notifyWhen = await testSubjects.find('notifyWhenSelect');
+      await notifyWhen.click();
+      const customInterval = await testSubjects.find('onThrottleInterval');
+      await customInterval.click();
+      await testSubjects.setValue('throttleInput', '24');
+      await testSubjects.scrollIntoView('addAlertActionButton');
+      await commonScreenshots.takeScreenshot(
+        'rule-types-index-threshold-example-action-summary',
         screenshotDirectories,
         1400,
         1024

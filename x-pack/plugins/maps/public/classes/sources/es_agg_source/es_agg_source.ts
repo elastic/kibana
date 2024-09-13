@@ -8,14 +8,20 @@
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties } from 'geojson';
 import { DataView } from '@kbn/data-plugin/common';
-import type { IESAggSource } from './types';
+import type { IESAggSource, ESAggsSourceSyncMeta } from './types';
 import { AbstractESSource } from '../es_source';
 import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
-import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
+import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
-import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common/descriptor_types';
+import {
+  AbstractESAggSourceDescriptor,
+  AggDescriptor,
+  DataFilters,
+} from '../../../../common/descriptor_types';
 import { IField } from '../../fields/field';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { getAggDisplayName } from './get_agg_display_name';
+import { BUCKETS } from '../../layers/vector_layer/mask';
 
 export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
 
@@ -44,6 +50,10 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
         );
       });
     }
+  }
+
+  getBucketsName() {
+    return BUCKETS;
   }
 
   getFieldByName(fieldName: string): IField | null {
@@ -83,14 +93,14 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
   async getAggLabel(aggType: AGG_TYPE, fieldLabel: string): Promise<string> {
     switch (aggType) {
       case AGG_TYPE.COUNT:
-        return COUNT_PROP_LABEL;
+        return getAggDisplayName(aggType);
       case AGG_TYPE.TERMS:
         return i18n.translate('xpack.maps.source.esAggSource.topTermLabel', {
-          defaultMessage: `Top {fieldLabel}`,
+          defaultMessage: `top {fieldLabel}`,
           values: { fieldLabel },
         });
       default:
-        return `${aggType} ${fieldLabel}`;
+        return `${getAggDisplayName(aggType)} ${fieldLabel}`;
     }
   }
 
@@ -119,7 +129,7 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     metricFields.forEach((metricField) => {
       let value;
       for (const key in mbProperties) {
-        if (mbProperties.hasOwnProperty(key) && metricField.getMbFieldName() === key) {
+        if (Object.hasOwn(mbProperties, key) && metricField.getMbFieldName() === key) {
           value = mbProperties[key];
           break;
         }
@@ -134,6 +144,23 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
 
   isGeoGridPrecisionAware(): boolean {
     return false;
+  }
+
+  /*
+   * Changes in requestMeta.fieldNames does not require re-fetch.
+   * It is not possible to filter metrics from responses so all metrics are always returned in all responses.
+   */
+  isFieldAware(): boolean {
+    return false;
+  }
+
+  /*
+   * Force re-fetch when requested metrics change.
+   */
+  getSyncMeta(dataFilters: DataFilters): ESAggsSourceSyncMeta {
+    return {
+      metrics: this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName()),
+    };
   }
 
   getGeoGridPrecision(zoom: number): number {

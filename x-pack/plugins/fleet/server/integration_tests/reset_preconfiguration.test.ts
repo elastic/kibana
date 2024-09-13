@@ -16,12 +16,14 @@ import {
 
 import type { AgentPolicySOAttributes } from '../types';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../../common';
+import { API_VERSIONS } from '../../common/constants';
 
 import { useDockerRegistry, waitForFleetSetup, getSupertestWithAdminUser } from './helpers';
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
-describe('Fleet preconfiguration reset', () => {
+// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
+describe.skip('Fleet preconfiguration reset', () => {
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
 
@@ -177,15 +179,83 @@ describe('Fleet preconfiguration reset', () => {
     await stopServers();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/124779
-  describe.skip('Reset all policy', () => {
+  const POLICY_ID = 'test-12345';
+
+  async function addAgents() {
+    const esClient = kbnServer.coreStart.elasticsearch.client.asInternalUser;
+    await esClient.bulk({
+      index: '.fleet-agents',
+      body: [
+        {
+          update: {
+            _id: 'agent1',
+          },
+        },
+        {
+          doc_as_upsert: true,
+          doc: {
+            agent: {
+              version: '8.5.1',
+            },
+            last_checkin_status: 'online',
+            last_checkin: new Date().toISOString(),
+            active: true,
+            policy_id: POLICY_ID,
+          },
+        },
+        {
+          update: {
+            _id: 'agent2',
+          },
+        },
+        {
+          doc_as_upsert: true,
+          doc: {
+            agent: {
+              version: '8.5.1',
+            },
+            last_checkin_status: 'online',
+            last_checkin: new Date(Date.now() - 24 * 1000).toISOString(),
+            active: true,
+            policy_id: POLICY_ID,
+          },
+        },
+      ],
+    });
+  }
+
+  async function expectAllAgentUnenrolled() {
+    const esClient = kbnServer.coreStart.elasticsearch.client.asInternalUser;
+    const res = await esClient.search({
+      index: '.fleet-agents',
+      query: {
+        bool: {
+          must: {
+            terms: {
+              policy_id: [POLICY_ID],
+            },
+          },
+        },
+      },
+    });
+
+    for (const hit of res.hits.hits) {
+      expect((hit._source as any).active).toBe(false);
+    }
+  }
+
+  describe('Reset all policy', () => {
     it('Works and reset all preconfigured policies', async () => {
       const resetAPI = getSupertestWithAdminUser(
         kbnServer.root,
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies'
       );
-      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
+      await resetAPI
+        .set('kbn-sxrf', 'xx')
+        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .expect(200)
+        .send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()
@@ -207,12 +277,8 @@ describe('Fleet preconfiguration reset', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/124780
-  // FLAKY: https://github.com/elastic/kibana/issues/124781
-  // FLAKY: https://github.com/elastic/kibana/issues/134529
-  describe.skip('Reset one preconfigured policy', () => {
-    const POLICY_ID = 'test-12345';
-
+  describe('Reset one preconfigured policy', () => {
+    beforeEach(() => addAgents());
     it('Works and reset one preconfigured policies if the policy is already deleted (with a ghost package policy)', async () => {
       const soClient = kbnServer.coreStart.savedObjects.createInternalRepository();
 
@@ -230,7 +296,11 @@ describe('Fleet preconfiguration reset', () => {
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies/test-12345'
       );
-      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
+      await resetAPI
+        .set('kbn-sxrf', 'xx')
+        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .expect(200)
+        .send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()
@@ -264,7 +334,11 @@ describe('Fleet preconfiguration reset', () => {
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies/test-12345'
       );
-      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
+      await resetAPI
+        .set('kbn-sxrf', 'xx')
+        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .expect(200)
+        .send();
 
       const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
         type: 'ingest-agent-policies',
@@ -281,6 +355,7 @@ describe('Fleet preconfiguration reset', () => {
           }),
         ])
       );
+      await expectAllAgentUnenrolled();
     });
 
     it('Works and reset one preconfigured policies if the policy was deleted with a preconfiguration deletion record', async () => {
@@ -296,7 +371,11 @@ describe('Fleet preconfiguration reset', () => {
         'post',
         `/internal/fleet/reset_preconfigured_agent_policies/${POLICY_ID}`
       );
-      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
+      await resetAPI
+        .set('kbn-sxrf', 'xx')
+        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .expect(200)
+        .send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()

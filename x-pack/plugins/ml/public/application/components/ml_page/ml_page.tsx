@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { createContext, FC, useEffect, useMemo, useState } from 'react';
-import { createHtmlPortalNode, HtmlPortalNode } from 'react-reverse-portal';
-import { Redirect, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-
+import type { FC } from 'react';
+import React, { createContext, useEffect, useMemo, useState } from 'react';
+import { createHtmlPortalNode, type HtmlPortalNode } from 'react-reverse-portal';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { Subscription } from 'rxjs';
-
 import { EuiPageSection } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -23,13 +22,14 @@ import { DatePickerWrapper } from '@kbn/ml-date-picker';
 import * as routes from '../../routing/routes';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
-import { MlRoute, PageDependencies } from '../../routing/router';
+import type { MlRoute, PageDependencies } from '../../routing/router';
 import { useActiveRoute } from '../../routing/use_active_route';
 import { useDocTitle } from '../../routing/use_doc_title';
 
 import { MlPageHeaderRenderer } from '../page_header/page_header';
 
 import { useSideNavItems } from './side_nav';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 const ML_APP_SELECTOR = '[data-test-subj="mlApp"]';
 
@@ -57,6 +57,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
       mlServices: { httpService },
     },
   } = useMlKibana();
+  const { showMLNavMenu } = useEnabledFeatures();
 
   const headerPortalNode = useMemo(() => createHtmlPortalNode(), []);
   const [isHeaderMounted, setIsHeaderMounted] = useState(false);
@@ -70,7 +71,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         setIsLoading(v !== 0);
       })
     );
-
     return function cleanup() {
       subscriptions.unsubscribe();
     };
@@ -113,6 +113,8 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
     }
   }, [activeRoute]);
 
+  const sideNavItems = useSideNavItems(activeRoute);
+
   return (
     <MlPageControlsContext.Provider
       value={{
@@ -126,13 +128,18 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         className={'ml-app'}
         data-test-subj={'mlApp'}
         restrictWidth={false}
-        solutionNav={{
-          name: i18n.translate('xpack.ml.plugin.title', {
-            defaultMessage: 'Machine Learning',
-          }),
-          icon: 'machineLearningApp',
-          items: useSideNavItems(activeRoute),
-        }}
+        panelled
+        solutionNav={
+          showMLNavMenu
+            ? {
+                name: i18n.translate('xpack.ml.plugin.title', {
+                  defaultMessage: 'Machine Learning',
+                }),
+                icon: 'machineLearningApp',
+                items: sideNavItems,
+              }
+            : undefined
+        }
         pageHeader={{
           pageTitle: <MlPageHeaderRenderer />,
           rightSideItems,
@@ -167,7 +174,7 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, ro
      * avoiding full page reload **/
     <RedirectAppLinks coreStart={{ application }}>
       <EuiPageSection restrictWidth={false}>
-        <Switch>
+        <Routes>
           {routeList.map((route) => {
             return (
               <Route
@@ -186,7 +193,7 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, ro
             );
           })}
           <Redirect to="/overview" />
-        </Switch>
+        </Routes>
       </EuiPageSection>
     </RedirectAppLinks>
   );

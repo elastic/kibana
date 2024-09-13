@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import cuid from 'cuid';
-import * as cborx from 'cbor-x';
+import { createId } from '@paralleldrive/cuid2';
+import { encode, decode } from '@kbn/cbor';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -16,6 +17,7 @@ import { Duplex, Writable, Readable } from 'stream';
 
 import { GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { inspect } from 'util';
+import { wrapErrorAndReThrow } from '../../../../file_client/utils';
 import type { FileChunkDocument } from '../mappings';
 
 type Callback = (error?: Error) => void;
@@ -143,7 +145,7 @@ export class ContentStream extends Duplex {
       }
       const buffer = Buffer.concat(chunks);
       const decodedChunkDoc: GetResponse<FileChunkDocument> | undefined = buffer.byteLength
-        ? (cborx.decode(buffer) as GetResponse<FileChunkDocument>)
+        ? (decode(buffer) as GetResponse<FileChunkDocument>)
         : undefined;
 
       // Because `asStream` was used in retrieving the document, errors are also not be processed
@@ -224,7 +226,7 @@ export class ContentStream extends Duplex {
 
   private getId(): string {
     if (!this.id) {
-      this.id = cuid();
+      this.id = createId();
     }
     return this.id;
   }
@@ -238,27 +240,29 @@ export class ContentStream extends Duplex {
   }
 
   private async indexChunk({ bid, data, id, index }: IndexRequestParams, last?: true) {
-    await this.client.index(
-      {
-        id,
-        index,
-        document: cborx.encode(
-          last
-            ? {
-                data,
-                bid,
-                last,
-              }
-            : { data, bid }
-        ),
-      },
-      {
-        headers: {
-          'content-type': 'application/cbor',
-          accept: 'application/json',
+    await this.client
+      .index(
+        {
+          id,
+          index,
+          op_type: 'create',
+          document: encode({
+            data,
+            bid,
+            // Mark it as last?
+            ...(last ? { last } : {}),
+            // Add `@timestamp` for Index Alias/DS?
+            ...(this.indexIsAlias ? { '@timestamp': new Date().toISOString() } : {}),
+          }),
         },
-      }
-    );
+        {
+          headers: {
+            'content-type': 'application/cbor',
+            accept: 'application/json',
+          },
+        }
+      )
+      .catch(wrapErrorAndReThrow.withMessagePrefix('ContentStream.indexChunk(): '));
   }
 
   /**
@@ -268,6 +272,7 @@ export class ContentStream extends Duplex {
    * of holding, at most, 2 full chunks in memory.
    */
   private indexRequestBuffer: undefined | IndexRequestParams;
+
   private async writeChunk(data: Buffer) {
     const chunkId = this.getChunkId(this.chunksWritten);
 

@@ -13,6 +13,7 @@ import type {
   ListIdOrUndefined,
   ListSchema,
   MetaOrUndefined,
+  RefreshWithWaitFor,
   SerializerOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -38,6 +39,7 @@ export interface ImportListItemsToStreamOptions {
   user: string;
   meta: MetaOrUndefined;
   version: Version;
+  refresh?: RefreshWithWaitFor;
 }
 
 export const importListItemsToStream = ({
@@ -53,61 +55,72 @@ export const importListItemsToStream = ({
   user,
   meta,
   version,
+  refresh,
 }: ImportListItemsToStreamOptions): Promise<ListSchema | null> => {
-  return new Promise<ListSchema | null>((resolve) => {
+  return new Promise<ListSchema | null>((resolve, reject) => {
     const readBuffer = new BufferLines({ bufferSize: config.importBufferSize, input: stream });
     let fileName: string | undefined;
     let list: ListSchema | null = null;
     readBuffer.on('fileName', async (fileNameEmitted: string) => {
-      readBuffer.pause();
-      fileName = decodeURIComponent(fileNameEmitted);
-      if (listId == null) {
-        list = await createListIfItDoesNotExist({
-          description: i18n.translate('xpack.lists.services.items.fileUploadFromFileSystem', {
-            defaultMessage: 'File uploaded from file system of {fileName}',
-            values: { fileName },
-          }),
-          deserializer,
-          esClient,
-          id: fileName,
-          immutable: false,
-          listIndex,
-          meta,
-          name: fileName,
-          serializer,
-          type,
-          user,
-          version,
-        });
+      try {
+        readBuffer.pause();
+        fileName = decodeURIComponent(fileNameEmitted);
+        if (listId == null) {
+          list = await createListIfItDoesNotExist({
+            description: i18n.translate('xpack.lists.services.items.fileUploadFromFileSystem', {
+              defaultMessage: 'File uploaded from file system of {fileName}',
+              values: { fileName },
+            }),
+            deserializer,
+            esClient,
+            id: fileName,
+            immutable: false,
+            listIndex,
+            meta,
+            name: fileName,
+            serializer,
+            type,
+            user,
+            version,
+          });
+        }
+        readBuffer.resume();
+      } catch (err) {
+        reject(err);
       }
-      readBuffer.resume();
     });
 
     readBuffer.on('lines', async (lines: string[]) => {
-      if (listId != null) {
-        await writeBufferToItems({
-          buffer: lines,
-          deserializer,
-          esClient,
-          listId,
-          listItemIndex,
-          meta,
-          serializer,
-          type,
-          user,
-        });
-      } else if (fileName != null) {
-        await writeBufferToItems({
-          buffer: lines,
-          deserializer,
-          esClient,
-          listId: fileName,
-          listItemIndex,
-          meta,
-          serializer,
-          type,
-          user,
-        });
+      try {
+        if (listId != null) {
+          await writeBufferToItems({
+            buffer: lines,
+            deserializer,
+            esClient,
+            listId,
+            listItemIndex,
+            meta,
+            refresh,
+            serializer,
+            type,
+            user,
+          });
+        } else if (fileName != null) {
+          await writeBufferToItems({
+            buffer: lines,
+            deserializer,
+            esClient,
+            listId: fileName,
+            listItemIndex,
+            meta,
+            refresh,
+            serializer,
+            type,
+            user,
+          });
+        }
+      } catch (err) {
+        reject(err);
       }
     });
 
@@ -127,6 +140,7 @@ export interface WriteBufferToItemsOptions {
   type: Type;
   user: string;
   meta: MetaOrUndefined;
+  refresh?: RefreshWithWaitFor;
 }
 
 export interface LinesResult {
@@ -143,6 +157,7 @@ export const writeBufferToItems = async ({
   type,
   user,
   meta,
+  refresh,
 }: WriteBufferToItemsOptions): Promise<LinesResult> => {
   await createListItemsBulk({
     deserializer,
@@ -150,6 +165,7 @@ export const writeBufferToItems = async ({
     listId,
     listItemIndex,
     meta,
+    refresh,
     serializer,
     type,
     user,

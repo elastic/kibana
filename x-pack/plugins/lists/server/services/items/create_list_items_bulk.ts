@@ -10,6 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   DeserializerOrUndefined,
   MetaOrUndefined,
+  RefreshWithWaitFor,
   SerializerOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -29,6 +30,7 @@ export interface CreateListItemsBulkOptions {
   meta: MetaOrUndefined;
   dateNow?: string;
   tieBreaker?: string[];
+  refresh?: RefreshWithWaitFor;
 }
 
 export const createListItemsBulk = async ({
@@ -43,6 +45,7 @@ export const createListItemsBulk = async ({
   meta,
   dateNow,
   tieBreaker,
+  refresh = 'wait_for',
 }: CreateListItemsBulkOptions): Promise<void> => {
   // It causes errors if you try to add items to bulk that do not exist within ES
   if (!value.length) {
@@ -60,6 +63,7 @@ export const createListItemsBulk = async ({
       });
       if (elasticQuery != null) {
         const elasticBody: IndexEsListItemSchema = {
+          '@timestamp': createdAt,
           created_at: createdAt,
           created_by: user,
           deserializer,
@@ -84,7 +88,7 @@ export const createListItemsBulk = async ({
     await esClient.bulk({
       body,
       index: listItemIndex,
-      refresh: 'wait_for',
+      refresh,
     });
   } catch (error) {
     // TODO: Log out the error with return values from the bulk insert into another index or saved object

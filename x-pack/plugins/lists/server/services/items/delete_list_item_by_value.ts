@@ -18,6 +18,7 @@ export interface DeleteListItemByValueOptions {
   value: string;
   esClient: ElasticsearchClient;
   listItemIndex: string;
+  refresh?: boolean;
 }
 
 export const deleteListItemByValue = async ({
@@ -26,6 +27,7 @@ export const deleteListItemByValue = async ({
   type,
   esClient,
   listItemIndex,
+  refresh = false,
 }: DeleteListItemByValueOptions): Promise<ListItemArraySchema> => {
   const listItems = await getListItemByValues({
     esClient,
@@ -49,7 +51,7 @@ export const deleteListItemByValue = async ({
       },
     },
     index: listItemIndex,
-    refresh: false,
+    refresh,
   });
   return listItems;
 };

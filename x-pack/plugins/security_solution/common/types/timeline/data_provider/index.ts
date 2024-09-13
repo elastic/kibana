@@ -8,7 +8,6 @@ export { IS_OPERATOR, EXISTS_OPERATOR } from '@kbn/timelines-plugin/common';
 
 export type {
   QueryOperator,
-  DataProviderType,
   QueryMatch,
   DataProvider,
   DataProvidersAnd,

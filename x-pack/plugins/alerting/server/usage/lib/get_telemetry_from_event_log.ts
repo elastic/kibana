@@ -56,15 +56,18 @@ interface GetExecutionsPerDayCountResults {
   alertsPercentilesByType: Record<string, Record<string, number>>;
   countRulesByExecutionStatus: Record<string, number>;
 }
+
 interface GetExecutionTimeoutsPerDayCountResults {
   hasErrors: boolean;
   errorMessage?: string;
   countExecutionTimeouts: number;
   countExecutionTimeoutsByType: Record<string, number>;
 }
+
 interface GetExecutionCountsExecutionFailures extends AggregationsSingleBucketAggregateBase {
   by_reason: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
 }
+
 interface GetExecutionCountsAggregationBucket extends AggregationsStringTermsBucketKeys {
   avg_execution_time: AggregationsSingleMetricAggregateBase;
   avg_es_search_duration: AggregationsSingleMetricAggregateBase;
@@ -153,10 +156,10 @@ export async function getExecutionsPerDayCount({
       },
     };
 
-    logger.debug(`query for getExecutionsPerDayCount - ${JSON.stringify(query)}`);
+    logger.debug(() => `query for getExecutionsPerDayCount - ${JSON.stringify(query)}`);
     const results = await esClient.search(query);
 
-    logger.debug(`results for getExecutionsPerDayCount query - ${JSON.stringify(results)}`);
+    logger.debug(() => `results for getExecutionsPerDayCount query - ${JSON.stringify(results)}`);
 
     const totalRuleExecutions =
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
@@ -239,10 +242,12 @@ export async function getExecutionTimeoutsPerDayCount({
       },
     };
 
-    logger.debug(`query for getExecutionTimeoutsPerDayCount - ${JSON.stringify(query)}`);
+    logger.debug(() => `query for getExecutionTimeoutsPerDayCount - ${JSON.stringify(query)}`);
     const results = await esClient.search(query);
 
-    logger.debug(`results for getExecutionTimeoutsPerDayCount query - ${JSON.stringify(results)}`);
+    logger.debug(
+      () => `results for getExecutionTimeoutsPerDayCount query - ${JSON.stringify(results)}`
+    );
 
     const aggregations = results.aggregations as {
       by_rule_type_id: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
@@ -484,10 +489,7 @@ export function parsePercentileAggs(
         };
       }
     }
-    return {
-      ...acc,
-      ...result,
-    };
+    return Object.assign(acc, result);
   }, {});
 }
 
@@ -562,13 +564,11 @@ export function parseExecutionCountAggregationResults(results: {
 
   return {
     countTotalFailedExecutions: results?.execution_failures?.doc_count ?? 0,
-    countFailedExecutionsByReason: executionFailuresByReasonBuckets.reduce(
-      (acc: Record<string, number>, bucket: AggregationsStringTermsBucketKeys) => {
+    countFailedExecutionsByReason: executionFailuresByReasonBuckets.reduce<Record<string, number>>(
+      (acc, bucket: AggregationsStringTermsBucketKeys) => {
         const reason: string = bucket.key;
-        return {
-          ...acc,
-          [reason]: bucket.doc_count ?? 0,
-        };
+        acc[reason] = bucket.doc_count ?? 0;
+        return acc;
       },
       {}
     ),

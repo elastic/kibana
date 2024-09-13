@@ -27,13 +27,15 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { EnterpriseSearchCronEditor } from '@kbn/search-connectors/components/cron_editor';
+
 import {
   HOURS_UNIT_LABEL,
   DAYS_UNIT_LABEL,
   WEEKS_UNIT_LABEL,
   MONTHS_UNIT_LABEL,
 } from '../../../../../shared/constants';
-import { EnterpriseSearchCronEditor } from '../../../../../shared/cron_editor/enterprise_search_cron_editor';
+
 import { docLinks } from '../../../../../shared/doc_links/doc_links';
 import { CrawlUnits } from '../../../../api/crawler/types';
 import { isCrawlerIndex } from '../../../../utils/indices';
@@ -60,7 +62,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
   return (
     <>
       <EuiSpacer />
-      <EuiTitle size="m">
+      <EuiTitle size="s">
         <h2>
           {i18n.translate('xpack.enterpriseSearch.automaticCrawlSchedule.title', {
             defaultMessage: 'Crawl frequency',
@@ -108,7 +110,8 @@ export const AutomaticCrawlScheduler: React.FC = () => {
                       {i18n.translate(
                         'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.cronSchedulingDescription',
                         {
-                          defaultMessage: 'Define the frequency and time for scheduled crawls',
+                          defaultMessage:
+                            'Define the frequency and time for scheduled crawls. The crawler uses UTC as its timezone.',
                         }
                       )}
                     </EuiText>
@@ -121,7 +124,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
               >
                 <EnterpriseSearchCronEditor
                   disabled={!crawlAutomatically || !useConnectorSchedule}
-                  scheduling={index.connector.scheduling}
+                  scheduling={index.connector.scheduling.full}
                   onChange={(newScheduling) =>
                     submitConnectorSchedule({
                       ...newScheduling,

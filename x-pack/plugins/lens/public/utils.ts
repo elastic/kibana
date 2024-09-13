@@ -9,19 +9,17 @@ import { uniq, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
-
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import {
-  BrushTriggerEvent,
-  ClickTriggerEvent,
-  MultiClickTriggerEvent,
-} from '@kbn/charts-plugin/public';
+import { emptyTitleText } from '@kbn/visualization-ui-components';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { ISearchStart } from '@kbn/data-plugin/public';
-import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
+import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import { DateRange } from '../common/types';
 import type { Document } from './persistence/saved_object_store';
 import {
   Datasource,
@@ -33,9 +31,15 @@ import {
   DragDropOperation,
   isOperation,
   UserMessage,
+  TriggerEvent,
+  isLensBrushEvent,
+  isLensMultiFilterEvent,
+  isLensFilterEvent,
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
+import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../common/constants';
+import type { RangeTypeLens } from './datasources/form_based/operations/definitions/ranges';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
@@ -44,13 +48,44 @@ export function getVisualizeGeoFieldMessage(fieldType: string) {
   });
 }
 
+export const isLensRange = (range: unknown = {}): range is RangeTypeLens => {
+  if (!range || typeof range !== 'object') return false;
+  const { from, to, label } = range as RangeTypeLens;
+
+  return (
+    label !== undefined &&
+    (typeof from === 'number' || from === null) &&
+    (typeof to === 'number' || to === null)
+  );
+};
+
 export const getResolvedDateRange = function (timefilter: TimefilterContract) {
+  const { from, to } = timefilter.getTime();
+  return { fromDate: from, toDate: to };
+};
+
+export const getAbsoluteDateRange = function (timefilter: TimefilterContract) {
   const { from, to } = timefilter.getTime();
   const { min, max } = timefilter.calculateBounds({
     from,
     to,
   });
   return { fromDate: min?.toISOString() || from, toDate: max?.toISOString() || to };
+};
+
+export const convertToAbsoluteDateRange = function (dateRange: DateRange, now: Date) {
+  const absRange = getAbsoluteTimeRange(
+    {
+      from: dateRange.fromDate as string,
+      to: dateRange.toDate as string,
+    },
+    { forceNow: now }
+  );
+
+  return {
+    fromDate: absRange.from,
+    toDate: absRange.to,
+  };
 };
 
 export function containsDynamicMath(dateMathString: string) {
@@ -175,6 +210,7 @@ export function getIndexPatternsIds({
     }
     return currentId;
   }, undefined);
+
   const referencesIds = references
     .filter(({ type }) => type === 'index-pattern')
     .map(({ id }) => id);
@@ -212,17 +248,28 @@ export function getRemoveOperation(
   return layerCount === 1 ? 'clear' : 'remove';
 }
 
-export function inferTimeField(
-  datatableUtilities: DatatableUtilitiesService,
-  context: BrushTriggerEvent['data'] | ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']
-) {
-  const tablesAndColumns =
-    'table' in context
-      ? [{ table: context.table, column: context.column }]
-      : !context.negate
-      ? context.data
-      : // if it's a negated filter, never respect bound time field
-        [];
+function getTablesAndColumnsFromContext(event: TriggerEvent) {
+  // if it's a negated filter, never respect bound time field
+  if ('negate' in event.data && event.data.negate) {
+    return [];
+  }
+  if (isLensBrushEvent(event)) {
+    return [{ table: event.data.table, column: event.data.column }];
+  }
+  if (isLensMultiFilterEvent(event)) {
+    return event.data.data.map(({ table, cells }) => ({
+      table,
+      column: cells[0].column,
+    }));
+  }
+  if (isLensFilterEvent(event)) {
+    return event.data.data;
+  }
+  return event.data;
+}
+
+export function inferTimeField(datatableUtilities: DatatableUtilitiesService, event: TriggerEvent) {
+  const tablesAndColumns = getTablesAndColumnsFromContext(event);
   return !Array.isArray(tablesAndColumns)
     ? [tablesAndColumns]
     : tablesAndColumns
@@ -337,27 +384,84 @@ export const getSearchWarningMessages = (
     searchService: ISearchStart;
   }
 ): UserMessage[] => {
-  const warningsMap: Map<string, UserMessage[]> = new Map();
+  const userMessages: UserMessage[] = [];
 
   deps.searchService.showWarnings(adapter, (warning, meta) => {
-    const { request, response, requestId } = meta;
+    const { request, response } = meta;
 
-    const warningMessages = datasource.getSearchWarningMessages?.(
+    const userMessagesFromWarning = datasource.getSearchWarningMessages?.(
       state,
       warning,
       request,
       response
     );
 
-    if (warningMessages?.length) {
-      const key = (requestId ?? '') + warning.type + warning.reason?.type ?? '';
-      if (!warningsMap.has(key)) {
-        warningsMap.set(key, warningMessages);
-      }
+    if (userMessagesFromWarning?.length) {
+      userMessages.push(...userMessagesFromWarning);
       return true;
     }
     return false;
   });
 
-  return [...warningsMap.values()].flat();
+  return userMessages;
 };
+
+function getSafeLabel(label: string) {
+  return label.trim().length ? label : emptyTitleText;
+}
+
+export function getUniqueLabelGenerator() {
+  const counts = {} as Record<string, number>;
+  return function makeUnique(label: string) {
+    let uniqueLabel = getSafeLabel(label);
+
+    while (counts[uniqueLabel] >= 0) {
+      const num = ++counts[uniqueLabel];
+      uniqueLabel = i18n.translate('xpack.lens.uniqueLabel', {
+        defaultMessage: '{label} [{num}]',
+        values: { label: getSafeLabel(label), num },
+      });
+    }
+
+    counts[uniqueLabel] = 0;
+    return uniqueLabel;
+  };
+}
+
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
+
+export function reorderElements<S>(items: S[], targetId: S, sourceId: S) {
+  const result = items.filter((c) => c !== sourceId);
+  const targetIndex = items.findIndex((c) => c === sourceId);
+  const sourceIndex = items.findIndex((c) => c === targetId);
+
+  const targetPosition = result.indexOf(targetId);
+  result.splice(targetIndex < sourceIndex ? targetPosition + 1 : targetPosition, 0, sourceId);
+  return result;
+}
+
+export function shouldRemoveSource(
+  source: unknown,
+  dropType: DropType
+): source is DragDropOperation {
+  return (
+    isOperation(source) &&
+    (dropType === 'move_compatible' ||
+      dropType === 'move_incompatible' ||
+      dropType === 'combine_incompatible' ||
+      dropType === 'combine_compatible' ||
+      dropType === 'replace_compatible' ||
+      dropType === 'replace_incompatible')
+  );
+}
+
+export const getColorMappingDefaults = () => {
+  if (COLOR_MAPPING_OFF_BY_DEFAULT) {
+    return undefined;
+  }
+  return { ...DEFAULT_COLOR_MAPPING_CONFIG };
+};
+
+export const EXPRESSION_BUILD_ERROR_ID = 'expression_build_error';

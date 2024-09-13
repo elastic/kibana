@@ -7,24 +7,26 @@
 
 /* eslint-disable no-console */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { euiDarkVars } from '@kbn/ui-theme';
-import { I18nProvider } from '@kbn/i18n-react';
-import { ThemeProvider } from 'styled-components';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
+import { render as reactRender, waitFor } from '@testing-library/react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
-import { render as reactRender } from '@testing-library/react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-plugin/public';
-import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import type { ScopedFilesClient } from '@kbn/files-plugin/public';
+import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
+import { QueryClient } from '@tanstack/react-query';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { FilesContext } from '@kbn/shared-ux-file-context';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+
 import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
-import { CasesProvider } from '../../components/cases_context';
-import { createStartServicesMock } from '../lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../types';
 import type { ReleasePhase } from '../../components/types';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { CasesProvider } from '../../components/cases_context';
+import { createStartServicesMock } from '../lib/kibana/kibana_react.mock';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { allCasesPermissions } from './permissions';
@@ -43,17 +45,36 @@ type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResul
 
 window.scrollTo = jest.fn();
 
+const mockGetFilesClient = () => {
+  const mockedFilesClient = createMockFilesClient() as unknown as DeeplyMockedKeys<
+    ScopedFilesClient<unknown>
+  >;
+
+  mockedFilesClient.getFileKind.mockImplementation(() => ({
+    id: 'test',
+    maxSizeBytes: 10000,
+    http: {},
+  }));
+
+  return () => mockedFilesClient;
+};
+
+export const mockedTestProvidersOwner = [SECURITY_SOLUTION_OWNER];
+
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<TestProviderProps> = ({
   children,
   features,
-  owner = [SECURITY_SOLUTION_OWNER],
+  owner = mockedTestProvidersOwner,
   permissions = allCasesPermissions(),
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
   persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
   license,
 }) => {
+  const coreStart = useMemo(() => coreMock.createStart(), []);
+  const services = useMemo(() => createStartServicesMock({ license }), [license]);
+
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -67,30 +88,28 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
     },
   });
 
-  const services = createStartServicesMock({ license });
+  const getFilesClient = mockGetFilesClient();
 
   return (
-    <I18nProvider>
+    <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
       <KibanaContextProvider services={services}>
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <QueryClientProvider client={queryClient}>
-            <MemoryRouter>
-              <CasesProvider
-                value={{
-                  externalReferenceAttachmentTypeRegistry,
-                  persistableStateAttachmentTypeRegistry,
-                  features,
-                  owner,
-                  permissions,
-                }}
-              >
-                {children}
-              </CasesProvider>
-            </MemoryRouter>
-          </QueryClientProvider>
-        </ThemeProvider>
+        <MemoryRouter>
+          <CasesProvider
+            value={{
+              externalReferenceAttachmentTypeRegistry,
+              persistableStateAttachmentTypeRegistry,
+              features,
+              owner,
+              permissions,
+              getFilesClient,
+            }}
+            queryClient={queryClient}
+          >
+            <FilesContext client={createMockFilesClient()}>{children}</FilesContext>
+          </CasesProvider>
+        </MemoryRouter>
       </KibanaContextProvider>
-    </I18nProvider>
+    </KibanaRenderContextProvider>
   );
 };
 TestProvidersComponent.displayName = 'TestProviders';
@@ -103,7 +122,9 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: StartServices;
   queryClient: QueryClient;
-  AppWrapper: React.FC<{ children: React.ReactElement }>;
+  AppWrapper: React.FC<{ children: React.ReactNode }>;
+  getFilesClient: () => ScopedFilesClient;
+  clearQueryCache: () => Promise<void>;
 }
 
 export const testQueryClient = new QueryClient({
@@ -125,13 +146,14 @@ export const testQueryClient = new QueryClient({
 
 export const createAppMockRenderer = ({
   features,
-  owner = [SECURITY_SOLUTION_OWNER],
+  owner = mockedTestProvidersOwner,
   permissions = allCasesPermissions(),
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
   persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
   license,
 }: Omit<TestProviderProps, 'children'> = {}): AppMockRenderer => {
+  const coreStart = coreMock.createStart();
   const services = createStartServicesMock({ license });
 
   const queryClient = new QueryClient({
@@ -147,29 +169,29 @@ export const createAppMockRenderer = ({
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
-    <I18nProvider>
+  const getFilesClient = mockGetFilesClient();
+
+  const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
       <KibanaContextProvider services={services}>
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <QueryClientProvider client={queryClient}>
-            <MemoryRouter>
-              <CasesProvider
-                value={{
-                  externalReferenceAttachmentTypeRegistry,
-                  persistableStateAttachmentTypeRegistry,
-                  features,
-                  owner,
-                  permissions,
-                  releasePhase,
-                }}
-              >
-                {children}
-              </CasesProvider>
-            </MemoryRouter>
-          </QueryClientProvider>
-        </ThemeProvider>
+        <MemoryRouter>
+          <CasesProvider
+            value={{
+              externalReferenceAttachmentTypeRegistry,
+              persistableStateAttachmentTypeRegistry,
+              features,
+              owner,
+              permissions,
+              releasePhase,
+              getFilesClient,
+            }}
+            queryClient={queryClient}
+          >
+            {children}
+          </CasesProvider>
+        </MemoryRouter>
       </KibanaContextProvider>
-    </I18nProvider>
+    </KibanaRenderContextProvider>
   );
 
   AppWrapper.displayName = 'AppWrapper';
@@ -181,6 +203,12 @@ export const createAppMockRenderer = ({
     });
   };
 
+  const clearQueryCache = async () => {
+    queryClient.getQueryCache().clear();
+
+    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+  };
+
   return {
     coreStart: services,
     queryClient,
@@ -188,29 +216,7 @@ export const createAppMockRenderer = ({
     AppWrapper,
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    getFilesClient,
+    clearQueryCache,
   };
 };
-
-export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => ({
-  path: 'path',
-  type: 'type',
-  value: 'mockedValue' as unknown as T,
-  isPristine: false,
-  isDirty: false,
-  isModified: false,
-  isValidating: false,
-  isValidated: false,
-  isChangingValue: false,
-  errors: [],
-  isValid: true,
-  getErrorsMessages: jest.fn(),
-  onChange: jest.fn(),
-  setValue: jest.fn(),
-  setErrors: jest.fn(),
-  clearErrors: jest.fn(),
-  validate: jest.fn(),
-  reset: jest.fn(),
-  __isIncludedInOutput: true,
-  __serializeValue: jest.fn(),
-  ...options,
-});

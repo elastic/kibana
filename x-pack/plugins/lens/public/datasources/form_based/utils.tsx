@@ -9,22 +9,22 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
+import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { groupBy, escape, uniq } from 'lodash';
+import { groupBy, escape, uniq, uniqBy } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
-import { SearchRequest } from '@kbn/data-plugin/common';
 
 import {
-  SearchResponseWarning,
-  ShardFailureOpenModalButton,
-  ShardFailureRequest,
-} from '@kbn/data-plugin/public';
+  type SearchResponseWarning,
+  SearchResponseWarningsBadgePopoverContent,
+} from '@kbn/search-response-warnings';
 
 import { estypes } from '@elastic/elasticsearch';
+import { isQueryValid } from '@kbn/visualization-ui-components';
 import type { DateRange } from '../../../common/types';
 import type {
   FramePublicAPI,
@@ -39,16 +39,19 @@ import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/
 
 import {
   operationDefinitionMap,
-  GenericIndexPatternColumn,
-  TermsIndexPatternColumn,
-  CountIndexPatternColumn,
+  getReferenceRoot,
   updateColumnParam,
   updateDefaultLabels,
-  RangeIndexPatternColumn,
-  FormulaIndexPatternColumn,
-  DateHistogramIndexPatternColumn,
-  MaxIndexPatternColumn,
-  MinIndexPatternColumn,
+  type GenericIndexPatternColumn,
+  type TermsIndexPatternColumn,
+  type CountIndexPatternColumn,
+  type RangeIndexPatternColumn,
+  type FormulaIndexPatternColumn,
+  type DateHistogramIndexPatternColumn,
+  type MaxIndexPatternColumn,
+  type MinIndexPatternColumn,
+  type GenericOperationDefinition,
+  type FieldBasedIndexPatternColumn,
 } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
@@ -58,8 +61,18 @@ import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
 import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
-import { isQueryValid } from '../../shared_components';
 import { ReducedSamplingSectionEntries } from './info_badges';
+import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
+import {
+  INCOMPLETE_ES_RESULTS,
+  LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
+  LAYER_SETTINGS_RANDOM_SAMPLING_INFO,
+  PRECISION_ERROR_ACCURACY_MODE_DISABLED,
+  PRECISION_ERROR_ACCURACY_MODE_ENABLED,
+  PRECISION_ERROR_ASC_COUNT_PRECISION,
+  TSDB_UNSUPPORTED_COUNTER_OP,
+  UNSUPPORTED_DOWNSAMPLED_INDEX_AGG_PREFIX,
+} from '../../user_messages_ids';
 
 function isMinOrMaxColumn(
   column?: GenericIndexPatternColumn
@@ -99,56 +112,56 @@ export function getSamplingValue(layer: FormBasedLayer) {
 
 export function isColumnInvalid(
   layer: FormBasedLayer,
+  column: GenericIndexPatternColumn,
   columnId: string,
   indexPattern: IndexPattern,
-  dateRange: DateRange | undefined
-) {
-  const column: GenericIndexPatternColumn | undefined = layer.columns[columnId];
-  if (!column || !indexPattern) return;
-
-  const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
+  dateRange: DateRange,
+  targetBars: number
+): boolean {
   // check also references for errors
   const referencesHaveErrors =
-    true &&
     'references' in column &&
-    Boolean(getReferencesErrors(layer, column, indexPattern, dateRange).filter(Boolean).length);
+    hasReferencesErrors(layer, column, indexPattern, dateRange, targetBars);
 
-  const operationErrorMessages =
-    operationDefinition &&
-    operationDefinition.getErrorMessage?.(
-      layer,
-      columnId,
-      indexPattern,
-      dateRange,
-      operationDefinitionMap
-    );
+  const operationHasErrorMessages =
+    (
+      operationDefinitionMap[column.operationType]?.getErrorMessage?.(
+        layer,
+        columnId,
+        indexPattern,
+        dateRange,
+        operationDefinitionMap,
+        targetBars
+      ) ?? []
+    ).length > 0;
 
   // it looks like this is just a back-stop since we prevent
   // invalid filters from being set at the UI level
   const filterHasError = column.filter ? !isQueryValid(column.filter, indexPattern) : false;
-
-  return (
-    (operationErrorMessages && operationErrorMessages.length > 0) ||
-    referencesHaveErrors ||
-    filterHasError
-  );
+  return operationHasErrorMessages || referencesHaveErrors || filterHasError;
 }
 
-function getReferencesErrors(
+function hasReferencesErrors(
   layer: FormBasedLayer,
   column: ReferenceBasedIndexPatternColumn,
   indexPattern: IndexPattern,
-  dateRange: DateRange | undefined
+  dateRange: DateRange,
+  targetBars: number
 ) {
-  return column.references?.map((referenceId: string) => {
+  return column.references?.some((referenceId: string) => {
     const referencedOperation = layer.columns[referenceId]?.operationType;
     const referencedDefinition = operationDefinitionMap[referencedOperation];
-    return referencedDefinition?.getErrorMessage?.(
-      layer,
-      referenceId,
-      indexPattern,
-      dateRange,
-      operationDefinitionMap
+    return (
+      (
+        referencedDefinition?.getErrorMessage?.(
+          layer,
+          referenceId,
+          indexPattern,
+          dateRange,
+          operationDefinitionMap,
+          targetBars
+        ) ?? []
+      ).length > 0
     );
   });
 }
@@ -163,7 +176,7 @@ export function fieldIsInvalid(
   if (!column || !hasField(column)) {
     return false;
   }
-  return !!getInvalidFieldMessage(layer, columnId, indexPattern)?.length;
+  return getInvalidFieldMessage(layer, columnId, indexPattern).length > 0;
 }
 
 const accuracyModeDisabledWarning = (
@@ -171,6 +184,7 @@ const accuracyModeDisabledWarning = (
   columnId: string,
   enableAccuracyMode: () => void
 ): UserMessage => ({
+  uniqueId: PRECISION_ERROR_ACCURACY_MODE_DISABLED,
   severity: 'warning',
   displayLocations: [{ id: 'toolbar' }, { id: 'dimensionButton', dimensionId: columnId }],
   fixableInEditor: true,
@@ -205,6 +219,7 @@ const accuracyModeEnabledWarning = (
   columnId: string,
   docLink: string
 ): UserMessage => ({
+  uniqueId: PRECISION_ERROR_ACCURACY_MODE_ENABLED,
   severity: 'warning',
   displayLocations: [{ id: 'toolbar' }, { id: 'dimensionButton', dimensionId: columnId }],
   fixableInEditor: true,
@@ -250,18 +265,17 @@ const accuracyModeEnabledWarning = (
   ),
 });
 
-export function getShardFailuresWarningMessages(
+export function getSearchWarningMessages(
   state: FormBasedPersistedState,
   warning: SearchResponseWarning,
-  request: SearchRequest,
+  request: estypes.SearchRequest,
   response: estypes.SearchResponse,
   theme: ThemeServiceStart
 ): UserMessage[] {
   if (state) {
-    if (warning.type === 'shard_failure') {
-      switch (warning.reason.type) {
-        case 'unsupported_aggregation_on_downsampled_index':
-          return Object.values(state.layers).flatMap((layer) =>
+    if (warning.type === 'incomplete') {
+      return hasUnsupportedDownsampledAggregationFailure(warning)
+        ? Object.values(state.layers).flatMap((layer) =>
             uniq(
               Object.values(layer.columns)
                 .filter((col) =>
@@ -275,60 +289,152 @@ export function getShardFailuresWarningMessages(
                   ].includes(col.operationType)
                 )
                 .map((col) => col.label)
-            ).map(
-              (label) =>
-                ({
-                  uniqueId: `unsupported_aggregation_on_downsampled_index--${label}`,
-                  severity: 'warning',
-                  fixableInEditor: true,
-                  displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
-                  shortMessage: '',
-                  longMessage: i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
-                    defaultMessage:
-                      '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
-                    values: {
-                      label,
-                    },
-                  }),
-                } as UserMessage)
-            )
-          );
-        default:
-          return [
-            {
-              uniqueId: `shard_failure`,
+            ).map((label) => ({
+              // TODO: we probably need to move label as part of the meta data
+              uniqueId: `${UNSUPPORTED_DOWNSAMPLED_INDEX_AGG_PREFIX}--${label}`,
               severity: 'warning',
               fixableInEditor: true,
               displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
               shortMessage: '',
-              longMessage: (
-                <>
-                  <EuiText size="s">
-                    <strong>{warning.message}</strong>
-                    <p>{warning.text}</p>
-                  </EuiText>
-                  <EuiSpacer size="s" />
-                  {warning.text ? (
-                    <ShardFailureOpenModalButton
-                      theme={theme}
-                      title={warning.message}
-                      size="m"
-                      getRequestMeta={() => ({
-                        request: request as ShardFailureRequest,
-                        response,
-                      })}
-                      color="primary"
-                      isButtonEmpty={true}
-                    />
-                  ) : null}
-                </>
+              longMessage: i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
+                defaultMessage:
+                  '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+                values: {
+                  label,
+                },
+              }),
+            }))
+          )
+        : [
+            {
+              uniqueId: INCOMPLETE_ES_RESULTS,
+              severity: 'warning',
+              fixableInEditor: true,
+              displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+              shortMessage: '',
+              longMessage: (closePopover) => (
+                <SearchResponseWarningsBadgePopoverContent
+                  onViewDetailsClick={closePopover}
+                  warnings={[warning]}
+                />
               ),
-            } as UserMessage,
+            },
           ];
-      }
     }
   }
   return [];
+}
+
+export function getUnsupportedOperationsWarningMessage(
+  state: FormBasedPrivateState,
+  { dataViews }: FramePublicAPI,
+  docLinks: DocLinksStart
+) {
+  const warningMessages: UserMessage[] = [];
+  const columnsWithUnsupportedOperations: Array<
+    [FieldBasedIndexPatternColumn, ReferenceBasedIndexPatternColumn | undefined]
+  > = Object.values(state.layers)
+    // filter layers without dataView loaded yet
+    .filter(({ indexPatternId }) => dataViews.indexPatterns[indexPatternId])
+    .flatMap((layer) => {
+      const dataView = dataViews.indexPatterns[layer.indexPatternId];
+      const columnsEntries = Object.entries(layer.columns);
+      return columnsEntries
+        .filter(([_, column]) => {
+          const operation = operationDefinitionMap[column.operationType] as Extract<
+            GenericOperationDefinition,
+            { input: 'field' }
+          >;
+
+          // this check for getPossibleOperationForField is needed as long as
+          // https://github.com/elastic/kibana/issues/168561 is unresolved
+          if (!operation.getPossibleOperationForField || !hasField(column)) {
+            return false;
+          }
+
+          const field = dataView.getFieldByName(column.sourceField);
+          if (!field) {
+            return false;
+          }
+          return (
+            !operation.getPossibleOperationForField?.(field) &&
+            field?.timeSeriesMetric === 'counter'
+          );
+        })
+        .map(
+          ([id, fieldColumn]) =>
+            [fieldColumn, layer.columns[getReferenceRoot(layer, id)]] as [
+              FieldBasedIndexPatternColumn,
+              ReferenceBasedIndexPatternColumn | undefined
+            ]
+        );
+    });
+  if (columnsWithUnsupportedOperations.length) {
+    // group the columns by field
+    // then group together columns of a formula/referenced operation who use the same field
+    const columnsGroupedByField = Object.values(
+      groupBy(columnsWithUnsupportedOperations, ([column]) => column.sourceField)
+    ).map((columnsList) => uniqBy(columnsList, ([column, rootColumn]) => rootColumn ?? column));
+
+    for (const columnsGrouped of columnsGroupedByField) {
+      const sourceField = columnsGrouped[0][0].sourceField;
+      warningMessages.push({
+        uniqueId: TSDB_UNSUPPORTED_COUNTER_OP,
+        severity: 'warning',
+        fixableInEditor: false,
+        displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+        shortMessage: i18n.translate(
+          'xpack.lens.indexPattern.tsdbErrorWarning.unsupportedCounterOperationErrorWarning.shortMessage',
+          {
+            defaultMessage:
+              'The result of {count} {count, plural, one {operation} other {operations}} might be meaningless for {field}: {operations}',
+            values: {
+              count: columnsGrouped.length,
+              operations: columnsGrouped
+                .map(([affectedColumn, rootColumn]) => (rootColumn ?? affectedColumn).label)
+                .join(', '),
+              field: sourceField,
+            },
+          }
+        ),
+        longMessage: (
+          <>
+            <FormattedMessage
+              id="xpack.lens.indexPattern.unsupportedCounterOperationErrorWarning"
+              defaultMessage="While {count} {count, plural, one {operation} other {operations}} for {field} {count, plural, one {is} other {are}} allowed the result might be meaningless: {operations}. To learn more about this, {link}."
+              values={{
+                count: columnsGrouped.length,
+                operations: (
+                  <>
+                    {columnsGrouped.map(([affectedColumn, rootColumn], i) => (
+                      <React.Fragment key={(rootColumn ?? affectedColumn).label}>
+                        <strong>{(rootColumn ?? affectedColumn).label}</strong>
+                        {i < columnsGrouped.length - 1 ? ', ' : ''}
+                      </React.Fragment>
+                    ))}
+                  </>
+                ),
+                field: sourceField,
+                link: (
+                  <EuiLink
+                    href={docLinks.links.fleet.datastreamsTSDSMetrics}
+                    target="_blank"
+                    external={true}
+                  >
+                    <FormattedMessage
+                      defaultMessage="visit the Time series documentation"
+                      id="xpack.lens.indexPattern.unsupportedCounterOperationErrorWarning.link"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </>
+        ),
+      });
+    }
+  }
+  return warningMessages;
 }
 
 export function getPrecisionErrorWarningMessages(
@@ -342,18 +448,18 @@ export function getPrecisionErrorWarningMessages(
 
   if (state && activeData) {
     Object.entries(activeData)
-      .reduce(
-        (acc, [layerId, { columns }]) => [
-          ...acc,
-          ...columns.map((column) => ({ layerId, column })),
-        ],
-        [] as Array<{ layerId: string; column: DatatableColumn }>
-      )
+      .reduce((acc, [layerId, { columns }]) => {
+        acc.push(...columns.map((column) => ({ layerId, column })));
+        return acc;
+      }, [] as Array<{ layerId: string; column: DatatableColumn }>)
       .forEach(({ layerId, column }) => {
         const currentLayer = state.layers[layerId];
         const currentColumn = currentLayer?.columns[column.id];
         if (currentLayer && currentColumn && datatableUtilities.hasPrecisionError(column)) {
           const indexPattern = dataViews.indexPatterns[currentLayer.indexPatternId];
+          if (!indexPattern) {
+            return;
+          }
           // currentColumnIsTerms is mostly a type guard. If there's a precision error,
           // we already know that we're dealing with a terms-based operation (at least for now).
           const currentColumnIsTerms = isColumnOfType<TermsIndexPatternColumn>(
@@ -405,6 +511,7 @@ export function getPrecisionErrorWarningMessages(
             );
           } else {
             warningMessages.push({
+              uniqueId: PRECISION_ERROR_ASC_COUNT_PRECISION,
               severity: 'warning',
               displayLocations: [
                 { id: 'toolbar' },
@@ -502,19 +609,18 @@ export function getNotifiableFeatures(
   if (!visualizationInfo) {
     return [];
   }
-  const layersWithCustomSamplingValues = Object.entries(state.layers).filter(
+  const features: UserMessage[] = [];
+  const layers = Object.entries(state.layers);
+  const layersWithCustomSamplingValues = layers.filter(
     ([, layer]) => getSamplingValue(layer) !== 1
   );
-  if (!layersWithCustomSamplingValues.length) {
-    return [];
-  }
-  return [
-    {
-      uniqueId: 'random_sampling_info',
+  if (layersWithCustomSamplingValues.length) {
+    features.push({
+      uniqueId: LAYER_SETTINGS_RANDOM_SAMPLING_INFO,
       severity: 'info',
       fixableInEditor: false,
       shortMessage: i18n.translate('xpack.lens.indexPattern.samplingPerLayer', {
-        defaultMessage: 'Layers with reduced sampling',
+        defaultMessage: 'Sampling probability by layer',
       }),
       longMessage: (
         <ReducedSamplingSectionEntries
@@ -524,8 +630,32 @@ export function getNotifiableFeatures(
         />
       ),
       displayLocations: [{ id: 'embeddableBadge' }],
-    },
-  ];
+    });
+  }
+  const layersWithIgnoreGlobalFilters = layers.filter(([, layer]) => layer.ignoreGlobalFilters);
+  if (layersWithIgnoreGlobalFilters.length) {
+    features.push({
+      uniqueId: LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
+      severity: 'info',
+      fixableInEditor: false,
+      shortMessage: i18n.translate('xpack.lens.xyChart.layerAnnotationsIgnoreTitle', {
+        defaultMessage: 'Layers ignoring global filters',
+      }),
+      longMessage: (
+        <IgnoredGlobalFiltersEntries
+          layers={layersWithIgnoreGlobalFilters.map(([layerId, { indexPatternId }]) => ({
+            layerId,
+            indexPatternId,
+          }))}
+          visualizationInfo={visualizationInfo}
+          dataViews={frame.dataViews}
+        />
+      ),
+      displayLocations: [{ id: 'embeddableBadge' }],
+    });
+  }
+
+  return features;
 }
 
 /**
@@ -575,7 +705,7 @@ function extractTimeRangeFromDateHistogram(
   return [
     {
       language: 'kuery',
-      query: `${column.sourceField} >= "${timeRange.from}" AND ${column.sourceField} <= "${timeRange.to}"`,
+      query: `"${column.sourceField}" >= "${timeRange.from}" AND "${column.sourceField}" <= "${timeRange.to}"`,
     },
   ];
 }
@@ -742,7 +872,7 @@ export function getFiltersInLayer(
           const fields = operationDefinitionMap[column.operationType]!.getCurrentFields!(column);
           return {
             kuery: fields.map((field) => ({
-              query: `${field}: *`,
+              query: `"${field}": *`,
               language: 'kuery',
             })),
           };

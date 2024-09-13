@@ -8,12 +8,12 @@
 import React, { useCallback } from 'react';
 import { isEmpty } from 'lodash/fp';
 import { EuiFormRow } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ActionConnector } from '../../../common/types/domain';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
-import type { ActionConnector } from '../../../common/api';
 
 interface ConnectorSelectorProps {
   connectors: ActionConnector[];
@@ -21,16 +21,9 @@ interface ConnectorSelectorProps {
   disabled: boolean;
   field: FieldHook<string>;
   idAria: string;
-  isEdit: boolean;
   isLoading: boolean;
   handleChange?: (newValue: string) => void;
 }
-
-const EuiFormRowWrapper = styled(EuiFormRow)`
-  .euiFormErrorText {
-    display: none;
-  }
-`;
 
 export const ConnectorSelector = ({
   connectors,
@@ -38,7 +31,6 @@ export const ConnectorSelector = ({
   disabled = false,
   field,
   idAria,
-  isEdit = true,
   isLoading = false,
   handleChange,
 }: ConnectorSelectorProps) => {
@@ -53,8 +45,17 @@ export const ConnectorSelector = ({
     [handleChange, field]
   );
 
-  return isEdit ? (
-    <EuiFormRowWrapper
+  const isConnectorAvailable = Boolean(
+    connectors.find((connector) => connector.id === field.value)
+  );
+
+  return (
+    <EuiFormRow
+      css={css`
+        .euiFormErrorText {
+          display: none;
+        }
+      `}
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
       error={errorMessage}
@@ -69,9 +70,9 @@ export const ConnectorSelector = ({
         disabled={disabled}
         isLoading={isLoading}
         onChange={onChange}
-        selectedConnector={isEmpty(field.value) ? 'none' : field.value}
+        selectedConnector={isEmpty(field.value) || !isConnectorAvailable ? 'none' : field.value}
       />
-    </EuiFormRowWrapper>
-  ) : null;
+    </EuiFormRow>
+  );
 };
 ConnectorSelector.displayName = 'ConnectorSelector';

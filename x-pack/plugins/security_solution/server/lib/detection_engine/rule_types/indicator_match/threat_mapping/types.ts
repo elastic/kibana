@@ -17,6 +17,7 @@ import type {
   LanguageOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -27,17 +28,20 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import type {
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   WrapHits,
+  WrapSuppressedHits,
   OverrideBodyQuery,
+  RunOpts,
 } from '../../types';
 import type { CompleteRule, ThreatRuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
+import type { ExperimentalFeatures } from '../../../../../../common';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
@@ -67,11 +71,16 @@ export interface CreateThreatSignalsOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
+  wrapSuppressedHits: WrapSuppressedHits;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
+  inputIndexFields: DataViewFieldBase[];
+  runOpts: RunOpts<ThreatRuleParams>;
+  licensing: LicensingPluginSetup;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export interface CreateThreatSignalOptions {
@@ -95,6 +104,7 @@ export interface CreateThreatSignalOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
+  wrapSuppressedHits: WrapSuppressedHits;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
@@ -109,6 +119,12 @@ export interface CreateThreatSignalOptions {
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
+  inputIndexFields: DataViewFieldBase[];
+  threatIndexFields: DataViewFieldBase[];
+  runOpts: RunOpts<ThreatRuleParams>;
+  sortOrder?: SortOrderOrUndefined;
+  isAlertSuppressionActive: boolean;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export interface CreateEventSignalOptions {
@@ -131,6 +147,7 @@ export interface CreateEventSignalOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
+  wrapSuppressedHits: WrapSuppressedHits;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
   threatIndicatorPath: ThreatIndicatorPath;
@@ -147,6 +164,12 @@ export interface CreateEventSignalOptions {
   unprocessedExceptions: ExceptionListItemSchema[];
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
   threatMatchedFields: ThreatMatchedFields;
+  inputIndexFields: DataViewFieldBase[];
+  threatIndexFields: DataViewFieldBase[];
+  runOpts: RunOpts<ThreatRuleParams>;
+  sortOrder?: SortOrderOrUndefined;
+  isAlertSuppressionActive: boolean;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 type EntryKey = 'field' | 'value';
@@ -217,6 +240,7 @@ export interface GetThreatListOptions {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   listClient: ListClient;
   exceptionFilter: Filter | undefined;
+  indexFields: DataViewFieldBase[];
 }
 
 export interface ThreatListCountOptions {
@@ -226,6 +250,7 @@ export interface ThreatListCountOptions {
   query: string;
   threatFilters: unknown[];
   exceptionFilter: Filter | undefined;
+  indexFields: DataViewFieldBase[];
 }
 
 export interface ThreatListDoc {
@@ -274,6 +299,7 @@ export interface BuildThreatEnrichmentOptions {
   exceptionFilter: Filter | undefined;
   threatMapping: ThreatMapping;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  threatIndexFields: DataViewFieldBase[];
 }
 
 export interface EventsOptions {
@@ -291,6 +317,8 @@ export interface EventsOptions {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   exceptionFilter: Filter | undefined;
   eventListConfig?: OverrideBodyQuery;
+  indexFields: DataViewFieldBase[];
+  sortOrder?: SortOrderOrUndefined;
 }
 
 export interface EventDoc {
@@ -308,6 +336,7 @@ export interface EventCountOptions {
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
+  indexFields: DataViewFieldBase[];
 }
 
 export interface SignalMatch {

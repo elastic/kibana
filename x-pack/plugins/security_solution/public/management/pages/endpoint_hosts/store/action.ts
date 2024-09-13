@@ -7,10 +7,9 @@
 
 import type { Action } from 'redux';
 import type { DataViewBase } from '@kbn/es-query';
+import type { IsolationRouteRequestBody } from '../../../../../common/api/endpoint';
 import type {
-  HostInfo,
   GetHostPolicyResponse,
-  HostIsolationRequestBody,
   ISOLATION_ACTIONS,
   MetadataListResponse,
 } from '../../../../../common/endpoint/types';
@@ -28,15 +27,6 @@ export interface ServerFailedToReturnEndpointList {
   payload: ServerApiError;
 }
 
-export interface ServerReturnedEndpointDetails {
-  type: 'serverReturnedEndpointDetails';
-  payload: HostInfo;
-}
-
-export interface ServerFailedToReturnEndpointDetails {
-  type: 'serverFailedToReturnEndpointDetails';
-  payload: ServerApiError;
-}
 export interface ServerReturnedEndpointPolicyResponse {
   type: 'serverReturnedEndpointPolicyResponse';
   payload: GetHostPolicyResponse;
@@ -86,6 +76,11 @@ export interface ServerReturnedEndpointNonExistingPolicies {
 export interface ServerReturnedEndpointAgentPolicies {
   type: 'serverReturnedEndpointAgentPolicies';
   payload: EndpointState['agentPolicies'];
+}
+
+export interface ServerFinishedInitialization {
+  type: 'serverFinishedInitialization';
+  payload: boolean;
 }
 
 export interface ServerReturnedEndpointExistValue {
@@ -138,24 +133,13 @@ export interface ServerFailedToReturnEndpointsTotal {
 export type EndpointIsolationRequest = Action<'endpointIsolationRequest'> & {
   payload: {
     type: ISOLATION_ACTIONS;
-    data: HostIsolationRequestBody;
+    data: IsolationRouteRequestBody;
   };
 };
 
 export type EndpointIsolationRequestStateChange = Action<'endpointIsolationRequestStateChange'> & {
   payload: EndpointState['isolationRequestState'];
 };
-
-export type EndpointPendingActionsStateChanged = Action<'endpointPendingActionsStateChanged'> & {
-  payload: EndpointState['endpointPendingActions'];
-};
-
-export interface EndpointDetailsLoad {
-  type: 'endpointDetailsLoad';
-  payload: {
-    endpointId: string;
-  };
-}
 
 export type LoadMetadataTransformStats = Action<'loadMetadataTransformStats'>;
 
@@ -166,11 +150,6 @@ export type MetadataTransformStatsChanged = Action<'metadataTransformStatsChange
 export type EndpointAction =
   | ServerReturnedEndpointList
   | ServerFailedToReturnEndpointList
-  | ServerReturnedEndpointDetails
-  | ServerFailedToReturnEndpointDetails
-  | EndpointDetailsLoad
-  | ServerReturnedEndpointPolicyResponse
-  | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding
   | ServerFailedToReturnPoliciesForOnboarding
   | UserSelectedEndpointPolicy
@@ -190,6 +169,6 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointsTotal
   | EndpointIsolationRequest
   | EndpointIsolationRequestStateChange
-  | EndpointPendingActionsStateChanged
   | LoadMetadataTransformStats
-  | MetadataTransformStatsChanged;
+  | MetadataTransformStatsChanged
+  | ServerFinishedInitialization;

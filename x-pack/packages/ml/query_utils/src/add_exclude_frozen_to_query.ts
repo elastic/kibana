@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { cloneDeep } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 

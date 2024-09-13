@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -58,7 +59,7 @@ export const GuidePanelFlyoutBody = ({
 
     return (
       <>
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
         <EuiText size="m">
           <EuiLink external target="_blank" href={guideConfig.docs.url}>
             {guideConfig.docs.text}
@@ -109,7 +110,7 @@ export const GuidePanelFlyoutBody = ({
     return (
       <>
         <EuiImage
-          size="fullWidth"
+          size="l"
           src={isDarkTheme ? wellDoneAnimatedDarkGif : wellDoneAnimatedGif}
           alt={i18n.translate('guidedOnboarding.dropdownPanel.wellDoneAnimatedGif', {
             defaultMessage: `Guide completed animated gif`,
@@ -131,17 +132,9 @@ export const GuidePanelFlyoutBody = ({
 
         {docsLink()}
 
-        <GuideProgress
-          guideConfig={guideConfig}
-          styles={styles}
-          pluginState={pluginState}
-          isLoading={isLoading}
-          handleStepButtonClick={handleStepButtonClick}
-          isGuideReadyToComplete={isGuideReadyToComplete}
-          stepsCompleted={stepsCompleted}
-        />
+        <EuiSpacer />
 
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiButton
               isLoading={isLoading}
@@ -156,6 +149,8 @@ export const GuidePanelFlyoutBody = ({
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
+
+        <EuiSpacer />
       </>
     );
   }

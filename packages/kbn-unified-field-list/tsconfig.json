@@ -1,0 +1,40 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts"],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/data-views-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/analytics",
+    "@kbn/i18n-react",
+    "@kbn/react-field",
+    "@kbn/expressions-plugin",
+    "@kbn/core",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/data-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/datemath",
+    "@kbn/es-query",
+    "@kbn/es-types",
+    "@kbn/field-types",
+    "@kbn/ui-actions-browser",
+    "@kbn/data-service",
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/dom-drag-drop",
+    "@kbn/shared-ux-utility",
+    "@kbn/discover-utils",
+    "@kbn/ebt-tools",
+    "@kbn/shared-ux-button-toolbar",
+    "@kbn/field-utils",
+    "@kbn/visualization-utils",
+    "@kbn/esql-utils",
+    "@kbn/search-types",
+    "@kbn/fields-metadata-plugin"
+  ],
+  "exclude": ["target/**/*"]
+}

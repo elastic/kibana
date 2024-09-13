@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataProviderType } from '@kbn/timelines-plugin/common';
+import { DataProviderTypeEnum } from '../../../../common/api/timeline';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import {
@@ -98,6 +98,7 @@ describe('helpers', () => {
             { label: 'event.action' },
             { label: 'event.category' },
             { label: 'event.severity' },
+            { label: 'event.kind' },
           ],
         },
         {
@@ -118,6 +119,7 @@ describe('helpers', () => {
             },
           ],
         },
+        { label: 'process', options: [{ label: 'process.args' }] },
         { label: 'source', options: [{ label: 'source.ip' }, { label: 'source.port' }] },
         {
           label: 'user',
@@ -142,7 +144,7 @@ describe('helpers', () => {
               label: 'is',
             },
           ],
-          type: DataProviderType.default,
+          type: DataProviderTypeEnum.default,
         })
       ).toBe(true);
     });
@@ -161,7 +163,7 @@ describe('helpers', () => {
               label: 'is',
             },
           ],
-          type: DataProviderType.default,
+          type: DataProviderTypeEnum.default,
         })
       ).toBe(false);
     });
@@ -180,7 +182,7 @@ describe('helpers', () => {
               label: 'is one of',
             },
           ],
-          type: DataProviderType.default,
+          type: DataProviderTypeEnum.default,
         })
       ).toBe(false);
     });
@@ -199,7 +201,7 @@ describe('helpers', () => {
               label: '',
             },
           ],
-          type: DataProviderType.default,
+          type: DataProviderTypeEnum.default,
         })
       ).toBe(false);
     });
@@ -218,7 +220,7 @@ describe('helpers', () => {
               label: 'invalid-operator',
             },
           ],
-          type: DataProviderType.default,
+          type: DataProviderTypeEnum.default,
         })
       ).toBe(false);
     });
@@ -237,7 +239,7 @@ describe('helpers', () => {
               label: 'is one of',
             },
           ],
-          type: DataProviderType.template,
+          type: DataProviderTypeEnum.template,
         })
       ).toBe(false);
     });
@@ -256,7 +258,7 @@ describe('helpers', () => {
               label: 'is not one of',
             },
           ],
-          type: DataProviderType.template,
+          type: DataProviderTypeEnum.template,
         })
       ).toBe(false);
     });

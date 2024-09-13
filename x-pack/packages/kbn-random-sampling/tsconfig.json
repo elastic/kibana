@@ -1,0 +1,21 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/i18n-react",
+    "@kbn/visualization-utils",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

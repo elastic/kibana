@@ -44,7 +44,7 @@ describe('Bulk Operation Buffer', () => {
         return Promise.resolve([incrementAttempts(task1), incrementAttempts(task2)]);
       });
 
-      const bufferedUpdate = createBuffer(bulkUpdate);
+      const bufferedUpdate = createBuffer(bulkUpdate, {});
 
       const task1 = createTask();
       const task2 = createTask();
@@ -69,28 +69,21 @@ describe('Bulk Operation Buffer', () => {
       const task3 = createTask();
       const task4 = createTask();
 
-      return new Promise<void>((resolve) => {
-        Promise.all([bufferedUpdate(task1), bufferedUpdate(task2)]).then((_) => {
-          expect(bulkUpdate).toHaveBeenCalledTimes(1);
-          expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
-          expect(bulkUpdate).not.toHaveBeenCalledWith([task3, task4]);
-        });
+      await Promise.all([bufferedUpdate(task1), bufferedUpdate(task2)]);
+      expect(bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
+      expect(bulkUpdate).not.toHaveBeenCalledWith([task3, task4]);
 
-        setTimeout(() => {
-          // on next tick
-          expect(bulkUpdate).toHaveBeenCalledTimes(1);
-          Promise.all([bufferedUpdate(task3), bufferedUpdate(task4)]).then((_) => {
-            expect(bulkUpdate).toHaveBeenCalledTimes(2);
-            expect(bulkUpdate).toHaveBeenCalledWith([task3, task4]);
-          });
+      await new Promise<void>((resolve) => setTimeout(resolve, bufferMaxDuration * 1.1));
+      // on next tick
+      expect(bulkUpdate).toHaveBeenCalledTimes(1);
+      await Promise.all([bufferedUpdate(task3), bufferedUpdate(task4)]);
+      expect(bulkUpdate).toHaveBeenCalledTimes(2);
+      expect(bulkUpdate).toHaveBeenCalledWith([task3, task4]);
 
-          setTimeout(() => {
-            // on next tick
-            expect(bulkUpdate).toHaveBeenCalledTimes(2);
-            resolve();
-          }, bufferMaxDuration * 1.1);
-        }, bufferMaxDuration * 1.1);
-      });
+      await new Promise<void>((resolve) => setTimeout(resolve, bufferMaxDuration * 1.1));
+      // on next tick
+      expect(bulkUpdate).toHaveBeenCalledTimes(2);
     });
 
     test('batch updates are executed once queue hits a certain bound', async () => {
@@ -110,20 +103,19 @@ describe('Bulk Operation Buffer', () => {
       const task4 = createTask();
       const task5 = createTask();
 
-      return Promise.all([
+      await Promise.all([
         bufferedUpdate(task1),
         bufferedUpdate(task2),
         bufferedUpdate(task3),
         bufferedUpdate(task4),
-      ]).then(() => {
-        expect(bulkUpdate).toHaveBeenCalledTimes(2);
-        expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
-        expect(bulkUpdate).toHaveBeenCalledWith([task3, task4]);
-        return bufferedUpdate(task5).then((_) => {
-          expect(bulkUpdate).toHaveBeenCalledTimes(3);
-          expect(bulkUpdate).toHaveBeenCalledWith([task5]);
-        });
-      });
+      ]);
+      expect(bulkUpdate).toHaveBeenCalledTimes(2);
+      expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
+      expect(bulkUpdate).toHaveBeenCalledWith([task3, task4]);
+
+      await bufferedUpdate(task5);
+      expect(bulkUpdate).toHaveBeenCalledTimes(3);
+      expect(bulkUpdate).toHaveBeenCalledWith([task5]);
     });
 
     test('queue upper bound is reset after each flush', async () => {
@@ -142,24 +134,17 @@ describe('Bulk Operation Buffer', () => {
       const task3 = createTask();
       const task4 = createTask();
 
-      return Promise.all([bufferedUpdate(task1), bufferedUpdate(task2)]).then(() => {
-        expect(bulkUpdate).toHaveBeenCalledTimes(1);
-        expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
+      await Promise.all([bufferedUpdate(task1), bufferedUpdate(task2)]);
+      expect(bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
 
-        return new Promise<void>((resolve) => {
-          const futureUpdates = Promise.all([bufferedUpdate(task3), bufferedUpdate(task4)]);
+      const futureUpdates = Promise.all([bufferedUpdate(task3), bufferedUpdate(task4)]);
+      await new Promise<void>((resolve) => setTimeout(resolve, bufferMaxDuration / 2));
+      expect(bulkUpdate).toHaveBeenCalledTimes(1);
 
-          setTimeout(() => {
-            expect(bulkUpdate).toHaveBeenCalledTimes(1);
-
-            futureUpdates.then(() => {
-              expect(bulkUpdate).toHaveBeenCalledTimes(2);
-              expect(bulkUpdate).toHaveBeenCalledWith([task3, task4]);
-              resolve();
-            });
-          }, bufferMaxDuration / 2);
-        });
-      });
+      await futureUpdates;
+      expect(bulkUpdate).toHaveBeenCalledTimes(2);
+      expect(bulkUpdate).toHaveBeenCalledWith([task3, task4]);
     });
 
     test('handles both resolutions and rejections at individual task level', async () => {
@@ -173,7 +158,7 @@ describe('Bulk Operation Buffer', () => {
         }
       );
 
-      const bufferedUpdate = createBuffer(bulkUpdate);
+      const bufferedUpdate = createBuffer(bulkUpdate, {});
 
       const task1 = createTask();
       const task2 = createTask();
@@ -195,7 +180,7 @@ describe('Bulk Operation Buffer', () => {
         return Promise.reject(new Error('bulkUpdate is an illusion'));
       });
 
-      const bufferedUpdate = createBuffer(bulkUpdate);
+      const bufferedUpdate = createBuffer(bulkUpdate, {});
 
       const task1 = createTask();
       const task2 = createTask();

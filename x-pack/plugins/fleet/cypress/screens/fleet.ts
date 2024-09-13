@@ -12,18 +12,28 @@ export const LANDING_PAGE_ADD_FLEET_SERVER_BUTTON = 'fleetServerLanding.addFleet
 export const AGENTS_TAB = 'fleet-agents-tab';
 export const AGENT_POLICIES_TAB = 'fleet-agent-policies-tab';
 export const ENROLLMENT_TOKENS_TAB = 'fleet-enrollment-tokens-tab';
+export const UNINSTALL_TOKENS_TAB = 'fleet-uninstall-tokens-tab';
 export const DATA_STREAMS_TAB = 'fleet-datastreams-tab';
 export const SETTINGS_TAB = 'fleet-settings-tab';
 
-export const MISSING_PRIVILEGES_TITLE = 'missingPrivilegesPromptTitle';
-export const MISSING_PRIVILEGES_MESSAGE = 'missingPrivilegesPromptMessage';
-export const FLEET_SERVER_MISSING_PRIVILEGES_MESSAGE = 'fleetServerMissingPrivilegesMessage';
-export const FLEET_SERVER_MISSING_PRIVILEGES_TITLE = 'fleetServerMissingPrivilegesTitle';
+export const MISSING_PRIVILEGES = {
+  PROMPT: 'missingPrivilegesPrompt',
+  TITLE: 'missingPrivilegesPromptTitle',
+  MESSAGE: 'missingPrivilegesPromptMessage',
+};
+
+export const FLEET_SERVER_MISSING_PRIVILEGES = {
+  PROMPT: 'fleetServerMissingPrivilegesPrompt',
+  MESSAGE: 'fleetServerMissingPrivilegesMessage',
+  TITLE: 'fleetServerMissingPrivilegesTitle',
+};
+
 export const AGENT_POLICY_SAVE_INTEGRATION = 'saveIntegration';
 export const PACKAGE_POLICY_TABLE_LINK = 'PackagePoliciesTableLink';
 export const ADD_PACKAGE_POLICY_BTN = 'addPackagePolicyButton';
 export const GENERATE_FLEET_SERVER_POLICY_BUTTON = 'generateFleetServerPolicyButton';
 export const ADD_FLEET_SERVER_HEADER = 'addFleetServerHeader';
+export const ADD_AGENT_POLICY_BTN = 'createAgentPolicyButton';
 
 export const PLATFORM_TYPE_LINUX_BUTTON = 'platformTypeLinux';
 export const ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON = 'fleetServerAddHostBtn';
@@ -43,8 +53,19 @@ export const ENROLLMENT_TOKENS = {
   LIST_TABLE: 'enrollmentTokenListTable',
   TABLE_REVOKE_BTN: 'enrollmentTokenTable.revokeBtn',
 };
+
+export const UNINSTALL_TOKENS = {
+  POLICY_ID_SEARCH_FIELD: 'uninstallTokensPolicyIdSearchInput',
+  POLICY_ID_TABLE_FIELD: 'uninstallTokensPolicyIdField',
+  VIEW_UNINSTALL_COMMAND_BUTTON: 'uninstallTokensViewCommandButton',
+  UNINSTALL_COMMAND_FLYOUT: 'uninstall-command-flyout',
+  TOKEN_FIELD: 'apiKeyField',
+  SHOW_HIDE_TOKEN_BUTTON: 'showHideTokenButton',
+};
+
 export const SETTINGS_FLEET_SERVER_HOST_HEADING = 'fleetServerHostHeader';
 export const SETTINGS_SAVE_BTN = 'saveApplySettingsBtn';
+export const SETTINGS_CONFIRM_MODAL_BTN = 'confirmModalConfirmButton';
 
 export const AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX = 'agentPolicyFormSystemMonitoringCheckbox';
 export const INSTALL_INTEGRATIONS_ADVANCE_OPTIONS_BTN = 'AgentPolicyAdvancedOptions.AccordionBtn';
@@ -65,8 +86,10 @@ export const AGENT_FLYOUT = {
   ADVANCED_TAB_BUTTON: 'fleetServerFlyoutTab-advanced',
   AGENT_POLICY_CODE_BLOCK: 'agentPolicyCodeBlock',
   STANDALONE_TAB: 'standaloneTab',
+  MANAGED_TAB: 'managedTab',
   CONFIRM_AGENT_ENROLLMENT_BUTTON: 'ConfirmAgentEnrollmentButton',
   INCOMING_DATA_CONFIRMED_CALL_OUT: 'IncomingDataConfirmedCallOut',
+  KUBERNETES_PLATFORM_TYPE: 'platformTypeKubernetes',
 };
 
 export const AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT = {
@@ -97,13 +120,71 @@ export const AGENT_BINARY_SOURCES_FLYOUT = {
 export const SETTINGS_OUTPUTS = {
   EDIT_BTN: 'editOutputBtn',
   ADD_BTN: 'addOutputBtn',
+  TABLE: 'settingsOutputsTable',
   NAME_INPUT: 'settingsOutputsFlyout.nameInput',
   TYPE_INPUT: 'settingsOutputsFlyout.typeInput',
+  ADD_HOST_ROW_BTN: 'fleetServerHosts.multiRowInput.addRowButton',
+  WARNING_ELASTICSEARCH_CALLOUT: 'settingsOutputsFlyout.elasticsearchOutputTypeCallout',
+  PRESET_INPUT: 'settingsOutputsFlyout.presetInput',
+};
+
+export const getSpecificSelectorId = (selector: string, id: number) => {
+  const lastChar = selector.charAt(selector.length - 1);
+
+  if (!isNaN(Number(lastChar))) {
+    return selector.slice(0, selector.length - 1) + id;
+  }
+
+  return selector;
+};
+
+export const SETTINGS_OUTPUTS_KAFKA = {
+  VERSION_SELECT: 'settingsOutputsFlyout.kafkaVersionInput',
+  AUTHENTICATION_SELECT: 'settingsOutputsFlyout.kafkaAuthenticationRadioInput',
+  AUTHENTICATION_NONE_OPTION: 'kafkaAuthenticationNoneRadioButton',
+  AUTHENTICATION_USERNAME_PASSWORD_OPTION: 'kafkaAuthenticationUsernamePasswordRadioButton',
+  AUTHENTICATION_SSL_OPTION: 'kafkaAuthenticationSSLRadioButton',
+  AUTHENTICATION_KERBEROS_OPTION: 'kafkaAuthenticationKerberosRadioButton',
+  AUTHENTICATION_USERNAME_INPUT: 'settingsOutputsFlyout.kafkaUsernameInput',
+  AUTHENTICATION_PASSWORD_INPUT: 'settingsOutputsFlyout.kafkaPasswordSecretInput',
+  AUTHENTICATION_VERIFICATION_MODE_INPUT: 'settingsOutputsFlyout.kafkaVerificationModeInput',
+  AUTHENTICATION_CONNECTION_TYPE_SELECT: 'settingsOutputsFlyout.kafkaConnectionTypeRadioInput',
+  AUTHENTICATION_CONNECTION_TYPE_PLAIN_OPTION: 'kafkaConnectionTypePlaintextRadioButton',
+  AUTHENTICATION_CONNECTION_TYPE_ENCRYPTION_OPTION: 'kafkaConnectionTypeEncryptionRadioButton',
+  AUTHENTICATION_SASL_SELECT: 'settingsOutputsFlyout.kafkaSaslInput',
+  AUTHENTICATION_SASL_PLAIN_OPTION: 'kafkaSaslPlainRadioButton',
+  AUTHENTICATION_SASL_SCRAM_256_OPTION: 'kafkaSaslScramSha256RadioButton',
+  AUTHENTICATION_SASL_SCRAM_512_OPTION: 'kafkaSaslScramSha512RadioButton',
+  PARTITIONING_PANEL: 'settingsOutputsFlyout.kafkaPartitionPanel',
+  PARTITIONING_SELECT: 'settingsOutputsFlyout.kafkaPartitioningRadioInput',
+  PARTITIONING_RANDOM_OPTION: 'kafkaPartitionRandomRadioButton',
+  PARTITIONING_HASH_OPTION: 'kafkaPartitionHashRadioButton',
+  PARTITIONING_ROUND_ROBIN_OPTION: 'kafkaPartitionRoundRobinRadioButton',
+  PARTITIONING_EVENTS_INPUT: 'settingsOutputsFlyout.kafkaPartitionTypeRandomInput',
+  PARTITIONING_HASH_INPUT: 'settingsOutputsFlyout.kafkaPartitionTypeHashInput',
+  TOPICS_PANEL: 'settingsOutputsFlyout.kafkaTopicsPanel',
+  TOPICS_DEFAULT_TOPIC_INPUT: 'settingsOutputsFlyout.kafkaDefaultTopicInput',
+  HEADERS_PANEL: 'settingsOutputsFlyout.kafkaHeadersPanel',
+  HEADERS_KEY_INPUT: 'settingsOutputsFlyout.kafkaHeadersKeyInput0',
+  HEADERS_VALUE_INPUT: 'settingsOutputsFlyout.kafkaHeadersValueInput0',
+  HEADERS_ADD_ROW_BUTTON: 'kafkaHeaders.multiRowInput.addRowButton',
+  HEADERS_REMOVE_ROW_BUTTON: 'settingsOutputsFlyout.kafkaHeadersDeleteButton0',
+  HEADERS_CLIENT_ID_INPUT: 'settingsOutputsFlyout.kafkaClientIdInput',
+  COMPRESSION_PANEL: 'settingsOutputsFlyout.kafkaCompressionPanel',
+  COMPRESSION_SWITCH: 'settingsOutputsFlyout.kafkaCompressionSwitch',
+  COMPRESSION_CODEC_INPUT: 'settingsOutputsFlyout.kafkaCompressionCodecInput',
+  COMPRESSION_LEVEL_INPUT: 'settingsOutputsFlyout.kafkaCompressionLevelInput',
+  BROKER_PANEL: 'settingsOutputsFlyout.kafkaBrokerSettingsPanel',
+  BROKER_TIMEOUT_SELECT: 'settingsOutputsFlyout.kafkaBrokerTimeoutInput',
+  BROKER_REACHABILITY_TIMEOUT_SELECT: 'settingsOutputsFlyout.kafkaBrokerReachabilityTimeoutInput',
+  BROKER_ACK_RELIABILITY_SELECT: 'settingsOutputsFlyout.kafkaBrokerAckReliabilityInputLabel',
+  KEY_INPUT: 'settingsOutputsFlyout.kafkaKeyInput',
 };
 
 export const SETTINGS_FLEET_SERVER_HOSTS = {
   ADD_BUTTON: 'settings.fleetServerHosts.addFleetServerHostBtn',
   EDIT_BUTTON: 'fleetServerHostsTable.edit.btn',
+  TABLE: 'settingsFleetServerHostsTable',
 };
 
 export const AGENT_POLICY_FORM = {
@@ -113,11 +194,30 @@ export const AGENT_POLICY_FORM = {
 export const FLEET_AGENT_LIST_PAGE = {
   TABLE: 'fleetAgentListTable',
   STATUS_FILTER: 'agentList.statusFilter',
+  TAGS_FILTER: 'agentList.tagsFilter',
   POLICY_FILTER: 'agentList.policyFilter',
   QUERY_INPUT: 'agentList.queryInput',
   SHOW_UPGRADEABLE: 'agentList.showUpgradeable',
   CHECKBOX_SELECT_ALL: 'checkboxSelectAll',
   BULK_ACTIONS_BUTTON: 'agentBulkActionsButton',
+  ACTIVITY_BUTTON: 'agentActivityButton',
+  ACTIVITY_FLYOUT: {
+    FLYOUT_ID: 'agentActivityFlyout',
+    CLOSE_BUTTON: 'euiFlyoutCloseButton',
+  },
+  BULK_ACTIONS: {
+    ADD_REMOVE_TAG_INPUT: 'addRemoveTags',
+  },
+};
+
+export const ASSETS_PAGE = {
+  TAB: 'tab-assets',
+  getButtonId(type: string) {
+    return `fleetAssetsAccordion.button.${type}`;
+  },
+  getContentId(type: string, id?: string | number) {
+    return `fleetAssetsAccordion.content.${type}${id ? `.${id}` : ''}`;
+  },
 };
 
 export const FLEET_SERVER_HOST_FLYOUT = {
@@ -135,4 +235,8 @@ export const FLEET_SERVER_SETUP = {
 
 export const API_KEYS = {
   REVOKE_KEY_BUTTON: 'enrollmentTokenTable.revokeBtn',
+};
+
+export const AGENT_POLICY_DETAILS_PAGE = {
+  ADD_AGENT_LINK: 'addAgentLink',
 };

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Hapi from '@hapi/hapi';
@@ -29,7 +30,10 @@ import {
   declarePostPitRoute,
   declarePostUpdateByQueryRoute,
   declarePassthroughRoute,
+  declareIndexRoute,
   setProxyInterrupt,
+  getVersionedKibanaIndex,
+  getIndicesWithNamespaceAwareTypes,
 } from './repository_with_proxy_utils';
 
 let esServer: TestElasticsearchUtils;
@@ -90,29 +94,6 @@ describe('404s from proxies', () => {
       ? parseInt(process.env.TEST_PROXY_SERVER_PORT, 10)
       : 5698;
 
-    // Setup custom hapi hapiServer with h2o2 plugin for proxying
-    hapiServer = Hapi.server({
-      port: proxyPort,
-    });
-
-    await hapiServer.register(h2o2);
-    // register specific routes to modify the response and a catch-all to relay the request/response as-is
-
-    declareGetRoute(hapiServer, esHostname, esPort);
-    declareDeleteRoute(hapiServer, esHostname, esPort);
-    declarePostUpdateRoute(hapiServer, esHostname, esPort);
-
-    declareGetSearchRoute(hapiServer, esHostname, esPort);
-    declarePostSearchRoute(hapiServer, esHostname, esPort);
-    declarePostBulkRoute(hapiServer, esHostname, esPort);
-    declarePostMgetRoute(hapiServer, esHostname, esPort);
-    declarePostPitRoute(hapiServer, esHostname, esPort);
-    declarePostUpdateByQueryRoute(hapiServer, esHostname, esPort);
-
-    declarePassthroughRoute(hapiServer, esHostname, esPort);
-
-    await hapiServer.start();
-
     // Setup kibana configured to use proxy as ES backend
     root = createRootWithCorePlugins({
       elasticsearch: {
@@ -126,13 +107,44 @@ describe('404s from proxies', () => {
     const setup = await root.setup();
     registerSOTypes(setup);
 
+    // Setup custom hapi hapiServer with h2o2 plugin for proxying
+    hapiServer = Hapi.server({
+      port: proxyPort,
+    });
+
+    const mainIndex = getVersionedKibanaIndex();
+    await hapiServer.register(h2o2);
+    // register specific routes to modify the response and a catch-all to relay the request/response as-is
+    declareGetRoute(hapiServer, esHostname, esPort, mainIndex);
+    declareDeleteRoute(hapiServer, esHostname, esPort, mainIndex);
+    declarePostUpdateRoute(hapiServer, esHostname, esPort, mainIndex);
+
+    declareGetSearchRoute(hapiServer, esHostname, esPort, mainIndex);
+    declarePostSearchRoute(hapiServer, esHostname, esPort, mainIndex);
+    declarePostPitRoute(hapiServer, esHostname, esPort, mainIndex);
+    declareIndexRoute(hapiServer, esHostname, esPort, mainIndex);
+
+    // the deleteByNamespace performs an updateByQuery under the hood.
+    // It targets all SO indices that have namespace-aware types
+    const nsIndices = getIndicesWithNamespaceAwareTypes(setup.savedObjects.getTypeRegistry());
+    declarePostUpdateByQueryRoute(hapiServer, esHostname, esPort, nsIndices);
+
+    // register index-agnostic routes
+    declarePostBulkRoute(hapiServer, esHostname, esPort);
+    declarePostMgetRoute(hapiServer, esHostname, esPort);
+    declarePassthroughRoute(hapiServer, esHostname, esPort);
+
+    await hapiServer.start();
+
     start = await root.start();
   });
 
   afterAll(async () => {
-    await root.shutdown();
-    await hapiServer.stop({ timeout: 1000 });
-    await esServer.stop();
+    if (root) {
+      await root.shutdown();
+      await hapiServer.stop({ timeout: 1000 });
+      await esServer.stop();
+    }
   });
 
   describe('requests when a proxy relays request/responses with the correct product header', () => {
@@ -385,7 +397,9 @@ describe('404s from proxies', () => {
       expect(genericNotFoundEsUnavailableError(myError, 'my_type', 'myTypeId1'));
     });
 
-    it('returns an EsUnavailable error on `update` requests that are interrupted', async () => {
+    it('returns an EsUnavailable error on `update` requests that are interrupted during index', async () => {
+      setProxyInterrupt('update');
+
       let updateError;
       try {
         await repository.update('my_type', 'myTypeToUpdate', {
@@ -395,7 +409,24 @@ describe('404s from proxies', () => {
       } catch (err) {
         updateError = err;
       }
+
       expect(genericNotFoundEsUnavailableError(updateError));
+    });
+
+    it('returns an EsUnavailable error on `update` requests that are interrupted during preflight', async () => {
+      setProxyInterrupt('updatePreflight');
+
+      let updateError;
+      try {
+        await repository.update('my_type', 'myTypeToUpdate', {
+          title: 'updated title',
+        });
+        expect(false).toBe(true); // Should not get here (we expect the call to throw)
+      } catch (err) {
+        updateError = err;
+      }
+
+      expect(genericNotFoundEsUnavailableError(updateError, 'my_type', 'myTypeToUpdate'));
     });
 
     it('returns an EsUnavailable error on `bulkCreate` requests with a 404 proxy response and wrong product header', async () => {

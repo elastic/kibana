@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { HttpSetup } from '@kbn/core/public';
-import { API_BASE_PATH } from '../../common/constants';
+import {
+  FIELD_PREVIEW_PATH as path,
+  INITIAL_REST_VERSION as version,
+} from '../../common/constants';
 import { sendRequest } from '../shared_imports';
 import { PainlessExecuteContext, FieldPreviewResponse } from '../components/preview';
 
@@ -23,7 +28,7 @@ export const initApi = (httpClient: HttpSetup) => {
     document: Record<string, unknown>;
   }) => {
     return sendRequest<FieldPreviewResponse>(httpClient, {
-      path: `${API_BASE_PATH}/field_preview`,
+      path,
       method: 'post',
       body: {
         index,
@@ -31,6 +36,7 @@ export const initApi = (httpClient: HttpSetup) => {
         script,
         document,
       },
+      version,
     });
   };
 

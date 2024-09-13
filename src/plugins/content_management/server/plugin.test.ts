@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { ContentManagementPlugin } from './plugin';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core-http-server';
 import type { ProcedureName } from '../common';
 import { procedureNames } from '../common/rpc';
 import { MSearchService } from './core/msearch';
@@ -80,14 +81,15 @@ const setup = () => {
       ...coreSetup,
       http,
     },
+    pluginsSetup: {},
   };
 };
 
 describe('ContentManagementPlugin', () => {
   describe('setup()', () => {
     test('should expose the core API', () => {
-      const { plugin, coreSetup } = setup();
-      const api = plugin.setup(coreSetup);
+      const { plugin, coreSetup, pluginsSetup } = setup();
+      const api = plugin.setup(coreSetup, pluginsSetup);
 
       expect(Object.keys(api).sort()).toEqual(['crud', 'eventBus', 'register']);
       expect(api.crud('')).toBe('mockedCrud');
@@ -96,19 +98,18 @@ describe('ContentManagementPlugin', () => {
     });
 
     describe('RPC', () => {
-      test('should create a single POST HTTP route on the router', () => {
-        const { plugin, coreSetup, router } = setup();
-        plugin.setup(coreSetup);
+      test('should create a rpc POST HTTP route on the router', () => {
+        const { plugin, coreSetup, router, pluginsSetup } = setup();
+        plugin.setup(coreSetup, pluginsSetup);
 
-        expect(router.post).toBeCalledTimes(1);
         const [routeConfig]: Parameters<IRouter['post']> = (router.post as jest.Mock).mock.calls[0];
 
         expect(routeConfig.path).toBe('/api/content_management/rpc/{name}');
       });
 
       test('should register all the procedures in the RPC service and the route handler must send to each procedure the core request context + the request body as input', async () => {
-        const { plugin, coreSetup, router } = setup();
-        plugin.setup(coreSetup);
+        const { plugin, coreSetup, router, pluginsSetup } = setup();
+        plugin.setup(coreSetup, pluginsSetup);
 
         const [_, handler]: Parameters<IRouter['post']> = (router.post as jest.Mock).mock.calls[0];
 
@@ -138,8 +139,8 @@ describe('ContentManagementPlugin', () => {
         // Each procedure has been called with the context and input
         const context = {
           requestHandlerContext: mockedRequestHandlerContext,
+          request: expect.any(Object),
           contentRegistry: 'mockedContentRegistry',
-          getTransformsFactory: expect.any(Function),
           mSearchService: expect.any(MSearchService),
         };
         expect(mockGet).toHaveBeenCalledWith(context, input);
@@ -151,8 +152,8 @@ describe('ContentManagementPlugin', () => {
       });
 
       test('should return error in custom error format', async () => {
-        const { plugin, coreSetup, router } = setup();
-        plugin.setup(coreSetup);
+        const { plugin, coreSetup, router, pluginsSetup } = setup();
+        plugin.setup(coreSetup, pluginsSetup);
 
         const [_, handler]: Parameters<IRouter['post']> = (router.post as jest.Mock).mock.calls[0];
 

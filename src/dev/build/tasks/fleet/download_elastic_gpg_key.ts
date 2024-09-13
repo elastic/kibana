@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -15,7 +16,7 @@ import { downloadToDisk } from '../../lib';
 const ARTIFACTS_URL = 'https://artifacts.elastic.co/';
 const GPG_KEY_NAME = 'GPG-KEY-elasticsearch';
 const GPG_KEY_SHA512 =
-  '84ee193cc337344d9a7da9021daf3f5ede83f5f1ab049d169f3634921529dcd096abf7a91eec7f26f3a6913e5e38f88f69a5e2ce79ad155d46edc75705a648c6';
+  '62a567354286deb02baf5fc6b82ddf6c7067898723463da9ae65b132b8c6d6f064b2874e390885682376228eed166c1c82fe7f11f6c9a69f0c157029c548fa3d';
 
 export async function downloadElasticGpgKey(pkgDir: string, log: ToolingLog) {
   const gpgKeyUrl = ARTIFACTS_URL + GPG_KEY_NAME;

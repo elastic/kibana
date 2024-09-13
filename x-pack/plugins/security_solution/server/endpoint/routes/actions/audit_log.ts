@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EndpointActionLogRequestSchema } from '../../../../common/api/endpoint';
 import { ENDPOINT_ACTION_LOG_ROUTE } from '../../../../common/endpoint/constants';
-import { EndpointActionLogRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { auditLogRequestHandler } from './audit_log_handler';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
@@ -23,16 +23,23 @@ export function registerActionAuditLogRoutes(
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: ENDPOINT_ACTION_LOG_ROUTE,
-      validate: EndpointActionLogRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canIsolateHost'] },
-      endpointContext.logFactory.get('hostIsolationLogs'),
-      auditLogRequestHandler(endpointContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: EndpointActionLogRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canIsolateHost'] },
+        endpointContext.logFactory.get('hostIsolationLogs'),
+        auditLogRequestHandler(endpointContext)
+      )
+    );
 }

@@ -16,7 +16,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
 
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -36,6 +36,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             kuery: '',
             documentType: ApmDocumentType.TransactionMetric,
             rollupInterval: RollupInterval.OneMinute,
+            useDurationSummary: true,
           },
         },
       }),
@@ -87,6 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177497
   registry.when('data is loaded', { config: 'basic', archives: [] }, () => {
     describe('Observability overview api ', () => {
       const GO_PROD_RATE = 50;
@@ -104,7 +106,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: 'synth-java', environment: 'production', agentName: 'java' })
           .instance('instance-c');
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_RATE)
@@ -135,7 +137,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       describe('compare throughput values', () => {
         let throughputValues: Awaited<ReturnType<typeof getThroughputValues>>;

@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 const DASHBOARD_TITLE = 'Ecom Dashboard';
 const SAVEDSEARCH_TITLE = 'Ecommerce Data';
 const VIS_TITLE = 'e-commerce pie chart';
-const CANVAS_TITLE = 'The Very Cool Workpad for PDF Tests';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -28,13 +27,13 @@ export default function ({ getService }: FtrProviderContext) {
       it('does not allow user that does not have reporting_user role', async () => {
         await reportingFunctional.loginDataAnalyst();
         await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
-        await reportingFunctional.tryDashboardDownloadCsvFail('Ecommerce Data');
+        await reportingFunctional.tryDashboardGenerateCsvFail('Ecommerce Data');
       });
 
       it('does allow user with reporting_user role', async () => {
-        await reportingFunctional.loginDataAnalyst();
+        await reportingFunctional.loginReportingUser();
         await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
-        await reportingFunctional.tryDashboardDownloadCsvSuccess('Ecommerce Data');
+        await reportingFunctional.tryDashboardGenerateCsvSuccess('Ecommerce Data');
       });
     });
 
@@ -63,32 +62,6 @@ export default function ({ getService }: FtrProviderContext) {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openSavedSearch(SAVEDSEARCH_TITLE);
         await reportingFunctional.tryDiscoverCsvSuccess();
-      });
-    });
-
-    describe('Canvas: Generate PDF', () => {
-      const esArchiver = getService('esArchiver');
-      const reportingApi = getService('reportingAPI');
-      before('initialize tests', async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/canvas/reports');
-      });
-
-      after('teardown tests', async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/canvas/reports');
-        await reportingApi.deleteAllReports();
-        await reportingFunctional.initEcommerce();
-      });
-
-      it('does not allow user that does not have reporting_user role', async () => {
-        await reportingFunctional.loginDataAnalyst();
-        await reportingFunctional.openCanvasWorkpad(CANVAS_TITLE);
-        await reportingFunctional.tryGeneratePdfFail();
-      });
-
-      it('does allow user with reporting_user role', async () => {
-        await reportingFunctional.loginReportingUser();
-        await reportingFunctional.openCanvasWorkpad(CANVAS_TITLE);
-        await reportingFunctional.tryGeneratePdfSuccess();
       });
     });
 

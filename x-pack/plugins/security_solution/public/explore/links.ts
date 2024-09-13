@@ -6,8 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HOSTS_PATH, NETWORK_PATH, SecurityPageName, USERS_PATH } from '../../common/constants';
-import { HOSTS, NETWORK, USERS } from '../app/translations';
+import {
+  HOSTS_PATH,
+  NETWORK_PATH,
+  USERS_PATH,
+  EXPLORE_PATH,
+  SERVER_APP_ID,
+  SecurityPageName,
+} from '../../common/constants';
+import { EXPLORE, HOSTS, NETWORK, USERS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import hostsPageImg from '../common/images/hosts_page.png';
 import userPageImg from '../common/images/users_page.png';
@@ -28,6 +35,13 @@ const networkLinks: LinkItem = {
     }),
   ],
   links: [
+    {
+      id: SecurityPageName.networkFlows,
+      title: i18n.translate('xpack.securitySolution.appLinks.network.flows', {
+        defaultMessage: 'Flows',
+      }),
+      path: `${NETWORK_PATH}/flows`,
+    },
     {
       id: SecurityPageName.networkDns,
       title: i18n.translate('xpack.securitySolution.appLinks.network.dns', {
@@ -83,6 +97,13 @@ const usersLinks: LinkItem = {
   ],
   links: [
     {
+      id: SecurityPageName.usersAll,
+      title: i18n.translate('xpack.securitySolution.appLinks.users.allUsers', {
+        defaultMessage: 'All users',
+      }),
+      path: `${USERS_PATH}/allUsers`,
+    },
+    {
       id: SecurityPageName.usersAuthentications,
       title: i18n.translate('xpack.securitySolution.appLinks.users.authentications', {
         defaultMessage: 'Authentications',
@@ -129,7 +150,15 @@ const hostsLinks: LinkItem = {
   ],
   links: [
     {
-      id: SecurityPageName.uncommonProcesses,
+      id: SecurityPageName.hostsAll,
+      title: i18n.translate('xpack.securitySolution.appLinks.hosts.allHosts', {
+        defaultMessage: 'All hosts',
+      }),
+      path: `${HOSTS_PATH}/allHosts`,
+      isBeta: false,
+    },
+    {
+      id: SecurityPageName.hostsUncommonProcesses,
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.uncommonProcesses', {
         defaultMessage: 'Uncommon Processes',
       }),
@@ -158,7 +187,7 @@ const hostsLinks: LinkItem = {
       path: `${HOSTS_PATH}/hostRisk`,
     },
     {
-      id: SecurityPageName.sessions,
+      id: SecurityPageName.hostsSessions,
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.sessions', {
         defaultMessage: 'Sessions',
       }),
@@ -169,4 +198,18 @@ const hostsLinks: LinkItem = {
   ],
 };
 
-export const exploreLinks = [hostsLinks, networkLinks, usersLinks];
+export const exploreLinks: LinkItem = {
+  id: SecurityPageName.exploreLanding,
+  title: EXPLORE,
+  path: EXPLORE_PATH,
+  globalNavPosition: 9,
+  capabilities: [`${SERVER_APP_ID}.show`],
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.explore', {
+      defaultMessage: 'Explore',
+    }),
+  ],
+  links: [hostsLinks, networkLinks, usersLinks],
+  hideTimeline: true,
+  skipUrlState: true,
+};

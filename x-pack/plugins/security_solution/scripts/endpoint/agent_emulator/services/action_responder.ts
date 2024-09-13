@@ -9,12 +9,9 @@ import { set } from '@kbn/safer-lodash-set';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
+import { sendEndpointActionResponse, sendFleetActionResponse } from '../../common/response_actions';
 import { BaseRunningService } from '../../common/base_running_service';
-import {
-  fetchEndpointActionList,
-  sendEndpointActionResponse,
-  sendFleetActionResponse,
-} from './endpoint_response_actions';
+import { fetchEndpointActionList } from './endpoint_response_actions';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 
 /**
@@ -45,7 +42,6 @@ export class ActionResponderService extends BaseRunningService {
         const { data: actions } = await fetchEndpointActionList(kbnClient, {
           page: nextPage++,
           pageSize: 100,
-          withAutomatedActions: true,
         });
 
         if (actions.length === 0) {

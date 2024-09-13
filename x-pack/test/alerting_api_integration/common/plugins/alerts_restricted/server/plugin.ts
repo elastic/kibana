@@ -9,7 +9,9 @@ import { Plugin, CoreSetup } from '@kbn/core/server';
 import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
 import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { defineAlertTypes } from './alert_types';
 
 export interface FixtureSetupDeps {
@@ -29,12 +31,13 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'AlertRestricted',
       app: ['alerts', 'kibana'],
       category: { id: 'foo', label: 'foo' },
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       alerting: ['test.restricted-noop', 'test.unrestricted-noop', 'test.noop'],
       privileges: {
         all: {
           app: ['alerts', 'kibana'],
           savedObject: {
-            all: ['alert'],
+            all: [RULE_SAVED_OBJECT_TYPE],
             read: [],
           },
           alerting: {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, from, Observable, of, Subscription } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, of, Subscription } from 'rxjs';
 import {
   switchMap,
   map,
@@ -15,13 +16,15 @@ import {
   tap,
   debounceTime,
   filter,
-} from 'rxjs/operators';
+} from 'rxjs';
 import { isEqual, sortBy, uniq } from 'lodash';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 // FIXME get rid of the static import
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
-import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
+import type { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type {
   AppStateSelectedCells,
   ExplorerJob,
@@ -35,11 +38,8 @@ import {
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
-// FIXME get rid of the static import
-import { mlJobService } from '../services/job_service';
+import type { MlJobService } from '../services/job_service';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
-import type { TimeBucketsInterval } from '../util/time_buckets';
-import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import type { Refresh } from '../routing/use_refresh';
 import { StateService } from '../services/state_service';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
@@ -47,6 +47,12 @@ import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_st
 interface SwimLanePagination {
   viewByFromPage: number;
   viewByPerPage: number;
+}
+
+export interface TimeDomain {
+  min: number;
+  max: number;
+  minInterval: number;
 }
 
 /**
@@ -87,7 +93,20 @@ export class AnomalyTimelineStateService extends StateService {
   private _timeBounds$: Observable<TimeRangeBounds>;
   private _refreshSubject$: Observable<Refresh>;
 
+  /** Time domain of the currently active swim lane */
+  public readonly timeDomain$: Observable<TimeDomain | null> = this._overallSwimLaneData$.pipe(
+    map((data) => {
+      if (!data) return null;
+      return {
+        min: data.earliest * 1000,
+        max: data.latest * 1000,
+        minInterval: data.interval * 1000,
+      };
+    })
+  );
+
   constructor(
+    private mlJobService: MlJobService,
     private anomalyExplorerUrlStateService: AnomalyExplorerUrlStateService,
     private anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
     private anomalyTimelineService: AnomalyTimelineService,
@@ -463,6 +482,7 @@ export class AnomalyTimelineStateService extends StateService {
     selectedCells: AppStateSelectedCells | undefined | null,
     selectedJobs: ExplorerJob[] | undefined
   ) {
+    const mlJobService = this.mlJobService;
     const selectedJobIds = selectedJobs?.map((d) => d.id) ?? [];
 
     // Unique influencers for the selected job(s).
@@ -644,6 +664,42 @@ export class AnomalyTimelineStateService extends StateService {
 
   public getViewBySwimLaneOptions$(): Observable<string[]> {
     return this._viewBySwimLaneOptions$.asObservable();
+  }
+
+  /**
+   * Currently selected jobs on the swim lane
+   */
+  public getSwimLaneJobs$(): Observable<ExplorerJob[]> {
+    return combineLatest([
+      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+      this.getViewBySwimlaneFieldName$(),
+      this._viewBySwimLaneData$,
+      this._selectedCells$,
+    ]).pipe(
+      map(([selectedJobs, swimLaneFieldName, viewBySwimLaneData, selectedCells]) => {
+        // If there are selected lanes on the view by swim lane, use those to filter the jobs.
+        if (
+          selectedCells?.type === SWIMLANE_TYPE.VIEW_BY &&
+          selectedCells?.viewByFieldName === VIEW_BY_JOB_LABEL
+        ) {
+          return selectedJobs.filter((job) => {
+            return selectedCells.lanes.includes(job.id);
+          });
+        }
+
+        if (
+          selectedCells?.type === SWIMLANE_TYPE.OVERALL &&
+          selectedCells?.viewByFieldName === VIEW_BY_JOB_LABEL &&
+          viewBySwimLaneData
+        ) {
+          return selectedJobs.filter((job) => {
+            return viewBySwimLaneData.laneLabels.includes(job.id);
+          });
+        }
+
+        return selectedJobs;
+      })
+    );
   }
 
   public getViewBySwimLaneOptions(): string[] {

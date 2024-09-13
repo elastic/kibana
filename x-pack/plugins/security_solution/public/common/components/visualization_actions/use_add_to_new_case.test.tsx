@@ -8,45 +8,35 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { useAddToNewCase } from './use_add_to_new_case';
-import { useGetUserCasesPermissions } from '../../lib/kibana';
 import {
   allCasesPermissions,
   readCasesPermissions,
   writeCasesPermissions,
 } from '../../../cases_test_utils';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 
 jest.mock('../../lib/kibana/kibana_react');
 
-const mockedUseKibana = mockUseKibana();
-const mockGetUseCasesAddToNewCaseFlyout = jest.fn();
-
-jest.mock('../../lib/kibana', () => {
-  const original = jest.requireActual('../../lib/kibana');
-
-  return {
-    ...original,
-    useGetUserCasesPermissions: jest.fn(),
-    useKibana: () => ({
-      ...mockedUseKibana,
-      services: {
-        ...mockedUseKibana.services,
-        cases: {
-          hooks: {
-            useCasesAddToNewCaseFlyout: mockGetUseCasesAddToNewCaseFlyout,
-          },
-        },
-      },
-    }),
-  };
-});
+jest.mock('../../lib/kibana');
 
 describe('useAddToNewCase', () => {
+  const mockedUseKibana = mockUseKibana();
+  const mockCanUseCases = jest.fn();
+  const mockGetUseCasesAddToNewCaseFlyout = jest.fn().mockReturnValue({
+    open: jest.fn(),
+    close: jest.fn(),
+  });
+
   const timeRange = {
     from: '2022-03-06T16:00:00.000Z',
     to: '2022-03-07T15:59:59.999Z',
   };
+
   beforeEach(() => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
+    mockCanUseCases.mockReturnValue(allCasesPermissions());
+    mockedUseKibana.services.cases.hooks.useCasesAddToNewCaseFlyout =
+      mockGetUseCasesAddToNewCaseFlyout;
+    mockedUseKibana.services.cases.helpers.canUseCases = mockCanUseCases;
   });
 
   it('useCasesAddToNewCaseFlyout with attachments', () => {
@@ -63,7 +53,7 @@ describe('useAddToNewCase', () => {
   });
 
   it("disables the button if the user can't create but can read", () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
+    mockCanUseCases.mockReturnValue(readCasesPermissions());
 
     const { result } = renderHook(() =>
       useAddToNewCase({
@@ -75,7 +65,7 @@ describe('useAddToNewCase', () => {
   });
 
   it("disables the button if the user can't read but can create", () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(writeCasesPermissions());
+    mockCanUseCases.mockReturnValue(writeCasesPermissions());
 
     const { result } = renderHook(() =>
       useAddToNewCase({
@@ -104,5 +94,33 @@ describe('useAddToNewCase', () => {
       })
     );
     expect(result.current.disabled).toEqual(true);
+  });
+
+  it('should open create case flyout', () => {
+    const mockOpenCaseFlyout = jest.fn();
+    mockGetUseCasesAddToNewCaseFlyout.mockReturnValue({ open: mockOpenCaseFlyout });
+
+    const mockClick = jest.fn();
+
+    const { result } = renderHook(() =>
+      useAddToNewCase({
+        lensAttributes: kpiHostMetricLensAttributes,
+        timeRange,
+        onClick: mockClick,
+      })
+    );
+
+    result.current.onAddToNewCaseClicked();
+
+    expect(mockOpenCaseFlyout).toHaveBeenCalledWith({
+      attachments: [
+        {
+          persistableStateAttachmentState: { attributes: kpiHostMetricLensAttributes, timeRange },
+          persistableStateAttachmentTypeId: '.lens',
+          type: AttachmentType.persistableState as const,
+        },
+      ],
+    });
+    expect(mockClick).toHaveBeenCalled();
   });
 });

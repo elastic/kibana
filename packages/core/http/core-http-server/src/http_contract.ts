@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -20,6 +21,7 @@ import type {
   OnPreRoutingHandler,
 } from './lifecycle';
 import type { IBasePath } from './base_path';
+import type { IStaticAssets } from './static_assets';
 import type { ICspConfig } from './csp';
 import type { GetAuthState, IsAuthenticated } from './auth_state';
 import type { SessionStorageCookieOptions, SessionStorageFactory } from './session_storage';
@@ -217,7 +219,7 @@ export interface HttpServiceSetup<
    * Creates cookie based session storage factory {@link SessionStorageFactory}
    * @param cookieOptions {@link SessionStorageCookieOptions} - options to configure created cookie session storage.
    */
-  createCookieSessionStorageFactory: <T>(
+  createCookieSessionStorageFactory: <T extends object>(
     cookieOptions: SessionStorageCookieOptions<T>
   ) => Promise<SessionStorageFactory<T>>;
 
@@ -286,6 +288,12 @@ export interface HttpServiceSetup<
    * See {@link IBasePath}.
    */
   basePath: IBasePath;
+
+  /**
+   * APIs for creating hrefs to static assets.
+   * See {@link IStaticAssets}
+   */
+  staticAssets: IStaticAssets;
 
   /**
    * The CSP config used for Kibana.
@@ -362,6 +370,12 @@ export interface HttpServiceStart {
   basePath: IBasePath;
 
   /**
+   * APIs for creating hrefs to static assets.
+   * See {@link IStaticAssets}
+   */
+  staticAssets: IStaticAssets;
+
+  /**
    * Auth status.
    * See {@link HttpAuth}
    */
@@ -389,3 +403,12 @@ export interface HttpServerInfo {
   /** The protocol used by the server */
   protocol: 'http' | 'https' | 'socket';
 }
+
+/**
+ * Defines an http protocol.
+ * (Only supporting http1 for now)
+ *
+ * - http1: regroups all http/1.x protocols
+ * - http2: h2
+ */
+export type HttpProtocol = 'http1' | 'http2';

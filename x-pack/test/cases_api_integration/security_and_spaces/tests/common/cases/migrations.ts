@@ -7,14 +7,18 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
-import { ESCaseSeverity, ESCaseStatus } from '@kbn/cases-plugin/server/services/cases/types';
+import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
+import {
+  CasePersistedSeverity,
+  CasePersistedStatus,
+} from '@kbn/cases-plugin/server/common/types/case';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   deleteAllCaseItems,
   getCase,
   getCaseSavedObjectsFromES,
   resolveCase,
+  findCases,
 } from '../../../../common/lib/api';
 import { superUser } from '../../../../common/lib/authentication/users';
 
@@ -68,6 +72,62 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         expect(body).key('settings');
         expect(body.settings).to.eql({
           syncAlerts: true,
+        });
+      });
+
+      it('should return the cases correctly', async () => {
+        const cases = await findCases({ supertest });
+        const theCase = cases.cases[0];
+
+        const { version, ...caseWithoutVersion } = theCase;
+        const { cases: _, ...caseStats } = cases;
+
+        expect(cases.cases.length).to.eql(1);
+
+        expect(caseStats).to.eql({
+          count_closed_cases: 0,
+          count_in_progress_cases: 0,
+          count_open_cases: 1,
+          page: 1,
+          per_page: 20,
+          total: 1,
+        });
+
+        expect(caseWithoutVersion).to.eql({
+          assignees: [],
+          category: null,
+          closed_at: null,
+          closed_by: null,
+          comments: [],
+          connector: {
+            fields: null,
+            id: 'connector-1',
+            name: 'none',
+            type: '.none',
+          },
+          created_at: '2020-09-28T11:43:52.158Z',
+          created_by: {
+            email: null,
+            full_name: null,
+            username: 'elastic',
+          },
+          customFields: [],
+          description: 'This is a brand new case of a bad meanie defacing data',
+          duration: null,
+          external_service: null,
+          id: 'e1900ac0-017f-11eb-93f8-d161651bf509',
+          owner: 'securitySolution',
+          settings: {
+            syncAlerts: true,
+          },
+          severity: 'low',
+          status: 'open',
+          tags: ['defacement'],
+          title: 'Super Bad Security Issue',
+          totalAlerts: 0,
+          totalComment: 1,
+          updated_at: null,
+          updated_by: null,
         });
       });
     });
@@ -334,7 +394,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               includeComments: true,
             });
 
-            const comment = theCase.comments![0] as AttributesTypeUser;
+            const comment = theCase.comments![0] as UserCommentAttachmentAttributes;
             expect(comment.comment).to.be('a comment');
             expect(comment.owner).to.be(SECURITY_SOLUTION_OWNER);
           });
@@ -499,17 +559,17 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       describe('severity', () => {
         it('severity keyword values are converted to matching short', async () => {
-          const expectedSeverityValues: Record<string, ESCaseSeverity> = {
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf6': ESCaseSeverity.LOW,
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf7': ESCaseSeverity.MEDIUM,
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf8': ESCaseSeverity.HIGH,
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf9': ESCaseSeverity.CRITICAL,
+          const expectedSeverityValues: Record<string, CasePersistedSeverity> = {
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf6': CasePersistedSeverity.LOW,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf7': CasePersistedSeverity.MEDIUM,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf8': CasePersistedSeverity.HIGH,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf9': CasePersistedSeverity.CRITICAL,
           };
 
           const casesFromES = await getCaseSavedObjectsFromES({ es });
 
           for (const hit of casesFromES.body.hits.hits) {
-            const caseID = hit._id;
+            const caseID = hit._id!;
             expect(expectedSeverityValues[caseID]).not.to.be(undefined);
             expect(hit._source?.cases.severity).to.eql(expectedSeverityValues[caseID]);
           }
@@ -518,17 +578,17 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       describe('status', () => {
         it('status keyword values are converted to matching short', async () => {
-          const expectedStatusValues: Record<string, ESCaseStatus> = {
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf6': ESCaseStatus.OPEN,
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf7': ESCaseStatus.OPEN,
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf8': ESCaseStatus.IN_PROGRESS,
-            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf9': ESCaseStatus.CLOSED,
+          const expectedStatusValues: Record<string, CasePersistedStatus> = {
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf6': CasePersistedStatus.OPEN,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf7': CasePersistedStatus.OPEN,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf8': CasePersistedStatus.IN_PROGRESS,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf9': CasePersistedStatus.CLOSED,
           };
 
           const casesFromES = await getCaseSavedObjectsFromES({ es });
 
           for (const hit of casesFromES.body.hits.hits) {
-            const caseID = hit._id;
+            const caseID = hit._id!;
             expect(expectedStatusValues[caseID]).not.to.be(undefined);
             expect(hit._source?.cases.status).to.eql(expectedStatusValues[caseID]);
           }

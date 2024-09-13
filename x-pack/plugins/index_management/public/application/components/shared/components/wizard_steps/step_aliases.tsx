@@ -18,9 +18,11 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CodeEditor } from '@kbn/code-editor';
 
-import { EuiCodeEditor, Forms } from '../../../../../shared_imports';
+import { Forms } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';
+import { documentationService } from '../../../mappings_editor/shared_imports';
 
 interface Props {
   defaultValue?: { [key: string]: any };
@@ -64,7 +66,7 @@ export const StepAliases: React.FunctionComponent<Props> = React.memo(
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={`${esDocsBase}/indices-aliases.html`}
+              href={documentationService.getBulkIndexAlias()}
               target="_blank"
               iconType="help"
             >
@@ -105,29 +107,23 @@ export const StepAliases: React.FunctionComponent<Props> = React.memo(
           error={error}
           fullWidth
         >
-          <EuiCodeEditor
-            mode="json"
-            theme="textmate"
-            width="100%"
-            height="500px"
-            setOptions={{
-              showLineNumbers: false,
+          <CodeEditor
+            languageId="json"
+            value={jsonContent}
+            data-test-subj="aliasesEditor"
+            height={500}
+            options={{
+              lineNumbers: 'off',
               tabSize: 2,
+              automaticLayout: true,
             }}
-            editorProps={{
-              $blockScrolling: Infinity,
-            }}
-            showGutter={false}
-            minLines={6}
             aria-label={i18n.translate(
               'xpack.idxMgmt.formWizard.stepAliases.fieldAliasesAriaLabel',
               {
                 defaultMessage: 'Aliases code editor',
               }
             )}
-            value={jsonContent}
             onChange={setJsonContent}
-            data-test-subj="aliasesEditor"
           />
         </EuiFormRow>
       </div>

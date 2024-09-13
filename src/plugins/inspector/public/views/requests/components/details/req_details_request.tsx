@@ -1,22 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { Request } from '../../../../../common/adapters/request/types';
-import { RequestDetailsProps } from '../types';
-import { RequestCodeViewer } from './req_code_viewer';
+import { DetailViewProps } from './types';
+import { RequestDetailsRequestContent } from './req_details_request_content';
 
-export class RequestDetailsRequest extends Component<RequestDetailsProps> {
-  static propTypes = {
-    request: PropTypes.object.isRequired,
-  };
-
+export class RequestDetailsRequest extends Component<DetailViewProps> {
   static shouldShow = (request: Request) => Boolean(request && request.json);
 
   render() {
@@ -27,8 +23,9 @@ export class RequestDetailsRequest extends Component<RequestDetailsProps> {
     }
 
     return (
-      <RequestCodeViewer
+      <RequestDetailsRequestContent
         indexPattern={this.props.request.stats?.indexPattern?.value}
+        requestParams={this.props.request.response?.requestParams}
         json={JSON.stringify(json, null, 2)}
       />
     );

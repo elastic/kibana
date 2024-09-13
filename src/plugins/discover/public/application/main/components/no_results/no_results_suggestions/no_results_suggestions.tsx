@@ -1,23 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiEmptyPrompt, EuiButton, EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  isOfQueryType,
-  isOfAggregateQueryType,
-  type Query,
-  type AggregateQuery,
-  type Filter,
-} from '@kbn/es-query';
+import { isOfQueryType, type Query, type AggregateQuery, type Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { NoResultsSuggestionDefault } from './no_results_suggestion_default';
 import {
   NoResultsSuggestionWhenFilters,
@@ -27,8 +23,9 @@ import { NoResultsSuggestionWhenQuery } from './no_results_suggestion_when_query
 import { NoResultsSuggestionWhenTimeRange } from './no_results_suggestion_when_time_range';
 import { hasActiveFilter } from '../../layout/utils';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
-import { useFetchOccurrencesRange } from './use_fetch_occurances_range';
+import { useFetchOccurrencesRange, TimeRangeExtendingStatus } from './use_fetch_occurances_range';
 import { NoResultsIllustration } from './assets/no_results_illustration';
+import { useIsEsqlMode } from '../../../hooks/use_is_esql_mode';
 
 interface NoResultsSuggestionProps {
   dataView: DataView;
@@ -47,13 +44,14 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
-  const { data, uiSettings, timefilter } = services;
-  const hasQuery =
-    (isOfQueryType(query) && !!query?.query) || (!!query && isOfAggregateQueryType(query));
+  const { data, uiSettings, timefilter, toastNotifications } = services;
+  const isEsqlMode = useIsEsqlMode();
+  const hasQuery = Boolean(isOfQueryType(query) && query.query) || isEsqlMode;
   const hasFilters = hasActiveFilter(filters);
 
-  const [isExtending, setIsExtending] = useState<boolean>(false);
-  const { range: occurrencesRange, refetch } = useFetchOccurrencesRange({
+  const [timeRangeExtendingStatus, setTimeRangeExtendingStatus] =
+    useState<TimeRangeExtendingStatus>(TimeRangeExtendingStatus.initial);
+  const { fetch } = useFetchOccurrencesRange({
     dataView,
     query,
     filters,
@@ -63,20 +61,35 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
     },
   });
 
-  const extendTimeRange = async () => {
-    setIsExtending(true);
-    const range = await refetch();
-    if (range?.from && range?.to) {
+  const extendTimeRange = useCallback(async () => {
+    setTimeRangeExtendingStatus(TimeRangeExtendingStatus.loading);
+    const { status, range } = await fetch();
+
+    if (status === TimeRangeExtendingStatus.succeedWithResults && range?.from && range?.to) {
       timefilter.setTime({
         from: range.from,
         to: range.to,
       });
-    } else {
-      setIsExtending(false);
+      return;
     }
-  };
 
-  const canExtendTimeRange = Boolean(occurrencesRange?.from && occurrencesRange.to);
+    setTimeRangeExtendingStatus(status);
+
+    if (status === TimeRangeExtendingStatus.failed) {
+      toastNotifications.addDanger(
+        i18n.translate('discover.noResults.suggestion.expandTimeRangeFailedNotification', {
+          defaultMessage: 'Request failed when searching the entire time range of documents',
+        })
+      );
+    } else if (status === TimeRangeExtendingStatus.timedOut) {
+      toastNotifications.addDanger(
+        i18n.translate('discover.noResults.suggestion.expandTimeRangeTimedOutNotification', {
+          defaultMessage: 'Request timed out when searching the entire time range of documents',
+        })
+      );
+    }
+  }, [fetch, setTimeRangeExtendingStatus, timefilter, toastNotifications]);
+
   const canAdjustSearchCriteria = isTimeBased || hasFilters || hasQuery;
 
   const body = canAdjustSearchCriteria ? (
@@ -93,7 +106,7 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
       >
         {isTimeBased && (
           <li>
-            <NoResultsSuggestionWhenTimeRange />
+            <NoResultsSuggestionWhenTimeRange timeRangeExtendingStatus={timeRangeExtendingStatus} />
           </li>
         )}
         {hasQuery && (
@@ -117,8 +130,9 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
   return (
     <EuiEmptyPrompt
       layout="horizontal"
-      color="plain"
+      color="transparent"
       icon={<NoResultsIllustration />}
+      hasBorder={false}
       title={
         <h2 data-test-subj="discoverNoResults">
           <FormattedMessage
@@ -129,28 +143,34 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
       }
       body={body}
       actions={
-        <div
-          css={css`
-            min-block-size: ${euiTheme.size.xxl};
-          `}
-        >
-          {typeof occurrencesRange === 'undefined' ? (
-            <EuiLoadingSpinner />
-          ) : canExtendTimeRange ? (
-            <EuiButton
-              color="primary"
-              fill
-              onClick={extendTimeRange}
-              isLoading={isExtending}
-              data-test-subj="discoverNoResultsViewAllMatches"
-            >
-              <FormattedMessage
-                id="discover.noResults.suggestion.viewAllMatchesButtonText"
-                defaultMessage="View all matches"
-              />
-            </EuiButton>
-          ) : null}
-        </div>
+        !isEsqlMode && isTimeBased ? (
+          <div
+            css={css`
+              min-block-size: ${euiTheme.size.xxl};
+            `}
+          >
+            {[
+              TimeRangeExtendingStatus.initial,
+              TimeRangeExtendingStatus.loading,
+              TimeRangeExtendingStatus.timedOut,
+              TimeRangeExtendingStatus.failed,
+            ].includes(timeRangeExtendingStatus) && (
+              <EuiButton
+                color="primary"
+                fill
+                onClick={extendTimeRange}
+                disabled={timeRangeExtendingStatus === TimeRangeExtendingStatus.loading}
+                isLoading={timeRangeExtendingStatus === TimeRangeExtendingStatus.loading}
+                data-test-subj="discoverNoResultsViewAllMatches"
+              >
+                <FormattedMessage
+                  id="discover.noResults.suggestion.searchAllMatchesButtonText"
+                  defaultMessage="Search entire time range"
+                />
+              </EuiButton>
+            )}
+          </div>
+        ) : undefined
       }
     />
   );

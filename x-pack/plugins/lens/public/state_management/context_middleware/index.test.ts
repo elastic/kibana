@@ -57,7 +57,7 @@ describe('contextMiddleware', () => {
       });
       const { next, invoke, store } = createMiddleware(data);
       const action = {
-        type: 'lens/setState',
+        type: 'lens/setExecutionContext',
         payload: {
           visualization: {
             state: {},
@@ -69,12 +69,12 @@ describe('contextMiddleware', () => {
       expect(store.dispatch).toHaveBeenCalledWith({
         payload: {
           resolvedDateRange: {
-            fromDate: '2021-01-10T04:00:00.000Z',
-            toDate: '2021-01-10T08:00:00.000Z',
+            fromDate: 'now-2m',
+            toDate: 'now',
           },
           searchSessionId: 'sessionId-1',
         },
-        type: 'lens/setState',
+        type: 'lens/setExecutionContext',
       });
       expect(next).toHaveBeenCalledWith(action);
     });
@@ -92,7 +92,7 @@ describe('contextMiddleware', () => {
       });
       const { next, invoke, store } = createMiddleware(data);
       const action = {
-        type: 'lens/setState',
+        type: 'lens/setExecutionContext',
         payload: {
           visualization: {
             state: {},
@@ -109,7 +109,7 @@ describe('contextMiddleware', () => {
           },
           searchSessionId: 'sessionId-1',
         },
-        type: 'lens/setState',
+        type: 'lens/setExecutionContext',
       });
       expect(next).toHaveBeenCalledWith(action);
     });
@@ -136,7 +136,7 @@ describe('contextMiddleware', () => {
 
         // setState shouldn't trigger
         const setStateAction = {
-          type: 'lens/setState',
+          type: 'lens/setExecutionContext',
           payload: {
             visualization: {
               state: {},
@@ -146,14 +146,14 @@ describe('contextMiddleware', () => {
         };
         invoke(setStateAction);
         expect(store.dispatch).not.toHaveBeenCalledWith(
-          expect.objectContaining({ type: 'lens/setState' })
+          expect.objectContaining({ type: 'lens/setExecutionContext' })
         );
 
         // applyChanges should trigger
         const applyChangesAction = applyChanges();
         invoke(applyChangesAction);
         expect(store.dispatch).toHaveBeenCalledWith(
-          expect.objectContaining({ type: 'lens/setState' })
+          expect.objectContaining({ type: 'lens/setExecutionContext' })
         );
       });
     });
@@ -171,7 +171,7 @@ describe('contextMiddleware', () => {
       });
       const { next, invoke, store } = createMiddleware(data);
       const action = {
-        type: 'lens/setState',
+        type: 'lens/setExecutionContext',
         payload: {
           visualization: {
             state: {},
@@ -196,7 +196,7 @@ describe('contextMiddleware', () => {
       });
       const { next, invoke, store } = createMiddleware(data);
       const action = {
-        type: 'lens/setState',
+        type: 'lens/setExecutionContext',
         payload: {
           visualization: {
             state: {},

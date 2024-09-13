@@ -8,44 +8,48 @@
 import { i18n } from '@kbn/i18n';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
-import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { NavigateToPath } from '../../../../../contexts/kibana';
 import {
-  ML_JOB_AGGREGATION,
-  SPARSE_DATA_AGGREGATIONS,
-} from '../../../../../../../common/constants/aggregation_types';
-import {
-  MLCATEGORY,
+  mlCategory,
+  type Field,
+  type AggFieldPair,
+  type SparseDataAggregation,
   DOC_COUNT,
   _DOC_COUNT,
-} from '../../../../../../../common/constants/field_types';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
-import {
   EVENT_RATE_FIELD_ID,
-  Field,
-  AggFieldPair,
-  mlCategory,
-} from '../../../../../../../common/types/fields';
-import { mlJobService } from '../../../../../services/job_service';
-import { JobCreatorType } from '..';
+  MLCATEGORY,
+  ML_JOB_AGGREGATION,
+  SPARSE_DATA_AGGREGATIONS,
+} from '@kbn/ml-anomaly-utils';
+import { cloneDeep } from 'lodash';
+import { jobCloningService } from '../../../../../services/job_cloning_service';
+import type {
+  Job,
+  Datafeed,
+  Detector,
+} from '../../../../../../../common/types/anomaly_detection_jobs';
+import type { NewJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import type { NavigateToPath } from '../../../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import type { JobCreatorType } from '..';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
-const getFieldByIdFactory = (additionalFields: Field[]) => (id: string) => {
-  let field = newJobCapsService.getFieldById(id);
-  // if no field could be found it may be a pretend field, like mlcategory or a script field
-  if (field === null) {
-    if (id === MLCATEGORY) {
-      field = mlCategory;
-    } else if (additionalFields.length) {
-      field = additionalFields.find((f) => f.id === id) || null;
+const getFieldByIdFactory =
+  (newJobCapsService: NewJobCapsService, additionalFields: Field[]) => (id: string) => {
+    let field = newJobCapsService.getFieldById(id);
+    // if no field could be found it may be a pretend field, like mlcategory or a script field
+    if (field === null) {
+      if (id === MLCATEGORY) {
+        field = mlCategory;
+      } else if (additionalFields.length) {
+        field = additionalFields.find((f) => f.id === id) || null;
+      }
     }
-  }
-  return field;
-};
+    return field;
+  };
 
 // populate the detectors with Field and Agg objects loaded from the job capabilities service
 export function getRichDetectors(
+  newJobCapsService: NewJobCapsService,
   job: Job,
   datafeed: Datafeed,
   additionalFields: Field[],
@@ -53,7 +57,7 @@ export function getRichDetectors(
 ) {
   const detectors = advanced ? getDetectorsAdvanced(job, datafeed) : getDetectors(job, datafeed);
 
-  const getFieldById = getFieldByIdFactory(additionalFields);
+  const getFieldById = getFieldByIdFactory(newJobCapsService, additionalFields);
 
   return detectors.map((d) => {
     let field = null;
@@ -75,7 +79,7 @@ export function getRichDetectors(
     }
 
     return {
-      agg: newJobCapsService.getAggById(d.function),
+      agg: newJobCapsService.getAggById(d.function!),
       field,
       byField,
       overField,
@@ -225,36 +229,12 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
   // return true
   if (distinctCountField === undefined) {
     for (const detector of detectors) {
-      if (SPARSE_DATA_AGGREGATIONS.includes(detector.function as ML_JOB_AGGREGATION)) {
+      if (SPARSE_DATA_AGGREGATIONS.includes(detector.function as SparseDataAggregation)) {
         return true;
       }
     }
   }
   return false;
-}
-
-export function stashJobForCloning(
-  jobCreator: JobCreatorType,
-  skipTimeRangeStep: boolean = false,
-  includeTimeRange: boolean = false,
-  autoSetTimeRange: boolean = false
-) {
-  mlJobService.tempJobCloningObjects.job = jobCreator.jobConfig;
-  mlJobService.tempJobCloningObjects.datafeed = jobCreator.datafeedConfig;
-  mlJobService.tempJobCloningObjects.createdBy = jobCreator.createdBy ?? undefined;
-
-  // skip over the time picker step of the wizard
-  mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;
-
-  if (includeTimeRange === true && autoSetTimeRange === false) {
-    // auto select the start and end dates of the time picker
-    mlJobService.tempJobCloningObjects.start = jobCreator.start;
-    mlJobService.tempJobCloningObjects.end = jobCreator.end;
-  } else if (autoSetTimeRange === true) {
-    mlJobService.tempJobCloningObjects.autoSetTimeRange = true;
-  }
-
-  mlJobService.tempJobCloningObjects.calendars = jobCreator.calendars;
 }
 
 export function convertToMultiMetricJob(
@@ -263,25 +243,25 @@ export function convertToMultiMetricJob(
 ) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
-  stashJobForCloning(jobCreator, true, true);
+  jobCloningService.stashJobForCloning(jobCreator, true, true);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC, true);
 }
 
 export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
-  stashJobForCloning(jobCreator, true, true);
+  jobCloningService.stashJobForCloning(jobCreator, true, true);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED, true);
 }
 
 export function resetAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
-  stashJobForCloning(jobCreator, true, false);
+  jobCloningService.stashJobForCloning(jobCreator, true, false);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
 }
 
 export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.jobId = '';
-  stashJobForCloning(jobCreator, true, true);
+  jobCloningService.stashJobForCloning(jobCreator, true, true);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
 }
 
@@ -290,7 +270,7 @@ export function advancedStartDatafeed(
   navigateToPath: NavigateToPath
 ) {
   if (jobCreator !== null) {
-    stashJobForCloning(jobCreator, false, false);
+    jobCloningService.stashJobForCloning(jobCreator, false, false);
   }
   navigateToPath('/jobs');
 }
@@ -356,4 +336,14 @@ export function collectAggs(o: any, aggFields: Field[]) {
       collectAggs(o[i], aggFields);
     }
   }
+}
+
+export function cloneDatafeed(datafeed: Datafeed) {
+  const tempDatafeed = cloneDeep(datafeed);
+
+  // remove parts of the datafeed config which should not be copied
+  tempDatafeed.datafeed_id = '';
+  tempDatafeed.job_id = '';
+
+  return tempDatafeed;
 }

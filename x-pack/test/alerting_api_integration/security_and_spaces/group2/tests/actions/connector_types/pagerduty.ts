@@ -7,6 +7,7 @@
 
 import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import {
@@ -14,12 +15,14 @@ import {
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function pagerdutyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
+  const retry = getService('retry');
 
   describe('pagerduty action', () => {
     let simulatedActionId = '';
@@ -61,6 +64,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'A pagerduty action',
         connector_type_id: '.pagerduty',
@@ -79,6 +83,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'A pagerduty action',
         connector_type_id: '.pagerduty',
@@ -158,6 +163,64 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         .send({
           params: {
             summary: 'just a test',
+          },
+        })
+        .expect(200);
+
+      expect(proxyHaveBeenCalled).to.equal(true);
+      expect(result).to.eql({
+        status: 'ok',
+        connector_id: simulatedActionId,
+        data: {
+          message: 'Event processed',
+          status: 'success',
+        },
+      });
+
+      const events: IValidatedEvent[] = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: 'default',
+          type: 'action',
+          id: simulatedActionId,
+          provider: 'actions',
+          actions: new Map([
+            ['execute-start', { equal: 1 }],
+            ['execute', { equal: 1 }],
+          ]),
+        });
+      });
+
+      const executeEvent = events[1];
+      expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(142);
+    });
+
+    it('should execute successfully with links and customDetails', async () => {
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            summary: 'just a test',
+            customDetails: {
+              myString: 'foo',
+              myNumber: 10,
+              myArray: ['foo', 'baz'],
+              myBoolean: true,
+              myObject: {
+                myNestedObject: 'foo',
+              },
+            },
+            links: [
+              {
+                href: 'http://example.com',
+                text: 'a link',
+              },
+              {
+                href: 'http://example.com',
+                text: 'a second link',
+              },
+            ],
           },
         })
         .expect(200);

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
@@ -27,7 +28,10 @@ const keywordComparator = (first: DataViewField, second: DataViewField) => {
 export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestionField> = (
   core
 ) => {
-  return async ({ indexPatterns }, { start, end, prefix, suffix, nestedPath = '' }) => {
+  return async (
+    { indexPatterns, suggestionsAbstraction },
+    { start, end, prefix, suffix, nestedPath = '' }
+  ) => {
     const allFields = flatten(
       indexPatterns.map((indexPattern) => {
         return indexPattern.fields.filter(indexPatternsUtils.isFilterable);
@@ -37,28 +41,54 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
     const search = `${prefix}${suffix}`.trim().toLowerCase();
     const matchingFields = allFields.filter((field) => {
       const subTypeNested = indexPatternsUtils.getFieldSubtypeNested(field);
-      return (
-        (!nestedPath || (nestedPath && subTypeNested?.nested.path.includes(nestedPath))) &&
-        field.name.toLowerCase().includes(search)
-      );
+      if (suggestionsAbstraction?.fields?.[field.name]) {
+        return (
+          (!nestedPath || (nestedPath && subTypeNested?.nested.path.includes(nestedPath))) &&
+          (suggestionsAbstraction?.fields[field.name]?.displayField ?? '')
+            .toLowerCase()
+            .includes(search)
+        );
+      } else {
+        return (
+          (!nestedPath || (nestedPath && subTypeNested?.nested.path.includes(nestedPath))) &&
+          field.name.toLowerCase().includes(search)
+        );
+      }
     });
     const sortedFields = sortPrefixFirst(matchingFields.sort(keywordComparator), search, 'name');
     const { escapeKuery } = await import('@kbn/es-query');
     const suggestions: QuerySuggestionField[] = sortedFields.map((field) => {
+      const isNested = field.subType && field.subType.nested;
+      const isSuggestionsAbstractionOn = !!suggestionsAbstraction?.fields?.[field.name];
+
       const remainingPath =
         field.subType && field.subType.nested
-          ? field.subType.nested.path.slice(nestedPath ? nestedPath.length + 1 : 0)
+          ? isSuggestionsAbstractionOn
+            ? (suggestionsAbstraction?.fields[field.name].displayField ?? '').slice(
+                nestedPath ? nestedPath.length + 1 : 0
+              )
+            : field.subType.nested.path.slice(nestedPath ? nestedPath.length + 1 : 0)
           : '';
-      const text =
-        field.subType && field.subType.nested && remainingPath.length > 0
+      let text =
+        isNested && remainingPath.length > 0
           ? `${escapeKuery(remainingPath)}:{ ${escapeKuery(
               field.name.slice(field.subType.nested.path.length + 1)
             )}  }`
           : `${escapeKuery(field.name.slice(nestedPath ? nestedPath.length + 1 : 0))} `;
-      const cursorIndex =
-        field.subType && field.subType.nested && remainingPath.length > 0
-          ? text.length - 2
-          : text.length;
+
+      if (isSuggestionsAbstractionOn) {
+        if (isNested && remainingPath.length > 0) {
+          text = `${escapeKuery(remainingPath)}:{ ${escapeKuery(
+            suggestionsAbstraction?.fields[field.name]?.nestedDisplayField ?? ''
+          )}  }`;
+        } else if (isNested && remainingPath.length === 0) {
+          text = suggestionsAbstraction?.fields[field.name]?.nestedDisplayField ?? '';
+        } else {
+          text = suggestionsAbstraction?.fields[field.name].displayField ?? '';
+        }
+      }
+
+      const cursorIndex = isNested && remainingPath.length > 0 ? text.length - 2 : text.length;
 
       return {
         type: QuerySuggestionTypes.Field,

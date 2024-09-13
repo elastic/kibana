@@ -7,11 +7,10 @@
 
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
 import type {
-  CaseUserActionInjectedAttributes,
-  CaseUserActionsResponse,
-  CaseUserActionsDeprecatedResponse,
   CaseUserActionDeprecatedResponse,
-} from '../../../common/api';
+  CaseUserActionsDeprecatedResponse,
+} from '../../../common/types/api';
+import type { UserActionAttributes, UserActions } from '../../../common/types/domain';
 
 export const extractAttributes = (
   userActions: SavedObjectsFindResponse<CaseUserActionDeprecatedResponse>
@@ -20,6 +19,6 @@ export const extractAttributes = (
 };
 
 export const formatSavedObjects = (
-  response: SavedObjectsFindResponse<CaseUserActionInjectedAttributes>
-): CaseUserActionsResponse =>
+  response: SavedObjectsFindResponse<UserActionAttributes>
+): UserActions =>
   response.saved_objects.map((so) => ({ id: so.id, version: so.version ?? '', ...so.attributes }));

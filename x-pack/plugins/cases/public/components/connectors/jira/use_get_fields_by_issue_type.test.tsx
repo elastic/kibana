@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { connector } from '../mock';
-import type { UseGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import * as api from './api';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./api');
@@ -19,88 +20,112 @@ jest.mock('./api');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('useGetFieldsByIssueType', () => {
-  const { http, notifications } = useKibanaMock().services;
+  const { http } = useKibanaMock().services;
+  let appMockRender: AppMockRenderer;
 
-  test('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetFieldsByIssueType>(() =>
-        useGetFieldsByIssueType({ http, toastNotifications: notifications.toasts, issueType: null })
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({ isLoading: true, fields: {} });
+  beforeEach(() => {
+    appMockRender = createAppMockRenderer();
+    jest.clearAllMocks();
+  });
+
+  it('calls the api when invoked with the correct parameters', async () => {
+    const spy = jest.spyOn(api, 'getFieldsByIssueType');
+    const { result, waitFor } = renderHook(
+      () =>
+        useGetFieldsByIssueType({
+          http,
+          connector,
+          issueType: '1',
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    await waitFor(() => result.current.isSuccess);
+
+    expect(spy).toHaveBeenCalledWith({
+      http,
+      signal: expect.anything(),
+      connectorId: connector.id,
+      id: '1',
     });
   });
 
-  test('does not fetch when issueType is not provided', async () => {
-    const spyOnGetFieldsByIssueType = jest.spyOn(api, 'getFieldsByIssueType');
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetFieldsByIssueType>(() =>
+  it('does not call the api when the connector is missing', async () => {
+    const spy = jest.spyOn(api, 'getFieldsByIssueType');
+    renderHook(
+      () =>
         useGetFieldsByIssueType({
           http,
-          toastNotifications: notifications.toasts,
+          issueType: '1',
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    expect(spy).not.toHaveBeenCalledWith();
+  });
+
+  it('does not call the api when the issueType=null', async () => {
+    const spy = jest.spyOn(api, 'getFieldsByIssueType');
+    renderHook(
+      () =>
+        useGetFieldsByIssueType({
+          http,
           connector,
           issueType: null,
-        })
-      );
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(spyOnGetFieldsByIssueType).not.toHaveBeenCalled();
-      expect(result.current).toEqual({ isLoading: false, fields: {} });
-    });
+    expect(spy).not.toHaveBeenCalledWith();
   });
 
-  test('fetch fields', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetFieldsByIssueType>(() =>
-        useGetFieldsByIssueType({
-          http,
-          toastNotifications: notifications.toasts,
-          connector,
-          issueType: 'Task',
-        })
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        fields: {
-          summary: { allowedValues: [], defaultValue: {} },
-          priority: {
-            allowedValues: [
-              {
-                name: 'Medium',
-                id: '3',
-              },
-            ],
-            defaultValue: { name: 'Medium', id: '3' },
-          },
-        },
-      });
-    });
-  });
-
-  test('unhappy path', async () => {
-    const spyOnGetCaseConfigure = jest.spyOn(api, 'getFieldsByIssueType');
-    spyOnGetCaseConfigure.mockImplementation(() => {
+  it('shows a toast error message when an error occurs', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getFieldsByIssueType');
+    spyOnGetCases.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetFieldsByIssueType>(() =>
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
+
+    const { waitFor } = renderHook(
+      () =>
         useGetFieldsByIssueType({
           http,
-          toastNotifications: notifications.toasts,
           connector,
-          issueType: null,
-        })
-      );
+          issueType: '1',
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
+  });
 
-      expect(result.current).toEqual({ isLoading: false, fields: {} });
+  it('calls addError when the getFieldsByIssueType api returns successfully but contains an error', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getFieldsByIssueType');
+    spyOnGetCases.mockResolvedValue({
+      status: 'error',
+      message: 'Error message',
+      actionId: 'test',
+    });
+
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
+
+    const { waitFor } = renderHook(
+      () =>
+        useGetFieldsByIssueType({
+          http,
+          connector,
+          issueType: '1',
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
     });
   });
 });

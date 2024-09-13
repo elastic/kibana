@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Either from 'fp-ts/lib/Either';
@@ -26,6 +27,12 @@ export interface BulkOverwriteTransformedDocumentsParams {
   index: string;
   operations: BulkOperation[];
   refresh?: estypes.Refresh;
+  /**
+   * If true, we prevent Elasticsearch from auto-creating the index if it
+   * doesn't exist. We use the ES paramater require_alias: true so `index`
+   * must be an alias, otherwise the bulk index will fail.
+   */
+  useAliasToPreventAutoCreate?: boolean;
 }
 
 /**
@@ -38,6 +45,7 @@ export const bulkOverwriteTransformedDocuments =
     index,
     operations,
     refresh = false,
+    useAliasToPreventAutoCreate = false,
   }: BulkOverwriteTransformedDocumentsParams): TaskEither.TaskEither<
     | RetryableEsClientError
     | TargetIndexHadWriteBlock
@@ -56,7 +64,7 @@ export const bulkOverwriteTransformedDocuments =
         // probably unlikely so for now we'll accept this risk and wait till
         // system indices puts in place a hard control.
         index,
-        require_alias: false,
+        require_alias: useAliasToPreventAutoCreate,
         wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
         refresh,
         filter_path: ['items.*.error'],

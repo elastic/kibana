@@ -1,122 +1,190 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiProgress,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import { DataTableRecord } from '../../../../types';
-import { useInternalStateSelector } from '../../services/discover_internal_state_container';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
-import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
-import { FetchStatus } from '../../../types';
+import { SortOrder } from '@kbn/saved-search-plugin/public';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
+import {
+  DataLoadingState,
+  useColumns,
+  type DataTableColumnsMeta,
+  getTextBasedColumnsMeta,
+  getRenderCustomToolbarWithElements,
+  type DataGridDensity,
+  UnifiedDataTableProps,
+  UseColumnsProps,
+} from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
-  DOC_TABLE_LEGACY,
-  SAMPLE_SIZE_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
   HIDE_ANNOUNCEMENTS,
-} from '../../../../../common';
-import { useColumns } from '../../../../hooks/use_data_grid_columns';
-import { RecordRawType } from '../../services/discover_data_state_container';
-import { DiscoverStateContainer } from '../../services/discover_state';
+  isLegacyTableEnabled,
+  MAX_DOC_FIELDS_DISPLAYED,
+  ROW_HEIGHT_OPTION,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SHOW_MULTIFIELDS,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '@kbn/discover-utils';
+import useObservable from 'react-use/lib/useObservable';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import { useQuerySubscriber } from '@kbn/unified-field-list';
+import { map } from 'rxjs';
+import { DiscoverGrid } from '../../../../components/discover_grid';
+import { getDefaultRowsPerPage } from '../../../../../common/constants';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { FetchStatus } from '../../../types';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
-import { DiscoverTourProvider } from '../../../../components/discover_tour';
-import { getRawRecordType } from '../../utils/get_raw_record_type';
-import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
-import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
+import {
+  DISCOVER_TOUR_STEP_ANCHOR_IDS,
+  DiscoverTourProvider,
+} from '../../../../components/discover_tour';
+import {
+  getMaxAllowedSampleSize,
+  getAllowedSampleSize,
+} from '../../../../utils/get_allowed_sample_size';
+import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
+import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
+import { useFetchMoreRecords } from './use_fetch_more_records';
+import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
+import { useDiscoverCustomization } from '../../../../customizations';
+import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
+import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
+import {
+  DISCOVER_CELL_ACTIONS_TRIGGER,
+  useAdditionalCellActions,
+  useProfileAccessor,
+} from '../../../../context_awareness';
+
+const containerStyles = css`
+  position: relative;
+`;
+
+const progressStyle = css`
+  z-index: 2;
+`;
+
+const TOUR_STEPS = { expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument };
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
-const DataGridMemoized = React.memo(DiscoverGrid);
+const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 // export needs for testing
 export const onResize = (
-  colSettings: { columnId: string; width: number },
+  colSettings: { columnId: string; width: number | undefined },
   stateContainer: DiscoverStateContainer
 ) => {
   const state = stateContainer.appState.getState();
-  const grid = { ...(state.grid || {}) };
-  const newColumns = { ...(grid.columns || {}) };
-  newColumns[colSettings.columnId] = {
-    width: Math.round(colSettings.width),
-  };
-  const newGrid = { ...grid, columns: newColumns };
+  const newGrid = onResizeGridColumn(colSettings, state.grid);
   stateContainer.appState.update({ grid: newGrid });
 };
 
 function DiscoverDocumentsComponent({
+  viewModeToggle,
   dataView,
   onAddFilter,
-  savedSearch,
   stateContainer,
   onFieldEdited,
 }: {
+  viewModeToggle: React.ReactElement | undefined;
   dataView: DataView;
-  navigateTo: (url: string) => void;
   onAddFilter?: DocViewFilterFn;
-  savedSearch: SavedSearch;
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
 }) {
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
-  const { dataViews, capabilities, uiSettings } = services;
-  const [query, sort, rowHeight, rowsPerPage, grid, columns, index] = useAppStateSelector(
-    (state) => {
-      return [
-        state.query,
-        state.sort,
-        state.rowHeight,
-        state.rowsPerPage,
-        state.grid,
-        state.columns,
-        state.index,
-      ];
-    }
-  );
-  const setExpandedDoc = useCallback(
-    (doc: DataTableRecord | undefined) => {
-      stateContainer.internalState.transitions.setExpandedDoc(doc);
-    },
-    [stateContainer]
-  );
-
+  const savedSearch = useSavedSearchInitial();
+  const { dataViews, capabilities, uiSettings, uiActions } = services;
+  const [
+    dataSource,
+    query,
+    sort,
+    rowHeight,
+    headerRowHeight,
+    rowsPerPage,
+    grid,
+    columns,
+    sampleSizeState,
+    density,
+  ] = useAppStateSelector((state) => {
+    return [
+      state.dataSource,
+      state.query,
+      state.sort,
+      state.rowHeight,
+      state.headerRowHeight,
+      state.rowsPerPage,
+      state.grid,
+      state.columns,
+      state.sampleSize,
+      state.density,
+    ];
+  });
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
-
+  const isEsqlMode = useIsEsqlMode();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
-  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
-  const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
-
+  const isLegacy = useMemo(
+    () => isLegacyTableEnabled({ uiSettings, isEsqlMode }),
+    [uiSettings, isEsqlMode]
+  );
   const documentState = useDataState(documents$);
-  const isDataLoading = documentState.fetchStatus === FetchStatus.LOADING;
+  const isDataLoading =
+    documentState.fetchStatus === FetchStatus.LOADING ||
+    documentState.fetchStatus === FetchStatus.PARTIAL;
+
   // This is needed to prevent EuiDataGrid pushing onSort because the data view has been switched.
+  // It's just necessary for non ES|QL requests since they don't have a partial result state, that's
+  // considered as loading state in the Component.
   // 1. When switching the data view, the sorting in the URL is reset to the default sorting of the selected data view.
   // 2. The new sort param is already available in this component and propagated to the EuiDataGrid.
   // 3. currentColumns are still referring to the old state
   // 4. since the new sort by field isn't available in currentColumns EuiDataGrid is emitting a 'onSort', which is unsorting the grid
   // 5. this is propagated to Discover's URL and causes an unwanted change of state to an unsorted state
   // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
-  const isDataViewLoading = index && dataView.id && index !== dataView.id;
-  const isEmptyDataResult = !documentState.result || documentState.result.length === 0;
-  const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
+  const isDataViewLoading =
+    useInternalStateSelector((state) => state.isDataViewLoading) && !isEsqlMode;
+  const isEmptyDataResult =
+    isEsqlMode || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
+
+  const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords({
+    stateContainer,
+  });
+
+  const setAppState = useCallback<UseColumnsProps['setAppState']>(
+    ({ settings, ...rest }) => {
+      stateContainer.appState.update({ ...rest, grid: settings as DiscoverGridSettings });
+    },
+    [stateContainer]
+  );
 
   const {
     columns: currentColumns,
@@ -126,16 +194,24 @@ function DiscoverDocumentsComponent({
     onSetColumns,
   } = useColumns({
     capabilities,
-    config: uiSettings,
+    defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
-    setAppState: stateContainer.appState.update,
+    setAppState,
     useNewFieldsApi,
     columns,
     sort,
+    settings: grid,
   });
 
-  const onResizeDataGrid = useCallback(
+  const setExpandedDoc = useCallback(
+    (doc: DataTableRecord | undefined) => {
+      stateContainer.internalState.transitions.setExpandedDoc(doc);
+    },
+    [stateContainer]
+  );
+
+  const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
     (colSettings) => onResize(colSettings, stateContainer),
     [stateContainer]
   );
@@ -143,6 +219,13 @@ function DiscoverDocumentsComponent({
   const onUpdateRowsPerPage = useCallback(
     (nextRowsPerPage: number) => {
       stateContainer.appState.update({ rowsPerPage: nextRowsPerPage });
+    },
+    [stateContainer]
+  );
+
+  const onUpdateSampleSize = useCallback(
+    (newSampleSize: number) => {
+      stateContainer.appState.update({ sampleSize: newSampleSize });
     },
     [stateContainer]
   );
@@ -161,12 +244,141 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
+  const onUpdateHeaderRowHeight = useCallback(
+    (newHeaderRowHeight: number) => {
+      stateContainer.appState.update({ headerRowHeight: newHeaderRowHeight });
+    },
+    [stateContainer]
+  );
+
+  const onUpdateDensity = useCallback(
+    (newDensity: DataGridDensity) => {
+      stateContainer.appState.update({ density: newDensity });
+    },
+    [stateContainer]
+  );
+
+  // should be aligned with embeddable `showTimeCol` prop
   const showTimeCol = useMemo(
+    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+    [uiSettings]
+  );
+
+  const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
     () =>
-      !isPlainRecord &&
-      !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
-      !!dataView.timeFieldName,
-    [isPlainRecord, uiSettings, dataView.timeFieldName]
+      documentState.esqlQueryColumns
+        ? getTextBasedColumnsMeta(documentState.esqlQueryColumns)
+        : undefined,
+    [documentState.esqlQueryColumns]
+  );
+
+  const { filters } = useQuerySubscriber({ data: services.data });
+
+  const timeRange = useObservable(
+    services.timefilter.getTimeUpdate$().pipe(map(() => services.timefilter.getTime())),
+    services.timefilter.getTime()
+  );
+
+  const cellActionsMetadata = useAdditionalCellActions({
+    dataSource,
+    dataView,
+    query,
+    filters,
+    timeRange,
+  });
+
+  const renderDocumentView = useCallback(
+    (
+      hit: DataTableRecord,
+      displayedRows: DataTableRecord[],
+      displayedColumns: string[],
+      customColumnsMeta?: DataTableColumnsMeta
+    ) => (
+      <DiscoverGridFlyout
+        dataView={dataView}
+        hit={hit}
+        hits={displayedRows}
+        // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+        columns={displayedColumns}
+        columnsMeta={customColumnsMeta}
+        savedSearchId={savedSearch.id}
+        onFilter={onAddFilter}
+        onRemoveColumn={onRemoveColumn}
+        onAddColumn={onAddColumn}
+        onClose={() => setExpandedDoc(undefined)}
+        setExpandedDoc={setExpandedDoc}
+        query={query}
+      />
+    ),
+    [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
+  );
+
+  const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
+  const { customCellRenderer, customGridColumnsConfiguration } =
+    useContextualGridCustomisations() || {};
+  const additionalFieldGroups = useAdditionalFieldGroups();
+
+  const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
+  const cellRenderers = useMemo(() => {
+    const getCellRenderers = getCellRenderersAccessor(() => customCellRenderer ?? {});
+    return getCellRenderers();
+  }, [customCellRenderer, getCellRenderersAccessor]);
+
+  const documents = useObservable(stateContainer.dataState.data$.documents$);
+
+  const callouts = useMemo(
+    () => (
+      <>
+        <SelectedVSAvailableCallout
+          esqlQueryColumns={documents?.esqlQueryColumns}
+          // `discover:searchFieldsFromSource` adds `_source` to the columns, but we should exclude it from the callout
+          selectedColumns={currentColumns.filter((col) => col !== '_source')}
+        />
+        <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />
+      </>
+    ),
+    [currentColumns, documents?.esqlQueryColumns, documentState.interceptedWarnings]
+  );
+
+  const gridAnnouncementCallout = useMemo(() => {
+    if (hideAnnouncements || isLegacy) {
+      return null;
+    }
+
+    return !isEsqlMode ? (
+      <DiscoverTourProvider>
+        <DocumentExplorerUpdateCallout />
+      </DiscoverTourProvider>
+    ) : null;
+  }, [hideAnnouncements, isLegacy, isEsqlMode]);
+
+  const loadingIndicator = useMemo(
+    () =>
+      isDataLoading ? (
+        <EuiProgress
+          data-test-subj="discoverDataGridUpdating"
+          size="xs"
+          color="accent"
+          position="absolute"
+          css={progressStyle}
+        />
+      ) : null,
+    [isDataLoading]
+  );
+
+  const renderCustomToolbarWithElements = useMemo(
+    () =>
+      getRenderCustomToolbarWithElements({
+        leftSide: viewModeToggle,
+        bottomSection: (
+          <>
+            {callouts}
+            {gridAnnouncementCallout}
+            {loadingIndicator}
+          </>
+        ),
+      }),
+    [viewModeToggle, callouts, gridAnnouncementCallout, loadingIndicator]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
@@ -182,78 +394,115 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel">
-      <EuiScreenReaderOnly>
-        <h2 id="documentsAriaLabel">
-          <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
-        </h2>
-      </EuiScreenReaderOnly>
-      {isLegacy && rows && rows.length && (
+    <>
+      {isLegacy && (
         <>
-          {!hideAnnouncements && <DocumentExplorerCallout />}
-          <DocTableInfiniteMemoized
-            columns={currentColumns}
-            dataView={dataView}
-            rows={rows}
-            sort={sort || []}
-            isLoading={isDataLoading}
-            searchDescription={savedSearch.description}
-            sharedItemTitle={savedSearch.title}
-            onAddColumn={onAddColumn}
-            onFilter={onAddFilter as DocViewFilterFn}
-            onMoveColumn={onMoveColumn}
-            onRemoveColumn={onRemoveColumn}
-            onSort={!isPlainRecord ? onSort : undefined}
-            useNewFieldsApi={useNewFieldsApi}
-            dataTestSubj="discoverDocTable"
-            DocViewer={DocViewer}
-          />
+          <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
+          {callouts}
         </>
       )}
-      {!isLegacy && (
-        <>
-          {!hideAnnouncements && !isPlainRecord && (
-            <DiscoverTourProvider isPlainRecord={isPlainRecord}>
-              <DocumentExplorerUpdateCallout />
-            </DiscoverTourProvider>
-          )}
-          <div className="dscDiscoverGrid">
-            <DataGridMemoized
-              ariaLabelledBy="documentsAriaLabel"
-              columns={currentColumns}
-              expandedDoc={expandedDoc}
-              dataView={dataView}
-              isLoading={isDataLoading}
-              rows={rows}
-              sort={(sort as SortOrder[]) || []}
-              sampleSize={sampleSize}
-              searchDescription={savedSearch.description}
-              searchTitle={savedSearch.title}
-              setExpandedDoc={!isPlainRecord ? setExpandedDoc : undefined}
-              showTimeCol={showTimeCol}
-              settings={grid}
-              onAddColumn={onAddColumn}
-              onFilter={onAddFilter as DocViewFilterFn}
-              onRemoveColumn={onRemoveColumn}
-              onSetColumns={onSetColumns}
-              onSort={!isPlainRecord ? onSort : undefined}
-              onResize={onResizeDataGrid}
-              useNewFieldsApi={useNewFieldsApi}
-              rowHeightState={rowHeight}
-              onUpdateRowHeight={onUpdateRowHeight}
-              isSortEnabled={!isPlainRecord}
-              isPlainRecord={isPlainRecord}
-              rowsPerPageState={rowsPerPage}
-              onUpdateRowsPerPage={onUpdateRowsPerPage}
-              onFieldEdited={onFieldEdited}
-              savedSearchId={savedSearch.id}
-              DocumentView={DiscoverGridFlyout}
-              services={services}
-            />
+      <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={containerStyles}>
+        <EuiScreenReaderOnly>
+          <h2 id="documentsAriaLabel">
+            <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
+          </h2>
+        </EuiScreenReaderOnly>
+        {isLegacy && (
+          <>
+            {rows && rows.length > 0 && (
+              <>
+                {!hideAnnouncements && <DocumentExplorerCallout />}
+                <DocTableInfiniteMemoized
+                  columns={currentColumns}
+                  dataView={dataView}
+                  rows={rows}
+                  sort={sort || []}
+                  isLoading={isDataLoading}
+                  searchDescription={savedSearch.description}
+                  sharedItemTitle={savedSearch.title}
+                  isEsqlMode={isEsqlMode}
+                  onAddColumn={onAddColumn}
+                  onFilter={onAddFilter as DocViewFilterFn}
+                  onMoveColumn={onMoveColumn}
+                  onRemoveColumn={onRemoveColumn}
+                  onSort={!isEsqlMode ? onSort : undefined}
+                  useNewFieldsApi={useNewFieldsApi}
+                  dataTestSubj="discoverDocTable"
+                />
+              </>
+            )}
+            {loadingIndicator}
+          </>
+        )}
+        {!isLegacy && (
+          <div className="unifiedDataTable">
+            <CellActionsProvider
+              getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+            >
+              <DiscoverGridMemoized
+                ariaLabelledBy="documentsAriaLabel"
+                columns={currentColumns}
+                columnsMeta={columnsMeta}
+                expandedDoc={expandedDoc}
+                dataView={dataView}
+                loadingState={
+                  isDataLoading
+                    ? DataLoadingState.loading
+                    : isMoreDataLoading
+                    ? DataLoadingState.loadingMore
+                    : DataLoadingState.loaded
+                }
+                rows={rows}
+                sort={(sort as SortOrder[]) || []}
+                searchDescription={savedSearch.description}
+                searchTitle={savedSearch.title}
+                setExpandedDoc={setExpandedDoc}
+                showTimeCol={showTimeCol}
+                settings={grid}
+                onFilter={onAddFilter as DocViewFilterFn}
+                onSetColumns={onSetColumns}
+                onSort={onSort}
+                onResize={onResizeDataGrid}
+                useNewFieldsApi={useNewFieldsApi}
+                configHeaderRowHeight={3}
+                headerRowHeightState={headerRowHeight}
+                onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}
+                rowHeightState={rowHeight}
+                onUpdateRowHeight={onUpdateRowHeight}
+                isSortEnabled={true}
+                isPlainRecord={isEsqlMode}
+                isPaginationEnabled={!isEsqlMode}
+                rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
+                onUpdateRowsPerPage={onUpdateRowsPerPage}
+                maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
+                sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
+                onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
+                onFieldEdited={onFieldEdited}
+                configRowHeight={uiSettings.get(ROW_HEIGHT_OPTION)}
+                showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
+                maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+                renderDocumentView={renderDocumentView}
+                renderCustomToolbar={renderCustomToolbarWithElements}
+                services={services}
+                totalHits={totalHits}
+                onFetchMoreRecords={onFetchMoreRecords}
+                componentsTourSteps={TOUR_STEPS}
+                externalCustomRenderers={cellRenderers}
+                customGridColumnsConfiguration={customGridColumnsConfiguration}
+                rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+                additionalFieldGroups={additionalFieldGroups}
+                dataGridDensityState={density}
+                onUpdateDataGridDensity={onUpdateDensity}
+                query={query}
+                cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+                cellActionsMetadata={cellActionsMetadata}
+                cellActionsHandling="append"
+              />
+            </CellActionsProvider>
           </div>
-        </>
-      )}
-    </EuiFlexItem>
+        )}
+      </EuiFlexItem>
+    </>
   );
 }
 

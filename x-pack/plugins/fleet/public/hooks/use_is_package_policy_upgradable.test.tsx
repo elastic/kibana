@@ -24,11 +24,9 @@ describe('useIsPackagePolicyUpgradable', () => {
         items: [
           {
             status: 'installed',
-            savedObject: {
-              attributes: {
-                name: 'test',
-                version: '1.0.0',
-              },
+            installationInfo: {
+              name: 'test',
+              version: '1.0.0',
             },
           },
         ],

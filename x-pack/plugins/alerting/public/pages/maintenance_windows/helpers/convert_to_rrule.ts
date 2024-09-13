@@ -6,20 +6,21 @@
  */
 
 import { Moment } from 'moment';
-import { RRule, RRuleFrequency, RRuleFrequencyMap } from '../types';
-import { Frequency, ISO_WEEKDAYS_TO_RRULE } from '../constants';
+import { Frequency } from '@kbn/rrule';
+import { ISO_WEEKDAYS_TO_RRULE } from '../constants';
 import { getNthByWeekday } from './get_nth_by_weekday';
 import { RecurringScheduleFormProps } from '../components/schema';
 import { getPresets } from './get_presets';
+import { RRuleParams } from '../../../../common';
 
 export const convertToRRule = (
   startDate: Moment,
   timezone: string,
   recurringForm?: RecurringScheduleFormProps
-): RRule => {
+): RRuleParams => {
   const presets = getPresets(startDate);
 
-  const rRule: RRule = {
+  const rRule: RRuleParams = {
     dtstart: startDate.toISOString(),
     tzid: timezone,
   };
@@ -29,48 +30,47 @@ export const convertToRRule = (
       ...rRule,
       // default to yearly and a count of 1
       // if the maintenance window is not recurring
-      freq: RRuleFrequency.YEARLY,
+      freq: Frequency.YEARLY,
       count: 1,
     };
 
-  if (recurringForm) {
-    let form = recurringForm;
-    if (recurringForm.frequency !== 'CUSTOM') {
-      form = { ...recurringForm, ...presets[recurringForm.frequency] };
-    }
+  let form = recurringForm;
+  if (recurringForm.frequency !== 'CUSTOM') {
+    form = { ...recurringForm, ...presets[recurringForm.frequency] };
+  }
 
-    const frequency = form.customFrequency ? form.customFrequency : (form.frequency as Frequency);
-    rRule.freq = RRuleFrequencyMap[frequency];
+  const frequency = form.customFrequency ?? (form.frequency as Frequency);
+  rRule.freq = frequency;
 
-    rRule.interval = form.interval;
+  rRule.interval = form.interval;
 
-    if (form.until) {
-      rRule.until = form.until;
-    }
+  if (form.until) {
+    rRule.until = form.until;
+  }
 
-    if (form.count) {
-      rRule.count = form.count;
-    }
+  if (form.count) {
+    rRule.count = form.count;
+  }
 
-    if (form.byweekday) {
-      const byweekday = form.byweekday;
-      rRule.byweekday = Object.keys(byweekday)
-        .filter((k) => byweekday[k] === true)
-        .map((n) => ISO_WEEKDAYS_TO_RRULE[Number(n)]);
-    }
+  if (form.byweekday) {
+    const byweekday = form.byweekday;
+    rRule.byweekday = Object.keys(byweekday)
+      .filter((k) => byweekday[k] === true)
+      .map((n) => ISO_WEEKDAYS_TO_RRULE[Number(n)]);
+  }
 
-    if (form.bymonth) {
-      if (form.bymonth === 'day') {
-        rRule.bymonthday = [startDate.date()];
-      } else if (form.bymonth === 'weekday') {
-        rRule.byweekday = [getNthByWeekday(startDate)];
-      }
-    }
-
-    if (frequency === Frequency.YEARLY) {
-      rRule.bymonth = [startDate.month()];
+  if (form.bymonth) {
+    if (form.bymonth === 'day') {
       rRule.bymonthday = [startDate.date()];
+    } else if (form.bymonth === 'weekday') {
+      rRule.byweekday = [getNthByWeekday(startDate)];
     }
+  }
+
+  if (frequency === Frequency.YEARLY) {
+    // rRule expects 1 based indexing for months
+    rRule.bymonth = [startDate.month() + 1];
+    rRule.bymonthday = [startDate.date()];
   }
 
   return rRule;

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -23,16 +24,14 @@ describe('endpointEntryMatchWildcard', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should NOT validate when "operator" is "excluded"', () => {
+  test('it should validate when "operator" is "excluded"', () => {
     const payload = getEntryMatchWildcardMock();
     payload.operator = 'excluded';
     const decoded = endpointEntryMatchWildcard.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "excluded" supplied to "operator"',
-    ]);
-    expect(message.schema).toEqual({});
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
   });
 
   test('it should FAIL validation when "field" is empty string', () => {

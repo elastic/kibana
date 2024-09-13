@@ -5,94 +5,141 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useCallback, useState, memo } from 'react';
+import React, { useState, memo } from 'react';
+import { isEmpty } from 'lodash';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  getFieldValidityAndErrorMessage,
+  UseField,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useIsUserTyping } from '../../../common/use_is_user_typing';
 import { useKibana } from '../../../common/lib/kibana';
-import type { ActionConnector } from '../../../../common/api';
+import type { ActionConnector } from '../../../../common/types/domain';
 import { useGetIssues } from './use_get_issues';
-import { useGetSingleIssue } from './use_get_single_issue';
 import * as i18n from './translations';
+import { useGetIssue } from './use_get_issue';
 
-interface Props {
-  selectedValue: string | null;
-  actionConnector?: ActionConnector;
-  onChange: (parentIssueKey: string) => void;
+interface FieldProps {
+  field: FieldHook<string>;
+  options: Array<EuiComboBoxOptionOption<string>>;
+  isLoading: boolean;
+  onSearchComboChange: (value: string) => void;
 }
 
-const SearchIssuesComponent: React.FC<Props> = ({ selectedValue, actionConnector, onChange }) => {
-  const [query, setQuery] = useState<string | null>(null);
-  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    []
-  );
-  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
-  const { http, notifications } = useKibana().services;
+interface Props {
+  actionConnector?: ActionConnector;
+}
 
-  const { isLoading: isLoadingIssues, issues } = useGetIssues({
-    http,
-    toastNotifications: notifications.toasts,
-    actionConnector,
-    query,
-  });
+const SearchIssuesFieldComponent: React.FC<FieldProps> = ({
+  field,
+  options,
+  isLoading,
+  onSearchComboChange,
+}) => {
+  const { value: parent } = field;
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-  const { isLoading: isLoadingSingleIssue, issue: singleIssue } = useGetSingleIssue({
-    http,
-    toastNotifications: notifications.toasts,
-    actionConnector,
-    id: selectedValue,
-  });
+  const selectedOptions = [parent]
+    .map((currentParent: string) => {
+      const selectedParent = options.find((issue) => issue.value === currentParent);
 
-  useEffect(
-    () => setOptions(issues.map((issue) => ({ label: issue.title, value: issue.key }))),
-    [issues]
-  );
+      if (selectedParent) {
+        return selectedParent;
+      }
 
-  useEffect(() => {
-    if (isLoadingSingleIssue || singleIssue == null) {
-      return;
-    }
+      return null;
+    })
+    .filter((value): value is EuiComboBoxOptionOption<string> => value != null);
 
-    const singleIssueAsOptions = [{ label: singleIssue.title, value: singleIssue.key }];
-    setOptions(singleIssueAsOptions);
-    setSelectedOptions(singleIssueAsOptions);
-  }, [singleIssue, isLoadingSingleIssue]);
-
-  const onSearchChange = useCallback((searchVal: string) => {
-    setQuery(searchVal);
-  }, []);
-
-  const onChangeComboBox = useCallback(
-    (changedOptions) => {
-      setSelectedOptions(changedOptions);
-      onChange(changedOptions[0].value);
-    },
-    [onChange]
-  );
-
-  const inputPlaceholder = useMemo(
-    (): string =>
-      isLoadingIssues || isLoadingSingleIssue
-        ? i18n.SEARCH_ISSUES_LOADING
-        : i18n.SEARCH_ISSUES_PLACEHOLDER,
-    [isLoadingIssues, isLoadingSingleIssue]
-  );
+  const onChangeComboBox = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    field.setValue(changedOptions.length ? changedOptions[0].value ?? '' : '');
+  };
 
   return (
-    <EuiComboBox
-      singleSelection
+    <EuiFormRow
+      id="indexConnectorSelectSearchBox"
       fullWidth
-      placeholder={inputPlaceholder}
-      data-test-subj={'search-parent-issues'}
-      aria-label={i18n.SEARCH_ISSUES_COMBO_BOX_ARIA_LABEL}
-      options={options}
-      isLoading={isLoadingIssues || isLoadingSingleIssue}
-      onSearchChange={onSearchChange}
-      selectedOptions={selectedOptions}
-      onChange={onChangeComboBox}
+      label={i18n.PARENT_ISSUE}
+      isInvalid={isInvalid}
+      error={errorMessage}
+    >
+      <EuiComboBox
+        fullWidth
+        singleSelection
+        async
+        placeholder={i18n.SEARCH_ISSUES_PLACEHOLDER}
+        aria-label={i18n.SEARCH_ISSUES_COMBO_BOX_ARIA_LABEL}
+        isLoading={isLoading}
+        isInvalid={isInvalid}
+        noSuggestions={!options.length}
+        options={options}
+        data-test-subj="search-parent-issues"
+        data-testid="search-parent-issues"
+        selectedOptions={selectedOptions}
+        onChange={onChangeComboBox}
+        onSearchChange={onSearchComboChange}
+      />
+    </EuiFormRow>
+  );
+};
+SearchIssuesFieldComponent.displayName = 'SearchIssuesField';
+
+const SearchIssuesComponent: React.FC<Props> = ({ actionConnector }) => {
+  const { http } = useKibana().services;
+  const [{ fields }] = useFormData<{ fields?: { parent: string } }>({
+    watch: ['fields.parent'],
+  });
+
+  const [query, setQuery] = useState<string | null>(null);
+  const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
+
+  const { isFetching: isLoadingIssues, data: issuesData } = useGetIssues({
+    http,
+    actionConnector,
+    query,
+    onDebounce,
+  });
+
+  const { isFetching: isLoadingIssue, data: issueData } = useGetIssue({
+    http,
+    actionConnector,
+    id: fields?.parent ?? '',
+  });
+
+  const issues = issuesData?.data ?? [];
+  const issue = issueData?.data ? [issueData.data] : [];
+
+  const onSearchComboChange = (value: string) => {
+    if (!isEmpty(value)) {
+      setQuery(value);
+    }
+
+    onContentChange(value);
+  };
+
+  const isLoading = isUserTyping || isLoadingIssues || isLoadingIssue;
+  const options = [...issues, ...issue].map((_issue) => ({
+    label: _issue.title,
+    value: _issue.key,
+  }));
+
+  return (
+    <UseField<string>
+      path="fields.parent"
+      component={SearchIssuesFieldComponent}
+      componentProps={{
+        isLoading,
+        onSearchComboChange,
+        options,
+      }}
     />
   );
 };
+
 SearchIssuesComponent.displayName = 'SearchIssues';
 
 export const SearchIssues = memo(SearchIssuesComponent);

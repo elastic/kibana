@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -15,17 +16,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
+  const { visualize, visEditor, visChart, timePicker } = getPageObjects([
+    'visualize',
+    'visEditor',
+    'visChart',
+    'timePicker',
+  ]);
 
   describe('metric chart', function () {
     before(async function () {
-      await PageObjects.visualize.initTests();
+      await visualize.initTests();
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
+      await visualize.navigateToNewAggBasedVisualization();
       log.debug('clickMetric');
-      await PageObjects.visualize.clickMetric();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await visualize.clickMetric();
+      await visualize.clickNewSearch();
+      await timePicker.setDefaultAbsoluteRange();
     });
 
     it('should have inspector enabled', async function () {
@@ -37,21 +43,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // initial metric of "Count" is selected by default
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visChart.getMetric();
+        const metricValue = await visChart.getMetric();
         expect(expectedCount).to.eql(metricValue);
       });
     });
 
     it('should show Average', async function () {
       const avgMachineRam = ['13,104,036,080.615', 'Average machine.ram'];
-      await PageObjects.visEditor.clickMetricEditor();
+      await visEditor.clickMetricEditor();
       log.debug('Aggregation = Average');
-      await PageObjects.visEditor.selectAggregation('Average', 'metrics');
+      await visEditor.selectAggregation('Average', 'metrics');
       log.debug('Field = machine.ram');
-      await PageObjects.visEditor.selectField('machine.ram', 'metrics');
-      await PageObjects.visEditor.clickGo();
+      await visEditor.selectField('machine.ram', 'metrics');
+      await visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visChart.getMetric();
+        const metricValue = await visChart.getMetric();
         expect(avgMachineRam).to.eql(metricValue);
       });
     });
@@ -59,12 +65,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show Sum', async function () {
       const sumPhpMemory = ['85,865,880', 'Sum of phpmemory'];
       log.debug('Aggregation = Sum');
-      await PageObjects.visEditor.selectAggregation('Sum', 'metrics');
+      await visEditor.selectAggregation('Sum', 'metrics');
       log.debug('Field = phpmemory');
-      await PageObjects.visEditor.selectField('phpmemory', 'metrics');
-      await PageObjects.visEditor.clickGo();
+      await visEditor.selectField('phpmemory', 'metrics');
+      await visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visChart.getMetric();
+        const metricValue = await visChart.getMetric();
         expect(sumPhpMemory).to.eql(metricValue);
       });
     });
@@ -73,12 +79,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const medianBytes = ['5,565.263', 'Median bytes'];
       //  For now, only comparing the text label part of the metric
       log.debug('Aggregation = Median');
-      await PageObjects.visEditor.selectAggregation('Median', 'metrics');
+      await visEditor.selectAggregation('Median', 'metrics');
       log.debug('Field = bytes');
-      await PageObjects.visEditor.selectField('bytes', 'metrics');
-      await PageObjects.visEditor.clickGo();
+      await visEditor.selectField('bytes', 'metrics');
+      await visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visChart.getMetric();
+        const metricValue = await visChart.getMetric();
         // only comparing the text label!
         expect(medianBytes[1]).to.eql(metricValue[1]);
       });
@@ -87,12 +93,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show Min', async function () {
       const minTimestamp = ['Sep 20, 2015 @ 00:00:00.000', 'Min @timestamp'];
       log.debug('Aggregation = Min');
-      await PageObjects.visEditor.selectAggregation('Min', 'metrics');
+      await visEditor.selectAggregation('Min', 'metrics');
       log.debug('Field = @timestamp');
-      await PageObjects.visEditor.selectField('@timestamp', 'metrics');
-      await PageObjects.visEditor.clickGo();
+      await visEditor.selectField('@timestamp', 'metrics');
+      await visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visChart.getMetric();
+        const metricValue = await visChart.getMetric();
         expect(minTimestamp).to.eql(metricValue);
       });
     });
@@ -103,12 +109,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Max relatedContent.article:modified_time',
       ];
       log.debug('Aggregation = Max');
-      await PageObjects.visEditor.selectAggregation('Max', 'metrics');
+      await visEditor.selectAggregation('Max', 'metrics');
       log.debug('Field = relatedContent.article:modified_time');
-      await PageObjects.visEditor.selectField('relatedContent.article:modified_time', 'metrics');
-      await PageObjects.visEditor.clickGo();
+      await visEditor.selectField('relatedContent.article:modified_time', 'metrics');
+      await visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visChart.getMetric();
+        const metricValue = await visChart.getMetric();
         expect(maxRelatedContentArticleModifiedTime).to.eql(metricValue);
       });
     });
@@ -116,12 +122,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show Unique Count', async function () {
       const uniqueCountClientip = ['1,000', 'Unique count of clientip'];
       log.debug('Aggregation = Unique Count');
-      await PageObjects.visEditor.selectAggregation('Unique Count', 'metrics');
+      await visEditor.selectAggregation('Unique Count', 'metrics');
       log.debug('Field = clientip');
-      await PageObjects.visEditor.selectField('clientip', 'metrics');
-      await PageObjects.visEditor.clickGo();
+      await visEditor.selectField('clientip', 'metrics');
+      await visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visChart.getMetric();
+        const metricValue = await visChart.getMetric();
         expect(uniqueCountClientip).to.eql(metricValue);
       });
     });
@@ -145,12 +151,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ];
 
       log.debug('Aggregation = Percentiles');
-      await PageObjects.visEditor.selectAggregation('Percentiles', 'metrics');
+      await visEditor.selectAggregation('Percentiles', 'metrics');
       log.debug('Field =  machine.ram');
-      await PageObjects.visEditor.selectField('machine.ram', 'metrics');
-      await PageObjects.visEditor.clickGo();
+      await visEditor.selectField('machine.ram', 'metrics');
+      await visEditor.toggleAdvancedParams('1');
+      await visEditor.inputValueInCodeEditor('{ "tdigest": { "compression": 1000 } }');
+      await visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visChart.getMetric();
+        const metricValue = await visChart.getMetric();
         expect(percentileMachineRam).to.eql(metricValue);
       });
     });
@@ -158,14 +166,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show Percentile Ranks', async function () {
       const percentileRankBytes = ['2.036%', 'Percentile rank 99 of "memory"'];
       log.debug('Aggregation = Percentile Ranks');
-      await PageObjects.visEditor.selectAggregation('Percentile Ranks', 'metrics');
+      await visEditor.selectAggregation('Percentile Ranks', 'metrics');
       log.debug('Field =  bytes');
-      await PageObjects.visEditor.selectField('memory', 'metrics');
+      await visEditor.selectField('memory', 'metrics');
       log.debug('Values =  99');
-      await PageObjects.visEditor.setValue('99');
-      await PageObjects.visEditor.clickGo();
+      await visEditor.setValue('99');
+      await visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visChart.getMetric();
+        const metricValue = await visChart.getMetric();
         expect(percentileRankBytes).to.eql(metricValue);
       });
     });
@@ -173,18 +181,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('with filters', function () {
       it('should allow filtering with buckets', async function () {
         log.debug('Bucket = Split Group');
-        await PageObjects.visEditor.clickBucket('Split group');
+        await visEditor.clickBucket('Split group');
         log.debug('Aggregation = Terms');
-        await PageObjects.visEditor.selectAggregation('Terms');
+        await visEditor.selectAggregation('Terms');
         log.debug('Field = machine.os.raw');
-        await PageObjects.visEditor.selectField('machine.os.raw');
-        await PageObjects.visEditor.clickGo();
+        await visEditor.selectField('machine.os.raw');
+        await visEditor.clickGo();
 
         let filterCount = 0;
         await retry.try(async function tryingForTime() {
           // click first metric bucket
-          await PageObjects.visEditor.clickMetricByIndex(0);
-          await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+          await visEditor.clickMetricByIndex(0);
+          await visChart.waitForVisualizationRenderingStabilized();
           filterCount = await filterBar.getFilterCount();
         });
         await filterBar.removeAllFilters();

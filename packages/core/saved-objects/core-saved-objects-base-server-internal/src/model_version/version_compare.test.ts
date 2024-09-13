@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { compareModelVersions } from './version_compare';
+import { compareVirtualVersions } from './version_compare';
 
 describe('compareModelVersions', () => {
   it('returns the correct value for greater app version', () => {
-    const result = compareModelVersions({
+    const result = compareVirtualVersions({
       appVersions: {
-        foo: 3,
-        bar: 2,
+        foo: '10.3.0',
+        bar: '10.2.0',
       },
       indexVersions: {
-        foo: 2,
-        bar: 2,
+        foo: '10.2.0',
+        bar: '10.2.0',
       },
       deletedTypes: [],
     });
@@ -26,14 +27,14 @@ describe('compareModelVersions', () => {
   });
 
   it('returns the correct value for lesser app version', () => {
-    const result = compareModelVersions({
+    const result = compareVirtualVersions({
       appVersions: {
-        foo: 1,
-        bar: 2,
+        foo: '10.1.0',
+        bar: '10.2.0',
       },
       indexVersions: {
-        foo: 2,
-        bar: 2,
+        foo: '10.2.0',
+        bar: '10.2.0',
       },
       deletedTypes: [],
     });
@@ -42,14 +43,14 @@ describe('compareModelVersions', () => {
   });
 
   it('returns the correct value for equal versions', () => {
-    const result = compareModelVersions({
+    const result = compareVirtualVersions({
       appVersions: {
-        foo: 2,
-        bar: 2,
+        foo: '10.2.0',
+        bar: '10.2.0',
       },
       indexVersions: {
-        foo: 2,
-        bar: 2,
+        foo: '10.2.0',
+        bar: '10.2.0',
       },
       deletedTypes: [],
     });
@@ -58,13 +59,13 @@ describe('compareModelVersions', () => {
   });
 
   it('handles new types not being present in the index', () => {
-    const result = compareModelVersions({
+    const result = compareVirtualVersions({
       appVersions: {
-        foo: 2,
-        new: 1,
+        foo: '10.2.0',
+        bar: '10.1.0',
       },
       indexVersions: {
-        foo: 2,
+        foo: '10.2.0',
       },
       deletedTypes: [],
     });
@@ -73,13 +74,13 @@ describe('compareModelVersions', () => {
   });
 
   it('handles types not being present in the app', () => {
-    const result = compareModelVersions({
+    const result = compareVirtualVersions({
       appVersions: {
-        foo: 3,
+        foo: '10.3.0',
       },
       indexVersions: {
-        foo: 2,
-        old: 1,
+        foo: '10.2.0',
+        old: '10.1.0',
       },
       deletedTypes: [],
     });
@@ -88,16 +89,16 @@ describe('compareModelVersions', () => {
   });
 
   it('returns the correct value for conflicts', () => {
-    const result = compareModelVersions({
+    const result = compareVirtualVersions({
       appVersions: {
-        a: 3,
-        b: 3,
-        c: 3,
+        a: '10.3.0',
+        b: '10.3.0',
+        c: '10.3.0',
       },
       indexVersions: {
-        a: 2,
-        b: 3,
-        c: 4,
+        a: '10.2.0',
+        b: '10.3.0',
+        c: '10.4.0',
       },
       deletedTypes: [],
     });
@@ -106,16 +107,16 @@ describe('compareModelVersions', () => {
   });
 
   it('properly lists the details', () => {
-    const result = compareModelVersions({
+    const result = compareVirtualVersions({
       appVersions: {
-        a: 3,
-        b: 3,
-        c: 3,
+        a: '10.3.0',
+        b: '10.3.0',
+        c: '10.3.0',
       },
       indexVersions: {
-        a: 2,
-        b: 3,
-        c: 4,
+        a: '10.2.0',
+        b: '10.3.0',
+        c: '10.4.0',
       },
       deletedTypes: [],
     });
@@ -126,13 +127,13 @@ describe('compareModelVersions', () => {
   });
 
   it('ignores deleted types when comparing', () => {
-    const result = compareModelVersions({
+    const result = compareVirtualVersions({
       appVersions: {
-        a: 3,
+        a: '10.3.0',
       },
       indexVersions: {
-        a: 2,
-        b: 3,
+        a: '10.2.0',
+        b: '10.3.0',
       },
       deletedTypes: ['b'],
     });

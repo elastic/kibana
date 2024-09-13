@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css, SerializedStyles } from '@emotion/react';
-import { IconError, IconWarning } from '../custom_icons';
 import { UserMessage } from '../../../types';
 
 export const MessageList = ({
@@ -69,6 +68,7 @@ export const MessageList = ({
 
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
   const closePopover = () => setIsPopoverOpen(false);
+
   return (
     <EuiPopover
       panelPaddingSize="none"
@@ -85,14 +85,14 @@ export const MessageList = ({
           >
             {errorCount > 0 && (
               <>
-                <EuiIcon type={IconError} />
+                <EuiIcon type="error" />
                 {errorCount}
               </>
             )}
             {warningCount > 0 && (
               <>
                 <EuiIcon
-                  type={IconWarning}
+                  type="alert"
                   css={css`
                     margin-left: 4px;
                   `}
@@ -107,24 +107,34 @@ export const MessageList = ({
       closePopover={closePopover}
     >
       <ul className="lnsWorkspaceWarningList">
-        {messages.map((message, index) => (
+        {messages.map(({ hidePopoverIcon = false, ...message }, index) => (
           <li
             key={index}
             className="lnsWorkspaceWarningList__item"
             data-test-subj={`lens-message-list-${message.severity}`}
           >
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                {message.severity === 'error' ? (
-                  <EuiIcon type={IconError} color="danger" />
-                ) : (
-                  <EuiIcon type={IconWarning} color="warning" />
+            {typeof message.longMessage === 'function' ? (
+              message.longMessage(closePopover)
+            ) : (
+              <EuiFlexGroup
+                gutterSize="s"
+                responsive={false}
+                className="lnsWorkspaceWarningList__textItem"
+              >
+                {!hidePopoverIcon && (
+                  <EuiFlexItem grow={false}>
+                    {message.severity === 'error' ? (
+                      <EuiIcon type="error" color="danger" />
+                    ) : (
+                      <EuiIcon type="alert" color="warning" />
+                    )}
+                  </EuiFlexItem>
                 )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={1} className="lnsWorkspaceWarningList__description">
-                <EuiText size="s">{message.longMessage}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                <EuiFlexItem grow={1} className="lnsWorkspaceWarningList__description">
+                  <EuiText size="s">{message.longMessage}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
           </li>
         ))}
       </ul>

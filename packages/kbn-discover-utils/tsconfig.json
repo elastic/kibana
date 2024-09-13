@@ -1,0 +1,31 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@testing-library/jest-dom"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/data-service",
+    "@kbn/data-views-plugin",
+    "@kbn/data-view-utils",
+    "@kbn/es-query",
+    "@kbn/field-formats-plugin",
+    "@kbn/field-types",
+    "@kbn/i18n",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/ui-theme",
+    "@kbn/expressions-plugin"
+  ]
+}

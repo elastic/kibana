@@ -29,6 +29,8 @@ jest.mock('../container_name_widget', () => ({
   ContainerNameWidget: () => <div>{'Mock Container Name widget'}</div>,
 }));
 
+const dataViewId = 'dataViewId';
+
 const renderWithRouter = (
   initialEntries: MemoryRouterProps['initialEntries'] = ['/kubernetes']
 ) => {
@@ -53,11 +55,6 @@ const renderWithRouter = (
       },
     };
   });
-  const responseActionButtonProps = {
-    tooltip: { content: 'test' },
-    isDisabled: false,
-    canAccessResponseConsole: true,
-  };
   const mockedContext = createAppRootMockRenderer();
   return mockedContext.render(
     <MemoryRouter initialEntries={initialEntries}>
@@ -68,10 +65,8 @@ const renderWithRouter = (
           startDate: '2022-03-08T18:52:15.532Z',
           endDate: '2022-06-09T17:52:15.532Z',
         }}
-        responseActionButtonProps={responseActionButtonProps}
-        responseActionClick={jest.fn()}
         renderSessionsView={jest.fn()}
-        handleTreeNavSelection={jest.fn()}
+        dataViewId={dataViewId}
       />
     </MemoryRouter>
   );

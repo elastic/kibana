@@ -43,6 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'my new tag',
           description: 'some desc',
           color: '#772299',
+          managed: false,
         },
       });
 
@@ -56,9 +57,12 @@ export default function ({ getService }: FtrProviderContext) {
               name: 'my new tag',
               description: 'some desc',
               color: '#772299',
+              managed: false,
             },
           });
         });
+
+      await supertest.delete(`/api/saved_objects_tagging/tags/${newTagId}`);
     });
 
     it('should return an error with details when validation failed', async () => {
@@ -83,6 +87,25 @@ export default function ({ getService }: FtrProviderContext) {
                 color: 'Tag color must be a valid hex color',
               },
             },
+          });
+        });
+    });
+
+    it('cannot create a new tag with existing name', async () => {
+      const existingName = 'tag-1';
+      await supertest
+        .post(`/api/saved_objects_tagging/tags/create`)
+        .send({
+          name: existingName,
+          description: 'some desc',
+          color: '#000000',
+        })
+        .expect(409)
+        .then(({ body }) => {
+          expect(body).to.eql({
+            statusCode: 409,
+            error: 'Conflict',
+            message: `A tag with the name "${existingName}" already exists.`,
           });
         });
     });

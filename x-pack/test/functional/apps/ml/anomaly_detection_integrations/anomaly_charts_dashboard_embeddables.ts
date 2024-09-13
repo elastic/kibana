@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
       await PageObjects.common.setTime({ from, to });
@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
       await PageObjects.common.unsetTime();
     });
 
@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             testData.jobConfig,
             testData.datafeedConfig
           );
-          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.navigateToApp();
         });
 
         after(async () => {
@@ -73,10 +73,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             ML_EMBEDDABLE_TYPES.ANOMALY_CHARTS
           );
         });
-
         it('can select jobs', async () => {
-          await ml.dashboardJobSelectionTable.setRowCheckboxState(testData.jobConfig.job_id, true);
-          await ml.dashboardJobSelectionTable.applyJobSelection();
+          await ml.alerting.selectJobs([testData.jobConfig.job_id]);
+          await ml.alerting.assertJobSelection([testData.jobConfig.job_id]);
+        });
+
+        it('populates with default default info', async () => {
           await ml.dashboardEmbeddables.assertAnomalyChartsEmbeddableInitializerExists();
           await ml.dashboardEmbeddables.assertSelectMaxSeriesToPlotValue(6);
         });

@@ -12,7 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const config = getService('config');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector', 'error']);
+  const { common, dashboard, error } = getPageObjects(['common', 'dashboard', 'error']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
@@ -41,15 +41,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       after(async () => await spacesService.delete(customSpace));
 
       it('shows dashboard navlink', async () => {
-        await PageObjects.common.navigateToApp('home', {
+        await common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Dashboard');
+        expect(navLinks).to.contain('Dashboards');
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
-        await PageObjects.dashboard.gotoDashboardListingURL({
+        await dashboard.gotoDashboardListingURL({
           args: {
             basePath: '/s/custom_space',
             ensureCurrentUrl: false,
@@ -63,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new dashboard shows addNew button`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({
+        await dashboard.gotoDashboardURL({
           args: {
             basePath: '/s/custom_space',
             ensureCurrentUrl: false,
@@ -76,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({
+        await dashboard.gotoDashboardURL({
           id: '8fba09d8-df3f-5aa1-83cc-65f7fbcbc0d9',
           args: {
             basePath: '/s/custom_space',
@@ -108,7 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       after(async () => await spacesService.delete('custom_space'));
 
       it(`doesn't show dashboard navlink`, async () => {
-        await PageObjects.common.navigateToApp('home', {
+        await common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
@@ -116,18 +116,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new dashboard shows 404`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({
+        await dashboard.gotoDashboardURL({
           args: {
             basePath: '/s/custom_space',
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           },
         });
-        await PageObjects.error.expectNotFound();
+        await error.expectNotFound();
       });
 
       it(`edit dashboard for object which doesn't exist shows 404`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({
+        await dashboard.gotoDashboardURL({
           id: 'i-dont-exist',
           args: {
             basePath: '/s/custom_space',
@@ -135,11 +135,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           },
         });
-        await PageObjects.error.expectNotFound();
+        await error.expectNotFound();
       });
 
       it(`edit dashboard for object which exists shows 404`, async () => {
-        await PageObjects.dashboard.gotoDashboardURL({
+        await dashboard.gotoDashboardURL({
           id: 'i-exist',
           args: {
             basePath: '/s/custom_space',
@@ -147,7 +147,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           },
         });
-        await PageObjects.error.expectNotFound();
+        await error.expectNotFound();
       });
     });
   });

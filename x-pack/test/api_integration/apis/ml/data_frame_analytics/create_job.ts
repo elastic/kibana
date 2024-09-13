@@ -6,11 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import {
+  type DataFrameAnalyticsConfig,
+  ANALYSIS_CONFIG_TYPE,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -35,8 +38,9 @@ export default ({ getService }: FtrProviderContext) => {
     max_num_threads: 1, // default value
   };
 
-  const jobTypes = ['classification', 'regression', 'outlier_detection'];
-  const jobAnalyses: any = {
+  const jobTypes = Object.values(ANALYSIS_CONFIG_TYPE);
+  type JobType = (typeof jobTypes)[number];
+  const jobAnalyses = {
     classification: {
       dependent_variable: 'y',
       training_percent: 20,
@@ -53,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const testJobConfigs: Array<{
     jobId: string;
-    jobType: string;
+    jobType: JobType;
     config: DeepPartial<DataFrameAnalyticsConfig>;
   }> = ['Test classification job', 'Test regression job', 'Test outlier detection job'].map(
     (description, idx) => {
@@ -92,20 +96,63 @@ export default ({ getService }: FtrProviderContext) => {
           const requestBody = testConfig.config;
 
           const { body, status } = await supertest
-            .put(`/api/ml/data_frame/analytics/${analyticsId}`)
+            .put(`/internal/ml/data_frame/analytics/${analyticsId}`)
             .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-            .set(COMMON_REQUEST_HEADERS)
+            .set(getCommonRequestHeader('1'))
             .send(requestBody);
           ml.api.assertResponseStatusCode(200, status, body);
 
           expect(body).not.to.be(undefined);
 
-          expect(body.description).to.eql(requestBody.description);
-          expect(body.allow_lazy_start).to.eql(requestBody.allow_lazy_start);
-          expect(body.model_memory_limit).to.eql(requestBody.model_memory_limit);
-          expect(body.max_num_threads).to.eql(requestBody.max_num_threads);
+          expect(body.dataFrameAnalyticsJobsCreated).to.have.length(
+            1,
+            `Expected dataFrameAnalyticsJobsCreated length to be 1, got ${body.dataFrameAnalyticsJobsCreated}.`
+          );
+          expect(body.dataFrameAnalyticsJobsErrors).to.have.length(
+            0,
+            `Expected dataFrameAnalyticsJobsErrors length to be 0, got ${body.dataFrameAnalyticsJobsErrors}.`
+          );
+          expect(body.dataViewsCreated).to.have.length(
+            0,
+            `Expected dataViewsCreated length to be 0, got ${body.dataViewsCreated}.`
+          );
+          expect(body.dataViewsErrors).to.have.length(
+            0,
+            `Expected dataViewsErrors length to be 0, got ${body.dataViewsErrors}.`
+          );
+        });
 
-          expect(Object.keys(body.analysis)).to.eql(Object.keys(requestBody.analysis!));
+        it(`should create ${testConfig.jobType} job and data view with given config`, async () => {
+          const analyticsId = `${testConfig.jobId}_with_data_view`;
+          const requestBody = testConfig.config;
+
+          const { body, status } = await supertest
+            .put(
+              `/internal/ml/data_frame/analytics/${analyticsId}?createDataView=true&timeFieldName=@timestamp`
+            )
+            .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+            .set(getCommonRequestHeader('1'))
+            .send(requestBody);
+          ml.api.assertResponseStatusCode(200, status, body);
+
+          expect(body).not.to.be(undefined);
+
+          expect(body.dataFrameAnalyticsJobsCreated).to.have.length(
+            1,
+            `Expected dataFrameAnalyticsJobsCreated length to be 1, got ${body.dataFrameAnalyticsJobsCreated}.`
+          );
+          expect(body.dataFrameAnalyticsJobsErrors).to.have.length(
+            0,
+            `Expected dataFrameAnalyticsJobsErrors length to be 0, got ${body.dataFrameAnalyticsJobsErrors}.`
+          );
+          expect(body.dataViewsCreated).to.have.length(
+            1,
+            `Expected dataViewsCreated length to be 1, got ${body.dataViewsCreated}.`
+          );
+          expect(body.dataViewsErrors).to.have.length(
+            0,
+            `Expected dataViewsErrors length to be 0, got ${body.dataViewsErrors}.`
+          );
         });
       });
 
@@ -114,9 +161,9 @@ export default ({ getService }: FtrProviderContext) => {
         const requestBody = testJobConfigs[0].config;
 
         const { body, status } = await supertest
-          .put(`/api/ml/data_frame/analytics/${analyticsId}`)
+          .put(`/internal/ml/data_frame/analytics/${analyticsId}`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(requestBody);
         ml.api.assertResponseStatusCode(403, status, body);
 
@@ -129,9 +176,9 @@ export default ({ getService }: FtrProviderContext) => {
         const requestBody = testJobConfigs[0].config;
 
         const { body, status } = await supertest
-          .put(`/api/ml/data_frame/analytics/${analyticsId}`)
+          .put(`/internal/ml/data_frame/analytics/${analyticsId}`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(requestBody);
         ml.api.assertResponseStatusCode(403, status, body);
 

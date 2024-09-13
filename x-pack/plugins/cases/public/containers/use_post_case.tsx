@@ -6,7 +6,7 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import type { CasePostRequest } from '../../common/api';
+import type { CasePostRequest } from '../../common/types/api';
 import { postCase } from './api';
 import * as i18n from './translations';
 import { useCasesToast } from '../common/use_cases_toast';
@@ -22,21 +22,15 @@ export const usePostCase = () => {
   const { showErrorToast } = useCasesToast();
   const refreshCases = useRefreshCases();
 
-  return useMutation(
-    ({ request }: MutationArgs) => {
-      const abortCtrlRef = new AbortController();
-      return postCase(request, abortCtrlRef.signal);
+  return useMutation(({ request }: MutationArgs) => postCase({ newCase: request }), {
+    mutationKey: casesMutationsKeys.createCase,
+    onSuccess: () => {
+      refreshCases();
     },
-    {
-      mutationKey: casesMutationsKeys.createCase,
-      onSuccess: () => {
-        refreshCases();
-      },
-      onError: (error: ServerError) => {
-        showErrorToast(error, { title: i18n.ERROR_CREATING_CASE });
-      },
-    }
-  );
+    onError: (error: ServerError) => {
+      showErrorToast(error, { title: i18n.ERROR_CREATING_CASE });
+    },
+  });
 };
 
 export type UsePostCase = ReturnType<typeof usePostCase>;

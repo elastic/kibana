@@ -1,0 +1,2193 @@
+{
+  "id": "@kbn/reporting-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.ExportType",
+        "type": "Class",
+        "tags": [],
+        "label": "ExportType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-server",
+            "scope": "server",
+            "docId": "kibKbnReportingServerPluginApi",
+            "section": "def-server.ExportType",
+            "text": "ExportType"
+          },
+          "<JobParamsType, TaskPayloadType, SetupDepsType, StartDepsType>"
+        ],
+        "path": "packages/kbn-reporting/server/export_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.jobType",
+            "type": "string",
+            "tags": [],
+            "label": "jobType",
+            "description": [],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.jobContentEncoding",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "jobContentEncoding",
+            "description": [],
+            "signature": [
+              "\"base64\" | \"csv\" | undefined"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.jobContentExtension",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "jobContentExtension",
+            "description": [],
+            "signature": [
+              "\"csv\" | \"png\" | \"pdf\""
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.createJob",
+            "type": "Function",
+            "tags": [],
+            "label": "createJob",
+            "description": [],
+            "signature": [
+              "(jobParams: JobParamsType, context: ",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.CustomRequestHandlerContext",
+                "text": "CustomRequestHandlerContext"
+              },
+              "<{ reporting: ",
+              {
+                "pluginId": "@kbn/reporting-server",
+                "scope": "server",
+                "docId": "kibKbnReportingServerPluginApi",
+                "section": "def-server.ReportingServerPluginSetup",
+                "text": "ReportingServerPluginSetup"
+              },
+              " | null; }>, req: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) => Promise<Omit<TaskPayloadType, \"spaceId\" | \"headers\">>"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.createJob.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "jobParams",
+                "description": [],
+                "signature": [
+                  "JobParamsType"
+                ],
+                "path": "packages/kbn-reporting/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.createJob.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-request-handler-context-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                    "section": "def-server.RequestHandlerContext",
+                    "text": "RequestHandlerContext"
+                  },
+                  " & { reporting: Promise<",
+                  {
+                    "pluginId": "@kbn/reporting-server",
+                    "scope": "server",
+                    "docId": "kibKbnReportingServerPluginApi",
+                    "section": "def-server.ReportingServerPluginSetup",
+                    "text": "ReportingServerPluginSetup"
+                  },
+                  " | null>; }"
+                ],
+                "path": "packages/kbn-reporting/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.createJob.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "req",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "packages/kbn-reporting/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.runTask",
+            "type": "Function",
+            "tags": [],
+            "label": "runTask",
+            "description": [],
+            "signature": [
+              "(jobId: string, payload: TaskPayloadType, taskInstanceFields: ",
+              "TaskInstanceFields",
+              ", cancellationToken: ",
+              {
+                "pluginId": "@kbn/reporting-common",
+                "scope": "common",
+                "docId": "kibKbnReportingCommonPluginApi",
+                "section": "def-common.CancellationToken",
+                "text": "CancellationToken"
+              },
+              ", stream: ",
+              "Writable",
+              ") => Promise<",
+              "TaskRunResult",
+              ">"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.runTask.$1",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
+                "description": [],
+                "path": "packages/kbn-reporting/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.runTask.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "payload",
+                "description": [],
+                "signature": [
+                  "TaskPayloadType"
+                ],
+                "path": "packages/kbn-reporting/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.runTask.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "taskInstanceFields",
+                "description": [],
+                "signature": [
+                  "{ startedAt: Date | null; retryAt: Date | null; }"
+                ],
+                "path": "packages/kbn-reporting/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.runTask.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "cancellationToken",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/reporting-common",
+                    "scope": "common",
+                    "docId": "kibKbnReportingCommonPluginApi",
+                    "section": "def-common.CancellationToken",
+                    "text": "CancellationToken"
+                  }
+                ],
+                "path": "packages/kbn-reporting/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.runTask.$5",
+                "type": "Object",
+                "tags": [],
+                "label": "stream",
+                "description": [],
+                "signature": [
+                  "Writable"
+                ],
+                "path": "packages/kbn-reporting/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.validLicenses",
+            "type": "Array",
+            "tags": [],
+            "label": "validLicenses",
+            "description": [],
+            "signature": [
+              "(\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\")[]"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.setupDeps",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "setupDeps",
+            "description": [],
+            "signature": [
+              "SetupDepsType"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.startDeps",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "startDeps",
+            "description": [],
+            "signature": [
+              "StartDepsType"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.HttpServiceSetup",
+                "text": "HttpServiceSetup"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RequestHandlerContextBase",
+                "text": "RequestHandlerContextBase"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-server.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<object, unknown>"
+                ],
+                "path": "packages/kbn-reporting/server/export_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ByteSizeValue",
+                    "text": "ByteSizeValue"
+                  },
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>"
+                ],
+                "path": "packages/kbn-reporting/server/export_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "packages/kbn-reporting/server/export_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.Unnamed.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-plugins-server",
+                    "scope": "server",
+                    "docId": "kibKbnCorePluginsServerPluginApi",
+                    "section": "def-server.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ByteSizeValue",
+                    "text": "ByteSizeValue"
+                  },
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>"
+                ],
+                "path": "packages/kbn-reporting/server/export_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(setupDeps: SetupDepsType) => void"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.setup.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "setupDeps",
+                "description": [],
+                "signature": [
+                  "SetupDepsType"
+                ],
+                "path": "packages/kbn-reporting/server/export_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "(startDeps: StartDepsType) => void"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.start.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "startDeps",
+                "description": [],
+                "signature": [
+                  "StartDepsType"
+                ],
+                "path": "packages/kbn-reporting/server/export_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.getUiSettingsServiceFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "getUiSettingsServiceFactory",
+            "description": [],
+            "signature": [
+              "(savedObjectsClient: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.getUiSettingsServiceFactory.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObjectsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
+                ],
+                "path": "packages/kbn-reporting/server/export_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.getUiSettingsClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getUiSettingsClient",
+            "description": [],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>, logger?: ",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.getUiSettingsClient.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "packages/kbn-reporting/server/export_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.getUiSettingsClient.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "packages/kbn-reporting/server/export_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.getFakeRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "getFakeRequest",
+            "description": [],
+            "signature": [
+              "(headers: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.Headers",
+                "text": "Headers"
+              },
+              ", spaceId: string | undefined, logger?: ",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.getFakeRequest.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "headers",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.Headers",
+                    "text": "Headers"
+                  }
+                ],
+                "path": "packages/kbn-reporting/server/export_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.getFakeRequest.$2",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-reporting/server/export_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.getFakeRequest.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "packages/kbn-reporting/server/export_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.getServerInfo",
+            "type": "Function",
+            "tags": [],
+            "label": "getServerInfo",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ReportingServerInfo"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.cryptoFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "cryptoFactory",
+        "description": [],
+        "signature": [
+          "(encryptionKey: string | undefined) => ",
+          "Crypto"
+        ],
+        "path": "packages/kbn-reporting/server/crypto.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.cryptoFactory.$1",
+            "type": "string",
+            "tags": [],
+            "label": "encryptionKey",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-reporting/server/crypto.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.decryptJobHeaders",
+        "type": "Function",
+        "tags": [],
+        "label": "decryptJobHeaders",
+        "description": [],
+        "signature": [
+          "(encryptionKey: string | undefined, headers: string, logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ") => Promise<Record<string, string>>"
+        ],
+        "path": "packages/kbn-reporting/server/decrypt_job_headers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.decryptJobHeaders.$1",
+            "type": "string",
+            "tags": [],
+            "label": "encryptionKey",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-reporting/server/decrypt_job_headers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.decryptJobHeaders.$2",
+            "type": "string",
+            "tags": [],
+            "label": "headers",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-reporting/server/decrypt_job_headers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.decryptJobHeaders.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "packages/kbn-reporting/server/decrypt_job_headers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.getFieldFormats",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldFormats",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "server",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-server.FieldFormatsStart",
+            "text": "FieldFormatsStart"
+          }
+        ],
+        "path": "packages/kbn-reporting/server/services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.getFullRedirectAppUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "getFullRedirectAppUrl",
+        "description": [],
+        "signature": [
+          "(config: Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
+          "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, serverInfo: ",
+          "ReportingServerInfo",
+          ", spaceId: string | undefined, forceNow: string | undefined) => string"
+        ],
+        "path": "packages/kbn-reporting/server/get_full_redirect_app_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.getFullRedirectAppUrl.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>"
+            ],
+            "path": "packages/kbn-reporting/server/get_full_redirect_app_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.getFullRedirectAppUrl.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "serverInfo",
+            "description": [],
+            "signature": [
+              "ReportingServerInfo"
+            ],
+            "path": "packages/kbn-reporting/server/get_full_redirect_app_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.getFullRedirectAppUrl.$3",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-reporting/server/get_full_redirect_app_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.getFullRedirectAppUrl.$4",
+            "type": "string",
+            "tags": [],
+            "label": "forceNow",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-reporting/server/get_full_redirect_app_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.setFieldFormats",
+        "type": "Function",
+        "tags": [],
+        "label": "setFieldFormats",
+        "description": [],
+        "signature": [
+          "(value: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "server",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-server.FieldFormatsStart",
+            "text": "FieldFormatsStart"
+          },
+          ") => void"
+        ],
+        "path": "packages/kbn-reporting/server/services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.setFieldFormats.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.BaseExportTypeSetupDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseExportTypeSetupDeps",
+        "description": [],
+        "path": "packages/kbn-reporting/server/export_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.BaseExportTypeSetupDeps.basePath",
+            "type": "Object",
+            "tags": [],
+            "label": "basePath",
+            "description": [],
+            "signature": [
+              "{ set: (request: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void; }"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.BaseExportTypeSetupDeps.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.SpacesPluginSetup",
+                "text": "SpacesPluginSetup"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.BaseExportTypeStartDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseExportTypeStartDeps",
+        "description": [],
+        "path": "packages/kbn-reporting/server/export_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.BaseExportTypeStartDeps.savedObjects",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjects",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsServiceStart",
+                "text": "SavedObjectsServiceStart"
+              }
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.BaseExportTypeStartDeps.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.UiSettingsServiceStart",
+                "text": "UiSettingsServiceStart"
+              }
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.BaseExportTypeStartDeps.esClient",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IClusterClient",
+                "text": "IClusterClient"
+              }
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.BaseExportTypeStartDeps.screenshotting",
+            "type": "Object",
+            "tags": [],
+            "label": "screenshotting",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "screenshotting",
+                "scope": "server",
+                "docId": "kibScreenshottingPluginApi",
+                "section": "def-server.ScreenshottingStart",
+                "text": "ScreenshottingStart"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.ReportingServerPluginSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReportingServerPluginSetup",
+        "description": [],
+        "path": "packages/kbn-reporting/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ReportingServerPluginSetup.registerExportTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "registerExportTypes",
+            "description": [],
+            "signature": [
+              "(item: ",
+              {
+                "pluginId": "@kbn/reporting-server",
+                "scope": "server",
+                "docId": "kibKbnReportingServerPluginApi",
+                "section": "def-server.ExportType",
+                "text": "ExportType"
+              },
+              "<any, any, ",
+              {
+                "pluginId": "@kbn/reporting-server",
+                "scope": "server",
+                "docId": "kibKbnReportingServerPluginApi",
+                "section": "def-server.BaseExportTypeSetupDeps",
+                "text": "BaseExportTypeSetupDeps"
+              },
+              ", ",
+              {
+                "pluginId": "@kbn/reporting-server",
+                "scope": "server",
+                "docId": "kibKbnReportingServerPluginApi",
+                "section": "def-server.BaseExportTypeStartDeps",
+                "text": "BaseExportTypeStartDeps"
+              },
+              ">) => void"
+            ],
+            "path": "packages/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ReportingServerPluginSetup.registerExportTypes.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/reporting-server",
+                    "scope": "server",
+                    "docId": "kibKbnReportingServerPluginApi",
+                    "section": "def-server.ExportType",
+                    "text": "ExportType"
+                  },
+                  "<any, any, ",
+                  {
+                    "pluginId": "@kbn/reporting-server",
+                    "scope": "server",
+                    "docId": "kibKbnReportingServerPluginApi",
+                    "section": "def-server.BaseExportTypeSetupDeps",
+                    "text": "BaseExportTypeSetupDeps"
+                  },
+                  ", ",
+                  {
+                    "pluginId": "@kbn/reporting-server",
+                    "scope": "server",
+                    "docId": "kibKbnReportingServerPluginApi",
+                    "section": "def-server.BaseExportTypeStartDeps",
+                    "text": "BaseExportTypeStartDeps"
+                  },
+                  ">"
+                ],
+                "path": "packages/kbn-reporting/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ReportingServerPluginSetup.usesUiCapabilities",
+            "type": "Function",
+            "tags": [],
+            "label": "usesUiCapabilities",
+            "description": [
+              "\nUsed to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.TimeRangeParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimeRangeParams",
+        "description": [],
+        "path": "packages/kbn-reporting/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.TimeRangeParams.min",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "signature": [
+              "string | number | Date | null | undefined"
+            ],
+            "path": "packages/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.TimeRangeParams.max",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "signature": [
+              "string | number | Date | null | undefined"
+            ],
+            "path": "packages/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.EventType",
+        "type": "Enum",
+        "tags": [],
+        "label": "EventType",
+        "description": [],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.FieldType",
+        "type": "Enum",
+        "tags": [],
+        "label": "FieldType",
+        "description": [],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.API_USAGE_COUNTER_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "API_USAGE_COUNTER_TYPE",
+        "description": [],
+        "signature": [
+          "\"reportingApi\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.API_USAGE_ERROR_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "API_USAGE_ERROR_TYPE",
+        "description": [],
+        "signature": [
+          "\"reportingApiError\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.CreateJobFn",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateJobFn",
+        "description": [],
+        "signature": [
+          "(jobParams: JobParamsType, context: ",
+          {
+            "pluginId": "@kbn/core-http-request-handler-context-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+            "section": "def-server.CustomRequestHandlerContext",
+            "text": "CustomRequestHandlerContext"
+          },
+          "<{ reporting: ",
+          {
+            "pluginId": "@kbn/reporting-server",
+            "scope": "server",
+            "docId": "kibKbnReportingServerPluginApi",
+            "section": "def-server.ReportingServerPluginSetup",
+            "text": "ReportingServerPluginSetup"
+          },
+          " | null; }>, req: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>) => Promise<Omit<JobPayloadType, \"spaceId\" | \"headers\">>"
+        ],
+        "path": "packages/kbn-reporting/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.CreateJobFn.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "jobParams",
+            "description": [],
+            "signature": [
+              "JobParamsType"
+            ],
+            "path": "packages/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.CreateJobFn.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              },
+              " & { reporting: Promise<",
+              {
+                "pluginId": "@kbn/reporting-server",
+                "scope": "server",
+                "docId": "kibKbnReportingServerPluginApi",
+                "section": "def-server.ReportingServerPluginSetup",
+                "text": "ReportingServerPluginSetup"
+              },
+              " | null>; }"
+            ],
+            "path": "packages/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.CreateJobFn.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "req",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "packages/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"reporting\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_DATA_STREAM_ALIAS",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_DATA_STREAM_ALIAS",
+        "description": [],
+        "signature": [
+          "\".kibana-reporting\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_DATA_STREAM_COMPONENT_TEMPLATE",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_DATA_STREAM_COMPONENT_TEMPLATE",
+        "description": [],
+        "signature": [
+          "\"kibana-reporting@custom\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_DATA_STREAM_WILDCARD",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_DATA_STREAM_WILDCARD",
+        "description": [],
+        "signature": [
+          "\".kibana-reporting*\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY",
+        "description": [],
+        "signature": [
+          "\".reporting-*,.kibana-reporting*\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_LEGACY_INDICES",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_LEGACY_INDICES",
+        "description": [],
+        "signature": [
+          "\".reporting-*\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_TRANSACTION_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_TRANSACTION_TYPE",
+        "description": [],
+        "signature": [
+          "\"reporting\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.ReportingConfigType",
+        "type": "Type",
+        "tags": [],
+        "label": "ReportingConfigType",
+        "description": [],
+        "signature": [
+          "{ readonly encryptionKey?: string | undefined; readonly enabled: boolean; readonly csv: Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
+          "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; readonly capture: Readonly<{} & { maxAttempts: number; }>; readonly roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; readonly kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; readonly queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; readonly poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; readonly export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; readonly statefulSettings: Readonly<{} & { enabled: boolean; }>; }"
+        ],
+        "path": "packages/kbn-reporting/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.RunTaskFn",
+        "type": "Type",
+        "tags": [],
+        "label": "RunTaskFn",
+        "description": [],
+        "signature": [
+          "(jobId: string, payload: TaskPayloadType, taskInstanceFields: ",
+          "TaskInstanceFields",
+          ", cancellationToken: ",
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.CancellationToken",
+            "text": "CancellationToken"
+          },
+          ", stream: ",
+          "Writable",
+          ") => Promise<",
+          "TaskRunResult",
+          ">"
+        ],
+        "path": "packages/kbn-reporting/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.RunTaskFn.$1",
+            "type": "string",
+            "tags": [],
+            "label": "jobId",
+            "description": [],
+            "path": "packages/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.RunTaskFn.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "payload",
+            "description": [],
+            "signature": [
+              "TaskPayloadType"
+            ],
+            "path": "packages/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.RunTaskFn.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "taskInstanceFields",
+            "description": [],
+            "signature": [
+              "{ startedAt: Date | null; retryAt: Date | null; }"
+            ],
+            "path": "packages/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.RunTaskFn.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "cancellationToken",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/reporting-common",
+                "scope": "common",
+                "docId": "kibKbnReportingCommonPluginApi",
+                "section": "def-common.CancellationToken",
+                "text": "CancellationToken"
+              }
+            ],
+            "path": "packages/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.RunTaskFn.$5",
+            "type": "Object",
+            "tags": [],
+            "label": "stream",
+            "description": [],
+            "signature": [
+              "Writable"
+            ],
+            "path": "packages/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.UNVERSIONED_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "UNVERSIONED_VERSION",
+        "description": [],
+        "signature": [
+          "\"7.14.0\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.ConfigSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "ConfigSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ enabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; kibanaServer: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ hostname: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; port: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number | undefined>; protocol: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; }>; queue: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ indexInterval: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; pollEnabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; pollInterval: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number | moment.Duration>; pollIntervalErrorMultiplier: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; timeout: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number | moment.Duration>; }>; capture: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ maxAttempts: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ConditionalType",
+            "text": "ConditionalType"
+          },
+          "<true, number, number>; }>; csv: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ checkForFormulas: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; escapeFormulaValues: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; enablePanelActionDownload: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; maxSizeBytes: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number | ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
+          ">; useByteOrderMarkEncoding: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; scroll: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ strategy: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"scroll\" | \"pit\">; duration: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; size: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; }>; maxConcurrentShardRequests: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; }>; encryptionKey: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ConditionalType",
+            "text": "ConditionalType"
+          },
+          "<true, string | undefined, string>; roles: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ enabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ConditionalType",
+            "text": "ConditionalType"
+          },
+          "<true, boolean, boolean>; allow: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ConditionalType",
+            "text": "ConditionalType"
+          },
+          "<true, string[], string[]>; }>; poll: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ jobCompletionNotifier: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ interval: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; intervalErrorMultiplier: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; }>; jobsRefresh: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ interval: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; intervalErrorMultiplier: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; }>; }>; export_types: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ csv: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ enabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; }>; png: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ enabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ConditionalType",
+            "text": "ConditionalType"
+          },
+          "<true, boolean, boolean>; }>; pdf: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ enabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ConditionalType",
+            "text": "ConditionalType"
+          },
+          "<true, boolean, boolean>; }>; }>; statefulSettings: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ enabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ConditionalType",
+            "text": "ConditionalType"
+          },
+          "<true, boolean, boolean>; }>; }>"
+        ],
+        "path": "packages/kbn-reporting/server/config_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

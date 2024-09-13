@@ -12,7 +12,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  // Failing: See https://github.com/elastic/kibana/issues/151636
+
+  // FLAKY: https://github.com/elastic/kibana/issues/151636
   describe.skip('Lists API', () => {
     before(async () => await esArchiver.load('x-pack/test/functional/es_archives/lists'));
 

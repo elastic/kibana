@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrService } from '../ftr_provider_context';
@@ -31,20 +32,28 @@ export class FlyoutService extends FtrService {
   }
 
   public async ensureAllClosed(): Promise<void> {
-    const flyoutElements = await this.find.allByCssSelector('.euiFlyout');
-
-    if (!flyoutElements.length) {
-      return;
-    }
-
-    for (let i = 0; i < flyoutElements.length; i++) {
-      const closeBtn = await flyoutElements[i].findByCssSelector('[aria-label*="Close"]');
-      await closeBtn.click();
-    }
-
-    await this.retry.waitFor(
-      'all flyouts to be closed',
-      async () => (await this.find.allByCssSelector('.euiFlyout')).length === 0
-    );
+    await this.retry.waitFor('all flyouts to be closed', async () => {
+      let flyoutElements = await this.find.allByCssSelector('.euiFlyout', 2500);
+      if (!flyoutElements.length) {
+        return true;
+      }
+      let expectedFlyoutCount = 0;
+      for (let i = 0; i < flyoutElements.length; i++) {
+        const closeBtnExists = await this.find.descendantExistsByCssSelector(
+          '[aria-label*="Close"]',
+          flyoutElements[i]
+        );
+        if (closeBtnExists) {
+          const closeBtn = await flyoutElements[i].findByCssSelector('[aria-label*="Close"]');
+          await closeBtn.click();
+        } else {
+          // If it doesn't have a close button, it can't
+          // be closed, so ignore it in the count check
+          expectedFlyoutCount++;
+        }
+      }
+      flyoutElements = await this.find.allByCssSelector('.euiFlyout', 500);
+      return flyoutElements.length === expectedFlyoutCount;
+    });
   }
 }

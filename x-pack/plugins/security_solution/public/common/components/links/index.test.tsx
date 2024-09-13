@@ -28,27 +28,16 @@ import {
   SecuritySolutionLinkButton,
 } from '.';
 import { SecurityPageName } from '../../../app/types';
+import { mockGetAppUrl, mockNavigateTo } from '@kbn/security-solution-navigation/mocks/navigation';
 
-jest.mock('../link_to');
+jest.mock('@kbn/security-solution-navigation/src/navigation');
+jest.mock('../navigation/use_url_state_query_params');
 
 jest.mock('../../../overview/components/events_by_dataset');
 
-const mockNavigateTo = jest.fn();
-jest.mock('../../lib/kibana', () => {
-  return {
-    useUiSetting$: jest.fn(),
-    useKibana: () => ({
-      services: {
-        application: {
-          navigateToApp: jest.fn(),
-        },
-      },
-    }),
-    useNavigateTo: () => ({
-      navigateTo: mockNavigateTo,
-    }),
-  };
-});
+jest.mock('../../lib/kibana');
+
+mockGetAppUrl.mockImplementation(({ path }) => path);
 
 describe('Custom Links', () => {
   const hostName = 'Host Name';
@@ -75,17 +64,17 @@ describe('Custom Links', () => {
     test('can handle array of ips', () => {
       const wrapper = mount(<NetworkDetailsLink ip={[ipv4, ipv4a]} />);
       expect(wrapper.find('EuiLink').first().prop('href')).toEqual(
-        `/ip/${encodeURIComponent(ipv4)}/source/flows`
+        `/ip/${encodeURIComponent(ipv4)}/source/events`
       );
       expect(wrapper.text()).toEqual(`${ipv4}${ipv4a}`);
       expect(wrapper.find('EuiLink').last().prop('href')).toEqual(
-        `/ip/${encodeURIComponent(ipv4a)}/source/flows`
+        `/ip/${encodeURIComponent(ipv4a)}/source/events`
       );
     });
     test('should render valid link to IP Details with ipv4 as the display text', () => {
       const wrapper = mount(<NetworkDetailsLink ip={ipv4} />);
       expect(wrapper.find('EuiLink').prop('href')).toEqual(
-        `/ip/${encodeURIComponent(ipv4)}/source/flows`
+        `/ip/${encodeURIComponent(ipv4)}/source/events`
       );
       expect(wrapper.text()).toEqual(ipv4);
     });
@@ -93,7 +82,7 @@ describe('Custom Links', () => {
     test('should render valid link to IP Details with child text as the display text', () => {
       const wrapper = mount(<NetworkDetailsLink ip={ipv4}>{hostName}</NetworkDetailsLink>);
       expect(wrapper.find('EuiLink').prop('href')).toEqual(
-        `/ip/${encodeURIComponent(ipv4)}/source/flows`
+        `/ip/${encodeURIComponent(ipv4)}/source/events`
       );
       expect(wrapper.text()).toEqual(hostName);
     });
@@ -101,7 +90,7 @@ describe('Custom Links', () => {
     test('should render valid link to IP Details with ipv6 as the display text', () => {
       const wrapper = mount(<NetworkDetailsLink ip={ipv6} />);
       expect(wrapper.find('EuiLink').prop('href')).toEqual(
-        `/ip/${encodeURIComponent(ipv6Encoded)}/source/flows`
+        `/ip/${encodeURIComponent(ipv6Encoded)}/source/events`
       );
       expect(wrapper.text()).toEqual(ipv6);
     });

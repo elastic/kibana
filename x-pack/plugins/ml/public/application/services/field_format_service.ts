@@ -5,19 +5,25 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
-import { getDataViewById, getDataViewIdFromName } from '../util/index_utils';
-import { mlJobService } from './job_service';
+import type { MlJobService } from './job_service';
+import type { MlIndexUtils } from '../util/index_service';
+import type { MlApi } from './ml_api_service';
 
 type FormatsByJobId = Record<string, any>;
 type IndexPatternIdsByJob = Record<string, any>;
 
 // Service for accessing FieldFormat objects configured for a Kibana data view
 // for use in formatting the actual and typical values from anomalies.
-class FieldFormatService {
+export class FieldFormatService {
   indexPatternIdsByJob: IndexPatternIdsByJob = {};
   formatsByJob: FormatsByJobId = {};
+
+  constructor(
+    private mlApi: MlApi,
+    private mlIndexUtils: MlIndexUtils,
+    private mlJobService: MlJobService
+  ) {}
 
   // Populate the service with the FieldFormats for the list of jobs with the
   // specified IDs. List of Kibana data views is passed, with a title
@@ -33,10 +39,18 @@ class FieldFormatService {
     (
       await Promise.all(
         jobIds.map(async (jobId) => {
-          const jobObj = mlJobService.getJob(jobId);
+          let jobObj;
+          if (this.mlApi) {
+            const { jobs } = await this.mlApi.getJobs({ jobId });
+            jobObj = jobs[0];
+          } else {
+            jobObj = this.mlJobService.getJob(jobId);
+          }
           return {
             jobId,
-            dataViewId: await getDataViewIdFromName(jobObj.datafeed_config.indices.join(',')),
+            dataViewId: await this.mlIndexUtils.getDataViewIdFromName(
+              jobObj.datafeed_config!.indices.join(',')
+            ),
           };
         })
       )
@@ -64,63 +78,43 @@ class FieldFormatService {
   // Return the FieldFormat to use for formatting values from
   // the detector from the job with the specified ID.
   getFieldFormat(jobId: string, detectorIndex: number) {
-    if (this.formatsByJob.hasOwnProperty(jobId)) {
+    if (Object.hasOwn(this.formatsByJob, jobId)) {
       return this.formatsByJob[jobId][detectorIndex];
     }
   }
 
-  // Utility for returning the FieldFormat from a full populated Kibana index pattern object
-  // containing the list of fields by name with their formats.
-  getFieldFormatFromIndexPattern(fullIndexPattern: DataView, fieldName: string, esAggName: string) {
-    // Don't use the field formatter for distinct count detectors as
-    // e.g. distinct_count(clientip) should be formatted as a count, not as an IP address.
-    let fieldFormat;
-    if (esAggName !== 'cardinality') {
-      const fieldList = fullIndexPattern.fields;
-      const field = fieldList.getByName(fieldName);
-      if (field !== undefined) {
-        fieldFormat = fullIndexPattern.getFormatterForField(field);
-      }
+  async getFormatsForJob(jobId: string): Promise<any[]> {
+    let jobObj;
+    if (this.mlApi) {
+      const { jobs } = await this.mlApi.getJobs({ jobId });
+      jobObj = jobs[0];
+    } else {
+      jobObj = this.mlJobService.getJob(jobId);
+    }
+    const detectors = jobObj.analysis_config.detectors || [];
+    const formatsByDetector: any[] = [];
+
+    const dataViewId = this.indexPatternIdsByJob[jobId];
+    if (dataViewId !== undefined) {
+      // Load the full data view configuration to obtain the formats of each field.
+      const dataView = await this.mlIndexUtils.getDataViewById(dataViewId);
+      // Store the FieldFormat for each job by detector_index.
+      const fieldList = dataView.fields;
+      detectors.forEach((dtr) => {
+        const esAgg = mlFunctionToESAggregation(dtr.function);
+        // distinct_count detectors should fall back to the default
+        // formatter as the values are just counts.
+        if (dtr.field_name !== undefined && esAgg !== 'cardinality') {
+          const field = fieldList.getByName(dtr.field_name);
+          if (field !== undefined) {
+            formatsByDetector[dtr.detector_index!] = dataView.getFormatterForField(field);
+          }
+        }
+      });
     }
 
-    return fieldFormat;
-  }
-
-  getFormatsForJob(jobId: string): Promise<any[]> {
-    return new Promise((resolve, reject) => {
-      const jobObj = mlJobService.getJob(jobId);
-      const detectors = jobObj.analysis_config.detectors || [];
-      const formatsByDetector: any[] = [];
-
-      const dataViewId = this.indexPatternIdsByJob[jobId];
-      if (dataViewId !== undefined) {
-        // Load the full data view configuration to obtain the formats of each field.
-        getDataViewById(dataViewId)
-          .then((dataView) => {
-            // Store the FieldFormat for each job by detector_index.
-            const fieldList = dataView.fields;
-            detectors.forEach((dtr) => {
-              const esAgg = mlFunctionToESAggregation(dtr.function);
-              // distinct_count detectors should fall back to the default
-              // formatter as the values are just counts.
-              if (dtr.field_name !== undefined && esAgg !== 'cardinality') {
-                const field = fieldList.getByName(dtr.field_name);
-                if (field !== undefined) {
-                  formatsByDetector[dtr.detector_index!] = dataView.getFormatterForField(field);
-                }
-              }
-            });
-
-            resolve(formatsByDetector);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      } else {
-        resolve(formatsByDetector);
-      }
-    });
+    return formatsByDetector;
   }
 }
 
-export const mlFieldFormatService = new FieldFormatService();
+export type MlFieldFormatService = FieldFormatService;

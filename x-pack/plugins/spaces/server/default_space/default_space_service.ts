@@ -6,15 +6,26 @@
  */
 
 import type { Observable, ObservableInput, Subscription } from 'rxjs';
-import { BehaviorSubject, combineLatest, concat, defer, of, timer } from 'rxjs';
-import { catchError, mergeMap, switchMap, tap } from 'rxjs/operators';
+import {
+  BehaviorSubject,
+  catchError,
+  combineLatest,
+  concat,
+  defer,
+  mergeMap,
+  of,
+  switchMap,
+  tap,
+  timer,
+} from 'rxjs';
 
+import type { OnBoardingDefaultSolution } from '@kbn/cloud-plugin/common';
 import type { CoreSetup, Logger, SavedObjectsServiceStart, ServiceStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
-import type { SpacesLicense } from '../../common/licensing';
 import { createDefaultSpace } from './create_default_space';
+import type { SpacesLicense } from '../../common/licensing';
 
 interface Deps {
   coreStatus: CoreSetup['status'];
@@ -22,6 +33,7 @@ interface Deps {
   license$: Observable<ILicense>;
   spacesLicense: SpacesLicense;
   logger: Logger;
+  solution?: OnBoardingDefaultSolution;
 }
 
 export const RETRY_SCALE_DURATION = 100;
@@ -54,7 +66,7 @@ export class DefaultSpaceService {
 
   private serviceStatus$?: BehaviorSubject<ServiceStatus>;
 
-  public setup({ coreStatus, getSavedObjects, license$, spacesLicense, logger }: Deps) {
+  public setup({ coreStatus, getSavedObjects, license$, spacesLicense, logger, solution }: Deps) {
     const statusLogger = logger.get('status');
 
     this.serviceStatus$ = new BehaviorSubject({
@@ -86,6 +98,7 @@ export class DefaultSpaceService {
             createDefaultSpace({
               getSavedObjects,
               logger,
+              solution,
             }).then(() => {
               return {
                 level: ServiceStatusLevels.available,

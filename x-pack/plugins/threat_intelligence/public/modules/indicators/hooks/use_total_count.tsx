@@ -6,12 +6,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import {
-  IEsSearchRequest,
-  IKibanaSearchResponse,
-  isCompleteResponse,
-} from '@kbn/data-plugin/common';
-import { useKibana } from '../../../hooks';
+import type { IKibanaSearchResponse, IEsSearchRequest } from '@kbn/search-types';
+import { isRunningResponse } from '@kbn/data-plugin/common';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useSourcererDataView } from './use_sourcerer_data_view';
 import type { RawIndicatorsResponse } from '../services/fetch_indicators';
 
@@ -61,7 +58,7 @@ export const useIndicatorsTotalCount = () => {
       .search<IEsSearchRequest, IKibanaSearchResponse<RawIndicatorsResponse>>(req)
       .subscribe({
         next: (res) => {
-          if (isCompleteResponse(res)) {
+          if (!isRunningResponse(res)) {
             const returnedCount = res.rawResponse.hits.total || 0;
 
             setCount(returnedCount);

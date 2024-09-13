@@ -7,9 +7,8 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
-import { AddMessageVariables } from './add_message_variables';
+import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 import { templateActionVariable } from '../lib';
 
 interface Props {
@@ -26,7 +25,7 @@ interface Props {
     describedByIds?: string[];
     error: string | null;
     fullWidth: boolean;
-    helpText: string;
+    helpText: React.ReactNode;
     isInvalid: boolean;
     label?: string;
   };
@@ -46,7 +45,7 @@ const Wrapper = ({
     describedByIds?: string[];
     error: string | null;
     fullWidth: boolean;
-    helpText: string;
+    helpText: React.ReactNode;
     isInvalid: boolean;
     label?: string;
   };

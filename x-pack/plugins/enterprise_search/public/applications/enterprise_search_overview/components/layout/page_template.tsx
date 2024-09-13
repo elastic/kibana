@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
-import { SetEnterpriseSearchChrome } from '../../../shared/kibana_chrome';
+import { SEARCH_PRODUCT_NAME } from '../../../../../common/constants';
+import { SetSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchNav } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
@@ -23,10 +23,10 @@ export const EnterpriseSearchOverviewPageTemplate: React.FC<PageTemplateProps> =
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
-        name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
+        name: SEARCH_PRODUCT_NAME,
         items: useEnterpriseSearchNav(),
       }}
-      setPageChrome={pageChrome && <SetEnterpriseSearchChrome trail={pageChrome} />}
+      setPageChrome={pageChrome && <SetSearchChrome trail={pageChrome} />}
     >
       {pageViewTelemetry && (
         <SendEnterpriseSearchTelemetry action="viewed" metric={pageViewTelemetry} />

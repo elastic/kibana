@@ -9,14 +9,14 @@
 // the ML plugin's page load bundle. You should either just export types or
 // use `getMlSharedImports()` to export static code.
 
-import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import {
-  MlPlugin,
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type {
   MlPluginSetup,
   MlPluginStart,
   MlSetupDependencies,
   MlStartDependencies,
 } from './plugin';
+import { MlPlugin } from './plugin';
 
 export const plugin: PluginInitializer<
   MlPluginSetup,
@@ -26,34 +26,18 @@ export const plugin: PluginInitializer<
 > = (initializerContext: PluginInitializerContext) => new MlPlugin(initializerContext);
 
 export type { MlPluginSetup, MlPluginStart };
-export type {
-  AnomaliesTableRecord,
-  DataRecognizerConfigResponse,
-  Influencer,
-  JobExistResult,
-  JobStat,
-  MlCapabilitiesResponse,
-  MlSummaryJob,
-  UseIndexDataReturnType,
-  EsSorting,
-  RenderCellValue,
-} from './shared';
+export type { TrainedModelConfigResponse } from '../common/types/trained_models';
 
-export type { AnomalySwimlaneEmbeddableInput } from './embeddables';
+export type { MlCapabilitiesResponse } from '../common/types/capabilities';
+export type { MlSummaryJob } from '../common/types/anomaly_detection_jobs';
+export type { JobExistResult, JobStat } from '../common/types/data_recognizer';
+export type { DataRecognizerConfigResponse } from '../common/types/modules';
+
+export type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './embeddables';
 
 export { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './embeddables/constants';
 export { CONTROLLED_BY_SWIM_LANE_FILTER } from './ui_actions/constants';
 
-// Static exports
-export {
-  getSeverityColor,
-  getSeverityType,
-  getFormattedSeverityScore,
-  getSeverity,
-} from '../common/util/anomaly_utils';
-export { ES_CLIENT_TOTAL_HITS_RELATION } from '../common/types/es_client';
-
-export { ANOMALY_SEVERITY } from '../common';
 export type { MlLocator } from './locator';
 export { useMlHref, ML_PAGES, MlLocatorDefinition } from './locator';
 
@@ -62,12 +46,10 @@ export { useMlHref, ML_PAGES, MlLocatorDefinition } from './locator';
 export const getMlSharedImports = async () => {
   return await import('./shared');
 };
+
 // Helper to get Type returned by getMlSharedImports.
 type AwaitReturnType<T> = T extends PromiseLike<infer U> ? U : T;
 export type GetMlSharedImportsReturnType = AwaitReturnType<ReturnType<typeof getMlSharedImports>>;
 
 export { MLJobsAwaitingNodeWarning } from './application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared';
-export {
-  MlNodeAvailableWarningShared,
-  useMlNodeAvailableCheck,
-} from './application/components/node_available_warning';
+export { MlNodeAvailableWarningShared } from './application/components/node_available_warning';

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { CoreStart, ToastInput } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { JobId } from '@kbn/reporting-common/types';
 import React from 'react';
-import { ThemeServiceStart, ToastInput } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { JobId, JobSummary } from '../../common/types';
+import { JobSummary } from '../types';
 import { DownloadButton } from './job_download_button';
 import { ReportLink } from './report_link';
 
@@ -17,7 +18,7 @@ export const getWarningToast = (
   job: JobSummary,
   getReportLink: () => string,
   getDownloadLink: (jobId: JobId) => string,
-  theme: ThemeServiceStart
+  core: CoreStart
 ): ToastInput => ({
   title: toMountPoint(
     <FormattedMessage
@@ -25,7 +26,7 @@ export const getWarningToast = (
       defaultMessage="{reportType} completed with issues"
       values={{ reportType: job.jobtype }}
     />,
-    { theme$: theme.theme$ }
+    core
   ),
   text: toMountPoint(
     <>
@@ -34,7 +35,7 @@ export const getWarningToast = (
       </p>
       <DownloadButton getUrl={getDownloadLink} job={job} />
     </>,
-    { theme$: theme.theme$ }
+    core
   ),
   'data-test-subj': 'completeReportWarning',
 });

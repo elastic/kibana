@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -42,7 +43,7 @@ export function resolveCustomSnapshotUrl(
 
   const ext = process.platform === 'win32' ? 'zip' : 'tar.gz';
   const os = process.platform === 'win32' ? 'windows' : process.platform;
-  const name = license === 'oss' ? 'elasticsearch-oss' : 'elasticsearch';
+  const name = 'elasticsearch';
   const overrideUrl = customSnapshotUrl
     .replace('{name}', name)
     .replace('{ext}', ext)

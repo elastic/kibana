@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import path from 'path';
 import { i18n } from '@kbn/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
-import { SampleDatasetSchema } from '../../lib/sample_dataset_registry_types';
+import { SampleDatasetProvider } from '../../lib/sample_dataset_registry_types';
 
 const flightsName = i18n.translate('home.sampleData.flightsSpecTitle', {
   defaultMessage: 'Sample flight data',
@@ -19,13 +20,17 @@ const flightsDescription = i18n.translate('home.sampleData.flightsSpecDescriptio
   defaultMessage: 'Sample data, visualizations, and dashboards for monitoring flight routes.',
 });
 
-export const flightsSpecProvider = function (): SampleDatasetSchema {
+export const flightsSpecProvider: SampleDatasetProvider = ({ staticAssets }) => {
   return {
     id: 'flights',
     name: flightsName,
     description: flightsDescription,
-    previewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard.webp',
-    darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard_dark.webp',
+    previewImagePath: staticAssets.getPluginAssetHref(
+      '/sample_data_resources/flights/dashboard.webp'
+    ),
+    darkPreviewImagePath: staticAssets.getPluginAssetHref(
+      '/sample_data_resources/flights/dashboard_dark.webp'
+    ),
     overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
     defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
     savedObjects: getSavedObjects(),
@@ -40,6 +45,6 @@ export const flightsSpecProvider = function (): SampleDatasetSchema {
       },
     ],
     status: 'not_installed',
-    iconPath: '/plugins/home/assets/sample_data_resources/flights/icon.svg',
+    iconPath: staticAssets.getPluginAssetHref('/sample_data_resources/flights/icon.svg'),
   };
 };

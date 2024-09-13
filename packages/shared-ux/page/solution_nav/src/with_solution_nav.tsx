@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { ComponentType, ReactNode, useState } from 'react';
@@ -57,9 +58,8 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
       isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop);
     const withSolutionNavStyles = WithSolutionNavStyles(euiTheme);
     const sideBarClasses = classNames(
-      {
-        'kbnSolutionNav__sidebar--shrink': isSidebarShrunk,
-      },
+      'kbnSolutionNav__sidebar',
+      { 'kbnSolutionNav__sidebar--shrink': isSidebarShrunk },
       props.pageSideBarProps?.className,
       withSolutionNavStyles
     );
@@ -77,6 +77,7 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
       ...props.pageSideBarProps,
       minWidth: isSidebarShrunk ? euiTheme.size.xxl : undefined,
       className: sideBarClasses,
+      hasEmbellish: !isSidebarShrunk,
     };
 
     return (

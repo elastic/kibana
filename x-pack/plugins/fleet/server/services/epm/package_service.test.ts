@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-jest.mock('../security');
+jest.mock('../security', () => {
+  return {
+    ...jest.requireActual('../security'),
+    getAuthzFromRequest: jest.fn(),
+  };
+});
 
 import type { MockedLogger } from '@kbn/logging-mocks';
 
@@ -20,19 +25,28 @@ import {
 import { FleetUnauthorizedError } from '../../errors';
 import type { InstallablePackage } from '../../types';
 
+import { getAuthzFromRequest } from '../security';
+
 import type { PackageClient, PackageService } from './package_service';
 import { PackageServiceImpl } from './package_service';
 import * as epmPackagesGet from './packages/get';
 import * as epmPackagesInstall from './packages/install';
 import * as epmRegistry from './registry';
 import * as epmTransformsInstall from './elasticsearch/transform/install';
+import * as epmArchiveParse from './archive/parse';
+import { getEsPackage } from './archive/storage';
 
+jest.mock('./archive/storage');
+
+const mockGetAuthzFromRequest = getAuthzFromRequest as jest.Mock;
 const testKeys = [
   'getInstallation',
   'ensureInstalledPackage',
   'fetchFindLatestPackage',
   'getPackage',
+  'getPackageFieldsMetadata',
   'reinstallEsAssets',
+  'readBundledPackage',
 ];
 
 function getTest(
@@ -114,6 +128,20 @@ function getTest(
       };
       break;
     case testKeys[4]:
+      test = {
+        method: mocks.packageClient.getPackageFieldsMetadata.bind(mocks.packageClient),
+        args: [{ packageName: 'package_name', datasetName: 'dataset_name' }],
+        spy: jest.spyOn(epmRegistry, 'getPackageFieldsMetadata'),
+        spyArgs: [{ packageName: 'package_name', datasetName: 'dataset_name' }, undefined],
+        spyResponse: {
+          dataset_name: { field_1: { flat_name: 'field_1', type: 'keyword' } },
+        },
+        expectedReturnValue: {
+          dataset_name: { field_1: { flat_name: 'field_1', type: 'keyword' } },
+        },
+      };
+      break;
+    case testKeys[5]:
       const pkg: InstallablePackage = {
         format_version: '1.0.0',
         name: 'package name',
@@ -129,7 +157,22 @@ function getTest(
         method: mocks.packageClient.reinstallEsAssets.bind(mocks.packageClient),
         args: [pkg, paths],
         spy: jest.spyOn(epmTransformsInstall, 'installTransforms'),
-        spyArgs: [pkg, paths, mocks.esClient, mocks.soClient, mocks.logger],
+        spyArgs: [
+          {
+            packageInstallContext: expect.objectContaining({
+              paths,
+            }),
+            esClient: mocks.esClient,
+            savedObjectsClient: mocks.soClient,
+            logger: mocks.logger,
+            // package reinstall means we need to force transforms to reinstall
+            force: true,
+            // Undefined es references
+            esReferences: undefined,
+            // Undefined secondary authorization
+            authorizationHeader: undefined,
+          },
+        ],
         spyResponse: {
           installedTransforms: [
             {
@@ -142,6 +185,27 @@ function getTest(
             name: 'package name',
           },
         ],
+      };
+      break;
+    case testKeys[6]:
+      const bundledPackage = {
+        name: 'package name',
+        version: '8.0.0',
+        getBuffer: () => Buffer.from([]),
+      };
+      test = {
+        method: mocks.packageClient.readBundledPackage.bind(mocks.packageClient),
+        args: [bundledPackage],
+        spy: jest.spyOn(epmArchiveParse, 'generatePackageInfoFromArchiveBuffer'),
+        spyArgs: [bundledPackage.getBuffer(), 'application/zip'],
+        spyResponse: {
+          packageInfo: { name: 'readBundledPackage test' },
+          paths: ['/some/test/path'],
+        },
+        expectedReturnValue: {
+          packageInfo: { name: 'readBundledPackage test' },
+          paths: ['/some/test/path'],
+        },
       };
       break;
     default:
@@ -173,6 +237,14 @@ describe('PackageService', () => {
       const unauthError = new FleetUnauthorizedError(
         `User does not have adequate permissions to access Fleet packages.`
       );
+      beforeEach(() => {
+        mockGetAuthzFromRequest.mockResolvedValueOnce({
+          integrations: {
+            installPackages: false,
+            readPackageInfo: false,
+          },
+        });
+      });
 
       it(`rejects on ${testKey}`, async () => {
         const { method, args } = getTest(
@@ -184,6 +256,14 @@ describe('PackageService', () => {
     });
 
     describe.each(testKeys)('with required privileges', (testKey: string) => {
+      beforeEach(() => {
+        mockGetAuthzFromRequest.mockResolvedValueOnce({
+          integrations: {
+            installPackages: true,
+            readPackageInfo: true,
+          },
+        });
+      });
       it(`calls ${testKey} and returns results`, async () => {
         const mockClients = {
           packageClient: mockPackageService.asInternalUser,
@@ -196,6 +276,12 @@ describe('PackageService', () => {
           testKey
         );
         spy.mockResolvedValue(spyResponse);
+        if (testKey === 'reinstallEsAssets') {
+          jest
+            .mocked(epmPackagesGet.getInstallation)
+            .mockResolvedValue({ name: 'package name' } as any);
+          jest.mocked(getEsPackage).mockResolvedValue({ name: 'package name' } as any);
+        }
 
         await expect(method(...args)).resolves.toEqual(expectedReturnValue);
         expect(spy).toHaveBeenCalledWith(...spyArgs);
@@ -216,6 +302,12 @@ describe('PackageService', () => {
         testKey
       );
       spy.mockResolvedValue(spyResponse);
+      if (testKey === 'reinstallEsAssets') {
+        jest
+          .mocked(epmPackagesGet.getInstallation)
+          .mockResolvedValue({ name: 'package name' } as any);
+        jest.mocked(getEsPackage).mockResolvedValue({ name: 'package name' } as any);
+      }
 
       await expect(method(...args)).resolves.toEqual(expectedReturnValue);
       expect(spy).toHaveBeenCalledWith(...spyArgs);

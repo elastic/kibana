@@ -1,45 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { pluginServices } from '../../services';
-import { EditControlFlyout } from './edit_control_flyout';
-import { DeleteControlAction } from './delete_control_action';
-import { ControlGroupStrings } from '../control_group_strings';
 import { ACTION_EDIT_CONTROL, ControlGroupContainer } from '..';
+import { pluginServices } from '../../services';
 import { ControlEmbeddable, DataControlInput } from '../../types';
-import { setFlyoutRef } from '../embeddable/control_group_container';
+import { ControlGroupStrings } from '../control_group_strings';
+import { ControlGroupContainerContext, setFlyoutRef } from '../embeddable/control_group_container';
 import { isControlGroup } from '../embeddable/control_group_helpers';
+import { DeleteControlAction } from './delete_control_action';
+import { EditControlFlyout } from './edit_control_flyout';
 
 export interface EditControlActionContext {
   embeddable: ControlEmbeddable<DataControlInput>;
 }
 
-export class EditControlAction implements Action<EditControlActionContext> {
+export class EditLegacyEmbeddableControlAction implements Action<EditControlActionContext> {
   public readonly type = ACTION_EDIT_CONTROL;
   public readonly id = ACTION_EDIT_CONTROL;
-  public order = 1;
+  public order = 2;
 
   private getEmbeddableFactory;
   private openFlyout;
-  private theme$;
+  private theme;
+  private i18n;
 
   constructor(private deleteControlAction: DeleteControlAction) {
     ({
       embeddable: { getEmbeddableFactory: this.getEmbeddableFactory },
       overlays: { openFlyout: this.openFlyout },
-      theme: { theme$: this.theme$ },
+      core: { theme: this.theme, i18n: this.i18n },
     } = pluginServices.getServices());
   }
 
@@ -91,11 +93,10 @@ export class EditControlAction implements Action<EditControlActionContext> {
       throw new IncompatibleActionError();
     }
     const controlGroup = embeddable.parent as ControlGroupContainer;
-    const ReduxWrapper = controlGroup.getReduxEmbeddableTools().Wrapper;
 
     const flyoutInstance = this.openFlyout(
       toMountPoint(
-        <ReduxWrapper>
+        <ControlGroupContainerContext.Provider value={controlGroup}>
           <EditControlFlyout
             embeddable={embeddable}
             removeControl={() => this.deleteControlAction.execute({ embeddable })}
@@ -104,9 +105,9 @@ export class EditControlAction implements Action<EditControlActionContext> {
               flyoutInstance.close();
             }}
           />
-        </ReduxWrapper>,
+        </ControlGroupContainerContext.Provider>,
 
-        { theme$: this.theme$ }
+        { theme: this.theme, i18n: this.i18n }
       ),
       {
         'aria-label': ControlGroupStrings.manageControl.getFlyoutEditTitle(),
@@ -116,8 +117,6 @@ export class EditControlAction implements Action<EditControlActionContext> {
           flyout.close();
         },
         ownFocus: true,
-        // @ts-ignore - TODO: Remove this once https://github.com/elastic/eui/pull/6645 lands in Kibana
-        focusTrapProps: { scrollLock: true },
       }
     );
     setFlyoutRef(flyoutInstance);

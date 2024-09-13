@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { GetDataFrameAnalyticsStatsResponseOk } from '../../../../../services/ml_api_service/data_frame_analytics';
+import { DATA_FRAME_TASK_STATE } from '@kbn/ml-data-frame-analytics-utils';
+import type { GetDataFrameAnalyticsStatsResponseOk } from '../../../../../services/ml_api_service/data_frame_analytics';
 import { getAnalyticsJobsStats } from './get_analytics';
-import { DATA_FRAME_TASK_STATE } from '../../components/analytics_list/common';
 
 describe('get_analytics', () => {
   test('should get analytics jobs stats', () => {
@@ -67,7 +67,7 @@ describe('get_analytics', () => {
     // act and assert
     expect(getAnalyticsJobsStats(mockResponse)).toEqual({
       total: {
-        label: 'Total analytics jobs',
+        label: 'Total',
         value: 2,
         show: true,
       },

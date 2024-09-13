@@ -1,4 +1,1 @@
-[
-  "x-pack/plugins/watcher/jest.config.js",
-  "src/core/server/integration_tests/ui_settings/jest.integration.config.js"
-]
+[]

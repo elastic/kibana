@@ -1,0 +1,111 @@
+openapi: 3.0.0
+info:
+  title: Packs Schema
+  version: '2023-10-31'
+paths:
+  /api/osquery/packs:
+    get:
+      summary: Get packs
+      description: Get a list of all query packs.
+      operationId: OsqueryFindPacks
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            $ref: './find_packs.schema.yaml#/components/schemas/FindPacksRequestQuery'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+    post:
+      summary: Create a pack
+      description: Create a query pack.
+      operationId: OsqueryCreatePacks
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './create_pack.schema.yaml#/components/schemas/CreatePacksRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+  /api/osquery/packs/{id}:
+    get:
+      summary: Get pack details
+      description: Get the details of a query pack using the pack ID.
+      operationId: OsqueryGetPacksDetails
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+    delete:
+      summary: Delete a pack
+      description: Delete a query pack using the pack ID.
+      operationId: OsqueryDeletePacks
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+    put:
+      summary: Update a pack
+      description: |
+        Update a query pack using the pack ID.
+        > info
+        > You cannot update a prebuilt pack.
+      operationId: OsqueryUpdatePacks
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'

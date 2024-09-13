@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { AggName } from '../../../../../../common/types/aggregations';
+import type { AggName } from '../../../../../../common/types/aggregations';
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
-import { PivotAggsConfig } from '../../../../common';
+import type { PivotAggsConfig } from '../../../../common';
 import { PopoverForm } from './popover_form';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -29,7 +28,7 @@ describe('Transform: Aggregation <PopoverForm />', () => {
     const otherAggNames: AggName[] = [];
     const onChange = (item: PivotAggsConfig) => {};
 
-    const wrapper = shallow(
+    const { getByTestId } = render(
       <PopoverForm
         defaultData={defaultData}
         otherAggNames={otherAggNames}
@@ -38,7 +37,8 @@ describe('Transform: Aggregation <PopoverForm />', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    const input = getByTestId('transformAggName');
+    expect(input).toHaveValue('the-group-by-agg-name');
   });
 
   test('preserves the field for unsupported aggs', async () => {

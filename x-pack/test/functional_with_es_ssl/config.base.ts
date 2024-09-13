@@ -24,6 +24,7 @@ const enabledActionTypes = [
   '.servicenow',
   '.servicenow-sir',
   '.slack',
+  '.slack_api',
   '.tines',
   '.webhook',
   'test.authorization',
@@ -60,6 +61,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       triggersActionsConnectors: {
         pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors',
       },
+      maintenanceWindows: {
+        pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
+      },
     },
     esTestCluster: {
       ...xpackFunctionalConfig.get('esTestCluster'),
@@ -78,7 +82,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           '../alerting_api_integration/common/plugins/actions_simulators'
         )}`,
         `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
-          'internalAlertsTable',
+          'stackAlertsPage',
           'ruleTagFilter',
           'ruleStatusFilter',
         ])}`,
@@ -139,6 +143,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               feature: {
                 actions: ['all'],
                 stackAlerts: ['all'],
+                logs: ['all'],
                 discover: ['all'],
                 advancedSettings: ['all'],
                 indexPatterns: ['all'],

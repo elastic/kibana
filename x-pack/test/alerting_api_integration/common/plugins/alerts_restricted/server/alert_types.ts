@@ -7,6 +7,7 @@
 
 import { CoreSetup } from '@kbn/core/server';
 import { RuleType } from '@kbn/alerting-plugin/server';
+import { schema } from '@kbn/config-schema';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 
 export function defineAlertTypes(
@@ -17,6 +18,7 @@ export function defineAlertTypes(
     id: 'test.restricted-noop',
     name: 'Test: Restricted Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
     producer: 'alertsRestrictedFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -25,17 +27,24 @@ export function defineAlertTypes(
     async executor() {
       return { state: {} };
     },
+    validate: {
+      params: schema.any(),
+    },
   };
   const noopUnrestrictedAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.unrestricted-noop',
     name: 'Test: Unrestricted Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
     producer: 'alertsRestrictedFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
     async executor() {
       return { state: {} };
+    },
+    validate: {
+      params: schema.any(),
     },
   };
   alerting.registerType(noopRestrictedAlertType);

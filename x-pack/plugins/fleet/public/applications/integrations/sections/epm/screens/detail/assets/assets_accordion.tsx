@@ -5,35 +5,33 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { FunctionComponent } from 'react';
+import { Fragment } from 'react';
+import React from 'react';
 
 import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSplitPanel,
-  EuiSpacer,
-  EuiText,
-  EuiLink,
   EuiHorizontalRule,
+  EuiLink,
   EuiNotificationBadge,
+  EuiSpacer,
+  EuiSplitPanel,
+  EuiText,
 } from '@elastic/eui';
 
 import { AssetTitleMap } from '../../../constants';
-
-import { getHrefToObjectInKibanaApp, useStartServices } from '../../../../../hooks';
-
+import type { DisplayedAssetTypes, GetBulkAssetsResponse } from '../../../../../../../../common';
+import { useStartServices } from '../../../../../hooks';
 import { KibanaAssetType } from '../../../../../types';
 
-import type { AllowedAssetType, AssetSavedObject } from './types';
+export type DisplayedAssetType = DisplayedAssetTypes[number] | 'view';
 
-interface Props {
-  type: AllowedAssetType;
-  savedObjects: AssetSavedObject[];
-}
-
-export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }) => {
+export const AssetsAccordion: FunctionComponent<{
+  type: DisplayedAssetType;
+  savedObjects: GetBulkAssetsResponse['items'];
+}> = ({ savedObjects, type }) => {
   const { http } = useStartServices();
 
   const isDashboard = type === KibanaAssetType.dashboard;
@@ -41,6 +39,7 @@ export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }
   return (
     <EuiAccordion
       initialIsOpen={isDashboard}
+      data-test-subj={`fleetAssetsAccordion.button.${type}`}
       buttonContent={
         <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -59,25 +58,30 @@ export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }
     >
       <>
         <EuiSpacer size="m" />
-        <EuiSplitPanel.Outer hasBorder hasShadow={false}>
-          {savedObjects.map(({ id, attributes: { title, description } }, idx) => {
-            // Ignore custom asset views
+        <EuiSplitPanel.Outer
+          hasBorder
+          hasShadow={false}
+          data-test-subj={`fleetAssetsAccordion.content.${type}`}
+        >
+          {savedObjects.map(({ id, attributes, appLink }, idx) => {
+            const { title: soTitle, description } = attributes || {};
+            // Ignore custom asset views or if not a Kibana asset
             if (type === 'view') {
               return;
             }
 
-            const pathToObjectInApp = getHrefToObjectInKibanaApp({
-              http,
-              id,
-              type,
-            });
+            const title = soTitle ?? id;
             return (
-              <>
-                <EuiSplitPanel.Inner grow={false} key={idx}>
+              <Fragment key={id}>
+                <EuiSplitPanel.Inner
+                  grow={false}
+                  key={idx}
+                  data-test-subj={`fleetAssetsAccordion.content.${type}.${title}`}
+                >
                   <EuiText size="m">
                     <p>
-                      {pathToObjectInApp ? (
-                        <EuiLink href={pathToObjectInApp}>{title}</EuiLink>
+                      {appLink ? (
+                        <EuiLink href={http.basePath.prepend(appLink)}>{title}</EuiLink>
                       ) : (
                         title
                       )}
@@ -93,7 +97,7 @@ export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }
                   )}
                 </EuiSplitPanel.Inner>
                 {idx + 1 < savedObjects.length && <EuiHorizontalRule margin="none" />}
-              </>
+              </Fragment>
             );
           })}
         </EuiSplitPanel.Outer>

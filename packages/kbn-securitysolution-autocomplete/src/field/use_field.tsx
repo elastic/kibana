@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import {
@@ -26,14 +28,13 @@ import {
   GetFieldComboBoxPropsReturn,
 } from './types';
 import { disabledTypesWithTooltipText } from './disabled_types_with_tooltip_text';
-import { paramContainsSpace } from '../param_contains_space';
 
 const getExistingFields = (indexPattern: DataViewBase | undefined): DataViewFieldBase[] => {
   return indexPattern != null ? indexPattern.fields : [];
 };
 
 const getSelectedFields = (selectedField: DataViewField | undefined): DataViewFieldBase[] => {
-  return selectedField && !paramContainsSpace(selectedField.name) ? [selectedField] : [];
+  return selectedField && selectedField.name.trim() !== '' ? [selectedField] : [];
 };
 
 const getAvailableFields = (

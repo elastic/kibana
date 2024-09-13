@@ -3,7 +3,7 @@
 exports[`IndicesList should change pages 1`] = `
 <div>
   <EuiTable
-    responsive={false}
+    responsiveBreakpoint={false}
     tableLayout="auto"
   >
     <EuiTableBody>
@@ -45,7 +45,7 @@ exports[`IndicesList should change pages 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Rows per page: {perPage}"
               id="indexPatternEditor.pagingLabel"
               values={
@@ -63,8 +63,9 @@ exports[`IndicesList should change pages 1`] = `
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={
             Array [
               <EuiContextMenuItem
@@ -103,7 +104,7 @@ exports[`IndicesList should change pages 1`] = `
 exports[`IndicesList should change per page 1`] = `
 <div>
   <EuiTable
-    responsive={false}
+    responsiveBreakpoint={false}
     tableLayout="auto"
   >
     <EuiTableBody>
@@ -137,7 +138,7 @@ exports[`IndicesList should change per page 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Rows per page: {perPage}"
               id="indexPatternEditor.pagingLabel"
               values={
@@ -155,8 +156,9 @@ exports[`IndicesList should change per page 1`] = `
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={
             Array [
               <EuiContextMenuItem
@@ -204,7 +206,7 @@ exports[`IndicesList should change per page 1`] = `
 exports[`IndicesList should highlight fully when an exact match 1`] = `
 <div>
   <EuiTable
-    responsive={false}
+    responsiveBreakpoint={false}
     tableLayout="auto"
   >
     <EuiTableBody>
@@ -253,7 +255,7 @@ exports[`IndicesList should highlight fully when an exact match 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Rows per page: {perPage}"
               id="indexPatternEditor.pagingLabel"
               values={
@@ -271,8 +273,9 @@ exports[`IndicesList should highlight fully when an exact match 1`] = `
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={
             Array [
               <EuiContextMenuItem
@@ -311,7 +314,7 @@ exports[`IndicesList should highlight fully when an exact match 1`] = `
 exports[`IndicesList should highlight the query in the matches 1`] = `
 <div>
   <EuiTable
-    responsive={false}
+    responsiveBreakpoint={false}
     tableLayout="auto"
   >
     <EuiTableBody>
@@ -360,7 +363,7 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Rows per page: {perPage}"
               id="indexPatternEditor.pagingLabel"
               values={
@@ -378,8 +381,9 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={
             Array [
               <EuiContextMenuItem
@@ -418,7 +422,7 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
 exports[`IndicesList should render normally 1`] = `
 <div>
   <EuiTable
-    responsive={false}
+    responsiveBreakpoint={false}
     tableLayout="auto"
   >
     <EuiTableBody>
@@ -460,7 +464,7 @@ exports[`IndicesList should render normally 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Rows per page: {perPage}"
               id="indexPatternEditor.pagingLabel"
               values={
@@ -478,8 +482,9 @@ exports[`IndicesList should render normally 1`] = `
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={
             Array [
               <EuiContextMenuItem
@@ -518,7 +523,7 @@ exports[`IndicesList should render normally 1`] = `
 exports[`IndicesList updating props should render all new indices 1`] = `
 <div>
   <EuiTable
-    responsive={false}
+    responsiveBreakpoint={false}
     tableLayout="auto"
   >
     <EuiTableBody>
@@ -624,7 +629,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Rows per page: {perPage}"
               id="indexPatternEditor.pagingLabel"
               values={
@@ -642,8 +647,9 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={
             Array [
               <EuiContextMenuItem

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CaseResponse } from '../../../common/api';
+import type { Case } from '../../../common/types/domain';
 import { format } from './format';
 
 describe('Jira formatter', () => {
   const theCase = {
     tags: ['tag'],
     connector: { fields: { priority: 'High', issueType: 'Task', parent: null } },
-  } as CaseResponse;
+  } as Case;
 
   it('it formats correctly', async () => {
     const res = await format(theCase, []);
@@ -20,7 +20,7 @@ describe('Jira formatter', () => {
   });
 
   it('it formats correctly when fields do not exist ', async () => {
-    const invalidFields = { tags: ['tag'], connector: { fields: null } } as CaseResponse;
+    const invalidFields = { tags: ['tag'], connector: { fields: null } } as Case;
     const res = await format(invalidFields, []);
     expect(res).toEqual({ priority: null, issueType: null, parent: null, labels: theCase.tags });
   });

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import {
-  AppNavLinkStatus,
+  AppStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
@@ -23,17 +23,21 @@ import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/publi
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-
+import {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { checkLicense } from '../common/check_license';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../server/config';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export interface GraphPluginSetupDependencies {
   home?: HomePublicPluginSetup;
+  contentManagement: ContentManagementPublicSetup;
 }
 
 export interface GraphPluginStartDependencies {
@@ -41,11 +45,11 @@ export interface GraphPluginStartDependencies {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  savedObjects: SavedObjectsStart;
   inspector: InspectorPublicPluginStart;
   home?: HomePublicPluginStart;
   spaces?: SpacesApi;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 export class GraphPlugin
@@ -55,7 +59,10 @@ export class GraphPlugin
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
-  setup(core: CoreSetup<GraphPluginStartDependencies>, { home }: GraphPluginSetupDependencies) {
+  setup(
+    core: CoreSetup<GraphPluginStartDependencies>,
+    { home, contentManagement }: GraphPluginSetupDependencies
+  ) {
     if (home) {
       home.featureCatalogue.register({
         id: 'graph',
@@ -76,6 +83,16 @@ export class GraphPlugin
     }
 
     const config = this.initializerContext.config.get();
+
+    contentManagement.registry.register({
+      id: CONTENT_ID,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: i18n.translate('xpack.graph.content.name', {
+        defaultMessage: 'Graph Visualization',
+      }),
+    });
 
     core.application.register({
       id: 'graph',
@@ -100,7 +117,7 @@ export class GraphPlugin
           navigation: pluginsStart.navigation,
           data: pluginsStart.data,
           unifiedSearch: pluginsStart.unifiedSearch,
-          savedObjectsClient: coreStart.savedObjects.client,
+          contentClient: pluginsStart.contentManagement.client,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
           canEditDrillDownUrls: config.canEditDrillDownUrls,
@@ -111,11 +128,11 @@ export class GraphPlugin
           toastNotifications: coreStart.notifications.toasts,
           indexPatterns: pluginsStart.data!.indexPatterns,
           overlays: coreStart.overlays,
-          savedObjects: pluginsStart.savedObjects,
           uiSettings: core.uiSettings,
           spaces: pluginsStart.spaces,
           inspect: pluginsStart.inspector,
           savedObjectsManagement: pluginsStart.savedObjectsManagement,
+          contentManagement: pluginsStart.contentManagement,
         });
       },
     });
@@ -126,11 +143,11 @@ export class GraphPlugin
       const licenseInformation = checkLicense(license);
 
       this.appUpdater$.next(() => ({
-        navLinkStatus: licenseInformation.showAppLink
+        status: licenseInformation.showAppLink
           ? licenseInformation.enableAppLink
-            ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.disabled
-          : AppNavLinkStatus.hidden,
+            ? AppStatus.accessible
+            : AppStatus.inaccessible
+          : AppStatus.inaccessible,
         tooltip: licenseInformation.showAppLink ? licenseInformation.message : undefined,
       }));
 

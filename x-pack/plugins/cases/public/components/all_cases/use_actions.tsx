@@ -13,7 +13,7 @@ import type {
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useStatusAction } from '../actions/status/use_status_action';
@@ -29,7 +29,7 @@ import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
 import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
 import { useCopyIDAction } from '../actions/copy_id/use_copy_id_action';
 
-const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }> = ({
+const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean }> = ({
   theCase,
   disableActions,
 }) => {
@@ -174,7 +174,7 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
           <EuiButtonIcon
             onClick={tooglePopover}
             iconType="boxesHorizontal"
-            aria-label={i18n.ACTIONS}
+            aria-label={i18n.ACTIONS_BUTTON_ARIA_LABEL(theCase.title)}
             color="text"
             key={`case-action-popover-button-${theCase.id}`}
             data-test-subj={`case-action-popover-button-${theCase.id}`}
@@ -223,7 +223,7 @@ ActionColumnComponent.displayName = 'ActionColumnComponent';
 const ActionColumn = React.memo(ActionColumnComponent);
 
 interface UseBulkActionsReturnValue {
-  actions: EuiTableComputedColumnType<Case> | null;
+  actions: EuiTableComputedColumnType<CaseUI> | null;
 }
 
 interface UseBulkActionsProps {
@@ -239,11 +239,12 @@ export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActi
       ? {
           name: i18n.ACTIONS,
           align: 'right',
-          render: (theCase: Case) => {
+          render: (theCase: CaseUI) => {
             return (
               <ActionColumn theCase={theCase} key={theCase.id} disableActions={disableActions} />
             );
           },
+          width: '100px',
         }
       : null,
   };

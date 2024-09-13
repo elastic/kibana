@@ -1,45 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiCallOut,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPage,
-} from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { firstValueFrom } from 'rxjs';
+import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPage, EuiPageBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getRootBreadcrumbs } from '../../../utils/breadcrumbs';
-import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
-import { ElasticRequestState } from '../types';
-import { useEsDocSearch } from '../../../hooks/use_es_doc_search';
+import { ElasticRequestState } from '@kbn/unified-doc-viewer';
+import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
+import type { EsDocSearchProps } from '@kbn/unified-doc-viewer-plugin/public/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import { SingleDocViewer } from './single_doc_viewer';
+import { createDataViewDataSource } from '../../../../common/data_sources';
 
-export interface DocProps {
-  /**
-   * Id of the doc in ES
-   */
-  id: string;
-  /**
-   * Index in ES to query
-   */
-  index: string;
-  /**
-   * DataView entity
-   */
-  dataView: DataView;
-  /**
-   * If set, will always request source, regardless of the global `fieldsFromSource` setting
-   */
-  requestSource?: boolean;
+export interface DocProps extends EsDocSearchProps {
   /**
    * Discover main view url
    */
@@ -48,21 +30,40 @@ export interface DocProps {
 
 export function Doc(props: DocProps) {
   const { dataView } = props;
-  const [reqState, hit] = useEsDocSearch(props);
-  const { locator, chrome, docLinks } = useDiscoverServices();
+  const services = useDiscoverServices();
+  const { locator, chrome, docLinks, core, profilesManager } = services;
   const indexExistsLink = docLinks.links.apis.indexExists;
 
-  const singleDocTitle = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    singleDocTitle.current?.focus();
-  }, []);
+  const onBeforeFetch = useCallback(async () => {
+    const solutionNavId = await firstValueFrom(core.chrome.getActiveSolutionNavId$());
+    await profilesManager.resolveRootProfile({ solutionNavId });
+    await profilesManager.resolveDataSourceProfile({
+      dataSource: dataView?.id ? createDataViewDataSource({ dataViewId: dataView.id }) : undefined,
+      dataView,
+      query: { query: '', language: 'kuery' },
+    });
+  }, [profilesManager, core, dataView]);
+
+  const onProcessRecord = useCallback(
+    (record: DataTableRecord) => {
+      return profilesManager.resolveDocumentProfile({ record });
+    },
+    [profilesManager]
+  );
+
+  const [reqState, record] = useEsDocSearch({
+    ...props,
+    onBeforeFetch,
+    onProcessRecord,
+  });
 
   useEffect(() => {
-    chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(props.referrer),
-      { text: `${props.index}#${props.id}` },
-    ]);
-  }, [chrome, props.referrer, props.index, props.id, dataView, locator]);
+    setBreadcrumbs({
+      services,
+      titleBreadcrumbText: `${props.index}#${props.id}`,
+      rootBreadcrumbPath: props.referrer,
+    });
+  }, [chrome, props.referrer, props.index, props.id, dataView, locator, services]);
 
   return (
     <EuiPage>
@@ -70,15 +71,13 @@ export function Doc(props: DocProps) {
         id="singleDocTitle"
         className="euiScreenReaderOnly"
         data-test-subj="discoverSingleDocTitle"
-        tabIndex={-1}
-        ref={singleDocTitle}
       >
         {i18n.translate('discover.doc.pageTitle', {
           defaultMessage: 'Single document - #{id}',
           values: { id: props.id },
         })}
       </h1>
-      <EuiPageContent>
+      <EuiPageBody panelled paddingSize="m" panelProps={{ role: 'main' }}>
         {reqState === ElasticRequestState.NotFoundDataView && (
           <EuiCallOut
             color="danger"
@@ -145,12 +144,12 @@ export function Doc(props: DocProps) {
           </EuiCallOut>
         )}
 
-        {reqState === ElasticRequestState.Found && hit !== null && dataView && (
+        {reqState === ElasticRequestState.Found && record !== null && dataView && (
           <div data-test-subj="doc-hit">
-            <DocViewer hit={hit} dataView={dataView} />
+            <SingleDocViewer record={record} dataView={dataView} />
           </div>
         )}
-      </EuiPageContent>
+      </EuiPageBody>
     </EuiPage>
   );
 }

@@ -11,11 +11,9 @@ import { RefreshInterval } from '@kbn/data-plugin/common';
 
 import { TimeRange } from '@kbn/es-query';
 
-import { AnalyticsCollection } from '../../../../../../common/types/analytics';
 import { KibanaLogic } from '../../../../shared/kibana/kibana_logic';
 
 export interface AnalyticsCollectionToolbarLogicActions {
-  findDataViewId(collection: AnalyticsCollection): { collection: AnalyticsCollection };
   onTimeRefresh(): void;
   setDataViewId(id: string): { id: string };
   setRefreshInterval(refreshInterval: RefreshInterval): RefreshInterval;
@@ -27,7 +25,6 @@ export interface AnalyticsCollectionToolbarLogicActions {
 export interface AnalyticsCollectionToolbarLogicValues {
   // kea forbid to set undefined as a value
   _searchSessionId: string | null;
-  dataViewId: string | null;
   refreshInterval: RefreshInterval;
   searchSessionId: string | undefined;
   timeRange: TimeRange;
@@ -40,25 +37,14 @@ export const AnalyticsCollectionToolbarLogic = kea<
   MakeLogicType<AnalyticsCollectionToolbarLogicValues, AnalyticsCollectionToolbarLogicActions>
 >({
   actions: {
-    findDataViewId: (collection) => ({ collection }),
     onTimeRefresh: true,
-    setDataViewId: (id) => ({ id }),
     setRefreshInterval: ({ pause, value }) => ({ pause, value }),
     setSearchSessionId: (searchSessionId) => ({ searchSessionId }),
     setTimeRange: ({ from, to }) => ({ from, to }),
   },
   listeners: ({ actions }) => ({
-    findDataViewId: async ({ collection }) => {
-      const dataViewId = (
-        await KibanaLogic.values.data.dataViews.find(collection.events_datastream, 1)
-      )?.[0]?.id;
-
-      if (dataViewId) {
-        actions.setDataViewId(dataViewId);
-      }
-    },
     onTimeRefresh() {
-      actions.setSearchSessionId(KibanaLogic.values.data.search.session.start());
+      actions.setSearchSessionId(KibanaLogic.values.data?.search.session.start() || '');
     },
     setRefreshInterval(refreshInterval) {
       if (refreshInterval.pause) {
@@ -69,16 +55,17 @@ export const AnalyticsCollectionToolbarLogic = kea<
       actions.setSearchSessionId(null);
     },
   }),
-  path: ['enterprise_search', 'analytics', 'collections', 'toolbar'],
+  path: ['enterprise_search', 'analytics', 'collection', 'toolbar'],
   reducers: () => ({
     _searchSessionId: [
       null,
+      // @ts-expect-error upgrade typescript v5.1.6
       { setSearchSessionId: (state, { searchSessionId }) => searchSessionId },
     ],
-    dataViewId: [null, { setDataViewId: (_, { id }) => id }],
     refreshInterval: [
       DEFAULT_REFRESH_INTERVAL,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRefreshInterval: (_, { pause, value }) => ({
           pause,
           value,
@@ -88,6 +75,7 @@ export const AnalyticsCollectionToolbarLogic = kea<
     timeRange: [
       DEFAULT_TIME_RANGE,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setTimeRange: (state, { from, to }) => ({
           ...state,
           from,

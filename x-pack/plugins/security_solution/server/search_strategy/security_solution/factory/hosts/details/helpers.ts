@@ -182,13 +182,9 @@ export const getHostEndpoint = async (
     const fleetAgentId = endpointData.metadata.elastic.agent.id;
 
     const pendingActions = fleetAgentId
-      ? getPendingActionsSummary(
-          esClient.asInternalUser,
-          endpointMetadataService,
-          logger,
-          [fleetAgentId],
-          endpointContext.experimentalFeatures.pendingActionResponsesWithAck
-        )
+      ? getPendingActionsSummary(esClient.asInternalUser, endpointMetadataService, logger, [
+          fleetAgentId,
+        ])
           .then((results) => {
             return results[0].pending_actions;
           })
@@ -201,12 +197,7 @@ export const getHostEndpoint = async (
       : {};
 
     return {
-      endpointPolicy: endpointData.metadata.Endpoint.policy.applied.name,
-      policyStatus: endpointData.metadata.Endpoint.policy.applied.status,
-      sensorVersion: endpointData.metadata.agent.version,
-      elasticAgentStatus: endpointData.host_status,
-      isolation: endpointData.metadata.Endpoint.state?.isolation ?? false,
-      fleetAgentId: endpointData.metadata.elastic.agent.id,
+      hostInfo: endpointData,
       pendingActions,
     };
   } catch (err) {

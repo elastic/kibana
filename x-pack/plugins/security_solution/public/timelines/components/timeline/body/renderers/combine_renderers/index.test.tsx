@@ -6,20 +6,21 @@
  */
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { RowRendererId, TimelineId } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types/timeline';
+import { RowRendererIdEnum } from '../../../../../../../common/api/timeline';
 import { combineRenderers } from '.';
 
 describe('combineRenderers', () => {
   const contextId = 'abcd';
 
   const a = {
-    id: RowRendererId.netflow,
+    id: RowRendererIdEnum.netflow,
     isInstance: jest.fn(),
     renderRow: jest.fn(),
   };
 
   const b = {
-    id: RowRendererId.registry,
+    id: RowRendererIdEnum.registry,
     isInstance: jest.fn(),
     renderRow: jest.fn(),
   };
@@ -31,7 +32,7 @@ describe('combineRenderers', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('returns a renderer with the expected id', () => {
-    const id = RowRendererId.library; // typically id from 'a', or 'b', but it can be any value
+    const id = RowRendererIdEnum.library; // typically id from 'a', or 'b', but it can be any value
 
     expect(combineRenderers({ a, b, id }).id).toEqual(id);
   });

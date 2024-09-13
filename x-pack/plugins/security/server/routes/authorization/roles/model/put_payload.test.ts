@@ -7,9 +7,9 @@
 
 import { KibanaFeature } from '@kbn/features-plugin/common';
 
+import { getPutPayloadSchema } from './put_payload';
 import { ALL_SPACES_ID } from '../../../../../common/constants';
 import { validateKibanaPrivileges } from '../../../../lib';
-import { getPutPayloadSchema } from './put_payload';
 
 const basePrivilegeNamesMap = {
   global: ['all', 'read'],
@@ -108,10 +108,10 @@ describe('Put payload schema', () => {
           kibana: [{ spaces: ['foo-*'] }],
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-"[kibana.0.spaces]: types that failed validation:
-- [kibana.0.spaces.0.0]: expected value to equal [*]
-- [kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed"
-`);
+        "[kibana.0.spaces]: types that failed validation:
+        - [kibana.0.spaces.0.0]: expected value to equal [*]
+        - [kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed"
+      `);
     });
 
     test(`can't assign space and global in same entry`, () => {
@@ -120,10 +120,10 @@ describe('Put payload schema', () => {
           kibana: [{ spaces: ['*', 'foo-space'] }],
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-"[kibana.0.spaces]: types that failed validation:
-- [kibana.0.spaces.0.1]: expected value to equal [*]
-- [kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed"
-`);
+        "[kibana.0.spaces]: types that failed validation:
+        - [kibana.0.spaces.0.1]: expected value to equal [*]
+        - [kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed"
+      `);
     });
 
     test(`only allows known Kibana space base privileges`, () => {
@@ -257,6 +257,20 @@ describe('Put payload schema', () => {
               query: `{ "match": { "title": "foo" } }`,
             },
           ],
+
+          remote_indices: [
+            {
+              field_security: {
+                grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                except: ['test-field-security-except-1', 'test-field-security-except-2'],
+              },
+              clusters: ['test-cluster-name-1', 'test-cluster-name-2'],
+              names: ['test-index-name-1', 'test-index-name-2'],
+              privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+              query: `{ "match": { "title": "foo" } }`,
+            },
+          ],
+
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
         kibana: [
@@ -284,6 +298,33 @@ describe('Put payload schema', () => {
           ],
           "indices": Array [
             Object {
+              "field_security": Object {
+                "except": Array [
+                  "test-field-security-except-1",
+                  "test-field-security-except-2",
+                ],
+                "grant": Array [
+                  "test-field-security-grant-1",
+                  "test-field-security-grant-2",
+                ],
+              },
+              "names": Array [
+                "test-index-name-1",
+                "test-index-name-2",
+              ],
+              "privileges": Array [
+                "test-index-privilege-1",
+                "test-index-privilege-2",
+              ],
+              "query": "{ \\"match\\": { \\"title\\": \\"foo\\" } }",
+            },
+          ],
+          "remote_indices": Array [
+            Object {
+              "clusters": Array [
+                "test-cluster-name-1",
+                "test-cluster-name-2",
+              ],
               "field_security": Object {
                 "except": Array [
                   "test-field-security-except-1",
@@ -345,6 +386,113 @@ describe('Put payload schema', () => {
         "metadata": Object {
           "foo": "test-metadata",
         },
+      }
+    `);
+  });
+
+  test('passes through remote_indices when specified', () => {
+    expect(
+      getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
+        elasticsearch: {
+          remote_indices: [
+            {
+              clusters: ['remote_cluster'],
+              names: ['remote_index'],
+              privileges: ['all'],
+            },
+          ],
+        },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "elasticsearch": Object {
+          "remote_indices": Array [
+            Object {
+              "clusters": Array [
+                "remote_cluster",
+              ],
+              "names": Array [
+                "remote_index",
+              ],
+              "privileges": Array [
+                "all",
+              ],
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  test('passes through remote_cluster when specified', () => {
+    expect(
+      getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
+        elasticsearch: {
+          remote_cluster: [
+            {
+              privileges: ['monitor_enrich'],
+              clusters: ['my_remote*'],
+            },
+          ],
+        },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "elasticsearch": Object {
+          "remote_cluster": Array [
+            Object {
+              "clusters": Array [
+                "my_remote*",
+              ],
+              "privileges": Array [
+                "monitor_enrich",
+              ],
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  test(`doesn't allow empty privilege for remote_cluster`, () => {
+    expect(() =>
+      getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
+        elasticsearch: {
+          remote_cluster: [
+            {
+              privileges: [],
+              clusters: ['cluster1'],
+            },
+          ],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[elasticsearch.remote_cluster.0.privileges]: array size is [0], but cannot be smaller than [1]"`
+    );
+  });
+
+  test(`doesn't allow empty clusters for remote_cluster`, () => {
+    expect(() =>
+      getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
+        elasticsearch: {
+          remote_cluster: [
+            {
+              privileges: ['enrich_monitor'],
+              clusters: [],
+            },
+          ],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[elasticsearch.remote_cluster.0.clusters]: array size is [0], but cannot be smaller than [1]"`
+    );
+  });
+
+  // This is important for backwards compatibility
+  test('does not set default value for remote_indices/remote_cluster when not specified', () => {
+    expect(getPutPayloadSchema(() => basePrivilegeNamesMap).validate({})).toMatchInlineSnapshot(`
+      Object {
+        "elasticsearch": Object {},
       }
     `);
   });

@@ -5,19 +5,38 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import styled from 'styled-components';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButton,
+  EuiCallOut,
+  EuiIcon,
+  EuiLink,
+  EuiPortal,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
-import { getPreviousAgentStatusForOfflineAgents } from '../../../../../../common/services/agent_status';
+import {
+  getPreviousAgentStatusForOfflineAgents,
+  isAgentInFailedUpgradeState,
+  isStuckInUpdating,
+} from '../../../../../../common/services/agent_status';
 
 import type { Agent } from '../../../types';
+import { useStartServices } from '../../../hooks';
+
+import { useAgentRefresh } from '../agent_details_page/hooks';
+
+import { AgentUpgradeAgentModal } from './agent_upgrade_modal';
 
 interface Props {
   agent: Agent;
-  showOfflinePreviousStatus?: boolean;
+  fromDetails?: boolean;
 }
 
 const Status = {
@@ -79,10 +98,11 @@ function getStatusComponent(status: Agent['status']): React.ReactElement {
   }
 }
 
-export const AgentHealth: React.FunctionComponent<Props> = ({
-  agent,
-  showOfflinePreviousStatus,
-}) => {
+const WrappedEuiCallOut = styled(EuiCallOut)`
+  white-space: wrap !important;
+`;
+
+export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails }) => {
   const { last_checkin: lastCheckIn, last_checkin_message: lastCheckInMessage } = agent;
   const msLastCheckIn = new Date(lastCheckIn || 0).getTime();
   const lastCheckInMessageText = lastCheckInMessage ? (
@@ -112,27 +132,127 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
   );
 
   const previousToOfflineStatus = useMemo(() => {
-    if (!showOfflinePreviousStatus || agent.status !== 'offline') {
+    if (!fromDetails || agent.status !== 'offline') {
       return;
     }
 
     return getPreviousAgentStatusForOfflineAgents(agent);
-  }, [showOfflinePreviousStatus, agent]);
+  }, [fromDetails, agent]);
+
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const refreshAgent = useAgentRefresh();
+
+  const { docLinks } = useStartServices();
 
   return (
-    <EuiToolTip
-      position="top"
-      content={
+    <>
+      <EuiToolTip
+        position="top"
+        content={
+          <>
+            <p>{lastCheckinText}</p>
+            <p>{lastCheckInMessageText}</p>
+            {isStuckInUpdating(agent) ? (
+              isAgentInFailedUpgradeState(agent) ? (
+                <FormattedMessage
+                  id="xpack.fleet.agentHealth.failedUpgradeTooltipText"
+                  defaultMessage="Agent upgrade failed. Consider restarting the upgrade."
+                />
+              ) : (
+                <p>
+                  <FormattedMessage
+                    id="xpack.fleet.agentHealth.restartUpgradeTooltipText"
+                    defaultMessage="Agent may be stuck updating. Consider restarting the upgrade."
+                  />
+                </p>
+              )
+            ) : null}
+          </>
+        }
+      >
+        {isStuckInUpdating(agent) && !fromDetails ? (
+          <div className="eui-textNoWrap">
+            {getStatusComponent(agent.status)}
+            &nbsp;
+            <EuiIcon type="warning" color="warning" />
+          </div>
+        ) : (
+          <>
+            {getStatusComponent(agent.status)}
+            {previousToOfflineStatus ? getStatusComponent(previousToOfflineStatus) : null}
+          </>
+        )}
+      </EuiToolTip>
+      {fromDetails && isStuckInUpdating(agent) ? (
         <>
-          <p>{lastCheckinText}</p>
-          <p>{lastCheckInMessageText}</p>
+          <EuiSpacer size="m" />
+          <WrappedEuiCallOut
+            iconType="warning"
+            size="m"
+            color="warning"
+            title={
+              isAgentInFailedUpgradeState(agent) ? (
+                <FormattedMessage
+                  id="xpack.fleet.agentHealth.failedUpgradeTitle"
+                  defaultMessage="Agent upgrade is stuck in failed state."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.agentHealth.stuckUpdatingTitle"
+                  defaultMessage="Agent may be stuck updating."
+                />
+              )
+            }
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.agentHealth.stuckUpdatingText"
+                defaultMessage="{stuckMessage} Consider restarting the upgrade. {learnMore}"
+                values={{
+                  stuckMessage: isAgentInFailedUpgradeState(agent)
+                    ? 'Agent upgrade failed.'
+                    : 'Agent has been updating for a while, and may be stuck.',
+                  learnMore: (
+                    <div>
+                      <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
+                        <FormattedMessage
+                          id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
+                          defaultMessage="Learn more"
+                        />
+                      </EuiLink>
+                    </div>
+                  ),
+                }}
+              />
+            </p>
+            <EuiButton
+              color="warning"
+              onClick={() => {
+                setIsUpgradeModalOpen(true);
+              }}
+              data-test-subj="restartUpgradeBtn"
+            >
+              <FormattedMessage
+                id="xpack.fleet.agentHealth.restartUpgradeBtn"
+                defaultMessage="Restart upgrade"
+              />
+            </EuiButton>
+          </WrappedEuiCallOut>
         </>
-      }
-    >
-      <>
-        {getStatusComponent(agent.status)}
-        {previousToOfflineStatus ? getStatusComponent(previousToOfflineStatus) : null}
-      </>
-    </EuiToolTip>
+      ) : null}
+      {isUpgradeModalOpen && (
+        <EuiPortal>
+          <AgentUpgradeAgentModal
+            agents={[agent]}
+            agentCount={1}
+            onClose={() => {
+              setIsUpgradeModalOpen(false);
+              refreshAgent();
+            }}
+            isUpdating={true}
+          />
+        </EuiPortal>
+      )}
+    </>
   );
 };

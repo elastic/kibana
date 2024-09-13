@@ -8,6 +8,10 @@
 import type { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ResponseActionsApiCommandNames } from '../service/response_actions/constants';
+import { EndpointError } from '../errors';
+import { usageTracker } from './usage_tracker';
 import type {
   EndpointAction,
   EndpointActionResponse,
@@ -15,233 +19,297 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../types';
-import { ENDPOINT_ACTIONS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX } from '../constants';
+import { ENDPOINT_ACTION_RESPONSES_INDEX, ENDPOINT_ACTIONS_INDEX } from '../constants';
 import { FleetActionGenerator } from '../data_generators/fleet_action_generator';
 import { wrapErrorAndRejectPromise } from './utils';
+import { EndpointActionGenerator } from '../data_generators/endpoint_action_generator';
 
-const defaultFleetActionGenerator = new FleetActionGenerator();
+const fleetActionGenerator = new FleetActionGenerator();
+const endpointActionGenerator = new EndpointActionGenerator();
 
 export interface IndexedEndpointAndFleetActionsForHostResponse {
   actions: EndpointAction[];
   actionResponses: EndpointActionResponse[];
   actionsIndex: string;
   responsesIndex: string;
+  /** @deprecated */
   endpointActions: LogsEndpointAction[];
+  /** @deprecated */
   endpointActionResponses: LogsEndpointActionResponse[];
   endpointActionsIndex: string;
   endpointActionResponsesIndex: string;
 }
 
+export interface IndexEndpointAndFleetActionsForHostOptions {
+  numResponseActions?: number;
+  alertIds?: string[];
+}
+
 /**
  * Indexes a random number of Endpoint (via Fleet) Actions for a given host
- * (NOTE: ensure that fleet is setup first before calling this loading function)
+ * (NOTE: ensure that fleet is set up first before calling this loading function)
  *
  * @param esClient
  * @param endpointHost
- * @param [fleetActionGenerator]
+ * @param options
  */
-export const indexEndpointAndFleetActionsForHost = async (
-  esClient: Client,
-  endpointHost: HostMetadata,
-  fleetActionGenerator: FleetActionGenerator = defaultFleetActionGenerator
-): Promise<IndexedEndpointAndFleetActionsForHostResponse> => {
-  const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
-  const agentId = endpointHost.elastic.agent.id;
-  const total = fleetActionGenerator.randomN(5) + 1; // generate at least one
-  const response: IndexedEndpointAndFleetActionsForHostResponse = {
+export const indexEndpointAndFleetActionsForHost = usageTracker.track(
+  'indexEndpointAndFleetActionsForHost',
+  async (
+    esClient: Client,
+    endpointHost: HostMetadata,
+    options: IndexEndpointAndFleetActionsForHostOptions = {}
+  ): Promise<IndexedEndpointAndFleetActionsForHostResponse> => {
+    const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
+    const actionsCount = options.numResponseActions ?? 1;
+    const total =
+      actionsCount === 1 ? actionsCount : fleetActionGenerator.randomN(5) + actionsCount;
+    const hostActions = buildIEndpointAndFleetActionsBulkOperations({
+      endpoints: [endpointHost],
+      count: total,
+      alertIds: options.alertIds,
+    });
+    const response: IndexedEndpointAndFleetActionsForHostResponse = {
+      actions: hostActions.actions,
+      actionResponses: hostActions.actionResponses,
+      endpointActions: [],
+      endpointActionResponses: [],
+      actionsIndex: AGENT_ACTIONS_INDEX,
+      responsesIndex: AGENT_ACTIONS_RESULTS_INDEX,
+      endpointActionsIndex: ENDPOINT_ACTIONS_INDEX,
+      endpointActionResponsesIndex: ENDPOINT_ACTION_RESPONSES_INDEX,
+    };
+
+    const bulkResponse = await esClient
+      .bulk(
+        {
+          operations: hostActions.operations,
+          refresh: 'wait_for',
+        },
+        ES_INDEX_OPTIONS
+      )
+      .catch(wrapErrorAndRejectPromise);
+
+    if (bulkResponse.errors) {
+      throw new EndpointError(
+        `indexEndpointAndFleetActionsForHost(): ES Bulk action failed\n\n${JSON.stringify(
+          bulkResponse,
+          null,
+          2
+        )}`,
+        bulkResponse
+      );
+    }
+
+    return response;
+  }
+);
+
+interface BuildIEndpointAndFleetActionsBulkOperationsOptions {
+  endpoints: HostMetadata[];
+  /** Number of response actions to create per endpoint host. Default: 1 */
+  count?: number;
+  /** List of alerts that should be associated with the action */
+  alertIds?: string[];
+}
+
+interface BuildIEndpointAndFleetActionsBulkOperationsResponse
+  extends IndexedEndpointAndFleetActionsForHostResponse {
+  operations: Required<BulkRequest>['operations'];
+}
+
+const getAutomatedActionsSample = (): Array<{
+  command: ResponseActionsApiCommandNames;
+  config?: { overwrite: boolean };
+}> => [
+  { command: 'isolate' },
+  { command: 'suspend-process', config: { overwrite: true } },
+  { command: 'kill-process', config: { overwrite: true } },
+];
+
+export const buildIEndpointAndFleetActionsBulkOperations = ({
+  endpoints,
+  count = 1,
+  alertIds,
+}: BuildIEndpointAndFleetActionsBulkOperationsOptions): BuildIEndpointAndFleetActionsBulkOperationsResponse => {
+  const bulkOperations: BulkRequest['operations'] = [];
+  const response: BuildIEndpointAndFleetActionsBulkOperationsResponse = {
+    operations: bulkOperations,
     actions: [],
     actionResponses: [],
-    endpointActions: [],
-    endpointActionResponses: [],
     actionsIndex: AGENT_ACTIONS_INDEX,
     responsesIndex: AGENT_ACTIONS_RESULTS_INDEX,
     endpointActionsIndex: ENDPOINT_ACTIONS_INDEX,
     endpointActionResponsesIndex: ENDPOINT_ACTION_RESPONSES_INDEX,
+    endpointActions: [],
+    endpointActionResponses: [],
   };
 
-  for (let i = 0; i < total; i++) {
-    // create an action
-    const action = fleetActionGenerator.generate({
-      data: { comment: 'data generator: this host is bad' },
-    });
+  for (const endpoint of endpoints) {
+    const agentId = endpoint.elastic.agent.id;
 
-    action.agents = [agentId];
-    const indexFleetActions = esClient
-      .index(
-        {
-          index: AGENT_ACTIONS_INDEX,
-          body: action,
-          refresh: 'wait_for',
-        },
-        ES_INDEX_OPTIONS
-      )
-      .catch(wrapErrorAndRejectPromise);
-
-    const endpointActionsBody: LogsEndpointAction & {
-      EndpointActions: LogsEndpointAction['EndpointActions'] & {
-        '@timestamp': undefined;
-        user_id: undefined;
-      };
-    } = {
-      EndpointActions: {
-        ...action,
-        '@timestamp': undefined,
-        user_id: undefined,
-      },
-      agent: {
-        id: [agentId],
-      },
-      '@timestamp': action['@timestamp'],
-      user: {
-        id: action.user_id,
-      },
-    };
-
-    await Promise.all([
-      indexFleetActions,
-      esClient
-        .index({
-          index: ENDPOINT_ACTIONS_INDEX,
-          body: endpointActionsBody,
-          refresh: 'wait_for',
-        })
-        .catch(wrapErrorAndRejectPromise),
-    ]);
-
-    const randomFloat = fleetActionGenerator.randomFloat();
-    // Create an action response for the above
-    const actionResponse = fleetActionGenerator.generateResponse({
-      action_id: action.action_id,
-      agent_id: agentId,
-      action_response: {
-        endpoint: {
-          // add ack to 4/5th of fleet response
-          ack: randomFloat < 0.8 ? true : undefined,
-        },
-      },
-      // error for 1/10th of responses
-      error: randomFloat < 0.1 ? 'some error happened' : undefined,
-    });
-
-    const indexFleetResponses = esClient
-      .index(
-        {
-          index: AGENT_ACTIONS_RESULTS_INDEX,
-          body: actionResponse,
-          refresh: 'wait_for',
-        },
-        ES_INDEX_OPTIONS
-      )
-      .catch(wrapErrorAndRejectPromise);
-
-    // 70% has endpoint response
-    if (randomFloat < 0.7) {
-      const endpointActionResponseBody = {
+    const automatedActions = getAutomatedActionsSample();
+    for (let i = 0; i < count; i++) {
+      // start with endpoint action
+      const logsEndpointAction: LogsEndpointAction = endpointActionGenerator.generate({
         EndpointActions: {
-          ...actionResponse,
-          data: actionResponse.action_data,
-          '@timestamp': undefined,
-          action_data: undefined,
-          agent_id: undefined,
-          error: undefined,
+          data: {
+            comment: 'data generator: this host is bad',
+            ...(alertIds ? automatedActions[i] : {}),
+          },
         },
-        agent: {
-          id: agentId,
+      });
+
+      const fleetAction: EndpointAction = {
+        ...logsEndpointAction.EndpointActions,
+        '@timestamp': logsEndpointAction['@timestamp'],
+        agents:
+          typeof logsEndpointAction.agent.id === 'string'
+            ? [logsEndpointAction.agent.id]
+            : logsEndpointAction.agent.id,
+        user_id: logsEndpointAction.user.id,
+      };
+
+      bulkOperations.push({ create: { _index: AGENT_ACTIONS_INDEX } }, fleetAction);
+
+      const logsEndpointActionsBody: LogsEndpointAction = {
+        ...logsEndpointAction,
+        EndpointActions: {
+          ...logsEndpointAction.EndpointActions,
+          data: {
+            ...logsEndpointAction.EndpointActions.data,
+            alert_id: alertIds,
+          },
+        },
+        // to test automated actions in cypress
+        user: alertIds ? { id: 'unknown' } : logsEndpointAction.user,
+        rule: alertIds
+          ? {
+              id: 'generated_rule_id',
+              name: 'generated_rule_name',
+            }
+          : logsEndpointAction.rule,
+      };
+
+      bulkOperations.push(
+        {
+          create: { _index: ENDPOINT_ACTIONS_INDEX },
+        },
+        logsEndpointActionsBody
+      );
+
+      const randomFloat = fleetActionGenerator.randomFloat();
+      // Create an action response for the above
+      const fleetActionResponse: EndpointActionResponse = fleetActionGenerator.generateResponse({
+        action_id: logsEndpointAction.EndpointActions.action_id,
+        agent_id: agentId,
+        action_response: {
+          endpoint: {
+            // add ack to 4/5th of fleet response
+            ack: randomFloat < 0.8 ? true : undefined,
+          },
         },
         // error for 1/10th of responses
-        error:
-          randomFloat < 0.1
-            ? {
-                message: actionResponse.error,
-              }
-            : undefined,
-        '@timestamp': actionResponse['@timestamp'],
-      };
+        error: randomFloat < 0.1 ? 'some error happened' : undefined,
+      });
 
-      await Promise.all([
-        indexFleetResponses,
-        esClient
-          .index({
-            index: ENDPOINT_ACTION_RESPONSES_INDEX,
-            body: endpointActionResponseBody,
-            refresh: 'wait_for',
-          })
-          .catch(wrapErrorAndRejectPromise),
-      ]);
-    } else {
-      // 30% has only fleet response
-      await indexFleetResponses;
-    }
+      bulkOperations.push(
+        {
+          create: { _index: AGENT_ACTIONS_RESULTS_INDEX },
+        },
+        fleetActionResponse
+      );
 
-    response.actions.push(action);
-    response.actionResponses.push(actionResponse);
-  }
+      // 70% has endpoint response
+      if (randomFloat < 0.7) {
+        const endpointActionResponseBody = {
+          EndpointActions: {
+            ...fleetActionResponse,
+            data: fleetActionResponse.action_data,
+            '@timestamp': undefined,
+            action_data: undefined,
+            agent_id: undefined,
+            error: undefined,
+          },
+          agent: {
+            id: agentId,
+          },
+          // error for 1/10th of responses
+          error:
+            randomFloat < 0.1
+              ? {
+                  message: fleetActionResponse.error,
+                }
+              : undefined,
+          '@timestamp': fleetActionResponse['@timestamp'],
+        };
 
-  // Add edge case fleet actions (maybe)
-  if (fleetActionGenerator.randomFloat() < 0.3) {
-    const randomFloat = fleetActionGenerator.randomFloat();
-
-    const actionStartedAt = {
-      '@timestamp': new Date().toISOString(),
-    };
-    // 70% of the time just add either an Isolate -OR- an UnIsolate action
-    if (randomFloat < 0.7) {
-      let action: EndpointAction;
-
-      if (randomFloat < 0.3) {
-        // add a pending isolation
-        action = fleetActionGenerator.generateIsolateAction(actionStartedAt);
-      } else {
-        // add a pending UN-isolation
-        action = fleetActionGenerator.generateUnIsolateAction(actionStartedAt);
+        bulkOperations.push(
+          {
+            create: { _index: ENDPOINT_ACTION_RESPONSES_INDEX },
+          },
+          endpointActionResponseBody
+        );
       }
 
-      action.agents = [agentId];
+      response.actions.push(fleetAction);
+      response.actionResponses.push(fleetActionResponse);
+    }
 
-      await esClient
-        .index(
+    // -------------------------------------------
+    // Add edge case fleet actions (maybe)
+    // -------------------------------------------
+    if (fleetActionGenerator.randomFloat() < 0.3) {
+      const randomFloat = fleetActionGenerator.randomFloat();
+
+      const actionStartedAt = {
+        '@timestamp': new Date().toISOString(),
+      };
+      // 70% of the time just add either an Isolate -OR- an UnIsolate action
+      if (randomFloat < 0.7) {
+        let fleetAction: EndpointAction;
+
+        if (randomFloat < 0.3) {
+          // add a pending isolation
+          fleetAction = fleetActionGenerator.generateIsolateAction(actionStartedAt);
+        } else {
+          // add a pending UN-isolation
+          fleetAction = fleetActionGenerator.generateUnIsolateAction(actionStartedAt);
+        }
+
+        fleetAction.agents = [agentId];
+        bulkOperations.push(
           {
-            index: AGENT_ACTIONS_INDEX,
-            body: action,
-            refresh: 'wait_for',
+            create: { _index: AGENT_ACTIONS_INDEX },
           },
-          ES_INDEX_OPTIONS
-        )
-        .catch(wrapErrorAndRejectPromise);
+          fleetAction
+        );
 
-      response.actions.push(action);
-    } else {
-      // Else (30% of the time) add a pending isolate AND pending un-isolate
-      const action1 = fleetActionGenerator.generateIsolateAction(actionStartedAt);
-      const action2 = fleetActionGenerator.generateUnIsolateAction(actionStartedAt);
+        response.actions.push(fleetAction);
+      } else {
+        // Else (30% of the time) add a pending isolate AND pending un-isolate
+        const fleetAction1 = fleetActionGenerator.generateIsolateAction(actionStartedAt);
+        const fleetAction2 = fleetActionGenerator.generateUnIsolateAction(actionStartedAt);
 
-      action1.agents = [agentId];
-      action2.agents = [agentId];
+        fleetAction1.agents = [agentId];
+        fleetAction2.agents = [agentId];
 
-      await Promise.all([
-        esClient
-          .index(
-            {
-              index: AGENT_ACTIONS_INDEX,
-              body: action1,
-              refresh: 'wait_for',
-            },
-            ES_INDEX_OPTIONS
-          )
-          .catch(wrapErrorAndRejectPromise),
-        esClient
-          .index(
-            {
-              index: AGENT_ACTIONS_INDEX,
-              body: action2,
-              refresh: 'wait_for',
-            },
-            ES_INDEX_OPTIONS
-          )
-          .catch(wrapErrorAndRejectPromise),
-      ]);
+        bulkOperations.push(
+          {
+            create: { _index: AGENT_ACTIONS_INDEX },
+          },
+          fleetAction1
+        );
 
-      response.actions.push(action1, action2);
+        bulkOperations.push(
+          {
+            create: { _index: AGENT_ACTIONS_INDEX },
+          },
+          fleetAction2
+        );
+
+        response.actions.push(fleetAction1, fleetAction2);
+      }
     }
   }
 

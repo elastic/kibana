@@ -6,12 +6,13 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { EuiAccordionProps } from '@elastic/eui';
+import type { EuiAccordionProps, UseEuiTheme } from '@elastic/eui';
 import { EuiCodeBlock, EuiFormRow, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import { QUERY_TIMEOUT } from '../../../common/constants';
+import { TimeoutField } from '../../form/timeout_field';
 import type { LiveQueryFormFields } from '.';
 import { OsqueryEditor } from '../../editor';
 import { useKibana } from '../../common/lib/kibana';
@@ -19,19 +20,18 @@ import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_edit
 import type { SavedQueriesDropdownProps } from '../../saved_queries/saved_queries_dropdown';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 
-const StyledEuiAccordion = styled(EuiAccordion)`
-  ${({ isDisabled }: { isDisabled?: boolean }) => isDisabled && 'display: none;'}
-  .euiAccordion__button {
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
-  .euiAccordion__childWrapper {
-    -webkit-transition: none;
-  }
-`;
+const euiCodeBlockCss = {
+  minHeight: '100px',
+};
 
-const StyledEuiCodeBlock = styled(EuiCodeBlock)`
-  min-height: 100px;
-`;
+const euiAccordionCss = ({ euiTheme }: UseEuiTheme) => ({
+  '.euiAccordion__button': {
+    color: euiTheme.colors.primary,
+  },
+  '.euiAccordion__childWrapper': {
+    '-webkit-transition': 'none',
+  },
+});
 
 export interface LiveQueryQueryFieldProps {
   handleSubmitForm?: () => void;
@@ -70,6 +70,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
         resetField('query', { defaultValue: savedQuery.query });
         resetField('savedQueryId', { defaultValue: savedQuery.savedQueryId });
         resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
+        resetField('timeout', { defaultValue: savedQuery.timeout ?? QUERY_TIMEOUT.DEFAULT });
 
         if (!isEmpty(savedQuery.ecs_mapping)) {
           setAdvancedContentState('open');
@@ -81,7 +82,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
     [resetField]
   );
 
-  const handleToggle = useCallback((isOpen) => {
+  const handleToggle = useCallback((isOpen: any) => {
     const newState = isOpen ? 'open' : 'closed';
     setAdvancedContentState(newState);
   }, []);
@@ -112,7 +113,6 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
         ? [
             {
               name: 'submitOnCmdEnter',
-              bindKey: { win: 'ctrl+enter', mac: 'cmd+enter' },
               exec: handleSubmitForm,
             },
           ]
@@ -125,6 +125,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
       {!isSavedQueryDisabled && (
         <SavedQueriesDropdown disabled={isSavedQueryDisabled} onChange={handleSavedQueryChange} />
       )}
+
       <EuiFormRow
         isInvalid={!!error?.message}
         error={error?.message}
@@ -132,14 +133,15 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
         isDisabled={!permissions.writeLiveQueries || disabled}
       >
         {!permissions.writeLiveQueries || disabled ? (
-          <StyledEuiCodeBlock
+          <EuiCodeBlock
+            css={euiCodeBlockCss}
             language="sql"
             fontSize="m"
             paddingSize="m"
             transparentBackground={!value.length}
           >
             {value}
-          </StyledEuiCodeBlock>
+          </EuiCodeBlock>
         ) : (
           <OsqueryEditor defaultValue={value} onChange={onChange} commands={commands} />
         )}
@@ -148,7 +150,8 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
       <EuiSpacer size="m" />
 
       {!isAdvancedToggleHidden && (
-        <StyledEuiAccordion
+        <EuiAccordion
+          css={euiAccordionCss}
           id="advanced"
           forceState={advancedContentState}
           onToggle={handleToggle}
@@ -156,14 +159,16 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
           data-test-subj="advanced-accordion-content"
         >
           <EuiSpacer size="xs" />
+          <TimeoutField />
+          <EuiSpacer size="s" />
           <ECSMappingEditorField euiFieldProps={ecsFieldProps} />
-        </StyledEuiAccordion>
+        </EuiAccordion>
       )}
     </>
   );
 };
 
-export const LiveQueryQueryField = React.memo(LiveQueryQueryFieldComponent);
+const LiveQueryQueryField = React.memo(LiveQueryQueryFieldComponent);
 
 // eslint-disable-next-line import/no-default-export
 export { LiveQueryQueryField as default };

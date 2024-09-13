@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConfigPath } from '@kbn/config';
+import type { ConfigPath } from '@kbn/config';
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
@@ -76,6 +77,12 @@ export interface DiscoveredPlugin {
    * duplicated here.
    */
   readonly requiredBundles: readonly PluginName[];
+
+  /**
+   * An optional list of plugin dependencies that can be resolved dynamically at runtime
+   * using the dynamic contract resolving capabilities from the plugin service.
+   */
+  readonly runtimePluginDependencies: readonly PluginName[];
 
   /**
    * Specifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when

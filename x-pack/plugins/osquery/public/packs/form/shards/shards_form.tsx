@@ -9,16 +9,11 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import styled from 'styled-components';
 import type { UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
-import type { ShardsArray } from '../../../../common/schemas/common/utils';
+import type { ShardsArray } from '../../../../common/utils/converters';
 import { ShardsPolicyField } from './shards_policy_field';
 import { ShardsPercentageField } from './shards_percentage_field';
 import { overflowCss } from '../../utils';
-
-const StyledButtonWrapper = styled.div`
-  margin-top: ${(props: { index: number }) => props.index === 0 && '16px'};
-`;
 
 export type ShardsFormReturn = UseFormReturn<{ shardsArray: ShardsArray }>;
 
@@ -43,6 +38,11 @@ const ShardsFormComponent = ({
     }
   }, [index, onDelete]);
 
+  const buttonWrapperCss = useCallback(
+    ({ euiTheme }: any) => (index === 0 ? { marginTop: euiTheme.size.base } : {}),
+    [index]
+  );
+
   return (
     <>
       <EuiFlexGroup
@@ -65,7 +65,7 @@ const ShardsFormComponent = ({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <StyledButtonWrapper index={index}>
+              <div css={buttonWrapperCss}>
                 <EuiButtonIcon
                   aria-label={i18n.translate(
                     'xpack.osquery.pack.form.deleteShardsRowButtonAriaLabel',
@@ -78,7 +78,7 @@ const ShardsFormComponent = ({
                   disabled={isLastItem}
                   onClick={handleDeleteClick}
                 />
-              </StyledButtonWrapper>
+              </div>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

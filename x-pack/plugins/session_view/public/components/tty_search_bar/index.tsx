@@ -7,7 +7,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import stripAnsi from 'strip-ansi';
 import { SessionViewSearchBar } from '../session_view_search_bar';
-import { IOLine } from '../../../common/types/process_tree';
+import type { IOLine } from '../../../common';
 
 interface SearchResult {
   line: IOLine;
@@ -37,7 +37,7 @@ export const TTYSearchBar = ({
   const [currentMatch, setCurrentMatch] = useState<SearchResult | null>(null);
 
   const jumpToMatch = useCallback(
-    (match) => {
+    (match: any) => {
       if (match) {
         setIsPlaying(false);
         const goToLine = lines.indexOf(match.line);
@@ -103,7 +103,7 @@ export const TTYSearchBar = ({
   }, [searchQuery, lines, jumpToMatch, xTermSearchFn]);
 
   const onSearch = useCallback(
-    (query) => {
+    (query: any) => {
       setIsPlaying(false);
       setSearchQuery(query);
       setCurrentMatch(null);
@@ -112,7 +112,7 @@ export const TTYSearchBar = ({
   );
 
   const onSetCurrentMatch = useCallback(
-    (index) => {
+    (index: any) => {
       const match = searchResults[index];
 
       if (match && currentMatch !== match) {

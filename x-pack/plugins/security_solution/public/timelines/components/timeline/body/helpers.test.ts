@@ -5,184 +5,10 @@
  * 2.0.
  */
 
-import {
-  eventHasNotes,
-  eventIsPinned,
-  getPinOnClick,
-  getPinTooltip,
-  stringifyEvent,
-} from './helpers';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { TimelineType } from '../../../../../common/types/timeline';
+import { eventHasNotes, eventIsPinned, getPinOnClick, getPinTooltip } from './helpers';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 describe('helpers', () => {
-  describe('stringifyEvent', () => {
-    test('it omits __typename when it appears at arbitrary levels', () => {
-      const toStringify: Ecs = {
-        __typename: 'level 0',
-        _id: '4',
-        timestamp: '2018-11-08T19:03:25.937Z',
-        host: {
-          __typename: 'level 1',
-          name: ['suricata'],
-          ip: ['192.168.0.1'],
-        },
-        event: {
-          id: ['4'],
-          category: ['Attempted Administrator Privilege Gain'],
-          type: ['Alert'],
-          module: ['suricata'],
-          severity: [1],
-        },
-        source: {
-          ip: ['192.168.0.3'],
-          port: [53],
-        },
-        destination: {
-          ip: ['192.168.0.3'],
-          port: [6343],
-        },
-        suricata: {
-          eve: {
-            flow_id: [4],
-            proto: [''],
-            alert: {
-              signature: ['ET PHONE HOME Stack Overflow (CVE-2019-90210)'],
-              signature_id: [4],
-              __typename: 'level 2',
-            },
-          },
-        },
-        user: {
-          id: ['4'],
-          name: ['jack.black'],
-        },
-        geo: {
-          region_name: ['neither'],
-          country_iso_code: ['sasquatch'],
-        },
-      } as Ecs; // as cast so that `__typename` can be added for the tests even though it is not part of ECS
-      const expected: Ecs = {
-        _id: '4',
-        timestamp: '2018-11-08T19:03:25.937Z',
-        host: {
-          name: ['suricata'],
-          ip: ['192.168.0.1'],
-        },
-        event: {
-          id: ['4'],
-          category: ['Attempted Administrator Privilege Gain'],
-          type: ['Alert'],
-          module: ['suricata'],
-          severity: [1],
-        },
-        source: {
-          ip: ['192.168.0.3'],
-          port: [53],
-        },
-        destination: {
-          ip: ['192.168.0.3'],
-          port: [6343],
-        },
-        suricata: {
-          eve: {
-            flow_id: [4],
-            proto: [''],
-            alert: {
-              signature: ['ET PHONE HOME Stack Overflow (CVE-2019-90210)'],
-              signature_id: [4],
-            },
-          },
-        },
-        user: {
-          id: ['4'],
-          name: ['jack.black'],
-        },
-        geo: {
-          region_name: ['neither'],
-          country_iso_code: ['sasquatch'],
-        },
-      };
-      expect(JSON.parse(stringifyEvent(toStringify))).toEqual(expected);
-    });
-
-    test('it omits null and undefined values at arbitrary levels, for arbitrary data types', () => {
-      const expected: Ecs = {
-        _id: '4',
-        host: {},
-        event: {
-          id: ['4'],
-          category: ['theory'],
-          type: ['Alert'],
-          module: ['me'],
-          severity: [1],
-        },
-        source: {
-          port: [53],
-        },
-        destination: {
-          ip: ['192.168.0.3'],
-          port: [6343],
-        },
-        suricata: {
-          eve: {
-            flow_id: [4],
-            proto: [''],
-            alert: {
-              signature: ['dance moves'],
-            },
-          },
-        },
-        user: {
-          id: ['4'],
-          name: ['no use for a'],
-        },
-        geo: {
-          region_name: ['bizzaro'],
-          country_iso_code: ['world'],
-        },
-      };
-      const toStringify: Ecs = {
-        _id: '4',
-        host: {},
-        event: {
-          id: ['4'],
-          category: ['theory'],
-          type: ['Alert'],
-          module: ['me'],
-          severity: [1],
-        },
-        source: {
-          ip: undefined,
-          port: [53],
-        },
-        destination: {
-          ip: ['192.168.0.3'],
-          port: [6343],
-        },
-        suricata: {
-          eve: {
-            flow_id: [4],
-            proto: [''],
-            alert: {
-              signature: ['dance moves'],
-              signature_id: undefined,
-            },
-          },
-        },
-        user: {
-          id: ['4'],
-          name: ['no use for a'],
-        },
-        geo: {
-          region_name: ['bizzaro'],
-          country_iso_code: ['world'],
-        },
-      };
-      expect(JSON.parse(stringifyEvent(toStringify))).toEqual(expected);
-    });
-  });
-
   describe('eventHasNotes', () => {
     test('it returns false for when notes is empty', () => {
       expect(eventHasNotes([])).toEqual(false);
@@ -200,7 +26,7 @@ describe('helpers', () => {
           isAlert: false,
           isPinned: true,
           eventHasNotes: true,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
       ).toEqual('This event cannot be unpinned because it has notes');
     });
@@ -211,7 +37,7 @@ describe('helpers', () => {
           isAlert: true,
           isPinned: true,
           eventHasNotes: true,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
       ).toEqual('This alert cannot be unpinned because it has notes');
     });
@@ -222,7 +48,7 @@ describe('helpers', () => {
           isAlert: false,
           isPinned: true,
           eventHasNotes: false,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
       ).toEqual('Unpin event');
     });
@@ -233,31 +59,31 @@ describe('helpers', () => {
           isAlert: true,
           isPinned: true,
           eventHasNotes: false,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
       ).toEqual('Unpin alert');
     });
 
-    test('it indicates the event is NOT pinned when `isPinned` is `false` and the event has notes', () => {
+    test('it indicates the event is pinned when `isPinned` is `false` and the event has notes', () => {
       expect(
         getPinTooltip({
           isAlert: false,
           isPinned: false,
           eventHasNotes: true,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
-      ).toEqual('Pin event');
+      ).toEqual('This event cannot be unpinned because it has notes');
     });
 
-    test('it indicates the alert is NOT pinned when `isPinned` is `false` and the alert has notes', () => {
+    test('it indicates the alert is pinned when `isPinned` is `false` and the alert has notes', () => {
       expect(
         getPinTooltip({
           isAlert: true,
           isPinned: false,
           eventHasNotes: true,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
-      ).toEqual('Pin alert');
+      ).toEqual('This alert cannot be unpinned because it has notes');
     });
 
     test('it indicates the event is NOT pinned when `isPinned` is `false` and the event does NOT have notes', () => {
@@ -266,7 +92,7 @@ describe('helpers', () => {
           isAlert: false,
           isPinned: false,
           eventHasNotes: false,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
       ).toEqual('Pin event');
     });
@@ -277,7 +103,7 @@ describe('helpers', () => {
           isAlert: true,
           isPinned: false,
           eventHasNotes: false,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
       ).toEqual('Pin alert');
     });
@@ -288,7 +114,7 @@ describe('helpers', () => {
           isAlert: false,
           isPinned: false,
           eventHasNotes: false,
-          timelineType: TimelineType.template,
+          timelineType: TimelineTypeEnum.template,
         })
       ).toEqual('This event may not be pinned while editing a template timeline');
     });
@@ -299,7 +125,7 @@ describe('helpers', () => {
           isAlert: true,
           isPinned: false,
           eventHasNotes: false,
-          timelineType: TimelineType.template,
+          timelineType: TimelineTypeEnum.template,
         })
       ).toEqual('This alert may not be pinned while editing a template timeline');
     });

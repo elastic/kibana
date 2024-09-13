@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
@@ -26,13 +27,35 @@ export class CommonPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
-  private readonly globalNav = this.ctx.getService('globalNav');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly loginPage = this.ctx.getPageObject('login');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
+
+  private getUrlWithoutPort(urlStr: string) {
+    const url = new URL(urlStr);
+    url.port = '';
+    return url.toString();
+  }
+
+  private async disableTours() {
+    const NEW_FEATURES_TOUR_STORAGE_KEYS = {
+      RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.9',
+      TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
+      FLYOUT: 'securitySolution.documentDetails.newFeaturesTour.v8.14',
+    };
+
+    const tourStorageKeys = Object.values(NEW_FEATURES_TOUR_STORAGE_KEYS);
+    const tourConfig = {
+      isTourActive: false,
+    };
+
+    for (const key of tourStorageKeys) {
+      await this.browser.setLocalStorageItem(key, JSON.stringify(tourConfig));
+    }
+  }
 
   /**
    * Logins to Kibana as default user and navigates to provided app
@@ -49,6 +72,8 @@ export class CommonPageObject extends FtrService {
     if (disableWelcomePrompt) {
       await this.browser.setLocalStorageItem('home:welcome:show', 'false');
     }
+
+    await this.disableTours();
 
     let currentUrl = await this.browser.getCurrentUrl();
     this.log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
@@ -110,8 +135,25 @@ export class CommonPageObject extends FtrService {
         ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
         : await this.browser.getCurrentUrl();
 
-      if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
-        throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
+      if (
+        currentUrl.includes('/app/home') &&
+        disableWelcomePrompt &&
+        (await this.isWelcomeScreen())
+      ) {
+        await this.browser.setLocalStorageItem('home:welcome:show', 'false');
+        // Force a new navigation again
+        const msg = `Found the Welcome page in ${currentUrl}. Skipping it...`;
+        this.log.debug(msg);
+        throw new Error(msg);
+      }
+
+      if (ensureCurrentUrl) {
+        const actualUrl = this.getUrlWithoutPort(currentUrl);
+        const expectedUrl = this.getUrlWithoutPort(appUrl);
+
+        if (!actualUrl.includes(expectedUrl)) {
+          throw new Error(`expected ${actualUrl}.includes(${expectedUrl})`);
+        }
       }
     });
   }
@@ -139,10 +181,12 @@ export class CommonPageObject extends FtrService {
       pathname: `${basePath}${this.config.get(['apps', appName]).pathname}`,
     };
 
-    if (shouldUseHashForSubUrl) {
-      appConfig.hash = useActualUrl ? subUrl : `/${appName}/${subUrl}`;
-    } else {
-      appConfig.pathname += `/${subUrl}`;
+    if (typeof subUrl === 'string') {
+      if (shouldUseHashForSubUrl) {
+        appConfig.hash = useActualUrl ? subUrl : `/${appName}/${subUrl}`;
+      } else {
+        appConfig.pathname += `/${subUrl}`;
+      }
     }
 
     await this.navigate({
@@ -221,13 +265,23 @@ export class CommonPageObject extends FtrService {
     {
       basePath = '',
       shouldLoginIfPrompted = true,
+      path = '',
       hash = '',
       search = '',
       disableWelcomePrompt = true,
       insertTimestamp = true,
+      retryOnFatalError = true,
     } = {}
   ) {
     let appUrl: string;
+
+    // See https://github.com/elastic/kibana/pull/164376
+    if (appName === 'canvas' && !path) {
+      throw new Error(
+        'This causes flaky test failures. Use Canvas page object goToListingPage instead'
+      );
+    }
+
     if (this.config.has(['apps', appName])) {
       // Legacy applications
       const appConfig = this.config.get(['apps', appName]);
@@ -238,7 +292,7 @@ export class CommonPageObject extends FtrService {
       });
     } else {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
-        pathname: `${basePath}/app/${appName}`,
+        pathname: `${basePath}/app/${appName}` + (path ? `/${path}` : ''),
         hash,
         search,
       });
@@ -271,7 +325,7 @@ export class CommonPageObject extends FtrService {
           appName === 'home' &&
           currentUrl.includes('app/home') &&
           disableWelcomePrompt &&
-          (await this.isChromeHidden())
+          (await this.isWelcomeScreen())
         ) {
           await this.browser.setLocalStorageItem('home:welcome:show', 'false');
           const msg = `Failed to skip the Welcome page when navigating the app ${appName}`;
@@ -280,17 +334,26 @@ export class CommonPageObject extends FtrService {
         }
 
         currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
+        const decodedAppUrl = decodeURIComponent(appUrl);
+        const decodedCurrentUrl = decodeURIComponent(currentUrl);
 
-        const navSuccessful = currentUrl
+        const navSuccessful = decodedCurrentUrl
           .replace(':80/', '/')
           .replace(':443/', '/')
-          .startsWith(appUrl);
+          .startsWith(decodedAppUrl.replace(':80/', '/').replace(':443/', '/'));
 
         if (!navSuccessful) {
-          const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;
+          const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${decodedAppUrl} currentUrl=${decodedCurrentUrl}`;
           this.log.debug(msg);
           throw new Error(msg);
         }
+
+        if (retryOnFatalError && (await this.isFatalErrorScreen())) {
+          const msg = `Fatal error screen shown. Let's try refreshing the page once more.`;
+          this.log.debug(msg);
+          throw new Error(msg);
+        }
+
         if (appName === 'discover') {
           await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
         }
@@ -335,7 +398,7 @@ export class CommonPageObject extends FtrService {
 
   async ensureModalOverlayHidden() {
     return this.retry.try(async () => {
-      const shown = await this.testSubjects.exists('confirmModalTitleText');
+      const shown = await this.testSubjects.exists('confirmModalTitleText', { timeout: 500 });
       if (shown) {
         throw new Error('Modal overlay is showing');
       }
@@ -346,6 +409,12 @@ export class CommonPageObject extends FtrService {
     this.log.debug('Clicking modal confirm');
     // make sure this data-test-subj 'confirmModalTitleText' exists because we're going to wait for it to be gone later
     await this.testSubjects.exists('confirmModalTitleText');
+    // make sure button is enabled before clicking it
+    // (and conveniently give UI enough time to bind a handler to it)
+    const isEnabled = await this.testSubjects.isEnabled('confirmModalConfirmButton');
+    if (!isEnabled) {
+      throw new Error('Modal confirm button is not enabled');
+    }
     await this.testSubjects.click('confirmModalConfirmButton');
     if (ensureHidden) {
       await this.ensureModalOverlayHidden();
@@ -393,13 +462,15 @@ export class CommonPageObject extends FtrService {
   }
 
   async isChromeVisible() {
-    const globalNavShown = await this.globalNav.exists();
-    return globalNavShown;
+    return await this.testSubjects.exists('kbnAppWrapper visibleChrome');
   }
 
   async isChromeHidden() {
-    const globalNavShown = await this.globalNav.exists();
-    return !globalNavShown;
+    return await this.testSubjects.exists('kbnAppWrapper hiddenChrome');
+  }
+
+  async isFatalErrorScreen() {
+    return await this.testSubjects.exists('fatalErrorScreen');
   }
 
   async waitForTopNavToBeVisible() {
@@ -409,39 +480,6 @@ export class CommonPageObject extends FtrService {
         throw new Error('Local nav not visible yet');
       }
     });
-  }
-
-  async closeToast() {
-    const toast = await this.find.byCssSelector('.euiToast', 6 * this.defaultFindTimeout);
-    await toast.moveMouseTo();
-    const title = await (await this.testSubjects.find('euiToastHeader__title')).getVisibleText();
-
-    await this.testSubjects.click('toastCloseButton');
-    return title;
-  }
-
-  async closeToastIfExists() {
-    const toastShown = await this.find.existsByCssSelector('.euiToast');
-    if (toastShown) {
-      try {
-        await this.testSubjects.click('toastCloseButton');
-      } catch (err) {
-        // ignore errors, toast clear themselves after timeout
-      }
-    }
-  }
-
-  async clearAllToasts() {
-    const toasts = await this.find.allByCssSelector('.euiToast');
-    for (const toastElement of toasts) {
-      try {
-        await toastElement.moveMouseTo();
-        const closeBtn = await toastElement.findByTestSubject('toastCloseButton');
-        await closeBtn.click();
-      } catch (err) {
-        // ignore errors, toast clear themselves after timeout
-      }
-    }
   }
 
   async getJsonBodyText() {
@@ -491,6 +529,10 @@ export class CommonPageObject extends FtrService {
       const button = await this.find.byButtonText('Dismiss');
       await button.click();
     }
+  }
+
+  async isWelcomeScreen() {
+    return await this.testSubjects.exists('homeWelcomeInterstitial');
   }
 
   /**

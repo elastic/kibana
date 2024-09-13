@@ -7,6 +7,10 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
+
+import { API_VERSIONS } from '../../../common/constants';
+
 import type { FleetAuthz } from '../../../common';
 
 import {
@@ -14,6 +18,7 @@ import {
   type FleetAuthzRouter,
   getRouteRequiredAuthz,
 } from '../../services/security';
+import type { FleetAuthzRouteConfig } from '../../services/security/types';
 
 import type {
   DeletePackageResponse,
@@ -27,9 +32,11 @@ import { splitPkgKey } from '../../services/epm/registry';
 import {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
+  GetInstalledPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
   GetInfoRequestSchemaDeprecated,
+  GetBulkAssetsRequestSchema,
   InstallPackageFromRegistryRequestSchema,
   InstallPackageFromRegistryRequestSchemaDeprecated,
   InstallPackageByUploadRequestSchema,
@@ -39,14 +46,22 @@ import {
   GetStatsRequestSchema,
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
+  ReauthorizeTransformRequestSchema,
+  GetDataStreamsRequestSchema,
+  CreateCustomIntegrationRequestSchema,
+  GetInputsRequestSchema,
+  InstallKibanaAssetsRequestSchema,
+  DeleteKibanaAssetsRequestSchema,
 } from '../../types';
+import type { FleetConfigType } from '../../config';
 
 import {
   getCategoriesHandler,
   getListHandler,
+  getInstalledListHandler,
   getLimitedListHandler,
-  getFileHandler,
   getInfoHandler,
+  getBulkAssetsHandler,
   installPackageFromRegistryHandler,
   installPackageByUploadHandler,
   deletePackageHandler,
@@ -54,115 +69,218 @@ import {
   getStatsHandler,
   updatePackageHandler,
   getVerificationKeyIdHandler,
+  reauthorizeTransformsHandler,
+  getDataStreamsHandler,
+  createCustomIntegrationHandler,
+  getInputsHandler,
 } from './handlers';
+import { getFileHandler } from './file_handler';
+import {
+  deletePackageKibanaAssetsHandler,
+  installPackageKibanaAssetsHandler,
+} from './kibana_assets_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
-export const registerRoutes = (router: FleetAuthzRouter) => {
-  router.get(
-    {
+export const INSTALL_PACKAGES_AUTHZ: FleetAuthzRouteConfig['fleetAuthz'] = {
+  integrations: { installPackages: true },
+};
+
+export const READ_PACKAGE_INFO_AUTHZ: FleetAuthzRouteConfig['fleetAuthz'] = {
+  integrations: { readPackageInfo: true },
+};
+
+export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
+  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
-      validate: GetCategoriesRequestSchema,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      description: `Get package categories`,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetCategoriesRequestSchema },
       },
-    },
-    getCategoriesHandler
-  );
+      getCategoriesHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.LIST_PATTERN,
-      validate: GetPackagesRequestSchema,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      description: `Get list of packages`,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetPackagesRequestSchema },
       },
-    },
-    getListHandler
-  );
+      getListHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.INSTALLED_LIST_PATTERN,
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetInstalledPackagesRequestSchema },
+      },
+      getInstalledListHandler
+    );
+
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
-      validate: false,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      description: `Get limited package list`,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: false,
       },
-    },
-    getLimitedListHandler
-  );
+      getLimitedListHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.STATS_PATTERN,
-      validate: GetStatsRequestSchema,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetStatsRequestSchema },
       },
-    },
-    getStatsHandler
-  );
+      getStatsHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.INPUTS_PATTERN,
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetInputsRequestSchema },
+      },
+      getInputsHandler
+    );
+
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.FILEPATH_PATTERN,
-      validate: GetFileRequestSchema,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetFileRequestSchema },
       },
-    },
-    getFileHandler
-  );
+      getFileHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.INFO_PATTERN,
-      validate: GetInfoRequestSchema,
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(fleetAuthz, getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN))
           .granted,
-    },
-    getInfoHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetInfoRequestSchema },
+      },
+      getInfoHandler
+    );
 
-  router.put(
-    {
+  router.versioned
+    .put({
       path: EPM_API_ROUTES.INFO_PATTERN,
-      validate: UpdatePackageRequestSchema,
       fleetAuthz: {
-        integrations: { upgradePackages: true, writePackageSettings: true },
+        integrations: { writePackageSettings: true },
       },
-    },
-    updatePackageHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: UpdatePackageRequestSchema },
+      },
+      updatePackageHandler
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN,
-      validate: InstallPackageFromRegistryRequestSchema,
-      fleetAuthz: {
-        integrations: { installPackages: true },
+      fleetAuthz: INSTALL_PACKAGES_AUTHZ,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: InstallPackageFromRegistryRequestSchema },
       },
-    },
-    installPackageFromRegistryHandler
-  );
+      installPackageFromRegistryHandler
+    );
 
-  router.post(
-    {
+  if (experimentalFeatures.useSpaceAwareness) {
+    router.versioned
+      .post({
+        path: EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN,
+        fleetAuthz: {
+          integrations: { installPackages: true },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: { request: InstallKibanaAssetsRequestSchema },
+        },
+        installPackageKibanaAssetsHandler
+      );
+
+    router.versioned
+      .delete({
+        path: EPM_API_ROUTES.DELETE_KIBANA_ASSETS_PATTERN,
+        fleetAuthz: {
+          integrations: { installPackages: true },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: { request: DeleteKibanaAssetsRequestSchema },
+        },
+        deletePackageKibanaAssetsHandler
+      );
+  }
+
+  router.versioned
+    .post({
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
-      validate: BulkInstallPackagesFromRegistryRequestSchema,
       fleetAuthz: {
         integrations: { installPackages: true, upgradePackages: true },
       },
-    },
-    bulkInstallPackagesFromRegistryHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: BulkInstallPackagesFromRegistryRequestSchema },
+      },
+      bulkInstallPackagesFromRegistryHandler
+    );
 
   // Only allow upload for superuser
-  router.post(
-    {
+  router.versioned
+    .post({
       path: EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
-      validate: InstallPackageByUploadRequestSchema,
       options: {
         body: {
           accepts: ['application/gzip', 'application/zip'],
@@ -173,125 +291,220 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { uploadPackages: true },
       },
-    },
-    installPackageByUploadHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: InstallPackageByUploadRequestSchema },
+      },
+      installPackageByUploadHandler
+    );
 
-  router.delete(
-    {
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.CUSTOM_INTEGRATIONS_PATTERN,
+      fleetAuthz: INSTALL_PACKAGES_AUTHZ,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: CreateCustomIntegrationRequestSchema },
+      },
+      createCustomIntegrationHandler
+    );
+
+  router.versioned
+    .delete({
       path: EPM_API_ROUTES.DELETE_PATTERN,
-      validate: DeletePackageRequestSchema,
       fleetAuthz: {
         integrations: { removePackages: true },
       },
-    },
-    deletePackageHandler
-  );
-
-  router.get(
-    {
-      path: EPM_API_ROUTES.VERIFICATION_KEY_ID,
-      validate: false,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: DeletePackageRequestSchema },
       },
-    },
-    getVerificationKeyIdHandler
-  );
+
+      deletePackageHandler
+    );
+
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.VERIFICATION_KEY_ID,
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      description: `Get a package signature verification key ID`,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: false,
+      },
+      getVerificationKeyIdHandler
+    );
+
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.DATA_STREAMS_PATTERN,
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetDataStreamsRequestSchema },
+      },
+      getDataStreamsHandler
+    );
+
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.BULK_ASSETS_PATTERN,
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      description: `Get bulk assets`,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetBulkAssetsRequestSchema },
+      },
+      getBulkAssetsHandler
+    );
 
   // deprecated since 8.0
-  router.get(
-    {
+  // This endpoint should be marked as internal but the router selects this endpoint over the new GET one
+  // For now keeping it public
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
-      validate: GetInfoRequestSchemaDeprecated,
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(
           fleetAuthz,
           getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN_DEPRECATED)
         ).granted,
-    },
-    async (context, request, response) => {
-      const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
-      const resp: IKibanaResponse<GetInfoResponse> = await getInfoHandler(
-        context,
-        newRequest,
-        response
-      );
-      if (resp.payload?.item) {
-        // returning item as well here, because pkgVersion is optional in new GET endpoint, and if not specified, the router selects the deprecated route
-        return response.ok({ body: { item: resp.payload.item, response: resp.payload.item } });
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetInfoRequestSchemaDeprecated },
+      },
+      async (context, request, response) => {
+        const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
+        const resp: IKibanaResponse<GetInfoResponse> = await getInfoHandler(
+          context,
+          newRequest,
+          response
+        );
+        if (resp.payload?.item) {
+          // returning item as well here, because pkgVersion is optional in new GET endpoint, and if not specified, the router selects the deprecated route
+          return response.ok({ body: { item: resp.payload.item, response: resp.payload.item } });
+        }
+        return resp;
       }
-      return resp;
-    }
-  );
+    );
 
-  router.put(
-    {
+  router.versioned
+    .put({
       path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
-      validate: UpdatePackageRequestSchemaDeprecated,
-      fleetAuthz: {
-        integrations: { upgradePackages: true, writePackageSettings: true },
-      },
-    },
-    async (context, request, response) => {
-      const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
-      const resp: IKibanaResponse<UpdatePackageResponse> = await updatePackageHandler(
-        context,
-        newRequest,
-        response
-      );
-      if (resp.payload?.item) {
-        return response.ok({ body: { response: resp.payload.item } });
-      }
-      return resp;
-    }
-  );
 
-  router.post(
-    {
+      fleetAuthz: {
+        integrations: { writePackageSettings: true },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: UpdatePackageRequestSchemaDeprecated },
+      },
+      async (context, request, response) => {
+        const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
+        const resp: IKibanaResponse<UpdatePackageResponse> = await updatePackageHandler(
+          context,
+          newRequest,
+          response
+        );
+        if (resp.payload?.item) {
+          return response.ok({ body: { response: resp.payload.item } });
+        }
+        return resp;
+      }
+    );
+
+  // This endpoint should be marked as internal but the router selects this endpoint over the new POST
+  router.versioned
+    .post({
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED,
-      validate: InstallPackageFromRegistryRequestSchemaDeprecated,
-      fleetAuthz: {
-        integrations: { installPackages: true },
+      fleetAuthz: INSTALL_PACKAGES_AUTHZ,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: InstallPackageFromRegistryRequestSchemaDeprecated },
       },
-    },
-    async (context, request, response) => {
-      const newRequest = {
-        ...request,
-        params: splitPkgKey(request.params.pkgkey),
-        query: request.query,
-      } as any;
-      const resp: IKibanaResponse<InstallPackageResponse> = await installPackageFromRegistryHandler(
-        context,
-        newRequest,
-        response
-      );
-      if (resp.payload?.items) {
-        return response.ok({ body: { ...resp.payload, response: resp.payload.items } });
+      async (context, request, response) => {
+        const newRequest = {
+          ...request,
+          params: splitPkgKey(request.params.pkgkey),
+          query: request.query,
+        } as any;
+        const resp: IKibanaResponse<InstallPackageResponse> =
+          await installPackageFromRegistryHandler(context, newRequest, response);
+        if (resp.payload?.items) {
+          return response.ok({ body: { ...resp.payload, response: resp.payload.items } });
+        }
+        return resp;
       }
-      return resp;
-    }
-  );
+    );
 
-  router.delete(
-    {
+  router.versioned
+    .delete({
       path: EPM_API_ROUTES.DELETE_PATTERN_DEPRECATED,
-      validate: DeletePackageRequestSchemaDeprecated,
+
       fleetAuthz: {
         integrations: { removePackages: true },
       },
-    },
-    async (context, request, response) => {
-      const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
-      const resp: IKibanaResponse<DeletePackageResponse> = await deletePackageHandler(
-        context,
-        newRequest,
-        response
-      );
-      if (resp.payload?.items) {
-        return response.ok({ body: { response: resp.payload.items } });
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: DeletePackageRequestSchemaDeprecated },
+      },
+      async (context, request, response) => {
+        const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
+        const resp: IKibanaResponse<DeletePackageResponse> = await deletePackageHandler(
+          context,
+          newRequest,
+          response
+        );
+        if (resp.payload?.items) {
+          return response.ok({ body: { response: resp.payload.items } });
+        }
+        return resp;
       }
-      return resp;
-    }
-  );
+    );
+
+  // Update transforms with es-secondary-authorization headers,
+  // append authorized_by to transform's _meta, and start transforms
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS,
+      fleetAuthz: {
+        ...INSTALL_PACKAGES_AUTHZ,
+        packagePrivileges: {
+          transform: {
+            actions: {
+              canStartStopTransform: {
+                executePackageAction: true,
+              },
+            },
+          },
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: ReauthorizeTransformRequestSchema },
+      },
+      reauthorizeTransformsHandler
+    );
 };

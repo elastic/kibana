@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { History } from 'history';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 
 import {
   EuiFieldText,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageTemplate,
   EuiPageHeader,
   EuiText,
   EuiTitle,
@@ -79,42 +80,38 @@ export const App = ({
   return (
     <StateContainersExamplesPage navigateToApp={navigateToApp} exampleLinks={exampleLinks}>
       <Router history={history}>
-        <>
-          <EuiPageBody>
-            <EuiPageHeader>
-              <EuiTitle size="l">
-                <h1>Integration with search bar</h1>
-              </EuiTitle>
-            </EuiPageHeader>
-            <EuiText>
-              <p>
-                This examples shows how you can use state containers, state syncing utils and
-                helpers from data plugin to sync your app state and search bar state with the URL.
-              </p>
-            </EuiText>
+        <EuiPageBody>
+          <EuiPageHeader>
+            <EuiTitle size="l">
+              <h1>Integration with search bar</h1>
+            </EuiTitle>
+          </EuiPageHeader>
+          <EuiText>
+            <p>
+              This examples shows how you can use state containers, state syncing utils and helpers
+              from data plugin to sync your app state and search bar state with the URL.
+            </p>
+          </EuiText>
 
-            <navigation.ui.TopNavMenu
-              appName={'Example'}
-              showSearchBar={true}
-              indexPatterns={[dataView]}
-              useDefaultBehaviors={true}
-              showSaveQuery={true}
+          <navigation.ui.TopNavMenu
+            appName={'Example'}
+            showSearchBar={true}
+            indexPatterns={[dataView]}
+            useDefaultBehaviors={true}
+            saveQueryMenuVisibility="allowed_by_app_privilege" // allowed only for this example app, use `globally_managed` by default
+          />
+          <EuiPageTemplate.Section>
+            <EuiText>
+              <p>In addition to state from query bar also sync your arbitrary application state:</p>
+            </EuiText>
+            <EuiFieldText
+              placeholder="Additional example applications state: My name is..."
+              value={appState.name}
+              onChange={(e) => appStateContainer.set({ ...appState, name: e.target.value })}
+              aria-label="My name"
             />
-            <EuiPageContent>
-              <EuiText>
-                <p>
-                  In addition to state from query bar also sync your arbitrary application state:
-                </p>
-              </EuiText>
-              <EuiFieldText
-                placeholder="Additional example applications state: My name is..."
-                value={appState.name}
-                onChange={(e) => appStateContainer.set({ ...appState, name: e.target.value })}
-                aria-label="My name"
-              />
-            </EuiPageContent>
-          </EuiPageBody>
-        </>
+          </EuiPageTemplate.Section>
+        </EuiPageBody>
       </Router>
     </StateContainersExamplesPage>
   );

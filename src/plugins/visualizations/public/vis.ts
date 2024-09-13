@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -22,21 +23,9 @@ import { i18n } from '@kbn/i18n';
 
 import { IAggConfigs, ISearchSource, AggConfigSerialized } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import {
-  getSavedSearch,
-  SavedSearch,
-  throwErrorOnSavedSearchUrlConflict,
-} from '@kbn/saved-search-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { PersistedState } from './persisted_state';
-import {
-  getTypes,
-  getAggs,
-  getSearch,
-  getSavedObjects,
-  getSpaces,
-  getFieldsFormats,
-  getSavedObjectTagging,
-} from './services';
+import { getTypes, getAggs, getSearch, getFieldsFormats, getSavedSearch } from './services';
 import { BaseVisType } from './vis_types';
 import { SerializedVis, SerializedVisData, VisParams } from '../common/types';
 
@@ -55,17 +44,10 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
     let savedSearch: SavedSearch;
 
     try {
-      savedSearch = await getSavedSearch(savedSearchId, {
-        search: getSearch(),
-        savedObjectsClient: getSavedObjects().client,
-        spaces: getSpaces(),
-        savedObjectsTagging: getSavedObjectTagging()?.getTaggingApi(),
-      });
+      savedSearch = await getSavedSearch().get(savedSearchId);
     } catch (e) {
       return inputSearchSource;
     }
-
-    await throwErrorOnSavedSearchUrlConflict(savedSearch);
 
     if (savedSearch?.searchSource) {
       inputSearchSource.setParent(savedSearch.searchSource);
@@ -76,7 +58,7 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
 
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
 
-export class Vis<TVisParams = VisParams> {
+export class Vis<TVisParams extends VisParams = VisParams> {
   public readonly type: BaseVisType<TVisParams>;
   public readonly id?: string;
   public title: string = '';

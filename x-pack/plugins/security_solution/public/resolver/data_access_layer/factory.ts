@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-import type { StartServices } from '../../types';
+import type { CoreStart } from '@kbn/core/public';
 import type { DataAccessLayer, TimeRange } from '../types';
 import type {
   ResolverNode,
@@ -31,9 +30,7 @@ function getRangeFilter(timeRange: TimeRange | undefined) {
 /**
  * The data access layer for resolver. All communication with the Kibana server is done through this object. This object is provided to Resolver. In tests, a mock data access layer can be used instead.
  */
-export function dataAccessLayerFactory(
-  context: KibanaReactContextValue<StartServices>
-): DataAccessLayer {
+export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
   const dataAccessLayer: DataAccessLayer = {
     /**
      * Used to get non-process related events for a node.
@@ -43,17 +40,20 @@ export function dataAccessLayerFactory(
       entityID,
       timeRange,
       indexPatterns,
+      agentId,
     }: {
       entityID: string;
       timeRange?: TimeRange;
       indexPatterns: string[];
+      agentId: string;
     }): Promise<ResolverRelatedEvents> {
-      const response: ResolverPaginatedEvents = await context.services.http.post(
+      const response: ResolverPaginatedEvents = await context.http.post(
         '/api/endpoint/resolver/events',
         {
           query: {},
           body: JSON.stringify({
             indexPatterns,
+            agentId,
             ...getRangeFilter(timeRange),
             filter: JSON.stringify({
               bool: {
@@ -80,12 +80,14 @@ export function dataAccessLayerFactory(
       after,
       timeRange,
       indexPatterns,
+      agentId,
     }: {
       entityID: string;
       category: string;
       after?: string;
       timeRange?: TimeRange;
       indexPatterns: string[];
+      agentId: string;
     }): Promise<ResolverPaginatedEvents> {
       const commonFields = {
         query: { afterEvent: after, limit: 25 },
@@ -95,19 +97,21 @@ export function dataAccessLayerFactory(
         },
       };
       if (category === 'alert') {
-        return context.services.http.post('/api/endpoint/resolver/events', {
+        return context.http.post('/api/endpoint/resolver/events', {
           query: commonFields.query,
           body: JSON.stringify({
             ...commonFields.body,
             entityType: 'alerts',
             eventID: entityID,
+            agentId,
           }),
         });
       } else {
-        return context.services.http.post('/api/endpoint/resolver/events', {
+        return context.http.post('/api/endpoint/resolver/events', {
           query: commonFields.query,
           body: JSON.stringify({
             ...commonFields.body,
+            agentId,
             filter: JSON.stringify({
               bool: {
                 filter: [
@@ -130,16 +134,19 @@ export function dataAccessLayerFactory(
       timeRange,
       indexPatterns,
       limit,
+      agentId,
     }: {
       ids: string[];
       timeRange?: TimeRange;
       indexPatterns: string[];
       limit: number;
+      agentId: string;
     }): Promise<SafeResolverEvent[]> {
       const query = {
         query: { limit },
         body: JSON.stringify({
           indexPatterns,
+          agentId,
           ...getRangeFilter(timeRange),
           filter: JSON.stringify({
             bool: {
@@ -151,7 +158,7 @@ export function dataAccessLayerFactory(
           }),
         }),
       };
-      const response: ResolverPaginatedEvents = await context.services.http.post(
+      const response: ResolverPaginatedEvents = await context.http.post(
         '/api/endpoint/resolver/events',
         query
       );
@@ -169,6 +176,7 @@ export function dataAccessLayerFactory(
       winlogRecordID,
       timeRange,
       indexPatterns,
+      agentId,
     }: {
       nodeID: string;
       eventCategory: string[];
@@ -177,6 +185,7 @@ export function dataAccessLayerFactory(
       winlogRecordID: string;
       timeRange?: TimeRange;
       indexPatterns: string[];
+      agentId: string;
     }): Promise<SafeResolverEvent | null> {
       /** @description - eventID isn't provided by winlog. This can be removed once runtime fields are available */
       const filter =
@@ -197,11 +206,12 @@ export function dataAccessLayerFactory(
               },
             };
       if (eventCategory.includes('alert') === false) {
-        const response: ResolverPaginatedEvents = await context.services.http.post(
+        const response: ResolverPaginatedEvents = await context.http.post(
           '/api/endpoint/resolver/events',
           {
             query: { limit: 1 },
             body: JSON.stringify({
+              agentId,
               indexPatterns,
               ...getRangeFilter(timeRange),
               filter: JSON.stringify(filter),
@@ -211,7 +221,7 @@ export function dataAccessLayerFactory(
         const [oneEvent] = response.events;
         return oneEvent ?? null;
       } else {
-        const response: ResolverPaginatedEvents = await context.services.http.post(
+        const response: ResolverPaginatedEvents = await context.http.post(
           '/api/endpoint/resolver/events',
           {
             query: { limit: 1 },
@@ -220,6 +230,7 @@ export function dataAccessLayerFactory(
               ...getRangeFilter(timeRange),
               entityType: 'alertDetail',
               eventID,
+              agentId,
             }),
           }
         );
@@ -244,6 +255,7 @@ export function dataAccessLayerFactory(
       indices,
       ancestors,
       descendants,
+      agentId,
     }: {
       dataId: string;
       schema: ResolverSchema;
@@ -251,8 +263,9 @@ export function dataAccessLayerFactory(
       indices: string[];
       ancestors: number;
       descendants: number;
+      agentId: string;
     }): Promise<ResolverNode[]> {
-      return context.services.http.post('/api/endpoint/resolver/tree', {
+      return context.http.post('/api/endpoint/resolver/tree', {
         body: JSON.stringify({
           ancestors,
           descendants,
@@ -260,6 +273,7 @@ export function dataAccessLayerFactory(
           schema,
           nodes: [dataId],
           indexPatterns: indices,
+          agentId,
         }),
       });
     },
@@ -276,7 +290,7 @@ export function dataAccessLayerFactory(
       indices: string[];
       signal: AbortSignal;
     }): Promise<ResolverEntityIndex> {
-      return context.services.http.get('/api/endpoint/resolver/entity', {
+      return context.http.get('/api/endpoint/resolver/entity', {
         signal,
         query: {
           _id,

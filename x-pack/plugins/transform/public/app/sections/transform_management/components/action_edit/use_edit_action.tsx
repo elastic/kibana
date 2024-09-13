@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { TransformListAction, TransformListRow } from '../../../../common';
-import { AuthorizationContext } from '../../../../lib/authorization';
+import type { TransformListAction, TransformListRow } from '../../../../common';
+import { useGetDataViewsTitleIdMap, useTransformCapabilities } from '../../../../hooks';
 
 import { editActionNameText, EditActionName } from './edit_action_name';
-import { useSearchItems } from '../../../../hooks/use_search_items';
-import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
-import { TransformConfigUnion } from '../../../../../../common/types/transform';
+import { useToastNotifications } from '../../../../app_dependencies';
+import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 export type EditAction = ReturnType<typeof useEditAction>;
 export const useEditAction = (forceDisable: boolean, transformNodes: number) => {
-  const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
+  const { data: dataViewsTitleIdMap } = useGetDataViewsTitleIdMap();
+  const { canCreateTransform } = useTransformCapabilities();
 
   const [config, setConfig] = useState<TransformConfigUnion>();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -27,20 +27,21 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
 
   const closeFlyout = () => setIsFlyoutVisible(false);
 
-  const { getDataViewIdByTitle } = useSearchItems(undefined);
   const toastNotifications = useToastNotifications();
-  const appDeps = useAppDependencies();
-  const dataViews = appDeps.data.dataViews;
 
   const clickHandler = useCallback(
     async (item: TransformListRow) => {
       try {
+        if (!dataViewsTitleIdMap) {
+          return;
+        }
+
         const dataViewTitle = Array.isArray(item.config.source.index)
           ? item.config.source.index.join(',')
           : item.config.source.index;
-        const currentDataViewId = getDataViewIdByTitle(dataViewTitle);
+        const newDataViewId = dataViewsTitleIdMap[dataViewTitle];
 
-        if (currentDataViewId === undefined) {
+        if (newDataViewId === undefined) {
           toastNotifications.addWarning(
             i18n.translate('xpack.transform.edit.noDataViewErrorPromptText', {
               defaultMessage:
@@ -48,8 +49,9 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
               values: { dataViewTitle, transformId: item.id },
             })
           );
+        } else {
+          setDataViewId(newDataViewId);
         }
-        setDataViewId(currentDataViewId);
         setConfig(item.config);
         setIsFlyoutVisible(true);
       } catch (e) {
@@ -60,8 +62,7 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
         });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dataViews, toastNotifications, getDataViewIdByTitle]
+    [dataViewsTitleIdMap, toastNotifications]
   );
 
   const action: TransformListAction = useMemo(

@@ -12,38 +12,39 @@ import { createMemoryHistory } from 'history';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender } from '@testing-library/react';
 import type { Action, Reducer, Store } from 'redux';
-import type { AppDeepLink } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import type { RenderHookOptions, RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook as reactRenderHoook } from '@testing-library/react-hooks';
+import { renderHook as reactRenderHook } from '@testing-library/react-hooks';
 import type {
   ReactHooksRenderer,
   WrapperComponent,
 } from '@testing-library/react-hooks/src/types/react';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
+import type { DeepReadonly } from 'utility-types';
+import type { UserPrivilegesState } from '../../components/user_privileges/user_privileges_context';
+import { getUserPrivilegesMockDefaultValue } from '../../components/user_privileges/__mocks__';
+import type { AppLinkItems } from '../../links/types';
 import { ExperimentalFeaturesService } from '../../experimental_features_service';
 import { applyIntersectionObserverMock } from '../intersection_observer_mock';
-import { ConsoleManager } from '../../../management/components/console';
 import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
 import type { MiddlewareActionSpyHelper } from '../../store/test_utils';
 import { createSpyMiddleware } from '../../store/test_utils';
-import { kibanaObservable } from '../test_providers';
 import type { State } from '../../store';
-import { createStore } from '../../store';
 import { AppRootProvider } from './app_root_provider';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
-import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
+import { SUB_PLUGINS_REDUCER, mockGlobalState, createMockStore } from '..';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
-import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
-import { getDeepLinks } from '../../../app/deep_links';
+import { KibanaServices } from '../../lib/kibana';
+import { appLinks } from '../../../app_links';
 import { fleetGetPackageHttpMock } from '../../../management/mocks';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
+import type { EndpointPrivileges } from '../../../../common/endpoint/types';
 
 const REAL_REACT_DOM_CREATE_PORTAL = ReactDOM.createPortal;
 
@@ -119,6 +120,11 @@ export type ReactQueryHookRenderer<
   options?: RenderHookOptions<TProps>
 ) => Promise<TResult>;
 
+export interface UserPrivilegesMockSetter {
+  set: (privileges: Partial<EndpointPrivileges>) => void;
+  reset: () => void;
+}
+
 /**
  * Mocked app root context renderer
  */
@@ -157,6 +163,42 @@ export interface AppContextTestRender {
    * @param flags
    */
   setExperimentalFlag: (flags: Partial<ExperimentalFeatures>) => void;
+
+  /**
+   * A helper method that will return an interface to more easily manipulate Endpoint related user authz.
+   * Works in conjunction with `jest.mock()` at the test level.
+   * @param useUserPrivilegesHookMock
+   *
+   * @example
+   *
+   * // in your test
+   * import { useUserPrivileges as _useUserPrivileges } from 'path/to/user_privileges'
+   *
+   * jest.mock('path/to/user_privileges');
+   *
+   * const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+   *
+   * // If you test - or more likely, in the `beforeEach` and `afterEach`
+   * let authMockSetter: UserPrivilegesMockSetter;
+   *
+   * beforeEach(() => {
+   *   const appTestSetup = createAppRootMockRenderer();
+   *
+   *   authMockSetter = appTestSetup.getUserPrivilegesMockSetter(useUserPrivilegesMock);
+   * })
+   *
+   * afterEach(() => {
+   *   authMockSetter.reset();
+   * }
+   *
+   * // Manipulate the authz in your test
+   * it('does something', () => {
+   *   authMockSetter({ canReadPolicyManagement: false });
+   * });
+   */
+  getUserPrivilegesMockSetter: (
+    useUserPrivilegesHookMock: jest.MockedFn<() => DeepReadonly<UserPrivilegesState>>
+  ) => UserPrivilegesMockSetter;
 
   /**
    * The React Query client (setup to support jest testing)
@@ -202,7 +244,6 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const coreStart = createCoreStartMock(history);
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
-  const { storage } = createSecuritySolutionStorageMock();
   const startServices: StartServices = createStartServicesMock(coreStart);
 
   const storeReducer = {
@@ -212,10 +253,14 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     app: experimentalFeaturesReducer,
   };
 
-  const store = createStore(mockGlobalState, storeReducer, kibanaObservable, storage, [
-    ...managementMiddlewareFactory(coreStart, depsStart),
-    middlewareSpy.actionSpyMiddleware,
-  ]);
+  const store = createMockStore(
+    undefined,
+    storeReducer,
+    undefined,
+    undefined,
+    // @ts-expect-error ts upgrade v4.7.4
+    [...managementMiddlewareFactory(coreStart, depsStart), middlewareSpy.actionSpyMiddleware]
+  );
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -229,21 +274,26 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     // hide react-query output in console
     logger: {
       error: () => {},
+
       // eslint-disable-next-line no-console
       log: console.log,
+
       // eslint-disable-next-line no-console
       warn: console.warn,
     },
   });
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
-    <KibanaContextProvider services={startServices}>
-      <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
-        <QueryClientProvider client={queryClient}>
-          <ConsoleManager>{children}</ConsoleManager>
-        </QueryClientProvider>
-      </AppRootProvider>
-    </KibanaContextProvider>
+    <AppRootProvider
+      store={store}
+      history={history}
+      coreStart={coreStart}
+      depsStart={depsStart}
+      startServices={startServices}
+      queryClient={queryClient}
+    >
+      {children}
+    </AppRootProvider>
   );
 
   const render: UiRender = (ui, options) => {
@@ -259,7 +309,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     hookFn: HookRendererFunction<TProps, TResult>,
     options: RenderHookOptions<TProps> = {}
   ): RenderHookResult<TProps, TResult> => {
-    return reactRenderHoook<TProps, TResult>(hookFn, {
+    return reactRenderHook<TProps, TResult>(hookFn, {
       wrapper: AppWrapper as WrapperComponent<TProps>,
       ...options,
     });
@@ -300,6 +350,23 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     });
   };
 
+  const getUserPrivilegesMockSetter: AppContextTestRender['getUserPrivilegesMockSetter'] = (
+    useUserPrivilegesHookMock
+  ) => {
+    return {
+      set: (authOverrides) => {
+        const newAuthz = getUserPrivilegesMockDefaultValue();
+
+        Object.assign(newAuthz.endpointPrivileges, authOverrides);
+        useUserPrivilegesHookMock.mockReturnValue(newAuthz);
+      },
+      reset: () => {
+        useUserPrivilegesHookMock.mockReset();
+        useUserPrivilegesHookMock.mockReturnValue(getUserPrivilegesMockDefaultValue());
+      },
+    };
+  };
+
   // Initialize the singleton `KibanaServices` with global services created for this test instance.
   // The module (`../../lib/kibana`) could have been mocked at the test level via `jest.mock()`,
   // and if so, then we set the return value of `KibanaServices.get` instead of calling `KibanaServices.init()`
@@ -307,6 +374,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     ...startServices,
     kibanaVersion: '8.0.0',
     kibanaBranch: 'main',
+    buildFlavor: 'traditional',
   };
 
   if (jest.isMockFunction(KibanaServices.get)) {
@@ -330,6 +398,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     renderHook,
     renderReactQueryHook,
     setExperimentalFlag,
+    getUserPrivilegesMockSetter,
     queryClient,
   };
 };
@@ -339,7 +408,7 @@ const createCoreStartMock = (
 ): ReturnType<typeof coreMock.createStart> => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
 
-  const deepLinkPaths = getDeepLinkPaths(getDeepLinks(mockGlobalState.app.enableExperimental));
+  const linkPaths = getLinksPaths(appLinks);
 
   // Mock the certain APP Ids returned by `application.getUrlForApp()`
   coreStart.application.getUrlForApp.mockImplementation((appId, { deepLinkId, path } = {}) => {
@@ -347,9 +416,9 @@ const createCoreStartMock = (
       case PLUGIN_ID:
         return '/app/fleet';
       case APP_UI_ID:
-        return `${APP_PATH}${
-          deepLinkId && deepLinkPaths[deepLinkId] ? deepLinkPaths[deepLinkId] : ''
-        }${path ?? ''}`;
+        return `${APP_PATH}${deepLinkId && linkPaths[deepLinkId] ? linkPaths[deepLinkId] : ''}${
+          path ?? ''
+        }`;
       default:
         return `${appId} not mocked!`;
     }
@@ -358,7 +427,7 @@ const createCoreStartMock = (
   coreStart.application.navigateToApp.mockImplementation((appId, { deepLinkId, path } = {}) => {
     if (appId === APP_UI_ID) {
       history.push(
-        `${deepLinkId && deepLinkPaths[deepLinkId] ? deepLinkPaths[deepLinkId] : ''}${path ?? ''}`
+        `${deepLinkId && linkPaths[deepLinkId] ? linkPaths[deepLinkId] : ''}${path ?? ''}`
       );
     }
     return Promise.resolve();
@@ -372,13 +441,13 @@ const createCoreStartMock = (
   return coreStart;
 };
 
-const getDeepLinkPaths = (deepLinks: AppDeepLink[]): Record<string, string> => {
-  return deepLinks.reduce((result: Record<string, string>, deepLink) => {
-    if (deepLink.path) {
-      result[deepLink.id] = deepLink.path;
+const getLinksPaths = (links: AppLinkItems): Record<string, string> => {
+  return links.reduce((result: Record<string, string>, link) => {
+    if (link.path) {
+      result[link.id] = link.path;
     }
-    if (deepLink.deepLinks) {
-      return { ...result, ...getDeepLinkPaths(deepLink.deepLinks) };
+    if (link.links) {
+      return { ...result, ...getLinksPaths(link.links) };
     }
     return result;
   }, {});

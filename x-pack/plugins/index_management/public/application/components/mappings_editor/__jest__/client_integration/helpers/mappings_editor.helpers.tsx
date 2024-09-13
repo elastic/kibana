@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { registerTestBed, TestBed, findTestSubject } from '@kbn/test-jest-helpers';
@@ -22,6 +23,23 @@ export interface DomFields {
     fields?: DomFields;
   };
 }
+
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
+        }}
+      />
+    ),
+  };
+});
 
 const createActions = (testBed: TestBed<TestSubjects>) => {
   const { find, exists, form, component } = testBed;
@@ -206,7 +224,10 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     await act(async () => {
       form.setInputValue('runtimeFieldEditor.nameField.input', field.name);
       jest.advanceTimersByTime(0); // advance timers to allow the form to validate
-      form.setInputValue('runtimeFieldEditor.scriptField', field.script.source);
+      find('runtimeFieldEditor.scriptField')
+        .getDOMNode()
+        .setAttribute('data-currentvalue', field.script.source);
+      find('runtimeFieldEditor.scriptField').simulate('change');
       jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       find('typeField').simulate('change', [
         {
@@ -296,8 +317,8 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   };
 
   const updateJsonEditor = (testSubject: TestSubjects, value: object) => {
-    find(testSubject).simulate('change', { jsonString: JSON.stringify(value) });
-    jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+    find(testSubject).getDOMNode().setAttribute('data-currentvalue', JSON.stringify(value));
+    find(testSubject).simulate('change');
   };
 
   const getJsonEditorValue = (testSubject: TestSubjects) => {
@@ -355,13 +376,22 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   };
 };
 
-export const setup = (props: any = { onUpdate() {} }): MappingsEditorTestBed => {
-  const setupTestBed = registerTestBed<TestSubjects>(WithAppDependencies(MappingsEditor), {
-    memoryRouter: {
-      wrapComponent: false,
-    },
-    defaultProps: props,
-  });
+export const setup = (
+  props: any = { onUpdate() {} },
+  appDependencies?: any
+): MappingsEditorTestBed => {
+  const defaultAppDependencies = {
+    plugins: {},
+  };
+  const setupTestBed = registerTestBed<TestSubjects>(
+    WithAppDependencies(MappingsEditor, appDependencies ?? defaultAppDependencies),
+    {
+      memoryRouter: {
+        wrapComponent: false,
+      },
+      defaultProps: props,
+    }
+  );
 
   const testBed = setupTestBed() as MappingsEditorTestBed;
 

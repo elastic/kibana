@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import type { PostTransformsPreviewRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import type { PostTransformsPreviewRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
 import { generateTransformConfig } from './common';
@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
     return config as PostTransformsPreviewRequestSchema;
   }
 
-  describe('/api/transform/transforms/_preview', function () {
+  describe('/internal/transform/transforms/_preview', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
@@ -44,12 +44,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return a transform preview', async () => {
       const { body, status } = await supertest
-        .post('/api/transform/transforms/_preview')
+        .post('/internal/transform/transforms/_preview')
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(getTransformPreviewConfig());
       transform.api.assertResponseStatusCode(200, status, body);
 
@@ -61,12 +61,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return a correct error for transform preview', async () => {
       const { body, status } = await supertest
-        .post(`/api/transform/transforms/_preview`)
+        .post(`/internal/transform/transforms/_preview`)
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send({
           ...getTransformPreviewConfig(),
           pivot: {
@@ -85,12 +85,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return 403 for transform view-only user', async () => {
       const { body, status } = await supertest
-        .post(`/api/transform/transforms/_preview`)
+        .post(`/internal/transform/transforms/_preview`)
         .auth(
           USER.TRANSFORM_VIEWER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
         )
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(getTransformPreviewConfig());
       transform.api.assertResponseStatusCode(403, status, body);
     });

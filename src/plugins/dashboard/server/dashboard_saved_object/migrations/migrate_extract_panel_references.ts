@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectAttributes, SavedObjectMigrationFn } from '@kbn/core/server';
+import { SavedObjectMigrationFn } from '@kbn/core/server';
 
-import { DashboardAttributes, extractReferences, injectReferences } from '../../../common';
+import { extractReferences, injectReferences } from '../../../common';
+import { DashboardAttributes } from '../../../common/content_management';
 import { DashboardSavedObjectTypeMigrationsDeps } from './dashboard_saved_object_migrations';
 
 /**
@@ -36,7 +38,7 @@ export function createExtractPanelReferencesMigration(
 
     const injectedAttributes = injectReferences(
       {
-        attributes: doc.attributes as unknown as SavedObjectAttributes,
+        attributes: doc.attributes,
         references,
       },
       { embeddablePersistableStateService: deps.embeddable }

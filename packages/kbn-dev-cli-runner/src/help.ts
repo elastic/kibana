@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -36,11 +37,13 @@ export function getHelp({
   usage,
   flagHelp,
   defaultLogLevel,
+  examples,
 }: {
   description?: string;
   usage?: string;
   flagHelp?: string;
   defaultLogLevel?: string;
+  examples?: string;
 }) {
   const optionHelp = joinAndTrimLines(
     dedent(flagHelp || ''),
@@ -48,13 +51,17 @@ export function getHelp({
     GLOBAL_FLAGS
   );
 
+  const examplesHelp = examples ? joinAndTrimLines('Examples:', examples) : '';
+
   return `
   ${dedent(usage || '') || DEFAULT_GLOBAL_USAGE}
 
   ${indent(dedent(description || 'Runs a dev task'), 2)}
 
   Options:
-    ${indent(optionHelp, 4)}\n\n`;
+    ${indent(optionHelp, 4)}
+${examplesHelp ? `\n  ${indent(examplesHelp, 4)}` : ''}
+`;
 }
 
 export function getCommandLevelHelp({

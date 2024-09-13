@@ -9,32 +9,39 @@ import type { Dispatch, MiddlewareAPI } from 'redux';
 import { isEqual } from 'lodash';
 import type { ResolverPaginatedEvents } from '../../../../common/endpoint/types';
 
-import type { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
+import type { DataAccessLayer, PanelViewAndParameters } from '../../types';
 import * as selectors from '../selectors';
-import type { ResolverAction } from '../actions';
+import type { State } from '../../../common/store/types';
+import {
+  serverFailedToReturnNodeEventsInCategory,
+  serverReturnedNodeEventsInCategory,
+} from '../data/action';
 
 export function RelatedEventsFetcher(
   dataAccessLayer: DataAccessLayer,
-  api: MiddlewareAPI<Dispatch<ResolverAction>, ResolverState>
-): () => void {
-  let last: PanelViewAndParameters | undefined;
-
+  api: MiddlewareAPI<Dispatch, State>
+): (id: string) => void {
+  const last: { [id: string]: PanelViewAndParameters | undefined } = {};
   // Call this after each state change.
   // This fetches the ResolverTree for the current entityID
   // if the entityID changes while
-  return async () => {
+  return async (id: string) => {
     const state = api.getState();
 
-    const newParams = selectors.panelViewAndParameters(state);
-    const isLoadingMoreEvents = selectors.isLoadingMoreNodeEventsInCategory(state);
-    const indices = selectors.eventIndices(state);
+    if (!last[id]) {
+      last[id] = undefined;
+    }
+    const newParams = selectors.panelViewAndParameters(state.analyzer[id]);
+    const isLoadingMoreEvents = selectors.isLoadingMoreNodeEventsInCategory(state.analyzer[id]);
+    const indices = selectors.eventIndices(state.analyzer[id]);
 
-    const oldParams = last;
-    const detectedBounds = selectors.detectedBounds(state);
+    const oldParams = last[id];
+    const detectedBounds = selectors.detectedBounds(state.analyzer[id]);
+    const agentId = selectors.agentId(state.analyzer[id]);
     const timeRangeFilters =
-      detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state);
+      detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state.analyzer[id]);
     // Update this each time before fetching data (or even if we don't fetch data) so that subsequent actions that call this (concurrently) will have up to date info.
-    last = newParams;
+    last[id] = newParams;
 
     async function fetchEvents({
       nodeID,
@@ -55,6 +62,7 @@ export function RelatedEventsFetcher(
             after: cursor,
             indexPatterns: indices,
             timeRange: timeRangeFilters,
+            agentId,
           });
         } else {
           result = await dataAccessLayer.eventsWithEntityIDAndCategory({
@@ -62,29 +70,26 @@ export function RelatedEventsFetcher(
             category: eventCategory,
             indexPatterns: indices,
             timeRange: timeRangeFilters,
+            agentId,
           });
         }
       } catch (error) {
-        api.dispatch({
-          type: 'serverFailedToReturnNodeEventsInCategory',
-          payload: {
-            nodeID,
-            eventCategory,
-            cursor,
-          },
-        });
+        api.dispatch(
+          serverFailedToReturnNodeEventsInCategory({ id, nodeID, eventCategory, cursor })
+        );
       }
 
       if (result) {
-        api.dispatch({
-          type: 'serverReturnedNodeEventsInCategory',
-          payload: {
+        api.dispatch(
+          serverReturnedNodeEventsInCategory({
+            id,
             events: result.events,
             eventCategory,
             cursor: result.nextEvent,
             nodeID,
-          },
-        });
+            agentId,
+          })
+        );
       }
     }
 
@@ -92,12 +97,6 @@ export function RelatedEventsFetcher(
     if (!isEqual(newParams, oldParams)) {
       if (newParams.panelView === 'nodeEventsInCategory') {
         const nodeID = newParams.panelParameters.nodeID;
-        api.dispatch({
-          type: 'appRequestedNodeEventsInCategory',
-          payload: {
-            parameters: newParams,
-          },
-        });
         await fetchEvents({
           nodeID,
           eventCategory: newParams.panelParameters.eventCategory,
@@ -105,7 +104,7 @@ export function RelatedEventsFetcher(
         });
       }
     } else if (isLoadingMoreEvents) {
-      const nodeEventsInCategory = state.data.nodeEventsInCategory;
+      const nodeEventsInCategory = state.analyzer[id].data.nodeEventsInCategory;
       if (nodeEventsInCategory !== undefined) {
         await fetchEvents(nodeEventsInCategory);
       }

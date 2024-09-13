@@ -6,3 +6,5 @@
  */
 
 export { persistNoteRoute } from './persist_note';
+export { deleteNoteRoute } from './delete_note';
+export { getNotesRoute } from './get_notes';

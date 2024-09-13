@@ -6,39 +6,32 @@
  */
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { CaseResponse, CasePostRequest } from '../../../common/api';
-import {
-  throwErrors,
-  CaseResponseRt,
-  ActionTypes,
-  CasePostRequestRt,
-  excess,
-  CaseSeverity,
-} from '../../../common/api';
-import { MAX_ASSIGNEES_PER_CASE, MAX_TITLE_LENGTH } from '../../../common/constants';
-import { isInvalidTag, areTotalAssigneesInvalid } from '../../../common/utils/validators';
+import type { Case } from '../../../common/types/domain';
+import { CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
-import type { CasesClientArgs } from '..';
+import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import type { CasePostRequest } from '../../../common/types/api';
+import { CasePostRequestRt } from '../../../common/types/api';
+import {} from '../utils';
+import { validateCustomFields } from './validators';
+import { normalizeCreateCaseRequest } from './utils';
 
 /**
  * Creates a new case.
  *
- * @ignore
  */
 export const create = async (
   data: CasePostRequest,
-  clientArgs: CasesClientArgs
-): Promise<CaseResponse> => {
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+): Promise<Case> => {
   const {
     services: { caseService, userActionService, licensingService, notificationService },
     user,
@@ -46,24 +39,18 @@ export const create = async (
     authorization: auth,
   } = clientArgs;
 
-  const query = pipe(
-    excess(CasePostRequestRt).decode({
-      ...data,
-    }),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
-
-  if (query.title.length > MAX_TITLE_LENGTH) {
-    throw Boom.badRequest(
-      `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
-    );
-  }
-
-  if (query.tags.some(isInvalidTag)) {
-    throw Boom.badRequest('A tag must contain at least one non-space character');
-  }
-
   try {
+    const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
+    const configurations = await casesClient.configure.get({ owner: data.owner });
+    const customFieldsConfiguration = configurations[0]?.customFields;
+
+    const customFieldsValidationParams = {
+      requestCustomFields: data.customFields,
+      customFieldsConfiguration,
+    };
+
+    validateCustomFields(customFieldsValidationParams);
+
     const savedObjectID = SavedObjectsUtils.generateId();
 
     await auth.ensureAuthorized({
@@ -87,35 +74,37 @@ export const create = async (
       licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
     }
 
-    if (areTotalAssigneesInvalid(query.assignees)) {
-      throw Boom.badRequest(
-        `You cannot assign more than ${MAX_ASSIGNEES_PER_CASE} assignees to a case.`
-      );
-    }
+    /**
+     * Trim title, category, description and tags
+     * and fill out missing custom fields
+     * before saving to ES
+     */
 
-    const newCase = await caseService.postNewCase({
+    const normalizedCase = normalizeCreateCaseRequest(query, customFieldsConfiguration);
+
+    const newCase = await caseService.createCase({
       attributes: transformNewCase({
         user,
-        newCase: query,
+        newCase: normalizedCase,
       }),
       id: savedObjectID,
       refresh: false,
     });
 
     await userActionService.creator.createUserAction({
-      type: ActionTypes.create_case,
-      caseId: newCase.id,
-      user,
-      payload: {
-        ...query,
-        severity: query.severity ?? CaseSeverity.LOW,
-        assignees: query.assignees ?? [],
+      userAction: {
+        type: UserActionTypes.create_case,
+        caseId: newCase.id,
+        user,
+        payload: {
+          ...query,
+          severity: query.severity ?? CaseSeverity.LOW,
+          assignees: query.assignees ?? [],
+          category: query.category ?? null,
+          customFields: query.customFields ?? [],
+        },
+        owner: newCase.attributes.owner,
       },
-      owner: newCase.attributes.owner,
-    });
-
-    const flattenedCase = flattenCaseSavedObject({
-      savedObject: newCase,
     });
 
     if (query.assignees && query.assignees.length !== 0) {
@@ -129,7 +118,11 @@ export const create = async (
       });
     }
 
-    return CaseResponseRt.encode(flattenedCase);
+    const res = flattenCaseSavedObject({
+      savedObject: newCase,
+    });
+
+    return decodeOrThrow(CaseRt)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to create case: ${error}`, error, logger });
   }

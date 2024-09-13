@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './app.scss';
@@ -15,13 +16,13 @@ import useAsync from 'react-use/lib/useAsync';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { StatusResult } from '../common';
 import { ClusterAddressForm } from './cluster_address_form';
 import type { ClusterConfigurationFormProps } from './cluster_configuration_form';
 import { ClusterConfigurationForm } from './cluster_configuration_form';
 import { EnrollmentTokenForm } from './enrollment_token_form';
 import { ProgressIndicator } from './progress_indicator';
 import { useKibana } from './use_kibana';
+import type { StatusResult } from '../common';
 
 export interface AppProps {
   onSuccess?(): void;

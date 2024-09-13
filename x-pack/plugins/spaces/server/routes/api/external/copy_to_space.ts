@@ -24,14 +24,15 @@ const areObjectsUnique = (objects: SavedObjectIdentifier[]) =>
   _.uniqBy(objects, (o: SavedObjectIdentifier) => `${o.type}:${o.id}`).length === objects.length;
 
 export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, getSpacesService, usageStatsServicePromise, getStartServices } = deps;
+  const { router, getSpacesService, usageStatsServicePromise, getStartServices, log } = deps;
   const usageStatsClientPromise = usageStatsServicePromise.then(({ getClient }) => getClient());
 
-  externalRouter.post(
+  router.post(
     {
       path: '/api/spaces/_copy_saved_objects',
       options: {
         tags: ['access:copySavedObjectsToSpaces'],
+        description: `Copy saved objects to spaces`,
       },
       validate: {
         body: schema.object(
@@ -96,36 +97,59 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       } = request.body;
 
       const { headers } = request;
-      usageStatsClientPromise.then((usageStatsClient) =>
-        usageStatsClient.incrementCopySavedObjects({
-          headers,
-          createNewCopies,
-          overwrite,
-          compatibilityMode,
-        })
-      );
+      usageStatsClientPromise
+        .then((usageStatsClient) =>
+          usageStatsClient.incrementCopySavedObjects({
+            headers,
+            createNewCopies,
+            overwrite,
+            compatibilityMode,
+          })
+        )
+        .catch((err) => {
+          log.error(
+            `Failed to report usage statistics for the copy saved objects route: ${err.message}`
+          );
+        });
 
-      const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-        startServices.savedObjects,
-        request
-      );
-      const sourceSpaceId = getSpacesService().getSpaceId(request);
-      const copyResponse = await copySavedObjectsToSpaces(sourceSpaceId, destinationSpaceIds, {
-        objects,
-        includeReferences,
-        overwrite,
-        createNewCopies,
-        compatibilityMode,
-      });
-      return response.ok({ body: copyResponse });
+      try {
+        const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
+          startServices.savedObjects,
+          request
+        );
+        const sourceSpaceId = getSpacesService().getSpaceId(request);
+        const copyResponse = await copySavedObjectsToSpaces(sourceSpaceId, destinationSpaceIds, {
+          objects,
+          includeReferences,
+          overwrite,
+          createNewCopies,
+          compatibilityMode,
+        });
+        return response.ok({ body: copyResponse });
+      } catch (e) {
+        if (e.type === 'object-fetch-error' && e.attributes?.objects) {
+          return response.notFound({
+            body: {
+              message: 'Saved objects not found',
+              attributes: {
+                objects: e.attributes?.objects.map((obj: SavedObjectIdentifier) => ({
+                  id: obj.id,
+                  type: obj.type,
+                })),
+              },
+            },
+          });
+        } else throw e;
+      }
     })
   );
 
-  externalRouter.post(
+  router.post(
     {
       path: '/api/spaces/_resolve_copy_saved_objects_errors',
       options: {
         tags: ['access:copySavedObjectsToSpaces'],
+        description: `Resolve conflicts copying saved objects`,
       },
       validate: {
         body: schema.object(
@@ -182,13 +206,19 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         request.body;
 
       const { headers } = request;
-      usageStatsClientPromise.then((usageStatsClient) =>
-        usageStatsClient.incrementResolveCopySavedObjectsErrors({
-          headers,
-          createNewCopies,
-          compatibilityMode,
-        })
-      );
+      usageStatsClientPromise
+        .then((usageStatsClient) =>
+          usageStatsClient.incrementResolveCopySavedObjectsErrors({
+            headers,
+            createNewCopies,
+            compatibilityMode,
+          })
+        )
+        .catch((err) => {
+          log.error(
+            `Failed to report usage statistics for the resolve copy saved objects errors route: ${err.message}`
+          );
+        });
 
       const resolveCopySavedObjectsToSpacesConflicts =
         resolveCopySavedObjectsToSpacesConflictsFactory(startServices.savedObjects, request);

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import type { NetworkDnsRequestOptions } from '../../../../../../../common/api/search_strategy';
 
-import type { NetworkDnsRequestOptions } from '../../../../../../../common/search_strategy';
 import {
   Direction,
   NetworkDnsFields,
@@ -197,8 +197,8 @@ export const formattedSearchStrategyResponse = {
                 format: 'strict_date_optional_time',
               },
             ],
+            size: 0,
           },
-          size: 0,
           track_total_hits: false,
         },
         null,
@@ -277,7 +277,7 @@ export const expectedDsl = {
         format: 'strict_date_optional_time',
       },
     ],
+    size: 0,
   },
-  size: 0,
   track_total_hits: false,
 };

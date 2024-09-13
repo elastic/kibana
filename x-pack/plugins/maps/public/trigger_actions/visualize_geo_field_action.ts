@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
-import type { Query } from '@kbn/es-query';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   createAction,
@@ -18,16 +15,7 @@ import {
 import { getUsageCollection } from '../kibana_services';
 import { APP_ID } from '../../common/constants';
 
-import {
-  getVisualizeCapabilities,
-  getIndexPatternService,
-  getData,
-  getShareService,
-  getCore,
-} from '../kibana_services';
-import { MapsAppLocator, MAPS_APP_LOCATOR } from '../locators';
-import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../../common/constants';
-import { LayerDescriptor } from '../../common/descriptor_types';
+import { getVisualizeCapabilities, getCore } from '../kibana_services';
 
 export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
   id: ACTION_VISUALIZE_GEO_FIELD,
@@ -36,8 +24,11 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
     i18n.translate('xpack.maps.discover.visualizeFieldLabel', {
       defaultMessage: 'Visualize in Maps',
     }),
-  isCompatible: async () => !!getVisualizeCapabilities().show,
+  isCompatible: async (context) => {
+    return Boolean(!!getVisualizeCapabilities().show && context.dataViewSpec && context.fieldName);
+  },
   getHref: async (context) => {
+    const { getMapsLink } = await import('./get_maps_link');
     const { app, path } = await getMapsLink(context);
 
     return getCore().application.getUrlForApp(app, {
@@ -46,6 +37,7 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
     });
   },
   execute: async (context) => {
+    const { getMapsLink } = await import('./get_maps_link');
     const { app, path, state } = await getMapsLink(context);
 
     const usageCollection = getUsageCollection();
@@ -61,37 +53,3 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
     });
   },
 });
-
-const getMapsLink = async (context: VisualizeFieldContext) => {
-  const dataView = await getIndexPatternService().get(context.dataViewSpec.id!);
-  // create initial layer descriptor
-  const hasTooltips =
-    context?.contextualFields?.length && context?.contextualFields[0] !== '_source';
-  const initialLayers = [
-    {
-      id: uuidv4(),
-      visible: true,
-      type: LAYER_TYPE.MVT_VECTOR,
-      sourceDescriptor: {
-        id: uuidv4(),
-        type: SOURCE_TYPES.ES_SEARCH,
-        tooltipProperties: hasTooltips ? context.contextualFields : [],
-        label: dataView.getIndexPattern(),
-        indexPatternId: context.dataViewSpec.id,
-        geoField: context.fieldName,
-        scalingType: SCALING_TYPES.MVT,
-      },
-    },
-  ];
-
-  const locator = getShareService().url.locators.get(MAPS_APP_LOCATOR) as MapsAppLocator;
-  const location = await locator.getLocation({
-    filters: getData().query.filterManager.getFilters(),
-    query: getData().query.queryString.getQuery() as Query,
-    initialLayers: initialLayers as unknown as LayerDescriptor[] & SerializableRecord,
-    timeRange: getData().query.timefilter.timefilter.getTime(),
-    dataViewSpec: context.dataViewSpec,
-  });
-
-  return location;
-};

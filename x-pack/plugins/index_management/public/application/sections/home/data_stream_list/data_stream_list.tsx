@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +16,7 @@ import {
   EuiText,
   EuiIconTip,
   EuiSpacer,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiEmptyPrompt,
   EuiLink,
 } from '@elastic/eui';
@@ -32,10 +32,11 @@ import {
   APP_WRAPPER_CLASS,
   useExecutionContext,
 } from '../../../../shared_imports';
+import { Section } from '../../../../../common/constants';
 import { useAppContext } from '../../../app_context';
 import { useLoadDataStreams } from '../../../services/api';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { documentationService } from '../../../services/documentation';
-import { Section } from '../home';
 import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
 import { filterDataStreams, isSelectedDataStreamHidden } from '../../../lib/data_streams';
@@ -59,12 +60,19 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   const {
     core: { getUrlForApp, executionContext },
     plugins: { isFleetEnabled },
+    config,
   } = useAppContext();
+
+  const { enableDataStreamStats: isDataStreamStatsEnabled } = config;
 
   useExecutionContext(executionContext, {
     type: 'application',
     page: 'indexManagementDataStreamsTab',
   });
+
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.dataStreams);
+  }, []);
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
   const {
@@ -79,7 +87,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   const [filters, setFilters] = useState<Filters<DataStreamFilterName>>({
     managed: {
       name: i18n.translate('xpack.idxMgmt.dataStreamList.viewManagedLabel', {
-        defaultMessage: 'Fleet-managed data streams',
+        defaultMessage: 'Managed data streams',
       }),
       checked: 'on',
     },
@@ -123,7 +131,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
-              defaultMessage="Data streams store time-series data across multiple indices. {learnMoreLink}"
+              defaultMessage="Data streams store time-series data across multiple indices and can be created from index templates. {learnMoreLink}"
               values={{
                 learnMoreLink: (
                   <EuiLink
@@ -141,35 +149,37 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           </EuiText>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                label={i18n.translate(
-                  'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel',
-                  {
-                    defaultMessage: 'Include stats',
-                  }
-                )}
-                checked={isIncludeStatsChecked}
-                onChange={(e) => setIsIncludeStatsChecked(e.target.checked)}
-                data-test-subj="includeStatsSwitch"
-              />
-            </EuiFlexItem>
+        {isDataStreamStatsEnabled && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  label={i18n.translate(
+                    'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel',
+                    {
+                      defaultMessage: 'Include stats',
+                    }
+                  )}
+                  checked={isIncludeStatsChecked}
+                  onChange={(e) => setIsIncludeStatsChecked(e.target.checked)}
+                  data-test-subj="includeStatsSwitch"
+                />
+              </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchToolTip',
-                  {
-                    defaultMessage: 'Including stats can increase reload times',
-                  }
-                )}
-                position="top"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchToolTip',
+                    {
+                      defaultMessage: 'Including stats can increase reload times',
+                    }
+                  )}
+                  position="top"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <FilterListButton<DataStreamFilterName> filters={filters} onChange={setFilters} />
         </EuiFlexItem>
@@ -221,7 +231,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
             {' ' /* We need this space to separate these two sentences. */}
             {isFleetEnabled ? (
               <FormattedMessage
-                id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerMessage"
+                id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaFleetMessage"
                 defaultMessage="Get started with data streams in {link}."
                 values={{
                   link: (
@@ -230,7 +240,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
                       href={getUrlForApp('fleet')}
                     >
                       {i18n.translate(
-                        'xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerLink',
+                        'xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaFleetLink',
                         {
                           defaultMessage: 'Fleet',
                         }
@@ -270,7 +280,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   } else {
     activateHiddenFilter(isSelectedDataStreamHidden(dataStreams!, decodedDataStreamName));
     content = (
-      <EuiPageContent hasShadow={false} paddingSize="none" data-test-subj="dataStreamList">
+      <EuiPageSection paddingSize="none" data-test-subj="dataStreamList">
         {renderHeader()}
         <EuiSpacer size="l" />
 
@@ -285,7 +295,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 

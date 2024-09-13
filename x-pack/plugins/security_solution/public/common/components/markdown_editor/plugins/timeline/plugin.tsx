@@ -9,7 +9,7 @@ import React, { useCallback, memo } from 'react';
 import type { EuiSelectableOption, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import { EuiModalBody, EuiModalHeader, EuiCodeBlock } from '@elastic/eui';
 
-import { TimelineType } from '../../../../../../common/types/timeline';
+import { TimelineTypeEnum } from '../../../../../../common/api/timeline';
 import { SelectableTimeline } from '../../../../../timelines/components/timeline/selectable_timeline';
 import type { OpenTimelineResult } from '../../../../../timelines/components/open_timeline/types';
 import { getTimelineUrl, useFormatUrl } from '../../../link_to';
@@ -45,7 +45,7 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
   );
 
   const handleTimelineChange = useCallback(
-    (timelineTitle, timelineId, graphEventId) => {
+    (timelineTitle: string, timelineId: string | null, graphEventId?: string) => {
       const url = formatUrl(getTimelineUrl(timelineId ?? '', graphEventId), {
         absolute: true,
         skipSearch: true,
@@ -66,7 +66,7 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
           getSelectableOptions={handleGetSelectableOptions}
           onTimelineChange={handleTimelineChange}
           onClosePopover={onClosePopover}
-          timelineType={TimelineType.default}
+          timelineType={TimelineTypeEnum.default}
         />
       </EuiModalBody>
     </>
@@ -75,18 +75,25 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
 
 const TimelineEditor = memo(TimelineEditorComponent);
 
-export const plugin: EuiMarkdownEditorUiPlugin = {
-  name: ID,
-  button: {
-    label: i18n.INSERT_TIMELINE,
-    iconType: 'timeline',
-  },
-  helpText: (
-    <EuiCodeBlock language="md" paddingSize="s" fontSize="l">
-      {'[title](url)'}
-    </EuiCodeBlock>
-  ),
-  editor: function editor({ node, onSave, onCancel }) {
-    return <TimelineEditor onClosePopover={onCancel} onInsert={onSave} />;
-  },
+export const plugin = ({
+  interactionsUpsellingMessage,
+}: {
+  interactionsUpsellingMessage: string | null;
+}): EuiMarkdownEditorUiPlugin => {
+  return {
+    name: ID,
+    button: {
+      label: interactionsUpsellingMessage ?? i18n.INSERT_TIMELINE,
+      iconType: 'timeline',
+      isDisabled: !!interactionsUpsellingMessage,
+    },
+    helpText: (
+      <EuiCodeBlock language="md" paddingSize="s" fontSize="l">
+        {'[title](url)'}
+      </EuiCodeBlock>
+    ),
+    editor: function editor({ node, onSave, onCancel }) {
+      return <TimelineEditor onClosePopover={onCancel} onInsert={onSave} />;
+    },
+  };
 };

@@ -6,14 +6,18 @@
  */
 
 import { SavedObjectAttribute } from '@kbn/core/public';
-import { isEqual } from 'lodash';
+import { isEqual, isUndefined, omitBy } from 'lodash';
 import { Reducer } from 'react';
 import {
   RuleActionParam,
   IntervalSchedule,
   RuleActionAlertsFilterProperty,
+  AlertsFilter,
+  AlertDelay,
+  SanitizedRuleAction,
 } from '@kbn/alerting-plugin/common';
-import { Rule, RuleAction } from '../../../types';
+import { isEmpty } from 'lodash/fp';
+import { ActionTypeRegistryContract, Rule, RuleUiAction } from '../../../types';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
 export type InitialRule = Partial<Rule> &
@@ -29,6 +33,7 @@ interface CommandType<
     | 'setRuleActionProperty'
     | 'setRuleActionFrequency'
     | 'setRuleActionAlertsFilter'
+    | 'setAlertDelayProperty'
 > {
   type: T;
 }
@@ -49,15 +54,21 @@ interface RulePayload<Key extends keyof Rule> {
   index?: number;
 }
 
-interface RuleActionPayload<Key extends keyof RuleAction> {
+interface RuleActionPayload<Key extends keyof RuleUiAction> {
   key: Key;
-  value: RuleAction[Key] | null;
+  value: RuleUiAction[Key] | null;
   index?: number;
 }
 
 interface RuleSchedulePayload<Key extends keyof IntervalSchedule> {
   key: Key;
   value: IntervalSchedule[Key];
+  index?: number;
+}
+
+interface AlertDelayPayload<Key extends keyof AlertDelay> {
+  key: Key;
+  value: AlertDelay[Key] | null;
   index?: number;
 }
 
@@ -93,186 +104,216 @@ export type RuleReducerAction =
   | {
       command: CommandType<'setRuleActionAlertsFilter'>;
       payload: Payload<string, RuleActionAlertsFilterProperty>;
+    }
+  | {
+      command: CommandType<'setAlertDelayProperty'>;
+      payload: AlertDelayPayload<keyof AlertDelay>;
     };
 
 export type InitialRuleReducer = Reducer<{ rule: InitialRule }, RuleReducerAction>;
 export type ConcreteRuleReducer = Reducer<{ rule: Rule }, RuleReducerAction>;
 
-export const ruleReducer = <RulePhase extends InitialRule | Rule>(
-  state: { rule: RulePhase },
-  action: RuleReducerAction
-) => {
-  const { rule } = state;
+export const getRuleReducer =
+  <RulePhase extends InitialRule | Rule>(actionTypeRegistry: ActionTypeRegistryContract) =>
+  (state: { rule: RulePhase }, action: RuleReducerAction) => {
+    const { rule } = state;
 
-  switch (action.command.type) {
-    case 'setRule': {
-      const { key, value } = action.payload as Payload<'rule', RulePhase>;
-      if (key === 'rule') {
-        return {
-          ...state,
-          rule: value,
-        };
-      } else {
-        return state;
+    switch (action.command.type) {
+      case 'setRule': {
+        const { key, value } = action.payload as Payload<'rule', RulePhase>;
+        if (key === 'rule') {
+          return {
+            ...state,
+            rule: value,
+          };
+        } else {
+          return state;
+        }
       }
-    }
-    case 'setProperty': {
-      const { key, value } = action.payload as RulePayload<keyof Rule>;
-      if (isEqual(rule[key], value)) {
-        return state;
-      } else {
-        return {
-          ...state,
-          rule: {
-            ...rule,
-            [key]: value,
-          },
-        };
-      }
-    }
-    case 'setScheduleProperty': {
-      const { key, value } = action.payload as RuleSchedulePayload<keyof IntervalSchedule>;
-      if (rule.schedule && isEqual(rule.schedule[key], value)) {
-        return state;
-      } else {
-        return {
-          ...state,
-          rule: {
-            ...rule,
-            schedule: {
-              ...rule.schedule,
+      case 'setProperty': {
+        const { key, value } = action.payload as RulePayload<keyof Rule>;
+        if (isEqual(rule[key], value)) {
+          return state;
+        } else {
+          return {
+            ...state,
+            rule: {
+              ...rule,
               [key]: value,
             },
-          },
-        };
+          };
+        }
       }
-    }
-    case 'setRuleParams': {
-      const { key, value } = action.payload as Payload<string, Record<string, unknown>>;
-      if (isEqual(rule.params[key], value)) {
-        return state;
-      } else {
-        return {
-          ...state,
-          rule: {
-            ...rule,
+      case 'setScheduleProperty': {
+        const { key, value } = action.payload as RuleSchedulePayload<keyof IntervalSchedule>;
+        if (rule.schedule && isEqual(rule.schedule[key], value)) {
+          return state;
+        } else {
+          return {
+            ...state,
+            rule: {
+              ...rule,
+              schedule: {
+                ...rule.schedule,
+                [key]: value,
+              },
+            },
+          };
+        }
+      }
+      case 'setRuleParams': {
+        const { key, value } = action.payload as Payload<string, Record<string, unknown>>;
+        if (isEqual(rule.params[key], value)) {
+          return state;
+        } else {
+          return {
+            ...state,
+            rule: {
+              ...rule,
+              params: {
+                ...rule.params,
+                [key]: value,
+              },
+            },
+          };
+        }
+      }
+      case 'setRuleActionParams': {
+        const { key, value, index } = action.payload as Payload<
+          keyof RuleUiAction,
+          SavedObjectAttribute
+        >;
+        if (
+          index === undefined ||
+          rule.actions[index] == null ||
+          (!!rule.actions[index][key] && isEqual(rule.actions[index][key], value))
+        ) {
+          return state;
+        } else {
+          const oldAction = rule.actions.splice(index, 1)[0];
+          const updatedAction = {
+            ...oldAction,
             params: {
-              ...rule.params,
+              ...oldAction.params,
               [key]: value,
             },
-          },
-        };
+          };
+          rule.actions.splice(index, 0, updatedAction);
+          return {
+            ...state,
+            rule: {
+              ...rule,
+              actions: [...rule.actions],
+            },
+          };
+        }
       }
-    }
-    case 'setRuleActionParams': {
-      const { key, value, index } = action.payload as Payload<
-        keyof RuleAction,
-        SavedObjectAttribute
-      >;
-      if (
-        index === undefined ||
-        rule.actions[index] == null ||
-        (!!rule.actions[index][key] && isEqual(rule.actions[index][key], value))
-      ) {
-        return state;
-      } else {
-        const oldAction = rule.actions.splice(index, 1)[0];
-        const updatedAction = {
-          ...oldAction,
-          params: {
-            ...oldAction.params,
+      case 'setRuleActionFrequency': {
+        const { key, value, index } = action.payload as Payload<
+          keyof RuleUiAction,
+          SavedObjectAttribute
+        >;
+        if (
+          index === undefined ||
+          rule.actions[index] == null ||
+          (!!rule.actions[index][key] && isEqual(rule.actions[index][key], value))
+        ) {
+          return state;
+        } else {
+          const oldAction = rule.actions.splice(index, 1)[0];
+          if (actionTypeRegistry.get(oldAction.actionTypeId).isSystemActionType) {
+            return state;
+          }
+          const oldSanitizedAction = oldAction as SanitizedRuleAction;
+          const updatedAction = {
+            ...oldSanitizedAction,
+            frequency: {
+              ...(oldSanitizedAction?.frequency ?? DEFAULT_FREQUENCY),
+              [key]: value,
+            },
+          };
+          rule.actions.splice(index, 0, updatedAction);
+          return {
+            ...state,
+            rule: {
+              ...rule,
+              actions: [...rule.actions],
+            },
+          };
+        }
+      }
+      case 'setRuleActionAlertsFilter': {
+        const { key, value, index } = action.payload as Payload<
+          keyof AlertsFilter,
+          RuleActionAlertsFilterProperty
+        >;
+        if (index === undefined || rule.actions[index] == null) {
+          return state;
+        } else {
+          const oldAction = rule.actions.splice(index, 1)[0];
+          if (actionTypeRegistry.get(oldAction.actionTypeId).isSystemActionType) {
+            return state;
+          }
+          const oldSanitizedAction = oldAction as SanitizedRuleAction;
+          if (
+            oldSanitizedAction.alertsFilter &&
+            isEqual(oldSanitizedAction.alertsFilter[key], value)
+          )
+            return state;
+
+          const { alertsFilter, ...rest } = oldSanitizedAction;
+          const updatedAlertsFilter = omitBy({ ...alertsFilter, [key]: value }, isUndefined);
+
+          const updatedAction = {
+            ...rest,
+            ...(!isEmpty(updatedAlertsFilter) ? { alertsFilter: updatedAlertsFilter } : {}),
+          };
+          rule.actions.splice(index, 0, updatedAction);
+          return {
+            ...state,
+            rule: {
+              ...rule,
+              actions: [...rule.actions],
+            },
+          };
+        }
+      }
+      case 'setRuleActionProperty': {
+        const { key, value, index } = action.payload as RuleActionPayload<keyof RuleUiAction>;
+        if (index === undefined || isEqual(rule.actions[index][key], value)) {
+          return state;
+        } else {
+          const oldAction = rule.actions.splice(index, 1)[0];
+          const updatedAction = {
+            ...oldAction,
             [key]: value,
-          },
-        };
-        rule.actions.splice(index, 0, updatedAction);
-        return {
-          ...state,
-          rule: {
-            ...rule,
-            actions: [...rule.actions],
-          },
-        };
+          };
+          rule.actions.splice(index, 0, updatedAction);
+          return {
+            ...state,
+            rule: {
+              ...rule,
+              actions: [...rule.actions],
+            },
+          };
+        }
+      }
+      case 'setAlertDelayProperty': {
+        const { key, value } = action.payload as Payload<keyof AlertDelay, SavedObjectAttribute>;
+        if (rule.alertDelay && isEqual(rule.alertDelay[key], value)) {
+          return state;
+        } else {
+          return {
+            ...state,
+            rule: {
+              ...rule,
+              alertDelay: {
+                ...rule.alertDelay,
+                [key]: value,
+              },
+            },
+          };
+        }
       }
     }
-    case 'setRuleActionFrequency': {
-      const { key, value, index } = action.payload as Payload<
-        keyof RuleAction,
-        SavedObjectAttribute
-      >;
-      if (
-        index === undefined ||
-        rule.actions[index] == null ||
-        (!!rule.actions[index][key] && isEqual(rule.actions[index][key], value))
-      ) {
-        return state;
-      } else {
-        const oldAction = rule.actions.splice(index, 1)[0];
-        const updatedAction = {
-          ...oldAction,
-          frequency: {
-            ...(oldAction.frequency ?? DEFAULT_FREQUENCY),
-            [key]: value,
-          },
-        };
-        rule.actions.splice(index, 0, updatedAction);
-        return {
-          ...state,
-          rule: {
-            ...rule,
-            actions: [...rule.actions],
-          },
-        };
-      }
-    }
-    case 'setRuleActionAlertsFilter': {
-      const { key, value, index } = action.payload as Payload<
-        keyof RuleAction,
-        SavedObjectAttribute
-      >;
-      if (
-        index === undefined ||
-        rule.actions[index] == null ||
-        (!!rule.actions[index][key] && isEqual(rule.actions[index][key], value))
-      ) {
-        return state;
-      } else {
-        const oldAction = rule.actions.splice(index, 1)[0];
-        const updatedAction = {
-          ...oldAction,
-          alertsFilter: {
-            ...(oldAction.alertsFilter ?? { timeframe: null, query: null }),
-            [key]: value,
-          },
-        };
-        rule.actions.splice(index, 0, updatedAction);
-        return {
-          ...state,
-          rule: {
-            ...rule,
-            actions: [...rule.actions],
-          },
-        };
-      }
-    }
-    case 'setRuleActionProperty': {
-      const { key, value, index } = action.payload as RuleActionPayload<keyof RuleAction>;
-      if (index === undefined || isEqual(rule.actions[index][key], value)) {
-        return state;
-      } else {
-        const oldAction = rule.actions.splice(index, 1)[0];
-        const updatedAction = {
-          ...oldAction,
-          [key]: value,
-        };
-        rule.actions.splice(index, 0, updatedAction);
-        return {
-          ...state,
-          rule: {
-            ...rule,
-            actions: [...rule.actions],
-          },
-        };
-      }
-    }
-  }
-};
+  };

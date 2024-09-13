@@ -9,9 +9,12 @@ import type { Interception } from 'cypress/types/net-stubbing';
 
 import { CONFIRM_MODAL } from '../screens/navigation';
 import { SETTINGS } from '../screens/integrations';
+import { login } from '../tasks/login';
 
 describe('Install unverified package assets', () => {
   beforeEach(() => {
+    login();
+
     cy.intercept('POST', '/api/fleet/epm/packages/fleet_server/*', (req) => {
       if (!req.body.force) {
         return req.reply({
@@ -37,12 +40,13 @@ describe('Install unverified package assets', () => {
     // save mocking out the whole package response, but make it so that fleet server is always uninstalled
     cy.intercept('GET', '/api/fleet/epm/packages/fleet_server*', (req) => {
       req.continue((res) => {
-        if (res.body?.item?.savedObject) {
-          delete res.body.item.savedObject;
+        if (res.body?.item?.installationInfo) {
+          delete res.body.item.installationInfo;
         }
         if (res.body?.item?.status) {
           res.body.item.status = 'not_installed';
         }
+        res.body.metadata = { has_policies: false };
       });
     });
   });

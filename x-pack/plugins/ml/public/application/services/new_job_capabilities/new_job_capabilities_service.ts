@@ -4,20 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Field, Aggregation, AggId, FieldId } from '../../../../common/types/fields';
-import { EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
+import {
+  type Field,
+  type Aggregation,
+  type AggId,
+  type FieldId,
+  EVENT_RATE_FIELD_ID,
+} from '@kbn/ml-anomaly-utils';
+import { DataViewType } from '@kbn/data-views-plugin/public';
+import { useMlApi } from '../../contexts/kibana';
 import { getGeoFields, filterCategoryFields } from '../../../../common/util/fields_utils';
-import { ml } from '../ml_api_service';
+import type { MlApi } from '../ml_api_service';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 
-class NewJobCapsService extends NewJobCapabilitiesServiceBase {
+export class NewJobCapsService extends NewJobCapabilitiesServiceBase {
   private _catFields: Field[] = [];
   private _dateFields: Field[] = [];
   private _geoFields: Field[] = [];
   private _includeEventRateField: boolean = true;
   private _removeTextFields: boolean = true;
+  private _mlApiService: MlApi;
+
+  constructor(mlApiService: MlApi) {
+    super();
+    this._mlApiService = mlApiService;
+  }
 
   public get catFields(): Field[] {
     return this._catFields;
@@ -44,7 +58,10 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
       this._includeEventRateField = includeEventRateField;
       this._removeTextFields = removeTextFields;
 
-      const resp = await ml.jobs.newJobCaps(dataView.getIndexPattern(), dataView.type === 'rollup');
+      const resp = await this._mlApiService.jobs.newJobCaps(
+        dataView.getIndexPattern(),
+        dataView.type === DataViewType.ROLLUP
+      );
       const { fields: allFields, aggs } = createObjects(resp, dataView.getIndexPattern());
 
       if (this._includeEventRateField === true) {
@@ -170,4 +187,16 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
   fields.splice(0, 0, eventRateField);
 }
 
-export const newJobCapsService = new NewJobCapsService();
+// This is to retain the singleton behavior of the previous direct instantiation and export.
+let newJobCapsService: NewJobCapsService;
+export const mlJobCapsServiceFactory = (mlApi: MlApi) => {
+  if (newJobCapsService) return newJobCapsService;
+
+  newJobCapsService = new NewJobCapsService(mlApi);
+  return newJobCapsService;
+};
+
+export const useNewJobCapsService = () => {
+  const mlApi = useMlApi();
+  return mlJobCapsServiceFactory(mlApi);
+};

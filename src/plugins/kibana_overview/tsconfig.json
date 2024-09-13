@@ -23,9 +23,11 @@
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/shared-ux-page-analytics-no-data",
-    "@kbn/shared-ux-avatar-solution",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/shared-ux-router",
+    "@kbn/shared-ux-avatar-solution",
+    "@kbn/shared-ux-utility",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

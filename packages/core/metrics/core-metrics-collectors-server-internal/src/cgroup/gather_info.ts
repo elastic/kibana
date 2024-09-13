@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import fs from 'fs/promises';
 
-import { GROUP_CPU, GROUP_CPUACCT } from './constants';
+import fs from 'fs/promises';
 
 const CONTROL_GROUP_RE = new RegExp('\\d+:([^:]+):(/.*)');
 const CONTROLLER_SEPARATOR_RE = ',';
@@ -27,10 +27,15 @@ async function readProcSelf(): Promise<string[]> {
   return data.split(/\n/).filter((line) => line.trim().length > 0);
 }
 
-interface Result {
-  data: Record<string, string>;
-  v2: boolean;
-}
+type Result =
+  | {
+      v2: true;
+      path: string;
+    }
+  | {
+      v2: false;
+      data: Record<string, string>;
+    };
 
 export async function gatherInfo(): Promise<Result> {
   const lines = await readProcSelf();
@@ -39,11 +44,8 @@ export async function gatherInfo(): Promise<Result> {
     // eslint-disable-next-line prettier/prettier
     const [/* '0' */, /* '' */, path] = lines[0].trim().split(':');
     return {
-      data: {
-        [GROUP_CPU]: path,
-        [GROUP_CPUACCT]: path,
-      },
       v2: true,
+      path,
     };
   }
 

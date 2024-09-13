@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './index.scss';
@@ -13,6 +14,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EventEmitter } from 'events';
 import { EuiResizableContainer } from '@elastic/eui';
 
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   Vis,
   VisualizeEmbeddableContract,
@@ -82,7 +84,7 @@ function DefaultEditor({
   const editorInitialWidth = getInitialWidth(vis.type.editorConfig.defaultSize);
 
   return (
-    <core.i18n.Context>
+    <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider
         services={{
           appName: 'vis_default_editor',
@@ -109,6 +111,7 @@ function DefaultEditor({
               </EuiResizablePanel>
 
               <EuiResizableButton
+                alignIndicator="start"
                 className={`visEditor__resizer ${isCollapsed ? 'visEditor__resizer-isHidden' : ''}`}
               />
 
@@ -138,7 +141,7 @@ function DefaultEditor({
           )}
         </EuiResizableContainer>
       </KibanaContextProvider>
-    </core.i18n.Context>
+    </KibanaRenderContextProvider>
   );
 }
 

@@ -6,15 +6,13 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { IconChartHeatmap } from '@kbn/chart-icons';
 import { CUSTOM_PALETTE, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { HeatmapConfiguration } from '@kbn/visualizations-plugin/common';
@@ -40,10 +38,7 @@ import { HeatmapToolbar } from './toolbar_component';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import { FormBasedPersistedState } from '../..';
-
-const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
-  defaultMessage: 'Magnitude',
-});
+import { HEATMAP_RENDER_ARRAY_VALUES, HEATMAP_X_MISSING_AXIS } from '../../user_messages_ids';
 
 interface HeatmapVisualizationDeps {
   paletteService: PaletteRegistry;
@@ -109,6 +104,9 @@ export const getHeatmapVisualization = ({
 }: HeatmapVisualizationDeps): Visualization<HeatmapVisualizationState> => ({
   id: LENS_HEATMAP_ID,
 
+  getVisualizationTypeId(state) {
+    return state.shape;
+  },
   visualizationTypes: [
     {
       id: 'heatmap',
@@ -116,15 +114,12 @@ export const getHeatmapVisualization = ({
       label: i18n.translate('xpack.lens.heatmapVisualization.heatmapLabel', {
         defaultMessage: 'Heat map',
       }),
-      groupLabel: groupLabelForHeatmap,
-      showExperimentalBadge: false,
-      sortPriority: 1,
+      sortPriority: 8,
+      description: i18n.translate('xpack.lens.heatmap.visualizationDescription', {
+        defaultMessage: 'Show density or distribution across two dimensions.',
+      }),
     },
   ],
-
-  getVisualizationTypeId(state) {
-    return state.shape;
-  },
 
   getLayerIds(state) {
     return [state.layerId];
@@ -199,6 +194,7 @@ export const getHeatmapVisualization = ({
           filterOperations: filterOperationsAxis,
           supportsMoreColumns: !state.yAccessor,
           requiredMinDimensionCount: 0,
+          isBreakdownDimension: true,
           dataTestSubj: 'lnsHeatmap_yDimensionPanel',
         },
         {
@@ -272,26 +268,12 @@ export const getHeatmapVisualization = ({
     return update;
   },
 
-  renderDimensionEditor(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <HeatmapDimensionEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorComponent(props) {
+    return <HeatmapDimensionEditor {...props} paletteService={paletteService} />;
   },
 
-  renderToolbar(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <HeatmapToolbar {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  ToolbarComponent(props) {
+    return <HeatmapToolbar {...props} />;
   },
 
   getSupportedLayers() {
@@ -443,6 +425,7 @@ export const getHeatmapVisualization = ({
 
     if (!state.xAccessor) {
       errors.push({
+        uniqueId: HEATMAP_X_MISSING_AXIS,
         severity: 'error',
         fixableInEditor: true,
         displayLocations: [{ id: 'visualization' }],
@@ -471,6 +454,7 @@ export const getHeatmapVisualization = ({
         warnings = hasArrayValues
           ? [
               {
+                uniqueId: HEATMAP_RENDER_ARRAY_VALUES,
                 severity: 'warning',
                 fixableInEditor: true,
                 displayLocations: [{ id: 'toolbar' }],
@@ -515,7 +499,7 @@ export const getHeatmapVisualization = ({
     return suggestion;
   },
 
-  getVisualizationInfo(state: HeatmapVisualizationState) {
+  getVisualizationInfo(state, frame) {
     const dimensions = [];
     if (state.xAccessor) {
       dimensions.push({
@@ -543,6 +527,15 @@ export const getHeatmapVisualization = ({
       });
     }
 
+    const { displayStops } = getSafePaletteParams(
+      paletteService,
+      // When the active data comes from the embeddable side it might not have been indexed by layerId
+      // rather using a "default" key
+      frame?.activeData?.[state.layerId] || frame?.activeData?.default,
+      state.valueAccessor,
+      state?.palette && state.palette.accessor === state.valueAccessor ? state.palette : undefined
+    );
+
     return {
       layers: [
         {
@@ -551,6 +544,7 @@ export const getHeatmapVisualization = ({
           chartType: state.shape,
           ...this.getDescription(state),
           dimensions,
+          palette: displayStops.length ? displayStops.map(({ color }) => color) : undefined,
         },
       ],
     };

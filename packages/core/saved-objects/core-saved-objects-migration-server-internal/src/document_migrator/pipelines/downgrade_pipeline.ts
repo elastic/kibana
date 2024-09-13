@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { cloneDeep } from 'lodash';
@@ -48,9 +49,7 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
 
     for (const transform of this.getPendingTransforms()) {
       if (!transform.transformDown) {
-        throw new Error(
-          `Could not apply transformation ${transform.transformType}:${transform.version}: no down conversion registered`
-        );
+        continue;
       }
       const { transformedDoc } = transform.transformDown(this.document);
       if (this.document.type !== this.originalDoc.type) {
@@ -60,6 +59,7 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
     }
 
     this.document = this.ensureVersion(this.document);
+    this.document = this.applyVersionSchema(this.document);
 
     return {
       document: this.document,
@@ -103,14 +103,7 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
    * And that the targetTypeVersion is not greater than the document's
    */
   private assertCompatibility() {
-    const { id, typeMigrationVersion: currentVersion } = this.document;
-    const latestVersion = this.typeTransforms.latestVersion.migrate;
-
-    if (currentVersion && Semver.gt(currentVersion, latestVersion)) {
-      throw new Error(
-        `Document "${id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`
-      );
-    }
+    const { typeMigrationVersion: currentVersion } = this.document;
 
     if (currentVersion && Semver.gt(this.targetTypeVersion, currentVersion)) {
       throw new Error(
@@ -131,5 +124,14 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
       typeMigrationVersion: this.targetTypeVersion,
       ...(coreMigrationVersion ? { coreMigrationVersion } : {}),
     };
+  }
+
+  private applyVersionSchema(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
+    const targetVersion = this.targetTypeVersion;
+    const versionSchema = this.typeTransforms.versionSchemas[targetVersion];
+    if (versionSchema) {
+      return versionSchema(doc);
+    }
+    return doc;
   }
 }

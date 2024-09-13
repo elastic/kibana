@@ -6,6 +6,7 @@
  */
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { CustomFieldTypes } from '../../../common/types/domain';
 import type {
   AttachmentAggregationResult,
   AttachmentFrameworkAggsResult,
@@ -21,6 +22,7 @@ import {
   getCountsAggregationQuery,
   getCountsAndMaxData,
   getCountsFromBuckets,
+  getCustomFieldsTelemetry,
   getMaxBucketOnCaseAggregationQuery,
   getOnlyAlertsCommentsFilter,
   getOnlyConnectorsFilter,
@@ -565,6 +567,88 @@ describe('utils', () => {
     });
 
     describe('files', () => {
+      it('rounds the average file size when it is a decimal', () => {
+        const attachmentFramework: AttachmentFrameworkAggsResult = {
+          externalReferenceTypes: {
+            buckets: [
+              {
+                doc_count: 5,
+                key: '.files',
+                references: {
+                  cases: {
+                    max: {
+                      value: 10,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          persistableReferenceTypes: {
+            buckets: [],
+          },
+        };
+
+        expect(
+          getAttachmentsFrameworkStats({
+            attachmentAggregations: attachmentFramework,
+            totalCasesForOwner: 5,
+            filesAggregations: {
+              averageSize: { value: 1.1 },
+              topMimeTypes: {
+                buckets: [],
+              },
+            },
+          }).attachmentFramework.files
+        ).toMatchInlineSnapshot(`
+          Object {
+            "average": 1,
+            "averageSize": 1,
+            "maxOnACase": 10,
+            "topMimeTypes": Array [],
+            "total": 5,
+          }
+        `);
+      });
+
+      it('sets the average file size to 0 when the aggregation does not exist', () => {
+        const attachmentFramework: AttachmentFrameworkAggsResult = {
+          externalReferenceTypes: {
+            buckets: [
+              {
+                doc_count: 5,
+                key: '.files',
+                references: {
+                  cases: {
+                    max: {
+                      value: 10,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          persistableReferenceTypes: {
+            buckets: [],
+          },
+        };
+
+        expect(
+          getAttachmentsFrameworkStats({
+            attachmentAggregations: attachmentFramework,
+            totalCasesForOwner: 5,
+          }).attachmentFramework.files
+        ).toMatchInlineSnapshot(`
+          Object {
+            "average": 1,
+            "averageSize": 0,
+            "maxOnACase": 10,
+            "topMimeTypes": Array [],
+            "total": 5,
+          }
+        `);
+      });
+
       it('sets the files stats to empty when the file aggregation results is the empty version', () => {
         const attachmentFramework: AttachmentFrameworkAggsResult = {
           externalReferenceTypes: {
@@ -1115,6 +1199,63 @@ describe('utils', () => {
         ],
         function: 'is',
         type: 'function',
+      });
+    });
+  });
+
+  describe('getCustomFieldsTelemetry', () => {
+    const customFieldsMock = [
+      {
+        key: 'foobar1',
+        label: 'foobar1',
+        type: CustomFieldTypes.TEXT,
+        required: false,
+      },
+      {
+        key: 'foobar2',
+        label: 'foobar2',
+        type: CustomFieldTypes.TOGGLE,
+        required: true,
+      },
+      {
+        key: 'foobar3',
+        label: 'foobar3',
+        type: 'foo',
+        required: true,
+      },
+      {
+        key: 'foobar4',
+        label: 'foobar4',
+        type: CustomFieldTypes.TOGGLE,
+        required: true,
+      },
+    ];
+
+    it('returns customFields telemetry correctly', () => {
+      expect(getCustomFieldsTelemetry(customFieldsMock)).toEqual({
+        totalsByType: {
+          text: 1,
+          toggle: 2,
+          foo: 1,
+        },
+        totals: 4,
+        required: 3,
+      });
+    });
+
+    it('returns correctly when customFields undefined', () => {
+      expect(getCustomFieldsTelemetry(undefined)).toEqual({
+        totalsByType: {},
+        totals: 0,
+        required: 0,
+      });
+    });
+
+    it('returns correctly when customFields empty', () => {
+      expect(getCustomFieldsTelemetry([])).toEqual({
+        totalsByType: {},
+        totals: 0,
+        required: 0,
       });
     });
   });

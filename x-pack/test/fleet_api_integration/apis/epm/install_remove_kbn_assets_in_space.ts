@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 const testSpaceId = 'fleet_test_space';
 
@@ -16,9 +14,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
-  const server = dockerServers.get('registry');
-  const es: Client = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
   const pkgName = 'only_dashboard';
   const pkgVersion = '0.1.0';
 
@@ -47,38 +43,36 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/spaces/space/${spaceId}`).set('kbn-xsrf', 'xxxx').send();
   };
 
-  describe('installs and uninstalls all assets (non default space)', async () => {
+  describe('installs and uninstalls all assets (non default space)', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     before(async () => {
+      await fleetAndAgents.setup();
       await createSpace(testSpaceId);
     });
 
     after(async () => {
       await deleteSpace(testSpaceId);
     });
-    describe('installs all assets when installing a package for the first time in non default space', async () => {
+    describe('installs all assets when installing a package for the first time in non default space', () => {
       before(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackageInSpace(pkgName, pkgVersion, testSpaceId);
       });
       after(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(pkgName, pkgVersion);
       });
 
       expectAssetsInstalled({
-        pkgVersion,
-        pkgName,
-        es,
         kibanaServer,
+        space: testSpaceId,
       });
     });
 
-    describe('uninstalls all assets when uninstalling a package from a different space', async () => {
+    describe('uninstalls all assets when uninstalling a package from a different space', () => {
       before(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackageInSpace(pkgName, pkgVersion, testSpaceId);
         await uninstallPackage(pkgName, pkgVersion);
       });
@@ -123,17 +117,7 @@ export default function (providerContext: FtrProviderContext) {
   });
 }
 
-const expectAssetsInstalled = ({
-  pkgVersion,
-  pkgName,
-  es,
-  kibanaServer,
-}: {
-  pkgVersion: string;
-  pkgName: string;
-  es: Client;
-  kibanaServer: any;
-}) => {
+const expectAssetsInstalled = ({ kibanaServer, space }: { kibanaServer: any; space: string }) => {
   it('should have installed the kibana assets', async function () {
     // These are installed from Fleet along with every package
     const resIndexPatternLogs = await kibanaServer.savedObjects.get({
@@ -151,20 +135,20 @@ const expectAssetsInstalled = ({
     const resDashboard = await kibanaServer.savedObjects.get({
       type: 'dashboard',
       id: 'test_dashboard',
-      space: testSpaceId,
+      space,
     });
     expect(resDashboard.id).equal('test_dashboard');
 
     const resVis = await kibanaServer.savedObjects.get({
       type: 'visualization',
       id: 'test_visualization',
-      space: testSpaceId,
+      space,
     });
     expect(resVis.id).equal('test_visualization');
     const resSearch = await kibanaServer.savedObjects.get({
       type: 'search',
       id: 'test_search',
-      space: testSpaceId,
+      space,
     });
     expect(resSearch.id).equal('test_search');
   });

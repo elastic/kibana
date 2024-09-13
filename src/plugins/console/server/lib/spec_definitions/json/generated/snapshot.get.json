@@ -1,30 +1,38 @@
 {
   "snapshot.get": {
     "url_params": {
-      "master_timeout": "",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "ignore_unavailable": "__flag__",
-      "index_names": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "verbose": "__flag__",
       "index_details": "__flag__",
+      "index_names": "__flag__",
       "include_repository": "__flag__",
       "sort": [
         "start_time",
         "duration",
         "name",
-        "repository",
         "index_count",
+        "repository",
         "shard_count",
         "failed_shard_count"
       ],
-      "size": 0,
+      "size": "",
       "order": [
         "asc",
         "desc"
       ],
-      "from_sort_value": "",
       "after": "",
-      "offset": 0,
-      "slm_policy_filter": "",
-      "verbose": "__flag__"
+      "offset": "",
+      "from_sort_value": "",
+      "slm_policy_filter": ""
     },
     "methods": [
       "GET"
@@ -32,6 +40,10 @@
     "patterns": [
       "_snapshot/{repository}/{snapshot}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

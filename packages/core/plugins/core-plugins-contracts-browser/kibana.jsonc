@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/core-plugins-contracts-browser",
+  "owner": "@elastic/kibana-core"
+}

@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo, useRef, useState } from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -27,9 +26,8 @@ export const WorkspaceRoute = ({
   deps: {
     toastNotifications,
     coreStart,
-    savedObjectsClient,
+    contentClient,
     graphSavePolicy,
-    chrome,
     canEditDrillDownUrls,
     overlays,
     navigation,
@@ -44,6 +42,7 @@ export const WorkspaceRoute = ({
     indexPatterns: getIndexPatternProvider,
     inspect,
     savedObjectsManagement,
+    contentManagement,
   },
 }: WorkspaceRouteProps) => {
   /**
@@ -72,9 +71,10 @@ export const WorkspaceRoute = ({
       data,
       unifiedSearch,
       savedObjectsManagement,
+      contentManagement,
       ...coreStart,
     }),
-    [coreStart, data, storage, unifiedSearch, savedObjectsManagement]
+    [coreStart, data, storage, unifiedSearch, savedObjectsManagement, contentManagement]
   );
 
   const { loading, requestAdapter, callNodeProxy, callSearchNodeProxy, handleSearchQueryError } =
@@ -105,22 +105,19 @@ export const WorkspaceRoute = ({
         return createdWorkspace;
       },
       getWorkspace: () => workspaceRef.current,
-      notifications: coreStart.notifications,
-      http: coreStart.http,
-      overlays: coreStart.overlays,
-      savedObjectsClient,
       savePolicy: graphSavePolicy,
+      contentClient,
       changeUrl: (newUrl) => history.push(newUrl),
       notifyReact: () => setRenderCounter((cur) => cur + 1),
-      chrome,
       handleSearchQueryError,
+      ...coreStart,
     })
   );
 
   const loaded = useWorkspaceLoader({
     workspaceRef,
     store,
-    savedObjectsClient,
+    contentClient,
     spaces,
     coreStart,
     data,
@@ -133,29 +130,27 @@ export const WorkspaceRoute = ({
   const { savedWorkspace, sharingSavedObjectProps } = loaded;
 
   return (
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <Provider store={store}>
-          <WorkspaceLayout
-            spaces={spaces}
-            sharingSavedObjectProps={sharingSavedObjectProps}
-            renderCounter={renderCounter}
-            workspace={workspaceRef.current}
-            loading={loading}
-            setHeaderActionMenu={setHeaderActionMenu}
-            graphSavePolicy={graphSavePolicy}
-            navigation={navigation}
-            capabilities={capabilities}
-            coreStart={coreStart}
-            canEditDrillDownUrls={canEditDrillDownUrls}
-            overlays={overlays}
-            savedWorkspace={savedWorkspace}
-            indexPatternProvider={indexPatternProvider}
-            inspect={inspect}
-            requestAdapter={requestAdapter}
-          />
-        </Provider>
-      </KibanaContextProvider>
-    </I18nProvider>
+    <KibanaContextProvider services={services}>
+      <Provider store={store}>
+        <WorkspaceLayout
+          spaces={spaces}
+          sharingSavedObjectProps={sharingSavedObjectProps}
+          renderCounter={renderCounter}
+          workspace={workspaceRef.current}
+          loading={loading}
+          setHeaderActionMenu={setHeaderActionMenu}
+          graphSavePolicy={graphSavePolicy}
+          navigation={navigation}
+          capabilities={capabilities}
+          coreStart={coreStart}
+          canEditDrillDownUrls={canEditDrillDownUrls}
+          overlays={overlays}
+          savedWorkspace={savedWorkspace}
+          indexPatternProvider={indexPatternProvider}
+          inspect={inspect}
+          requestAdapter={requestAdapter}
+        />
+      </Provider>
+    </KibanaContextProvider>
   );
 };

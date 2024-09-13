@@ -7,23 +7,27 @@
 
 import Handlebars from 'handlebars';
 import { safeLoad, safeDump } from 'js-yaml';
+import type { Logger } from '@kbn/core/server';
 
 import type { PackagePolicyConfigRecord } from '../../../../common/types';
+import { toCompiledSecretRef } from '../../secrets';
+import { PackageInvalidArchiveError } from '../../../errors';
+import { appContextService } from '../..';
 
 const handlebars = Handlebars.create();
 
 export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
-  const { vars, yamlValues } = buildTemplateVariables(variables, templateStr);
+  const logger = appContextService.getLogger();
+  const { vars, yamlValues } = buildTemplateVariables(logger, variables);
   let compiledTemplate: string;
   try {
     const template = handlebars.compile(templateStr, { noEscape: true });
     compiledTemplate = template(vars);
   } catch (err) {
-    throw new Error(`Error while compiling agent template: ${err.message}`);
+    throw new PackageInvalidArchiveError(`Error while compiling agent template: ${err.message}`);
   }
 
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
-
   const yamlFromCompiledTemplate = safeLoad(compiledTemplate, {});
 
   // Hack to keep empty string ('') values around in the end yaml because
@@ -64,21 +68,26 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
-function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateStr: string) {
+function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRecord) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
     // support variables with . like key.patterns
     const keyParts = key.split('.');
     const lastKeyPart = keyParts.pop();
+    logger.debug(`Building agent template variables`);
 
     if (!lastKeyPart || !isValidKey(lastKeyPart)) {
-      throw new Error('Invalid key');
+      throw new PackageInvalidArchiveError(
+        `Error while compiling agent template: Invalid key ${lastKeyPart}`
+      );
     }
 
     let varPart = acc;
     for (const keyPart of keyParts) {
       if (!isValidKey(keyPart)) {
-        throw new Error('Invalid key');
+        throw new PackageInvalidArchiveError(
+          `Error while compiling agent template: Invalid key ${keyPart}`
+        );
       }
       if (!varPart[keyPart]) {
         varPart[keyPart] = {};
@@ -90,6 +99,8 @@ function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateSt
       const yamlKeyPlaceholder = `##${key}##`;
       varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
+    } else if (recordEntry.value && recordEntry.value.isSecretRef) {
+      varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
     } else {
       varPart[lastKeyPart] = recordEntry.value;
     }
@@ -115,6 +126,7 @@ handlebars.registerHelper('contains', containsHelper);
 // and to respect any incoming newline we also need to double them, otherwise
 // they will be replaced with a space.
 function escapeStringHelper(str: string) {
+  if (!str) return undefined;
   return "'" + str.replace(/\'/g, "''").replace(/\n/g, '\n\n') + "'";
 }
 handlebars.registerHelper('escape_string', escapeStringHelper);
@@ -129,6 +141,22 @@ function toJsonHelper(value: any) {
 }
 handlebars.registerHelper('to_json', toJsonHelper);
 
+// urlEncodeHelper returns a string encoded as a URI component.
+function urlEncodeHelper(input: string) {
+  let encodedString = encodeURIComponent(input);
+  // encodeURIComponent does not encode the characters -.!~*'(), known as "unreserved marks",
+  // which do not have a reserved purpose but are allowed in a URI "as is". So, these have are
+  // explicitly encoded. The following creates the sequences %27 %28 %29 %2A. Since the valid
+  // encoding of "*" is %2A, it is necessary to call toUpperCase() to properly encode.
+  encodedString = encodedString.replace(
+    /[!'()*]/g,
+    (char) => '%' + char.charCodeAt(0).toString(16).toUpperCase()
+  );
+
+  return encodedString;
+}
+handlebars.registerHelper('url_encode', urlEncodeHelper);
+
 function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yamlTemplate: string) {
   if (Object.keys(yamlVariables).length === 0 || !yamlTemplate) {
     return yamlTemplate;
@@ -136,8 +164,7 @@ function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yaml
 
   let patchedTemplate = yamlTemplate;
   Object.entries(yamlVariables).forEach(([key, val]) => {
-    patchedTemplate = patchedTemplate.replace(
-      new RegExp(`^"${key}"`, 'gm'),
+    patchedTemplate = patchedTemplate.replace(new RegExp(`^"${key}"`, 'gm'), () =>
       val ? safeDump(val) : ''
     );
   });

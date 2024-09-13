@@ -7,28 +7,11 @@
 
 import React from 'react';
 
-import { ThemeProvider } from 'styled-components';
-
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-
-import { coreMock } from '@kbn/core/public/mocks';
-import { registerTestBed } from '@kbn/test-jest-helpers';
-
 import type { Agent } from '../../../../types';
-
-import { FleetStatusProvider, ConfigContext, KibanaVersionContext } from '../../../../../../hooks';
-
-import { getMockTheme } from '../../../../../../mocks';
-
+import { createFleetTestRendererMock } from '../../../../../../mock';
 import { ExperimentalFeaturesService } from '../../../../services';
 
 import { SearchAndFilterBar } from './search_and_filter_bar';
-
-const mockTheme = getMockTheme({
-  eui: {
-    euiSize: '10px',
-  },
-});
 
 jest.mock('../../../../components', () => {
   return {
@@ -41,41 +24,35 @@ jest.mock('../../../../../../hooks/use_locator', () => {
     useDashboardLocator: jest.fn().mockImplementation(() => {
       return {
         id: 'DASHBOARD_APP_LOCATOR',
-        getRedirectUrl: jest.fn().mockResolvedValue('app/dashboards#/view/elastic_agent-a0002'),
+        getRedirectUrl: jest.fn().mockReturnValue('app/dashboards#/view/elastic_agent-a0002'),
       };
     }),
   };
 });
-
-const TestComponent = (props: any) => (
-  <KibanaContextProvider services={coreMock.createStart()}>
-    <ConfigContext.Provider value={{ agents: { enabled: true, elasticsearch: {} }, enabled: true }}>
-      <KibanaVersionContext.Provider value={'8.2.0'}>
-        <ThemeProvider theme={mockTheme}>
-          <FleetStatusProvider>
-            <SearchAndFilterBar {...props} />
-          </FleetStatusProvider>
-        </ThemeProvider>
-      </KibanaVersionContext.Provider>
-    </ConfigContext.Provider>
-  </KibanaContextProvider>
-);
 
 describe('SearchAndFilterBar', () => {
   beforeAll(() => {
     // @ts-ignore - prevents us needing to mock the entire service
     ExperimentalFeaturesService.init({});
   });
+
+  function render(props: any) {
+    const renderer = createFleetTestRendererMock();
+
+    return renderer.render(<SearchAndFilterBar {...props} />);
+  }
+
   it('should show no Actions button when no agent is selected', async () => {
     const selectedAgents: Agent[] = [];
     const props: any = {
-      totalAgents: 10,
+      nAgentsInTable: 10,
       totalInactiveAgents: 2,
+      totalManagedAgentIds: [],
       selectionMode: 'manual',
       currentQuery: '',
       selectedAgents,
       refreshAgents: () => undefined,
-      visibleAgents: [],
+      agentsOnCurrentPage: [],
       tags: [],
       agentPolicies: [],
       selectedStatus: [],
@@ -83,10 +60,8 @@ describe('SearchAndFilterBar', () => {
       selectedAgentPolicies: [],
       showAgentActivityTour: {},
     };
-    const testBed = registerTestBed(TestComponent)(props);
-    const { exists } = testBed;
-
-    expect(exists('agentBulkActionsButton')).toBe(false);
+    const results = render(props);
+    expect(results.queryByTestId('agentBulkActionsButton')).toBeNull();
   });
 
   it('should show an Actions button when at least an agent is selected', async () => {
@@ -103,13 +78,14 @@ describe('SearchAndFilterBar', () => {
       },
     ];
     const props: any = {
-      totalAgents: 10,
+      nAgentsInTable: 10,
       totalInactiveAgents: 2,
+      totalManagedAgentIds: [],
       selectionMode: 'manual',
       currentQuery: '',
       selectedAgents,
       refreshAgents: () => undefined,
-      visibleAgents: [],
+      agentsOnCurrentPage: [],
       tags: [],
       agentPolicies: [],
       selectedStatus: [],
@@ -117,21 +93,20 @@ describe('SearchAndFilterBar', () => {
       selectedAgentPolicies: [],
       showAgentActivityTour: {},
     };
-    const testBed = registerTestBed(TestComponent)(props);
-    const { exists } = testBed;
-
-    expect(exists('agentBulkActionsButton')).not.toBeNull();
+    const results = render(props);
+    expect(results.queryByTestId('agentBulkActionsButton')).not.toBeNull();
   });
 
   it('should show an Actions button when agents selected in query mode', async () => {
     const props: any = {
-      totalAgents: 10,
+      nAgentsInTable: 10,
       totalInactiveAgents: 2,
+      totalManagedAgentIds: [],
       selectionMode: 'query',
       currentQuery: '',
       selectedAgents: [],
       refreshAgents: () => undefined,
-      visibleAgents: [],
+      agentsOnCurrentPage: [],
       tags: [],
       agentPolicies: [],
       selectedStatus: [],
@@ -139,9 +114,7 @@ describe('SearchAndFilterBar', () => {
       selectedAgentPolicies: [],
       showAgentActivityTour: {},
     };
-    const testBed = registerTestBed(TestComponent)(props);
-    const { exists } = testBed;
-
-    expect(exists('agentBulkActionsButton')).not.toBeNull();
+    const results = render(props);
+    expect(results.queryByTestId('agentBulkActionsButton')).not.toBeNull();
   });
 });

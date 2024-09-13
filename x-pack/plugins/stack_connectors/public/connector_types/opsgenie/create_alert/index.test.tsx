@@ -8,20 +8,7 @@
 import React from 'react';
 import { screen, render, within, fireEvent, waitFor } from '@testing-library/react';
 import { CreateAlert } from '.';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import userEvent from '@testing-library/user-event';
-
-const kibanaReactPath = '../../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 
 describe('CreateAlert', () => {
   const editSubAction = jest.fn();
@@ -109,7 +96,7 @@ describe('CreateAlert', () => {
   it('shows the json editor when clicking the editor toggle', async () => {
     render(<CreateAlert {...options} />);
 
-    userEvent.click(screen.getByTestId('opsgenie-show-json-editor-toggle'));
+    await userEvent.click(screen.getByTestId('opsgenie-show-json-editor-toggle'));
 
     await waitFor(() => {
       expect(screen.getByTestId('actionJsonEditor')).toBeInTheDocument();
@@ -119,10 +106,10 @@ describe('CreateAlert', () => {
     });
   });
 
-  it('shows the additional options when clicking the more options button', () => {
+  it('shows the additional options when clicking the more options button', async () => {
     render(<CreateAlert {...options} />);
 
-    userEvent.click(screen.getByTestId('opsgenie-display-more-options'));
+    await userEvent.click(screen.getByTestId('opsgenie-display-more-options'));
 
     expect(screen.getByTestId('opsgenie-entity-row')).toBeInTheDocument();
   });
@@ -130,13 +117,13 @@ describe('CreateAlert', () => {
   it('sets the json editor error to undefined when the toggle is switched off', async () => {
     render(<CreateAlert {...options} />);
 
-    userEvent.click(screen.getByTestId('opsgenie-show-json-editor-toggle'));
+    await userEvent.click(screen.getByTestId('opsgenie-show-json-editor-toggle'));
 
     await waitFor(() => {
       expect(screen.getByTestId('actionJsonEditor')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('opsgenie-show-json-editor-toggle'));
+    await userEvent.click(screen.getByTestId('opsgenie-show-json-editor-toggle'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('actionJsonEditor')).not.toBeInTheDocument();

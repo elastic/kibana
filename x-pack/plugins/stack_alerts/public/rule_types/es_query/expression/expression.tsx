@@ -15,8 +15,9 @@ import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
 import { QueryFormTypeChooser } from './query_form_type_chooser';
-import { isSearchSourceRule } from '../util';
+import { isEsqlQueryRule, isSearchSourceRule } from '../util';
 import { ALL_EXPRESSION_ERROR_KEYS } from '../constants';
+import { EsqlQueryExpression } from './esql_query_expression';
 
 function areSearchSourceExpressionPropsEqual(
   prevProps: Readonly<PropsWithChildren<SearchSourceExpressionProps>>,
@@ -37,6 +38,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
 > = (props) => {
   const { ruleParams, errors, setRuleProperty, setRuleParams } = props;
   const isSearchSource = isSearchSourceRule(ruleParams);
+  const isEsqlQuery = isEsqlQueryRule(ruleParams);
   // metadata provided only when open alert from Discover page
   const isManagementPage = props.metadata?.isManagementPage ?? true;
 
@@ -60,6 +62,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
   );
 
   const errorParam = ALL_EXPRESSION_ERROR_KEYS.find((errorKey) => {
+    // @ts-expect-error upgrade typescript v5.1.6
     return errors[errorKey]?.length >= 1 && ruleParams[errorKey] !== undefined;
   });
 
@@ -71,7 +74,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
         data-test-subj="esQueryAlertExpressionError"
         title={
           ['index', 'searchType', 'timeField'].includes(errorParam)
-            ? errors[errorParam]
+            ? (errors[errorParam] as string)
             : expressionGenericErrorMessage
         }
       />
@@ -95,8 +98,12 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
         <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
       )}
 
-      {ruleParams.searchType && !isSearchSource && (
+      {ruleParams.searchType && !isSearchSource && !isEsqlQuery && (
         <EsQueryExpression {...props} ruleParams={ruleParams} />
+      )}
+
+      {ruleParams.searchType && isEsqlQuery && (
+        <EsqlQueryExpression {...props} ruleParams={ruleParams} />
       )}
 
       <EuiHorizontalRule />

@@ -11,12 +11,15 @@ import {
   SearchHitsMetadata,
   AggregationsSingleMetricAggregateBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Group } from '@kbn/observability-alerting-rule-utils';
 
 export const UngroupedGroupId = 'all documents';
 export interface ParsedAggregationGroup {
   group: string;
   count: number;
   hits: Array<SearchHit<unknown>>;
+  sourceFields: string[];
+  groups?: Group[];
   value?: number;
 }
 
@@ -30,12 +33,18 @@ interface ParseAggregationResultsOpts {
   isGroupAgg: boolean;
   esResult: SearchResponse<unknown>;
   resultLimit?: number;
+  sourceFieldsParams?: Array<{ label: string; searchPath: string }>;
+  generateSourceFieldsFromHits?: boolean;
+  termField?: string | string[];
 }
 export const parseAggregationResults = ({
   isCountAgg,
   isGroupAgg,
   esResult,
   resultLimit,
+  sourceFieldsParams = [],
+  generateSourceFieldsFromHits = false,
+  termField,
 }: ParseAggregationResultsOpts): ParsedAggregationResults => {
   const aggregations = esResult?.aggregations || {};
 
@@ -51,6 +60,7 @@ export const parseAggregationResults = ({
               hits: esResult.hits.hits ?? [],
             },
           },
+          ...aggregations, // sourceFields
           ...(!isCountAgg
             ? {
                 metricAgg: {
@@ -77,11 +87,43 @@ export const parseAggregationResults = ({
     if (resultLimit && results.results.length === resultLimit) break;
 
     const groupName: string = `${groupBucket?.key}`;
+    const groups =
+      termField && groupBucket?.key
+        ? [termField].flat().reduce<Group[]>((resultGroups, groupByItem, groupIndex) => {
+            resultGroups.push({
+              field: groupByItem,
+              value: [groupBucket.key].flat()[groupIndex],
+            });
+            return resultGroups;
+          }, [])
+        : undefined;
+    const sourceFields: { [key: string]: string[] } = {};
+
+    sourceFieldsParams.forEach((field) => {
+      if (generateSourceFieldsFromHits) {
+        const fieldsSet: string[] = [];
+        groupBucket.topHitsAgg.hits.hits.forEach((hit: SearchHit<{ [key: string]: string }>) => {
+          if (hit._source && hit._source[field.label]) {
+            fieldsSet.push(hit._source[field.label]);
+          }
+        });
+        sourceFields[field.label] = Array.from(fieldsSet);
+      } else {
+        if (groupBucket[field.label]?.buckets && groupBucket[field.label].buckets.length > 0) {
+          sourceFields[field.label] = groupBucket[field.label].buckets.map(
+            (bucket: { doc_count: number; key: string | number }) => bucket.key
+          );
+        }
+      }
+    });
+
     const groupResult: any = {
       group: groupName,
+      groups,
       count: groupBucket?.doc_count,
       hits: groupBucket?.topHitsAgg?.hits?.hits ?? [],
       ...(!isCountAgg ? { value: groupBucket?.metricAgg?.value } : {}),
+      sourceFields,
     };
     results.results.push(groupResult);
   }

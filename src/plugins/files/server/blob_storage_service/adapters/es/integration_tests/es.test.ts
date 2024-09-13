@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
@@ -22,9 +23,10 @@ describe('Elasticsearch blob storage', () => {
   let esBlobStorage: ElasticsearchBlobStorageClient;
   let esClient: ElasticsearchClient;
   let esGetSpy: jest.SpyInstance;
+  let esRefreshIndexSpy: jest.SpyInstance;
 
   beforeAll(async () => {
-    ElasticsearchBlobStorageClient.configureConcurrentUpload(Infinity);
+    ElasticsearchBlobStorageClient.configureConcurrentTransfers(Infinity);
     const { startES, startKibana } = createTestServers({ adjustTimeout: jest.setTimeout });
     manageES = await startES();
     manageKbn = await startKibana();
@@ -48,6 +50,7 @@ describe('Elasticsearch blob storage', () => {
   beforeEach(() => {
     esBlobStorage = createEsBlobStorage();
     esGetSpy = jest.spyOn(esClient, 'get');
+    esRefreshIndexSpy = jest.spyOn(esClient.indices, 'refresh');
   });
 
   afterEach(async () => {
@@ -105,7 +108,9 @@ describe('Elasticsearch blob storage', () => {
     esBlobStorage = createEsBlobStorage({ chunkSize: '1024B' });
     const { id } = await esBlobStorage.upload(Readable.from([fileString]));
     expect(await getAllDocCount()).toMatchObject({ count: 37 });
+    esRefreshIndexSpy.mockClear();
     const rs = await esBlobStorage.download({ id });
+    expect(esRefreshIndexSpy).toHaveBeenCalled(); // Make sure we refresh the index before downloading the chunks
     const chunks: string[] = [];
     for await (const chunk of rs) {
       chunks.push(chunk);
@@ -137,7 +142,9 @@ describe('Elasticsearch blob storage', () => {
     const { id } = await esBlobStorage.upload(Readable.from([fileString]));
     const { id: id2 } = await esBlobStorage.upload(Readable.from([fileString2]));
     expect(await getAllDocCount()).toMatchObject({ count: 10 });
+    esRefreshIndexSpy.mockClear();
     await esBlobStorage.delete(id);
+    expect(esRefreshIndexSpy).toHaveBeenCalled(); // Make sure we refresh the index before deleting the chunks
     expect(await getAllDocCount()).toMatchObject({ count: 2 });
     // Now we check that the other file is still intact
     const rs = await esBlobStorage.download({ id: id2 });

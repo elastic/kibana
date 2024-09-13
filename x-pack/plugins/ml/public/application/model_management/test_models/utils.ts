@@ -15,14 +15,22 @@ import type { ModelItem } from '../models_list';
 
 const PYTORCH_TYPES = Object.values(SUPPORTED_PYTORCH_TASKS);
 
+export function isDfaTrainedModel(modelItem: ModelItem) {
+  return (
+    modelItem.metadata?.analytics_config !== undefined ||
+    modelItem.inference_config?.regression !== undefined ||
+    modelItem.inference_config?.classification !== undefined
+  );
+}
+
 export function isTestable(modelItem: ModelItem, checkForState = false) {
   if (
     modelItem.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
     PYTORCH_TYPES.includes(
-      Object.keys(modelItem.inference_config)[0] as SupportedPytorchTasksType
+      Object.keys(modelItem.inference_config ?? {})[0] as SupportedPytorchTasksType
     ) &&
     (checkForState === false ||
-      modelItem.stats?.deployment_stats?.state === DEPLOYMENT_STATE.STARTED)
+      modelItem.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTED))
   ) {
     return true;
   }
@@ -31,5 +39,5 @@ export function isTestable(modelItem: ModelItem, checkForState = false) {
     return true;
   }
 
-  return false;
+  return isDfaTrainedModel(modelItem);
 }

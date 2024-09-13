@@ -41,6 +41,9 @@ Object {
                 "isBucketed": false,
                 "label": "Count of records",
                 "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
                 "scale": "ratio",
                 "sourceField": "___records___",
               },
@@ -50,6 +53,7 @@ Object {
                 "label": "@timestamp",
                 "operationType": "date_histogram",
                 "params": Object {
+                  "includeEmptyRows": true,
                   "interval": "auto",
                 },
                 "scale": "interval",
@@ -190,6 +194,11 @@ Object {
       "query": "host.name: *",
     },
     "visualization": Object {
+      "axisTitlesVisibilitySettings": Object {
+        "x": false,
+        "yLeft": false,
+        "yRight": true,
+      },
       "layers": Array [
         Object {
           "accessors": Array [
@@ -206,7 +215,11 @@ Object {
       ],
       "legend": Object {
         "isVisible": true,
-        "position": "left",
+        "legendSize": "xlarge",
+        "legendStats": Array [
+          "currentAndLastValue",
+        ],
+        "position": "right",
       },
       "preferredSeriesType": "bar_stacked",
       "title": "Empty XY chart",

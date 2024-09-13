@@ -8,7 +8,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTabProps } from '../../types';
-import { Process, ProcessEvent } from '../../../common/types/process_tree';
+import type { Process, ProcessEvent } from '../../../common';
 import { getSelectedTabContent } from './helpers';
 import { DetailPanelProcessTab } from '../detail_panel_process_tab';
 import { DetailPanelMetadataTab } from '../detail_panel_metadata_tab';
@@ -17,6 +17,7 @@ import { DetailPanelAlertTab } from '../detail_panel_alert_tab';
 import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 
 interface SessionViewDetailPanelDeps {
+  index: string;
   selectedProcess: Process | null;
   alerts?: ProcessEvent[];
   alertsCount: number;
@@ -32,6 +33,7 @@ interface SessionViewDetailPanelDeps {
  * Detail panel in the session view.
  */
 export const SessionViewDetailPanel = ({
+  index,
   alerts,
   alertsCount,
   isFetchingAlerts,
@@ -57,7 +59,7 @@ export const SessionViewDetailPanel = ({
         name: i18n.translate('xpack.sessionView.detailsPanel.process', {
           defaultMessage: 'Process',
         }),
-        content: <DetailPanelProcessTab selectedProcess={selectedProcess} />,
+        content: <DetailPanelProcessTab index={index} selectedProcess={selectedProcess} />,
       },
       {
         id: 'metadata',
@@ -106,6 +108,7 @@ export const SessionViewDetailPanel = ({
     onJumpToEvent,
     onShowAlertDetails,
     investigatedAlertId,
+    index,
   ]);
 
   const onSelectedTabChanged = useCallback((id: string) => {
@@ -122,9 +125,9 @@ export const SessionViewDetailPanel = ({
   return (
     <div css={styles.detailsPanel}>
       <EuiTabs size="l" expand>
-        {tabs.map((tab, index) => (
+        {tabs.map((tab, i) => (
           <EuiTab
-            key={index}
+            key={`${tab}-${i}`}
             onClick={() => onSelectedTabChanged(tab.id)}
             isSelected={tab.id === selectedTabId}
             disabled={tab.disabled}

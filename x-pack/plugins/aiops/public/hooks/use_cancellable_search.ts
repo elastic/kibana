@@ -6,12 +6,9 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import {
-  type IKibanaSearchResponse,
-  isCompleteResponse,
-  isErrorResponse,
-} from '@kbn/data-plugin/common';
-import { tap } from 'rxjs/operators';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { isRunningResponse } from '@kbn/data-plugin/common';
+import { tap } from 'rxjs';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 export function useCancellableSearch() {
@@ -25,6 +22,7 @@ export function useCancellableSearch() {
     ): Promise<ResponseType | null> => {
       return new Promise((resolve, reject) => {
         data.search
+          // @ts-expect-error upgrade typescript v4.9.5
           .search<RequestBody, ResponseType>(requestBody, {
             abortSignal: abortController.current.signal,
           })
@@ -35,11 +33,9 @@ export function useCancellableSearch() {
           )
           .subscribe({
             next: (result) => {
-              if (isCompleteResponse(result)) {
+              if (!isRunningResponse(result)) {
                 setIsFetching(false);
                 resolve(result);
-              } else if (isErrorResponse(result)) {
-                reject(result);
               } else {
                 // partial results
                 // Ignore partial results for now.

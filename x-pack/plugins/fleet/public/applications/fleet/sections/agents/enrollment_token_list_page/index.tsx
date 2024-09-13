@@ -20,8 +20,16 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
+import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public/request/send_request';
 
-import { ENROLLMENT_API_KEYS_INDEX, SO_SEARCH_LIMIT } from '../../../constants';
+import { ApiKeyField } from '../../../../../components/api_key_field';
+
+import type { GetOneEnrollmentAPIKeyResponse } from '../../../../../../common/types';
+import {
+  ENROLLMENT_API_KEYS_INDEX,
+  SO_SEARCH_LIMIT,
+  FLEET_ENROLLMENT_API_PREFIX,
+} from '../../../constants';
 import { NewEnrollmentTokenModal } from '../../../components';
 import {
   useBreadcrumbs,
@@ -37,73 +45,6 @@ import { SearchBar } from '../../../components/search_bar';
 import { DefaultLayout } from '../../../layouts';
 
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
-
-const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }) => {
-  const { notifications } = useStartServices();
-  const [state, setState] = useState<'VISIBLE' | 'HIDDEN' | 'LOADING'>('HIDDEN');
-  const [key, setKey] = useState<string | undefined>();
-
-  const toggleKey = async () => {
-    if (state === 'VISIBLE') {
-      setState('HIDDEN');
-    } else if (state === 'HIDDEN') {
-      try {
-        setState('LOADING');
-        const res = await sendGetOneEnrollmentAPIKey(apiKeyId);
-        if (res.error) {
-          throw res.error;
-        }
-        setKey(res.data?.item.api_key);
-        setState('VISIBLE');
-      } catch (err) {
-        notifications.toasts.addError(err as Error, {
-          title: 'Error',
-        });
-        setState('HIDDEN');
-      }
-    }
-  };
-
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem>
-        <EuiText color="subdued" size="xs">
-          {state === 'VISIBLE'
-            ? key
-            : '•••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••'}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={
-            state === 'VISIBLE'
-              ? i18n.translate('xpack.fleet.enrollmentTokensList.hideTokenButtonLabel', {
-                  defaultMessage: 'Hide token',
-                })
-              : i18n.translate('xpack.fleet.enrollmentTokensList.showTokenButtonLabel', {
-                  defaultMessage: 'Show token',
-                })
-          }
-        >
-          <EuiButtonIcon
-            aria-label={
-              state === 'VISIBLE'
-                ? i18n.translate('xpack.fleet.enrollmentTokensList.hideTokenButtonLabel', {
-                    defaultMessage: 'Hide token',
-                  })
-                : i18n.translate('xpack.fleet.enrollmentTokensList.showTokenButtonLabel', {
-                    defaultMessage: 'Show token',
-                  })
-            }
-            color="text"
-            onClick={toggleKey}
-            iconType={state === 'VISIBLE' ? 'eyeClosed' : 'eye'}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
 
 const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh: () => void }> = ({
   apiKey,
@@ -187,6 +128,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       const agentPolicy = agentPoliciesById[enrollmentKey.policy_id];
       return !agentPolicy?.is_managed;
     }) || [];
+  const filteredTotal = rowItems.length;
 
   const columns = [
     {
@@ -207,7 +149,16 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       }),
       width: '215px',
       render: (apiKeyId: string) => {
-        return <ApiKeyField apiKeyId={apiKeyId} />;
+        return (
+          <ApiKeyField
+            apiKeyId={apiKeyId}
+            sendGetAPIKey={sendGetOneEnrollmentAPIKey}
+            tokenGetter={(response: SendRequestResponse<GetOneEnrollmentAPIKeyResponse>) =>
+              response.data?.item.api_key
+            }
+            length={60}
+          />
+        );
       },
     },
     {
@@ -295,6 +246,8 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         <EuiFlexItem>
           <SearchBar
             value={search}
+            indexPattern={ENROLLMENT_API_KEYS_INDEX}
+            fieldPrefix={FLEET_ENROLLMENT_API_PREFIX}
             onChange={(newSearch) => {
               setPagination({
                 ...pagination,
@@ -302,7 +255,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
               });
               setSearch(newSearch);
             }}
-            indexPattern={ENROLLMENT_API_KEYS_INDEX}
+            dataTestSubj="enrollmentKeysList.queryInput"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -323,7 +276,6 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       <EuiBasicTable<EnrollmentAPIKey>
         data-test-subj="enrollmentTokenListTable"
         loading={isLoading}
-        hasActions={true}
         noItemsMessage={
           isLoading ? (
             <FormattedMessage
@@ -343,7 +295,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,
-          totalItemCount: total,
+          totalItemCount: filteredTotal,
           pageSizeOptions,
         }}
         onChange={({ page }: { page: { index: number; size: number } }) => {

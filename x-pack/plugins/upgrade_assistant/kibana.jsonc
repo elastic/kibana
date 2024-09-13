@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/upgrade-assistant-plugin",
-  "owner": "@elastic/platform-deployment-management",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "upgradeAssistant",
     "server": true,
@@ -21,7 +21,8 @@
       "usageCollection",
       "cloud",
       "security",
-      "infra"
+      "infra",
+      "logsShared"
     ],
     "requiredBundles": [
       "esUiShared",

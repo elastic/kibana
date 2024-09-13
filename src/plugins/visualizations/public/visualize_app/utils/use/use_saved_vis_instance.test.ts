@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { renderHook } from '@testing-library/react-hooks';
@@ -145,6 +146,46 @@ describe('useSavedVisInstance', () => {
       expect(mockEmbeddableHandlerRender).not.toHaveBeenCalled();
       expect(result.current.visEditorController).toBeDefined();
       expect(result.current.savedVisInstance).toBeDefined();
+    });
+
+    test('should pass the input timeRange if it exists', async () => {
+      const embeddableInput = {
+        timeRange: {
+          from: 'now-7d/d',
+          to: 'now',
+        },
+        id: 'panel1',
+      };
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useSavedVisInstance(
+          mockServices,
+          eventEmitter,
+          true,
+          undefined,
+          savedVisId,
+          embeddableInput
+        )
+      );
+
+      result.current.visEditorRef.current = document.createElement('div');
+      expect(mockGetVisualizationInstance).toHaveBeenCalledWith(mockServices, savedVisId);
+      expect(mockGetVisualizationInstance.mock.calls.length).toBe(1);
+
+      await waitForNextUpdate();
+      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis');
+      expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
+      expect(getEditBreadcrumbs).toHaveBeenCalledWith(
+        { originatingAppName: undefined, redirectToOrigin: undefined },
+        'Test Vis'
+      );
+      expect(getCreateBreadcrumbs).not.toHaveBeenCalled();
+      expect(mockEmbeddableHandlerRender).not.toHaveBeenCalled();
+      expect(result.current.visEditorController).toBeDefined();
+      expect(result.current.savedVisInstance).toBeDefined();
+      expect(result.current.savedVisInstance?.panelTimeRange).toStrictEqual({
+        from: 'now-7d/d',
+        to: 'now',
+      });
     });
 
     test('should destroy the editor and the savedVis on unmount if chrome exists', async () => {

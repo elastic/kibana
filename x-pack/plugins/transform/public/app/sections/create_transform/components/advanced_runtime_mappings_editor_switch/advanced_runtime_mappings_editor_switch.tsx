@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+
 import { EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SwitchModal } from './switch_modal';
-import { useAdvancedRuntimeMappingsEditor } from '../step_define/hooks/use_advanced_runtime_mappings_editor';
+import type { useAdvancedRuntimeMappingsEditor } from '../step_define/hooks/use_advanced_runtime_mappings_editor';
 
 type Props = ReturnType<typeof useAdvancedRuntimeMappingsEditor>;
 export const AdvancedRuntimeMappingsEditorSwitch: FC<Props> = (props) => {

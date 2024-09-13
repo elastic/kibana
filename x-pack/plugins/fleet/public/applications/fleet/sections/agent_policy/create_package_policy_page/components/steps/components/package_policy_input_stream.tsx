@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, memo, useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useState, Fragment, memo, useMemo, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { uniq } from 'lodash';
@@ -18,21 +18,22 @@ import {
   EuiText,
   EuiSpacer,
   EuiButtonEmpty,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
+import { useQuery } from '@tanstack/react-query';
+
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
-import { useConfig, useGetDataStreams } from '../../../../../../../../hooks';
+import { useConfig, sendGetDataStreams } from '../../../../../../../../hooks';
 
 import {
   getRegistryDataStreamAssetBaseName,
   mapPackageReleaseToIntegrationCardRelease,
 } from '../../../../../../../../../common/services';
-import type { ExperimentalDataStreamFeature } from '../../../../../../../../../common/types/models/epm';
 
 import type {
-  NewPackagePolicy,
   NewPackagePolicyInputStream,
   PackageInfo,
   RegistryStreamWithDataStream,
@@ -46,22 +47,19 @@ import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings
 
 import { useIndexTemplateExists } from '../../datastream_hooks';
 
-import { ExperimentDatastreamSettings } from './experimental_datastream_settings';
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
 
 const ScrollAnchor = styled.div`
   display: none;
-  scroll-margin-top: ${(props) => parseFloat(props.theme.eui.euiHeaderHeightCompensation) * 2}px;
+  scroll-margin-top: var(--euiFixedHeadersOffset, 0);
 `;
 
 interface Props {
-  packagePolicy: NewPackagePolicy;
   packageInputStream: RegistryStreamWithDataStream;
   packageInfo: PackageInfo;
   packagePolicyInputStream: NewPackagePolicyInputStream;
-  updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
   updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
@@ -70,11 +68,9 @@ interface Props {
 
 export const PackagePolicyInputStreamConfig = memo<Props>(
   ({
-    packagePolicy,
     packageInputStream,
     packageInfo,
     packagePolicyInputStream,
-    updatePackagePolicy,
     updatePackagePolicyInputStream,
     inputStreamValidationResults,
     forceShowErrors,
@@ -136,9 +132,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
           }
         });
       }
-
       return [_requiredVars, _advancedVars];
-    }, [packageInputStream.vars]);
+    }, [packageInputStream]);
 
     const advancedVarsWithErrorsCount: number = useMemo(
       () =>
@@ -148,23 +143,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       [advancedVars, inputStreamValidationResults?.vars]
     );
 
-    const setNewExperimentalDataFeatures = useCallback(
-      (newFeatures: ExperimentalDataStreamFeature[]) => {
-        if (!packagePolicy.package) {
-          return;
-        }
-
-        updatePackagePolicy({
-          package: {
-            ...packagePolicy.package,
-            experimental_data_stream_features: newFeatures,
-          },
-        });
-      },
-      [updatePackagePolicy, packagePolicy]
-    );
-
-    const { data: dataStreamsData } = useGetDataStreams();
+    const { data: dataStreamsData } = useQuery(['datastreams'], () => sendGetDataStreams(), {
+      enabled: packageInfo.type === 'input', // Only fetch datastream for input type package
+    });
     const datasetList = uniq(dataStreamsData?.data_streams) ?? [];
     const datastreams = sortDatastreamsByDataset(datasetList, packageInfo.name);
 
@@ -183,14 +164,17 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       showPipelinesAndMappings,
     ]);
 
+    const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
+    const flexWidth = isBiggerScreen ? 7 : 5;
+
     return (
       <>
-        <EuiFlexGrid columns={2}>
+        <EuiFlexGrid columns={2} data-test-subj="streamOptions.inputStreams">
           <ScrollAnchor ref={containerRef} />
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="none" alignItems="flexStart">
               <EuiFlexItem grow={1} />
-              <EuiFlexItem grow={5}>
+              <EuiFlexItem grow={flexWidth}>
                 <EuiFlexGroup
                   gutterSize="none"
                   alignItems="flexStart"
@@ -199,6 +183,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                   {packageInfo.type !== 'input' && (
                     <EuiFlexItem grow={false}>
                       <EuiSwitch
+                        data-test-subj="streamOptions.switch"
                         label={packageInputStream.title}
                         disabled={packagePolicyInputStream.keep_enabled}
                         checked={packagePolicyInputStream.enabled}
@@ -241,7 +226,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                 const varConfigEntry = packagePolicyInputStream.vars?.[varName];
                 const value = varConfigEntry?.value;
                 const frozen = varConfigEntry?.frozen ?? false;
-
                 return (
                   <EuiFlexItem key={varName}>
                     <PackagePolicyInputVarField
@@ -352,16 +336,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             />
                           </EuiFlexItem>
                         </>
-                      )}
-                      {/* Experimental index/datastream settings e.g. synthetic source */}
-                      {isExperimentalDataStreamSettingsEnabled && (
-                        <ExperimentDatastreamSettings
-                          registryDataStream={packageInputStream.data_stream}
-                          experimentalDataFeatures={
-                            packagePolicy.package?.experimental_data_stream_features
-                          }
-                          setNewExperimentalDataFeatures={setNewExperimentalDataFeatures}
-                        />
                       )}
                     </>
                   ) : null}

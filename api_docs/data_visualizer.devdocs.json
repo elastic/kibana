@@ -302,13 +302,63 @@
     "misc": [
       {
         "parentPluginId": "dataVisualizer",
+        "id": "def-public.DataDriftSpec",
+        "type": "Type",
+        "tags": [],
+        "label": "DataDriftSpec",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<",
+          "DataDriftDetectionAppStateProps",
+          ">"
+        ],
+        "path": "x-pack/plugins/data_visualizer/public/application/data_drift/data_drift_app_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-public.DataDriftSpec.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-public.DataDriftSpec.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
         "id": "def-public.FileDataVisualizerSpec",
         "type": "Type",
         "tags": [],
         "label": "FileDataVisualizerSpec",
         "description": [],
         "signature": [
-          "React.FunctionComponent<Props>"
+          "React.FunctionComponent<",
+          "Props",
+          ">"
         ],
         "path": "x-pack/plugins/data_visualizer/public/application/file_data_visualizer/file_data_visualizer.tsx",
         "deprecated": false,
@@ -385,15 +435,9 @@
         "label": "IndexDataVisualizerSpec",
         "description": [],
         "signature": [
-          "React.FunctionComponent<{ getAdditionalLinks?: ",
-          {
-            "pluginId": "dataVisualizer",
-            "scope": "public",
-            "docId": "kibDataVisualizerPluginApi",
-            "section": "def-public.GetAdditionalLinks",
-            "text": "GetAdditionalLinks"
-          },
-          " | undefined; }>"
+          "React.FunctionComponent<",
+          "Props",
+          ">"
         ],
         "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx",
         "deprecated": false,
@@ -441,15 +485,17 @@
       "label": "DataVisualizerPluginStart",
       "description": [],
       "signature": [
-        "{ getFileDataVisualizerComponent: () => Promise<() => React.FC<Props>>; getIndexDataVisualizerComponent: () => Promise<() => React.FC<{ getAdditionalLinks?: ",
-        {
-          "pluginId": "dataVisualizer",
-          "scope": "public",
-          "docId": "kibDataVisualizerPluginApi",
-          "section": "def-public.GetAdditionalLinks",
-          "text": "GetAdditionalLinks"
-        },
-        " | undefined; }>>; getMaxBytesFormatted: () => string; }"
+        "{ getFileDataVisualizerComponent: () => Promise<() => ",
+        "SpecWithLinks",
+        "<React.FC<",
+        "Props",
+        ">>>; getIndexDataVisualizerComponent: () => Promise<() => React.FC<",
+        "Props",
+        ">>; getDataDriftComponent: () => Promise<() => React.FC<",
+        "DataDriftDetectionAppStateProps",
+        ">>; getMaxBytesFormatted: () => string; FieldStatisticsTable: React.ForwardRefExoticComponent<",
+        "FieldStatisticTableEmbeddableProps",
+        " & React.RefAttributes<{}>>; }"
       ],
       "path": "x-pack/plugins/data_visualizer/public/plugin.ts",
       "deprecated": false,

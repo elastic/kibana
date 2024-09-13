@@ -13,10 +13,11 @@ import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mock
 import {
   RULES_SETTINGS_FEATURE_ID,
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
-  RULES_SETTINGS_SAVED_OBJECT_ID,
+  RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID,
   DEFAULT_FLAPPING_SETTINGS,
   RulesSettings,
 } from '../../../common';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 const mockDateString = '2019-02-12T21:01:22.479Z';
 
@@ -29,9 +30,9 @@ const getMockRulesSettings = (): RulesSettings => {
       lookBackWindow: DEFAULT_FLAPPING_SETTINGS.lookBackWindow,
       statusChangeThreshold: DEFAULT_FLAPPING_SETTINGS.statusChangeThreshold,
       createdBy: 'test name',
+      createdAt: '2023-03-24T00:00:00.000Z',
       updatedBy: 'test name',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      updatedAt: '2023-03-24T00:00:00.000Z',
     },
   };
 };
@@ -39,18 +40,33 @@ const getMockRulesSettings = (): RulesSettings => {
 const rulesSettingsFlappingClientParams: jest.Mocked<RulesSettingsFlappingClientConstructorOptions> =
   {
     logger: loggingSystemMock.create().get(),
-    getOrCreate: jest.fn().mockReturnValue({
+    getModificationMetadata: jest.fn(),
+    savedObjectsClient,
+  };
+
+const updatedMetadata = {
+  createdAt: '2023-03-26T00:00:00.000Z',
+  updatedAt: '2023-03-26T00:00:00.000Z',
+  createdBy: 'updated-user',
+  updatedBy: 'updated-user',
+};
+
+describe('RulesSettingsFlappingClient', () => {
+  beforeEach(() => {
+    rulesSettingsFlappingClientParams.getModificationMetadata.mockResolvedValue(updatedMetadata);
+    savedObjectsClient.get.mockResolvedValue({
       id: RULES_SETTINGS_FEATURE_ID,
       type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
       attributes: getMockRulesSettings(),
       references: [],
       version: '123',
-    }),
-    getModificationMetadata: jest.fn(),
-    savedObjectsClient,
-  };
+    });
+  });
 
-describe('RulesSettingsFlappingClient', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   beforeAll(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date(mockDateString));
@@ -109,16 +125,16 @@ describe('RulesSettingsFlappingClient', () => {
 
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       RULES_SETTINGS_SAVED_OBJECT_TYPE,
-      RULES_SETTINGS_SAVED_OBJECT_ID,
+      RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID,
       {
         flapping: expect.objectContaining({
           enabled: false,
           lookBackWindow: 19,
           statusChangeThreshold: 3,
+          updatedAt: '2023-03-26T00:00:00.000Z',
+          updatedBy: 'updated-user',
           createdBy: 'test name',
-          updatedBy: 'test name',
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
+          createdAt: '2023-03-24T00:00:00.000Z',
         }),
       },
       { version: '123' }
@@ -180,6 +196,248 @@ describe('RulesSettingsFlappingClient', () => {
       })
     ).rejects.toThrowError(
       'Invalid values,lookBackWindow (10) must be equal to or greater than statusChangeThreshold (20).'
+    );
+  });
+
+  test('can create a new flapping settings saved object', async () => {
+    rulesSettingsFlappingClientParams.getModificationMetadata.mockResolvedValueOnce({
+      ...updatedMetadata,
+      createdBy: 'test name',
+      updatedBy: 'test name',
+    });
+    const client = new RulesSettingsFlappingClient(rulesSettingsFlappingClientParams);
+    const mockAttributes = getMockRulesSettings();
+
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: RULES_SETTINGS_FEATURE_ID,
+      type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      attributes: mockAttributes,
+      references: [],
+    });
+
+    // @ts-expect-error access private method
+    const result = await client.createSettings();
+
+    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      {
+        flapping: expect.objectContaining({
+          enabled: mockAttributes.flapping?.enabled,
+          lookBackWindow: mockAttributes.flapping?.lookBackWindow,
+          statusChangeThreshold: mockAttributes.flapping?.statusChangeThreshold,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      },
+      {
+        id: RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID,
+        overwrite: true,
+      }
+    );
+    expect(result.attributes).toEqual(mockAttributes);
+  });
+
+  test('can get existing flapping settings saved object', async () => {
+    const client = new RulesSettingsFlappingClient(rulesSettingsFlappingClientParams);
+    const mockAttributes = getMockRulesSettings();
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: RULES_SETTINGS_FEATURE_ID,
+      type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      attributes: mockAttributes,
+      references: [],
+    });
+    // @ts-expect-error access private method
+    const result = await client.getSettings();
+    expect(result.attributes).toEqual(mockAttributes);
+  });
+
+  test('throws if there is no existing saved object to get', async () => {
+    const client = new RulesSettingsFlappingClient(rulesSettingsFlappingClientParams);
+
+    savedObjectsClient.get.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createGenericNotFoundError(
+        RULES_SETTINGS_SAVED_OBJECT_TYPE,
+        RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID
+      )
+    );
+    // @ts-expect-error access private method
+    await expect(client.getSettings()).rejects.toThrowError();
+  });
+
+  test('can persist flapping settings when saved object does not exist', async () => {
+    rulesSettingsFlappingClientParams.getModificationMetadata.mockResolvedValueOnce({
+      ...updatedMetadata,
+      createdBy: 'test name',
+      updatedBy: 'test name',
+    });
+    const client = new RulesSettingsFlappingClient(rulesSettingsFlappingClientParams);
+    const mockAttributes = getMockRulesSettings();
+    savedObjectsClient.get.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createGenericNotFoundError(
+        RULES_SETTINGS_SAVED_OBJECT_TYPE,
+        RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID
+      )
+    );
+
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: RULES_SETTINGS_FEATURE_ID,
+      type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      attributes: mockAttributes,
+      references: [],
+    });
+
+    const result = await client.get();
+
+    expect(savedObjectsClient.get).toHaveBeenCalledWith(
+      RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID
+    );
+
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      {
+        flapping: expect.objectContaining({
+          enabled: mockAttributes.flapping?.enabled,
+          lookBackWindow: mockAttributes.flapping?.lookBackWindow,
+          statusChangeThreshold: mockAttributes.flapping?.statusChangeThreshold,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      },
+      {
+        id: RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID,
+        overwrite: true,
+      }
+    );
+    expect(result).toEqual(mockAttributes.flapping);
+  });
+
+  test('can persist flapping settings when saved object already exists', async () => {
+    rulesSettingsFlappingClientParams.getModificationMetadata.mockResolvedValueOnce({
+      ...updatedMetadata,
+      createdBy: 'test name',
+      updatedBy: 'test name',
+    });
+    const client = new RulesSettingsFlappingClient(rulesSettingsFlappingClientParams);
+    const mockAttributes = getMockRulesSettings();
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: RULES_SETTINGS_FEATURE_ID,
+      type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      attributes: mockAttributes,
+      references: [],
+    });
+
+    const result = await client.get();
+
+    expect(savedObjectsClient.get).toHaveBeenCalledWith(
+      RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID
+    );
+    expect(savedObjectsClient.create).not.toHaveBeenCalled();
+    expect(result).toEqual(mockAttributes.flapping);
+  });
+
+  test('can update flapping settings when saved object does not exist', async () => {
+    rulesSettingsFlappingClientParams.getModificationMetadata.mockResolvedValueOnce({
+      ...updatedMetadata,
+      createdBy: 'test name',
+      updatedBy: 'test name',
+    });
+    const client = new RulesSettingsFlappingClient(rulesSettingsFlappingClientParams);
+    const mockAttributes = getMockRulesSettings();
+
+    savedObjectsClient.get.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createGenericNotFoundError(
+        RULES_SETTINGS_SAVED_OBJECT_TYPE,
+        RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID
+      )
+    );
+
+    const mockResolve = {
+      id: RULES_SETTINGS_FEATURE_ID,
+      type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      attributes: mockAttributes,
+      references: [],
+      version: '123',
+    };
+
+    savedObjectsClient.create.mockResolvedValueOnce(mockResolve);
+    savedObjectsClient.update.mockResolvedValueOnce({
+      ...mockResolve,
+      attributes: {
+        flapping: {
+          ...mockResolve.attributes.flapping,
+          enabled: false,
+          lookBackWindow: 5,
+          statusChangeThreshold: 5,
+        },
+      },
+    });
+
+    // Try to update with new values
+    const result = await client.update({
+      enabled: false,
+      lookBackWindow: 5,
+      statusChangeThreshold: 5,
+    });
+
+    // Tried to get first, but no results
+    expect(savedObjectsClient.get).toHaveBeenCalledWith(
+      RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID
+    );
+
+    // So create a new entry
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      {
+        flapping: expect.objectContaining({
+          enabled: mockAttributes.flapping?.enabled,
+          lookBackWindow: mockAttributes.flapping?.lookBackWindow,
+          statusChangeThreshold: mockAttributes.flapping?.statusChangeThreshold,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      },
+      {
+        id: RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID,
+        overwrite: true,
+      }
+    );
+
+    // Try to update with version
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+      RULES_SETTINGS_SAVED_OBJECT_TYPE,
+      RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID,
+      {
+        flapping: expect.objectContaining({
+          enabled: false,
+          lookBackWindow: 5,
+          statusChangeThreshold: 5,
+          createdBy: 'test name',
+          updatedBy: 'test name',
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      },
+      { version: '123' }
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        enabled: false,
+        lookBackWindow: 5,
+        statusChangeThreshold: 5,
+      })
     );
   });
 });

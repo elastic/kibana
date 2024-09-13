@@ -8,8 +8,29 @@
 import type { Capabilities } from '@kbn/core/types';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { IconType } from '@elastic/eui';
+import type {
+  NavigationLink as GenericNavigationLink,
+  LinkCategory as GenericLinkCategory,
+  LinkCategories as GenericLinkCategories,
+  ExternalPageName,
+  SecurityPageName,
+} from '@kbn/security-solution-navigation';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { AppDeepLinkLocations } from '@kbn/core-application-browser';
+import type { Observable } from 'rxjs';
+import type { SolutionSideNavItem as ClassicSolutionSideNavItem } from '@kbn/security-solution-side-nav';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import type { SecurityPageName } from '../../../common/constants';
+import type { RequiredCapabilities } from '../lib/capabilities';
+
+export type SecurityNavLink = GenericNavigationLink<SecurityPageName>;
+
+export type SolutionPageName = SecurityPageName | ExternalPageName;
+export type SolutionNavLink = GenericNavigationLink<SolutionPageName>;
+export type SolutionNavLinks$ = Observable<SolutionNavLink[]>;
+export type SolutionLinkCategory = GenericLinkCategory<SolutionPageName>;
+
+export type SolutionSideNavItem = ClassicSolutionSideNavItem<SolutionPageName>;
 
 /**
  * Permissions related parameters needed for the links to be filtered
@@ -17,15 +38,10 @@ import type { SecurityPageName } from '../../../common/constants';
 export interface LinksPermissions {
   capabilities: Capabilities;
   experimentalFeatures: Readonly<ExperimentalFeatures>;
+  uiSettingsClient: IUiSettingsClient;
+  upselling: UpsellingService;
   license?: ILicense;
 }
-
-export interface LinkCategory {
-  label: string;
-  linkIds: readonly SecurityPageName[];
-}
-
-export type LinkCategories = Readonly<LinkCategory[]>;
 
 export interface LinkItem {
   /**
@@ -41,11 +57,11 @@ export interface LinkItem {
    * The final format is to specify a single feature, this would be like: features: feature1, which is the same as
    * features: [feature1]
    */
-  capabilities?: string | Array<string | string[]>;
+  capabilities?: RequiredCapabilities;
   /**
    * Categories to display in the navigation
    */
-  categories?: LinkCategories;
+  categories?: GenericLinkCategories<SecurityPageName>;
   /**
    * The description of the link content
    */
@@ -113,9 +129,17 @@ export interface LinkItem {
    */
   path: string;
   /**
+   * Displays the link in the footer of the side navigation. Defaults to false.
+   */
+  sideNavFooter?: boolean;
+  /**
    * Disables link in the side navigation. Defaults to false.
    */
   sideNavDisabled?: boolean;
+  /**
+   * Icon that is displayed on the side navigation menu.
+   */
+  sideNavIcon?: IconType;
   /**
    * Disables the state query string in the URL. Defaults to false.
    */
@@ -124,6 +148,21 @@ export interface LinkItem {
    * Title of the link
    */
   title: string;
+  /**
+   * Reserved for links management, this property is set automatically
+   * */
+  unauthorized?: boolean;
+  /**
+   * Locations where the link is visible in the UI
+   */
+  visibleIn?: AppDeepLinkLocations[];
+
+  /**
+   * Required UI setting to enable a link.
+   * To enable a link when a boolean UiSetting is true, pass the key as a string.
+   * To enable a link when a specific value is set for a UiSetting, pass an object with key and value.
+   */
+  uiSettingRequired?: string | { key: string; value: unknown };
 }
 
 export type AppLinkItems = Readonly<LinkItem[]>;
@@ -131,3 +170,7 @@ export type AppLinkItems = Readonly<LinkItem[]>;
 export type LinkInfo = Omit<LinkItem, 'links'>;
 export type NormalizedLink = LinkInfo & { parentId?: SecurityPageName };
 export type NormalizedLinks = Partial<Record<SecurityPageName, NormalizedLink>>;
+
+export type NavigationLink = GenericNavigationLink<SolutionPageName>;
+export type LinkCategory = GenericLinkCategory<SolutionPageName>;
+export type LinkCategories = GenericLinkCategories<SolutionPageName>;

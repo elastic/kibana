@@ -108,7 +108,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
             index && index.length > 0
               ? renderIndices(index)
               : i18n.translate('xpack.stackAlerts.components.ui.alertParams.indexPlaceholder', {
-                  defaultMessage: 'Select an index',
+                  defaultMessage: 'Select indices and a time field',
                 })
           }
           isActive={indexPopoverOpen}
@@ -158,8 +158,9 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
               defaultMessage="Indices to query"
             />
           }
+          // @ts-expect-error upgrade typescript v5.1.6
           isInvalid={errors.index.length > 0 && index != null && index.length > 0}
-          error={errors.index}
+          error={errors.index as string}
           helpText={
             <FormattedMessage
               id="xpack.stackAlerts.components.ui.alertParams.howToBroadenSearchQueryDescription"
@@ -171,6 +172,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
             fullWidth
             async
             isLoading={areIndicesLoading}
+            // @ts-expect-error upgrade typescript v5.1.6
             isInvalid={errors.index.length > 0 && index != null && index.length > 0}
             noSuggestions={!indexOptions.length}
             options={indexOptions}
@@ -213,11 +215,13 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
               defaultMessage="Time field"
             />
           }
+          // @ts-expect-error upgrade typescript v5.1.6
           isInvalid={errors.timeField.length > 0 && timeField !== undefined}
-          error={errors.timeField}
+          error={errors.timeField as string}
         >
           <EuiSelect
             options={timeFieldOptions}
+            // @ts-expect-error upgrade typescript v5.1.6
             isInvalid={errors.timeField.length > 0 && timeField !== undefined}
             fullWidth
             name="thresholdTimeField"

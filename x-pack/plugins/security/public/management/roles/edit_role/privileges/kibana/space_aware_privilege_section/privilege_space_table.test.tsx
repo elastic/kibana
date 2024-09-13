@@ -10,11 +10,11 @@ import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { KibanaFeature } from '@kbn/features-plugin/public';
+import type { Role, RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
+import { createKibanaPrivileges } from '@kbn/security-role-management-model/src/__fixtures__';
+import { PrivilegeFormCalculator } from '@kbn/security-ui-components';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
-import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
-import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { PrivilegeDisplay } from './privilege_display';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 
@@ -201,6 +201,15 @@ describe('only global', () => {
     const actualTable = getTableFromComponent(component);
     expect(actualTable).toEqual([
       { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
+    ]);
+  });
+
+  it('base *', () => {
+    const props = buildProps([{ spaces: ['*'], base: ['*'], feature: {} }]);
+    const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+    const actualTable = getTableFromComponent(component);
+    expect(actualTable).toEqual([
+      { spaces: ['*'], privileges: { summary: '*', overridden: false } },
     ]);
   });
 

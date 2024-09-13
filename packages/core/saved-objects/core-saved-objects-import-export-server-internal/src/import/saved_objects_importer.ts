@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
@@ -41,10 +42,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     this.#importSizeLimit = importSizeLimit;
     this.#importHooks = typeRegistry.getAllTypes().reduce((hooks, type) => {
       if (type.management?.onImport) {
-        return {
-          ...hooks,
-          [type.name]: [type.management.onImport],
-        };
+        hooks[type.name] = [type.management.onImport];
       }
       return hooks;
     }, {} as Record<string, SavedObjectsImportHook[]>);
@@ -57,6 +55,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     overwrite,
     refresh,
     compatibilityMode,
+    managed,
   }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
     return importSavedObjectsFromStream({
       readStream,
@@ -69,6 +68,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,
       importHooks: this.#importHooks,
+      managed,
     });
   }
 
@@ -78,6 +78,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     compatibilityMode,
     namespace,
     retries,
+    managed,
   }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
     return resolveSavedObjectsImportErrors({
       readStream,
@@ -89,6 +90,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,
       importHooks: this.#importHooks,
+      managed,
     });
   }
 }

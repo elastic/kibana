@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { logStateTransition, type LogAwareState } from './logs';
 
@@ -19,62 +19,81 @@ describe('logStateTransition', () => {
     logger = loggerMock.create();
   });
 
-  it('logs the offset of messages between the old and the new state', () => {
-    const previous: LogAwareState = {
-      controlState: 'PREVIOUS',
-      logs: [],
-    };
-    const next: LogAwareState = {
-      controlState: 'NEXT',
-      logs: [
-        ...previous.logs,
-        { level: 'info', message: 'info message' },
-        { level: 'warning', message: 'warning message' },
-      ],
-    };
+  describe('when DEBUG log level is not enabled', () => {
+    beforeEach(() => {
+      logger.isLevelEnabled.mockImplementation((level) => {
+        return level !== 'debug';
+      });
+    });
 
-    logStateTransition(logger, messagePrefix, previous, next, 500);
+    it('logs the offset of messages between the old and the new state', () => {
+      logger.isLevelEnabled.mockImplementation((level) => {
+        return level !== 'debug';
+      });
 
-    expect(omit(loggerMock.collect(logger), 'debug')).toEqual({
-      error: [],
-      fatal: [],
-      info: [['[PREFIX] info message'], ['[PREFIX] PREVIOUS -> NEXT. took: 500ms.']],
-      log: [],
-      trace: [],
-      warn: [['[PREFIX] warning message']],
+      const previous: LogAwareState = {
+        controlState: 'PREVIOUS',
+        logs: [],
+      };
+      const next: LogAwareState = {
+        controlState: 'NEXT',
+        logs: [
+          ...previous.logs,
+          { level: 'info', message: 'info message' },
+          { level: 'warning', message: 'warning message' },
+        ],
+      };
+
+      logStateTransition(logger, messagePrefix, previous, next, 500);
+
+      expect(loggerMock.collect(logger)).toEqual({
+        error: [],
+        fatal: [],
+        info: [['[PREFIX] info message'], ['[PREFIX] PREVIOUS -> NEXT. took: 500ms.']],
+        log: [],
+        trace: [],
+        warn: [['[PREFIX] warning message']],
+        debug: [],
+      });
     });
   });
 
-  it('logs a debug message with the correct meta', () => {
-    const previous: LogAwareState = {
-      controlState: 'PREVIOUS',
-      logs: [],
-    };
-    const next: LogAwareState = {
-      controlState: 'NEXT',
-      logs: [
-        ...previous.logs,
-        { level: 'info', message: 'info message' },
-        { level: 'warning', message: 'warning message' },
-      ],
-    };
+  describe('when DEBUG log level is enabled', () => {
+    beforeEach(() => {
+      logger.isLevelEnabled.mockReturnValue(true);
+    });
 
-    logStateTransition(logger, messagePrefix, previous, next, 500);
+    it('logs a debug message with the correct meta', () => {
+      const previous: LogAwareState = {
+        controlState: 'PREVIOUS',
+        logs: [],
+      };
+      const next: LogAwareState = {
+        controlState: 'NEXT',
+        logs: [
+          ...previous.logs,
+          { level: 'info', message: 'info message' },
+          { level: 'warning', message: 'warning message' },
+        ],
+      };
 
-    expect(loggerMock.collect(logger).debug).toEqual([
-      [
-        '[PREFIX] PREVIOUS -> NEXT. took: 500ms.',
-        {
-          kibana: {
-            migrations: {
-              duration: 500,
-              state: expect.objectContaining({
-                controlState: 'NEXT',
-              }),
+      logStateTransition(logger, messagePrefix, previous, next, 500);
+
+      expect(loggerMock.collect(logger).debug).toEqual([
+        [
+          '[PREFIX] PREVIOUS -> NEXT. took: 500ms.',
+          {
+            kibana: {
+              migrations: {
+                duration: 500,
+                state: expect.objectContaining({
+                  controlState: 'NEXT',
+                }),
+              },
             },
           },
-        },
-      ],
-    ]);
+        ],
+      ]);
+    });
   });
 });

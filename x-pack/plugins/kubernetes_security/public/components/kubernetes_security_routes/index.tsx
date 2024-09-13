@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import React, { useCallback } from 'react';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import {
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -36,18 +28,16 @@ import {
   COUNT_WIDGET_KEY_NAMESPACE,
   COUNT_WIDGET_KEY_NODES,
   COUNT_WIDGET_KEY_CONTAINER_IMAGES,
-  DEFAULT_KUBERNETES_FILTER_QUERY,
 } from '../../../common/constants';
 import { PercentWidget } from '../percent_widget';
 import { CountWidget } from '../count_widget';
-import { GlobalFilter, KubernetesSecurityDeps } from '../../types';
-import { AggregateResult } from '../../../common/types/aggregate';
+import { KubernetesSecurityDeps } from '../../types';
+import { AggregateResult } from '../../../common/types';
 import { useLastUpdated } from '../../hooks';
 import { useStyles } from './styles';
 import { TreeViewContainer } from '../tree_view_container';
 import { ChartsToggle } from '../charts_toggle';
 import {
-  BETA,
   COUNT_WIDGET_CLUSTERS,
   COUNT_WIDGET_NAMESPACE,
   COUNT_WIDGET_NODES,
@@ -57,13 +47,11 @@ import {
 import { ContainerNameWidget } from '../container_name_widget';
 
 const KubernetesSecurityRoutesComponent = ({
+  dataViewId,
   filter,
   indexPattern,
   globalFilter,
   renderSessionsView,
-  responseActionClick,
-  handleTreeNavSelection,
-  responseActionButtonProps,
 }: KubernetesSecurityDeps) => {
   const [shouldHideCharts, setShouldHideCharts] = useLocalStorage(
     LOCAL_STORAGE_HIDE_WIDGETS_KEY,
@@ -71,17 +59,6 @@ const KubernetesSecurityRoutesComponent = ({
   );
   const styles = useStyles();
   const lastUpdated = useLastUpdated(globalFilter);
-
-  const globalFilterForKubernetes: GlobalFilter = useMemo(() => {
-    return {
-      ...globalFilter,
-      filterQuery: JSON.stringify({
-        ...JSON.parse(globalFilter?.filterQuery ?? ''),
-        ...JSON.parse(DEFAULT_KUBERNETES_FILTER_QUERY),
-      }),
-    };
-  }, [globalFilter]);
-
   const onReduceInteractiveAggs = useCallback(
     (result: AggregateResult): Record<string, number> =>
       result.buckets.reduce((groupedByKeyValue, aggregate) => {
@@ -111,16 +88,13 @@ const KubernetesSecurityRoutesComponent = ({
   }, [setShouldHideCharts, shouldHideCharts]);
 
   return (
-    <Switch>
+    <Routes>
       <Route strict exact path={KUBERNETES_PATH}>
         {filter}
         <EuiFlexGroup gutterSize="none" css={styles.titleSection}>
           <EuiFlexItem>
             <EuiTitle size="l">
-              <h1 css={styles.titleText}>
-                {KUBERNETES_TITLE}
-                <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
-              </h1>
+              <h1 css={styles.titleText}>{KUBERNETES_TITLE}</h1>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={styles.titleActions}>
@@ -140,7 +114,7 @@ const KubernetesSecurityRoutesComponent = ({
                     <CountWidget
                       title={COUNT_WIDGET_CLUSTERS}
                       indexPattern={indexPattern}
-                      globalFilter={globalFilterForKubernetes}
+                      globalFilter={globalFilter}
                       widgetKey={COUNT_WIDGET_KEY_CLUSTERS}
                       groupedBy={ORCHESTRATOR_CLUSTER_ID}
                     />
@@ -149,7 +123,7 @@ const KubernetesSecurityRoutesComponent = ({
                     <CountWidget
                       title={COUNT_WIDGET_NAMESPACE}
                       indexPattern={indexPattern}
-                      globalFilter={globalFilterForKubernetes}
+                      globalFilter={globalFilter}
                       widgetKey={COUNT_WIDGET_KEY_NAMESPACE}
                       groupedBy={ORCHESTRATOR_NAMESPACE}
                     />
@@ -158,7 +132,7 @@ const KubernetesSecurityRoutesComponent = ({
                     <CountWidget
                       title={COUNT_WIDGET_NODES}
                       indexPattern={indexPattern}
-                      globalFilter={globalFilterForKubernetes}
+                      globalFilter={globalFilter}
                       widgetKey={COUNT_WIDGET_KEY_NODES}
                       groupedBy={CLOUD_INSTANCE_NAME}
                     />
@@ -167,7 +141,7 @@ const KubernetesSecurityRoutesComponent = ({
                     <CountWidget
                       title={COUNT_WIDGET_PODS}
                       indexPattern={indexPattern}
-                      globalFilter={globalFilterForKubernetes}
+                      globalFilter={globalFilter}
                       widgetKey={COUNT_WIDGET_KEY_NODES}
                       groupedBy={ORCHESTRATOR_RESOURCE_ID}
                     />
@@ -176,7 +150,7 @@ const KubernetesSecurityRoutesComponent = ({
                     <CountWidget
                       title={COUNT_WIDGET_CONTAINER_IMAGES}
                       indexPattern={indexPattern}
-                      globalFilter={globalFilterForKubernetes}
+                      globalFilter={globalFilter}
                       widgetKey={COUNT_WIDGET_KEY_CONTAINER_IMAGES}
                       groupedBy={CONTAINER_IMAGE_NAME}
                     />
@@ -185,12 +159,13 @@ const KubernetesSecurityRoutesComponent = ({
                 <EuiFlexGroup css={styles.widgetsBottomSpacing}>
                   <EuiFlexItem>
                     <PercentWidget
+                      dataViewId={dataViewId}
                       title={
                         <>
                           <EuiText size="xs" css={styles.percentageChartTitle}>
                             <FormattedMessage
                               id="xpack.kubernetesSecurity.sessionChart.title"
-                              defaultMessage="Session Interactivity"
+                              defaultMessage="Session interactivity"
                             />
                           </EuiText>
                           <EuiIconTip
@@ -206,7 +181,7 @@ const KubernetesSecurityRoutesComponent = ({
                       }
                       widgetKey="sessionsPercentage"
                       indexPattern={indexPattern}
-                      globalFilter={globalFilterForKubernetes}
+                      globalFilter={globalFilter}
                       dataValueMap={{
                         true: {
                           name: i18n.translate(
@@ -242,14 +217,14 @@ const KubernetesSecurityRoutesComponent = ({
                           <EuiText size="xs" css={styles.percentageChartTitle}>
                             <FormattedMessage
                               id="xpack.kubernetesSecurity.entryUserChart.title"
-                              defaultMessage="Session Entry Users"
+                              defaultMessage="Entry session users"
                             />
                           </EuiText>
                           <EuiIconTip
                             content={
                               <FormattedMessage
                                 id="xpack.kubernetesSecurity.entryUserChart.tooltip"
-                                defaultMessage="The session user is the initial Linux user associated
+                                defaultMessage="The entry session user is the initial Linux user associated
                     with the session. This user may be set from authentication of a remote
                     login or automatically for service sessions started by init."
                               />
@@ -259,7 +234,7 @@ const KubernetesSecurityRoutesComponent = ({
                       }
                       widgetKey="rootLoginPercentage"
                       indexPattern={indexPattern}
-                      globalFilter={globalFilterForKubernetes}
+                      globalFilter={globalFilter}
                       dataValueMap={{
                         '0': {
                           name: i18n.translate('xpack.kubernetesSecurity.entryUserChart.root', {
@@ -277,6 +252,7 @@ const KubernetesSecurityRoutesComponent = ({
                           shouldHideFilter: true,
                         },
                       }}
+                      dataViewId={dataViewId}
                       groupedBy={ENTRY_LEADER_USER_ID}
                       countBy={ENTRY_LEADER_ENTITY_ID}
                       onReduce={onReduceRootAggs}
@@ -286,9 +262,10 @@ const KubernetesSecurityRoutesComponent = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false} css={styles.rightWidgetsGroup}>
                 <ContainerNameWidget
+                  dataViewId={dataViewId}
                   widgetKey="containerNameSessions"
                   indexPattern={indexPattern}
-                  globalFilter={globalFilterForKubernetes}
+                  globalFilter={globalFilter}
                   groupedBy={CONTAINER_IMAGE_NAME}
                   countBy={ENTRY_LEADER_ENTITY_ID}
                 />
@@ -297,15 +274,12 @@ const KubernetesSecurityRoutesComponent = ({
           </>
         )}
         <TreeViewContainer
-          globalFilter={globalFilterForKubernetes}
+          globalFilter={globalFilter}
           renderSessionsView={renderSessionsView}
           indexPattern={indexPattern}
-          responseActionButtonProps={responseActionButtonProps}
-          responseActionClick={responseActionClick}
-          handleTreeNavSelection={handleTreeNavSelection}
         />
       </Route>
-    </Switch>
+    </Routes>
   );
 };
 

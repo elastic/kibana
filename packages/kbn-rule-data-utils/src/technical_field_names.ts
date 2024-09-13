@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ValuesType } from 'utility-types';
@@ -16,6 +17,7 @@ import {
   ALERT_DURATION,
   ALERT_END,
   ALERT_FLAPPING,
+  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_INSTANCE_ID,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
@@ -31,7 +33,9 @@ import {
   ALERT_STATUS,
   ALERT_TIME_RANGE,
   ALERT_UUID,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
@@ -84,6 +88,11 @@ const EVENT_MODULE = 'event.module' as const;
 const ALERT_BUILDING_BLOCK_TYPE = `${ALERT_NAMESPACE}.building_block_type` as const;
 const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as const;
 const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
+const ALERT_CONTEXT = `${ALERT_NAMESPACE}.context` as const;
+const ALERT_EVALUATION_VALUES = `${ALERT_NAMESPACE}.evaluation.values` as const;
+const ALERT_GROUP = `${ALERT_NAMESPACE}.group` as const;
+const ALERT_GROUP_FIELD = `${ALERT_GROUP}.field` as const;
+const ALERT_GROUP_VALUE = `${ALERT_GROUP}.value` as const;
 
 // Fields pertaining to the rule associated with the alert
 const ALERT_RULE_EXCEPTIONS_LIST = `${ALERT_RULE_NAMESPACE}.exceptions_list` as const;
@@ -124,11 +133,17 @@ const fields = {
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_EVALUATION_VALUES,
+  ALERT_GROUP,
+  ALERT_GROUP_FIELD,
+  ALERT_GROUP_VALUE,
   ALERT_FLAPPING,
+  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_INSTANCE_ID,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_PRODUCER,
   ALERT_REASON,
+  ALERT_CONTEXT,
   ALERT_RISK_SCORE,
   ALERT_CASE_IDS,
   ALERT_RULE_AUTHOR,
@@ -161,8 +176,10 @@ const fields = {
   ALERT_STATUS,
   ALERT_SYSTEM_STATUS,
   ALERT_UUID,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_REASON,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   ALERT_WORKFLOW_USER,
   ALERT_RULE_UUID,
   ALERT_RULE_CATEGORY,
@@ -190,6 +207,11 @@ export {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_CONTEXT,
+  ALERT_EVALUATION_VALUES,
+  ALERT_GROUP,
+  ALERT_GROUP_FIELD,
+  ALERT_GROUP_VALUE,
   ALERT_RULE_EXCEPTIONS_LIST,
   ALERT_RULE_NAMESPACE_FIELD,
   ALERT_THREAT_FRAMEWORK,

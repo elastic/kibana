@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Logger } from '@kbn/logging';
@@ -32,8 +33,6 @@ import type {
 } from '@kbn/core-http-resources-server';
 
 import type { InternalHttpResourcesSetup } from './types';
-
-import { getApmConfig } from './get_apm_config';
 
 /**
  * @internal
@@ -85,12 +84,21 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         route: RouteConfig<P, Q, B, 'get'>,
         handler: HttpResourcesRequestHandler<P, Q, B, Context>
       ) => {
-        return router.get<P, Q, B>(route, (context, request, response) => {
-          return handler(context as Context, request, {
-            ...response,
-            ...this.createResponseToolkit(deps, context, request, response),
-          });
-        });
+        return router.get<P, Q, B>(
+          {
+            ...route,
+            options: {
+              access: 'public',
+              ...route.options,
+            },
+          },
+          (context, request, response) => {
+            return handler(context as Context, request, {
+              ...response,
+              ...this.createResponseToolkit(deps, context, request, response),
+            });
+          }
+        );
       },
     };
   }
@@ -103,13 +111,9 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
   ): HttpResourcesServiceToolkit {
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
-        const apmConfig = getApmConfig(request.url.pathname);
         const { uiSettings } = await context.core;
         const body = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: false,
-          vars: {
-            apmConfig,
-          },
           includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
@@ -119,13 +123,9 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
-        const apmConfig = getApmConfig(request.url.pathname);
         const { uiSettings } = await context.core;
         const body = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: true,
-          vars: {
-            apmConfig,
-          },
           includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 

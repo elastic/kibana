@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BETA = i18n.translate('xpack.kubernetesSecurity.beta', {
-  defaultMessage: 'Beta',
-});
-
 export const SEARCH_GROUP_CLUSTER = i18n.translate('xpack.kubernetesSecurity.searchGroup.cluster', {
   defaultMessage: 'Cluster',
 });
@@ -53,6 +49,12 @@ export const TREE_NAVIGATION_LOADING = i18n.translate(
     defaultMessage: 'Loading',
   }
 );
+export const TREE_NAVIGATION_EMPTY = i18n.translate(
+  'xpack.kubernetesSecurity.treeNavigation.empty',
+  {
+    defaultMessage: 'No data available',
+  }
+);
 export const TREE_NAVIGATION_SHOW_MORE = (name: string) =>
   i18n.translate('xpack.kubernetesSecurity.treeNavigation.loadMore', {
     values: { name },
@@ -62,14 +64,14 @@ export const TREE_NAVIGATION_SHOW_MORE = (name: string) =>
 export const TREE_NAVIGATION_COLLAPSE = i18n.translate(
   'xpack.kubernetesSecurity.treeNavigation.collapse',
   {
-    defaultMessage: 'Collapse Tree Navigation',
+    defaultMessage: 'Collapse tree navigation',
   }
 );
 
 export const TREE_NAVIGATION_EXPAND = i18n.translate(
   'xpack.kubernetesSecurity.treeNavigation.expand',
   {
-    defaultMessage: 'Expand Tree Navigation',
+    defaultMessage: 'Expand tree navigation',
   }
 );
 
@@ -106,14 +108,14 @@ export const COUNT_WIDGET_PODS = i18n.translate('xpack.kubernetesSecurity.countW
 export const COUNT_WIDGET_CONTAINER_IMAGES = i18n.translate(
   'xpack.kubernetesSecurity.countWidget.containerImages',
   {
-    defaultMessage: 'Container Images',
+    defaultMessage: 'Container images',
   }
 );
 
 export const CONTAINER_NAME_SESSION = i18n.translate(
   'xpack.kubernetesSecurity.containerNameWidget.containerImage',
   {
-    defaultMessage: 'Container images',
+    defaultMessage: 'Container image',
   }
 );
 
@@ -127,6 +129,6 @@ export const CONTAINER_NAME_SESSION_COUNT_COLUMN = i18n.translate(
 export const CONTAINER_NAME_SESSION_ARIA_LABEL = i18n.translate(
   'xpack.kubernetesSecurity.containerNameWidget.containerImageAriaLabel',
   {
-    defaultMessage: 'Container Name Session Widget',
+    defaultMessage: 'Container name session widget',
   }
 );

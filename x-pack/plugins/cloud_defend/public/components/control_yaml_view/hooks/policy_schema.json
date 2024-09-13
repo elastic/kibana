@@ -1,6 +1,7 @@
 {
   "$id": "https://elastic.co/cloud-defend/policy-schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$comment": "policy-version=1.0.0",
   "type": "object",
   "anyOf": [
     {
@@ -10,8 +11,11 @@
       "required": ["process"]
     }
   ],
-  "additionalProperties": false,
+  "additionalProperties": true,
   "properties": {
+    "version": {
+      "type": "string"
+    },
     "file": {
       "type": "object",
       "required": ["selectors", "responses"],
@@ -57,7 +61,7 @@
     "fileSelector": {
       "type": "object",
       "required": ["name"],
-      "additionalProperties": false,
+      "additionalProperties": true,
       "anyOf": [
         {
           "required": ["operation"]
@@ -66,10 +70,10 @@
           "required": ["containerImageName"]
         },
         {
-          "required": ["containerImageFullName"]
+          "required": ["containerImageTag"]
         },
         {
-          "required": ["containerImageTag"]
+          "required": ["containerImageFullName"]
         },
         {
           "required": ["kubernetesClusterId"]
@@ -81,10 +85,10 @@
           "required": ["kubernetesNamespace"]
         },
         {
-          "required": ["kubernetesResourceLabel"]
+          "required": ["kubernetesPodLabel"]
         },
         {
-          "required": ["kubernetesResourceName"]
+          "required": ["kubernetesPodName"]
         },
         {
           "required": ["targetFilePath"]
@@ -100,12 +104,25 @@
         "name": {
           "type": "string"
         },
+        "operation": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "createExecutable",
+              "modifyExecutable",
+              "createFile",
+              "modifyFile",
+              "deleteFile"
+            ]
+          }
+        },
         "containerImageName": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^[a-z0-9]+$"
+            "pattern": "^([a-z0-9]+(?:[._-][a-z0-9]+)*)$"
           }
         },
         "containerImageTag": {
@@ -120,7 +137,7 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$"
+            "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+(?:[._-][a-z0-9]+)*)+$"
           }
         },
         "kubernetesClusterId": {
@@ -144,7 +161,7 @@
             "type": "string"
           }
         },
-        "kubernetesResourceLabel": {
+        "kubernetesPodLabel": {
           "type": "array",
           "minItems": 1,
           "items": {
@@ -152,24 +169,11 @@
             "pattern": "^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$"
           }
         },
-        "kubernetesResourceName": {
+        "kubernetesPodName": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "string"
-          }
-        },
-        "operation": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "enum": [
-              "createExecutable",
-              "modifyExecutable",
-              "createFile",
-              "modifyFile",
-              "deleteFile"
-            ]
           }
         },
         "targetFilePath": {
@@ -177,7 +181,8 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^(?:\\/[^\\/\\*]+)+(?:\\/\\*|\\/\\*\\*)?$"
+            "pattern": "^(?:\\/[^\\/\\*]+)*(?:\\/\\*|\\/\\*\\*)?$",
+            "minLength": 1
           }
         },
         "ignoreVolumeMounts": {
@@ -205,7 +210,7 @@
     "processSelector": {
       "type": "object",
       "required": ["name"],
-      "additionalProperties": false,
+      "additionalProperties": true,
       "anyOf": [
         {
           "required": ["operation"]
@@ -214,10 +219,10 @@
           "required": ["containerImageName"]
         },
         {
-          "required": ["containerImageFullName"]
+          "required": ["containerImageTag"]
         },
         {
-          "required": ["containerImageTag"]
+          "required": ["containerImageFullName"]
         },
         {
           "required": ["kubernetesClusterId"]
@@ -229,10 +234,10 @@
           "required": ["kubernetesNamespace"]
         },
         {
-          "required": ["kubernetesResourceLabel"]
+          "required": ["kubernetesPodLabel"]
         },
         {
-          "required": ["kubernetesResourceName"]
+          "required": ["kubernetesPodName"]
         },
         {
           "required": ["processExecutable"]
@@ -248,12 +253,19 @@
         "name": {
           "type": "string"
         },
+        "operation": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": ["fork", "exec"]
+          }
+        },
         "containerImageName": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^[a-z0-9]+$"
+            "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*$"
           }
         },
         "containerImageTag": {
@@ -268,7 +280,7 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$"
+            "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+(?:[._-][a-z0-9]+)*)+$"
           }
         },
         "kubernetesClusterId": {
@@ -292,7 +304,7 @@
             "type": "string"
           }
         },
-        "kubernetesResourceLabel": {
+        "kubernetesPodLabel": {
           "type": "array",
           "minItems": 1,
           "items": {
@@ -300,18 +312,11 @@
             "pattern": "^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$"
           }
         },
-        "kubernetesResourceName": {
+        "kubernetesPodName": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "string"
-          }
-        },
-        "operation": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "enum": ["fork", "exec"]
           }
         },
         "processExecutable": {
@@ -319,7 +324,8 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^(?:\\/[^\\/\\*]+)+(?:\\/\\*|\\/\\*\\*)?$"
+            "pattern": "^(?:\\/[^\\/\\*]+)*(?:\\/\\*|\\/\\*\\*)?$",
+            "minLength": 1
           }
         },
         "processName": {
@@ -344,7 +350,7 @@
     "fileResponse": {
       "type": "object",
       "required": ["match", "actions"],
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "match": {
           "type": "array",
@@ -371,7 +377,7 @@
     "processResponse": {
       "type": "object",
       "required": ["match", "actions"],
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "match": {
           "type": "array",
@@ -390,7 +396,7 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "enum": ["alert", "log"]
+            "enum": ["alert", "block", "log"]
           }
         }
       }

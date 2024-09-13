@@ -122,7 +122,7 @@ export const useFetch = <Parameters, Response, Error extends unknown>(
     Reducer<State<Parameters, Response, Error>, Action<Parameters, Response, Error>>
   >(requestReducer, {
     data: undefined,
-    isLoading: initialParameters !== undefined, // isLoading state is used internally to control fetch executions
+    isLoading: !disabled && initialParameters !== undefined, // isLoading state is used internally to control fetch executions
     error: undefined,
     parameters: initialParameters,
   });

@@ -1,0 +1,272 @@
+{
+  "id": "@kbn/react-kibana-context-root",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/react-kibana-context-root",
+        "id": "def-public.KibanaEuiProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaEuiProvider",
+        "description": [
+          "\nPrepares and returns a configured `EuiProvider` for use in Kibana roots.  In most cases, this utility context\nshould not be used.  Instead, refer to `KibanaRootContextProvider` to set up the root of Kibana."
+        ],
+        "signature": [
+          "({ theme: { theme$ }, globalStyles: globalStylesProp, colorMode: colorModeProp, modify, children, }: React.PropsWithChildren<React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/react-kibana-context-root",
+            "scope": "public",
+            "docId": "kibKbnReactKibanaContextRootPluginApi",
+            "section": "def-public.KibanaEuiProviderProps",
+            "text": "KibanaEuiProviderProps"
+          },
+          ">>) => JSX.Element"
+        ],
+        "path": "packages/react/kibana_context/root/eui_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-root",
+            "id": "def-public.KibanaEuiProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  theme: { theme$ },\n  globalStyles: globalStylesProp,\n  colorMode: colorModeProp,\n  modify,\n  children,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/react-kibana-context-root",
+                "scope": "public",
+                "docId": "kibKbnReactKibanaContextRootPluginApi",
+                "section": "def-public.KibanaEuiProviderProps",
+                "text": "KibanaEuiProviderProps"
+              },
+              ">>"
+            ],
+            "path": "packages/react/kibana_context/root/eui_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-root",
+        "id": "def-public.KibanaRootContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaRootContextProvider",
+        "description": [
+          "\nThe `KibanaRootContextProvider` provides the necessary context at the root of Kibana, including\ninitialization and the theme and i18n contexts.  This context should only be used _once_, and\nat the _very top_ of the application root, rendered by the `RenderingService`.\n\nWhile this context is exposed for edge cases and tooling, (e.g. Storybook, Jest, etc.), it should\n_not_ be used in applications.  Instead, applications should choose the context that makes the\nmost sense for the problem they are trying to solve:\n\n- Consider `KibanaRenderContextProvider` for rendering components outside the current tree, (e.g.\nwith `ReactDOM.render`).\n- Consider `KibanaThemeContextProvider` for altering the theme of a component or tree of components.\n"
+        ],
+        "signature": [
+          "({ children, i18n, ...props }: React.PropsWithChildren<React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/react-kibana-context-root",
+            "scope": "public",
+            "docId": "kibKbnReactKibanaContextRootPluginApi",
+            "section": "def-public.KibanaRootContextProviderProps",
+            "text": "KibanaRootContextProviderProps"
+          },
+          ">>) => JSX.Element"
+        ],
+        "path": "packages/react/kibana_context/root/root_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-root",
+            "id": "def-public.KibanaRootContextProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  i18n,\n  ...props\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/react-kibana-context-root",
+                "scope": "public",
+                "docId": "kibKbnReactKibanaContextRootPluginApi",
+                "section": "def-public.KibanaRootContextProviderProps",
+                "text": "KibanaRootContextProviderProps"
+              },
+              ">>"
+            ],
+            "path": "packages/react/kibana_context/root/root_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/react-kibana-context-root",
+        "id": "def-public.KibanaEuiProviderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaEuiProviderProps",
+        "description": [
+          "\nProps for the KibanaEuiProvider."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/react-kibana-context-root",
+            "scope": "public",
+            "docId": "kibKbnReactKibanaContextRootPluginApi",
+            "section": "def-public.KibanaEuiProviderProps",
+            "text": "KibanaEuiProviderProps"
+          },
+          " extends Pick<",
+          "EuiProviderProps",
+          "<{}>, \"modify\" | \"colorMode\">"
+        ],
+        "path": "packages/react/kibana_context/root/eui_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-root",
+            "id": "def-public.KibanaEuiProviderProps.theme",
+            "type": "Object",
+            "tags": [],
+            "label": "theme",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/react-kibana-context-common",
+                "scope": "public",
+                "docId": "kibKbnReactKibanaContextCommonPluginApi",
+                "section": "def-public.ThemeServiceStart",
+                "text": "ThemeServiceStart"
+              }
+            ],
+            "path": "packages/react/kibana_context/root/eui_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-root",
+            "id": "def-public.KibanaEuiProviderProps.globalStyles",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "globalStyles",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/react/kibana_context/root/eui_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-root",
+        "id": "def-public.KibanaRootContextProviderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaRootContextProviderProps",
+        "description": [
+          "Props for the KibanaRootContextProvider"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/react-kibana-context-root",
+            "scope": "public",
+            "docId": "kibKbnReactKibanaContextRootPluginApi",
+            "section": "def-public.KibanaRootContextProviderProps",
+            "text": "KibanaRootContextProviderProps"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/react-kibana-context-root",
+            "scope": "public",
+            "docId": "kibKbnReactKibanaContextRootPluginApi",
+            "section": "def-public.KibanaEuiProviderProps",
+            "text": "KibanaEuiProviderProps"
+          }
+        ],
+        "path": "packages/react/kibana_context/root/root_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-root",
+            "id": "def-public.KibanaRootContextProviderProps.i18n",
+            "type": "Object",
+            "tags": [],
+            "label": "i18n",
+            "description": [
+              "The `I18nStart` API from `CoreStart`."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-i18n-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreI18nBrowserPluginApi",
+                "section": "def-public.I18nStart",
+                "text": "I18nStart"
+              }
+            ],
+            "path": "packages/react/kibana_context/root/root_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-root",
+            "id": "def-public.KibanaRootContextProviderProps.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [
+              "The `AnalyticsServiceStart` API from `CoreStart`."
+            ],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "@kbn/core-analytics-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+                "section": "def-public.AnalyticsServiceStart",
+                "text": "AnalyticsServiceStart"
+              },
+              ", \"reportEvent\"> | undefined"
+            ],
+            "path": "packages/react/kibana_context/root/root_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

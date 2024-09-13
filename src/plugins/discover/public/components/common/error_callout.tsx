@@ -1,156 +1,95 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiModal,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiText,
   useEuiTheme,
+  EuiIcon,
+  EuiCodeBlock,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { getSearchErrorOverrideDisplay } from '@kbn/data-plugin/public';
+import { renderSearchError } from '@kbn/search-errors';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useState } from 'react';
+import React from 'react';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
-export interface ErrorCalloutProps {
+interface Props {
   title: string;
   error: Error;
-  inline?: boolean;
-  'data-test-subj'?: string;
+  isEsqlMode?: boolean;
 }
 
-export const ErrorCallout = ({
-  title,
-  error,
-  inline,
-  'data-test-subj': dataTestSubj,
-}: ErrorCalloutProps) => {
-  const { core } = useDiscoverServices();
+export const ErrorCallout = ({ title, error, isEsqlMode }: Props) => {
+  const { core, docLinks } = useDiscoverServices();
   const { euiTheme } = useEuiTheme();
 
-  const showErrorMessage = i18n.translate('discover.errorCalloutShowErrorMessage', {
-    defaultMessage: 'Show details',
-  });
-
-  const overrideDisplay = getSearchErrorOverrideDisplay({
-    error,
-    application: core.application,
-  });
-
-  const [overrideModalOpen, setOverrideModalOpen] = useState(false);
-
-  const showError = overrideDisplay?.body
-    ? () => setOverrideModalOpen(true)
-    : () => core.notifications.showErrorDialog({ title, error });
-
-  let formattedTitle: ReactNode = overrideDisplay?.title || title;
-
-  if (inline) {
-    const formattedTitleMessage = overrideDisplay
-      ? formattedTitle
-      : i18n.translate('discover.errorCalloutFormattedTitle', {
-          defaultMessage: '{title}: {errorMessage}',
-          values: { title, errorMessage: error.message },
-        });
-
-    formattedTitle = (
-      <>
-        <span className="eui-textTruncate" data-test-subj="discoverErrorCalloutMessage">
-          {formattedTitleMessage}
-        </span>
-        <EuiLink
-          onClick={showError}
-          css={css`
-            white-space: nowrap;
-            margin-inline-start: ${euiTheme.size.s};
-          `}
-        >
-          {showErrorMessage}
-        </EuiLink>
-      </>
-    );
-  }
+  const searchErrorDisplay = renderSearchError(error);
 
   return (
-    <>
-      {inline ? (
-        <EuiCallOut
-          title={formattedTitle}
-          color="danger"
-          iconType="error"
-          size="s"
-          css={css`
-            .euiTitle {
-              display: flex;
-              align-items: center;
-            }
-          `}
-          data-test-subj={dataTestSubj}
-        />
-      ) : (
-        <EuiEmptyPrompt
-          color="danger"
-          title={
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="error" color="danger" size="l" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <h2 data-test-subj="discoverErrorCalloutTitle">{formattedTitle}</h2>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          body={
-            overrideDisplay?.body ?? (
-              <>
-                <p
-                  css={css`
-                    white-space: break-spaces;
-                    font-family: ${euiTheme.font.familyCode};
-                  `}
-                  data-test-subj="discoverErrorCalloutMessage"
+    <EuiEmptyPrompt
+      icon={<EuiIcon size="l" type="error" color="danger" />}
+      color="plain"
+      paddingSize="m"
+      css={css`
+        margin: ${euiTheme.size.xl} auto;
+      `}
+      title={
+        <h2 data-test-subj="discoverErrorCalloutTitle">{searchErrorDisplay?.title ?? title}</h2>
+      }
+      titleSize="xs"
+      hasBorder
+      actions={searchErrorDisplay?.actions ?? []}
+      body={
+        <>
+          {searchErrorDisplay?.body ?? (
+            <>
+              <EuiCodeBlock
+                paddingSize="s"
+                language="json"
+                isCopyable
+                css={css`
+                  text-align: left;
+                `}
+                data-test-subj="discoverErrorCalloutMessage"
+              >
+                {error.message}
+              </EuiCodeBlock>
+              {!isEsqlMode && (
+                <EuiButton
+                  onClick={() => core.notifications.showErrorDialog({ title, error })}
+                  data-test-subj="discoverErrorCalloutShowDetailsButton"
                 >
-                  {error.message}
-                </p>
-                <EuiButton onClick={showError}>{showErrorMessage}</EuiButton>
-              </>
-            )
-          }
-          css={css`
-            text-align: left;
-          `}
-          data-test-subj={dataTestSubj}
-        />
-      )}
-      {overrideDisplay && overrideModalOpen && (
-        <EuiModal onClose={() => setOverrideModalOpen(false)}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle data-test-subj="discoverErrorCalloutOverrideModalTitle">
-              {overrideDisplay.title}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiText data-test-subj="discoverErrorCalloutOverrideModalBody">
-              {overrideDisplay.body}
-            </EuiText>
-          </EuiModalBody>
-        </EuiModal>
-      )}
-    </>
+                  {i18n.translate('discover.errorCalloutShowErrorMessage', {
+                    defaultMessage: 'View details',
+                  })}
+                </EuiButton>
+              )}
+            </>
+          )}
+        </>
+      }
+      footer={
+        isEsqlMode ? (
+          <EuiButtonEmpty
+            iconType="documentation"
+            href={docLinks.links.query.queryESQL}
+            data-test-subj="discoverErrorCalloutESQLReferenceButton"
+            target="_blank"
+          >
+            {i18n.translate('discover.errorCalloutESQLReferenceButtonLabel', {
+              defaultMessage: 'Open ES|QL reference',
+            })}
+          </EuiButtonEmpty>
+        ) : undefined
+      }
+    />
   );
 };

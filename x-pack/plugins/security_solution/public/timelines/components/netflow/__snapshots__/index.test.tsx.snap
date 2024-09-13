@@ -2,13 +2,8 @@
 
 exports[`Netflow renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c13 svg {
-  position: relative;
-  top: -1px;
-}
-
-.c11,
-.c11 * {
+  .c10,
+.c10 * {
   display: inline-block;
   max-width: 100%;
   overflow: hidden;
@@ -17,18 +12,14 @@ exports[`Netflow renders correctly against snapshot 1`] = `
   white-space: nowrap;
 }
 
-.c1 .euiPopover__anchor {
-  width: 100%;
-}
-
-.c3 {
+.c2 {
   border-radius: 2px;
   padding: 0 4px 0 8px;
   position: relative;
   z-index: 0 !important;
 }
 
-.c3::before {
+.c2::before {
   background-image: linear-gradient( 135deg, #535966 25%, transparent 25% ), linear-gradient( -135deg, #535966 25%, transparent 25% ), linear-gradient( 135deg, transparent 75%, #535966 75% ), linear-gradient( -135deg, transparent 75%, #535966 75% );
   background-position: 0 0,1px 0,1px -1px,0px 1px;
   background-size: 2px 2px;
@@ -41,147 +32,152 @@ exports[`Netflow renders correctly against snapshot 1`] = `
   width: 4px;
 }
 
-.c3:hover,
-.c3:hover .euiBadge,
-.c3:hover .euiBadge__text {
+.c2:hover,
+.c2:hover .euiBadge,
+.c2:hover .euiBadge__text {
   cursor: move;
   cursor: -webkit-grab;
   cursor: -moz-grab;
   cursor: grab;
 }
 
-.event-column-view:hover .c3::before,
-tr:hover .c3::before {
+.event-column-view:hover .c2::before,
+tr:hover .c2::before {
   background-image: linear-gradient( 135deg, #98a2b3 25%, transparent 25% ), linear-gradient( -135deg, #98a2b3 25%, transparent 25% ), linear-gradient( 135deg, transparent 75%, #98a2b3 75% ), linear-gradient( -135deg, transparent 75%, #98a2b3 75% );
 }
 
-.c3:hover,
-.c3:focus,
-.event-column-view:hover .c3:hover,
-.event-column-view:focus .c3:focus,
-tr:hover .c3:hover,
-tr:hover .c3:focus {
+.c2:hover,
+.c2:focus,
+.event-column-view:hover .c2:hover,
+.event-column-view:focus .c2:focus,
+tr:hover .c2:hover,
+tr:hover .c2:focus {
   background-color: #36a2ef;
 }
 
-.c3:hover,
-.c3:focus,
-.event-column-view:hover .c3:hover,
-.event-column-view:focus .c3:focus,
-tr:hover .c3:hover,
-tr:hover .c3:focus,
-.c3:hover a,
-.c3:focus a,
-.event-column-view:hover .c3:hover a,
-.event-column-view:focus .c3:focus a,
-tr:hover .c3:hover a,
-tr:hover .c3:focus a,
-.c3:hover a:hover,
-.c3:focus a:hover,
-.event-column-view:hover .c3:hover a:hover,
-.event-column-view:focus .c3:focus a:hover,
-tr:hover .c3:hover a:hover,
-tr:hover .c3:focus a:hover {
+.c2:hover,
+.c2:focus,
+.event-column-view:hover .c2:hover,
+.event-column-view:focus .c2:focus,
+tr:hover .c2:hover,
+tr:hover .c2:focus,
+.c2:hover a,
+.c2:focus a,
+.event-column-view:hover .c2:hover a,
+.event-column-view:focus .c2:focus a,
+tr:hover .c2:hover a,
+tr:hover .c2:focus a,
+.c2:hover a:hover,
+.c2:focus a:hover,
+.event-column-view:hover .c2:hover a:hover,
+.event-column-view:focus .c2:focus a:hover,
+tr:hover .c2:hover a:hover,
+tr:hover .c2:focus a:hover {
   color: #1d1e24;
 }
 
-.c3:hover::before,
-.c3:focus::before,
-.event-column-view:hover .c3:hover::before,
-.event-column-view:focus .c3:focus::before,
-tr:hover .c3:hover::before,
-tr:hover .c3:focus::before {
+.c2:hover::before,
+.c2:focus::before,
+.event-column-view:hover .c2:hover::before,
+.event-column-view:focus .c2:focus::before,
+tr:hover .c2:hover::before,
+tr:hover .c2:focus::before {
   background-image: linear-gradient( 135deg, #1d1e24 25%, transparent 25% ), linear-gradient( -135deg, #1d1e24 25%, transparent 25% ), linear-gradient( 135deg, transparent 75%, #1d1e24 75% ), linear-gradient( -135deg, transparent 75%, #1d1e24 75% );
 }
 
-.c2 {
+.c1 {
   display: inline-block;
   max-width: 100%;
 }
 
-.c2 [data-rbd-placeholder-context-id] {
+.c1 [data-rbd-placeholder-context-id] {
   display: none !important;
 }
 
-.c4 > span.euiToolTipAnchor {
+.c3 > span.euiToolTipAnchor {
   display: block;
 }
 
-.c4 > span.euiToolTipAnchor.eui-textTruncate {
+.c3 > span.euiToolTipAnchor.eui-textTruncate {
   display: inline-block;
 }
 
-.c5 {
+.c4 {
   vertical-align: top;
 }
 
-.c22 {
-  margin-right: 5px;
+.c12 svg {
+  position: relative;
+  top: -1px;
 }
 
 .c21 {
   margin-right: 5px;
 }
 
-.c15 {
-  position: relative;
-  top: 1px;
-}
-
-.c14 {
+.c20 {
   margin-right: 5px;
 }
 
-.c17 {
+.c6 {
+  margin-right: 3px;
+}
+
+.c7 {
+  margin: 0 5px;
+}
+
+.c16 {
   background-color: #343741;
   height: 2.8px;
   width: 25px;
 }
 
-.c20 {
+.c19 {
   background-color: #343741;
   height: 2.2px;
   width: 25px;
 }
 
-.c19 {
+.c18 {
   margin-right: 5px;
 }
 
-.c16 {
+.c15 {
   margin: 0 2px;
 }
 
-.c16 .euiToolTipAnchor {
+.c15 .euiToolTipAnchor {
   white-space: nowrap;
 }
 
-.c18 {
+.c17 {
   margin: 0 5px;
 }
 
-.c7 {
-  margin-right: 3px;
+.c14 {
+  position: relative;
+  top: 1px;
 }
 
-.c8 {
-  margin: 0 5px;
+.c13 {
+  margin-right: 5px;
 }
 
-.c12 {
+.c11 {
   margin: 0 3px;
 }
 
-.c10 {
+.c9 {
   font-weight: bold;
   margin-top: 2px;
 }
 
-.c9 {
+.c8 {
   margin-top: 3px;
 }
 
-.c6 {
+.c5 {
   margin-right: 3px;
   position: relative;
   top: -1px;
@@ -213,24 +209,20 @@ tr:hover .c3:focus::before {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class=""
+                data-test-subj="cellActions-renderContent-user.name"
               >
-                <div
-                  class="euiPopover c1 emotion-euiPopover"
-                >
+                <div>
                   <div
-                    class="euiPopover__anchor css-16vtueo-render"
+                    class="euiPopover emotion-euiPopover-inline-block"
                   >
-                    <div
-                      data-test-subj="withHoverActionsButton"
-                    >
+                    <div>
                       <div
-                        class="c2"
+                        class="c1"
                         data-test-subj="draggableWrapperDiv"
                       >
                         <div
-                          data-rbd-droppable-context-id="0"
-                          data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
+                          data-rfd-droppable-context-id="0"
+                          data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
                         >
                           <div
                             class="draggable-keyboard-wrapper"
@@ -239,26 +231,26 @@ tr:hover .c3:focus::before {
                             tabindex="0"
                           >
                             <div
-                              aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                              class="c3"
-                              data-rbd-drag-handle-context-id="0"
-                              data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
-                              data-rbd-draggable-context-id="0"
-                              data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
+                              aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                              class="c2"
+                              data-rfd-drag-handle-context-id="0"
+                              data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
+                              data-rfd-draggable-context-id="0"
+                              data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
                               data-test-subj="providerContainer"
                               draggable="false"
                               role="button"
                               tabindex="-1"
                             >
                               <span
-                                class="c4"
+                                class="c3"
                                 data-test-subj="draggable-content-user.name"
                               >
                                 <span
                                   class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                 >
                                   <span
-                                    class="euiBadge c5 emotion-euiBadge-hollow"
+                                    class="euiBadge c4 emotion-euiBadge-hollow"
                                     title=""
                                   >
                                     <span
@@ -291,75 +283,59 @@ tr:hover .c3:focus::before {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class=""
+                class="c1"
+                data-test-subj="draggableWrapperDiv"
               >
                 <div
-                  class="euiPopover c1 emotion-euiPopover"
+                  data-rfd-droppable-context-id="0"
+                  data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
                 >
                   <div
-                    class="euiPopover__anchor css-16vtueo-render"
+                    class="draggable-keyboard-wrapper"
+                    data-test-subj="draggableWrapperKeyboardHandler"
+                    role="button"
+                    tabindex="0"
                   >
                     <div
-                      data-test-subj="withHoverActionsButton"
+                      aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                      class="c2"
+                      data-rfd-drag-handle-context-id="0"
+                      data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
+                      data-rfd-draggable-context-id="0"
+                      data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
+                      data-test-subj="providerContainer"
+                      draggable="false"
+                      role="button"
+                      tabindex="-1"
                     >
-                      <div
-                        class="c2"
-                        data-test-subj="draggableWrapperDiv"
+                      <span
+                        class="c3"
+                        data-test-subj="draggable-content-process.name"
                       >
-                        <div
-                          data-rbd-droppable-context-id="0"
-                          data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
+                        <span
+                          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                         >
-                          <div
-                            class="draggable-keyboard-wrapper"
-                            data-test-subj="draggableWrapperKeyboardHandler"
-                            role="button"
-                            tabindex="0"
+                          <span
+                            class="euiBadge c4 emotion-euiBadge-hollow"
+                            title=""
                           >
-                            <div
-                              aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                              class="c3"
-                              data-rbd-drag-handle-context-id="0"
-                              data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
-                              data-rbd-draggable-context-id="0"
-                              data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
-                              data-test-subj="providerContainer"
-                              draggable="false"
-                              role="button"
-                              tabindex="-1"
+                            <span
+                              class="euiBadge__content emotion-euiBadge__content"
                             >
                               <span
-                                class="c4"
-                                data-test-subj="draggable-content-process.name"
+                                class="euiBadge__icon emotion-euiBadge__icon-left"
+                                color="inherit"
+                                data-euiicon-type="console"
+                              />
+                              <span
+                                class="euiBadge__text emotion-euiBadge__text"
                               >
-                                <span
-                                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                >
-                                  <span
-                                    class="euiBadge c5 emotion-euiBadge-hollow"
-                                    title=""
-                                  >
-                                    <span
-                                      class="euiBadge__content emotion-euiBadge__content"
-                                    >
-                                      <span
-                                        class="euiBadge__icon emotion-euiBadge__icon-left"
-                                        color="inherit"
-                                        data-euiicon-type="console"
-                                      />
-                                      <span
-                                        class="euiBadge__text emotion-euiBadge__text"
-                                      >
-                                        rat
-                                      </span>
-                                    </span>
-                                  </span>
-                                </span>
+                                rat
                               </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                            </span>
+                          </span>
+                        </span>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -378,69 +354,53 @@ tr:hover .c3:focus::before {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class=""
+                class="c1"
+                data-test-subj="draggableWrapperDiv"
               >
                 <div
-                  class="euiPopover c1 emotion-euiPopover"
+                  data-rfd-droppable-context-id="0"
+                  data-rfd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
                 >
                   <div
-                    class="euiPopover__anchor css-16vtueo-render"
+                    class="draggable-keyboard-wrapper"
+                    data-test-subj="draggableWrapperKeyboardHandler"
+                    role="button"
+                    tabindex="0"
                   >
                     <div
-                      data-test-subj="withHoverActionsButton"
+                      aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                      class="c2"
+                      data-rfd-drag-handle-context-id="0"
+                      data-rfd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
+                      data-rfd-draggable-context-id="0"
+                      data-rfd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
+                      data-test-subj="providerContainer"
+                      draggable="false"
+                      role="button"
+                      tabindex="-1"
                     >
-                      <div
-                        class="c2"
-                        data-test-subj="draggableWrapperDiv"
+                      <span
+                        class="c3"
+                        data-test-subj="draggable-content-event.duration"
                       >
                         <div
-                          data-rbd-droppable-context-id="0"
-                          data-rbd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
+                          class="euiText emotion-euiText-xs"
                         >
-                          <div
-                            class="draggable-keyboard-wrapper"
-                            data-test-subj="draggableWrapperKeyboardHandler"
-                            role="button"
-                            tabindex="0"
+                          <span
+                            class="c5"
+                            data-euiicon-type="clock"
+                          />
+                          <span
+                            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                           >
                             <div
-                              aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                              class="c3"
-                              data-rbd-drag-handle-context-id="0"
-                              data-rbd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
-                              data-rbd-draggable-context-id="0"
-                              data-rbd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
-                              data-test-subj="providerContainer"
-                              draggable="false"
-                              role="button"
-                              tabindex="-1"
+                              data-test-subj="formatted-duration"
                             >
-                              <span
-                                class="c4"
-                                data-test-subj="draggable-content-event.duration"
-                              >
-                                <div
-                                  class="euiText emotion-euiText-xs"
-                                >
-                                  <span
-                                    class="c6"
-                                    data-euiicon-type="clock"
-                                  />
-                                  <span
-                                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                  >
-                                    <div
-                                      data-test-subj="formatted-duration"
-                                    >
-                                      1ms
-                                    </div>
-                                  </span>
-                                </div>
-                              </span>
+                              1ms
                             </div>
-                          </div>
+                          </span>
                         </div>
-                      </div>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -450,65 +410,49 @@ tr:hover .c3:focus::before {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class=""
+                class="c1"
+                data-test-subj="draggableWrapperDiv"
               >
                 <div
-                  class="euiPopover c1 emotion-euiPopover"
+                  data-rfd-droppable-context-id="0"
+                  data-rfd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
                 >
                   <div
-                    class="euiPopover__anchor css-16vtueo-render"
+                    class="draggable-keyboard-wrapper"
+                    data-test-subj="draggableWrapperKeyboardHandler"
+                    role="button"
+                    tabindex="0"
                   >
                     <div
-                      data-test-subj="withHoverActionsButton"
+                      aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                      class="c2"
+                      data-rfd-drag-handle-context-id="0"
+                      data-rfd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
+                      data-rfd-draggable-context-id="0"
+                      data-rfd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
+                      data-test-subj="providerContainer"
+                      draggable="false"
+                      role="button"
+                      tabindex="-1"
                     >
-                      <div
-                        class="c2"
-                        data-test-subj="draggableWrapperDiv"
+                      <span
+                        class="c3"
+                        data-test-subj="draggable-content-event.start"
                       >
                         <div
-                          data-rbd-droppable-context-id="0"
-                          data-rbd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
+                          class="euiText emotion-euiText-xs"
                         >
-                          <div
-                            class="draggable-keyboard-wrapper"
-                            data-test-subj="draggableWrapperKeyboardHandler"
-                            role="button"
-                            tabindex="0"
+                          <span
+                            class="c5"
+                            data-euiicon-type="clock"
+                          />
+                          <span
+                            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                           >
-                            <div
-                              aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                              class="c3"
-                              data-rbd-drag-handle-context-id="0"
-                              data-rbd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
-                              data-rbd-draggable-context-id="0"
-                              data-rbd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
-                              data-test-subj="providerContainer"
-                              draggable="false"
-                              role="button"
-                              tabindex="-1"
-                            >
-                              <span
-                                class="c4"
-                                data-test-subj="draggable-content-event.start"
-                              >
-                                <div
-                                  class="euiText emotion-euiText-xs"
-                                >
-                                  <span
-                                    class="c6"
-                                    data-euiicon-type="clock"
-                                  />
-                                  <span
-                                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                  >
-                                    Nov 12, 2018 @ 19:03:25.836
-                                  </span>
-                                </div>
-                              </span>
-                            </div>
-                          </div>
+                            Nov 12, 2018 @ 19:03:25.836
+                          </span>
                         </div>
-                      </div>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -518,24 +462,20 @@ tr:hover .c3:focus::before {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class=""
+                data-test-subj="cellActions-renderContent-event.end"
               >
-                <div
-                  class="euiPopover c1 emotion-euiPopover"
-                >
+                <div>
                   <div
-                    class="euiPopover__anchor css-16vtueo-render"
+                    class="euiPopover emotion-euiPopover-inline-block"
                   >
-                    <div
-                      data-test-subj="withHoverActionsButton"
-                    >
+                    <div>
                       <div
-                        class="c2"
+                        class="c1"
                         data-test-subj="draggableWrapperDiv"
                       >
                         <div
-                          data-rbd-droppable-context-id="0"
-                          data-rbd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
+                          data-rfd-droppable-context-id="0"
+                          data-rfd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
                         >
                           <div
                             class="draggable-keyboard-wrapper"
@@ -544,26 +484,26 @@ tr:hover .c3:focus::before {
                             tabindex="0"
                           >
                             <div
-                              aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                              class="c3"
-                              data-rbd-drag-handle-context-id="0"
-                              data-rbd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
-                              data-rbd-draggable-context-id="0"
-                              data-rbd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
+                              aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                              class="c2"
+                              data-rfd-drag-handle-context-id="0"
+                              data-rfd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
+                              data-rfd-draggable-context-id="0"
+                              data-rfd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
                               data-test-subj="providerContainer"
                               draggable="false"
                               role="button"
                               tabindex="-1"
                             >
                               <span
-                                class="c4"
+                                class="c3"
                                 data-test-subj="draggable-content-event.end"
                               >
                                 <div
                                   class="euiText emotion-euiText-xs"
                                 >
                                   <span
-                                    class="c6"
+                                    class="c5"
                                     data-euiicon-type="clock"
                                   />
                                   <span
@@ -597,356 +537,276 @@ tr:hover .c3:focus::before {
                 class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
               >
                 <div
-                  class="euiFlexItem c7 emotion-euiFlexItem-growZero"
+                  class="euiFlexItem c6 emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class=""
+                    class="c1"
+                    data-test-subj="draggableWrapperDiv"
                   >
                     <div
-                      class="euiPopover c1 emotion-euiPopover"
+                      data-rfd-droppable-context-id="0"
+                      data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
                     >
                       <div
-                        class="euiPopover__anchor css-16vtueo-render"
+                        class="draggable-keyboard-wrapper"
+                        data-test-subj="draggableWrapperKeyboardHandler"
+                        role="button"
+                        tabindex="0"
                       >
                         <div
-                          data-test-subj="withHoverActionsButton"
+                          aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                          class="c2"
+                          data-rfd-drag-handle-context-id="0"
+                          data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
+                          data-rfd-draggable-context-id="0"
+                          data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
+                          data-test-subj="providerContainer"
+                          draggable="false"
+                          role="button"
+                          tabindex="-1"
                         >
-                          <div
-                            class="c2"
-                            data-test-subj="draggableWrapperDiv"
+                          <span
+                            class="c3"
+                            data-test-subj="draggable-content-network.direction"
                           >
-                            <div
-                              data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
+                            <span
+                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                             >
-                              <div
-                                class="draggable-keyboard-wrapper"
-                                data-test-subj="draggableWrapperKeyboardHandler"
-                                role="button"
-                                tabindex="0"
+                              <span
+                                class="euiBadge c4 emotion-euiBadge-hollow"
+                                title=""
                               >
-                                <div
-                                  aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                  class="c3"
-                                  data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
-                                  data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
-                                  data-test-subj="providerContainer"
-                                  draggable="false"
-                                  role="button"
-                                  tabindex="-1"
+                                <span
+                                  class="euiBadge__content emotion-euiBadge__content"
                                 >
                                   <span
-                                    class="c4"
-                                    data-test-subj="draggable-content-network.direction"
+                                    class="euiBadge__icon emotion-euiBadge__icon-left"
+                                    color="inherit"
+                                    data-euiicon-type="arrowUp"
+                                  />
+                                  <span
+                                    class="euiBadge__text emotion-euiBadge__text"
                                   >
-                                    <span
-                                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                    >
-                                      <span
-                                        class="euiBadge c5 emotion-euiBadge-hollow"
-                                        title=""
-                                      >
-                                        <span
-                                          class="euiBadge__content emotion-euiBadge__content"
-                                        >
-                                          <span
-                                            class="euiBadge__icon emotion-euiBadge__icon-left"
-                                            color="inherit"
-                                            data-euiicon-type="arrowUp"
-                                          />
-                                          <span
-                                            class="euiBadge__text emotion-euiBadge__text"
-                                          >
-                                            outgoing
-                                          </span>
-                                        </span>
-                                      </span>
-                                    </span>
+                                    outgoing
                                   </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                                </span>
+                              </span>
+                            </span>
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem c7 emotion-euiFlexItem-growZero"
+                  class="euiFlexItem c6 emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class=""
+                    class="c1"
+                    data-test-subj="draggableWrapperDiv"
                   >
                     <div
-                      class="euiPopover c1 emotion-euiPopover"
+                      data-rfd-droppable-context-id="0"
+                      data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
                     >
                       <div
-                        class="euiPopover__anchor css-16vtueo-render"
+                        class="draggable-keyboard-wrapper"
+                        data-test-subj="draggableWrapperKeyboardHandler"
+                        role="button"
+                        tabindex="0"
                       >
                         <div
-                          data-test-subj="withHoverActionsButton"
+                          aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                          class="c2"
+                          data-rfd-drag-handle-context-id="0"
+                          data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
+                          data-rfd-draggable-context-id="0"
+                          data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
+                          data-test-subj="providerContainer"
+                          draggable="false"
+                          role="button"
+                          tabindex="-1"
                         >
-                          <div
-                            class="c2"
-                            data-test-subj="draggableWrapperDiv"
+                          <span
+                            class="c3"
+                            data-test-subj="draggable-content-network.protocol"
                           >
-                            <div
-                              data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
+                            <span
+                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                             >
-                              <div
-                                class="draggable-keyboard-wrapper"
-                                data-test-subj="draggableWrapperKeyboardHandler"
-                                role="button"
-                                tabindex="0"
+                              <span
+                                class="euiBadge c4 emotion-euiBadge-hollow"
+                                title=""
                               >
-                                <div
-                                  aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                  class="c3"
-                                  data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
-                                  data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
-                                  data-test-subj="providerContainer"
-                                  draggable="false"
-                                  role="button"
-                                  tabindex="-1"
+                                <span
+                                  class="euiBadge__content emotion-euiBadge__content"
                                 >
                                   <span
-                                    class="c4"
-                                    data-test-subj="draggable-content-network.protocol"
+                                    class="euiBadge__text emotion-euiBadge__text"
                                   >
-                                    <span
-                                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                    >
-                                      <span
-                                        class="euiBadge c5 emotion-euiBadge-hollow"
-                                        title=""
-                                      >
-                                        <span
-                                          class="euiBadge__content emotion-euiBadge__content"
-                                        >
-                                          <span
-                                            class="euiBadge__text emotion-euiBadge__text"
-                                          >
-                                            http
-                                          </span>
-                                        </span>
-                                      </span>
-                                    </span>
+                                    http
                                   </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                                </span>
+                              </span>
+                            </span>
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem c7 emotion-euiFlexItem-growZero"
+                  class="euiFlexItem c6 emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class=""
+                    class="c1"
+                    data-test-subj="draggableWrapperDiv"
                   >
                     <div
-                      class="euiPopover c1 emotion-euiPopover"
+                      data-rfd-droppable-context-id="0"
+                      data-rfd-droppable-id="droppableId.content.network-default-draggable-test-abcd-network_bytes-100"
                     >
                       <div
-                        class="euiPopover__anchor css-16vtueo-render"
+                        class="draggable-keyboard-wrapper"
+                        data-test-subj="draggableWrapperKeyboardHandler"
+                        role="button"
+                        tabindex="0"
                       >
                         <div
-                          data-test-subj="withHoverActionsButton"
+                          aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                          class="c2"
+                          data-rfd-drag-handle-context-id="0"
+                          data-rfd-drag-handle-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_bytes-100"
+                          data-rfd-draggable-context-id="0"
+                          data-rfd-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_bytes-100"
+                          data-test-subj="providerContainer"
+                          draggable="false"
+                          role="button"
+                          tabindex="-1"
                         >
-                          <div
-                            class="c2"
-                            data-test-subj="draggableWrapperDiv"
+                          <span
+                            class="c3"
+                            data-test-subj="draggable-content-network.bytes"
                           >
-                            <div
-                              data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.network-default-draggable-test-abcd-network_bytes-100"
+                            <span
+                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                             >
                               <div
-                                class="draggable-keyboard-wrapper"
-                                data-test-subj="draggableWrapperKeyboardHandler"
-                                role="button"
-                                tabindex="0"
+                                class="euiText c7 emotion-euiText-xs"
                               >
-                                <div
-                                  aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                  class="c3"
-                                  data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_bytes-100"
-                                  data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_bytes-100"
-                                  data-test-subj="providerContainer"
-                                  draggable="false"
-                                  role="button"
-                                  tabindex="-1"
-                                >
-                                  <span
-                                    class="c4"
-                                    data-test-subj="draggable-content-network.bytes"
-                                  >
-                                    <span
-                                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                    >
-                                      <div
-                                        class="euiText c8 emotion-euiText-xs"
-                                      >
-                                        <span>
-                                          100B
-                                        </span>
-                                      </div>
-                                    </span>
-                                  </span>
-                                </div>
+                                <span>
+                                  100B
+                                </span>
                               </div>
-                            </div>
-                          </div>
+                            </span>
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem c7 emotion-euiFlexItem-growZero"
+                  class="euiFlexItem c6 emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class=""
+                    class="c1"
+                    data-test-subj="draggableWrapperDiv"
                   >
                     <div
-                      class="euiPopover c1 emotion-euiPopover"
+                      data-rfd-droppable-context-id="0"
+                      data-rfd-droppable-id="droppableId.content.network-default-draggable-test-abcd-network_packets-3"
                     >
                       <div
-                        class="euiPopover__anchor css-16vtueo-render"
+                        class="draggable-keyboard-wrapper"
+                        data-test-subj="draggableWrapperKeyboardHandler"
+                        role="button"
+                        tabindex="0"
                       >
                         <div
-                          data-test-subj="withHoverActionsButton"
+                          aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                          class="c2"
+                          data-rfd-drag-handle-context-id="0"
+                          data-rfd-drag-handle-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_packets-3"
+                          data-rfd-draggable-context-id="0"
+                          data-rfd-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_packets-3"
+                          data-test-subj="providerContainer"
+                          draggable="false"
+                          role="button"
+                          tabindex="-1"
                         >
-                          <div
-                            class="c2"
-                            data-test-subj="draggableWrapperDiv"
+                          <span
+                            class="c3"
+                            data-test-subj="draggable-content-network.packets"
                           >
-                            <div
-                              data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.network-default-draggable-test-abcd-network_packets-3"
+                            <span
+                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                             >
                               <div
-                                class="draggable-keyboard-wrapper"
-                                data-test-subj="draggableWrapperKeyboardHandler"
-                                role="button"
-                                tabindex="0"
+                                class="euiText c7 emotion-euiText-xs"
                               >
-                                <div
-                                  aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                  class="c3"
-                                  data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_packets-3"
-                                  data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_packets-3"
-                                  data-test-subj="providerContainer"
-                                  draggable="false"
-                                  role="button"
-                                  tabindex="-1"
-                                >
-                                  <span
-                                    class="c4"
-                                    data-test-subj="draggable-content-network.packets"
-                                  >
-                                    <span
-                                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                    >
-                                      <div
-                                        class="euiText c8 emotion-euiText-xs"
-                                      >
-                                        <span>
-                                          3 pkts
-                                        </span>
-                                      </div>
-                                    </span>
-                                  </span>
-                                </div>
+                                <span>
+                                  3 pkts
+                                </span>
                               </div>
-                            </div>
-                          </div>
+                            </span>
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem c7 emotion-euiFlexItem-growZero"
+                  class="euiFlexItem c6 emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class=""
+                    class="c1"
+                    data-test-subj="draggableWrapperDiv"
                   >
                     <div
-                      class="euiPopover c1 emotion-euiPopover"
+                      data-rfd-droppable-context-id="0"
+                      data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
                     >
                       <div
-                        class="euiPopover__anchor css-16vtueo-render"
+                        class="draggable-keyboard-wrapper"
+                        data-test-subj="draggableWrapperKeyboardHandler"
+                        role="button"
+                        tabindex="0"
                       >
                         <div
-                          data-test-subj="withHoverActionsButton"
+                          aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                          class="c2"
+                          data-rfd-drag-handle-context-id="0"
+                          data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
+                          data-rfd-draggable-context-id="0"
+                          data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
+                          data-test-subj="providerContainer"
+                          draggable="false"
+                          role="button"
+                          tabindex="-1"
                         >
-                          <div
-                            class="c2"
-                            data-test-subj="draggableWrapperDiv"
+                          <span
+                            class="c3"
+                            data-test-subj="draggable-content-network.transport"
                           >
-                            <div
-                              data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
+                            <span
+                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                             >
-                              <div
-                                class="draggable-keyboard-wrapper"
-                                data-test-subj="draggableWrapperKeyboardHandler"
-                                role="button"
-                                tabindex="0"
+                              <span
+                                class="euiBadge c4 emotion-euiBadge-hollow"
+                                title=""
                               >
-                                <div
-                                  aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                  class="c3"
-                                  data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
-                                  data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
-                                  data-test-subj="providerContainer"
-                                  draggable="false"
-                                  role="button"
-                                  tabindex="-1"
+                                <span
+                                  class="euiBadge__content emotion-euiBadge__content"
                                 >
                                   <span
-                                    class="c4"
-                                    data-test-subj="draggable-content-network.transport"
+                                    class="euiBadge__text emotion-euiBadge__text"
                                   >
-                                    <span
-                                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                    >
-                                      <span
-                                        class="euiBadge c5 emotion-euiBadge-hollow"
-                                        title=""
-                                      >
-                                        <span
-                                          class="euiBadge__content emotion-euiBadge__content"
-                                        >
-                                          <span
-                                            class="euiBadge__text emotion-euiBadge__text"
-                                          >
-                                            tcp
-                                          </span>
-                                        </span>
-                                      </span>
-                                    </span>
+                                    tcp
                                   </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                                </span>
+                              </span>
+                            </span>
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -956,70 +816,54 @@ tr:hover .c3:focus::before {
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class=""
+                    class="c1"
+                    data-test-subj="draggableWrapperDiv"
                   >
                     <div
-                      class="euiPopover c1 emotion-euiPopover"
+                      data-rfd-droppable-context-id="0"
+                      data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
                     >
                       <div
-                        class="euiPopover__anchor css-16vtueo-render"
+                        class="draggable-keyboard-wrapper"
+                        data-test-subj="draggableWrapperKeyboardHandler"
+                        role="button"
+                        tabindex="0"
                       >
                         <div
-                          data-test-subj="withHoverActionsButton"
+                          aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                          class="c2"
+                          data-rfd-drag-handle-context-id="0"
+                          data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
+                          data-rfd-draggable-context-id="0"
+                          data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
+                          data-test-subj="providerContainer"
+                          draggable="false"
+                          role="button"
+                          tabindex="-1"
                         >
-                          <div
-                            class="c2"
-                            data-test-subj="draggableWrapperDiv"
+                          <span
+                            class="c3"
+                            data-test-subj="draggable-content-network.community_id"
                           >
-                            <div
-                              data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
+                            <span
+                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                             >
-                              <div
-                                class="draggable-keyboard-wrapper"
-                                data-test-subj="draggableWrapperKeyboardHandler"
-                                role="button"
-                                tabindex="0"
+                              <span
+                                class="euiBadge c4 emotion-euiBadge-hollow"
+                                title=""
                               >
-                                <div
-                                  aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                  class="c3"
-                                  data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
-                                  data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
-                                  data-test-subj="providerContainer"
-                                  draggable="false"
-                                  role="button"
-                                  tabindex="-1"
+                                <span
+                                  class="euiBadge__content emotion-euiBadge__content"
                                 >
                                   <span
-                                    class="c4"
-                                    data-test-subj="draggable-content-network.community_id"
+                                    class="euiBadge__text emotion-euiBadge__text"
                                   >
-                                    <span
-                                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                    >
-                                      <span
-                                        class="euiBadge c5 emotion-euiBadge-hollow"
-                                        title=""
-                                      >
-                                        <span
-                                          class="euiBadge__content emotion-euiBadge__content"
-                                        >
-                                          <span
-                                            class="euiBadge__text emotion-euiBadge__text"
-                                          >
-                                            we.live.in.a
-                                          </span>
-                                        </span>
-                                      </span>
-                                    </span>
+                                    we.live.in.a
                                   </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                                </span>
+                              </span>
+                            </span>
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -1028,7 +872,7 @@ tr:hover .c3:focus::before {
               </div>
             </div>
             <div
-              class="euiFlexItem c9 emotion-euiFlexItem-growZero"
+              class="euiFlexItem c8 emotion-euiFlexItem-growZero"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-stretch-row"
@@ -1055,7 +899,7 @@ tr:hover .c3:focus::before {
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <div
-                              class="c10"
+                              class="c9"
                             >
                               Source
                             </div>
@@ -1076,24 +920,20 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      class=""
+                                      data-test-subj="cellActions-renderContent-source.ip"
                                     >
-                                      <div
-                                        class="euiPopover c1 emotion-euiPopover"
-                                      >
+                                      <div>
                                         <div
-                                          class="euiPopover__anchor css-16vtueo-render"
+                                          class="euiPopover emotion-euiPopover-inline-block"
                                         >
-                                          <div
-                                            data-test-subj="withHoverActionsButton"
-                                          >
+                                          <div>
                                             <div
-                                              class="c2"
+                                              class="c1"
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.formatted-ip-data-provider-test-source_ip-192_168_1_2-abcd"
+                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-id="droppableId.content.formatted-ip-data-provider-test-source_ip-192_168_1_2-abcd"
                                               >
                                                 <div
                                                   class="draggable-keyboard-wrapper"
@@ -1102,19 +942,19 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                                    class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.formatted-ip-data-provider-test-source_ip-192_168_1_2-abcd"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.formatted-ip-data-provider-test-source_ip-192_168_1_2-abcd"
+                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                                    class="c2"
+                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-draggable-id="draggableId.content.formatted-ip-data-provider-test-source_ip-192_168_1_2-abcd"
+                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-id="draggableId.content.formatted-ip-data-provider-test-source_ip-192_168_1_2-abcd"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
                                                     role="button"
                                                     tabindex="-1"
                                                   >
                                                     <span
-                                                      class="c11"
+                                                      class="c10"
                                                       data-test-subj="draggable-truncatable-content"
                                                     >
                                                       <span
@@ -1123,7 +963,7 @@ tr:hover .c3:focus::before {
                                                         <a
                                                           class="euiLink emotion-euiLink-primary"
                                                           data-test-subj="network-details"
-                                                          href="/ip/192.168.1.2/source/flows"
+                                                          href="/ip/192.168.1.2/source/events"
                                                           rel="noreferrer"
                                                         >
                                                           192.168.1.2
@@ -1149,7 +989,7 @@ tr:hover .c3:focus::before {
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <span
-                                          class="c12"
+                                          class="c11"
                                           data-test-subj="ip-port-separator"
                                         >
                                           :
@@ -1159,7 +999,7 @@ tr:hover .c3:focus::before {
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          class="c13"
+                                          class="c12"
                                         >
                                           <a
                                             class="euiLink emotion-euiLink-primary"
@@ -1170,13 +1010,13 @@ tr:hover .c3:focus::before {
                                           >
                                             9987
                                             <span
-                                              class="emotion-euiLink__externalIcon"
+                                              class="emotion-EuiExternalLinkIcon"
                                               data-euiicon-type="popout"
                                             >
                                               External link
                                             </span>
                                             <span
-                                              class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                                              class="emotion-euiScreenReaderOnly"
                                             >
                                               (opens in a new tab or window)
                                             </span>
@@ -1196,7 +1036,7 @@ tr:hover .c3:focus::before {
                               class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                             >
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem c13 emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1205,57 +1045,41 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      class=""
+                                      class="c1"
+                                      data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        class="euiPopover c1 emotion-euiPopover"
+                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
                                       >
                                         <div
-                                          class="euiPopover__anchor css-16vtueo-render"
+                                          class="draggable-keyboard-wrapper"
+                                          data-test-subj="draggableWrapperKeyboardHandler"
+                                          role="button"
+                                          tabindex="0"
                                         >
                                           <div
-                                            data-test-subj="withHoverActionsButton"
+                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            class="c2"
+                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
+                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
+                                            data-test-subj="providerContainer"
+                                            draggable="false"
+                                            role="button"
+                                            tabindex="-1"
                                           >
-                                            <div
-                                              class="c2"
-                                              data-test-subj="draggableWrapperDiv"
+                                            <span
+                                              class="c3"
+                                              data-test-subj="draggable-content-source.geo.continent_name"
                                             >
-                                              <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
+                                              <span
+                                                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                               >
-                                                <div
-                                                  class="draggable-keyboard-wrapper"
-                                                  data-test-subj="draggableWrapperKeyboardHandler"
-                                                  role="button"
-                                                  tabindex="0"
-                                                >
-                                                  <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                                    class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
-                                                    data-test-subj="providerContainer"
-                                                    draggable="false"
-                                                    role="button"
-                                                    tabindex="-1"
-                                                  >
-                                                    <span
-                                                      class="c4"
-                                                      data-test-subj="draggable-content-source.geo.continent_name"
-                                                    >
-                                                      <span
-                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                                      >
-                                                        North America
-                                                      </span>
-                                                    </span>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
+                                                North America
+                                              </span>
+                                            </span>
                                           </div>
                                         </div>
                                       </div>
@@ -1264,7 +1088,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem c13 emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1273,57 +1097,41 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      class=""
+                                      class="c1"
+                                      data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        class="euiPopover c1 emotion-euiPopover"
+                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
                                       >
                                         <div
-                                          class="euiPopover__anchor css-16vtueo-render"
+                                          class="draggable-keyboard-wrapper"
+                                          data-test-subj="draggableWrapperKeyboardHandler"
+                                          role="button"
+                                          tabindex="0"
                                         >
                                           <div
-                                            data-test-subj="withHoverActionsButton"
+                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            class="c2"
+                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
+                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
+                                            data-test-subj="providerContainer"
+                                            draggable="false"
+                                            role="button"
+                                            tabindex="-1"
                                           >
-                                            <div
-                                              class="c2"
-                                              data-test-subj="draggableWrapperDiv"
+                                            <span
+                                              class="c3"
+                                              data-test-subj="draggable-content-source.geo.country_name"
                                             >
-                                              <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
+                                              <span
+                                                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                               >
-                                                <div
-                                                  class="draggable-keyboard-wrapper"
-                                                  data-test-subj="draggableWrapperKeyboardHandler"
-                                                  role="button"
-                                                  tabindex="0"
-                                                >
-                                                  <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                                    class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
-                                                    data-test-subj="providerContainer"
-                                                    draggable="false"
-                                                    role="button"
-                                                    tabindex="-1"
-                                                  >
-                                                    <span
-                                                      class="c4"
-                                                      data-test-subj="draggable-content-source.geo.country_name"
-                                                    >
-                                                      <span
-                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                                      >
-                                                        United States
-                                                      </span>
-                                                    </span>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
+                                                United States
+                                              </span>
+                                            </span>
                                           </div>
                                         </div>
                                       </div>
@@ -1332,7 +1140,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem c13 emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1341,7 +1149,7 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <span
-                                      class="c15"
+                                      class="c14"
                                       data-test-subj="country-flag"
                                     >
                                       🇺🇸
@@ -1351,57 +1159,41 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      class=""
+                                      class="c1"
+                                      data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        class="euiPopover c1 emotion-euiPopover"
+                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
                                       >
                                         <div
-                                          class="euiPopover__anchor css-16vtueo-render"
+                                          class="draggable-keyboard-wrapper"
+                                          data-test-subj="draggableWrapperKeyboardHandler"
+                                          role="button"
+                                          tabindex="0"
                                         >
                                           <div
-                                            data-test-subj="withHoverActionsButton"
+                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            class="c2"
+                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
+                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
+                                            data-test-subj="providerContainer"
+                                            draggable="false"
+                                            role="button"
+                                            tabindex="-1"
                                           >
-                                            <div
-                                              class="c2"
-                                              data-test-subj="draggableWrapperDiv"
+                                            <span
+                                              class="c3"
+                                              data-test-subj="draggable-content-source.geo.country_iso_code"
                                             >
-                                              <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
+                                              <span
+                                                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                               >
-                                                <div
-                                                  class="draggable-keyboard-wrapper"
-                                                  data-test-subj="draggableWrapperKeyboardHandler"
-                                                  role="button"
-                                                  tabindex="0"
-                                                >
-                                                  <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                                    class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
-                                                    data-test-subj="providerContainer"
-                                                    draggable="false"
-                                                    role="button"
-                                                    tabindex="-1"
-                                                  >
-                                                    <span
-                                                      class="c4"
-                                                      data-test-subj="draggable-content-source.geo.country_iso_code"
-                                                    >
-                                                      <span
-                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                                      >
-                                                        US
-                                                      </span>
-                                                    </span>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
+                                                US
+                                              </span>
+                                            </span>
                                           </div>
                                         </div>
                                       </div>
@@ -1410,7 +1202,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem c13 emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1419,57 +1211,41 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      class=""
+                                      class="c1"
+                                      data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        class="euiPopover c1 emotion-euiPopover"
+                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
                                       >
                                         <div
-                                          class="euiPopover__anchor css-16vtueo-render"
+                                          class="draggable-keyboard-wrapper"
+                                          data-test-subj="draggableWrapperKeyboardHandler"
+                                          role="button"
+                                          tabindex="0"
                                         >
                                           <div
-                                            data-test-subj="withHoverActionsButton"
+                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            class="c2"
+                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
+                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
+                                            data-test-subj="providerContainer"
+                                            draggable="false"
+                                            role="button"
+                                            tabindex="-1"
                                           >
-                                            <div
-                                              class="c2"
-                                              data-test-subj="draggableWrapperDiv"
+                                            <span
+                                              class="c3"
+                                              data-test-subj="draggable-content-source.geo.region_name"
                                             >
-                                              <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
+                                              <span
+                                                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                               >
-                                                <div
-                                                  class="draggable-keyboard-wrapper"
-                                                  data-test-subj="draggableWrapperKeyboardHandler"
-                                                  role="button"
-                                                  tabindex="0"
-                                                >
-                                                  <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                                    class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
-                                                    data-test-subj="providerContainer"
-                                                    draggable="false"
-                                                    role="button"
-                                                    tabindex="-1"
-                                                  >
-                                                    <span
-                                                      class="c4"
-                                                      data-test-subj="draggable-content-source.geo.region_name"
-                                                    >
-                                                      <span
-                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                                      >
-                                                        Georgia
-                                                      </span>
-                                                    </span>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
+                                                Georgia
+                                              </span>
+                                            </span>
                                           </div>
                                         </div>
                                       </div>
@@ -1478,7 +1254,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem c13 emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1487,57 +1263,41 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      class=""
+                                      class="c1"
+                                      data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        class="euiPopover c1 emotion-euiPopover"
+                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
                                       >
                                         <div
-                                          class="euiPopover__anchor css-16vtueo-render"
+                                          class="draggable-keyboard-wrapper"
+                                          data-test-subj="draggableWrapperKeyboardHandler"
+                                          role="button"
+                                          tabindex="0"
                                         >
                                           <div
-                                            data-test-subj="withHoverActionsButton"
+                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            class="c2"
+                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
+                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
+                                            data-test-subj="providerContainer"
+                                            draggable="false"
+                                            role="button"
+                                            tabindex="-1"
                                           >
-                                            <div
-                                              class="c2"
-                                              data-test-subj="draggableWrapperDiv"
+                                            <span
+                                              class="c3"
+                                              data-test-subj="draggable-content-source.geo.city_name"
                                             >
-                                              <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
+                                              <span
+                                                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                               >
-                                                <div
-                                                  class="draggable-keyboard-wrapper"
-                                                  data-test-subj="draggableWrapperKeyboardHandler"
-                                                  role="button"
-                                                  tabindex="0"
-                                                >
-                                                  <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                                    class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
-                                                    data-test-subj="providerContainer"
-                                                    draggable="false"
-                                                    role="button"
-                                                    tabindex="-1"
-                                                  >
-                                                    <span
-                                                      class="c4"
-                                                      data-test-subj="draggable-content-source.geo.city_name"
-                                                    >
-                                                      <span
-                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                                      >
-                                                        Atlanta
-                                                      </span>
-                                                    </span>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
+                                                Atlanta
+                                              </span>
+                                            </span>
                                           </div>
                                         </div>
                                       </div>
@@ -1553,7 +1313,7 @@ tr:hover .c3:focus::before {
                   </span>
                 </div>
                 <div
-                  class="euiFlexGroup c16 emotion-euiFlexGroup-none-center-center-column"
+                  class="euiFlexGroup c15 emotion-euiFlexGroup-none-center-center-column"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1565,7 +1325,7 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="c17"
+                          class="c16"
                           height="2.8"
                         />
                       </div>
@@ -1573,68 +1333,52 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <div
-                          class=""
+                          class="c1"
+                          data-test-subj="draggableWrapperDiv"
                         >
                           <div
-                            class="euiPopover c1 emotion-euiPopover"
+                            data-rfd-droppable-context-id="0"
+                            data-rfd-droppable-id="droppableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
                           >
                             <div
-                              class="euiPopover__anchor css-16vtueo-render"
+                              class="draggable-keyboard-wrapper"
+                              data-test-subj="draggableWrapperKeyboardHandler"
+                              role="button"
+                              tabindex="0"
                             >
                               <div
-                                data-test-subj="withHoverActionsButton"
+                                aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                class="c2"
+                                data-rfd-drag-handle-context-id="0"
+                                data-rfd-drag-handle-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
+                                data-rfd-draggable-context-id="0"
+                                data-rfd-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
+                                data-test-subj="providerContainer"
+                                draggable="false"
+                                role="button"
+                                tabindex="-1"
                               >
-                                <div
-                                  class="c2"
-                                  data-test-subj="draggableWrapperDiv"
+                                <span
+                                  class="c3"
+                                  data-test-subj="draggable-content-source.bytes"
                                 >
-                                  <div
-                                    data-rbd-droppable-context-id="0"
-                                    data-rbd-droppable-id="droppableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
+                                  <span
+                                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                   >
                                     <div
-                                      class="draggable-keyboard-wrapper"
-                                      data-test-subj="draggableWrapperKeyboardHandler"
-                                      role="button"
-                                      tabindex="0"
+                                      class="euiText c17 emotion-euiText-xs"
                                     >
-                                      <div
-                                        aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                        class="c3"
-                                        data-rbd-drag-handle-context-id="0"
-                                        data-rbd-drag-handle-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
-                                        data-rbd-draggable-context-id="0"
-                                        data-rbd-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
-                                        data-test-subj="providerContainer"
-                                        draggable="false"
-                                        role="button"
-                                        tabindex="-1"
+                                      <span
+                                        class="c18"
                                       >
-                                        <span
-                                          class="c4"
-                                          data-test-subj="draggable-content-source.bytes"
-                                        >
-                                          <span
-                                            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                          >
-                                            <div
-                                              class="euiText c18 emotion-euiText-xs"
-                                            >
-                                              <span
-                                                class="c19"
-                                              >
-                                                (60.00%)
-                                              </span>
-                                              <span>
-                                                60B
-                                              </span>
-                                            </div>
-                                          </span>
-                                        </span>
-                                      </div>
+                                        (60.00%)
+                                      </span>
+                                      <span>
+                                        60B
+                                      </span>
                                     </div>
-                                  </div>
-                                </div>
+                                  </span>
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -1644,7 +1388,7 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="c17"
+                          class="c16"
                           height="2.8"
                         />
                       </div>
@@ -1652,63 +1396,47 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <div
-                          class=""
+                          class="c1"
+                          data-test-subj="draggableWrapperDiv"
                         >
                           <div
-                            class="euiPopover c1 emotion-euiPopover"
+                            data-rfd-droppable-context-id="0"
+                            data-rfd-droppable-id="droppableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
                           >
                             <div
-                              class="euiPopover__anchor css-16vtueo-render"
+                              class="draggable-keyboard-wrapper"
+                              data-test-subj="draggableWrapperKeyboardHandler"
+                              role="button"
+                              tabindex="0"
                             >
                               <div
-                                data-test-subj="withHoverActionsButton"
+                                aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                class="c2"
+                                data-rfd-drag-handle-context-id="0"
+                                data-rfd-drag-handle-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
+                                data-rfd-draggable-context-id="0"
+                                data-rfd-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
+                                data-test-subj="providerContainer"
+                                draggable="false"
+                                role="button"
+                                tabindex="-1"
                               >
-                                <div
-                                  class="c2"
-                                  data-test-subj="draggableWrapperDiv"
+                                <span
+                                  class="c3"
+                                  data-test-subj="draggable-content-source.packets"
                                 >
-                                  <div
-                                    data-rbd-droppable-context-id="0"
-                                    data-rbd-droppable-id="droppableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
+                                  <span
+                                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                   >
                                     <div
-                                      class="draggable-keyboard-wrapper"
-                                      data-test-subj="draggableWrapperKeyboardHandler"
-                                      role="button"
-                                      tabindex="0"
+                                      class="euiText c17 emotion-euiText-xs"
                                     >
-                                      <div
-                                        aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                        class="c3"
-                                        data-rbd-drag-handle-context-id="0"
-                                        data-rbd-drag-handle-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
-                                        data-rbd-draggable-context-id="0"
-                                        data-rbd-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
-                                        data-test-subj="providerContainer"
-                                        draggable="false"
-                                        role="button"
-                                        tabindex="-1"
-                                      >
-                                        <span
-                                          class="c4"
-                                          data-test-subj="draggable-content-source.packets"
-                                        >
-                                          <span
-                                            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                          >
-                                            <div
-                                              class="euiText c18 emotion-euiText-xs"
-                                            >
-                                              <span>
-                                                2 pkts
-                                              </span>
-                                            </div>
-                                          </span>
-                                        </span>
-                                      </div>
+                                      <span>
+                                        2 pkts
+                                      </span>
                                     </div>
-                                  </div>
-                                </div>
+                                  </span>
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -1718,7 +1446,7 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="c17"
+                          class="c16"
                           height="2.8"
                         />
                       </div>
@@ -1752,7 +1480,7 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="c20"
+                          class="c19"
                           height="2.2"
                         />
                       </div>
@@ -1760,24 +1488,20 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <div
-                          class=""
+                          data-test-subj="cellActions-renderContent-destination.bytes"
                         >
-                          <div
-                            class="euiPopover c1 emotion-euiPopover"
-                          >
+                          <div>
                             <div
-                              class="euiPopover__anchor css-16vtueo-render"
+                              class="euiPopover emotion-euiPopover-inline-block"
                             >
-                              <div
-                                data-test-subj="withHoverActionsButton"
-                              >
+                              <div>
                                 <div
-                                  class="c2"
+                                  class="c1"
                                   data-test-subj="draggableWrapperDiv"
                                 >
                                   <div
-                                    data-rbd-droppable-context-id="0"
-                                    data-rbd-droppable-id="droppableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
+                                    data-rfd-droppable-context-id="0"
+                                    data-rfd-droppable-id="droppableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
                                   >
                                     <div
                                       class="draggable-keyboard-wrapper"
@@ -1786,29 +1510,29 @@ tr:hover .c3:focus::before {
                                       tabindex="0"
                                     >
                                       <div
-                                        aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                        class="c3"
-                                        data-rbd-drag-handle-context-id="0"
-                                        data-rbd-drag-handle-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
-                                        data-rbd-draggable-context-id="0"
-                                        data-rbd-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
+                                        aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                        class="c2"
+                                        data-rfd-drag-handle-context-id="0"
+                                        data-rfd-drag-handle-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
+                                        data-rfd-draggable-context-id="0"
+                                        data-rfd-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
                                         data-test-subj="providerContainer"
                                         draggable="false"
                                         role="button"
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="c4"
+                                          class="c3"
                                           data-test-subj="draggable-content-destination.bytes"
                                         >
                                           <span
                                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                           >
                                             <div
-                                              class="euiText c18 emotion-euiText-xs"
+                                              class="euiText c17 emotion-euiText-xs"
                                             >
                                               <span
-                                                class="c19"
+                                                class="c18"
                                               >
                                                 (40.00%)
                                               </span>
@@ -1831,7 +1555,7 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="c20"
+                          class="c19"
                           height="2.2"
                         />
                       </div>
@@ -1839,63 +1563,47 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <div
-                          class=""
+                          class="c1"
+                          data-test-subj="draggableWrapperDiv"
                         >
                           <div
-                            class="euiPopover c1 emotion-euiPopover"
+                            data-rfd-droppable-context-id="0"
+                            data-rfd-droppable-id="droppableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
                           >
                             <div
-                              class="euiPopover__anchor css-16vtueo-render"
+                              class="draggable-keyboard-wrapper"
+                              data-test-subj="draggableWrapperKeyboardHandler"
+                              role="button"
+                              tabindex="0"
                             >
                               <div
-                                data-test-subj="withHoverActionsButton"
+                                aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                class="c2"
+                                data-rfd-drag-handle-context-id="0"
+                                data-rfd-drag-handle-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
+                                data-rfd-draggable-context-id="0"
+                                data-rfd-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
+                                data-test-subj="providerContainer"
+                                draggable="false"
+                                role="button"
+                                tabindex="-1"
                               >
-                                <div
-                                  class="c2"
-                                  data-test-subj="draggableWrapperDiv"
+                                <span
+                                  class="c3"
+                                  data-test-subj="draggable-content-destination.packets"
                                 >
-                                  <div
-                                    data-rbd-droppable-context-id="0"
-                                    data-rbd-droppable-id="droppableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
+                                  <span
+                                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                   >
                                     <div
-                                      class="draggable-keyboard-wrapper"
-                                      data-test-subj="draggableWrapperKeyboardHandler"
-                                      role="button"
-                                      tabindex="0"
+                                      class="euiText c17 emotion-euiText-xs"
                                     >
-                                      <div
-                                        aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                        class="c3"
-                                        data-rbd-drag-handle-context-id="0"
-                                        data-rbd-drag-handle-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
-                                        data-rbd-draggable-context-id="0"
-                                        data-rbd-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
-                                        data-test-subj="providerContainer"
-                                        draggable="false"
-                                        role="button"
-                                        tabindex="-1"
-                                      >
-                                        <span
-                                          class="c4"
-                                          data-test-subj="draggable-content-destination.packets"
-                                        >
-                                          <span
-                                            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                          >
-                                            <div
-                                              class="euiText c18 emotion-euiText-xs"
-                                            >
-                                              <span>
-                                                1 pkts
-                                              </span>
-                                            </div>
-                                          </span>
-                                        </span>
-                                      </div>
+                                      <span>
+                                        1 pkts
+                                      </span>
                                     </div>
-                                  </div>
-                                </div>
+                                  </span>
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -1905,7 +1613,7 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="c20"
+                          class="c19"
                           height="2.2"
                         />
                       </div>
@@ -1934,7 +1642,7 @@ tr:hover .c3:focus::before {
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <div
-                              class="c10"
+                              class="c9"
                             >
                               Destination
                             </div>
@@ -1955,24 +1663,20 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      class=""
+                                      data-test-subj="cellActions-renderContent-destination.ip"
                                     >
-                                      <div
-                                        class="euiPopover c1 emotion-euiPopover"
-                                      >
+                                      <div>
                                         <div
-                                          class="euiPopover__anchor css-16vtueo-render"
+                                          class="euiPopover emotion-euiPopover-inline-block"
                                         >
-                                          <div
-                                            data-test-subj="withHoverActionsButton"
-                                          >
+                                          <div>
                                             <div
-                                              class="c2"
+                                              class="c1"
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.formatted-ip-data-provider-test-destination_ip-10_1_2_3-abcd"
+                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-id="droppableId.content.formatted-ip-data-provider-test-destination_ip-10_1_2_3-abcd"
                                               >
                                                 <div
                                                   class="draggable-keyboard-wrapper"
@@ -1981,19 +1685,19 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                                    class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.formatted-ip-data-provider-test-destination_ip-10_1_2_3-abcd"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.formatted-ip-data-provider-test-destination_ip-10_1_2_3-abcd"
+                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                                    class="c2"
+                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-draggable-id="draggableId.content.formatted-ip-data-provider-test-destination_ip-10_1_2_3-abcd"
+                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-id="draggableId.content.formatted-ip-data-provider-test-destination_ip-10_1_2_3-abcd"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
                                                     role="button"
                                                     tabindex="-1"
                                                   >
                                                     <span
-                                                      class="c11"
+                                                      class="c10"
                                                       data-test-subj="draggable-truncatable-content"
                                                     >
                                                       <span
@@ -2002,7 +1706,7 @@ tr:hover .c3:focus::before {
                                                         <a
                                                           class="euiLink emotion-euiLink-primary"
                                                           data-test-subj="network-details"
-                                                          href="/ip/10.1.2.3/source/flows"
+                                                          href="/ip/10.1.2.3/source/events"
                                                           rel="noreferrer"
                                                         >
                                                           10.1.2.3
@@ -2028,7 +1732,7 @@ tr:hover .c3:focus::before {
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <span
-                                          class="c12"
+                                          class="c11"
                                           data-test-subj="ip-port-separator"
                                         >
                                           :
@@ -2038,7 +1742,7 @@ tr:hover .c3:focus::before {
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          class="c13"
+                                          class="c12"
                                         >
                                           <a
                                             class="euiLink emotion-euiLink-primary"
@@ -2049,13 +1753,13 @@ tr:hover .c3:focus::before {
                                           >
                                             80
                                             <span
-                                              class="emotion-euiLink__externalIcon"
+                                              class="emotion-EuiExternalLinkIcon"
                                               data-euiicon-type="popout"
                                             >
                                               External link
                                             </span>
                                             <span
-                                              class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                                              class="emotion-euiScreenReaderOnly"
                                             >
                                               (opens in a new tab or window)
                                             </span>
@@ -2075,7 +1779,7 @@ tr:hover .c3:focus::before {
                               class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                             >
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem c13 emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -2084,57 +1788,41 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      class=""
+                                      class="c1"
+                                      data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        class="euiPopover c1 emotion-euiPopover"
+                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
                                       >
                                         <div
-                                          class="euiPopover__anchor css-16vtueo-render"
+                                          class="draggable-keyboard-wrapper"
+                                          data-test-subj="draggableWrapperKeyboardHandler"
+                                          role="button"
+                                          tabindex="0"
                                         >
                                           <div
-                                            data-test-subj="withHoverActionsButton"
+                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            class="c2"
+                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
+                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
+                                            data-test-subj="providerContainer"
+                                            draggable="false"
+                                            role="button"
+                                            tabindex="-1"
                                           >
-                                            <div
-                                              class="c2"
-                                              data-test-subj="draggableWrapperDiv"
+                                            <span
+                                              class="c3"
+                                              data-test-subj="draggable-content-destination.geo.continent_name"
                                             >
-                                              <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
+                                              <span
+                                                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                               >
-                                                <div
-                                                  class="draggable-keyboard-wrapper"
-                                                  data-test-subj="draggableWrapperKeyboardHandler"
-                                                  role="button"
-                                                  tabindex="0"
-                                                >
-                                                  <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                                    class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
-                                                    data-test-subj="providerContainer"
-                                                    draggable="false"
-                                                    role="button"
-                                                    tabindex="-1"
-                                                  >
-                                                    <span
-                                                      class="c4"
-                                                      data-test-subj="draggable-content-destination.geo.continent_name"
-                                                    >
-                                                      <span
-                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                                      >
-                                                        North America
-                                                      </span>
-                                                    </span>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
+                                                North America
+                                              </span>
+                                            </span>
                                           </div>
                                         </div>
                                       </div>
@@ -2143,7 +1831,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem c13 emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -2152,57 +1840,41 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      class=""
+                                      class="c1"
+                                      data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        class="euiPopover c1 emotion-euiPopover"
+                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
                                       >
                                         <div
-                                          class="euiPopover__anchor css-16vtueo-render"
+                                          class="draggable-keyboard-wrapper"
+                                          data-test-subj="draggableWrapperKeyboardHandler"
+                                          role="button"
+                                          tabindex="0"
                                         >
                                           <div
-                                            data-test-subj="withHoverActionsButton"
+                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            class="c2"
+                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
+                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
+                                            data-test-subj="providerContainer"
+                                            draggable="false"
+                                            role="button"
+                                            tabindex="-1"
                                           >
-                                            <div
-                                              class="c2"
-                                              data-test-subj="draggableWrapperDiv"
+                                            <span
+                                              class="c3"
+                                              data-test-subj="draggable-content-destination.geo.country_name"
                                             >
-                                              <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
+                                              <span
+                                                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                               >
-                                                <div
-                                                  class="draggable-keyboard-wrapper"
-                                                  data-test-subj="draggableWrapperKeyboardHandler"
-                                                  role="button"
-                                                  tabindex="0"
-                                                >
-                                                  <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                                    class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
-                                                    data-test-subj="providerContainer"
-                                                    draggable="false"
-                                                    role="button"
-                                                    tabindex="-1"
-                                                  >
-                                                    <span
-                                                      class="c4"
-                                                      data-test-subj="draggable-content-destination.geo.country_name"
-                                                    >
-                                                      <span
-                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                                      >
-                                                        United States
-                                                      </span>
-                                                    </span>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
+                                                United States
+                                              </span>
+                                            </span>
                                           </div>
                                         </div>
                                       </div>
@@ -2211,7 +1883,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem c13 emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -2220,7 +1892,7 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <span
-                                      class="c15"
+                                      class="c14"
                                       data-test-subj="country-flag"
                                     >
                                       🇺🇸
@@ -2230,57 +1902,41 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      class=""
+                                      class="c1"
+                                      data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        class="euiPopover c1 emotion-euiPopover"
+                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
                                       >
                                         <div
-                                          class="euiPopover__anchor css-16vtueo-render"
+                                          class="draggable-keyboard-wrapper"
+                                          data-test-subj="draggableWrapperKeyboardHandler"
+                                          role="button"
+                                          tabindex="0"
                                         >
                                           <div
-                                            data-test-subj="withHoverActionsButton"
+                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            class="c2"
+                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
+                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
+                                            data-test-subj="providerContainer"
+                                            draggable="false"
+                                            role="button"
+                                            tabindex="-1"
                                           >
-                                            <div
-                                              class="c2"
-                                              data-test-subj="draggableWrapperDiv"
+                                            <span
+                                              class="c3"
+                                              data-test-subj="draggable-content-destination.geo.country_iso_code"
                                             >
-                                              <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
+                                              <span
+                                                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                               >
-                                                <div
-                                                  class="draggable-keyboard-wrapper"
-                                                  data-test-subj="draggableWrapperKeyboardHandler"
-                                                  role="button"
-                                                  tabindex="0"
-                                                >
-                                                  <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                                    class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
-                                                    data-test-subj="providerContainer"
-                                                    draggable="false"
-                                                    role="button"
-                                                    tabindex="-1"
-                                                  >
-                                                    <span
-                                                      class="c4"
-                                                      data-test-subj="draggable-content-destination.geo.country_iso_code"
-                                                    >
-                                                      <span
-                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                                      >
-                                                        US
-                                                      </span>
-                                                    </span>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
+                                                US
+                                              </span>
+                                            </span>
                                           </div>
                                         </div>
                                       </div>
@@ -2289,7 +1945,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem c13 emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -2298,57 +1954,41 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      class=""
+                                      class="c1"
+                                      data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        class="euiPopover c1 emotion-euiPopover"
+                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
                                       >
                                         <div
-                                          class="euiPopover__anchor css-16vtueo-render"
+                                          class="draggable-keyboard-wrapper"
+                                          data-test-subj="draggableWrapperKeyboardHandler"
+                                          role="button"
+                                          tabindex="0"
                                         >
                                           <div
-                                            data-test-subj="withHoverActionsButton"
+                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            class="c2"
+                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
+                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
+                                            data-test-subj="providerContainer"
+                                            draggable="false"
+                                            role="button"
+                                            tabindex="-1"
                                           >
-                                            <div
-                                              class="c2"
-                                              data-test-subj="draggableWrapperDiv"
+                                            <span
+                                              class="c3"
+                                              data-test-subj="draggable-content-destination.geo.region_name"
                                             >
-                                              <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
+                                              <span
+                                                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                               >
-                                                <div
-                                                  class="draggable-keyboard-wrapper"
-                                                  data-test-subj="draggableWrapperKeyboardHandler"
-                                                  role="button"
-                                                  tabindex="0"
-                                                >
-                                                  <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                                    class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
-                                                    data-test-subj="providerContainer"
-                                                    draggable="false"
-                                                    role="button"
-                                                    tabindex="-1"
-                                                  >
-                                                    <span
-                                                      class="c4"
-                                                      data-test-subj="draggable-content-destination.geo.region_name"
-                                                    >
-                                                      <span
-                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                                      >
-                                                        New York
-                                                      </span>
-                                                    </span>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
+                                                New York
+                                              </span>
+                                            </span>
                                           </div>
                                         </div>
                                       </div>
@@ -2357,7 +1997,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem c13 emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -2366,57 +2006,41 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
-                                      class=""
+                                      class="c1"
+                                      data-test-subj="draggableWrapperDiv"
                                     >
                                       <div
-                                        class="euiPopover c1 emotion-euiPopover"
+                                        data-rfd-droppable-context-id="0"
+                                        data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
                                       >
                                         <div
-                                          class="euiPopover__anchor css-16vtueo-render"
+                                          class="draggable-keyboard-wrapper"
+                                          data-test-subj="draggableWrapperKeyboardHandler"
+                                          role="button"
+                                          tabindex="0"
                                         >
                                           <div
-                                            data-test-subj="withHoverActionsButton"
+                                            aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                                            class="c2"
+                                            data-rfd-drag-handle-context-id="0"
+                                            data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
+                                            data-rfd-draggable-context-id="0"
+                                            data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
+                                            data-test-subj="providerContainer"
+                                            draggable="false"
+                                            role="button"
+                                            tabindex="-1"
                                           >
-                                            <div
-                                              class="c2"
-                                              data-test-subj="draggableWrapperDiv"
+                                            <span
+                                              class="c3"
+                                              data-test-subj="draggable-content-destination.geo.city_name"
                                             >
-                                              <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
+                                              <span
+                                                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                               >
-                                                <div
-                                                  class="draggable-keyboard-wrapper"
-                                                  data-test-subj="draggableWrapperKeyboardHandler"
-                                                  role="button"
-                                                  tabindex="0"
-                                                >
-                                                  <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                                                    class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
-                                                    data-test-subj="providerContainer"
-                                                    draggable="false"
-                                                    role="button"
-                                                    tabindex="-1"
-                                                  >
-                                                    <span
-                                                      class="c4"
-                                                      data-test-subj="draggable-content-destination.geo.city_name"
-                                                    >
-                                                      <span
-                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                                                      >
-                                                        New York
-                                                      </span>
-                                                    </span>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
+                                                New York
+                                              </span>
+                                            </span>
                                           </div>
                                         </div>
                                       </div>
@@ -2448,99 +2072,83 @@ tr:hover .c3:focus::before {
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class=""
+            class="c1"
+            data-test-subj="draggableWrapperDiv"
           >
             <div
-              class="euiPopover c1 emotion-euiPopover"
+              data-rfd-droppable-context-id="0"
+              data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
             >
               <div
-                class="euiPopover__anchor css-16vtueo-render"
+                class="draggable-keyboard-wrapper"
+                data-test-subj="draggableWrapperKeyboardHandler"
+                role="button"
+                tabindex="0"
               >
                 <div
-                  data-test-subj="withHoverActionsButton"
+                  aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                  class="c2"
+                  data-rfd-drag-handle-context-id="0"
+                  data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
+                  data-rfd-draggable-context-id="0"
+                  data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
+                  data-test-subj="providerContainer"
+                  draggable="false"
+                  role="button"
+                  tabindex="-1"
                 >
-                  <div
-                    class="c2"
-                    data-test-subj="draggableWrapperDiv"
+                  <span
+                    class="c3"
+                    data-test-subj="draggable-content-tls.fingerprints.ja3.hash"
                   >
-                    <div
-                      data-rbd-droppable-context-id="0"
-                      data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                     >
-                      <div
-                        class="draggable-keyboard-wrapper"
-                        data-test-subj="draggableWrapperKeyboardHandler"
-                        role="button"
-                        tabindex="0"
+                      <span
+                        class="euiBadge c4 emotion-euiBadge-hollow"
+                        title=""
                       >
-                        <div
-                          aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                          class="c3"
-                          data-rbd-drag-handle-context-id="0"
-                          data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
-                          data-rbd-draggable-context-id="0"
-                          data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
-                          data-test-subj="providerContainer"
-                          draggable="false"
-                          role="button"
-                          tabindex="-1"
+                        <span
+                          class="euiBadge__content emotion-euiBadge__content"
                         >
                           <span
-                            class="c4"
-                            data-test-subj="draggable-content-tls.fingerprints.ja3.hash"
+                            class="euiBadge__icon emotion-euiBadge__icon-left"
+                            color="inherit"
+                            data-euiicon-type="snowflake"
+                          />
+                          <span
+                            class="euiBadge__text emotion-euiBadge__text"
                           >
                             <span
-                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                              class="c20"
                             >
-                              <span
-                                class="euiBadge c5 emotion-euiBadge-hollow"
-                                title=""
-                              >
-                                <span
-                                  class="euiBadge__content emotion-euiBadge__content"
-                                >
-                                  <span
-                                    class="euiBadge__icon emotion-euiBadge__icon-left"
-                                    color="inherit"
-                                    data-euiicon-type="snowflake"
-                                  />
-                                  <span
-                                    class="euiBadge__text emotion-euiBadge__text"
-                                  >
-                                    <span
-                                      class="c21"
-                                    >
-                                      ja3
-                                    </span>
-                                    <a
-                                      class="euiLink emotion-euiLink-primary"
-                                      data-test-subj="ja3-fingerprint-link"
-                                      href="https://sslbl.abuse.ch/ja3-fingerprints/tls.fingerprints.ja3.hash-value"
-                                      rel="noopener noreferrer"
-                                      target="_blank"
-                                    >
-                                      tls.fingerprints.ja3.hash-value
-                                      <span
-                                        class="emotion-euiLink__externalIcon"
-                                        data-euiicon-type="popout"
-                                      >
-                                        External link
-                                      </span>
-                                      <span
-                                        class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
-                                      >
-                                        (opens in a new tab or window)
-                                      </span>
-                                    </a>
-                                  </span>
-                                </span>
-                              </span>
+                              ja3
                             </span>
+                            <a
+                              class="euiLink emotion-euiLink-primary"
+                              data-test-subj="ja3-fingerprint-link"
+                              href="https://sslbl.abuse.ch/ja3-fingerprints/tls.fingerprints.ja3.hash-value"
+                              rel="noopener noreferrer"
+                              target="_blank"
+                            >
+                              tls.fingerprints.ja3.hash-value
+                              <span
+                                class="emotion-EuiExternalLinkIcon"
+                                data-euiicon-type="popout"
+                              >
+                                External link
+                              </span>
+                              <span
+                                class="emotion-euiScreenReaderOnly"
+                              >
+                                (opens in a new tab or window)
+                              </span>
+                            </a>
                           </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                        </span>
+                      </span>
+                    </span>
+                  </span>
                 </div>
               </div>
             </div>
@@ -2550,99 +2158,83 @@ tr:hover .c3:focus::before {
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class=""
+            class="c1"
+            data-test-subj="draggableWrapperDiv"
           >
             <div
-              class="euiPopover c1 emotion-euiPopover"
+              data-rfd-droppable-context-id="0"
+              data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
             >
               <div
-                class="euiPopover__anchor css-16vtueo-render"
+                class="draggable-keyboard-wrapper"
+                data-test-subj="draggableWrapperKeyboardHandler"
+                role="button"
+                tabindex="0"
               >
                 <div
-                  data-test-subj="withHoverActionsButton"
+                  aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                  class="c2"
+                  data-rfd-drag-handle-context-id="0"
+                  data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
+                  data-rfd-draggable-context-id="0"
+                  data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
+                  data-test-subj="providerContainer"
+                  draggable="false"
+                  role="button"
+                  tabindex="-1"
                 >
-                  <div
-                    class="c2"
-                    data-test-subj="draggableWrapperDiv"
+                  <span
+                    class="c3"
+                    data-test-subj="draggable-content-tls.client_certificate.fingerprint.sha1"
                   >
-                    <div
-                      data-rbd-droppable-context-id="0"
-                      data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                     >
-                      <div
-                        class="draggable-keyboard-wrapper"
-                        data-test-subj="draggableWrapperKeyboardHandler"
-                        role="button"
-                        tabindex="0"
+                      <span
+                        class="euiBadge c4 emotion-euiBadge-hollow"
+                        title=""
                       >
-                        <div
-                          aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                          class="c3"
-                          data-rbd-drag-handle-context-id="0"
-                          data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
-                          data-rbd-draggable-context-id="0"
-                          data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
-                          data-test-subj="providerContainer"
-                          draggable="false"
-                          role="button"
-                          tabindex="-1"
+                        <span
+                          class="euiBadge__content emotion-euiBadge__content"
                         >
                           <span
-                            class="c4"
-                            data-test-subj="draggable-content-tls.client_certificate.fingerprint.sha1"
+                            class="euiBadge__icon emotion-euiBadge__icon-left"
+                            color="inherit"
+                            data-euiicon-type="snowflake"
+                          />
+                          <span
+                            class="euiBadge__text emotion-euiBadge__text"
                           >
                             <span
-                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                              class="c21"
                             >
-                              <span
-                                class="euiBadge c5 emotion-euiBadge-hollow"
-                                title=""
-                              >
-                                <span
-                                  class="euiBadge__content emotion-euiBadge__content"
-                                >
-                                  <span
-                                    class="euiBadge__icon emotion-euiBadge__icon-left"
-                                    color="inherit"
-                                    data-euiicon-type="snowflake"
-                                  />
-                                  <span
-                                    class="euiBadge__text emotion-euiBadge__text"
-                                  >
-                                    <span
-                                      class="c22"
-                                    >
-                                      client cert
-                                    </span>
-                                    <a
-                                      class="euiLink emotion-euiLink-primary"
-                                      data-test-subj="certificate-fingerprint-link"
-                                      href="https://sslbl.abuse.ch/ssl-certificates/sha1/tls.client_certificate.fingerprint.sha1-value"
-                                      rel="noopener noreferrer"
-                                      target="_blank"
-                                    >
-                                      tls.client_certificate.fingerprint.sha1-value
-                                      <span
-                                        class="emotion-euiLink__externalIcon"
-                                        data-euiicon-type="popout"
-                                      >
-                                        External link
-                                      </span>
-                                      <span
-                                        class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
-                                      >
-                                        (opens in a new tab or window)
-                                      </span>
-                                    </a>
-                                  </span>
-                                </span>
-                              </span>
+                              client cert
                             </span>
+                            <a
+                              class="euiLink emotion-euiLink-primary"
+                              data-test-subj="certificate-fingerprint-link"
+                              href="https://sslbl.abuse.ch/ssl-certificates/sha1/tls.client_certificate.fingerprint.sha1-value"
+                              rel="noopener noreferrer"
+                              target="_blank"
+                            >
+                              tls.client_certificate.fingerprint.sha1-value
+                              <span
+                                class="emotion-EuiExternalLinkIcon"
+                                data-euiicon-type="popout"
+                              >
+                                External link
+                              </span>
+                              <span
+                                class="emotion-euiScreenReaderOnly"
+                              >
+                                (opens in a new tab or window)
+                              </span>
+                            </a>
                           </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                        </span>
+                      </span>
+                    </span>
+                  </span>
                 </div>
               </div>
             </div>
@@ -2652,99 +2244,83 @@ tr:hover .c3:focus::before {
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class=""
+            class="c1"
+            data-test-subj="draggableWrapperDiv"
           >
             <div
-              class="euiPopover c1 emotion-euiPopover"
+              data-rfd-droppable-context-id="0"
+              data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
             >
               <div
-                class="euiPopover__anchor css-16vtueo-render"
+                class="draggable-keyboard-wrapper"
+                data-test-subj="draggableWrapperKeyboardHandler"
+                role="button"
+                tabindex="0"
               >
                 <div
-                  data-test-subj="withHoverActionsButton"
+                  aria-describedby="rfd-hidden-text-0-hidden-text-0"
+                  class="c2"
+                  data-rfd-drag-handle-context-id="0"
+                  data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
+                  data-rfd-draggable-context-id="0"
+                  data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
+                  data-test-subj="providerContainer"
+                  draggable="false"
+                  role="button"
+                  tabindex="-1"
                 >
-                  <div
-                    class="c2"
-                    data-test-subj="draggableWrapperDiv"
+                  <span
+                    class="c3"
+                    data-test-subj="draggable-content-tls.server_certificate.fingerprint.sha1"
                   >
-                    <div
-                      data-rbd-droppable-context-id="0"
-                      data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                     >
-                      <div
-                        class="draggable-keyboard-wrapper"
-                        data-test-subj="draggableWrapperKeyboardHandler"
-                        role="button"
-                        tabindex="0"
+                      <span
+                        class="euiBadge c4 emotion-euiBadge-hollow"
+                        title=""
                       >
-                        <div
-                          aria-describedby="rbd-hidden-text-0-hidden-text-0"
-                          class="c3"
-                          data-rbd-drag-handle-context-id="0"
-                          data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
-                          data-rbd-draggable-context-id="0"
-                          data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
-                          data-test-subj="providerContainer"
-                          draggable="false"
-                          role="button"
-                          tabindex="-1"
+                        <span
+                          class="euiBadge__content emotion-euiBadge__content"
                         >
                           <span
-                            class="c4"
-                            data-test-subj="draggable-content-tls.server_certificate.fingerprint.sha1"
+                            class="euiBadge__icon emotion-euiBadge__icon-left"
+                            color="inherit"
+                            data-euiicon-type="snowflake"
+                          />
+                          <span
+                            class="euiBadge__text emotion-euiBadge__text"
                           >
                             <span
-                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                              class="c21"
                             >
-                              <span
-                                class="euiBadge c5 emotion-euiBadge-hollow"
-                                title=""
-                              >
-                                <span
-                                  class="euiBadge__content emotion-euiBadge__content"
-                                >
-                                  <span
-                                    class="euiBadge__icon emotion-euiBadge__icon-left"
-                                    color="inherit"
-                                    data-euiicon-type="snowflake"
-                                  />
-                                  <span
-                                    class="euiBadge__text emotion-euiBadge__text"
-                                  >
-                                    <span
-                                      class="c22"
-                                    >
-                                      server cert
-                                    </span>
-                                    <a
-                                      class="euiLink emotion-euiLink-primary"
-                                      data-test-subj="certificate-fingerprint-link"
-                                      href="https://sslbl.abuse.ch/ssl-certificates/sha1/tls.server_certificate.fingerprint.sha1-value"
-                                      rel="noopener noreferrer"
-                                      target="_blank"
-                                    >
-                                      tls.server_certificate.fingerprint.sha1-value
-                                      <span
-                                        class="emotion-euiLink__externalIcon"
-                                        data-euiicon-type="popout"
-                                      >
-                                        External link
-                                      </span>
-                                      <span
-                                        class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
-                                      >
-                                        (opens in a new tab or window)
-                                      </span>
-                                    </a>
-                                  </span>
-                                </span>
-                              </span>
+                              server cert
                             </span>
+                            <a
+                              class="euiLink emotion-euiLink-primary"
+                              data-test-subj="certificate-fingerprint-link"
+                              href="https://sslbl.abuse.ch/ssl-certificates/sha1/tls.server_certificate.fingerprint.sha1-value"
+                              rel="noopener noreferrer"
+                              target="_blank"
+                            >
+                              tls.server_certificate.fingerprint.sha1-value
+                              <span
+                                class="emotion-EuiExternalLinkIcon"
+                                data-euiicon-type="popout"
+                              >
+                                External link
+                              </span>
+                              <span
+                                class="emotion-euiScreenReaderOnly"
+                              >
+                                (opens in a new tab or window)
+                              </span>
+                            </a>
                           </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                        </span>
+                      </span>
+                    </span>
+                  </span>
                 </div>
               </div>
             </div>

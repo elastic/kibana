@@ -6,17 +6,25 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { validateActionId, getFileInfo, validateActionFileId } from '../../services';
+import { ensureUserHasAuthzToFilesForAction } from './utils';
+import { stringify } from '../../utils/stringify';
+import type { EndpointActionFileInfoParams } from '../../../../common/api/endpoint';
+import { EndpointActionFileInfoSchema } from '../../../../common/api/endpoint';
+import type { ResponseActionsClient } from '../../services';
+import {
+  getResponseActionsClient,
+  NormalizedExternalConnectorClient,
+  getActionAgentType,
+} from '../../services';
 import { ACTION_AGENT_FILE_INFO_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointAppContext } from '../../types';
-import type { EndpointActionFileInfoParams } from '../../../../common/endpoint/schema/actions';
 import type {
   SecuritySolutionRequestHandlerContext,
   SecuritySolutionPluginRouter,
 } from '../../../types';
-import { EndpointActionFileInfoSchema } from '../../../../common/endpoint/schema/actions';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
+import type { ActionFileInfoApiResponse } from '../../../../common/endpoint/types';
 
 export const getActionFileInfoRouteHandler = (
   endpointContext: EndpointAppContext
@@ -29,18 +37,29 @@ export const getActionFileInfoRouteHandler = (
   const logger = endpointContext.logFactory.get('actionFileInfo');
 
   return async (context, req, res) => {
-    const { action_id: actionId, file_id: fileId } = req.params;
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    logger.debug(() => `Get response action file info:\n${stringify(req.params)}`);
+
+    const { action_id: requestActionId, file_id: fileId } = req.params;
+    const coreContext = await context.core;
 
     try {
-      await validateActionId(esClient, actionId);
-      await validateActionFileId(esClient, logger, fileId, actionId);
-
-      return res.ok({
-        body: {
-          data: await getFileInfo(esClient, logger, fileId),
-        },
+      const esClient = coreContext.elasticsearch.client.asInternalUser;
+      const { agentType } = await getActionAgentType(esClient, requestActionId);
+      const user = coreContext.security.authc.getCurrentUser();
+      const casesClient = await endpointContext.service.getCasesClient(req);
+      const connectorActions = (await context.actions).getActionsClient();
+      const responseActionsClient: ResponseActionsClient = getResponseActionsClient(agentType, {
+        esClient,
+        casesClient,
+        endpointService: endpointContext.service,
+        username: user?.username || 'unknown',
+        connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
       });
+      const response: ActionFileInfoApiResponse = {
+        data: await responseActionsClient.getFileInfo(requestActionId, fileId),
+      };
+
+      return res.ok({ body: response });
     } catch (error) {
       return errorHandler(logger, res, error);
     }
@@ -51,16 +70,24 @@ export const registerActionFileInfoRoute = (
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: ACTION_AGENT_FILE_INFO_ROUTE,
-      validate: EndpointActionFileInfoSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteFileOperations'] },
-      endpointContext.logFactory.get('actionFileInfo'),
-      getActionFileInfoRouteHandler(endpointContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: EndpointActionFileInfoSchema,
+        },
+      },
+      withEndpointAuthz(
+        { any: ['canWriteFileOperations', 'canWriteExecuteOperations', 'canGetRunningProcesses'] },
+        endpointContext.logFactory.get('actionFileInfo'),
+        getActionFileInfoRouteHandler(endpointContext),
+        ensureUserHasAuthzToFilesForAction
+      )
+    );
 };

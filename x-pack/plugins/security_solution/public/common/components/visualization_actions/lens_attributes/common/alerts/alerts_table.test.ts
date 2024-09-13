@@ -11,11 +11,23 @@ import { useLensAttributes } from '../../../use_lens_attributes';
 
 import { getAlertsTableLensAttributes } from './alerts_table';
 
+interface VisualizationState {
+  visualization: { columns: {} };
+  datasourceStates: {
+    formBased: { layers: Record<string, { columns: {}; columnOrder: string[] }> };
+  };
+}
+
 jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b'),
+  v4: jest
+    .fn()
+    .mockReturnValueOnce('mockLayerId')
+    .mockReturnValueOnce('mockTopValuesOfStackByFieldColumnId')
+    .mockReturnValueOnce('mockCountColumnId')
+    .mockReturnValueOnce('mockTopValuesOfBreakdownFieldColumnId'),
 }));
 
-jest.mock('../../../../../containers/sourcerer', () => ({
+jest.mock('../../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     dataViewId: 'security-solution-my-test',
     indicesExist: true,
@@ -95,6 +107,49 @@ describe('getAlertsTableLensAttributes', () => {
       { wrapper }
     );
 
+    const state = result?.current?.state as VisualizationState;
     expect(result?.current).toMatchSnapshot();
+
+    expect(state.datasourceStates.formBased.layers.mockLayerId.columnOrder).toMatchInlineSnapshot(`
+      Array [
+        "mockTopValuesOfStackByFieldColumnId",
+        "mockTopValuesOfBreakdownFieldColumnId",
+        "mockCountColumnId",
+      ]
+    `);
+  });
+
+  it('should render Without extra options - breakdownField', () => {
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          extraOptions: { breakdownField: '' },
+          getLensAttributes: getAlertsTableLensAttributes,
+          stackByField: 'event.category',
+        }),
+      { wrapper }
+    );
+
+    const state = result?.current?.state as VisualizationState;
+    expect(state.visualization?.columns).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "columnId": "mockTopValuesOfStackByFieldColumnId",
+          "isTransposed": false,
+          "width": 362,
+        },
+        Object {
+          "columnId": "mockCountColumnId",
+          "isTransposed": false,
+        },
+      ]
+    `);
+
+    expect(state.datasourceStates.formBased.layers.mockLayerId.columnOrder).toMatchInlineSnapshot(`
+      Array [
+        "mockTopValuesOfStackByFieldColumnId",
+        "mockCountColumnId",
+      ]
+    `);
   });
 });

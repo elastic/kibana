@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiFilterGroup, EuiFilterButton } from '@elastic/eui';
 
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import type { CaseUserActionsStats } from '../../containers/types';
 import * as i18n from './translations';
 import type { UserActivityFilter } from './types';
@@ -19,18 +19,6 @@ interface FilterActivityProps {
   userActionsStats?: CaseUserActionsStats;
   onFilterChange: (type: UserActivityFilter) => void;
 }
-
-const MyEuiFilterGroup = styled(EuiFilterGroup)`
-  > .euiFilterButton-hasNotification {
-    min-width: 68px;
-  }
-`;
-
-const FilterAllButton = styled(EuiFilterButton)`
-  & .euiFilterButton__textShift {
-    min-width: 28px;
-  }
-`;
 
 export const FilterActivity = React.memo<FilterActivityProps>(
   ({ type, onFilterChange, userActionsStats, isLoading = false }) => {
@@ -44,9 +32,22 @@ export const FilterActivity = React.memo<FilterActivityProps>(
     );
 
     return (
-      <MyEuiFilterGroup data-test-subj="user-actions-filter-activity-group">
-        <FilterAllButton
+      <EuiFilterGroup
+        data-test-subj="user-actions-filter-activity-group"
+        css={css`
+          > .euiFilterButton-hasNotification {
+            min-width: 68px;
+          }
+        `}
+      >
+        <EuiFilterButton
           withNext
+          css={css`
+            &,
+            & .euiFilterButton__text {
+              min-width: 28px;
+            }
+          `}
           grow={false}
           onClick={() => handleFilterChange('all')}
           hasActiveFilters={type === 'all'}
@@ -57,7 +58,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           iconSize="s"
         >
           {i18n.ALL}
-        </FilterAllButton>
+        </EuiFilterButton>
         <EuiFilterButton
           withNext
           grow={false}
@@ -88,7 +89,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
         >
           {i18n.HISTORY}
         </EuiFilterButton>
-      </MyEuiFilterGroup>
+      </EuiFilterGroup>
     );
   }
 );

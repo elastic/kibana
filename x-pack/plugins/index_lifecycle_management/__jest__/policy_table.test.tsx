@@ -43,6 +43,7 @@ const testPolicy = {
 
 const isUsedByAnIndex = (i: number) => i % 2 === 0;
 const isDesignatedManagedPolicy = (i: number) => i > 0 && i % 3 === 0;
+const isDeprecatedPolicy = (i: number) => i > 0 && i % 2 === 0;
 
 const policies: PolicyFromES[] = [testPolicy];
 for (let i = 1; i < 105; i++) {
@@ -54,6 +55,7 @@ for (let i = 1; i < 105; i++) {
     name: `testy${i}`,
     policy: {
       name: `testy${i}`,
+      deprecated: i % 2 === 0,
       phases: {},
       ...(isDesignatedManagedPolicy(i)
         ? {
@@ -96,6 +98,7 @@ const getPolicies = (rendered: ReactWrapper) => {
       version,
       name,
       isManagedPolicy: isDesignatedManagedPolicy(version),
+      isDeprecatedPolicy: isDeprecatedPolicy(version),
       isUsedByAnIndex: isUsedByAnIndex(version),
     };
   });
@@ -163,7 +166,7 @@ describe('policy table', () => {
     const perPageButton = rendered.find('EuiTablePagination EuiPopover').find('button');
     perPageButton.simulate('click');
     rendered.update();
-    const numberOfRowsButton = rendered.find('.euiContextMenuItem').at(1);
+    const numberOfRowsButton = rendered.find('button.euiContextMenuItem').at(1);
     numberOfRowsButton.simulate('click');
     rendered.update();
     expect(getPolicyNames(rendered).length).toBe(25);
@@ -198,9 +201,27 @@ describe('policy table', () => {
     });
   });
 
+  test('shows deprecated policies with Deprecated badges', () => {
+    const rendered = mountWithIntl(component);
+
+    // Initially the switch is off so we should not see any deprecated policies
+    let deprecatedPolicies = findTestSubject(rendered, 'deprecatedPolicyBadge');
+    expect(deprecatedPolicies.length).toBe(0);
+
+    // Enable filtering by deprecated policies
+    const searchInput = rendered.find('input.euiFieldSearch').first();
+    (searchInput.instance() as unknown as HTMLInputElement).value = 'is:policy.deprecated';
+    searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
+    rendered.update();
+
+    // Now we should see all deprecated policies
+    deprecatedPolicies = findTestSubject(rendered, 'deprecatedPolicyBadge');
+    expect(deprecatedPolicies.length).toBeGreaterThan(0);
+  });
+
   test('filters based on content of search input', () => {
     const rendered = mountWithIntl(component);
-    const searchInput = rendered.find('.euiFieldSearch').first();
+    const searchInput = rendered.find('input.euiFieldSearch').first();
     (searchInput.instance() as unknown as HTMLInputElement).value = 'testy0';
     searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
     rendered.update();
@@ -286,11 +307,11 @@ describe('policy table', () => {
     const policyName = findTestSubject(firstRow, 'policyTablePolicyNameLink').text();
     expect(policyName).toBe(`${testPolicy.name}`);
     const policyIndexTemplates = findTestSubject(firstRow, 'policy-indexTemplates').text();
-    expect(policyIndexTemplates).toBe(`Linked index templates${testPolicy.indexTemplates.length}`);
+    expect(policyIndexTemplates).toBe(`${testPolicy.indexTemplates.length}`);
     const policyIndices = findTestSubject(firstRow, 'policy-indices').text();
-    expect(policyIndices).toBe(`Linked indices${testPolicy.indices.length}`);
+    expect(policyIndices).toBe(`${testPolicy.indices.length}`);
     const policyModifiedDate = findTestSubject(firstRow, 'policy-modifiedDate').text();
-    expect(policyModifiedDate).toBe(`Modified date${testDateFormatted}`);
+    expect(policyModifiedDate).toBe(`${testDateFormatted}`);
   });
   test('opens a flyout with index templates', () => {
     const rendered = mountWithIntl(component);

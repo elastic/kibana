@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -38,7 +39,8 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
   const dataViews = getDataViewsStart();
 
   try {
-    const seriesNum = model.series.filter((series) => !series.hidden).length;
+    const visibleSeries = model.series.filter((series) => !series.hidden);
+    const seriesNum = visibleSeries.length;
     const sortConfig = uiState.get('table')?.sort ?? {};
 
     const datasourceInfo = await extractOrGenerateDatasourceInfo(
@@ -165,6 +167,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
     }
 
     const extendedLayer: ExtendedLayer = {
+      ignoreGlobalFilters: Boolean(
+        model.ignore_global_filter ||
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          visibleSeries.some(({ ignore_global_filter }) => ignore_global_filter)
+      ),
       indexPatternId: indexPatternId as string,
       layerId: uuidv4(),
       columns: [...metrics, ...commonBucketsColumns, ...bucketsColumns],

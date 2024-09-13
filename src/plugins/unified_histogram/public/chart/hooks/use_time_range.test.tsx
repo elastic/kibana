@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
@@ -245,6 +246,7 @@ describe('useTimeRange', () => {
         timeRange,
         timeInterval,
         isPlainRecord: true,
+        timeField: '@timestamp',
       })
     );
     expect(result.current.timeRangeDisplay).toMatchInlineSnapshot(`
@@ -263,8 +265,21 @@ describe('useTimeRange', () => {
         size="xs"
         textAlign="center"
       >
-        2022-11-17T00:00:00.000Z - 2022-11-17T12:00:00.000Z 
+        2022-11-17T00:00:00.000Z - 2022-11-17T12:00:00.000Z
       </EuiText>
     `);
+  });
+
+  it('should not render a text for text based languages when not timeField is provided', () => {
+    const { result } = renderHook(() =>
+      useTimeRange({
+        uiSettings,
+        bucketInterval,
+        timeRange,
+        timeInterval,
+        isPlainRecord: true,
+      })
+    );
+    expect(result.current.timeRangeDisplay).toBeNull();
   });
 });

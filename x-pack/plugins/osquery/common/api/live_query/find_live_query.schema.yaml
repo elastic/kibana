@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  title: Find Live Queries Schema
+  version: '2023-10-31'
+paths: { }
+components:
+  schemas:
+    FindLiveQueryRequestQuery:
+      type: object
+      properties:
+        kuery:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
+        page:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
+        pageSize:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
+        sort:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
+        sortOrder:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'

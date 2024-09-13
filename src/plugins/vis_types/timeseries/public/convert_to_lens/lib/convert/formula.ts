@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -139,6 +140,11 @@ export const convertMathToFormulaColumn = (
 
   if (script === null) {
     return null;
+  }
+
+  // now replace the _interval with the new time_range() formula
+  if (script.includes('params._interval')) {
+    script = script.replaceAll('params._interval', 'time_range()');
   }
 
   const scripthasNoStaticNumber = isNaN(Number(script));

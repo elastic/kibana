@@ -7,6 +7,12 @@
     "id": "unifiedHistogram",
     "server": false,
     "browser": true,
-    "requiredBundles": ["data", "dataViews", "embeddable", "inspector", "expressions"]
+    "requiredBundles": [
+      "data",
+      "dataViews",
+      "embeddable",
+      "inspector",
+      "visualizations"
+    ]
   }
 }

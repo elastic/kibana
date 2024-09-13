@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
@@ -50,13 +51,15 @@ const DataViewFlyoutContentContainer = ({
     try {
       let saveResponse;
       if (editData) {
-        const { name = '', timeFieldName, title = '' } = dataViewSpec;
+        const { name = '', timeFieldName, title = '', allowHidden = false } = dataViewSpec;
         editData.setIndexPattern(title);
         editData.name = name;
         editData.timeFieldName = timeFieldName;
-        saveResponse = editData.isPersisted()
-          ? await dataViews.updateSavedObject(editData)
-          : editData;
+        editData.setAllowHidden(allowHidden);
+        if (editData.isPersisted()) {
+          await dataViews.updateSavedObject(editData);
+        }
+        saveResponse = editData;
       } else {
         saveResponse = persist
           ? await dataViews.createAndSave(dataViewSpec)
@@ -67,11 +70,14 @@ const DataViewFlyoutContentContainer = ({
         await dataViews.refreshFields(saveResponse);
 
         if (persist) {
-          const message = i18n.translate('indexPatternEditor.saved', {
-            defaultMessage: "Saved '{indexPatternName}'",
-            values: { indexPatternName: saveResponse.getName() },
+          const title = i18n.translate('indexPatternEditor.saved', {
+            defaultMessage: 'Saved',
           });
-          notifications.toasts.addSuccess(message);
+          const text = `'${saveResponse.getName()}'`;
+          notifications.toasts.addSuccess({
+            title,
+            text,
+          });
         }
         await onSave(saveResponse);
       }

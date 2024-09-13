@@ -4,20 +4,22 @@
 {kib} requires a specific Node.js version to run.
 When running {kib} from source, you must have this version installed locally.
 
+=== Step 1: Generate custom Node.js builds
+
+Before making a PR to upgrade Node.js, we must first <<start-new-nodejs-build,generate the required custom Node.js builds>> matching the desired Node.js version.
+
+=== Step 2: Create PR to upgrade Node.js
+
 The required version of Node.js is listed in several different files throughout the {kib} source code.
 These files must be updated when upgrading Node.js:
 
-  - {kib-repo}blob/{branch}/.ci/Dockerfile[`.ci/Dockerfile`] - The version is specified in the `NODE_VERSION` constant.
-    This is used to pull the relevant image from https://hub.docker.com/_/node[Docker Hub].
-    Note that Docker Hub can take 24+ hours to be updated with the new images after a new release of Node.js, so if you're upgrading Node.js in Kibana just after the official Node.js release, you have to check if the new images are present on Docker Hub.
-    If they are not, and the update is urgent, you can skip this file and update it later once Docker Hub has been updated.
   - {kib-repo}blob/{branch}/.node-version[`.node-version`]
   - {kib-repo}blob/{branch}/.nvmrc[`.nvmrc`]
   - {kib-repo}blob/{branch}/package.json[`package.json`] - The version is specified in the `engines.node` field (if possible, also upgrade `@types/node` to match the new version, both under `devDependencies` and `resolutions`).
   - {kib-repo}blob/{branch}/WORKSPACE.bazel[`WORKSPACE.bazel`] - The version is specified in the `node_version` property.
     Besides this property, the list of files under `node_repositories` must be updated along with their respective SHA256 hashes.
-    These can be found on the https://nodejs.org[nodejs.org] website.
-    Example for Node.js v16.19.1: https://nodejs.org/dist/v16.19.1/SHASUMS256.txt.asc
+    These can be found in the `SHASUMS256.txt` file inside the public `kibana-custom-node-artifacts` GCP bucket.
+    Example for Node.js v20.15.1: https://storage.googleapis.com/kibana-custom-node-artifacts/node-glibc-217/dist/v20.15.1/SHASUMS256.txt[kibana-custom-node-artifacts/node-glibc-217/dist/v20.15.1/SHASUMS256.txt]
 
 See PR {kib-repo}pull/128123[#128123] for an example of how the Node.js version has been upgraded previously.
 
@@ -30,6 +32,20 @@ When upgrading to a new major version of Node.js, the following extra steps must
     You can change which Node.js major version to view, by changing the selected branch.
     If Node.js has dropped support for platform still supported by Kibana, appropriate steps must be taken as soon as possible to deprecate support for this platform. This way support for it can be dropped before the currently used major version of Node.js https://github.com/nodejs/release#release-schedule[reaches End-of-Life].
 
+[[custom-nodejs-builds]]
+=== Custom builds of Node.js
+
+Due to Node.js 16 coming to an https://nodejs.org/en/blog/announcements/nodejs16-eol[early End-of-Life] and Node.js 18 no longer supporting the same platforms that {kib} supports (most notably CentOS7/RHEL7), we cannot bundle the official Node.js binaries with the Linux distributable of {kib}.
+To keep support for these older platforms, we're bundling the Linux distributable of {kib} with a https://github.com/elastic/kibana-custom-nodejs-builds[custom build of Node.js] with extended backwards compatibility.
+The only difference between the offical Node.js build and our custom build, is the version of `glibc` that it's compiled against.
+
+[[start-new-nodejs-build]]
+==== How to start a new build
+
+To generate a new custom Node.js build, https://buildkite.com/elastic/kibana-custom-node-dot-js-builds#new[start a new build] on our dedicated Buildkite pipeline (requires Elastic employee permissions).
+Give it a clear name (e.g. `Node 20.15.1`) and remember so set the custom `OVERRIDE_TARGET_VERSION` environment variable to the desired Node.js version - e.g. `OVERRIDE_TARGET_VERSION=20.15.1`.
+You find the "Environment Variables" field by expanding "Options >" in the "New Build" dialog.
+
 === Backporting
 
 The following rules are not set in stone.
@@ -37,15 +53,21 @@ Use best judgement when backporting.
 
 ==== Node.js patch upgrades
 
-Typically, you want to backport Node.js *patch* upgrades to all supported release branches that run the same *major* Node.js version (which currently is all of them, but this might change in the future once Node.js v18 is released and becomes LTS):
+Typically, you want to backport Node.js *patch* upgrades to all supported release branches that run the same *major* Node.js version (which currently is all of them, but this might change in the future):
 
-  - If upgrading Node.js 16, and the current release is 8.1.x, the main PR should target `main` and be backported to `7.17` and `8.1`.
+  - If the current release is 8.1.x, the main PR should target `main` and be backported to `7.17` and `8.1` (GitHub tag example: `backport:all-open`).
 
 ==== Node.js minor upgrades
 
-Typically, you want to backport Node.js *minor* upgrades to the next minor {kib} release branch that runs the same *major* Node.js version:
+Typically, you want to backport Node.js *minor* upgrades to the previous major {kib} release branch (if it runs the same *major* Node.js version):
 
-  - If upgrading Node.js 16, and the current release is 8.1.x, the main PR should target `main` and be backported to `7.17`, while leaving the `8.1` branch as-is.
+  - If the current release is 8.1.x, the main PR should target `main` and be backported to `7.17`, while leaving the `8.1` branch as-is (GitHub tag example: `auto-backport` + `v7.17.13`).
+
+==== Node.js major upgrades
+
+Typically, you want to backport Node.js *major* upgrades to the previous major {kib} release branch:
+
+  - If the current release is 8.1.x, the main PR should target `main` and be backported to `7.17`, while leaving the `8.1` branch as-is (GitHub tag example: `auto-backport` + `v7.17.13`).
 
 === Upgrading installed Node.js version
 

@@ -1,0 +1,5 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/core-user-settings-server-mocks",
+  "owner": "@elastic/kibana-security",
+}

@@ -7,9 +7,15 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSuperDatePicker,
+} from '@elastic/eui';
 
-import type { RuleExecutionEvent } from '../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionEvent } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 import { HeaderSection } from '../../../../common/components/header_section';
 import { EventTypeFilter } from '../basic/filters/event_type_filter';
@@ -22,6 +28,7 @@ import { usePagination } from '../basic/tables/use_pagination';
 import { useColumns } from './use_columns';
 import { useExpandableRows } from '../basic/tables/use_expandable_rows';
 import { useExecutionEvents } from './use_execution_events';
+import { EventMessageFilter } from './event_message_filter';
 
 import * as i18n from './translations';
 
@@ -56,8 +63,10 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
 
   const executionEvents = useExecutionEvents({
     ruleId,
+    searchTerm: filters.state.searchTerm,
     eventTypes: filters.state.eventTypes,
     logLevels: filters.state.logLevels,
+    dateRange: filters.state.dateRange,
     sortOrder: sorting.state.sort.direction,
     page: pagination.state.pageNumber,
     perPage: pagination.state.pageSize,
@@ -86,6 +95,9 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
         <EuiFlexItem grow={true}>
           <HeaderSection title={i18n.TABLE_TITLE} subtitle={i18n.TABLE_SUBTITLE} />
         </EuiFlexItem>
+        <EuiFlexItem grow>
+          <EventMessageFilter value={filters.state.searchTerm} onChange={filters.setSearchTerm} />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LogLevelFilter selectedItems={filters.state.logLevels} onChange={filters.setLogLevels} />
         </EuiFlexItem>
@@ -93,6 +105,14 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
           <EventTypeFilter
             selectedItems={filters.state.eventTypes}
             onChange={filters.setEventTypes}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSuperDatePicker
+            start={filters.state.dateRange.start}
+            end={filters.state.dateRange.end}
+            onTimeChange={filters.setDateRange}
+            showUpdateButton={false}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -103,7 +123,6 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
         items={items}
         itemId={getItemId}
         itemIdToExpandedRowMap={rows.itemIdToExpandedRowMap}
-        isExpandable={true}
         loading={executionEvents.isFetching}
         sorting={sorting.state}
         pagination={pagination.state}

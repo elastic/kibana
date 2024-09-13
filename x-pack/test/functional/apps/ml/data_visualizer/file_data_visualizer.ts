@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
       expected: {
         results: {
           title: 'artificial_server_log',
-          numberOfFields: 4,
+          highlightedText: true,
         },
         metricFields: [
           {
@@ -104,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
       expected: {
         results: {
           title: 'geo_file.csv',
-          numberOfFields: 3,
+          highlightedText: false,
         },
         metricFields: [],
         nonMetricFields: [
@@ -146,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
       expected: {
         results: {
           title: 'missing_end_of_file_newline.csv',
-          numberOfFields: 3,
+          highlightedText: false,
         },
         metricFields: [
           {
@@ -217,6 +217,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the components of the file details page');
           await ml.dataVisualizerFileBased.assertFileTitle(testData.expected.results.title);
           await ml.dataVisualizerFileBased.assertFileContentPanelExists();
+          await ml.dataVisualizerFileBased.assertFileContentHighlightingSwitchExists(
+            testData.expected.results.highlightedText
+          );
+          await ml.dataVisualizerFileBased.assertFileContentHighlighting(
+            testData.expected.results.highlightedText,
+            testData.expected.totalFieldsCount - 1 // -1 for the message field
+          );
           await ml.dataVisualizerFileBased.assertSummaryPanelExists();
           await ml.dataVisualizerFileBased.assertFileStatsPanelExists();
 

@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo } from 'react';
 import type { FC } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiImage,
   EuiEmptyPrompt,
   EuiButton,
@@ -116,13 +117,16 @@ const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
     listType,
   ]);
 
-  if (viewerStatus === ViewerStatus.LOADING || viewerStatus === ViewerStatus.SEARCHING)
-    return <EuiLoadingContent lines={4} data-test-subj="loadingViewerState" />;
-
   return (
-    <EuiPanel css={panelCss} color={viewerStatus === 'empty_search' ? 'subdued' : 'transparent'}>
-      <EuiEmptyPrompt {...euiEmptyPromptProps} />
-    </EuiPanel>
+    <EuiSkeletonText
+      lines={4}
+      data-test-subj="loadingViewerState"
+      isLoading={viewerStatus === ViewerStatus.LOADING || viewerStatus === ViewerStatus.SEARCHING}
+    >
+      <EuiPanel css={panelCss} color={viewerStatus === 'empty_search' ? 'subdued' : 'transparent'}>
+        <EuiEmptyPrompt {...euiEmptyPromptProps} />
+      </EuiPanel>
+    </EuiSkeletonText>
   );
 };
 

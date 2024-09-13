@@ -8,11 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
-import {
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
 import { SectionError, Error, PageError } from '../../../shared_imports';
@@ -98,7 +94,7 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
             error: i18n.translate(
               'xpack.snapshotRestore.restoreSnapshot.snapshotNotFoundErrorMessage',
               {
-                defaultMessage: `The snapshot '{snapshot}' does not exist in repository '{repository}'.`,
+                defaultMessage: `The snapshot ''{snapshot}'' does not exist in repository ''{repository}''.`,
                 values: {
                   snapshot: snapshotId,
                   repository: repositoryName,
@@ -149,13 +145,13 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   }
 
   return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+    <EuiPageSection restrictWidth style={{ width: '100%' }}>
       <EuiPageHeader
         pageTitle={
           <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.snapshotRestore.restoreSnapshotTitle"
-              defaultMessage="Restore '{snapshot}'"
+              defaultMessage="Restore ''{snapshot}''"
               values={{ snapshot: snapshotId }}
             />
           </span>
@@ -171,6 +167,6 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
         clearSaveError={clearSaveError}
         onSave={onSave}
       />
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };

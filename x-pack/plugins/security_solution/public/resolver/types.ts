@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type ResizeObserver from 'resize-observer-polyfill';
 import type React from 'react';
-import type { Store, Middleware, Dispatch } from 'redux';
+import type { Store, Middleware, Dispatch, AnyAction } from 'redux';
 import type { BBox } from 'rbush';
 import type { Provider } from 'react-redux';
-import type { ResolverAction } from './store/actions';
 import type {
   ResolverNode,
   ResolverRelatedEvents,
@@ -21,6 +19,15 @@ import type {
   ResolverSchema,
 } from '../../common/endpoint/types';
 import type { Tree } from '../../common/endpoint/generate_data';
+import type { State } from '../common/store/types';
+
+export interface AnalyzerState {
+  analyzer: AnalyzerById;
+}
+
+export interface AnalyzerById {
+  [id: string]: ResolverState;
+}
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -194,6 +201,8 @@ export interface TreeFetcherParameters {
   indices: string[];
 
   filters: TimeFilters;
+
+  agentId: string;
 }
 
 /**
@@ -229,6 +238,8 @@ export interface NodeEventsInCategoryState {
      */
     parameters: PanelViewAndParameters;
   };
+
+  agentId: string;
 
   /**
    * Flag for showing an error message when fetching additional related events.
@@ -309,6 +320,8 @@ export interface DataState {
 
   readonly detectedBounds?: TimeFilters;
 
+  readonly overriddenTimeBounds?: TimeFilters;
+
   readonly tree?: {
     /**
      * The parameters passed from the resolver properties
@@ -380,7 +393,7 @@ export interface DataState {
 /**
  * Represents an ordered pair. Used for x-y coordinates and the like.
  */
-export type Vector2 = readonly [number, number];
+export type Vector2 = [number, number];
 
 /**
  * A rectangle with sides that align with the `x` and `y` axises.
@@ -512,6 +525,7 @@ export interface DurationDetails {
   duration: number | '<1';
   durationType: DurationTypes;
 }
+
 /**
  * Values shared between two vertices joined by an edge line.
  */
@@ -566,6 +580,7 @@ export type ProcessWithWidthMetadata = {
  */
 interface ResizeObserverConstructor {
   prototype: ResizeObserver;
+
   new (callback: ResizeObserverCallback): ResizeObserver;
 }
 
@@ -589,10 +604,12 @@ export interface SideEffectors {
    * Use instead of the `ResizeObserver` global.
    */
   ResizeObserver: ResizeObserverConstructor;
+
   /**
    * Use this instead of the Clipboard API's `writeText` method.
    */
   writeTextToClipboard(text: string): Promise<void>;
+
   /**
    * Use this instead of `Element.prototype.getBoundingClientRect` .
    */
@@ -646,7 +663,7 @@ export type ResolverProcessType =
   | 'processError'
   | 'unknownEvent';
 
-export type ResolverStore = Store<ResolverState, ResolverAction>;
+export type ResolverStore = Store<State, AnyAction>;
 
 /**
  * Describes the basic Resolver graph layout.
@@ -690,10 +707,12 @@ export interface DataAccessLayer {
     entityID,
     timeRange,
     indexPatterns,
+    agentId,
   }: {
     entityID: string;
     timeRange?: TimeRange;
     indexPatterns: string[];
+    agentId: string;
   }) => Promise<ResolverRelatedEvents>;
 
   /**
@@ -706,12 +725,14 @@ export interface DataAccessLayer {
     after,
     timeRange,
     indexPatterns,
+    agentId,
   }: {
     entityID: string;
     category: string;
     after?: string;
     timeRange?: TimeRange;
     indexPatterns: string[];
+    agentId: string;
   }) => Promise<ResolverPaginatedEvents>;
 
   /**
@@ -723,11 +744,13 @@ export interface DataAccessLayer {
     timeRange,
     indexPatterns,
     limit,
+    agentId,
   }: {
     ids: string[];
     timeRange?: TimeRange;
     indexPatterns: string[];
     limit: number;
+    agentId: string;
   }): Promise<SafeResolverEvent[]>;
 
   /**
@@ -741,6 +764,7 @@ export interface DataAccessLayer {
     timeRange,
     indexPatterns,
     winlogRecordID,
+    agentId,
   }: {
     nodeID: string;
     eventCategory: string[];
@@ -749,6 +773,7 @@ export interface DataAccessLayer {
     winlogRecordID: string;
     timeRange?: TimeRange;
     indexPatterns: string[];
+    agentId: string;
   }) => Promise<SafeResolverEvent | null>;
 
   /**
@@ -761,6 +786,7 @@ export interface DataAccessLayer {
     indices,
     ancestors,
     descendants,
+    agentId,
   }: {
     dataId: string;
     schema: ResolverSchema;
@@ -768,6 +794,7 @@ export interface DataAccessLayer {
     indices: string[];
     ancestors: number;
     descendants: number;
+    agentId: string;
   }): Promise<ResolverNode[]>;
 
   /**
@@ -827,11 +854,11 @@ export interface ResolverProps {
 export interface SpyMiddlewareStateActionPair {
   /** An action dispatched, `state` is the state that the reducer returned when handling this action.
    */
-  action: ResolverAction;
+  action: AnyAction;
   /**
    * A resolver state that was returned by the reducer when handling `action`.
    */
-  state: ResolverState;
+  state: State;
 }
 
 /**
@@ -841,7 +868,7 @@ export interface SpyMiddleware {
   /**
    * A middleware to use with `applyMiddleware`.
    */
-  middleware: Middleware<{}, ResolverState, Dispatch<ResolverAction>>;
+  middleware: Middleware<{}, State, Dispatch<AnyAction>>;
   /**
    * A generator that returns all state and action pairs that pass through the middleware.
    */
@@ -866,11 +893,11 @@ export interface ResolverPluginSetup {
    * Takes a `DataAccessLayer`, which could be a mock one, and returns an redux Store.
    * All data acess (e.g. HTTP requests) are done through the store.
    */
-  storeFactory: (dataAccessLayer: DataAccessLayer) => Store<ResolverState, ResolverAction>;
+  storeFactory: (dataAccessLayer: DataAccessLayer) => Store<AnalyzerById, AnyAction>;
 
   /**
    * The Resolver component without the required Providers.
-   * You must wrap this component in: `I18nProvider`, `Router` (from react-router,) `KibanaContextProvider`,
+   * You must wrap this component in: `KibanaRenderContextProvider`, `Router` (from react-router,) `KibanaContextProvider`,
    * and the `Provider` component provided by this object.
    */
   ResolverWithoutProviders: React.MemoExoticComponent<

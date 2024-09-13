@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { DataVisualizerPlugin } from './plugin';
 
-export function plugin() {
-  return new DataVisualizerPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DataVisualizerPlugin(initializerContext);
 }
 
 export type { DataVisualizerPluginStart } from './plugin';
@@ -17,6 +18,7 @@ export type {
   FileDataVisualizerSpec,
   IndexDataVisualizerSpec,
   IndexDataVisualizerViewProps,
+  DataDriftSpec,
 } from './application';
 export type {
   GetAdditionalLinksParams,

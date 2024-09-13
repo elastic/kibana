@@ -8,7 +8,8 @@
 import { of } from 'rxjs';
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { coreMock } from '@kbn/core/server/mocks';
+import type { PluginInitializerContextMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -16,6 +17,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ConfigSchema } from './config';
 import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
 import { SecurityPlugin } from './plugin';
+import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
 
 describe('Security Plugin', () => {
   let plugin: SecurityPlugin;
@@ -23,20 +25,27 @@ describe('Security Plugin', () => {
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
   let mockSetupDependencies: PluginSetupDependencies;
   let mockStartDependencies: PluginStartDependencies;
+  let mockInitializerContext: PluginInitializerContextMock<typeof ConfigSchema>;
   beforeEach(() => {
-    plugin = new SecurityPlugin(
-      coreMock.createPluginInitializerContext(
-        ConfigSchema.validate({
+    jest.clearAllMocks();
+    mockInitializerContext = coreMock.createPluginInitializerContext(
+      ConfigSchema.validate(
+        {
           session: { idleTimeout: 1500 },
           authc: {
             providers: ['saml', 'token'],
             saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
           },
-        })
+          encryptionKey: 'z'.repeat(32),
+        },
+        { dist: true }
       )
     );
+    plugin = new SecurityPlugin(mockInitializerContext);
 
-    mockCoreSetup = coreMock.createSetup();
+    mockCoreSetup = coreMock.createSetup({
+      pluginStartContract: { userProfiles: userProfileServiceMock.createStart() },
+    });
     mockCoreSetup.http.getServerInfo.mockReturnValue({
       hostname: 'localhost',
       name: 'kibana',
@@ -45,7 +54,10 @@ describe('Security Plugin', () => {
     });
 
     mockSetupDependencies = {
-      licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
+      licensing: {
+        license$: of({ getUnavailableReason: jest.fn() }),
+        featureUsage: { register: jest.fn() },
+      },
       features: featuresPluginMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
     } as unknown as PluginSetupDependencies;
@@ -78,29 +90,27 @@ describe('Security Plugin', () => {
           "authz": Object {
             "actions": Actions {
               "alerting": AlertingActions {
-                "prefix": "alerting:version:",
+                "prefix": "alerting:",
               },
               "api": ApiActions {
-                "prefix": "api:version:",
+                "prefix": "api:",
               },
               "app": AppActions {
-                "prefix": "app:version:",
+                "prefix": "app:",
               },
               "cases": CasesActions {
-                "prefix": "cases:version:",
+                "prefix": "cases:",
               },
               "login": "login:",
               "savedObject": SavedObjectActions {
-                "prefix": "saved_object:version:",
+                "prefix": "saved_object:",
               },
               "space": SpaceActions {
-                "prefix": "space:version:",
+                "prefix": "space:",
               },
               "ui": UIActions {
-                "prefix": "ui:version:",
+                "prefix": "ui:",
               },
-              "version": "version:version",
-              "versionNumber": "version",
             },
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
@@ -117,6 +127,8 @@ describe('Security Plugin', () => {
               },
             },
             "getFeatures": [Function],
+            "getLicenseType": [Function],
+            "getUnavailableReason": [Function],
             "hasAtLeast": [Function],
             "isEnabled": [Function],
             "isLicenseAvailable": [Function],
@@ -126,6 +138,31 @@ describe('Security Plugin', () => {
           },
         }
       `);
+    });
+
+    it('calls core.security.registerSecurityDelegate', () => {
+      plugin.setup(mockCoreSetup, mockSetupDependencies);
+
+      expect(mockCoreSetup.security.registerSecurityDelegate).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls core.userProfile.registerUserProfileDelegate', () => {
+      plugin.setup(mockCoreSetup, mockSetupDependencies);
+
+      expect(mockCoreSetup.userProfile.registerUserProfileDelegate).toHaveBeenCalledTimes(1);
+    });
+
+    it('logs the hash for the security encryption key', () => {
+      plugin.setup(mockCoreSetup, mockSetupDependencies);
+
+      const infoLogs = loggingSystemMock.collect(mockInitializerContext.logger).info;
+
+      expect(infoLogs.length).toBeGreaterThan(0);
+      infoLogs.forEach((log) => {
+        expect(log).toEqual([
+          `Hashed 'xpack.security.encryptionKey' for this instance: WLbjNGKEm7aA4NfJHYyW88jHUkHtyF7ENHcF0obYGBU=`,
+        ]);
+      });
     });
   });
 
@@ -137,6 +174,7 @@ describe('Security Plugin', () => {
           "authc": Object {
             "apiKeys": Object {
               "areAPIKeysEnabled": [Function],
+              "areCrossClusterAPIKeysEnabled": [Function],
               "create": [Function],
               "grantAsInternalUser": [Function],
               "invalidate": [Function],
@@ -149,29 +187,27 @@ describe('Security Plugin', () => {
           "authz": Object {
             "actions": Actions {
               "alerting": AlertingActions {
-                "prefix": "alerting:version:",
+                "prefix": "alerting:",
               },
               "api": ApiActions {
-                "prefix": "api:version:",
+                "prefix": "api:",
               },
               "app": AppActions {
-                "prefix": "app:version:",
+                "prefix": "app:",
               },
               "cases": CasesActions {
-                "prefix": "cases:version:",
+                "prefix": "cases:",
               },
               "login": "login:",
               "savedObject": SavedObjectActions {
-                "prefix": "saved_object:version:",
+                "prefix": "saved_object:",
               },
               "space": SpaceActions {
-                "prefix": "space:version:",
+                "prefix": "space:",
               },
               "ui": UIActions {
-                "prefix": "ui:version:",
+                "prefix": "ui:",
               },
-              "version": "version:version",
-              "versionNumber": "version",
             },
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],

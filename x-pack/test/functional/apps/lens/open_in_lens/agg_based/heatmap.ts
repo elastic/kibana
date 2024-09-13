@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects }: FtrProviderContext) {
   const { visualize, lens, visChart, timePicker, visEditor } = getPageObjects([
     'visualize',
     'lens',
@@ -52,19 +52,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectField('machine.os.raw');
       await visEditor.clickGo();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('heatmapChart');
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
-
       // assert axes
-      expect(debugState.axes!.x[0].labels).to.eql(['win 8', 'win xp', 'win 7', 'ios', 'osx']);
-      expect(debugState.axes!.y[0].labels).to.eql(['']);
-      expect(debugState.heatmap!.cells.length).to.eql(5);
-      expect(debugState.legend!.items).to.eql([
+      expect(debugState?.axes!.x[0].labels).to.eql(['win 8', 'win xp', 'win 7', 'ios', 'osx']);
+      expect(debugState?.axes!.y[0].labels).to.eql(['']);
+      expect(debugState?.heatmap!.cells.length).to.eql(5);
+      expect(debugState?.legend!.items).to.eql([
         {
           color: '#006837',
           key: '1,322 - 1,717.5',
@@ -90,17 +86,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectField('machine.os.raw');
       await visEditor.clickGo();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('heatmapChart');
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
-
-      expect(debugState.axes!.x[0].labels).to.eql(['*']);
-      expect(debugState.axes!.y[0].labels).to.eql(['win 8', 'win xp', 'win 7', 'ios', 'osx']);
-      expect(debugState.heatmap!.cells.length).to.eql(5);
+      expect(debugState?.axes!.x[0].labels).to.eql(['*']);
+      expect(debugState?.axes!.y[0].labels).to.eql(['win 8', 'win xp', 'win 7', 'ios', 'osx']);
+      expect(debugState?.heatmap!.cells.length).to.eql(5);
     });
 
     it('should respect heatmap colors number', async () => {
@@ -114,45 +106,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await visChart.waitForVisualizationRenderingStabilized();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('heatmapChart');
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
-
-      expect(debugState.legend!.items).to.eql([
-        {
-          color: '#006837',
-          key: '1,322 - 1,585.67',
-          name: '1,322 - 1,585.67',
-        },
-        {
-          color: '#4CB15D',
-          key: '1,585.67 - 1,849.33',
-          name: '1,585.67 - 1,849.33',
-        },
-        {
-          color: '#B7E075',
-          key: '1,849.33 - 2,113',
-          name: '1,849.33 - 2,113',
-        },
-        {
-          color: '#FEFEBD',
-          key: '2,113 - 2,376.67',
-          name: '2,113 - 2,376.67',
-        },
-        {
-          color: '#FDBF6F',
-          key: '2,376.67 - 2,640.33',
-          name: '2,376.67 - 2,640.33',
-        },
-        {
-          color: '#EA5839',
-          key: '2,640.33 - 2,904',
-          name: '2,640.33 - 2,904',
-        },
+      expect(debugState?.legend!.items).to.eql([
+        { key: '1,322 - 1,585.667', name: '1,322 - 1,585.667', color: '#006837' },
+        { key: '1,585.667 - 1,849.333', name: '1,585.667 - 1,849.333', color: '#4CB15D' },
+        { key: '1,849.333 - 2,113', name: '1,849.333 - 2,113', color: '#B7E075' },
+        { key: '2,113 - 2,376.667', name: '2,113 - 2,376.667', color: '#FEFEBD' },
+        { key: '2,376.667 - 2,640.333', name: '2,376.667 - 2,640.333', color: '#FDBF6F' },
+        { key: '2,640.333 - 2,904', name: '2,640.333 - 2,904', color: '#EA5839' },
       ]);
     });
 
@@ -174,15 +138,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await visChart.waitForVisualizationRenderingStabilized();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('heatmapChart');
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
-      if (!debugState) {
-        throw new Error('Debug state is not available');
-      }
-
-      expect(debugState.legend!.items).to.eql([
+      expect(debugState?.legend!.items).to.eql([
         {
           color: '#006837',
           key: '0 - 100',

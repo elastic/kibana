@@ -13,11 +13,10 @@ import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/co
 import { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { errors } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchMvtRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   APP_ID,
   MVT_GETTILE_API_PATH,
-  API_ROOT_PATH,
   MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
 } from '../../common/constants';
@@ -28,153 +27,167 @@ const CACHE_TIMEOUT_SECONDS = 60 * 60;
 export function initMVTRoutes({
   router,
   logger,
-  core,
+  getCore,
 }: {
   router: IRouter<DataRequestHandlerContext>;
   logger: Logger;
-  core: CoreStart;
+  getCore: () => Promise<CoreStart>;
 }) {
-  router.get(
-    {
-      path: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
-      validate: {
-        params: schema.object({
-          x: schema.number(),
-          y: schema.number(),
-          z: schema.number(),
-        }),
-        query: schema.object({
-          buffer: schema.maybe(schema.number()),
-          geometryFieldName: schema.string(),
-          hasLabels: schema.boolean(),
-          requestBody: schema.string(),
-          index: schema.string(),
-          token: schema.maybe(schema.string()),
-          executionContextId: schema.maybe(schema.string()),
-        }),
+  router.versioned
+    .get({
+      path: `${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({
+              x: schema.number(),
+              y: schema.number(),
+              z: schema.number(),
+            }),
+            query: schema.object({
+              buffer: schema.maybe(schema.number()),
+              geometryFieldName: schema.string(),
+              hasLabels: schema.boolean(),
+              requestBody: schema.string(),
+              index: schema.string(),
+              token: schema.maybe(schema.string()),
+              executionContextId: schema.maybe(schema.string()),
+            }),
+          },
+        },
       },
-    },
-    async (
-      context: DataRequestHandlerContext,
-      request: KibanaRequest<unknown, Record<string, any>, unknown>,
-      response: KibanaResponseFactory
-    ) => {
-      const { query, params } = request;
-      const x = parseInt((params as any).x, 10) as number;
-      const y = parseInt((params as any).y, 10) as number;
-      const z = parseInt((params as any).z, 10) as number;
+      async (
+        context: DataRequestHandlerContext,
+        request: KibanaRequest<unknown, Record<string, any>, unknown>,
+        response: KibanaResponseFactory
+      ) => {
+        const { query, params } = request;
+        const x = parseInt((params as any).x, 10) as number;
+        const y = parseInt((params as any).y, 10) as number;
+        const z = parseInt((params as any).z, 10) as number;
 
-      let tileRequest: { path: string; body: estypes.SearchMvtRequest['body'] } = {
-        path: '',
-        body: {},
-      };
-      try {
-        tileRequest = getHitsTileRequest({
-          buffer: 'buffer' in query ? parseInt(query.buffer, 10) : 5,
-          encodedRequestBody: query.requestBody as string,
-          geometryFieldName: query.geometryFieldName as string,
-          hasLabels: query.hasLabels as boolean,
-          index: query.index as string,
-          x,
-          y,
-          z,
+        let tileRequest: { path: string; body: SearchMvtRequest['body'] } = {
+          path: '',
+          body: {},
+        };
+        try {
+          tileRequest = getHitsTileRequest({
+            buffer: 'buffer' in query ? parseInt(query.buffer, 10) : 5,
+            risonRequestBody: query.requestBody as string,
+            geometryFieldName: query.geometryFieldName as string,
+            hasLabels: query.hasLabels as boolean,
+            index: query.index as string,
+            x,
+            y,
+            z,
+          });
+        } catch (e) {
+          return response.badRequest();
+        }
+
+        const { stream, headers, statusCode } = await getTile({
+          abortController: makeAbortController(request),
+          body: tileRequest.body,
+          context,
+          core: await getCore(),
+          executionContext: makeExecutionContext({
+            type: 'server',
+            name: APP_ID,
+            description: 'mvt:get_hits_tile',
+            url: `${MVT_GETTILE_API_PATH}/${z}/${x}/${y}.pbf`,
+            id: query.executionContextId,
+          }),
+          logger,
+          path: tileRequest.path,
         });
-      } catch (e) {
-        return response.badRequest();
+
+        return sendResponse(response, stream, headers, statusCode);
       }
+    );
 
-      const { stream, headers, statusCode } = await getTile({
-        abortController: makeAbortController(request),
-        body: tileRequest.body,
-        context,
-        core,
-        executionContext: makeExecutionContext({
-          type: 'server',
-          name: APP_ID,
-          description: 'mvt:get_hits_tile',
-          url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/${z}/${x}/${y}.pbf`,
-          id: query.executionContextId,
-        }),
-        logger,
-        path: tileRequest.path,
-      });
-
-      return sendResponse(response, stream, headers, statusCode);
-    }
-  );
-
-  router.get(
-    {
-      path: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
-      validate: {
-        params: schema.object({
-          x: schema.number(),
-          y: schema.number(),
-          z: schema.number(),
-        }),
-        query: schema.object({
-          buffer: schema.maybe(schema.number()),
-          geometryFieldName: schema.string(),
-          hasLabels: schema.boolean(),
-          requestBody: schema.string(),
-          index: schema.string(),
-          renderAs: schema.string(),
-          token: schema.maybe(schema.string()),
-          gridPrecision: schema.number(),
-          executionContextId: schema.maybe(schema.string()),
-        }),
+  router.versioned
+    .get({
+      path: `${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({
+              x: schema.number(),
+              y: schema.number(),
+              z: schema.number(),
+            }),
+            query: schema.object({
+              buffer: schema.maybe(schema.number()),
+              geometryFieldName: schema.string(),
+              hasLabels: schema.boolean(),
+              requestBody: schema.string(),
+              index: schema.string(),
+              renderAs: schema.string(),
+              token: schema.maybe(schema.string()),
+              gridPrecision: schema.number(),
+              executionContextId: schema.maybe(schema.string()),
+            }),
+          },
+        },
       },
-    },
-    async (
-      context: DataRequestHandlerContext,
-      request: KibanaRequest<unknown, Record<string, any>, unknown>,
-      response: KibanaResponseFactory
-    ) => {
-      const { query, params } = request;
-      const x = parseInt((params as any).x, 10) as number;
-      const y = parseInt((params as any).y, 10) as number;
-      const z = parseInt((params as any).z, 10) as number;
+      async (
+        context: DataRequestHandlerContext,
+        request: KibanaRequest<unknown, Record<string, any>, unknown>,
+        response: KibanaResponseFactory
+      ) => {
+        const { query, params } = request;
+        const x = parseInt((params as any).x, 10) as number;
+        const y = parseInt((params as any).y, 10) as number;
+        const z = parseInt((params as any).z, 10) as number;
 
-      let tileRequest: { path: string; body: estypes.SearchMvtRequest['body'] } = {
-        path: '',
-        body: {},
-      };
-      try {
-        tileRequest = getAggsTileRequest({
-          buffer: 'buffer' in query ? parseInt(query.buffer, 10) : 5,
-          encodedRequestBody: query.requestBody as string,
-          geometryFieldName: query.geometryFieldName as string,
-          gridPrecision: parseInt(query.gridPrecision, 10),
-          hasLabels: query.hasLabels as boolean,
-          index: query.index as string,
-          renderAs: query.renderAs as RENDER_AS,
-          x,
-          y,
-          z,
+        let tileRequest: { path: string; body: SearchMvtRequest['body'] } = {
+          path: '',
+          body: {},
+        };
+        try {
+          tileRequest = getAggsTileRequest({
+            buffer: 'buffer' in query ? parseInt(query.buffer, 10) : 5,
+            risonRequestBody: query.requestBody as string,
+            geometryFieldName: query.geometryFieldName as string,
+            gridPrecision: parseInt(query.gridPrecision, 10),
+            hasLabels: query.hasLabels as boolean,
+            index: query.index as string,
+            renderAs: query.renderAs as RENDER_AS,
+            x,
+            y,
+            z,
+          });
+        } catch (e) {
+          return response.badRequest();
+        }
+
+        const { stream, headers, statusCode } = await getTile({
+          abortController: makeAbortController(request),
+          body: tileRequest.body,
+          context,
+          core: await getCore(),
+          executionContext: makeExecutionContext({
+            type: 'server',
+            name: APP_ID,
+            description: 'mvt:get_aggs_tile',
+            url: `${MVT_GETGRIDTILE_API_PATH}/${z}/${x}/${y}.pbf`,
+            id: query.executionContextId,
+          }),
+          logger,
+          path: tileRequest.path,
         });
-      } catch (e) {
-        return response.badRequest();
+
+        return sendResponse(response, stream, headers, statusCode);
       }
-
-      const { stream, headers, statusCode } = await getTile({
-        abortController: makeAbortController(request),
-        body: tileRequest.body,
-        context,
-        core,
-        executionContext: makeExecutionContext({
-          type: 'server',
-          name: APP_ID,
-          description: 'mvt:get_aggs_tile',
-          url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/${z}/${x}/${y}.pbf`,
-          id: query.executionContextId,
-        }),
-        logger,
-        path: tileRequest.path,
-      });
-
-      return sendResponse(response, stream, headers, statusCode);
-    }
-  );
+    );
 }
 
 async function getTile({
@@ -187,7 +200,7 @@ async function getTile({
   path,
 }: {
   abortController: AbortController;
-  body: estypes.SearchMvtRequest['body'];
+  body: SearchMvtRequest['body'];
   context: DataRequestHandlerContext;
   core: CoreStart;
   executionContext: KibanaExecutionContext;

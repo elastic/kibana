@@ -1,35 +1,62 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { DataPluginRouter } from '../types';
+import {
+  SearchSessionRestResponse,
+  SearchSessionStatusRestResponse,
+  SearchSessionsFindRestResponse,
+  SearchSessionsUpdateRestResponse,
+} from './response_types';
+import {
+  searchSessionSchema,
+  searchSessionStatusSchema,
+  searchSessionsFindSchema,
+  searchSessionsUpdateSchema,
+} from './response_schema';
 
 const STORE_SEARCH_SESSIONS_ROLE_TAG = `access:store_search_session`;
+const access = 'internal';
+const options = {
+  tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+};
+const pathPrefix = '/internal/session';
+export const INITIAL_SEARCH_SESSION_REST_VERSION = '1';
+const version = INITIAL_SEARCH_SESSION_REST_VERSION;
+
+const idAndAttrsOnly = (so?: SearchSessionRestResponse) =>
+  so && { id: so.id, attributes: so.attributes };
 
 export function registerSessionRoutes(router: DataPluginRouter, logger: Logger): void {
-  router.post(
+  router.versioned.post({ path: pathPrefix, access, options }).addVersion(
     {
-      path: '/internal/session',
+      version,
       validate: {
-        body: schema.object({
-          sessionId: schema.string(),
-          name: schema.string(),
-          appId: schema.string(),
-          expires: schema.maybe(schema.string()),
-          locatorId: schema.string(),
-          initialState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-          restoreState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+        request: {
+          body: schema.object({
+            sessionId: schema.string(),
+            name: schema.string(),
+            appId: schema.string(),
+            expires: schema.maybe(schema.string()),
+            locatorId: schema.string(),
+            initialState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+            restoreState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+          }),
+        },
+        response: {
+          200: {
+            body: () => schema.maybe(searchSessionSchema()),
+          },
+        },
       },
     },
     async (context, request, res) => {
@@ -38,6 +65,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
 
       try {
         const searchContext = await context.search;
+
         const response = await searchContext.saveSession(sessionId, {
           name,
           appId,
@@ -47,9 +75,9 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           restoreState,
         });
 
-        return res.ok({
-          body: response,
-        });
+        const body: SearchSessionRestResponse | undefined = idAndAttrsOnly(response);
+
+        return res.ok({ body });
       } catch (err) {
         logger.error(err);
         return reportServerError(res, err);
@@ -57,23 +85,59 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.get(
+  router.versioned.get({ path: `${pathPrefix}/{id}`, access, options }).addVersion(
     {
-      path: '/internal/session/{id}',
+      version,
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+        request: {
+          params: schema.object({
+            id: schema.string(),
+          }),
+        },
+        response: {
+          200: {
+            body: searchSessionSchema,
+          },
+        },
       },
     },
     async (context, request, res) => {
       const { id } = request.params;
       try {
         const searchContext = await context.search;
-        const response = await searchContext!.getSession(id);
+        const response: SearchSessionRestResponse = await searchContext!.getSession(id);
+        const body = idAndAttrsOnly(response);
+
+        return res.ok({ body });
+      } catch (e) {
+        const err = e.output?.payload || e;
+        logger.error(err);
+        return reportServerError(res, err);
+      }
+    }
+  );
+
+  router.versioned.get({ path: `${pathPrefix}/{id}/status`, access, options }).addVersion(
+    {
+      version,
+      validate: {
+        request: {
+          params: schema.object({
+            id: schema.string(),
+          }),
+        },
+        response: {
+          200: {
+            body: searchSessionStatusSchema,
+          },
+        },
+      },
+    },
+    async (context, request, res) => {
+      const { id } = request.params;
+      try {
+        const searchContext = await context.search;
+        const response: SearchSessionStatusRestResponse = await searchContext!.getSessionStatus(id);
 
         return res.ok({
           body: response,
@@ -86,58 +150,33 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.get(
+  router.versioned.post({ path: `${pathPrefix}/_find`, access, options }).addVersion(
     {
-      path: '/internal/session/{id}/status',
+      version,
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
-      },
-    },
-    async (context, request, res) => {
-      const { id } = request.params;
-      try {
-        const searchContext = await context.search;
-        const response = await searchContext!.getSessionStatus(id);
-
-        return res.ok({
-          body: response,
-        });
-      } catch (e) {
-        const err = e.output?.payload || e;
-        logger.error(err);
-        return reportServerError(res, err);
-      }
-    }
-  );
-
-  router.post(
-    {
-      path: '/internal/session/_find',
-      validate: {
-        body: schema.object({
-          page: schema.maybe(schema.number()),
-          perPage: schema.maybe(schema.number()),
-          sortField: schema.maybe(schema.string()),
-          sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-          filter: schema.maybe(schema.string()),
-          searchFields: schema.maybe(schema.arrayOf(schema.string())),
-          search: schema.maybe(schema.string()),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+        request: {
+          body: schema.object({
+            page: schema.maybe(schema.number()),
+            perPage: schema.maybe(schema.number()),
+            sortField: schema.maybe(schema.string()),
+            sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
+            filter: schema.maybe(schema.string()),
+            searchFields: schema.maybe(schema.arrayOf(schema.string())),
+            search: schema.maybe(schema.string()),
+          }),
+        },
+        response: {
+          200: {
+            body: searchSessionsFindSchema,
+          },
+        },
       },
     },
     async (context, request, res) => {
       const { page, perPage, sortField, sortOrder, filter, searchFields, search } = request.body;
       try {
         const searchContext = await context.search;
-        const response = await searchContext!.findSessions({
+        const response: SearchSessionsFindRestResponse = await searchContext!.findSessions({
           page,
           perPage,
           sortField,
@@ -147,9 +186,13 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           search,
         });
 
-        return res.ok({
-          body: response,
-        });
+        const body = {
+          total: response.total,
+          saved_objects: response.saved_objects.map(idAndAttrsOnly),
+          statuses: response.statuses,
+        };
+
+        return res.ok({ body });
       } catch (err) {
         logger.error(err);
         return reportServerError(res, err);
@@ -157,16 +200,15 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.delete(
+  router.versioned.delete({ path: `${pathPrefix}/{id}`, access, options }).addVersion(
     {
-      path: '/internal/session/{id}',
+      version,
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+        request: {
+          params: schema.object({
+            id: schema.string(),
+          }),
+        },
       },
     },
     async (context, request, res) => {
@@ -184,16 +226,15 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.post(
+  router.versioned.post({ path: `${pathPrefix}/{id}/cancel`, access, options }).addVersion(
     {
-      path: '/internal/session/{id}/cancel',
+      version,
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+        request: {
+          params: schema.object({
+            id: schema.string(),
+          }),
+        },
       },
     },
     async (context, request, res) => {
@@ -211,20 +252,24 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.put(
+  router.versioned.put({ path: `${pathPrefix}/{id}`, access, options }).addVersion(
     {
-      path: '/internal/session/{id}',
+      version,
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-        body: schema.object({
-          name: schema.maybe(schema.string()),
-          expires: schema.maybe(schema.string()),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+        request: {
+          params: schema.object({
+            id: schema.string(),
+          }),
+          body: schema.object({
+            name: schema.maybe(schema.string()),
+            expires: schema.maybe(schema.string()),
+          }),
+        },
+        response: {
+          200: {
+            body: searchSessionsUpdateSchema,
+          },
+        },
       },
     },
     async (context, request, res) => {
@@ -232,8 +277,10 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
       const { name, expires } = request.body;
       try {
         const searchContext = await context.search;
-        const response = await searchContext.updateSession(id, { name, expires });
-
+        const response: SearchSessionsUpdateRestResponse = await searchContext.updateSession(id, {
+          name,
+          expires,
+        });
         return res.ok({
           body: response,
         });
@@ -244,19 +291,23 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.post(
+  router.versioned.post({ path: `${pathPrefix}/{id}/_extend`, access, options }).addVersion(
     {
-      path: '/internal/session/{id}/_extend',
+      version,
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-        body: schema.object({
-          expires: schema.string(),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+        request: {
+          params: schema.object({
+            id: schema.string(),
+          }),
+          body: schema.object({
+            expires: schema.string(),
+          }),
+        },
+        response: {
+          200: {
+            body: searchSessionsUpdateSchema,
+          },
+        },
       },
     },
     async (context, request, res) => {
@@ -264,7 +315,10 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
       const { expires } = request.body;
       try {
         const searchContext = await context.search;
-        const response = await searchContext.extendSession(id, new Date(expires));
+        const response: SearchSessionsUpdateRestResponse = await searchContext.extendSession(
+          id,
+          new Date(expires)
+        );
 
         return res.ok({
           body: response,

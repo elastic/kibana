@@ -6,16 +6,23 @@
  */
 
 import React from 'react';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { ConnectorProvider } from '../application/context/connector_context';
 import { RuleAdd } from '../application/sections/rule_form';
-import type { ConnectorServices, RuleAddProps } from '../types';
+import type { ConnectorServices, RuleAddProps, RuleTypeParams, RuleTypeMetaData } from '../types';
+import { queryClient } from '../application/query_client';
 
-export const getAddRuleFlyoutLazy = (
-  props: RuleAddProps & { connectorServices: ConnectorServices }
+export const getAddRuleFlyoutLazy = <
+  Params extends RuleTypeParams = RuleTypeParams,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+>(
+  props: RuleAddProps<Params, MetaData> & { connectorServices: ConnectorServices }
 ) => {
   return (
     <ConnectorProvider value={{ services: props.connectorServices }}>
-      <RuleAdd {...props} />
+      <QueryClientProvider client={queryClient}>
+        <RuleAdd {...props} />
+      </QueryClientProvider>
     </ConnectorProvider>
   );
 };

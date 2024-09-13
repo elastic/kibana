@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Entity } from '../entity';
 import { Span } from './span';
 import { Transaction } from './transaction';
-import { ApmFields, SpanParams, GeoLocation } from './apm_fields';
-import { generateLongId } from '../utils/generate_id';
+import { Event } from './event';
+import { ApmApplicationMetricFields, ApmFields, GeoLocation, SpanParams } from './apm_fields';
+import { generateLongIdWithSeed, generateLongId } from '../utils/generate_id';
+import { Metricset } from './metricset';
+import { ApmError } from './apm_error';
 
 export interface DeviceInfo {
   manufacturer: string;
@@ -115,6 +119,7 @@ export class MobileDevice extends Entity<ApmFields> {
     return this;
   }
 
+  // FIXME  synthtrace shouldn't have side-effects like this. We should use an API like .session() which returns a session
   startNewSession() {
     this.fields['session.id'] = generateLongId();
     return this;
@@ -138,6 +143,10 @@ export class MobileDevice extends Entity<ApmFields> {
     }
 
     return this;
+  }
+
+  event(): Event {
+    return new Event({ ...this.fields });
   }
 
   transaction(
@@ -237,5 +246,23 @@ export class MobileDevice extends Entity<ApmFields> {
     }
 
     return this.span(spanParameters);
+  }
+
+  appMetrics(metrics: ApmApplicationMetricFields) {
+    return new Metricset<ApmFields>({
+      ...this.fields,
+      'metricset.name': 'app',
+      ...metrics,
+    });
+  }
+
+  crash({ message, groupingName }: { message: string; groupingName?: string }) {
+    return new ApmError({
+      ...this.fields,
+      'error.type': 'crash',
+      'error.id': generateLongIdWithSeed(message),
+      'error.exception': [{ message, ...{ type: 'crash' } }],
+      'error.grouping_name': groupingName || message,
+    });
   }
 }

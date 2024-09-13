@@ -199,8 +199,6 @@ export interface ExtensionPointStorageInterface {
 
   clear(): void;
 
-  getExtensionRegistrationSource(extensionPoint: ExtensionPoint): string | undefined;
-
   get<T extends ExtensionPoint['type']>(
     extensionType: T
   ): Set<NarrowExtensionPointToType<T>> | undefined;

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
-import {
-  FieldStats,
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import type {
   FieldStatsProps,
   FieldStatsServices,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list/src/components/field_stats';
+import { FieldStats } from '@kbn/unified-field-list/src/components/field_stats';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
@@ -27,7 +28,7 @@ export const FieldStatsContent: FC<{
   fieldStatsServices: FieldStatsServices;
   timeRangeMs?: TimeRangeMs;
   dslQuery?: FieldStatsProps['dslQuery'];
-}> = ({ dataView: currentDataView, fieldStatsServices, timeRangeMs, dslQuery }) => {
+}> = ({ dataView: selectedDataView, fieldStatsServices, timeRangeMs, dslQuery }) => {
   const { fieldName } = useFieldStatsFlyoutContext();
 
   // Format timestamp to ISO formatted date strings
@@ -47,11 +48,11 @@ export const FieldStatsContent: FC<{
   }, [timeRangeMs]);
 
   const fieldForStats = useMemo(
-    () => (isDefined(fieldName) ? currentDataView.getFieldByName(fieldName) : undefined),
-    [fieldName, currentDataView]
+    () => (isDefined(fieldName) ? selectedDataView.getFieldByName(fieldName) : undefined),
+    [fieldName, selectedDataView]
   );
 
-  const showFieldStats = timeRange && isDefined(currentDataView) && fieldForStats;
+  const showFieldStats = timeRange && isDefined(selectedDataView) && fieldForStats;
 
   return showFieldStats ? (
     <FieldStats
@@ -60,7 +61,7 @@ export const FieldStatsContent: FC<{
       dslQuery={dslQuery ?? DEFAULT_DSL_QUERY}
       fromDate={timeRange.from}
       toDate={timeRange.to}
-      dataViewOrDataViewId={currentDataView}
+      dataViewOrDataViewId={selectedDataView}
       field={fieldForStats}
       data-test-subj={`mlFieldStatsFlyoutContent ${fieldForStats.name}`}
       color={DEFAULT_COLOR}

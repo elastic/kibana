@@ -9,6 +9,7 @@ import sinon from 'sinon';
 import { Alert } from './alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
 import { alertWithAnyUUID } from '../test_utils';
+import { CombinedSummarizedAlerts } from '../types';
 
 let clock: sinon.SinonFakeTimers;
 
@@ -43,7 +44,7 @@ describe('isThrottled', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -57,10 +58,10 @@ describe('isThrottled', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
           actions: {
-            'slack:alert:1h': { date: new Date() },
+            'slack:alert:1h': { date: new Date().toISOString() },
           },
         },
       },
@@ -76,7 +77,7 @@ describe('isThrottled', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -90,7 +91,7 @@ describe('isThrottled', () => {
     const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -104,10 +105,10 @@ describe('isThrottled', () => {
     const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
           actions: {
-            '111-111': { date: new Date() },
+            '111-111': { date: new Date().toISOString() },
           },
         },
       },
@@ -121,10 +122,10 @@ describe('isThrottled', () => {
     const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date('2020-01-01'),
+          date: new Date('2020-01-01').toISOString(),
           group: 'default',
           actions: {
-            '111-111': { date: new Date() },
+            '111-111': { date: new Date().toISOString() },
           },
         },
       },
@@ -140,10 +141,10 @@ describe('isThrottled', () => {
     const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
           actions: {
-            '111-111': { date: new Date() },
+            '111-111': { date: new Date().toISOString() },
           },
         },
       },
@@ -164,7 +165,7 @@ describe('scheduledActionGroupHasChanged()', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -183,7 +184,7 @@ describe('scheduledActionGroupHasChanged()', () => {
     const alert = new Alert<never, never, 'default' | 'penguin'>('1', {
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -249,13 +250,31 @@ describe('getUUID()', () => {
   });
 });
 
+describe('getStart()', () => {
+  test('returns null for new alert', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.getStart()).toBeNull();
+  });
+
+  test('returns start time if set in state', () => {
+    const uuid = 'previous-uuid';
+    const meta = { uuid };
+    const state = { foo: true, start: '2023-03-28T12:27:28.159Z', duration: '0' };
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      state,
+      meta,
+    });
+    expect(alert.getStart()).toEqual('2023-03-28T12:27:28.159Z');
+  });
+});
+
 describe('scheduleActions()', () => {
   test('makes hasScheduledActions() return true', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -269,7 +288,7 @@ describe('scheduleActions()', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -283,7 +302,7 @@ describe('scheduleActions()', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -344,6 +363,7 @@ describe('updateLastScheduledActions()', () => {
           group: 'default',
         },
         flappingHistory: [],
+        maintenanceWindowIds: [],
       },
     });
   });
@@ -357,6 +377,7 @@ describe('updateLastScheduledActions()', () => {
       state: {},
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -373,11 +394,12 @@ describe('updateLastScheduledActions()', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
           actions: {
-            'slack:alert:1h': { date: new Date() },
+            'slack:alert:1h': { date: new Date().toISOString() },
           },
         },
       },
@@ -387,6 +409,7 @@ describe('updateLastScheduledActions()', () => {
       state: {},
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -406,7 +429,7 @@ describe('getContext()', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -419,7 +442,7 @@ describe('getContext()', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -435,7 +458,7 @@ describe('hasContext()', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -449,7 +472,7 @@ describe('hasContext()', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -463,7 +486,7 @@ describe('hasContext()', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
       },
@@ -480,10 +503,11 @@ describe('toJSON', () => {
         state: { foo: true },
         meta: {
           lastScheduledActions: {
-            date: new Date(),
+            date: new Date().toISOString(),
             group: 'default',
           },
           flappingHistory: [false, true],
+          maintenanceWindowIds: [],
           flapping: false,
           pendingRecoveredCount: 2,
         },
@@ -496,7 +520,7 @@ describe('toJSON', () => {
       },
       meta: {
         lastScheduledActions: {
-          date: expect.any(Date),
+          date: expect.any(String),
           group: 'default',
         },
         uuid: expect.any(String),
@@ -514,11 +538,12 @@ describe('toRaw', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
         flappingHistory: [false, true, true],
         pendingRecoveredCount: 2,
+        activeCount: 1,
       },
     };
     const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
@@ -533,11 +558,12 @@ describe('toRaw', () => {
       state: { foo: true },
       meta: {
         lastScheduledActions: {
-          date: new Date(),
+          date: new Date().toISOString(),
           group: 'default',
         },
         flappingHistory: [false, true, true],
         flapping: false,
+        activeCount: 1,
       },
     };
     const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
@@ -548,7 +574,9 @@ describe('toRaw', () => {
       meta: {
         flappingHistory: [false, true, true],
         flapping: false,
+        maintenanceWindowIds: [],
         uuid: expect.any(String),
+        activeCount: 1,
       },
     });
   });
@@ -570,6 +598,7 @@ describe('setFlappingHistory', () => {
           "flappingHistory": Array [
             false,
           ],
+          "maintenanceWindowIds": Array [],
           "uuid": Any<String>,
         },
         "state": Object {},
@@ -602,6 +631,7 @@ describe('setFlapping', () => {
         "meta": Object {
           "flapping": false,
           "flappingHistory": Array [],
+          "maintenanceWindowIds": Array [],
           "uuid": Any<String>,
         },
         "state": Object {},
@@ -660,8 +690,35 @@ describe('resetPendingRecoveredCount', () => {
 });
 
 describe('isFilteredOut', () => {
-  const summarizedAlerts = {
-    all: { count: 1, data: [{ kibana: { alert: { instance: { id: 1 } } } }] },
+  const summarizedAlerts: CombinedSummarizedAlerts = {
+    all: {
+      count: 1,
+      data: [
+        {
+          _id: '1',
+          _index: '.alerts',
+          '@timestamp': '',
+          // @ts-expect-error
+          kibana: {
+            alert: {
+              instance: { id: 'a' },
+              rule: {
+                category: 'category',
+                consumer: 'consumer',
+                name: 'name',
+                producer: 'producer',
+                revision: 0,
+                rule_type_id: 'rule_type_id',
+                uuid: 'uuid',
+              },
+              status: 'status',
+              uuid: '1',
+            },
+            space_ids: ['default'],
+          },
+        },
+      ],
+    },
     new: { count: 0, data: [] },
     ongoing: { count: 0, data: [] },
     recovered: { count: 0, data: [] },
@@ -669,20 +726,66 @@ describe('isFilteredOut', () => {
 
   test('returns false if summarizedAlerts is null', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      meta: { pendingRecoveredCount: 3 },
+      meta: { pendingRecoveredCount: 3, uuid: '1' },
     });
     expect(alert.isFilteredOut(null)).toBe(false);
   });
-  test('returns false if the alert is in summarizedAlerts', () => {
+  test('returns false if the alert with same ID is in summarizedAlerts', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      meta: { pendingRecoveredCount: 3 },
+      meta: { pendingRecoveredCount: 3, uuid: 'no' },
     });
-    expect(alert.isFilteredOut(null)).toBe(false);
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(false);
   });
-  test('returns true if the alert is not in summarizedAlerts', () => {
+  test('returns false if the alert with same UUID is in summarizedAlerts', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2', {
-      meta: { pendingRecoveredCount: 3 },
+      meta: { pendingRecoveredCount: 3, uuid: '1' },
+    });
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(false);
+  });
+  test('returns true if the alert with same UUID or ID is not in summarizedAlerts', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2', {
+      meta: { pendingRecoveredCount: 3, uuid: '3' },
     });
     expect(alert.isFilteredOut(summarizedAlerts)).toBe(true);
+  });
+});
+
+describe('incrementActiveCount', () => {
+  test('correctly increments activeCount', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { activeCount: 3 },
+    });
+    alert.incrementActiveCount();
+    expect(alert.getActiveCount()).toEqual(4);
+  });
+
+  test('correctly increments activeCount when it is not already defined', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    alert.incrementActiveCount();
+    expect(alert.getActiveCount()).toEqual(1);
+  });
+});
+
+describe('getActiveCount', () => {
+  test('returns ActiveCount', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { activeCount: 3 },
+    });
+    expect(alert.getActiveCount()).toEqual(3);
+  });
+
+  test('defines and returns activeCount when it is not already defined', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.getActiveCount()).toEqual(0);
+  });
+});
+
+describe('resetActiveCount', () => {
+  test('resets activeCount to 0', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { activeCount: 3 },
+    });
+    alert.resetActiveCount();
+    expect(alert.getActiveCount()).toEqual(0);
   });
 });

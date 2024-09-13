@@ -7,9 +7,13 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { toElasticsearchQuery } from '@kbn/es-query';
 
 import { AGENTS_INDEX } from '../../constants';
+import { createAppContextStartContractMock } from '../../mocks';
 import type { Agent } from '../../types';
+import { appContextService } from '../app_context';
+import type { AgentStatus } from '../../../common/types';
 
 import { auditLoggingService } from '../audit_logging';
 
@@ -19,17 +23,28 @@ import {
   getAgentTags,
   openPointInTime,
   updateAgent,
+  _joinFilters,
 } from './crud';
 
 jest.mock('../audit_logging');
 jest.mock('../../../common/services/is_agent_upgradeable', () => ({
-  isAgentUpgradeable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
+  isAgentUpgradeAvailable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
 }));
+jest.mock('./versions', () => {
+  return {
+    getAvailableVersions: jest
+      .fn()
+      .mockResolvedValue(['8.4.0', '8.5.0', '8.6.0', '8.7.0', '8.8.0']),
+    getLatestAvailableAgentVersion: jest.fn().mockResolvedValue('8.8.0'),
+  };
+});
+jest.mock('../spaces/helpers');
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
 describe('Agents CRUD test', () => {
   const soClientMock = savedObjectsClientMock.create();
+  let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   let esClientMock: ElasticsearchClient;
   let searchMock: jest.Mock;
 
@@ -41,9 +56,14 @@ describe('Agents CRUD test', () => {
       openPointInTime: jest.fn().mockResolvedValue({ id: '1' }),
       closePointInTime: jest.fn(),
     } as unknown as ElasticsearchClient;
+
+    mockContract = createAppContextStartContractMock({}, false, {
+      withoutSpaceExtensions: soClientMock,
+    });
+    appContextService.start(mockContract);
   });
 
-  function getEsResponse(ids: string[], total: number) {
+  function getEsResponse(ids: string[], total: number, status: AgentStatus) {
     return {
       hits: {
         total,
@@ -51,7 +71,7 @@ describe('Agents CRUD test', () => {
           _id: id,
           _source: {},
           fields: {
-            status: ['inactive'],
+            status: [status],
           },
         })),
       },
@@ -120,20 +140,6 @@ describe('Agents CRUD test', () => {
       expect(searchMock).toHaveBeenCalledWith(
         expect.objectContaining({
           aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
-          body: {
-            query: {
-              bool: {
-                minimum_should_match: 1,
-                should: [
-                  {
-                    match: {
-                      policy_id: '123',
-                    },
-                  },
-                ],
-              },
-            },
-          },
           index: '.fleet-agents',
           size: 0,
           fields: ['status'],
@@ -142,15 +148,23 @@ describe('Agents CRUD test', () => {
           },
         })
       );
+
+      expect(searchMock.mock.calls.at(-1)[0].body.query).toEqual(
+        toElasticsearchQuery(
+          _joinFilters(['fleet-agents.policy_id: 123', 'NOT status:unenrolled'])!
+        )
+      );
     });
   });
 
   describe('getAgentsByKuery', () => {
     it('should return upgradeable on first page', async () => {
       searchMock
-        .mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2', '3', '4', '5'], 7)))
         .mockImplementationOnce(() =>
-          Promise.resolve(getEsResponse(['1', '2', '3', '4', '5', 'up', '7'], 7))
+          Promise.resolve(getEsResponse(['1', '2', '3', '4', '5'], 7, 'inactive'))
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve(getEsResponse(['1', '2', '3', '4', '5', 'up', '7'], 7, 'inactive'))
         );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
@@ -177,9 +191,11 @@ describe('Agents CRUD test', () => {
 
     it('should return upgradeable from all pages', async () => {
       searchMock
-        .mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 7)))
         .mockImplementationOnce(() =>
-          Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5', 'up2', '7'], 7))
+          Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 7, 'inactive'))
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5', 'up2', '7'], 7, 'inactive'))
         );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
@@ -213,9 +229,11 @@ describe('Agents CRUD test', () => {
 
     it('should return upgradeable on second page', async () => {
       searchMock
-        .mockImplementationOnce(() => Promise.resolve(getEsResponse(['up6', '7'], 7)))
+        .mockImplementationOnce(() => Promise.resolve(getEsResponse(['up6', '7'], 7, 'inactive')))
         .mockImplementationOnce(() =>
-          Promise.resolve(getEsResponse(['up1', 'up2', 'up3', 'up4', 'up5', 'up6', '7'], 7))
+          Promise.resolve(
+            getEsResponse(['up1', 'up2', 'up3', 'up4', 'up5', 'up6', '7'], 7, 'inactive')
+          )
         );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
@@ -242,7 +260,7 @@ describe('Agents CRUD test', () => {
 
     it('should return upgradeable from one page when total is more than limit', async () => {
       searchMock.mockImplementationOnce(() =>
-        Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001))
+        Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001, 'inactive'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
@@ -267,8 +285,79 @@ describe('Agents CRUD test', () => {
       });
     });
 
+    it('should return correct status summary when showUpgradeable is selected and total is less than limit', async () => {
+      searchMock.mockImplementationOnce(() =>
+        Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 100, 'updating'))
+      );
+      searchMock.mockImplementationOnce(() =>
+        Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 100, 'updating'))
+      );
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showUpgradeable: true,
+        showInactive: false,
+        getStatusSummary: true,
+        page: 1,
+        perPage: 5,
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          page: 1,
+          perPage: 5,
+          statusSummary: {
+            degraded: 0,
+            enrolling: 0,
+            error: 0,
+            inactive: 0,
+            offline: 0,
+            online: 0,
+            unenrolled: 0,
+            unenrolling: 0,
+            updating: 1,
+          },
+          total: 1,
+        })
+      );
+    });
+
+    it('should return correct status summary when showUpgradeable is selected and total is more than limit', async () => {
+      searchMock.mockImplementationOnce(() =>
+        Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001, 'updating'))
+      );
+      searchMock.mockImplementationOnce(() =>
+        Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001, 'updating'))
+      );
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showUpgradeable: true,
+        showInactive: false,
+        getStatusSummary: true,
+        page: 1,
+        perPage: 5,
+      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          page: 1,
+          perPage: 5,
+          statusSummary: {
+            degraded: 0,
+            enrolling: 0,
+            error: 0,
+            inactive: 0,
+            offline: 0,
+            online: 0,
+            unenrolled: 0,
+            unenrolling: 0,
+            updating: 1,
+          },
+          total: 10001,
+        })
+      );
+    });
+
     it('should return second page', async () => {
-      searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['6', '7'], 7)));
+      searchMock.mockImplementationOnce(() =>
+        Promise.resolve(getEsResponse(['6', '7'], 7, 'inactive'))
+      );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: false,
         showInactive: false,
@@ -300,7 +389,9 @@ describe('Agents CRUD test', () => {
     });
 
     it('should pass secondary sort for default sort', async () => {
-      searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2'], 2)));
+      searchMock.mockImplementationOnce(() =>
+        Promise.resolve(getEsResponse(['1', '2'], 2, 'inactive'))
+      );
       await getAgentsByKuery(esClientMock, soClientMock, {
         showInactive: false,
       });
@@ -312,12 +403,74 @@ describe('Agents CRUD test', () => {
     });
 
     it('should not pass secondary sort for non-default sort', async () => {
-      searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2'], 2)));
+      searchMock.mockImplementationOnce(() =>
+        Promise.resolve(getEsResponse(['1', '2'], 2, 'inactive'))
+      );
       await getAgentsByKuery(esClientMock, soClientMock, {
         showInactive: false,
         sortField: 'policy_id',
       });
       expect(searchMock.mock.calls.at(-1)[0].sort).toEqual([{ policy_id: { order: 'desc' } }]);
+    });
+
+    describe('status filters', () => {
+      beforeEach(() => {
+        searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse([], 0, 'online')));
+      });
+      it('should add inactive and unenrolled filter', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: false,
+          kuery: '',
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(_joinFilters(['NOT (status:inactive)', 'NOT status:unenrolled'])!)
+        );
+      });
+
+      it('should add unenrolled filter', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: '',
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(_joinFilters(['NOT status:unenrolled'])!)
+        );
+      });
+
+      it('should not add unenrolled filter', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'status:unenrolled',
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(_joinFilters(['status:unenrolled'])!)
+        );
+      });
+
+      it('should add inactive filter', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: false,
+          kuery: 'status:*',
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(_joinFilters(['status:*', 'NOT status:inactive'])!)
+        );
+      });
+
+      it('should not add inactive filter', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'status:*',
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(_joinFilters(['status:*'])!)
+        );
+      });
     });
   });
 

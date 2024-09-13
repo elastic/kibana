@@ -6,17 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { estypes } from '@elastic/elasticsearch';
-import { map } from 'rxjs/operators';
+import type { estypes } from '@elastic/elasticsearch';
+import { map } from 'rxjs';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 import { processResponse, processInferenceResult } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getFillMaskOutputComponent } from './fill_mask_output';
-import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
+import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 
-const MASK = '[MASK]';
+const DEFAULT_MASK_TOKEN = '[MASK]';
 
 export class FillMaskInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.FILL_MASK;
@@ -30,16 +30,22 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
       defaultMessage: 'Test how well the model predicts a missing word in a phrase.',
     }),
   ];
+  private maskToken = DEFAULT_MASK_TOKEN;
 
   constructor(
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
-    inputType: INPUT_TYPE
+    inputType: INPUT_TYPE,
+    deploymentId: string
   ) {
-    super(trainedModelsApi, model, inputType);
+    super(trainedModelsApi, model, inputType, deploymentId);
+    const maskToken = model.inference_config?.[this.inferenceType]?.mask_token;
+    if (maskToken) {
+      this.maskToken = maskToken;
+    }
 
     this.initialize([
-      this.inputText$.pipe(map((inputText) => inputText.every((t) => t.includes(MASK)))),
+      this.inputText$.pipe(map((inputText) => inputText.every((t) => t.includes(this.maskToken)))),
     ]);
   }
 
@@ -70,7 +76,7 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
 
   public predictedValue(resp: TextClassificationResponse) {
     const { response, inputText } = resp;
-    return response[0]?.value ? inputText.replace(MASK, response[0].value) : inputText;
+    return response[0]?.value ? inputText.replace(this.maskToken, response[0].value) : inputText;
   }
 
   public getInputComponent(): JSX.Element | null {
@@ -78,8 +84,8 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
       const placeholder = i18n.translate(
         'xpack.ml.trainedModels.testModelsFlyout.fillMask.inputText',
         {
-          defaultMessage:
-            'Enter a phrase to test. Use [MASK] as a placeholder for the missing words.',
+          defaultMessage: `Enter a phrase to test. Use {maskToken} as a placeholder for the missing words.`,
+          values: { maskToken: this.maskToken },
         }
       );
 

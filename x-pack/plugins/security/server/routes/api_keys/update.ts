@@ -6,43 +6,24 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { UpdateAPIKeyResult } from '@kbn/security-plugin-types-server';
+import {
+  getUpdateRestApiKeyWithKibanaPrivilegesSchema,
+  updateCrossClusterApiKeySchema,
+  updateRestApiKeySchema,
+} from '@kbn/security-plugin-types-server';
 
 import type { RouteDefinitionParams } from '..';
-import type { UpdateAPIKeyResult } from '../../authentication/api_keys/api_keys';
 import { UpdateApiKeyValidationError } from '../../authentication/api_keys/api_keys';
 import { wrapIntoCustomErrorResponse } from '../../errors';
-import { elasticsearchRoleSchema, getKibanaRoleSchema } from '../../lib';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-
-const bodySchema = schema.object({
-  id: schema.string(),
-  role_descriptors: schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' }), {
-    defaultValue: {},
-  }),
-  metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-});
-
-const getBodySchemaWithKibanaPrivileges = (
-  getBasePrivilegeNames: () => { global: string[]; space: string[] }
-) =>
-  schema.object({
-    id: schema.string(),
-    kibana_role_descriptors: schema.recordOf(
-      schema.string(),
-      schema.object({
-        elasticsearch: elasticsearchRoleSchema.extends({}, { unknowns: 'allow' }),
-        kibana: getKibanaRoleSchema(getBasePrivilegeNames),
-      })
-    ),
-    metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  });
 
 export function defineUpdateApiKeyRoutes({
   router,
   authz,
   getAuthenticationService,
 }: RouteDefinitionParams) {
-  const bodySchemaWithKibanaPrivileges = getBodySchemaWithKibanaPrivileges(() => {
+  const bodySchemaWithKibanaPrivileges = getUpdateRestApiKeyWithKibanaPrivilegesSchema(() => {
     const privileges = authz.privileges.get();
     return {
       global: Object.keys(privileges.global),
@@ -54,7 +35,14 @@ export function defineUpdateApiKeyRoutes({
     {
       path: '/internal/security/api_key',
       validate: {
-        body: schema.oneOf([bodySchema, bodySchemaWithKibanaPrivileges]),
+        body: schema.oneOf([
+          updateRestApiKeySchema,
+          updateCrossClusterApiKeySchema,
+          bodySchemaWithKibanaPrivileges,
+        ]),
+      },
+      options: {
+        access: 'internal',
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {

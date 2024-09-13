@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { resolve } from 'path';
@@ -18,6 +19,7 @@ jest.mock('./version_info', () => ({
     buildSha: 'abc1234',
     buildVersion: '8.0.0',
     buildNumber: 1234,
+    buildDate: '2023-05-15T23:12:09+0000',
   }),
 }));
 
@@ -32,6 +34,7 @@ const setup = async ({
   return await Config.create({
     isRelease,
     targetAllPlatforms,
+    targetServerlessPlatforms: false,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
     dockerNamespace: null,
@@ -122,7 +125,10 @@ describe('#getTargetPlatforms()', () => {
         "darwin-arm64",
         "darwin-x64",
         "linux-arm64",
+        "linux-arm64",
         "linux-x64",
+        "linux-x64",
+        "win32-arm64",
         "win32-x64",
       ]
     `);
@@ -145,7 +151,16 @@ describe('#getNodePlatforms()', () => {
         .getTargetPlatforms()
         .map((p) => p.getNodeArch())
         .sort()
-    ).toEqual(['darwin-arm64', 'darwin-x64', 'linux-arm64', 'linux-x64', 'win32-x64']);
+    ).toEqual([
+      'darwin-arm64',
+      'darwin-x64',
+      'linux-arm64',
+      'linux-arm64',
+      'linux-x64',
+      'linux-x64',
+      'win32-arm64',
+      'win32-x64',
+    ]);
   });
 
   it('returns this platform and linux, when targetAllPlatforms = false', async () => {
@@ -192,6 +207,13 @@ describe('#getBuildSha()', () => {
   it('returns the sha from the build info', async () => {
     const config = await setup();
     expect(config.getBuildSha()).toBe(versionInfo.buildSha);
+  });
+});
+
+describe('#getBuildDate()', () => {
+  it('returns the date from the build info', async () => {
+    const config = await setup();
+    expect(config.getBuildDate()).toBe(versionInfo.buildDate);
   });
 });
 

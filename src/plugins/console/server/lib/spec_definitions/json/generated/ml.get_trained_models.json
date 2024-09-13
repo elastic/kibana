@@ -1,14 +1,25 @@
 {
   "ml.get_trained_models": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_match": "__flag__",
-      "include": "",
-      "include_model_definition": "__flag__",
       "decompress_definition": "__flag__",
-      "from": 0,
-      "size": 0,
-      "tags": [],
-      "exclude_generated": "__flag__"
+      "exclude_generated": "__flag__",
+      "from": "",
+      "include": [
+        "definition",
+        "feature_importance_baseline",
+        "hyperparameters",
+        "total_feature_importance",
+        "definition_status"
+      ],
+      "size": [
+        "100"
+      ],
+      "tags": []
     },
     "methods": [
       "GET"
@@ -17,6 +28,10 @@
       "_ml/trained_models/{model_id}",
       "_ml/trained_models"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-trained-models.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-trained-models.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

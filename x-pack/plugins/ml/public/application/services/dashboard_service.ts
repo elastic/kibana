@@ -5,36 +5,41 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/public';
 import { useMemo } from 'react';
-import { DashboardAppLocator } from '@kbn/dashboard-plugin/public';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useMlKibana } from '../contexts/kibana';
 
 export type DashboardService = ReturnType<typeof dashboardServiceProvider>;
+export type DashboardItems = Awaited<ReturnType<DashboardService['fetchDashboards']>>;
 
-export function dashboardServiceProvider(
-  savedObjectClient: SavedObjectsClientContract,
-  dashboardLocator: DashboardAppLocator
-) {
+export function dashboardServiceProvider(dashboardService: DashboardStart) {
   return {
     /**
      * Fetches dashboards
      */
     async fetchDashboards(query?: string) {
-      return await savedObjectClient.find<DashboardAttributes>({
-        type: 'dashboard',
-        perPage: 1000,
+      const findDashboardsService = await dashboardService.findDashboardsService();
+      const responses = await findDashboardsService.search({
         search: query ? `${query}*` : '',
-        searchFields: ['title^3', 'description'],
+        size: 1000,
       });
+      return responses.hits;
     },
     /**
-     * Generates dashboard url with edit mode
+     * Fetch dashboards by id
      */
-    async getDashboardEditUrl(dashboardId: string) {
-      return await dashboardLocator.getUrl({
+    async fetchDashboardsById(ids: string[]) {
+      const findDashboardsService = await dashboardService.findDashboardsService();
+      const responses = await findDashboardsService.findByIds(ids);
+      const existingDashboards = responses.filter(({ status }) => status === 'success');
+      return existingDashboards;
+    },
+    /**
+     * Generates dashboard url
+     */
+    async getDashboardUrl(dashboardId: string, viewMode: ViewMode = ViewMode.EDIT) {
+      return await dashboardService.locator?.getUrl({
         dashboardId,
         viewMode: ViewMode.EDIT,
         useHash: false,
@@ -48,14 +53,8 @@ export function dashboardServiceProvider(
  */
 export function useDashboardService(): DashboardService {
   const {
-    services: {
-      savedObjects: { client: savedObjectClient },
-      dashboard: { locator: dashboardLocator },
-    },
+    services: { dashboard },
   } = useMlKibana();
 
-  return useMemo(
-    () => dashboardServiceProvider(savedObjectClient, dashboardLocator!),
-    [savedObjectClient, dashboardLocator]
-  );
+  return useMemo(() => dashboardServiceProvider(dashboard), [dashboard]);
 }

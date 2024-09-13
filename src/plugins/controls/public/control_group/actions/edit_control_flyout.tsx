@@ -1,20 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isEqual } from 'lodash';
-import React, { useState } from 'react';
+import React from 'react';
 
 import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
 
-import { DataControlInput, ControlEmbeddable, IEditableControlFactory } from '../../types';
+import {
+  DataControlInput,
+  ControlEmbeddable,
+  IEditableControlFactory,
+  DataControlEditorChanges,
+} from '../../types';
 import { pluginServices } from '../../services';
 import { ControlGroupStrings } from '../control_group_strings';
-import { useControlGroupContainerContext } from '../control_group_renderer';
+import { useControlGroupContainer } from '../embeddable/control_group_container';
 import { ControlEditor } from '../editor/control_editor';
 
 export const EditControlFlyout = ({
@@ -32,31 +38,20 @@ export const EditControlFlyout = ({
     controls: { getControlFactory },
   } = pluginServices.getServices();
   // Redux embeddable container Context
-  const reduxContext = useControlGroupContainerContext();
-  const {
-    embeddableInstance: controlGroup,
-    actions: { setControlWidth, setControlGrow },
-    useEmbeddableSelector,
-    useEmbeddableDispatch,
-  } = reduxContext;
-  const dispatch = useEmbeddableDispatch();
+  const controlGroup = useControlGroupContainer();
 
   // current state
-  const panels = useEmbeddableSelector((state) => state.explicitInput.panels);
+  const panels = controlGroup.select((state) => state.explicitInput.panels);
   const panel = panels[embeddable.id];
 
-  const [currentGrow, setCurrentGrow] = useState(panel.grow);
-  const [currentWidth, setCurrentWidth] = useState(panel.width);
-  const [inputToReturn, setInputToReturn] = useState<Partial<DataControlInput>>({});
-
-  const onCancel = () => {
+  const onCancel = (changes: DataControlEditorChanges) => {
     if (
       isEqual(panel.explicitInput, {
         ...panel.explicitInput,
-        ...inputToReturn,
+        ...changes.input,
       }) &&
-      currentGrow === panel.grow &&
-      currentWidth === panel.width
+      changes.grow === panel.grow &&
+      changes.width === panel.width
     ) {
       closeFlyout();
       return;
@@ -73,25 +68,36 @@ export const EditControlFlyout = ({
     });
   };
 
-  const onSave = async (type?: string) => {
+  const onSave = async (changes: DataControlEditorChanges, type?: string) => {
     if (!type) {
       closeFlyout();
       return;
     }
-
     const factory = getControlFactory(type) as IEditableControlFactory;
     if (!factory) throw new EmbeddableFactoryNotFoundError(type);
+    let inputToReturn = changes.input;
     if (factory.presaveTransformFunction) {
-      setInputToReturn(factory.presaveTransformFunction(inputToReturn, embeddable));
+      inputToReturn = factory.presaveTransformFunction(inputToReturn, embeddable);
     }
 
-    if (currentWidth !== panel.width)
-      dispatch(setControlWidth({ width: currentWidth, embeddableId: embeddable.id }));
-    if (currentGrow !== panel.grow)
-      dispatch(setControlGrow({ grow: currentGrow, embeddableId: embeddable.id }));
+    if (changes.width && changes.width !== panel.width)
+      controlGroup.dispatch.setControlWidth({
+        width: changes.width,
+        embeddableId: embeddable.id,
+      });
+    if (changes.grow !== undefined && changes.grow !== panel.grow) {
+      controlGroup.dispatch.setControlGrow({
+        grow: changes.grow,
+        embeddableId: embeddable.id,
+      });
+    }
 
     closeFlyout();
-    await controlGroup.replaceEmbeddable(embeddable.id, inputToReturn, type);
+    if (panel.type === type) {
+      controlGroup.updateInputForChild(embeddable.id, inputToReturn);
+    } else {
+      await controlGroup.replaceEmbeddable(embeddable.id, inputToReturn, type);
+    }
   };
 
   return (
@@ -100,16 +106,9 @@ export const EditControlFlyout = ({
       width={panel.width}
       grow={panel.grow}
       embeddable={embeddable}
-      title={embeddable.getTitle()}
-      onCancel={() => onCancel()}
-      updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
+      onCancel={onCancel}
       setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
-      updateWidth={(newWidth) => setCurrentWidth(newWidth)}
-      updateGrow={(newGrow) => setCurrentGrow(newGrow)}
-      onTypeEditorChange={(partialInput) => {
-        setInputToReturn({ ...inputToReturn, ...partialInput });
-      }}
-      onSave={(type) => onSave(type)}
+      onSave={onSave}
       removeControl={() => {
         closeFlyout();
         removeControl();

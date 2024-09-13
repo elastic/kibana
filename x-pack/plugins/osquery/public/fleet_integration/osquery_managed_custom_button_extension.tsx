@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import React from 'react';
 
 import type { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
@@ -23,7 +23,7 @@ export const OsqueryManagedCustomButtonExtension = React.memo<PackageCustomExten
     const { loading, disabled, permissionDenied } = useFetchStatus();
 
     if (loading) {
-      return <EuiLoadingContent lines={5} />;
+      return <EuiSkeletonText lines={5} />;
     }
 
     if (permissionDenied) {

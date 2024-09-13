@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SavedObjectMigrationFn } from '@kbn/core/server';
@@ -12,8 +13,8 @@ import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
-  SavedDashboardPanel,
 } from '../../../common';
+import { SavedDashboardPanel } from '../../../common/content_management';
 
 /**
  * Before 7.10, hidden panel titles were stored as a blank string on the title attribute. In 7.10, this was replaced
@@ -37,19 +38,16 @@ export const migrateExplicitlyHiddenTitles: SavedObjectMigrationFn<any, any> = (
       // Convert each panel into the dashboard panel state
       const originalPanelState = convertSavedDashboardPanelToPanelState<EmbeddableInput>(panel);
       newPanels.push(
-        convertPanelStateToSavedDashboardPanel(
-          {
-            ...originalPanelState,
-            explicitInput: {
-              ...originalPanelState.explicitInput,
-              ...(originalPanelState.explicitInput.title === '' &&
-              !originalPanelState.explicitInput.hidePanelTitles
-                ? { hidePanelTitles: true }
-                : {}),
-            },
+        convertPanelStateToSavedDashboardPanel({
+          ...originalPanelState,
+          explicitInput: {
+            ...originalPanelState.explicitInput,
+            ...(originalPanelState.explicitInput.title === '' &&
+            !originalPanelState.explicitInput.hidePanelTitles
+              ? { hidePanelTitles: true }
+              : {}),
           },
-          panel.version
-        )
+        })
       );
     });
     return {

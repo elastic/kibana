@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -16,6 +17,7 @@ import {
   SeriesName,
   StackMode,
   XYChartSeriesIdentifier,
+  SeriesColorAccessorFn,
 } from '@elastic/charts';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
@@ -23,6 +25,13 @@ import { Datatable } from '@kbn/expressions-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
+import {
+  getPalette,
+  AVAILABLE_PALETTES,
+  NeutralPalette,
+  SPECIAL_TOKENS_STRING_CONVERSION,
+} from '@kbn/coloring';
+import { getColorCategories } from '@kbn/chart-expressions-common';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
 import { CommonXYDataLayerConfig, CommonXYLayerConfig, XScaleType } from '../../common';
 import { AxisModes, SeriesTypes } from '../../common/constants';
@@ -32,6 +41,7 @@ import { ColorAssignments } from './color_assignment';
 import { GroupsConfiguration } from './axes_configuration';
 import { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
 import { getFormat } from './format';
+import { getColorSeriesAccessorFn } from './color/color_mapping_accessor';
 
 type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 
@@ -44,10 +54,10 @@ type GetSeriesPropsFn = (config: {
   colorAssignments: ColorAssignments;
   columnToLabelMap: Record<string, string>;
   paletteService: PaletteRegistry;
-  syncColors?: boolean;
   yAxis?: GroupsConfiguration[number];
   xAxis?: GroupsConfiguration[number];
-  timeZone?: string;
+  syncColors: boolean;
+  timeZone: string;
   emphasizeFitting?: boolean;
   fillOpacity?: number;
   formattedDatatableInfo: DatatableWithFormatInfo;
@@ -57,6 +67,7 @@ type GetSeriesPropsFn = (config: {
   allYAccessors: Array<string | ExpressionValueVisDimension>;
   singleTable?: boolean;
   multipleLayersWithSplits: boolean;
+  isDarkMode: boolean;
 }) => SeriesSpec;
 
 type GetSeriesNameFn = (
@@ -314,7 +325,7 @@ const getColor: GetColorFn = (
   series,
   { layer, colorAssignments, paletteService, syncColors, getSeriesNameFn },
   uiState,
-  singleTable
+  isSingleTable
 ) => {
   const overwriteColor = getSeriesColor(layer, series.yAccessor as string);
   if (overwriteColor !== null) {
@@ -323,7 +334,7 @@ const getColor: GetColorFn = (
 
   const name = getSeriesNameFn(series)?.toString() || '';
 
-  const overwriteColors: Record<string, string> = uiState?.get ? uiState.get('vis.colors', {}) : {};
+  const overwriteColors: Record<string, string> = uiState?.get?.('vis.colors', {}) ?? {};
 
   if (Object.keys(overwriteColors).includes(name)) {
     return overwriteColors[name];
@@ -334,7 +345,7 @@ const getColor: GetColorFn = (
     {
       name,
       totalSeriesAtDepth: colorAssignment.totalSeriesCount,
-      rankAtDepth: colorAssignment.getRank(singleTable ? 'commonLayerId' : layer.layerId, name),
+      rankAtDepth: colorAssignment.getRank(isSingleTable ? 'commonLayerId' : layer.layerId, name),
     },
   ];
   return paletteService.get(layer.palette.name).getCategoricalColor(
@@ -399,6 +410,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   allYAccessors,
   singleTable,
   multipleLayersWithSplits,
+  isDarkMode,
 }): SeriesSpec => {
   const { table, isStacked, markSizeAccessor } = layer;
   const isPercentage = layer.isPercentage;
@@ -406,7 +418,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   if (yAxis?.mode) {
     stackMode = yAxis?.mode === AxisModes.NORMAL ? undefined : yAxis?.mode;
   }
-  const scaleType = yAxis?.scaleType || ScaleType.Linear;
+  const yScaleType = yAxis?.scaleType || ScaleType.Linear;
   const isBarChart = layer.seriesType === SeriesTypes.BAR;
   const xColumnId =
     layer.xAccessor !== undefined
@@ -478,6 +490,34 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     );
   };
 
+  const colorAccessorFn: SeriesColorAccessorFn =
+    // if colorMapping exist then we can apply it, if not let's use the legacy coloring method
+    layer.colorMapping && splitColumnIds.length > 0
+      ? getColorSeriesAccessorFn(
+          JSON.parse(layer.colorMapping), // the color mapping is at this point just a stringified JSON
+          getPalette(AVAILABLE_PALETTES, NeutralPalette),
+          isDarkMode,
+          {
+            type: 'categories',
+            categories: getColorCategories(table.rows, splitColumnIds[0]),
+          },
+          splitColumnIds[0],
+          SPECIAL_TOKENS_STRING_CONVERSION
+        )
+      : (series) =>
+          getColor(
+            series,
+            {
+              layer,
+              colorAssignments,
+              paletteService,
+              getSeriesNameFn,
+              syncColors,
+            },
+            uiState,
+            singleTable
+          );
+
   return {
     splitSeriesAccessors: splitColumnIds.length ? splitColumnIds : [],
     stackAccessors: isStacked ? [xColumnId || 'unifiedX'] : [],
@@ -494,22 +534,10 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     data: rows,
     xScaleType: xColumnId ? layer.xScaleType ?? defaultXScaleType : 'ordinal',
     yScaleType:
-      formatter?.id === 'bytes' && scaleType === ScaleType.Linear
+      formatter?.id === 'bytes' && yScaleType === ScaleType.Linear
         ? ScaleType.LinearBinary
-        : scaleType,
-    color: (series) =>
-      getColor(
-        series,
-        {
-          layer,
-          colorAssignments,
-          paletteService,
-          getSeriesNameFn,
-          syncColors,
-        },
-        uiState,
-        singleTable
-      ),
+        : yScaleType,
+    color: colorAccessorFn,
     groupId: yAxis?.groupId,
     enableHistogramMode,
     stackMode,

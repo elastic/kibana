@@ -348,6 +348,7 @@ describe('Fleet - packageToPackagePolicy', () => {
     it('returns package policy with default name', () => {
       expect(packageToPackagePolicy(mockPackage, '1')).toEqual({
         policy_id: '1',
+        policy_ids: ['1'],
         namespace: '',
         enabled: true,
         inputs: [],
@@ -365,24 +366,24 @@ describe('Fleet - packageToPackagePolicy', () => {
         packageToPackagePolicy(
           {
             ...mockPackage,
-            savedObject: {
-              attributes: {
-                experimental_data_stream_features: [
-                  {
-                    data_stream: 'metrics-test.testdataset',
-                    features: {
-                      synthetic_source: true,
-                      tsdb: true,
-                    },
+            // @ts-expect-error upgrade typescript v5.1.6
+            installationInfo: {
+              experimental_data_stream_features: [
+                {
+                  data_stream: 'metrics-test.testdataset',
+                  features: {
+                    synthetic_source: true,
+                    tsdb: true,
                   },
-                ],
-              },
+                },
+              ],
             } as any,
           },
           '1'
         )
       ).toEqual({
         policy_id: '1',
+        policy_ids: ['1'],
         namespace: '',
         enabled: true,
         inputs: [],
@@ -407,6 +408,7 @@ describe('Fleet - packageToPackagePolicy', () => {
     it('returns package policy with custom name', () => {
       expect(packageToPackagePolicy(mockPackage, '1', 'default', 'pkgPolicy-1')).toEqual({
         policy_id: '1',
+        policy_ids: ['1'],
         namespace: 'default',
         enabled: true,
         inputs: [],
@@ -430,6 +432,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         )
       ).toEqual({
         policy_id: '1',
+        policy_ids: ['1'],
         enabled: true,
         inputs: [],
         name: 'pkgPolicy-1',
@@ -453,6 +456,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         packageToPackagePolicy(mockPackageWithPolicyTemplates, '1', 'default', 'pkgPolicy-1')
       ).toEqual({
         policy_id: '1',
+        policy_ids: ['1'],
         namespace: 'default',
         enabled: true,
         inputs: [{ type: 'foo', enabled: true, streams: [] }],

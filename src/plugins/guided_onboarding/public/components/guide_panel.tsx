@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
+
 import { useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart, NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
+import { ApplicationStart, CoreTheme, NotificationsStart } from '@kbn/core/public';
 import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
 
 import type { GuideId, GuideConfig, StepConfig } from '@kbn/guided-onboarding';
@@ -24,12 +28,13 @@ import { getGuidePanelStyles } from './guide_panel.styles';
 import { GuideButton } from './guide_button';
 
 import { GuidePanelFlyout } from './guide_panel_flyout';
+import { getStepLocationPath } from './get_step_location';
 
 interface GuidePanelProps {
   api: GuidedOnboardingApi;
   application: ApplicationStart;
   notifications: NotificationsStart;
-  uiSettings: IUiSettingsClient;
+  theme$: Observable<CoreTheme>;
 }
 
 const getProgress = (state?: GuideState): number => {
@@ -44,7 +49,7 @@ const getProgress = (state?: GuideState): number => {
   return 0;
 };
 
-export const GuidePanel = ({ api, application, notifications, uiSettings }: GuidePanelProps) => {
+export const GuidePanel = ({ api, application, notifications, theme$ }: GuidePanelProps) => {
   const euiThemeContext = useEuiTheme();
   const euiTheme = euiThemeContext.euiTheme;
   const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -52,8 +57,8 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
   const [pluginState, setPluginState] = useState<PluginState | undefined>(undefined);
   const [guideConfig, setGuideConfig] = useState<GuideConfig | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { darkMode: isDarkTheme } = useObservable(theme$, { darkMode: false });
 
-  const isDarkTheme = uiSettings.get('theme:darkMode');
   const styles = getGuidePanelStyles({ euiThemeContext, isDarkTheme });
 
   const toggleGuide = () => {
@@ -76,7 +81,7 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
 
             if (stepConfig.location) {
               await application.navigateToApp(stepConfig.location.appID, {
-                path: stepConfig.location.path,
+                path: getStepLocationPath(stepConfig.location.path, pluginState),
               });
 
               if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {

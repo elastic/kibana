@@ -2,16 +2,20 @@
 
 exports[`fieldAction is rendered 1`] = `
 <div
-  className="kbnFieldButton"
+  className="kbnFieldButton kbnFieldButton--s"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="kbnFieldButton__name eui-textBreakAll"
     >
-      name
+      <span
+        className="kbnFieldButton__nameInner"
+      >
+        name
+      </span>
     </span>
   </button>
   <div
@@ -26,7 +30,7 @@ exports[`fieldAction is rendered 1`] = `
 
 exports[`fieldIcon is rendered 1`] = `
 <div
-  className="kbnFieldButton"
+  className="kbnFieldButton kbnFieldButton--s"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
@@ -40,9 +44,13 @@ exports[`fieldIcon is rendered 1`] = `
       </span>
     </span>
     <span
-      className="kbnFieldButton__name"
+      className="kbnFieldButton__name eui-textBreakAll"
     >
-      name
+      <span
+        className="kbnFieldButton__nameInner"
+      >
+        name
+      </span>
     </span>
   </button>
 </div>
@@ -50,16 +58,20 @@ exports[`fieldIcon is rendered 1`] = `
 
 exports[`isActive defaults to false 1`] = `
 <div
-  className="kbnFieldButton"
+  className="kbnFieldButton kbnFieldButton--s"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="kbnFieldButton__name eui-textBreakAll"
     >
-      name
+      <span
+        className="kbnFieldButton__nameInner"
+      >
+        name
+      </span>
     </span>
   </button>
 </div>
@@ -67,50 +79,20 @@ exports[`isActive defaults to false 1`] = `
 
 exports[`isActive renders true 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton-isActive"
+  className="kbnFieldButton kbnFieldButton--s kbnFieldButton-isActive"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="kbnFieldButton__name eui-textBreakAll"
     >
-      name
-    </span>
-  </button>
-</div>
-`;
-
-exports[`isDraggable is rendered 1`] = `
-<div
-  className="kbnFieldButton kbnFieldButton--isDraggable"
->
-  <button
-    className="kbn-resetFocusState kbnFieldButton__button"
-    onClick={[Function]}
-  >
-    <span
-      className="kbnFieldButton__name"
-    >
-      name
-    </span>
-  </button>
-</div>
-`;
-
-exports[`sizes m is applied 1`] = `
-<div
-  className="kbnFieldButton"
->
-  <button
-    className="kbn-resetFocusState kbnFieldButton__button"
-    onClick={[Function]}
-  >
-    <span
-      className="kbnFieldButton__name"
-    >
-      name
+      <span
+        className="kbnFieldButton__nameInner"
+      >
+        name
+      </span>
     </span>
   </button>
 </div>
@@ -118,16 +100,69 @@ exports[`sizes m is applied 1`] = `
 
 exports[`sizes s is applied 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--small"
+  className="kbnFieldButton kbnFieldButton--s"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="kbnFieldButton__name eui-textBreakAll"
     >
-      name
+      <span
+        className="kbnFieldButton__nameInner"
+      >
+        name
+      </span>
+    </span>
+  </button>
+</div>
+`;
+
+exports[`sizes xs is applied 1`] = `
+<div
+  className="kbnFieldButton kbnFieldButton--xs"
+>
+  <button
+    className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
+  >
+    <span
+      className="kbnFieldButton__name eui-textBreakAll"
+    >
+      <span
+        className="kbnFieldButton__nameInner"
+      >
+        name
+      </span>
+    </span>
+  </button>
+</div>
+`;
+
+exports[`with drag handle is rendered 1`] = `
+<div
+  className="kbnFieldButton kbnFieldButton--s"
+>
+  <div
+    className="kbnFieldButton__dragHandle"
+  >
+    <span>
+      drag
+    </span>
+  </div>
+  <button
+    className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
+  >
+    <span
+      className="kbnFieldButton__name eui-textBreakAll"
+    >
+      <span
+        className="kbnFieldButton__nameInner"
+      >
+        name
+      </span>
     </span>
   </button>
 </div>

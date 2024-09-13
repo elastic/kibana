@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
@@ -218,6 +219,27 @@ describe('#rawToSavedObject', () => {
     expect(actual).not.toHaveProperty('coreMigrationVersion');
   });
 
+  test('if specified it copies the _source.managed property to managed', () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+        managed: false,
+      },
+    });
+    expect(actual).toHaveProperty('managed', false);
+  });
+
+  test(`if _source.managed is unspecified it doesn't set managed`, () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+      },
+    });
+    expect(actual).not.toHaveProperty('managed');
+  });
+
   test(`if version is unspecified it doesn't set version`, () => {
     const actual = singleNamespaceSerializer.rawToSavedObject({
       _id: 'foo:bar',
@@ -276,6 +298,18 @@ describe('#rawToSavedObject', () => {
     expect(actual).toHaveProperty('updated_at', now);
   });
 
+  test('if specified it copies the _source.updated_by property to updated_by', () => {
+    const updatedBy = 'elastic';
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+        updated_by: updatedBy,
+      },
+    });
+    expect(actual).toHaveProperty('updated_by', updatedBy);
+  });
+
   test('if specified it copies the _source.created_at property to created_at', () => {
     const now = Date();
     const actual = singleNamespaceSerializer.rawToSavedObject({
@@ -286,6 +320,18 @@ describe('#rawToSavedObject', () => {
       },
     });
     expect(actual).toHaveProperty('created_at', now);
+  });
+
+  test('if specified it copies the _source.created_by property to created_by', () => {
+    const createdBy = 'elastic';
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+        created_by: createdBy,
+      },
+    });
+    expect(actual).toHaveProperty('created_by', createdBy);
   });
 
   test(`if _source.updated_at is unspecified it doesn't set updated_at`, () => {
@@ -306,6 +352,16 @@ describe('#rawToSavedObject', () => {
       },
     });
     expect(actual).not.toHaveProperty('created_at');
+  });
+
+  test(`if _source.updated_by is unspecified it doesn't set updated_by`, () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+      },
+    });
+    expect(actual).not.toHaveProperty('updated_by');
   });
 
   test('if specified it copies the _source.originId property to originId', () => {
@@ -754,6 +810,25 @@ describe('#savedObjectToRaw', () => {
     } as any);
 
     expect(actual._source).not.toHaveProperty('coreMigrationVersion');
+  });
+
+  test('if specified, copies managed property to _source.managed', () => {
+    const actual = singleNamespaceSerializer.savedObjectToRaw({
+      type: '',
+      attributes: {},
+      managed: false,
+    } as any);
+
+    expect(actual._source).toHaveProperty('managed', false);
+  });
+
+  test(`if unspecified it doesn't add managed property to _source`, () => {
+    const actual = singleNamespaceSerializer.savedObjectToRaw({
+      type: '',
+      attributes: {},
+    } as any);
+
+    expect(actual._source.managed).toBe(undefined);
   });
 
   test('it decodes the version property to _seq_no and _primary_term', () => {

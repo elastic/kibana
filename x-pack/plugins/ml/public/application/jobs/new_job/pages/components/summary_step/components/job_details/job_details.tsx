@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useContext } from 'react';
+import type { FC } from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
+import { useMlKibana } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
 import {
   isMultiMetricJobCreator,
@@ -17,13 +19,16 @@ import {
   isAdvancedJobCreator,
 } from '../../../../../common/job_creator';
 import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
-import { ListItems, falseLabel, trueLabel, defaultLabel, Italic } from '../common';
-import { useMlContext } from '../../../../../../../contexts/ml';
+import type { ListItems } from '../common';
+import { falseLabel, trueLabel, defaultLabel, Italic } from '../common';
 
 export const JobDetails: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);
-  const mlContext = useMlContext();
-  const dateFormat: string = mlContext.kibanaConfig.get('dateFormat');
+  const {
+    services: { uiSettings },
+  } = useMlKibana();
+  // TODO should use fieldFormats instead
+  const dateFormat: string = uiSettings.get('dateFormat');
   const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
 
   const isAdvanced = isAdvancedJobCreator(jobCreator);

@@ -2,7 +2,7 @@
   "id": "security_linux_v3",
   "title": "Security: Linux",
   "description": "Anomaly detection jobs for Linux host-based threat hunting and detection.",
-  "type": "linux data",
+  "type": "Linux data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "auditbeat-*,logs-*",
   "query": {
@@ -43,10 +43,7 @@
       ],
       "must_not": {
         "terms": {
-          "_tier": [
-            "data_frozen",
-            "data_cold"
-          ]
+          "_tier": ["data_frozen", "data_cold"]
         }
       }
     }
@@ -180,5 +177,8 @@
       "file": "datafeed_v3_linux_anomalous_network_activity.json",
       "job_id": "v3_linux_anomalous_network_activity"
     }
+  ],
+  "tags": [
+    "security"
   ]
 }

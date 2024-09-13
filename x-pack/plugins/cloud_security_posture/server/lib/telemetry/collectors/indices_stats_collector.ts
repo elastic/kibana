@@ -14,6 +14,8 @@ import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '../../../../common/constants';
 
 const getIndexDocCount = (esClient: ElasticsearchClient, index: string) =>
@@ -76,9 +78,11 @@ export const getIndicesStats = async (
   coreServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>,
   logger: Logger
 ): Promise<CspmIndicesStats> => {
-  const [findings, latestFindings, score] = await Promise.all([
+  const [findings, latestFindings, vulMng, vulMngLatest, score] = await Promise.all([
     getIndexStats(esClient, FINDINGS_INDEX_DEFAULT_NS, logger),
     getIndexStats(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
+    getIndexStats(esClient, VULNERABILITIES_INDEX_DEFAULT_NS, logger),
+    getIndexStats(esClient, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, logger),
     getIndexStats(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger),
   ]);
 
@@ -100,6 +104,8 @@ export const getIndicesStats = async (
   return {
     findings,
     latest_findings: latestFindings,
+    vulnerabilities: vulMng,
+    latest_vulnerabilities: vulMngLatest,
     score,
 
     latestPackageVersion: status.latestPackageVersion,

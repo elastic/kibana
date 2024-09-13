@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Stream, { PassThrough, Readable, Writable, Transform } from 'stream';
 import { createGzip } from 'zlib';
 
 import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
-import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { createParseArchiveStreams } from './parse';
 
@@ -53,17 +53,6 @@ describe('esArchiver createParseArchiveStreams', () => {
         ] as [Readable, ...Writable[]]);
 
         expect(output).toEqual([{ a: 1 }, 1]);
-      });
-
-      it('replaces $KIBANA_PACKAGE_VERSION with the current kibana version', async () => {
-        const output = await createPromiseFromStreams([
-          createListStream([
-            Buffer.from('{"$KIBANA'),
-            Buffer.from('_PACKAGE_VERSION": "enabled"}'),
-          ]),
-          ...createParseArchiveStreams({ gzip: false }),
-        ]);
-        return expect(output).toEqual({ [kibanaPackageJson.version]: 'enabled' });
       });
 
       it('provides each JSON object as soon as it is parsed', async () => {
@@ -110,7 +99,7 @@ describe('esArchiver createParseArchiveStreams', () => {
           ] as [Readable, ...Writable[]]);
           throw new Error('should have failed');
         } catch (err) {
-          expect(err.message).toEqual(expect.stringContaining('Unexpected number'));
+          expect(err.message).toEqual(`Expected property name or '}' in JSON at position 1`);
         }
       });
     });
@@ -149,18 +138,6 @@ describe('esArchiver createParseArchiveStreams', () => {
         ] as [Readable, ...Writable[]]);
 
         expect(output).toEqual([{ a: 1 }, { a: 2 }]);
-      });
-
-      it('replaces $KIBANA_PACKAGE_VERSION with the current kibana version', async () => {
-        const output = await createPromiseFromStreams([
-          createListStream([
-            Buffer.from('{"$KIBANA_PACKAGE'),
-            Buffer.from('_VERSION": "enabled"}'),
-          ]),
-          createGzip(),
-          ...createParseArchiveStreams({ gzip: true }),
-        ]);
-        return expect(output).toEqual({ [kibanaPackageJson.version]: 'enabled' });
       });
     });
 

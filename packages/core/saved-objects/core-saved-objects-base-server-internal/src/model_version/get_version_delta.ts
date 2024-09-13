@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ModelVersionMap } from './version_map';
-import { compareModelVersions } from './version_compare';
+import type { VirtualVersionMap, VirtualVersion } from './version_map';
+import { compareVirtualVersions } from './version_compare';
 
 interface GetModelVersionDeltaOpts {
-  currentVersions: ModelVersionMap;
-  targetVersions: ModelVersionMap;
+  currentVersions: VirtualVersionMap;
+  targetVersions: VirtualVersionMap;
   deletedTypes: string[];
 }
 
@@ -25,10 +26,16 @@ interface ModelVersionDeltaResult {
 interface ModelVersionDeltaTypeResult {
   /** the name of the type */
   name: string;
-  /** the current version the type is at */
-  current: number;
-  /** the target version the type should go to */
-  target: number;
+  /**
+   * the current version the type is at,
+   * or undefined if the type is not present in the current versions
+   */
+  current: VirtualVersion | undefined;
+  /**
+   * the target version the type should go to,
+   * or undefined if the type is not present in the target versions
+   * */
+  target: VirtualVersion | undefined;
 }
 
 /**
@@ -41,7 +48,7 @@ export const getModelVersionDelta = ({
   targetVersions,
   deletedTypes,
 }: GetModelVersionDeltaOpts): ModelVersionDeltaResult => {
-  const compared = compareModelVersions({
+  const compared = compareVirtualVersions({
     indexVersions: currentVersions,
     appVersions: targetVersions,
     deletedTypes,
@@ -78,21 +85,12 @@ const getTypeDelta = ({
   targetVersions,
 }: {
   type: string;
-  currentVersions: ModelVersionMap;
-  targetVersions: ModelVersionMap;
+  currentVersions: VirtualVersionMap;
+  targetVersions: VirtualVersionMap;
 }): ModelVersionDeltaTypeResult => {
-  const currentVersion = currentVersions[type];
-  const targetVersion = targetVersions[type];
-  if (currentVersion === undefined || targetVersion === undefined) {
-    // should never occur given we've been checking consistency numerous times before getting there
-    // but better safe than sorry.
-    throw new Error(
-      `Consistency error: trying to generate delta with missing entry for type ${type}`
-    );
-  }
   return {
     name: type,
-    current: currentVersion,
-    target: targetVersion,
+    current: currentVersions[type],
+    target: targetVersions[type],
   };
 };

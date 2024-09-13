@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -22,8 +23,9 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { kibanaMigratorMock } from '../mocks';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  ISavedObjectsEncryptionExtension,
-  SavedObjectsRawDocSource,
+  MAIN_SAVED_OBJECT_INDEX,
+  type ISavedObjectsEncryptionExtension,
+  type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import {
   bulkCreateSuccess,
@@ -41,13 +43,10 @@ import {
   mockVersion,
   mockVersionProps,
   MULTI_NAMESPACE_ENCRYPTED_TYPE,
-  TypeIdTuple,
   updateSuccess,
+  type TypeIdTuple,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
-
-// BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
-// so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
 describe('SavedObjectsRepository Encryption Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -118,6 +117,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
 
     // create a mock saved objects encryption extension
     mockEncryptionExt = savedObjectsExtensionsMock.createEncryptionExtension();
+    mockEncryptionExt.encryptAttributes.mockImplementation((desc, attrs) => Promise.resolve(attrs));
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
     mockGetSearchDsl.mockClear();
@@ -249,7 +249,6 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         expect.objectContaining({
           ...encryptedSO,
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
-          attributes: undefined,
         }),
         encryptedSO.attributes // original attributes
       );
@@ -352,7 +351,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
           namespace,
         }
       );
-      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(client.index).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
       expect(mockEncryptionExt.encryptAttributes).not.toHaveBeenCalled();
@@ -384,7 +383,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
           references: encryptedSO.references,
         }
       );
-      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(client.index).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
       expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
@@ -633,7 +632,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
           total: 2,
           hits: [
             {
-              _index: '.kibana',
+              _index: MAIN_SAVED_OBJECT_INDEX,
               _id: `${space ? `${space}:` : ''}${encryptedSO.type}:${encryptedSO.id}`,
               _score: 1,
               ...mockVersionProps,
@@ -643,7 +642,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
               },
             },
             {
-              _index: '.kibana',
+              _index: MAIN_SAVED_OBJECT_INDEX,
               _id: `${space ? `${space}:` : ''}index-pattern:logstash-*`,
               _score: 2,
               ...mockVersionProps,

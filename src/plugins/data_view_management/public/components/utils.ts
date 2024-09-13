@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -11,8 +12,10 @@ import {
   DataView,
   DataViewField,
   DataViewListItem,
+  DataViewType,
 } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { ROLLUP_DEPRECATION_BADGE_LABEL } from '@kbn/rollup';
 
 const defaultIndexPatternListName = i18n.translate(
   'indexPatternManagement.editIndexPattern.list.defaultIndexPatternListName',
@@ -21,15 +24,8 @@ const defaultIndexPatternListName = i18n.translate(
   }
 );
 
-const rollupIndexPatternListName = i18n.translate(
-  'indexPatternManagement.editIndexPattern.list.rollupIndexPatternListName',
-  {
-    defaultMessage: 'Rollup',
-  }
-);
-
-const isRollup = (indexPatternType: string = '') => {
-  return indexPatternType === 'rollup';
+export const isRollup = (indexPatternType: string = '') => {
+  return indexPatternType === DataViewType.ROLLUP;
 };
 
 export async function getIndexPatterns(defaultIndex: string, dataViewsService: DataViewsContract) {
@@ -37,7 +33,7 @@ export async function getIndexPatterns(defaultIndex: string, dataViewsService: D
   const indexPatternsListItems = existingIndexPatterns.map((idxPattern) => {
     const { id, title, namespaces, name } = idxPattern;
     const isDefault = defaultIndex === id;
-    const tags = getTags(idxPattern, isDefault);
+    const tags = getTags(idxPattern, isDefault, dataViewsService.getRollupsEnabled());
     const displayName = name ? name : title;
 
     return {
@@ -68,25 +64,27 @@ export async function getIndexPatterns(defaultIndex: string, dataViewsService: D
   );
 }
 
-export const getTags = (indexPattern: DataViewListItem | DataView, isDefault: boolean) => {
+export const getTags = (
+  indexPattern: DataViewListItem | DataView,
+  isDefault: boolean,
+  rollupsEnabled: boolean
+) => {
   const tags = [];
   if (isDefault) {
     tags.push({
-      key: 'default',
+      key: DataViewType.DEFAULT,
       name: defaultIndexPatternListName,
+      'data-test-subj': 'default-tag',
     });
   }
-  if (isRollup(indexPattern.type)) {
+  if (isRollup(indexPattern.type) && rollupsEnabled) {
     tags.push({
-      key: 'rollup',
-      name: rollupIndexPatternListName,
+      key: DataViewType.ROLLUP,
+      name: ROLLUP_DEPRECATION_BADGE_LABEL,
+      'data-test-subj': 'rollup-tag',
     });
   }
   return tags;
-};
-
-export const areScriptedFieldsEnabled = (indexPattern: DataViewListItem | DataView) => {
-  return !isRollup(indexPattern.type);
 };
 
 export const getFieldInfo = (indexPattern: DataViewListItem | DataView, field: DataViewField) => {

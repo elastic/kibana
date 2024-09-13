@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   IRouter,
@@ -27,6 +28,8 @@ import type {
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudDefendPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -36,6 +39,7 @@ export interface CloudDefendPluginSetupDeps {
   data: DataPluginSetup;
   security: SecurityPluginSetup;
   cloud: CloudSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 export interface CloudDefendPluginStartDeps {
   data: DataPluginStart;
@@ -45,7 +49,7 @@ export interface CloudDefendPluginStartDeps {
 }
 
 export interface CloudDefendApiRequestHandlerContext {
-  user: ReturnType<SecurityPluginStart['authc']['getCurrentUser']>;
+  user: AuthenticatedUser | null;
   logger: Logger;
   esClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;

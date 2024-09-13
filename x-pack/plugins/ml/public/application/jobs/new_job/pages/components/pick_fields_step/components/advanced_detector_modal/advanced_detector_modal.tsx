@@ -6,31 +6,32 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React, { FC, Fragment, useState, useContext, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useState, useContext, useEffect } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiFlexItem,
   EuiFlexGroup,
   EuiFlexGrid,
-  EuiComboBoxOptionOption,
   EuiHorizontalRule,
   EuiTextArea,
 } from '@elastic/eui';
+import {
+  type Field,
+  type Aggregation,
+  EVENT_RATE_FIELD_ID,
+  mlCategory,
+} from '@kbn/ml-anomaly-utils';
 import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { AdvancedJobCreator } from '../../../../../common/job_creator';
+import type { AdvancedJobCreator } from '../../../../../common/job_creator';
 import {
   createFieldOptions,
   createMlcategoryFieldOption,
 } from '../../../../../common/job_creator/util/general';
-import {
-  Field,
-  Aggregation,
-  EVENT_RATE_FIELD_ID,
-  mlCategory,
-} from '../../../../../../../../../common/types/fields';
 import { filterCategoryFields } from '../../../../../../../../../common/util/fields_utils';
-import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
+import type { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
 import { ModalWrapper } from './modal_wrapper';
 import { detectorToString } from '../../../../../../../util/string_utils';
 import { createBasicDetector } from '../../../../../common/job_creator/util/default_configs';

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrService } from '../ftr_provider_context';
 
 export class NewsfeedPageObject extends FtrService {
@@ -16,8 +18,12 @@ export class NewsfeedPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly common = this.ctx.getPageObject('common');
 
+  async sleep(sleepMilliseconds: number) {
+    await setTimeoutAsync(sleepMilliseconds);
+  }
+
   async resetPage() {
-    await this.common.navigateToApp('home', { disableWelcomePrompt: true });
+    await this.common.navigateToApp('home');
   }
 
   async closeNewsfeedPanel() {

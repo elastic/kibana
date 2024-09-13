@@ -6,14 +6,13 @@
  */
 
 import { Filter, Query } from '@kbn/es-query';
-import {
-  SavedObjectsClientContract,
-  SavedObjectReference,
-  ResolvedSimpleSavedObject,
-} from '@kbn/core/public';
-import { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { DOC_TYPE } from '../../common/constants';
-import { LensSavedObjectAttributes } from '../async_services';
+import { SavedObjectReference } from '@kbn/core/public';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SearchQuery } from '@kbn/content-management-plugin/common';
+import type { VisualizationClient } from '@kbn/visualizations-plugin/public';
+import type { LensSavedObjectAttributes, LensSearchQuery } from '../../common/content_management';
+import { getLensClient } from './lens_client';
 
 export interface Document {
   savedObjectId?: string;
@@ -41,49 +40,54 @@ export interface DocumentSaver {
 }
 
 export interface DocumentLoader {
-  load: (savedObjectId: string) => Promise<ResolvedSimpleSavedObject>;
+  load: (savedObjectId: string) => Promise<unknown>;
 }
 
 export type SavedObjectStore = DocumentLoader & DocumentSaver;
 
 export class SavedObjectIndexStore implements SavedObjectStore {
-  private client: SavedObjectsClientContract;
+  private client: VisualizationClient<'lens', LensSavedObjectAttributes>;
 
-  constructor(client: SavedObjectsClientContract) {
-    this.client = client;
+  constructor(cm: ContentManagementPublicStart) {
+    this.client = getLensClient(cm);
   }
 
   save = async (vis: Document) => {
     const { savedObjectId, type, references, ...rest } = vis;
     const attributes = rest;
 
-    const result = await this.client.create(
-      DOC_TYPE,
-      attributes,
-      savedObjectId
-        ? {
-            references,
-            overwrite: true,
-            id: savedObjectId,
-          }
-        : {
-            references,
-          }
-    );
-
-    return { ...vis, savedObjectId: result.id };
+    if (savedObjectId) {
+      const result = await this.client.update({
+        id: savedObjectId,
+        data: attributes,
+        options: {
+          references,
+        },
+      });
+      return { ...vis, savedObjectId: result.item.id };
+    } else {
+      const result = await this.client.create({
+        data: attributes,
+        options: {
+          references,
+        },
+      });
+      return { ...vis, savedObjectId: result.item.id };
+    }
   };
 
-  async load(savedObjectId: string): Promise<ResolvedSimpleSavedObject<LensSavedObjectAttributes>> {
-    const resolveResult = await this.client.resolve<LensSavedObjectAttributes>(
-      DOC_TYPE,
-      savedObjectId
-    );
+  async load(savedObjectId: string) {
+    const resolveResult = await this.client.get(savedObjectId);
 
-    if (resolveResult.saved_object.error) {
-      throw resolveResult.saved_object.error;
+    if (resolveResult.item.error) {
+      throw resolveResult.item.error;
     }
 
     return resolveResult;
+  }
+
+  async search(query: SearchQuery, options: LensSearchQuery) {
+    const result = await this.client.search(query, options);
+    return result;
   }
 }

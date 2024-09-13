@@ -5,19 +5,20 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
 import type { Action, Reducer } from 'redux';
 import type { RenderOptions } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { render as reactRender } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { PackageInfo } from '@kbn/fleet-plugin/common/types';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { deepFreeze } from '@kbn/std';
+import { createFleetContextReduxStore } from '../../../../../common/components/with_security_context/store';
 import type { AppContextTestRender, UiRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { createFleetContextReduxStore } from './components/with_security_context/store';
 import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
 import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
 import type { State } from '../../../../../common/store';
@@ -25,7 +26,7 @@ import { mockGlobalState } from '../../../../../common/mock';
 import { managementReducer } from '../../../../store/reducer';
 import { appReducer } from '../../../../../common/store/app';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
-import { RenderContextProviders } from './components/with_security_context/render_context_providers';
+import { RenderContextProviders } from '../../../../../common/components/with_security_context/render_context_providers';
 import type { AppAction } from '../../../../../common/store/actions';
 
 // Defined a private custom reducer that reacts to an action that enables us to update the
@@ -82,7 +83,7 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
     additionalMiddleware: [mockedContext.middlewareSpy.actionSpyMiddleware],
   });
 
-  const Wrapper: RenderOptions['wrapper'] = ({ children }) => {
+  const Wrapper: RenderOptions['wrapper'] = ({ children }: PropsWithChildren<unknown>) => {
     useEffect(() => {
       return () => {
         // When the component un-mounts, reset the Experimental features since
@@ -99,15 +100,20 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
     });
 
     return (
-      <I18nProvider>
-        <EuiThemeProvider>
+      <EuiThemeProvider>
+        <KibanaRenderContextProvider {...coreStart}>
           <KibanaContextProvider services={startServices}>
-            <RenderContextProviders store={store} depsStart={depsStart} queryClient={queryClient}>
+            <RenderContextProviders
+              store={store}
+              depsStart={depsStart}
+              queryClient={queryClient}
+              upsellingService={startServices.upselling}
+            >
               {children}
             </RenderContextProviders>
           </KibanaContextProvider>
-        </EuiThemeProvider>
-      </I18nProvider>
+        </KibanaRenderContextProvider>
+      </EuiThemeProvider>
     );
   };
 

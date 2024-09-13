@@ -5,67 +5,20 @@
  * 2.0.
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type {
-  Logger,
-  KibanaRequest,
-  ISavedObjectsRepository,
-  IBasePath,
-  ExecutionContextStart,
-  SavedObjectsServiceStart,
-  ElasticsearchServiceStart,
-  UiSettingsServiceStart,
-} from '@kbn/core/server';
-import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import { RunContext } from '@kbn/task-manager-plugin/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import { IEventLogger } from '@kbn/event-log-plugin/server';
-import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
-import { SharePluginStart } from '@kbn/share-plugin/server';
 import {
+  RuleAlertData,
   RuleTypeParams,
-  RuleTypeRegistry,
-  SpaceIdToNamespaceFunction,
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-  RulesClientApi,
-  RulesSettingsClientApi,
 } from '../types';
 import { TaskRunner } from './task_runner';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { InMemoryMetrics } from '../monitoring';
-import { ActionsConfigMap } from '../lib/get_actions_config_map';
-import { AlertsService } from '../alerts_service/alerts_service';
-
-export interface TaskRunnerContext {
-  logger: Logger;
-  data: DataPluginStart;
-  dataViews: DataViewsPluginStart;
-  share: SharePluginStart;
-  savedObjects: SavedObjectsServiceStart;
-  uiSettings: UiSettingsServiceStart;
-  elasticsearch: ElasticsearchServiceStart;
-  getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
-  actionsPlugin: ActionsPluginStartContract;
-  eventLogger: IEventLogger;
-  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
-  executionContext: ExecutionContextStart;
-  spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  basePathService: IBasePath;
-  internalSavedObjectsRepository: ISavedObjectsRepository;
-  ruleTypeRegistry: RuleTypeRegistry;
-  alertsService: AlertsService | null;
-  kibanaBaseUrl: string | undefined;
-  supportsEphemeralTasks: boolean;
-  maxEphemeralActionsPerRule: number;
-  maxAlerts: number;
-  actionsConfigMap: ActionsConfigMap;
-  cancelAlertsOnRuleTimeout: boolean;
-  usageCounter?: UsageCounter;
-  getRulesSettingsClientWithRequest(request: KibanaRequest): RulesSettingsClientApi;
-}
+import { TaskRunnerContext } from './types';
+import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { AdHocTaskRunner } from './ad_hoc_task_runner';
 
 export class TaskRunnerFactory {
   private isInitialized = false;
@@ -86,7 +39,8 @@ export class TaskRunnerFactory {
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string
+    RecoveryActionGroupId extends string,
+    AlertData extends RuleAlertData
   >(
     ruleType: NormalizedRuleType<
       Params,
@@ -95,7 +49,8 @@ export class TaskRunnerFactory {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >,
     { taskInstance }: RunContext,
     inMemoryMetrics: InMemoryMetrics
@@ -111,7 +66,30 @@ export class TaskRunnerFactory {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
-    >(ruleType, taskInstance, this.taskRunnerContext!, inMemoryMetrics);
+      RecoveryActionGroupId,
+      AlertData
+    >({
+      context: this.taskRunnerContext!,
+      inMemoryMetrics,
+      internalSavedObjectsRepository: this.taskRunnerContext!.savedObjects.createInternalRepository(
+        [RULE_SAVED_OBJECT_TYPE]
+      ),
+      ruleType,
+      taskInstance,
+    });
+  }
+
+  public createAdHoc({ taskInstance }: RunContext) {
+    if (!this.isInitialized) {
+      throw new Error('TaskRunnerFactory not initialized');
+    }
+
+    return new AdHocTaskRunner({
+      taskInstance,
+      context: this.taskRunnerContext!,
+      internalSavedObjectsRepository: this.taskRunnerContext!.savedObjects.createInternalRepository(
+        [RULE_SAVED_OBJECT_TYPE, AD_HOC_RUN_SAVED_OBJECT_TYPE]
+      ),
+    });
   }
 }

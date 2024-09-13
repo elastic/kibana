@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   ProcessEventHost,
   ProcessEventContainer,
   ProcessEventOrchestrator,
   ProcessEventCloud,
-} from '../../../common/types/process_tree';
+} from '../../../common';
 import { DASH } from '../../constants';
 import { getHostData, getContainerData, getOrchestratorData, getCloudData } from './helpers';
 

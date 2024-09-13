@@ -20,6 +20,155 @@
     "classes": [
       {
         "parentPluginId": "@kbn/mapbox-gl",
+        "id": "def-common.AJAXError",
+        "type": "Class",
+        "tags": [],
+        "label": "AJAXError",
+        "description": [],
+        "signature": [
+          "maplibregl.AJAXError extends Error"
+        ],
+        "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.AJAXError.status",
+            "type": "number",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "\nThe response's HTTP status code."
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.AJAXError.statusText",
+            "type": "string",
+            "tags": [],
+            "label": "statusText",
+            "description": [
+              "\nThe response's HTTP status text."
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.AJAXError.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [
+              "\nThe request's URL."
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.AJAXError.body",
+            "type": "Object",
+            "tags": [],
+            "label": "body",
+            "description": [
+              "\nThe response's body."
+            ],
+            "signature": [
+              "Blob"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.AJAXError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.AJAXError.Unnamed.$1",
+                "type": "number",
+                "tags": [],
+                "label": "status",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.AJAXError.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "statusText",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.AJAXError.Unnamed.$3",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.AJAXError.Unnamed.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "body",
+                "description": [],
+                "signature": [
+                  "Blob"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mapbox-gl",
         "id": "def-common.GeoJSONSource",
         "type": "Class",
         "tags": [],
@@ -145,7 +294,7 @@
             "label": "_data",
             "description": [],
             "signature": [
-              "string | GeoJSON.GeoJSON"
+              "string | GeoJSON.GeoJSON | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -154,12 +303,12 @@
           {
             "parentPluginId": "@kbn/mapbox-gl",
             "id": "def-common.GeoJSONSource._options",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "_options",
             "description": [],
             "signature": [
-              "any"
+              "{ data?: string | GeoJSON.GeoJSON | undefined; cluster?: boolean | undefined; clusterMaxZoom?: number | undefined; clusterRadius?: number | undefined; clusterMinPoints?: number | undefined; generateId?: boolean | undefined; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -168,12 +317,12 @@
           {
             "parentPluginId": "@kbn/mapbox-gl",
             "id": "def-common.GeoJSONSource.workerOptions",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "workerOptions",
             "description": [],
             "signature": [
-              "any"
+              "{ source?: string | undefined; cluster?: boolean | undefined; geojsonVtOptions?: { buffer?: number | undefined; tolerance?: number | undefined; extent?: number | undefined; maxZoom?: number | undefined; linemetrics?: boolean | undefined; generateId?: boolean | undefined; } | undefined; superclusterOptions?: { maxZoom?: number | undefined; miniPoints?: number | undefined; extent?: number | undefined; radius?: number | undefined; log?: boolean | undefined; generateId?: boolean | undefined; } | undefined; clusterProperties?: any; fliter?: any; promoteId?: any; collectResourceTiming?: boolean | undefined; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -407,6 +556,82 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.GeoJSONSource.updateData",
+            "type": "Function",
+            "tags": [],
+            "label": "updateData",
+            "description": [
+              "\nUpdates the source's GeoJSON, and re-renders the map.\n\nFor sources with lots of features, this method can be used to make updates more quickly.\n\nThis approach requires unique IDs for every feature in the source. The IDs can either be specified on the feature,\nor by using the promoteId option to specify which property should be used as the ID.\n\nIt is an error to call updateData on a source that did not have unique IDs for each of its features already.\n\nUpdates are applied on a best-effort basis, updating an ID that does not exist will not result in an error.\n"
+            ],
+            "signature": [
+              "(diff: maplibregl.GeoJSONSourceDiff) => this"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.GeoJSONSource.updateData.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "diff",
+                "description": [
+                  "The changes that need to be applied."
+                ],
+                "signature": [
+                  "maplibregl.GeoJSONSourceDiff"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "this"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.GeoJSONSource.setClusterOptions",
+            "type": "Function",
+            "tags": [],
+            "label": "setClusterOptions",
+            "description": [
+              "\nTo disable/enable clustering on the source options"
+            ],
+            "signature": [
+              "(options: maplibregl.SetClusterOptions) => this"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.GeoJSONSource.setClusterOptions.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "The options to set"
+                ],
+                "signature": [
+                  "maplibregl.SetClusterOptions"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "this"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
             "id": "def-common.GeoJSONSource.getClusterExpansionZoom",
             "type": "Function",
             "tags": [],
@@ -612,7 +837,7 @@
             "label": "_updateWorkerData",
             "description": [],
             "signature": [
-              "(sourceDataType: maplibregl.MapSourceDataType) => void"
+              "(diff?: maplibregl.GeoJSONSourceDiff | undefined) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -621,17 +846,17 @@
               {
                 "parentPluginId": "@kbn/mapbox-gl",
                 "id": "def-common.GeoJSONSource._updateWorkerData.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
-                "label": "sourceDataType",
+                "label": "diff",
                 "description": [],
                 "signature": [
-                  "maplibregl.MapSourceDataType"
+                  "maplibregl.GeoJSONSourceDiff | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -927,14 +1152,14 @@
               "\nReturns the coordinates represented as an array of two numbers.\n"
             ],
             "signature": [
-              "() => number[]"
+              "() => [number, number]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": [
-              "The coordinates represeted as an array of longitude and latitude."
+              "The coordinates represented as an array of longitude and latitude."
             ]
           },
           {
@@ -993,44 +1218,6 @@
             ],
             "returnComment": [
               "Distance in meters between the two coordinates."
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-common.LngLat.toBounds",
-            "type": "Function",
-            "tags": [],
-            "label": "toBounds",
-            "description": [
-              "\nReturns a `LngLatBounds` from the coordinates extended by a given `radius`. The returned `LngLatBounds` completely contains the `radius`.\n"
-            ],
-            "signature": [
-              "(radius?: number | undefined) => maplibregl.LngLatBounds"
-            ],
-            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-common.LngLat.toBounds.$1",
-                "type": "number",
-                "tags": [],
-                "label": "radius",
-                "description": [
-                  "Distance in meters from the coordinates to extend the bounds."
-                ],
-                "signature": [
-                  "number | undefined"
-                ],
-                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": [
-              "A new `LngLatBounds` object representing the coordinates extended by the `radius`."
             ]
           },
           {
@@ -1133,32 +1320,36 @@
               {
                 "parentPluginId": "@kbn/mapbox-gl",
                 "id": "def-common.LngLatBounds.Unnamed.$1",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "sw",
-                "description": [],
+                "description": [
+                  "The southwest corner of the bounding box.\nOR array of 4 numbers in the order of  west, south, east, north\nOR array of 2 LngLatLike: [sw,ne]"
+                ],
                 "signature": [
-                  "any"
+                  "[number, number, number, number] | maplibregl.LngLatLike | [maplibregl.LngLatLike, maplibregl.LngLatLike] | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               },
               {
                 "parentPluginId": "@kbn/mapbox-gl",
                 "id": "def-common.LngLatBounds.Unnamed.$2",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "ne",
-                "description": [],
+                "description": [
+                  "The northeast corner of the bounding box."
+                ],
                 "signature": [
-                  "any"
+                  "maplibregl.LngLatLike | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1467,7 +1658,7 @@
               "\nReturns the bounding box represented as an array.\n"
             ],
             "signature": [
-              "() => number[][]"
+              "() => [number, number][]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -1591,6 +1782,61 @@
             ],
             "returnComment": [
               "A new `LngLatBounds` object, if a conversion occurred, or the original `LngLatBounds` object."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.LngLatBounds.fromLngLat",
+            "type": "Function",
+            "tags": [],
+            "label": "fromLngLat",
+            "description": [
+              "\nReturns a `LngLatBounds` from the coordinates extended by a given `radius`. The returned `LngLatBounds` completely contains the `radius`.\n"
+            ],
+            "signature": [
+              "(center: maplibregl.LngLat, radius?: number | undefined) => maplibregl.LngLatBounds"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.LngLatBounds.fromLngLat.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "center",
+                "description": [
+                  "center coordinates of the new bounds."
+                ],
+                "signature": [
+                  "maplibregl.LngLat"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.LngLatBounds.fromLngLat.$2",
+                "type": "number",
+                "tags": [],
+                "label": "radius",
+                "description": [
+                  "Distance in meters from the coordinates to extend the bounds."
+                ],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "A new `LngLatBounds` object representing the coordinates extended by the `radius`."
             ]
           }
         ],
@@ -1721,6 +1967,48 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map._cooperativeGestures",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "_cooperativeGestures",
+            "description": [],
+            "signature": [
+              "boolean | maplibregl.GestureOptions"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map._cooperativeGesturesScreen",
+            "type": "Object",
+            "tags": [],
+            "label": "_cooperativeGesturesScreen",
+            "description": [],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map._metaKey",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "_metaKey",
+            "description": [],
+            "signature": [
+              "keyof MouseEvent"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
             "id": "def-common.Map._showTileBoundaries",
             "type": "boolean",
             "tags": [],
@@ -1812,6 +2100,17 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map._maxTileCacheZoomLevels",
+            "type": "number",
+            "tags": [],
+            "label": "_maxTileCacheZoomLevels",
+            "description": [],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
             "id": "def-common.Map._frame",
             "type": "Object",
             "tags": [],
@@ -1870,6 +2169,17 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map._idleTriggered",
+            "type": "boolean",
+            "tags": [],
+            "label": "_idleTriggered",
+            "description": [],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
             "id": "def-common.Map._fullyLoaded",
             "type": "boolean",
             "tags": [],
@@ -1886,6 +2196,20 @@
             "tags": [],
             "label": "_trackResize",
             "description": [],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map._resizeObserver",
+            "type": "Object",
+            "tags": [],
+            "label": "_resizeObserver",
+            "description": [],
+            "signature": [
+              "ResizeObserver"
+            ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2058,6 +2382,17 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map._validateStyle",
+            "type": "boolean",
+            "tags": [],
+            "label": "_validateStyle",
+            "description": [],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
             "id": "def-common.Map._requestManager",
             "type": "Object",
             "tags": [],
@@ -2113,6 +2448,50 @@
             "tags": [],
             "label": "_pixelRatio",
             "description": [],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map._terrainDataCallback",
+            "type": "Function",
+            "tags": [],
+            "label": "_terrainDataCallback",
+            "description": [],
+            "signature": [
+              "(e: maplibregl.MapStyleDataEvent | maplibregl.MapSourceDataEvent) => void"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map._terrainDataCallback.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "e",
+                "description": [],
+                "signature": [
+                  "maplibregl.MapStyleDataEvent | maplibregl.MapSourceDataEvent"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map._imageQueueHandle",
+            "type": "number",
+            "tags": [],
+            "label": "_imageQueueHandle",
+            "description": [
+              "image queue throttling handle. To be used later when clean up"
+            ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2220,10 +2599,10 @@
             "tags": [],
             "label": "touchZoomRotate",
             "description": [
-              "\nThe map's {@link TouchZoomRotateHandler}, which allows the user to zoom or rotate the map with touch gestures.\nFind more details and examples using `touchZoomRotate` in the {@link TouchZoomRotateHandler} section."
+              "\nThe map's {@link TwoFingersTouchZoomRotateHandler}, which allows the user to zoom or rotate the map with touch gestures.\nFind more details and examples using `touchZoomRotate` in the {@link TwoFingersTouchZoomRotateHandler} section."
             ],
             "signature": [
-              "maplibregl.TouchZoomRotateHandler"
+              "maplibregl.TwoFingersTouchZoomRotateHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -2236,10 +2615,10 @@
             "tags": [],
             "label": "touchPitch",
             "description": [
-              "\nThe map's {@link TouchPitchHandler}, which allows the user to pitch the map with touch gestures.\nFind more details and examples using `touchPitch` in the {@link TouchPitchHandler} section."
+              "\nThe map's {@link TwoFingersTouchPitchHandler}, which allows the user to pitch the map with touch gestures.\nFind more details and examples using `touchPitch` in the {@link TwoFingersTouchPitchHandler} section."
             ],
             "signature": [
-              "maplibregl.TouchPitchHandler"
+              "maplibregl.TwoFingersTouchPitchHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -2425,6 +2804,83 @@
             "returnComment": [
               "True if map contains control."
             ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map.calculateCameraOptionsFromTo",
+            "type": "Function",
+            "tags": [],
+            "label": "calculateCameraOptionsFromTo",
+            "description": [],
+            "signature": [
+              "(from: maplibregl.LngLat, altitudeFrom: number, to: maplibregl.LngLat, altitudeTo?: number | undefined) => maplibregl.CameraOptions"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map.calculateCameraOptionsFromTo.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "from",
+                "description": [],
+                "signature": [
+                  "maplibregl.LngLat"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map.calculateCameraOptionsFromTo.$2",
+                "type": "number",
+                "tags": [],
+                "label": "altitudeFrom",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map.calculateCameraOptionsFromTo.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "to",
+                "description": [],
+                "signature": [
+                  "maplibregl.LngLat"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map.calculateCameraOptionsFromTo.$4",
+                "type": "number",
+                "tags": [],
+                "label": "altitudeTo",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -2894,6 +3350,64 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map.getCooperativeGestures",
+            "type": "Function",
+            "tags": [],
+            "label": "getCooperativeGestures",
+            "description": [
+              "\nGets the map's cooperativeGestures option\n"
+            ],
+            "signature": [
+              "() => boolean | maplibregl.GestureOptions"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "gestureOptions"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map.setCooperativeGestures",
+            "type": "Function",
+            "tags": [],
+            "label": "setCooperativeGestures",
+            "description": [
+              "\nSets or clears the map's cooperativeGestures option\n"
+            ],
+            "signature": [
+              "(gestureOptions?: boolean | maplibregl.GestureOptions | null | undefined) => this"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map.setCooperativeGestures.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "gestureOptions",
+                "description": [
+                  "If `true` or set to an options object, map is only accessible on desktop while holding Command/Ctrl and only accessible on mobile with two fingers. Interacting with the map using normal gestures will trigger an informational screen. With this option enabled, \"drag to pitch\" requires a three-finger gesture."
+                ],
+                "signature": [
+                  "boolean | maplibregl.GestureOptions | null | undefined"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "`this`"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
             "id": "def-common.Map.project",
             "type": "Function",
             "tags": [],
@@ -3037,7 +3551,7 @@
             "label": "_createDelegatedListener",
             "description": [],
             "signature": [
-              "(type: string, layerId: string, listener: maplibregl.Listener) => { layer: string; listener: maplibregl.Listener; delegates: { error?: ((e: any) => void) | undefined; load?: ((e: any) => void) | undefined; idle?: ((e: any) => void) | undefined; remove?: ((e: any) => void) | undefined; render?: ((e: any) => void) | undefined; resize?: ((e: any) => void) | undefined; webglcontextlost?: ((e: any) => void) | undefined; webglcontextrestored?: ((e: any) => void) | undefined; dataloading?: ((e: any) => void) | undefined; data?: ((e: any) => void) | undefined; tiledataloading?: ((e: any) => void) | undefined; sourcedataloading?: ((e: any) => void) | undefined; styledataloading?: ((e: any) => void) | undefined; sourcedata?: ((e: any) => void) | undefined; styledata?: ((e: any) => void) | undefined; styleimagemissing?: ((e: any) => void) | undefined; dataabort?: ((e: any) => void) | undefined; sourcedataabort?: ((e: any) => void) | undefined; boxzoomcancel?: ((e: any) => void) | undefined; boxzoomstart?: ((e: any) => void) | undefined; boxzoomend?: ((e: any) => void) | undefined; touchcancel?: ((e: any) => void) | undefined; touchmove?: ((e: any) => void) | undefined; touchend?: ((e: any) => void) | undefined; touchstart?: ((e: any) => void) | undefined; click?: ((e: any) => void) | undefined; contextmenu?: ((e: any) => void) | undefined; dblclick?: ((e: any) => void) | undefined; mousemove?: ((e: any) => void) | undefined; mouseup?: ((e: any) => void) | undefined; mousedown?: ((e: any) => void) | undefined; mouseout?: ((e: any) => void) | undefined; mouseover?: ((e: any) => void) | undefined; movestart?: ((e: any) => void) | undefined; move?: ((e: any) => void) | undefined; moveend?: ((e: any) => void) | undefined; zoomstart?: ((e: any) => void) | undefined; zoom?: ((e: any) => void) | undefined; zoomend?: ((e: any) => void) | undefined; rotatestart?: ((e: any) => void) | undefined; rotate?: ((e: any) => void) | undefined; rotateend?: ((e: any) => void) | undefined; dragstart?: ((e: any) => void) | undefined; drag?: ((e: any) => void) | undefined; dragend?: ((e: any) => void) | undefined; pitchstart?: ((e: any) => void) | undefined; pitch?: ((e: any) => void) | undefined; pitchend?: ((e: any) => void) | undefined; wheel?: ((e: any) => void) | undefined; }; }"
+              "(type: string, layerId: string, listener: maplibregl.Listener) => { layer: string; listener: maplibregl.Listener; delegates: { error?: ((e: any) => void) | undefined; load?: ((e: any) => void) | undefined; idle?: ((e: any) => void) | undefined; remove?: ((e: any) => void) | undefined; render?: ((e: any) => void) | undefined; resize?: ((e: any) => void) | undefined; webglcontextlost?: ((e: any) => void) | undefined; webglcontextrestored?: ((e: any) => void) | undefined; dataloading?: ((e: any) => void) | undefined; data?: ((e: any) => void) | undefined; tiledataloading?: ((e: any) => void) | undefined; sourcedataloading?: ((e: any) => void) | undefined; styledataloading?: ((e: any) => void) | undefined; sourcedata?: ((e: any) => void) | undefined; styledata?: ((e: any) => void) | undefined; styleimagemissing?: ((e: any) => void) | undefined; dataabort?: ((e: any) => void) | undefined; sourcedataabort?: ((e: any) => void) | undefined; boxzoomcancel?: ((e: any) => void) | undefined; boxzoomstart?: ((e: any) => void) | undefined; boxzoomend?: ((e: any) => void) | undefined; touchcancel?: ((e: any) => void) | undefined; touchmove?: ((e: any) => void) | undefined; touchend?: ((e: any) => void) | undefined; touchstart?: ((e: any) => void) | undefined; click?: ((e: any) => void) | undefined; contextmenu?: ((e: any) => void) | undefined; dblclick?: ((e: any) => void) | undefined; mousemove?: ((e: any) => void) | undefined; mouseup?: ((e: any) => void) | undefined; mousedown?: ((e: any) => void) | undefined; mouseout?: ((e: any) => void) | undefined; mouseover?: ((e: any) => void) | undefined; movestart?: ((e: any) => void) | undefined; move?: ((e: any) => void) | undefined; moveend?: ((e: any) => void) | undefined; zoomstart?: ((e: any) => void) | undefined; zoom?: ((e: any) => void) | undefined; zoomend?: ((e: any) => void) | undefined; rotatestart?: ((e: any) => void) | undefined; rotate?: ((e: any) => void) | undefined; rotateend?: ((e: any) => void) | undefined; dragstart?: ((e: any) => void) | undefined; drag?: ((e: any) => void) | undefined; dragend?: ((e: any) => void) | undefined; pitchstart?: ((e: any) => void) | undefined; pitch?: ((e: any) => void) | undefined; pitchend?: ((e: any) => void) | undefined; wheel?: ((e: any) => void) | undefined; terrain?: ((e: any) => void) | undefined; }; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -3135,7 +3649,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "layer",
-                "description": [],
+                "description": [
+                  "The ID of a style layer or a listener if no ID is provided. Event will only be triggered if its location\nis within a visible feature in this layer. The event will have a `features` property containing\nan array of the matching features. If `layerIdOrListener` is not supplied, the event will not have a `features` property.\nPlease note that many event types are not compatible with the optional `layerIdOrListener` parameter."
+                ],
                 "signature": [
                   "string"
                 ],
@@ -3275,7 +3791,7 @@
               "\nAdds a listener that will be called only once to a specified event type.\n\n\nAdds a listener that will be called only once to a specified event type occurring on features in a specified style layer.\n"
             ],
             "signature": [
-              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & Object) => void): this; (type: string, listener: maplibregl.Listener): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener?: ((ev: maplibregl.MapLayerEventType[T] & Object) => void) | undefined): this | Promise<maplibregl.MapLayerEventType[T] & Object>; <T extends keyof maplibregl.MapEventType>(type: T, listener?: ((ev: maplibregl.MapEventType[T] & Object) => void) | undefined): Promise<any> | this; (type: string, listener?: maplibregl.Listener | undefined): Promise<any> | this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -3304,7 +3820,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "layer",
-                "description": [],
+                "description": [
+                  "The ID of a style layer or a listener if no ID is provided. Only events whose location is within a visible\nfeature in this layer will trigger the listener. The event will have a `features` property containing\nan array of the matching features."
+                ],
                 "signature": [
                   "string"
                 ],
@@ -3323,12 +3841,12 @@
                   "The function to be called when the event is fired.\nThe listener function is called with the data object passed to `fire`,\nextended with `target` and `type` properties."
                 ],
                 "signature": [
-                  "(ev: maplibregl.MapLayerEventType[T] & Object) => void"
+                  "((ev: maplibregl.MapLayerEventType[T] & Object) => void) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": [
@@ -3343,7 +3861,7 @@
             "label": "once",
             "description": [],
             "signature": [
-              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & Object) => void): this; (type: string, listener: maplibregl.Listener): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener?: ((ev: maplibregl.MapLayerEventType[T] & Object) => void) | undefined): this | Promise<maplibregl.MapLayerEventType[T] & Object>; <T extends keyof maplibregl.MapEventType>(type: T, listener?: ((ev: maplibregl.MapEventType[T] & Object) => void) | undefined): Promise<any> | this; (type: string, listener?: maplibregl.Listener | undefined): Promise<any> | this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -3372,12 +3890,12 @@
                 "label": "listener",
                 "description": [],
                 "signature": [
-                  "(ev: maplibregl.MapEventType[T] & Object) => void"
+                  "((ev: maplibregl.MapEventType[T] & Object) => void) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -3390,7 +3908,7 @@
             "label": "once",
             "description": [],
             "signature": [
-              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & Object) => void): this; (type: string, listener: maplibregl.Listener): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener?: ((ev: maplibregl.MapLayerEventType[T] & Object) => void) | undefined): this | Promise<maplibregl.MapLayerEventType[T] & Object>; <T extends keyof maplibregl.MapEventType>(type: T, listener?: ((ev: maplibregl.MapEventType[T] & Object) => void) | undefined): Promise<any> | this; (type: string, listener?: maplibregl.Listener | undefined): Promise<any> | this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -3419,12 +3937,12 @@
                 "label": "listener",
                 "description": [],
                 "signature": [
-                  "maplibregl.Listener"
+                  "maplibregl.Listener | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -3473,7 +3991,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "layer",
-                "description": [],
+                "description": [
+                  "The layer ID or listener previously used to install the listener."
+                ],
                 "signature": [
                   "string"
                 ],
@@ -3610,7 +4130,7 @@
               "\nReturns an array of MapGeoJSONFeature objects\nrepresenting visible features that satisfy the query parameters.\n"
             ],
             "signature": [
-              "(geometry?: maplibregl.PointLike | [maplibregl.PointLike, maplibregl.PointLike] | undefined, options?: any) => maplibregl.MapGeoJSONFeature[]"
+              "(geometryOrOptions?: maplibregl.PointLike | [maplibregl.PointLike, maplibregl.PointLike] | maplibregl.QueryRenderedFeaturesOptions | undefined, options?: maplibregl.QueryRenderedFeaturesOptions | undefined) => maplibregl.MapGeoJSONFeature[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -3621,12 +4141,12 @@
                 "id": "def-common.Map.queryRenderedFeatures.$1",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "geometry",
+                "label": "geometryOrOptions",
                 "description": [
-                  "- The geometry of the query region:\neither a single point or southwest and northeast points describing a bounding box.\nOmitting this parameter (i.e. calling {@link MapqueryRenderedFeatures } with zero arguments,\nor with only a `options` argument) is equivalent to passing a bounding box encompassing the entire\nmap viewport."
+                  "(optional) The geometry of the query region:\neither a single point or southwest and northeast points describing a bounding box.\nOmitting this parameter (i.e. calling {@link MapqueryRenderedFeatures } with zero arguments,\nor with only a `options` argument) is equivalent to passing a bounding box encompassing the entire\nmap viewport.\nThe geometryOrOptions can receive a QueryRenderedFeaturesOptions only to support a situation where the function receives only one parameter which is the options parameter."
                 ],
                 "signature": [
-                  "maplibregl.PointLike | [maplibregl.PointLike, maplibregl.PointLike] | undefined"
+                  "maplibregl.PointLike | [maplibregl.PointLike, maplibregl.PointLike] | maplibregl.QueryRenderedFeaturesOptions | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
@@ -3636,23 +4156,23 @@
               {
                 "parentPluginId": "@kbn/mapbox-gl",
                 "id": "def-common.Map.queryRenderedFeatures.$2",
-                "type": "Any",
+                "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "Options object."
+                  "(optional) Options object."
                 ],
                 "signature": [
-                  "any"
+                  "maplibregl.QueryRenderedFeaturesOptions | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": [
-              "An array of MapGeoJSONFeature objects.\n\nThe `properties` value of each returned feature object contains the properties of its source feature. For GeoJSON sources, only\nstring and numeric property values are supported (i.e. `null`, `Array`, and `Object` values are not supported).\n\nEach feature includes top-level `layer`, `source`, and `sourceLayer` properties. The `layer` property is an object\nrepresenting the style layer to  which the feature belongs. Layout and paint properties in this object contain values\nwhich are fully evaluated for the given zoom level and feature.\n\nOnly features that are currently rendered are included. Some features will **not** be included, like:\n\n- Features from layers whose `visibility` property is `\"none\"`.\n- Features from layers whose zoom range excludes the current zoom level.\n- Symbol features that have been hidden due to text or icon collision.\n\nFeatures from all other layers are included, including features that may have no visible\ncontribution to the rendered result; for example, because the layer's opacity or color alpha component is set to\n0.\n\nThe topmost rendered feature appears first in the returned array, and subsequent features are sorted by\ndescending z-order. Features that are rendered multiple times (due to wrapping across the antimeridian at low\nzoom levels) are returned only once (though subject to the following caveat).\n\nBecause features come from tiled vector data or GeoJSON data that is converted to tiles internally, feature\ngeometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple\ntimes in query results. For example, suppose there is a highway running through the bounding rectangle of a query.\nThe results of the query will be those parts of the highway that lie within the map tiles covering the bounding\nrectangle, even if the highway extends into other tiles, and the portion of the highway within each map tile\nwill be returned as a separate feature. Similarly, a point feature near a tile boundary may appear in multiple\ntiles due to tile buffering."
+              "An array of MapGeoJSONFeature objects.\n\nThe `properties` value of each returned feature object contains the properties of its source feature. For GeoJSON sources, only\nstring and numeric property values are supported (i.e. `null`, `Array`, and `Object` values are not supported).\n\nEach feature includes top-level `layer`, `source`, and `sourceLayer` properties. The `layer` property is an object\nrepresenting the style layer to  which the feature belongs. Layout and paint properties in this object contain values\nwhich are fully evaluated for the given zoom level and feature.\n\nOnly features that are currently rendered are included. Some features will **not** be included, like:\n\n- Features from layers whose `visibility` property is `\"none\"`.\n- Features from layers whose zoom range excludes the current zoom level.\n- Symbol features that have been hidden due to text or icon collision.\n\nFeatures from all other layers are included, including features that may have no visible\ncontribution to the rendered result; for example, because the layer's opacity or color alpha component is set to\n0.\n\nThe topmost rendered feature appears first in the returned array, and subsequent features are sorted by\ndescending z-order. Features that are rendered multiple times (due to wrapping across the antemeridian at low\nzoom levels) are returned only once (though subject to the following caveat).\n\nBecause features come from tiled vector data or GeoJSON data that is converted to tiles internally, feature\ngeometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple\ntimes in query results. For example, suppose there is a highway running through the bounding rectangle of a query.\nThe results of the query will be those parts of the highway that lie within the map tiles covering the bounding\nrectangle, even if the highway extends into other tiles, and the portion of the highway within each map tile\nwill be returned as a separate feature. Similarly, a point feature near a tile boundary may appear in multiple\ntiles due to tile buffering."
             ]
           },
           {
@@ -3665,7 +4185,7 @@
               "\nReturns an array of MapGeoJSONFeature objects\nrepresenting features within the specified vector tile or GeoJSON source that satisfy the query parameters.\n"
             ],
             "signature": [
-              "(sourceId: string, parameters?: { sourceLayer: string; filter: any[]; validate?: boolean | undefined; } | null | undefined) => maplibregl.MapGeoJSONFeature[]"
+              "(sourceId: string, parameters?: { sourceLayer?: string | undefined; filter?: maplibregl.FilterSpecification | undefined; validate?: boolean | undefined; } | null | undefined) => maplibregl.MapGeoJSONFeature[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -3698,7 +4218,7 @@
                   "Options object."
                 ],
                 "signature": [
-                  "{ sourceLayer: string; filter: any[]; validate?: boolean | undefined; } | null | undefined"
+                  "{ sourceLayer?: string | undefined; filter?: maplibregl.FilterSpecification | undefined; validate?: boolean | undefined; } | null | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
@@ -3720,7 +4240,7 @@
               "\nUpdates the map's MapLibre style object with a new value.\n\nIf a style is already set when this is used and options.diff is set to true, the map renderer will attempt to compare the given style\nagainst the map's current state and perform only the changes necessary to make the map style match the desired state. Changes in sprites\n(images used for icons and patterns) and glyphs (fonts for label text) **cannot** be diffed. If the sprites or fonts used in the current\nstyle and the given style are different in any way, the map renderer will force a full update, removing the current style and building\nthe given one from scratch.\n\n"
             ],
             "signature": [
-              "(style: string | maplibregl.StyleSpecification | null, options?: ({ diff?: boolean | undefined; } & maplibregl.StyleOptions) | undefined) => this"
+              "(style: string | maplibregl.StyleSpecification | null, options?: (maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -3733,7 +4253,7 @@
                 "tags": [],
                 "label": "style",
                 "description": [
-                  "A JSON object conforming to the schema described in the\n[MapLibre Style Specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/), or a URL to such JSON."
+                  "A JSON object conforming to the schema described in the\n[MapLibre Style Specification](https://maplibre.org/maplibre-style-spec/), or a URL to such JSON."
                 ],
                 "signature": [
                   "string | maplibregl.StyleSpecification | null"
@@ -3753,7 +4273,7 @@
                   "Options object."
                 ],
                 "signature": [
-                  "({ diff?: boolean | undefined; } & maplibregl.StyleOptions) | undefined"
+                  "(maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
@@ -3843,7 +4363,7 @@
             "label": "_updateStyle",
             "description": [],
             "signature": [
-              "(style: string | maplibregl.StyleSpecification | null, options?: ({ diff?: boolean | undefined; } & maplibregl.StyleOptions) | undefined) => this"
+              "(style: string | maplibregl.StyleSpecification | null, options?: (maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -3872,7 +4392,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "({ diff?: boolean | undefined; } & maplibregl.StyleOptions) | undefined"
+                  "(maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
@@ -3906,7 +4426,7 @@
             "label": "_diffStyle",
             "description": [],
             "signature": [
-              "(style: string | maplibregl.StyleSpecification, options?: ({ diff?: boolean | undefined; } & maplibregl.StyleOptions) | undefined) => void"
+              "(style: string | maplibregl.StyleSpecification, options?: (maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -3935,7 +4455,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "({ diff?: boolean | undefined; } & maplibregl.StyleOptions) | undefined"
+                  "(maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
@@ -3953,7 +4473,7 @@
             "label": "_updateDiff",
             "description": [],
             "signature": [
-              "(style: maplibregl.StyleSpecification, options?: ({ diff?: boolean | undefined; } & maplibregl.StyleOptions) | undefined) => void"
+              "(style: maplibregl.StyleSpecification, options?: (maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -3982,7 +4502,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "({ diff?: boolean | undefined; } & maplibregl.StyleOptions) | undefined"
+                  "(maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
@@ -4075,7 +4595,7 @@
                 "tags": [],
                 "label": "source",
                 "description": [
-                  "The source object, conforming to the\nMapLibre Style Specification's [source definition](https://maplibre.org/maplibre-gl-js-docs/style-spec/#sources) or\n{@link CanvasSourceOptions }."
+                  "The source object, conforming to the\nMapLibre Style Specification's [source definition](https://maplibre.org/maplibre-style-spec/#sources) or\n{@link CanvasSourceOptions }."
                 ],
                 "signature": [
                   "maplibregl.SourceSpecification"
@@ -4126,6 +4646,64 @@
             ],
             "returnComment": [
               "A Boolean indicating whether the source is loaded."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map.setTerrain",
+            "type": "Function",
+            "tags": [],
+            "label": "setTerrain",
+            "description": [
+              "\nLoads a 3D terrain mesh, based on a \"raster-dem\" source."
+            ],
+            "signature": [
+              "(options: maplibregl.TerrainSpecification) => maplibregl.Map"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map.setTerrain.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "Options object."
+                ],
+                "signature": [
+                  "maplibregl.TerrainSpecification"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "`this`"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map.getTerrain",
+            "type": "Function",
+            "tags": [],
+            "label": "getTerrain",
+            "description": [
+              "\nGet the terrain-options if terrain is loaded"
+            ],
+            "signature": [
+              "() => maplibregl.TerrainSpecification"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "the TerrainSpecification passed to setTerrain"
             ]
           },
           {
@@ -4230,7 +4808,7 @@
               "\nRemoves a source from the map's style.\n"
             ],
             "signature": [
-              "(id: string) => this"
+              "(id: string) => maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -4297,7 +4875,7 @@
               }
             ],
             "returnComment": [
-              "The style source with the specified ID or `undefined` if the ID\ncorresponds to no existing sources.\nThe shape of the object varies by source type.\nA list of options for each source type is available on the MapLibre Style Specification's\n[Sources](https://maplibre.org/maplibre-gl-js-docs/style-spec/sources/) page."
+              "The style source with the specified ID or `undefined` if the ID\ncorresponds to no existing sources.\nThe shape of the object varies by source type.\nA list of options for each source type is available on the MapLibre Style Specification's\n[Sources](https://maplibre.org/maplibre-style-spec/sources/) page."
             ]
           },
           {
@@ -4310,7 +4888,7 @@
             ],
             "label": "addImage",
             "description": [
-              "\nAdd an image to the style. This image can be displayed on the map like any other icon in the style's\nsprite using the image's ID with\n[`icon-image`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#layout-symbol-icon-image),\n[`background-pattern`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#paint-background-background-pattern),\n[`fill-pattern`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#paint-fill-fill-pattern),\nor [`line-pattern`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#paint-line-line-pattern).\nA {@link Map.event:error} event will be fired if there is not enough space in the sprite to add this image.\n"
+              "\nAdd an image to the style. This image can be displayed on the map like any other icon in the style's\nsprite using the image's ID with\n[`icon-image`](https://maplibre.org/maplibre-style-spec/#layout-symbol-icon-image),\n[`background-pattern`](https://maplibre.org/maplibre-style-spec/#paint-background-background-pattern),\n[`fill-pattern`](https://maplibre.org/maplibre-style-spec/#paint-fill-fill-pattern),\nor [`line-pattern`](https://maplibre.org/maplibre-style-spec/#paint-line-line-pattern).\nA {@link Map.event:error} event will be fired if there is not enough space in the sprite to add this image.\n"
             ],
             "signature": [
               "(id: string, image: HTMLImageElement | ImageBitmap | ImageData | { width: number; height: number; data: Uint8Array | Uint8ClampedArray; } | maplibregl.StyleImageInterface, { pixelRatio, sdf, stretchX, stretchY, content }?: Partial<maplibregl.StyleImageMetadata> | undefined) => this"
@@ -4378,7 +4956,7 @@
             "tags": [],
             "label": "updateImage",
             "description": [
-              "\nUpdate an existing image in a style. This image can be displayed on the map like any other icon in the style's\nsprite using the image's ID with\n[`icon-image`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#layout-symbol-icon-image),\n[`background-pattern`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#paint-background-background-pattern),\n[`fill-pattern`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#paint-fill-fill-pattern),\nor [`line-pattern`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#paint-line-line-pattern).\n"
+              "\nUpdate an existing image in a style. This image can be displayed on the map like any other icon in the style's\nsprite using the image's ID with\n[`icon-image`](https://maplibre.org/maplibre-style-spec/#layout-symbol-icon-image),\n[`background-pattern`](https://maplibre.org/maplibre-style-spec/#paint-background-background-pattern),\n[`fill-pattern`](https://maplibre.org/maplibre-style-spec/#paint-fill-fill-pattern),\nor [`line-pattern`](https://maplibre.org/maplibre-style-spec/#paint-line-line-pattern).\n"
             ],
             "signature": [
               "(id: string, image: HTMLImageElement | ImageBitmap | ImageData | maplibregl.StyleImageInterface | { width: number; height: number; data: Uint8Array | Uint8ClampedArray; }) => this"
@@ -4423,6 +5001,44 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map.getImage",
+            "type": "Function",
+            "tags": [],
+            "label": "getImage",
+            "description": [
+              "\nReturns an image, specified by ID, currently available in the map.\nThis includes both images from the style's original sprite\nand any images that have been added at runtime using {@link Map#addImage}.\n"
+            ],
+            "signature": [
+              "(id: string) => maplibregl.StyleImage"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map.getImage.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "The ID of the image."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "An image in the map with the specified ID."
+            ]
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
@@ -4584,10 +5200,10 @@
             ],
             "label": "addLayer",
             "description": [
-              "\nAdds a [MapLibre style layer](https://maplibre.org/maplibre-gl-js-docs/style-spec/#layers)\nto the map's style.\n\nA layer defines how data from a specified source will be styled. Read more about layer types\nand available paint and layout properties in the [MapLibre Style Specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/#layers).\n"
+              "\nAdds a [MapLibre style layer](https://maplibre.org/maplibre-style-spec/#layers)\nto the map's style.\n\nA layer defines how data from a specified source will be styled. Read more about layer types\nand available paint and layout properties in the [MapLibre Style Specification](https://maplibre.org/maplibre-style-spec/#layers).\n\nTODO: JSDoc can't pass @param {(LayerSpecification & {source?: string | SourceSpecification}) | CustomLayerInterface} layer The layer to add,"
             ],
             "signature": [
-              "(layer: maplibregl.LayerSpecification | maplibregl.CustomLayerInterface, beforeId?: string | undefined) => this"
+              "(layer: (maplibregl.LayerSpecification & { source?: string | maplibregl.SourceSpecification | undefined; }) | maplibregl.CustomLayerInterface, beforeId?: string | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -4600,10 +5216,10 @@
                 "tags": [],
                 "label": "layer",
                 "description": [
-                  "The layer to add, conforming to either the MapLibre Style Specification's [layer definition](https://maplibre.org/maplibre-gl-js-docs/style-spec/#layers) or, less commonly, the {@link CustomLayerInterface } specification.\nThe MapLibre Style Specification's layer definition is appropriate for most layers."
+                  "conforming to either the MapLibre Style Specification's [layer definition](https://maplibre.org/maplibre-style-spec/#layers) or,\nless commonly, the {@link CustomLayerInterface } specification.\nThe MapLibre Style Specification's layer definition is appropriate for most layers."
                 ],
                 "signature": [
-                  "maplibregl.LayerSpecification | maplibregl.CustomLayerInterface"
+                  "(maplibregl.LayerSpecification & { source?: string | maplibregl.SourceSpecification | undefined; }) | maplibregl.CustomLayerInterface"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
@@ -4773,7 +5389,7 @@
             "tags": [],
             "label": "setLayerZoomRange",
             "description": [
-              "\nSets the zoom extent for the specified style layer. The zoom extent includes the\n[minimum zoom level](https://maplibre.org/maplibre-gl-js-docs/style-spec/#layer-minzoom)\nand [maximum zoom level](https://maplibre.org/maplibre-gl-js-docs/style-spec/#layer-maxzoom))\nat which the layer will be rendered.\n\nNote: For style layers using vector sources, style layers cannot be rendered at zoom levels lower than the\nminimum zoom level of the _source layer_ because the data does not exist at those zoom levels. If the minimum\nzoom level of the source layer is higher than the minimum zoom level defined in the style layer, the style\nlayer will not be rendered at all zoom levels in the zoom range.\n"
+              "\nSets the zoom extent for the specified style layer. The zoom extent includes the\n[minimum zoom level](https://maplibre.org/maplibre-style-spec/#layer-minzoom)\nand [maximum zoom level](https://maplibre.org/maplibre-style-spec/#layer-maxzoom))\nat which the layer will be rendered.\n\nNote: For style layers using vector sources, style layers cannot be rendered at zoom levels lower than the\nminimum zoom level of the _source layer_ because the data does not exist at those zoom levels. If the minimum\nzoom level of the source layer is higher than the minimum zoom level defined in the style layer, the style\nlayer will not be rendered at all zoom levels in the zoom range.\n"
             ],
             "signature": [
               "(layerId: string, minzoom: number, maxzoom: number) => this"
@@ -4880,7 +5496,7 @@
                 "tags": [],
                 "label": "filter",
                 "description": [
-                  "The filter, conforming to the MapLibre Style Specification's\n[filter definition](https://maplibre.org/maplibre-gl-js-docs/style-spec/layers/#filter).  If `null` or `undefined` is provided, the function removes any existing filter from the layer."
+                  "The filter, conforming to the MapLibre Style Specification's\n[filter definition](https://maplibre.org/maplibre-style-spec/layers/#filter).  If `null` or `undefined` is provided, the function removes any existing filter from the layer."
                 ],
                 "signature": [
                   "maplibregl.FilterSpecification | null | undefined"
@@ -5010,7 +5626,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [
-                  "The value of the paint property to set.\nMust be of a type appropriate for the property, as defined in the [MapLibre Style Specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/)."
+                  "The value of the paint property to set.\nMust be of a type appropriate for the property, as defined in the [MapLibre Style Specification](https://maplibre.org/maplibre-style-spec/)."
                 ],
                 "signature": [
                   "any"
@@ -5154,7 +5770,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [
-                  "The value of the layout property. Must be of a type appropriate for the property, as defined in the [MapLibre Style Specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/)."
+                  "The value of the layout property. Must be of a type appropriate for the property, as defined in the [MapLibre Style Specification](https://maplibre.org/maplibre-style-spec/)."
                 ],
                 "signature": [
                   "any"
@@ -5243,6 +5859,270 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map.setGlyphs",
+            "type": "Function",
+            "tags": [],
+            "label": "setGlyphs",
+            "description": [
+              "\nSets the value of the style's glyphs property.\n"
+            ],
+            "signature": [
+              "(glyphsUrl: string | null, options?: maplibregl.StyleSetterOptions | undefined) => this"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map.setGlyphs.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "glyphsUrl",
+                "description": [
+                  "Glyph URL to set. Must conform to the [MapLibre Style Specification](https://maplibre.org/maplibre-style-spec/glyphs/)."
+                ],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map.setGlyphs.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "Options object."
+                ],
+                "signature": [
+                  "maplibregl.StyleSetterOptions | undefined"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "`this`"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map.getGlyphs",
+            "type": "Function",
+            "tags": [],
+            "label": "getGlyphs",
+            "description": [
+              "\nReturns the value of the style's glyphs URL\n"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "glyphs Style's glyphs url"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map.addSprite",
+            "type": "Function",
+            "tags": [
+              "fires"
+            ],
+            "label": "addSprite",
+            "description": [
+              "\nAdds a sprite to the map's style.\n"
+            ],
+            "signature": [
+              "(id: string, url: string, options?: maplibregl.StyleSetterOptions | undefined) => this"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map.addSprite.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "The ID of the sprite to add. Must not conflict with existing sprites."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map.addSprite.$2",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [
+                  "The URL to load the sprite from"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map.addSprite.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "Options object."
+                ],
+                "signature": [
+                  "maplibregl.StyleSetterOptions | undefined"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "`this`"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map.removeSprite",
+            "type": "Function",
+            "tags": [
+              "fires"
+            ],
+            "label": "removeSprite",
+            "description": [
+              "\nRemoves the sprite from the map's style.\n"
+            ],
+            "signature": [
+              "(id: string) => this"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map.removeSprite.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "The ID of the sprite to remove. If the sprite is declared as a single URL, the ID must be \"default\"."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "`this`"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map.getSprite",
+            "type": "Function",
+            "tags": [],
+            "label": "getSprite",
+            "description": [
+              "\nReturns the as-is value of the style's sprite.\n"
+            ],
+            "signature": [
+              "() => { id: string; url: string; }[]"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "style's sprite url or a list of id-url pairs"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map.setSprite",
+            "type": "Function",
+            "tags": [],
+            "label": "setSprite",
+            "description": [
+              "\nSets the value of the style's sprite property.\n"
+            ],
+            "signature": [
+              "(spriteUrl: string | null, options?: maplibregl.StyleSetterOptions | undefined) => this"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map.setSprite.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "spriteUrl",
+                "description": [
+                  "Sprite URL to set."
+                ],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map.setSprite.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "Options object."
+                ],
+                "signature": [
+                  "maplibregl.StyleSetterOptions | undefined"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "`this`"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
             "id": "def-common.Map.setLight",
             "type": "Function",
             "tags": [],
@@ -5264,7 +6144,7 @@
                 "tags": [],
                 "label": "light",
                 "description": [
-                  "Light properties to set. Must conform to the [MapLibre Style Specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/#light)."
+                  "Light properties to set. Must conform to the [MapLibre Style Specification](https://maplibre.org/maplibre-style-spec/#light)."
                 ],
                 "signature": [
                   "maplibregl.LightSpecification"
@@ -5325,7 +6205,7 @@
             ],
             "label": "setFeatureState",
             "description": [
-              "\nSets the `state` of a feature.\nA feature's `state` is a set of user-defined key-value pairs that are assigned to a feature at runtime.\nWhen using this method, the `state` object is merged with any existing key-value pairs in the feature's state.\nFeatures are identified by their `feature.id` attribute, which can be any number or string.\n\nThis method can only be used with sources that have a `feature.id` attribute. The `feature.id` attribute can be defined in three ways:\n- For vector or GeoJSON sources, including an `id` attribute in the original data file.\n- For vector or GeoJSON sources, using the [`promoteId`](https://maplibre.org/maplibre-gl-js-docs/style-spec/sources/#vector-promoteId) option at the time the source is defined.\n- For GeoJSON sources, using the [`generateId`](https://maplibre.org/maplibre-gl-js-docs/style-spec/sources/#geojson-generateId) option to auto-assign an `id` based on the feature's index in the source data. If you change feature data using `map.getSource('some id').setData(..)`, you may need to re-apply state taking into account updated `id` values.\n\n_Note: You can use the [`feature-state` expression](https://maplibre.org/maplibre-gl-js-docs/style-spec/expressions/#feature-state) to access the values in a feature's state object for the purposes of styling._\n"
+              "\nSets the `state` of a feature.\nA feature's `state` is a set of user-defined key-value pairs that are assigned to a feature at runtime.\nWhen using this method, the `state` object is merged with any existing key-value pairs in the feature's state.\nFeatures are identified by their `feature.id` attribute, which can be any number or string.\n\nThis method can only be used with sources that have a `feature.id` attribute. The `feature.id` attribute can be defined in three ways:\n- For vector or GeoJSON sources, including an `id` attribute in the original data file.\n- For vector or GeoJSON sources, using the [`promoteId`](https://maplibre.org/maplibre-style-spec/sources/#vector-promoteId) option at the time the source is defined.\n- For GeoJSON sources, using the [`generateId`](https://maplibre.org/maplibre-style-spec/sources/#geojson-generateId) option to auto-assign an `id` based on the feature's index in the source data. If you change feature data using `map.getSource('some id').setData(..)`, you may need to re-apply state taking into account updated `id` values.\n\n_Note: You can use the [`feature-state` expression](https://maplibre.org/maplibre-style-spec/expressions/#feature-state) to access the values in a feature's state object for the purposes of styling._\n"
             ],
             "signature": [
               "(feature: maplibregl.FeatureIdentifier, state: any) => this"
@@ -5431,7 +6311,7 @@
             "tags": [],
             "label": "getFeatureState",
             "description": [
-              "\nGets the `state` of a feature.\nA feature's `state` is a set of user-defined key-value pairs that are assigned to a feature at runtime.\nFeatures are identified by their `feature.id` attribute, which can be any number or string.\n\n_Note: To access the values in a feature's state object for the purposes of styling the feature, use the [`feature-state` expression](https://maplibre.org/maplibre-gl-js-docs/style-spec/expressions/#feature-state)._\n"
+              "\nGets the `state` of a feature.\nA feature's `state` is a set of user-defined key-value pairs that are assigned to a feature at runtime.\nFeatures are identified by their `feature.id` attribute, which can be any number or string.\n\n_Note: To access the values in a feature's state object for the purposes of styling the feature, use the [`feature-state` expression](https://maplibre.org/maplibre-style-spec/expressions/#feature-state)._\n"
             ],
             "signature": [
               "(feature: maplibregl.FeatureIdentifier) => any"
@@ -5550,6 +6430,70 @@
             "type": "Function",
             "tags": [],
             "label": "_setupContainer",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map._cooperativeGesturesOnWheel",
+            "type": "Function",
+            "tags": [],
+            "label": "_cooperativeGesturesOnWheel",
+            "description": [],
+            "signature": [
+              "(event: WheelEvent) => void"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map._cooperativeGesturesOnWheel.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "WheelEvent"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map._setupCooperativeGestures",
+            "type": "Function",
+            "tags": [],
+            "label": "_setupCooperativeGestures",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map._destroyCooperativeGestures",
+            "type": "Function",
+            "tags": [],
+            "label": "_destroyCooperativeGestures",
             "description": [],
             "signature": [
               "() => void"
@@ -5722,6 +6666,68 @@
                 "type": "Any",
                 "tags": [],
                 "label": "event",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map._onCooperativeGesture",
+            "type": "Function",
+            "tags": [],
+            "label": "_onCooperativeGesture",
+            "description": [],
+            "signature": [
+              "(event: any, metaPress: any, touches: any) => boolean"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map._onCooperativeGesture.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map._onCooperativeGesture.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "metaPress",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.Map._onCooperativeGesture.$3",
+                "type": "Any",
+                "tags": [],
+                "label": "touches",
                 "description": [],
                 "signature": [
                   "any"
@@ -5981,38 +6987,6 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-common.Map._onWindowResize",
-            "type": "Function",
-            "tags": [],
-            "label": "_onWindowResize",
-            "description": [],
-            "signature": [
-              "(event: maplibregl.Event) => void"
-            ],
-            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-common.Map._onWindowResize.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "event",
-                "description": [],
-                "signature": [
-                  "maplibregl.Event"
-                ],
-                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/mapbox-gl",
             "id": "def-common.Map.showTileBoundaries",
             "type": "boolean",
             "tags": [
@@ -6173,50 +7147,36 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
-            "id": "def-common.Map._setCacheLimits",
+            "id": "def-common.Map.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "\nReturns the package version of the library"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.Map.getCameraTargetElevation",
             "type": "Function",
             "tags": [],
-            "label": "_setCacheLimits",
-            "description": [],
+            "label": "getCameraTargetElevation",
+            "description": [
+              "\nReturns the elevation for the point where the camera is looking.\nThis value corresponds to:\n\"meters above sea level\" * \"exaggeration\""
+            ],
             "signature": [
-              "(limit: number, checkThreshold: number) => void"
+              "() => number"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-common.Map._setCacheLimits.$1",
-                "type": "number",
-                "tags": [],
-                "label": "limit",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/mapbox-gl",
-                "id": "def-common.Map._setCacheLimits.$2",
-                "type": "number",
-                "tags": [],
-                "label": "checkThreshold",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
+            "children": [],
+            "returnComment": [
+              "* The elevation."
+            ]
           }
         ],
         "initialIsOpen": false
@@ -7794,7 +8754,7 @@
               "\nCalled during a render frame allowing the layer to draw into the GL context.\n\nThe layer can assume blending and depth state is set to allow the layer to properly\nblend and clip other layers. The layer cannot make any other assumptions about the\ncurrent GL state.\n\nIf the layer needs to render to a texture, it should implement the `prerender` method\nto do this and only use the `render` method for drawing directly into the main framebuffer.\n\nThe blend function is set to `gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)`. This expects\ncolors to be provided in premultiplied alpha form where the `r`, `g` and `b` values are already\nmultiplied by the `a` value. If you are unable to provide colors in premultiplied form you\nmay want to change the blend function to\n`gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)`.\n"
             ],
             "signature": [
-              "(gl: WebGLRenderingContext, matrix: ",
+              "(gl: WebGLRenderingContext | WebGL2RenderingContext, matrix: ",
               "mat4",
               ") => void"
             ],
@@ -7806,14 +8766,14 @@
               {
                 "parentPluginId": "@kbn/mapbox-gl",
                 "id": "def-common.CustomLayerInterface.render.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "gl",
                 "description": [
                   "The map's gl context."
                 ],
                 "signature": [
-                  "WebGLRenderingContext"
+                  "WebGLRenderingContext | WebGL2RenderingContext"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
@@ -7873,7 +8833,7 @@
               "\nOptional method called when the layer has been added to the Map with {@link Map#addLayer}. This\ngives the layer a chance to initialize gl resources and register event listeners.\n"
             ],
             "signature": [
-              "((map: maplibregl.Map, gl: WebGLRenderingContext) => void) | undefined"
+              "((map: maplibregl.Map, gl: WebGLRenderingContext | WebGL2RenderingContext) => void) | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -7899,14 +8859,14 @@
               {
                 "parentPluginId": "@kbn/mapbox-gl",
                 "id": "def-common.CustomLayerInterface.onAdd.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "gl",
                 "description": [
                   "The gl context for the map."
                 ],
                 "signature": [
-                  "WebGLRenderingContext"
+                  "WebGLRenderingContext | WebGL2RenderingContext"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
@@ -7931,7 +8891,7 @@
               "\nOptional method called when the layer has been removed from the Map with {@link Map#removeLayer}. This\ngives the layer a chance to clean up gl resources and event listeners.\n"
             ],
             "signature": [
-              "((map: maplibregl.Map, gl: WebGLRenderingContext) => void) | undefined"
+              "((map: maplibregl.Map, gl: WebGLRenderingContext | WebGL2RenderingContext) => void) | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -7957,14 +8917,14 @@
               {
                 "parentPluginId": "@kbn/mapbox-gl",
                 "id": "def-common.CustomLayerInterface.onRemove.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "gl",
                 "description": [
                   "The gl context for the map."
                 ],
                 "signature": [
-                  "WebGLRenderingContext"
+                  "WebGLRenderingContext | WebGL2RenderingContext"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "deprecated": false,
@@ -7985,7 +8945,7 @@
         "label": "MapSourceDataEvent",
         "description": [],
         "signature": [
-          "maplibregl.MapSourceDataEvent extends maplibregl.MapLibreEvent<undefined>"
+          "maplibregl.MapSourceDataEvent extends maplibregl.MapLibreEvent<unknown>"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
@@ -8049,7 +9009,7 @@
             "label": "sourceDataType",
             "description": [],
             "signature": [
-              "\"metadata\" | \"content\""
+              "\"metadata\" | \"content\" | \"visibility\" | \"idle\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -8602,9 +9562,9 @@
         "label": "FilterSpecification",
         "description": [],
         "signature": [
-          "[\"at\", number, (string | number)[]] | [\"get\", string, (Record<string, unknown> | undefined)?] | [\"has\", string, (Record<string, unknown> | undefined)?] | [\"in\", ...maplibregl.FilterSpecificationInputType[], maplibregl.FilterSpecificationInputType | maplibregl.FilterSpecificationInputType[]] | [\"index-of\", maplibregl.FilterSpecificationInputType, maplibregl.FilterSpecificationInputType | maplibregl.FilterSpecificationInputType[]] | [\"length\", string | string[]] | [\"slice\", string | string[], number] | [\"!\", maplibregl.FilterSpecification] | [\"!=\", string | maplibregl.FilterSpecification, maplibregl.FilterSpecificationInputType] | [\"<\", string | maplibregl.FilterSpecification, maplibregl.FilterSpecificationInputType] | [\"<=\", string | maplibregl.FilterSpecification, maplibregl.FilterSpecificationInputType] | [\"==\", string | maplibregl.FilterSpecification, maplibregl.FilterSpecificationInputType] | [\">\", string | maplibregl.FilterSpecification, maplibregl.FilterSpecificationInputType] | [\">=\", string | maplibregl.FilterSpecification, maplibregl.FilterSpecificationInputType] | [\"all\", ...maplibregl.FilterSpecification[], maplibregl.FilterSpecificationInputType] | [\"any\", ...maplibregl.FilterSpecification[], maplibregl.FilterSpecificationInputType] | [\"case\", ...maplibregl.FilterSpecification[], maplibregl.FilterSpecificationInputType] | [\"coalesce\", ...maplibregl.FilterSpecification[], maplibregl.FilterSpecificationInputType] | [\"match\", ...maplibregl.FilterSpecification[], maplibregl.FilterSpecificationInputType] | [\"within\", ...maplibregl.FilterSpecification[], maplibregl.FilterSpecificationInputType] | [\"!in\", ...maplibregl.FilterSpecification[], maplibregl.FilterSpecificationInputType] | [\"!has\", ...maplibregl.FilterSpecification[], maplibregl.FilterSpecificationInputType] | [\"none\", ...maplibregl.FilterSpecification[], maplibregl.FilterSpecificationInputType] | (string | maplibregl.FilterSpecification)[]"
+          "maplibregl.ExpressionFilterSpecification | maplibregl.LegacyFilterSpecification"
         ],
-        "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "path": "node_modules/@maplibre/maplibre-gl-style-spec/dist/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8619,7 +9579,7 @@
         "signature": [
           "maplibregl.FillLayerSpecification | maplibregl.LineLayerSpecification | maplibregl.SymbolLayerSpecification | maplibregl.CircleLayerSpecification | maplibregl.HeatmapLayerSpecification | maplibregl.FillExtrusionLayerSpecification | maplibregl.RasterLayerSpecification | maplibregl.HillshadeLayerSpecification | maplibregl.BackgroundLayerSpecification"
         ],
-        "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "path": "node_modules/@maplibre/maplibre-gl-style-spec/dist/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8632,7 +9592,7 @@
         "label": "MapEvent",
         "description": [],
         "signature": [
-          "\"error\" | \"remove\" | \"data\" | \"move\" | \"rotate\" | \"render\" | \"resize\" | \"zoom\" | \"idle\" | \"mousedown\" | \"mouseup\" | \"mouseover\" | \"mousemove\" | \"click\" | \"dblclick\" | \"mouseenter\" | \"mouseleave\" | \"mouseout\" | \"contextmenu\" | \"wheel\" | \"touchstart\" | \"touchend\" | \"touchmove\" | \"touchcancel\" | \"movestart\" | \"moveend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"boxzoomstart\" | \"boxzoomend\" | \"boxzoomcancel\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"load\" | \"styledata\" | \"sourcedata\" | \"dataloading\" | \"styledataloading\" | \"sourcedataloading\" | \"styleimagemissing\" | \"style.load\" | \"dataabort\" | \"sourcedataabort\""
+          "\"error\" | \"data\" | \"move\" | \"render\" | \"remove\" | \"rotate\" | \"resize\" | \"idle\" | \"zoom\" | \"load\" | \"mousedown\" | \"mouseup\" | \"mouseover\" | \"mousemove\" | \"click\" | \"dblclick\" | \"mouseenter\" | \"mouseleave\" | \"mouseout\" | \"contextmenu\" | \"wheel\" | \"touchstart\" | \"touchend\" | \"touchmove\" | \"touchcancel\" | \"movestart\" | \"moveend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"boxzoomstart\" | \"boxzoomend\" | \"boxzoomcancel\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"styledata\" | \"sourcedata\" | \"dataloading\" | \"styledataloading\" | \"sourcedataloading\" | \"styleimagemissing\" | \"style.load\" | \"terrain\" | \"dataabort\" | \"sourcedataabort\""
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
@@ -8647,7 +9607,7 @@
         "label": "MapGeoJSONFeature",
         "description": [],
         "signature": [
-          "maplibregl.GeoJSONFeature & { layer: Omit<maplibregl.LayerSpecification, \"source\"> & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
+          "maplibregl.GeoJSONFeature & { layer: (Omit<maplibregl.FillLayerSpecification, \"source\"> | Omit<maplibregl.LineLayerSpecification, \"source\"> | Omit<maplibregl.SymbolLayerSpecification, \"source\"> | Omit<maplibregl.CircleLayerSpecification, \"source\"> | Omit<maplibregl.HeatmapLayerSpecification, \"source\"> | Omit<maplibregl.FillExtrusionLayerSpecification, \"source\"> | Omit<maplibregl.RasterLayerSpecification, \"source\"> | Omit<maplibregl.HillshadeLayerSpecification, \"source\"> | Omit<maplibregl.BackgroundLayerSpecification, \"source\">) & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
@@ -8677,7 +9637,7 @@
         "label": "MapOptions",
         "description": [],
         "signature": [
-          "{ hash?: string | boolean | undefined; interactive?: boolean | undefined; container: string | HTMLElement; bearingSnap?: number | undefined; attributionControl?: boolean | undefined; customAttribution?: string | string[] | undefined; maplibreLogo?: boolean | undefined; logoPosition?: maplibregl.ControlPosition | undefined; failIfMajorPerformanceCaveat?: boolean | undefined; preserveDrawingBuffer?: boolean | undefined; antialias?: boolean | undefined; refreshExpiredTiles?: boolean | undefined; maxBounds?: maplibregl.LngLatBoundsLike | undefined; scrollZoom?: boolean | undefined; minZoom?: number | null | undefined; maxZoom?: number | null | undefined; minPitch?: number | null | undefined; maxPitch?: number | null | undefined; boxZoom?: boolean | undefined; dragRotate?: boolean | undefined; dragPan?: boolean | maplibregl.DragPanOptions | undefined; keyboard?: boolean | undefined; doubleClickZoom?: boolean | undefined; touchZoomRotate?: boolean | undefined; touchPitch?: boolean | undefined; trackResize?: boolean | undefined; center?: maplibregl.LngLatLike | undefined; zoom?: number | undefined; bearing?: number | undefined; pitch?: number | undefined; renderWorldCopies?: boolean | undefined; maxTileCacheSize?: number | undefined; transformRequest?: maplibregl.RequestTransformFunction | undefined; locale?: any; fadeDuration?: number | undefined; crossSourceCollisions?: boolean | undefined; collectResourceTiming?: boolean | undefined; clickTolerance?: number | undefined; bounds?: maplibregl.LngLatBoundsLike | undefined; fitBoundsOptions?: Object | undefined; localIdeographFontFamily?: string | undefined; style: string | maplibregl.StyleSpecification; pitchWithRotate?: boolean | undefined; pixelRatio?: number | undefined; }"
+          "{ hash?: string | boolean | undefined; interactive?: boolean | undefined; container: string | HTMLElement; bearingSnap?: number | undefined; attributionControl?: boolean | undefined; customAttribution?: string | string[] | undefined; maplibreLogo?: boolean | undefined; logoPosition?: maplibregl.ControlPosition | undefined; failIfMajorPerformanceCaveat?: boolean | undefined; preserveDrawingBuffer?: boolean | undefined; antialias?: boolean | undefined; refreshExpiredTiles?: boolean | undefined; maxBounds?: maplibregl.LngLatBoundsLike | undefined; scrollZoom?: boolean | undefined; minZoom?: number | null | undefined; maxZoom?: number | null | undefined; minPitch?: number | null | undefined; maxPitch?: number | null | undefined; boxZoom?: boolean | undefined; dragRotate?: boolean | undefined; dragPan?: boolean | maplibregl.DragPanOptions | undefined; keyboard?: boolean | undefined; doubleClickZoom?: boolean | undefined; touchZoomRotate?: boolean | undefined; touchPitch?: boolean | undefined; cooperativeGestures?: boolean | maplibregl.GestureOptions | undefined; trackResize?: boolean | undefined; center?: maplibregl.LngLatLike | undefined; zoom?: number | undefined; bearing?: number | undefined; pitch?: number | undefined; renderWorldCopies?: boolean | undefined; maxTileCacheSize?: number | undefined; maxTileCacheZoomLevels?: number | undefined; transformRequest?: maplibregl.RequestTransformFunction | undefined; transformCameraUpdate?: maplibregl.CameraUpdateTransformFunction | undefined; locale?: any; fadeDuration?: number | undefined; crossSourceCollisions?: boolean | undefined; collectResourceTiming?: boolean | undefined; clickTolerance?: number | undefined; bounds?: maplibregl.LngLatBoundsLike | undefined; fitBoundsOptions?: Object | undefined; localIdeographFontFamily?: string | undefined; style: string | maplibregl.StyleSpecification; pitchWithRotate?: boolean | undefined; pixelRatio?: number | undefined; validateStyle?: boolean | undefined; }"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
@@ -8721,15 +9681,30 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
+        "id": "def-common.SourceSpecification",
+        "type": "Type",
+        "tags": [],
+        "label": "SourceSpecification",
+        "description": [],
+        "signature": [
+          "maplibregl.VectorSourceSpecification | maplibregl.RasterSourceSpecification | maplibregl.RasterDEMSourceSpecification | maplibregl.GeoJSONSourceSpecification | maplibregl.VideoSourceSpecification | maplibregl.ImageSourceSpecification"
+        ],
+        "path": "node_modules/@maplibre/maplibre-gl-style-spec/dist/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mapbox-gl",
         "id": "def-common.StyleSpecification",
         "type": "Type",
         "tags": [],
         "label": "StyleSpecification",
         "description": [],
         "signature": [
-          "{ version: 8; name?: string | undefined; metadata?: unknown; center?: number[] | undefined; zoom?: number | undefined; bearing?: number | undefined; pitch?: number | undefined; light?: maplibregl.LightSpecification | undefined; sources: { [_: string]: maplibregl.SourceSpecification; }; sprite?: string | undefined; glyphs?: string | undefined; transition?: maplibregl.TransitionSpecification | undefined; layers: maplibregl.LayerSpecification[]; }"
+          "{ version: 8; name?: string | undefined; metadata?: unknown; center?: number[] | undefined; zoom?: number | undefined; bearing?: number | undefined; pitch?: number | undefined; light?: maplibregl.LightSpecification | undefined; terrain?: maplibregl.TerrainSpecification | undefined; sources: { [_: string]: maplibregl.SourceSpecification; }; sprite?: maplibregl.SpriteSpecification | undefined; glyphs?: string | undefined; transition?: maplibregl.TransitionSpecification | undefined; layers: maplibregl.LayerSpecification[]; }"
         ],
-        "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "path": "node_modules/@maplibre/maplibre-gl-style-spec/dist/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

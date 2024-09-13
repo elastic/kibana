@@ -6,14 +6,16 @@
  */
 
 import { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { AttachmentActionType } from '../../../../client/attachment_framework/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   parseCommentString,
   getLensVisualizations,
 } from '../../../../../common/utils/markdown_plugins/utils';
+import { OPEN_IN_VISUALIZATION } from '../../../visualizations/translations';
 
 export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
   const parsedComment = parseCommentString(comment);
@@ -22,6 +24,8 @@ export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
   const {
     lens: { navigateToPrefilledEditor, canUseEditor },
   } = useKibana().services;
+
+  const hasLensPermissions = canUseEditor();
 
   const handleClick = useCallback(() => {
     navigateToPrefilledEditor(
@@ -37,19 +41,26 @@ export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
     );
   }, [lensVisualization, navigateToPrefilledEditor]);
 
+  if (!lensVisualization.length || lensVisualization?.[0]?.attributes == null) {
+    return { canUseEditor: hasLensPermissions, actionConfig: null };
+  }
+
+  const lensAttributes = lensVisualization[0]
+    .attributes as unknown as TypedLensByValueInput['attributes'];
+
+  const isESQLQuery = isOfAggregateQueryType(lensAttributes.state.query);
+
+  if (isESQLQuery) {
+    return { canUseEditor: hasLensPermissions, actionConfig: null };
+  }
+
   return {
-    canUseEditor: canUseEditor(),
-    actionConfig: !lensVisualization.length
-      ? null
-      : {
-          iconType: 'lensApp',
-          label: i18n.translate(
-            'xpack.cases.markdownEditor.plugins.lens.openVisualizationButtonLabel',
-            {
-              defaultMessage: 'Open visualization',
-            }
-          ),
-          onClick: handleClick,
-        },
+    canUseEditor: hasLensPermissions,
+    actionConfig: {
+      type: AttachmentActionType.BUTTON as const,
+      iconType: 'lensApp',
+      label: OPEN_IN_VISUALIZATION,
+      onClick: handleClick,
+    },
   };
 };

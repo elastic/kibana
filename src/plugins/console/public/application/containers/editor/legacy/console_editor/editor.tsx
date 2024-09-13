@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -34,6 +35,7 @@ import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
 import type { SenseEditor } from '../../../../models/sense_editor';
 import { StorageKeys } from '../../../../../services';
+import { DEFAULT_INPUT_VALUE } from '../../../../../../common/constants';
 
 const { useUIAceKeyboardMode } = ace;
 
@@ -54,14 +56,6 @@ const abs: CSSProperties = {
   right: '0',
 };
 
-const DEFAULT_INPUT_VALUE = `# Click the Variables button, above, to create your own variables.
-GET \${exampleVariable1} // _search
-{
-  "query": {
-    "\${exampleVariable2}": {} // match_all
-  }
-}`;
-
 const inputId = 'ConAppInputTextarea';
 
 function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
@@ -76,6 +70,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
       storage,
     },
     docLinkVersion,
+    ...startServices
   } = useServicesContext();
 
   const { settings } = useEditorReadContext();
@@ -87,7 +82,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   const editorInstanceRef = useRef<senseEditor.SenseEditor | null>(null);
 
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
-  useUIAceKeyboardMode(textArea);
+  useUIAceKeyboardMode(textArea, startServices, settings.isAccessibilityOverlayEnabled);
 
   const openDocumentation = useCallback(async () => {
     const documentation = await getDocumentation(editorInstanceRef.current!, docLinkVersion);
@@ -108,7 +103,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     }
 
     const readQueryParams = () => {
-      const [, queryString] = (window.location.hash || '').split('?');
+      const [, queryString] = (window.location.hash || window.location.search || '').split('?');
 
       return parse(queryString || '', { sort: false }) as Required<QueryParams>;
     };
@@ -229,7 +224,12 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     autocompleteInfo.retrieve(settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
-    setupAutosave();
+    if (!initialQueryParams.load_from) {
+      // Don't setup autosaving editor content when we pre-load content
+      // This prevents losing the user's current console content when
+      // `loadFrom` query param is used for a console session
+      setupAutosave();
+    }
 
     return () => {
       unsubscribeResizer();
@@ -290,19 +290,19 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
         >
           <EuiFlexItem>
             <EuiToolTip
-              content={i18n.translate('console.sendRequestButtonTooltip', {
+              content={i18n.translate('console.sendRequestButtonTooltipContent', {
                 defaultMessage: 'Click to send request',
               })}
             >
               <EuiLink
-                color="success"
+                color="primary"
                 onClick={sendCurrentRequest}
                 data-test-subj="sendRequestButton"
-                aria-label={i18n.translate('console.sendRequestButtonTooltip', {
+                aria-label={i18n.translate('console.sendRequestButtonTooltipAriaLabel', {
                   defaultMessage: 'Click to send request',
                 })}
               >
-                <EuiIcon type="playFilled" />
+                <EuiIcon type="play" />
               </EuiLink>
             </EuiToolTip>
           </EuiFlexItem>

@@ -7,49 +7,60 @@
 import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, ValidFeatureId } from '@kbn/rule-data-utils';
+import { AlertsTableContext } from '../contexts/alerts_table_context';
 import {
-  Alerts,
   AlertsTableConfigurationRegistry,
   BulkActionsConfig,
+  BulkActionsPanelConfig,
   BulkActionsState,
   BulkActionsVerbs,
+  BulkActionsReducerAction,
   UseBulkActionsRegistry,
 } from '../../../../types';
-import { BulkActionsContext } from '../bulk_actions/context';
 import {
   getLeadingControlColumn as getBulkActionsLeadingControlColumn,
   GetLeadingControlColumn,
 } from '../bulk_actions/get_leading_control_column';
 import { CasesService } from '../types';
 import {
-  ADD_TO_CASE_DISABLED,
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,
   ALERTS_ALREADY_ATTACHED_TO_CASE,
+  MARK_AS_UNTRACKED,
   NO_ALERTS_ADDED_TO_CASE,
 } from './translations';
 import { TimelineItem } from '../bulk_actions/components/toolbar';
+import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
+import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
 
 interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
-  alerts: Alerts;
+  alertsCount: number;
   casesConfig?: AlertsTableConfigurationRegistry['cases'];
   useBulkActionsConfig?: UseBulkActionsRegistry;
   refresh: () => void;
+  featureIds?: ValidFeatureId[];
+  hideBulkActions?: boolean;
 }
 
 export interface UseBulkActions {
   isBulkActionsColumnActive: boolean;
   getBulkActionsLeadingControlColumn: GetLeadingControlColumn;
   bulkActionsState: BulkActionsState;
-  bulkActions: BulkActionsConfig[];
+  bulkActions: BulkActionsPanelConfig[];
   setIsBulkActionsLoading: (isLoading: boolean) => void;
   clearSelection: () => void;
+  updateBulkActionsState: React.Dispatch<BulkActionsReducerAction>;
 }
 
 type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'casesConfig' | 'refresh'> &
   Pick<UseBulkActions, 'clearSelection'>;
+
+type UseBulkUntrackActionsProps = Pick<BulkActionsProps, 'refresh' | 'query' | 'featureIds'> &
+  Pick<UseBulkActions, 'clearSelection' | 'setIsBulkActionsLoading'> & {
+    isAllSelected: boolean;
+  };
 
 const filterAlertsAlreadyAttachedToCase = (alerts: TimelineItem[], caseId: string) =>
   alerts.filter(
@@ -72,6 +83,25 @@ const getCaseAttachments = ({
   return groupAlertsByRule?.(filteredAlerts) ?? [];
 };
 
+const addItemsToInitialPanel = ({
+  panels,
+  items,
+}: {
+  panels: BulkActionsPanelConfig[];
+  items: BulkActionsConfig[];
+}) => {
+  if (panels.length > 0) {
+    if (panels[0].items) {
+      panels[0].items = [...panels[0].items, ...items].filter(
+        (item, index, self) => index === self.findIndex((newItem) => newItem.key === item.key)
+      );
+    }
+    return panels;
+  } else {
+    return [{ id: 0, items }];
+  }
+};
+
 export const useBulkAddToCaseActions = ({
   casesConfig,
   refresh,
@@ -79,8 +109,10 @@ export const useBulkAddToCaseActions = ({
 }: UseBulkAddToCaseActionsProps): BulkActionsConfig[] => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
 
-  const userCasesPermissions = casesService?.helpers.canUseCases(casesConfig?.owner ?? []);
-  const CasesContext = casesService?.ui.getCasesContext();
+  const userCasesPermissions = useMemo(() => {
+    return casesService?.helpers.canUseCases(casesConfig?.owner ?? []);
+  }, [casesConfig?.owner, casesService]);
+  const CasesContext = useMemo(() => casesService?.ui.getCasesContext(), [casesService]);
   const isCasesContextAvailable = Boolean(casesService && CasesContext);
 
   const onSuccess = useCallback(() => {
@@ -109,7 +141,7 @@ export const useBulkAddToCaseActions = ({
             key: 'attach-new-case',
             'data-test-subj': 'attach-new-case',
             disableOnQuery: true,
-            disabledLabel: ADD_TO_CASE_DISABLED,
+            disabledLabel: ADD_TO_NEW_CASE,
             onClick: (alerts?: TimelineItem[]) => {
               const caseAttachments = alerts
                 ? casesService?.helpers.groupAlertsByRule(alerts) ?? []
@@ -124,11 +156,15 @@ export const useBulkAddToCaseActions = ({
             label: ADD_TO_EXISTING_CASE,
             key: 'attach-existing-case',
             disableOnQuery: true,
-            disabledLabel: ADD_TO_CASE_DISABLED,
+            disabledLabel: ADD_TO_EXISTING_CASE,
             'data-test-subj': 'attach-existing-case',
             onClick: (alerts?: TimelineItem[]) => {
               selectCaseModal.open({
                 getAttachments: ({ theCase }) => {
+                  if (theCase == null) {
+                    return alerts ? casesService?.helpers.groupAlertsByRule(alerts) ?? [] : [];
+                  }
+
                   return getCaseAttachments({
                     alerts,
                     caseId: theCase.id,
@@ -150,39 +186,165 @@ export const useBulkAddToCaseActions = ({
   ]);
 };
 
+export const useBulkUntrackActions = ({
+  setIsBulkActionsLoading,
+  refresh,
+  clearSelection,
+  query,
+  featureIds = [],
+  isAllSelected,
+}: UseBulkUntrackActionsProps) => {
+  const onSuccess = useCallback(() => {
+    refresh();
+    clearSelection();
+  }, [clearSelection, refresh]);
+
+  const { application } = useKibana().services;
+  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+  const { mutateAsync: untrackAlertsByQuery } = useBulkUntrackAlertsByQuery();
+
+  const hasApmPermission = application?.capabilities.apm?.['alerting:show'];
+  const hasInfrastructurePermission = application?.capabilities.infrastructure?.show;
+  const hasLogsPermission = application?.capabilities.logs?.show;
+  const hasUptimePermission = application?.capabilities.uptime?.show;
+  const hasSloPermission = application?.capabilities.slo?.show;
+  const hasObservabilityPermission = application?.capabilities.observability?.show;
+  const onClick = useCallback(
+    async (alerts?: TimelineItem[]) => {
+      if (!alerts) return;
+      const alertUuids = alerts.map((alert) => alert._id);
+      const indices = alerts.map((alert) => alert._index ?? '');
+      try {
+        setIsBulkActionsLoading(true);
+        if (isAllSelected) {
+          await untrackAlertsByQuery({ query, featureIds });
+        } else {
+          await untrackAlerts({ indices, alertUuids });
+        }
+        onSuccess();
+      } finally {
+        setIsBulkActionsLoading(false);
+      }
+    },
+    [
+      query,
+      featureIds,
+      isAllSelected,
+      onSuccess,
+      setIsBulkActionsLoading,
+      untrackAlerts,
+      untrackAlertsByQuery,
+    ]
+  );
+
+  return useMemo(() => {
+    // Check if at least one Observability feature is enabled
+    if (!application?.capabilities) return [];
+    if (
+      !hasApmPermission &&
+      !hasInfrastructurePermission &&
+      !hasLogsPermission &&
+      !hasUptimePermission &&
+      !hasSloPermission &&
+      !hasObservabilityPermission
+    )
+      return [];
+    return [
+      {
+        label: MARK_AS_UNTRACKED,
+        key: 'mark-as-untracked',
+        disableOnQuery: false,
+        disabledLabel: MARK_AS_UNTRACKED,
+        'data-test-subj': 'mark-as-untracked',
+        onClick,
+      },
+    ];
+  }, [
+    application?.capabilities,
+    hasApmPermission,
+    hasInfrastructurePermission,
+    hasLogsPermission,
+    hasUptimePermission,
+    hasSloPermission,
+    hasObservabilityPermission,
+    onClick,
+  ]);
+};
+
 export function useBulkActions({
-  alerts,
+  alertsCount,
   casesConfig,
   query,
   refresh,
   useBulkActionsConfig = () => [],
+  featureIds,
+  hideBulkActions,
 }: BulkActionsProps): UseBulkActions {
-  const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
-  const configBulkActions = useBulkActionsConfig(query);
+  const {
+    bulkActions: [bulkActionsState, updateBulkActionsState],
+  } = useContext(AlertsTableContext);
+  const configBulkActionPanels = useBulkActionsConfig(query, refresh);
 
-  const clearSelection = () => {
+  const clearSelection = useCallback(() => {
     updateBulkActionsState({ action: BulkActionsVerbs.clear });
-  };
+  }, [updateBulkActionsState]);
+  const setIsBulkActionsLoading = useCallback(
+    (isLoading: boolean = true) => {
+      updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
+    },
+    [updateBulkActionsState]
+  );
   const caseBulkActions = useBulkAddToCaseActions({ casesConfig, refresh, clearSelection });
+  const untrackBulkActions = useBulkUntrackActions({
+    setIsBulkActionsLoading,
+    refresh,
+    clearSelection,
+    query,
+    featureIds,
+    isAllSelected: bulkActionsState.isAllSelected,
+  });
 
-  const bulkActions = [...configBulkActions, ...caseBulkActions];
+  const initialItems = useMemo(() => {
+    return [...caseBulkActions, ...(featureIds?.includes('siem') ? [] : untrackBulkActions)];
+  }, [caseBulkActions, featureIds, untrackBulkActions]);
+  const bulkActions = useMemo(() => {
+    if (hideBulkActions) {
+      return [];
+    }
+
+    return initialItems.length
+      ? addItemsToInitialPanel({
+          panels: configBulkActionPanels,
+          items: initialItems,
+        })
+      : configBulkActionPanels;
+  }, [configBulkActionPanels, initialItems, hideBulkActions]);
 
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 
   useEffect(() => {
-    updateBulkActionsState({ action: BulkActionsVerbs.rowCountUpdate, rowCount: alerts.length });
-  }, [alerts, updateBulkActionsState]);
+    updateBulkActionsState({
+      action: BulkActionsVerbs.rowCountUpdate,
+      rowCount: alertsCount,
+    });
+  }, [alertsCount, updateBulkActionsState]);
 
-  const setIsBulkActionsLoading = (isLoading: boolean = true) => {
-    updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
-  };
-
-  return {
-    isBulkActionsColumnActive,
-    getBulkActionsLeadingControlColumn,
-    bulkActionsState,
+  return useMemo(() => {
+    return {
+      isBulkActionsColumnActive,
+      getBulkActionsLeadingControlColumn,
+      bulkActionsState,
+      bulkActions,
+      setIsBulkActionsLoading,
+      clearSelection,
+      updateBulkActionsState,
+    };
+  }, [
     bulkActions,
-    setIsBulkActionsLoading,
+    bulkActionsState,
     clearSelection,
-  };
+    isBulkActionsColumnActive,
+    setIsBulkActionsLoading,
+    updateBulkActionsState,
+  ]);
 }

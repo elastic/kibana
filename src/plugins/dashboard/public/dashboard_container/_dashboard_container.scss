@@ -1,7 +1,4 @@
-@import '../../../embeddable/public/variables';
-
 @import './component/grid/index';
-@import './component/panel/index';
 @import './component/viewport/index';
 
 .dashboardContainer, .dashboardViewport {
@@ -14,26 +11,21 @@
   align-items: center;
 }
 
-.dshStartScreen {
-  text-align: center;
+.dshEmptyPromptParent {
+  flex-grow: 1;
+  display: flex;
 }
 
-.dshStartScreen__pageContent {
-  padding: $euiSizeXXL;
+.dshEmptyPromptPageTemplate {
+  background-color: inherit;
+  padding-block-start: 0 !important;
 }
 
-.dshStartScreen__panelDesc {
-  max-width: 260px;
-  margin: 0 auto;
-}
-
-.dshEmptyWidget {
-  background-color: $euiColorLightestShade;
-  border: $euiBorderThin;
-  border-style: dashed;
+.dshEmptyWidgetContainer {
+  padding: $euiSizeXL;
+  padding-top: 0 !important;
   border-radius: $euiBorderRadius;
-  padding: $euiSizeXXL * 2;
-  max-width: 400px;
-  margin-left: $euiSizeS;
-  text-align: center;
+  .euiEmptyPrompt__icon {
+    margin-bottom: 0;
+  }
 }

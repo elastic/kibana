@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useState } from 'react';
 import styled from 'styled-components';
 import type { EuiMarkdownEditorProps } from '@elastic/eui';
 import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
@@ -15,6 +15,7 @@ import { getFieldValidityAndErrorMessage } from '../../../shared_imports';
 import type { MarkdownEditorRef } from './editor';
 import { MarkdownEditor } from './editor';
 
+/* eslint-disable react/no-unused-prop-types */
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;
   field: FieldHook;
@@ -22,7 +23,9 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   idAria: string;
   isDisabled?: boolean;
   bottomRightContent?: React.ReactNode;
+  includePlugins?: boolean;
 };
+/* eslint-enable react/no-unused-prop-types */
 
 const BottomContentWrapper = styled(EuiFlexGroup)`
   ${({ theme }) => `
@@ -32,8 +35,9 @@ const BottomContentWrapper = styled(EuiFlexGroup)`
 
 export const MarkdownEditorForm = React.memo(
   forwardRef<MarkdownEditorRef, MarkdownEditorFormProps>(
-    ({ id, field, dataTestSubj, idAria, bottomRightContent }, ref) => {
+    ({ id, field, dataTestSubj, idAria, bottomRightContent, includePlugins }, ref) => {
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+      const [isMarkdownInvalid, setIsMarkdownInvalid] = useState(false);
 
       return (
         <EuiFormRow
@@ -42,7 +46,7 @@ export const MarkdownEditorForm = React.memo(
           error={errorMessage}
           fullWidth
           helpText={field.helpText}
-          isInvalid={isInvalid}
+          isInvalid={isInvalid || isMarkdownInvalid}
           label={field.label}
           labelAppend={field.labelAppend}
         >
@@ -54,6 +58,8 @@ export const MarkdownEditorForm = React.memo(
               onChange={field.setValue}
               value={field.value as string}
               data-test-subj={`${dataTestSubj}-markdown-editor`}
+              setIsMarkdownInvalid={setIsMarkdownInvalid}
+              includePlugins={includePlugins}
             />
             {bottomRightContent && (
               <BottomContentWrapper justifyContent={'flexEnd'}>

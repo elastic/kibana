@@ -17,7 +17,7 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValueOnce('mockLayerId').mockReturnValueOnce('mockInternalReferenceId'),
 }));
 
-jest.mock('../../../../../containers/sourcerer', () => ({
+jest.mock('../../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     dataViewId: 'security-solution-my-test',
     indicesExist: true,
@@ -41,6 +41,7 @@ describe('getRulePreviewLensAttributes', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
+          extraOptions: { showLegend: false },
           getLensAttributes: getRulePreviewLensAttributes,
           stackByField: 'event.category',
         }),

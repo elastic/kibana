@@ -15,6 +15,7 @@ export type { MLJobs } from '../server/lib/elasticsearch/get_ml_jobs';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { FleetStart } from '@kbn/fleet-plugin/public';
+import type { InfraClientStartExports } from '@kbn/infra-plugin/public';
 
 export interface MonitoringStartPluginDependencies {
   navigation: NavigationStart;
@@ -24,6 +25,7 @@ export interface MonitoringStartPluginDependencies {
   dataViews: DataViewsPublicPluginStart;
   dashboard?: DashboardStart;
   fleet?: FleetStart;
+  infra?: InfraClientStartExports;
 }
 
 interface LegacyStartDependencies {

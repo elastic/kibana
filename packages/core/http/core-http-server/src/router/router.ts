@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
@@ -13,6 +14,7 @@ import type { RouteConfig, RouteMethod } from './route';
 import type { RequestHandler, RequestHandlerWrapper } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
 import type { RouteConfigOptions } from './route';
+import { RouteValidator } from './route_validator';
 
 /**
  * Route handler common definition
@@ -43,6 +45,8 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
    * Register a route handler for `GET` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   *
+   * @track-adoption
    */
   get: RouteRegistrar<'get', Context>;
 
@@ -50,6 +54,8 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
    * Register a route handler for `POST` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   *
+   * @track-adoption
    */
   post: RouteRegistrar<'post', Context>;
 
@@ -57,6 +63,8 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
    * Register a route handler for `PUT` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   *
+   * @track-adoption
    */
   put: RouteRegistrar<'put', Context>;
 
@@ -64,6 +72,8 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
    * Register a route handler for `PATCH` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   *
+   * @track-adoption
    */
   patch: RouteRegistrar<'patch', Context>;
 
@@ -71,6 +81,8 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
    * Register a route handler for `DELETE` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   *
+   * @track-adoption
    */
   delete: RouteRegistrar<'delete', Context>;
 
@@ -86,11 +98,7 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
    * @internal
    */
   getRoutes: () => RouterRoute[];
-}
 
-export interface IRouterWithVersion<
-  Context extends RequestHandlerContextBase = RequestHandlerContextBase
-> extends IRouter<Context> {
   /**
    * An instance very similar to {@link IRouter} that can be used for versioning HTTP routes
    * following the Elastic versioning specification.
@@ -117,6 +125,14 @@ export interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions<RouteMethod>;
+  /**
+   * @note if providing a function to lazily load your validation schemas assume
+   *       that the function will only be called once.
+   */
+  validationSchemas?:
+    | (() => RouteValidator<unknown, unknown, unknown>)
+    | RouteValidator<unknown, unknown, unknown>
+    | false;
   handler: (
     req: Request,
     responseToolkit: ResponseToolkit

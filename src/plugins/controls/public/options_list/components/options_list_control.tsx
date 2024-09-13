@@ -1,23 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
 import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Subject } from 'rxjs';
 
-import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
+import {
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInputPopover,
+  EuiToken,
+  EuiToolTip,
+  htmlIdGenerator,
+} from '@elastic/eui';
 
-import { OptionsListStrings } from './options_list_strings';
+import { OptionsListSelection } from '../../../common/options_list/options_list_selections';
+import { MIN_POPOVER_WIDTH } from '../../constants';
+import { ControlError } from '../../control_group/component/control_error_component';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
+import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListPopover } from './options_list_popover';
-import { optionsListReducers } from '../options_list_reducers';
-import { MAX_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
+import { OptionsListStrings } from './options_list_strings';
 
 import './options_list.scss';
 
@@ -28,39 +41,32 @@ export const OptionsListControl = ({
   typeaheadSubject: Subject<string>;
   loadMoreSubject: Subject<number>;
 }) => {
-  const resizeRef = useRef(null);
-  const dimensions = useResizeObserver(resizeRef.current);
+  const optionsList = useOptionsList();
+  const popoverId = useMemo(() => htmlIdGenerator()(), []);
+  const error = optionsList.select((state) => state.componentState.error);
+  const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const fieldSpec = optionsList.select((state) => state.componentState.field);
 
-  // Redux embeddable Context
-  const {
-    useEmbeddableDispatch,
-    actions: { replaceSelection, setSearchString, setPopoverOpen },
-    useEmbeddableSelector: select,
-  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
-  const dispatch = useEmbeddableDispatch();
+  const id = optionsList.select((state) => state.explicitInput.id);
+  const exclude = optionsList.select((state) => state.explicitInput.exclude);
+  const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
+  const fieldTitle = optionsList.select((state) => state.explicitInput.title);
+  const placeholder = optionsList.select((state) => state.explicitInput.placeholder);
+  const controlStyle = optionsList.select((state) => state.explicitInput.controlStyle);
+  const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
+  const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
+  const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const validSelections = select((state) => state.componentState.validSelections);
-  const isPopoverOpen = select((state) => state.componentState.popoverOpen);
-
-  const selectedOptions = select((state) => state.explicitInput.selectedOptions);
-  const existsSelected = select((state) => state.explicitInput.existsSelected);
-  const controlStyle = select((state) => state.explicitInput.controlStyle);
-  const singleSelect = select((state) => state.explicitInput.singleSelect);
-  const fieldName = select((state) => state.explicitInput.fieldName);
-  const exclude = select((state) => state.explicitInput.exclude);
-  const id = select((state) => state.explicitInput.id);
-
-  const placeholder = select((state) => state.explicitInput.placeholder);
-
-  const loading = select((state) => state.output.loading);
+  const loading = optionsList.select((state) => state.output.loading);
+  const dataViewId = optionsList.select((state) => state.output.dataViewId);
+  const fieldFormatter = useFieldFormatter({ dataViewId, fieldSpec });
 
   useEffect(() => {
     return () => {
-      dispatch(setPopoverOpen(false)); // on unmount, close the popover
+      optionsList.dispatch.setPopoverOpen(false); // on unmount, close the popover
     };
-  }, [dispatch, setPopoverOpen]);
+  }, [optionsList]);
 
   // debounce loading state so loading doesn't flash when user types
   const [debouncedLoading, setDebouncedLoading] = useState(true);
@@ -76,16 +82,16 @@ export const OptionsListControl = ({
   // remove all other selections if this control is single select
   useEffect(() => {
     if (singleSelect && selectedOptions && selectedOptions?.length > 1) {
-      dispatch(replaceSelection(selectedOptions[0]));
+      optionsList.dispatch.replaceSelection(selectedOptions[0]);
     }
-  }, [selectedOptions, singleSelect, dispatch, replaceSelection]);
+  }, [selectedOptions, singleSelect, optionsList.dispatch]);
 
   const updateSearchString = useCallback(
     (newSearchString: string) => {
       typeaheadSubject.next(newSearchString);
-      dispatch(setSearchString(newSearchString));
+      optionsList.dispatch.setSearchString(newSearchString);
     },
-    [typeaheadSubject, dispatch, setSearchString]
+    [typeaheadSubject, optionsList.dispatch]
   );
 
   const loadMoreSuggestions = useCallback(
@@ -95,45 +101,89 @@ export const OptionsListControl = ({
     [loadMoreSubject]
   );
 
-  const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
+  const delimiter = useMemo(
+    () => OptionsListStrings.control.getSeparator(fieldSpec?.type),
+    [fieldSpec?.type]
+  );
+
+  const { hasSelections, selectionDisplayNode, selectedOptionsCount } = useMemo(() => {
     return {
-      hasSelections: !isEmpty(validSelections) || !isEmpty(invalidSelections),
-      validSelectionsCount: validSelections?.length,
+      hasSelections: !isEmpty(selectedOptions),
+      selectedOptionsCount: selectedOptions?.length,
       selectionDisplayNode: (
-        <>
-          {exclude && (
-            <>
-              <span className="optionsList__negateLabel">
-                {existsSelected
-                  ? OptionsListStrings.control.getExcludeExists()
-                  : OptionsListStrings.control.getNegate()}
-              </span>{' '}
-            </>
-          )}
-          {existsSelected ? (
-            <span className={`optionsList__existsFilter`}>
-              {OptionsListStrings.controlAndPopover.getExists(+Boolean(exclude))}
-            </span>
-          ) : (
-            <>
-              {validSelections && (
-                <span>{validSelections.join(OptionsListStrings.control.getSeparator())}</span>
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
+          <EuiFlexItem className="optionsList__selections">
+            <div className="eui-textTruncate">
+              {exclude && (
+                <>
+                  <span className="optionsList__negateLabel">
+                    {existsSelected
+                      ? OptionsListStrings.control.getExcludeExists()
+                      : OptionsListStrings.control.getNegate()}
+                  </span>{' '}
+                </>
               )}
-              {invalidSelections && (
-                <span className="optionsList__filterInvalid">
-                  {invalidSelections.join(OptionsListStrings.control.getSeparator())}
+              {existsSelected ? (
+                <span className={`optionsList__existsFilter`}>
+                  {OptionsListStrings.controlAndPopover.getExists(+Boolean(exclude))}
                 </span>
+              ) : (
+                <>
+                  {selectedOptions?.length
+                    ? selectedOptions.map((value: OptionsListSelection, i, { length }) => {
+                        const text = `${fieldFormatter(value)}${
+                          i + 1 === length ? '' : delimiter
+                        } `;
+                        const isInvalid = invalidSelections?.includes(value);
+                        return (
+                          <span
+                            key={text} // each item must have a unique key to prevent warning
+                            className={`optionsList__filter ${
+                              isInvalid ? 'optionsList__filterInvalid' : ''
+                            }`}
+                          >
+                            {text}
+                          </span>
+                        );
+                      })
+                    : null}
+                </>
               )}
-            </>
+            </div>
+          </EuiFlexItem>
+          {invalidSelections && invalidSelections.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="top"
+                content={OptionsListStrings.control.getInvalidSelectionWarningLabel(
+                  invalidSelections.length
+                )}
+                delay="long"
+              >
+                <EuiToken
+                  tabIndex={0}
+                  iconType="alert"
+                  size="s"
+                  color="euiColorVis5"
+                  shape="square"
+                  fill="dark"
+                  title={OptionsListStrings.control.getInvalidSelectionWarningLabel(
+                    invalidSelections.length
+                  )}
+                  css={{ verticalAlign: 'text-bottom' }} // Align with the notification badge
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
           )}
-        </>
+        </EuiFlexGroup>
       ),
     };
-  }, [exclude, existsSelected, validSelections, invalidSelections]);
+  }, [selectedOptions, exclude, existsSelected, fieldFormatter, delimiter, invalidSelections]);
 
   const button = (
-    <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
+    <>
       <EuiFilterButton
+        badgeColor="success"
         iconType="arrowDown"
         isLoading={debouncedLoading}
         className={classNames('optionsList--filterBtn', {
@@ -141,44 +191,55 @@ export const OptionsListControl = ({
           'optionsList--filterBtnPlaceholder': !hasSelections,
         })}
         data-test-subj={`optionsList-control-${id}`}
-        onClick={() => dispatch(setPopoverOpen(!isPopoverOpen))}
+        onClick={() => optionsList.dispatch.setPopoverOpen(!isPopoverOpen)}
         isSelected={isPopoverOpen}
-        numActiveFilters={validSelectionsCount}
-        hasActiveFilters={Boolean(validSelectionsCount)}
+        numActiveFilters={selectedOptionsCount}
+        hasActiveFilters={Boolean(selectedOptionsCount)}
+        textProps={{ className: 'optionsList--selectionText' }}
+        aria-label={fieldTitle ?? fieldName}
+        aria-expanded={isPopoverOpen}
+        aria-controls={popoverId}
+        role="combobox"
       >
         {hasSelections || existsSelected
           ? selectionDisplayNode
           : placeholder ?? OptionsListStrings.control.getPlaceholder()}
       </EuiFilterButton>
-    </div>
+    </>
   );
 
-  return (
+  return error ? (
+    <ControlError error={error} />
+  ) : (
     <EuiFilterGroup
       className={classNames('optionsList--filterGroup', {
         'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
       })}
+      compressed
     >
-      <EuiPopover
+      <EuiInputPopover
+        id={popoverId}
         ownFocus
-        button={button}
+        input={button}
+        hasArrow={false}
         repositionOnScroll
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
-        anchorPosition="downCenter"
+        panelMinWidth={MIN_POPOVER_WIDTH}
+        className="optionsList__inputButtonOverride"
         initialFocus={'[data-test-subj=optionsList-control-search-input]'}
-        className="optionsList__popoverOverride"
-        closePopover={() => dispatch(setPopoverOpen(false))}
-        anchorClassName="optionsList__anchorOverride"
-        aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
+        closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
+        panelClassName="optionsList__popoverOverride"
+        panelProps={{
+          'aria-label': OptionsListStrings.popover.getAriaLabel(fieldTitle ?? fieldName),
+        }}
       >
         <OptionsListPopover
-          width={dimensions.width}
           isLoading={debouncedLoading}
           updateSearchString={updateSearchString}
           loadMoreSuggestions={loadMoreSuggestions}
         />
-      </EuiPopover>
+      </EuiInputPopover>
     </EuiFilterGroup>
   );
 };

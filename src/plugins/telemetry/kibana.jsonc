@@ -6,6 +6,7 @@
     "id": "telemetry",
     "server": true,
     "browser": true,
+    "enabledOnAnonymousPages": true,
     "requiredPlugins": [
       "telemetryCollectionManager",
       "usageCollection",
@@ -16,8 +17,7 @@
       "security"
     ],
     "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact"
+      "kibanaUtils"
     ],
     "extraPublicDirs": [
       "common/constants"

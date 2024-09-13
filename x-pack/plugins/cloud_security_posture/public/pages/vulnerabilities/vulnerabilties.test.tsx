@@ -6,17 +6,14 @@
  */
 import React from 'react';
 import Chance from 'chance';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-common';
 import { Vulnerabilities } from './vulnerabilities';
 import {
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
+import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
@@ -24,16 +21,17 @@ import {
   NO_VULNERABILITIES_STATUS_TEST_SUBJ,
   VULNERABILITIES_CONTAINER_TEST_SUBJ,
 } from '../../components/test_subjects';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { expectIdsInDoc } from '../../test/utils';
-import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT } from '../../components/cloud_posture_page';
 import { TestProvider } from '../../test/test_provider';
+import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
+import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
+import { VULNERABILITIES_PAGE } from './test_subjects';
 
-jest.mock('../../common/api/use_latest_findings_data_view');
-jest.mock('../../common/api/use_setup_status_api');
-jest.mock('../../common/hooks/use_subscription_status');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_data_view');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
+jest.mock('../../common/api/use_license_management_locator_api');
+jest.mock('../../common/hooks/use_is_subscription_status_valid');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_csp_integration_link');
 
@@ -42,26 +40,26 @@ const chance = new Chance();
 beforeEach(() => {
   jest.restoreAllMocks();
 
-  (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+  (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
     createReactQueryResponse({
       status: 'success',
       data: true,
     })
   );
+
+  (useDataView as jest.Mock).mockReturnValue({
+    status: 'success',
+    data: createStubDataView({
+      spec: {
+        id: CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+      },
+    }),
+  });
 });
 
 const renderVulnerabilitiesPage = () => {
   render(
-    <TestProvider
-      deps={{
-        data: dataPluginMock.createStartContract(),
-        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-        charts: chartPluginMock.createStartContract(),
-        discover: discoverPluginMock.createStartContract(),
-        fleet: fleetMock.createStartMock(),
-        licensing: licensingMock.createStart(),
-      }}
-    >
+    <TestProvider>
       <Vulnerabilities />
     </TestProvider>
   );
@@ -74,7 +72,9 @@ describe('<Vulnerabilities />', () => {
         status: 'success',
         data: {
           [VULN_MGMT_POLICY_TEMPLATE]: { status: 'not-deployed' },
-          indicesDetails: [{ index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, status: 'empty' }],
+          indicesDetails: [
+            { index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, status: 'empty' },
+          ],
         },
       })
     );
@@ -84,10 +84,11 @@ describe('<Vulnerabilities />', () => {
     renderVulnerabilitiesPage();
 
     expectIdsInDoc({
-      be: [NO_VULNERABILITIES_STATUS_TEST_SUBJ.SCANNING_VULNERABILITIES],
+      be: [NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_DEPLOYED],
       notToBe: [
         VULNERABILITIES_CONTAINER_TEST_SUBJ,
-        NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED,
+        NO_VULNERABILITIES_STATUS_TEST_SUBJ.SCANNING_VULNERABILITIES,
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
@@ -99,7 +100,9 @@ describe('<Vulnerabilities />', () => {
         status: 'success',
         data: {
           [VULN_MGMT_POLICY_TEMPLATE]: { status: 'indexing' },
-          indicesDetails: [{ index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, status: 'empty' }],
+          indicesDetails: [
+            { index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, status: 'empty' },
+          ],
         },
       })
     );
@@ -111,7 +114,7 @@ describe('<Vulnerabilities />', () => {
       be: [NO_VULNERABILITIES_STATUS_TEST_SUBJ.SCANNING_VULNERABILITIES],
       notToBe: [
         VULNERABILITIES_CONTAINER_TEST_SUBJ,
-        NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED,
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
@@ -123,12 +126,13 @@ describe('<Vulnerabilities />', () => {
         status: 'success',
         data: {
           [VULN_MGMT_POLICY_TEMPLATE]: { status: 'index-timeout' },
-          indicesDetails: [{ index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, status: 'empty' }],
+          indicesDetails: [
+            { index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, status: 'empty' },
+          ],
         },
       })
     );
     (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
-
     renderVulnerabilitiesPage();
 
     expectIdsInDoc({
@@ -147,7 +151,9 @@ describe('<Vulnerabilities />', () => {
         status: 'success',
         data: {
           [VULN_MGMT_POLICY_TEMPLATE]: { status: 'unprivileged' },
-          indicesDetails: [{ index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, status: 'empty' }],
+          indicesDetails: [
+            { index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, status: 'empty' },
+          ],
         },
       })
     );
@@ -159,14 +165,10 @@ describe('<Vulnerabilities />', () => {
       be: [NO_VULNERABILITIES_STATUS_TEST_SUBJ.UNPRIVILEGED],
       notToBe: [
         VULNERABILITIES_CONTAINER_TEST_SUBJ,
+        NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED,
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.SCANNING_VULNERABILITIES,
-        NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
       ],
     });
-  });
-
-  xit("renders the success state component when 'latest vulnerabilities findings' DataView exists and request status is 'success'", async () => {
-    // TODO: Add test cases for VulnerabilityContent
   });
 
   it('renders vuln_mgmt integrations installation prompt if vuln_mgmt integration is not installed', () => {
@@ -180,7 +182,7 @@ describe('<Vulnerabilities />', () => {
           indicesDetails: [
             { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-            { index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, status: 'empty' },
+            { index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, status: 'empty' },
           ],
         },
       })
@@ -190,13 +192,36 @@ describe('<Vulnerabilities />', () => {
     renderVulnerabilitiesPage();
 
     expectIdsInDoc({
-      be: [VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
+      be: [NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED],
       notToBe: [
         VULNERABILITIES_CONTAINER_TEST_SUBJ,
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.SCANNING_VULNERABILITIES,
-        NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
+  });
+
+  it('renders Vulnerabilities page when there are findings', async () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          hasVulnerabilitiesFindings: true,
+        },
+      })
+    );
+
+    (useDataView as jest.Mock).mockReturnValue({
+      status: 'success',
+      data: createStubDataView({
+        spec: {
+          id: CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+        },
+      }),
+    });
+
+    renderVulnerabilitiesPage();
+
+    expect(screen.getByTestId(VULNERABILITIES_PAGE)).toBeInTheDocument();
   });
 });

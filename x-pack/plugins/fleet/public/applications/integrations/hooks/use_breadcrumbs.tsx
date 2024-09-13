@@ -19,6 +19,7 @@ const BASE_BREADCRUMB: ChromeBreadcrumb = {
   text: i18n.translate('xpack.fleet.breadcrumbs.integrationsAppTitle', {
     defaultMessage: 'Integrations',
   }),
+  deepLinkId: 'integrations',
 };
 
 const breadcrumbGetters: {
@@ -38,6 +39,14 @@ const breadcrumbGetters: {
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.installedIntegrationsPageTitle', {
         defaultMessage: 'Installed integrations',
+      }),
+    },
+  ],
+  integration_create: () => [
+    BASE_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.createIntegrationPageTitle', {
+        defaultMessage: 'Create integration',
       }),
     },
   ],

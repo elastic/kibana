@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -56,27 +57,41 @@ export interface IndexMapping {
 }
 
 /** @internal */
-export interface IndexMappingMeta {
+export type IndexTypesMap = Record<string, string[]>;
+
+/** @internal */
+export interface V2AlgoIndexMappingMeta {
   /**
    * A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
    * with each key being a root-level mapping property, and each value being
    * the md5 hash of that mapping's value when the index was created.
    *
    * @remark: Only defined for indices using the v2 migration algorithm.
+   * @deprecated Replaced by mappingVersions (FIPS-compliant initiative)
    */
   migrationMappingPropertyHashes?: { [k: string]: string };
   /**
-   * The current model versions of the mapping of the index.
+   * A map that tells what are the SO types stored in each index
    *
-   * @remark: Only defined for indices using the zdt migration algorithm.
+   * @remark: Only defined for indices using the v2 migration algorithm.
    */
-  mappingVersions?: { [k: string]: number };
+  indexTypesMap?: IndexTypesMap;
   /**
-   * The current model versions of the documents of the index.
-   *
-   * @remark: Only defined for indices using the zdt migration algorithm.
+   * The current virtual version of the mapping of the index.
    */
-  docVersions?: { [k: string]: number };
+  mappingVersions?: { [k: string]: string };
+}
+
+/** @internal */
+export interface ZdtAlgoIndexMappingMeta {
+  /**
+   * The current virtual version of the mapping of the index.
+   */
+  mappingVersions?: { [k: string]: string };
+  /**
+   * The current virtual versions of the documents of the index.
+   */
+  docVersions?: { [k: string]: string };
   /**
    * Info about the current state of the migration.
    * Should only be present if a migration is in progress or was interrupted.
@@ -85,6 +100,9 @@ export interface IndexMappingMeta {
    */
   migrationState?: IndexMappingMigrationStateMeta;
 }
+
+/** @internal */
+export type IndexMappingMeta = V2AlgoIndexMappingMeta & ZdtAlgoIndexMappingMeta;
 
 /** @internal */
 export interface IndexMappingMigrationStateMeta {

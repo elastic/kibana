@@ -15,7 +15,7 @@ import {
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import * as i18n from '../translations';
 import type { OpenTimelineProps } from '../types';
 
@@ -58,7 +58,7 @@ export const SearchRow = React.memo<Props>(
     const searchBox = useMemo(
       () => ({
         placeholder:
-          timelineType === TimelineType.default
+          timelineType === TimelineTypeEnum.default
             ? i18n.SEARCH_PLACEHOLDER
             : i18n.SEARCH_TEMPLATE_PLACEHOLDER,
         incremental: false,

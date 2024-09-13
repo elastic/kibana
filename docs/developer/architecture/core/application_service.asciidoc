@@ -29,7 +29,7 @@ export class MyPlugin implements Plugin {
   }
 }
 ----
-<1> See {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md[application.register interface]
+<1> Refer to {kib-repo}/blob/8.9/packages/core/application/core-application-browser/src/contracts.ts[application.register interface]
 <2> Application specific URL.
 <3> `mount` callback is invoked when a user navigates to the application-specific URL.
 <4> `core.getStartServices` method provides API available during `start` lifecycle.

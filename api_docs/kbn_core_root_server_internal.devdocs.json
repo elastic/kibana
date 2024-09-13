@@ -9,18 +9,10 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-root-server-internal",
-        "id": "def-common.Root",
+        "id": "def-server.Root",
         "type": "Class",
         "tags": [],
         "label": "Root",
@@ -33,7 +25,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.logger",
+            "id": "def-server.Root.logger",
             "type": "Object",
             "tags": [],
             "label": "logger",
@@ -53,7 +45,7 @@
           },
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.Unnamed",
+            "id": "def-server.Root.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -67,7 +59,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-root-server-internal",
-                "id": "def-common.Root.Unnamed.$1",
+                "id": "def-server.Root.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "rawConfigProvider",
@@ -75,9 +67,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.RawConfigurationProvider",
+                    "section": "def-server.RawConfigurationProvider",
                     "text": "RawConfigurationProvider"
                   }
                 ],
@@ -88,7 +80,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-root-server-internal",
-                "id": "def-common.Root.Unnamed.$2",
+                "id": "def-server.Root.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "env",
@@ -96,9 +88,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.Env",
+                    "section": "def-server.Env",
                     "text": "Env"
                   }
                 ],
@@ -109,7 +101,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-root-server-internal",
-                "id": "def-common.Root.Unnamed.$3",
+                "id": "def-server.Root.Unnamed.$3",
                 "type": "Function",
                 "tags": [],
                 "label": "onShutdown",
@@ -127,7 +119,7 @@
           },
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.preboot",
+            "id": "def-server.Root.preboot",
             "type": "Function",
             "tags": [],
             "label": "preboot",
@@ -135,7 +127,7 @@
             "signature": [
               "() => Promise<",
               "InternalCorePreboot",
-              ">"
+              " | undefined>"
             ],
             "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
             "deprecated": false,
@@ -145,7 +137,7 @@
           },
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.setup",
+            "id": "def-server.Root.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -163,7 +155,7 @@
           },
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.start",
+            "id": "def-server.Root.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -181,7 +173,7 @@
           },
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.shutdown",
+            "id": "def-server.Root.shutdown",
             "type": "Function",
             "tags": [],
             "label": "shutdown",
@@ -195,7 +187,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-root-server-internal",
-                "id": "def-common.Root.shutdown.$1",
+                "id": "def-server.Root.shutdown.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "reason",
@@ -213,214 +205,12 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-root-server-internal",
-        "id": "def-common.Server",
-        "type": "Class",
-        "tags": [],
-        "label": "Server",
-        "description": [],
-        "path": "packages/core/root/core-root-server-internal/src/server.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Server.configService",
-            "type": "Object",
-            "tags": [],
-            "label": "configService",
-            "description": [],
-            "signature": [
-              "ConfigService"
-            ],
-            "path": "packages/core/root/core-root-server-internal/src/server.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Server.pluginsInitialized",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "#pluginsInitialized",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/core/root/core-root-server-internal/src/server.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Server.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "packages/core/root/core-root-server-internal/src/server.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-root-server-internal",
-                "id": "def-common.Server.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "rawConfigProvider",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config",
-                    "scope": "common",
-                    "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.RawConfigurationProvider",
-                    "text": "RawConfigurationProvider"
-                  }
-                ],
-                "path": "packages/core/root/core-root-server-internal/src/server.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/core-root-server-internal",
-                "id": "def-common.Server.Unnamed.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "env",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config",
-                    "scope": "common",
-                    "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.Env",
-                    "text": "Env"
-                  }
-                ],
-                "path": "packages/core/root/core-root-server-internal/src/server.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/core-root-server-internal",
-                "id": "def-common.Server.Unnamed.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "loggingSystem",
-                "description": [],
-                "signature": [
-                  "ILoggingSystem"
-                ],
-                "path": "packages/core/root/core-root-server-internal/src/server.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Server.preboot",
-            "type": "Function",
-            "tags": [],
-            "label": "preboot",
-            "description": [],
-            "signature": [
-              "() => Promise<",
-              "InternalCorePreboot",
-              ">"
-            ],
-            "path": "packages/core/root/core-root-server-internal/src/server.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Server.setup",
-            "type": "Function",
-            "tags": [],
-            "label": "setup",
-            "description": [],
-            "signature": [
-              "() => Promise<",
-              "InternalCoreSetup",
-              ">"
-            ],
-            "path": "packages/core/root/core-root-server-internal/src/server.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Server.start",
-            "type": "Function",
-            "tags": [],
-            "label": "start",
-            "description": [],
-            "signature": [
-              "() => Promise<",
-              "InternalCoreStart",
-              ">"
-            ],
-            "path": "packages/core/root/core-root-server-internal/src/server.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Server.stop",
-            "type": "Function",
-            "tags": [],
-            "label": "stop",
-            "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
-            "path": "packages/core/root/core-root-server-internal/src/server.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Server.setupCoreConfig",
-            "type": "Function",
-            "tags": [],
-            "label": "setupCoreConfig",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "packages/core/root/core-root-server-internal/src/server.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "functions": [
       {
         "parentPluginId": "@kbn/core-root-server-internal",
-        "id": "def-common.registerServiceConfig",
+        "id": "def-server.registerServiceConfig",
         "type": "Function",
         "tags": [],
         "label": "registerServiceConfig",
@@ -436,7 +226,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.registerServiceConfig.$1",
+            "id": "def-server.registerServiceConfig.$1",
             "type": "Object",
             "tags": [],
             "label": "configService",
@@ -454,6 +244,14 @@
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

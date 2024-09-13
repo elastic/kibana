@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -70,9 +70,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function getDFAJob(id: string) {
     const { body } = await supertest
-      .get(`/api/ml/data_frame/analytics/${id}`)
+      .get(`/internal/ml/data_frame/analytics/${id}`)
       .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('1'));
 
     return body.data_frame_analytics[0];
   }
@@ -100,9 +100,9 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(requestBody);
         ml.api.assertResponseStatusCode(200, status, body);
 
@@ -124,9 +124,9 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(requestBody);
         ml.api.assertResponseStatusCode(200, status, body);
 
@@ -148,9 +148,9 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(requestBody);
         ml.api.assertResponseStatusCode(200, status, body);
 
@@ -172,9 +172,9 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(requestBody);
         ml.api.assertResponseStatusCode(200, status, body);
 
@@ -196,9 +196,9 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(requestBody);
         ml.api.assertResponseStatusCode(200, status, body);
 
@@ -219,9 +219,9 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(requestBody);
         ml.api.assertResponseStatusCode(403, status, body);
 
@@ -240,9 +240,9 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${analyticsId}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${analyticsId}/_update`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(requestBody);
         ml.api.assertResponseStatusCode(403, status, body);
 
@@ -262,9 +262,9 @@ export default ({ getService }: FtrProviderContext) => {
         const message = `No known job with id '${id}'`;
 
         const { body, status } = await supertest
-          .post(`/api/ml/data_frame/analytics/${id}/_update`)
+          .post(`/internal/ml/data_frame/analytics/${id}/_update`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(requestBody);
         ml.api.assertResponseStatusCode(404, status, body);
 

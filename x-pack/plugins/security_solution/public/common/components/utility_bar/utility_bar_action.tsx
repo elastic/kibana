@@ -16,11 +16,8 @@ import { BarAction } from './styles';
 
 const LoadingButtonEmpty = styled(EuiButtonEmpty)`
   ${({ theme }) => css`
-    &.euiButtonEmpty.euiButtonEmpty--xSmall {
+    &.euiButtonEmpty {
       height: ${theme.eui.euiSize};
-      .euiButtonEmpty__content {
-        padding: 0;
-      }
     }
   `}
 `;
@@ -110,6 +107,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
             className="eui-alignTop"
             isLoading
             iconSide="right"
+            flush="both"
           >
             {children}
           </LoadingButtonEmpty>

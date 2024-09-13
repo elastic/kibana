@@ -11,7 +11,7 @@ import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import { Feature, Polygon } from 'geojson';
-import { DRAW_SHAPE, ES_SPATIAL_RELATIONS } from '../../../../../common/constants';
+import { DRAW_SHAPE } from '../../../../../common/constants';
 import { DrawState } from '../../../../../common/descriptor_types';
 import {
   createDistanceFilterWithMeta,
@@ -75,9 +75,7 @@ export class DrawFilterControl extends Component<Props, {}> {
             : geometry,
         geoFieldNames: this.props.geoFieldNames,
         geometryLabel: this.props.drawState.geometryLabel ? this.props.drawState.geometryLabel : '',
-        relation: this.props.drawState.relation
-          ? this.props.drawState.relation
-          : ES_SPATIAL_RELATIONS.INTERSECTS,
+        relation: this.props.drawState.relation ? this.props.drawState.relation : 'intersects',
       });
     }
 
@@ -86,7 +84,7 @@ export class DrawFilterControl extends Component<Props, {}> {
     } catch (error) {
       getToasts().addWarning(
         i18n.translate('xpack.maps.drawFilterControl.unableToCreatFilter', {
-          defaultMessage: `Unable to create filter, error: '{errorMsg}'.`,
+          defaultMessage: `Unable to create filter, error: ''{errorMsg}''.`,
           values: {
             errorMsg: error.message,
           },

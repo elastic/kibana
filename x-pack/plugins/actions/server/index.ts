@@ -7,7 +7,6 @@
 import { get } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { ActionsPlugin } from './plugin';
 import { configSchema, ActionsConfig, CustomHostSettings } from './config';
 import { ActionsClient as ActionsClientClass } from './actions_client';
 import { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
@@ -22,10 +21,11 @@ export type {
   ActionResult,
   ActionTypeExecutorOptions,
   ActionType,
-  PreConfiguredAction,
+  InMemoryConnector,
   ActionsApiRequestHandlerContext,
-  FindActionResult,
 } from './types';
+
+export type { ConnectorWithExtraFindData as FindActionResult } from './application/connector/types';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 
@@ -33,10 +33,14 @@ export {
   asSavedObjectExecutionSource,
   asHttpRequestExecutionSource,
   asNotificationExecutionSource,
+  getBasicAuthHeader,
 } from './lib';
 export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 
-export const plugin = (initContext: PluginInitializerContext) => new ActionsPlugin(initContext);
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { ActionsPlugin } = await import('./plugin');
+  return new ActionsPlugin(initContext);
+};
 
 export { SubActionConnector } from './sub_action_framework/sub_action_connector';
 export { CaseConnector } from './sub_action_framework/case';
@@ -57,8 +61,8 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       if (
         customHostSettings.find(
           (customHostSchema: CustomHostSettings) =>
-            customHostSchema.hasOwnProperty('ssl') &&
-            customHostSchema.ssl?.hasOwnProperty('rejectUnauthorized')
+            Object.hasOwn(customHostSchema, 'ssl') &&
+            Object.hasOwn(customHostSchema.ssl ?? {}, 'rejectUnauthorized')
         )
       ) {
         addDeprecation({
@@ -89,7 +93,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     },
     (settings, fromPath, addDeprecation) => {
       const actions = get(settings, fromPath);
-      if (actions?.hasOwnProperty('rejectUnauthorized')) {
+      if (Object.hasOwn(actions ?? {}, 'rejectUnauthorized')) {
         addDeprecation({
           level: 'warning',
           configPath: `${fromPath}.rejectUnauthorized`,
@@ -117,7 +121,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     },
     (settings, fromPath, addDeprecation) => {
       const actions = get(settings, fromPath);
-      if (actions?.hasOwnProperty('proxyRejectUnauthorizedCertificates')) {
+      if (Object.hasOwn(actions ?? {}, 'proxyRejectUnauthorizedCertificates')) {
         addDeprecation({
           level: 'warning',
           configPath: `${fromPath}.proxyRejectUnauthorizedCertificates`,

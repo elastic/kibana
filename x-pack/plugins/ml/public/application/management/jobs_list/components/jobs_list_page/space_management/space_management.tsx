@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState, FC, useCallback, useMemo, useRef } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SearchFilterConfig, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiSpacer,
@@ -14,12 +16,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  SearchFilterConfig,
-  EuiBasicTableColumn,
   EuiProgress,
 } from '@elastic/eui';
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { useTableState } from '@kbn/ml-in-memory-table';
+import { useEnabledFeatures } from '../../../../../contexts/ml';
 import type { JobType, MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
 import type {
   ManagementListResponse,
@@ -29,20 +31,23 @@ import { useManagementApiService } from '../../../../../services/ml_api_service/
 import { getColumns } from './columns';
 import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
 import { getFilters } from './filters';
-import { useTableState } from './use_table_state';
 
 interface Props {
   spacesApi?: SpacesPluginStart;
-  setCurrentTab: (tabId: MlSavedObjectType) => void;
+  onTabChange: (tabId: MlSavedObjectType) => void;
+  onReload: React.Dispatch<React.SetStateAction<(() => void) | null>>;
 }
 
-export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
+export const SpaceManagement: FC<Props> = ({ spacesApi, onTabChange, onReload }) => {
   const { getList } = useManagementApiService();
-  const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
+
+  const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType | null>(null);
   const [items, setItems] = useState<ManagementListResponse>();
   const [columns, setColumns] = useState<Array<EuiBasicTableColumn<ManagementItems>>>([]);
   const [filters, setFilters] = useState<SearchFilterConfig[] | undefined>();
   const [isLoading, setIsLoading] = useState(false);
+
+  const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
 
   const { onTableChange, pagination, sorting, setPageIndex } = useTableState<ManagementItems>(
     items ?? [],
@@ -56,9 +61,26 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
     };
   }, []);
 
+  useEffect(
+    function setInitialSelectedTab() {
+      if (isADEnabled === true) {
+        setCurrentTabId('anomaly-detector');
+      } else if (isDFAEnabled === true) {
+        setCurrentTabId('data-frame-analytics');
+      } else if (isNLPEnabled === true) {
+        setCurrentTabId('trained-model');
+      }
+    },
+    [isADEnabled, isDFAEnabled, isNLPEnabled]
+  );
+
   const loadingTab = useRef<MlSavedObjectType | null>(null);
   const refresh = useCallback(
-    (tabId: MlSavedObjectType) => {
+    (tabId: MlSavedObjectType | null) => {
+      if (tabId === null) {
+        return;
+      }
+
       loadingTab.current = tabId;
       setIsLoading(true);
       getList(tabId)
@@ -80,19 +102,31 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
     [getList, loadingTab]
   );
 
+  useEffect(() => {
+    onReload(() => () => refresh(currentTabId));
+    return () => {
+      onReload(null);
+    };
+  }, [currentTabId, refresh, onReload]);
+
   useEffect(
     function refreshOnTabChange() {
       setItems(undefined);
-      setColumns(createColumns());
-      setCurrentTab(currentTabId);
-      refresh(currentTabId);
-      setPageIndex(0);
+      if (currentTabId !== null) {
+        setColumns(createColumns());
+        onTabChange(currentTabId);
+        refresh(currentTabId);
+        setPageIndex(0);
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentTabId]
   );
 
   const createColumns = useCallback(() => {
+    if (currentTabId === null) {
+      return [];
+    }
     return [
       ...getColumns(currentTabId),
       ...(spacesApi !== undefined
@@ -165,35 +199,41 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, columns, isLoading, filters, currentTabId, refresh, onTableChange]);
 
-  const tabs = useMemo(
-    () => [
-      {
+  const tabs = useMemo(() => {
+    const tempTabs = [];
+
+    if (isADEnabled === true) {
+      tempTabs.push({
         'data-test-subj': 'mlStackManagementAnomalyDetectionTab',
         id: 'anomaly-detector',
         name: i18n.translate('xpack.ml.management.list.anomalyDetectionTab', {
           defaultMessage: 'Anomaly detection',
         }),
         content: getTable(),
-      },
-      {
+      });
+    }
+    if (isDFAEnabled === true) {
+      tempTabs.push({
         'data-test-subj': 'mlStackManagementAnalyticsTab',
         id: 'data-frame-analytics',
         name: i18n.translate('xpack.ml.management.list.analyticsTab', {
           defaultMessage: 'Analytics',
         }),
         content: getTable(),
-      },
-      {
+      });
+    }
+    if (isNLPEnabled === true || isDFAEnabled === true) {
+      tempTabs.push({
         'data-test-subj': 'mlStackManagementTrainedModelsTab',
         id: 'trained-model',
         name: i18n.translate('xpack.ml.management.list.trainedModelsTab', {
           defaultMessage: 'Trained models',
         }),
         content: getTable(),
-      },
-    ],
-    [getTable]
-  );
+      });
+    }
+    return tempTabs;
+  }, [getTable, isADEnabled, isDFAEnabled, isNLPEnabled]);
 
   return (
     <EuiTabbedContent

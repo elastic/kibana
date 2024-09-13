@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component } from 'react';
@@ -129,7 +130,7 @@ export class Home extends Component<HomeProps, State> {
   private renderNormal() {
     const { addBasePath, solutions, isCloudEnabled } = this.props;
     const { application, trackUiMetric } = getServices();
-    const isDarkMode = getServices().uiSettings?.get('theme:darkMode') || false;
+    const isDarkMode = getServices().theme?.getTheme().darkMode ?? false;
     const devTools = this.findDirectoryById('console');
     const manageDataFeatures = this.getFeaturesByCategory('admin');
 
@@ -188,15 +189,14 @@ export class Home extends Component<HomeProps, State> {
 
   public render() {
     const { isLoading, isWelcomeEnabled, isNewKibanaInstance } = this.state;
-    const { isCloudEnabled } = this.props;
-    const { application } = getServices();
+    const { application, guidedOnboardingService } = getServices();
 
     if (isWelcomeEnabled) {
       if (isLoading) {
         return this.renderLoading();
       }
       if (isNewKibanaInstance) {
-        if (isCloudEnabled) {
+        if (guidedOnboardingService?.isEnabled) {
           application.navigateToUrl('./home#/getting_started');
           return null;
         }

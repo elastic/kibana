@@ -21,6 +21,7 @@ import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 
 interface Props {
   repository: AzureRepository;
+  isManagedRepository?: boolean;
   updateRepositorySettings: (
     updatedSettings: Partial<Repository['settings']>,
     replaceSettings?: boolean
@@ -30,6 +31,7 @@ interface Props {
 
 export const AzureSettings: React.FunctionComponent<Props> = ({
   repository,
+  isManagedRepository,
   updateRepositorySettings,
   settingErrors,
 }) => {
@@ -101,6 +103,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
               });
             }}
             data-test-subj="clientInput"
+            disabled={isManagedRepository}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -145,6 +148,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
               });
             }}
             data-test-subj="containerInput"
+            disabled={isManagedRepository}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -189,6 +193,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
               });
             }}
             data-test-subj="basePathInput"
+            disabled={isManagedRepository}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -214,7 +219,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.compress)}
           error={settingErrors.compress}
@@ -328,7 +332,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}

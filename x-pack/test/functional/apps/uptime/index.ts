@@ -6,9 +6,9 @@
  */
 
 import {
-  settingsObjectId,
   settingsObjectType,
-} from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/uptime_settings';
+  settingsObjectId,
+} from '@kbn/uptime-plugin/server/legacy_uptime/lib/saved_objects/uptime_settings';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const ARCHIVE = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';

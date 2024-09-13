@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -14,6 +14,8 @@ import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import ServiceNowSIRParamsFields from './servicenow_sir_params';
 import { Choice } from '../lib/servicenow/types';
 import { merge } from 'lodash';
+import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('../lib/servicenow/use_get_choices');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -36,6 +38,7 @@ const actionParams = {
       externalId: null,
       correlation_id: 'alertID',
       correlation_display: 'Alerting',
+      additional_fields: null,
     },
     comments: [],
   },
@@ -48,6 +51,7 @@ const connector: ActionConnector = {
   actionTypeId: '.test',
   name: 'Test',
   isPreconfigured: false,
+  isSystemAction: false as const,
   isDeprecated: false,
 };
 
@@ -339,6 +343,20 @@ describe('ServiceNowSIRParamsFields renders', () => {
       const comments = wrapper.find('textarea[data-test-subj="commentsTextArea"]');
       expect(comments.simulate('change', changeEvent));
       expect(editAction.mock.calls[0][1].comments.length).toEqual(1);
+    });
+
+    it('updates additional fields', async () => {
+      const newValue = JSON.stringify({ bar: 'test' });
+      render(<ServiceNowSIRParamsFields {...defaultProps} />, {
+        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+      });
+
+      await userEvent.click(await screen.findByTestId('additional_fieldsJsonEditor'));
+      await userEvent.paste(newValue);
+
+      await waitFor(() => {
+        expect(editAction.mock.calls[0][1].incident.additional_fields).toEqual(newValue);
+      });
     });
   });
 });

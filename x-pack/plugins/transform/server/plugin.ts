@@ -6,12 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
+import { registerCollector } from './usage';
 import { setupCapabilities } from './capabilities';
-import { PluginSetupDependencies, PluginStartDependencies } from './types';
+import type { PluginSetupDependencies, PluginStartDependencies } from './types';
 import { registerRoutes } from './routes';
 import { License } from './services';
 import { registerTransformHealthRuleType } from './lib/alerting';
@@ -38,7 +45,13 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
 
   setup(
     coreSetup: CoreSetup<PluginStartDependencies>,
-    { licensing, features, alerting, security: securitySetup }: PluginSetupDependencies
+    {
+      licensing,
+      features,
+      alerting,
+      security: securitySetup,
+      usageCollection,
+    }: PluginSetupDependencies
   ): {} {
     const { http, getStartServices } = coreSetup;
 
@@ -58,25 +71,41 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
       ],
     });
 
-    getStartServices().then(([coreStart, { dataViews }]) => {
-      const license = new License({
-        pluginId: PLUGIN.id,
-        minimumLicenseType: PLUGIN.minimumLicenseType,
-        defaultErrorMessage: i18n.translate('xpack.transform.licenseCheckErrorMessage', {
-          defaultMessage: 'License check failed',
-        }),
-        licensing,
-        logger: this.logger,
-        coreStart,
-      });
-
-      registerRoutes({
-        router: http.createRouter(),
-        license,
-        dataViews,
-        coreStart,
-      });
+    registerRoutes({
+      router: http.createRouter(),
+      getLicense: async () => {
+        const [coreStart] = await getStartServices();
+        return new License({
+          pluginId: PLUGIN.id,
+          minimumLicenseType: PLUGIN.minimumLicenseType,
+          defaultErrorMessage: i18n.translate('xpack.transform.licenseCheckErrorMessage', {
+            defaultMessage: 'License check failed',
+          }),
+          licensing,
+          logger: this.logger,
+          coreStart,
+        });
+      },
+      getDataViewsStart: async () => {
+        const [, { dataViews }] = await getStartServices();
+        return dataViews;
+      },
+      getCoreStart: async () => {
+        const [coreStart] = await getStartServices();
+        return coreStart;
+      },
+      getSecurity: async () => {
+        const [, { security }] = await getStartServices();
+        return security;
+      },
     });
+
+    if (usageCollection) {
+      registerCollector(usageCollection, async () => {
+        const [coreStart] = await getStartServices();
+        return coreStart.savedObjects.getIndexForType('alert');
+      });
+    }
 
     if (alerting) {
       registerTransformHealthRuleType({

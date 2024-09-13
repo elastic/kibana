@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
@@ -19,7 +20,11 @@ import {
   SeriesIdentifier,
   PartitionElementEvent,
   SettingsProps,
+  Tooltip,
+  TooltipValue,
 } from '@elastic/charts';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { LegendToggle, ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -71,6 +76,7 @@ import {
 } from './partition_vis_component.styles';
 import { filterOutConfig } from '../utils/filter_out_config';
 import { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
+import { getMultiFilterCells } from '../utils/filter_helpers';
 
 declare global {
   interface Window {
@@ -93,6 +99,7 @@ export type PartitionVisComponentProps = Omit<
   palettesRegistry: PaletteRegistry;
   services: Pick<StartDeps, 'data' | 'fieldFormats'>;
   columnCellValueActions: ColumnCellValueActions;
+  hasOpenedOnAggBasedEditor: boolean;
 };
 
 const PartitionVisComponent = (props: PartitionVisComponentProps) => {
@@ -105,9 +112,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     syncColors,
     interactive,
     overrides,
+    hasOpenedOnAggBasedEditor,
   } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
-  const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
 
   const {
@@ -148,7 +155,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const [showLegend, setShowLegend] = useState<boolean>(() => showLegendDefault());
 
   const showToggleLegendElement = props.uiState !== undefined;
-
+  const [chartIsLoaded, setChartIsLoaded] = useState<boolean>(false);
   const [containerDimensions, setContainerDimensions] = useState<
     undefined | PieContainerDimensions
   >();
@@ -156,12 +163,14 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const parentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (parentRef && parentRef.current) {
+    // chart should be loaded to compute the dimensions
+    // otherwise the height is set to 0
+    if (parentRef && parentRef.current && chartIsLoaded) {
       const parentHeight = parentRef.current!.getBoundingClientRect().height;
       const parentWidth = parentRef.current!.getBoundingClientRect().width;
       setContainerDimensions({ width: parentWidth, height: parentHeight });
     }
-  }, [parentRef]);
+  }, [chartIsLoaded, parentRef]);
 
   useEffect(() => {
     const legendShow = showLegendDefault();
@@ -172,6 +181,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     (isRendered: boolean = true) => {
       if (isRendered) {
         props.renderComplete();
+        setChartIsLoaded(true);
       }
     },
     [props]
@@ -196,6 +206,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         splitChartDimension,
         splitChartFormatter
       );
+
       props.fireEvent({ name: 'filter', data: { data } });
     },
     [metricColumn.id, originalVisData, props, visParams.dimensions.metrics.length]
@@ -363,15 +374,27 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   ) as Partial<SettingsProps>;
 
   const themeOverrides = useMemo(
-    () => getPartitionTheme(visType, visParams, chartTheme, containerDimensions, rescaleFactor),
-    [visType, visParams, chartTheme, containerDimensions, rescaleFactor]
+    () =>
+      getPartitionTheme(
+        visType,
+        visParams,
+        chartBaseTheme,
+        containerDimensions,
+        rescaleFactor,
+        hasOpenedOnAggBasedEditor
+      ),
+    [
+      visType,
+      visParams,
+      chartBaseTheme,
+      containerDimensions,
+      rescaleFactor,
+      hasOpenedOnAggBasedEditor,
+    ]
   );
 
   const fixedViewPort = document.getElementById('app-fixed-viewport');
-  const tooltip: TooltipProps = {
-    ...(fixedViewPort ? { boundary: fixedViewPort } : {}),
-    type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
-  };
+
   const legendPosition = visParams.legendPosition ?? Position.Right;
 
   const splitChartColumnAccessor = splitColumn
@@ -387,6 +410,50 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     : splitRow
     ? getColumnByAccessor(splitRow[0], visData.columns)
     : undefined;
+
+  const isEsqlMode = originalVisData?.meta?.type === ESQL_TABLE_TYPE;
+  const hasTooltipActions =
+    interactive && !isEsqlMode && bucketAccessors.filter((a) => a !== 'metric-name').length > 0;
+
+  const tooltip: TooltipProps = {
+    ...(fixedViewPort ? { boundary: fixedViewPort } : {}),
+    type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
+    actions: hasTooltipActions
+      ? [
+          {
+            disabled: (selected) => selected.length < 1,
+            label: (selected) =>
+              selected.length === 0
+                ? i18n.translate('expressionPartitionVis.tooltipActions.emptyFilterSelection', {
+                    defaultMessage: 'Select at least one series to filter',
+                  })
+                : i18n.translate('expressionPartitionVis.tooltipActions.filterValues', {
+                    defaultMessage: 'Filter {seriesNumber} series',
+                    values: { seriesNumber: selected.length },
+                  }),
+            onSelect: (
+              tooltipSelectedValues: Array<
+                TooltipValue<Record<'key', string | number>, SeriesIdentifier>
+              >
+            ) => {
+              const cells = getMultiFilterCells(tooltipSelectedValues, bucketColumns, visData);
+
+              props.fireEvent({
+                name: 'multiFilter',
+                data: {
+                  data: [
+                    {
+                      table: visData,
+                      cells,
+                    },
+                  ],
+                },
+              });
+            },
+          },
+        ]
+      : undefined,
+  };
 
   /**
    * Checks whether data have all zero values.
@@ -479,11 +546,12 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 legendPosition={legendPosition}
               />
             )}
-            <Chart size="100%">
+            <Chart size="100%" {...getOverridesFor(overrides, 'chart')}>
               <ChartSplit
                 splitColumnAccessor={splitChartColumnAccessor}
                 splitRowAccessor={splitChartRowAccessor}
               />
+              <Tooltip {...tooltip} />
               <Settings
                 noResults={
                   <VisualizationNoResults chartType={visType} renderComplete={onRenderChange} />
@@ -498,8 +566,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
                 flatLegend={flatLegend}
                 legendSort={customLegendSort}
-                tooltip={tooltip}
-                showLegendExtra={visParams.showValuesInLegend}
+                legendValues={visParams.legendStats}
                 onElementClick={([elementEvent]) => {
                   // this cast is safe because we are rendering a partition chart
                   const [layerValues] = elementEvent as PartitionElementEvent;
@@ -516,7 +583,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   // Chart background should be transparent for the usage at Canvas.
                   { background: { color: 'transparent' } },
                   themeOverrides,
-                  chartTheme,
                   {
                     legend: {
                       labelOptions: {
@@ -533,6 +599,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 onRenderChange={onRenderChange}
                 ariaLabel={props.visParams.ariaLabel}
                 ariaUseDefaultSummary={!props.visParams.ariaLabel}
+                locale={i18n.getLocale()}
                 {...settingsOverrides}
               />
               <Partition

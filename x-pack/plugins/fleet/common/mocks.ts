@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { PostDeletePackagePoliciesResponse, NewPackagePolicy, PackagePolicy } from './types';
+import type {
+  AgentPolicy,
+  NewPackagePolicy,
+  PackagePolicy,
+  PostDeletePackagePoliciesResponse,
+} from './types';
 import type { FleetAuthz } from './authz';
-import { ENDPOINT_PRIVILEGES } from './constants';
+import { dataTypes, ENDPOINT_PRIVILEGES } from './constants';
 
 export const createNewPackagePolicyMock = (): NewPackagePolicy => {
   return {
@@ -16,6 +21,7 @@ export const createNewPackagePolicyMock = (): NewPackagePolicy => {
     namespace: 'default',
     enabled: true,
     policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
+    policy_ids: ['93c46720-c217-11ea-9906-b5b8a21b268e'],
     package: {
       name: 'endpoint',
       title: 'Elastic Endpoint',
@@ -75,8 +81,15 @@ export const createFleetAuthzMock = (): FleetAuthz => {
     fleet: {
       all: true,
       setup: true,
+      readAgents: true,
       readEnrollmentTokens: true,
       readAgentPolicies: true,
+      allAgentPolicies: true,
+      allAgents: true,
+      allSettings: true,
+      readSettings: true,
+      addAgents: true,
+      addFleetServers: true,
     },
     integrations: {
       readPackageInfo: true,
@@ -94,6 +107,38 @@ export const createFleetAuthzMock = (): FleetAuthz => {
       endpoint: {
         actions: endpointActions,
       },
+      transform: {
+        actions: {
+          canCreateTransform: { executePackageAction: true },
+          canDeleteTransform: { executePackageAction: true },
+          canGetTransform: { executePackageAction: true },
+          canStartStopTransform: { executePackageAction: true },
+        },
+      },
     },
+    endpointExceptionsPrivileges: {
+      actions: {
+        showEndpointExceptions: true,
+        crudEndpointExceptions: true,
+      },
+    },
+  };
+};
+
+export const createAgentPolicyMock = (overrideProps?: Partial<AgentPolicy>): AgentPolicy => {
+  return {
+    id: 'agent-policy-1',
+    name: 'agent-policy-1',
+    description: 'an agent policy',
+    status: 'active',
+    namespace: 'default',
+    monitoring_enabled: Object.values(dataTypes),
+    inactivity_timeout: 1209600,
+    updated_at: '2023-06-30T16:03:38.159292',
+    updated_by: 'user-1',
+    revision: 1,
+    is_managed: false,
+    is_protected: false,
+    ...overrideProps,
   };
 };

@@ -1,25 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { TableRow, TableRowProps } from './table_row';
-import { setDocViewsRegistry } from '../../../kibana_services';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
-import { DocViewsRegistry } from '../../../services/doc_views/doc_views_registry';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 
-import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
-import { EsHitRecord } from '../../../types';
+import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 
 jest.mock('../utils/row_formatter', () => {
   const originalModule = jest.requireActual('../utils/row_formatter');
@@ -81,12 +79,7 @@ describe('Doc table row component', () => {
     useNewFieldsApi: true,
     filterManager: mockFilterManager,
     addBasePath: (path: string) => path,
-    DocViewer,
   } as unknown as TableRowProps;
-
-  beforeEach(() => {
-    setDocViewsRegistry(new DocViewsRegistry());
-  });
 
   it('should render __document__ column', () => {
     const component = mountComponent({ ...defaultProps, columns: [] });
@@ -121,16 +114,28 @@ describe('Doc table row component', () => {
   describe('details row', () => {
     it('should be empty by default', () => {
       const component = mountComponent(defaultProps);
-      expect(findTestSubject(component, 'docTableRowDetailsTitle').exists()).toBeFalsy();
+      expect(findTestSubject(component, 'docViewerRowDetailsTitle').exists()).toBeFalsy();
     });
 
     it('should expand the detail row when the toggle arrow is clicked', () => {
       const component = mountComponent(defaultProps);
       const toggleButton = findTestSubject(component, 'docTableExpandToggleColumn');
 
-      expect(findTestSubject(component, 'docTableRowDetailsTitle').exists()).toBeFalsy();
+      expect(findTestSubject(component, 'docViewerRowDetailsTitle').exists()).toBeFalsy();
       toggleButton.simulate('click');
-      expect(findTestSubject(component, 'docTableRowDetailsTitle').exists()).toBeTruthy();
+      expect(findTestSubject(component, 'docViewerRowDetailsTitle').exists()).toBeTruthy();
+    });
+
+    it('should hide the single/surrounding views for ES|QL mode', () => {
+      const props = {
+        ...defaultProps,
+        isEsqlMode: true,
+      };
+      const component = mountComponent(props);
+      const toggleButton = findTestSubject(component, 'docTableExpandToggleColumn');
+      toggleButton.simulate('click');
+      expect(findTestSubject(component, 'docViewerRowDetailsTitle').text()).toBe('Expanded result');
+      expect(findTestSubject(component, 'docTableRowAction').length).toBeFalsy();
     });
   });
 });

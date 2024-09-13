@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, useEuiTheme } from '@elastic/eui';
@@ -21,12 +22,14 @@ export const useTimeRange = ({
   timeRange: { from, to },
   timeInterval,
   isPlainRecord,
+  timeField,
 }: {
   uiSettings: IUiSettingsClient;
   bucketInterval?: UnifiedHistogramBucketInterval;
   timeRange: TimeRange;
   timeInterval?: string;
   isPlainRecord?: boolean;
+  timeField?: string;
 }) => {
   const dateFormat = useMemo(() => uiSettings.get('dateFormat'), [uiSettings]);
 
@@ -44,6 +47,10 @@ export const useTimeRange = ({
   );
 
   const timeRangeText = useMemo(() => {
+    if (!timeField && isPlainRecord) {
+      return '';
+    }
+
     const timeRange = {
       from: dateMath.parse(from),
       to: dateMath.parse(to, { roundUp: true }),
@@ -69,19 +76,19 @@ export const useTimeRange = ({
           },
         });
 
-    return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
-  }, [bucketInterval?.description, from, isPlainRecord, timeInterval, to, toMoment]);
+    return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`.trim();
+  }, [bucketInterval?.description, from, isPlainRecord, timeField, timeInterval, to, toMoment]);
 
   const { euiTheme } = useEuiTheme();
   const timeRangeCss = css`
     padding: 0 ${euiTheme.size.s} 0 ${euiTheme.size.s};
   `;
 
-  let timeRangeDisplay = (
+  let timeRangeDisplay = timeRangeText ? (
     <EuiText size="xs" textAlign="center" css={timeRangeCss}>
       {timeRangeText}
     </EuiText>
-  );
+  ) : null;
 
   if (bucketInterval?.scaled) {
     const toolTipTitle = i18n.translate('unifiedHistogram.timeIntervalWithValueWarning', {

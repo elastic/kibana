@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { Section } from '../../../common/constants';
+import type { IndexDetailsTabId } from '../../../common/constants';
+
 export const getTemplateListLink = () => `/templates`;
 
 export const getTemplateDetailsLink = (name: string, isLegacy?: boolean) => {
@@ -31,26 +34,47 @@ export const getTemplateCloneLink = (name: string, isLegacy?: boolean) => {
   return encodeURI(url);
 };
 
-export const getILMPolicyPath = (policyName: string) => {
-  return `/data/index_lifecycle_management/policies/edit/${encodeURIComponent(policyName)}`;
-};
-
 export const getIndexListUri = (filter?: string, includeHiddenIndices?: boolean) => {
+  let url = `/${Section.Indices}`;
   const hiddenIndicesParam =
     typeof includeHiddenIndices !== 'undefined' ? includeHiddenIndices : false;
-  if (filter) {
+  if (hiddenIndicesParam) {
+    url = `${url}?includeHiddenIndices=${hiddenIndicesParam}`;
+  }
+  if (filter && filter !== 'undefined') {
     // React router tries to decode url params but it can't because the browser partially
     // decodes them. So we have to encode both the URL and the filter to get it all to
     // work correctly for filters with URL unsafe characters in them.
-    return encodeURI(
-      `/indices?includeHiddenIndices=${hiddenIndicesParam}&filter=${encodeURIComponent(filter)}`
-    );
+    url = `${url}${hiddenIndicesParam ? '&' : '?'}filter=${encodeURIComponent(filter)}`;
   }
 
-  // If no filter, URI is already safe so no need to encode.
-  return '/indices';
+  return url;
 };
 
 export const getDataStreamDetailsLink = (name: string) => {
   return encodeURI(`/data_streams/${encodeURIComponent(name)}`);
+};
+
+export const getIndexDetailsLink = (
+  indexName: string,
+  indicesListURLParams: string,
+  tab?: IndexDetailsTabId
+) => {
+  let link = `/${Section.Indices}/index_details?indexName=${encodeURIComponent(indexName)}`;
+  if (indicesListURLParams) {
+    link = `${link}&${indicesListURLParams.replace('?', '')}`;
+  }
+  if (tab) {
+    link = `${link}&tab=${tab}`;
+  }
+  return link;
+};
+
+export const getComponentTemplatesLink = (usedByTemplateName?: string) => {
+  let url = '/component_templates';
+  if (usedByTemplateName) {
+    const filter = `usedBy=(${usedByTemplateName})`;
+    url = `${url}?filter=${encodeURIComponent(filter)}`;
+  }
+  return url;
 };

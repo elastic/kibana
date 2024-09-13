@@ -8,43 +8,7 @@
 import { cloneDeep } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-
-import type { FeaturesPrivileges } from './features_privileges';
-
-export interface RoleIndexPrivilege {
-  names: string[];
-  privileges: string[];
-  field_security?: {
-    grant?: string[];
-    except?: string[];
-  };
-  query?: string;
-}
-
-export interface RoleKibanaPrivilege {
-  spaces: string[];
-  base: string[];
-  feature: FeaturesPrivileges;
-  _reserved?: string[];
-}
-
-export interface Role {
-  name: string;
-  elasticsearch: {
-    cluster: string[];
-    indices: RoleIndexPrivilege[];
-    run_as: string[];
-  };
-  kibana: RoleKibanaPrivilege[];
-  metadata?: {
-    [anyKey: string]: any;
-  };
-  transient_metadata?: {
-    [anyKey: string]: any;
-  };
-  _transform_error?: string[];
-  _unrecognized_applications?: string[];
-}
+import type { Role } from '@kbn/security-plugin-types-common';
 
 /**
  * Returns whether given role is enabled or not
@@ -90,7 +54,9 @@ export function isRoleSystem(role: Partial<Role>) {
  */
 export function isRoleAdmin(role: Partial<Role>) {
   return (
-    (isRoleReserved(role) && (role.name?.endsWith('_admin') || role.name === 'superuser')) ?? false
+    ((isRoleReserved(role) && (role.name?.endsWith('_admin') || role.name === 'superuser')) ||
+      isRoleWithWildcardBasePrivilege(role)) ??
+    false
   );
 }
 
@@ -114,8 +80,21 @@ export function getExtendedRoleDeprecationNotice(role: Partial<Role>) {
  *
  * @param role the Role as returned by roles API
  */
+export function isRoleWithWildcardBasePrivilege(role: Partial<Role>): boolean {
+  return role.kibana?.some((entry) => entry.base.includes('*')) ?? false;
+}
+
+/**
+ * Returns whether given role is editable through the UI or not.
+ *
+ * @param role the Role as returned by roles API
+ */
 export function isRoleReadOnly(role: Partial<Role>): boolean {
-  return isRoleReserved(role) || (role._transform_error?.length ?? 0) > 0;
+  return (
+    isRoleReserved(role) ||
+    isRoleWithWildcardBasePrivilege(role) ||
+    (role._transform_error?.length ?? 0) > 0
+  );
 }
 
 /**

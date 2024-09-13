@@ -16,5 +16,10 @@
       "file": "datafeed_log_entry_categories_count.json",
       "job_id": "log-entry-categories-count"
     }
+  ],
+  "tags": [
+    "logs",
+    "observability",
+    "security"
   ]
 }

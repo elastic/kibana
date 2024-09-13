@@ -7,10 +7,9 @@
 
 export { download } from './download';
 export { install } from './install';
-export type { Context, PerformanceMetrics } from './chromium';
+export type { Context } from './chromium';
 export {
   getChromiumDisconnectedError,
-  ChromiumArchivePaths,
   DEFAULT_VIEWPORT,
   HeadlessChromiumDriver,
   HeadlessChromiumDriverFactory,

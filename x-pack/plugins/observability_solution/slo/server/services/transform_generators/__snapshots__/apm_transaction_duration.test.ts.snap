@@ -1,0 +1,791 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`APM Transaction Duration Transform Generator adds the custom kql filter to the query 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "terms": Object {
+          "processor.event": Array [
+            "metric",
+          ],
+        },
+      },
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "exists": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "service.name": "irrelevant",
+        },
+      },
+      Object {
+        "match": Object {
+          "service.environment": "irrelevant",
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.name": "irrelevant",
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.type": "irrelevant",
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "my.field": "value",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "range": Object {
+                            "foo": Object {
+                              "gte": "12",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "range": Object {
+                            "bar": Object {
+                              "lte": "100",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator does not include the query filter when params are '*' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "terms": Object {
+          "processor.event": Array [
+            "metric",
+          ],
+        },
+      },
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "exists": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'service.environment' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "terms": Object {
+          "processor.event": Array [
+            "metric",
+          ],
+        },
+      },
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "exists": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "service.environment": "production",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'service.environment' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "service.environment": Object {
+    "terms": Object {
+      "field": "service.environment",
+    },
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'service.name' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "terms": Object {
+          "processor.event": Array [
+            "metric",
+          ],
+        },
+      },
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "exists": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "service.name": "my-service",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'service.name' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "service.name": Object {
+    "terms": Object {
+      "field": "service.name",
+    },
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'transaction.name' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "terms": Object {
+          "processor.event": Array [
+            "metric",
+          ],
+        },
+      },
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "exists": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.name": "GET /foo",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'transaction.name' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "transaction.name": Object {
+    "terms": Object {
+      "field": "transaction.name",
+    },
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'transaction.type' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "terms": Object {
+          "processor.event": Array [
+            "metric",
+          ],
+        },
+      },
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "exists": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.type": "request",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'transaction.type' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "transaction.type": Object {
+    "terms": Object {
+      "field": "transaction.type",
+    },
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator returns the expected transform params for timeslices slo 1`] = `
+Object {
+  "_meta": Object {
+    "managed": true,
+    "managed_by": "observability",
+    "version": 3.3,
+  },
+  "defer_validation": true,
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
+  "dest": Object {
+    "index": ".slo-observability.sli-v3.3",
+    "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
+  },
+  "frequency": "1m",
+  "pivot": Object {
+    "aggregations": Object {
+      "_numerator": Object {
+        "range": Object {
+          "field": "transaction.duration.histogram",
+          "keyed": true,
+          "ranges": Array [
+            Object {
+              "key": "target",
+              "to": 500000,
+            },
+          ],
+        },
+      },
+      "slo.denominator": Object {
+        "value_count": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      "slo.isGoodSlice": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "goodEvents": "slo.numerator.value",
+            "totalEvents": "slo.denominator.value",
+          },
+          "script": "params.goodEvents / params.totalEvents >= 0.95 ? 1 : 0",
+        },
+      },
+      "slo.numerator": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "numerator": "_numerator['target']>_count",
+          },
+          "script": "params.numerator",
+        },
+      },
+    },
+    "group_by": Object {
+      "@timestamp": Object {
+        "date_histogram": Object {
+          "field": "@timestamp",
+          "fixed_interval": "2m",
+        },
+      },
+      "service.environment": Object {
+        "terms": Object {
+          "field": "service.environment",
+        },
+      },
+      "service.name": Object {
+        "terms": Object {
+          "field": "service.name",
+        },
+      },
+      "transaction.name": Object {
+        "terms": Object {
+          "field": "transaction.name",
+        },
+      },
+      "transaction.type": Object {
+        "terms": Object {
+          "field": "transaction.type",
+        },
+      },
+    },
+  },
+  "settings": Object {
+    "deduce_mappings": false,
+    "unattended": true,
+  },
+  "source": Object {
+    "index": "metrics-apm*",
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "metric",
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "metricset.name": "transaction",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.duration.histogram",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-7d/d",
+              },
+            },
+          },
+          Object {
+            "match": Object {
+              "service.name": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "service.environment": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "transaction.name": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "transaction.type": "irrelevant",
+            },
+          },
+        ],
+      },
+    },
+    "runtime_mappings": Object {},
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "1m",
+      "field": "@timestamp",
+    },
+  },
+  "transform_id": "slo-irrelevant-1",
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator returns the expected transform params for timeslices slo using a timesliceTarget = 0 1`] = `
+Object {
+  "_meta": Object {
+    "managed": true,
+    "managed_by": "observability",
+    "version": 3.3,
+  },
+  "defer_validation": true,
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
+  "dest": Object {
+    "index": ".slo-observability.sli-v3.3",
+    "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
+  },
+  "frequency": "1m",
+  "pivot": Object {
+    "aggregations": Object {
+      "_numerator": Object {
+        "range": Object {
+          "field": "transaction.duration.histogram",
+          "keyed": true,
+          "ranges": Array [
+            Object {
+              "key": "target",
+              "to": 500000,
+            },
+          ],
+        },
+      },
+      "slo.denominator": Object {
+        "value_count": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      "slo.isGoodSlice": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "goodEvents": "slo.numerator.value",
+            "totalEvents": "slo.denominator.value",
+          },
+          "script": "params.goodEvents / params.totalEvents > 0 ? 1 : 0",
+        },
+      },
+      "slo.numerator": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "numerator": "_numerator['target']>_count",
+          },
+          "script": "params.numerator",
+        },
+      },
+    },
+    "group_by": Object {
+      "@timestamp": Object {
+        "date_histogram": Object {
+          "field": "@timestamp",
+          "fixed_interval": "2m",
+        },
+      },
+      "service.environment": Object {
+        "terms": Object {
+          "field": "service.environment",
+        },
+      },
+      "service.name": Object {
+        "terms": Object {
+          "field": "service.name",
+        },
+      },
+      "transaction.name": Object {
+        "terms": Object {
+          "field": "transaction.name",
+        },
+      },
+      "transaction.type": Object {
+        "terms": Object {
+          "field": "transaction.type",
+        },
+      },
+    },
+  },
+  "settings": Object {
+    "deduce_mappings": false,
+    "unattended": true,
+  },
+  "source": Object {
+    "index": "metrics-apm*",
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "metric",
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "metricset.name": "transaction",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.duration.histogram",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-7d/d",
+              },
+            },
+          },
+          Object {
+            "match": Object {
+              "service.name": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "service.environment": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "transaction.name": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "transaction.type": "irrelevant",
+            },
+          },
+        ],
+      },
+    },
+    "runtime_mappings": Object {},
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "1m",
+      "field": "@timestamp",
+    },
+  },
+  "transform_id": "slo-irrelevant-1",
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator returns the expected transform params with every specified indicator params 1`] = `
+Object {
+  "_meta": Object {
+    "managed": true,
+    "managed_by": "observability",
+    "version": 3.3,
+  },
+  "defer_validation": true,
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
+  "dest": Object {
+    "index": ".slo-observability.sli-v3.3",
+    "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
+  },
+  "frequency": "1m",
+  "pivot": Object {
+    "aggregations": Object {
+      "_numerator": Object {
+        "range": Object {
+          "field": "transaction.duration.histogram",
+          "keyed": true,
+          "ranges": Array [
+            Object {
+              "key": "target",
+              "to": 500000,
+            },
+          ],
+        },
+      },
+      "slo.denominator": Object {
+        "value_count": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      "slo.numerator": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "numerator": "_numerator['target']>_count",
+          },
+          "script": "params.numerator",
+        },
+      },
+    },
+    "group_by": Object {
+      "@timestamp": Object {
+        "date_histogram": Object {
+          "field": "@timestamp",
+          "fixed_interval": "1m",
+        },
+      },
+      "service.environment": Object {
+        "terms": Object {
+          "field": "service.environment",
+        },
+      },
+      "service.name": Object {
+        "terms": Object {
+          "field": "service.name",
+        },
+      },
+      "transaction.name": Object {
+        "terms": Object {
+          "field": "transaction.name",
+        },
+      },
+      "transaction.type": Object {
+        "terms": Object {
+          "field": "transaction.type",
+        },
+      },
+    },
+  },
+  "settings": Object {
+    "deduce_mappings": false,
+    "unattended": true,
+  },
+  "source": Object {
+    "index": "metrics-apm*",
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "metric",
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "metricset.name": "transaction",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.duration.histogram",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-7d/d",
+              },
+            },
+          },
+          Object {
+            "match": Object {
+              "service.name": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "service.environment": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "transaction.name": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "transaction.type": "irrelevant",
+            },
+          },
+        ],
+      },
+    },
+    "runtime_mappings": Object {},
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "1m",
+      "field": "@timestamp",
+    },
+  },
+  "transform_id": "slo-irrelevant-1",
+}
+`;

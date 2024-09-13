@@ -518,7 +518,13 @@
             "description": [],
             "signature": [
               "(crumbs: ",
-              "EuiBreadcrumbProps",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.ChromeBreadcrumb",
+                "text": "ChromeBreadcrumb"
+              },
               "[]) => void"
             ],
             "path": "src/plugins/management/public/types.ts",
@@ -533,7 +539,13 @@
                 "label": "crumbs",
                 "description": [],
                 "signature": [
-                  "EuiBreadcrumbProps",
+                  {
+                    "pluginId": "@kbn/core-chrome-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreChromeBrowserPluginApi",
+                    "section": "def-public.ChromeBreadcrumb",
+                    "text": "ChromeBreadcrumb"
+                  },
                   "[]"
                 ],
                 "path": "src/plugins/management/public/types.ts",
@@ -554,9 +566,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ScopedHistory",
+                "section": "def-public.ScopedHistory",
                 "text": "ScopedHistory"
               },
               "<unknown>"
@@ -567,9 +579,31 @@
           },
           {
             "parentPluginId": "management",
-            "id": "def-public.ManagementAppMountParams.theme$",
+            "id": "def-public.ManagementAppMountParams.theme",
             "type": "Object",
             "tags": [],
+            "label": "theme",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-public.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
+              }
+            ],
+            "path": "src/plugins/management/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "management",
+            "id": "def-public.ManagementAppMountParams.theme$",
+            "type": "Object",
+            "tags": [
+              "deprecated"
+            ],
             "label": "theme$",
             "description": [],
             "signature": [
@@ -577,16 +611,22 @@
               "<",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
+                "section": "def-public.CoreTheme",
                 "text": "CoreTheme"
               },
               ">"
             ],
             "path": "src/plugins/management/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts"
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -772,7 +812,42 @@
       "path": "src/plugins/management/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "management",
+          "id": "def-public.ManagementStart.setupCardsNavigation",
+          "type": "Function",
+          "tags": [],
+          "label": "setupCardsNavigation",
+          "description": [],
+          "signature": [
+            "({ enabled, hideLinksTo, extendCardNavDefinitions, }: ",
+            "NavigationCardsSubject",
+            ") => void"
+          ],
+          "path": "src/plugins/management/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "management",
+              "id": "def-public.ManagementStart.setupCardsNavigation.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "{\n    enabled,\n    hideLinksTo,\n    extendCardNavDefinitions,\n  }",
+              "description": [],
+              "signature": [
+                "NavigationCardsSubject"
+              ],
+              "path": "src/plugins/management/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }

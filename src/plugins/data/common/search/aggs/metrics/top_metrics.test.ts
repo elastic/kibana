@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getTopMetricsMetricAgg } from './top_metrics';
@@ -11,6 +12,7 @@ import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig } from './metric_agg_type';
 import { KBN_FIELD_TYPES } from '../../..';
+import { CombinedFilter } from '@kbn/es-query';
 
 describe('Top metrics metric', () => {
   let aggConfig: IMetricAggConfig;
@@ -190,6 +192,16 @@ describe('Top metrics metric', () => {
 
       init({ fieldName: 'bytes' });
       expect(getTopMetricsMetricAgg().getValue(aggConfig, bucket)).toEqual([1024, 512, 256]);
+    });
+    it('returns phrase filter', () => {
+      expect(getTopMetricsMetricAgg().createFilter!(aggConfig, '10').query.match_phrase).toEqual({
+        bytes: 10,
+      });
+    });
+    it('returns combined OR filter for array values', () => {
+      const params = getTopMetricsMetricAgg().createFilter!(aggConfig, ['10', '20']).meta
+        .params as CombinedFilter['meta']['params'];
+      expect(params.map((p) => p.query!.match_phrase)).toEqual([{ bytes: 10 }, { bytes: 20 }]);
     });
   });
 });

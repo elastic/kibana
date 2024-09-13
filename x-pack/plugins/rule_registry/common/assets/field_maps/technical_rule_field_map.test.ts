@@ -24,11 +24,19 @@ it('matches snapshot', () => {
       },
       "event.action": Object {
         "array": false,
+        "ignore_above": 1024,
         "required": false,
         "type": "keyword",
       },
       "event.kind": Object {
         "array": false,
+        "ignore_above": 1024,
+        "required": false,
+        "type": "keyword",
+      },
+      "event.original": Object {
+        "array": false,
+        "ignore_above": 1024,
         "required": false,
         "type": "keyword",
       },
@@ -41,6 +49,11 @@ it('matches snapshot', () => {
         "array": true,
         "required": false,
         "type": "keyword",
+      },
+      "kibana.alert.consecutive_matches": Object {
+        "array": false,
+        "required": false,
+        "type": "long",
       },
       "kibana.alert.duration.us": Object {
         "array": false,
@@ -67,13 +80,35 @@ it('matches snapshot', () => {
         "required": true,
         "type": "keyword",
       },
+      "kibana.alert.intended_timestamp": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
       "kibana.alert.last_detected": Object {
         "array": false,
         "required": false,
         "type": "date",
       },
+      "kibana.alert.maintenance_window_ids": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.previous_action_group": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.reason": Object {
         "array": false,
+        "multi_fields": Array [
+          Object {
+            "flat_name": "kibana.alert.reason.text",
+            "name": "text",
+            "type": "match_only_text",
+          },
+        ],
         "required": false,
         "type": "keyword",
       },
@@ -116,6 +151,11 @@ it('matches snapshot', () => {
         "array": false,
         "required": false,
         "type": "keyword",
+      },
+      "kibana.alert.rule.execution.timestamp": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
       },
       "kibana.alert.rule.execution.uuid": Object {
         "array": false,
@@ -223,6 +263,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
+      "kibana.alert.severity_improving": Object {
+        "array": false,
+        "required": false,
+        "type": "boolean",
+      },
       "kibana.alert.start": Object {
         "array": false,
         "required": false,
@@ -269,9 +314,21 @@ it('matches snapshot', () => {
         "required": false,
         "type": "date_range",
       },
+      "kibana.alert.url": Object {
+        "array": false,
+        "ignore_above": 2048,
+        "index": false,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.uuid": Object {
         "array": false,
         "required": true,
+        "type": "keyword",
+      },
+      "kibana.alert.workflow_assignee_ids": Object {
+        "array": true,
+        "required": false,
         "type": "keyword",
       },
       "kibana.alert.workflow_reason": Object {
@@ -281,6 +338,16 @@ it('matches snapshot', () => {
       },
       "kibana.alert.workflow_status": Object {
         "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.workflow_status_updated_at": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
+      "kibana.alert.workflow_tags": Object {
+        "array": true,
         "required": false,
         "type": "keyword",
       },

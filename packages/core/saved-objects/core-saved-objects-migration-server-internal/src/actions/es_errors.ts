@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export const isWriteBlockException = (errorCause?: estypes.ErrorCause): boolean => {
@@ -27,8 +29,10 @@ export const isIndexNotFoundException = (errorCause?: estypes.ErrorCause): boole
 };
 
 export const isClusterShardLimitExceeded = (errorCause?: estypes.ErrorCause): boolean => {
+  // traditional ES: validation_exception. serverless ES: illegal_argument_exception
   return (
-    errorCause?.type === 'validation_exception' &&
+    (errorCause?.type === 'validation_exception' ||
+      errorCause?.type === 'illegal_argument_exception') &&
     errorCause?.reason?.match(
       /this action would add .* shards, but this cluster currently has .* maximum normal shards open/
     ) !== null

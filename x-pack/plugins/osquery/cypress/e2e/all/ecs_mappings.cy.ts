@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { getAdvancedButton } from '../../screens/integrations';
-import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
@@ -18,9 +18,10 @@ import {
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
 
-describe('EcsMapping', () => {
+// Failing: See https://github.com/elastic/kibana/issues/192128
+describe.skip('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    initializeDataViews();
   });
 
   it('should properly show static values in form and results', () => {
@@ -58,14 +59,17 @@ describe('EcsMapping', () => {
     cy.getBySel('savedQuerySelect').within(() => {
       cy.getBySel('comboBoxInput').type('processes_elastic{downArrow}{enter}');
     });
-    cy.react('EuiAccordionClass', {
-      props: { buttonContent: 'Advanced', forceState: 'open' },
-    }).should('exist');
-    cy.getBySel('advanced-accordion-content').within(() => {
-      cy.contains('Advanced').click();
-    });
-    cy.react('EuiAccordionClass', {
-      props: { buttonContent: 'Advanced', forceState: 'closed' },
-    }).should('exist');
+
+    cy.contains('Use the fields below to map results from this query to ECS fields.').should(
+      'be.visible'
+    );
+    cy.contains('Advanced').click();
+    cy.contains('Use the fields below to map results from this query to ECS fields.').should(
+      'not.be.visible'
+    );
+    cy.contains('Advanced').click();
+    cy.contains('Use the fields below to map results from this query to ECS fields.').should(
+      'be.visible'
+    );
   });
 });

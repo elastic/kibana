@@ -8,15 +8,15 @@
 import React, { useCallback, useMemo } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from '../../../../../types';
 import {
   DragDropBuckets,
   FieldsBucketContainer,
   NewBucketButton,
-  useDebouncedValue,
   DraggableBucketContainer,
-} from '../../../../../shared_components';
-import { FieldSelect } from '../../../dimension_panel/field_select';
+} from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
+import { IndexPattern } from '../../../../../types';
+import { FieldChoiceWithOperationType, FieldSelect } from '../../../dimension_panel/field_select';
 import type { TermsIndexPatternColumn } from './types';
 import type { OperationSupportMatrix } from '../../../dimension_panel';
 import { supportedTypes } from './constants';
@@ -30,6 +30,7 @@ export interface FieldInputsProps {
   invalidFields?: string[];
   operationSupportMatrix: Pick<OperationSupportMatrix, 'operationByField'>;
   onChange: (newValues: string[]) => void;
+  showTimeSeriesDimensions: boolean;
 }
 
 interface WrappedValue {
@@ -50,6 +51,7 @@ export function FieldInputs({
   indexPattern,
   operationSupportMatrix,
   invalidFields,
+  showTimeSeriesDimensions,
 }: FieldInputsProps) {
   const onChangeWrapped = useCallback(
     (values: WrappedValue[]) =>
@@ -70,7 +72,7 @@ export function FieldInputs({
   });
 
   const onFieldSelectChange = useCallback(
-    (choice, index = 0) => {
+    (choice: FieldChoiceWithOperationType, index = 0) => {
       const fields = [...localValues];
 
       if (indexPattern.getFieldByName(choice.field)) {
@@ -165,6 +167,7 @@ export function FieldInputs({
                 data-test-subj={
                   localValues.length !== 1 ? `indexPattern-dimension-field-${index}` : undefined
                 }
+                showTimeSeriesDimensions={localValues.length < 2 && showTimeSeriesDimensions}
               />
             </DraggableBucketContainer>
           );
@@ -179,7 +182,9 @@ export function FieldInputs({
           defaultMessage: 'Add field',
         })}
         isDisabled={
-          column.params.orderBy.type === 'rare' || localValues.length > MAX_MULTI_FIELDS_SIZE
+          column.params.orderBy.type === 'rare' ||
+          column.params.orderBy.type === 'significant' ||
+          localValues.length > MAX_MULTI_FIELDS_SIZE
         }
       />
     </>

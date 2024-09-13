@@ -12,7 +12,7 @@ import { Feature, Geometry, Position } from 'geojson';
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import * as jsts from 'jsts';
-import type { Map as MbMap, MapMouseEvent, PointLike } from '@kbn/mapbox-gl';
+import type { FilterSpecification, Map as MbMap, MapMouseEvent, PointLike } from '@kbn/mapbox-gl';
 import { getToasts } from '../../../../kibana_services';
 import { DrawControl } from '../draw_control';
 import { DRAW_MODE, DRAW_SHAPE } from '../../../../../common/constants';
@@ -67,7 +67,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
     } catch (error) {
       getToasts().addWarning(
         i18n.translate('xpack.maps.drawFeatureControl.unableToCreateFeature', {
-          defaultMessage: `Unable to create feature, error: '{errorMsg}'.`,
+          defaultMessage: `Unable to create feature, error: ''{errorMsg}''.`,
           values: {
             errorMsg: error.message,
           },
@@ -105,7 +105,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
     ] as [PointLike, PointLike];
     const selectedFeatures = this.props.mbMap.queryRenderedFeatures(mbBbox, {
       layers: mbEditLayerIds,
-      filter: ['all', EXCLUDE_CENTROID_FEATURES],
+      filter: ['all', EXCLUDE_CENTROID_FEATURES] as FilterSpecification,
     });
     if (!selectedFeatures.length) {
       return;
@@ -121,7 +121,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
     } catch (error) {
       getToasts().addWarning(
         i18n.translate('xpack.maps.drawFeatureControl.unableToDeleteFeature', {
-          defaultMessage: `Unable to delete feature, error: '{errorMsg}'.`,
+          defaultMessage: `Unable to delete feature, error: ''{errorMsg}''.`,
           values: {
             errorMsg: error.message,
           },

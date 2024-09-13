@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '../query_client';
 import type { OsqueryResponseActionsParamsFormProps } from './osquery_response_action_type';
 
 const OsqueryResponseActionParamsForm = lazy(() => import('./osquery_response_action_type'));
@@ -18,14 +17,12 @@ export const getLazyOsqueryResponseActionTypeForm =
     const { onError, defaultValues, onChange } = props;
 
     return (
-      <Suspense fallback={null}>
-        <QueryClientProvider client={queryClient}>
-          <OsqueryResponseActionParamsForm
-            onChange={onChange}
-            defaultValues={defaultValues}
-            onError={onError}
-          />
-        </QueryClientProvider>
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <OsqueryResponseActionParamsForm
+          onChange={onChange}
+          defaultValues={defaultValues}
+          onError={onError}
+        />
       </Suspense>
     );
   };

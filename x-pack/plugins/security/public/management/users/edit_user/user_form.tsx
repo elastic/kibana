@@ -27,8 +27,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import type { Role, User } from '../../../../common';
 import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
-import type { Role, User } from '../../../../common/model';
 import { isRoleDeprecated } from '../../../../common/model';
 import { DocLink } from '../../../components/doc_link';
 import type { ValidationErrors } from '../../../components/use_form';
@@ -99,11 +99,11 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
         services.notifications!.toasts.addSuccess(
           isNewUser
             ? i18n.translate('xpack.security.management.users.userForm.createSuccessMessage', {
-                defaultMessage: "Created user '{username}'",
+                defaultMessage: "Created user ''{username}''",
                 values: { username: user.username },
               })
             : i18n.translate('xpack.security.management.users.userForm.updateSuccessMessage', {
-                defaultMessage: "Updated user '{username}'",
+                defaultMessage: "Updated user ''{username}''",
                 values: { username: user.username },
               })
         );
@@ -112,11 +112,11 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
         services.notifications!.toasts.addDanger({
           title: isNewUser
             ? i18n.translate('xpack.security.management.users.userForm.createErrorMessage', {
-                defaultMessage: "Could not create user '{username}'",
+                defaultMessage: "Could not create user ''{username}''",
                 values: { username: user.username },
               })
             : i18n.translate('xpack.security.management.users.userForm.updateErrorMessage', {
-                defaultMessage: "Could not update user '{username}'",
+                defaultMessage: "Could not update user ''{username}''",
                 values: { username: user.username },
               }),
           text: (error as any).body?.message || error.message,
@@ -165,7 +165,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
               errors.username = i18n.translate(
                 'xpack.security.management.users.userForm.usernameTakenError',
                 {
-                  defaultMessage: "User '{username}' already exists.",
+                  defaultMessage: "User ''{username}'' already exists.",
                   values: { username: values.username },
                 }
               );
@@ -316,7 +316,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           </>
         ) : undefined}
       </EuiDescribedFormGroup>
-
       {isNewUser ? (
         <EuiDescribedFormGroup
           title={
@@ -377,7 +376,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           </EuiFormRow>
         </EuiDescribedFormGroup>
       ) : null}
-
       <EuiDescribedFormGroup
         title={
           <h2>
@@ -405,7 +403,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
                   <p key={role.name}>
                     <FormattedMessage
                       id="xpack.security.management.users.userForm.deprecatedRolesAssignedWarning"
-                      defaultMessage="Role '{name}' is deprecated. {reason}."
+                      defaultMessage="Role ''{name}'' is deprecated. {reason}."
                       values={{
                         name: role.name,
                         reason: role.metadata?._deprecated_reason?.replace(/\[(.+)\]/, "'$1'"),

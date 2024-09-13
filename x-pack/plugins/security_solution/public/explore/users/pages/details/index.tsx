@@ -20,6 +20,15 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
+import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
+import {
+  useAssetCriticalityData,
+  useAssetCriticalityPrivileges,
+} from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
+import {
+  AssetCriticalitySelector,
+  AssetCriticalityTitle,
+} from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
@@ -27,7 +36,7 @@ import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../../app/types';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -41,30 +50,34 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { UsersDetailsTabs } from './details_tabs';
 import { navTabsUsersDetails } from './nav_tabs';
 import type { UsersDetailsProps } from './types';
-import { type } from './utils';
 import { getUsersDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { timelineDefaults } from '../../../../timelines/store/defaults';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LastEventTime } from '../../../../common/components/last_event_time';
-import { LastEventIndexKey } from '../../../../../common/search_strategy';
+import { LastEventIndexKey, RiskScoreEntity } from '../../../../../common/search_strategy';
 
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
-import { UserOverview } from '../../../../overview/components/user_overview';
-import { useUserDetails } from '../../containers/users/details';
+import type { UserSummaryProps } from '../../../../overview/components/user_overview';
+import {
+  UserOverview,
+  USER_OVERVIEW_RISK_SCORE_QUERY_ID,
+} from '../../../../overview/components/user_overview';
+import { useObservedUserDetails } from '../../containers/users/observed_details';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { UsersType } from '../../store/model';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { LandingPageComponent } from '../../../../common/components/landing_page';
+import { EmptyPrompt } from '../../../../common/components/empty_prompt';
+import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
 
 const QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
@@ -74,7 +87,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   usersDetailsPagePath,
 }) => {
   const dispatch = useDispatch();
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.hostsPageEvents) ?? timelineDefaults).graphEventId
@@ -103,7 +115,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [detailName]
   );
 
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
+    useSourcererDataView();
 
   const [rawFilteredQuery, kqlError] = useMemo(() => {
     try {
@@ -134,7 +147,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     dispatch(setUsersDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
 
-  const [loading, { inspect, userDetails, refetch }] = useUserDetails({
+  const [loading, { inspect, userDetails, refetch }] = useObservedUserDetails({
     id: QUERY_ID,
     endDate: to,
     startDate: from,
@@ -147,7 +160,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   useQueryInspector({ setQuery, deleteQuery, refetch, inspect, loading, queryId: QUERY_ID });
 
-  const narrowDateRange = useCallback(
+  const narrowDateRange = useCallback<UserSummaryProps['narrowDateRange']>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
@@ -169,13 +182,35 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [detailName]
   );
 
+  const entity = useMemo(() => ({ type: 'user' as const, name: detailName }), [detailName]);
+  const privileges = useAssetCriticalityPrivileges(entity.name);
+
+  const refetchRiskScore = useRefetchOverviewPageRiskScore(USER_OVERVIEW_RISK_SCORE_QUERY_ID);
+  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
+    RiskScoreEntity.user,
+    detailName,
+    { onSuccess: refetchRiskScore }
+  );
+
+  const additionalFilters = useMemo(
+    () => (rawFilteredQuery ? [rawFilteredQuery] : []),
+    [rawFilteredQuery]
+  );
+
+  const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
+  const criticality = useAssetCriticalityData({
+    entity,
+    enabled: canReadAssetCriticality,
+    onChange: calculateEntityRiskScore,
+  });
+
   return (
     <>
       {indicesExist ? (
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
+            <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -189,6 +224,16 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               }
               title={detailName}
             />
+
+            {canReadAssetCriticality && (
+              <>
+                <EuiHorizontalRule margin="m" />
+                <AssetCriticalityTitle />
+                <EuiSpacer size="s" />
+                <AssetCriticalitySelector compressed criticality={criticality} entity={entity} />
+                <EuiHorizontalRule margin="m" />
+              </>
+            )}
 
             <AnomalyTableProvider
               criteriaFields={getCriteriaFromUsersType(UsersType.details, detailName)}
@@ -223,14 +268,14 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                     <AlertsByStatus
                       signalIndexName={signalIndexName}
                       entityFilter={entityFilter}
-                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                      additionalFilters={additionalFilters}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
                       entityFilter={entityFilter}
                       signalIndexName={signalIndexName}
-                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                      additionalFilters={additionalFilters}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -238,12 +283,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               </>
             )}
 
-            <TabNavigationWithBreadcrumbs
-              navTabs={navTabsUsersDetails(
-                detailName,
-                hasMlUserPermissions(capabilities),
-                isPlatinumOrTrialLicense
-              )}
+            <TabNavigation
+              navTabs={navTabsUsersDetails(detailName, hasMlUserPermissions(capabilities))}
             />
             <EuiSpacer />
             <UsersDetailsTabs
@@ -257,13 +298,13 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               userDetailFilter={usersDetailsPageFilters}
               setQuery={setQuery}
               to={to}
-              type={type}
+              type={UsersType.details}
               usersDetailsPagePath={usersDetailsPagePath}
             />
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.users} />

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { RuleDetailsContextType } from '../rule_details_context';
-import { RuleDetailTabs } from '..';
+import { RuleDetailTabs } from '../use_rule_details_tabs';
 
 export const useRuleDetailsContextMock = {
   create: (): jest.Mocked<RuleDetailsContextType> => ({
@@ -31,6 +31,8 @@ export const useRuleDetailsContextMock = {
           sortField: 'timestamp',
           sortDirection: 'desc',
         },
+        runTypeFilters: [],
+        showSourceEventTimeRange: true,
       },
       actions: {
         setEnd: jest.fn(),
@@ -45,6 +47,8 @@ export const useRuleDetailsContextMock = {
         setSortField: jest.fn(),
         setStart: jest.fn(),
         setStatusFilters: jest.fn(),
+        setRunTypeFilters: jest.fn(),
+        setShowSourceEventTimeRange: jest.fn(),
       },
     },
   }),

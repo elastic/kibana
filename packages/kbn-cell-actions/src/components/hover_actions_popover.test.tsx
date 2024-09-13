@@ -1,40 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { CellActionsProvider } from '../context';
 import { makeAction } from '../mocks/helpers';
-import { CellActionExecutionContext } from '../types';
+import type { CellActionExecutionContext } from '../types';
 import { HoverActionsPopover } from './hover_actions_popover';
 
-describe('HoverActionsPopover', () => {
-  const actionContext = {
+const defaultProps = {
+  anchorPosition: 'rightCenter' as const,
+  disabledActionTypes: [],
+  visibleCellActions: 4,
+  actionContext: {
     trigger: { id: 'triggerId' },
-    field: { name: 'fieldName' },
-  } as CellActionExecutionContext;
+    data: [
+      {
+        field: { name: 'fieldName' },
+      },
+    ],
+  } as CellActionExecutionContext,
+  showActionTooltips: false,
+};
+describe('HoverActionsPopover', () => {
   const TestComponent = () => <span data-test-subj="test-component" />;
   jest.useFakeTimers();
 
-  it('renders', () => {
+  it('renders the children', () => {
     const getActions = () => Promise.resolve([]);
-    const { queryByTestId } = render(
+    const { getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <HoverActionsPopover
-          disabledActionTypes={[]}
-          children={null}
-          visibleCellActions={4}
-          actionContext={actionContext}
-          showActionTooltips={false}
-        />
+        <HoverActionsPopover {...defaultProps}>
+          <TestComponent />
+        </HoverActionsPopover>
       </CellActionsProvider>
     );
-    expect(queryByTestId('hoverActionsPopover')).toBeInTheDocument();
+    expect(getByTestId('test-component')).toBeInTheDocument();
   });
 
   it('renders actions when hovered', async () => {
@@ -44,12 +51,7 @@ describe('HoverActionsPopover', () => {
 
     const { queryByLabelText, getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <HoverActionsPopover
-          disabledActionTypes={[]}
-          visibleCellActions={4}
-          actionContext={actionContext}
-          showActionTooltips={false}
-        >
+        <HoverActionsPopover {...defaultProps}>
           <TestComponent />
         </HoverActionsPopover>
       </CellActionsProvider>
@@ -70,12 +72,7 @@ describe('HoverActionsPopover', () => {
 
     const { queryByLabelText, getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <HoverActionsPopover
-          disabledActionTypes={[]}
-          visibleCellActions={4}
-          actionContext={actionContext}
-          showActionTooltips={false}
-        >
+        <HoverActionsPopover {...defaultProps}>
           <TestComponent />
         </HoverActionsPopover>
       </CellActionsProvider>
@@ -101,12 +98,7 @@ describe('HoverActionsPopover', () => {
 
     const { getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <HoverActionsPopover
-          disabledActionTypes={[]}
-          visibleCellActions={1}
-          actionContext={actionContext}
-          showActionTooltips={false}
-        >
+        <HoverActionsPopover {...defaultProps} visibleCellActions={1}>
           <TestComponent />
         </HoverActionsPopover>
       </CellActionsProvider>
@@ -127,12 +119,7 @@ describe('HoverActionsPopover', () => {
 
     const { getByTestId, getByLabelText } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <HoverActionsPopover
-          disabledActionTypes={[]}
-          visibleCellActions={1}
-          actionContext={actionContext}
-          showActionTooltips={false}
-        >
+        <HoverActionsPopover {...defaultProps} visibleCellActions={1}>
           <TestComponent />
         </HoverActionsPopover>
       </CellActionsProvider>
@@ -162,12 +149,7 @@ describe('HoverActionsPopover', () => {
 
     const { getByTestId, queryByLabelText } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <HoverActionsPopover
-          disabledActionTypes={[]}
-          visibleCellActions={2}
-          actionContext={actionContext}
-          showActionTooltips={false}
-        >
+        <HoverActionsPopover {...defaultProps} visibleCellActions={2}>
           <TestComponent />
         </HoverActionsPopover>
       </CellActionsProvider>
@@ -190,6 +172,44 @@ describe('HoverActionsPopover', () => {
     expect(queryByLabelText('test-action-1')).not.toBeInTheDocument();
     expect(queryByLabelText('test-action-2')).toBeInTheDocument();
     expect(queryByLabelText('test-action-3')).toBeInTheDocument();
+  });
+  it('does not add css positioning when anchorPosition = downCenter', async () => {
+    const getActionsPromise = Promise.resolve([makeAction('test-action')]);
+    const getActions = () => getActionsPromise;
+
+    const { getByLabelText, getByTestId } = render(
+      <CellActionsProvider getTriggerCompatibleActions={getActions}>
+        <HoverActionsPopover {...defaultProps} anchorPosition="downCenter">
+          <TestComponent />
+        </HoverActionsPopover>
+      </CellActionsProvider>
+    );
+
+    await hoverElement(getByTestId('test-component'), async () => {
+      await getActionsPromise;
+      jest.runAllTimers();
+    });
+
+    expect(Object.values(getByLabelText('Actions').style).includes('margin-top')).toEqual(false);
+  });
+  it('adds css positioning when anchorPosition = rightCenter', async () => {
+    const getActionsPromise = Promise.resolve([makeAction('test-action')]);
+    const getActions = () => getActionsPromise;
+
+    const { getByLabelText, getByTestId } = render(
+      <CellActionsProvider getTriggerCompatibleActions={getActions}>
+        <HoverActionsPopover {...defaultProps} anchorPosition="rightCenter">
+          <TestComponent />
+        </HoverActionsPopover>
+      </CellActionsProvider>
+    );
+
+    await hoverElement(getByTestId('test-component'), async () => {
+      await getActionsPromise;
+      jest.runAllTimers();
+    });
+
+    expect(Object.values(getByLabelText('Actions').style).includes('margin-top')).toEqual(true);
   });
 });
 

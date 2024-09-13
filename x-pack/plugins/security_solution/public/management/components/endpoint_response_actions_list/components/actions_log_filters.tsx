@@ -5,17 +5,16 @@
  * 2.0.
  */
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFilterGroup, EuiSuperUpdateButton } from '@elastic/eui';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSuperUpdateButton } from '@elastic/eui';
 import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { ActionsLogWithRuleToggle } from './actions_log_with_rule_toggle';
 import type { useGetEndpointActionList } from '../../../hooks';
 import {
-  type DateRangePickerValues,
   ActionLogDateRangePicker,
+  type DateRangePickerValues,
 } from './actions_log_date_range_picker';
 import { ActionsLogFilter } from './actions_log_filter';
 import { ActionsLogUsersFilter } from './actions_log_users_filter';
@@ -27,10 +26,12 @@ export const ActionsLogFilters = memo(
     isDataLoading,
     isFlyout,
     onClick,
+    onChangeAgentTypesFilter,
     onChangeHostsFilter,
     onChangeCommandsFilter,
     onChangeStatusesFilter,
     onChangeUsersFilter,
+    onChangeTypeFilter,
     onRefresh,
     onRefreshChange,
     onTimeChange,
@@ -40,10 +41,12 @@ export const ActionsLogFilters = memo(
     dateRangePickerState: DateRangePickerValues;
     isDataLoading: boolean;
     isFlyout: boolean;
+    onChangeAgentTypesFilter: (selectedAgentTypes: string[]) => void;
     onChangeHostsFilter: (selectedCommands: string[]) => void;
     onChangeCommandsFilter: (selectedCommands: string[]) => void;
     onChangeStatusesFilter: (selectedStatuses: string[]) => void;
     onChangeUsersFilter: (selectedUsers: string[]) => void;
+    onChangeTypeFilter: (selectedTypes: string[]) => void;
     onRefresh: () => void;
     onRefreshChange: (evt: OnRefreshChangeProps) => void;
     onTimeChange: ({ start, end }: DurationRange) => void;
@@ -52,9 +55,11 @@ export const ActionsLogFilters = memo(
     'data-test-subj'?: string;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const responseActionsEnabled = useIsExperimentalFeatureEnabled(
-      'endpointResponseActionsEnabled'
+
+    const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+      'responseActionsSentinelOneV1Enabled'
     );
+
     const filters = useMemo(() => {
       return (
         <>
@@ -78,19 +83,36 @@ export const ActionsLogFilters = memo(
             onChangeFilterOptions={onChangeStatusesFilter}
             data-test-subj={dataTestSubj}
           />
-          {responseActionsEnabled && (
-            <ActionsLogWithRuleToggle dataTestSubj={dataTestSubj} isFlyout={isFlyout} />
+          {isSentinelOneV1Enabled ? (
+            <ActionsLogFilter
+              filterName={'types'}
+              typesFilters={{
+                agentTypes: { onChangeFilterOptions: onChangeAgentTypesFilter },
+                actionTypes: { onChangeFilterOptions: onChangeTypeFilter },
+              }}
+              isFlyout={isFlyout}
+              data-test-subj={dataTestSubj}
+            />
+          ) : (
+            <ActionsLogFilter
+              filterName={'types'}
+              onChangeFilterOptions={onChangeTypeFilter}
+              isFlyout={isFlyout}
+              data-test-subj={dataTestSubj}
+            />
           )}
         </>
       );
     }, [
-      dataTestSubj,
-      isFlyout,
-      onChangeCommandsFilter,
-      onChangeHostsFilter,
-      onChangeStatusesFilter,
-      responseActionsEnabled,
       showHostsFilter,
+      isFlyout,
+      isSentinelOneV1Enabled,
+      onChangeHostsFilter,
+      dataTestSubj,
+      onChangeCommandsFilter,
+      onChangeStatusesFilter,
+      onChangeAgentTypesFilter,
+      onChangeTypeFilter,
     ]);
 
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);
@@ -111,7 +133,6 @@ export const ActionsLogFilters = memo(
           <ActionLogDateRangePicker
             dateRangePickerState={dateRangePickerState}
             isDataLoading={isDataLoading}
-            isFlyout={isFlyout}
             onRefresh={onRefresh}
             onRefreshChange={onRefreshChange}
             onTimeChange={onTimeChange}

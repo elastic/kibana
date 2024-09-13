@@ -4,15 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isEmpty } from 'lodash';
 
 import type {
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
   PackagePolicyConfigRecord,
+  PackagePolicy,
   NewPackagePolicy,
   PackageInfo,
   ExperimentalDataStreamFeature,
 } from '../types';
+import { DATASET_VAR_NAME } from '../constants';
 import { PackagePolicyValidationError } from '../errors';
 
 import { packageToPackagePolicy } from '.';
@@ -27,25 +30,95 @@ export type SimplifiedPackagePolicyStreams = Record<
   }
 >;
 
+export type SimplifiedInputs = Record<
+  string,
+  {
+    enabled?: boolean | undefined;
+    vars?: SimplifiedVars;
+    streams?: SimplifiedPackagePolicyStreams;
+  }
+>;
+
 export interface SimplifiedPackagePolicy {
   id?: string;
-  policy_id: string;
+  policy_id?: string | null;
+  policy_ids: string[];
+  output_id?: string;
   namespace: string;
   name: string;
   description?: string;
   vars?: SimplifiedVars;
-  inputs?: Record<
-    string,
-    {
-      enabled?: boolean | undefined;
-      vars?: SimplifiedVars;
-      streams?: SimplifiedPackagePolicyStreams;
-    }
-  >;
+  inputs?: SimplifiedInputs;
+}
+
+export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs' | 'vars'> {
+  inputs?: SimplifiedInputs;
+  vars?: SimplifiedVars;
+}
+
+export interface FormattedCreatePackagePolicyResponse {
+  item: FormattedPackagePolicy;
+}
+
+export function packagePolicyToSimplifiedPackagePolicy(packagePolicy: PackagePolicy) {
+  const formattedPackagePolicy = packagePolicy as unknown as FormattedPackagePolicy;
+  formattedPackagePolicy.inputs = formatInputs(packagePolicy.inputs);
+  if (packagePolicy.vars) {
+    formattedPackagePolicy.vars = formatVars(packagePolicy.vars);
+  }
+
+  return formattedPackagePolicy;
 }
 
 export function generateInputId(input: NewPackagePolicyInput) {
   return `${input.policy_template ? `${input.policy_template}-` : ''}${input.type}`;
+}
+
+export function formatInputs(inputs: NewPackagePolicy['inputs']) {
+  return inputs.reduce((acc, input) => {
+    const inputId = generateInputId(input);
+    if (!acc) {
+      acc = {};
+    }
+    acc[inputId] = {
+      enabled: input.enabled,
+      vars: formatVars(input.vars),
+      streams: formatStreams(input.streams),
+    };
+
+    return acc;
+  }, {} as SimplifiedPackagePolicy['inputs']);
+}
+
+export function formatVars(vars: NewPackagePolicy['inputs'][number]['vars']) {
+  if (!vars) {
+    return;
+  }
+
+  return Object.entries(vars).reduce((acc, [varKey, varRecord]) => {
+    // the dataset var uses an internal format before we send it
+    if (varKey === DATASET_VAR_NAME && varRecord?.value?.dataset) {
+      acc[varKey] = varRecord?.value.dataset;
+    } else {
+      acc[varKey] = varRecord?.value;
+    }
+
+    return acc;
+  }, {} as SimplifiedVars);
+}
+
+function formatStreams(streams: NewPackagePolicy['inputs'][number]['streams']) {
+  return streams.reduce((acc, stream) => {
+    if (!acc) {
+      acc = {};
+    }
+    acc[stream.data_stream.dataset] = {
+      enabled: stream.enabled,
+      vars: formatVars(stream.vars),
+    };
+
+    return acc;
+  }, {} as SimplifiedPackagePolicyStreams);
 }
 
 function assignVariables(
@@ -74,13 +147,26 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
 ): NewPackagePolicy {
   const {
     policy_id: policyId,
+    policy_ids: policyIds,
+    output_id: outputId,
     namespace,
     name,
     description,
     inputs = {},
     vars: packageLevelVars,
   } = data;
-  const packagePolicy = packageToPackagePolicy(packageInfo, policyId, namespace, name, description);
+  const packagePolicy = packageToPackagePolicy(
+    packageInfo,
+    policyId && isEmpty(policyIds) ? policyId : policyIds,
+    namespace,
+    name,
+    description
+  );
+
+  if (outputId) {
+    packagePolicy.output_id = outputId;
+  }
+
   if (packagePolicy.package && options?.experimental_data_stream_features) {
     packagePolicy.package.experimental_data_stream_features =
       options.experimental_data_stream_features;

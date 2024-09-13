@@ -53,6 +53,7 @@ export interface LoadExecutionLogAggregationsProps {
   dateStart: string;
   dateEnd?: string;
   outcomeFilter?: string[];
+  ruleTypeIds?: string[];
   message?: string;
   perPage?: number;
   page?: number;
@@ -70,13 +71,14 @@ export const loadExecutionLogAggregations = async ({
   dateStart,
   dateEnd,
   outcomeFilter,
+  ruleTypeIds,
   message,
   perPage = 10,
   page = 0,
   sort = [],
 }: LoadExecutionLogAggregationsProps & { http: HttpSetup }) => {
   const sortField: any[] = sort;
-  const filter = getFilter({ outcomeFilter, message });
+  const filter = getFilter({ outcomeFilter, message, ruleTypeIds });
 
   const result = await http.get<AsApiContract<IExecutionLogResult>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${id}/_execution_log`,
@@ -102,6 +104,7 @@ export const loadGlobalExecutionLogAggregations = async ({
   dateStart,
   dateEnd,
   outcomeFilter,
+  ruleTypeIds,
   message,
   perPage = 10,
   page = 0,
@@ -109,7 +112,7 @@ export const loadGlobalExecutionLogAggregations = async ({
   namespaces,
 }: LoadGlobalExecutionLogAggregationsProps & { http: HttpSetup }) => {
   const sortField: any[] = sort;
-  const filter = getFilter({ outcomeFilter, message });
+  const filter = getFilter({ outcomeFilter, message, ruleTypeIds });
 
   const result = await http.get<AsApiContract<IExecutionLogResult>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_logs`,

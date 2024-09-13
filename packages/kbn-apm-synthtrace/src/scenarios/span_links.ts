@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { compact, shuffle } from 'lodash';
@@ -11,6 +12,7 @@ import { Readable } from 'stream';
 import { apm, ApmFields, generateLongId, generateShortId } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -32,7 +34,7 @@ function getSpanLinksFromEvents(events: ApmFields[]) {
 
 const scenario: Scenario<ApmFields> = async () => {
   return {
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const producerInternalOnlyInstance = apm
 
         .service({ name: 'producer-internal-only', environment: ENVIRONMENT, agentName: 'go' })
@@ -111,8 +113,9 @@ const scenario: Scenario<ApmFields> = async () => {
             );
         });
 
-      return Readable.from(
-        Array.from(producerInternalOnlyEvents).concat(Array.from(consumerEvents))
+      return withClient(
+        apmEsClient,
+        Readable.from(Array.from(producerInternalOnlyEvents).concat(Array.from(consumerEvents)))
       );
     },
   };

@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { act, within } from '@testing-library/react';
+import { act, within, render, screen, waitFor } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { render, act as reactAct } from '@testing-library/react';
 
 import { ConnectorValidationFunc } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
@@ -268,7 +267,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       getAppInfoMock.mockResolvedValue(applicationInfoData);
       updateActionConnectorMock.mockResolvedValue({ isDeprecated: false });
 
-      const { getByTestId, queryByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={usesTableApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
@@ -278,46 +277,49 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await reactAct(async () => {
-        userEvent.click(getByTestId('update-connector-btn'));
-      });
+      await userEvent.click(await screen.findByTestId('update-connector-btn'));
 
-      await reactAct(async () => {
-        const updateConnectorForm = getByTestId('updateConnectorForm');
-        const urlInput = within(updateConnectorForm).getByTestId('credentialsApiUrlFromInput');
-        const usernameInput = within(updateConnectorForm).getByTestId(
-          'connector-servicenow-username-form-input'
-        );
-        const passwordInput = within(updateConnectorForm).getByTestId(
-          'connector-servicenow-password-form-input'
-        );
-
-        await userEvent.type(urlInput, 'https://example.com', { delay: 100 });
-        await userEvent.type(usernameInput, 'user', { delay: 100 });
-        await userEvent.type(passwordInput, 'pass', { delay: 100 });
-        userEvent.click(within(updateConnectorForm).getByTestId('snUpdateInstallationSubmit'));
-      });
-
-      expect(getAppInfoMock).toHaveBeenCalledTimes(1);
-      expect(updateActionConnectorMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          connector: {
-            config: { apiUrl: 'https://example.com', usesTableApi: false },
-            id: 'test',
-            name: 'SN',
-            secrets: { password: 'pass', username: 'user' },
-          },
-        })
+      const updateConnectorForm = await screen.findByTestId('updateConnectorForm');
+      const urlInput = await within(updateConnectorForm).findByTestId('credentialsApiUrlFromInput');
+      const usernameInput = await within(updateConnectorForm).findByTestId(
+        'connector-servicenow-username-form-input'
+      );
+      const passwordInput = await within(updateConnectorForm).findByTestId(
+        'connector-servicenow-password-form-input'
       );
 
-      expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        text: 'Connector has been updated.',
-        title: 'SN connector updated',
+      await userEvent.click(urlInput);
+      await userEvent.paste('https://example.com');
+      await userEvent.click(usernameInput);
+      await userEvent.paste('user');
+      await userEvent.click(passwordInput);
+      await userEvent.paste('pass');
+      await userEvent.click(
+        await within(updateConnectorForm).findByTestId('snUpdateInstallationSubmit')
+      );
+
+      await waitFor(() => {
+        expect(getAppInfoMock).toHaveBeenCalledTimes(1);
+        expect(updateActionConnectorMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            connector: {
+              config: { apiUrl: 'https://example.com', usesTableApi: false },
+              id: 'test',
+              name: 'SN',
+              secrets: { password: 'pass', username: 'user' },
+            },
+          })
+        );
+
+        expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+          text: 'Connector has been updated.',
+          title: 'SN connector updated',
+        });
       });
 
-      expect(queryByTestId('updateConnectorForm')).toBe(null);
-      expect(queryByTestId('snDeprecatedCallout')).toBe(null);
-      expect(getByTestId('snInstallationCallout')).toBeInTheDocument();
+      expect(screen.queryByTestId('updateConnectorForm')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('snDeprecatedCallout')).not.toBeInTheDocument();
+      expect(await screen.findByTestId('snInstallationCallout')).toBeInTheDocument();
     });
 
     test('should NOT migrate the deprecated connector when there is an error', async () => {
@@ -325,7 +327,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       getAppInfoMock.mockRejectedValueOnce(new Error(errorMessage));
       updateActionConnectorMock.mockResolvedValue({ isDeprecated: false });
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={usesTableApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
@@ -335,32 +337,36 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await reactAct(async () => {
-        userEvent.click(getByTestId('update-connector-btn'));
+      await userEvent.click(await screen.findByTestId('update-connector-btn'));
+
+      const updateConnectorForm = await screen.findByTestId('updateConnectorForm');
+      const urlInput = await within(updateConnectorForm).findByTestId('credentialsApiUrlFromInput');
+      const usernameInput = await within(updateConnectorForm).findByTestId(
+        'connector-servicenow-username-form-input'
+      );
+      const passwordInput = await within(updateConnectorForm).findByTestId(
+        'connector-servicenow-password-form-input'
+      );
+
+      await userEvent.click(urlInput);
+      await userEvent.paste('https://example.com');
+      await userEvent.click(usernameInput);
+      await userEvent.paste('user');
+      await userEvent.click(passwordInput);
+      await userEvent.paste('pass');
+      await userEvent.click(
+        await within(updateConnectorForm).findByTestId('snUpdateInstallationSubmit')
+      );
+
+      await waitFor(() => {
+        expect(getAppInfoMock).toHaveBeenCalledTimes(1);
+        expect(updateActionConnectorMock).not.toHaveBeenCalled();
+        expect(services.notifications.toasts.addSuccess).not.toHaveBeenCalled();
       });
 
-      await reactAct(async () => {
-        const updateConnectorForm = getByTestId('updateConnectorForm');
-        const urlInput = within(updateConnectorForm).getByTestId('credentialsApiUrlFromInput');
-        const usernameInput = within(updateConnectorForm).getByTestId(
-          'connector-servicenow-username-form-input'
-        );
-        const passwordInput = within(updateConnectorForm).getByTestId(
-          'connector-servicenow-password-form-input'
-        );
-
-        await userEvent.type(urlInput, 'https://example.com', { delay: 100 });
-        await userEvent.type(usernameInput, 'user', { delay: 100 });
-        await userEvent.type(passwordInput, 'pass', { delay: 100 });
-        userEvent.click(within(updateConnectorForm).getByTestId('snUpdateInstallationSubmit'));
-      });
-
-      expect(getAppInfoMock).toHaveBeenCalledTimes(1);
-      expect(updateActionConnectorMock).not.toHaveBeenCalled();
-      expect(services.notifications.toasts.addSuccess).not.toHaveBeenCalled();
-      expect(getByTestId('updateConnectorForm')).toBeInTheDocument();
+      expect(await screen.findByTestId('updateConnectorForm')).toBeInTheDocument();
       expect(
-        within(getByTestId('updateConnectorForm')).getByTestId('snApplicationCallout')
+        within(await screen.findByTestId('updateConnectorForm')).getByTestId('snApplicationCallout')
       ).toBeInTheDocument();
     });
   });
@@ -390,7 +396,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
     it.each([[usesImportSetApiConnector], [usesImportSetApiConnectorOauth]])(
       'connector validation succeeds when connector config is valid',
       async (connector) => {
-        const { getByTestId } = render(
+        render(
           <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
             <ServiceNowConnectorFields
               readOnly={false}
@@ -400,11 +406,11 @@ describe('ServiceNowActionConnectorFields renders', () => {
           </ConnectorFormTestProvider>
         );
 
-        await act(async () => {
-          userEvent.click(getByTestId('form-test-provide-submit'));
-        });
+        await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
-        expect(onSubmit).toHaveBeenCalledWith({ data: { ...connector }, isValid: true });
+        await waitFor(() => {
+          expect(onSubmit).toHaveBeenCalledWith({ data: { ...connector }, isValid: true });
+        });
       }
     );
 
@@ -419,7 +425,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
         },
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <ServiceNowConnectorFields
             readOnly={false}
@@ -429,23 +435,23 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       const {
         secrets: { clientSecret, privateKey },
         ...rest
       } = connector;
 
-      expect(onSubmit).toHaveBeenCalledWith({
-        data: { ...rest, secrets: { clientSecret, privateKey } },
-        isValid: true,
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: { ...rest, secrets: { clientSecret, privateKey } },
+          isValid: true,
+        });
       });
     });
 
     it.each(basicAuthTests)('validates correctly %p', async (field, value) => {
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={usesImportSetApiConnector} onSubmit={onSubmit}>
           <ServiceNowConnectorFields
             readOnly={false}
@@ -455,21 +461,22 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+      await userEvent.clear(screen.getByTestId(field));
+      if (value !== '') {
+        await userEvent.type(screen.getByTestId(field), value, {
           delay: 10,
         });
-      });
+      }
 
-      await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
 
     it.each(oauthTests)('validates correctly %p', async (field, value) => {
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={usesImportSetApiConnectorOauth} onSubmit={onSubmit}>
           <ServiceNowConnectorFields
             readOnly={false}
@@ -479,17 +486,18 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+      await userEvent.clear(screen.getByTestId(field));
+      if (value !== '') {
+        await userEvent.type(screen.getByTestId(field), value, {
           delay: 10,
         });
-      });
+      }
 
-      await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
   });
 });

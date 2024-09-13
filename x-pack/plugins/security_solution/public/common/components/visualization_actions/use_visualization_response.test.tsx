@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import { createStore } from '../../store';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useVisualizationResponse } from './use_visualization_response';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
@@ -45,17 +38,18 @@ describe('useVisualizationResponse', () => {
     },
   };
 
-  const { storage } = createSecuritySolutionStorageMock();
-  const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const mockStore = createMockStore(mockState);
   const visualizationId = 'testId';
   beforeEach(() => {
     jest.clearAllMocks();
   });
   it('should get result by visualization id', () => {
     const { result } = renderHook(() => useVisualizationResponse({ visualizationId }), {
-      wrapper: ({ children }) => <TestProviders store={mockStore}>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders store={mockStore}>{children}</TestProviders>
+      ),
     });
-    expect(result.current).toEqual(
+    expect(result.current.responses).toEqual(
       parseVisualizationData(mockState.inputs.global.queries[0].inspect.response)
     );
   });

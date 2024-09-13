@@ -6,30 +6,31 @@
  */
 
 import React from 'react';
-import { Redirect, Switch } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { SetupGuide } from '../enterprise_search_overview/components/setup_guide';
+import { ErrorStatePrompt } from '../shared/error_state';
 import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
-import { EnginesRouter } from './components/engines/engines_router';
-import { ErrorConnecting } from './components/error_connecting';
+import { ConnectorsRouter } from './components/connectors/connectors_router';
+import { CrawlersRouter } from './components/connectors/crawlers_router';
 import { NotFound } from './components/not_found';
 import { SearchIndicesRouter } from './components/search_indices';
-import { Settings } from './components/settings';
 import {
-  SETUP_GUIDE_PATH,
+  CONNECTORS_PATH,
+  CRAWLERS_PATH,
+  ERROR_STATE_PATH,
   ROOT_PATH,
   SEARCH_INDICES_PATH,
-  SETTINGS_PATH,
-  ENGINES_PATH,
+  SETUP_GUIDE_PATH,
 } from './routes';
 
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
@@ -39,56 +40,51 @@ export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 
   const showView = () => {
-    if (!config.host && config.canDeployEntSearch) {
-      return <EnterpriseSearchContentUnconfigured />;
-    } else if (incompatibleVersions) {
+    if (config.host && config.canDeployEntSearch && incompatibleVersions) {
       return (
         <VersionMismatchPage
           enterpriseSearchVersion={enterpriseSearchVersion}
           kibanaVersion={kibanaVersion}
         />
       );
-    } else if (errorConnectingMessage) {
-      return <ErrorConnecting />;
     }
 
     return <EnterpriseSearchContentConfigured {...(props as Required<InitialAppData>)} />;
   };
 
   return (
-    <Switch>
+    <Routes>
       <Route exact path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
+      <Route exact path={ERROR_STATE_PATH}>
+        {config.host && config.canDeployEntSearch && errorConnectingMessage ? (
+          <ErrorStatePrompt />
+        ) : (
+          <Redirect to={SEARCH_INDICES_PATH} />
+        )}
+      </Route>
       <Route>{showView()}</Route>
-    </Switch>
+    </Routes>
   );
 };
 
-export const EnterpriseSearchContentUnconfigured: React.FC = () => (
-  <Switch>
-    <Route>
-      <Redirect to={SETUP_GUIDE_PATH} />
-    </Route>
-  </Switch>
-);
-
 export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData>> = () => {
   return (
-    <Switch>
+    <Routes>
       <Redirect exact from={ROOT_PATH} to={SEARCH_INDICES_PATH} />
       <Route path={SEARCH_INDICES_PATH}>
         <SearchIndicesRouter />
       </Route>
-      <Route path={SETTINGS_PATH}>
-        <Settings />
+      <Route path={CONNECTORS_PATH}>
+        <ConnectorsRouter />
       </Route>
-      <Route path={ENGINES_PATH}>
-        <EnginesRouter />
+      <Route path={CRAWLERS_PATH}>
+        <CrawlersRouter />
       </Route>
       <Route>
         <NotFound />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

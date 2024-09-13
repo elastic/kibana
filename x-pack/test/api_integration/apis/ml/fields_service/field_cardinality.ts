@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -42,8 +42,8 @@ export default ({ getService }: FtrProviderContext) => {
         fieldNames: ['geoip.city_name', 'geoip.continent_name', 'geoip.country_iso_code'],
         query: { bool: { must: [{ match_all: {} }] } },
         timeFieldName: 'order_date',
-        earliestMs: 1560556800000, // June 15, 2019 12:00:00 AM GMT
-        latestMs: 1560643199000, //  June 15, 2019 11:59:59 PM GMT
+        earliestMs: 1686787200000, // June 15, 2023 12:00:00 AM GMT
+        latestMs: 1686873599000, //  June 15, 2023 11:59:59 PM GMT
       },
       expected: {
         statusCode: 200,
@@ -62,8 +62,8 @@ export default ({ getService }: FtrProviderContext) => {
         fieldNames: ['manufacturer'],
         query: { bool: { must: [{ match_all: {} }] } },
         timeFieldName: 'order_date',
-        earliestMs: 1560556800000, // June 15, 2019 12:00:00 AM GMT
-        latestMs: 1560643199000, //  June 15, 2019 11:59:59 PM GMT
+        earliestMs: 1686787200000, // June 15, 2023 12:00:00 AM GMT
+        latestMs: 1686873599000, //  June 15, 2023 11:59:59 PM GMT
       },
       expected: {
         statusCode: 200,
@@ -97,9 +97,9 @@ export default ({ getService }: FtrProviderContext) => {
     for (const testData of testDataList) {
       it(`${testData.testTitle}`, async () => {
         const { body, status } = await supertest
-          .post('/api/ml/fields_service/field_cardinality')
+          .post('/internal/ml/fields_service/field_cardinality')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(testData.requestBody);
         ml.api.assertResponseStatusCode(testData.expected.statusCode, status, body);
 

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CasesResponse, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
+import { Cases, CaseStatuses, AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { postCaseReq } from '../../../../common/lib/mock';
@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
           alertId: signalID,
           index: defaultSignalsIndex,
           rule: { id: 'test-rule-id', name: 'test-index-id' },
-          type: CommentType.alert,
+          type: AttachmentType.alert,
           owner: 'securitySolutionFixture',
         },
       });
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
           alertId: signalID2,
           index: defaultSignalsIndex,
           rule: { id: 'test-rule-id', name: 'test-index-id' },
-          type: CommentType.alert,
+          type: AttachmentType.alert,
           owner: 'securitySolutionFixture',
         },
       });
@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // does NOT updates alert status when the status is updated and syncAlerts=false
       // this performs the cases update through the test plugin that leverages the cases client instead
       // of going through RESTful API of the cases plugin
-      const { body: updatedIndWithStatus }: { body: CasesResponse } = await supertest
+      const { body: updatedIndWithStatus }: { body: Cases } = await supertest
         .patch('/api/cases_user/cases')
         .set('kbn-xsrf', 'true')
         .send({

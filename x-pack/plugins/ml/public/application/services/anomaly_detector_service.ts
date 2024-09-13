@@ -5,27 +5,25 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Job, JobId } from '../../../common/types/anomaly_detection_jobs';
-import { basePath } from './ml_api_service';
-import { HttpService } from './http_service';
+import type { Observable } from 'rxjs';
+import { map } from 'rxjs';
+import type { Job, JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { HttpService } from './http_service';
+import { type MlApi, mlApiProvider } from './ml_api_service';
 
 export class AnomalyDetectorService {
-  private readonly apiBasePath = basePath() + '/anomaly_detectors';
+  private mlApi: MlApi;
 
-  constructor(private httpService: HttpService) {}
+  constructor(httpService: HttpService) {
+    this.mlApi = mlApiProvider(httpService);
+  }
 
   /**
    * Fetches a single job object
    * @param jobId
    */
   getJobById$(jobId: JobId): Observable<Job> {
-    return this.httpService
-      .http$<{ count: number; jobs: Job[] }>({
-        path: `${this.apiBasePath}/${jobId}`,
-      })
-      .pipe(map((response) => response.jobs[0]));
+    return this.getJobs$([jobId]).pipe(map((jobs) => jobs[0]));
   }
 
   /**
@@ -33,27 +31,6 @@ export class AnomalyDetectorService {
    * @param jobIds
    */
   getJobs$(jobIds: JobId[]): Observable<Job[]> {
-    return this.httpService
-      .http$<{ count: number; jobs: Job[] }>({
-        path: `${this.apiBasePath}/${jobIds.join(',')}`,
-      })
-      .pipe(map((response) => response.jobs));
-  }
-
-  /**
-   * Extract unique influencers from the job or collection of jobs
-   * @param jobs
-   */
-  extractInfluencers(jobs: Job | Job[]): string[] {
-    if (!Array.isArray(jobs)) {
-      jobs = [jobs];
-    }
-    const influencers = new Set<string>();
-    for (const job of jobs) {
-      for (const influencer of job.analysis_config.influencers || []) {
-        influencers.add(influencer);
-      }
-    }
-    return Array.from(influencers);
+    return this.mlApi.getJobs$({ jobId: jobIds.join(',') }).pipe(map((response) => response.jobs));
   }
 }

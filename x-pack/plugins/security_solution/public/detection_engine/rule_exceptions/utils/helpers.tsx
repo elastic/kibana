@@ -8,7 +8,7 @@
 import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiText, EuiAvatar } from '@elastic/eui';
-import { capitalize, omit } from 'lodash';
+import { capitalize, get, omit } from 'lodash';
 import type { Moment } from 'moment';
 import moment from 'moment';
 
@@ -20,61 +20,44 @@ import type {
   NamespaceType,
   EntryNested,
   OsTypeArray,
-  ExceptionListType,
   ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
   ExceptionListSchema,
+  EntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { comment, osType } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ListOperatorTypeEnum,
+  ListOperatorEnum,
+  comment,
+  osType,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import type {
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-utils';
-import type { DataViewBase } from '@kbn/es-query';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
 import type { EcsSecurityExtension as Ecs, CodeSignature } from '@kbn/securitysolution-ecs';
+import type { EventSummaryField } from '../../../common/components/event_details/types';
+import { getEventFieldsToDisplay } from '../../../common/components/event_details/get_alert_summary_rows';
 import * as i18n from './translations';
 import type { AlertData, Flattened } from './types';
 
 import { WithCopyToClipboard } from '../../../common/lib/clipboard/with_copy_to_clipboard';
-import exceptionableLinuxFields from './exceptionable_linux_fields.json';
-import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';
-import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
-import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint/exceptions/exceptionable_endpoint_event_fields';
 import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
-
-export const filterIndexPatterns = (
-  patterns: DataViewBase,
-  type: ExceptionListType,
-  osTypes?: OsTypeArray
-): DataViewBase => {
-  switch (type) {
-    case 'endpoint':
-      const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
-        ? (name: string) =>
-            exceptionableLinuxFields.includes(name) || exceptionableEndpointFields.includes(name)
-        : (name: string) =>
-            exceptionableWindowsMacFields.includes(name) ||
-            exceptionableEndpointFields.includes(name);
-
-      return {
-        ...patterns,
-        fields: patterns.fields.filter(({ name }) => osFilterForEndpoint(name)),
-      };
-    case 'endpoint_events':
-      return {
-        ...patterns,
-        fields: patterns.fields.filter(({ name }) =>
-          EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS.includes(name)
-        ),
-      };
-    default:
-      return patterns;
-  }
-};
+import {
+  EVENT_CODE,
+  EVENT_CATEGORY,
+  getKibanaAlertIdField,
+  highlightedFieldsPrefixToExclude,
+  KIBANA_ALERT_RULE_TYPE,
+  AGENT_ID,
+  AGENT_TYPE,
+  KIBANA_ALERT_RULE_UUID,
+  ENDPOINT_ALERT,
+} from './highlighted_fields_config';
 
 /**
  * Formats os value array to a displayable string
@@ -869,4 +852,150 @@ export const enrichSharedExceptions = (
       };
     });
   });
+};
+
+/**
+ * Creates new Rule exception item with passed in entries
+ */
+export const buildRuleExceptionWithConditions = ({
+  name,
+  exceptionEntries,
+}: {
+  name: string;
+  exceptionEntries: EntriesArray;
+}): ExceptionsBuilderExceptionItem => {
+  return {
+    ...getNewExceptionItem({ listId: undefined, namespaceType: 'single', name }),
+    entries: addIdToEntries(exceptionEntries),
+  };
+};
+
+/**
+ Generate exception conditions based on the highlighted fields of the alert that
+ have corresponding values in the alert data.
+ For the initial implementation the nested conditions are not considered
+ Converting a singular value to a string or an array of strings
+ is necessary because the "Match" or "Match any" operators
+ are designed to operate with string value(s).
+ */
+export const buildExceptionEntriesFromAlertFields = ({
+  highlightedFields,
+  alertData,
+}: {
+  highlightedFields: EventSummaryField[];
+  alertData: AlertData;
+}): EntriesArray => {
+  return Object.values(highlightedFields).reduce((acc: EntriesArray, field) => {
+    const fieldKey = field.id;
+    const fieldValue = get(alertData, fieldKey) ?? get(alertData, getKibanaAlertIdField(fieldKey));
+
+    if (fieldValue !== null && fieldValue !== undefined) {
+      const listOperatorType = Array.isArray(fieldValue)
+        ? ListOperatorTypeEnum.MATCH_ANY
+        : ListOperatorTypeEnum.MATCH;
+
+      const fieldValueAsString = Array.isArray(fieldValue)
+        ? fieldValue.map(String)
+        : fieldValue.toString();
+      acc.push({
+        field: fieldKey,
+        operator: ListOperatorEnum.INCLUDED,
+        type: listOperatorType,
+        value: fieldValueAsString,
+      });
+    }
+
+    return acc;
+  }, []);
+};
+/**
+ * Prepopulate the Rule Exception with the highlighted fields from the Alert's Summary.
+ * @param alertData The Alert data object
+ * @param exceptionItemName The name of the Exception Item
+ * @returns A new Rule Exception Item with the highlighted fields as entries,
+ */
+export const getPrepopulatedRuleExceptionWithHighlightFields = ({
+  alertData,
+  exceptionItemName,
+  ruleCustomHighlightedFields,
+}: {
+  alertData: AlertData;
+  exceptionItemName: string;
+  ruleCustomHighlightedFields: string[];
+}): ExceptionsBuilderExceptionItem | null => {
+  const highlightedFields = getAlertHighlightedFields(alertData, ruleCustomHighlightedFields);
+  if (!highlightedFields.length) return null;
+
+  const exceptionEntries = buildExceptionEntriesFromAlertFields({
+    highlightedFields,
+    alertData,
+  });
+  if (!exceptionEntries.length) return null;
+
+  return buildRuleExceptionWithConditions({
+    name: exceptionItemName,
+    exceptionEntries,
+  });
+};
+
+/**
+  Filters out the irrelevant highlighted fields for Rule exceptions using
+  1. The "highlightedFieldsPrefixToExclude" array
+  2. Agent.id field in case the alert was not generated from Endpoint
+  3. Threshold Rule
+*/
+export const filterHighlightedFields = (
+  fields: EventSummaryField[],
+  prefixesToExclude: string[],
+  alertData: AlertData
+): EventSummaryField[] => {
+  return fields.filter(({ id }) => {
+    // Exclude agent.id field only if the agent type was not Endpoint
+    if (id === AGENT_ID) return isAlertFromEndpointEvent(alertData);
+
+    return !prefixesToExclude.some((field: string) => id.startsWith(field));
+  });
+};
+
+/**
+ * Retrieve the highlighted fields from the Alert Summary based on the following Alert properties:
+ * * event.category
+ * * event.code
+ * * kibana.alert.rule.type
+ * * Alert field ids filters
+ * @param alertData The Alert data object
+ */
+export const getAlertHighlightedFields = (
+  alertData: AlertData,
+  ruleCustomHighlightedFields: string[]
+): EventSummaryField[] => {
+  const eventCategory = get(alertData, EVENT_CATEGORY);
+  const eventCode = get(alertData, EVENT_CODE);
+  const eventRuleType = get(alertData, KIBANA_ALERT_RULE_TYPE);
+  const eventCategories = {
+    primaryEventCategory: Array.isArray(eventCategory) ? eventCategory[0] : eventCategory,
+    allEventCategories: [eventCategory],
+  };
+
+  const fieldsToDisplay = getEventFieldsToDisplay({
+    eventCategories,
+    eventCode,
+    eventRuleType,
+    highlightedFieldsOverride: ruleCustomHighlightedFields,
+  });
+  return filterHighlightedFields(fieldsToDisplay, highlightedFieldsPrefixToExclude, alertData);
+};
+
+/**
+ * Checks to see if the given set of Timeline event detail items includes data that indicates its
+ * an endpoint Alert
+ */
+export const isAlertFromEndpointEvent = (alertData: AlertData) => {
+  // Check to see if a timeline event item is an Alert
+  const isTimelineEventItemAnAlert = get(alertData, KIBANA_ALERT_RULE_UUID);
+  if (!isTimelineEventItemAnAlert) return false;
+
+  const agentTypes = get(alertData, AGENT_TYPE);
+  const agentType = Array.isArray(agentTypes) ? agentTypes[0] : agentTypes;
+  return agentType === ENDPOINT_ALERT;
 };

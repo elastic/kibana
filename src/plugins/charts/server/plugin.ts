@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -32,6 +33,7 @@ export class ChartsServerPlugin implements Plugin<object, object> {
         description: i18n.translate('charts.advancedSettings.visualization.colorMappingText', {
           defaultMessage:
             'Maps values to specific colors in charts using the <strong>Compatibility</strong> palette.',
+          values: { strong: (chunks) => `<strong>${chunks}</strong>` },
         }),
         deprecation: {
           message: i18n.translate(
@@ -58,6 +60,16 @@ export class ChartsServerPlugin implements Plugin<object, object> {
               'Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB',
           }
         ),
+        deprecation: {
+          message: i18n.translate(
+            'charts.advancedSettings.visualization.useLegacyTimeAxis.deprecation',
+            {
+              defaultMessage:
+                'This setting is deprecated and will not be supported in a future version.',
+            }
+          ),
+          docLinksKey: 'visualizationSettings',
+        },
         category: ['visualization'],
         schema: schema.boolean(),
       },

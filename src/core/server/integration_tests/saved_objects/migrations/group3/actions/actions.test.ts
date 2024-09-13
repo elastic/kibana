@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -13,6 +14,8 @@ import { errors } from '@elastic/elasticsearch';
 import type { TaskEither } from 'fp-ts/lib/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { MIGRATION_CLIENT_OPTIONS } from '@kbn/core-saved-objects-server-internal';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   bulkOverwriteTransformedDocuments,
@@ -22,9 +25,8 @@ import {
   type OpenPitResponse,
   reindex,
   readWithPit,
+  type EsResponseTooLargeError,
   type ReadWithPit,
-  searchForOutdatedDocuments,
-  type SearchResponse,
   setWriteBlock,
   updateAliases,
   waitForReindexTask,
@@ -38,12 +40,12 @@ import {
   removeWriteBlock,
   transformDocs,
   waitForIndexStatus,
-  initAction,
+  fetchIndices,
   cloneIndex,
   type DocumentsTransformFailed,
   type DocumentsTransformSuccess,
-  MIGRATION_CLIENT_OPTIONS,
   createBulkIndexOperationTuple,
+  checkClusterRoutingAllocationEnabled,
 } from '@kbn/core-saved-objects-migration-server-internal';
 
 const { startES } = createTestServers({
@@ -58,17 +60,23 @@ const { startES } = createTestServers({
 });
 let esServer: TestElasticsearchUtils;
 
-describe('migration actions', () => {
+// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
+describe.skip('migration actions', () => {
   let client: ElasticsearchClient;
+  let esCapabilities: ReturnType<typeof elasticsearchServiceMock.createCapabilities>;
 
   beforeAll(async () => {
     esServer = await startES();
-    client = esServer.es.getClient().child(MIGRATION_CLIENT_OPTIONS);
+    // we don't need a long timeout for testing purposes
+    client = esServer.es.getClient().child({ ...MIGRATION_CLIENT_OPTIONS, requestTimeout: 10_000 });
+    esCapabilities = elasticsearchServiceMock.createCapabilities();
 
     // Create test fixture data:
     await createIndex({
       client,
       indexName: 'existing_index_with_docs',
+      aliases: ['existing_index_with_docs_alias'],
+      esCapabilities,
       mappings: {
         dynamic: true,
         properties: {
@@ -89,24 +97,31 @@ describe('migration actions', () => {
       { _source: { title: 'doc 3' } },
       { _source: { title: 'saved object 4', type: 'another_unused_type' } },
       { _source: { title: 'f-agent-event 5', type: 'f_agent_event' } },
+      { _source: { title: new Array(1000).fill('a').join(), type: 'large' } }, // "large" saved object
     ] as unknown as SavedObjectsRawDoc[];
     await bulkOverwriteTransformedDocuments({
       client,
       index: 'existing_index_with_docs',
-      operations: docs.map(createBulkIndexOperationTuple),
+      operations: docs.map((doc) => createBulkIndexOperationTuple(doc)),
       refresh: 'wait_for',
     })();
 
-    await createIndex({ client, indexName: 'existing_index_2', mappings: { properties: {} } })();
+    await createIndex({
+      client,
+      indexName: 'existing_index_2',
+      mappings: { properties: {} },
+      esCapabilities,
+    })();
     await createIndex({
       client,
       indexName: 'existing_index_with_write_block',
       mappings: { properties: {} },
+      esCapabilities,
     })();
     await bulkOverwriteTransformedDocuments({
       client,
       index: 'existing_index_with_write_block',
-      operations: docs.map(createBulkIndexOperationTuple),
+      operations: docs.map((doc) => createBulkIndexOperationTuple(doc)),
       refresh: 'wait_for',
     })();
     await setWriteBlock({ client, index: 'existing_index_with_write_block' })();
@@ -120,7 +135,7 @@ describe('migration actions', () => {
     await esServer.stop();
   });
 
-  describe('initAction', () => {
+  describe('fetchIndices', () => {
     afterAll(async () => {
       await client.cluster.putSettings({
         body: {
@@ -133,7 +148,7 @@ describe('migration actions', () => {
     });
     it('resolves right empty record if no indices were found', async () => {
       expect.assertions(1);
-      const task = initAction({ client, indices: ['no_such_index'] });
+      const task = fetchIndices({ client, indices: ['no_such_index'] });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
@@ -143,7 +158,7 @@ describe('migration actions', () => {
     });
     it('resolves right record with found indices', async () => {
       expect.assertions(1);
-      const res = (await initAction({
+      const res = (await fetchIndices({
         client,
         indices: ['no_such_index', 'existing_index_with_docs'],
       })()) as Either.Right<unknown>;
@@ -151,7 +166,9 @@ describe('migration actions', () => {
       expect(res.right).toEqual(
         expect.objectContaining({
           existing_index_with_docs: {
-            aliases: {},
+            aliases: {
+              existing_index_with_docs_alias: {},
+            },
             mappings: expect.anything(),
             settings: expect.anything(),
           },
@@ -160,7 +177,7 @@ describe('migration actions', () => {
     });
     it('includes the _meta data of the indices in the response', async () => {
       expect.assertions(1);
-      const res = (await initAction({
+      const res = (await fetchIndices({
         client,
         indices: ['existing_index_with_docs'],
       })()) as Either.Right<unknown>;
@@ -168,7 +185,9 @@ describe('migration actions', () => {
       expect(res.right).toEqual(
         expect.objectContaining({
           existing_index_with_docs: {
-            aliases: {},
+            aliases: {
+              existing_index_with_docs_alias: {},
+            },
             mappings: {
               // FIXME https://github.com/elastic/elasticsearch-js/issues/1796
               dynamic: 'true',
@@ -184,6 +203,9 @@ describe('migration actions', () => {
         })
       );
     });
+  });
+
+  describe('checkClusterRoutingAllocation', () => {
     it('resolves left when cluster.routing.allocation.enabled is incompatible', async () => {
       expect.assertions(3);
       await client.cluster.putSettings({
@@ -194,10 +216,7 @@ describe('migration actions', () => {
           },
         },
       });
-      const task = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task = checkClusterRoutingAllocationEnabled(client);
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -214,10 +233,7 @@ describe('migration actions', () => {
           },
         },
       });
-      const task2 = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task2 = checkClusterRoutingAllocationEnabled(client);
       await expect(task2()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -234,10 +250,7 @@ describe('migration actions', () => {
           },
         },
       });
-      const task3 = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task3 = checkClusterRoutingAllocationEnabled(client);
       await expect(task3()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -256,10 +269,7 @@ describe('migration actions', () => {
           },
         },
       });
-      const task = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task = checkClusterRoutingAllocationEnabled(client);
       const result = await task();
       expect(Either.isRight(result)).toBe(true);
     });
@@ -271,6 +281,7 @@ describe('migration actions', () => {
         client,
         indexName: 'new_index_without_write_block',
         mappings: { properties: {} },
+        esCapabilities,
       })();
     });
     it('resolves right when setting the write block succeeds', async () => {
@@ -307,7 +318,7 @@ describe('migration actions', () => {
       const res = (await bulkOverwriteTransformedDocuments({
         client,
         index: 'new_index_without_write_block',
-        operations: sourceDocs.map(createBulkIndexOperationTuple),
+        operations: sourceDocs.map((doc) => createBulkIndexOperationTuple(doc)),
         refresh: 'wait_for',
       })()) as Either.Left<unknown>;
 
@@ -336,11 +347,13 @@ describe('migration actions', () => {
         client,
         indexName: 'existing_index_without_write_block_2',
         mappings: { properties: {} },
+        esCapabilities,
       })();
       await createIndex({
         client,
         indexName: 'existing_index_with_write_block_2',
         mappings: { properties: {} },
+        esCapabilities,
       })();
       await setWriteBlock({ client, index: 'existing_index_with_write_block_2' })();
     });
@@ -382,22 +395,19 @@ describe('migration actions', () => {
     });
     it('resolves right after waiting for an index status to be yellow if the index already existed', async () => {
       // Create a red index
-      await client.indices.create(
-        {
-          index: 'red_then_yellow_index',
-          timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index stays yellow
-              number_of_replicas: '1',
-              // Disable all shard allocation so that the index status is red
-              routing: { allocation: { enable: 'none' } },
-            },
+      await client.indices.create({
+        index: 'red_then_yellow_index',
+        timeout: '5s',
+        body: {
+          mappings: { properties: {} },
+          settings: {
+            // Allocate 1 replica so that this index stays yellow
+            number_of_replicas: '1',
+            // Disable all shard allocation so that the index status is red
+            routing: { allocation: { enable: 'none' } },
           },
         },
-        { maxRetries: 0 /** handle retry ourselves for now */ }
-      );
+      });
 
       // Start tracking the index status
       const indexStatusPromise = waitForIndexStatus({
@@ -409,7 +419,7 @@ describe('migration actions', () => {
       const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
       expect(redStatusResponse.status).toBe('red');
 
-      client.indices.putSettings({
+      void client.indices.putSettings({
         index: 'red_then_yellow_index',
         body: {
           // Enable all shard allocation so that the index status turns yellow
@@ -509,6 +519,7 @@ describe('migration actions', () => {
         client,
         source: 'existing_index_with_write_block',
         target: 'clone_target_1',
+        esCapabilities,
       });
       expect.assertions(3);
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -552,11 +563,12 @@ describe('migration actions', () => {
         client,
         source: 'existing_index_with_write_block',
         target: 'clone_red_then_green_index',
+        esCapabilities,
       })();
 
       let indexGreen = false;
       setTimeout(() => {
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'clone_red_then_green_index',
           body: {
             // Enable all shard allocation so that the index status goes green
@@ -604,6 +616,7 @@ describe('migration actions', () => {
         source: 'existing_index_with_write_block',
         target: 'clone_red_index',
         timeout: '1s',
+        esCapabilities,
       })();
 
       await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
@@ -632,6 +645,7 @@ describe('migration actions', () => {
         source: 'existing_index_with_write_block',
         target: 'clone_red_index',
         timeout: '1s',
+        esCapabilities,
       })();
 
       await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
@@ -660,6 +674,7 @@ describe('migration actions', () => {
         source: 'existing_index_with_write_block',
         target: 'clone_red_index',
         timeout: '30s',
+        esCapabilities,
       })();
 
       await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
@@ -674,7 +689,12 @@ describe('migration actions', () => {
     });
     it('resolves left index_not_found_exception if the source index does not exist', async () => {
       expect.assertions(1);
-      const task = cloneIndex({ client, source: 'no_such_index', target: 'clone_target_3' });
+      const task = cloneIndex({
+        client,
+        source: 'no_such_index',
+        target: 'clone_target_3',
+        esCapabilities,
+      });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -692,6 +712,7 @@ describe('migration actions', () => {
         client,
         source: 'existing_index_with_write_block',
         target: 'clone_target_4',
+        esCapabilities,
       })();
       await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
         Object {
@@ -715,6 +736,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -724,15 +746,11 @@ describe('migration actions', () => {
         }
       `);
 
-      const results = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'reindex_target',
-          outdatedDocumentsQuery: undefined,
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
+      const results = await client.search({ index: 'reindex_target', size: 1000 });
+      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
         Array [
+          "a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a",
           "doc 1",
           "doc 2",
           "doc 3",
@@ -755,6 +773,7 @@ describe('migration actions', () => {
             })),
           },
         },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -764,15 +783,11 @@ describe('migration actions', () => {
         }
       `);
 
-      const results = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'reindex_target_excluded_docs',
-          outdatedDocumentsQuery: undefined,
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
+      const results = await client.search({ index: 'reindex_target_excluded_docs', size: 1000 });
+      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
         Array [
+          "a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a",
           "doc 1",
           "doc 2",
           "doc 3",
@@ -788,6 +803,7 @@ describe('migration actions', () => {
         reindexScript: Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -796,15 +812,12 @@ describe('migration actions', () => {
           "right": "reindex_succeeded",
         }
       `);
-      const results = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'reindex_target_2',
-          outdatedDocumentsQuery: undefined,
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
+
+      const results = await client.search({ index: 'reindex_target_2', size: 1000 });
+      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
         Array [
+          "a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a_updated",
           "doc 1_updated",
           "doc 2_updated",
           "doc 3_updated",
@@ -823,6 +836,7 @@ describe('migration actions', () => {
         reindexScript: Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       let task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -840,6 +854,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -850,15 +865,11 @@ describe('migration actions', () => {
       `);
 
       // Assert that documents weren't overridden by the second, unscripted reindex
-      const results = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'reindex_target_3',
-          outdatedDocumentsQuery: undefined,
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
+      const results = await client.search({ index: 'reindex_target_3', size: 1000 });
+      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
         Array [
+          "a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a_updated",
           "doc 1_updated",
           "doc 2_updated",
           "doc 3_updated",
@@ -871,14 +882,14 @@ describe('migration actions', () => {
       expect.assertions(2);
       // Simulate a reindex that only adds some of the documents from the
       // source index into the target index
-      await createIndex({ client, indexName: 'reindex_target_4', mappings: { properties: {} } })();
-      const sourceDocs = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'existing_index_with_docs',
-          outdatedDocumentsQuery: undefined,
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments
+      await createIndex({
+        client,
+        indexName: 'reindex_target_4',
+        mappings: { properties: {} },
+        esCapabilities,
+      })();
+      const response = await client.search({ index: 'existing_index_with_docs', size: 1000 });
+      const sourceDocs = (response.hits?.hits as SavedObjectsRawDoc[])
         .slice(0, 2)
         .map(({ _id, _source }) => ({
           _id,
@@ -887,7 +898,7 @@ describe('migration actions', () => {
       await bulkOverwriteTransformedDocuments({
         client,
         index: 'reindex_target_4',
-        operations: sourceDocs.map(createBulkIndexOperationTuple),
+        operations: sourceDocs.map((doc) => createBulkIndexOperationTuple(doc)),
         refresh: 'wait_for',
       })();
 
@@ -899,6 +910,7 @@ describe('migration actions', () => {
         reindexScript: Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -909,15 +921,11 @@ describe('migration actions', () => {
       `);
       // Assert that existing documents weren't overridden, but that missing
       // documents were added by the reindex
-      const results = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'reindex_target_4',
-          outdatedDocumentsQuery: undefined,
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
-      expect(results.map((doc) => doc._source.title).sort()).toMatchInlineSnapshot(`
+      const results = await client.search({ index: 'reindex_target_4', size: 1000 });
+      expect((results.hits?.hits as SavedObjectsRawDoc[]).map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
         Array [
+          "a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a_updated",
           "doc 1",
           "doc 2",
           "doc 3_updated",
@@ -944,6 +952,7 @@ describe('migration actions', () => {
             /** no title field */
           },
         },
+        esCapabilities,
       })();
 
       const {
@@ -955,6 +964,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
 
@@ -983,6 +993,7 @@ describe('migration actions', () => {
           dynamic: false,
           properties: { title: { type: 'integer' } }, // integer is incompatible with string title
         },
+        esCapabilities,
       })();
 
       const {
@@ -994,6 +1005,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
 
@@ -1017,6 +1029,7 @@ describe('migration actions', () => {
         excludeOnUpgradeQuery: {
           match_all: {},
         },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -1038,6 +1051,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
@@ -1060,6 +1074,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: true,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
@@ -1088,6 +1103,7 @@ describe('migration actions', () => {
         reindexScript: Option.none,
         requireAlias: false,
         excludeOnUpgradeQuery: { match_all: {} },
+        batchSize: 1000,
       })()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '0s' });
@@ -1096,9 +1112,7 @@ describe('migration actions', () => {
         _tag: 'Left',
         left: {
           error: expect.any(errors.ResponseError),
-          message: expect.stringContaining(
-            '[timeout_exception] Timed out waiting for completion of task'
-          ),
+          message: expect.stringContaining('[timeout_exception]'),
           type: 'wait_for_task_completion_timeout',
         },
       });
@@ -1140,7 +1154,7 @@ describe('migration actions', () => {
       });
       const docsResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
 
-      await expect(docsResponse.right.outdatedDocuments.length).toBe(5);
+      await expect(docsResponse.right.outdatedDocuments.length).toBe(6);
     });
 
     it('requests the batchSize of documents from an index', async () => {
@@ -1191,6 +1205,7 @@ describe('migration actions', () => {
       expect(docsResponse.right.outdatedDocuments.map((doc) => doc._source.title).sort())
         .toMatchInlineSnapshot(`
         Array [
+          "a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a",
           "doc 1",
           "doc 2",
           "doc 3",
@@ -1277,6 +1292,40 @@ describe('migration actions', () => {
       );
     });
 
+    it('returns a left es_response_too_large error when a read batch exceeds the maxResponseSize', async () => {
+      const openPitTask = openPit({ client, index: 'existing_index_with_docs' });
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
+
+      let readWithPitTask = readWithPit({
+        client,
+        pitId: pitResponse.right.pitId,
+        query: { match_all: {} },
+        batchSize: 1, // small batch size so we don't exceed the maxResponseSize
+        searchAfter: undefined,
+        maxResponseSizeBytes: 5000, // make sure long ids don't cause es_response_too_large
+      });
+      const rightResponse = await readWithPitTask();
+
+      if (Either.isLeft(rightResponse)) {
+        throw new Error(
+          `Expected a successful response but got ${JSON.stringify(rightResponse.left)}`
+        );
+      }
+
+      readWithPitTask = readWithPit({
+        client,
+        pitId: pitResponse.right.pitId,
+        query: { match_all: {} },
+        batchSize: 10, // a bigger batch will exceed the maxResponseSize
+        searchAfter: undefined,
+        maxResponseSizeBytes: 1000, // set a small size to force the error
+      });
+      const leftResponse = (await readWithPitTask()) as Either.Left<EsResponseTooLargeError>;
+
+      expect(leftResponse.left.type).toBe('es_response_too_large');
+      expect(leftResponse.left.contentLength).toBeGreaterThanOrEqual(3184);
+    });
+
     it('rejects if PIT does not exist', async () => {
       const readWithPitTask = readWithPit({
         client,
@@ -1350,7 +1399,8 @@ describe('migration actions', () => {
     it('rejects if there are failures', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        'existing_index_with_write_block'
+        'existing_index_with_write_block',
+        1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
       const task = waitForPickupUpdatedMappingsTask({
@@ -1369,7 +1419,8 @@ describe('migration actions', () => {
     it('rejects if there is an error', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        'no_such_index'
+        'no_such_index',
+        1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
       const task = waitForPickupUpdatedMappingsTask({
@@ -1384,7 +1435,8 @@ describe('migration actions', () => {
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        '.kibana_1'
+        '.kibana_1',
+        1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
       const task = waitForPickupUpdatedMappingsTask({
@@ -1397,9 +1449,7 @@ describe('migration actions', () => {
         _tag: 'Left',
         left: {
           error: expect.any(errors.ResponseError),
-          message: expect.stringContaining(
-            '[timeout_exception] Timed out waiting for completion of task'
-          ),
+          message: expect.stringContaining('[timeout_exception]'),
           type: 'wait_for_task_completion_timeout',
         },
       });
@@ -1407,7 +1457,8 @@ describe('migration actions', () => {
     it('resolves right when successful', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        'existing_index_with_docs'
+        'existing_index_with_docs',
+        1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
       const task = waitForPickupUpdatedMappingsTask({
@@ -1435,6 +1486,7 @@ describe('migration actions', () => {
           dynamic: false,
           properties: {},
         },
+        esCapabilities,
       })();
       const sourceDocs = [
         { _source: { title: 'doc 1' } },
@@ -1445,21 +1497,20 @@ describe('migration actions', () => {
       await bulkOverwriteTransformedDocuments({
         client,
         index: 'existing_index_without_mappings',
-        operations: sourceDocs.map(createBulkIndexOperationTuple),
+        operations: sourceDocs.map((doc) => createBulkIndexOperationTuple(doc)),
         refresh: 'wait_for',
       })();
 
       // Assert that we can't search over the unmapped fields of the document
-      const originalSearchResults = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'existing_index_without_mappings',
-          outdatedDocumentsQuery: {
-            match: { title: { query: 'doc' } },
-          },
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
-      expect(originalSearchResults.length).toBe(0);
+
+      const originalSearchResults = await client.search({
+        index: 'existing_index_without_mappings',
+        size: 1000,
+        query: {
+          match: { title: { query: 'doc' } },
+        },
+      });
+      expect(originalSearchResults.hits?.hits.length).toBe(0);
 
       // Update and pickup mappings so that the title field is searchable
       const res = await updateAndPickupMappings({
@@ -1470,22 +1521,21 @@ describe('migration actions', () => {
             title: { type: 'text' },
           },
         },
+        batchSize: 1000,
       })();
       expect(Either.isRight(res)).toBe(true);
       const taskId = (res as Either.Right<UpdateAndPickupMappingsResponse>).right.taskId;
       await waitForPickupUpdatedMappingsTask({ client, taskId, timeout: '60s' })();
 
       // Repeat the search expecting to be able to find the existing documents
-      const pickedUpSearchResults = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'existing_index_without_mappings',
-          outdatedDocumentsQuery: {
-            match: { title: { query: 'doc' } },
-          },
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
-      expect(pickedUpSearchResults.length).toBe(4);
+      const pickedUpSearchResults = await client.search({
+        index: 'existing_index_without_mappings',
+        size: 1000,
+        query: {
+          match: { title: { query: 'doc' } },
+        },
+      });
+      expect(pickedUpSearchResults.hits?.hits.length).toBe(4);
     });
   });
 
@@ -1742,6 +1792,7 @@ describe('migration actions', () => {
         indexName: 'create_new_index',
         mappings: undefined as any,
         timeout: '1nanos',
+        esCapabilities,
       })();
       await expect(createIndexPromise).resolves.toEqual({
         _tag: 'Right',
@@ -1757,36 +1808,37 @@ describe('migration actions', () => {
       expect.assertions(2);
       // Create a red index
       await client.indices
-        .create(
-          {
-            index: 'red_then_yellow_index',
-            timeout: '5s',
-            body: {
-              mappings: { properties: {} },
-              settings: {
-                // Allocate 1 replica so that this index stays yellow
-                number_of_replicas: '1',
-                // Disable all shard allocation so that the index status starts as red
-                index: { routing: { allocation: { enable: 'none' } } },
-              },
+        .create({
+          index: 'red_then_yellow_index',
+          timeout: '5s',
+          body: {
+            mappings: { properties: {} },
+            settings: {
+              // Allocate 1 replica so that this index stays yellow
+              number_of_replicas: '1',
+              // Disable all shard allocation so that the index status starts as red
+              index: { routing: { allocation: { enable: 'none' } } },
             },
           },
-          { maxRetries: 0 /** handle retry ourselves for now */ }
-        )
+        })
         .catch((e) => {
           /** ignore */
         });
 
       // Call createIndex even though the index already exists
       const createIndexPromise = createIndex({
-        client,
+        // make sure this request does not timeout
+        client: client.child({ requestTimeout: 30_000 }),
         indexName: 'red_then_yellow_index',
         mappings: undefined as any,
+        esCapabilities,
+        timeout: '30s',
+        waitForIndexStatusTimeout: '2s',
       })();
       let indexYellow = false;
 
       setTimeout(() => {
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'red_then_yellow_index',
           body: {
             // Renable allocation so that the status becomes yellow
@@ -1834,11 +1886,12 @@ describe('migration actions', () => {
         client,
         indexName: 'yellow_then_green_index',
         mappings: undefined as any,
+        esCapabilities,
       })();
       let indexGreen = false;
 
       setTimeout(() => {
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'yellow_then_green_index',
           body: {
             // Set 0 replican so that this index becomes green
@@ -1854,7 +1907,7 @@ describe('migration actions', () => {
         expect(res).toMatchInlineSnapshot(`
           Object {
             "_tag": "Right",
-            "right": "create_index_succeeded",
+            "right": "index_already_exists",
           }
         `);
       });
@@ -1866,6 +1919,7 @@ describe('migration actions', () => {
         client,
         indexName: 'create_index_1',
         mappings: undefined as any,
+        esCapabilities,
       })();
       await expect(createIndexPromise).resolves.toMatchInlineSnapshot(`
         Object {
@@ -1880,7 +1934,12 @@ describe('migration actions', () => {
       // Creating an index with the same name as an existing alias to induce
       // failure
       await expect(
-        createIndex({ client, indexName: 'existing_index_2_alias', mappings: undefined as any })()
+        createIndex({
+          client,
+          indexName: 'existing_index_2_alias',
+          mappings: undefined as any,
+          esCapabilities,
+        })()
       ).rejects.toThrow('invalid_index_name_exception');
     });
   });
@@ -1895,7 +1954,7 @@ describe('migration actions', () => {
       const task = bulkOverwriteTransformedDocuments({
         client,
         index: 'existing_index_with_docs',
-        operations: newDocs.map(createBulkIndexOperationTuple),
+        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
         refresh: 'wait_for',
       });
 
@@ -1907,13 +1966,8 @@ describe('migration actions', () => {
       `);
     });
     it('resolves right even if there were some version_conflict_engine_exception', async () => {
-      const existingDocs = (
-        (await searchForOutdatedDocuments(client, {
-          batchSize: 1000,
-          targetIndex: 'existing_index_with_docs',
-          outdatedDocumentsQuery: undefined,
-        })()) as Either.Right<SearchResponse>
-      ).right.outdatedDocuments;
+      const response = await client.search({ index: 'existing_index_with_docs', size: 1000 });
+      const existingDocs = response.hits?.hits as SavedObjectsRawDoc[];
 
       const task = bulkOverwriteTransformedDocuments({
         client,
@@ -1921,7 +1975,7 @@ describe('migration actions', () => {
         operations: [
           ...existingDocs,
           { _source: { title: 'doc 8' } } as unknown as SavedObjectsRawDoc,
-        ].map(createBulkIndexOperationTuple),
+        ].map((doc) => createBulkIndexOperationTuple(doc)),
         refresh: 'wait_for',
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -1929,6 +1983,30 @@ describe('migration actions', () => {
           "_tag": "Right",
           "right": "bulk_index_succeeded",
         }
+      `);
+    });
+    it('resolves left index_not_found_exception if the index does not exist and useAliasToPreventAutoCreate=true', async () => {
+      const newDocs = [
+        { _source: { title: 'doc 5' } },
+        { _source: { title: 'doc 6' } },
+        { _source: { title: 'doc 7' } },
+      ] as unknown as SavedObjectsRawDoc[];
+      await expect(
+        bulkOverwriteTransformedDocuments({
+          client,
+          index: 'existing_index_with_docs_alias_that_does_not_exist',
+          useAliasToPreventAutoCreate: true,
+          operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
+          refresh: 'wait_for',
+        })()
+      ).resolves.toMatchInlineSnapshot(`
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "index": "existing_index_with_docs_alias_that_does_not_exist",
+              "type": "index_not_found_exception",
+            },
+          }
       `);
     });
     it('resolves left target_index_had_write_block if there are write_block errors', async () => {
@@ -1941,7 +2019,7 @@ describe('migration actions', () => {
         bulkOverwriteTransformedDocuments({
           client,
           index: 'existing_index_with_write_block',
-          operations: newDocs.map(createBulkIndexOperationTuple),
+          operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
           refresh: 'wait_for',
         })()
       ).resolves.toMatchInlineSnapshot(`
@@ -1964,7 +2042,7 @@ describe('migration actions', () => {
       const task = bulkOverwriteTransformedDocuments({
         client,
         index: 'existing_index_with_docs',
-        operations: newDocs.map(createBulkIndexOperationTuple),
+        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {

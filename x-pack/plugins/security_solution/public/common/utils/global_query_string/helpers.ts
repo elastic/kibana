@@ -17,6 +17,7 @@ import { SecurityPageName } from '../../../app/types';
 export const isDetectionsPages = (pageName: string) =>
   pageName === SecurityPageName.alerts ||
   pageName === SecurityPageName.rules ||
+  pageName === SecurityPageName.rulesAdd ||
   pageName === SecurityPageName.rulesCreate ||
   pageName === SecurityPageName.exceptions;
 
@@ -32,6 +33,17 @@ export const getParamFromQueryString = (
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
+export const getObjectFromQueryString = <State extends RisonValue>(
+  urlParamKey: string,
+  search?: string
+) => {
+  const rawParamValue = getParamFromQueryString(
+    getQueryStringFromLocation(search ?? window.location.search),
+    urlParamKey
+  );
+  return safeDecode(rawParamValue ?? '') as State | null;
+};
+
 /**
  *
  * Gets the value of the URL param from the query string.
@@ -43,15 +55,10 @@ export const useGetInitialUrlParamValue = <State extends RisonValue>(
 ): (() => State | null) => {
   // window.location.search provides the most updated representation of the url search.
   // It also guarantees that we don't overwrite URL param managed outside react-router.
-  const getInitialUrlParamValue = useCallback((): State | null => {
-    const rawParamValue = getParamFromQueryString(
-      getQueryStringFromLocation(window.location.search),
-      urlParamKey
-    );
-    const paramValue = safeDecode(rawParamValue ?? '') as State | null;
-
-    return paramValue;
-  }, [urlParamKey]);
+  const getInitialUrlParamValue = useCallback(
+    (): State | null => getObjectFromQueryString(urlParamKey),
+    [urlParamKey]
+  );
 
   return getInitialUrlParamValue;
 };
@@ -95,4 +102,11 @@ export const useReplaceUrlParams = (): ((params: Record<string, RisonValue | nul
     [history]
   );
   return replaceUrlParams;
+};
+
+export const createHistoryEntry = () => {
+  // NOTE: This is a workaround to make sure that new history entry is created as a result of the user action.
+  // This is needed because of the way global url state is handled in the security app.
+  // (it defaults to replace the url params instead of pushing new history entry)
+  window.history.pushState({}, '', window.location.href);
 };

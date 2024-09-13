@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component, RefObject } from 'react';
 import { Subscription } from 'rxjs';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { IContainer, PanelState, EmbeddableChildPanel } from '../..';
-import { EmbeddableStart } from '../../../plugin';
+
+import { IContainer, PanelState } from '../..';
+import { EmbeddablePanel } from '../../../embeddable_panel';
 
 interface Props {
   container: IContainer;
-  panelComponent: EmbeddableStart['EmbeddablePanel'];
 }
 
 interface State {
@@ -85,10 +86,10 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
     const list = Object.values(this.state.panels).map((panelState) => {
       const item = (
         <EuiFlexItem key={panelState.explicitInput.id}>
-          <EmbeddableChildPanel
-            container={this.props.container}
-            embeddableId={panelState.explicitInput.id}
-            PanelComponent={this.props.panelComponent}
+          <EmbeddablePanel
+            embeddable={() =>
+              this.props.container.untilEmbeddableLoaded(panelState.explicitInput.id)
+            }
           />
         </EuiFlexItem>
       );

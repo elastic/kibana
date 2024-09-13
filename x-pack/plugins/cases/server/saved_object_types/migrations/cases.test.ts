@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { CaseAttributes, ExternalService } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
 import type { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import type { CaseAttributes, CaseFullExternalService } from '../../../common/api';
-import { CaseSeverity, CaseStatuses, ConnectorTypes, NONE_CONNECTOR_ID } from '../../../common/api';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_SAVED_OBJECT, NONE_CONNECTOR_ID } from '../../../common/constants';
+import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
 import { getNoneCaseConnector } from '../../common/utils';
-import { ESCaseSeverity, ESCaseStatus } from '../../services/cases/types';
 import type { ESCaseConnectorWithId } from '../../services/test_utils';
 import { createExternalService } from '../../services/test_utils';
 import {
@@ -29,7 +29,7 @@ import {
 const create_7_14_0_case = ({
   connector,
   externalService,
-}: { connector?: ESCaseConnectorWithId; externalService?: CaseFullExternalService } = {}) => ({
+}: { connector?: ESCaseConnectorWithId; externalService?: ExternalService | null } = {}) => ({
   type: CASE_SAVED_OBJECT,
   id: '1',
   attributes: {
@@ -585,10 +585,10 @@ describe('case migrations', () => {
 
   describe('update severity', () => {
     it.each([
-      [CaseSeverity.LOW, ESCaseSeverity.LOW],
-      [CaseSeverity.MEDIUM, ESCaseSeverity.MEDIUM],
-      [CaseSeverity.HIGH, ESCaseSeverity.HIGH],
-      [CaseSeverity.CRITICAL, ESCaseSeverity.CRITICAL],
+      [CaseSeverity.LOW, CasePersistedSeverity.LOW],
+      [CaseSeverity.MEDIUM, CasePersistedSeverity.MEDIUM],
+      [CaseSeverity.HIGH, CasePersistedSeverity.HIGH],
+      [CaseSeverity.CRITICAL, CasePersistedSeverity.CRITICAL],
     ])(
       'migrates "%s" severity keyword value to matching short',
       (oldSeverityValue, expectedSeverityValue) => {
@@ -624,7 +624,7 @@ describe('case migrations', () => {
         ...doc,
         attributes: {
           ...doc.attributes,
-          severity: ESCaseSeverity.LOW,
+          severity: CasePersistedSeverity.LOW,
         },
         references: [],
       });
@@ -633,9 +633,9 @@ describe('case migrations', () => {
 
   describe('update status', () => {
     it.each([
-      [CaseStatuses.open, ESCaseStatus.OPEN],
-      [CaseStatuses['in-progress'], ESCaseStatus.IN_PROGRESS],
-      [CaseStatuses.closed, ESCaseStatus.CLOSED],
+      [CaseStatuses.open, CasePersistedStatus.OPEN],
+      [CaseStatuses['in-progress'], CasePersistedStatus.IN_PROGRESS],
+      [CaseStatuses.closed, CasePersistedStatus.CLOSED],
     ])(
       'migrates "%s" status keyword value to matching short',
       (oldStatusValue, expectedStatusValue) => {
@@ -671,7 +671,7 @@ describe('case migrations', () => {
         ...doc,
         attributes: {
           ...doc.attributes,
-          status: ESCaseStatus.OPEN,
+          status: CasePersistedStatus.OPEN,
         },
         references: [],
       });

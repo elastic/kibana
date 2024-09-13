@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Observable } from 'rxjs';
-import { ScopedHistory, Capabilities } from '@kbn/core/public';
+import { ScopedHistory, Capabilities, ThemeServiceStart } from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ChromeBreadcrumb, CoreTheme } from '@kbn/core/public';
+import type { CardsNavigationComponentProps } from '@kbn/management-cards-navigation';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
 
@@ -27,8 +29,13 @@ export interface DefinedSections {
   stack: ManagementSection;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ManagementStart {}
+export interface ManagementStart {
+  setupCardsNavigation: ({
+    enabled,
+    hideLinksTo,
+    extendCardNavDefinitions,
+  }: NavigationCardsSubject) => void;
+}
 
 export interface ManagementSectionsStartPrivate {
   getSectionsEnabled: () => ManagementSection[];
@@ -64,6 +71,8 @@ export interface ManagementAppMountParams {
   element: HTMLElement; // element the section should render into
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   history: ScopedHistory;
+  theme: ThemeServiceStart;
+  /** @deprecated - use `theme` **/
   theme$: Observable<CoreTheme>;
 }
 
@@ -74,6 +83,25 @@ export interface CreateManagementItemArgs {
   order?: number;
   euiIconType?: string; // takes precedence over `icon` property.
   icon?: string; // URL to image file; fallback if no `euiIconType`
+  hideFromSidebar?: boolean;
   capabilitiesId?: string; // overrides app id
   redirectFrom?: string; // redirects from an old app id to the current app id
+}
+
+export interface NavigationCardsSubject extends Pick<CardsNavigationComponentProps, 'hideLinksTo'> {
+  enabled: boolean;
+  extendCardNavDefinitions?: CardsNavigationComponentProps['extendedCardNavigationDefinitions'];
+}
+
+export interface AppDependencies {
+  appBasePath: string;
+  kibanaVersion: string;
+  sections: ManagementSection[];
+  cardsNavigationConfig?: NavigationCardsSubject;
+}
+
+export interface ConfigSchema {
+  deeplinks: {
+    navLinkStatus: 'default' | 'visible';
+  };
 }

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RouteAccess } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsUpdateOptions } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
@@ -22,16 +24,23 @@ interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
+  access: RouteAccess;
 }
 
 export const registerUpdateRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger, access }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.put(
     {
       path: '/{type}/{id}',
+      options: {
+        summary: `Update a saved object`,
+        tags: ['oas-tag:saved objects'],
+        access,
+        deprecated: true,
+      },
       validate: {
         params: schema.object({
           type: schema.string(),
@@ -53,25 +62,30 @@ export const registerUpdateRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'get',
         path: '/api/saved_objects/{type}/{id}',
-        req,
+        request,
         logger,
       });
-      const { type, id } = req.params;
-      const { attributes, version, references, upsert } = req.body;
-      const options: SavedObjectsUpdateOptions = { version, references, upsert };
+      const { type, id } = request.params;
+      const { attributes, version, references, upsert } = request.body;
+      const options: SavedObjectsUpdateOptions = {
+        version,
+        references,
+        upsert,
+        migrationVersionCompatibility: 'raw' as const,
+      };
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsUpdate({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsUpdate({ request, types: [type] }).catch(() => {});
       const { savedObjects } = await context.core;
       if (!allowHttpApiAccess) {
         throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
       }
       const result = await savedObjects.client.update(type, id, attributes, options);
-      return res.ok({ body: result });
+      return response.ok({ body: result });
     })
   );
 };

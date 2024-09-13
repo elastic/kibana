@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as t from 'io-ts';
 import { either, isRight } from 'fp-ts/lib/Either';
-import { difference, isPlainObject, forEach } from 'lodash';
+import { difference, isPlainObject, forEach, isArray, castArray } from 'lodash';
 import { MergeType } from '../merge_rt';
 
 /*
@@ -23,7 +24,9 @@ type ParsableType =
   | t.ExactType<ParsableType>
   | t.InterfaceType<any>
   | MergeType<any, any>
-  | t.DictionaryType<any, any>;
+  | t.DictionaryType<any, any>
+  | t.ArrayType<any, any>
+  | t.AnyType;
 
 const tags = [
   'DictionaryType',
@@ -33,6 +36,8 @@ const tags = [
   'PartialType',
   'ExactType',
   'UnionType',
+  'ArrayType',
+  'AnyType',
 ];
 
 function isParsableType(type: t.Mixed): type is ParsableType {
@@ -45,6 +50,12 @@ function getHandlingTypes(type: t.Mixed, key: string, value: object): t.Mixed[] 
   }
 
   switch (type._tag) {
+    case 'AnyType':
+      return [type];
+
+    case 'ArrayType':
+      return [type.type];
+
     case 'DictionaryType':
       return [type.codomain];
 
@@ -90,11 +101,31 @@ function getHandledKeys<T extends Record<string, unknown>>(
       keys.handled.add(ownPrefix);
     }
 
+    const processObject = (typeForObject: t.Mixed, objectToProcess: Record<string, unknown>) => {
+      const nextKeys = getHandledKeys(typeForObject, objectToProcess, ownPrefix);
+      nextKeys.all.forEach((k) => keys.all.add(k));
+      nextKeys.handled.forEach((k) => keys.handled.add(k));
+    };
+
     if (isPlainObject(value)) {
-      handlingTypes.forEach((i) => {
-        const nextKeys = getHandledKeys(i, value as Record<string, unknown>, ownPrefix);
-        nextKeys.all.forEach((k) => keys.all.add(k));
-        nextKeys.handled.forEach((k) => keys.handled.add(k));
+      handlingTypes.forEach((typeAtIndex) => {
+        processObject(typeAtIndex, value as Record<string, unknown>);
+      });
+    }
+
+    if (isArray(value)) {
+      handlingTypes.forEach((typeAtIndex) => {
+        if (!isParsableType(typeAtIndex) || typeAtIndex._tag !== 'ArrayType') {
+          return;
+        }
+
+        const innerType = typeAtIndex.type;
+
+        castArray(value).forEach((valueAtIndex) => {
+          if (isPlainObject(valueAtIndex)) {
+            processObject(innerType, valueAtIndex as Record<string, unknown>);
+          }
+        });
       });
     }
   });

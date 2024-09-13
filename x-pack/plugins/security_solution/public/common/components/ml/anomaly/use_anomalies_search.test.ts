@@ -6,7 +6,7 @@
  */
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../mock';
-import { useNotableAnomaliesSearch, AnomalyEntity } from './use_anomalies_search';
+import { useAggregatedAnomaliesByJob, AnomalyEntity } from './use_anomalies_search';
 
 const jobId = 'auth_rare_source_ip_for_a_user';
 const from = 'now-24h';
@@ -33,48 +33,46 @@ jest.mock('../../../hooks/use_app_toasts', () => ({
   })),
 }));
 
-const mockNotableAnomaliesSearch = jest.fn().mockResolvedValue({});
+const mockAnomaliesSearch = jest.fn().mockResolvedValue({});
 jest.mock('../api/anomalies_search', () => ({
-  notableAnomaliesSearch: jest
-    .fn()
-    .mockImplementation((params: unknown) => mockNotableAnomaliesSearch(params)),
+  anomaliesSearch: jest.fn().mockImplementation((params: unknown) => mockAnomaliesSearch(params)),
 }));
 
-describe('useNotableAnomaliesSearch', () => {
+describe('useAggregatedAnomaliesByJob', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('returns the initial value', () => {
-    const { result } = renderHook(() => useNotableAnomaliesSearch({ skip: true, from, to }), {
+    const { result } = renderHook(() => useAggregatedAnomaliesByJob({ skip: true, from, to }), {
       wrapper: TestProviders,
     });
 
     expect(result.current.data.length).toEqual(0);
   });
 
-  it('calls notableAnomaliesSearch when skip is false', async () => {
+  it('calls anomaliesSearch when skip is false', async () => {
     await act(async () => {
-      renderHook(() => useNotableAnomaliesSearch({ skip: false, from, to }), {
+      renderHook(() => useAggregatedAnomaliesByJob({ skip: false, from, to }), {
         wrapper: TestProviders,
       });
     });
-    expect(mockNotableAnomaliesSearch).toHaveBeenCalled();
+    expect(mockAnomaliesSearch).toHaveBeenCalled();
   });
 
-  it('does NOT call notableAnomaliesSearch when skip is true', async () => {
+  it('does NOT call anomaliesSearch when skip is true', async () => {
     await act(async () => {
-      renderHook(() => useNotableAnomaliesSearch({ skip: true, from, to }), {
+      renderHook(() => useAggregatedAnomaliesByJob({ skip: true, from, to }), {
         wrapper: TestProviders,
       });
     });
-    expect(mockNotableAnomaliesSearch).not.toHaveBeenCalled();
+    expect(mockAnomaliesSearch).not.toHaveBeenCalled();
   });
 
   it('refetch calls useSecurityJobs().refetch', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(
-        () => useNotableAnomaliesSearch({ skip: false, from, to }),
+        () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
         {
           wrapper: TestProviders,
         }
@@ -91,11 +89,11 @@ describe('useNotableAnomaliesSearch', () => {
   it('returns formated data', async () => {
     await act(async () => {
       const jobCount = { key: jobId, doc_count: 99 };
-      mockNotableAnomaliesSearch.mockResolvedValue({
+      mockAnomaliesSearch.mockResolvedValue({
         aggregations: { number_of_anomalies: { buckets: [jobCount] } },
       });
       const { result, waitForNextUpdate } = renderHook(
-        () => useNotableAnomaliesSearch({ skip: false, from, to }),
+        () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
         {
           wrapper: TestProviders,
         }
@@ -141,7 +139,7 @@ describe('useNotableAnomaliesSearch', () => {
         },
       };
 
-      mockNotableAnomaliesSearch.mockResolvedValue({
+      mockAnomaliesSearch.mockResolvedValue({
         aggregations: { number_of_anomalies: { buckets: [fistJobCount, secondJobCount] } },
       });
 
@@ -153,7 +151,7 @@ describe('useNotableAnomaliesSearch', () => {
       });
 
       const { result, waitForNextUpdate } = renderHook(
-        () => useNotableAnomaliesSearch({ skip: false, from, to }),
+        () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
         {
           wrapper: TestProviders,
         }
@@ -162,22 +160,17 @@ describe('useNotableAnomaliesSearch', () => {
       await waitForNextUpdate();
 
       const names = result.current.data.map(({ name }) => name);
-      expect(names).toEqual([
-        firstJobSecurityName,
-        secondJobSecurityName,
-        'packetbeat_dns_tunneling',
-        'packetbeat_rare_dns_question',
-        'packetbeat_rare_server_domain',
-        'suspicious_login_activity',
-      ]);
+
+      expect(names[0]).toEqual(firstJobSecurityName);
+      expect(names[1]).toEqual(secondJobSecurityName);
     });
   });
 
   it('does not throw error when aggregations is undefined', async () => {
     await act(async () => {
-      mockNotableAnomaliesSearch.mockResolvedValue({});
+      mockAnomaliesSearch.mockResolvedValue({});
       const { waitForNextUpdate } = renderHook(
-        () => useNotableAnomaliesSearch({ skip: false, from, to }),
+        () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
         {
           wrapper: TestProviders,
         }

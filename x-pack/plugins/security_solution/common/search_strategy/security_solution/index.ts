@@ -4,131 +4,116 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IEsSearchRequest } from '@kbn/data-plugin/common';
-import type { ESQuery } from '../../typed_json';
+
 import type {
   HostDetailsStrategyResponse,
-  HostDetailsRequestOptions,
   HostsOverviewStrategyResponse,
-  HostOverviewRequestOptions,
   HostsQueries,
-  HostsRequestOptions,
   HostsStrategyResponse,
   HostsUncommonProcessesStrategyResponse,
-  HostsUncommonProcessesRequestOptions,
-  HostsKpiQueries,
-  HostsKpiHostsStrategyResponse,
-  HostsKpiHostsRequestOptions,
-  HostsKpiUniqueIpsStrategyResponse,
-  HostsKpiUniqueIpsRequestOptions,
 } from './hosts';
 import type {
   NetworkQueries,
   NetworkDetailsStrategyResponse,
-  NetworkDetailsRequestOptions,
   NetworkDnsStrategyResponse,
-  NetworkDnsRequestOptions,
   NetworkTlsStrategyResponse,
-  NetworkTlsRequestOptions,
   NetworkHttpStrategyResponse,
-  NetworkHttpRequestOptions,
   NetworkOverviewStrategyResponse,
-  NetworkOverviewRequestOptions,
   NetworkTopCountriesStrategyResponse,
-  NetworkTopCountriesRequestOptions,
   NetworkTopNFlowStrategyResponse,
-  NetworkTopNFlowRequestOptions,
   NetworkUsersStrategyResponse,
-  NetworkUsersRequestOptions,
-  NetworkKpiQueries,
-  NetworkKpiDnsStrategyResponse,
-  NetworkKpiDnsRequestOptions,
-  NetworkKpiNetworkEventsStrategyResponse,
-  NetworkKpiNetworkEventsRequestOptions,
-  NetworkKpiTlsHandshakesStrategyResponse,
-  NetworkKpiTlsHandshakesRequestOptions,
-  NetworkKpiUniqueFlowsStrategyResponse,
-  NetworkKpiUniqueFlowsRequestOptions,
-  NetworkKpiUniquePrivateIpsStrategyResponse,
-  NetworkKpiUniquePrivateIpsRequestOptions,
+  NetworkTopNFlowCountStrategyResponse,
 } from './network';
 import type {
-  MatrixHistogramQuery,
-  MatrixHistogramRequestOptions,
-  MatrixHistogramStrategyResponse,
-} from './matrix_histogram';
-import type { TimerangeInput, SortField, PaginationInputPaginated } from '../common';
-import type {
-  CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
   CtiQueries,
-  CtiDataSourceRequestOptions,
   CtiDataSourceStrategyResponse,
 } from './cti';
 
 import type {
   RiskQueries,
   KpiRiskScoreStrategyResponse,
-  KpiRiskScoreRequestOptions,
   HostsRiskScoreStrategyResponse,
   UsersRiskScoreStrategyResponse,
-  RiskScoreRequestOptions,
 } from './risk_score';
 import type { UsersQueries } from './users';
-import type { UserDetailsRequestOptions, UserDetailsStrategyResponse } from './users/details';
-import type {
-  TotalUsersKpiRequestOptions,
-  TotalUsersKpiStrategyResponse,
-} from './users/kpi/total_users';
+import type { ObservedUserDetailsStrategyResponse } from './users/observed_details';
+
+import type { UsersStrategyResponse } from './users/all';
+import type { UserAuthenticationsStrategyResponse } from './users/authentications';
+import type { FirstLastSeenQuery, FirstLastSeenStrategyResponse } from './first_last_seen';
+import type { ManagedUserDetailsStrategyResponse } from './users/managed_details';
+import type { RelatedEntitiesQueries } from './related_entities';
+import type { UsersRelatedHostsStrategyResponse } from './related_entities/related_hosts';
+import type { HostsRelatedUsersStrategyResponse } from './related_entities/related_users';
 
 import type {
-  UsersKpiAuthenticationsRequestOptions,
-  UsersKpiAuthenticationsStrategyResponse,
-} from './users/kpi/authentications';
-
-import type { UsersRequestOptions, UsersStrategyResponse } from './users/all';
-import type {
-  UserAuthenticationsRequestOptions,
-  UserAuthenticationsStrategyResponse,
-} from './users/authentications';
-import type {
-  FirstLastSeenQuery,
+  EventEnrichmentRequestOptions,
+  EventEnrichmentRequestOptionsInput,
   FirstLastSeenRequestOptions,
-  FirstLastSeenStrategyResponse,
-} from './first_last_seen';
+  FirstLastSeenRequestOptionsInput,
+  HostDetailsRequestOptions,
+  HostDetailsRequestOptionsInput,
+  HostOverviewRequestOptions,
+  HostOverviewRequestOptionsInput,
+  HostsRequestOptions,
+  HostsRequestOptionsInput,
+  HostUncommonProcessesRequestOptions,
+  HostUncommonProcessesRequestOptionsInput,
+  ManagedUserDetailsRequestOptions,
+  ManagedUserDetailsRequestOptionsInput,
+  NetworkDetailsRequestOptions,
+  NetworkDetailsRequestOptionsInput,
+  NetworkDnsRequestOptions,
+  NetworkDnsRequestOptionsInput,
+  NetworkHttpRequestOptions,
+  NetworkHttpRequestOptionsInput,
+  NetworkOverviewRequestOptions,
+  NetworkOverviewRequestOptionsInput,
+  NetworkTlsRequestOptions,
+  NetworkTlsRequestOptionsInput,
+  NetworkTopCountriesRequestOptions,
+  NetworkTopCountriesRequestOptionsInput,
+  NetworkTopNFlowCountRequestOptions,
+  NetworkTopNFlowCountRequestOptionsInput,
+  NetworkTopNFlowRequestOptions,
+  NetworkTopNFlowRequestOptionsInput,
+  NetworkUsersRequestOptions,
+  NetworkUsersRequestOptionsInput,
+  ObservedUserDetailsRequestOptions,
+  ObservedUserDetailsRequestOptionsInput,
+  RelatedHostsRequestOptions,
+  RelatedHostsRequestOptionsInput,
+  RelatedUsersRequestOptions,
+  RelatedUsersRequestOptionsInput,
+  RiskScoreKpiRequestOptions,
+  RiskScoreKpiRequestOptionsInput,
+  RiskScoreRequestOptions,
+  RiskScoreRequestOptionsInput,
+  ThreatIntelSourceRequestOptions,
+  ThreatIntelSourceRequestOptionsInput,
+  UserAuthenticationsRequestOptions,
+  UserAuthenticationsRequestOptionsInput,
+  UsersRequestOptions,
+  UsersRequestOptionsInput,
+} from '../../api/search_strategy';
 
 export * from './cti';
 export * from './hosts';
 export * from './risk_score';
-export * from './matrix_histogram';
 export * from './network';
 export * from './users';
 export * from './first_last_seen';
+export * from './related_entities';
 
 export type FactoryQueryTypes =
   | HostsQueries
-  | HostsKpiQueries
   | UsersQueries
   | NetworkQueries
-  | NetworkKpiQueries
   | RiskQueries
   | CtiQueries
-  | typeof MatrixHistogramQuery
-  | typeof FirstLastSeenQuery;
-
-export interface RequestBasicOptions extends IEsSearchRequest {
-  timerange: TimerangeInput;
-  filterQuery: ESQuery | string | undefined;
-  defaultIndex: string[];
-  factoryQueryType?: FactoryQueryTypes;
-}
-
-/** A mapping of semantic fields to their document counterparts */
-
-export interface RequestOptionsPaginated<Field = string> extends RequestBasicOptions {
-  pagination: PaginationInputPaginated;
-  sort: SortField<Field>;
-}
+  | typeof FirstLastSeenQuery
+  | RelatedEntitiesQueries;
 
 export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsStrategyResponse
@@ -140,20 +125,14 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? FirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesStrategyResponse
-  : T extends HostsKpiQueries.kpiHosts
-  ? HostsKpiHostsStrategyResponse
-  : T extends HostsKpiQueries.kpiUniqueIps
-  ? HostsKpiUniqueIpsStrategyResponse
-  : T extends UsersQueries.details
-  ? UserDetailsStrategyResponse
-  : T extends UsersQueries.kpiTotalUsers
-  ? TotalUsersKpiStrategyResponse
+  : T extends UsersQueries.observedDetails
+  ? ObservedUserDetailsStrategyResponse
+  : T extends UsersQueries.managedDetails
+  ? ManagedUserDetailsStrategyResponse
   : T extends UsersQueries.authentications
   ? UserAuthenticationsStrategyResponse
   : T extends UsersQueries.users
   ? UsersStrategyResponse
-  : T extends UsersQueries.kpiAuthentications
-  ? UsersKpiAuthenticationsStrategyResponse
   : T extends NetworkQueries.details
   ? NetworkDetailsStrategyResponse
   : T extends NetworkQueries.dns
@@ -168,20 +147,10 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? NetworkTopCountriesStrategyResponse
   : T extends NetworkQueries.topNFlow
   ? NetworkTopNFlowStrategyResponse
+  : T extends NetworkQueries.topNFlowCount
+  ? NetworkTopNFlowCountStrategyResponse
   : T extends NetworkQueries.users
   ? NetworkUsersStrategyResponse
-  : T extends NetworkKpiQueries.dns
-  ? NetworkKpiDnsStrategyResponse
-  : T extends NetworkKpiQueries.networkEvents
-  ? NetworkKpiNetworkEventsStrategyResponse
-  : T extends NetworkKpiQueries.tlsHandshakes
-  ? NetworkKpiTlsHandshakesStrategyResponse
-  : T extends NetworkKpiQueries.uniqueFlows
-  ? NetworkKpiUniqueFlowsStrategyResponse
-  : T extends NetworkKpiQueries.uniquePrivateIps
-  ? NetworkKpiUniquePrivateIpsStrategyResponse
-  : T extends typeof MatrixHistogramQuery
-  ? MatrixHistogramStrategyResponse
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentStrategyResponse
   : T extends CtiQueries.dataSource
@@ -192,6 +161,62 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? UsersRiskScoreStrategyResponse
   : T extends RiskQueries.kpiRiskScore
   ? KpiRiskScoreStrategyResponse
+  : T extends RelatedEntitiesQueries.relatedUsers
+  ? HostsRelatedUsersStrategyResponse
+  : T extends RelatedEntitiesQueries.relatedHosts
+  ? UsersRelatedHostsStrategyResponse
+  : never;
+
+export type StrategyRequestInputType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
+  ? HostsRequestOptionsInput
+  : T extends HostsQueries.details
+  ? HostDetailsRequestOptionsInput
+  : T extends HostsQueries.overview
+  ? HostOverviewRequestOptionsInput
+  : T extends typeof FirstLastSeenQuery
+  ? FirstLastSeenRequestOptionsInput
+  : T extends HostsQueries.uncommonProcesses
+  ? HostUncommonProcessesRequestOptionsInput
+  : T extends UsersQueries.authentications
+  ? UserAuthenticationsRequestOptionsInput
+  : T extends UsersQueries.observedDetails
+  ? ObservedUserDetailsRequestOptionsInput
+  : T extends UsersQueries.managedDetails
+  ? ManagedUserDetailsRequestOptionsInput
+  : T extends UsersQueries.users
+  ? UsersRequestOptionsInput
+  : T extends NetworkQueries.details
+  ? NetworkDetailsRequestOptionsInput
+  : T extends NetworkQueries.dns
+  ? NetworkDnsRequestOptionsInput
+  : T extends NetworkQueries.http
+  ? NetworkHttpRequestOptionsInput
+  : T extends NetworkQueries.overview
+  ? NetworkOverviewRequestOptionsInput
+  : T extends NetworkQueries.tls
+  ? NetworkTlsRequestOptionsInput
+  : T extends NetworkQueries.topCountries
+  ? NetworkTopCountriesRequestOptionsInput
+  : T extends NetworkQueries.topNFlow
+  ? NetworkTopNFlowRequestOptionsInput
+  : T extends NetworkQueries.topNFlowCount
+  ? NetworkTopNFlowCountRequestOptionsInput
+  : T extends NetworkQueries.users
+  ? NetworkUsersRequestOptionsInput
+  : T extends CtiQueries.eventEnrichment
+  ? EventEnrichmentRequestOptionsInput
+  : T extends CtiQueries.dataSource
+  ? ThreatIntelSourceRequestOptionsInput
+  : T extends RiskQueries.hostsRiskScore
+  ? RiskScoreRequestOptionsInput
+  : T extends RiskQueries.usersRiskScore
+  ? RiskScoreRequestOptionsInput
+  : T extends RiskQueries.kpiRiskScore
+  ? RiskScoreKpiRequestOptionsInput
+  : T extends RelatedEntitiesQueries.relatedHosts
+  ? RelatedHostsRequestOptionsInput
+  : T extends RelatedEntitiesQueries.relatedUsers
+  ? RelatedUsersRequestOptionsInput
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -203,21 +228,15 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   : T extends typeof FirstLastSeenQuery
   ? FirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
-  ? HostsUncommonProcessesRequestOptions
-  : T extends HostsKpiQueries.kpiHosts
-  ? HostsKpiHostsRequestOptions
-  : T extends HostsKpiQueries.kpiUniqueIps
-  ? HostsKpiUniqueIpsRequestOptions
+  ? HostUncommonProcessesRequestOptions
   : T extends UsersQueries.authentications
   ? UserAuthenticationsRequestOptions
-  : T extends UsersQueries.details
-  ? UserDetailsRequestOptions
-  : T extends UsersQueries.kpiTotalUsers
-  ? TotalUsersKpiRequestOptions
+  : T extends UsersQueries.observedDetails
+  ? ObservedUserDetailsRequestOptions
+  : T extends UsersQueries.managedDetails
+  ? ManagedUserDetailsRequestOptions
   : T extends UsersQueries.users
   ? UsersRequestOptions
-  : T extends UsersQueries.kpiAuthentications
-  ? UsersKpiAuthenticationsRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns
@@ -232,30 +251,24 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkTopCountriesRequestOptions
   : T extends NetworkQueries.topNFlow
   ? NetworkTopNFlowRequestOptions
+  : T extends NetworkQueries.topNFlowCount
+  ? NetworkTopNFlowCountRequestOptions
   : T extends NetworkQueries.users
   ? NetworkUsersRequestOptions
-  : T extends NetworkKpiQueries.dns
-  ? NetworkKpiDnsRequestOptions
-  : T extends NetworkKpiQueries.networkEvents
-  ? NetworkKpiNetworkEventsRequestOptions
-  : T extends NetworkKpiQueries.tlsHandshakes
-  ? NetworkKpiTlsHandshakesRequestOptions
-  : T extends NetworkKpiQueries.uniqueFlows
-  ? NetworkKpiUniqueFlowsRequestOptions
-  : T extends NetworkKpiQueries.uniquePrivateIps
-  ? NetworkKpiUniquePrivateIpsRequestOptions
-  : T extends typeof MatrixHistogramQuery
-  ? MatrixHistogramRequestOptions
   : T extends CtiQueries.eventEnrichment
-  ? CtiEventEnrichmentRequestOptions
+  ? EventEnrichmentRequestOptions
   : T extends CtiQueries.dataSource
-  ? CtiDataSourceRequestOptions
+  ? ThreatIntelSourceRequestOptions
   : T extends RiskQueries.hostsRiskScore
   ? RiskScoreRequestOptions
   : T extends RiskQueries.usersRiskScore
   ? RiskScoreRequestOptions
   : T extends RiskQueries.kpiRiskScore
-  ? KpiRiskScoreRequestOptions
+  ? RiskScoreKpiRequestOptions
+  : T extends RelatedEntitiesQueries.relatedHosts
+  ? RelatedHostsRequestOptions
+  : T extends RelatedEntitiesQueries.relatedUsers
+  ? RelatedUsersRequestOptions
   : never;
 
 export interface CommonFields {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { FeatureKibanaPrivilegesReference } from './feature_kibana_privileges_reference';
+
 /**
  * Feature privilege definition
  */
@@ -22,8 +24,6 @@ export interface FeatureKibanaPrivileges {
 
   /**
    * Whether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`.
-   * @deprecated
-   * @removeBy 8.8.0
    */
   disabled?: boolean;
 
@@ -206,6 +206,16 @@ export interface FeatureKibanaPrivileges {
      * ```
      */
     delete?: readonly string[];
+    /**
+     * List of case owners which users should have settings access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    settings: ['securitySolution']
+     *  }
+     * ```
+     */
+    settings?: readonly string[];
   };
 
   /**
@@ -255,4 +265,11 @@ export interface FeatureKibanaPrivileges {
    * @see UICapabilities
    */
   ui: readonly string[];
+
+  /**
+   * An optional list of other registered feature or sub-feature privileges that this privilege is composed of. When
+   * privilege is registered with Elasticsearch, it will be expanded to grant everything that referenced privileges
+   * grant. This property can only be set in the feature configuration overrides.
+   */
+  composedOf?: readonly FeatureKibanaPrivilegesReference[];
 }

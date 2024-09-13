@@ -1,29 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IUiSettingsClient, HttpStart } from '@kbn/core/public';
-
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { ContentClient } from '@kbn/content-management-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import type { BaseVisType } from '../../vis_types';
 import { DialogNavigation } from '../dialog_navigation';
 import { showSavedObject } from './show_saved_object';
 
 interface SearchSelectionProps {
+  contentClient: ContentClient;
+  uiSettings: IUiSettingsClient;
   onSearchSelected: (searchId: string, searchType: string) => void;
   visType: BaseVisType;
-  uiSettings: IUiSettingsClient;
-  http: HttpStart;
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
   goBack: () => void;
 }
 
@@ -81,14 +80,12 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                     defaultMessage: 'Data view',
                   }
                 ),
-                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={this.fixedPageSize}
             services={{
+              contentClient: this.props.contentClient,
               uiSettings: this.props.uiSettings,
-              http: this.props.http,
-              savedObjectsManagement: this.props.savedObjectsManagement,
             }}
           />
         </EuiModalBody>

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { IconType } from '@elastic/eui';
@@ -18,6 +19,7 @@ import type {
   MultiValueClickContext,
 } from '@kbn/embeddable-plugin/public';
 import { ExpressionsServiceStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 
 export interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -29,6 +31,8 @@ export interface SetupDeps {
 export interface StartDeps {
   expression: ExpressionsServiceStart;
 }
+
+export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 
 export type ExpressionXyPluginSetup = void;
 export type ExpressionXyPluginStart = void;
@@ -118,15 +122,9 @@ export interface VisualizationType {
   showExperimentalBadge?: boolean;
 }
 
-export interface AccessorConfig {
-  columnId: string;
-  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible';
-  color?: string;
-  palette?: string[] | Array<{ color: string; stop: number }>;
-}
-
 export interface CellValueAction {
   id: string;
+  type?: string;
   iconType: string;
   displayName: string;
   execute: (data: CellValueContext['data']) => void;

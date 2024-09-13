@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
@@ -19,10 +20,20 @@ export interface ActiveMigrations {
  * Structure containing all the required info to perform a type's conversion
  */
 export interface TypeTransforms {
-  /** Derived from the related transforms */
+  /**
+   * Latest non-deferred version for each transform type.
+   * This is the version that will be used to query outdated documents.
+   */
+  immediateVersion: Record<TransformType, string>;
+  /**
+   * Latest version for each transform type, including deferred transforms.
+   * This is the version that will be used to perform the migration.
+   */
   latestVersion: Record<TransformType, string>;
   /** Ordered list of transforms registered for the type **/
   transforms: Transform[];
+  /** Per-version schemas for the given type */
+  versionSchemas: Record<string, TypeVersionSchema>;
 }
 
 /**
@@ -37,6 +48,8 @@ export interface Transform {
   transform: TransformFn;
   /** The (optional) downward transformation function */
   transformDown?: TransformFn;
+  /** Whether this transform is deferred */
+  deferred?: boolean;
 }
 
 export enum TransformType {
@@ -84,3 +97,8 @@ export interface TransformResult {
    */
   additionalDocs: SavedObjectUnsanitizedDoc[];
 }
+
+/**
+ * per-version persistence schema for {@link TypeTransforms}
+ */
+export type TypeVersionSchema = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;

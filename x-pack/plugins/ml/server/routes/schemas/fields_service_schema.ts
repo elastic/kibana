@@ -6,34 +6,67 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { indicesOptionsSchema } from './datafeeds_schema';
 import { runtimeMappingsSchema } from './runtime_mappings_schema';
+import { indicesOptionsSchema } from './datafeeds_schema';
+
+const indexPatternSchema = {
+  index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+    meta: { description: 'Index or indexes for which to return the time range.' },
+  }),
+};
+
+const querySchema = {
+  query: schema.maybe(
+    schema.any({ meta: { description: 'Query to match documents in the index(es).' } })
+  ),
+};
+
+const timeFieldNameSchema = {
+  timeFieldName: schema.maybe(
+    schema.string({ meta: { description: 'Name of the time field in the index' } })
+  ),
+};
 
 export const getCardinalityOfFieldsSchema = schema.object({
-  /** Index or indexes for which to return the time range. */
-  index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
-  /** Name(s) of the field(s) to return cardinality information. */
-  fieldNames: schema.maybe(schema.arrayOf(schema.string())),
-  /** Query to match documents in the index(es) (optional). */
-  query: schema.maybe(schema.any()),
-  /** Name of the time field in the index. */
-  timeFieldName: schema.maybe(schema.string()),
-  /** Earliest timestamp for search, as epoch ms (optional). */
-  earliestMs: schema.maybe(schema.oneOf([schema.number(), schema.string()])),
-  /** Latest timestamp for search, as epoch ms (optional). */
-  latestMs: schema.maybe(schema.oneOf([schema.number(), schema.string()])),
+  ...indexPatternSchema,
+  fieldNames: schema.maybe(
+    schema.arrayOf(schema.string(), {
+      meta: { description: 'Name(s) of the field(s) to return cardinality information.' },
+    })
+  ),
+  ...querySchema,
+  ...timeFieldNameSchema,
+  earliestMs: schema.maybe(
+    schema.oneOf([schema.number(), schema.string()], {
+      meta: { description: 'Earliest timestamp for search, as epoch ms' },
+    })
+  ),
+  latestMs: schema.maybe(
+    schema.oneOf([schema.number(), schema.string()], {
+      meta: { description: 'Latest timestamp for search, as epoch ms' },
+    })
+  ),
 });
 
 export const getTimeFieldRangeSchema = schema.object({
-  /** Index or indexes for which to return the time range. */
-  index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
-  /** Name of the time field in the index. */
-  timeFieldName: schema.maybe(schema.string()),
-  /** Query to match documents in the index(es). */
-  query: schema.maybe(schema.any()),
-  /** Additional search options. */
+  ...indexPatternSchema,
+  ...timeFieldNameSchema,
+  ...querySchema,
   runtimeMappings: runtimeMappingsSchema,
   indicesOptions: indicesOptionsSchema,
-  /** Return times from the future. */
-  allowFutureTime: schema.maybe(schema.boolean()),
+  allowFutureTime: schema.maybe(
+    schema.boolean({ meta: { description: 'Return times from the future' } })
+  ),
 });
+
+export const getCardinalityOfFieldsResponse = () => {
+  return schema.recordOf(schema.string(), schema.number());
+};
+
+export const getTimeFieldRangeResponse = () => {
+  return schema.object({
+    start: schema.number(),
+    end: schema.number(),
+    success: schema.boolean(),
+  });
+};

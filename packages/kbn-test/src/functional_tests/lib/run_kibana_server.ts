@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -24,6 +25,7 @@ export async function runKibanaServer(options: {
   extraKbnOpts?: string[];
   logsDir?: string;
   onEarlyExit?: (msg: string) => void;
+  inspect?: boolean;
 }) {
   const { config, procs } = options;
   const runOptions = options.config.get('kbnTestServer.runOptions');
@@ -50,6 +52,10 @@ export async function runKibanaServer(options: {
   const prefixArgs = devMode
     ? [Path.relative(procRunnerOpts.cwd, Path.resolve(REPO_ROOT, 'scripts/kibana'))]
     : [];
+
+  if (options.inspect) {
+    prefixArgs.unshift('--inspect');
+  }
 
   const buildArgs: string[] = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs: string[] = config.get('kbnTestServer.sourceArgs') || [];

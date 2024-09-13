@@ -15,12 +15,12 @@ import {
   ANOMALY_SWIM_LANE_HARD_LIMIT,
   SWIM_LANE_DEFAULT_PAGE_SIZE,
 } from '../../explorer/explorer_constants';
-import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
+import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 
 /**
  * Service for carrying out Elasticsearch queries to obtain data for the Ml Results dashboards.
  */
-export function resultsServiceProvider(mlApiServices) {
+export function resultsServiceProvider(mlApi) {
   const SAMPLER_TOP_TERMS_SHARD_SIZE = 20000;
   const ENTITY_AGGREGATION_SIZE = 10;
   const AGGREGATION_MIN_DOC_COUNT = 1;
@@ -84,7 +84,7 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices.results
+        mlApi.results
           .anomalySearch(
             {
               size: 0,
@@ -264,7 +264,7 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices.results
+        mlApi.results
           .anomalySearch(
             {
               size: 0,
@@ -406,7 +406,7 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices.results
+        mlApi.results
           .anomalySearch(
             {
               size: 0,
@@ -483,7 +483,7 @@ export function resultsServiceProvider(mlApiServices) {
       return new Promise((resolve, reject) => {
         const obj = { success: true, results: {} };
 
-        mlApiServices
+        mlApi
           .overallBuckets({
             jobId: jobIds,
             topN: topN,
@@ -592,7 +592,7 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices.results
+        mlApi.results
           .anomalySearch(
             {
               size: 0,
@@ -755,7 +755,7 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices.results
+        mlApi.results
           .anomalySearch(
             {
               size: maxResults !== undefined ? maxResults : 100,
@@ -883,7 +883,7 @@ export function resultsServiceProvider(mlApiServices) {
           }
         }
 
-        mlApiServices.results
+        mlApi.results
           .anomalySearch(
             {
               size: maxResults !== undefined ? maxResults : 100,
@@ -962,7 +962,7 @@ export function resultsServiceProvider(mlApiServices) {
           mustCriteria.push(query);
         }
 
-        mlApiServices
+        mlApi
           .esSearch({
             index,
             size: 0,
@@ -1140,7 +1140,7 @@ export function resultsServiceProvider(mlApiServices) {
           body.aggs.sample.aggs.byTime.aggs.entities.aggs.metric = metricAgg;
         }
 
-        mlApiServices
+        mlApi
           .esSearch({
             index,
             body,
@@ -1240,7 +1240,7 @@ export function resultsServiceProvider(mlApiServices) {
             },
           });
         }
-        mlApiServices.results
+        mlApi.results
           .anomalySearch(
             {
               size: 0,

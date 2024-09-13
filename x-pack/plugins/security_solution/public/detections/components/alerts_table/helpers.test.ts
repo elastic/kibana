@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { TimelineType } from '../../../../common/types/timeline';
+import { DataProviderTypeEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { DataProviderType } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
-
 import {
   getStringArray,
   replaceTemplateFieldFromQuery,
@@ -143,7 +141,7 @@ describe('helpers', () => {
         const replacement = replaceTemplateFieldFromQuery(
           '',
           mockTimelineDetails,
-          TimelineType.default
+          TimelineTypeEnum.default
         );
         expect(replacement).toEqual('');
       });
@@ -152,7 +150,7 @@ describe('helpers', () => {
         const replacement = replaceTemplateFieldFromQuery(
           '    ',
           mockTimelineDetails,
-          TimelineType.default
+          TimelineTypeEnum.default
         );
         expect(replacement).toEqual('');
       });
@@ -161,7 +159,7 @@ describe('helpers', () => {
         const replacement = replaceTemplateFieldFromQuery(
           'host.name: placeholdertext',
           mockTimelineDetails,
-          TimelineType.default
+          TimelineTypeEnum.default
         );
         expect(replacement).toEqual('host.name: apache');
       });
@@ -175,7 +173,7 @@ describe('helpers', () => {
         const replacement = replaceTemplateFieldFromQuery(
           'host.name: *',
           dupTimelineDetails,
-          TimelineType.default
+          TimelineTypeEnum.default
         );
         expect(replacement).toEqual('host.name: *');
       });
@@ -184,7 +182,7 @@ describe('helpers', () => {
         const replacement = replaceTemplateFieldFromQuery(
           'user.id: placeholdertext',
           mockTimelineDetails,
-          TimelineType.default
+          TimelineTypeEnum.default
         );
         expect(replacement).toEqual('user.id: placeholdertext');
       });
@@ -195,7 +193,7 @@ describe('helpers', () => {
         const replacement = replaceTemplateFieldFromQuery(
           '',
           mockTimelineDetails,
-          TimelineType.template
+          TimelineTypeEnum.template
         );
         expect(replacement).toEqual('');
       });
@@ -204,7 +202,7 @@ describe('helpers', () => {
         const replacement = replaceTemplateFieldFromQuery(
           '    ',
           mockTimelineDetails,
-          TimelineType.template
+          TimelineTypeEnum.template
         );
         expect(replacement).toEqual('');
       });
@@ -213,7 +211,7 @@ describe('helpers', () => {
         const replacement = replaceTemplateFieldFromQuery(
           'host.name: placeholdertext',
           mockTimelineDetails,
-          TimelineType.template
+          TimelineTypeEnum.template
         );
         expect(replacement).toEqual('host.name: placeholdertext');
       });
@@ -227,7 +225,7 @@ describe('helpers', () => {
         const replacement = replaceTemplateFieldFromQuery(
           'host.name: *',
           dupTimelineDetails,
-          TimelineType.default
+          TimelineTypeEnum.default
         );
         expect(replacement).toEqual('host.name: *');
       });
@@ -236,7 +234,7 @@ describe('helpers', () => {
         const replacement = replaceTemplateFieldFromQuery(
           'user.id: placeholdertext',
           mockTimelineDetails,
-          TimelineType.default
+          TimelineTypeEnum.default
         );
         expect(replacement).toEqual('user.id: placeholdertext');
       });
@@ -323,7 +321,7 @@ describe('helpers', () => {
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
           mockTimelineDetails,
-          TimelineType.default
+          TimelineTypeEnum.default
         );
         expect(replacement).toEqual({
           id: 'apache',
@@ -339,7 +337,7 @@ describe('helpers', () => {
             displayValue: undefined,
           },
           and: [],
-          type: TimelineType.default,
+          type: TimelineTypeEnum.default,
         });
       });
 
@@ -357,7 +355,7 @@ describe('helpers', () => {
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
           dupTimelineDetails,
-          TimelineType.default
+          TimelineTypeEnum.default
         );
         expect(replacement).toEqual({
           id: 'apache',
@@ -373,7 +371,7 @@ describe('helpers', () => {
             displayValue: undefined,
           },
           and: [],
-          type: TimelineType.default,
+          type: TimelineTypeEnum.default,
         });
       });
 
@@ -386,7 +384,7 @@ describe('helpers', () => {
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
           mockTimelineDetails,
-          TimelineType.default
+          TimelineTypeEnum.default
         );
         expect(replacement).toEqual({
           id: 'my-id',
@@ -402,7 +400,7 @@ describe('helpers', () => {
             displayValue: undefined,
           },
           and: [],
-          type: TimelineType.default,
+          type: TimelineTypeEnum.default,
         });
       });
     });
@@ -414,11 +412,11 @@ describe('helpers', () => {
         mockDataProvider.id = 'Braden';
         mockDataProvider.name = 'Braden';
         mockDataProvider.queryMatch.value = '{host.name}';
-        mockDataProvider.type = DataProviderType.template;
+        mockDataProvider.type = DataProviderTypeEnum.template;
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
           mockTimelineDetails,
-          TimelineType.template
+          TimelineTypeEnum.template
         );
         expect(replacement).toEqual({
           id: 'apache',
@@ -434,7 +432,7 @@ describe('helpers', () => {
             displayValue: undefined,
           },
           and: [],
-          type: DataProviderType.default,
+          type: DataProviderTypeEnum.default,
         });
       });
 
@@ -444,11 +442,11 @@ describe('helpers', () => {
         mockDataProvider.id = 'Braden';
         mockDataProvider.name = 'Braden';
         mockDataProvider.queryMatch.value = '{host.name}';
-        mockDataProvider.type = DataProviderType.default;
+        mockDataProvider.type = DataProviderTypeEnum.default;
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
           mockTimelineDetails,
-          TimelineType.template
+          TimelineTypeEnum.template
         );
         expect(replacement).toEqual({
           id: 'Braden',
@@ -464,7 +462,7 @@ describe('helpers', () => {
             displayValue: undefined,
           },
           and: [],
-          type: DataProviderType.default,
+          type: DataProviderTypeEnum.default,
         });
       });
 
@@ -479,11 +477,11 @@ describe('helpers', () => {
         mockDataProvider.id = 'Braden';
         mockDataProvider.name = 'Braden';
         mockDataProvider.queryMatch.value = '{host.name}';
-        mockDataProvider.type = DataProviderType.template;
+        mockDataProvider.type = DataProviderTypeEnum.template;
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
           dupTimelineDetails,
-          TimelineType.template
+          TimelineTypeEnum.template
         );
         expect(replacement).toEqual({
           id: 'apache',
@@ -499,7 +497,7 @@ describe('helpers', () => {
             displayValue: undefined,
           },
           and: [],
-          type: DataProviderType.default,
+          type: DataProviderTypeEnum.default,
         });
       });
 
@@ -509,11 +507,11 @@ describe('helpers', () => {
         mockDataProvider.id = 'my-id';
         mockDataProvider.name = 'Rebecca';
         mockDataProvider.queryMatch.value = 'Rebecca';
-        mockDataProvider.type = DataProviderType.default;
+        mockDataProvider.type = DataProviderTypeEnum.default;
         const replacement = reformatDataProviderWithNewValue(
           mockDataProvider,
           mockTimelineDetails,
-          TimelineType.template
+          TimelineTypeEnum.template
         );
         expect(replacement).toEqual({
           id: 'my-id',
@@ -529,7 +527,7 @@ describe('helpers', () => {
             displayValue: undefined,
           },
           and: [],
-          type: DataProviderType.default,
+          type: DataProviderTypeEnum.default,
         });
       });
     });
@@ -545,7 +543,7 @@ describe('helpers', () => {
           range: {
             '@timestamp': {
               gte: '2020-10-29T21:06:10.192Z',
-              lt: '2020-10-29T21:07:38.774Z',
+              lte: '2020-10-29T21:07:38.774Z',
               format: 'strict_date_optional_time',
             },
           },
@@ -557,7 +555,7 @@ describe('helpers', () => {
             key: '@timestamp',
             params: {
               gte: from,
-              lt: to,
+              lte: to,
               format: 'strict_date_optional_time',
             },
           },

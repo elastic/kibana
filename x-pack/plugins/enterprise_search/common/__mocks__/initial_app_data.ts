@@ -34,11 +34,14 @@ export const DEFAULT_INITIAL_APP_DATA = {
   features: {
     hasConnectors: true,
     hasDefaultIngestPipeline: true,
+    hasDocumentLevelSecurityEnabled: true,
+    hasIncrementalSyncEnabled: true,
     hasNativeConnectors: true,
     hasWebCrawler: true,
   },
   appSearch: {
     accountId: 'some-id-string',
+    kibanaUIsEnabled: true,
     onboardingComplete: true,
     role: {
       id: 'account_id:somestring|user_oid:somestring',
@@ -57,6 +60,7 @@ export const DEFAULT_INITIAL_APP_DATA = {
     organization: {
       name: 'ACME Donuts',
       defaultOrgName: 'My Organization',
+      kibanaUIsEnabled: false,
     },
     account: {
       id: 'some-id-string',

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Observable } from 'rxjs';
@@ -15,16 +16,16 @@ import type {
   KibanaRequest,
   CustomRequestHandlerContext,
 } from '@kbn/core/server';
-import {
-  ISearchOptions,
-  ISearchStartSearchSource,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
+import type {
   ISearchClient,
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+  ISearchOptions,
   IEsSearchResponse,
   IEsSearchRequest,
-  SearchSourceService,
-} from '../../common/search';
+} from '@kbn/search-types';
+
+import { ISearchStartSearchSource, SearchSourceService } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors/search';
 import type { IScopedSearchSessionsClient } from './session';
@@ -35,6 +36,7 @@ export interface SearchStrategyDependencies {
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>;
   searchSessionsClient: IScopedSearchSessionsClient;
   request: KibanaRequest;
+  rollupsEnabled?: boolean;
 }
 
 export interface ISearchSetup {
@@ -55,7 +57,7 @@ export interface ISearchSetup {
    * Used internally for telemetry
    */
   usage?: SearchUsage;
-
+  enableRollups: () => void;
   searchSource: ReturnType<SearchSourceService['setup']>;
 }
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Buffer } from 'buffer';
@@ -68,6 +69,7 @@ describe('instrumentQueryAndDeprecationLogger', () => {
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
+    logger.isLevelEnabled.mockReturnValue(true);
     parseClientOptionsMock.mockReturnValue({});
     ClientMock.mockImplementation(() => createFakeClient());
   });
@@ -493,6 +495,29 @@ describe('instrumentQueryAndDeprecationLogger', () => {
         {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}"
       `);
     });
+
+    it('does not log when debug level is disabled for the query logger', () => {
+      logger.isLevelEnabled.mockReturnValue(false);
+
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
+
+      const response = createResponseWithBody(
+        JSON.stringify({
+          seq_no_primary_term: true,
+          query: {
+            term: { user: 'kimchy' },
+          },
+        })
+      );
+
+      client.diagnostic.emit('response', null, response);
+      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`Array []`);
+    });
   });
 
   describe('deprecation warnings from response headers', () => {
@@ -710,6 +735,39 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         /Query:\n.*200\n.*GET \/_path\?hello\=dolly/
       );
+    });
+
+    it('does not log when debug level is disabled for the deprecation logger', () => {
+      logger.isLevelEnabled.mockReturnValue(false);
+
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
+
+      const response = createApiResponse({
+        statusCode: 200,
+        warnings: ['299 Elasticsearch-8.1.0 "GET /_path is deprecated"'],
+        params: {
+          method: 'GET',
+          path: '/_path',
+          querystring: { hello: 'dolly' },
+          // Set the request header to indicate to Elasticsearch that this is a request over which users have no control
+          headers: { 'x-elastic-product-origin': 'kibana' },
+        },
+        body: {
+          hits: [
+            {
+              _source: 'may the source be with you',
+            },
+          ],
+        },
+      });
+      client.diagnostic.emit('response', null, response);
+
+      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`Array []`);
     });
 
     describe('Request body redaction on some APIs', () => {
@@ -992,6 +1050,43 @@ describe('instrumentQueryAndDeprecationLogger', () => {
           `);
         });
       });
+    });
+  });
+
+  describe('requests aborted due to maximum response size exceeded errors', () => {
+    const requestAbortedErrorMessage = `The content length (9000) is bigger than the maximum allowed buffer (42)`;
+
+    it('logs warning when the client emits a RequestAbortedError error due to excessive response length ', () => {
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
+
+      client.diagnostic.emit(
+        'response',
+        new errors.RequestAbortedError(requestAbortedErrorMessage),
+        null
+      );
+
+      expect(loggingSystemMock.collect(logger).warn[0][0]).toMatchInlineSnapshot(
+        `"Request was aborted: The content length (9000) is bigger than the maximum allowed buffer (42)"`
+      );
+    });
+
+    it('does not log warning for other type of errors', () => {
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
+
+      const response = createApiResponse({ body: {} });
+      client.diagnostic.emit('response', new errors.TimeoutError('message', response), response);
+
+      expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`Array []`);
     });
   });
 });

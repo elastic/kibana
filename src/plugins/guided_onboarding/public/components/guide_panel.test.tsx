@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { act } from 'react-dom/test-utils';
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
+import { CoreTheme } from '@kbn/core/public';
 
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -31,14 +34,9 @@ import {
   mockPluginStateInProgress,
 } from '../services/api.mocks';
 import { GuidePanel } from './guide_panel';
-import { IUiSettingsClient } from '@kbn/core/public';
 
 const applicationMock = applicationServiceMock.createStartContract();
 const notificationsMock = notificationServiceMock.createStartContract();
-
-const uiSettingsMock = {
-  get: jest.fn(),
-} as unknown as IUiSettingsClient;
 
 const mockGetResponse = (path: string, pluginState: PluginState) => {
   if (path === `${API_BASE_PATH}/configs/${testGuideId}`) {
@@ -60,13 +58,14 @@ const setupComponentWithPluginStateMock = async (
 };
 
 const setupGuidePanelComponent = async (api: GuidedOnboardingApi) => {
+  const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: true });
   let testBed: TestBed;
   const GuidePanelComponent = () => (
     <GuidePanel
       application={applicationMock}
       api={api}
       notifications={notificationsMock}
-      uiSettings={uiSettingsMock}
+      theme$={coreTheme$}
     />
   );
   await act(async () => {
@@ -457,8 +456,8 @@ describe('Guided setup', () => {
 
         expect(
           find('guidePanelStepDescription')
-            .last()
-            .containsMatchingElement(<p>{testGuideConfig.steps[2].description}</p>)
+            .first()
+            .containsMatchingElement(<p>{testGuideConfig.steps[2].description as string}</p>)
         ).toBe(true);
       });
 
@@ -476,7 +475,7 @@ describe('Guided setup', () => {
             .containsMatchingElement(
               <ul>
                 {testGuideConfig.steps[0].descriptionList?.map((description, i) => (
-                  <li key={i}>{description}</li>
+                  <li key={i}>{description as string}</li>
                 ))}
               </ul>
             )

@@ -6,20 +6,15 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import styled, { css } from 'styled-components';
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiHorizontalRule,
-  EuiSpacer,
-  EuiFlyoutHeader,
   EuiFlyoutBody,
-  EuiFlexGroup,
   EuiTitle,
   EuiFlyout,
-  EuiFlyoutFooter,
-  EuiLoadingContent,
+  EuiSkeletonText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type {
@@ -31,7 +26,10 @@ import {
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
+import { hasWrongOperatorWithWildcard } from '@kbn/securitysolution-list-utils';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
+
+import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
 
 import type { Moment } from 'moment';
 import moment from 'moment';
@@ -48,7 +46,6 @@ import { ExceptionsLinkedToRule } from '../flyout_components/linked_to_rule';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
 import { ExceptionsConditions } from '../flyout_components/item_conditions';
 
-import { filterIndexPatterns } from '../../utils/helpers';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
@@ -58,7 +55,12 @@ import { createExceptionItemsReducer } from './reducer';
 import { useEditExceptionItems } from './use_edit_exception';
 
 import * as i18n from './translations';
+import { RULE_EXCEPTION, ENDPOINT_EXCEPTION } from '../../utils/translations';
 import { ExceptionsExpireTime } from '../flyout_components/expire_time';
+import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../management/common/translations';
+import { ArtifactConfirmModal } from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
+import { ExceptionFlyoutFooter } from '../flyout_components/footer';
+import { ExceptionFlyoutHeader } from '../flyout_components/header';
 
 interface EditExceptionFlyoutProps {
   list: ExceptionListSchema;
@@ -70,23 +72,11 @@ interface EditExceptionFlyoutProps {
   onConfirm: (arg: boolean) => void;
 }
 
-const FlyoutHeader = styled(EuiFlyoutHeader)`
-  ${({ theme }) => css`
-    border-bottom: 1px solid ${theme.eui.euiColorLightShade};
-  `}
-`;
-
 const FlyoutBodySection = styled(EuiFlyoutBody)`
   ${() => css`
     &.builder-section {
       overflow-y: scroll;
     }
-  `}
-`;
-
-const FlyoutFooterGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    padding: ${theme.eui.euiSizeS};
   `}
 `;
 
@@ -109,7 +99,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   const rules = useMemo(() => (rule != null ? [rule] : null), [rule]);
   const listType = useMemo((): ExceptionListTypeEnum => list.type as ExceptionListTypeEnum, [list]);
 
-  const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
+  const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitEditExceptionItems] = useEditExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
 
@@ -118,24 +108,28 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       exceptionItems,
       exceptionItemMeta: { name: exceptionItemName },
       newComment,
+      commentErrorExists,
       bulkCloseAlerts,
       disableBulkClose,
       bulkCloseIndex,
       entryErrorExists,
       expireTime,
       expireErrorExists,
+      wildcardWarningExists,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
     exceptionItems: [itemToEdit],
     exceptionItemMeta: { name: itemToEdit.name },
     newComment: '',
+    commentErrorExists: false,
     bulkCloseAlerts: false,
     disableBulkClose: true,
     bulkCloseIndex: undefined,
     entryErrorExists: false,
     expireTime: itemToEdit.expire_time !== undefined ? moment(itemToEdit.expire_time) : undefined,
     expireErrorExists: false,
+    wildcardWarningExists: false,
   });
 
   const allowLargeValueLists = useMemo((): boolean => {
@@ -149,6 +143,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       return true;
     }
   }, [rule]);
+
+  const [showConfirmModal, setShowConfirmModal] = useState<boolean>(wildcardWarningExists);
 
   const [isLoadingReferences, referenceFetchError, ruleReferences, fetchReferences] =
     useFindExceptionListReferences();
@@ -170,6 +166,10 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
    * */
   const setExceptionItemsToAdd = useCallback(
     (items: ExceptionsBuilderReturnExceptionItem[]): void => {
+      dispatch({
+        type: 'setWildcardWithWrongOperator',
+        warningExists: hasWrongOperatorWithWildcard(items),
+      });
       dispatch({
         type: 'setExceptionItems',
         items,
@@ -193,6 +193,16 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       dispatch({
         type: 'setComment',
         comment,
+      });
+    },
+    [dispatch]
+  );
+
+  const setCommentError = useCallback(
+    (errorExists: boolean): void => {
+      dispatch({
+        type: 'setCommentError',
+        errorExists,
       });
     },
     [dispatch]
@@ -269,7 +279,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     []
   );
 
-  const handleSubmit = useCallback(async (): Promise<void> => {
+  const handleSubmitException = useCallback(async (): Promise<void> => {
     if (submitEditExceptionItems == null) return;
 
     try {
@@ -323,13 +333,13 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     expireTime,
   ]);
 
-  const editExceptionMessage = useMemo(
-    () =>
-      listType === ExceptionListTypeEnum.ENDPOINT
-        ? i18n.EDIT_ENDPOINT_EXCEPTION_TITLE
-        : i18n.EDIT_EXCEPTION_TITLE,
-    [listType]
-  );
+  const handleOnSubmit = useCallback(() => {
+    if (wildcardWarningExists) {
+      setShowConfirmModal(true);
+    } else {
+      return handleSubmitException();
+    }
+  }, [wildcardWarningExists, handleSubmitException]);
 
   const isSubmitButtonDisabled = useMemo(
     () =>
@@ -338,20 +348,55 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       exceptionItems.every((item) => item.entries.length === 0) ||
       isLoading ||
       entryErrorExists ||
+      expireErrorExists ||
+      commentErrorExists,
+    [
+      isLoading,
+      entryErrorExists,
+      exceptionItems,
+      isSubmitting,
+      isClosingAlerts,
       expireErrorExists,
-    [isLoading, entryErrorExists, exceptionItems, isSubmitting, isClosingAlerts, expireErrorExists]
+      commentErrorExists,
+    ]
   );
 
+  const exceptionFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'exceptionFlyoutTitle',
+  });
+
+  const confirmModal = useMemo(() => {
+    const { title, body, confirmButton, cancelButton } = CONFIRM_WARNING_MODAL_LABELS(
+      listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION
+    );
+
+    return (
+      <ArtifactConfirmModal
+        title={title}
+        body={body}
+        confirmButton={confirmButton}
+        cancelButton={cancelButton}
+        onSuccess={handleSubmitException}
+        onCancel={() => setShowConfirmModal(false)}
+        data-test-subj="artifactConfirmModal"
+      />
+    );
+  }, [listType, handleSubmitException]);
+
   return (
-    <EuiFlyout size="l" onClose={handleCloseFlyout} data-test-subj="editExceptionFlyout">
-      <FlyoutHeader>
-        <EuiTitle>
-          <h2 data-test-subj="exceptionFlyoutTitle">{editExceptionMessage}</h2>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-      </FlyoutHeader>
-      {isLoading && <EuiLoadingContent data-test-subj="loadingEditExceptionFlyout" lines={4} />}
+    <EuiFlyout
+      size="l"
+      onClose={handleCloseFlyout}
+      data-test-subj="editExceptionFlyout"
+      aria-labelledby={exceptionFlyoutTitleId}
+    >
+      <ExceptionFlyoutHeader
+        listType={listType}
+        titleId={exceptionFlyoutTitleId}
+        dataTestSubjId={'exceptionFlyoutTitle'}
+      />
       <FlyoutBodySection className="builder-section">
+        {isLoading && <EuiSkeletonText data-test-subj="loadingEditExceptionFlyout" lines={4} />}
         <ExceptionsFlyoutMeta
           exceptionItemName={exceptionItemName}
           onChange={setExceptionItemMeta}
@@ -369,8 +414,9 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           isEdit
           onExceptionItemAdd={setExceptionItemsToAdd}
           onSetErrorExists={setConditionsValidationError}
-          onFilterIndexPatterns={filterIndexPatterns}
+          getExtendedFields={getExtendedFields}
         />
+        {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
         {!openedFromListDetailPage && listType === ExceptionListTypeEnum.DETECTION && (
           <>
             <EuiHorizontalRule />
@@ -399,6 +445,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           exceptionItemComments={itemToEdit.comments}
           newCommentValue={newComment}
           newCommentOnChange={setComment}
+          setCommentError={setCommentError}
         />
         {listType !== ExceptionListTypeEnum.ENDPOINT && (
           <>
@@ -425,22 +472,15 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           </>
         )}
       </FlyoutBodySection>
-      <EuiFlyoutFooter>
-        <FlyoutFooterGroup justifyContent="spaceBetween">
-          <EuiButtonEmpty data-test-subj="cancelExceptionEditButton" onClick={handleCloseFlyout}>
-            {i18n.CANCEL}
-          </EuiButtonEmpty>
-
-          <EuiButton
-            data-test-subj="editExceptionConfirmButton"
-            onClick={handleSubmit}
-            isDisabled={isSubmitButtonDisabled}
-            fill
-          >
-            {editExceptionMessage}
-          </EuiButton>
-        </FlyoutFooterGroup>
-      </EuiFlyoutFooter>
+      <ExceptionFlyoutFooter
+        listType={listType}
+        isSubmitButtonDisabled={isSubmitButtonDisabled}
+        cancelButtonDataTestSubjId={'cancelExceptionEditButton'}
+        submitButtonDataTestSubjId={'editExceptionConfirmButton'}
+        handleOnSubmit={handleOnSubmit}
+        handleCloseFlyout={handleCloseFlyout}
+      />
+      {showConfirmModal && confirmModal}
     </EuiFlyout>
   );
 };

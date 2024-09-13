@@ -8,8 +8,11 @@
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
-import type { DownloadSourceAttributes } from '../types';
+import type { Logger } from '@kbn/core/server';
+
+import type { DownloadSourceSOAttributes } from '../types';
 
 import { DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE } from '../constants';
 
@@ -132,9 +135,13 @@ function getMockedSoClient(options: { defaultDownloadSourceId?: string; sameName
 
   return soClient;
 }
-
+let mockedLogger: jest.Mocked<Logger>;
 describe('Download Service', () => {
   beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+  });
+  afterEach(() => {
     mockedAgentPolicyService.list.mockClear();
     mockedAgentPolicyService.hasAPMIntegration.mockClear();
     mockedAgentPolicyService.removeDefaultSourceFromAll.mockReset();
@@ -158,7 +165,7 @@ describe('Download Service', () => {
 
       // ID should always be the same for a predefined id
       expect(soClient.create.mock.calls[0][2]?.id).toEqual('download-source-test');
-      expect((soClient.create.mock.calls[0][1] as DownloadSourceAttributes).source_id).toEqual(
+      expect((soClient.create.mock.calls[0][1] as DownloadSourceSOAttributes).source_id).toEqual(
         'download-source-test'
       );
     });
@@ -284,12 +291,12 @@ describe('Download Service', () => {
   });
 
   describe('requireUniqueName', () => {
-    it('throws an error if the name already exists', () => {
+    it('throws an error if the name already exists', async () => {
       const soClient = getMockedSoClient({
         defaultDownloadSourceId: 'download-source-test',
         sameName: true,
       });
-      expect(
+      await expect(
         async () => await downloadSourceService.requireUniqueName(soClient, { name: 'Test' })
       ).rejects.toThrow(`Download Source 'download-source-test' already exists with name 'Test'`);
     });

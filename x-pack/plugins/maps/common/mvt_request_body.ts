@@ -6,26 +6,15 @@
  */
 
 import rison from '@kbn/rison';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  SearchMvtRequest,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RENDER_AS } from './constants';
-
-export function decodeMvtResponseBody(encodedRequestBody: string): estypes.SearchRequest['body'] {
-  return rison.decode(
-    decodeURIComponent(encodedRequestBody).replace('%25', '%')
-  ) as estypes.SearchRequest['body'];
-}
-
-export function encodeMvtResponseBody(unencodedRequestBody: estypes.SearchRequest['body']): string {
-  // URL encoding replaces unsafe ASCII characters with a '%' followed by two hexadecimal digits
-  // encodeURIComponent does not encode '%'
-  // This causes preexisting '%' to break decoding because they are not valid URL encoding
-  // To prevent this, properly url encode '%' before calling encodeURIComponent
-  return encodeURIComponent(rison.encode(unencodedRequestBody).replace('%', '%25'));
-}
 
 export function getAggsTileRequest({
   buffer,
-  encodedRequestBody,
+  risonRequestBody,
   geometryFieldName,
   gridPrecision,
   hasLabels,
@@ -36,7 +25,7 @@ export function getAggsTileRequest({
   z,
 }: {
   buffer: number;
-  encodedRequestBody: string;
+  risonRequestBody: string;
   geometryFieldName: string;
   gridPrecision: number;
   hasLabels: boolean;
@@ -46,7 +35,7 @@ export function getAggsTileRequest({
   y: number;
   z: number;
 }) {
-  const requestBody = decodeMvtResponseBody(encodedRequestBody);
+  const requestBody = rison.decode(risonRequestBody) as SearchRequest['body'];
   if (!requestBody) {
     throw new Error('Required requestBody parameter not provided');
   }
@@ -64,16 +53,15 @@ export function getAggsTileRequest({
       grid_agg: renderAs === RENDER_AS.HEX ? 'geohex' : 'geotile',
       grid_type: renderAs === RENDER_AS.GRID || renderAs === RENDER_AS.HEX ? 'grid' : 'centroid',
       aggs: requestBody.aggs,
-      fields: requestBody.fields ? requestBody.fields : [],
       runtime_mappings: requestBody.runtime_mappings,
       with_labels: hasLabels,
-    } as estypes.SearchMvtRequest['body'],
+    } as SearchMvtRequest['body'],
   };
 }
 
 export function getHitsTileRequest({
   buffer,
-  encodedRequestBody,
+  risonRequestBody,
   geometryFieldName,
   hasLabels,
   index,
@@ -82,7 +70,7 @@ export function getHitsTileRequest({
   z,
 }: {
   buffer: number;
-  encodedRequestBody: string;
+  risonRequestBody: string;
   geometryFieldName: string;
   hasLabels: boolean;
   index: string;
@@ -90,10 +78,11 @@ export function getHitsTileRequest({
   y: number;
   z: number;
 }) {
-  const requestBody = decodeMvtResponseBody(encodedRequestBody);
+  const requestBody = rison.decode(risonRequestBody) as SearchRequest['body'];
   if (!requestBody) {
     throw new Error('Required requestBody parameter not provided');
   }
+  const size = typeof requestBody.size === 'number' ? requestBody.size : 10000;
   const tileRequestBody = {
     buffer,
     grid_precision: 0, // no aggs
@@ -101,9 +90,14 @@ export function getHitsTileRequest({
     extent: 4096, // full resolution,
     query: requestBody.query,
     runtime_mappings: requestBody.runtime_mappings,
-    track_total_hits: typeof requestBody.size === 'number' ? requestBody.size + 1 : false,
+    // Number of hits matching the query to count accurately
+    // Used to notify users of truncated results
+    track_total_hits: size + 1,
+    // Maximum number of features to return in the hits layer
+    // Used to fetch number of hits that correspondes with track_total_hits
+    size,
     with_labels: hasLabels,
-  } as estypes.SearchMvtRequest['body'];
+  } as SearchMvtRequest['body'];
   if (requestBody.fields) {
     // @ts-expect-error SearchRequest['body'].fields and SearchMvtRequest['body'].fields types do not allign, even though they do in implemenation
     tileRequestBody.fields = requestBody.fields;

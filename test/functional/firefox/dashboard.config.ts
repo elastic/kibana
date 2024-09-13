@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable import/no-default-export */
@@ -18,7 +19,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     testFiles: [
       require.resolve('../apps/dashboard/group4/dashboard_save'),
-      require.resolve('../apps/dashboard_elements'),
+      require.resolve('../apps/dashboard_elements/controls/common'),
+      require.resolve('../apps/dashboard_elements/controls/options_list'),
+      require.resolve('../apps/dashboard_elements/image_embeddable'),
+      require.resolve('../apps/dashboard_elements/input_control_vis'),
+      require.resolve('../apps/dashboard_elements/markdown/_markdown_vis.ts'),
     ],
 
     junit: {

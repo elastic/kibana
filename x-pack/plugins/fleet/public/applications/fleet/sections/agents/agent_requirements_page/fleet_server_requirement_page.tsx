@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useStartServices, sendGetPermissionsCheck } from '../../../hooks';
+import { useStartServices, useCheckPermissions, useAuthz } from '../../../hooks';
 
-import { FleetServerMissingPrivileges } from '../components/fleet_server_callouts';
+import {
+  FleetServerMissingESPrivileges,
+  FleetServerMissingKbnPrivileges,
+} from '../components/fleet_server_callouts';
 
 import { Loading } from '../components';
 
@@ -41,29 +44,9 @@ export const FleetServerRequirementPage: React.FunctionComponent<
 > = ({ showStandaloneTab = () => {}, showEnrollmentRecommendation = true }) => {
   const startService = useStartServices();
   const deploymentUrl = startService.cloud?.deploymentUrl;
+  const authz = useAuthz();
 
-  const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
-  const [permissionsError, setPermissionsError] = useState<string>();
-
-  useEffect(() => {
-    async function checkPermissions() {
-      setIsPermissionsLoading(false);
-      setPermissionsError(undefined);
-
-      try {
-        setIsPermissionsLoading(true);
-        const permissionsResponse = await sendGetPermissionsCheck(true);
-
-        setIsPermissionsLoading(false);
-        if (!permissionsResponse.data?.success) {
-          setPermissionsError(permissionsResponse.data?.error || 'REQUEST_ERROR');
-        }
-      } catch (err) {
-        setPermissionsError('REQUEST_ERROR');
-      }
-    }
-    checkPermissions();
-  }, []);
+  const { permissionsError, isPermissionsLoading } = useCheckPermissions();
 
   return (
     <>
@@ -71,10 +54,12 @@ export const FleetServerRequirementPage: React.FunctionComponent<
         <FlexItemWithMinWidth grow={false}>
           {deploymentUrl ? (
             <CloudInstructions deploymentUrl={deploymentUrl} />
+          ) : !authz.fleet.addFleetServers ? (
+            <FleetServerMissingKbnPrivileges />
           ) : isPermissionsLoading ? (
             <Loading />
           ) : permissionsError ? (
-            <FleetServerMissingPrivileges />
+            <FleetServerMissingESPrivileges />
           ) : showEnrollmentRecommendation ? (
             <EnrollmentRecommendation showStandaloneTab={showStandaloneTab} />
           ) : (

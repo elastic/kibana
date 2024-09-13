@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export type { ChromeBreadcrumbsAppendExtension, ChromeBreadcrumb } from './breadcrumb';
@@ -20,10 +21,41 @@ export type {
   ChromeHelpExtensionMenuGitHubLink,
   ChromeGlobalHelpExtensionMenuLink,
 } from './help_extension';
-export type { ChromeNavControls, ChromeNavControl } from './nav_controls';
+export type { ChromeNavControls, ChromeNavControl, ChromeHelpMenuLink } from './nav_controls';
 export type { ChromeNavLinks, ChromeNavLink } from './nav_links';
 export type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
 } from './recently_accessed';
-export type { ChromeBadge, ChromeUserBanner } from './types';
+export type { ChromeBadge, ChromeUserBanner, ChromeStyle } from './types';
+
+export type {
+  ChromeProjectNavigationNode,
+  AppDeepLinkId,
+  AppId,
+  CloudLinkId,
+  CloudLink,
+  CloudLinks,
+  CloudURLs,
+  SideNavCompProps,
+  SideNavComponent,
+  SideNavNodeStatus,
+  ChromeSetProjectBreadcrumbsParams,
+  ChromeProjectBreadcrumb,
+  NodeDefinition,
+  NodeDefinitionWithChildren,
+  RenderAs as NodeRenderAs,
+  EuiThemeSize,
+  NavigationTreeDefinition,
+  GroupDefinition,
+  ItemDefinition,
+  PresetDefinition,
+  RecentlyAccessedDefinition,
+  NavigationGroupPreset,
+  RootNavigationItemDefinition,
+  NavigationTreeDefinitionUI,
+  SolutionNavigationDefinition,
+  SolutionNavigationDefinitions,
+  EuiSideNavItemTypeEnhanced,
+  RenderAs,
+} from './project_navigation';

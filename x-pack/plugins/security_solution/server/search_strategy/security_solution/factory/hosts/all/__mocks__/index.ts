@@ -7,16 +7,13 @@
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import type { HostsRequestOptions } from '../../../../../../../common/api/search_strategy';
+import { HostsFields } from '../../../../../../../common/api/search_strategy/hosts/model/sort';
 
-import type {
-  HostAggEsItem,
-  HostsRequestOptions,
-} from '../../../../../../../common/search_strategy';
-import { Direction, HostsFields, HostsQueries } from '../../../../../../../common/search_strategy';
-import type { EndpointAppContextService } from '../../../../../../endpoint/endpoint_app_context_services';
-import type { EndpointAppContext } from '../../../../../../endpoint/types';
+import type { HostAggEsItem } from '../../../../../../../common/search_strategy';
+import { Direction, HostsQueries } from '../../../../../../../common/search_strategy';
+import { createMockEndpointAppContext } from '../../../../../../endpoint/mocks';
 
 export const mockOptions: HostsRequestOptions = {
   defaultIndex: [
@@ -34,6 +31,7 @@ export const mockOptions: HostsRequestOptions = {
   pagination: { activePage: 0, cursorStart: 0, fakePossibleCount: 50, querySize: 10 },
   timerange: { interval: '12h', from: '2020-09-03T09:15:21.415Z', to: '2020-09-04T09:15:21.415Z' },
   sort: { direction: Direction.desc, field: HostsFields.lastSeen },
+  isNewRiskScoreModuleInstalled: false,
 };
 
 export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
@@ -713,15 +711,6 @@ export const expectedDsl = {
 export const mockDeps = {
   esClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: {} as SavedObjectsClientContract,
-  endpointContext: {
-    logFactory: {
-      get: jest.fn(),
-    },
-    config: jest.fn().mockResolvedValue({}),
-    experimentalFeatures: {
-      ...allowedExperimentalValues,
-    },
-    service: {} as EndpointAppContextService,
-  } as EndpointAppContext,
+  endpointContext: createMockEndpointAppContext(),
   request: {} as KibanaRequest,
 };

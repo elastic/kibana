@@ -14,12 +14,12 @@ import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technica
 import type { MgetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common/types/domain';
 import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import type { AlertInfo } from '../../common/types';
 import type {
-  RemoveAlertsFromCaseRequest,
+  RemoveCaseIdFromAlertsRequest,
   UpdateAlertCasesRequest,
   UpdateAlertStatusRequest,
 } from '../../client/alerts/types';
@@ -43,7 +43,7 @@ export class AlertService {
       const { ids, indices } = AlertService.getUniqueIdsIndices(alerts);
 
       const builtAggs = aggregationBuilders.reduce((acc, agg) => {
-        return { ...acc, ...agg.build() };
+        return Object.assign(acc, agg.build());
       }, {});
 
       const res = await this.scopedClusterClient.search({
@@ -237,7 +237,7 @@ export class AlertService {
   public async removeCaseIdFromAlerts({
     alerts,
     caseId,
-  }: RemoveAlertsFromCaseRequest): Promise<void> {
+  }: RemoveCaseIdFromAlertsRequest): Promise<void> {
     try {
       const nonEmptyAlerts = this.getNonEmptyAlerts(alerts);
 
@@ -250,11 +250,31 @@ export class AlertService {
         caseId,
       });
     } catch (error) {
-      throw createCaseError({
-        message: `Failed to remove case ${caseId} from alerts: ${error}`,
-        error,
-        logger: this.logger,
+      /**
+       * We intentionally do not throw an error.
+       * Users should be able to remove alerts from a case even
+       * in the event of an error produced by the alerts client
+       */
+      this.logger.error(`Failed removing case ${caseId} from alerts: ${error}`);
+    }
+  }
+
+  public async removeCaseIdsFromAllAlerts({ caseIds }: { caseIds: string[] }): Promise<void> {
+    try {
+      if (caseIds.length <= 0) {
+        return;
+      }
+
+      await this.alertsClient.removeCaseIdsFromAllAlerts({
+        caseIds,
       });
+    } catch (error) {
+      /**
+       * We intentionally do not throw an error.
+       * Users should be able to remove alerts from cases even
+       * in the event of an error produced by the alerts client
+       */
+      this.logger.error(`Failed removing cases ${caseIds} for all alerts: ${error}`);
     }
   }
 

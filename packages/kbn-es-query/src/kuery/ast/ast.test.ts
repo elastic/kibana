@@ -1,18 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fromKueryExpression, fromLiteralExpression, toElasticsearchQuery } from './ast';
+import {
+  fromKueryExpression,
+  fromLiteralExpression,
+  toElasticsearchQuery,
+  toKqlExpression,
+} from './ast';
 import { nodeTypes } from '../node_types';
 import { DataViewBase } from '../../..';
 import { KueryNode } from '../types';
 import { fields } from '../../filters/stubs';
-
-jest.mock('../grammar');
+import { performance } from 'perf_hooks';
 
 describe('kuery AST API', () => {
   let indexPattern: DataViewBase;
@@ -271,6 +276,43 @@ describe('kuery AST API', () => {
       const actual = fromKueryExpression('nestedField:{ nestedChild:{ doublyNestedChild:foo } }');
       expect(actual).toEqual(expected);
     });
+
+    describe('performance', () => {
+      const NUM_RUNS = 100;
+      it('with simple expression', () => {
+        const start = performance.now();
+        for (let i = 0; i < NUM_RUNS; i++) {
+          fromKueryExpression(
+            'not fleet-agent-actions.attributes.sent_at: * and fleet-agent-actions.attributes.agent_id:1234567'
+          );
+        }
+        const elapsed = performance.now() - start;
+        const opsPerSec = NUM_RUNS / (elapsed / 1000);
+        expect(opsPerSec).toBeGreaterThan(1000);
+      });
+
+      it('with complex expression', () => {
+        const start = performance.now();
+        for (let i = 0; i < NUM_RUNS; i++) {
+          fromKueryExpression(
+            `((alert.attributes.alertTypeId:.index-threshold and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:siem.signals and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:siem.notifications and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:metrics.alert.threshold and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:metrics.alert.inventory.threshold and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:logs.alert.document.count and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_cluster_health and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_license_expiration and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_cpu_usage and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_nodes_changed and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_logstash_version_mismatch and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_kibana_version_mismatch and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_elasticsearch_version_mismatch and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:apm.transaction_duration and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:apm.transaction_duration_anomaly and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:apm.error_rate and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:xpack.uptime.alerts.monitorStatus and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:xpack.uptime.alerts.tls and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:xpack.uptime.alerts.durationAnomaly and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)))`
+          );
+        }
+        const elapsed = performance.now() - start;
+        const opsPerSec = NUM_RUNS / (elapsed / 1000);
+        expect(opsPerSec).toBeGreaterThan(100);
+      });
+
+      it('with many subqueries', () => {
+        const start = performance.now();
+        for (let i = 0; i < NUM_RUNS; i++) {
+          fromKueryExpression(`((((((((((foo))))))))))`);
+        }
+        const elapsed = performance.now() - start;
+        const opsPerSec = NUM_RUNS / (elapsed / 1000);
+        expect(opsPerSec).toBeGreaterThan(1000);
+      });
+    });
   });
 
   describe('fromLiteralExpression', () => {
@@ -385,6 +427,46 @@ describe('kuery AST API', () => {
       const expected = nodeTypes.function.toElasticsearchQuery(node, indexPattern, config);
       const result = toElasticsearchQuery(node, indexPattern, config);
       expect(result).toEqual(expected);
+    });
+  });
+
+  describe('toKqlExpression', () => {
+    test('function node', () => {
+      const node = nodeTypes.function.buildNode('exists', 'response');
+      const result = toKqlExpression(node);
+      expect(result).toEqual('response: *');
+    });
+
+    test('literal node', () => {
+      const node = nodeTypes.literal.buildNode('foo');
+      const result = toKqlExpression(node);
+      expect(result).toEqual('foo');
+    });
+
+    test('wildcard node', () => {
+      const node = nodeTypes.wildcard.buildNode('foo*bar');
+      const result = toKqlExpression(node);
+      expect(result).toEqual('foo*bar');
+    });
+
+    test('should throw an error with invalid node type', () => {
+      const noTypeNode = nodeTypes.function.buildNode('exists', 'foo');
+
+      // @ts-expect-error
+      delete noTypeNode.type;
+      expect(() => toKqlExpression(noTypeNode)).toThrowErrorMatchingInlineSnapshot(
+        `"Unknown KQL node type: \\"undefined\\""`
+      );
+    });
+
+    test('fromKueryExpression toKqlExpression', () => {
+      const node = fromKueryExpression(
+        'field: (value AND value2 OR "value3") OR nested: { field2: value4 }'
+      );
+      const result = toKqlExpression(node);
+      expect(result).toMatchInlineSnapshot(
+        `"(((field: value AND field: value2) OR field: \\"value3\\") OR nested: { field2: value4 })"`
+      );
     });
   });
 });

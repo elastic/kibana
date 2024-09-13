@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/advanced-settings-plugin",
-  "owner": "@elastic/appex-sharedux",
+  "owner": "@elastic/appex-sharedux @elastic/kibana-management",
   "plugin": {
     "id": "advancedSettings",
     "server": true,
@@ -14,8 +14,6 @@
       "usageCollection"
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "kibanaUtils"
     ]
   }
 }

@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import path from 'path';
 import expect from '@kbn/expect';
+import { byIdAscComparator } from '@kbn/core-saved-objects-import-export-server-internal/src/export/utils';
 import { PluginFunctionalProviderContext } from '../../services';
 
 const fixturePaths = {
@@ -21,8 +23,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/116059
-  describe.skip('saved objects management with hidden types', () => {
+  describe('saved objects management with hidden types', () => {
     before(async () => {
       await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
@@ -48,11 +49,13 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           .expect(200)
           .then((resp) => {
             expect(
-              resp.body.saved_objects.map((obj: any) => ({
-                id: obj.id,
-                type: obj.type,
-                hidden: obj.meta.hiddenType,
-              }))
+              resp.body.saved_objects
+                .map((obj: any) => ({
+                  id: obj.id,
+                  type: obj.type,
+                  hidden: obj.meta.hiddenType,
+                }))
+                .sort(byIdAscComparator)
             ).to.eql([
               {
                 id: 'obj_1',

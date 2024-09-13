@@ -1,26 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { chain } from 'lodash';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  DEFAULT_INDEX_TYPES_MAP,
+  type IndexMapping,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type {
   BaseState,
   CalculateExcludeFiltersState,
   UpdateSourceMappingsPropertiesState,
-  CheckTargetMappingsState,
+  CheckTargetTypesMappingsState,
   CheckUnknownDocumentsState,
   CheckVersionIndexReadyActions,
   CleanupUnknownAndExcluded,
   CleanupUnknownAndExcludedWaitForTaskState,
-  CloneTempToSource,
+  CloneTempToTarget,
   CreateNewTargetState,
   CreateReindexTempState,
   FatalState,
@@ -35,7 +40,6 @@ import type {
   OutdatedDocumentsSearchOpenPit,
   OutdatedDocumentsSearchRead,
   OutdatedDocumentsTransform,
-  PostInitState,
   PrepareCompatibleMigration,
   RefreshTarget,
   ReindexSourceToTempClosePit,
@@ -51,6 +55,10 @@ import type {
   UpdateTargetMappingsPropertiesState,
   UpdateTargetMappingsPropertiesWaitForTaskState,
   WaitForYellowSourceState,
+  ReadyToReindexSyncState,
+  DoneReindexingSyncState,
+  LegacyCheckClusterRoutingAllocationState,
+  CheckClusterRoutingAllocationState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
@@ -83,7 +91,9 @@ describe('migrations v2 model', () => {
     retryDelay: 0,
     retryAttempts: 15,
     batchSize: 1000,
+    maxBatchSize: 1000,
     maxBatchSizeBytes: 1e8,
+    maxReadBatchSizeBytes: 1234,
     discardUnknownObjects: false,
     discardCorruptObjects: false,
     indexPrefix: '.kibana',
@@ -95,6 +105,7 @@ describe('migrations v2 model', () => {
     versionAlias: '.kibana_7.11.0',
     versionIndex: '.kibana_7.11.0_001',
     tempIndex: '.kibana_7.11.0_reindex_temp',
+    tempIndexAlias: '.kibana_7.11.0_reindex_temp_alias',
     excludeOnUpgradeQuery: {
       bool: {
         must_not: [
@@ -106,7 +117,16 @@ describe('migrations v2 model', () => {
         ],
       },
     },
+    indexTypes: ['config'],
     knownTypes: ['dashboard', 'config'],
+    latestMappingsVersions: {
+      config: '10.3.0',
+      dashboard: '10.3.0',
+    },
+    hashToVersionMap: {
+      'config|someHash': '10.1.0',
+      'dashboard|anotherHash': '10.2.0',
+    },
     excludeFromUpgradeFilterHooks: {},
     migrationDocLinks: {
       resolveMigrationFailures: 'https://someurl.co/',
@@ -115,6 +135,9 @@ describe('migrations v2 model', () => {
       clusterShardLimitExceeded: 'clusterShardLimitExceeded',
     },
     waitForMigrationCompletion: false,
+    mustRelocateDocuments: false,
+    indexTypesMap: DEFAULT_INDEX_TYPES_MAP,
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
   };
   const postInitState = {
     ...baseState,
@@ -154,6 +177,7 @@ describe('migrations v2 model', () => {
       type: 'retryable_es_client_error',
       message: 'snapshot_in_progress_exception',
     };
+
     test('increments retryCount, exponential retryDelay if an action fails with a retryable_es_client_error', () => {
       const states = new Array(10).fill(1).map(() => {
         state = model(state, Either.left(retryableError));
@@ -280,38 +304,63 @@ describe('migrations v2 model', () => {
         },
       } as const;
 
+      test("INIT -> FATAL when .kibana points to newer version's index", () => {
+        const res: ResponseType<'INIT'> = Either.right({
+          '.kibana_7.12.0_001': {
+            aliases: {
+              '.kibana': {},
+              '.kibana_7.12.0': {},
+            },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+          '.kibana_7.11.0_001': {
+            aliases: { '.kibana_7.11.0': {} },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+        });
+        const newState = model(initBaseState, res) as FatalState;
+
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"The .kibana alias is pointing to a newer version of Kibana: v7.12.0"`
+        );
+      });
+
+      test('INIT -> FATAL when .kibana points to multiple indices', () => {
+        const res: ResponseType<'INIT'> = Either.right({
+          '.kibana_7.12.0_001': {
+            aliases: {
+              '.kibana': {},
+              '.kibana_7.12.0': {},
+            },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+          '.kibana_7.11.0_001': {
+            aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
+          },
+        });
+        const newState = model(initBaseState, res) as FatalState;
+
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"The .kibana alias is pointing to multiple indices: .kibana_7.12.0_001,.kibana_7.11.0_001."`
+        );
+      });
+
       describe('if waitForMigrationCompletion=true', () => {
         const initState = Object.assign({}, initBaseState, {
           waitForMigrationCompletion: true,
         });
-        test('INIT -> INIT when cluster routing allocation is incompatible', () => {
-          const res: ResponseType<'INIT'> = Either.left({
-            type: 'incompatible_cluster_routing_allocation',
-          });
-          const newState = model(initState, res) as FatalState;
 
-          expect(newState.controlState).toEqual('INIT');
-          expect(newState.retryCount).toEqual(1);
-          expect(newState.retryDelay).toEqual(2000);
-          expect(newState.logs[0]).toMatchInlineSnapshot(`
-            Object {
-              "level": "error",
-              "message": "Action failed with '[incompatible_cluster_routing_allocation] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to routingAllocationDisabled for more information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
-            }
-          `);
-        });
-        test("INIT -> FATAL when .kibana points to newer version's index", () => {
+        test('INIT -> FATAL when later version alias exists', () => {
           const res: ResponseType<'INIT'> = Either.right({
-            '.kibana_7.12.0_001': {
-              aliases: {
-                '.kibana': {},
-                '.kibana_7.12.0': {},
-              },
-              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-              settings: {},
-            },
             '.kibana_7.11.0_001': {
-              aliases: { '.kibana_7.11.0': {} },
+              aliases: { '.kibana_7.12.0': {}, '.kibana': {} },
               mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
               settings: {},
             },
@@ -320,32 +369,10 @@ describe('migrations v2 model', () => {
 
           expect(newState.controlState).toEqual('FATAL');
           expect(newState.reason).toMatchInlineSnapshot(
-            `"The .kibana alias is pointing to a newer version of Kibana: v7.12.0"`
+            `"The .kibana_7.12.0 alias refers to a newer version of Kibana: v7.12.0"`
           );
         });
-        test('INIT -> FATAL when .kibana points to multiple indices', () => {
-          const res: ResponseType<'INIT'> = Either.right({
-            '.kibana_7.12.0_001': {
-              aliases: {
-                '.kibana': {},
-                '.kibana_7.12.0': {},
-              },
-              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-              settings: {},
-            },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
-              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-              settings: {},
-            },
-          });
-          const newState = model(initState, res) as FatalState;
 
-          expect(newState.controlState).toEqual('FATAL');
-          expect(newState.reason).toMatchInlineSnapshot(
-            `"The .kibana alias is pointing to multiple indices: .kibana_7.12.0_001,.kibana_7.11.0_001."`
-          );
-        });
         test('INIT -> WAIT_FOR_MIGRATION_COMPLETION when .kibana points to an index with an invalid version', () => {
           // If users tamper with our index version naming scheme we can no
           // longer accurately detect a newer version. Older Kibana versions
@@ -358,22 +385,23 @@ describe('migrations v2 model', () => {
             '.kibana_7.invalid.0_001': {
               aliases: {
                 '.kibana': {},
-                '.kibana_7.12.0': {},
+                '.kibana_7.11.0': {},
               },
               mappings: mappingsWithUnknownType,
               settings: {},
             },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana_7.11.0': {} },
+            '.kibana_7.10.0_001': {
+              aliases: { '.kibana_7.10.0': {} },
               mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
               settings: {},
             },
           });
-          const newState = model(initState, res) as WaitForYellowSourceState;
+          const newState = model(initState, res);
 
           expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
           expect(newState.retryDelay).toBe(2000);
         });
+
         test('INIT -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a v2 migrations index (>= 7.11.0)', () => {
           const res: ResponseType<'INIT'> = Either.right({
             '.kibana_7.11.0_001': {
@@ -395,11 +423,12 @@ describe('migrations v2 model', () => {
               versionIndex: '.kibana_7.12.0_001',
             },
             res
-          ) as WaitForYellowSourceState;
+          );
 
           expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
           expect(newState.retryDelay).toEqual(2000);
         });
+
         test('INIT -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a v1 migrations index (>= 6.5 < 7.11.0)', () => {
           const res: ResponseType<'INIT'> = Either.right({
             '.kibana_3': {
@@ -410,11 +439,12 @@ describe('migrations v2 model', () => {
               settings: {},
             },
           });
-          const newState = model(initState, res) as WaitForYellowSourceState;
+          const newState = model(initState, res);
 
           expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
           expect(newState.retryDelay).toEqual(2000);
         });
+
         test('INIT -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a legacy index (>= 6.0.0 < 6.5)', () => {
           const res: ResponseType<'INIT'> = Either.right({
             '.kibana': {
@@ -428,6 +458,7 @@ describe('migrations v2 model', () => {
           expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
           expect(newState.retryDelay).toEqual(2000);
         });
+
         test('INIT -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a custom kibana.index name (>= 6.5 < 7.11.0)', () => {
           const res: ResponseType<'INIT'> = Either.right({
             'my-saved-objects_3': {
@@ -447,11 +478,12 @@ describe('migrations v2 model', () => {
               versionIndex: 'my-saved-objects_7.11.0_001',
             },
             res
-          ) as WaitForYellowSourceState;
+          );
 
           expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
           expect(newState.retryDelay).toEqual(2000);
         });
+
         test('INIT -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a custom kibana.index v2 migrations index (>= 7.11.0)', () => {
           const res: ResponseType<'INIT'> = Either.right({
             'my-saved-objects_7.11.0': {
@@ -472,11 +504,12 @@ describe('migrations v2 model', () => {
               versionIndex: 'my-saved-objects_7.12.0_001',
             },
             res
-          ) as WaitForYellowSourceState;
+          );
 
           expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
           expect(newState.retryDelay).toEqual(2000);
         });
+
         test('INIT -> WAIT_FOR_MIGRATION_COMPLETION when no indices/aliases exist', () => {
           const res: ResponseType<'INIT'> = Either.right({});
           const newState = model(initState, res);
@@ -490,68 +523,7 @@ describe('migrations v2 model', () => {
         const initState = Object.assign({}, initBaseState, {
           waitForMigrationCompletion: false,
         });
-        test('INIT -> INIT when cluster routing allocation is incompatible', () => {
-          const res: ResponseType<'INIT'> = Either.left({
-            type: 'incompatible_cluster_routing_allocation',
-          });
-          const newState = model(initState, res) as FatalState;
 
-          expect(newState.controlState).toEqual('INIT');
-          expect(newState.retryCount).toEqual(1);
-          expect(newState.retryDelay).toEqual(2000);
-          expect(newState.logs[0]).toMatchInlineSnapshot(`
-            Object {
-              "level": "error",
-              "message": "Action failed with '[incompatible_cluster_routing_allocation] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to routingAllocationDisabled for more information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
-            }
-          `);
-        });
-        test("INIT -> FATAL when .kibana points to newer version's index", () => {
-          const res: ResponseType<'INIT'> = Either.right({
-            '.kibana_7.12.0_001': {
-              aliases: {
-                '.kibana': {},
-                '.kibana_7.12.0': {},
-              },
-              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-              settings: {},
-            },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana_7.11.0': {} },
-              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-              settings: {},
-            },
-          });
-          const newState = model(initState, res) as FatalState;
-
-          expect(newState.controlState).toEqual('FATAL');
-          expect(newState.reason).toMatchInlineSnapshot(
-            `"The .kibana alias is pointing to a newer version of Kibana: v7.12.0"`
-          );
-        });
-        test('INIT -> FATAL when .kibana points to multiple indices', () => {
-          const res: ResponseType<'INIT'> = Either.right({
-            '.kibana_7.12.0_001': {
-              aliases: {
-                '.kibana': {},
-                '.kibana_7.12.0': {},
-              },
-              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-              settings: {},
-            },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
-              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-              settings: {},
-            },
-          });
-          const newState = model(initState, res) as FatalState;
-
-          expect(newState.controlState).toEqual('FATAL');
-          expect(newState.reason).toMatchInlineSnapshot(
-            `"The .kibana alias is pointing to multiple indices: .kibana_7.12.0_001,.kibana_7.11.0_001."`
-          );
-        });
         test('INIT -> WAIT_FOR_YELLOW_SOURCE when .kibana points to an index with an invalid version', () => {
           // If users tamper with our index version naming scheme we can no
           // longer accurately detect a newer version. Older Kibana versions
@@ -564,13 +536,13 @@ describe('migrations v2 model', () => {
             '.kibana_7.invalid.0_001': {
               aliases: {
                 '.kibana': {},
-                '.kibana_7.12.0': {},
+                '.kibana_7.11.0': {},
               },
               mappings: mappingsWithUnknownType,
               settings: {},
             },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana_7.11.0': {} },
+            '.kibana_7.10.0_001': {
+              aliases: { '.kibana_7.10.0': {} },
               mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
               settings: {},
             },
@@ -581,8 +553,8 @@ describe('migrations v2 model', () => {
           expect(newState.sourceIndex.value).toBe('.kibana_7.invalid.0_001');
           expect(newState.aliases).toEqual({
             '.kibana': '.kibana_7.invalid.0_001',
-            '.kibana_7.11.0': '.kibana_7.11.0_001',
-            '.kibana_7.12.0': '.kibana_7.invalid.0_001',
+            '.kibana_7.10.0': '.kibana_7.10.0_001',
+            '.kibana_7.11.0': '.kibana_7.invalid.0_001',
           });
         });
 
@@ -639,7 +611,8 @@ describe('migrations v2 model', () => {
             '.kibana': '.kibana_3',
           });
         });
-        test('INIT -> LEGACY_SET_WRITE_BLOCK when migrating from a legacy index (>= 6.0.0 < 6.5)', () => {
+
+        test('INIT -> LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION when migrating from a legacy index (>= 6.0.0 < 6.5)', () => {
           const res: ResponseType<'INIT'> = Either.right({
             '.kibana': {
               aliases: {},
@@ -650,7 +623,7 @@ describe('migrations v2 model', () => {
           const newState = model(initState, res);
 
           expect(newState).toMatchObject({
-            controlState: 'LEGACY_SET_WRITE_BLOCK',
+            controlState: 'LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION',
             sourceIndex: Option.some('.kibana_pre6.5.0_001'),
             targetIndex: '.kibana_7.11.0_001',
           });
@@ -678,6 +651,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
         });
+
         test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a custom kibana.index name (>= 6.5 < 7.11.0)', () => {
           const res: ResponseType<'INIT'> = Either.right({
             'my-saved-objects_3': {
@@ -704,6 +678,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
         });
+
         test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a custom kibana.index v2 migrations index (>= 7.11.0)', () => {
           const res: ResponseType<'INIT'> = Either.right({
             'my-saved-objects_7.11.0': {
@@ -732,7 +707,8 @@ describe('migrations v2 model', () => {
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
         });
-        test('INIT -> CREATE_NEW_TARGET when no indices/aliases exist', () => {
+
+        test('INIT -> CREATE_NEW_TARGET when the index does not exist and the migrator is NOT involved in a relocation', () => {
           const res: ResponseType<'INIT'> = Either.right({});
           const newState = model(initState, res);
 
@@ -740,6 +716,30 @@ describe('migrations v2 model', () => {
             controlState: 'CREATE_NEW_TARGET',
             sourceIndex: Option.none,
             targetIndex: '.kibana_7.11.0_001',
+          });
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
+        });
+
+        test('INIT -> CREATE_REINDEX_TEMP when the index does not exist and the migrator is involved in a relocation', () => {
+          const res: ResponseType<'INIT'> = Either.right({});
+          const newState = model(
+            {
+              ...initState,
+              mustRelocateDocuments: true,
+            },
+            res
+          );
+
+          expect(newState).toMatchObject({
+            controlState: 'CREATE_REINDEX_TEMP',
+            sourceIndex: Option.none,
+            targetIndex: '.kibana_7.11.0_001',
+            versionIndexReadyActions: Option.some([
+              { add: { index: '.kibana_7.11.0_001', alias: '.kibana' } },
+              { add: { index: '.kibana_7.11.0_001', alias: '.kibana_7.11.0' } },
+              { remove_index: { index: '.kibana_7.11.0_reindex_temp' } },
+            ]),
           });
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
@@ -778,11 +778,12 @@ describe('migrations v2 model', () => {
             settings: {},
           },
         });
-        const newState = model(waitForMState, res) as WaitForYellowSourceState;
+        const newState = model(waitForMState, res);
 
         expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
         expect(newState.retryDelay).toBe(2000);
       });
+
       test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a v2 migrations index (>= 7.11.0)', () => {
         const res: ResponseType<'WAIT_FOR_MIGRATION_COMPLETION'> = Either.right({
           '.kibana_7.11.0_001': {
@@ -806,11 +807,12 @@ describe('migrations v2 model', () => {
             },
           },
           res
-        ) as WaitForYellowSourceState;
+        );
 
         expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
         expect(newState.retryDelay).toEqual(2000);
       });
+
       test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a v1 migrations index (>= 6.5 < 7.11.0)', () => {
         const res: ResponseType<'WAIT_FOR_MIGRATION_COMPLETION'> = Either.right({
           '.kibana_3': {
@@ -821,11 +823,12 @@ describe('migrations v2 model', () => {
             settings: {},
           },
         });
-        const newState = model(waitForMState, res) as WaitForYellowSourceState;
+        const newState = model(waitForMState, res);
 
         expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
         expect(newState.retryDelay).toEqual(2000);
       });
+
       test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a legacy index (>= 6.0.0 < 6.5)', () => {
         const res: ResponseType<'WAIT_FOR_MIGRATION_COMPLETION'> = Either.right({
           '.kibana': {
@@ -839,6 +842,7 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
         expect(newState.retryDelay).toEqual(2000);
       });
+
       test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a custom kibana.index name (>= 6.5 < 7.11.0)', () => {
         const res: ResponseType<'WAIT_FOR_MIGRATION_COMPLETION'> = Either.right({
           'my-saved-objects_3': {
@@ -857,11 +861,12 @@ describe('migrations v2 model', () => {
             versionIndex: 'my-saved-objects_7.11.0_001',
           },
           res
-        ) as WaitForYellowSourceState;
+        );
 
         expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
         expect(newState.retryDelay).toEqual(2000);
       });
+
       test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a custom kibana.index v2 migrations index (>= 7.11.0)', () => {
         const res: ResponseType<'WAIT_FOR_MIGRATION_COMPLETION'> = Either.right({
           'my-saved-objects_7.11.0': {
@@ -881,11 +886,12 @@ describe('migrations v2 model', () => {
             versionIndex: 'my-saved-objects_7.12.0_001',
           },
           res
-        ) as WaitForYellowSourceState;
+        );
 
         expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
         expect(newState.retryDelay).toEqual(2000);
       });
+
       test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when no indices/aliases exist', () => {
         const res: ResponseType<'WAIT_FOR_MIGRATION_COMPLETION'> = Either.right({});
         const newState = model(waitForMState, res);
@@ -911,6 +917,37 @@ describe('migrations v2 model', () => {
       });
     });
 
+    describe('LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
+      const legacyCheckClusterRoutingAllocationState: LegacyCheckClusterRoutingAllocationState = {
+        ...postInitState,
+        controlState: 'LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION',
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        sourceIndexMappings: Option.some({ properties: {} }) as Option.Some<IndexMapping>,
+        legacyPreMigrationDoneActions: [],
+        legacyIndex: '',
+      };
+
+      test('LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION -> LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION when cluster allocation is not compatible', () => {
+        const res: ResponseType<'LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.left({
+          type: 'incompatible_cluster_routing_allocation',
+        });
+        const newState = model(legacyCheckClusterRoutingAllocationState, res);
+
+        expect(newState.controlState).toBe('LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
+
+      test('LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION -> LEGACY_SET_WRITE_BLOCK when cluster allocation is compatible', () => {
+        const res: ResponseType<'LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.right({});
+        const newState = model(legacyCheckClusterRoutingAllocationState, res);
+
+        expect(newState.controlState).toBe('LEGACY_SET_WRITE_BLOCK');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+    });
+
     describe('LEGACY_SET_WRITE_BLOCK', () => {
       const legacySetWriteBlockState: LegacySetWriteBlockState = {
         ...postInitState,
@@ -920,6 +957,7 @@ describe('migrations v2 model', () => {
         legacyPreMigrationDoneActions: [],
         legacyIndex: '',
       };
+
       test('LEGACY_SET_WRITE_BLOCK -> LEGACY_SET_WRITE_BLOCK if action fails with set_write_block_failed', () => {
         const res: ResponseType<'LEGACY_SET_WRITE_BLOCK'> = Either.left({
           type: 'retryable_es_client_error',
@@ -930,6 +968,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
+
       test('LEGACY_SET_WRITE_BLOCK -> LEGACY_CREATE_REINDEX_TARGET if action fails with index_not_found_exception', () => {
         const res: ResponseType<'LEGACY_SET_WRITE_BLOCK'> = Either.left({
           type: 'index_not_found_exception',
@@ -940,6 +979,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('LEGACY_SET_WRITE_BLOCK -> LEGACY_CREATE_REINDEX_TARGET if action succeeds with set_write_block_succeeded', () => {
         const res: ResponseType<'LEGACY_SET_WRITE_BLOCK'> = Either.right(
           'set_write_block_succeeded'
@@ -960,6 +1000,7 @@ describe('migrations v2 model', () => {
         legacyPreMigrationDoneActions: [],
         legacyIndex: '',
       };
+
       test('LEGACY_CREATE_REINDEX_TARGET -> LEGACY_REINDEX', () => {
         const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> =
           Either.right('create_index_succeeded');
@@ -968,6 +1009,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('LEGACY_CREATE_REINDEX_TARGET -> LEGACY_CREATE_REINDEX_TARGET if action fails with index_not_green_timeout', () => {
         const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> = Either.left({
           message: '[index_not_green_timeout] Timeout waiting for ...',
@@ -984,6 +1026,7 @@ describe('migrations v2 model', () => {
           }
         `);
       });
+
       test('LEGACY_CREATE_REINDEX_TARGET -> LEGACY_REINDEX resets retry count and retry delay if action succeeds', () => {
         const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> =
           Either.right('create_index_succeeded');
@@ -997,13 +1040,14 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('LEGACY_CREATE_REINDEX_TARGET -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
         const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> = Either.left({
           type: 'cluster_shard_limit_exceeded',
         });
-        const newState = model(legacyCreateReindexTargetState, res);
+        const newState = model(legacyCreateReindexTargetState, res) as FatalState;
         expect(newState.controlState).toEqual('FATAL');
-        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+        expect(newState.reason).toMatchInlineSnapshot(
           `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
         );
       });
@@ -1018,6 +1062,7 @@ describe('migrations v2 model', () => {
         legacyPreMigrationDoneActions: [],
         legacyIndex: '',
       };
+
       test('LEGACY_REINDEX -> LEGACY_REINDEX_WAIT_FOR_TASK', () => {
         const res: ResponseType<'LEGACY_REINDEX'> = Either.right({ taskId: 'task id' });
         const newState = model(legacyReindexState, res);
@@ -1037,6 +1082,7 @@ describe('migrations v2 model', () => {
         legacyIndex: 'legacy_index_name',
         legacyReindexTaskId: 'test_task_id',
       };
+
       test('LEGACY_REINDEX_WAIT_FOR_TASK -> LEGACY_DELETE if action succeeds', () => {
         const res: ResponseType<'LEGACY_REINDEX_WAIT_FOR_TASK'> = Either.right('reindex_succeeded');
         const newState = model(legacyReindexWaitForTaskState, res);
@@ -1044,6 +1090,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('LEGACY_REINDEX_WAIT_FOR_TASK -> LEGACY_DELETE if action fails with index_not_found_exception for reindex source', () => {
         const res: ResponseType<'LEGACY_REINDEX_WAIT_FOR_TASK'> = Either.left({
           type: 'index_not_found_exception',
@@ -1054,6 +1101,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('LEGACY_REINDEX_WAIT_FOR_TASK -> LEGACY_DELETE if action fails with target_index_had_write_block', () => {
         const res: ResponseType<'LEGACY_REINDEX_WAIT_FOR_TASK'> = Either.left({
           type: 'target_index_had_write_block',
@@ -1063,6 +1111,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('LEGACY_REINDEX_WAIT_FOR_TASK -> LEGACY_REINDEX_WAIT_FOR_TASK if action fails with wait_for_task_completion_timeout', () => {
         const res: ResponseType<'LEGACY_REINDEX_WAIT_FOR_TASK'> = Either.left({
           message: '[timeout_exception] Timeout waiting for ...',
@@ -1073,6 +1122,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
+
       test('LEGACY_REINDEX_WAIT_FOR_TASK -> LEGACY_REINDEX_WAIT_FOR_TASK with incremented retryCount if action fails with wait_for_task_completion_timeout a second time', () => {
         const state = Object.assign({}, legacyReindexWaitForTaskState, { retryCount: 1 });
         const res: ResponseType<'LEGACY_REINDEX_WAIT_FOR_TASK'> = Either.left({
@@ -1095,6 +1145,7 @@ describe('migrations v2 model', () => {
         legacyPreMigrationDoneActions: [],
         legacyIndex: 'legacy_index_name',
       };
+
       test('LEGACY_DELETE -> SET_SOURCE_WRITE_BLOCK if action succeeds', () => {
         const res: ResponseType<'LEGACY_DELETE'> = Either.right('update_aliases_succeeded');
         const newState = model(legacyDeleteState, res);
@@ -1102,6 +1153,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('LEGACY_DELETE -> SET_SOURCE_WRITE_BLOCK if action fails with index_not_found_exception for legacy index', () => {
         const res: ResponseType<'LEGACY_REINDEX_WAIT_FOR_TASK'> = Either.left({
           type: 'index_not_found_exception',
@@ -1112,6 +1164,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('LEGACY_DELETE -> SET_SOURCE_WRITE_BLOCK if action fails with remove_index_not_a_concrete_index', () => {
         const res: ResponseType<'LEGACY_DELETE'> = Either.left({
           type: 'remove_index_not_a_concrete_index',
@@ -1146,12 +1199,24 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(0);
         });
 
-        test('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES', () => {
-          const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
-          const newState = model(waitForYellowSourceState, res);
+        describe('if the migrator is NOT involved in a relocation', () => {
+          test('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES', () => {
+            const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
+            const newState = model(waitForYellowSourceState, res);
+            expect(newState.controlState).toEqual('UPDATE_SOURCE_MAPPINGS_PROPERTIES');
+          });
+        });
 
-          expect(newState).toMatchObject({
-            controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+        describe('if the migrator is involved in a relocation', () => {
+          // no need to attempt to update the mappings, we are going to reindex
+          test('WAIT_FOR_YELLOW_SOURCE -> CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
+            const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
+            const newState = model(
+              { ...waitForYellowSourceState, mustRelocateDocuments: true },
+              res
+            );
+
+            expect(newState.controlState).toEqual('CHECK_CLUSTER_ROUTING_ALLOCATION');
           });
         });
       });
@@ -1196,10 +1261,7 @@ describe('migrations v2 model', () => {
             'update_mappings_succeeded'
           );
           const newState = model(updateSourceMappingsPropertiesState, res);
-
-          expect(newState).toMatchObject({
-            controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
-          });
+          expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED');
         });
 
         test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if mappings changes are compatible and index is already migrated', () => {
@@ -1229,15 +1291,12 @@ describe('migrations v2 model', () => {
       });
 
       describe('if action fails', () => {
-        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CHECK_UNKNOWN_DOCUMENTS if mappings changes are incompatible', () => {
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CHECK_CLUSTER_ROUTING_ALLOCATION if mappings changes are incompatible', () => {
           const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.left({
             type: 'incompatible_mapping_exception',
           });
           const newState = model(updateSourceMappingsPropertiesState, res);
-
-          expect(newState).toMatchObject({
-            controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-          });
+          expect(newState.controlState).toEqual('CHECK_CLUSTER_ROUTING_ALLOCATION');
         });
 
         test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> FATAL', () => {
@@ -1250,11 +1309,12 @@ describe('migrations v2 model', () => {
               .set(['aliases', '.kibana'], '.kibana_7.11.0_001')
               .value(),
             res
-          );
+          ) as FatalState;
 
-          expect(newState).toMatchObject({
-            controlState: 'FATAL',
-          });
+          expect(newState.controlState).toEqual('FATAL');
+          expect(newState.reason).toMatchInlineSnapshot(
+            `"Incompatible mappings change on already migrated Kibana instance."`
+          );
         });
       });
     });
@@ -1409,6 +1469,35 @@ describe('migrations v2 model', () => {
       });
     });
 
+    describe('CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
+      const checkClusterRoutingAllocationState: CheckClusterRoutingAllocationState = {
+        ...postInitState,
+        controlState: 'CHECK_CLUSTER_ROUTING_ALLOCATION',
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
+      };
+
+      test('CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_CLUSTER_ROUTING_ALLOCATION when cluster allocation is not compatible', () => {
+        const res: ResponseType<'CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.left({
+          type: 'incompatible_cluster_routing_allocation',
+        });
+        const newState = model(checkClusterRoutingAllocationState, res);
+
+        expect(newState.controlState).toBe('CHECK_CLUSTER_ROUTING_ALLOCATION');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
+
+      test('CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS when cluster allocation is compatible', () => {
+        const res: ResponseType<'CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.right({});
+        const newState = model(checkClusterRoutingAllocationState, res);
+
+        expect(newState.controlState).toBe('CHECK_UNKNOWN_DOCUMENTS');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+    });
+
     describe('CHECK_UNKNOWN_DOCUMENTS', () => {
       const mappingsWithUnknownType = {
         properties: {
@@ -1550,6 +1639,7 @@ describe('migrations v2 model', () => {
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
       };
+
       test('SET_SOURCE_WRITE_BLOCK -> SET_SOURCE_WRITE_BLOCK if action fails with set_write_block_failed', () => {
         const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.left({
           type: 'retryable_es_client_error',
@@ -1560,6 +1650,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
+
       test('SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS if action succeeds with set_write_block_succeeded', () => {
         const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.right(
           'set_write_block_succeeded'
@@ -1568,6 +1659,15 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('CALCULATE_EXCLUDE_FILTERS');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+      test('SET_SOURCE_WRITE_BLOCK -> REFRESH_TARGET if source index matches target index', () => {
+        const index = `.kibana_${setWriteBlockState.kibanaVersion}_001`;
+        const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.left({
+          type: 'source_equals_target' as const,
+          index,
+        });
+        const newState = model(setWriteBlockState, res);
+        expect(newState.controlState).toEqual('REFRESH_TARGET');
       });
     });
 
@@ -1579,6 +1679,7 @@ describe('migrations v2 model', () => {
         sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
         tempIndexMappings: { properties: {} },
       };
+
       test('CALCULATE_EXCLUDE_FILTERS -> CALCULATE_EXCLUDE_FILTERS if action fails with retryable error', () => {
         const res: ResponseType<'CALCULATE_EXCLUDE_FILTERS'> = Either.left({
           type: 'retryable_es_client_error',
@@ -1630,13 +1731,27 @@ describe('migrations v2 model', () => {
         sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
         tempIndexMappings: { properties: {} },
       };
-      it('CREATE_REINDEX_TEMP -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT if action succeeds', () => {
-        const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
-        const newState = model(state, res);
-        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
+
+      describe('if the migrator is NOT involved in a relocation', () => {
+        it('CREATE_REINDEX_TEMP -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT if action succeeds', () => {
+          const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
+          const newState = model(state, res);
+          expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
+        });
       });
+
+      describe('if the migrator is involved in a relocation', () => {
+        it('CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC if action succeeds', () => {
+          const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
+          const newState = model({ ...state, mustRelocateDocuments: true }, res);
+          expect(newState.controlState).toEqual('READY_TO_REINDEX_SYNC');
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
+        });
+      });
+
       it('CREATE_REINDEX_TEMP -> CREATE_REINDEX_TEMP if action fails with index_not_green_timeout', () => {
         const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.left({
           message: '[index_not_green_timeout] Timeout waiting for ...',
@@ -1665,14 +1780,63 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('CREATE_REINDEX_TEMP -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
         const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.left({
           type: 'cluster_shard_limit_exceeded',
         });
-        const newState = model(state, res);
+        const newState = model(state, res) as FatalState;
         expect(newState.controlState).toEqual('FATAL');
-        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+        expect(newState.reason).toMatchInlineSnapshot(
           `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
+        );
+      });
+    });
+
+    describe('READY_TO_REINDEX_SYNC', () => {
+      const state: ReadyToReindexSyncState = {
+        ...postInitState,
+        controlState: 'READY_TO_REINDEX_SYNC',
+      };
+
+      describe('if the migrator source index did NOT exist', () => {
+        test('READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC', () => {
+          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+            type: 'synchronization_successful' as const,
+            data: [],
+          });
+          const newState = model(state, res);
+          expect(newState.controlState).toEqual('DONE_REINDEXING_SYNC');
+        });
+      });
+
+      describe('if the migrator source index did exist', () => {
+        test('READY_TO_REINDEX_SYNC -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT', () => {
+          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+            type: 'synchronization_successful' as const,
+            data: [],
+          });
+          const newState = model(
+            {
+              ...state,
+              sourceIndex: Option.fromNullable('.kibana'),
+              sourceIndexMappings: Option.fromNullable({} as IndexMapping),
+            },
+            res
+          );
+          expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
+        });
+      });
+
+      test('READY_TO_REINDEX_SYNC -> FATAL if the synchronization between migrators fails', () => {
+        const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.left({
+          type: 'synchronization_failed',
+          error: new Error('Other migrators failed to reach the synchronization point'),
+        });
+        const newState = model(state, res) as FatalState;
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"An error occurred whilst waiting for other migrators to get to this step."`
         );
       });
     });
@@ -1727,6 +1891,8 @@ describe('migrations v2 model', () => {
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
         expect(newState.progress.processed).toBe(undefined);
         expect(newState.progress.total).toBe(1);
+        expect(newState.maxBatchSize).toBe(1000);
+        expect(newState.batchSize).toBe(1000); // don't increase batchsize above default
         expect(newState.logs).toMatchInlineSnapshot(`
           Array [
             Object {
@@ -1735,6 +1901,84 @@ describe('migrations v2 model', () => {
             },
           ]
         `);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM increases batchSize if < maxBatchSize', () => {
+        const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
+        const lastHitSortValue = [123456];
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
+          outdatedDocuments,
+          lastHitSortValue,
+          totalHits: 1,
+          processedDocs: 1,
+        });
+        let newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(600);
+        newState = model({ ...state, batchSize: 600 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(720);
+        newState = model({ ...state, batchSize: 720 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(864);
+        newState = model({ ...state, batchSize: 864 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(1000); // + 20% would have been 1036
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_TRANSFORM');
+        expect(newState.maxBatchSize).toBe(1000);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_READ if left es_response_too_large', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 4567,
+        });
+        const newState = model(state, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(500); // halves the batch size
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch with a response content length of 4567 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 500.",
+            },
+          ]
+        `);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_READ if left es_response_too_large will not reduce batch size below 1', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1.5 }, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch with a response content length of 2345 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 1.",
+            },
+          ]
+        `);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> FATAL if left es_response_too_large and batchSize already 1', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1 }, res) as FatalState;
+        expect(newState).toMatchObject({
+          controlState: 'FATAL',
+          batchSize: 1,
+          maxBatchSize: 1000,
+          reason:
+            'After reducing the read batch size to a single document, the Elasticsearch response content length was 2345bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again.',
+        });
       });
 
       it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT if no outdated documents to reindex', () => {
@@ -1812,11 +2056,52 @@ describe('migrations v2 model', () => {
         tempIndexMappings: { properties: {} },
       };
 
-      it('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> SET_TEMP_WRITE_BLOCK if action succeeded', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT'> = Either.right({});
-        const newState = model(state, res) as ReindexSourceToTempTransform;
-        expect(newState.controlState).toBe('SET_TEMP_WRITE_BLOCK');
-        expect(newState.sourceIndex).toEqual(state.sourceIndex);
+      describe('if the migrator is NOT involved in a relocation', () => {
+        it('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> SET_TEMP_WRITE_BLOCK if action succeeded', () => {
+          const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT'> = Either.right({});
+          const newState = model(state, res) as ReindexSourceToTempTransform;
+          expect(newState.controlState).toBe('SET_TEMP_WRITE_BLOCK');
+          expect(newState.sourceIndex).toEqual(state.sourceIndex);
+        });
+      });
+
+      describe('if the migrator is involved in a relocation', () => {
+        it('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> DONE_REINDEXING_SYNC if action succeeded', () => {
+          const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT'> = Either.right({});
+          const newState = model(
+            { ...state, mustRelocateDocuments: true },
+            res
+          ) as ReindexSourceToTempTransform;
+          expect(newState.controlState).toBe('DONE_REINDEXING_SYNC');
+        });
+      });
+    });
+
+    describe('DONE_REINDEXING_SYNC', () => {
+      const state: DoneReindexingSyncState = {
+        ...postInitState,
+        controlState: 'DONE_REINDEXING_SYNC',
+      };
+
+      test('DONE_REINDEXING_SYNC -> SET_TEMP_WRITE_BLOCK if synchronization succeeds', () => {
+        const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+          type: 'synchronization_successful' as const,
+          data: [],
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('SET_TEMP_WRITE_BLOCK');
+      });
+
+      test('DONE_REINDEXING_SYNC -> FATAL if the synchronization between migrators fails', () => {
+        const res: ResponseType<'DONE_REINDEXING_SYNC'> = Either.left({
+          type: 'synchronization_failed',
+          error: new Error('Other migrators failed to reach the synchronization point'),
+        });
+        const newState = model(state, res) as FatalState;
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"An error occurred whilst waiting for other migrators to get to this step."`
+        );
       });
     });
 
@@ -1911,6 +2196,7 @@ describe('migrations v2 model', () => {
         corruptDocumentIds: [],
         progress: createInitialProgress(),
       };
+
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> =
           Either.right('bulk_index_succeeded');
@@ -1919,6 +2205,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT if response is left target_index_had_write_block', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.left({
           type: 'target_index_had_write_block',
@@ -1928,6 +2215,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT if response is left index_not_found_exception', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.left({
           type: 'index_not_found_exception',
@@ -1938,6 +2226,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> FATAL if action returns left request_entity_too_large_exception', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.left({
           type: 'request_entity_too_large_exception',
@@ -1948,6 +2237,7 @@ describe('migrations v2 model', () => {
           `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option."`
         );
       });
+
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK should throw a throwBadResponse error if action failed', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.left({
           type: 'retryable_es_client_error',
@@ -1967,6 +2257,7 @@ describe('migrations v2 model', () => {
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
       };
+
       test('SET_TEMP_WRITE_BLOCK -> CLONE_TEMP_TO_TARGET when response is right', () => {
         const res: ResponseType<'SET_TEMP_WRITE_BLOCK'> = Either.right('set_write_block_succeeded');
         const newState = model(state, res);
@@ -1977,7 +2268,7 @@ describe('migrations v2 model', () => {
     });
 
     describe('CLONE_TEMP_TO_TARGET', () => {
-      const state: CloneTempToSource = {
+      const state: CloneTempToTarget = {
         ...postInitState,
         controlState: 'CLONE_TEMP_TO_TARGET',
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
@@ -2033,13 +2324,14 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toBe(0);
         expect(newState.retryDelay).toBe(0);
       });
+
       test('CLONE_TEMP_TO_TARGET -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
         const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.left({
           type: 'cluster_shard_limit_exceeded',
         });
-        const newState = model(state, res);
+        const newState = model(state, res) as FatalState;
         expect(newState.controlState).toEqual('FATAL');
-        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+        expect(newState.reason).toMatchInlineSnapshot(
           `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
         );
       });
@@ -2160,6 +2452,8 @@ describe('migrations v2 model', () => {
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
         expect(newState.progress.processed).toBe(undefined);
         expect(newState.progress.total).toBe(10);
+        expect(newState.maxBatchSize).toBe(1000);
+        expect(newState.batchSize).toBe(1000); // don't increase batchsize above default
         expect(newState.logs).toMatchInlineSnapshot(`
           Array [
             Object {
@@ -2199,6 +2493,83 @@ describe('migrations v2 model', () => {
             },
           ]
         `);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_TRANSFORM increases batchSize up to maxBatchSize', () => {
+        const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
+        const lastHitSortValue = [123456];
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
+          outdatedDocuments,
+          lastHitSortValue,
+          totalHits: 1,
+          processedDocs: [],
+        });
+        let newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(600);
+        newState = model({ ...state, batchSize: 600 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(720);
+        newState = model({ ...state, batchSize: 720 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(864);
+        newState = model({ ...state, batchSize: 864 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(1000); // + 20% would have been 1036
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_TRANSFORM');
+        expect(newState.maxBatchSize).toBe(1000);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_READ if left es_response_too_large', () => {
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 3456,
+        });
+        const newState = model(state, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(500); // halves the batch size
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch with a response content length of 3456 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 500.",
+            },
+          ]
+        `);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_READ if left es_response_too_large will not reduce batch size below 1', () => {
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1.5 }, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch with a response content length of 2345 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 1.",
+            },
+          ]
+        `);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL if left es_response_too_large and batchSize already 1', () => {
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1 }, res) as FatalState;
+        expect(newState.controlState).toBe('FATAL');
+        expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"After reducing the read batch size to a single document, the response content length was 2345 bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again."`
+        );
       });
 
       it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT if no outdated documents to transform', () => {
@@ -2256,7 +2627,7 @@ describe('migrations v2 model', () => {
 
       it('OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT -> CHECK_TARGET_MAPPINGS if action succeeded', () => {
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT'> = Either.right({});
-        const newState = model(state, res) as CheckTargetMappingsState;
+        const newState = model(state, res) as CheckTargetTypesMappingsState;
         expect(newState.controlState).toBe('CHECK_TARGET_MAPPINGS');
         // @ts-expect-error pitId shouldn't leak outside
         expect(newState.pitId).toBe(undefined);
@@ -2264,7 +2635,7 @@ describe('migrations v2 model', () => {
     });
 
     describe('CHECK_TARGET_MAPPINGS', () => {
-      const checkTargetMappingsState: CheckTargetMappingsState = {
+      const checkTargetTypesMappingsState: CheckTargetTypesMappingsState = {
         ...postInitState,
         controlState: 'CHECK_TARGET_MAPPINGS',
         versionIndexReadyActions: Option.none,
@@ -2272,19 +2643,62 @@ describe('migrations v2 model', () => {
         targetIndex: '.kibana_7.11.0_001',
       };
 
-      it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if mappings do not match', () => {
-        const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({ match: false });
-        const newState = model(
-          checkTargetMappingsState,
-          res
-        ) as UpdateTargetMappingsPropertiesState;
-        expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+      describe('reindex migration', () => {
+        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if origin mappings did not exist', () => {
+          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
+            type: 'index_mappings_incomplete' as const,
+          });
+          const newState = model(
+            checkTargetTypesMappingsState,
+            res
+          ) as UpdateTargetMappingsPropertiesState;
+          expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+          expect(Option.isNone(newState.updatedTypesQuery)).toEqual(true);
+        });
       });
 
-      it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if mappings match', () => {
-        const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({ match: true });
-        const newState = model(checkTargetMappingsState, res) as CheckVersionIndexReadyActions;
-        expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');
+      describe('compatible migration', () => {
+        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if SO types have changed', () => {
+          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
+            type: 'types_changed' as const,
+            updatedFields: [],
+            updatedTypes: ['dashboard', 'lens'],
+          });
+          const newState = model(
+            checkTargetTypesMappingsState,
+            res
+          ) as UpdateTargetMappingsPropertiesState;
+          expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+          expect(
+            Option.isSome(newState.updatedTypesQuery) && newState.updatedTypesQuery.value
+          ).toEqual({
+            bool: {
+              should: [
+                {
+                  term: {
+                    type: 'dashboard',
+                  },
+                },
+                {
+                  term: {
+                    type: 'lens',
+                  },
+                },
+              ],
+            },
+          });
+        });
+
+        it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if types match (there might be additions in core fields)', () => {
+          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({
+            type: 'types_match' as const,
+          });
+          const newState = model(
+            checkTargetTypesMappingsState,
+            res
+          ) as CheckVersionIndexReadyActions;
+          expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');
+        });
       });
     });
 
@@ -2299,7 +2713,7 @@ describe('migrations v2 model', () => {
 
       it('REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action succeeded', () => {
         const res: ResponseType<'REFRESH_TARGET'> = Either.right({ refreshed: true });
-        const newState = model(state, res) as UpdateTargetMappingsPropertiesState;
+        const newState = model(state, res);
         expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
       });
     });
@@ -2328,6 +2742,7 @@ describe('migrations v2 model', () => {
         hasTransformedDocs: false,
         progress: createInitialProgress(),
       };
+
       describe('OUTDATED_DOCUMENTS_TRANSFORM if action succeeds', () => {
         test('OUTDATED_DOCUMENTS_TRANSFORM -> TRANSFORMED_DOCUMENTS_BULK_INDEX if action succeeds', () => {
           const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.right({ processedDocs });
@@ -2342,6 +2757,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(0);
           expect(newState.progress.processed).toBe(outdatedDocuments.length);
         });
+
         test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH_READ if there are are existing documents that failed transformation', () => {
           const outdatedDocumentsTransformStateWithFailedDocuments: OutdatedDocumentsTransform = {
             ...outdatedDocumentsTransformState,
@@ -2359,6 +2775,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(0);
           expect(newState.progress.processed).toBe(outdatedDocuments.length);
         });
+
         test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH_READ if there are are existing documents that failed transformation because of transform errors', () => {
           const outdatedDocumentsTransformStateWithFailedDocuments: OutdatedDocumentsTransform = {
             ...outdatedDocumentsTransformState,
@@ -2378,6 +2795,7 @@ describe('migrations v2 model', () => {
           expect(newState.progress.processed).toBe(outdatedDocuments.length);
         });
       });
+
       describe('OUTDATED_DOCUMENTS_TRANSFORM if action fails', () => {
         test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH_READ adding newly failed documents to state if documents failed the transform', () => {
           const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.left({
@@ -2394,6 +2812,7 @@ describe('migrations v2 model', () => {
           expect(newState.corruptDocumentIds).toEqual(corruptDocumentIds);
           expect(newState.progress.processed).toBe(outdatedDocuments.length);
         });
+
         test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH_READ combines newly failed documents with those already on state if documents failed the transform', () => {
           const newFailedTransformDocumentIds = ['b:other', 'c:__'];
           const outdatedDocumentsTransformStateWithFailedDocuments: OutdatedDocumentsTransform = {
@@ -2517,7 +2936,19 @@ describe('migrations v2 model', () => {
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
+        updatedTypesQuery: Option.fromNullable({
+          bool: {
+            should: [
+              {
+                term: {
+                  type: 'type1',
+                },
+              },
+            ],
+          },
+        }),
       };
+
       test('UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK', () => {
         const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES'> = Either.right({
           taskId: 'update target mappings task',
@@ -2562,10 +2993,7 @@ describe('migrations v2 model', () => {
           message: '[timeout_exception] Timeout waiting for ...',
           type: 'wait_for_task_completion_timeout',
         });
-        const newState = model(
-          updateTargetMappingsWaitForTaskState,
-          res
-        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        const newState = model(updateTargetMappingsWaitForTaskState, res);
         expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
@@ -2577,7 +3005,7 @@ describe('migrations v2 model', () => {
           message: '[timeout_exception] Timeout waiting for ...',
           type: 'wait_for_task_completion_timeout',
         });
-        const newState = model(state, res) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        const newState = model(state, res);
         expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK');
         expect(newState.retryCount).toEqual(2);
         expect(newState.retryDelay).toEqual(4000);
@@ -2624,14 +3052,32 @@ describe('migrations v2 model', () => {
             versionIndexReadyActions,
           },
           res
-        ) as PostInitState;
+        );
         expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
 
+      test('CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY_SYNC if mustRelocateDocuments === true', () => {
+        const versionIndexReadyActions = Option.some([
+          { add: { index: 'kibana-index', alias: 'my-alias' } },
+        ]);
+
+        const newState = model(
+          {
+            ...сheckVersionIndexReadyActionsState,
+            mustRelocateDocuments: true,
+            versionIndexReadyActions,
+          },
+          res
+        );
+        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY_SYNC');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+
       test('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE if none versionIndexReadyActions', () => {
-        const newState = model(сheckVersionIndexReadyActionsState, res) as PostInitState;
+        const newState = model(сheckVersionIndexReadyActionsState, res);
         expect(newState.controlState).toEqual('DONE');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
@@ -2649,13 +3095,15 @@ describe('migrations v2 model', () => {
         sourceIndex: Option.none as Option.None,
         targetIndex: '.kibana_7.11.0_001',
       };
-      test('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY', () => {
+
+      test('CREATE_NEW_TARGET -> CHECK_VERSION_INDEX_READY_ACTIONS', () => {
         const res: ResponseType<'CREATE_NEW_TARGET'> = Either.right('create_index_succeeded');
         const newState = model(createNewTargetState, res);
-        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
+        expect(newState.controlState).toEqual('CHECK_VERSION_INDEX_READY_ACTIONS');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('CREATE_NEW_TARGET -> CREATE_NEW_TARGET if action fails with index_not_green_timeout', () => {
         const res: ResponseType<'CREATE_NEW_TARGET'> = Either.left({
           message: '[index_not_green_timeout] Timeout waiting for ...',
@@ -2666,7 +3114,8 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
-      test('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY resets the retry count and delay', () => {
+
+      test('CREATE_NEW_TARGET -> CHECK_VERSION_INDEX_READY_ACTIONS resets the retry count and delay', () => {
         const res: ResponseType<'CREATE_NEW_TARGET'> = Either.right('create_index_succeeded');
         const testState = {
           ...createNewTargetState,
@@ -2675,17 +3124,18 @@ describe('migrations v2 model', () => {
         };
 
         const newState = model(testState, res);
-        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
+        expect(newState.controlState).toEqual('CHECK_VERSION_INDEX_READY_ACTIONS');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('CREATE_NEW_TARGET -> FATAL if action fails with cluster_shard_limit_exceeded', () => {
         const res: ResponseType<'CREATE_NEW_TARGET'> = Either.left({
           type: 'cluster_shard_limit_exceeded',
         });
-        const newState = model(createNewTargetState, res);
+        const newState = model(createNewTargetState, res) as FatalState;
         expect(newState.controlState).toEqual('FATAL');
-        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+        expect(newState.reason).toMatchInlineSnapshot(
           `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
         );
       });
@@ -2701,6 +3151,7 @@ describe('migrations v2 model', () => {
         versionIndexReadyActions: aliasActions,
         targetIndex: '.kibana_7.11.0_001',
       };
+
       test('MARK_VERSION_INDEX_READY -> DONE if the action succeeded', () => {
         const res: ResponseType<'MARK_VERSION_INDEX_READY'> = Either.right(
           'update_aliases_succeeded'
@@ -2710,6 +3161,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('MARK_VERSION_INDEX_READY -> MARK_VERSION_INDEX_CONFLICT if another removed the current alias from the source index', () => {
         const res: ResponseType<'MARK_VERSION_INDEX_READY'> = Either.left({
           type: 'alias_not_found_exception',
@@ -2719,6 +3171,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('MARK_VERSION_INDEX_READY -> MARK_VERSION_INDEX_CONFLICT if another node removed the temporary index', () => {
         const res: ResponseType<'MARK_VERSION_INDEX_READY'> = Either.left({
           type: 'index_not_found_exception',
@@ -2741,6 +3194,7 @@ describe('migrations v2 model', () => {
         versionIndexReadyActions: aliasActions,
         targetIndex: '.kibana_7.11.0_001',
       };
+
       test('MARK_VERSION_INDEX_CONFLICT -> DONE if the current alias is pointing to the version alias', () => {
         const res: ResponseType<'MARK_VERSION_INDEX_READY_CONFLICT'> = Either.right({
           '.kibana_7.11.0_001': {
@@ -2762,6 +3216,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('MARK_VERSION_INDEX_READY_CONFLICT -> FATAL if the current alias is pointing to a different version index', () => {
         const res: ResponseType<'MARK_VERSION_INDEX_READY_CONFLICT'> = Either.right({
           '.kibana_7.11.0_001': {
@@ -2786,6 +3241,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+
       test('MARK_VERSION_INDEX_READY_CONFLICT -> FATAL if the current alias is pointing to a multiple indices', () => {
         const res: ResponseType<'MARK_VERSION_INDEX_READY_CONFLICT'> = Either.right({
           '.kibana_7.11.0_001': {

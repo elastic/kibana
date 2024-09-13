@@ -114,15 +114,18 @@ describe('Cloud Experiments public plugin', () => {
         expect(customPlugin).toHaveProperty('launchDarklyClient', undefined);
       });
 
-      test('it skips identifying the user if cloud is not enabled', () => {
+      test('it skips identifying the user if cloud is not enabled and cancels loading the LDclient', () => {
+        const ldClientCancelSpy = jest.spyOn(LaunchDarklyClient.prototype, 'cancel');
         plugin.setup(coreMock.createSetup(), {
           cloud: { ...cloudMock.createSetup(), isCloudEnabled: false },
         });
 
         expect(metadataServiceSetupSpy).not.toHaveBeenCalled();
+        expect(ldClientCancelSpy).toHaveBeenCalled(); // Cancel loading the client
       });
 
       test('it initializes the LaunchDarkly client', async () => {
+        const ldClientCancelSpy = jest.spyOn(LaunchDarklyClient.prototype, 'cancel');
         plugin.setup(coreMock.createSetup(), {
           cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
         });
@@ -131,8 +134,9 @@ describe('Cloud Experiments public plugin', () => {
           isElasticStaff: true,
           kibanaVersion: 'version',
           trialEndDate: '2020-10-01T14:13:12.000Z',
-          userId: '1c2412b751f056aef6e340efa5637d137442d489a4b1e3117071e7c87f8523f2',
+          userId: 'mock-deployment-id',
         });
+        expect(ldClientCancelSpy).not.toHaveBeenCalled();
       });
     });
   });

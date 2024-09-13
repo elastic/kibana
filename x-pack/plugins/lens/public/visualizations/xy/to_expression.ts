@@ -7,17 +7,17 @@
 
 import { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
-import type { PaletteRegistry } from '@kbn/coloring';
+import { PaletteRegistry } from '@kbn/coloring';
 import {
   buildExpression,
   buildExpressionFunction,
   ExpressionFunctionTheme,
 } from '@kbn/expressions-plugin/common';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
-  EventAnnotationServiceType,
   isManualPointAnnotationConfig,
   isRangeAnnotationConfig,
-} from '@kbn/event-annotation-plugin/public';
+} from '@kbn/event-annotation-common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   AvailableReferenceLineIcon,
@@ -35,21 +35,21 @@ import {
   XYCurveType,
   YAxisConfigFn,
 } from '@kbn/expression-xy-plugin/common';
-import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type {
-  State,
+  State as XYState,
   YConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   XYAnnotationLayerConfig,
   AxisConfig,
   ValidXYDataLayerConfig,
+  XYLayerConfig,
 } from './types';
 import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { hasIcon } from '../../shared_components/icon_select/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import {
@@ -57,6 +57,7 @@ import {
   getDataLayers,
   getReferenceLayers,
   getAnnotationsLayers,
+  isTimeChart,
 } from './visualization_helpers';
 import { getUniqueLabels } from './annotations/helpers';
 import {
@@ -64,6 +65,11 @@ import {
   hasNumericHistogramDimension,
 } from '../../shared_components';
 import type { CollapseExpressionFunction } from '../../../common/expressions';
+import { hasIcon } from './xy_config_panel/shared/marker_decoration_settings';
+
+type XYLayerConfigWithSimpleView = XYLayerConfig & { simpleView?: boolean };
+type XYAnnotationLayerConfigWithSimpleView = XYAnnotationLayerConfig & { simpleView?: boolean };
+type State = Omit<XYState, 'layers'> & { layers: XYLayerConfigWithSimpleView[] };
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI | undefined,
@@ -83,7 +89,6 @@ export const toExpression = (
   state: State,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
-  attributes: Partial<{ title: string; description: string }> = {},
   datasourceExpressionsByLayers: Record<string, Ast>,
   eventAnnotationService: EventAnnotationServiceType
 ): Ast | null => {
@@ -152,7 +157,6 @@ export function toPreviewExpression(
     },
     datasourceLayers,
     paletteService,
-    {},
     datasourceExpressionsByLayers,
     eventAnnotationService
   );
@@ -289,6 +293,7 @@ export const buildXYExpression = (
       : state.legend.legendSize
       ? state.legend.legendSize
       : undefined,
+    layout: state.legend.layout,
     horizontalAlignment:
       state.legend.horizontalAlignment && state.legend.isInside
         ? state.legend.horizontalAlignment
@@ -304,6 +309,9 @@ export const buildXYExpression = (
         ? Math.min(5, state.legend.floatingColumns)
         : [],
     maxLines: state.legend.maxLines,
+    legendStats: state.legend.legendStats,
+    title: state.legend.title,
+    isTitleVisible: state.legend.isTitleVisible,
     shouldTruncate:
       state.legend.shouldTruncate ??
       getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
@@ -328,14 +336,15 @@ export const buildXYExpression = (
 
   const layeredXyVisFn = buildExpressionFunction<LayeredXyVisFn>('layeredXyVis', {
     legend: buildExpression([legendConfigFn]).toAst(),
-    fittingFunction: state.fittingFunction || 'None',
-    endValue: state.endValue || 'None',
-    emphasizeFitting: state.emphasizeFitting || false,
-    fillOpacity: state.fillOpacity || 0.3,
-    valueLabels: state?.valueLabels || 'hide',
-    hideEndzones: state?.hideEndzones || false,
-    addTimeMarker: state?.showCurrentTimeMarker || false,
-    valuesInLegend: state?.valuesInLegend || false,
+    fittingFunction: state.fittingFunction ?? 'None',
+    endValue: state.endValue ?? 'None',
+    emphasizeFitting: state.emphasizeFitting ?? false,
+    minBarHeight: state.minBarHeight ?? 1,
+    fillOpacity: state.fillOpacity ?? 0.3,
+    valueLabels: state.valueLabels ?? 'hide',
+    hideEndzones: state.hideEndzones ?? false,
+    addTimeMarker:
+      (isTimeChart(validDataLayers, { datasourceLayers }) && state.showCurrentTimeMarker) ?? false,
     yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
     xAxisConfig: buildExpression([xAxisConfigFn]).toAst(),
     showTooltip: [],
@@ -429,7 +438,7 @@ const referenceLineLayerToExpression = (
 };
 
 const annotationLayerToExpression = (
-  layer: XYAnnotationLayerConfig,
+  layer: XYAnnotationLayerConfigWithSimpleView,
   eventAnnotationService: EventAnnotationServiceType
 ): Ast => {
   const extendedAnnotationLayerFn = buildExpressionFunction<ExtendedAnnotationLayerFn>(
@@ -508,6 +517,7 @@ const dataLayerToExpression = (
             name: 'default',
           }),
     ]).toAst(),
+    colorMapping: layer.colorMapping ? JSON.stringify(layer.colorMapping) : undefined,
   });
 
   return {

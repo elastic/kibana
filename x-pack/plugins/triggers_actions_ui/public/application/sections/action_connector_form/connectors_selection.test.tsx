@@ -6,15 +6,17 @@
  */
 
 import * as React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ConnectorsSelection } from './connectors_selection';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionType, GenericValidationResult } from '../../../types';
 import { EuiFieldText } from '@elastic/eui';
 
 describe('connectors_selection', () => {
+  const core = coreMock.createStart();
   const mockedActionParamsFields = React.lazy(async () => ({
     default() {
       return (
@@ -57,6 +59,7 @@ describe('connectors_selection', () => {
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
     },
   };
 
@@ -69,6 +72,7 @@ describe('connectors_selection', () => {
       id: 'testId',
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false as const,
       name: 'test pagerduty',
       secrets: {},
     },
@@ -90,7 +94,7 @@ describe('connectors_selection', () => {
 
   it('renders a selector', () => {
     const wrapper = mountWithIntl(
-      <EuiThemeProvider>
+      <KibanaThemeProvider theme={core.theme}>
         <ConnectorsSelection
           accordionIndex={0}
           actionItem={actionItem}
@@ -99,7 +103,7 @@ describe('connectors_selection', () => {
           connectors={connectors}
           onConnectorSelected={jest.fn()}
         />
-      </EuiThemeProvider>
+      </KibanaThemeProvider>
     );
 
     expect(
@@ -109,7 +113,7 @@ describe('connectors_selection', () => {
 
   it('renders the title of the connector', () => {
     render(
-      <EuiThemeProvider>
+      <KibanaThemeProvider theme={core.theme}>
         <ConnectorsSelection
           accordionIndex={0}
           actionItem={actionItem}
@@ -118,9 +122,9 @@ describe('connectors_selection', () => {
           connectors={connectors}
           onConnectorSelected={jest.fn()}
         />
-      </EuiThemeProvider>
+      </KibanaThemeProvider>
     );
 
-    expect(screen.queryAllByText('test pagerduty')).toHaveLength(1);
+    expect(screen.getByRole('combobox')).toHaveValue('test pagerduty');
   });
 });

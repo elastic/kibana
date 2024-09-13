@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import PropTypes from 'prop-types';
@@ -13,7 +14,7 @@ import _ from 'lodash';
 import { TSVB_DEFAULT_COLOR } from '../../../../common/constants';
 import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -28,7 +29,7 @@ import { ColorPicker } from '../color_picker';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const newPercentile = (opts) => {
-  return _.assign({ id: uuidv1(), mode: 'line', shade: 0.2, color: TSVB_DEFAULT_COLOR }, opts);
+  return _.assign({ id: uuidv4(), mode: 'line', shade: 0.2, color: TSVB_DEFAULT_COLOR }, opts);
 };
 
 export class Percentiles extends Component {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -25,15 +26,18 @@ interface TimeSeriesExplorerPageProps {
   noSingleMetricJobsFound?: boolean;
 }
 
-export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
+export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPageProps>> = ({
   children,
   dateFormatTz,
   resizeRef,
   noSingleMetricJobsFound,
 }) => {
   const {
-    services: { docLinks },
+    services: { cases, docLinks, presentationUtil },
   } = useMlKibana();
+  const PresentationContextProvider = presentationUtil?.ContextProvider ?? React.Fragment;
+  const CasesContext = cases?.ui.getCasesContext() ?? React.Fragment;
+  const casesPermissions = cases?.helpers.canUseCases();
   const helpLink = docLinks.links.ml.anomalyDetection;
   return (
     <>
@@ -60,8 +64,9 @@ export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
         {noSingleMetricJobsFound ? null : (
           <JobSelector dateFormatTz={dateFormatTz!} singleSelection={true} timeseriesOnly={true} />
         )}
-
-        {children}
+        <CasesContext owner={[]} permissions={casesPermissions!}>
+          <PresentationContextProvider>{children}</PresentationContextProvider>
+        </CasesContext>
         <HelpMenu docLink={helpLink} />
       </div>
     </>

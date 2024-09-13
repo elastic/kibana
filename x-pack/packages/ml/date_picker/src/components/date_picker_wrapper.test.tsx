@@ -7,17 +7,18 @@
 
 import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 
-import { useUrlState } from '@kbn/ml-url-state';
 import type { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 import { DatePickerWrapper } from './date_picker_wrapper';
+import { useRefreshIntervalUpdates } from '../..';
 
 jest.mock('@elastic/eui', () => {
   const EuiButtonMock = jest.fn(() => {
@@ -26,10 +27,10 @@ jest.mock('@elastic/eui', () => {
   const EuiSuperDatePickerMock = jest.fn(() => {
     return null;
   });
-  const EuiFlexGroupMock = jest.fn(({ children }) => {
+  const EuiFlexGroupMock = jest.fn(({ children }: PropsWithChildren<unknown>) => {
     return <>{children}</>;
   });
-  const EuiFlexItemMock = jest.fn(({ children }) => {
+  const EuiFlexItemMock = jest.fn(({ children }: PropsWithChildren<unknown>) => {
     return <>{children}</>;
   });
   return {
@@ -51,7 +52,12 @@ jest.mock('@kbn/ml-url-state', () => {
 });
 
 jest.mock('../hooks/use_timefilter', () => ({
-  useRefreshIntervalUpdates: jest.fn(),
+  useRefreshIntervalUpdates: jest.fn(() => {
+    return {
+      pause: false,
+    };
+  }),
+
   useTimefilter: () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { of } = require('rxjs');
@@ -72,8 +78,7 @@ const mockContextFactory = (addWarning: jest.Mock<void, []>) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { of } = require('rxjs');
   const mockedUiSettingsKeys = {} as typeof UI_SETTINGS;
-  const mockedToMountPoint = jest.fn();
-  const mockedWrapWithTheme = jest.fn();
+  const mockedI18n = jest.fn();
 
   return () => ({
     notifications: {
@@ -116,8 +121,7 @@ const mockContextFactory = (addWarning: jest.Mock<void, []>) => {
       theme$: of(),
     },
     uiSettingsKeys: mockedUiSettingsKeys,
-    toMountPoint: mockedToMountPoint,
-    wrapWithTheme: mockedWrapWithTheme,
+    i18n: mockedI18n,
   });
 };
 
@@ -152,7 +156,7 @@ describe('<DatePickerWrapper />', () => {
 
   test('should set interval to default of 5s when pause is disabled and refresh interval is 0', () => {
     // arrange
-    (useUrlState as jest.Mock).mockReturnValue([{ refreshInterval: { pause: false, value: 0 } }]);
+    (useRefreshIntervalUpdates as jest.Mock).mockReturnValue({ pause: false, value: 0 });
 
     const displayWarningSpy = jest.fn(() => {});
 
@@ -171,7 +175,7 @@ describe('<DatePickerWrapper />', () => {
 
   test('should show a warning when configured interval is too short', () => {
     // arrange
-    (useUrlState as jest.Mock).mockReturnValue([{ refreshInterval: { pause: false, value: 10 } }]);
+    (useRefreshIntervalUpdates as jest.Mock).mockReturnValue({ pause: false, value: 10 });
 
     const displayWarningSpy = jest.fn(() => {});
 

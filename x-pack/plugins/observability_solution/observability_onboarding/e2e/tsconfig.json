@@ -1,0 +1,19 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "include": ["**/*"],
+  "exclude": ["tmp", "target/**/*"],
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["cypress", "node", "cypress-real-events"],
+    "isolatedModules": false
+  },
+  "kbn_references": [
+    { "path": "../../../test/tsconfig.json" },
+    "@kbn/test",
+    "@kbn/dev-utils",
+    "@kbn/cypress-config",
+    "@kbn/observability-onboarding-plugin",
+    "@kbn/ftr-common-functional-services",
+    "@kbn/ftr-common-functional-ui-services"
+  ]
+}

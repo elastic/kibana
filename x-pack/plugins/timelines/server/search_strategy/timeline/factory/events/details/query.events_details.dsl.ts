@@ -6,7 +6,7 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { RunTimeMappings } from '../../../../../../common/api/search_strategy/model/runtime_mappings';
 
 export const buildTimelineDetailsQuery = ({
   authFilter,
@@ -17,7 +17,7 @@ export const buildTimelineDetailsQuery = ({
   authFilter?: JsonObject;
   id: string;
   indexName: string;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
 }) => {
   const basicFilter = {
     terms: {
@@ -61,7 +61,7 @@ export const buildTimelineDetailsQuery = ({
       // Remove and instead pass index_pattern.id once issue resolved: https://github.com/elastic/kibana/issues/111762
       runtime_mappings: runtimeMappings,
       stored_fields: ['*'],
-      _source: false,
+      _source: true,
     },
     size: 1,
   };

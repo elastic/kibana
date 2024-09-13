@@ -10,13 +10,19 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import type { TimelineSavedObject } from '../../../../../common/types/timeline';
 import {
-  SavedTimelineRuntimeType,
-  TimelineTypeLiteralWithNullRt,
-  TimelineType,
-  TimelineStatus,
-} from '../../../../../common/types/timeline';
+  SavedObjectTimelineRuntimeType,
+  SavedObjectTimelineTypeLiteralWithNullRt,
+  SavedObjectTimelineType,
+  SavedObjectTimelineStatus,
+} from '../../../../../common/types/timeline/saved_object';
+import type { TimelineSavedObject } from '../../../../../common/api/timeline';
+import {
+  type TimelineType,
+  TimelineTypeEnum,
+  type TimelineStatus,
+  TimelineStatusEnum,
+} from '../../../../../common/api/timeline';
 
 // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
 const TimelineSavedObjectWithDraftRuntime = intersection([
@@ -24,8 +30,8 @@ const TimelineSavedObjectWithDraftRuntime = intersection([
     id: string,
     version: string,
     attributes: partial({
-      ...SavedTimelineRuntimeType.props,
-      timelineType: union([TimelineTypeLiteralWithNullRt, literal('draft')]),
+      ...SavedObjectTimelineRuntimeType.props,
+      timelineType: union([SavedObjectTimelineTypeLiteralWithNullRt, literal('draft')]),
     }),
   }),
   partial({
@@ -34,20 +40,12 @@ const TimelineSavedObjectWithDraftRuntime = intersection([
 ]);
 
 const getTimelineTypeAndStatus = (
-  timelineType: TimelineType | 'draft' | null = TimelineType.default,
-  status: TimelineStatus | null = TimelineStatus.active
+  timelineType: SavedObjectTimelineType | 'draft' | null = SavedObjectTimelineType.default,
+  status: SavedObjectTimelineStatus | null = SavedObjectTimelineStatus.active
 ) => {
-  // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
-  if (timelineType === 'draft') {
-    return {
-      timelineType: TimelineType.default,
-      status: TimelineStatus.draft,
-    };
-  }
-
   return {
-    timelineType,
-    status,
+    timelineType: savedObjectTimelineTypeToAPITimelineType(timelineType),
+    status: savedObjectTimelineStatusToAPITimelineStatus(timelineType, status),
   };
 };
 
@@ -56,7 +54,28 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
     TimelineSavedObjectWithDraftRuntime.decode(savedObject),
     map((savedTimeline) => {
       const attributes = {
-        ...savedTimeline.attributes,
+        columns: savedTimeline.attributes.columns,
+        dataProviders: savedTimeline.attributes.dataProviders,
+        dataViewId: savedTimeline.attributes.dataViewId,
+        description: savedTimeline.attributes.description,
+        eqlOptions: savedTimeline.attributes.eqlOptions,
+        eventType: savedTimeline.attributes.eventType,
+        excludedRowRendererIds: savedTimeline.attributes.excludedRowRendererIds,
+        favorite: savedTimeline.attributes.favorite,
+        filters: savedTimeline.attributes.filters,
+        indexNames: savedTimeline.attributes.indexNames,
+        kqlMode: savedTimeline.attributes.kqlMode,
+        kqlQuery: savedTimeline.attributes.kqlQuery,
+        title: savedTimeline.attributes.title,
+        templateTimelineId: savedTimeline.attributes.templateTimelineId,
+        templateTimelineVersion: savedTimeline.attributes.templateTimelineVersion,
+        dateRange: savedTimeline.attributes.dateRange,
+        savedQueryId: savedTimeline.attributes.savedQueryId,
+        created: savedTimeline.attributes.created,
+        createdBy: savedTimeline.attributes.createdBy,
+        updated: savedTimeline.attributes.updated,
+        updatedBy: savedTimeline.attributes.updatedBy,
+
         ...getTimelineTypeAndStatus(
           savedTimeline.attributes.timelineType,
           savedTimeline.attributes.status
@@ -67,7 +86,9 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
               ? savedTimeline.attributes.sort
               : [savedTimeline.attributes.sort]
             : [],
+        savedSearchId: savedTimeline.attributes.savedSearchId,
       };
+
       return {
         savedObjectId: savedTimeline.id,
         version: savedTimeline.version,
@@ -78,3 +99,34 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
       throw new Error(failure(errors).join('\n'));
     }, identity)
   );
+
+function savedObjectTimelineTypeToAPITimelineType(
+  timelineType: SavedObjectTimelineType | 'draft' | null
+): TimelineType {
+  switch (timelineType) {
+    case SavedObjectTimelineType.template:
+      return TimelineTypeEnum.template;
+    case 'draft':
+    default:
+      return TimelineTypeEnum.default;
+  }
+}
+
+function savedObjectTimelineStatusToAPITimelineStatus(
+  timelineType: SavedObjectTimelineType | 'draft' | null,
+  status: SavedObjectTimelineStatus | null
+): TimelineStatus {
+  // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
+  if (timelineType === 'draft') {
+    return TimelineStatusEnum.draft;
+  }
+  switch (status) {
+    case SavedObjectTimelineStatus.draft:
+      return TimelineStatusEnum.draft;
+    case SavedObjectTimelineStatus.immutable:
+      return TimelineStatusEnum.immutable;
+    case SavedObjectTimelineStatus.active:
+    default:
+      return TimelineStatusEnum.active;
+  }
+}

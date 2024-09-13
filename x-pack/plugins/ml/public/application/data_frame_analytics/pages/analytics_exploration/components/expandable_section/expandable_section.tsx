@@ -7,14 +7,15 @@
 
 import './expandable_section.scss';
 
-import React, { FC, ReactNode, useCallback, useMemo } from 'react';
+import type { FC, ReactNode } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import {
   EuiBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
@@ -22,7 +23,7 @@ import {
   getDefaultExplorationPageUrlState,
   useExplorationUrlState,
 } from '../../hooks/use_exploration_url_state';
-import { ExpandablePanels } from '../../../../../../../common/types/locator';
+import type { ExpandablePanels } from '../../../../../../../common/types/locator';
 
 interface HeaderItem {
   // id is used as the React key and to construct a data-test-subj
@@ -98,7 +99,7 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
                   </EuiText>
                 </EuiButtonEmpty>
               </EuiFlexItem>
-              {headerItems === HEADER_ITEMS_LOADING && <EuiLoadingContent lines={1} />}
+              {headerItems === HEADER_ITEMS_LOADING && <EuiSkeletonText lines={1} />}
               {isHeaderItems(headerItems)
                 ? headerItems.map(({ label, value, id }) => (
                     <EuiFlexItem

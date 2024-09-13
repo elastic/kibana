@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -22,19 +22,51 @@ import type { HistogramField, NumericColumnStatsMap } from './types';
 const MAX_CHART_COLUMNS = 20;
 
 /**
- * Returns aggregation intervals for the supplied document fields.
+ * Interface for the parameters required to fetch aggregation intervals.
+ */
+export interface FetchAggIntervalsParams {
+  /** The Elasticsearch client to use for the query. */
+  esClient: ElasticsearchClient;
+  /** An optional abort signal to cancel the request. */
+  abortSignal?: AbortSignal;
+  /** The arguments for the aggregation query. */
+  arguments: {
+    /** The index pattern to query against. */
+    indexPattern: string;
+    /** The query to filter documents. */
+    query: estypes.QueryDslQueryContainer;
+    /** The fields to aggregate on. */
+    fields: HistogramField[];
+    /** The size of the sampler shard. */
+    samplerShardSize: number;
+    /** Optional runtime mappings for the query. */
+    runtimeMappings?: estypes.MappingRuntimeFields;
+    /** Optional probability for random sampling. */
+    randomSamplerProbability?: number;
+    /** Optional seed for random sampling. */
+    randomSamplerSeed?: number;
+  };
+}
+/**
+ * Asynchronously fetches aggregation intervals from an Elasticsearch client.
+ *
+ * @param params - The parameters for fetching aggregation intervals.
+ * @returns A promise that resolves to a map of numeric column statistics.
  */
 export const fetchAggIntervals = async (
-  client: ElasticsearchClient,
-  indexPattern: string,
-  query: estypes.QueryDslQueryContainer,
-  fields: HistogramField[],
-  samplerShardSize: number,
-  runtimeMappings?: estypes.MappingRuntimeFields,
-  abortSignal?: AbortSignal,
-  randomSamplerProbability?: number,
-  randomSamplerSeed?: number
+  params: FetchAggIntervalsParams
 ): Promise<NumericColumnStatsMap> => {
+  const { esClient, abortSignal, arguments: args } = params;
+  const {
+    indexPattern,
+    query,
+    fields,
+    samplerShardSize,
+    runtimeMappings,
+    randomSamplerProbability,
+    randomSamplerSeed,
+  } = args;
+
   if (
     samplerShardSize >= 1 &&
     randomSamplerProbability !== undefined &&
@@ -66,7 +98,7 @@ export const fetchAggIntervals = async (
     seed: randomSamplerSeed,
   });
 
-  const body = await client.search(
+  const body = await esClient.search(
     {
       index: indexPattern,
       size: 0,

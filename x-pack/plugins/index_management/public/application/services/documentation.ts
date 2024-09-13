@@ -14,6 +14,9 @@ class DocumentationService {
 
   private dataStreams: string = '';
   private esDocsBase: string = '';
+  private enrichPolicies: string = '';
+  private createEnrichPolicies: string = '';
+  private matchAllQuery: string = '';
   private indexManagement: string = '';
   private indexSettings: string = '';
   private indexTemplates: string = '';
@@ -53,10 +56,17 @@ class DocumentationService {
   private mappingSourceFields: string = '';
   private mappingSourceFieldsDisable: string = '';
   private mappingStore: string = '';
+  private mappingSubobjects: string = '';
   private mappingTermVector: string = '';
   private mappingTypesRemoval: string = '';
   private percolate: string = '';
   private runtimeFields: string = '';
+  private indicesComponentTemplate: string = '';
+  private bulkIndexAlias: string = '';
+  private indexStats: string = '';
+  private bulkApi: string = '';
+  private updateExistingDS: string = '';
+  private enrichIngestData: string = '';
 
   public setup(docLinks: DocLinksStart): void {
     const { links } = docLinks;
@@ -64,6 +74,9 @@ class DocumentationService {
 
     this.dataStreams = links.elasticsearch.dataStreams;
     this.esDocsBase = links.elasticsearch.docsBase;
+    this.enrichPolicies = links.elasticsearch.enrichPolicies;
+    this.createEnrichPolicies = links.elasticsearch.createEnrichPolicy;
+    this.matchAllQuery = links.elasticsearch.matchAllQuery;
     this.indexManagement = links.management.indexManagement;
     this.indexSettings = links.elasticsearch.indexSettings;
     this.indexTemplates = links.elasticsearch.indexTemplates;
@@ -103,10 +116,17 @@ class DocumentationService {
     this.mappingSourceFields = links.elasticsearch.mappingSourceFields;
     this.mappingSourceFieldsDisable = links.elasticsearch.mappingSourceFieldsDisable;
     this.mappingStore = links.elasticsearch.mappingStore;
+    this.mappingSubobjects = links.elasticsearch.mappingSubobjects;
     this.mappingTermVector = links.elasticsearch.mappingTermVector;
     this.mappingTypesRemoval = links.elasticsearch.mappingTypesRemoval;
     this.percolate = links.query.percolate;
     this.runtimeFields = links.runtimeFields.overview;
+    this.indicesComponentTemplate = links.apis.putComponentTemplate;
+    this.bulkIndexAlias = links.apis.bulkIndexAlias;
+    this.indexStats = links.apis.indexStats;
+    this.bulkApi = links.enterpriseSearch.bulkApi;
+    this.updateExistingDS = links.elasticsearch.tutorialUpdateExistingDataStream;
+    this.enrichIngestData = links.ingest.enrich;
   }
 
   public getEsDocsBase() {
@@ -137,6 +157,10 @@ class DocumentationService {
     return this.indexManagement;
   }
 
+  public getIndicesComponentTemplate() {
+    return this.indicesComponentTemplate;
+  }
+
   public getTypeDocLink = (type: DataType, docType = 'main'): string | undefined => {
     const typeDefinition = TYPE_DEFINITION[type];
 
@@ -161,6 +185,18 @@ class DocumentationService {
 
   public getRankFeatureQueryLink() {
     return this.mappingRankFeatureFields;
+  }
+
+  public getEnrichApisLink() {
+    return this.enrichPolicies;
+  }
+
+  public getCreateEnrichPolicyLink() {
+    return this.createEnrichPolicies;
+  }
+
+  public getMatchAllQueryLink() {
+    return this.matchAllQuery;
   }
 
   public getMetaFieldLink() {
@@ -295,8 +331,32 @@ class DocumentationService {
     return this.mappingEnabled;
   }
 
+  public getSubobjectsLink() {
+    return this.mappingSubobjects;
+  }
+
   public getRuntimeFields() {
     return this.runtimeFields;
+  }
+
+  public getBulkIndexAlias() {
+    return this.bulkIndexAlias;
+  }
+
+  public getIndexStats() {
+    return this.indexStats;
+  }
+
+  public getBulkApi() {
+    return this.bulkApi;
+  }
+
+  public getUpdateExistingDS() {
+    return this.updateExistingDS;
+  }
+
+  public getEnrichIngestDataLink() {
+    return this.enrichIngestData;
   }
 
   public getWellKnownTextLink() {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SavedObjectsErrorHelpers, Logger } from '@kbn/core/server';
@@ -17,12 +18,13 @@ describe('fetchProvider', () => {
 
   beforeEach(async () => {
     const kibanaIndex = '123';
+    const getIndexForType = () => Promise.resolve(kibanaIndex);
     mockLogger = {
       warn: jest.fn(),
       debug: jest.fn(),
     } as any;
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    fetchFn = fetchProvider(kibanaIndex, mockLogger);
+    fetchFn = fetchProvider(getIndexForType, mockLogger);
   });
 
   test('returns when ES returns no results', async () => {

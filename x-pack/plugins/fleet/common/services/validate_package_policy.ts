@@ -19,13 +19,16 @@ import type {
   RegistryVarsEntry,
 } from '../types';
 
+import { DATASET_VAR_NAME } from '../constants';
+
 import {
   isValidNamespace,
   doesPackageHaveIntegrations,
-  isInputOnlyPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
 } from '.';
+import { packageHasNoPolicyTemplates } from './policy_template';
+import { isValidDataset } from './is_valid_namespace';
 
 type Errors = string[] | null;
 
@@ -53,7 +56,8 @@ export type PackagePolicyValidationResults = {
 export const validatePackagePolicy = (
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
-  safeLoadYaml: (yaml: string) => any
+  safeLoadYaml: (yaml: string) => any,
+  spaceSettings?: { allowedNamespacePrefixes?: string[] }
 ): PackagePolicyValidationResults => {
   const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
   const validationResults: PackagePolicyValidationResults = {
@@ -63,8 +67,6 @@ export const validatePackagePolicy = (
     inputs: {},
     vars: {},
   };
-  const namespaceValidation = isValidNamespace(packagePolicy.namespace);
-
   if (!packagePolicy.name.trim()) {
     validationResults.name = [
       i18n.translate('xpack.fleet.packagePolicyValidation.nameRequiredErrorMessage', {
@@ -73,8 +75,15 @@ export const validatePackagePolicy = (
     ];
   }
 
-  if (!namespaceValidation.valid && namespaceValidation.error) {
-    validationResults.namespace = [namespaceValidation.error];
+  if (packagePolicy?.namespace) {
+    const namespaceValidation = isValidNamespace(
+      packagePolicy?.namespace,
+      true,
+      spaceSettings?.allowedNamespacePrefixes
+    );
+    if (!namespaceValidation.valid && namespaceValidation.error) {
+      validationResults.namespace = [namespaceValidation.error];
+    }
   }
 
   // Validate package-level vars
@@ -92,16 +101,8 @@ export const validatePackagePolicy = (
     }, {} as ValidationEntry);
   }
 
-  if (
-    !packageInfo.policy_templates ||
-    packageInfo.policy_templates.length === 0 ||
-    !packageInfo.policy_templates.find(
-      (policyTemplate) =>
-        isInputOnlyPolicyTemplate(policyTemplate) ||
-        (policyTemplate.inputs && policyTemplate.inputs.length > 0)
-    )
-  ) {
-    validationResults.inputs = null;
+  if (!packageInfo?.policy_templates?.length || packageHasNoPolicyTemplates(packageInfo)) {
+    validationResults.inputs = {};
     return validationResults;
   }
 
@@ -180,7 +181,13 @@ export const validatePackagePolicy = (
 
             results[name] =
               input.enabled && stream.enabled
-                ? validatePackagePolicyConfig(configEntry, streamVarDefs[name], name, safeLoadYaml)
+                ? validatePackagePolicyConfig(
+                    configEntry,
+                    streamVarDefs[name],
+                    name,
+                    safeLoadYaml,
+                    packageInfo.type
+                  )
                 : null;
 
             return results;
@@ -199,7 +206,7 @@ export const validatePackagePolicy = (
   });
 
   if (Object.entries(validationResults.inputs!).length === 0) {
-    validationResults.inputs = null;
+    validationResults.inputs = {};
   }
 
   return validationResults;
@@ -209,7 +216,8 @@ export const validatePackagePolicyConfig = (
   configEntry: PackagePolicyConfigRecordEntry | undefined,
   varDef: RegistryVarsEntry,
   varName: string,
-  safeLoadYaml: (yaml: string) => any
+  safeLoadYaml: (yaml: string) => any,
+  packageType?: string
 ): string[] | null => {
   const errors = [];
 
@@ -240,6 +248,23 @@ export const validatePackagePolicyConfig = (
         })
       );
     }
+  }
+
+  if (varDef.secret === true && parsedValue && parsedValue.isSecretRef === true) {
+    if (
+      parsedValue.id === undefined ||
+      parsedValue.id === '' ||
+      typeof parsedValue.id !== 'string'
+    ) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSecretReference', {
+          defaultMessage: 'Secret reference is invalid, id must be a string',
+        })
+      );
+
+      return errors;
+    }
+    return null;
   }
 
   if (varDef.type === 'yaml') {
@@ -337,13 +362,23 @@ export const validatePackagePolicyConfig = (
     }
   }
 
-  if (varDef.type === 'select' && parsedValue) {
+  if (varDef.type === 'select' && parsedValue !== undefined) {
     if (!varDef.options?.map((o) => o.value).includes(parsedValue)) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidSelectValueErrorMessage', {
           defaultMessage: 'Invalid value for select type',
         })
       );
+    }
+  }
+
+  if (varName === DATASET_VAR_NAME && packageType === 'input' && parsedValue !== undefined) {
+    const { valid, error } = isValidDataset(
+      parsedValue.dataset ? parsedValue.dataset : parsedValue,
+      false
+    );
+    if (!valid && error) {
+      errors.push(error);
     }
   }
 

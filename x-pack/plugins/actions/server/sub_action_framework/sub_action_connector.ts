@@ -8,12 +8,30 @@
 import { isPlainObject, isEmpty } from 'lodash';
 import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
-import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestHeaders } from 'axios';
+import axios, {
+  AxiosInstance,
+  AxiosResponse,
+  AxiosError,
+  AxiosRequestHeaders,
+  AxiosHeaders,
+  AxiosHeaderValue,
+  AxiosBasicCredentials,
+} from 'axios';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { finished } from 'stream/promises';
+import { IncomingMessage } from 'http';
+import { PassThrough } from 'stream';
+import { KibanaRequest } from '@kbn/core-http-server';
+import { inspect } from 'util';
+import { ConnectorUsageCollector } from '../usage';
+import { assertURL } from './helpers/validators';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { SubAction, SubActionRequestParams } from './types';
 import { ServiceParams } from './types';
 import * as i18n from './translations';
 import { request } from '../lib/axios_utils';
+import { combineHeadersWithBasicAuthHeader } from '../lib/get_basic_auth_header';
 
 const isObject = (value: unknown): value is Record<string, unknown> => {
   return isPlainObject(value);
@@ -24,10 +42,12 @@ const isAxiosError = (error: unknown): error is AxiosError => (error as AxiosErr
 export abstract class SubActionConnector<Config, Secrets> {
   [k: string]: ((params: unknown) => unknown) | unknown;
   private axiosInstance: AxiosInstance;
-  private validProtocols: string[] = ['http:', 'https:'];
   private subActions: Map<string, SubAction> = new Map();
   private configurationUtilities: ActionsConfigurationUtilities;
+  protected readonly kibanaRequest?: KibanaRequest;
   protected logger: Logger;
+  protected esClient: ElasticsearchClient;
+  protected savedObjectsClient: SavedObjectsClientContract;
   protected connector: ServiceParams<Config, Secrets>['connector'];
   protected config: Config;
   protected secrets: Secrets;
@@ -37,8 +57,11 @@ export abstract class SubActionConnector<Config, Secrets> {
     this.logger = params.logger;
     this.config = params.config;
     this.secrets = params.secrets;
+    this.savedObjectsClient = params.services.savedObjectsClient;
+    this.esClient = params.services.scopedClusterClient;
     this.configurationUtilities = params.configurationUtilities;
     this.axiosInstance = axios.create();
+    this.kibanaRequest = params.request;
   }
 
   private normalizeURL(url: string) {
@@ -56,19 +79,7 @@ export abstract class SubActionConnector<Config, Secrets> {
   }
 
   private assertURL(url: string) {
-    try {
-      const parsedUrl = new URL(url);
-
-      if (!parsedUrl.hostname) {
-        throw new Error('URL must contain hostname');
-      }
-
-      if (!this.validProtocols.includes(parsedUrl.protocol)) {
-        throw new Error('Invalid protocol');
-      }
-    } catch (error) {
-      throw new Error(`URL Error: ${error.message}`);
-    }
+    assertURL(url);
   }
 
   private ensureUriAllowed(url: string) {
@@ -79,15 +90,26 @@ export abstract class SubActionConnector<Config, Secrets> {
     }
   }
 
-  private getHeaders(headers?: AxiosRequestHeaders) {
-    return { ...headers, 'Content-Type': 'application/json' };
+  private getHeaders(
+    auth?: AxiosBasicCredentials,
+    headers?: AxiosRequestHeaders
+  ): Record<string, AxiosHeaderValue> {
+    const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
+      username: auth?.username,
+      password: auth?.password,
+      headers,
+    });
+
+    return { 'Content-Type': 'application/json', ...headersWithBasicAuth };
   }
 
   private validateResponse(responseSchema: Type<unknown>, data: unknown) {
     try {
       responseSchema.validate(data);
     } catch (resValidationError) {
-      throw new Error(`Response validation failed (${resValidationError})`);
+      const err = new Error(`Response validation failed (${resValidationError})`);
+      this.logger.debug(() => `${err.message}:\n${inspect(data, { depth: 10 })}`);
+      throw err;
     }
   }
 
@@ -109,14 +131,18 @@ export abstract class SubActionConnector<Config, Secrets> {
 
   protected abstract getResponseErrorMessage(error: AxiosError): string;
 
-  protected async request<R>({
-    url,
-    data,
-    method = 'get',
-    responseSchema,
-    headers,
-    ...config
-  }: SubActionRequestParams<R>): Promise<AxiosResponse<R>> {
+  protected async request<R>(
+    {
+      url,
+      data,
+      method = 'get',
+      responseSchema,
+      headers,
+      timeout,
+      ...config
+    }: SubActionRequestParams<R>,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<AxiosResponse<R>> {
     try {
       this.assertURL(url);
       this.ensureUriAllowed(url);
@@ -126,15 +152,19 @@ export abstract class SubActionConnector<Config, Secrets> {
         `Request to external service. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type} Method: ${method}. URL: ${normalizedURL}`
       );
 
+      const { auth, ...restConfig } = config;
+
       const res = await request({
-        ...config,
+        ...restConfig,
         axios: this.axiosInstance,
         url: normalizedURL,
         logger: this.logger,
         method,
         data: this.normalizeData(data),
         configurationUtilities: this.configurationUtilities,
-        headers: this.getHeaders(headers),
+        headers: this.getHeaders(auth, headers as AxiosHeaders),
+        timeout,
+        connectorUsageCollector,
       });
 
       this.validateResponse(responseSchema, res.data);
@@ -143,8 +173,29 @@ export abstract class SubActionConnector<Config, Secrets> {
     } catch (error) {
       if (isAxiosError(error)) {
         this.logger.debug(
-          `Request to external service failed. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type}. Method: ${error.config.method}. URL: ${error.config.url}`
+          `Request to external service failed. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type}. Method: ${error.config?.method}. URL: ${error.config?.url}`
         );
+
+        let responseBody = '';
+
+        // The error response body may also be a stream, e.g. for the GenAI connector
+        if (error.response?.config?.responseType === 'stream' && error.response?.data) {
+          try {
+            const incomingMessage = error.response.data as IncomingMessage;
+
+            const pt = incomingMessage.pipe(new PassThrough());
+
+            pt.on('data', (chunk) => {
+              responseBody += chunk.toString();
+            });
+
+            await finished(pt);
+
+            error.response.data = JSON.parse(responseBody);
+          } catch {
+            // the response body is a nice to have, no worries if it fails
+          }
+        }
 
         const errorMessage = `Status code: ${
           error.status ?? error.response?.status

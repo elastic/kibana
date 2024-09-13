@@ -8,8 +8,13 @@
 import React, { useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { orderBy } from 'lodash';
-import { EuiBasicTable, EuiButtonIcon, EuiHealth } from '@elastic/eui';
-import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButtonIcon,
+  EuiHealth,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 
 import { SnapshotRestore } from '../../../../../../common/types';
 import { UIM_RESTORE_LIST_EXPAND_INDEX } from '../../../../constants';
@@ -94,7 +99,7 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
     }, {} as { [key: string]: JSX.Element });
   }, [expandedIndices, restores]);
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<SnapshotRestore>> = [
     {
       field: 'index',
       name: i18n.translate('xpack.snapshotRestore.restoreList.table.indexColumnTitle', {
@@ -186,7 +191,6 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
       items={getRestores()}
       itemId="index"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      isExpandable={true}
       columns={columns}
       sorting={getSorting()}
       pagination={getPagination()}

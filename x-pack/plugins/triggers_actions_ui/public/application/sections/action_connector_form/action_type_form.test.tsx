@@ -11,7 +11,6 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   ActionConnector,
   ActionType,
-  RuleAction,
   GenericValidationResult,
   ActionConnectorMode,
   ActionVariables,
@@ -22,8 +21,13 @@ import { EuiFieldText } from '@elastic/eui';
 import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
-import { transformActionVariables } from '../../lib/action_variables';
-import { RuleNotifyWhen, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import {
+  RuleNotifyWhen,
+  RuleNotifyWhenType,
+  SanitizedRuleAction,
+} from '@kbn/alerting-plugin/common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
 
 const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -52,8 +56,8 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../../lib/action_variables', () => {
-  const original = jest.requireActual('../../lib/action_variables');
+jest.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', () => {
+  const original = jest.requireActual('@kbn/alerts-ui-shared/src/action_variables/transforms');
   return {
     ...original,
     transformActionVariables: jest.fn(),
@@ -62,6 +66,19 @@ jest.mock('../../lib/action_variables', () => {
 
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
+}));
+
+jest.mock('../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled() {
+    return true;
+  },
+}));
+
+jest.mock('../../hooks/use_rule_aad_template_fields', () => ({
+  useRuleTypeAadTemplateFields: () => ({
+    isLoading: false,
+    fields: [],
+  }),
 }));
 
 describe('action_type_form', () => {
@@ -201,6 +218,56 @@ describe('action_type_form', () => {
       expect(screen.getByTestId('executionModeFieldActionForm')).toBeInTheDocument();
       expect(screen.queryByTestId('executionModeFieldTest')).not.toBeInTheDocument();
       expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
+    });
+  });
+
+  it('renders the alerts filters with the producerId set to SIEM', async () => {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.pagerduty',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
+        const validationResult = { errors: {} };
+        return Promise.resolve(validationResult);
+      },
+      actionConnectorFields: null,
+      actionParamsFields: mockedActionParamsFieldsWithExecutionMode,
+      defaultActionParams: {
+        dedupKey: 'test',
+        eventAction: 'resolve',
+      },
+    });
+    actionTypeRegistry.get.mockReturnValue(actionType);
+
+    render(
+      <I18nProvider>
+        {getActionTypeForm({
+          index: 1,
+          actionItem: {
+            id: '123',
+            actionTypeId: '.pagerduty',
+            group: 'recovered',
+            params: {
+              eventAction: 'recovered',
+              dedupKey: undefined,
+              summary: '2323',
+              source: 'source',
+              severity: '1',
+              timestamp: new Date().toISOString(),
+              component: 'test',
+              group: 'group',
+              class: 'test class',
+            },
+          },
+          producerId: AlertConsumers.SIEM,
+          featureId: AlertConsumers.SIEM,
+        })}
+      </I18nProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('alertsFilterQueryToggle')).toBeInTheDocument();
+      expect(screen.getByTestId('alertsFilterTimeframeToggle')).toBeInTheDocument();
     });
   });
 
@@ -377,6 +444,11 @@ describe('action_type_form', () => {
           params: [],
           state: [],
         },
+        {
+          context: [],
+          params: [],
+          state: [],
+        },
         undefined,
         false,
       ],
@@ -386,10 +458,68 @@ describe('action_type_form', () => {
           params: [],
           state: [],
         },
+        {
+          context: [],
+          params: [],
+          state: [],
+        },
         undefined,
         true,
       ],
     ]);
+  });
+
+  it('clears the default message when the user toggles the "Use template fields from alerts index" switch ', async () => {
+    const setActionParamsProperty = jest.fn();
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.pagerduty',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
+        const validationResult = { errors: {} };
+        return Promise.resolve(validationResult);
+      },
+      actionConnectorFields: null,
+      actionParamsFields: mockedActionParamsFields,
+      defaultActionParams: {
+        dedupKey: '{{rule.id}}:{{alert.id}}',
+        eventAction: 'resolve',
+      },
+    });
+    actionTypeRegistry.get.mockReturnValue(actionType);
+
+    const wrapper = render(
+      <IntlProvider locale="en">
+        {getActionTypeForm({
+          index: 1,
+          ruleTypeId: 'test',
+          setActionParamsProperty,
+          actionItem: {
+            id: '123',
+            actionTypeId: '.pagerduty',
+            group: 'recovered',
+            params: {
+              eventAction: 'recovered',
+              dedupKey: '232323',
+              summary: '2323',
+              source: 'source',
+              severity: '1',
+              timestamp: new Date().toISOString(),
+              component: 'test',
+              group: 'group',
+              class: 'test class',
+            },
+          },
+        })}
+      </IntlProvider>
+    );
+
+    expect(wrapper.getByTestId('mustacheAutocompleteSwitch')).toBeTruthy();
+
+    await act(async () => {
+      wrapper.getByTestId('mustacheAutocompleteSwitch').click();
+    });
+    expect(setActionParamsProperty).toHaveBeenCalledWith('dedupKey', '', 1);
   });
 
   describe('Customize notify when options', () => {
@@ -513,16 +643,21 @@ function getActionTypeForm({
   onAddConnector,
   onDeleteAction,
   onConnectorSelected,
+  setActionParamsProperty,
   setActionFrequencyProperty,
   setActionAlertsFilterProperty,
-  hasSummary = true,
+  hasAlertsMappings = true,
   messageVariables = { context: [], state: [], params: [] },
+  summaryMessageVariables = { context: [], state: [], params: [] },
   notifyWhenSelectOptions,
   defaultNotifyWhenValue,
+  ruleTypeId,
+  producerId = AlertConsumers.INFRASTRUCTURE,
+  featureId = AlertConsumers.INFRASTRUCTURE,
 }: {
   index?: number;
   actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>;
-  actionItem?: RuleAction;
+  actionItem?: SanitizedRuleAction;
   defaultActionGroupId?: string;
   connectors?: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>>;
   actionTypeIndex?: Record<string, ActionType>;
@@ -530,11 +665,16 @@ function getActionTypeForm({
   onDeleteAction?: () => void;
   onConnectorSelected?: (id: string) => void;
   setActionFrequencyProperty?: () => void;
+  setActionParamsProperty?: () => void;
   setActionAlertsFilterProperty?: () => void;
-  hasSummary?: boolean;
+  hasAlertsMappings?: boolean;
   messageVariables?: ActionVariables;
+  summaryMessageVariables?: ActionVariables;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultNotifyWhenValue?: RuleNotifyWhenType;
+  ruleTypeId?: string;
+  producerId?: string;
+  featureId?: string;
 }) {
   const actionConnectorDefault = {
     actionTypeId: '.pagerduty',
@@ -544,11 +684,12 @@ function getActionTypeForm({
     id: 'test',
     isPreconfigured: false,
     isDeprecated: false,
+    isSystemAction: false as const,
     name: 'test name',
     secrets: {},
   };
 
-  const actionItemDefault: RuleAction = {
+  const actionItemDefault = {
     id: '123',
     actionTypeId: '.pagerduty',
     group: 'trigger',
@@ -567,6 +708,7 @@ function getActionTypeForm({
       id: 'test',
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false as const,
       name: 'test name',
       secrets: {},
     },
@@ -576,6 +718,7 @@ function getActionTypeForm({
       actionTypeId: '.server-log',
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false as const,
       config: {},
       secrets: {},
     },
@@ -590,6 +733,7 @@ function getActionTypeForm({
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
     },
     '.server-log': {
       id: '.server-log',
@@ -599,6 +743,7 @@ function getActionTypeForm({
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
     },
   };
 
@@ -611,16 +756,20 @@ function getActionTypeForm({
       onDeleteAction={onDeleteAction ?? jest.fn()}
       onConnectorSelected={onConnectorSelected ?? jest.fn()}
       defaultActionGroupId={defaultActionGroupId ?? 'default'}
-      setActionParamsProperty={jest.fn()}
+      setActionParamsProperty={setActionParamsProperty ?? jest.fn()}
       setActionFrequencyProperty={setActionFrequencyProperty ?? jest.fn()}
       setActionAlertsFilterProperty={setActionAlertsFilterProperty ?? jest.fn()}
       index={index ?? 1}
       actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
       actionTypeRegistry={actionTypeRegistry}
-      hasSummary={hasSummary}
+      hasAlertsMappings={hasAlertsMappings}
       messageVariables={messageVariables}
+      summaryMessageVariables={summaryMessageVariables}
       notifyWhenSelectOptions={notifyWhenSelectOptions}
       defaultNotifyWhenValue={defaultNotifyWhenValue}
+      producerId={producerId}
+      featureId={featureId}
+      ruleTypeId={ruleTypeId}
     />
   );
 }

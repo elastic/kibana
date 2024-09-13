@@ -6,19 +6,14 @@
     "id": "home",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "dataViews",
-      "share",
-      "urlForwarding"
-    ],
+    "requiredPlugins": ["dataViews", "share", "urlForwarding"],
+    "requiredBundles": ["kibanaReact"],
     "optionalPlugins": [
       "usageCollection",
       "customIntegrations",
       "cloud",
-      "guidedOnboarding"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
+      "guidedOnboarding",
+      "cloudExperiments"
     ]
   }
 }

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, type ComponentType } from 'enzyme';
 import { LinkToApp } from './link_to_app';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -21,7 +21,7 @@ describe('LinkToApp component', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   const render = (ui: Parameters<typeof mount>[0]) =>
     mount(ui, {
-      wrappingComponent: KibanaContextProvider,
+      wrappingComponent: KibanaContextProvider as ComponentType<{}>,
       wrappingComponentProps: {
         services: { application: fakeCoreStart.application },
       },
@@ -32,7 +32,7 @@ describe('LinkToApp component', () => {
   });
 
   it('should render with minimum input', () => {
-    expect(render(<LinkToApp appId="fleet">{'link'}</LinkToApp>)).toMatchSnapshot();
+    expect(render(<LinkToApp appId="fleet">{'link'}</LinkToApp>).render()).toMatchSnapshot();
   });
   it('should render with href', () => {
     expect(
@@ -40,7 +40,7 @@ describe('LinkToApp component', () => {
         <LinkToApp appId="fleet" href="/app/fleet">
           {'link'}
         </LinkToApp>
-      )
+      ).render()
     ).toMatchSnapshot();
   });
   it('should support onClick prop', () => {

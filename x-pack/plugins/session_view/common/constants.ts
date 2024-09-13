@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { EventAction } from './types/v1';
+
 export const SESSION_VIEW_APP_ID = 'sessionView';
+export const USAGE_COLLECTION_APP_NAME = 'session_view'; // underscore delimited is required
 
 // routes
+export const CURRENT_API_VERSION = '1';
 export const PROCESS_EVENTS_ROUTE = '/internal/session_view/process_events';
 export const ALERTS_ROUTE = '/internal/session_view/alerts';
 export const ALERT_STATUS_ROUTE = '/internal/session_view/alert_status';
@@ -18,10 +22,6 @@ export const SECURITY_APP_ID = 'security';
 export const POLICIES_PAGE_PATH = '/administration/policy';
 
 // index patterns
-const ENDPOINT_PROCESS_EVENTS_INDEX =
-  '*:logs-endpoint.events.process*,logs-endpoint.events.process*';
-const CLOUD_DEFEND_PROCESS_EVENTS_INDEX = '*:logs-cloud_defend.process*,logs-cloud_defend.process*';
-export const PROCESS_EVENTS_INDEX = `${ENDPOINT_PROCESS_EVENTS_INDEX},${CLOUD_DEFEND_PROCESS_EVENTS_INDEX}`; // match on both cross cluster and local indices
 export const PREVIEW_ALERTS_INDEX = '.preview.alerts-security.alerts-default';
 
 // field properties
@@ -77,3 +77,111 @@ export const ALERT_ICONS: { [key: string]: string } = {
 };
 export const DEFAULT_ALERT_FILTER_VALUE = 'all';
 export const ALERT = 'alert';
+
+// a list of fields to pull in ES queries for process_events_route, io_events_route and alerts.
+export const PROCESS_EVENT_FIELDS = [
+  '@timestamp',
+  'event.id',
+  'event.kind',
+  'event.type',
+  'event.action',
+  'event.category',
+  'user.id',
+  'user.name',
+  'group.id',
+  'group.name',
+  'host.architecture',
+  'host.hostname',
+  'host.id',
+  'host.ip',
+  'host.mac',
+  'host.name',
+  'host.os.family',
+  'host.os.full',
+  'host.os.kernel',
+  'host.os.name',
+  'host.platform',
+  'host.version',
+  'host.boot.id',
+  'process.entity_id',
+  'process.args',
+  'process.command_line',
+  'process.executable',
+  'process.name',
+  'process.interactive',
+  'process.working_directory',
+  'process.pid',
+  'process.start',
+  'process.end',
+  'process.user.id',
+  'process.user.name',
+  'process.group.id',
+  'process.group.name',
+  'process.supplemental_groups',
+  'process.exit_code',
+  'process.tty.*',
+  'process.entry_leader.*',
+  'process.session_leader.*',
+  'process.group_leader.*',
+  'process.parent.*',
+  'process.previous',
+  'container.id',
+  'container.name',
+  'container.image.name',
+  'container.image.tag',
+  'container.image.hash.all',
+  'orchestrator.resource.name',
+  'orchestrator.resource.type',
+  'orchestrator.resource.ip',
+  'orchestrator.resource.parent.type',
+  'orchestrator.resource.labels',
+  'orchestrator.resource.annotations',
+  'orchestrator.namespace',
+  'orchestrator.cluster.name',
+  'orchestrator.cluster.id',
+  'cloud.instance.name',
+  'cloud.account.id',
+  'cloud.project.id',
+  'cloud.project.name',
+  'cloud.provider',
+  'cloud.region',
+];
+
+export const IO_EVENT_FIELDS = PROCESS_EVENT_FIELDS.concat(['process.io.*']);
+
+export const ALERT_FIELDS = PROCESS_EVENT_FIELDS.concat([
+  'file.extension',
+  'file.path',
+  'file.name',
+  'network.type',
+  'network.transport',
+  'network.protocol',
+  'destination.address',
+  'destination.ip',
+  'destination.protocol',
+  'source.address',
+  'source.ip',
+  'source.protocol',
+  'kibana.alert.uuid',
+  'kibana.alert.reason',
+  'kibana.alert.workflow_status',
+  'kibana.alert.status',
+  'kibana.alert.original_time',
+  'kibana.alert.original_event.action',
+  'kibana.alert.rule.category',
+  'kibana.alert.rule.consumer',
+  'kibana.alert.rule.description',
+  'kibana.alert.rule.enabled',
+  'kibana.alert.rule.name',
+  'kibana.alert.rule.risk_score',
+  'kibana.alert.rule.severity',
+  'kibana.alert.rule.uuid',
+  'kibana.alert.rule.parameters.query',
+  'kibana.alert.rule.query',
+]);
+export const EVENT_ACTION_FORK: EventAction = 'fork';
+export const EVENT_ACTION_END: EventAction = 'end';
+// exec event.action is used by Endpoint and Cloud Defend
+export const EVENT_ACTION_EXEC: EventAction = 'exec';
+// executed event.action is used by Auditbeat
+export const EVENT_ACTION_EXECUTED: EventAction = 'executed';

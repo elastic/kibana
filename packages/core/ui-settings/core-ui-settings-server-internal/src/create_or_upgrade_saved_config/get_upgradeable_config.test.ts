@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
@@ -44,6 +45,59 @@ describe('getUpgradeableConfig', () => {
       type: 'config',
     });
     expect(result).toEqual(savedConfig);
+  });
+
+  it('uses the latest config when multiple are found', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.find.mockResolvedValue({
+      saved_objects: [
+        { id: '7.2.0', attributes: 'foo' },
+        { id: '7.3.0', attributes: 'foo' },
+      ],
+    } as SavedObjectsFindResponse);
+
+    const result = await getUpgradeableConfig({
+      savedObjectsClient,
+      version: '7.5.0',
+      type: 'config',
+    });
+    expect(result!.id).toBe('7.3.0');
+  });
+
+  it('uses the latest config when multiple are found with rc qualifier', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.find.mockResolvedValue({
+      saved_objects: [
+        { id: '7.2.0', attributes: 'foo' },
+        { id: '7.3.0', attributes: 'foo' },
+        { id: '7.5.0-rc1', attributes: 'foo' },
+      ],
+    } as SavedObjectsFindResponse);
+
+    const result = await getUpgradeableConfig({
+      savedObjectsClient,
+      version: '7.5.0',
+      type: 'config',
+    });
+    expect(result!.id).toBe('7.5.0-rc1');
+  });
+
+  it('ignores documents with malformed ids', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.find.mockResolvedValue({
+      saved_objects: [
+        { id: 'not-a-semver', attributes: 'foo' },
+        { id: '7.2.0', attributes: 'foo' },
+        { id: '7.3.0', attributes: 'foo' },
+      ],
+    } as SavedObjectsFindResponse);
+
+    const result = await getUpgradeableConfig({
+      savedObjectsClient,
+      version: '7.5.0',
+      type: 'config',
+    });
+    expect(result!.id).toBe('7.3.0');
   });
 
   it('finds saved config with RC version === Kibana version', async () => {

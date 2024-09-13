@@ -16,18 +16,25 @@
       "data",
       "kibanaReact",
       "kibanaUtils",
-      "savedObjects",
       "unifiedSearch",
+      "fieldFormats",
       "dataViews",
       "dataViewEditor",
       "alerting",
-      "actions"
+      "actions",
+      "dashboard",
+      "licensing",
+      "expressions",
+      "lens",
+      "controls",
+      "embeddable"
     ],
     "optionalPlugins": [
       "cloud",
       "features",
       "home",
-      "spaces"
+      "spaces",
+      "serverless"
     ],
     "requiredBundles": [
       "alerting",
@@ -38,7 +45,7 @@
     ],
     "extraPublicDirs": [
       "public/common",
-      "public/common/constants"
+      "public/common/constants",
     ]
   }
 }

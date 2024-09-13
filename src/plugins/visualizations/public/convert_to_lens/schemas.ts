@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { IAggConfig, METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
-import { AggBasedColumn, PercentageModeConfig, SchemaConfig } from '../../common';
+import { AggBasedColumn, PercentageModeConfig, SchemaConfig, VisParams } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
-import { getCustomBucketsFromSiblingAggs } from '../../common/convert_to_lens/lib/utils';
+import {
+  getAggIdAndValue,
+  getCustomBucketsFromSiblingAggs,
+} from '../../common/convert_to_lens/lib/utils';
 import { BucketColumn } from '../../common/convert_to_lens/lib';
 import type { Vis } from '../types';
 import { getVisSchemas, Schemas } from '../vis_schemas';
@@ -130,8 +134,8 @@ const createLayer = (
   };
 };
 
-export const getColumnsFromVis = <T>(
-  vis: Vis<T>,
+export const getColumnsFromVis = <TVisParams extends VisParams>(
+  vis: Vis<TVisParams>,
   timefilter: TimefilterContract,
   dataView: DataView,
   {
@@ -178,11 +182,12 @@ export const getColumnsFromVis = <T>(
 
   if (series && series.length) {
     for (const { metrics: metricAggIds } of series) {
+      const metricAggIdsLookup = new Set(metricAggIds);
       const metrics = aggs.filter(
-        (agg) => agg.aggId && metricAggIds.includes(agg.aggId.split('.')[0])
+        (agg) => agg.aggId && metricAggIdsLookup.has(getAggIdAndValue(agg.aggId)[0])
       );
       const customBucketsForLayer = customBucketsWithMetricIds.filter((c) =>
-        c.metricIds.some((m) => metricAggIds.includes(m))
+        c.metricIds.some((m) => metricAggIdsLookup.has(m))
       );
       const layer = createLayer(
         vis.type.name,

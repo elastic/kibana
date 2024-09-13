@@ -5,18 +5,16 @@
  * 2.0.
  */
 
+import { EuiButton, EuiCallOut, EuiCode } from '@elastic/eui';
+import type { NotificationsSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ILM_POLICY_NAME } from '@kbn/reporting-common';
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { EuiCallOut, EuiButton, EuiCode } from '@elastic/eui';
 
-import type { NotificationsSetup } from '@kbn/core/public';
-
-import { ILM_POLICY_NAME } from '../../../../common/constants';
-
-import { useInternalApiClient } from '../../../lib/reporting_api_client';
+import { useInternalApiClient } from '@kbn/reporting-public';
 
 const i18nTexts = {
   title: i18n.translate('xpack.reporting.listing.ilmPolicyCallout.migrationNeededTitle', {

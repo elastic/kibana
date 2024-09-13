@@ -1,28 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import {
-  EuiFieldSearch,
   EuiButtonIcon,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiToolTip,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { OptionsListReduxState } from '../types';
-import { OptionsListStrings } from './options_list_strings';
-import { optionsListReducers } from '../options_list_reducers';
+import { getCompatibleSearchTechniques } from '../../../common/options_list/suggestions_searching';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
+import { OptionsListStrings } from './options_list_strings';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
@@ -35,44 +35,48 @@ export const OptionsListPopoverActionBar = ({
   updateSearchString,
   setShowOnlySelected,
 }: OptionsListPopoverProps) => {
-  // Redux embeddable container Context
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { clearSelections },
-  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
-  const dispatch = useEmbeddableDispatch();
+  const optionsList = useOptionsList();
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const allowExpensiveQueries = select((state) => state.componentState.allowExpensiveQueries);
-  const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const totalCardinality = select((state) => state.componentState.totalCardinality) ?? 0;
-  const searchString = select((state) => state.componentState.searchString);
-  const hideSort = select((state) => state.explicitInput.hideSort);
+  const totalCardinality =
+    optionsList.select((state) => state.componentState.totalCardinality) ?? 0;
+  const fieldSpec = optionsList.select((state) => state.componentState.field);
+  const searchString = optionsList.select((state) => state.componentState.searchString);
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const allowExpensiveQueries = optionsList.select(
+    (state) => state.componentState.allowExpensiveQueries
+  );
+
+  const hideSort = optionsList.select((state) => state.explicitInput.hideSort);
+  const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
+
+  const compatibleSearchTechniques = useMemo(() => {
+    if (!fieldSpec) return [];
+    return getCompatibleSearchTechniques(fieldSpec.type);
+  }, [fieldSpec]);
+
+  const defaultSearchTechnique = useMemo(
+    () => searchTechnique ?? compatibleSearchTechniques[0],
+    [searchTechnique, compatibleSearchTechniques]
+  );
 
   return (
     <div className="optionsList__actions">
-      <EuiFormRow fullWidth>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={true}>
-            <EuiFieldSearch
-              isInvalid={!searchString.valid}
-              compressed
-              disabled={showOnlySelected}
-              fullWidth
-              onChange={(event) => updateSearchString(event.target.value)}
-              value={searchString.value}
-              data-test-subj="optionsList-control-search-input"
-              placeholder={OptionsListStrings.popover.getSearchPlaceholder()}
-            />
-          </EuiFlexItem>
-          {!hideSort && (
-            <EuiFlexItem grow={false}>
-              <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFormRow>
+      {compatibleSearchTechniques.length > 0 && (
+        <EuiFormRow className="optionsList__searchRow" fullWidth>
+          <EuiFieldSearch
+            isInvalid={!searchString.valid}
+            compressed
+            disabled={showOnlySelected}
+            fullWidth
+            onChange={(event) => updateSearchString(event.target.value)}
+            value={searchString.value}
+            data-test-subj="optionsList-control-search-input"
+            placeholder={OptionsListStrings.popover.getSearchPlaceholder(
+              allowExpensiveQueries ? defaultSearchTechnique : 'exact'
+            )}
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow className="optionsList__actionsRow" fullWidth>
         <EuiFlexGroup
           justifyContent="spaceBetween"
@@ -133,21 +137,11 @@ export const OptionsListPopoverActionBar = ({
                   />
                 </EuiToolTip>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                >
-                  <EuiButtonIcon
-                    size="xs"
-                    color="danger"
-                    iconType="eraser"
-                    onClick={() => dispatch(clearSelections({}))}
-                    data-test-subj="optionsList-control-clear-all-selections"
-                    aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
+              {!hideSort && (
+                <EuiFlexItem grow={false}>
+                  <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

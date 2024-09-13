@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
@@ -16,8 +17,9 @@ async function runRequest(
   mockRouter: IRouter<RequestHandlerContext>,
   body?: { unencrypted?: boolean; refreshCache?: boolean }
 ) {
-  expect(mockRouter.post).toBeCalled();
-  const [, handler] = (mockRouter.post as jest.Mock).mock.calls[0];
+  expect(mockRouter.versioned.post).toBeCalled();
+  const [, handler] = (mockRouter.versioned.post as jest.Mock).mock.results[0].value.addVersion.mock
+    .calls[0];
   const mockResponse = httpServerMock.createResponseFactory();
   const mockRequest = httpServerMock.createKibanaRequest({ body });
   await handler(null, mockRequest, mockResponse);
@@ -49,10 +51,10 @@ describe('registerTelemetryUsageStatsRoutes', () => {
   describe('clusters/_stats POST route', () => {
     it('registers _stats POST route and accepts body configs', () => {
       registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
-      expect(mockRouter.post).toBeCalledTimes(1);
-      const [routeConfig, handler] = (mockRouter.post as jest.Mock).mock.calls[0];
-      expect(routeConfig.path).toMatchInlineSnapshot(`"/api/telemetry/v2/clusters/_stats"`);
-      expect(Object.keys(routeConfig.validate.body.props)).toEqual(['unencrypted', 'refreshCache']);
+      expect(mockRouter.versioned.post).toBeCalledTimes(1);
+      const [routeConfig, handler] = (mockRouter.versioned.post as jest.Mock).mock.results[0].value
+        .addVersion.mock.calls[0];
+      expect(routeConfig.version).toMatchInlineSnapshot(`"1"`);
       expect(handler).toBeInstanceOf(Function);
     });
 
@@ -99,9 +101,28 @@ describe('registerTelemetryUsageStatsRoutes', () => {
       });
     });
 
+    it('calls getStats when unencrypted is set to true, there is security, but it is not enabled on ES', async () => {
+      const securityStartMock = securityMock.createStart();
+      getSecurity.mockImplementationOnce(() => {
+        securityStartMock.authz.mode.useRbacForRequest.mockReturnValue(false);
+        return securityStartMock;
+      });
+      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
+      await runRequest(mockRouter, {
+        refreshCache: false,
+        unencrypted: true,
+      });
+      expect(telemetryCollectionManager.getStats).toBeCalledWith({
+        unencrypted: true,
+        refreshCache: true,
+      });
+      expect(securityStartMock.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
+    });
+
     it('returns 403 when the user does not have enough permissions to request unencrypted telemetry', async () => {
       const getSecurityMock = jest.fn().mockImplementation(() => {
         const securityStartMock = securityMock.createStart();
+        securityStartMock.authz.mode.useRbacForRequest.mockReturnValue(true);
         securityStartMock.authz.checkPrivilegesWithRequest.mockReturnValue({
           globally: () => ({ hasAllRequested: false }),
         });

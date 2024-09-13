@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
-import { Direction, EuiBadge, EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useState } from 'react';
+import type { Direction, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getAnalysisType } from '../../../data_frame_analytics/common/analytics';
-import {
-  DataFrameAnalyticsListColumn,
-  DataFrameAnalyticsListRow,
-} from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+import { getAnalysisType } from '@kbn/ml-data-frame-analytics-utils';
+import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { DataFrameAnalyticsListColumn } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import {
   getTaskStateBadge,
   progressColumn,
 } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_columns';
-import { formatHumanReadableDateTime } from '../../../../../common/util/date_utils';
 
 import { useTableActions } from './actions';
 
@@ -112,9 +112,6 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       allowNeutralSort={false}
       className="mlAnalyticsTable"
       columns={columns}
-      hasActions={true}
-      isExpandable={false}
-      isSelectable={false}
       items={items}
       itemId={DataFrameAnalyticsListColumn.id}
       onTableChange={onTableChange}

@@ -8,7 +8,6 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { PackageNotFoundError, RegistryResponseError } from '../../../errors';
-
 import * as Archive from '../archive';
 
 import {
@@ -17,10 +16,13 @@ import {
   fetchFindLatestPackageOrThrow,
   fetchInfo,
   getLicensePath,
+  fetchCategories,
+  fetchList,
 } from '.';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
+const mockGetConfig = jest.fn();
 
 const mockGetBundledPackageByName = jest.fn();
 const mockFetchUrl = jest.fn();
@@ -34,7 +36,7 @@ jest.mock('../..', () => ({
     getLogger: () => mockLogger,
     getKibanaBranch: () => 'main',
     getKibanaVersion: () => '99.0.0',
-    getConfig: () => ({}),
+    getConfig: () => mockGetConfig(),
     getIsProductionMode: () => false,
   },
 }));
@@ -151,7 +153,7 @@ describe('fetch package', () => {
 
       mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
 
-      expect(() => fetchFindLatestPackageOrThrow('testpkg')).rejects.toBeInstanceOf(
+      await expect(() => fetchFindLatestPackageOrThrow('testpkg')).rejects.toBeInstanceOf(
         PackageNotFoundError
       );
     });
@@ -191,7 +193,7 @@ describe('fetchInfo', () => {
     mockGetBundledPackageByName.mockResolvedValueOnce({
       name: 'test-package',
       version: '1.0.0',
-      buffer: Buffer.from(''),
+      getBuffer: async () => Buffer.from(''),
     });
     MockArchive.generatePackageInfoFromArchiveBuffer.mockResolvedValueOnce({
       paths: [],
@@ -217,5 +219,129 @@ describe('fetchInfo', () => {
     } catch (e) {
       expect(e).toBeInstanceOf(PackageNotFoundError);
     }
+  });
+});
+
+describe('fetchCategories', () => {
+  beforeEach(() => {
+    mockFetchUrl.mockReset();
+    mockGetConfig.mockReset();
+  });
+  it('call registry with capabilities if configured', async () => {
+    mockGetConfig.mockReturnValue({
+      internal: {
+        registry: {
+          capabilities: ['apm', 'security'],
+        },
+      },
+    });
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchCategories();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('capabilities')).toBe('apm,security');
+  });
+  it('call registry with spec.min spec.max if configured', async () => {
+    mockGetConfig.mockReturnValue({
+      internal: {
+        registry: {
+          spec: {
+            min: '3.0',
+            max: '3.0',
+          },
+          capabilities: [],
+        },
+      },
+    });
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchCategories();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('spec.min')).toBe('3.0');
+    expect(callUrl.searchParams.get('spec.max')).toBe('3.0');
+  });
+  it('does not call registry with capabilities if none are configured', async () => {
+    mockGetConfig.mockReturnValue({});
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchCategories();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('capabilities')).toBeNull();
+  });
+});
+
+describe('fetchList', () => {
+  beforeEach(() => {
+    mockFetchUrl.mockReset();
+    mockGetConfig.mockReset();
+  });
+  it('call registry with capabilities if configured', async () => {
+    mockGetConfig.mockReturnValue({
+      internal: {
+        registry: {
+          capabilities: ['apm', 'security'],
+        },
+      },
+    });
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchList();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('capabilities')).toBe('apm,security');
+  });
+  it('call registry with spec.min spec.max if configured', async () => {
+    mockGetConfig.mockReturnValue({
+      internal: {
+        registry: {
+          spec: {
+            min: '3.0',
+            max: '3.0',
+          },
+        },
+      },
+    });
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchList();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('spec.min')).toBe('3.0');
+    expect(callUrl.searchParams.get('spec.max')).toBe('3.0');
+  });
+
+  it('does not call registry with capabilities if none are configured', async () => {
+    mockGetConfig.mockReturnValue({});
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchList();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('capabilities')).toBeNull();
+  });
+
+  it('does call registry with kibana.version if not explictly disabled', async () => {
+    mockGetConfig.mockReturnValue({
+      internal: {
+        registry: {},
+      },
+    });
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchList();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('kibana.version')).not.toBeNull();
+  });
+
+  it('does not call registry with kibana.version with config internal.registry.kibanaVersionCheckEnabled:false', async () => {
+    mockGetConfig.mockReturnValue({
+      internal: {
+        registry: {
+          kibanaVersionCheckEnabled: false,
+        },
+      },
+    });
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchList();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('kibana.version')).toBeNull();
   });
 });

@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2022-01-01T00:00:00.000Z').getTime();
   const end = new Date('2022-01-01T00:15:00.000Z').getTime() - 1;
@@ -30,7 +30,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       endpoint: `GET /internal/apm/traces/{traceId}/spans/{spanId}`,
       params: {
         path: { traceId, spanId },
-        query: { parentTransactionId },
+        query: {
+          parentTransactionId,
+          start: new Date(start).toISOString(),
+          end: new Date(end).toISOString(),
+        },
       },
     });
   }
@@ -47,6 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177544
   registry.when('Span details', { config: 'basic', archives: [] }, () => {
     let traceId: string;
     let spanId: string;
@@ -95,10 +100,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       parentTransactionId = span?.['parent.id']!;
       traceId = span?.['trace.id']!;
 
-      await synthtraceEsClient.index(Readable.from(unserialized));
+      await apmSynthtraceEsClient.index(Readable.from(unserialized));
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('span details', () => {
       let spanDetails: Awaited<ReturnType<typeof fetchSpanDetails>>['body'];

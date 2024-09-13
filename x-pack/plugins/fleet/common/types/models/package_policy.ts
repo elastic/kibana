@@ -6,12 +6,14 @@
  */
 
 import type { RegistryRelease, ExperimentalDataStreamFeature } from './epm';
+import type { PolicySecretReference } from './secret';
 
 export interface PackagePolicyPackage {
   name: string;
   title: string;
   version: string;
   experimental_data_stream_features?: ExperimentalDataStreamFeature[];
+  requires_root?: boolean;
 }
 
 export interface PackagePolicyConfigRecordEntry {
@@ -30,9 +32,15 @@ export interface NewPackagePolicyInputStream {
     dataset: string;
     type: string;
     elasticsearch?: {
+      // TODO: these don't really need to be defined in the package policy schema and could be pulled directly from
+      // the package where needed.
+      dynamic_dataset?: boolean;
+      dynamic_namespace?: boolean;
       privileges?: {
         indices?: string[];
       };
+
+      // Package policy specific values
       index_mode?: string;
       source_mode?: string;
     };
@@ -67,10 +75,14 @@ export interface NewPackagePolicy {
   id?: string | number;
   name: string;
   description?: string;
-  namespace: string;
+  namespace?: string;
   enabled: boolean;
   is_managed?: boolean;
-  policy_id: string;
+  /** @deprecated Nullable to allow user to clear existing policy id */
+  policy_id?: string | null;
+  policy_ids: string[];
+  // Nullable to allow user to reset to default outputs
+  output_id?: string | null;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
@@ -79,25 +91,27 @@ export interface NewPackagePolicy {
       cluster?: string[];
     };
   };
+  overrides?: { inputs?: { [key: string]: any } } | null;
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {
   version?: string;
 }
 
+// SO definition for this type is declared in server/types/interfaces
 export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   id: string;
+  spaceIds?: string[];
   inputs: PackagePolicyInput[];
   version?: string;
   agents?: number;
   revision: number;
+  secret_references?: PolicySecretReference[];
   updated_at: string;
   updated_by: string;
   created_at: string;
   created_by: string;
 }
-
-export type PackagePolicySOAttributes = Omit<PackagePolicy, 'id' | 'version'>;
 
 export type DryRunPackagePolicy = NewPackagePolicy & {
   errors?: Array<{ key: string | undefined; message: string }>;

@@ -7,11 +7,12 @@
 
 import { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { get } from 'lodash';
+import { get, sortBy } from 'lodash';
 import { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { DataStreamAdapter } from './data_stream_adapter';
 
-interface ConcreteIndexInfo {
+export interface ConcreteIndexInfo {
   index: string;
   alias: string;
   isWriteIndex: boolean;
@@ -21,6 +22,7 @@ interface UpdateIndexMappingsOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
+  validIndexPrefixes?: string[];
   concreteIndices: ConcreteIndexInfo[];
 }
 
@@ -50,7 +52,7 @@ const updateTotalFieldLimitSetting = async ({
     return;
   } catch (err) {
     logger.error(
-      `Failed to PUT index.mapping.total_fields.limit settings for alias ${alias}: ${err.message}`
+      `Failed to PUT index.mapping.total_fields.limit settings for ${alias}: ${err.message}`
     );
     throw err;
   }
@@ -74,7 +76,7 @@ const updateUnderlyingMapping = async ({
     );
   } catch (err) {
     logger.error(
-      `Ignored PUT mappings for alias ${alias}; error generating simulated mappings: ${err.message}`
+      `Ignored PUT mappings for ${alias}; error generating simulated mappings: ${err.message}`
     );
     return;
   }
@@ -82,7 +84,7 @@ const updateUnderlyingMapping = async ({
   const simulatedMapping = get(simulatedIndexMapping, ['template', 'mappings']);
 
   if (simulatedMapping == null) {
-    logger.error(`Ignored PUT mappings for alias ${alias}; simulated mappings were empty`);
+    logger.error(`Ignored PUT mappings for ${alias}; simulated mappings were empty`);
     return;
   }
 
@@ -94,42 +96,65 @@ const updateUnderlyingMapping = async ({
 
     return;
   } catch (err) {
-    logger.error(`Failed to PUT mapping for alias ${alias}: ${err.message}`);
+    logger.error(`Failed to PUT mapping for ${alias}: ${err.message}`);
     throw err;
   }
 };
 /**
  * Updates the underlying mapping for any existing concrete indices
  */
-const updateIndexMappings = async ({
+export const updateIndexMappings = async ({
   logger,
   esClient,
   totalFieldsLimit,
   concreteIndices,
+  validIndexPrefixes,
 }: UpdateIndexMappingsOpts) => {
-  logger.debug(`Updating underlying mappings for ${concreteIndices.length} indices.`);
+  let validConcreteIndices = [];
+  if (validIndexPrefixes) {
+    for (const cIdx of concreteIndices) {
+      if (!validIndexPrefixes?.some((prefix: string) => cIdx.index.startsWith(prefix))) {
+        logger.warn(
+          `Found unexpected concrete index name "${
+            cIdx.index
+          }" while expecting index with one of the following prefixes: [${validIndexPrefixes.join(
+            ','
+          )}] Not updating mappings or settings for this index.`
+        );
+      } else {
+        validConcreteIndices.push(cIdx);
+      }
+    }
+  } else {
+    validConcreteIndices = concreteIndices;
+  }
+
+  logger.debug(
+    `Updating underlying mappings for ${validConcreteIndices.length} indices / data streams.`
+  );
 
   // Update total field limit setting of found indices
   // Other index setting changes are not updated at this time
   await Promise.all(
-    concreteIndices.map((index) =>
+    validConcreteIndices.map((index) =>
       updateTotalFieldLimitSetting({ logger, esClient, totalFieldsLimit, concreteIndexInfo: index })
     )
   );
 
   // Update mappings of the found indices.
   await Promise.all(
-    concreteIndices.map((index) =>
+    validConcreteIndices.map((index) =>
       updateUnderlyingMapping({ logger, esClient, totalFieldsLimit, concreteIndexInfo: index })
     )
   );
 };
 
-interface CreateConcreteWriteIndexOpts {
+export interface CreateConcreteWriteIndexOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
   indexPatterns: IIndexPatternString;
+  dataStreamAdapter: DataStreamAdapter;
 }
 /**
  * Installs index template that uses installed component template
@@ -137,107 +162,48 @@ interface CreateConcreteWriteIndexOpts {
  * conflicts. Simulate should return an empty mapping if a template
  * conflicts with an already installed template.
  */
-export const createConcreteWriteIndex = async ({
-  logger,
-  esClient,
-  indexPatterns,
-  totalFieldsLimit,
-}: CreateConcreteWriteIndexOpts) => {
-  logger.info(`Creating concrete write index - ${indexPatterns.name}`);
+export const createConcreteWriteIndex = async (opts: CreateConcreteWriteIndexOpts) => {
+  await opts.dataStreamAdapter.createStream(opts);
+};
 
-  // check if a concrete write index already exists
-  let concreteIndices: ConcreteIndexInfo[] = [];
+interface SetConcreteWriteIndexOpts {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  concreteIndices: ConcreteIndexInfo[];
+}
+
+export async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
+  const { logger, esClient, concreteIndices } = opts;
+  const lastIndex = concreteIndices.length - 1;
+  const concreteIndex = sortBy(concreteIndices, ['index'])[lastIndex];
+  logger.debug(
+    `Attempting to set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
+  );
   try {
-    // Specify both the index pattern for the backing indices and their aliases
-    // The alias prevents the request from finding other namespaces that could match the -* pattern
-    const response = await retryTransientEsErrors(
+    await retryTransientEsErrors(
       () =>
-        esClient.indices.getAlias({
-          index: indexPatterns.pattern,
-          name: indexPatterns.basePattern,
-        }),
-      { logger }
-    );
-
-    concreteIndices = Object.entries(response).flatMap(([index, { aliases }]) =>
-      Object.entries(aliases).map(([aliasName, aliasProperties]) => ({
-        index,
-        alias: aliasName,
-        isWriteIndex: aliasProperties.is_write_index ?? false,
-      }))
-    );
-
-    logger.debug(
-      `Found ${concreteIndices.length} concrete indices for ${
-        indexPatterns.name
-      } - ${JSON.stringify(concreteIndices)}`
-    );
-  } catch (error) {
-    // 404 is expected if no concrete write indices have been created
-    if (error.statusCode !== 404) {
-      logger.error(
-        `Error fetching concrete indices for ${indexPatterns.pattern} pattern - ${error.message}`
-      );
-      throw error;
-    }
-  }
-
-  let concreteWriteIndicesExist = false;
-  // if a concrete write index already exists, update the underlying mapping
-  if (concreteIndices.length > 0) {
-    await updateIndexMappings({ logger, esClient, totalFieldsLimit, concreteIndices });
-
-    const concreteIndicesExist = concreteIndices.some(
-      (index) => index.alias === indexPatterns.alias
-    );
-    concreteWriteIndicesExist = concreteIndices.some(
-      (index) => index.alias === indexPatterns.alias && index.isWriteIndex
-    );
-
-    // If there are some concrete indices but none of them are the write index, we'll throw an error
-    // because one of the existing indices should have been the write target.
-    if (concreteIndicesExist && !concreteWriteIndicesExist) {
-      throw new Error(
-        `Indices matching pattern ${indexPatterns.pattern} exist but none are set as the write index for alias ${indexPatterns.alias}`
-      );
-    }
-  }
-
-  // check if a concrete write index already exists
-  if (!concreteWriteIndicesExist) {
-    try {
-      await retryTransientEsErrors(
-        () =>
-          esClient.indices.create({
-            index: indexPatterns.name,
-            body: {
-              aliases: {
-                [indexPatterns.alias]: {
+        esClient.indices.updateAliases({
+          body: {
+            actions: [
+              { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
+              {
+                add: {
+                  index: concreteIndex.index,
+                  alias: concreteIndex.alias,
                   is_write_index: true,
                 },
               },
-            },
-          }),
-        { logger }
-      );
-    } catch (error) {
-      logger.error(`Error creating concrete write index - ${error.message}`);
-      // If the index already exists and it's the write index for the alias,
-      // something else created it so suppress the error. If it's not the write
-      // index, that's bad, throw an error.
-      if (error?.meta?.body?.error?.type === 'resource_already_exists_exception') {
-        const existingIndices = await retryTransientEsErrors(
-          () => esClient.indices.get({ index: indexPatterns.name }),
-          { logger }
-        );
-        if (!existingIndices[indexPatterns.name]?.aliases?.[indexPatterns.alias]?.is_write_index) {
-          throw Error(
-            `Attempted to create index: ${indexPatterns.name} as the write index for alias: ${indexPatterns.alias}, but the index already exists and is not the write index for the alias`
-          );
-        }
-      } else {
-        throw error;
-      }
-    }
+            ],
+          },
+        }),
+      { logger }
+    );
+    logger.info(
+      `Successfully set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
+    );
+  } catch (error) {
+    throw new Error(
+      `Failed to set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
+    );
   }
-};
+}

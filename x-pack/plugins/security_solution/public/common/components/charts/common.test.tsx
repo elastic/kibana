@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useUiSetting } from '../../lib/kibana';
+import { useDarkMode } from '../../lib/kibana';
 import type { ChartSeriesData } from './common';
 import {
   checkIfAllValuesAreZero,
@@ -17,19 +17,11 @@ import {
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
-  useTheme,
+  useThemes,
 } from './common';
+import { LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
 
 jest.mock('../../lib/kibana');
-
-jest.mock('@elastic/charts', () => {
-  const original = jest.requireActual('@elastic/charts');
-
-  return {
-    ...original,
-    getSpecId: jest.fn(() => {}),
-  };
-});
 
 describe('WrappedByAutoSizer', () => {
   it('should render correct default height', () => {
@@ -169,22 +161,25 @@ describe('checkIfAllValuesAreZero', () => {
     });
   });
 
-  describe('useTheme', () => {
-    it('merges our spacing with the default theme', () => {
-      const { result } = renderHook(() => useTheme());
+  describe('useThemes', () => {
+    it('should return custom spacing theme', () => {
+      const { result } = renderHook(() => useThemes());
 
-      expect(result.current).toEqual(
-        expect.objectContaining({ chartMargins: expect.objectContaining({ top: 4, bottom: 0 }) })
-      );
+      expect(result.current.theme.chartMargins).toMatchObject({ top: 4, bottom: 0 });
     });
 
-    it('returns a different theme depending on user settings', () => {
-      const { result: defaultResult } = renderHook(() => useTheme());
-      (useUiSetting as jest.Mock).mockImplementation(() => true);
+    it('should return light baseTheme when isDarkMode false', () => {
+      (useDarkMode as jest.Mock).mockImplementation(() => false);
+      const { result } = renderHook(() => useThemes());
 
-      const { result: darkResult } = renderHook(() => useTheme());
+      expect(result.current.baseTheme).toBe(LEGACY_LIGHT_THEME);
+    });
 
-      expect(defaultResult.current).not.toMatchObject(darkResult.current);
+    it('should return dark baseTheme when isDarkMode true', () => {
+      (useDarkMode as jest.Mock).mockImplementation(() => true);
+      const { result } = renderHook(() => useThemes());
+
+      expect(result.current.baseTheme).toBe(LEGACY_DARK_THEME);
     });
   });
 });

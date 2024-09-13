@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -64,17 +65,25 @@ export const aggSignificantTerms = (): FunctionDefinition => ({
         defaultMessage: 'Max number of buckets to retrieve',
       }),
     },
+    shardSize: {
+      types: ['number'],
+      help: i18n.translate('data.search.aggs.buckets.significantTerms.shardSize.help', {
+        defaultMessage: 'Number of terms provided by each shard and returned to coordinating node',
+      }),
+    },
     exclude: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.significantTerms.exclude.help', {
         defaultMessage: 'Specific bucket values to exclude from results',
       }),
+      multi: true,
     },
     include: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.significantTerms.include.help', {
         defaultMessage: 'Specific bucket values to include in results',
       }),
+      multi: true,
     },
     json: {
       types: ['string'],

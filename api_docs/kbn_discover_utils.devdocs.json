@@ -1,0 +1,3332 @@
+{
+  "id": "@kbn/discover-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.buildDataTableRecord",
+        "type": "Function",
+        "tags": [],
+        "label": "buildDataTableRecord",
+        "description": [
+          "\nBuild a record for data table, explorer + classic one"
+        ],
+        "signature": [
+          "(doc: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.EsHitRecord",
+            "text": "EsHitRecord"
+          },
+          ", dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined, isAnchor: boolean | undefined, options: { flattenedFieldsComparator?: ((a: string | symbol, b: string | symbol) => 0 | 1 | -1) | undefined; } | undefined) => ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.buildDataTableRecord.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [
+              "the document returned from Elasticsearch"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.EsHitRecord",
+                "text": "EsHitRecord"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.buildDataTableRecord.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "this current data view"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.buildDataTableRecord.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isAnchor",
+            "description": [
+              "determines if the given doc is the anchor doc when viewing surrounding documents"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.buildDataTableRecord.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.buildDataTableRecord.$4.flattenedFieldsComparator",
+                "type": "Function",
+                "tags": [],
+                "label": "flattenedFieldsComparator",
+                "description": [],
+                "signature": [
+                  "((a: string | symbol, b: string | symbol) => 0 | 1 | -1) | undefined"
+                ],
+                "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.buildDataTableRecordList",
+        "type": "Function",
+        "tags": [],
+        "label": "buildDataTableRecordList",
+        "description": [
+          "\nHelper to build multiple DataTableRecords at once, saved a bit of testing code lines"
+        ],
+        "signature": [
+          "({\n  records,\n  dataView,\n  processRecord,\n}: { records: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.EsHitRecord",
+            "text": "EsHitRecord"
+          },
+          "[]; dataView?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined; processRecord?: ((record: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          ") => T) | undefined; }) => ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.buildDataTableRecordList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  records,\n  dataView,\n  processRecord,\n}",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.buildDataTableRecordList.$1.records",
+                "type": "Array",
+                "tags": [],
+                "label": "records",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.EsHitRecord",
+                    "text": "EsHitRecord"
+                  },
+                  "[]"
+                ],
+                "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.buildDataTableRecordList.$1.dataView",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.buildDataTableRecordList.$1.processRecord",
+                "type": "Function",
+                "tags": [],
+                "label": "processRecord",
+                "description": [],
+                "signature": [
+                  "((record: ",
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.DataTableRecord",
+                    "text": "DataTableRecord"
+                  },
+                  ") => T) | undefined"
+                ],
+                "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/discover-utils",
+                    "id": "def-common.buildDataTableRecordList.$1.processRecord.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "record",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/discover-utils",
+                        "scope": "common",
+                        "docId": "kibKbnDiscoverUtilsPluginApi",
+                        "section": "def-common.DataTableRecord",
+                        "text": "DataTableRecord"
+                      }
+                    ],
+                    "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.calcFieldCounts",
+        "type": "Function",
+        "tags": [],
+        "label": "calcFieldCounts",
+        "description": [
+          "\nThis function is calculating stats of the available fields, for usage in sidebar and sharing\nNote that this values aren't displayed, but used for internal calculations"
+        ],
+        "signature": [
+          "(rows: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          "[] | undefined) => Record<string, number>"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/calc_field_counts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.calcFieldCounts.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "rows",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/calc_field_counts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.canPrependTimeFieldColumn",
+        "type": "Function",
+        "tags": [],
+        "label": "canPrependTimeFieldColumn",
+        "description": [],
+        "signature": [
+          "(columns: string[] | undefined, timeFieldName: string | undefined, columnsMeta: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableColumnsMeta",
+            "text": "DataTableColumnsMeta"
+          },
+          " | undefined, showTimeCol: boolean, isESQLMode: boolean) => boolean"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.canPrependTimeFieldColumn.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.canPrependTimeFieldColumn.$2",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.canPrependTimeFieldColumn.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "columnsMeta",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableColumnsMeta",
+                "text": "DataTableColumnsMeta"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.canPrependTimeFieldColumn.$4",
+            "type": "boolean",
+            "tags": [],
+            "label": "showTimeCol",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.canPrependTimeFieldColumn.$5",
+            "type": "boolean",
+            "tags": [],
+            "label": "isESQLMode",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.createDegradedDocsControl",
+        "type": "Function",
+        "tags": [],
+        "label": "createDegradedDocsControl",
+        "description": [
+          "\nDegraded docs control factory function."
+        ],
+        "signature": [
+          "(props?: DegradedDocsControlProps | undefined) => ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.RowControlColumn",
+            "text": "RowControlColumn"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/components/custom_control_columns/degraded_docs_control.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.createDegradedDocsControl.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "Optional props for the generated Control component, useful to override onClick, etc"
+            ],
+            "signature": [
+              "DegradedDocsControlProps | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/degraded_docs_control.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.createLogsContextService",
+        "type": "Function",
+        "tags": [],
+        "label": "createLogsContextService",
+        "description": [],
+        "signature": [
+          "(_deps?: ",
+          "LogsContextServiceDeps",
+          ") => { isLogsIndexPattern: (indexPattern: unknown) => boolean; }"
+        ],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.createLogsContextService.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "_deps",
+            "description": [],
+            "signature": [
+              "LogsContextServiceDeps"
+            ],
+            "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.createStacktraceControl",
+        "type": "Function",
+        "tags": [],
+        "label": "createStacktraceControl",
+        "description": [
+          "\nStacktrace control factory function."
+        ],
+        "signature": [
+          "(props?: Partial<",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.RowControlProps",
+            "text": "RowControlProps"
+          },
+          "> | undefined) => ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.RowControlColumn",
+            "text": "RowControlColumn"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/components/custom_control_columns/stacktrace_control.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.createStacktraceControl.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "Optional props for the generated Control component, useful to override onClick, etc"
+            ],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.RowControlProps",
+                "text": "RowControlProps"
+              },
+              "> | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/stacktrace_control.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.formatFieldValue",
+        "type": "Function",
+        "tags": [],
+        "label": "formatFieldValue",
+        "description": [
+          "\nFormats the value of a specific field using the appropriate field formatter if available\nor the default string field formatter otherwise.\n"
+        ],
+        "signature": [
+          "(value: unknown, hit: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.EsHitRecord",
+            "text": "EsHitRecord"
+          },
+          ", fieldFormats: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "public",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-public.FieldFormatsStart",
+            "text": "FieldFormatsStart"
+          },
+          ", dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined, field: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          " | undefined, contentType: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.FieldFormatsContentType",
+            "text": "FieldFormatsContentType"
+          },
+          " | undefined, options: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.TextContextTypeOptions",
+            "text": "TextContextTypeOptions"
+          },
+          " | ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.HtmlContextTypeOptions",
+            "text": "HtmlContextTypeOptions"
+          },
+          " | undefined) => string"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatFieldValue.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "The value to format"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatFieldValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "hit",
+            "description": [
+              "The actual search hit (required to get highlight information from)"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.EsHitRecord",
+                "text": "EsHitRecord"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatFieldValue.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fieldFormats",
+            "description": [
+              "Field formatters"
+            ],
+            "signature": [
+              {
+                "pluginId": "fieldFormats",
+                "scope": "public",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-public.FieldFormatsStart",
+                "text": "FieldFormatsStart"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatFieldValue.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "The data view if available"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatFieldValue.$5",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "The field that value was from if available"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatFieldValue.$6",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "contentType",
+            "description": [
+              "Type of a converter"
+            ],
+            "signature": [
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatsContentType",
+                "text": "FieldFormatsContentType"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatFieldValue.$7",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "Options for the converter"
+            ],
+            "signature": [
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.TextContextTypeOptions",
+                "text": "TextContextTypeOptions"
+              },
+              " | ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.HtmlContextTypeOptions",
+                "text": "HtmlContextTypeOptions"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/format_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "An sanitized HTML string, that is safe to be applied via dangerouslySetInnerHTML"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.formatHit",
+        "type": "Function",
+        "tags": [],
+        "label": "formatHit",
+        "description": [
+          "\nReturns a formatted document in form of key/value pairs of the fields name and a formatted value.\nThe value returned in each pair is an HTML string which is safe to be applied to the DOM, since\nit's formatted using field formatters."
+        ],
+        "signature": [
+          "(hit: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          ", dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", shouldShowFieldHandler: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.ShouldShowFieldInTableHandler",
+            "text": "ShouldShowFieldInTableHandler"
+          },
+          ", maxEntries: number, fieldFormats: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "public",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-public.FieldFormatsStart",
+            "text": "FieldFormatsStart"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.FormattedHit",
+            "text": "FormattedHit"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/format_hit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatHit.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "hit",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/format_hit.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatHit.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/format_hit.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatHit.$3",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldShowFieldHandler",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.ShouldShowFieldInTableHandler",
+                "text": "ShouldShowFieldInTableHandler"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/format_hit.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatHit.$4",
+            "type": "number",
+            "tags": [],
+            "label": "maxEntries",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/format_hit.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.formatHit.$5",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fieldFormats",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldFormats",
+                "scope": "public",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-public.FieldFormatsStart",
+                "text": "FieldFormatsStart"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/format_hit.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getDocId",
+        "type": "Function",
+        "tags": [],
+        "label": "getDocId",
+        "description": [
+          "\nReturning a generated id of a given ES document, since `_id` can be the same\nwhen using different indices and shard routing"
+        ],
+        "signature": [
+          "(doc: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.EsHitRecord",
+            "text": "EsHitRecord"
+          },
+          " & { _routing?: string | undefined; }) => string"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/get_doc_id.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getDocId.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.EsHitRecord",
+                "text": "EsHitRecord"
+              },
+              " & { _routing?: string | undefined; }"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_doc_id.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getFieldValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldValue",
+        "description": [],
+        "signature": [
+          "(record: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          ", field: string) => any"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/get_field_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getFieldValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "record",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_field_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getFieldValue.$2",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_field_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getIgnoredReason",
+        "type": "Function",
+        "tags": [],
+        "label": "getIgnoredReason",
+        "description": [
+          "\nReturns the reason why a specific field was ignored in the response.\nWill return undefined if the field had no ignored values in it.\nThis implementation will make some assumptions based on specific types\nof ignored values can only happen with specific field types in Elasticsearch.\n"
+        ],
+        "signature": [
+          "(field: string | ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ", ignoredFields: string[] | undefined) => ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.IgnoredReason",
+            "text": "IgnoredReason"
+          },
+          " | undefined"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/get_ignored_reason.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getIgnoredReason.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "Either the data view field or the string name of it."
+            ],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_ignored_reason.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getIgnoredReason.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "ignoredFields",
+            "description": [
+              "The hit._ignored value of the hit to validate."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_ignored_reason.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getLogDocumentOverview",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogDocumentOverview",
+        "description": [],
+        "signature": [
+          "(doc: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          ", { dataView, fieldFormats }: { dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "; fieldFormats: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "public",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-public.FieldFormatsStart",
+            "text": "FieldFormatsStart"
+          },
+          "; }) => ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogDocumentOverview",
+            "text": "LogDocumentOverview"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/get_log_document_overview.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getLogDocumentOverview.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_log_document_overview.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getLogDocumentOverview.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ dataView, fieldFormats }",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/utils/get_log_document_overview.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.getLogDocumentOverview.$2.dataView",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  }
+                ],
+                "path": "packages/kbn-discover-utils/src/utils/get_log_document_overview.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.getLogDocumentOverview.$2.fieldFormats",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "fieldFormats",
+                "description": [],
+                "signature": [
+                  "Omit<",
+                  {
+                    "pluginId": "fieldFormats",
+                    "scope": "common",
+                    "docId": "kibFieldFormatsPluginApi",
+                    "section": "def-common.FieldFormatsRegistry",
+                    "text": "FieldFormatsRegistry"
+                  },
+                  ", \"init\" | \"register\"> & { deserialize: ",
+                  {
+                    "pluginId": "fieldFormats",
+                    "scope": "common",
+                    "docId": "kibFieldFormatsPluginApi",
+                    "section": "def-common.FormatFactory",
+                    "text": "FormatFactory"
+                  },
+                  "; }"
+                ],
+                "path": "packages/kbn-discover-utils/src/utils/get_log_document_overview.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getLogLevelCoalescedValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogLevelCoalescedValue",
+        "description": [],
+        "signature": [
+          "(logLevel: unknown) => ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogLevelCoalescedValue",
+            "text": "LogLevelCoalescedValue"
+          },
+          " | undefined"
+        ],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getLogLevelCoalescedValue.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "logLevel",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getLogLevelCoalescedValueLabel",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogLevelCoalescedValueLabel",
+        "description": [],
+        "signature": [
+          "(coalescedValue: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogLevelCoalescedValue",
+            "text": "LogLevelCoalescedValue"
+          },
+          ") => string"
+        ],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getLogLevelCoalescedValueLabel.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "coalescedValue",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.LogLevelCoalescedValue",
+                "text": "LogLevelCoalescedValue"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getLogLevelColor",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogLevelColor",
+        "description": [],
+        "signature": [
+          "(logLevelCoalescedValue: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogLevelCoalescedValue",
+            "text": "LogLevelCoalescedValue"
+          },
+          ", euiTheme: ",
+          "EuiThemeComputed",
+          "<{}>) => string | undefined"
+        ],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_color.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getLogLevelColor.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "logLevelCoalescedValue",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.LogLevelCoalescedValue",
+                "text": "LogLevelCoalescedValue"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_color.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getLogLevelColor.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "euiTheme",
+            "description": [],
+            "signature": [
+              "EuiThemeComputed",
+              "<{}>"
+            ],
+            "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_color.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getMessageFieldWithFallbacks",
+        "type": "Function",
+        "tags": [],
+        "label": "getMessageFieldWithFallbacks",
+        "description": [],
+        "signature": [
+          "(doc: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogDocumentOverview",
+            "text": "LogDocumentOverview"
+          },
+          ") => { field: \"message\" | \"event.original\" | \"error.message\"; value: string | undefined; } | { field: undefined; value?: undefined; }"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/get_message_field_with_fallbacks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getMessageFieldWithFallbacks.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.LogDocumentOverview",
+                "text": "LogDocumentOverview"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_message_field_with_fallbacks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getShouldShowFieldHandler",
+        "type": "Function",
+        "tags": [],
+        "label": "getShouldShowFieldHandler",
+        "description": [
+          "\nReturns a function for checking whether we should display a field in the Documents column of the data table\nIf showMultiFields is set to false, it filters out multifields that have a parent, to prevent entries for multifields\nlike this: field, field.keyword, field.whatever"
+        ],
+        "signature": [
+          "(fields: string[], dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", showMultiFields: boolean) => ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.ShouldShowFieldInTableHandler",
+            "text": "ShouldShowFieldInTableHandler"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getShouldShowFieldHandler.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getShouldShowFieldHandler.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getShouldShowFieldHandler.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "showMultiFields",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getVisibleColumns",
+        "type": "Function",
+        "tags": [],
+        "label": "getVisibleColumns",
+        "description": [],
+        "signature": [
+          "(columns: string[], dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", shouldPrependTimeFieldColumn: boolean) => string[]"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getVisibleColumns.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getVisibleColumns.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getVisibleColumns.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "shouldPrependTimeFieldColumn",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_visible_columns.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.isLegacyTableEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "isLegacyTableEnabled",
+        "description": [],
+        "signature": [
+          "({\n  uiSettings,\n  isEsqlMode,\n}: { uiSettings: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+            "section": "def-public.IUiSettingsClient",
+            "text": "IUiSettingsClient"
+          },
+          "; isEsqlMode: boolean; }) => boolean"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.isLegacyTableEnabled.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  uiSettings,\n  isEsqlMode,\n}",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.isLegacyTableEnabled.$1.uiSettings",
+                "type": "Object",
+                "tags": [],
+                "label": "uiSettings",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-ui-settings-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                    "section": "def-public.IUiSettingsClient",
+                    "text": "IUiSettingsClient"
+                  }
+                ],
+                "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.isLegacyTableEnabled.$1.isEsqlMode",
+                "type": "boolean",
+                "tags": [],
+                "label": "isEsqlMode",
+                "description": [],
+                "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.isNestedFieldParent",
+        "type": "Function",
+        "tags": [],
+        "label": "isNestedFieldParent",
+        "description": [
+          "\nThis function checks if the given field in a given data view is a nested field's parent.\nDiscover doesn't flatten arrays of objects, so for documents with an `object` or `nested` field that\ncontains an array, Discover will only detect the top level root field. We want to detect when those\nroot fields are `nested` so that we can display the proper icon and label. However, those root\n`nested` fields are not a part of the data view. Their children are though, and contain nested path\ninfo. So to detect nested fields we look through the data view for nested children\nwhose path begins with the current field. There are edge cases where\nthis could incorrectly identify a plain `object` field as `nested`. Say we had the following document\nwhere `foo` is a plain object field and `bar` is a nested field.\n{\n  \"foo\": [\n  {\n    \"bar\": [\n      {\n        \"baz\": \"qux\"\n      }\n    ]\n  },\n  {\n    \"bar\": [\n      {\n        \"baz\": \"qux\"\n      }\n    ]\n  }\n]\n}\nThe following code will search for `foo`, find it at the beginning of the path to the nested child field\n`foo.bar.baz` and incorrectly mark `foo` as nested. Any time we're searching for the name of a plain object\nfield that happens to match a segment of a nested path, we'll get a false positive.\nWe're aware of this issue and we'll have to live with\nit in the short term. The long term fix will be to add info about the `nested` and `object` root fields\nto the data view, but that has its own complications which you can read more about in the following\nissue: https://github.com/elastic/kibana/issues/54957"
+        ],
+        "signature": [
+          "(fieldName: string, dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ") => boolean"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/nested_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.isNestedFieldParent.$1",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/nested_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.isNestedFieldParent.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/nested_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.LogLevelBadge",
+        "type": "Function",
+        "tags": [],
+        "label": "LogLevelBadge",
+        "description": [],
+        "signature": [
+          "({ logLevel, fallback, \"data-test-subj\": dataTestSubj, ...badgeProps }: Omit<",
+          "EuiBadgeProps",
+          ", \"color\" | \"children\"> & { logLevel: {}; fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogLevelBadge.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  logLevel,\n  fallback,\n  'data-test-subj': dataTestSubj = 'logLevelBadge',\n  ...badgeProps\n}",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiBadgeProps",
+              ", \"color\" | \"children\"> & { logLevel: {}; fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }"
+            ],
+            "path": "packages/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.usePager",
+        "type": "Function",
+        "tags": [],
+        "label": "usePager",
+        "description": [],
+        "signature": [
+          "({ initialPageSize, totalItems, }: { totalItems: number; initialPageSize: number; }) => { curPageIndex: number; pageSize: number; changePageIndex: (pageIndex: number) => void; changePageSize: (newPageSize: number) => void; totalPages: number; startIndex: number; hasNextPage: boolean; }"
+        ],
+        "path": "packages/kbn-discover-utils/src/hooks/use_pager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.usePager.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  initialPageSize,\n  totalItems,\n}",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/hooks/use_pager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.usePager.$1.totalItems",
+                "type": "number",
+                "tags": [],
+                "label": "totalItems",
+                "description": [],
+                "path": "packages/kbn-discover-utils/src/hooks/use_pager.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.usePager.$1.initialPageSize",
+                "type": "number",
+                "tags": [],
+                "label": "initialPageSize",
+                "description": [],
+                "path": "packages/kbn-discover-utils/src/hooks/use_pager.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DataTableRecord",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataTableRecord",
+        "description": [
+          "\nThis is the record/row of data provided to our Data Table"
+        ],
+        "path": "packages/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.DataTableRecord.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nA unique id generated by index, id and routing of a record"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.DataTableRecord.raw",
+            "type": "Object",
+            "tags": [],
+            "label": "raw",
+            "description": [
+              "\nThe document returned by Elasticsearch for search queries"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.EsHitRecord",
+                "text": "EsHitRecord"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.DataTableRecord.flattened",
+            "type": "Object",
+            "tags": [],
+            "label": "flattened",
+            "description": [
+              "\nA flattened version of the ES doc or data provided by SQL, aggregations ..."
+            ],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.DataTableRecord.isAnchor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isAnchor",
+            "description": [
+              "\nDetermines that the given doc is the anchor doc when rendering view surrounding docs"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.EsHitRecord",
+        "type": "Interface",
+        "tags": [],
+        "label": "EsHitRecord",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.EsHitRecord",
+            "text": "EsHitRecord"
+          },
+          " extends Omit<DiscoverSearchHit, \"_source\" | \"_index\" | \"_id\">"
+        ],
+        "path": "packages/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.EsHitRecord._index",
+            "type": "string",
+            "tags": [],
+            "label": "_index",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.EsHitRecord._id",
+            "type": "string",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.EsHitRecord._source",
+            "type": "Object",
+            "tags": [],
+            "label": "_source",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.LogCloudFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogCloudFields",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogCloudFields.cloud.provider",
+            "type": "string",
+            "tags": [],
+            "label": "'cloud.provider'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogCloudFields.cloud.region",
+            "type": "string",
+            "tags": [],
+            "label": "'cloud.region'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogCloudFields.cloud.availability_zone",
+            "type": "string",
+            "tags": [],
+            "label": "'cloud.availability_zone'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogCloudFields.cloud.project.id",
+            "type": "string",
+            "tags": [],
+            "label": "'cloud.project.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogCloudFields.cloud.instance.id",
+            "type": "string",
+            "tags": [],
+            "label": "'cloud.instance.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.LogDocumentOverview",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogDocumentOverview",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogDocumentOverview",
+            "text": "LogDocumentOverview"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogResourceFields",
+            "text": "LogResourceFields"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogStackTraceFields",
+            "text": "LogStackTraceFields"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogCloudFields",
+            "text": "LogCloudFields"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogDocumentOverview.timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "'@timestamp'",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogDocumentOverview.log.level",
+            "type": "string",
+            "tags": [],
+            "label": "'log.level'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogDocumentOverview.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogDocumentOverview.error.message",
+            "type": "string",
+            "tags": [],
+            "label": "'error.message'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogDocumentOverview.event.original",
+            "type": "string",
+            "tags": [],
+            "label": "'event.original'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogDocumentOverview.trace.id",
+            "type": "string",
+            "tags": [],
+            "label": "'trace.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogDocumentOverview.log.file.path",
+            "type": "string",
+            "tags": [],
+            "label": "'log.file.path'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogDocumentOverview.data_stream.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "'data_stream.namespace'",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogDocumentOverview.data_stream.dataset",
+            "type": "string",
+            "tags": [],
+            "label": "'data_stream.dataset'",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.LogResourceFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogResourceFields",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogResourceFields.host.name",
+            "type": "string",
+            "tags": [],
+            "label": "'host.name'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogResourceFields.service.name",
+            "type": "string",
+            "tags": [],
+            "label": "'service.name'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogResourceFields.agent.name",
+            "type": "string",
+            "tags": [],
+            "label": "'agent.name'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogResourceFields.orchestrator.cluster.name",
+            "type": "string",
+            "tags": [],
+            "label": "'orchestrator.cluster.name'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogResourceFields.orchestrator.cluster.id",
+            "type": "string",
+            "tags": [],
+            "label": "'orchestrator.cluster.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogResourceFields.orchestrator.resource.id",
+            "type": "string",
+            "tags": [],
+            "label": "'orchestrator.resource.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogResourceFields.orchestrator.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "'orchestrator.namespace'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogResourceFields.container.name",
+            "type": "string",
+            "tags": [],
+            "label": "'container.name'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogResourceFields.container.id",
+            "type": "string",
+            "tags": [],
+            "label": "'container.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.LogsContextService",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogsContextService",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogsContextService.isLogsIndexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "isLogsIndexPattern",
+            "description": [],
+            "signature": [
+              "(indexPattern: unknown) => boolean"
+            ],
+            "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.LogsContextService.isLogsIndexPattern.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.LogStackTraceFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogStackTraceFields",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogStackTraceFields.error.stack_trace",
+            "type": "string",
+            "tags": [],
+            "label": "'error.stack_trace'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogStackTraceFields.error.exception.stacktrace",
+            "type": "string",
+            "tags": [],
+            "label": "'error.exception.stacktrace'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogStackTraceFields.error.log.stacktrace",
+            "type": "string",
+            "tags": [],
+            "label": "'error.log.stacktrace'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.RowControlColumn",
+        "type": "Interface",
+        "tags": [],
+        "label": "RowControlColumn",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlColumn.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlColumn.headerAriaLabel",
+            "type": "string",
+            "tags": [],
+            "label": "headerAriaLabel",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlColumn.headerCellRender",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "headerCellRender",
+            "description": [],
+            "signature": [
+              "React.ComponentType<{}> | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlColumn.renderControl",
+            "type": "Function",
+            "tags": [],
+            "label": "renderControl",
+            "description": [],
+            "signature": [
+              "(Control: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.RowControlComponent",
+                "text": "RowControlComponent"
+              },
+              ", props: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.RowControlRowProps",
+                "text": "RowControlRowProps"
+              },
+              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.RowControlColumn.renderControl.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "Control",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.RowControlComponent",
+                    "text": "RowControlComponent"
+                  }
+                ],
+                "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.RowControlColumn.renderControl.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.RowControlRowProps",
+                    "text": "RowControlRowProps"
+                  }
+                ],
+                "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.RowControlProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "RowControlProps",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlProps.color",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlProps.disabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlProps.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlProps.iconType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "iconType",
+            "description": [],
+            "signature": [
+              "string | React.ComponentType<{}>"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlProps.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "((props: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.RowControlRowProps",
+                "text": "RowControlRowProps"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlProps.tooltipContent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "tooltipContent",
+            "description": [],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.RowControlRowProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "RowControlRowProps",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlRowProps.rowIndex",
+            "type": "number",
+            "tags": [],
+            "label": "rowIndex",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlRowProps.record",
+            "type": "Object",
+            "tags": [],
+            "label": "record",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.IgnoredReason",
+        "type": "Enum",
+        "tags": [],
+        "label": "IgnoredReason",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/utils/get_ignored_reason.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.LogLevelCoalescedValue",
+        "type": "Enum",
+        "tags": [],
+        "label": "LogLevelCoalescedValue",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.CONTEXT_DEFAULT_SIZE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "CONTEXT_DEFAULT_SIZE_SETTING",
+        "description": [],
+        "signature": [
+          "\"context:defaultSize\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.CONTEXT_STEP_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "CONTEXT_STEP_SETTING",
+        "description": [],
+        "signature": [
+          "\"context:step\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.CONTEXT_TIE_BREAKER_FIELDS_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "CONTEXT_TIE_BREAKER_FIELDS_SETTING",
+        "description": [],
+        "signature": [
+          "\"context:tieBreakerFields\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DataTableColumnsMeta",
+        "type": "Type",
+        "tags": [],
+        "label": "DataTableColumnsMeta",
+        "description": [
+          "\nCustom column types per column name"
+        ],
+        "signature": [
+          "{ [x: string]: { type: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumnType",
+            "text": "DatatableColumnType"
+          },
+          "; esType?: string | undefined; }; }"
+        ],
+        "path": "packages/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DEFAULT_ALLOWED_LOGS_BASE_PATTERNS",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_ALLOWED_LOGS_BASE_PATTERNS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DEFAULT_COLUMNS_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_COLUMNS_SETTING",
+        "description": [],
+        "signature": [
+          "\"defaultColumns\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DOC_HIDE_TIME_COLUMN_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "DOC_HIDE_TIME_COLUMN_SETTING",
+        "description": [],
+        "signature": [
+          "\"doc_table:hideTimeColumn\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DOC_TABLE_LEGACY",
+        "type": "string",
+        "tags": [],
+        "label": "DOC_TABLE_LEGACY",
+        "description": [],
+        "signature": [
+          "\"doc_table:legacy\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.FIELDS_LIMIT_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "FIELDS_LIMIT_SETTING",
+        "description": [],
+        "signature": [
+          "\"fields:popularLimit\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.FormattedHit",
+        "type": "Type",
+        "tags": [],
+        "label": "FormattedHit",
+        "description": [
+          "\nPairs array for each field in the hit"
+        ],
+        "signature": [
+          "FormattedHitPair[]"
+        ],
+        "path": "packages/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.HIDE_ANNOUNCEMENTS",
+        "type": "string",
+        "tags": [],
+        "label": "HIDE_ANNOUNCEMENTS",
+        "description": [],
+        "signature": [
+          "\"hideAnnouncements\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.MAX_DOC_FIELDS_DISPLAYED",
+        "type": "string",
+        "tags": [],
+        "label": "MAX_DOC_FIELDS_DISPLAYED",
+        "description": [],
+        "signature": [
+          "\"discover:maxDocFieldsDisplayed\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.MODIFY_COLUMNS_ON_SWITCH",
+        "type": "string",
+        "tags": [],
+        "label": "MODIFY_COLUMNS_ON_SWITCH",
+        "description": [],
+        "signature": [
+          "\"discover:modifyColumnsOnSwitch\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ROW_HEIGHT_OPTION",
+        "type": "string",
+        "tags": [],
+        "label": "ROW_HEIGHT_OPTION",
+        "description": [],
+        "signature": [
+          "\"discover:rowHeightOption\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.RowControlComponent",
+        "type": "Type",
+        "tags": [],
+        "label": "RowControlComponent",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.RowControlProps",
+            "text": "RowControlProps"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlComponent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.RowControlComponent.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SAMPLE_ROWS_PER_PAGE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SAMPLE_ROWS_PER_PAGE_SETTING",
+        "description": [],
+        "signature": [
+          "\"discover:sampleRowsPerPage\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SAMPLE_SIZE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SAMPLE_SIZE_SETTING",
+        "description": [],
+        "signature": [
+          "\"discover:sampleSize\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SEARCH_EMBEDDABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_EMBEDDABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"search\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SEARCH_FIELDS_FROM_SOURCE",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_FIELDS_FROM_SOURCE",
+        "description": [],
+        "signature": [
+          "\"discover:searchFieldsFromSource\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SEARCH_ON_PAGE_LOAD_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_ON_PAGE_LOAD_SETTING",
+        "description": [],
+        "signature": [
+          "\"discover:searchOnPageLoad\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ShouldShowFieldInTableHandler",
+        "type": "Type",
+        "tags": [],
+        "label": "ShouldShowFieldInTableHandler",
+        "description": [],
+        "signature": [
+          "(fieldName: string) => boolean"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.ShouldShowFieldInTableHandler.$1",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SHOW_FIELD_STATISTICS",
+        "type": "string",
+        "tags": [],
+        "label": "SHOW_FIELD_STATISTICS",
+        "description": [],
+        "signature": [
+          "\"discover:showFieldStatistics\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SHOW_MULTIFIELDS",
+        "type": "string",
+        "tags": [],
+        "label": "SHOW_MULTIFIELDS",
+        "description": [],
+        "signature": [
+          "\"discover:showMultiFields\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SORT_DEFAULT_ORDER_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SORT_DEFAULT_ORDER_SETTING",
+        "description": [],
+        "signature": [
+          "\"discover:sort:defaultOrder\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TRUNCATE_MAX_HEIGHT",
+        "type": "string",
+        "tags": [],
+        "label": "TRUNCATE_MAX_HEIGHT",
+        "description": [],
+        "signature": [
+          "\"truncate:maxHeight\""
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE",
+        "type": "number",
+        "tags": [],
+        "label": "TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE",
+        "description": [],
+        "signature": [
+          "115"
+        ],
+        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

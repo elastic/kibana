@@ -11,7 +11,7 @@ import { SavedObjectReference } from '@kbn/core/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { LensState } from './types';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
-import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
+import { getDatasourceLayers } from './utils';
 
 export const selectPersistedDoc = (state: LensState) => state.lens.persistedDoc;
 export const selectQuery = (state: LensState) => state.lens.query;
@@ -36,6 +36,7 @@ export const selectVisualizationState = (state: LensState) => state.lens.visuali
 export const selectActiveDatasourceId = (state: LensState) => state.lens.activeDatasourceId;
 export const selectActiveData = (state: LensState) => state.lens.activeData;
 export const selectDataViews = (state: LensState) => state.lens.dataViews;
+export const selectIsManaged = (state: LensState) => state.lens.managed;
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
 
@@ -46,9 +47,11 @@ export const selectTriggerApplyChanges = (state: LensState) => {
   return shouldApply;
 };
 
+// TODO - is there any point to keeping this around since we have selectExecutionSearchContext?
 export const selectExecutionContext = createSelector(
   [selectQuery, selectFilters, selectResolvedDateRange],
   (query, filters, dateRange) => ({
+    now: Date.now(),
     dateRange,
     query,
     filters,
@@ -56,13 +59,14 @@ export const selectExecutionContext = createSelector(
 );
 
 export const selectExecutionContextSearch = createSelector(selectExecutionContext, (res) => ({
+  now: res.now,
   query: res.query,
   timeRange: {
     from: res.dateRange.fromDate,
     to: res.dateRange.toDate,
   },
   filters: res.filters,
-  disableShardWarnings: true,
+  disableWarningToasts: true,
 }));
 
 const selectInjectedDependencies = (_state: LensState, dependencies: unknown) => dependencies;
@@ -220,10 +224,10 @@ export const selectFramePublicAPI = createSelector(
     selectCurrentDatasourceStates,
     selectActiveData,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
-    selectResolvedDateRange,
     selectDataViews,
+    selectExecutionContext,
   ],
-  (datasourceStates, activeData, datasourceMap, dateRange, dataViews) => {
+  (datasourceStates, activeData, datasourceMap, dataViews, context) => {
     return {
       datasourceLayers: getDatasourceLayers(
         datasourceStates,
@@ -231,13 +235,9 @@ export const selectFramePublicAPI = createSelector(
         dataViews.indexPatterns
       ),
       activeData,
-      dateRange,
       dataViews,
+      ...context,
+      absDateRange: context.dateRange,
     };
   }
-);
-
-export const selectFrameDatasourceAPI = createSelector(
-  [selectFramePublicAPI, selectExecutionContext],
-  (framePublicAPI, context) => ({ ...context, ...framePublicAPI })
 );

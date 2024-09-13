@@ -1,33 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo } from 'react';
 
-import { EuiButtonIcon, EuiToolTip, IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { CellAction, CellActionExecutionContext } from '../types';
 
 export const ActionItem = ({
   action,
   actionContext,
   showTooltip,
+  onClick,
 }: {
   action: CellAction;
   actionContext: CellActionExecutionContext;
   showTooltip: boolean;
+  onClick?: () => void;
 }) => {
   const actionProps = useMemo(
     () => ({
       iconType: action.getIconType(actionContext) as IconType,
-      onClick: () => action.execute(actionContext),
+      onClick: () => {
+        action.execute(actionContext);
+        if (onClick) onClick();
+      },
       'data-test-subj': `actionItem-${action.id}`,
       'aria-label': action.getDisplayName(actionContext),
     }),
-    [action, actionContext]
+    [action, actionContext, onClick]
   );
 
   if (!actionProps.iconType) return null;

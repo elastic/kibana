@@ -22,27 +22,35 @@ import { registerRoutes as registerAppRoutes } from './app';
 import { registerRoutes as registerPreconfigurationRoutes } from './preconfiguration';
 import { registerRoutes as registerDownloadSourcesRoutes } from './download_source';
 import { registerRoutes as registerHealthCheckRoutes } from './health_check';
-import { registerRoutes as registerFleetServerHostRoutes } from './fleet_server_policy_config';
+import { registerRoutes as registerFleetServerHostRoutes } from './fleet_server_hosts';
 import { registerRoutes as registerFleetProxiesRoutes } from './fleet_proxies';
+import { registerRoutes as registerMessageSigningServiceRoutes } from './message_signing_service';
+import { registerRoutes as registerUninstallTokenRoutes } from './uninstall_token';
+import { registerRoutes as registerStandaloneAgentApiKeyRoutes } from './standalone_agent_api_key';
+import { registerRoutes as registerDebugRoutes } from './debug';
 
-export async function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
+export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
   // Always register app routes for permissions checking
-  registerAppRoutes(fleetAuthzRouter);
+  registerAppRoutes(fleetAuthzRouter, config);
 
   // The upload package route is only authorized for the superuser
-  registerEPMRoutes(fleetAuthzRouter);
+  registerEPMRoutes(fleetAuthzRouter, config);
 
   registerSetupRoutes(fleetAuthzRouter, config);
   registerAgentPolicyRoutes(fleetAuthzRouter);
   registerPackagePolicyRoutes(fleetAuthzRouter);
   registerOutputRoutes(fleetAuthzRouter);
-  registerSettingsRoutes(fleetAuthzRouter);
+  registerSettingsRoutes(fleetAuthzRouter, config);
   registerDataStreamRoutes(fleetAuthzRouter);
   registerPreconfigurationRoutes(fleetAuthzRouter);
   registerFleetServerHostRoutes(fleetAuthzRouter);
   registerFleetProxiesRoutes(fleetAuthzRouter);
   registerDownloadSourcesRoutes(fleetAuthzRouter);
   registerHealthCheckRoutes(fleetAuthzRouter);
+  registerMessageSigningServiceRoutes(fleetAuthzRouter);
+  registerUninstallTokenRoutes(fleetAuthzRouter, config);
+  registerStandaloneAgentApiKeyRoutes(fleetAuthzRouter);
+  registerDebugRoutes(fleetAuthzRouter);
 
   // Conditional config routes
   if (config.agents.enabled) {

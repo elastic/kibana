@@ -6,17 +6,21 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
+import type { ComponentType, ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { render, screen } from '@testing-library/react';
 
 import type { Props } from './connectors';
 import { Connectors } from './connectors';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, TestProviders } from '../../common/mock';
+import {
+  type AppMockRenderer,
+  noConnectorsCasePermission,
+  createAppMockRenderer,
+  TestProviders,
+} from '../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors, actionTypes } from './__mock__';
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
@@ -37,7 +41,9 @@ describe('Connectors', () => {
   };
 
   beforeAll(() => {
-    wrapper = mount(<Connectors {...props} />, { wrappingComponent: TestProviders });
+    wrapper = mount(<Connectors {...props} />, {
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
+    });
   });
 
   beforeEach(() => {
@@ -86,7 +92,7 @@ describe('Connectors', () => {
         selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       }
     );
 
@@ -113,7 +119,7 @@ describe('Connectors', () => {
         selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       }
     );
 
@@ -154,6 +160,16 @@ describe('Connectors', () => {
       ...appMockRender.coreStart.application.capabilities,
       actions: { save: false, show: false },
     };
+
+    const result = appMockRender.render(<Connectors {...props} />);
+    expect(
+      result.getByTestId('configure-case-connector-permissions-error-msg')
+    ).toBeInTheDocument();
+    expect(result.queryByTestId('case-connectors-dropdown')).toBe(null);
+  });
+
+  it('shows the actions permission message if the user does not have access to case connector', async () => {
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
 
     const result = appMockRender.render(<Connectors {...props} />);
     expect(

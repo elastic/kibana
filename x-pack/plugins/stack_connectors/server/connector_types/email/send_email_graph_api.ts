@@ -11,24 +11,17 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { SendEmailOptions } from './send_email';
-
-interface SendEmailGraphApiOptions {
-  options: SendEmailOptions;
-  headers: Record<string, string>;
-  messageHTML: string;
-  graphApiUrl?: string;
-}
-
-const MICROSOFT_GRAPH_API_HOST = 'https://graph.microsoft.com/v1.0';
 
 export async function sendEmailGraphApi(
   sendEmailOptions: SendEmailGraphApiOptions,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
+  connectorUsageCollector: ConnectorUsageCollector,
   axiosInstance?: AxiosInstance
 ): Promise<AxiosResponse> {
-  const { options, headers, messageHTML, graphApiUrl } = sendEmailOptions;
+  const { options, headers, messageHTML } = sendEmailOptions;
 
   // Create a new axios instance if one is not provided
   axiosInstance = axiosInstance ?? axios.create();
@@ -36,13 +29,16 @@ export async function sendEmailGraphApi(
   // POST /users/{id | userPrincipalName}/sendMail
   const res = await request({
     axios: axiosInstance,
-    url: `${graphApiUrl ?? MICROSOFT_GRAPH_API_HOST}/users/${options.routing.from}/sendMail`,
+    url: `${configurationUtilities.getMicrosoftGraphApiUrl()}/users/${
+      options.routing.from
+    }/sendMail`,
     method: 'post',
     logger,
     data: getMessage(options, messageHTML),
     headers,
     configurationUtilities,
     validateStatus: () => true,
+    connectorUsageCollector,
   });
   if (res.status === 202) {
     return res.data;
@@ -52,6 +48,12 @@ export async function sendEmailGraphApi(
     `error thrown sending Microsoft Exchange email for clientID: ${sendEmailOptions.options.transport.clientId}: ${errString}`
   );
   throw new Error(errString);
+}
+
+interface SendEmailGraphApiOptions {
+  options: SendEmailOptions;
+  headers: Record<string, string>;
+  messageHTML: string;
 }
 
 function getMessage(emailOptions: SendEmailOptions, messageHTML: string) {

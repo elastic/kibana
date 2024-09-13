@@ -5,9 +5,8 @@
  * 2.0.
  */
 import { act, renderHook } from '@testing-library/react-hooks/dom';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 
-import { MaintenanceWindow } from '../pages/maintenance_windows/types';
 import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
 import { useCreateMaintenanceWindow } from './use_create_maintenance_window';
 
@@ -35,7 +34,7 @@ jest.mock('../services/maintenance_windows_api/create', () => ({
 
 const { createMaintenanceWindow } = jest.requireMock('../services/maintenance_windows_api/create');
 
-const maintenanceWindow: MaintenanceWindow = {
+const maintenanceWindow = {
   title: 'test',
   duration: 1,
   rRule: {
@@ -80,7 +79,25 @@ describe('useCreateMaintenanceWindow', () => {
     });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith('Failed to create maintenance window.')
+      expect(mockAddDanger).toBeCalledWith('Failed to create maintenance window')
+    );
+  });
+
+  it('should show 400 error messages', async () => {
+    createMaintenanceWindow.mockRejectedValue({
+      body: { statusCode: 400, message: 'Bad request' },
+    });
+
+    const { result } = renderHook(() => useCreateMaintenanceWindow(), {
+      wrapper: appMockRenderer.AppWrapper,
+    });
+
+    act(() => {
+      result.current.mutate(maintenanceWindow);
+    });
+
+    await waitFor(() =>
+      expect(mockAddDanger).toBeCalledWith('Failed to create maintenance window: Bad request')
     );
   });
 });

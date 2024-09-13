@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
@@ -36,30 +37,25 @@ export class SavedObjectsManagementActionService {
 
   setup(): SavedObjectsManagementActionServiceSetup {
     return {
-      register: (action) => {
-        if (this.actions.has(action.id)) {
-          throw new Error(`Saved Objects Management Action with id '${action.id}' already exists`);
-        }
-        this.actions.set(action.id, action);
-      },
+      register: (action) => this.register(action),
     };
   }
 
   start(spacesApi?: SpacesApi): SavedObjectsManagementActionServiceStart {
-    if (spacesApi) {
-      registerSpacesApiActions(this, spacesApi);
+    if (spacesApi && !spacesApi.hasOnlyDefaultSpace) {
+      this.register(new ShareToSpaceSavedObjectsManagementAction(spacesApi.ui));
+      this.register(new CopyToSpaceSavedObjectsManagementAction(spacesApi.ui));
     }
     return {
       has: (actionId) => this.actions.has(actionId),
       getAll: () => [...this.actions.values()],
     };
   }
-}
 
-function registerSpacesApiActions(
-  service: SavedObjectsManagementActionService,
-  spacesApi: SpacesApi
-) {
-  service.setup().register(new ShareToSpaceSavedObjectsManagementAction(spacesApi.ui));
-  service.setup().register(new CopyToSpaceSavedObjectsManagementAction(spacesApi.ui));
+  private register(action: SavedObjectsManagementAction) {
+    if (this.actions.has(action.id)) {
+      throw new Error(`Saved Objects Management Action with id '${action.id}' already exists`);
+    }
+    this.actions.set(action.id, action);
+  }
 }

@@ -106,10 +106,6 @@ export class CustomRasterSource implements IRasterSource {
     return false;
   }
 
-  getFieldNames(): string[] {
-    return [];
-  }
-
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
     return null;
   }
@@ -123,18 +119,6 @@ export class CustomRasterSource implements IRasterSource {
   }
 
   getApplyForceRefresh(): boolean {
-    return false;
-  }
-
-  getIndexPatternIds(): string[] {
-    return [];
-  }
-
-  getQueryableIndexPatternIds(): string[] {
-    return [];
-  }
-
-  isESSource(): boolean {
     return false;
   }
 

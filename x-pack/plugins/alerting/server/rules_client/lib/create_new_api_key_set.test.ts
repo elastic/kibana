@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -17,6 +22,8 @@ import { RawRule } from '../../types';
 import { getBeforeSetup, mockedDateString } from '../tests/lib';
 import { createNewAPIKeySet } from './create_new_api_key_set';
 import { RulesClientContext } from '../types';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -24,6 +31,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v8.0.0';
 const rulesClientParams: jest.Mocked<RulesClientContext> = {
@@ -36,15 +44,23 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   minimumScheduleIntervalInMs: 1,
   fieldsToExcludeFromPublicApi: [],
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
+  backfillClient: backfillClientMock.create(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 const username = 'test';

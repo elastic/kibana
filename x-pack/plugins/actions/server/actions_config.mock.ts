@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+} from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
 
 const createActionsConfigMock = () => {
@@ -24,10 +29,13 @@ const createActionsConfigMock = () => {
       timeout: 360000,
     }),
     getCustomHostSettings: jest.fn().mockReturnValue(undefined),
-    getMicrosoftGraphApiUrl: jest.fn().mockReturnValue(undefined),
+    getMicrosoftGraphApiUrl: jest.fn().mockReturnValue(DEFAULT_MICROSOFT_GRAPH_API_URL),
+    getMicrosoftGraphApiScope: jest.fn().mockReturnValue(DEFAULT_MICROSOFT_GRAPH_API_SCOPE),
+    getMicrosoftExchangeUrl: jest.fn().mockReturnValue(DEFAULT_MICROSOFT_EXCHANGE_URL),
     validateEmailAddresses: jest.fn().mockReturnValue(undefined),
     getMaxAttempts: jest.fn().mockReturnValue(3),
     enableFooterInEmail: jest.fn().mockReturnValue(true),
+    getMaxQueued: jest.fn().mockReturnValue(1000),
   };
   return mocked;
 };

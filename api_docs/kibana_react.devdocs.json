@@ -192,86 +192,6 @@
     "functions": [
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.CodeEditor",
-        "type": "Function",
-        "tags": [
-          "see"
-        ],
-        "label": "CodeEditor",
-        "description": [
-          "\nRenders a Monaco code editor with EUI color theme.\n"
-        ],
-        "signature": [
-          "(props: React.PropsWithChildren<",
-          "Props",
-          ">) => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.CodeEditor.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              "Props",
-              ">"
-            ],
-            "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.CodeEditorField",
-        "type": "Function",
-        "tags": [],
-        "label": "CodeEditorField",
-        "description": [
-          "\nRenders a Monaco code editor in the same style as other EUI form fields."
-        ],
-        "signature": [
-          "(props: React.PropsWithChildren<",
-          "Props",
-          ">) => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.CodeEditorField.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              "Props",
-              ">"
-            ],
-            "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.createKibanaReactContext",
         "type": "Function",
         "tags": [],
@@ -281,9 +201,9 @@
           "<Services extends Partial<",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
           ">>(services: Services) => ",
@@ -330,9 +250,9 @@
           "(services: Partial<",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
           ">) => ",
@@ -359,9 +279,9 @@
               "Partial<",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ">"
@@ -386,9 +306,9 @@
           "(services: Partial<",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
           ">) => ",
@@ -415,9 +335,9 @@
               "Partial<",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ">"
@@ -490,7 +410,7 @@
         "label": "KibanaContextProvider",
         "description": [],
         "signature": [
-          "React.FunctionComponent<{ services?: {} | undefined; }>"
+          "React.FunctionComponent<React.PropsWithChildren<{ services?: {} | undefined; }>>"
         ],
         "path": "src/plugins/kibana_react/public/context/context.tsx",
         "deprecated": false,
@@ -526,107 +446,6 @@
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.KibanaPageTemplate",
-        "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "KibanaPageTemplate",
-        "description": [],
-        "signature": [
-          "({ template, className, children, solutionNav, noDataConfig, ...rest }: React.PropsWithChildren<",
-          {
-            "pluginId": "kibanaReact",
-            "scope": "public",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-public.KibanaPageTemplateProps",
-            "text": "KibanaPageTemplateProps"
-          },
-          ">) => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/tutorial_directory.js"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/tutorial_directory.js"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/tutorial_directory.js"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/components/empty_state.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/components/empty_state.tsx"
-          }
-        ],
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.KibanaPageTemplate.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  template,\n  className,\n  children,\n  solutionNav,\n  noDataConfig,\n  ...rest\n}",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.KibanaPageTemplateProps",
-                "text": "KibanaPageTemplateProps"
-              },
-              ">"
-            ],
-            "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -672,27 +491,44 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.KibanaThemeProvider",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "KibanaThemeProvider",
         "description": [],
         "signature": [
-          "({ theme$, modify, children }: React.PropsWithChildren<KibanaThemeProviderProps>) => JSX.Element"
+          "({ children, theme$, modify }: ",
+          {
+            "pluginId": "kibanaReact",
+            "scope": "public",
+            "docId": "kibKibanaReactPluginApi",
+            "section": "def-public.KibanaThemeProviderProps",
+            "text": "KibanaThemeProviderProps"
+          },
+          ") => JSX.Element"
         ],
-        "path": "src/plugins/kibana_react/public/theme/kibana_theme_provider.tsx",
-        "deprecated": false,
+        "path": "src/plugins/kibana_react/public/theme.tsx",
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "kibanaReact",
             "id": "def-public.KibanaThemeProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ theme$, modify, children }",
+            "label": "{ children, theme$, modify }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<KibanaThemeProviderProps>"
+              {
+                "pluginId": "kibanaReact",
+                "scope": "public",
+                "docId": "kibKibanaReactPluginApi",
+                "section": "def-public.KibanaThemeProviderProps",
+                "text": "KibanaThemeProviderProps"
+              }
             ],
-            "path": "src/plugins/kibana_react/public/theme/kibana_theme_provider.tsx",
+            "path": "src/plugins/kibana_react/public/theme.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -763,41 +599,6 @@
               "MarkdownSimpleProps"
             ],
             "path": "src/plugins/kibana_react/public/markdown/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.MountPointPortal",
-        "type": "Function",
-        "tags": [],
-        "label": "MountPointPortal",
-        "description": [
-          "\nUtility component to portal a part of a react application into the provided `MountPoint`."
-        ],
-        "signature": [
-          "({ children, setMountPoint }: React.PropsWithChildren<MountPointPortalProps>) => React.ReactPortal | null"
-        ],
-        "path": "src/plugins/kibana_react/public/util/mount_point_portal.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.MountPointPortal.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{ children, setMountPoint }",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<MountPointPortalProps>"
-            ],
-            "path": "src/plugins/kibana_react/public/util/mount_point_portal.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -981,9 +782,9 @@
           "(history: ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.ScopedHistory",
+            "section": "def-public.ScopedHistory",
             "text": "ScopedHistory"
           },
           "<unknown> | ",
@@ -1004,9 +805,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ScopedHistory",
+                "section": "def-public.ScopedHistory",
                 "text": "ScopedHistory"
               },
               "<unknown> | ",
@@ -1063,9 +864,9 @@
           "(history: ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.ScopedHistory",
+            "section": "def-public.ScopedHistory",
             "text": "ScopedHistory"
           },
           "<unknown> | ",
@@ -1086,9 +887,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ScopedHistory",
+                "section": "def-public.ScopedHistory",
                 "text": "ScopedHistory"
               },
               "<unknown> | ",
@@ -1136,431 +937,15 @@
       },
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.RedirectAppLinks",
+        "id": "def-public.toMountPoint",
         "type": "Function",
         "tags": [
           "deprecated"
         ],
-        "label": "RedirectAppLinks",
-        "description": [
-          "\nUtility component that will intercept click events on children anchor (`<a>`) elements to call\n`application.navigateToUrl` with the link's href. This will trigger SPA friendly navigation\nwhen the link points to a valid Kibana app.\n"
-        ],
-        "signature": [
-          "({ application, children, className, ...otherProps }: React.PropsWithChildren<RedirectCrossAppLinksProps>) => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/public/app_links/redirect_app_link.tsx",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/get_columns.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/get_columns.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/get_columns.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "esUiShared",
-            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
-          },
-          {
-            "plugin": "esUiShared",
-            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
-          },
-          {
-            "plugin": "esUiShared",
-            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
-            "plugin": "spaces",
-            "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/components/home_integration/tutorial_directory_header_link.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/components/custom_assets_accordion.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/components/custom_assets_accordion.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/components/custom_assets_accordion.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/agent_logs.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/agent_logs.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/agent_logs.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/routing/app_root/index.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/routing/app_root/index.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/routing/app_root/index.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_toolbar/analytics_collection_toolbar.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_toolbar/analytics_collection_toolbar.tsx"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_toolbar/analytics_collection_toolbar.tsx"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/shared_imports.ts"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/plugins/upgrade_assistant/public/shared_imports.ts"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/plugins/upgrade_assistant/public/application/app.tsx"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/plugins/upgrade_assistant/public/application/app.tsx"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/plugins/upgrade_assistant/public/application/app.tsx"
-          },
-          {
-            "plugin": "ux",
-            "path": "x-pack/plugins/ux/public/application/ux_app.tsx"
-          },
-          {
-            "plugin": "ux",
-            "path": "x-pack/plugins/ux/public/application/ux_app.tsx"
-          },
-          {
-            "plugin": "ux",
-            "path": "x-pack/plugins/ux/public/application/ux_app.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/components/manage_data/manage_data.tsx"
-          }
-        ],
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.RedirectAppLinks.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  application,\n  children,\n  className,\n  ...otherProps\n}",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<RedirectCrossAppLinksProps>"
-            ],
-            "path": "src/plugins/kibana_react/public/app_links/redirect_app_link.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.Route",
-        "type": "Function",
-        "tags": [],
-        "label": "Route",
-        "description": [
-          "\nIt's a wrapper around the react-router-dom Route component that inserts\nMatchPropagator in every application route. It helps track all route changes\nand send them to the execution context, later used to enrich APM\n'route-change' transactions."
-        ],
-        "signature": [
-          "({ children, component: Component, render, ...rest }: ",
-          "RouteProps",
-          ") => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/public/router/router.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Route.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ children, component: Component, render, ...rest }",
-            "description": [],
-            "signature": [
-              "RouteProps"
-            ],
-            "path": "src/plugins/kibana_react/public/router/router.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.toMountPoint",
-        "type": "Function",
-        "tags": [],
         "label": "toMountPoint",
-        "description": [
-          "\nMountPoint converter for react nodes.\n"
-        ],
+        "description": [],
         "signature": [
-          "(node: React.ReactNode, { theme$ }?: ",
+          "(node: React.ReactNode, { analytics, theme$ }?: ",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -1571,16 +956,26 @@
           ") => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-common.MountPoint",
+            "section": "def-public.MountPoint",
             "text": "MountPoint"
           },
           "<HTMLElement>"
         ],
-        "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
-        "deprecated": false,
+        "path": "src/plugins/kibana_react/public/util/index.tsx",
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "observabilityShared",
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
+          },
+          {
+            "plugin": "observabilityShared",
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1588,13 +983,11 @@
             "type": "CompoundType",
             "tags": [],
             "label": "node",
-            "description": [
-              "to get a mount point for"
-            ],
+            "description": [],
             "signature": [
               "React.ReactNode"
             ],
-            "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
+            "path": "src/plugins/kibana_react/public/util/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1604,7 +997,7 @@
             "id": "def-public.toMountPoint.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ theme$ }",
+            "label": "{ analytics, theme$ }",
             "description": [],
             "signature": [
               {
@@ -1615,56 +1008,7 @@
                 "text": "ToMountPointOptions"
               }
             ],
-            "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.ToolbarButton",
-        "type": "Function",
-        "tags": [],
-        "label": "ToolbarButton",
-        "description": [],
-        "signature": [
-          "({ children, className, fontWeight, size, hasArrow, groupPosition, dataTestSubj, ...rest }: React.PropsWithChildren<",
-          {
-            "pluginId": "kibanaReact",
-            "scope": "public",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-public.ToolbarButtonProps",
-            "text": "ToolbarButtonProps"
-          },
-          ">) => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.ToolbarButton.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  children,\n  className,\n  fontWeight = 'normal',\n  size = 'm',\n  hasArrow = true,\n  groupPosition = 'none',\n  dataTestSubj = '',\n  ...rest\n}",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.ToolbarButtonProps",
-                "text": "ToolbarButtonProps"
-              },
-              ">"
-            ],
-            "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
+            "path": "src/plugins/kibana_react/public/util/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1681,7 +1025,7 @@
         "label": "UrlTemplateEditor",
         "description": [],
         "signature": [
-          "({ height, value, variables, onChange, placeholder, onEditor, Editor, }: React.PropsWithChildren<",
+          "({ height, fitToContent, value, variables, onChange, placeholder, onEditor, Editor, }: React.PropsWithChildren<",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -1700,7 +1044,7 @@
             "id": "def-public.UrlTemplateEditor.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  height = 105,\n  value,\n  variables,\n  onChange,\n  placeholder,\n  onEditor,\n  Editor = CodeEditor,\n}",
+            "label": "{\n  height = 105,\n  fitToContent,\n  value,\n  variables,\n  onChange,\n  placeholder,\n  onEditor,\n  Editor = CodeEditor,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -1724,6 +1068,39 @@
       },
       {
         "parentPluginId": "kibanaReact",
+        "id": "def-public.useDarkMode",
+        "type": "Function",
+        "tags": [],
+        "label": "useDarkMode",
+        "description": [],
+        "signature": [
+          "(defaultValue?: boolean | undefined) => boolean"
+        ],
+        "path": "src/plugins/kibana_react/public/dark_mode/use_dark_mode.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.useDarkMode.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/dark_mode/use_dark_mode.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
         "id": "def-public.useExecutionContext",
         "type": "Function",
         "tags": [],
@@ -1735,9 +1112,9 @@
           "(executionContext: ",
           {
             "pluginId": "@kbn/core-execution-context-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-            "section": "def-common.ExecutionContextSetup",
+            "section": "def-public.ExecutionContextSetup",
             "text": "ExecutionContextSetup"
           },
           " | undefined, context: ",
@@ -1764,9 +1141,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-execution-context-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-                "section": "def-common.ExecutionContextSetup",
+                "section": "def-public.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
               },
               " | undefined"
@@ -1920,9 +1297,9 @@
           "<Partial<",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
           "> & Extra>"
@@ -2087,15 +1464,15 @@
           "Observable",
           "<",
           {
-            "pluginId": "@kbn/core-theme-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.CoreTheme",
-            "text": "CoreTheme"
+            "pluginId": "@kbn/react-kibana-context-common",
+            "scope": "public",
+            "docId": "kibKbnReactKibanaContextCommonPluginApi",
+            "section": "def-public.KibanaTheme",
+            "text": "KibanaTheme"
           },
-          ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+          ">) => JSX.Element"
         ],
-        "path": "src/plugins/kibana_react/public/theme/wrap_with_theme.tsx",
+        "path": "src/plugins/kibana_react/public/theme.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2109,7 +1486,7 @@
             "signature": [
               "React.ReactNode"
             ],
-            "path": "src/plugins/kibana_react/public/theme/wrap_with_theme.tsx",
+            "path": "src/plugins/kibana_react/public/theme.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2125,15 +1502,15 @@
               "Observable",
               "<",
               {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
-                "text": "CoreTheme"
+                "pluginId": "@kbn/react-kibana-context-common",
+                "scope": "public",
+                "docId": "kibKbnReactKibanaContextCommonPluginApi",
+                "section": "def-public.KibanaTheme",
+                "text": "KibanaTheme"
               },
               ">"
             ],
-            "path": "src/plugins/kibana_react/public/theme/wrap_with_theme.tsx",
+            "path": "src/plugins/kibana_react/public/theme.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2144,75 +1521,6 @@
       }
     ],
     "interfaces": [
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.ExitFullScreenButtonProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "ExitFullScreenButtonProps",
-        "description": [],
-        "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.ExitFullScreenButtonProps.onExitFullScreenMode",
-            "type": "Function",
-            "tags": [],
-            "label": "onExitFullScreenMode",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.ExitFullScreenButtonProps.chrome",
-            "type": "Object",
-            "tags": [],
-            "label": "chrome",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeStart",
-                "text": "ChromeStart"
-              }
-            ],
-            "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.ExitFullScreenButtonProps.toggleChrome",
-            "type": "CompoundType",
-            "tags": [
-              "note",
-              "default"
-            ],
-            "label": "toggleChrome",
-            "description": [
-              "\nOptional argument that determines whether we toggle the chrome bar\nthe button unmounts.\n"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "kibanaReact",
         "id": "def-public.KibanaReactContext",
@@ -2263,7 +1571,7 @@
             "label": "Provider",
             "description": [],
             "signature": [
-              "React.FunctionComponent<{ services?: T | undefined; }>"
+              "React.FunctionComponent<React.PropsWithChildren<{ services?: T | undefined; }>>"
             ],
             "path": "src/plugins/kibana_react/public/context/types.ts",
             "deprecated": false,
@@ -2502,17 +1810,17 @@
               "(node: React.ReactNode, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayFlyoutOpenOptions",
+                "section": "def-public.OverlayFlyoutOpenOptions",
                 "text": "OverlayFlyoutOpenOptions"
               },
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.OverlayRef",
+                "section": "def-public.OverlayRef",
                 "text": "OverlayRef"
               }
             ],
@@ -2538,16 +1846,16 @@
               {
                 "parentPluginId": "kibanaReact",
                 "id": "def-public.KibanaReactOverlays.openFlyout.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-common.OverlayFlyoutOpenOptions",
+                    "section": "def-public.OverlayFlyoutOpenOptions",
                     "text": "OverlayFlyoutOpenOptions"
                   },
                   " | undefined"
@@ -2571,17 +1879,17 @@
               "(node: React.ReactNode, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayModalOpenOptions",
+                "section": "def-public.OverlayModalOpenOptions",
                 "text": "OverlayModalOpenOptions"
               },
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.OverlayRef",
+                "section": "def-public.OverlayRef",
                 "text": "OverlayRef"
               }
             ],
@@ -2614,9 +1922,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-common.OverlayModalOpenOptions",
+                    "section": "def-public.OverlayModalOpenOptions",
                     "text": "OverlayModalOpenOptions"
                   },
                   " | undefined"
@@ -2842,13 +2150,37 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.ToMountPointOptions",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ToMountPointOptions",
         "description": [],
-        "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
-        "deprecated": false,
+        "path": "src/plugins/kibana_react/public/util/index.tsx",
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.ToMountPointOptions.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-analytics-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+                "section": "def-public.AnalyticsServiceStart",
+                "text": "AnalyticsServiceStart"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/util/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "kibanaReact",
             "id": "def-public.ToMountPointOptions.theme$",
@@ -2861,14 +2193,14 @@
               "<",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
+                "section": "def-public.CoreTheme",
                 "text": "CoreTheme"
               },
               "> | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
+            "path": "src/plugins/kibana_react/public/util/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2906,6 +2238,20 @@
             "description": [],
             "signature": [
               "string | number | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.UrlTemplateEditorProps.fitToContent",
+            "type": "Object",
+            "tags": [],
+            "label": "fitToContent",
+            "description": [],
+            "signature": [
+              "{ minLines?: number | undefined; maxLines?: number | undefined; } | undefined"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
@@ -3006,7 +2352,13 @@
             "description": [],
             "signature": [
               "React.ComponentType<",
-              "Props",
+              {
+                "pluginId": "@kbn/code-editor",
+                "scope": "common",
+                "docId": "kibKbnCodeEditorPluginApi",
+                "section": "def-common.CodeEditorProps",
+                "text": "CodeEditorProps"
+              },
               "> | undefined"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
@@ -3103,21 +2455,6 @@
     "misc": [
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.CodeEditorProps",
-        "type": "Type",
-        "tags": [],
-        "label": "CodeEditorProps",
-        "description": [],
-        "signature": [
-          "Props"
-        ],
-        "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.ElasticAgentCardProps",
         "type": "Type",
         "tags": [],
@@ -3140,52 +2477,6 @@
       },
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.KibanaPageTemplateProps",
-        "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "KibanaPageTemplateProps",
-        "description": [
-          "\nA thin wrapper around EuiPageTemplate with a few Kibana specific additions"
-        ],
-        "signature": [
-          "Omit<",
-          "EuiPageProps",
-          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"m\" | \"none\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
-          "EuiPageSideBarProps_Deprecated",
-          " | undefined; pageHeader?: ",
-          "EuiPageHeaderProps",
-          " | undefined; pageBodyProps?: ",
-          "EuiPageBodyProps",
-          "<\"main\"> | undefined; pageContentProps?: ",
-          "EuiPageContentProps",
-          " | undefined; pageContentBodyProps?: ",
-          "EuiPageContentBodyProps",
-          " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
-          "EuiBottomBarProps",
-          " | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: ",
-          "Property",
-          ".MinHeight<string | number> | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
-          "KibanaPageTemplateSolutionNavProps",
-          " | undefined; noDataConfig?: ",
-          {
-            "pluginId": "kibanaReact",
-            "scope": "public",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-public.NoDataPageProps",
-            "text": "NoDataPageProps"
-          },
-          " | undefined; }"
-        ],
-        "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.KibanaServices",
         "type": "Type",
         "tags": [],
@@ -3195,130 +2486,154 @@
           "{ analytics?: ",
           {
             "pluginId": "@kbn/core-analytics-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-common.AnalyticsServiceStart",
+            "section": "def-public.AnalyticsServiceStart",
             "text": "AnalyticsServiceStart"
           },
           " | undefined; application?: ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.ApplicationStart",
+            "section": "def-public.ApplicationStart",
             "text": "ApplicationStart"
           },
           " | undefined; chrome?: ",
           {
             "pluginId": "@kbn/core-chrome-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-common.ChromeStart",
+            "section": "def-public.ChromeStart",
             "text": "ChromeStart"
           },
           " | undefined; customBranding?: ",
           {
             "pluginId": "@kbn/core-custom-branding-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
-            "section": "def-common.CustomBrandingStart",
+            "section": "def-public.CustomBrandingStart",
             "text": "CustomBrandingStart"
           },
           " | undefined; docLinks?: ",
           {
             "pluginId": "@kbn/core-doc-links-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-            "section": "def-common.DocLinksStart",
+            "section": "def-public.DocLinksStart",
             "text": "DocLinksStart"
           },
           " | undefined; executionContext?: ",
           {
             "pluginId": "@kbn/core-execution-context-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-            "section": "def-common.ExecutionContextSetup",
+            "section": "def-public.ExecutionContextSetup",
             "text": "ExecutionContextSetup"
           },
           " | undefined; http?: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
           " | undefined; savedObjects?: ",
           {
             "pluginId": "@kbn/core-saved-objects-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
-            "section": "def-common.SavedObjectsStart",
+            "section": "def-public.SavedObjectsStart",
             "text": "SavedObjectsStart"
           },
           " | undefined; i18n?: ",
           {
             "pluginId": "@kbn/core-i18n-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreI18nBrowserPluginApi",
-            "section": "def-common.I18nStart",
+            "section": "def-public.I18nStart",
             "text": "I18nStart"
           },
           " | undefined; notifications?: ",
           {
             "pluginId": "@kbn/core-notifications-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-common.NotificationsStart",
+            "section": "def-public.NotificationsStart",
             "text": "NotificationsStart"
           },
           " | undefined; overlays?: ",
           {
             "pluginId": "@kbn/core-overlays-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-            "section": "def-common.OverlayStart",
+            "section": "def-public.OverlayStart",
             "text": "OverlayStart"
           },
           " | undefined; uiSettings?: ",
           {
             "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-common.IUiSettingsClient",
+            "section": "def-public.IUiSettingsClient",
             "text": "IUiSettingsClient"
           },
           " | undefined; settings?: ",
           {
             "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-common.SettingsStart",
+            "section": "def-public.SettingsStart",
             "text": "SettingsStart"
           },
           " | undefined; fatalErrors?: ",
           {
             "pluginId": "@kbn/core-fatal-errors-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-            "section": "def-common.FatalErrorsSetup",
+            "section": "def-public.FatalErrorsSetup",
             "text": "FatalErrorsSetup"
           },
           " | undefined; deprecations?: ",
           {
             "pluginId": "@kbn/core-deprecations-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
-            "section": "def-common.DeprecationsServiceStart",
+            "section": "def-public.DeprecationsServiceStart",
             "text": "DeprecationsServiceStart"
           },
           " | undefined; theme?: ",
           {
             "pluginId": "@kbn/core-theme-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.ThemeServiceStart",
-            "text": "ThemeServiceStart"
+            "section": "def-public.ThemeServiceSetup",
+            "text": "ThemeServiceSetup"
+          },
+          " | undefined; plugins?: ",
+          {
+            "pluginId": "@kbn/core-plugins-contracts-browser",
+            "scope": "public",
+            "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+            "section": "def-public.PluginsServiceStart",
+            "text": "PluginsServiceStart"
+          },
+          " | undefined; security?: ",
+          {
+            "pluginId": "@kbn/core-security-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreSecurityBrowserPluginApi",
+            "section": "def-public.SecurityServiceStart",
+            "text": "SecurityServiceStart"
+          },
+          " | undefined; userProfile?: ",
+          {
+            "pluginId": "@kbn/core-user-profile-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+            "section": "def-public.UserProfileService",
+            "text": "UserProfileService"
           },
           " | undefined; }"
         ],
@@ -3329,104 +2644,44 @@
       },
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
+        "id": "def-public.KibanaThemeProviderProps",
+        "type": "Type",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "KibanaThemeProviderProps",
         "description": [],
         "signature": [
-          "\"css\""
+          "Pick<",
+          {
+            "pluginId": "@kbn/react-kibana-context-theme",
+            "scope": "public",
+            "docId": "kibKbnReactKibanaContextThemePluginApi",
+            "section": "def-public.KibanaThemeProviderProps",
+            "text": "KibanaThemeProviderProps"
+          },
+          ", \"children\" | \"modify\"> & ",
+          {
+            "pluginId": "@kbn/react-kibana-context-common",
+            "scope": "public",
+            "docId": "kibKbnReactKibanaContextCommonPluginApi",
+            "section": "def-public.ThemeServiceStart",
+            "text": "ThemeServiceStart"
+          }
         ],
-        "path": "src/plugins/kibana_react/public/code_editor/languages/css/constants.ts",
-        "deprecated": false,
+        "path": "src/plugins/kibana_react/public/theme.tsx",
+        "deprecated": true,
         "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"markdown\""
-        ],
-        "path": "src/plugins/kibana_react/public/code_editor/languages/markdown/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"yaml\""
-        ],
-        "path": "src/plugins/kibana_react/public/code_editor/languages/yaml/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"handlebars\""
-        ],
-        "path": "src/plugins/kibana_react/public/code_editor/languages/handlebars/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"hjson\""
-        ],
-        "path": "src/plugins/kibana_react/public/code_editor/languages/hjson/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.NO_DATA_PAGE_MAX_WIDTH",
-        "type": "number",
-        "tags": [],
-        "label": "NO_DATA_PAGE_MAX_WIDTH",
-        "description": [],
-        "signature": [
-          "950"
-        ],
-        "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
+        "references": [],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "kibanaReact",
         "id": "def-public.NO_DATA_RECOMMENDED",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "NO_DATA_RECOMMENDED",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -3474,67 +2729,6 @@
       },
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.POSITIONS",
-        "type": "Array",
-        "tags": [],
-        "label": "POSITIONS",
-        "description": [],
-        "signature": [
-          "(\"none\" | \"right\" | \"left\" | \"center\")[]"
-        ],
-        "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.TOOLBAR_BUTTON_SIZES",
-        "type": "Array",
-        "tags": [],
-        "label": "TOOLBAR_BUTTON_SIZES",
-        "description": [],
-        "signature": [
-          "(\"m\" | \"s\" | undefined)[]"
-        ],
-        "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.ToolbarButtonProps",
-        "type": "Type",
-        "tags": [],
-        "label": "ToolbarButtonProps",
-        "description": [],
-        "signature": [
-          "((",
-          "DisambiguateSet",
-          "<",
-          "EuiButtonPropsForAnchor",
-          ", ",
-          "EuiButtonPropsForButton",
-          "> & ",
-          "EuiButtonProps",
-          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }) | (",
-          "DisambiguateSet",
-          "<",
-          "EuiButtonPropsForButton",
-          ", ",
-          "EuiButtonPropsForAnchor",
-          "> & ",
-          "EuiButtonProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })) & { fontWeight?: Weights | undefined; size?: \"m\" | \"s\" | undefined; hasArrow?: boolean | undefined; groupPosition?: \"none\" | \"right\" | \"left\" | \"center\" | undefined; dataTestSubj?: string | undefined; }"
-        ],
-        "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.Value",
         "type": "Type",
         "tags": [],
@@ -3544,21 +2738,6 @@
           "[string | number, string | number]"
         ],
         "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.WEIGHTS",
-        "type": "Array",
-        "tags": [],
-        "label": "WEIGHTS",
-        "description": [],
-        "signature": [
-          "Weights[]"
-        ],
-        "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3584,9 +2763,9 @@
           "<Partial<",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
           ">>>"
@@ -3594,104 +2773,6 @@
         "path": "src/plugins/kibana_react/public/context/context.tsx",
         "deprecated": false,
         "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.ExitFullScreenButton",
-        "type": "Object",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "ExitFullScreenButton",
-        "description": [],
-        "signature": [
-          "typeof ExitFullScreenButtonUi"
-        ],
-        "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.NO_DATA_PAGE_TEMPLATE_PROPS",
-        "type": "Object",
-        "tags": [],
-        "label": "NO_DATA_PAGE_TEMPLATE_PROPS",
-        "description": [],
-        "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.NO_DATA_PAGE_TEMPLATE_PROPS.restrictWidth",
-            "type": "number",
-            "tags": [],
-            "label": "restrictWidth",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.NO_DATA_PAGE_TEMPLATE_PROPS.template",
-            "type": "string",
-            "tags": [],
-            "label": "template",
-            "description": [],
-            "signature": [
-              "\"centeredBody\""
-            ],
-            "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.NO_DATA_PAGE_TEMPLATE_PROPS.pageContentProps",
-            "type": "Object",
-            "tags": [],
-            "label": "pageContentProps",
-            "description": [],
-            "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.NO_DATA_PAGE_TEMPLATE_PROPS.pageContentProps.hasShadow",
-                "type": "boolean",
-                "tags": [],
-                "label": "hasShadow",
-                "description": [],
-                "signature": [
-                  "false"
-                ],
-                "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "kibanaReact",
-                "id": "def-public.NO_DATA_PAGE_TEMPLATE_PROPS.pageContentProps.color",
-                "type": "string",
-                "tags": [],
-                "label": "color",
-                "description": [],
-                "signature": [
-                  "\"transparent\""
-                ],
-                "path": "src/plugins/kibana_react/public/page_template/util/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
         "initialIsOpen": false
       }
     ]
@@ -3713,7 +2794,9 @@
         "type": "Function",
         "tags": [],
         "label": "createGlobalStyle",
-        "description": [],
+        "description": [
+          "/** see https://styled-components.com/docs/api#createglobalstyle */"
+        ],
         "signature": [
           "<P extends object = {}>(first: TemplateStringsArray | ",
           "CSSObject",
@@ -3723,9 +2806,9 @@
           "ThemedStyledProps",
           "<P, ",
           {
-            "pluginId": "kibanaReact",
+            "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
-            "docId": "kibKibanaReactPluginApi",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
@@ -3735,9 +2818,9 @@
           "ThemedStyledProps",
           "<P, ",
           {
-            "pluginId": "kibanaReact",
+            "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
-            "docId": "kibKibanaReactPluginApi",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
@@ -3745,15 +2828,15 @@
           "GlobalStyleComponent",
           "<P, ",
           {
-            "pluginId": "kibanaReact",
+            "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
-            "docId": "kibKibanaReactPluginApi",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
           ">"
         ],
-        "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -3804,20 +2887,22 @@
         "type": "Function",
         "tags": [],
         "label": "css",
-        "description": [],
+        "description": [
+          "/** see https://styled-components.com/docs/api#css-prop */"
+        ],
         "signature": [
           "BaseThemedCssFunction",
           "<",
           {
-            "pluginId": "kibanaReact",
+            "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
-            "docId": "kibKibanaReactPluginApi",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
           ">"
         ],
-        "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3828,151 +2913,24 @@
         "type": "Function",
         "tags": [],
         "label": "euiStyled",
-        "description": [],
+        "description": [
+          "/** see https://styled-components.com/docs/api#styled */"
+        ],
         "signature": [
           "ThemedBaseStyledInterface",
           "<",
           {
-            "pluginId": "kibanaReact",
+            "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
-            "docId": "kibKibanaReactPluginApi",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
           ">"
         ],
-        "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-common.EuiThemeProvider",
-        "type": "Function",
-        "tags": [],
-        "label": "EuiThemeProvider",
-        "description": [],
-        "signature": [
-          "<OuterTheme extends ",
-          "DefaultTheme",
-          " = ",
-          "DefaultTheme",
-          ">({ darkMode, ...otherProps }: Omit<",
-          "ThemeProviderProps",
-          "<OuterTheme, OuterTheme & ",
-          {
-            "pluginId": "kibanaReact",
-            "scope": "common",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-common.EuiTheme",
-            "text": "EuiTheme"
-          },
-          ">, \"theme\"> & { darkMode?: boolean | undefined; }) => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-common.EuiThemeProvider.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  darkMode = false,\n  ...otherProps\n}",
-            "description": [],
-            "signature": [
-              "Omit<",
-              "ThemeProviderProps",
-              "<OuterTheme, OuterTheme & ",
-              {
-                "pluginId": "kibanaReact",
-                "scope": "common",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-common.EuiTheme",
-                "text": "EuiTheme"
-              },
-              ">, \"theme\"> & { darkMode?: boolean | undefined; }"
-            ],
-            "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-common.EuiThemeProviderDecorator",
-        "type": "Function",
-        "tags": [],
-        "label": "EuiThemeProviderDecorator",
-        "description": [
-          "\nStorybook decorator using the EUI theme provider. Uses the value from\n`globals` provided by the Storybook theme switcher."
-        ],
-        "signature": [
-          "(storyFn: ",
-          "PartialStoryFn",
-          "<ReturnTypeFramework<",
-          "StoryFnReactReturnType",
-          ">, ",
-          "Args",
-          ">, { globals }: ",
-          "StoryContext",
-          "<ReturnTypeFramework<",
-          "StoryFnReactReturnType",
-          ">, ",
-          "Args",
-          ">) => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-common.EuiThemeProviderDecorator.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "storyFn",
-            "description": [],
-            "signature": [
-              "PartialStoryFn",
-              "<ReturnTypeFramework<",
-              "StoryFnReactReturnType",
-              ">, ",
-              "Args",
-              ">"
-            ],
-            "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-common.EuiThemeProviderDecorator.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{ globals }",
-            "description": [],
-            "signature": [
-              "StoryContext",
-              "<ReturnTypeFramework<",
-              "StoryFnReactReturnType",
-              ">, ",
-              "Args",
-              ">"
-            ],
-            "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -3981,7 +2939,9 @@
         "type": "Function",
         "tags": [],
         "label": "keyframes",
-        "description": [],
+        "description": [
+          "/** see https://styled-components.com/docs/api#keyframes */"
+        ],
         "signature": [
           "(strings: TemplateStringsArray | ",
           "CSSKeyframes",
@@ -3990,7 +2950,7 @@
           "[]) => ",
           "Keyframes"
         ],
-        "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -4030,31 +2990,172 @@
       },
       {
         "parentPluginId": "kibanaReact",
+        "id": "def-common.KibanaStyledComponentsThemeProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaStyledComponentsThemeProvider",
+        "description": [
+          "\nA `styled-components` `ThemeProvider` that incorporates EUI dark mode."
+        ],
+        "signature": [
+          "<OuterTheme extends ",
+          "DefaultTheme",
+          " = ",
+          "DefaultTheme",
+          ">({ darkMode, ...otherProps }: Omit<",
+          "ThemeProviderProps",
+          "<OuterTheme, OuterTheme & ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          ">, \"theme\"> & { darkMode?: boolean | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-common.KibanaStyledComponentsThemeProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  darkMode = false,\n  ...otherProps\n}",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "ThemeProviderProps",
+              "<OuterTheme, OuterTheme & ",
+              {
+                "pluginId": "@kbn/react-kibana-context-styled",
+                "scope": "common",
+                "docId": "kibKbnReactKibanaContextStyledPluginApi",
+                "section": "def-common.EuiTheme",
+                "text": "EuiTheme"
+              },
+              ">, \"theme\"> & { darkMode?: boolean | undefined; }"
+            ],
+            "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-common.KibanaStyledComponentsThemeProviderDecorator",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "KibanaStyledComponentsThemeProviderDecorator",
+        "description": [
+          "\nStorybook decorator using the EUI theme provider. Uses the value from\n`globals` provided by the Storybook theme switcher.\n"
+        ],
+        "signature": [
+          "(storyFn: ",
+          "PartialStoryFn",
+          "<ReturnTypeFramework<",
+          "StoryFnReactReturnType",
+          ">, ",
+          "Args",
+          ">, { globals }: ",
+          "StoryContext",
+          "<ReturnTypeFramework<",
+          "StoryFnReactReturnType",
+          ">, ",
+          "Args",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/react-kibana-context-styled",
+            "path": "packages/react/kibana_context/styled/index.ts"
+          }
+        ],
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-common.KibanaStyledComponentsThemeProviderDecorator.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "storyFn",
+            "description": [],
+            "signature": [
+              "PartialStoryFn",
+              "<ReturnTypeFramework<",
+              "StoryFnReactReturnType",
+              ">, ",
+              "Args",
+              ">"
+            ],
+            "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-common.KibanaStyledComponentsThemeProviderDecorator.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ globals }",
+            "description": [],
+            "signature": [
+              "StoryContext",
+              "<ReturnTypeFramework<",
+              "StoryFnReactReturnType",
+              ">, ",
+              "Args",
+              ">"
+            ],
+            "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
         "id": "def-common.withTheme",
         "type": "Function",
         "tags": [],
         "label": "withTheme",
-        "description": [],
+        "description": [
+          "/** see https://styled-components.com/docs/api#withtheme */"
+        ],
         "signature": [
           "<C extends React.ComponentType<any>>(component: React.ComponentProps<C> extends { theme?: ",
           {
-            "pluginId": "kibanaReact",
+            "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
-            "docId": "kibKibanaReactPluginApi",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
           " | undefined; } ? C : never) => React.ForwardRefExoticComponent<WithOptionalTheme<React.ComponentPropsWithRef<C>, ",
           {
-            "pluginId": "kibanaReact",
+            "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
-            "docId": "kibKibanaReactPluginApi",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
           ">>"
         ],
-        "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -4084,8 +3185,10 @@
         "type": "Interface",
         "tags": [],
         "label": "EuiTheme",
-        "description": [],
-        "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+        "description": [
+          "\nA `deprecated` structure representing a Kibana theme containing variables from the current EUI theme."
+        ],
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4095,11 +3198,13 @@
             "type": "Object",
             "tags": [],
             "label": "eui",
-            "description": [],
+            "description": [
+              "EUI theme vars that automaticall adjust to light and dark mode."
+            ],
             "signature": [
               "{ euiZDataGrid: number; euiZHeaderBelowDataGrid: number; euiZDataGridCellPopover: number; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiContrastRatioText: number; euiContrastRatioGraphic: number; euiContrastRatioDisabled: number; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; accent: string; success: string; warning: string; danger: string; ghost: string; text: string; }; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: string; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormControlPlaceholderText: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiHeaderBackgroundColor: string; euiHeaderDarkBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiScrollBar: string; euiScrollBarCorner: string; euiScrollBarCornerThin: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusTransparencyPercent: string; euiFocusBackgroundColor: string; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZToastList: number; euiZModal: number; euiZMask: number; euiZNavigation: number; euiZContentMenu: number; euiZHeader: number; euiZFlyout: number; euiZMaskBelowHeader: number; euiZContent: number; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSuccessText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiLinkColor: string; euiColorChartLines: string; euiColorChartBand: string; }"
             ],
-            "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+            "path": "packages/react/kibana_context/styled/styled_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4109,8 +3214,10 @@
             "type": "boolean",
             "tags": [],
             "label": "darkMode",
-            "description": [],
-            "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+            "description": [
+              "True if the theme is in \"dark\" mode, false otherwise."
+            ],
+            "path": "packages/react/kibana_context/styled/styled_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -25,6 +25,7 @@ interface Props {
   onClickViewAgents?: () => void;
   agentCount: number;
   showLoading?: boolean;
+  isLongEnrollment?: boolean;
 }
 
 interface UsePollingAgentCountOptions {
@@ -40,7 +41,10 @@ const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
  * @param policyId
  * @returns agentIds
  */
-export const usePollingAgentCount = (policyId: string, opts?: UsePollingAgentCountOptions) => {
+export const usePollingAgentCount = (
+  policyId: string,
+  opts?: UsePollingAgentCountOptions
+): { enrolledAgentIds: string[] } => {
   const [agentIds, setAgentIds] = useState<string[]>([]);
   const [didPollInitially, setDidPollInitially] = useState(false);
   const timeout = useRef<number | undefined>(undefined);
@@ -88,7 +92,7 @@ export const usePollingAgentCount = (policyId: string, opts?: UsePollingAgentCou
       isAborted = true;
     };
   }, [agentIds, policyId, kuery, getNewAgentIds]);
-  return agentIds;
+  return { enrolledAgentIds: agentIds };
 };
 
 export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
@@ -97,6 +101,7 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   onClickViewAgents,
   agentCount,
   showLoading = false,
+  isLongEnrollment = false,
 }) => {
   const { getHref } = useLink();
   const { application } = useStartServices();
@@ -139,10 +144,17 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
           color="primary"
           iconType={EuiLoadingSpinner}
           title={
-            <FormattedMessage
-              id="xpack.fleet.agentEnrollment.loading.listening"
-              defaultMessage="Listening for agent..."
-            />
+            isLongEnrollment ? (
+              <FormattedMessage
+                id="xpack.fleet.agentEnrollment.loading.listeninglongenrollemnt"
+                defaultMessage="Listening for agent... this can take several minutes"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.agentEnrollment.loading.listening"
+                defaultMessage="Listening for agent"
+              />
+            )
           }
         />
         <EuiSpacer size="m" />

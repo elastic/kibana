@@ -6,11 +6,17 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/server';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { SanitizedRule, ResolvedSanitizedRule } from '@kbn/alerting-plugin/common';
 
+import type {
+  SetAlertsStatusByIds,
+  SetAlertsStatusByQuery,
+  SetAlertsStatusRequestBodyInput,
+  SearchAlertsRequestBody,
+} from '../../../../../common/api/detection_engine/signals';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -24,54 +30,55 @@ import {
   DETECTION_ENGINE_RULES_BULK_CREATE,
   DETECTION_ENGINE_RULES_URL_FIND,
 } from '../../../../../common/constants';
-import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/detection_engine/rule_management/api/urls';
+import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
 
 import {
+  BOOTSTRAP_PREBUILT_RULES_URL,
   PREBUILT_RULES_STATUS_URL,
   PREBUILT_RULES_URL,
-} from '../../../../../common/detection_engine/prebuilt_rules';
+} from '../../../../../common/api/detection_engine/prebuilt_rules';
 import {
-  getPerformBulkActionSchemaMock,
+  getBulkDisableRuleActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
-} from '../../../../../common/detection_engine/rule_management/mocks';
+} from '../../../../../common/api/detection_engine/rule_management/mocks';
 
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/rule_schema/mocks';
-import type { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
-import type { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
-import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema.mock';
-import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
+
+import {
+  getFinalizeSignalsMigrationSchemaMock,
+  getSignalsMigrationStatusSchemaMock,
+} from '../../../../../common/api/detection_engine/signals_migration/mocks';
 
 // eslint-disable-next-line no-restricted-imports
-import type {
-  LegacyRuleNotificationAlertType,
-  LegacyIRuleActionsAttributes,
-} from '../../rule_actions_legacy';
-import type { HapiReadableStream } from '../../rule_management/logic/import/hapi_readable_stream';
+import type { LegacyRuleNotificationRuleType } from '../../rule_actions_legacy';
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 
 import { requestMock } from './request';
+import type { HapiReadableStream } from '../../../../types';
 
-export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
+export const typicalSetStatusSignalByIdsPayload = (): SetAlertsStatusByIds => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
   status: 'closed',
 });
 
-export const typicalSetStatusSignalByQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
+export const typicalSetStatusSignalByQueryPayload = (): SetAlertsStatusByQuery => ({
   query: { bool: { filter: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } } } },
   status: 'closed',
+  conflicts: 'abort',
 });
 
-export const typicalSignalsQuery = (): QuerySignalsSchemaDecoded => ({
+export const typicalSignalsQuery = (): SearchAlertsRequestBody => ({
   aggs: {},
   query: { match_all: {} },
 });
 
-export const typicalSignalsQueryAggs = (): QuerySignalsSchemaDecoded => ({
+export const typicalSignalsQueryAggs = (): SearchAlertsRequestBody => ({
   aggs: { statuses: { terms: { field: ALERT_WORKFLOW_STATUS, size: 10 } } },
 });
 
-export const setStatusSignalMissingIdsAndQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
+// @ts-expect-error data with missing required fields
+export const setStatusSignalMissingIdsAndQueryPayload = (): SetAlertsStatusRequestBodyInput => ({
   status: 'closed',
 });
 
@@ -130,11 +137,11 @@ export const getPatchBulkRequest = () =>
     body: [getCreateRulesSchemaMock()],
   });
 
-export const getBulkActionRequest = () =>
+export const getBulkDisableRuleActionRequest = () =>
   requestMock.create({
     method: 'patch',
     path: DETECTION_ENGINE_RULES_BULK_ACTION,
-    body: getPerformBulkActionSchemaMock(),
+    body: getBulkDisableRuleActionSchemaMock(),
   });
 
 export const getBulkActionEditRequest = () =>
@@ -195,6 +202,12 @@ export const getRuleManagementFiltersRequest = () =>
   requestMock.create({
     method: 'get',
     path: RULE_MANAGEMENT_FILTERS_URL,
+  });
+
+export const getBootstrapRulesRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: BOOTSTRAP_PREBUILT_RULES_URL,
   });
 
 export interface FindHit<T = RuleAlertType> {
@@ -351,7 +364,10 @@ export const nonRuleAlert = () => ({
   alertTypeId: 'something',
 });
 
-export const getRuleMock = <T extends RuleParams>(params: T): SanitizedRule<T> => ({
+export const getRuleMock = <T extends RuleParams>(
+  params: T,
+  rewrites?: Partial<SanitizedRule<T>>
+): SanitizedRule<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [],
@@ -376,6 +392,7 @@ export const getRuleMock = <T extends RuleParams>(params: T): SanitizedRule<T> =
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
   revision: 0,
+  ...rewrites,
 });
 
 export const resolveRuleMock = <T extends RuleParams>(params: T): ResolvedSanitizedRule<T> => ({
@@ -388,38 +405,23 @@ export const getMockPrivilegesResult = () => ({
   has_all_requested: false,
   cluster: {
     monitor_ml: true,
-    manage_ccr: false,
     manage_index_templates: true,
-    monitor_watcher: true,
     monitor_transform: true,
-    read_ilm: true,
     manage_api_key: false,
     manage_security: false,
     manage_own_api_key: false,
-    manage_saml: false,
     all: false,
-    manage_ilm: true,
-    manage_ingest_pipelines: true,
-    read_ccr: false,
-    manage_rollup: true,
     monitor: true,
-    manage_watcher: true,
     manage: true,
     manage_transform: true,
-    manage_token: false,
     manage_ml: true,
     manage_pipeline: true,
-    monitor_rollup: true,
-    transport_client: true,
-    create_snapshot: true,
   },
   index: {
     '.siem-signals-test-space': {
       all: false,
-      manage_ilm: true,
       read: false,
       create_index: true,
-      read_cross_cluster: false,
       index: false,
       monitor: true,
       delete: false,
@@ -428,8 +430,6 @@ export const getMockPrivilegesResult = () => ({
       create_doc: false,
       view_index_metadata: true,
       create: false,
-      manage_follow_index: true,
-      manage_leader_index: true,
       write: false,
     },
   },
@@ -505,6 +505,11 @@ export const getSignalsMigrationStatusRequest = () =>
     query: getSignalsMigrationStatusSchemaMock(),
   });
 
+export const getMockUserProfiles = () => [
+  { uid: 'default-test-assignee-id-1', enabled: true, user: { username: 'user1' }, data: {} },
+  { uid: 'default-test-assignee-id-2', enabled: true, user: { username: 'user2' }, data: {} },
+];
+
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
@@ -514,7 +519,7 @@ export const legacyGetNotificationResult = ({
 }: {
   id?: string;
   ruleId?: string;
-} = {}): LegacyRuleNotificationAlertType => ({
+} = {}): LegacyRuleNotificationRuleType => ({
   id,
   name: 'Notification for Rule Test',
   tags: [],
@@ -559,360 +564,11 @@ export const legacyGetNotificationResult = ({
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export const legacyGetHourlyNotificationResult = (
-  id = '456',
-  ruleId = '123'
-): LegacyRuleNotificationAlertType => ({
-  id,
-  name: 'Notification for Rule Test',
-  tags: [],
-  alertTypeId: 'siem.notifications',
-  consumer: 'siem',
-  params: {
-    ruleAlertId: `${ruleId}`,
-  },
-  schedule: {
-    interval: '1h',
-  },
-  enabled: true,
-  actions: [
-    {
-      group: 'default',
-      params: {
-        message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-        to: ['test@test.com'],
-        subject: 'Test Actions',
-      },
-      actionTypeId: '.email',
-      id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-    },
-  ],
-  throttle: null,
-  notifyWhen: 'onActiveAlert',
-  apiKey: null,
-  apiKeyOwner: 'elastic',
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
-  createdAt: new Date('2020-03-21T11:15:13.530Z'),
-  muteAll: false,
-  mutedInstanceIds: [],
-  scheduledTaskId: '62b3a130-6b70-11ea-9ce9-6b9818c4cbd7',
-  updatedAt: new Date('2020-03-21T12:37:08.730Z'),
-  executionStatus: {
-    status: 'unknown',
-    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-  },
-  revision: 0,
-});
-
-/**
- * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- */
-export const legacyGetDailyNotificationResult = (
-  id = '456',
-  ruleId = '123'
-): LegacyRuleNotificationAlertType => ({
-  id,
-  name: 'Notification for Rule Test',
-  tags: [],
-  alertTypeId: 'siem.notifications',
-  consumer: 'siem',
-  params: {
-    ruleAlertId: `${ruleId}`,
-  },
-  schedule: {
-    interval: '1d',
-  },
-  enabled: true,
-  actions: [
-    {
-      group: 'default',
-      params: {
-        message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-        to: ['test@test.com'],
-        subject: 'Test Actions',
-      },
-      actionTypeId: '.email',
-      id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-    },
-  ],
-  throttle: null,
-  notifyWhen: 'onActiveAlert',
-  apiKey: null,
-  apiKeyOwner: 'elastic',
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
-  createdAt: new Date('2020-03-21T11:15:13.530Z'),
-  muteAll: false,
-  mutedInstanceIds: [],
-  scheduledTaskId: '62b3a130-6b70-11ea-9ce9-6b9818c4cbd7',
-  updatedAt: new Date('2020-03-21T12:37:08.730Z'),
-  executionStatus: {
-    status: 'unknown',
-    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-  },
-  revision: 0,
-});
-
-/**
- * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- */
-export const legacyGetWeeklyNotificationResult = (
-  id = '456',
-  ruleId = '123'
-): LegacyRuleNotificationAlertType => ({
-  id,
-  name: 'Notification for Rule Test',
-  tags: [],
-  alertTypeId: 'siem.notifications',
-  consumer: 'siem',
-  params: {
-    ruleAlertId: `${ruleId}`,
-  },
-  schedule: {
-    interval: '7d',
-  },
-  enabled: true,
-  actions: [
-    {
-      group: 'default',
-      params: {
-        message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-        to: ['test@test.com'],
-        subject: 'Test Actions',
-      },
-      actionTypeId: '.email',
-      id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-    },
-  ],
-  throttle: null,
-  notifyWhen: 'onActiveAlert',
-  apiKey: null,
-  apiKeyOwner: 'elastic',
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
-  createdAt: new Date('2020-03-21T11:15:13.530Z'),
-  muteAll: false,
-  mutedInstanceIds: [],
-  scheduledTaskId: '62b3a130-6b70-11ea-9ce9-6b9818c4cbd7',
-  updatedAt: new Date('2020-03-21T12:37:08.730Z'),
-  executionStatus: {
-    status: 'unknown',
-    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-  },
-  revision: 0,
-});
-
-/**
- * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- */
 export const legacyGetFindNotificationsResultWithSingleHit = (
   ruleId = '123'
-): FindHit<LegacyRuleNotificationAlertType> => ({
+): FindHit<LegacyRuleNotificationRuleType> => ({
   page: 1,
   perPage: 1,
   total: 1,
   data: [legacyGetNotificationResult({ ruleId })],
 });
-
-/**
- * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- */
-export const legacyGetSiemNotificationRuleNoActionsSOResult = (
-  ruleId = '123'
-): SavedObjectsFindResult<LegacyIRuleActionsAttributes> => ({
-  type: 'siem-detection-engine-rule-actions',
-  id: 'ID_OF_LEGACY_SIDECAR_NO_ACTIONS',
-  namespaces: ['default'],
-  attributes: {
-    actions: [],
-    ruleThrottle: 'no_actions',
-    alertThrottle: null,
-  },
-  references: [{ id: ruleId, type: 'alert', name: 'alert_0' }],
-  migrationVersion: {
-    'siem-detection-engine-rule-actions': '7.11.2',
-  },
-  coreMigrationVersion: '7.15.2',
-  updated_at: '2022-03-31T19:06:40.473Z',
-  version: 'WzIzNywxXQ==',
-  score: 0,
-});
-
-/**
- * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- */
-export const legacyGetSiemNotificationRuleEveryRunSOResult = (
-  ruleId = '123'
-): SavedObjectsFindResult<LegacyIRuleActionsAttributes> => ({
-  type: 'siem-detection-engine-rule-actions',
-  id: 'ID_OF_LEGACY_SIDECAR_RULE_RUN_ACTIONS',
-  namespaces: ['default'],
-  attributes: {
-    actions: [
-      {
-        group: 'default',
-        actionRef: 'action_0',
-        params: {
-          message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-          to: ['test@test.com'],
-          subject: 'Test Actions',
-        },
-        action_type_id: '.email',
-      },
-    ],
-    ruleThrottle: 'rule',
-    alertThrottle: null,
-  },
-  references: [{ id: ruleId, type: 'alert', name: 'alert_0' }],
-  migrationVersion: {
-    'siem-detection-engine-rule-actions': '7.11.2',
-  },
-  coreMigrationVersion: '7.15.2',
-  updated_at: '2022-03-31T19:06:40.473Z',
-  version: 'WzIzNywxXQ==',
-  score: 0,
-});
-
-/**
- * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- */
-export const legacyGetSiemNotificationRuleHourlyActionsSOResult = (
-  ruleId = '123',
-  connectorId = '456'
-): SavedObjectsFindResult<LegacyIRuleActionsAttributes> => ({
-  type: 'siem-detection-engine-rule-actions',
-  id: 'ID_OF_LEGACY_SIDECAR_HOURLY_ACTIONS',
-  namespaces: ['default'],
-  attributes: {
-    actions: [
-      {
-        group: 'default',
-        actionRef: 'action_0',
-        params: {
-          message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-          to: ['test@test.com'],
-          subject: 'Test Actions',
-        },
-        action_type_id: '.email',
-      },
-    ],
-    ruleThrottle: '1h',
-    alertThrottle: '1h',
-  },
-  references: [
-    { id: ruleId, type: 'alert', name: 'alert_0' },
-    { id: connectorId, type: 'action', name: 'action_0' },
-  ],
-  migrationVersion: {
-    'siem-detection-engine-rule-actions': '7.11.2',
-  },
-  coreMigrationVersion: '7.15.2',
-  updated_at: '2022-03-31T19:06:40.473Z',
-  version: 'WzIzNywxXQ==',
-  score: 0,
-});
-
-/**
- * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- */
-export const legacyGetSiemNotificationRuleDailyActionsSOResult = (
-  ruleId = '123',
-  connectorId = '456'
-): SavedObjectsFindResult<LegacyIRuleActionsAttributes> => ({
-  type: 'siem-detection-engine-rule-actions',
-  id: 'ID_OF_LEGACY_SIDECAR_DAILY_ACTIONS',
-  namespaces: ['default'],
-  attributes: {
-    actions: [
-      {
-        group: 'default',
-        actionRef: 'action_0',
-        params: {
-          message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-          to: ['test@test.com'],
-          subject: 'Test Actions',
-        },
-        action_type_id: '.email',
-      },
-    ],
-    ruleThrottle: '1d',
-    alertThrottle: '1d',
-  },
-  references: [
-    { id: ruleId, type: 'alert', name: 'alert_0' },
-    { id: connectorId, type: 'action', name: 'action_0' },
-  ],
-  migrationVersion: {
-    'siem-detection-engine-rule-actions': '7.11.2',
-  },
-  coreMigrationVersion: '7.15.2',
-  updated_at: '2022-03-31T19:06:40.473Z',
-  version: 'WzIzNywxXQ==',
-  score: 0,
-});
-
-/**
- * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- */
-export const legacyGetSiemNotificationRuleWeeklyActionsSOResult = (
-  ruleId = '123',
-  connectorId = '456'
-): SavedObjectsFindResult<LegacyIRuleActionsAttributes> => ({
-  type: 'siem-detection-engine-rule-actions',
-  id: 'ID_OF_LEGACY_SIDECAR_WEEKLY_ACTIONS',
-  namespaces: ['default'],
-  attributes: {
-    actions: [
-      {
-        group: 'default',
-        actionRef: 'action_0',
-        params: {
-          message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-          to: ['test@test.com'],
-          subject: 'Test Actions',
-        },
-        action_type_id: '.email',
-      },
-    ],
-    ruleThrottle: '7d',
-    alertThrottle: '7d',
-  },
-  references: [
-    { id: ruleId, type: 'alert', name: 'alert_0' },
-    { id: connectorId, type: 'action', name: 'action_0' },
-  ],
-  migrationVersion: {
-    'siem-detection-engine-rule-actions': '7.11.2',
-  },
-  coreMigrationVersion: '7.15.2',
-  updated_at: '2022-03-31T19:06:40.473Z',
-  version: 'WzIzNywxXQ==',
-  score: 0,
-});
-
-const getLegacyActionSOs = (ruleId = '123', connectorId = '456') => ({
-  none: () => legacyGetSiemNotificationRuleNoActionsSOResult(ruleId),
-  rule: () => legacyGetSiemNotificationRuleEveryRunSOResult(ruleId),
-  hourly: () => legacyGetSiemNotificationRuleHourlyActionsSOResult(ruleId, connectorId),
-  daily: () => legacyGetSiemNotificationRuleDailyActionsSOResult(ruleId, connectorId),
-  weekly: () => legacyGetSiemNotificationRuleWeeklyActionsSOResult(ruleId, connectorId),
-});
-
-/**
- * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- */
-export const legacyGetSiemNotificationRuleActionsSOResultWithSingleHit = (
-  actionTypes: Array<'none' | 'rule' | 'daily' | 'hourly' | 'weekly'>,
-  ruleId = '123',
-  connectorId = '456'
-): SavedObjectsFindResponse<LegacyIRuleActionsAttributes> => {
-  const actions = getLegacyActionSOs(ruleId, connectorId);
-
-  return {
-    page: 1,
-    per_page: 1,
-    total: 1,
-    saved_objects: actionTypes.map((type) => actions[type]()),
-  };
-};

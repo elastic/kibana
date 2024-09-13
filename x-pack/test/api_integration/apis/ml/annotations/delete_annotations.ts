@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { testSetupJobConfigs, jobIds, testSetupAnnotations } from './common_jobs';
 
@@ -39,12 +39,12 @@ export default ({ getService }: FtrProviderContext) => {
       const annotationsForJob = await ml.api.getAnnotations(jobIds[0]);
       expect(annotationsForJob).to.have.length(1);
 
-      const annotationIdToDelete = annotationsForJob[0]._id;
+      const annotationIdToDelete = annotationsForJob[0]._id!;
 
       const { body, status } = await supertest
-        .delete(`/api/ml/annotations/delete/${annotationIdToDelete}`)
+        .delete(`/internal/ml/annotations/delete/${annotationIdToDelete}`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body._id).to.eql(annotationIdToDelete);
@@ -57,12 +57,12 @@ export default ({ getService }: FtrProviderContext) => {
       const annotationsForJob = await ml.api.getAnnotations(jobIds[1]);
       expect(annotationsForJob).to.have.length(1);
 
-      const annotationIdToDelete = annotationsForJob[0]._id;
+      const annotationIdToDelete = annotationsForJob[0]._id!;
 
       const { body, status } = await supertest
-        .delete(`/api/ml/annotations/delete/${annotationIdToDelete}`)
+        .delete(`/internal/ml/annotations/delete/${annotationIdToDelete}`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body._id).to.eql(annotationIdToDelete);
@@ -75,12 +75,12 @@ export default ({ getService }: FtrProviderContext) => {
       const annotationsForJob = await ml.api.getAnnotations(jobIds[2]);
       expect(annotationsForJob).to.have.length(1);
 
-      const annotationIdToDelete = annotationsForJob[0]._id;
+      const annotationIdToDelete = annotationsForJob[0]._id!;
 
       const { body, status } = await supertest
-        .delete(`/api/ml/annotations/delete/${annotationIdToDelete}`)
+        .delete(`/internal/ml/annotations/delete/${annotationIdToDelete}`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');

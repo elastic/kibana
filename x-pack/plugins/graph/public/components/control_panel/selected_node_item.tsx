@@ -5,18 +5,26 @@
  * 2.0.
  */
 
-import { hexToRgb, isColorDark } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { WorkspaceNode } from '../../types';
-
-const isHexColorDark = (color: string) => isColorDark(...hexToRgb(color));
+import { getIconOffset, IconRenderer } from '../icon_renderer';
 
 interface SelectedNodeItemProps {
   node: WorkspaceNode;
   isHighlighted: boolean;
   onDeselectNode: (node: WorkspaceNode) => void;
   onSelectedFieldClick: (node: WorkspaceNode) => void;
+}
+
+function fixIconOffset(node: WorkspaceNode) {
+  const offset = getIconOffset(node.icon) || { x: 0, y: 0 };
+  const finalOffset = { x: offset.x / 2, y: offset.y / 2 };
+  // Maki icons need to be offset a little bit more on the right (~0.5px)
+  if (node.icon?.package === 'maki') {
+    finalOffset.x += 0.5;
+  }
+  return finalOffset;
 }
 
 export const SelectedNodeItem = ({
@@ -28,12 +36,10 @@ export const SelectedNodeItem = ({
   const fieldClasses = classNames('gphSelectionList__field', {
     ['gphSelectionList__field--selected']: isHighlighted,
   });
-  const fieldIconClasses = classNames('fa', 'gphNode__text', 'gphSelectionList__icon', {
-    ['gphNode__text--inverse']: isHexColorDark(node.color),
-  });
+  const offset = fixIconOffset(node);
 
   return (
-    <div aria-hidden="true" className={fieldClasses} onClick={() => onSelectedFieldClick(node)}>
+    <button aria-hidden="true" className={fieldClasses} onClick={() => onSelectedFieldClick(node)}>
       <svg width="24" height="24">
         <circle
           className="gphNode__circle"
@@ -42,22 +48,18 @@ export const SelectedNodeItem = ({
           cy="12"
           style={{ fill: node.color }}
           onClick={() => onDeselectNode(node)}
+          data-test-subj={`graph-selected-${node.label}`}
         />
-
-        {node.icon && (
-          <text
-            className={fieldIconClasses}
-            textAnchor="middle"
-            x="12"
-            y="16"
-            onClick={() => onDeselectNode(node)}
-          >
-            {node.icon.code}
-          </text>
-        )}
+        <IconRenderer
+          color={node.color}
+          icon={node.icon}
+          className="gphSelectionList__icon"
+          x={offset.x}
+          y={offset.y}
+        />
       </svg>
       <span>{node.label}</span>
       {node.numChildren > 0 && <span> (+{node.numChildren})</span>}
-    </div>
+    </button>
   );
 };

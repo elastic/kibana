@@ -8,8 +8,7 @@
 import { ActionResult } from '@kbn/actions-plugin/server';
 import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
-import { AlertsFactory } from '../../../../alerts';
-import { disableWatcherClusterAlerts } from '../../../../lib/alerts/disable_watcher_cluster_alerts';
+import { RulesFactory } from '../../../../rules';
 import { handleError } from '../../../../lib/errors';
 import { MonitoringCore, RouteDependencies } from '../../../../types';
 
@@ -20,6 +19,9 @@ export function enableAlertsRoute(server: MonitoringCore, npRoute: RouteDependen
     {
       path: '/api/monitoring/v1/alerts/enable',
       validate: false,
+      options: {
+        access: 'internal',
+      },
     },
     async (context, request, response) => {
       try {
@@ -27,7 +29,7 @@ export function enableAlertsRoute(server: MonitoringCore, npRoute: RouteDependen
         const infraContext = await context.infra;
         const actionContext = await context.actions;
 
-        const alerts = AlertsFactory.getAll();
+        const alerts = RulesFactory.getAll();
         if (alerts.length) {
           const { isSufficientlySecure, hasPermanentEncryptionKey } = npRoute.alerting
             ?.getSecurityHealth
@@ -82,23 +84,15 @@ export function enableAlertsRoute(server: MonitoringCore, npRoute: RouteDependen
           },
         ];
 
-        let createdAlerts: Array<SanitizedRule<RuleTypeParams>> = [];
-        const disabledWatcherClusterAlerts = await disableWatcherClusterAlerts(
-          npRoute.cluster.asScoped(request).asCurrentUser,
-          npRoute.logger
+        const createdAlerts: Array<SanitizedRule<RuleTypeParams>> = await Promise.all(
+          alerts.map((alert) => alert.createIfDoesNotExist(rulesClient, actionsClient, actions))
         );
-
-        if (disabledWatcherClusterAlerts) {
-          createdAlerts = await Promise.all(
-            alerts.map((alert) => alert.createIfDoesNotExist(rulesClient, actionsClient, actions))
-          );
-        }
 
         server.log.info(
           `Created ${createdAlerts.length} alerts for "${infraContext.spaceId}" space`
         );
 
-        return response.ok({ body: { createdAlerts, disabledWatcherClusterAlerts } });
+        return response.ok({ body: { createdAlerts } });
       } catch (err) {
         throw handleError(err);
       }

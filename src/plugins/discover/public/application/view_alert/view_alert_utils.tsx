@@ -1,25 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { CoreStart, ToastsStart } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Rule } from '@kbn/alerting-plugin/common';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { ISearchSource, SerializedSearchSourceFields, getTime } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { MarkdownSimple, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/shared-ux-markdown';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Filter } from '@kbn/es-query';
-import { DiscoverAppLocatorParams } from '../../../common/locator';
+import { DiscoverAppLocatorParams } from '../../../common/app_locator';
 
 export interface SearchThresholdAlertParams extends RuleTypeParams {
   searchConfiguration: SerializedSearchSourceFields;
+  esqlQuery?: AggregateQuery;
+  timeField?: string;
 }
 
 export interface QueryParams {
@@ -49,19 +55,22 @@ export const getAlertUtils = (
   queryParams: QueryParams,
   toastNotifications: ToastsStart,
   core: CoreStart,
-  data: DataPublicPluginStart
+  data: DataPublicPluginStart,
+  dataViews: DataViewsPublicPluginStart
 ) => {
   const showDataViewFetchError = (alertId: string) => {
     const errorTitle = i18n.translate('discover.viewAlert.dataViewErrorTitle', {
       defaultMessage: 'Error fetching data view',
     });
+    const errorText = i18n.translate('discover.viewAlert.dataViewErrorText', {
+      defaultMessage: 'Data view failure of the alert rule with id {alertId}.',
+      values: {
+        alertId,
+      },
+    });
     toastNotifications.addDanger({
       title: errorTitle,
-      text: toMountPoint(
-        <MarkdownSimple>
-          {new Error(`Data view failure of the alert rule with id ${alertId}.`).message}
-        </MarkdownSimple>
-      ),
+      text: errorText,
     });
   };
 
@@ -76,7 +85,7 @@ export const getAlertUtils = (
       });
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
+        text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, core),
       });
       throw new Error(errorTitle);
     }
@@ -96,20 +105,37 @@ export const getAlertUtils = (
       });
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
+        text: toMountPoint(<Markdown markdownContent={error.message} readOnly />, core),
       });
       throw new Error(errorTitle);
     }
   };
 
-  const buildLocatorParams = ({
+  const buildLocatorParams = async ({
     alert,
     searchSource,
   }: {
     alert: Rule<SearchThresholdAlertParams>;
     searchSource: ISearchSource;
-  }): DiscoverAppLocatorParams => {
-    const dataView = searchSource.getField('index');
+  }): Promise<DiscoverAppLocatorParams> => {
+    let dataView = searchSource.getField('index');
+    let query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
+
+    // Dataview and query for ES|QL alerts
+    if (
+      alert.params &&
+      'esqlQuery' in alert.params &&
+      alert.params.esqlQuery &&
+      'esql' in alert.params.esqlQuery
+    ) {
+      query = alert.params.esqlQuery;
+      const indexPattern: string = getIndexPatternFromESQLQuery(alert.params.esqlQuery.esql);
+      dataView = await dataViews.create({
+        title: indexPattern,
+        timeFieldName: alert.params.timeField,
+      });
+    }
+
     const timeFieldName = dataView?.timeFieldName;
     // data view fetch error
     if (!dataView || !timeFieldName) {
@@ -122,7 +148,7 @@ export const getAlertUtils = (
       : buildTimeRangeFilter(dataView, alert, timeFieldName);
 
     return {
-      query: searchSource.getField('query') || data.query.queryString.getDefaultQuery(),
+      query,
       dataViewSpec: dataView.toSpec(false),
       timeRange,
       filters: searchSource.getField('filter') as Filter[],

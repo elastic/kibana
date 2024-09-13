@@ -6,10 +6,7 @@
     "id": "dashboardEnhanced",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "dashboardEnhanced"
-    ],
+    "configPath": ["xpack", "dashboardEnhanced"],
     "requiredPlugins": [
       "dashboard",
       "data",
@@ -21,9 +18,10 @@
     "requiredBundles": [
       "embeddable",
       "embeddableEnhanced",
-      "kibanaReact",
       "kibanaUtils",
-      "imageEmbeddable"
+      "imageEmbeddable",
+      "presentationUtil",
+      "uiActions"
     ]
   }
 }

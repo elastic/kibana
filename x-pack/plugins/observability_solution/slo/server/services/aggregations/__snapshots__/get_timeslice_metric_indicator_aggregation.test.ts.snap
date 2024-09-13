@@ -1,0 +1,213 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GetTimesliceMetricIndicatorAggregation should generate an aggregation for basic metrics 1`] = `
+Object {
+  "_A": Object {
+    "aggs": Object {
+      "metric": Object {
+        "avg": Object {
+          "field": "test.field",
+        },
+      },
+    },
+    "filter": Object {
+      "bool": Object {
+        "minimum_should_match": 1,
+        "should": Array [
+          Object {
+            "match": Object {
+              "test.category": "test",
+            },
+          },
+        ],
+      },
+    },
+  },
+  "_B": Object {
+    "aggs": Object {
+      "metric": Object {
+        "max": Object {
+          "field": "test.field",
+        },
+      },
+    },
+    "filter": Object {
+      "match_all": Object {},
+    },
+  },
+  "_C": Object {
+    "aggs": Object {
+      "metric": Object {
+        "min": Object {
+          "field": "test.field",
+        },
+      },
+    },
+    "filter": Object {
+      "match_all": Object {},
+    },
+  },
+  "_D": Object {
+    "aggs": Object {
+      "metric": Object {
+        "sum": Object {
+          "field": "test.field",
+        },
+      },
+    },
+    "filter": Object {
+      "match_all": Object {},
+    },
+  },
+  "_E": Object {
+    "aggs": Object {
+      "metric": Object {
+        "cardinality": Object {
+          "field": "test.field",
+        },
+      },
+    },
+    "filter": Object {
+      "match_all": Object {},
+    },
+  },
+  "_metric": Object {
+    "bucket_script": Object {
+      "buckets_path": Object {
+        "A": "_A>metric",
+        "B": "_B>metric",
+        "C": "_C>metric",
+        "D": "_D>metric",
+        "E": "_E>metric",
+      },
+      "script": Object {
+        "lang": "painless",
+        "source": "(params.A + params.B + params.C + params.D + params.E) / params.A",
+      },
+    },
+  },
+}
+`;
+
+exports[`GetTimesliceMetricIndicatorAggregation should generate an aggregation for doc_count 1`] = `
+Object {
+  "_A": Object {
+    "filter": Object {
+      "bool": Object {
+        "minimum_should_match": 1,
+        "should": Array [
+          Object {
+            "match": Object {
+              "test.category": "test",
+            },
+          },
+        ],
+      },
+    },
+  },
+  "_metric": Object {
+    "bucket_script": Object {
+      "buckets_path": Object {
+        "A": "_A>_count",
+      },
+      "script": Object {
+        "lang": "painless",
+        "source": "params.A",
+      },
+    },
+  },
+}
+`;
+
+exports[`GetTimesliceMetricIndicatorAggregation should generate an aggregation for last_value 1`] = `
+Object {
+  "_A": Object {
+    "aggs": Object {
+      "metric": Object {
+        "top_metrics": Object {
+          "metrics": Object {
+            "field": "test.field",
+          },
+          "sort": Object {
+            "@timestamp": "desc",
+          },
+        },
+      },
+    },
+    "filter": Object {
+      "match_all": Object {},
+    },
+  },
+  "_metric": Object {
+    "bucket_script": Object {
+      "buckets_path": Object {
+        "A": "_A>metric[test.field]",
+      },
+      "script": Object {
+        "lang": "painless",
+        "source": "params.A",
+      },
+    },
+  },
+}
+`;
+
+exports[`GetTimesliceMetricIndicatorAggregation should generate an aggregation for percentile 1`] = `
+Object {
+  "_A": Object {
+    "aggs": Object {
+      "metric": Object {
+        "percentiles": Object {
+          "field": "test.field",
+          "keyed": true,
+          "percents": Array [
+            97,
+          ],
+        },
+      },
+    },
+    "filter": Object {
+      "match_all": Object {},
+    },
+  },
+  "_metric": Object {
+    "bucket_script": Object {
+      "buckets_path": Object {
+        "A": "_A>metric[97]",
+      },
+      "script": Object {
+        "lang": "painless",
+        "source": "params.A",
+      },
+    },
+  },
+}
+`;
+
+exports[`GetTimesliceMetricIndicatorAggregation should generate an aggregation for std_deviation 1`] = `
+Object {
+  "_A": Object {
+    "aggs": Object {
+      "metric": Object {
+        "extended_stats": Object {
+          "field": "test.field",
+        },
+      },
+    },
+    "filter": Object {
+      "match_all": Object {},
+    },
+  },
+  "_metric": Object {
+    "bucket_script": Object {
+      "buckets_path": Object {
+        "A": "_A>metric[std_deviation]",
+      },
+      "script": Object {
+        "lang": "painless",
+        "source": "params.A",
+      },
+    },
+  },
+}
+`;

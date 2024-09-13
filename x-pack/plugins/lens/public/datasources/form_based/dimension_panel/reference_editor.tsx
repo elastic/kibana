@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRowProps, EuiSpacer, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -82,7 +82,6 @@ export interface ReferenceEditorProps {
   labelAppend?: EuiFormRowProps['labelAppend'];
   isFullscreen: boolean;
   toggleFullscreen: () => void;
-  setIsCloseable: (isCloseable: boolean) => void;
   paramEditorCustomProps?: ParamEditorCustomProps;
   paramEditorUpdater: (
     setter:
@@ -92,12 +91,12 @@ export interface ReferenceEditorProps {
   ) => void;
   onChooseField: (choice: FieldChoiceWithOperationType) => void;
   onDeleteColumn: () => void;
+  onResetIncomplete: () => void;
   onChooseFunction: (operationType: string, field?: IndexPatternField) => void;
 
   // Services
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
-  savedObjectsClient: SavedObjectsClientContract;
   http: HttpSetup;
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
@@ -116,6 +115,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
     functionLabel,
     onChooseField,
     onDeleteColumn,
+    onResetIncomplete,
     onChooseFunction,
     fieldLabel,
     operationDefinitionMap,
@@ -261,6 +261,10 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                 }
 
                 const operationType = choices[0].value!;
+                // When it has an incomplete state, make sure to clear it up before updating
+                if (incompleteColumn) {
+                  onResetIncomplete();
+                }
                 if (column?.operationType === operationType) {
                   return;
                 }
@@ -313,6 +317,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
             markAllFieldsCompatible={selectionStyle === 'field'}
             onDeleteColumn={onDeleteColumn}
             onChoose={onChooseField}
+            showTimeSeriesDimensions={false}
           />
         </FormRow>
       ) : null}

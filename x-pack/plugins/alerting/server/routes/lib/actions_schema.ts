@@ -6,13 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { FilterStateStore } from '@kbn/es-query';
 import { validateTimezone } from './validate_timezone';
 import { validateDurationSchema } from '../../lib';
 import { validateHours } from './validate_hours';
 
 export const actionsSchema = schema.arrayOf(
   schema.object({
-    group: schema.string(),
+    group: schema.maybe(schema.string()),
     id: schema.string(),
     params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
     frequency: schema.maybe(
@@ -29,13 +30,27 @@ export const actionsSchema = schema.arrayOf(
     uuid: schema.maybe(schema.string()),
     alerts_filter: schema.maybe(
       schema.object({
-        query: schema.nullable(
+        query: schema.maybe(
           schema.object({
             kql: schema.string(),
+            filters: schema.arrayOf(
+              schema.object({
+                query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+                meta: schema.recordOf(schema.string(), schema.any()),
+                $state: schema.maybe(
+                  schema.object({
+                    store: schema.oneOf([
+                      schema.literal(FilterStateStore.APP_STATE),
+                      schema.literal(FilterStateStore.GLOBAL_STATE),
+                    ]),
+                  })
+                ),
+              })
+            ),
             dsl: schema.maybe(schema.string()),
           })
         ),
-        timeframe: schema.nullable(
+        timeframe: schema.maybe(
           schema.object({
             days: schema.arrayOf(
               schema.oneOf([
@@ -61,6 +76,18 @@ export const actionsSchema = schema.arrayOf(
         ),
       })
     ),
+    use_alert_data_for_template: schema.maybe(schema.boolean()),
   }),
   { defaultValue: [] }
+);
+
+export const systemActionsSchema = schema.maybe(
+  schema.arrayOf(
+    schema.object({
+      id: schema.string(),
+      params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+      uuid: schema.maybe(schema.string()),
+    }),
+    { defaultValue: [] }
+  )
 );

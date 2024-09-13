@@ -12,6 +12,7 @@ import {
   IdOrUndefined,
   ListItemSchema,
   MetaOrUndefined,
+  RefreshWithWaitFor,
   SerializerOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -33,6 +34,7 @@ export interface CreateListItemOptions {
   meta: MetaOrUndefined;
   dateNow?: string;
   tieBreaker?: string;
+  refresh?: RefreshWithWaitFor;
 }
 
 export const createListItem = async ({
@@ -48,10 +50,12 @@ export const createListItem = async ({
   meta,
   dateNow,
   tieBreaker,
+  refresh = 'wait_for',
 }: CreateListItemOptions): Promise<ListItemSchema | null> => {
   const createdAt = dateNow ?? new Date().toISOString();
   const tieBreakerId = tieBreaker ?? uuidv4();
   const baseBody = {
+    '@timestamp': createdAt,
     created_at: createdAt,
     created_by: user,
     deserializer,
@@ -68,11 +72,11 @@ export const createListItem = async ({
       ...baseBody,
       ...elasticQuery,
     };
-    const response = await esClient.index({
+    const response = await esClient.create({
       body,
-      id,
+      id: id ?? uuidv4(),
       index: listItemIndex,
-      refresh: 'wait_for',
+      refresh,
     });
 
     return {

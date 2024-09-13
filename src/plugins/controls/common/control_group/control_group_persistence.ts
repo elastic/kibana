@@ -1,26 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
 import deepEqual from 'fast-deep-equal';
+import { SerializableRecord } from '@kbn/utility-types';
 
 import { pick, omit, xor } from 'lodash';
-import { ControlGroupInput } from '..';
+
 import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_STYLE,
   DEFAULT_CONTROL_WIDTH,
 } from './control_group_constants';
-import { PersistableControlGroupInput, RawControlGroupAttributes } from './types';
 import {
   ControlPanelDiffSystems,
   genericControlPanelDiffSystem,
 } from './control_group_panel_diff_system';
+import { ControlGroupInput } from '..';
+import {
+  PersistableControlGroupInput,
+  persistableControlGroupInputKeys,
+  RawControlGroupAttributes,
+} from './types';
 
 const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
   if (!jsonString && typeof jsonString !== 'string') return;
@@ -37,6 +43,7 @@ export const getDefaultControlGroupInput = (): Omit<ControlGroupInput, 'id'> => 
   defaultControlGrow: DEFAULT_CONTROL_GROW,
   controlStyle: DEFAULT_CONTROL_STYLE,
   chainingSystem: 'HIERARCHICAL',
+  showApplySelections: false,
   ignoreParentSettings: {
     ignoreFilters: false,
     ignoreQuery: false,
@@ -45,32 +52,34 @@ export const getDefaultControlGroupInput = (): Omit<ControlGroupInput, 'id'> => 
   },
 });
 
+export const getDefaultControlGroupPersistableInput = (): PersistableControlGroupInput =>
+  pick(getDefaultControlGroupInput(), persistableControlGroupInputKeys);
+
 export const persistableControlGroupInputIsEqual = (
   a: PersistableControlGroupInput | undefined,
-  b: PersistableControlGroupInput | undefined
+  b: PersistableControlGroupInput | undefined,
+  compareSelections: boolean = true
 ) => {
-  const defaultInput = getDefaultControlGroupInput();
+  const defaultInput = getDefaultControlGroupPersistableInput();
   const inputA = {
     ...defaultInput,
-    ...pick(a, ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']),
+    ...pick(a, persistableControlGroupInputKeys),
   };
   const inputB = {
     ...defaultInput,
-    ...pick(b, ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']),
+    ...pick(b, persistableControlGroupInputKeys),
   };
 
-  if (
-    getPanelsAreEqual(inputA.panels, inputB.panels) &&
-    deepEqual(omit(inputA, 'panels'), omit(inputB, 'panels'))
-  )
-    return true;
-
-  return false;
+  return (
+    getPanelsAreEqual(inputA.panels, inputB.panels, compareSelections) &&
+    deepEqual(omit(inputA, ['panels']), omit(inputB, ['panels']))
+  );
 };
 
 const getPanelsAreEqual = (
   originalPanels: PersistableControlGroupInput['panels'],
-  newPanels: PersistableControlGroupInput['panels']
+  newPanels: PersistableControlGroupInput['panels'],
+  compareSelections: boolean
 ) => {
   const originalPanelIds = Object.keys(originalPanels);
   const newPanelIds = Object.keys(newPanels);
@@ -84,7 +93,8 @@ const getPanelsAreEqual = (
     const panelIsEqual = ControlPanelDiffSystems[newPanelType]
       ? ControlPanelDiffSystems[newPanelType].getPanelIsEqual(
           originalPanels[panelId],
-          newPanels[panelId]
+          newPanels[panelId],
+          compareSelections
         )
       : genericControlPanelDiffSystem.getPanelIsEqual(originalPanels[panelId], newPanels[panelId]);
     if (!panelIsEqual) return false;
@@ -92,23 +102,17 @@ const getPanelsAreEqual = (
   return true;
 };
 
-export const controlGroupInputToRawControlGroupAttributes = (
-  controlGroupInput: Omit<ControlGroupInput, 'id'>
-): RawControlGroupAttributes => {
-  return {
-    controlStyle: controlGroupInput.controlStyle,
-    chainingSystem: controlGroupInput.chainingSystem,
-    panelsJSON: JSON.stringify(controlGroupInput.panels),
-    ignoreParentSettingsJSON: JSON.stringify(controlGroupInput.ignoreParentSettings),
-  };
-};
-
 export const rawControlGroupAttributesToControlGroupInput = (
   rawControlGroupAttributes: RawControlGroupAttributes
-): Omit<ControlGroupInput, 'id'> | undefined => {
+): PersistableControlGroupInput | undefined => {
   const defaultControlGroupInput = getDefaultControlGroupInput();
-  const { chainingSystem, controlStyle, ignoreParentSettingsJSON, panelsJSON } =
-    rawControlGroupAttributes;
+  const {
+    chainingSystem,
+    controlStyle,
+    showApplySelections,
+    ignoreParentSettingsJSON,
+    panelsJSON,
+  } = rawControlGroupAttributes;
   const panels = safeJSONParse<ControlGroupInput['panels']>(panelsJSON);
   const ignoreParentSettings =
     safeJSONParse<ControlGroupInput['ignoreParentSettings']>(ignoreParentSettingsJSON);
@@ -116,6 +120,7 @@ export const rawControlGroupAttributesToControlGroupInput = (
     ...defaultControlGroupInput,
     ...(chainingSystem ? { chainingSystem } : {}),
     ...(controlStyle ? { controlStyle } : {}),
+    ...(showApplySelections ? { showApplySelections } : {}),
     ...(ignoreParentSettings ? { ignoreParentSettings } : {}),
     ...(panels ? { panels } : {}),
   };
@@ -128,6 +133,7 @@ export const rawControlGroupAttributesToSerializable = (
   return {
     chainingSystem: rawControlGroupAttributes?.chainingSystem,
     controlStyle: rawControlGroupAttributes?.controlStyle ?? defaultControlGroupInput.controlStyle,
+    showApplySelections: rawControlGroupAttributes?.showApplySelections,
     ignoreParentSettings: safeJSONParse(rawControlGroupAttributes?.ignoreParentSettingsJSON) ?? {},
     panels: safeJSONParse(rawControlGroupAttributes?.panelsJSON) ?? {},
   };
@@ -139,6 +145,7 @@ export const serializableToRawControlGroupAttributes = (
   return {
     controlStyle: serializable.controlStyle as RawControlGroupAttributes['controlStyle'],
     chainingSystem: serializable.chainingSystem as RawControlGroupAttributes['chainingSystem'],
+    showApplySelections: Boolean(serializable.showApplySelections),
     ignoreParentSettingsJSON: JSON.stringify(serializable.ignoreParentSettings),
     panelsJSON: JSON.stringify(serializable.panels),
   };

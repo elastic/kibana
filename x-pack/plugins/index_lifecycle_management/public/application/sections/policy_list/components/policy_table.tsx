@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiLink,
@@ -15,6 +15,8 @@ import {
   EuiBadge,
   EuiFlexItem,
   EuiSwitch,
+  EuiSearchBarProps,
+  EuiInMemoryTableProps,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -25,6 +27,7 @@ import { useHistory } from 'react-router-dom';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { useStateWithLocalStorage } from '../../../lib/settings_local_storage';
 import { PolicyFromES } from '../../../../../common/types';
 import { useKibana } from '../../../../shared_imports';
@@ -69,13 +72,29 @@ const managedPolicyTooltips = {
   ),
 };
 
+const deprecatedPolicyTooltips = {
+  badge: i18n.translate('xpack.indexLifecycleMgmt.policyTable.templateBadgeType.deprecatedLabel', {
+    defaultMessage: 'Deprecated',
+  }),
+  badgeTooltip: i18n.translate(
+    'xpack.indexLifecycleMgmt.policyTable.templateBadgeType.deprecatedDescription',
+    {
+      defaultMessage:
+        'This policy is no longer supported and might be removed in a future release. Instead, use one of the other policies available or create a new one.',
+    }
+  ),
+};
+
 interface Props {
   policies: PolicyFromES[];
 }
 
 const SHOW_MANAGED_POLICIES_BY_DEFAULT = 'ILM_SHOW_MANAGED_POLICIES_BY_DEFAULT';
+const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
+  const [query, setQuery] = useState('');
+
   const history = useHistory();
   const {
     services: { getUrlForApp },
@@ -85,9 +104,37 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
     false
   );
   const { setListAction } = usePolicyListContext();
+
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<PolicyFromES>({
+    tableId: 'ilmPolicies',
+    initialPageSize: 25,
+    initialSort: {
+      field: 'name',
+      direction: 'asc',
+    },
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
+  });
+
+  const handleOnChange: EuiSearchBarProps['onChange'] = ({ queryText, error }) => {
+    if (!error) {
+      setQuery(queryText);
+    }
+  };
+
   const searchOptions = useMemo(
     () => ({
+      query,
+      onChange: handleOnChange,
       box: { incremental: true, 'data-test-subj': 'ilmSearchBar' },
+      filters: [
+        {
+          type: 'is',
+          field: 'policy.deprecated',
+          name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.isDeprecatedFilterLabel', {
+            defaultMessage: 'Deprecated',
+          }),
+        },
+      ],
       toolsRight: (
         <EuiFlexItem grow={false}>
           <EuiSwitch
@@ -105,14 +152,24 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
         </EuiFlexItem>
       ),
     }),
-    [managedPoliciesVisible, setManagedPoliciesVisible]
+    [managedPoliciesVisible, setManagedPoliciesVisible, query]
   );
 
   const filteredPolicies = useMemo(() => {
-    return managedPoliciesVisible
+    let result = managedPoliciesVisible
       ? policies
       : policies.filter((item) => !item.policy?._meta?.managed);
-  }, [policies, managedPoliciesVisible]);
+
+    // When the query includes 'is:policy.deprecated', we want to show deprecated policies.
+    // Otherwise hide them all since they wont be supported in the future.
+    if (query.includes('is:policy.deprecated')) {
+      result = result.filter((item) => item.policy?.deprecated);
+    } else {
+      result = result.filter((item) => !item.policy?.deprecated);
+    }
+
+    return result;
+  }, [policies, managedPoliciesVisible, query]);
 
   const columns: Array<EuiBasicTableColumn<PolicyFromES>> = [
     {
@@ -124,6 +181,8 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
       sortable: true,
       render: (value: string, item) => {
         const isManaged = item.policy?._meta?.managed;
+        const isDeprecated = item.policy?.deprecated;
+
         return (
           <>
             <EuiLink
@@ -135,6 +194,17 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
             >
               {value}
             </EuiLink>
+
+            {isDeprecated && (
+              <>
+                &nbsp;
+                <EuiToolTip content={deprecatedPolicyTooltips.badgeTooltip}>
+                  <EuiBadge color="warning" data-test-subj="deprecatedPolicyBadge">
+                    {deprecatedPolicyTooltips.badge}
+                  </EuiBadge>
+                </EuiToolTip>
+              </>
+            )}
 
             {isManaged && (
               <>
@@ -255,14 +325,13 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
           'The table below contains {count, plural, one {# Index Lifecycle policy} other {# Index Lifecycle policies}} .',
         values: { count: policies.length },
       })}
-      pagination={true}
-      sorting={{
-        sort: {
-          field: 'name',
-          direction: 'asc',
-        },
+      pagination={{
+        initialPageSize: pageSize,
+        pageSizeOptions: PAGE_SIZE_OPTIONS,
       }}
-      search={searchOptions}
+      onTableChange={onTableChange}
+      sorting={sorting}
+      search={searchOptions as EuiInMemoryTableProps<PolicyFromES>['search']}
       tableLayout="auto"
       items={filteredPolicies}
       columns={columns}

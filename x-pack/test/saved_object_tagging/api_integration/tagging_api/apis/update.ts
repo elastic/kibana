@@ -42,6 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
               name: 'updated name',
               description: 'updated desc',
               color: '#123456',
+              managed: false,
             },
           });
         });
@@ -56,6 +57,41 @@ export default function ({ getService }: FtrProviderContext) {
               name: 'updated name',
               description: 'updated desc',
               color: '#123456',
+              managed: false,
+            },
+          });
+        });
+    });
+
+    it('should not allow updating tag name to an existing name', async () => {
+      const existingName = 'tag-3';
+      await supertest
+        .post(`/api/saved_objects_tagging/tags/tag-2`)
+        .send({
+          name: existingName,
+          description: 'updated desc',
+          color: '#123456',
+        })
+        .expect(409)
+        .then(({ body }) => {
+          expect(body).to.eql({
+            statusCode: 409,
+            error: 'Conflict',
+            message: `A tag with the name "${existingName}" already exists.`,
+          });
+        });
+
+      await supertest
+        .get(`/api/saved_objects_tagging/tags/tag-3`)
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).to.eql({
+            tag: {
+              id: 'tag-3',
+              name: 'tag-3',
+              description: 'Last but not least',
+              color: '#000000',
+              managed: false,
             },
           });
         });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { externals } from '@kbn/ui-shared-deps-src';
@@ -115,9 +116,22 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
                     resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
                   )};\n${content}`;
                 },
-                implementation: require('node-sass'),
+                implementation: require('sass-embedded'),
                 sassOptions: {
                   includePaths: [resolve(REPO_ROOT, 'node_modules')],
+                  quietDeps: true,
+                  logger: {
+                    warn: (message: string, warning: any) => {
+                      // Muted - see https://github.com/elastic/kibana/issues/190345 for tracking remediation
+                      if (warning?.deprecationType?.id === 'mixed-decls') return;
+
+                      if (warning.deprecation)
+                        return process.stderr.write(
+                          `DEPRECATION WARNING: ${message}\n${warning.stack}`
+                        );
+                      process.stderr.write('WARNING: ' + message);
+                    },
+                  },
                 },
               },
             },
@@ -137,6 +151,9 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
     },
     stats,
   };
+
+  // Override storybookConfig mainFields instead of merging with config
+  delete storybookConfig.resolve?.mainFields;
 
   const updatedModuleRules = [];
   // clone and modify the module.rules config provided by storybook so that the default babel plugins run after the typescript preset

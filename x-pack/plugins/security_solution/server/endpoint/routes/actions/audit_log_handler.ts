@@ -9,9 +9,9 @@ import type { RequestHandler } from '@kbn/core/server';
 import type {
   EndpointActionLogRequestParams,
   EndpointActionLogRequestQuery,
-} from '../../../../common/endpoint/schema/actions';
-import { getAuditLogResponse } from '../../services';
+} from '../../../../common/api/endpoint';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import { getAuditLogResponse } from '../../services/actions/actions_audit_log';
 import type { EndpointAppContext } from '../../types';
 
 export const auditLogRequestHandler = (

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { bulkDeleteObjectsMock, bulkGetObjectsMock } from './saved_object_view.test.mocks';
@@ -20,6 +21,7 @@ import {
   uiSettingsServiceMock,
   scopedHistoryMock,
   docLinksServiceMock,
+  themeServiceMock,
 } from '@kbn/core/public/mocks';
 
 import type { SavedObjectWithMetadata } from '../../types';
@@ -28,6 +30,7 @@ import {
   SavedObjectEditionProps,
   SavedObjectEditionState,
 } from './saved_object_view';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 const resolvePromises = () => new Promise((resolve) => process.nextTick(resolve));
 
@@ -40,6 +43,8 @@ describe('SavedObjectEdition', () => {
   let history: ReturnType<typeof scopedHistoryMock.create>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
   let docLinks: ReturnType<typeof docLinksServiceMock.createStartContract>;
+  let settings: ReturnType<typeof settingsServiceMock.createStartContract>;
+  let theme: ReturnType<typeof themeServiceMock.createStartContract>;
 
   const shallowRender = (overrides: Partial<SavedObjectEditionProps> = {}) => {
     return shallowWithI18nProvider(
@@ -56,9 +61,11 @@ describe('SavedObjectEdition', () => {
     overlays = overlayServiceMock.createStartContract();
     notifications = notificationServiceMock.createStartContract();
     uiSettings = uiSettingsServiceMock.createStartContract();
+    settings = settingsServiceMock.createStartContract();
     history = scopedHistoryMock.create();
     docLinks = docLinksServiceMock.createStartContract();
     applications = applicationServiceMock.createStartContract();
+    theme = themeServiceMock.createStartContract();
     applications.capabilities = {
       navLinks: {},
       management: {},
@@ -82,6 +89,8 @@ describe('SavedObjectEdition', () => {
       history,
       uiSettings,
       docLinks: docLinks.links,
+      settings,
+      theme,
     };
 
     bulkDeleteObjectsMock.mockResolvedValue([{}]);

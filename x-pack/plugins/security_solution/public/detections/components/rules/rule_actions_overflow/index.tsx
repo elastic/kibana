@@ -14,9 +14,12 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useScheduleRuleRun } from '../../../../detection_engine/rule_gaps/logic/use_schedule_rule_run';
+import type { TimeRange } from '../../../../detection_engine/rule_gaps/types';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
@@ -49,6 +52,8 @@ interface RuleActionsOverflowComponentProps {
   userHasPermissions: boolean;
   canDuplicateRuleWithActions: boolean;
   showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
+  showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
+  confirmDeletion: () => Promise<boolean>;
 }
 
 /**
@@ -59,13 +64,21 @@ const RuleActionsOverflowComponent = ({
   userHasPermissions,
   canDuplicateRuleWithActions,
   showBulkDuplicateExceptionsConfirmation,
+  showManualRuleRunConfirmation,
+  confirmDeletion,
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    telemetry,
+  } = useKibana().services;
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: true });
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
+  const { scheduleRuleRun } = useScheduleRuleRun();
+
+  const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
 
   const onRuleDeletedCallback = useCallback(() => {
     navigateToApp(APP_UI_ID, {
@@ -92,11 +105,17 @@ const RuleActionsOverflowComponent = ({
                   return;
                 }
                 const result = await executeBulkAction({
-                  type: BulkActionType.duplicate,
+                  type: BulkActionTypeEnum.duplicate,
                   ids: [rule.id],
                   duplicatePayload: {
                     include_exceptions:
-                      modalDuplicationConfirmationResult === DuplicateOptions.withExceptions,
+                      modalDuplicationConfirmationResult === DuplicateOptions.withExceptions ||
+                      modalDuplicationConfirmationResult ===
+                        DuplicateOptions.withExceptionsExcludeExpiredExceptions,
+                    include_expired_exceptions: !(
+                      modalDuplicationConfirmationResult ===
+                      DuplicateOptions.withExceptionsExcludeExpiredExceptions
+                    ),
                   },
                 });
 
@@ -133,16 +152,55 @@ const RuleActionsOverflowComponent = ({
             >
               {i18nActions.EXPORT_RULE}
             </EuiContextMenuItem>,
+            ...(isManualRuleRunEnabled
+              ? [
+                  <EuiContextMenuItem
+                    key={i18nActions.MANUAL_RULE_RUN}
+                    icon="play"
+                    disabled={!userHasPermissions || !rule.enabled}
+                    toolTipContent={
+                      !userHasPermissions || !rule.enabled
+                        ? i18nActions.MANUAL_RULE_RUN_TOOLTIP
+                        : ''
+                    }
+                    data-test-subj="rules-details-manual-rule-run"
+                    onClick={async () => {
+                      startTransaction({ name: SINGLE_RULE_ACTIONS.MANUAL_RULE_RUN });
+                      closePopover();
+                      const modalManualRuleRunConfirmationResult =
+                        await showManualRuleRunConfirmation();
+                      telemetry.reportManualRuleRunOpenModal({
+                        type: 'single',
+                      });
+                      if (modalManualRuleRunConfirmationResult === null) {
+                        return;
+                      }
+                      await scheduleRuleRun({
+                        ruleIds: [rule.id],
+                        timeRange: modalManualRuleRunConfirmationResult,
+                      });
+                    }}
+                  >
+                    {i18nActions.MANUAL_RULE_RUN}
+                  </EuiContextMenuItem>,
+                ]
+              : []),
             <EuiContextMenuItem
               key={i18nActions.DELETE_RULE}
               icon="trash"
               disabled={!userHasPermissions}
               data-test-subj="rules-details-delete-rule"
               onClick={async () => {
-                startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
                 closePopover();
+
+                if ((await confirmDeletion()) === false) {
+                  // User has canceled deletion
+                  return;
+                }
+
+                startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
                 await executeBulkAction({
-                  type: BulkActionType.delete,
+                  type: BulkActionTypeEnum.delete,
                   ids: [rule.id],
                 });
 
@@ -162,9 +220,14 @@ const RuleActionsOverflowComponent = ({
       onRuleDeletedCallback,
       rule,
       showBulkDuplicateExceptionsConfirmation,
+      showManualRuleRunConfirmation,
       startTransaction,
       userHasPermissions,
       downloadExportedRules,
+      confirmDeletion,
+      scheduleRuleRun,
+      isManualRuleRunEnabled,
+      telemetry,
     ]
   );
 

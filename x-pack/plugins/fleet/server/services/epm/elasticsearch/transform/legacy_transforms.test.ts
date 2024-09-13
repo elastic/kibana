@@ -12,12 +12,6 @@ jest.mock('../../packages/get', () => {
   return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };
 });
 
-jest.mock('./common', () => {
-  return {
-    getAsset: jest.fn(),
-  };
-});
-
 import { errors } from '@elastic/elasticsearch';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -26,15 +20,15 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { getInstallation, getInstallationObject } from '../../packages';
-import type { Installation, RegistryPackage } from '../../../../types';
+import type { Installation } from '../../../../types';
 import { ElasticsearchAssetType } from '../../../../types';
 import { appContextService } from '../../../app_context';
 
 import { getESAssetMetadata } from '../meta';
 
+import type { PackageInstallContext } from '../../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../constants';
 
-import { getAsset } from './common';
 import { installTransforms } from './install';
 
 describe('test transform install with legacy schema', () => {
@@ -92,10 +86,6 @@ describe('test transform install with legacy schema', () => {
         },
       ],
     } as unknown as Installation;
-    (getAsset as jest.MockedFunction<typeof getAsset>)
-      .mockReturnValueOnce(Buffer.from('{"content": "data"}', 'utf8'))
-      .mockReturnValueOnce(Buffer.from('{"content": "data"}', 'utf8'));
-
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
@@ -122,60 +112,68 @@ describe('test transform install with legacy schema', () => {
       ],
     });
 
-    await installTransforms(
-      {
-        name: 'endpoint',
-        version: '0.16.0-dev.0',
-        data_streams: [
-          {
-            type: 'metrics',
-            dataset: 'endpoint.metadata',
-            title: 'Endpoint Metadata',
-            release: 'experimental',
-            package: 'endpoint',
-            ingest_pipeline: 'default',
-            elasticsearch: {
-              'index_template.mappings': {
-                dynamic: false,
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: {
+          name: 'endpoint',
+          version: '0.16.0-dev.0',
+          data_streams: [
+            {
+              type: 'metrics',
+              dataset: 'endpoint.metadata',
+              title: 'Endpoint Metadata',
+              release: 'experimental',
+              package: 'endpoint',
+              ingest_pipeline: 'default',
+              elasticsearch: {
+                'index_template.mappings': {
+                  dynamic: false,
+                },
               },
+              path: 'metadata',
             },
-            path: 'metadata',
-          },
-          {
-            type: 'metrics',
-            dataset: 'endpoint.metadata_current',
-            title: 'Endpoint Metadata Current',
-            release: 'experimental',
-            package: 'endpoint',
-            ingest_pipeline: 'default',
-            elasticsearch: {
-              'index_template.mappings': {
-                dynamic: false,
+            {
+              type: 'metrics',
+              dataset: 'endpoint.metadata_current',
+              title: 'Endpoint Metadata Current',
+              release: 'experimental',
+              package: 'endpoint',
+              ingest_pipeline: 'default',
+              elasticsearch: {
+                'index_template.mappings': {
+                  dynamic: false,
+                },
               },
+              path: 'metadata_current',
             },
-            path: 'metadata_current',
-          },
+          ],
+        },
+        paths: [
+          'endpoint-0.16.0-dev.0/data_stream/policy/elasticsearch/ingest_pipeline/default.json',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata/default.json',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
         ],
-      } as unknown as RegistryPackage,
-      [
-        'endpoint-0.16.0-dev.0/data_stream/policy/elasticsearch/ingest_pipeline/default.json',
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata/default.json',
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
-      ],
+        assetsMap: new Map([
+          [
+            'endpoint-0.16.0-dev.0/data_stream/policy/elasticsearch/ingest_pipeline/default.json',
+            Buffer.from('{"content": "data"}'),
+          ],
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata/default.json',
+            Buffer.from('{"content": "data"}'),
+          ],
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
+            Buffer.from('{"content": "data"}'),
+          ],
+        ]),
+      } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
-    expect(esClient.transform.getTransform.mock.calls).toEqual([
-      [
-        {
-          transform_id: 'endpoint.metadata_current-default-0.15.0-dev.0',
-        },
-        { ignore: [404] },
-      ],
-    ]);
     expect(esClient.transform.stopTransform.mock.calls).toEqual([
       [
         {
@@ -190,16 +188,7 @@ describe('test transform install with legacy schema', () => {
         {
           transform_id: 'endpoint.metadata_current-default-0.15.0-dev.0',
           force: true,
-        },
-        { ignore: [404] },
-      ],
-    ]);
-
-    expect(esClient.transport.request.mock.calls).toEqual([
-      [
-        {
-          method: 'DELETE',
-          path: '/index',
+          delete_dest_index: true,
         },
         { ignore: [404] },
       ],
@@ -214,6 +203,7 @@ describe('test transform install with legacy schema', () => {
           defer_validation: true,
           body: { content: 'data', _meta: meta },
         },
+        { ignore: [409] },
       ],
       [
         {
@@ -221,6 +211,7 @@ describe('test transform install with legacy schema', () => {
           defer_validation: true,
           body: { content: 'data', _meta: meta },
         },
+        { ignore: [409] },
       ],
     ]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
@@ -305,9 +296,6 @@ describe('test transform install with legacy schema', () => {
         },
       ],
     } as unknown as Installation;
-    (getAsset as jest.MockedFunction<typeof getAsset>).mockReturnValueOnce(
-      Buffer.from('{"content": "data"}', 'utf8')
-    );
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
@@ -320,33 +308,41 @@ describe('test transform install with legacy schema', () => {
       } as unknown as SavedObject<Installation>)
     );
 
-    await installTransforms(
-      {
-        name: 'endpoint',
-        version: '0.16.0-dev.0',
-        data_streams: [
-          {
-            type: 'metrics',
-            dataset: 'endpoint.metadata_current',
-            title: 'Endpoint Metadata',
-            release: 'experimental',
-            package: 'endpoint',
-            ingest_pipeline: 'default',
-            elasticsearch: {
-              'index_template.mappings': {
-                dynamic: false,
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: {
+          name: 'endpoint',
+          version: '0.16.0-dev.0',
+          data_streams: [
+            {
+              type: 'metrics',
+              dataset: 'endpoint.metadata_current',
+              title: 'Endpoint Metadata',
+              release: 'experimental',
+              package: 'endpoint',
+              ingest_pipeline: 'default',
+              elasticsearch: {
+                'index_template.mappings': {
+                  dynamic: false,
+                },
               },
+              path: 'metadata_current',
             },
-            path: 'metadata_current',
-          },
-        ],
-      } as unknown as RegistryPackage,
-      ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
+          ],
+        },
+        paths: ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
+        assetsMap: new Map([
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
+            Buffer.from('{"content": "data"}'),
+          ],
+        ]),
+      } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     const meta = getESAssetMetadata({ packageName: 'endpoint' });
 
@@ -357,6 +353,7 @@ describe('test transform install with legacy schema', () => {
           defer_validation: true,
           body: { content: 'data', _meta: meta },
         },
+        { ignore: [409] },
       ],
     ]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
@@ -422,56 +419,49 @@ describe('test transform install with legacy schema', () => {
       ],
     });
 
-    await installTransforms(
-      {
-        name: 'endpoint',
-        version: '0.16.0-dev.0',
-        data_streams: [
-          {
-            type: 'metrics',
-            dataset: 'endpoint.metadata',
-            title: 'Endpoint Metadata',
-            release: 'experimental',
-            package: 'endpoint',
-            ingest_pipeline: 'default',
-            elasticsearch: {
-              'index_template.mappings': {
-                dynamic: false,
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: {
+          name: 'endpoint',
+          version: '0.16.0-dev.0',
+          data_streams: [
+            {
+              type: 'metrics',
+              dataset: 'endpoint.metadata',
+              title: 'Endpoint Metadata',
+              release: 'experimental',
+              package: 'endpoint',
+              ingest_pipeline: 'default',
+              elasticsearch: {
+                'index_template.mappings': {
+                  dynamic: false,
+                },
               },
+              path: 'metadata',
             },
-            path: 'metadata',
-          },
-          {
-            type: 'metrics',
-            dataset: 'endpoint.metadata_current',
-            title: 'Endpoint Metadata Current',
-            release: 'experimental',
-            package: 'endpoint',
-            ingest_pipeline: 'default',
-            elasticsearch: {
-              'index_template.mappings': {
-                dynamic: false,
+            {
+              type: 'metrics',
+              dataset: 'endpoint.metadata_current',
+              title: 'Endpoint Metadata Current',
+              release: 'experimental',
+              package: 'endpoint',
+              ingest_pipeline: 'default',
+              elasticsearch: {
+                'index_template.mappings': {
+                  dynamic: false,
+                },
               },
+              path: 'metadata_current',
             },
-            path: 'metadata_current',
-          },
-        ],
-      } as unknown as RegistryPackage,
-      [],
+          ],
+        },
+        paths: [],
+      } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
-
-    expect(esClient.transform.getTransform.mock.calls).toEqual([
-      [
-        {
-          transform_id: 'endpoint.metadata-current-default-0.15.0-dev.0',
-        },
-        { ignore: [404] },
-      ],
-    ]);
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     expect(esClient.transform.stopTransform.mock.calls).toEqual([
       [
@@ -488,16 +478,7 @@ describe('test transform install with legacy schema', () => {
         {
           transform_id: 'endpoint.metadata-current-default-0.15.0-dev.0',
           force: true,
-        },
-        { ignore: [404] },
-      ],
-    ]);
-
-    expect(esClient.transport.request.mock.calls).toEqual([
-      [
-        {
-          method: 'DELETE',
-          path: '/index',
+          delete_dest_index: true,
         },
         { ignore: [404] },
       ],
@@ -530,9 +511,6 @@ describe('test transform install with legacy schema', () => {
         },
       ],
     } as unknown as Installation;
-    (getAsset as jest.MockedFunction<typeof getAsset>).mockReturnValueOnce(
-      Buffer.from('{"content": "data"}', 'utf8')
-    );
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
@@ -556,33 +534,41 @@ describe('test transform install with legacy schema', () => {
       )
     );
 
-    await installTransforms(
-      {
-        name: 'endpoint',
-        version: '0.16.0-dev.0',
-        data_streams: [
-          {
-            type: 'metrics',
-            dataset: 'endpoint.metadata_current',
-            title: 'Endpoint Metadata',
-            release: 'experimental',
-            package: 'endpoint',
-            ingest_pipeline: 'default',
-            elasticsearch: {
-              'index_template.mappings': {
-                dynamic: false,
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: {
+          name: 'endpoint',
+          version: '0.16.0-dev.0',
+          data_streams: [
+            {
+              type: 'metrics',
+              dataset: 'endpoint.metadata_current',
+              title: 'Endpoint Metadata',
+              release: 'experimental',
+              package: 'endpoint',
+              ingest_pipeline: 'default',
+              elasticsearch: {
+                'index_template.mappings': {
+                  dynamic: false,
+                },
               },
+              path: 'metadata_current',
             },
-            path: 'metadata_current',
-          },
-        ],
-      } as unknown as RegistryPackage,
-      ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
+          ],
+        },
+        paths: ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
+        assetsMap: new Map([
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
+            Buffer.from('{"content": "data"}'),
+          ],
+        ]),
+      } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     const meta = getESAssetMetadata({ packageName: 'endpoint' });
 
@@ -593,6 +579,7 @@ describe('test transform install with legacy schema', () => {
           defer_validation: true,
           body: { content: 'data', _meta: meta },
         },
+        { ignore: [409] },
       ],
     ]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([

@@ -6,33 +6,10 @@
  */
 
 import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
-import { CoreKibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
-import {
-  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
-  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
-  LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
-  LOGOUT_REASON_QUERY_STRING_PARAMETER,
-  NEXT_URL_QUERY_STRING_PARAMETER,
-  SESSION_ERROR_REASON_HEADER,
-} from '../../common/constants';
-import { shouldProviderUseLoginForm } from '../../common/model';
-import type { AuditServiceSetup } from '../audit';
-import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
-import type { ConfigType } from '../config';
-import { getErrorStatusCode } from '../errors';
-import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import {
-  type Session,
-  SessionConcurrencyLimitError,
-  SessionExpiredError,
-  SessionUnexpectedError,
-  type SessionValue,
-} from '../session_management';
-import type { UserProfileServiceStartInternal } from '../user_profile';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
@@ -53,6 +30,29 @@ import {
   TokenAuthenticationProvider,
 } from './providers';
 import { Tokens } from './tokens';
+import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
+import {
+  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+  LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
+  LOGOUT_REASON_QUERY_STRING_PARAMETER,
+  NEXT_URL_QUERY_STRING_PARAMETER,
+  SESSION_ERROR_REASON_HEADER,
+} from '../../common/constants';
+import { shouldProviderUseLoginForm } from '../../common/model';
+import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
+import type { ConfigType } from '../config';
+import { getErrorStatusCode } from '../errors';
+import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import {
+  getPrintableSessionId,
+  type Session,
+  SessionConcurrencyLimitError,
+  SessionExpiredError,
+  SessionUnexpectedError,
+  type SessionValue,
+} from '../session_management';
+import type { UserProfileServiceStartInternal } from '../user_profile';
 
 /**
  * List of query string parameters used to pass various authentication related metadata that should
@@ -97,6 +97,7 @@ export interface AuthenticatorOptions {
   session: PublicMethodsOf<Session>;
   getServerBaseURL: () => string;
   isElasticCloudDeployment: () => boolean;
+  customLogoutURL?: string;
 }
 
 /** @internal */
@@ -136,13 +137,6 @@ const ACCESS_AGREEMENT_ROUTE = '/security/access_agreement';
  * The route to the overwritten session UI.
  */
 const OVERWRITTEN_SESSION_ROUTE = '/security/overwritten_session';
-
-function assertRequest(request: KibanaRequest) {
-  if (!(request instanceof CoreKibanaRequest)) {
-    throw new Error(`Request should be a valid "KibanaRequest" instance, was [${typeof request}].`);
-  }
-}
-
 function assertLoginAttempt(attempt: ProviderLoginAttempt) {
   if (!isLoginAttemptWithProviderType(attempt) && !isLoginAttemptWithProviderName(attempt)) {
     throw new Error(
@@ -259,7 +253,7 @@ export class Authenticator {
               ...providerCommonOptions,
               name,
               logger: options.loggers.get(type, name),
-              urls: { loggedOut: (request) => this.getLoggedOutURL(request, type) },
+              urls: { loggedOut: (request: KibanaRequest) => this.getLoggedOutURL(request, type) },
             }),
             this.options.config.authc.providers[type]?.[name]
           ),
@@ -275,7 +269,8 @@ export class Authenticator {
           name: '__http__',
           logger: options.loggers.get(HTTPAuthenticationProvider.type),
           urls: {
-            loggedOut: (request) => this.getLoggedOutURL(request, HTTPAuthenticationProvider.type),
+            loggedOut: (request: KibanaRequest) =>
+              this.getLoggedOutURL(request, HTTPAuthenticationProvider.type),
           },
         })
       );
@@ -294,7 +289,6 @@ export class Authenticator {
    * @param attempt Login attempt description.
    */
   async login(request: KibanaRequest, attempt: ProviderLoginAttempt) {
-    assertRequest(request);
     assertLoginAttempt(attempt);
 
     const { value: existingSessionValue } = await this.getSessionValue(request);
@@ -313,7 +307,7 @@ export class Authenticator {
         : [];
 
     if (providers.length === 0) {
-      this.logger.debug(
+      this.logger.warn(
         `Login attempt for provider with ${
           isLoginAttemptWithProviderName(attempt)
             ? `name ${attempt.provider.name}`
@@ -362,8 +356,6 @@ export class Authenticator {
    * @param request Request instance.
    */
   async authenticate(request: KibanaRequest): Promise<AuthenticationResult> {
-    assertRequest(request);
-
     const existingSession = await this.getSessionValue(request);
 
     if (this.shouldRedirectToLoginSelector(request, existingSession.value)) {
@@ -503,11 +495,21 @@ export class Authenticator {
    * @param request Request instance.
    */
   async reauthenticate(request: KibanaRequest) {
-    assertRequest(request);
+    // Return early if request doesn't have any associated session. We retrieve session ID separately from the session
+    // content because it doesn't trigger session invalidation for expired sessions.
+    const sid = await this.session.getSID(request);
+    if (!sid) {
+      this.logger.debug(
+        'Re-authentication is only supported for requests with associated sessions.'
+      );
+      return AuthenticationResult.notHandled();
+    }
 
     const { value: existingSessionValue } = await this.getSessionValue(request);
     if (!existingSessionValue) {
-      this.logger.warn('Session is no longer available and cannot be re-authenticated.');
+      this.logger
+        .get(getPrintableSessionId(sid))
+        .warn('Session is no longer available and cannot be re-authenticated.');
       return AuthenticationResult.notHandled();
     }
 
@@ -535,8 +537,6 @@ export class Authenticator {
    * @param request Request instance.
    */
   async logout(request: KibanaRequest) {
-    assertRequest(request);
-
     const { value: sessionValue } = await this.getSessionValue(request);
     const suggestedProviderName =
       sessionValue?.provider.name ??
@@ -575,8 +575,6 @@ export class Authenticator {
    * @param request Request instance.
    */
   async acknowledgeAccessAgreement(request: KibanaRequest) {
-    assertRequest(request);
-
     const { value: existingSessionValue } = await this.getSessionValue(request);
     const currentUser = this.options.getCurrentUser(request);
 
@@ -647,7 +645,13 @@ export class Authenticator {
       throw new Error(`Provider name "${options.name}" is reserved.`);
     }
 
-    this.providers.set(options.name, new HTTPAuthenticationProvider(options, { supportedSchemes }));
+    this.providers.set(
+      options.name,
+      new HTTPAuthenticationProvider(options, {
+        supportedSchemes,
+        jwt: this.options.config.authc.http.jwt,
+      })
+    );
   }
 
   /**
@@ -755,7 +759,7 @@ export class Authenticator {
     // invalidation (e.g. when Elasticsearch is temporarily unavailable).
     if (authenticationResult.failed()) {
       if (ownsSession && getErrorStatusCode(authenticationResult.error) === 401) {
-        this.logger.debug('Authentication attempt failed, existing session will be invalidated.');
+        this.logger.warn('Authentication attempt failed, existing session will be invalidated.');
         await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       }
       return null;
@@ -791,7 +795,7 @@ export class Authenticator {
     // 3. If we re-authenticated user with another username (e.g. during IdP initiated SSO login or
     // when client certificate changes and PKI provider needs to re-authenticate user).
     if (providerHasChanged) {
-      this.logger.debug(
+      this.logger.warn(
         'Authentication provider has changed, existing session will be invalidated.'
       );
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
@@ -807,7 +811,7 @@ export class Authenticator {
       });
       existingSessionValue = null;
     } else if (usernameHasChanged) {
-      this.logger.debug('Username has changed, existing session will be invalidated.');
+      this.logger.warn('Username has changed, existing session will be invalidated.');
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     }
@@ -1013,6 +1017,10 @@ export class Authenticator {
    * provider in the chain (default) is assumed.
    */
   private getLoggedOutURL(request: KibanaRequest, providerType?: string) {
+    if (this.options.customLogoutURL) {
+      return this.options.customLogoutURL;
+    }
+
     // The app that handles logout needs to know the reason of the logout and the URL we may need to
     // redirect user to once they log in again (e.g. when session expires).
     const searchParams = new URLSearchParams();

@@ -5,17 +5,24 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+
+import { renderReactTestingLibraryWithI18n } from '@kbn/test-jest-helpers';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { CreateTransformButton } from './create_transform_button';
 
 jest.mock('../../../../../shared_imports');
 
+const queryClient = new QueryClient();
+
 describe('Transform: Transform List <CreateTransformButton />', () => {
   test('Minimal initialization', () => {
-    const wrapper = shallow(<CreateTransformButton onClick={jest.fn()} transformNodes={1} />);
-
-    expect(wrapper).toMatchSnapshot();
+    const { container } = renderReactTestingLibraryWithI18n(
+      <QueryClientProvider client={queryClient}>
+        <CreateTransformButton onClick={jest.fn()} transformNodes={1} />
+      </QueryClientProvider>
+    );
+    expect(container.textContent).toBe('Create a transform');
   });
 });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -16,12 +17,15 @@ import { nextActionMap, type ActionMap } from './next';
 import {
   createContextMock,
   type MockedMigratorContext,
+  createPostInitState,
   createPostDocInitState,
 } from './test_helpers';
 import type {
   SetDocMigrationStartedState,
   UpdateMappingModelVersionState,
   UpdateDocumentModelVersionsState,
+  UpdateIndexMappingsState,
+  CreateTargetIndexState,
 } from './state';
 
 describe('actions', () => {
@@ -72,6 +76,33 @@ describe('actions', () => {
     });
   });
 
+  describe('CREATE_TARGET_INDEX', () => {
+    it('calls createIndex with the correct parameters', () => {
+      const state: CreateTargetIndexState = {
+        ...createPostInitState(),
+        controlState: 'CREATE_TARGET_INDEX',
+        currentIndex: '.kibana_1',
+        indexMappings: {
+          properties: { foo: { type: 'keyword' } },
+        },
+        creationAliases: ['.kibana', '.kibana_foo'],
+      };
+
+      const action = actionMap.CREATE_TARGET_INDEX;
+
+      action(state);
+
+      expect(ActionMocks.createIndex).toHaveBeenCalledTimes(1);
+      expect(ActionMocks.createIndex).toHaveBeenCalledWith({
+        client: context.elasticsearchClient,
+        indexName: state.currentIndex,
+        aliases: state.creationAliases,
+        mappings: state.indexMappings,
+        esCapabilities: context.esCapabilities,
+      });
+    });
+  });
+
   describe('UPDATE_MAPPING_MODEL_VERSIONS', () => {
     it('calls setMetaMappingMigrationComplete with the correct parameters', () => {
       const state: UpdateMappingModelVersionState = {
@@ -85,7 +116,7 @@ describe('actions', () => {
       expect(setMetaMappingMigrationCompleteMock).toHaveBeenCalledTimes(1);
       expect(setMetaMappingMigrationCompleteMock).toHaveBeenCalledWith({
         meta: state.currentIndexMeta,
-        versions: context.typeModelVersions,
+        versions: context.typeVirtualVersions,
       });
     });
 
@@ -123,7 +154,7 @@ describe('actions', () => {
       expect(setMetaDocMigrationCompleteMock).toHaveBeenCalledTimes(1);
       expect(setMetaDocMigrationCompleteMock).toHaveBeenCalledWith({
         meta: state.currentIndexMeta,
-        versions: context.typeModelVersions,
+        versions: context.typeVirtualVersions,
       });
     });
 
@@ -144,6 +175,38 @@ describe('actions', () => {
         client: context.elasticsearchClient,
         index: state.currentIndex,
         meta: someMeta,
+      });
+    });
+  });
+
+  describe('UPDATE_INDEX_MAPPINGS', () => {
+    it('calls updateAndPickupMappings with the correct parameters', () => {
+      const state: UpdateIndexMappingsState = {
+        ...createPostDocInitState(),
+        controlState: 'UPDATE_INDEX_MAPPINGS',
+        additiveMappingChanges: {
+          someToken: {},
+        },
+      };
+      const action = actionMap.UPDATE_INDEX_MAPPINGS;
+
+      action(state);
+
+      expect(ActionMocks.updateAndPickupMappings).toHaveBeenCalledTimes(1);
+      expect(ActionMocks.updateAndPickupMappings).toHaveBeenCalledWith({
+        client: context.elasticsearchClient,
+        index: state.currentIndex,
+        mappings: {
+          properties: {
+            someToken: {},
+          },
+        },
+        batchSize: context.batchSize,
+        query: {
+          bool: {
+            should: [{ term: { type: 'someToken' } }],
+          },
+        },
       });
     });
   });

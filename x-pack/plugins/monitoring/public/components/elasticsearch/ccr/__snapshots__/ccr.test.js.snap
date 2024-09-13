@@ -5,142 +5,139 @@ exports[`Ccr that it renders normally 1`] = `
   <EuiPageBody>
     <EuiScreenReaderOnly>
       <h1>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="CCR"
           id="xpack.monitoring.elasticsearch.ccr.heading"
-          values={Object {}}
         />
       </h1>
     </EuiScreenReaderOnly>
-    <EuiPageContent_Deprecated>
-      <EuiPageContentBody_Deprecated>
-        <EuiInMemoryTable
-          className="monitoringElasticsearchCcrListingTable"
-          columns={
-            Array [
-              Object {
-                "field": "index",
-                "name": "Index",
-                "render": [Function],
-                "sortable": true,
-              },
-              Object {
-                "field": "follows",
-                "name": "Follows",
-                "sortable": true,
-              },
-              Object {
-                "field": "alerts",
-                "name": "Alerts",
-                "render": [Function],
-                "sortable": true,
-              },
-              Object {
-                "field": "syncLagOps",
-                "name": "Sync Lag (ops)",
-                "sortable": true,
-              },
-              Object {
-                "field": "syncLagTime",
-                "name": "Last fetch time",
-                "render": [Function],
-                "sortable": true,
-              },
-              Object {
-                "field": "opsSynced",
-                "name": "Ops synced",
-                "sortable": true,
-              },
-              Object {
-                "field": "error",
-                "name": "Error",
-                "render": [Function],
-                "sortable": true,
-              },
-            ]
-          }
-          executeQueryOptions={
+    <EuiPanel>
+      <EuiInMemoryTable
+        className="monitoringElasticsearchCcrListingTable"
+        columns={
+          Array [
             Object {
-              "defaultFields": Array [
-                "index",
-                "follows",
+              "field": "index",
+              "name": "Index",
+              "render": [Function],
+              "sortable": true,
+            },
+            Object {
+              "field": "follows",
+              "name": "Follows",
+              "sortable": true,
+            },
+            Object {
+              "field": "alerts",
+              "name": "Alerts",
+              "render": [Function],
+              "sortable": true,
+            },
+            Object {
+              "field": "syncLagOps",
+              "name": "Sync Lag (ops)",
+              "sortable": true,
+            },
+            Object {
+              "field": "syncLagTime",
+              "name": "Last fetch time",
+              "render": [Function],
+              "sortable": true,
+            },
+            Object {
+              "field": "opsSynced",
+              "name": "Ops synced",
+              "sortable": true,
+            },
+            Object {
+              "field": "error",
+              "name": "Error",
+              "render": [Function],
+              "sortable": true,
+            },
+          ]
+        }
+        executeQueryOptions={
+          Object {
+            "defaultFields": Array [
+              "index",
+              "follows",
+            ],
+          }
+        }
+        itemId="id"
+        itemIdToExpandedRowMap={Object {}}
+        items={
+          Array [
+            Object {
+              "follows": "leader",
+              "id": "follower",
+              "index": "follower",
+              "opsSynced": 400,
+              "shards": Array [
+                Object {
+                  "opsSynced": 200,
+                  "shardId": 0,
+                  "syncLagOps": 2,
+                  "syncLagOpsFollower": 1,
+                  "syncLagOpsLeader": 1,
+                  "syncLagTime": 45000,
+                },
+                Object {
+                  "opsSynced": 200,
+                  "shardId": 1,
+                  "syncLagOps": 1,
+                  "syncLagOpsFollower": 0,
+                  "syncLagOpsLeader": 1,
+                  "syncLagTime": 60000,
+                },
               ],
-            }
-          }
-          itemId="id"
-          itemIdToExpandedRowMap={Object {}}
-          items={
-            Array [
-              Object {
-                "follows": "leader",
-                "id": "follower",
-                "index": "follower",
-                "opsSynced": 400,
-                "shards": Array [
-                  Object {
-                    "opsSynced": 200,
-                    "shardId": 0,
-                    "syncLagOps": 2,
-                    "syncLagOpsFollower": 1,
-                    "syncLagOpsLeader": 1,
-                    "syncLagTime": 45000,
-                  },
-                  Object {
-                    "opsSynced": 200,
-                    "shardId": 1,
-                    "syncLagOps": 1,
-                    "syncLagOpsFollower": 0,
-                    "syncLagOpsLeader": 1,
-                    "syncLagTime": 60000,
-                  },
-                ],
-                "syncLagOps": 5,
-                "syncLagTime": 60000,
-              },
-              Object {
-                "error": "not_working_properly",
-                "follows": "leader2",
-                "id": "follower2",
-                "index": "follower2",
-                "opsSynced": 50,
-                "shards": Array [
-                  Object {
-                    "opsSynced": 20,
-                    "shardId": 1,
-                    "syncLagOps": 0,
-                    "syncLagOpsFollower": 0,
-                    "syncLagOpsLeader": 0,
-                    "syncLagTime": 11000,
-                  },
-                  Object {
-                    "error": "not_working_properly",
-                    "opsSynced": 30,
-                    "shardId": 2,
-                    "syncLagOps": 5,
-                    "syncLagOpsFollower": 5,
-                    "syncLagOpsLeader": 0,
-                    "syncLagTime": 1000,
-                  },
-                ],
-                "syncLagOps": 1,
-                "syncLagTime": 12000,
-              },
-            ]
-          }
-          pagination={false}
-          responsive={true}
-          sorting={
+              "syncLagOps": 5,
+              "syncLagTime": 60000,
+            },
             Object {
-              "sort": Object {
-                "direction": "asc",
-                "field": "index",
-              },
-            }
+              "error": "not_working_properly",
+              "follows": "leader2",
+              "id": "follower2",
+              "index": "follower2",
+              "opsSynced": 50,
+              "shards": Array [
+                Object {
+                  "opsSynced": 20,
+                  "shardId": 1,
+                  "syncLagOps": 0,
+                  "syncLagOpsFollower": 0,
+                  "syncLagOpsLeader": 0,
+                  "syncLagTime": 11000,
+                },
+                Object {
+                  "error": "not_working_properly",
+                  "opsSynced": 30,
+                  "shardId": 2,
+                  "syncLagOps": 5,
+                  "syncLagOpsFollower": 5,
+                  "syncLagOpsLeader": 0,
+                  "syncLagTime": 1000,
+                },
+              ],
+              "syncLagOps": 1,
+              "syncLagTime": 12000,
+            },
+          ]
+        }
+        pagination={false}
+        searchFormat="eql"
+        sorting={
+          Object {
+            "sort": Object {
+              "direction": "asc",
+              "field": "index",
+            },
           }
-          tableLayout="fixed"
-        />
-      </EuiPageContentBody_Deprecated>
-    </EuiPageContent_Deprecated>
+        }
+        tableLayout="fixed"
+      />
+    </EuiPanel>
   </EuiPageBody>
 </EuiPage>
 `;

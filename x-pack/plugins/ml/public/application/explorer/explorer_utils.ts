@@ -11,20 +11,28 @@
 
 import { get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { asyncForEach } from '@kbn/std';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-
 import { lastValueFrom } from 'rxjs';
+
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import {
+  getEntityFieldList,
+  type MlEntityField,
+  type MlInfluencer,
+  type MlRecordForInfluencer,
+  ML_JOB_AGGREGATION,
+} from '@kbn/ml-anomaly-utils';
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { IUiSettingsClient } from '@kbn/core/public';
+
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
-import { EntityField, getEntityFieldList } from '../../../common/util/anomaly_utils';
-import { getDataViewIdFromName } from '../util/index_utils';
-import { extractErrorMessage } from '../../../common/util/errors';
-import { ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
+import type { MlIndexUtils } from '../util/index_service';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
@@ -32,24 +40,19 @@ import {
   isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { ml } from '../services/ml_api_service';
-import { mlJobService } from '../services/job_service';
-import { getUiSettings } from '../util/dependency_cache';
+import type { MlJobService } from '../services/job_service';
 
+import type { SwimlaneType } from './explorer_constants';
 import {
   MAX_CATEGORY_EXAMPLES,
   MAX_INFLUENCER_FIELD_VALUES,
   SWIMLANE_TYPE,
-  SwimlaneType,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import { MlResultsService } from '../services/results_service';
-import { InfluencersFilterQuery } from '../../../common/types/es_client';
-import { TimeRangeBounds } from '../util/time_buckets';
-import { Annotations, AnnotationsTable } from '../../../common/types/annotations';
-import { Influencer } from '../../../common/types/anomalies';
-import { RecordForInfluencer } from '../services/results_service/results_service';
+import type { MlResultsService } from '../services/results_service';
+import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
+import type { MlApi } from '../services/ml_api_service';
 
 export interface ExplorerJob {
   id: string;
@@ -107,7 +110,7 @@ export interface AnomaliesTableData {
   jobIds: string[];
 }
 
-export interface ChartRecord extends RecordForInfluencer {
+export interface ChartRecord extends MlRecordForInfluencer {
   function: string;
 }
 
@@ -137,7 +140,7 @@ export interface SourceIndicesWithGeoFields {
 // create new job objects based on standard job config objects
 export function createJobs(jobs: CombinedJob[]): ExplorerJob[] {
   return jobs.map((job) => {
-    const bucketSpan = parseInterval(job.analysis_config.bucket_span);
+    const bucketSpan = parseInterval(job.analysis_config.bucket_span!);
     return {
       id: job.job_id,
       selected: false,
@@ -190,7 +193,7 @@ export async function loadFilteredTopInfluencers(
 
   // Add the influencers from the top scoring anomalies.
   records.forEach((record) => {
-    const influencersByName: Influencer[] = record.influencers || [];
+    const influencersByName: MlInfluencer[] = record.influencers || [];
     influencersByName.forEach((influencer) => {
       const fieldName = influencer.influencer_field_name;
       const fieldValues = influencer.influencer_field_values;
@@ -207,7 +210,7 @@ export async function loadFilteredTopInfluencers(
     uniqValuesByName[fieldName] = uniq(fieldValues);
   });
 
-  const filterInfluencers: EntityField[] = [];
+  const filterInfluencers: MlEntityField[] = [];
   Object.keys(uniqValuesByName).forEach((fieldName) => {
     // Find record influencers with the same field name as the clicked on cell(s).
     const matchingFieldName = influencers.find((influencer) => {
@@ -236,7 +239,7 @@ export async function loadFilteredTopInfluencers(
   )) as any[];
 }
 
-export function getInfluencers(selectedJobs: any[]): string[] {
+export function getInfluencers(mlJobService: MlJobService, selectedJobs: any[]): string[] {
   const influencers: string[] = [];
   selectedJobs.forEach((selectedJob) => {
     const job = mlJobService.getJob(selectedJob.id);
@@ -247,15 +250,14 @@ export function getInfluencers(selectedJobs: any[]): string[] {
   return influencers;
 }
 
-export function getDateFormatTz(): string {
-  const uiSettings = getUiSettings();
+export function getDateFormatTz(uiSettings: IUiSettingsClient): string {
   // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
   const tzConfig = uiSettings.get('dateFormat:tz');
   const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
   return dateFormatTz;
 }
 
-export function getFieldsByJob() {
+export function getFieldsByJob(mlJobService: MlJobService) {
   return mlJobService.jobs.reduce(
     (reducedFieldsByJob, job) => {
       // Add the list of distinct by, over, partition and influencer fields for each job.
@@ -320,7 +322,7 @@ export function getSelectionTimeRange(
 export function getSelectionInfluencers(
   selectedCells: AppStateSelectedCells | undefined | null,
   fieldName: string
-): EntityField[] {
+): MlEntityField[] {
   if (
     !!selectedCells &&
     selectedCells.type !== SWIMLANE_TYPE.OVERALL &&
@@ -350,6 +352,7 @@ export function getSelectionJobIds(
 }
 
 export function loadOverallAnnotations(
+  mlApi: MlApi,
   selectedJobs: ExplorerJob[],
   bounds: TimeRangeBounds
 ): Promise<AnnotationsTable> {
@@ -358,7 +361,7 @@ export function loadOverallAnnotations(
 
   return new Promise((resolve) => {
     lastValueFrom(
-      ml.annotations.getAnnotations$({
+      mlApi.annotations.getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
@@ -404,6 +407,7 @@ export function loadOverallAnnotations(
 }
 
 export function loadAnnotationsTableData(
+  mlApi: MlApi,
   selectedCells: AppStateSelectedCells | undefined | null,
   selectedJobs: ExplorerJob[],
   bounds: Required<TimeRangeBounds>
@@ -413,7 +417,7 @@ export function loadAnnotationsTableData(
 
   return new Promise((resolve) => {
     lastValueFrom(
-      ml.annotations.getAnnotations$({
+      mlApi.annotations.getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
@@ -462,6 +466,8 @@ export function loadAnnotationsTableData(
 }
 
 export async function loadAnomaliesTableData(
+  mlApi: MlApi,
+  mlJobService: MlJobService,
   selectedCells: AppStateSelectedCells | undefined | null,
   selectedJobs: ExplorerJob[],
   dateFormatTz: string,
@@ -476,7 +482,7 @@ export async function loadAnomaliesTableData(
   const timeRange = getSelectionTimeRange(selectedCells, bounds);
 
   return new Promise((resolve, reject) => {
-    ml.results
+    mlApi.results
       .getAnomaliesTableData(
         jobIds,
         [],
@@ -628,14 +634,17 @@ export function removeFilterFromQueryString(
 }
 
 // Returns an object mapping job ids to source indices which map to geo fields for that index
-export async function getSourceIndicesWithGeoFields(
+export async function getDataViewsAndIndicesWithGeoFields(
   selectedJobs: Array<CombinedJob | ExplorerJob>,
-  dataViewsService: DataViewsContract
-): Promise<SourceIndicesWithGeoFields> {
+  dataViewsService: DataViewsContract,
+  mlIndexUtils: MlIndexUtils
+): Promise<{ sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields; dataViews: DataView[] }> {
   const sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields = {};
+  // Avoid searching for data view again if previous job already has same source index
+  const dataViewsMap = new Map<string, DataView>();
   // Go through selected jobs
   if (Array.isArray(selectedJobs)) {
-    await asyncForEach(selectedJobs, async (job) => {
+    for (const job of selectedJobs) {
       let sourceIndices;
       let jobId: string;
       if (isExplorerJob(job)) {
@@ -647,12 +656,19 @@ export async function getSourceIndicesWithGeoFields(
       }
 
       if (Array.isArray(sourceIndices)) {
-        // Check fields for each source index to see if it has geo fields
-        await asyncForEach(sourceIndices, async (sourceIndex) => {
-          const dataViewId = await getDataViewIdFromName(sourceIndex);
+        for (const sourceIndex of sourceIndices) {
+          const cachedDV = dataViewsMap.get(sourceIndex);
+          const dataViewId =
+            cachedDV?.id ?? (await mlIndexUtils.getDataViewIdFromName(sourceIndex));
 
           if (dataViewId) {
-            const dataView = await dataViewsService.get(dataViewId);
+            const dataView = cachedDV ?? (await dataViewsService.get(dataViewId));
+
+            if (!dataView) {
+              continue;
+            }
+            dataViewsMap.set(sourceIndex, dataView);
+
             const geoFields = [
               ...dataView.fields.getByType(ES_FIELD_TYPES.GEO_POINT),
               ...dataView.fields.getByType(ES_FIELD_TYPES.GEO_SHAPE),
@@ -668,9 +684,9 @@ export async function getSourceIndicesWithGeoFields(
               );
             }
           }
-        });
+        }
       }
-    });
+    }
   }
-  return sourceIndicesWithGeoFieldsMap;
+  return { sourceIndicesWithGeoFieldsMap, dataViews: [...dataViewsMap.values()] };
 }

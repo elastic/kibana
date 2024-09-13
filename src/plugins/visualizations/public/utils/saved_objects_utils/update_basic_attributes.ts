@@ -1,22 +1,51 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-browser';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { SerializableRecord } from '@kbn/utility-types';
 
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { extractReferences } from '../saved_visualization_references';
+import { visualizationsClient } from '../../content_management';
+import { TypesStart } from '../../vis_types';
 
 interface UpdateBasicSoAttributesDependencies {
-  savedObjectsClient: SavedObjectsClientContract;
   savedObjectsTagging?: SavedObjectsTaggingApi;
   overlays: OverlayStart;
+  typesService: TypesStart;
+  contentManagement: ContentManagementPublicStart;
+}
+
+function getClientForType(
+  type: string,
+  typesService: TypesStart,
+  contentManagement: ContentManagementPublicStart
+) {
+  const visAliases = typesService.getAliases();
+  return (
+    visAliases
+      .find((v) => v.appExtensions?.visualizations.docTypes.includes(type))
+      ?.appExtensions?.visualizations.client(contentManagement) || visualizationsClient
+  );
+}
+
+function getAdditionalOptionsForUpdate(
+  type: string,
+  typesService: TypesStart,
+  method: 'update' | 'create'
+) {
+  const visAliases = typesService.getAliases();
+  const aliasType = visAliases.find((v) => v.appExtensions?.visualizations.docTypes.includes(type));
+  if (!aliasType) {
+    return { overwrite: true };
+  }
+  return aliasType?.appExtensions?.visualizations?.clientOptions?.[method];
 }
 
 export const updateBasicSoAttributes = async (
@@ -29,10 +58,12 @@ export const updateBasicSoAttributes = async (
   },
   dependencies: UpdateBasicSoAttributesDependencies
 ) => {
-  const so = await dependencies.savedObjectsClient.get<SerializableRecord>(type, soId);
+  const client = getClientForType(type, dependencies.typesService, dependencies.contentManagement);
+
+  const so = await client.get(soId);
   const extractedReferences = extractReferences({
-    attributes: so.attributes,
-    references: so.references,
+    attributes: so.item.attributes,
+    references: so.item.references,
   });
 
   let { references } = extractedReferences;
@@ -50,9 +81,14 @@ export const updateBasicSoAttributes = async (
     );
   }
 
-  return await dependencies.savedObjectsClient.create(type, attributes, {
+  return await client.update({
     id: soId,
-    overwrite: true,
-    references,
+    data: {
+      ...attributes,
+    },
+    options: {
+      references,
+      ...getAdditionalOptionsForUpdate(type, dependencies.typesService, 'update'),
+    },
   });
 };

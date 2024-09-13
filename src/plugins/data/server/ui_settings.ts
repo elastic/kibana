@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -32,14 +33,15 @@ const requestPreferenceOptionLabels = {
 };
 
 export function getUiSettings(
-  docLinks: DocLinksServiceSetup
+  docLinks: DocLinksServiceSetup,
+  enableValidations: boolean
 ): Record<string, UiSettingsParams<unknown>> {
   return {
     [UI_SETTINGS.META_FIELDS]: {
       name: i18n.translate('data.advancedSettings.metaFieldsTitle', {
         defaultMessage: 'Meta fields',
       }),
-      value: ['_source', '_id', '_index', '_score'],
+      value: ['_source', '_id', '_index', '_score', '_ignored'],
       description: i18n.translate('data.advancedSettings.metaFieldsText', {
         defaultMessage:
           'Fields that exist outside of _source to merge into our document when displaying it',
@@ -167,12 +169,12 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.defaultIndexTitle', {
         defaultMessage: 'Default data view',
       }),
-      value: null,
+      value: '',
       type: 'string',
       description: i18n.translate('data.advancedSettings.defaultIndexText', {
         defaultMessage: 'Used by discover and visualizations when a data view is not set.',
       }),
-      schema: schema.nullable(schema.string()),
+      schema: schema.string(),
     },
     [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: {
       name: i18n.translate('data.advancedSettings.courier.ignoreFilterTitle', {
@@ -203,7 +205,7 @@ export function getUiSettings(
             <li><strong>{sessionId}:</strong> restricts operations to execute all search requests on the same shards.
               This has the benefit of reusing shard caches across requests.</li>
             <li><strong>{custom}:</strong> allows you to define a your own preference.
-              Use <strong>'courier:customRequestPreference'</strong> to customize your preference value.</li>
+              Use <strong>courier:customRequestPreference</strong> to customize your preference value.</li>
             <li><strong>{none}:</strong> means do not set a preference.
               This might provide better performance because requests can be spread across all shard copies.
               However, results might be inconsistent because different shards might be in different refresh states.</li>
@@ -212,6 +214,9 @@ export function getUiSettings(
           sessionId: requestPreferenceOptionLabels.sessionId,
           custom: requestPreferenceOptionLabels.custom,
           none: requestPreferenceOptionLabels.none,
+          ul: (chunks) => `<ul>${chunks}</ul>`,
+          li: (chunks) => `<li>${chunks}</li>`,
+          strong: (chunks) => `<strong>${chunks}</strong>`,
         },
       }),
       category: ['search'],
@@ -385,6 +390,13 @@ export function getUiSettings(
             }),
           },
           {
+            from: 'now-1m',
+            to: 'now',
+            display: i18n.translate('data.advancedSettings.timepicker.last1Minute', {
+              defaultMessage: 'Last 1 minute',
+            }),
+          },
+          {
             from: 'now-15m',
             to: 'now',
             display: i18n.translate('data.advancedSettings.timepicker.last15Minutes', {
@@ -463,13 +475,23 @@ export function getUiSettings(
             '</a>',
         },
       }),
-      schema: schema.arrayOf(
-        schema.object({
-          from: schema.string(),
-          to: schema.string(),
-          display: schema.string(),
-        })
-      ),
+      requiresPageReload: true,
+      schema: enableValidations
+        ? schema.arrayOf(
+            schema.object({
+              from: schema.string(),
+              to: schema.string(),
+              display: schema.string(),
+            }),
+            { maxSize: 12 }
+          )
+        : schema.arrayOf(
+            schema.object({
+              from: schema.string(),
+              to: schema.string(),
+              display: schema.string(),
+            })
+          ),
     },
     [UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT]: {
       name: i18n.translate('data.advancedSettings.pinFiltersTitle', {
@@ -480,6 +502,7 @@ export function getUiSettings(
         defaultMessage: 'Whether the filters should have a global state (be pinned) by default',
       }),
       schema: schema.boolean(),
+      requiresPageReload: true,
     },
     [UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES]: {
       name: i18n.translate('data.advancedSettings.suggestFilterValuesTitle', {
@@ -492,6 +515,7 @@ export function getUiSettings(
           'Set this property to false to prevent the filter editor from suggesting values for fields.',
       }),
       schema: schema.boolean(),
+      requiresPageReload: true,
     },
     [UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD]: {
       name: i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethod', {
@@ -517,6 +541,7 @@ export function getUiSettings(
       options: ['terms_enum', 'terms_agg'],
       category: ['autocomplete'],
       schema: schema.string(),
+      requiresPageReload: true,
     },
     [UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE]: {
       name: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerange', {
@@ -538,6 +563,7 @@ export function getUiSettings(
       }),
       category: ['autocomplete'],
       schema: schema.boolean(),
+      requiresPageReload: true,
     },
     [UI_SETTINGS.SEARCH_TIMEOUT]: {
       name: i18n.translate('data.advancedSettings.searchTimeout', {
@@ -551,6 +577,7 @@ export function getUiSettings(
       type: 'number',
       category: ['search'],
       schema: schema.number(),
+      requiresPageReload: true,
     },
   };
 }

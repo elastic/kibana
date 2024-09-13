@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FlyoutPanel } from './types';
+import { createAction } from '@reduxjs/toolkit';
+import { FlyoutPanelProps } from './types';
 
 export enum ActionType {
   openFlyout = 'open_flyout',
@@ -18,41 +20,103 @@ export enum ActionType {
   closePreviewPanel = 'close_preview_panel',
   previousPreviewPanel = 'previous_preview_panel',
   closeFlyout = 'close_flyout',
+  urlChanged = 'urlChanged',
 }
 
-export type Action =
-  | {
-      type: ActionType.openFlyout;
-      payload: {
-        right?: FlyoutPanel;
-        left?: FlyoutPanel;
-        preview?: FlyoutPanel;
-      };
-    }
-  | {
-      type: ActionType.openRightPanel;
-      payload: FlyoutPanel;
-    }
-  | {
-      type: ActionType.openLeftPanel;
-      payload: FlyoutPanel;
-    }
-  | {
-      type: ActionType.openPreviewPanel;
-      payload: FlyoutPanel;
-    }
-  | {
-      type: ActionType.closeRightPanel;
-    }
-  | {
-      type: ActionType.closeLeftPanel;
-    }
-  | {
-      type: ActionType.closePreviewPanel;
-    }
-  | {
-      type: ActionType.previousPreviewPanel;
-    }
-  | {
-      type: ActionType.closeFlyout;
-    };
+export const openPanelsAction = createAction<{
+  /**
+   * Panel to render in the right section
+   */
+  right?: FlyoutPanelProps;
+  /**
+   * Panel to render in the left section
+   */
+  left?: FlyoutPanelProps;
+  /**
+   * Panels to render in the preview section
+   */
+  preview?: FlyoutPanelProps;
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.openFlyout);
+
+export const openRightPanelAction = createAction<{
+  /**
+   * Panel to render in the right section
+   */
+  right: FlyoutPanelProps;
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.openRightPanel);
+export const openLeftPanelAction = createAction<{
+  /**
+   * Panel to render in the left section
+   */
+  left: FlyoutPanelProps;
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.openLeftPanel);
+export const openPreviewPanelAction = createAction<{
+  /**
+   * Panels to render in the preview section
+   */
+  preview: FlyoutPanelProps;
+  id: string;
+}>(ActionType.openPreviewPanel);
+
+export const closePanelsAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.closeFlyout);
+export const closeRightPanelAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.closeRightPanel);
+export const closeLeftPanelAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.closeLeftPanel);
+export const closePreviewPanelAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.closePreviewPanel);
+
+export const previousPreviewPanelAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.previousPreviewPanel);
+
+export const urlChangedAction = createAction<{
+  /**
+   * Panel to render in the right section
+   */
+  right?: FlyoutPanelProps;
+  /**
+   * Panel to render in the left section
+   */
+  left?: FlyoutPanelProps;
+  /**
+   * Panels to render in the preview section
+   */
+  preview?: FlyoutPanelProps;
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.urlChanged);

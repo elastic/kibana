@@ -9,7 +9,6 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import '../../../../../common/mock/match_media';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
@@ -20,7 +19,7 @@ import { columnRenderers } from '.';
 import { getColumnRenderer } from './get_column_renderer';
 import { getValues, findItem, deleteItemIdx } from './helpers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
-import { TimelineId } from '../../../../../../common/types';
+import { TimelineId } from '../../../../../../common/types/timeline';
 
 jest.mock('../../../../../common/lib/kibana');
 

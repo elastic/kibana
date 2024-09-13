@@ -1,0 +1,46 @@
+# @kbn-doc-linker partial
+
+
+required:
+  - windowSize
+  - windowUnit
+  - threshold
+  - environment
+properties:
+  serviceName:
+    type: string
+    description: The service name from APM
+  transactionType:
+    type: string
+    description: The transaction type from APM
+  transactionName:
+    type: string
+    description: The transaction name from APM
+  windowSize:
+    type: number
+    description: The window size
+    example: 6
+  windowUnit:
+    type: string
+    description: The window size unit
+    enum:
+      - "m"
+      - "h"
+      - "d"
+  environment:
+    type: string
+    description: The environment from APM
+  threshold:
+    type: number
+    description: The error rate threshold value
+  groupBy:
+    type: array
+    default: ["service.name", "service.environment", "transaction.type"]
+    uniqueItems: true
+    items:
+      type: string
+      enum:
+        - "service.name"
+        - "service.environment"
+        - "transaction.type"
+        - "transaction.name"

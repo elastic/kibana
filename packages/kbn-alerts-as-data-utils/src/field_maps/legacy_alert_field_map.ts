@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -33,11 +34,9 @@ import {
   ALERT_SUPPRESSION_VALUE,
   ALERT_SYSTEM_STATUS,
   ALERT_WORKFLOW_REASON,
+  ALERT_WORKFLOW_STATUS_UPDATED_AT,
   ALERT_WORKFLOW_USER,
   ECS_VERSION,
-  EVENT_ACTION,
-  EVENT_KIND,
-  TAGS,
 } from '@kbn/rule-data-utils';
 
 export const legacyAlertFieldMap = {
@@ -176,25 +175,15 @@ export const legacyAlertFieldMap = {
     array: false,
     required: false,
   },
+  [ALERT_WORKFLOW_STATUS_UPDATED_AT]: {
+    type: 'date',
+    array: false,
+    required: false,
+  },
   // get these from ecs field map when available
   [ECS_VERSION]: {
     type: 'keyword',
     array: false,
-    required: false,
-  },
-  [EVENT_ACTION]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [EVENT_KIND]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [TAGS]: {
-    type: 'keyword',
-    array: true,
     required: false,
   },
 } as const;

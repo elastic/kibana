@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { get } from 'lodash';
 import { Env } from '@kbn/config';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+
+import { ENABLE_ALL_PLUGINS_CONFIG_PATH } from './constants';
 
 const configSchema = schema.object({
   initialize: schema.boolean({ defaultValue: true }),
@@ -17,9 +21,16 @@ const configSchema = schema.object({
    * Defines an array of directories where another plugin should be loaded from.
    */
   paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  /**
+   * Internal config, not intended to be used by end users. Only for specific
+   * internal purposes.
+   */
+  forceEnableAllPlugins: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
-export type PluginsConfigType = TypeOf<typeof configSchema>;
+type InternalPluginsConfigType = TypeOf<typeof configSchema>;
+
+export type PluginsConfigType = Omit<InternalPluginsConfigType, '__internal__'>;
 
 export const config: ServiceConfigDescriptor<PluginsConfigType> = {
   path: 'plugins',
@@ -43,9 +54,17 @@ export class PluginsConfig {
    */
   public readonly additionalPluginPaths: readonly string[];
 
+  /**
+   * Whether to enable all plugins.
+   *
+   * @note this is intended to be an undocumented setting.
+   */
+  public readonly shouldEnableAllPlugins: boolean;
+
   constructor(rawConfig: PluginsConfigType, env: Env) {
     this.initialize = rawConfig.initialize;
     this.pluginSearchPaths = env.pluginSearchPaths;
     this.additionalPluginPaths = rawConfig.paths;
+    this.shouldEnableAllPlugins = get(rawConfig, ENABLE_ALL_PLUGINS_CONFIG_PATH, false);
   }
 }

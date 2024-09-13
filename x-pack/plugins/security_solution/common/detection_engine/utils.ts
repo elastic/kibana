@@ -16,7 +16,8 @@ import type {
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
-import type { Threshold, ThresholdNormalized } from './rule_schema';
+import type { Threshold, ThresholdNormalized } from '../api/detection_engine/model/rule_schema';
+import { SUPPRESSIBLE_ALERT_RULES, SUPPRESSIBLE_ALERT_RULES_GA } from './constants';
 
 export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
@@ -46,6 +47,7 @@ export const isThreatMatchRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'threat_match';
 export const isMlRule = (ruleType: Type | undefined): boolean => ruleType === 'machine_learning';
 export const isNewTermsRule = (ruleType: Type | undefined): boolean => ruleType === 'new_terms';
+export const isEsqlRule = (ruleType: Type | undefined): boolean => ruleType === 'esql';
 
 export const normalizeThresholdField = (
   thresholdField: string | string[] | null | undefined
@@ -58,6 +60,9 @@ export const normalizeThresholdField = (
       [thresholdField!];
 };
 
+export const isEqlSequenceQuery = (ruleQuery: string | undefined): boolean =>
+  ruleQuery?.trim().startsWith('sequence') ?? false;
+
 export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormalized => {
   return {
     ...threshold,
@@ -67,3 +72,24 @@ export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormali
 
 export const normalizeMachineLearningJobIds = (value: string | string[]): string[] =>
   Array.isArray(value) ? value : [value];
+
+export const isSuppressibleAlertRule = (ruleType: Type): boolean => {
+  return SUPPRESSIBLE_ALERT_RULES.includes(ruleType);
+};
+
+export const isSuppressionRuleConfiguredWithDuration = (ruleType: Type) =>
+  isSuppressibleAlertRule(ruleType);
+
+export const isSuppressionRuleConfiguredWithGroupBy = (ruleType: Type) =>
+  !isThresholdRule(ruleType) && isSuppressibleAlertRule(ruleType);
+
+export const isSuppressionRuleConfiguredWithMissingFields = (ruleType: Type) =>
+  !isThresholdRule(ruleType) && isSuppressibleAlertRule(ruleType);
+
+/**
+ * checks if rule type alert suppression is GA(Global availability)
+ * needed to determine for which rule types to show Technical Preview badge
+ */
+export const isSuppressionRuleInGA = (ruleType: Type): boolean => {
+  return isSuppressibleAlertRule(ruleType) && SUPPRESSIBLE_ALERT_RULES_GA.includes(ruleType);
+};

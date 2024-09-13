@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -80,10 +81,12 @@ describe('#importSavedObjectsFromStream', () => {
         management: { icon: `${type}-icon` },
       } as any),
     importHooks = {},
+    managed,
   }: {
     createNewCopies?: boolean;
     getTypeImpl?: (name: string) => any;
     importHooks?: Record<string, SavedObjectsImportHook[]>;
+    managed?: boolean;
   } = {}): ImportSavedObjectsOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
@@ -98,19 +101,23 @@ describe('#importSavedObjectsFromStream', () => {
       namespace,
       createNewCopies,
       importHooks,
+      managed,
     };
   };
   const createObject = ({
     type = 'foo-type',
     title = 'some-title',
-  }: { type?: string; title?: string } = {}): SavedObject<{
+    managed = undefined, // explicitly declare undefined so as not set to test against existing objects
+  }: { type?: string; title?: string; managed?: boolean } = {}): SavedObject<{
     title: string;
+    managed?: boolean;
   }> => {
     return {
       type,
       id: uuidv4(),
       references: [],
       attributes: { title },
+      managed,
     };
   };
   const createError = (): SavedObjectsImportFailure => {
@@ -320,6 +327,55 @@ describe('#importSavedObjectsFromStream', () => {
           importStateMap,
           overwrite,
           namespace,
+          managed: options.managed,
+        };
+        expect(mockCreateSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
+      });
+
+      test('creates managed saved objects', async () => {
+        const options = setupOptions({ managed: true });
+        const collectedObjects = [createObject({ managed: true })];
+        const filteredObjects = [createObject({ managed: false })];
+        const errors = [createError(), createError(), createError(), createError()];
+        mockCollectSavedObjects.mockResolvedValue({
+          errors: [errors[0]],
+          collectedObjects,
+          importStateMap: new Map([
+            ['foo', {}],
+            ['bar', {}],
+            ['baz', { isOnlyReference: true }],
+          ]),
+        });
+        mockCheckReferenceOrigins.mockResolvedValue({
+          importStateMap: new Map([['baz', { isOnlyReference: true, destinationId: 'newId1' }]]),
+        });
+        mockValidateReferences.mockResolvedValue([errors[1]]);
+        mockCheckConflicts.mockResolvedValue({
+          errors: [errors[2]],
+          filteredObjects,
+          importStateMap: new Map([['foo', { destinationId: 'newId2' }]]),
+          pendingOverwrites: new Set(),
+        });
+        mockCheckOriginConflicts.mockResolvedValue({
+          errors: [errors[3]],
+          importStateMap: new Map([['bar', { destinationId: 'newId3' }]]),
+          pendingOverwrites: new Set(),
+        });
+
+        await importSavedObjectsFromStream(options);
+        const importStateMap = new Map([
+          ['foo', { destinationId: 'newId2' }],
+          ['bar', { destinationId: 'newId3' }],
+          ['baz', { isOnlyReference: true, destinationId: 'newId1' }],
+        ]);
+        const createSavedObjectsParams = {
+          objects: collectedObjects,
+          accumulatedErrors: errors,
+          savedObjectsClient,
+          importStateMap,
+          overwrite,
+          namespace,
+          managed: options.managed,
         };
         expect(mockCreateSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
       });
@@ -379,6 +435,118 @@ describe('#importSavedObjectsFromStream', () => {
           importStateMap,
           overwrite,
           namespace,
+        };
+        expect(mockCreateSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
+      });
+    });
+
+    describe('managed option', () => {
+      test('if not provided, calls create without an override', async () => {
+        const options = setupOptions({ createNewCopies: true }); // weithout `managed` set
+        const collectedObjects = [
+          createObject({ type: 'foo', managed: true }),
+          createObject({ type: 'bar', title: 'bar-title', managed: false }),
+        ];
+        const errors = [createError(), createError()];
+        mockCollectSavedObjects.mockResolvedValue({
+          errors: [errors[0]],
+          collectedObjects,
+          importStateMap: new Map([
+            ['foo', {}],
+            ['bar', { isOnlyReference: true }],
+          ]),
+        });
+        mockCheckReferenceOrigins.mockResolvedValue({
+          importStateMap: new Map([['bar', { isOnlyReference: true, destinationId: 'newId' }]]),
+        });
+        mockValidateReferences.mockResolvedValue([errors[1]]);
+        mockRegenerateIds.mockReturnValue(new Map([['foo', { destinationId: `randomId1` }]]));
+
+        await importSavedObjectsFromStream(options);
+        const importStateMap: ImportStateMap = new Map([
+          ['foo', { destinationId: `randomId1` }],
+          ['bar', { isOnlyReference: true, destinationId: 'newId' }],
+        ]);
+        const createSavedObjectsParams = {
+          objects: collectedObjects,
+          accumulatedErrors: errors,
+          savedObjectsClient,
+          importStateMap,
+          overwrite,
+          namespace,
+          managed: undefined,
+        };
+        expect(mockCreateSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
+      }); // assert that the call to create will not override the object props.
+
+      test('creates managed saved objects, overriding existing `managed` value', async () => {
+        const options = setupOptions({ createNewCopies: true, managed: true });
+        const collectedObjects = [createObject({ managed: false })];
+        const errors = [createError(), createError()];
+        mockCollectSavedObjects.mockResolvedValue({
+          errors: [errors[0]],
+          collectedObjects,
+          importStateMap: new Map([
+            ['foo', {}],
+            ['bar', { isOnlyReference: true }],
+          ]),
+        });
+        mockCheckReferenceOrigins.mockResolvedValue({
+          importStateMap: new Map([['bar', { isOnlyReference: true, destinationId: 'newId' }]]),
+        });
+        mockValidateReferences.mockResolvedValue([errors[1]]);
+        mockRegenerateIds.mockReturnValue(new Map([['foo', { destinationId: `randomId1` }]]));
+
+        await importSavedObjectsFromStream(options);
+        // assert that the importStateMap is correctly composed of the results from the three modules
+        const importStateMap: ImportStateMap = new Map([
+          ['foo', { destinationId: `randomId1` }],
+          ['bar', { isOnlyReference: true, destinationId: 'newId' }],
+        ]);
+        const createSavedObjectsParams = {
+          objects: collectedObjects,
+          accumulatedErrors: errors,
+          savedObjectsClient,
+          importStateMap,
+          overwrite,
+          namespace,
+          managed: true,
+        };
+        expect(mockCreateSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
+      });
+
+      test('creates and converts objects from managed to unmanaged', async () => {
+        const options = setupOptions({ createNewCopies: true, managed: false });
+        const collectedObjects = [createObject({ managed: true })];
+        const errors = [createError(), createError()];
+        mockCollectSavedObjects.mockResolvedValue({
+          errors: [errors[0]],
+          collectedObjects,
+          importStateMap: new Map([
+            ['foo', {}],
+            ['bar', { isOnlyReference: true }],
+          ]),
+        });
+        mockCheckReferenceOrigins.mockResolvedValue({
+          importStateMap: new Map([['bar', { isOnlyReference: true, destinationId: 'newId' }]]),
+        });
+        mockValidateReferences.mockResolvedValue([errors[1]]);
+        mockRegenerateIds.mockReturnValue(new Map([['foo', { destinationId: `randomId1` }]]));
+
+        await importSavedObjectsFromStream(options);
+        // assert that the importStateMap is correctly composed of the results from the three modules
+        const importStateMap: ImportStateMap = new Map([
+          ['foo', { destinationId: `randomId1` }],
+          ['bar', { isOnlyReference: true, destinationId: 'newId' }],
+        ]);
+        const createSavedObjectsParams = {
+          objects: collectedObjects,
+          accumulatedErrors: errors,
+          savedObjectsClient,
+          importStateMap,
+          overwrite,
+          namespace,
+          managed: false,
         };
         expect(mockCreateSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
       });

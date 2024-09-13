@@ -29,7 +29,7 @@ export const CHANGE_POINT_TYPES = {
   INDETERMINABLE: 'indeterminable',
 } as const;
 
-export type ChangePointType = typeof CHANGE_POINT_TYPES[keyof typeof CHANGE_POINT_TYPES];
+export type ChangePointType = (typeof CHANGE_POINT_TYPES)[keyof typeof CHANGE_POINT_TYPES];
 
 export const EXCLUDED_CHANGE_POINT_TYPES = new Set<ChangePointType>([
   CHANGE_POINT_TYPES.STATIONARY,
@@ -38,3 +38,9 @@ export const EXCLUDED_CHANGE_POINT_TYPES = new Set<ChangePointType>([
 ]);
 
 export const MAX_CHANGE_POINT_CONFIGS = 6;
+
+export const CHANGE_POINT_DETECTION_EVENT = {
+  RUN: 'ran_aiops_change_point_detection',
+  SUCCESS: 'aiops_change_point_detection_success',
+  ERROR: 'aiops_change_point_detection_error',
+} as const;

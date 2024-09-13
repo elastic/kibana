@@ -14,11 +14,13 @@ import {
   IUiSettingsClient,
   ApplicationStart,
   ExecutionContextStart,
+  ThemeServiceStart,
+  I18nStart,
 } from '@kbn/core/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
-import { Router, Switch, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
-
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { RegisterManagementAppArgs, ManagementAppMountParams } from '@kbn/management-plugin/public';
 
@@ -40,7 +42,9 @@ export interface AppDeps {
   toasts: ToastsSetup;
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
-  theme: ChartsPluginSetup['theme'];
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
+  chartsTheme: ChartsPluginSetup['theme'];
   createTimeBuckets: () => any;
   licenseStatus$: Observable<LicenseStatus>;
   setBreadcrumbs: Parameters<RegisterManagementAppArgs['mount']>[0]['setBreadcrumbs'];
@@ -48,6 +52,7 @@ export interface AppDeps {
   getUrlForApp: ApplicationStart['getUrlForApp'];
   executionContext: ExecutionContextStart;
   licenseManagementLocator?: LicenseManagementLocator;
+  settings: SettingsStart;
 }
 
 export const App = (deps: AppDeps) => {
@@ -76,12 +81,12 @@ export const App = (deps: AppDeps) => {
 
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
-  <Switch>
+  <Routes>
     <Route exact path="/watches" component={WatchListPage} />
     <Route exact path="/watches/watch/:id/status" component={WatchStatusPage} />
     <Route exact path="/watches/watch/:id/edit" component={WatchEditPage} />
     <Route exact path="/watches/new-watch/:type(json|threshold)" component={WatchEditPage} />
     <Redirect exact from="/" to="/watches" />
     <Redirect exact from="" to="/watches" />
-  </Switch>
+  </Routes>
 );

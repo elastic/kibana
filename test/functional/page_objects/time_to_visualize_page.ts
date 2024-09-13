@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrService } from '../ftr_provider_context';
@@ -14,6 +15,7 @@ interface SaveModalArgs {
   dashboardId?: string;
   saveAsNew?: boolean;
   redirectToOrigin?: boolean;
+  description?: string;
 }
 
 type DashboardPickerOption =
@@ -27,6 +29,7 @@ export class TimeToVisualizePageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
+  private readonly retry = this.ctx.getService('retry');
 
   public async ensureSaveModalIsOpen() {
     await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });
@@ -42,19 +45,48 @@ export class TimeToVisualizePageObject extends FtrService {
   }
 
   public async resetNewDashboard() {
-    await this.common.navigateToApp('dashboard');
-    await this.dashboard.gotoDashboardLandingPage(true);
-    await this.dashboard.clickNewDashboard(false);
+    await this.dashboard.navigateToApp();
+    await this.dashboard.gotoDashboardLandingPage();
+    await this.dashboard.clickNewDashboard();
+  }
+
+  private async selectDashboard(dashboardId: string) {
+    await this.retry.try(async () => {
+      await this.testSubjects.waitForEnabled('open-dashboard-picker');
+      await this.testSubjects.click('open-dashboard-picker');
+      await this.testSubjects.setValue('dashboard-picker-search', dashboardId);
+      await this.common.sleep(150); // wait for input debounce so loading starts
+      await this.testSubjects.waitForEnabled('open-dashboard-picker');
+      await this.testSubjects.click(`dashboard-picker-option-${dashboardId.replaceAll(' ', '-')}`);
+      const dashboardPickerLabel = await this.testSubjects.getVisibleText('open-dashboard-picker');
+      if (dashboardPickerLabel === 'Select dashboard') {
+        throw new Error(`Dashboard not selected`);
+      }
+    });
   }
 
   public async setSaveModalValues(
     vizName: string,
-    { saveAsNew, redirectToOrigin, addToDashboard, dashboardId, saveToLibrary }: SaveModalArgs = {}
+    {
+      saveAsNew,
+      redirectToOrigin,
+      addToDashboard,
+      dashboardId,
+      saveToLibrary,
+      description,
+    }: SaveModalArgs = {}
   ) {
     await this.testSubjects.setValue('savedObjectTitle', vizName, {
       typeCharByChar: true,
       clearWithKeyboard: true,
     });
+
+    if (description !== undefined) {
+      await this.testSubjects.setValue('savedObjectDescription', description, {
+        typeCharByChar: true,
+        clearWithKeyboard: true,
+      });
+    }
 
     const hasSaveAsNew = await this.testSubjects.exists('saveAsNewCheckbox');
     if (hasSaveAsNew && saveAsNew !== undefined) {
@@ -75,8 +107,7 @@ export class TimeToVisualizePageObject extends FtrService {
       await label.click();
 
       if (dashboardId) {
-        await this.testSubjects.setValue('dashboardPickerInput', dashboardId);
-        await this.find.clickByButtonText(dashboardId);
+        await this.selectDashboard(dashboardId);
       }
     }
 
@@ -101,18 +132,6 @@ export class TimeToVisualizePageObject extends FtrService {
       this.log.debug('redirect to origin checkbox exists. Setting its state to', state);
       await this.testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
     }
-  }
-
-  public async libraryNotificationExists(panelTitle: string) {
-    this.log.debug('searching for library modal on panel:', panelTitle);
-    const panel = await this.testSubjects.find(
-      `embeddablePanelHeading-${panelTitle.replace(/ /g, '')}`
-    );
-    const libraryActionExists = await this.testSubjects.descendantExists(
-      'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-      panel
-    );
-    return libraryActionExists;
   }
 
   public async saveFromModal(

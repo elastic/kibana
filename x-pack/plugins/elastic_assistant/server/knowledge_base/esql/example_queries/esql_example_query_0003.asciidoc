@@ -1,0 +1,10 @@
+// 3. suspicious powershell cmds from base64 encoded cmdline
+// Helpful when answering questions on regex based searches and replacements, base64 conversions, and dealing with case sensitivity (TO_LOWER and TO_UPPER commands)
+from logs-*
+| where host.os.type == "windows" and event.category == "process" and event.action == "start" and TO_LOWER(process.name) == "powershell.exe" and process.command_line rlike ".+ -(e|E).*"
+| keep agent.id, process.command_line
+| grok process.command_line """(?<base64_data>([A-Za-z0-9+/]+={1,2}$|[A-Za-z0-9+/]{100,}))"""
+| where base64_data is not null
+| eval decoded_base64_cmdline = replace(TO_LOWER(FROM_BASE64(base64_data)), """\u0000""", "")
+| where decoded_base64_cmdline rlike """.*(http|webclient|download|mppreference|sockets|bxor|.replace|reflection|assembly|load|bits|start-proc|iwr|frombase64).*"""
+| keep agent.id, process.command_line, decoded_base64_cmdline

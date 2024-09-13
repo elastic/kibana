@@ -5,129 +5,63 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, FC } from 'react';
+import React, { type FC } from 'react';
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type {
+  BarStyleAccessor,
+  RectAnnotationSpec,
+} from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
-import { i18n } from '@kbn/i18n';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
+import { DocumentCountChartRedux } from '@kbn/aiops-components';
 
-import { DocumentCountStats } from '../../../get_document_stats';
+import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
-import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../total_count_header';
 
-const clearSelectionLabel = i18n.translate(
-  'xpack.aiops.documentCountContent.clearSelectionAriaLabel',
-  {
-    defaultMessage: 'Clear selection',
-  }
-);
-
 export interface DocumentCountContentProps {
-  brushSelectionUpdateHandler: (d: WindowParameters) => void;
-  clearSelectionHandler: () => void;
-  documentCountStats?: DocumentCountStats;
-  documentCountStatsSplit?: DocumentCountStats;
-  documentCountStatsSplitLabel?: string;
-  totalCount: number;
-  sampleProbability: number;
-  windowParameters?: WindowParameters;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
+  baselineLabel?: string;
+  deviationLabel?: string;
+  barStyleAccessor?: BarStyleAccessor;
+  baselineAnnotationStyle?: RectAnnotationSpec['style'];
+  deviationAnnotationStyle?: RectAnnotationSpec['style'];
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
-  brushSelectionUpdateHandler,
-  clearSelectionHandler,
-  documentCountStats,
-  documentCountStatsSplit,
-  documentCountStatsSplitLabel = '',
-  totalCount,
-  sampleProbability,
-  windowParameters,
+  barColorOverride,
+  barHighlightColorOverride,
+  ...docCountChartProps
 }) => {
-  const [isBrushCleared, setIsBrushCleared] = useState(true);
+  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
-  useEffect(() => {
-    setIsBrushCleared(windowParameters === undefined);
-  }, [windowParameters]);
+  const { documentStats } = useAppSelector((s) => s.logRateAnalysis);
+  const { sampleProbability, totalCount, documentCountStats } = documentStats;
 
-  const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
-  const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
-    (time) => +time
-  );
-  const timeRangeEarliest = Math.min(...[...bucketTimestamps, ...splitBucketTimestamps]);
-  const timeRangeLatest = Math.max(...[...bucketTimestamps, ...splitBucketTimestamps]);
-
-  if (
-    documentCountStats === undefined ||
-    documentCountStats.buckets === undefined ||
-    timeRangeEarliest === undefined ||
-    timeRangeLatest === undefined
-  ) {
+  if (documentCountStats === undefined) {
     return totalCount !== undefined ? (
       <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
     ) : null;
   }
 
-  const chartPoints: DocumentCountChartPoint[] = Object.entries(documentCountStats.buckets).map(
-    ([time, value]) => ({
-      time: +time,
-      value,
-    })
-  );
-
-  let chartPointsSplit: DocumentCountChartPoint[] | undefined;
-  if (documentCountStatsSplit?.buckets !== undefined) {
-    chartPointsSplit = Object.entries(documentCountStatsSplit?.buckets).map(([time, value]) => ({
-      time: +time,
-      value,
-    }));
-  }
-
-  function brushSelectionUpdate(d: WindowParameters, force: boolean) {
-    if (!isBrushCleared || force) {
-      brushSelectionUpdateHandler(d);
-    }
-    if (force) {
-      setIsBrushCleared(false);
-    }
-  }
-
-  function clearSelection() {
-    setIsBrushCleared(true);
-    clearSelectionHandler();
-  }
-
   return (
-    <>
-      <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem>
-          <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
-        </EuiFlexItem>
-        {!isBrushCleared && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={clearSelection}
-              size="xs"
-              data-test-subj="aiopsClearSelectionBadge"
-            >
-              {clearSelectionLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      {documentCountStats.interval !== undefined && (
-        <DocumentCountChart
-          brushSelectionUpdateHandler={brushSelectionUpdate}
-          chartPoints={chartPoints}
-          chartPointsSplit={chartPointsSplit}
-          timeRangeEarliest={timeRangeEarliest}
-          timeRangeLatest={timeRangeLatest}
-          interval={documentCountStats.interval}
-          chartPointsSplitLabel={documentCountStatsSplitLabel}
-          isBrushCleared={isBrushCleared}
+    <EuiFlexGroup gutterSize="m" direction="column">
+      <EuiFlexItem>
+        <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <DocumentCountChartRedux
+          dependencies={{ data, uiSettings, fieldFormats, charts }}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
+          changePoint={documentCountStats.changePoint}
+          {...docCountChartProps}
         />
-      )}
-    </>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

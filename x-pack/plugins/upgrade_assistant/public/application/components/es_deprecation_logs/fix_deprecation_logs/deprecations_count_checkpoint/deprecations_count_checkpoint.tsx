@@ -10,7 +10,7 @@ import moment from 'moment-timezone';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiButton, EuiLoadingContent } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiSkeletonText } from '@elastic/eui';
 
 import { useAppContext } from '../../../../app_context';
 import { uiMetricService, UIM_RESET_LOGS_COUNTER_CLICK } from '../../../../lib/ui_metric';
@@ -95,7 +95,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   };
 
   if (isInitialRequest && isLoading) {
-    return <EuiLoadingContent lines={6} />;
+    return <EuiSkeletonText lines={6} />;
   }
 
   if (error) {
@@ -107,7 +107,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
         data-test-subj="errorCallout"
       >
         <p>
-          {error.statusCode} - {error.message}
+          {error.statusCode} - {error.message as string}
         </p>
         <EuiButton color="danger" onClick={resendRequest} data-test-subj="retryButton">
           {i18nTexts.retryButton}

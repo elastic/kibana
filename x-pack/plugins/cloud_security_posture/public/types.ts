@@ -6,17 +6,12 @@
  */
 
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ComponentType, ReactNode } from 'react';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
-import type { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
-import type {
-  UsageCollectionSetup,
-  UsageCollectionStart,
-} from '@kbn/usage-collection-plugin/public';
+import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import type { FleetSetup } from '@kbn/fleet-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
 
@@ -39,20 +34,9 @@ export interface CspClientPluginSetupDeps {
   data: DataPublicPluginSetup;
   fleet: FleetSetup;
   cloud: CloudSetup;
+  uiActions: UiActionsSetup;
   // optional
   usageCollection?: UsageCollectionSetup;
-}
-
-export interface CspClientPluginStartDeps {
-  // required
-  data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  charts: ChartsPluginStart;
-  discover: DiscoverStart;
-  fleet: FleetStart;
-  licensing: LicensingPluginStart;
-  // optional
-  usageCollection?: UsageCollectionStart;
 }
 
 /**
@@ -67,3 +51,8 @@ export interface CspSecuritySolutionContext {
     state?: Record<string, string | undefined>;
   }>;
 }
+
+export type CloudSecurityPostureStartServices = Pick<
+  CoreStart,
+  'notifications' | 'analytics' | 'i18n' | 'theme'
+>;

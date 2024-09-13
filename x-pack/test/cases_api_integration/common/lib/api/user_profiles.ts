@@ -9,10 +9,13 @@ import type SuperTest from 'supertest';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 
 import { INTERNAL_SUGGEST_USER_PROFILES_URL } from '@kbn/cases-plugin/common/constants';
-import { SuggestUserProfilesRequest } from '@kbn/cases-plugin/common/api';
 import { UserProfileService } from '@kbn/cases-plugin/server/services';
-import { UserProfileAvatarData } from '@kbn/security-plugin/common';
-import { UserProfile, UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type {
+  UserProfile,
+  UserProfileAvatarData,
+  UserProfileWithAvatar,
+} from '@kbn/user-profile-components';
+import { SuggestUserProfilesRequest } from '@kbn/cases-plugin/common/types/api';
 import { superUser } from '../authentication/users';
 import { User } from '../authentication/types';
 import { getSpaceUrlPrefix } from './helpers';
@@ -35,7 +38,7 @@ export const bulkGetUserProfiles = async <T extends string>({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   req: BulkGetUserProfilesParams<T>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -59,7 +62,7 @@ export const suggestUserProfiles = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   req: SuggestUserProfilesRequest;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -86,10 +89,10 @@ export const updateUserProfileAvatar = async ({
   expectedHttpCode = 200,
   headers = {},
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   req: UserProfileAvatarData;
   expectedHttpCode?: number;
-  headers?: Record<string, unknown>;
+  headers?: Record<string, string | string[]>;
 }): Promise<void> => {
   await supertest
     .post('/internal/security/user_profile/_data')
@@ -103,7 +106,7 @@ export const loginUsers = async ({
   supertest,
   users = [superUser],
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   users?: User[];
 }) => {
   const cookies: Cookie[] = [];

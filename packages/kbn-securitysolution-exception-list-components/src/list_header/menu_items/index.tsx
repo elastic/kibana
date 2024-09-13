@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import React, { FC, useMemo } from 'react';
 import { HeaderMenu } from '../../header_menu';
@@ -21,6 +23,7 @@ interface MenuItemsProps {
   onDeleteList: () => void;
   onManageRules: () => void;
   onExportList: () => void;
+  onDuplicateList: () => void;
 }
 
 const MenuItemsComponent: FC<MenuItemsProps> = ({
@@ -32,6 +35,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
   onDeleteList,
   onManageRules,
   onExportList,
+  onDuplicateList,
 }) => {
   const referencedLinks = useMemo(
     () =>
@@ -75,7 +79,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
       {canUserEditList && (
         <EuiFlexItem>
           <EuiButton
-            data-test-subj={`${dataTestSubj || ''}ManageRulesButton`}
+            data-test-subj={`${dataTestSubj || ''}LinkRulesButton`}
             fill
             onClick={() => {
               if (typeof onManageRules === 'function') onManageRules();
@@ -100,6 +104,15 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
             },
             {
               key: '2',
+              icon: 'copy',
+              label: i18n.EXCEPTION_LIST_HEADER_DUPLICATE_ACTION,
+              onClick: () => {
+                if (typeof onDuplicateList === 'function') onDuplicateList();
+              },
+              disabled: !canUserEditList,
+            },
+            {
+              key: '3',
               icon: 'trash',
               label: i18n.EXCEPTION_LIST_HEADER_DELETE_ACTION,
               onClick: () => {

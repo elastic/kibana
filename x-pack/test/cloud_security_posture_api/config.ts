@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
@@ -14,7 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...xpackFunctionalConfig.getAll(),
-    testFiles: [require.resolve('./telemetry/telemetry.ts')],
+    testFiles: [resolve(__dirname, './routes')],
     junit: {
       reportName: 'X-Pack Cloud Security Posture API Tests',
     },
@@ -36,7 +37,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
          *   2. merge the updated version number change to kibana
          */
         `--xpack.fleet.packages.0.name=cloud_security_posture`,
-        `--xpack.fleet.packages.0.version=1.2.8`,
+        `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PLUGIN_VERSION}`,
         // `--xpack.fleet.registryUrl=https://localhost:8080`,
       ],
     },

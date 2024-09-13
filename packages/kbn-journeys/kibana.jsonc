@@ -1,6 +1,6 @@
 {
-  "type": "shared-common",
+  "type": "test-helper",
   "id": "@kbn/journeys",
-  "owner": "@elastic/kibana-operations",
+  "owner": ["@elastic/kibana-operations", "@elastic/appex-qa"],
   "devOnly": true
 }

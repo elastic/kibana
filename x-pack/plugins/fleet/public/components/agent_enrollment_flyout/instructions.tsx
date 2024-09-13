@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useFleetStatus, useGetAgents, useFleetServerStandalone } from '../../hooks';
+import { useFleetStatus, useFleetServerStandalone, useGetEnrollmentSettings } from '../../hooks';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
-import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../constants';
-import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
+import { FLEET_SERVER_PACKAGE } from '../../constants';
 import { Loading } from '..';
-import { policyHasFleetServer } from '../../services';
 import { AdvancedTab } from '../../applications/fleet/components/fleet_server_instructions/advanced_tab';
 
 import type { InstructionProps } from './types';
@@ -23,70 +21,49 @@ import { DefaultMissingRequirements } from './default_missing_requirements';
 
 export const Instructions = (props: InstructionProps) => {
   const {
-    agentPolicies,
     isFleetServerPolicySelected,
-    fleetServerHosts,
+    fleetServerHost,
     isLoadingAgentPolicies,
     selectionType,
     setSelectionType,
     mode,
     setMode,
     isIntegrationFlow,
-    refreshAgentPolicies,
   } = props;
   const fleetStatus = useFleetStatus();
-  const { isUnhealthy: isFleetServerUnhealthy, isLoading: isLoadingFleetServerHealth } =
-    useFleetServerUnhealthy();
-
   const { isFleetServerStandalone } = useFleetServerStandalone();
+  const { isLoading: isLoadingEnrollmentSettings, data: enrollmentSettings } =
+    useGetEnrollmentSettings();
 
-  useEffect(() => {
-    refreshAgentPolicies();
-  }, [refreshAgentPolicies]);
-
-  const fleetServerAgentPolicies: string[] = useMemo(
-    () => agentPolicies.filter((pol) => policyHasFleetServer(pol)).map((pol) => pol.id),
-    [agentPolicies]
-  );
-
-  const { data: agents, isLoading: isLoadingAgents } = useGetAgents({
-    perPage: SO_SEARCH_LIMIT,
-    showInactive: false,
-    kuery:
-      fleetServerAgentPolicies.length === 0
-        ? ''
-        : `${AGENTS_PREFIX}.policy_id:${fleetServerAgentPolicies
-            .map((id) => `"${id}"`)
-            .join(' or ')}`,
-  });
-
-  const fleetServers = agents?.items || [];
-
-  if (isLoadingAgents || isLoadingAgentPolicies || isLoadingFleetServerHealth)
-    return <Loading size="l" />;
-
-  const hasNoFleetServerHost = fleetStatus.isReady && (fleetServerHosts?.length ?? 0) === 0;
+  const hasNoFleetServerHost = fleetStatus.isReady && !fleetServerHost;
 
   const showAgentEnrollment =
     isFleetServerPolicySelected ||
     isFleetServerStandalone ||
-    (fleetStatus.isReady &&
-      !isFleetServerUnhealthy &&
-      fleetServers.length > 0 &&
-      (fleetServerHosts?.length ?? 0) > 0);
+    (fleetStatus.isReady && enrollmentSettings?.fleet_server.has_active && fleetServerHost);
 
   const showFleetServerEnrollment =
     !isFleetServerStandalone &&
     !isFleetServerPolicySelected &&
-    (fleetServers.length === 0 ||
-      isFleetServerUnhealthy ||
+    (!enrollmentSettings?.fleet_server.has_active ||
       (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 
-  if (!isIntegrationFlow && showAgentEnrollment) {
-    setSelectionType('radio');
-  } else {
-    setSelectionType('tabs');
-  }
+  useEffect(() => {
+    // If we detect a CloudFormation integration, we want to hide the selection type
+    if (
+      props.cloudSecurityIntegration?.isAzureArmTemplate ||
+      props.cloudSecurityIntegration?.isCloudFormation ||
+      props.cloudSecurityIntegration?.cloudShellUrl
+    ) {
+      setSelectionType(undefined);
+    } else if (!isIntegrationFlow && showAgentEnrollment) {
+      setSelectionType('radio');
+    } else {
+      setSelectionType('tabs');
+    }
+  }, [isIntegrationFlow, showAgentEnrollment, setSelectionType, props.cloudSecurityIntegration]);
+
+  if (isLoadingEnrollmentSettings || isLoadingAgentPolicies) return <Loading size="l" />;
 
   if (hasNoFleetServerHost) {
     return null;
@@ -98,7 +75,7 @@ export const Instructions = (props: InstructionProps) => {
     } else if (showAgentEnrollment) {
       return (
         <>
-          {selectionType === 'tabs' && (
+          {selectionType === 'tabs' && !props.cloudSecurityIntegration?.cloudShellUrl && (
             <>
               <EuiText>
                 <FormattedMessage

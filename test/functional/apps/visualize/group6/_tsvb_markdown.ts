@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -11,9 +12,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualBuilder, timePicker, visualize, visChart } = getPageObjects([
+  const { visualBuilder, common, visualize, visChart } = getPageObjects([
     'visualBuilder',
-    'timePicker',
+    'common',
     'visualize',
     'visChart',
   ]);
@@ -37,16 +38,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('markdown', () => {
       before(async () => {
         await visualize.initTests();
-        await visualBuilder.resetPage();
+        await common.setTime({
+          to: 'Sep 22, 2015 @ 06:00:00.000',
+          from: 'Sep 22, 2015 @ 11:00:00.000',
+        });
+        await visualize.navigateToNewVisualization();
+        await visualize.clickVisualBuilder();
+        await visualBuilder.checkVisualBuilderIsPresent();
         await visualBuilder.clickMarkdown();
-        await timePicker.setAbsoluteRange(
-          'Sep 22, 2015 @ 06:00:00.000',
-          'Sep 22, 2015 @ 11:00:00.000'
-        );
         await visualBuilder.markdownSwitchSubTab('options');
         await visualBuilder.setMetricsDataTimerangeMode('Last value');
         await visualBuilder.setDropLastBucket(true);
         await visualBuilder.markdownSwitchSubTab('markdown');
+      });
+
+      after(async () => {
+        await common.unsetTime();
       });
 
       it('should render subtabs and table variables markdown components', async () => {

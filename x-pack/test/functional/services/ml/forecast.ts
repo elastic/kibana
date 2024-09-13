@@ -9,8 +9,10 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningForecastProvider({ getService }: FtrProviderContext) {
+export function MachineLearningForecastProvider({ getPageObject, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
+  const headerPage = getPageObject('header');
 
   return {
     async assertForecastButtonExists() {
@@ -32,14 +34,22 @@ export function MachineLearningForecastProvider({ getService }: FtrProviderConte
     },
 
     async assertForecastChartElementsExists() {
-      await testSubjects.existOrFail(`mlForecastArea`, {
-        timeout: 30 * 1000,
+      await retry.tryForTime(3000, async () => {
+        await testSubjects.existOrFail(`mlForecastArea`, {
+          timeout: 30 * 1000,
+        });
       });
-      await testSubjects.existOrFail(`mlForecastValuesline`, {
-        timeout: 30 * 1000,
+
+      await retry.tryForTime(3000, async () => {
+        await testSubjects.existOrFail(`mlForecastValuesline`, {
+          timeout: 30 * 1000,
+        });
       });
-      await testSubjects.existOrFail(`mlForecastMarkers`, {
-        timeout: 30 * 1000,
+
+      await retry.tryForTime(3000, async () => {
+        await testSubjects.existOrFail(`mlForecastMarkers`, {
+          timeout: 30 * 1000,
+        });
       });
     },
 
@@ -93,6 +103,7 @@ export function MachineLearningForecastProvider({ getService }: FtrProviderConte
     },
 
     async assertForecastModalRunButtonEnabled(expectedValue: boolean) {
+      await headerPage.waitUntilLoadingHasFinished();
       const isEnabled = await testSubjects.isEnabled('mlModalForecast > mlModalForecastButtonRun');
       expect(isEnabled).to.eql(
         expectedValue,

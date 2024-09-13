@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { set } from '@kbn/safer-lodash-set';
@@ -29,10 +30,13 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
   public migrationVersion: SavedObjectType<T>['migrationVersion'];
   public coreMigrationVersion: SavedObjectType<T>['coreMigrationVersion'];
   public typeMigrationVersion: SavedObjectType<T>['typeMigrationVersion'];
+  public managed: SavedObjectType<T>['managed'];
   public error: SavedObjectType<T>['error'];
   public references: SavedObjectType<T>['references'];
   public updatedAt: SavedObjectType<T>['updated_at'];
+  public updatedBy: SavedObjectType<T>['updated_by'];
   public createdAt: SavedObjectType<T>['created_at'];
+  public createdBy: SavedObjectType<T>['created_by'];
   public namespaces: SavedObjectType<T>['namespaces'];
 
   constructor(
@@ -47,9 +51,12 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
       migrationVersion,
       coreMigrationVersion,
       typeMigrationVersion,
+      managed,
       namespaces,
       updated_at: updatedAt,
+      updated_by: updatedBy,
       created_at: createdAt,
+      created_by: createdBy,
     }: SavedObjectType<T>
   ) {
     this.id = id;
@@ -60,9 +67,12 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
     this.migrationVersion = migrationVersion;
     this.coreMigrationVersion = coreMigrationVersion;
     this.typeMigrationVersion = typeMigrationVersion;
+    this.managed = managed;
     this.namespaces = namespaces;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
+    this.createdBy = createdBy;
+    this.updatedBy = updatedBy;
     if (error) {
       this.error = error;
     }
@@ -96,6 +106,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
           migrationVersion: this.migrationVersion,
           coreMigrationVersion: this.coreMigrationVersion,
           typeMigrationVersion: this.typeMigrationVersion,
+          managed: this.managed,
           references: this.references,
         })
         .then((sso) => {

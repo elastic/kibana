@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -33,7 +34,6 @@ interface HelloWorldContainerInput extends ContainerInput {
 
 interface HelloWorldContainerOptions {
   getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'];
-  panelComponent?: EmbeddableStart['EmbeddablePanel'];
 }
 
 export class HelloWorldContainer extends Container<InheritedInput, HelloWorldContainerInput> {
@@ -41,10 +41,8 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
 
   constructor(
     input: ContainerInput<{ firstName: string; lastName: string }>,
-    private readonly options: HelloWorldContainerOptions,
-    initializeSettings?: EmbeddableContainerSettings<
-      ContainerInput<{ firstName: string; lastName: string }>
-    >
+    options: HelloWorldContainerOptions,
+    initializeSettings?: EmbeddableContainerSettings
   ) {
     super(
       input,
@@ -66,14 +64,7 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
   public render(node: HTMLElement) {
     ReactDOM.render(
       <I18nProvider>
-        {this.options.panelComponent ? (
-          <HelloWorldContainerComponent
-            container={this}
-            panelComponent={this.options.panelComponent}
-          />
-        ) : (
-          <div>Panel component not provided.</div>
-        )}
+        <HelloWorldContainerComponent container={this} />
       </I18nProvider>,
       node
     );

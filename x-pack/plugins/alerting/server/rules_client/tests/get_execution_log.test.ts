@@ -7,7 +7,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -22,6 +27,9 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
 import { getExecutionLogAggregation } from '../../lib/get_execution_log_aggregation';
 import { fromKueryExpression } from '@kbn/es-query';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -32,6 +40,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -42,10 +51,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
@@ -53,6 +64,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
+  backfillClient: backfillClientMock.create(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -66,7 +83,7 @@ const RuleIntervalSeconds = 1;
 
 const BaseRuleSavedObject: SavedObject<RawRule> = {
   id: '1',
-  type: 'alert',
+  type: RULE_SAVED_OBJECT_TYPE,
   attributes: {
     enabled: true,
     name: 'rule-name',
@@ -133,7 +150,7 @@ const aggregateResults = {
               numRecoveredAlerts: {
                 value: 0.0,
               },
-              outcomeAndMessage: {
+              outcomeMessageAndMaintenanceWindow: {
                 hits: {
                   total: {
                     value: 1,
@@ -242,7 +259,7 @@ const aggregateResults = {
               numRecoveredAlerts: {
                 value: 5.0,
               },
-              outcomeAndMessage: {
+              outcomeMessageAndMaintenanceWindow: {
                 hits: {
                   total: {
                     value: 1,
@@ -261,6 +278,9 @@ const aggregateResults = {
                         },
                         kibana: {
                           version: '8.2.0',
+                          alert: {
+                            maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
+                          },
                           alerting: {
                             outcome: 'success',
                           },
@@ -326,12 +346,14 @@ const aggregateResults = {
         ],
       },
       executionUuidCardinality: {
-        executionUuidCardinality: {
-          value: 374,
-        },
+        value: 374,
       },
     },
   },
+  hits: {
+    total: { value: 875, relation: 'eq' },
+    hits: [],
+  } as estypes.SearchHitsMetadata<unknown>,
 };
 
 function getRuleSavedObject(attributes: Partial<RawRule> = {}): SavedObject<RawRule> {
@@ -389,6 +411,7 @@ describe('getExecutionLogForRule()', () => {
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
           space_ids: [],
+          maintenance_window_ids: [],
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -412,6 +435,7 @@ describe('getExecutionLogForRule()', () => {
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
           space_ids: [],
+          maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
         },
       ],
     });
@@ -430,7 +454,7 @@ describe('getExecutionLogForRule()', () => {
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds.mock.calls[0]).toEqual([
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       ['1'],
       {
         aggs: getExecutionLogAggregation({
@@ -456,7 +480,7 @@ describe('getExecutionLogForRule()', () => {
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds.mock.calls[0]).toEqual([
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       ['1'],
       {
         aggs: getExecutionLogAggregation({
@@ -482,7 +506,7 @@ describe('getExecutionLogForRule()', () => {
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds.mock.calls[0]).toEqual([
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       ['1'],
       {
         aggs: getExecutionLogAggregation({
@@ -508,7 +532,7 @@ describe('getExecutionLogForRule()', () => {
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds.mock.calls[0]).toEqual([
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       ['1'],
       {
         aggs: getExecutionLogAggregation({
@@ -529,7 +553,7 @@ describe('getExecutionLogForRule()', () => {
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
     const dateStart = 'ain"t no way this will get parsed as a date';
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams({ dateStart }))
     ).rejects.toMatchInlineSnapshot(
       `[Error: Invalid date for parameter dateStart: "ain"t no way this will get parsed as a date"]`
@@ -541,7 +565,7 @@ describe('getExecutionLogForRule()', () => {
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
     const dateEnd = 'ain"t no way this will get parsed as a date';
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams({ dateEnd }))
     ).rejects.toMatchInlineSnapshot(
       `[Error: Invalid date for parameter dateEnd: "ain"t no way this will get parsed as a date"]`
@@ -552,7 +576,7 @@ describe('getExecutionLogForRule()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams({ page: -3 }))
     ).rejects.toMatchInlineSnapshot(`[Error: Invalid page field "-3" - must be greater than 0]`);
   });
@@ -561,7 +585,7 @@ describe('getExecutionLogForRule()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams({ perPage: -3 }))
     ).rejects.toMatchInlineSnapshot(`[Error: Invalid perPage field "-3" - must be greater than 0]`);
   });
@@ -570,7 +594,7 @@ describe('getExecutionLogForRule()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(
         getExecutionLogByIdParams({ sort: [{ foo: { order: 'desc' } }] })
       )
@@ -583,7 +607,7 @@ describe('getExecutionLogForRule()', () => {
     unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('OMG!'));
     eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValueOnce(aggregateResults);
 
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams())
     ).rejects.toMatchInlineSnapshot(`[Error: OMG!]`);
   });
@@ -592,7 +616,7 @@ describe('getExecutionLogForRule()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.aggregateEventsBySavedObjectIds.mockRejectedValueOnce(new Error('OMG 2!'));
 
-    expect(
+    await expect(
       rulesClient.getExecutionLogForRule(getExecutionLogByIdParams())
     ).rejects.toMatchInlineSnapshot(`[Error: OMG 2!]`);
   });
@@ -648,7 +672,7 @@ describe('getExecutionLogForRule()', () => {
             action: 'rule_get_execution_log',
             outcome: 'success',
           }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
         })
       );
     });
@@ -670,7 +694,7 @@ describe('getExecutionLogForRule()', () => {
           kibana: {
             saved_object: {
               id: '1',
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
             },
           },
           error: {
@@ -725,6 +749,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
           space_ids: [],
+          maintenance_window_ids: [],
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -748,6 +773,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
           space_ids: [],
+          maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
         },
       ],
     });

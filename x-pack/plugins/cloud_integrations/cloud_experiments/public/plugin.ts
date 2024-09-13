@@ -9,9 +9,10 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { get, has } from 'lodash';
 import { duration } from 'moment';
 import { concatMap } from 'rxjs';
-import { Sha256 } from '@kbn/crypto-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { Logger } from '@kbn/logging';
+
 import { LaunchDarklyClient, type LaunchDarklyClientConfig } from './launch_darkly_client';
 import type {
   CloudExperimentsFeatureFlagNames,
@@ -36,6 +37,7 @@ interface CloudExperimentsPluginStartDeps {
 export class CloudExperimentsPlugin
   implements Plugin<void, CloudExperimentsPluginStart, CloudExperimentsPluginSetupDeps>
 {
+  private readonly logger: Logger;
   private readonly metadataService: MetadataService;
   private readonly launchDarklyClient?: LaunchDarklyClient;
   private readonly kibanaVersion: string;
@@ -44,6 +46,7 @@ export class CloudExperimentsPlugin
 
   /** Constructor of the plugin **/
   constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
     this.isDev = initializerContext.env.mode.dev;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     const config = initializerContext.config.get<{
@@ -52,9 +55,10 @@ export class CloudExperimentsPlugin
       metadata_refresh_interval: string;
     }>();
 
-    this.metadataService = new MetadataService({
-      metadata_refresh_interval: duration(config.metadata_refresh_interval),
-    });
+    this.metadataService = new MetadataService(
+      { metadata_refresh_interval: duration(config.metadata_refresh_interval) },
+      this.logger.get('metadata')
+    );
 
     if (config.flag_overrides) {
       this.flagOverrides = config.flag_overrides;
@@ -68,7 +72,7 @@ export class CloudExperimentsPlugin
       );
     }
     if (ldConfig?.client_id) {
-      this.launchDarklyClient = new LaunchDarklyClient(ldConfig, this.kibanaVersion);
+      this.launchDarklyClient = new LaunchDarklyClient(ldConfig, this.kibanaVersion, this.logger);
     }
   }
 
@@ -78,13 +82,15 @@ export class CloudExperimentsPlugin
    * @param deps {@link CloudExperimentsPluginSetupDeps}
    */
   public setup(core: CoreSetup, deps: CloudExperimentsPluginSetupDeps) {
-    if (deps.cloud.isCloudEnabled && deps.cloud.cloudId && this.launchDarklyClient) {
+    if (deps.cloud.isCloudEnabled && deps.cloud.deploymentId && this.launchDarklyClient) {
       this.metadataService.setup({
-        userId: sha256(deps.cloud.cloudId),
+        userId: deps.cloud.deploymentId,
         kibanaVersion: this.kibanaVersion,
         trialEndDate: deps.cloud.trialEndDate?.toISOString(),
         isElasticStaff: deps.cloud.isElasticStaffOwned,
       });
+    } else {
+      this.launchDarklyClient?.cancel();
     }
   }
 
@@ -107,7 +113,7 @@ export class CloudExperimentsPlugin
         .pipe(
           // Using concatMap to ensure we call the promised update in an orderly manner to avoid concurrency issues
           concatMap(
-            async (userMetadata) => await this.launchDarklyClient!.updateUserMetadata(userMetadata)
+            async (userMetadata) => await this.launchDarklyClient?.updateUserMetadata(userMetadata)
           )
         )
         .subscribe(); // This subscription will stop on when the metadataService stops because it completes the Observable
@@ -155,8 +161,4 @@ export class CloudExperimentsPlugin
       });
     }
   };
-}
-
-function sha256(str: string) {
-  return new Sha256().update(str, 'utf8').digest('hex');
 }

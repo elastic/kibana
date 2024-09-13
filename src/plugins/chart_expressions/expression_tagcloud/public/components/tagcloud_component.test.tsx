@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
-import { Wordcloud, Settings, WordcloudSpec } from '@elastic/charts';
+import { Wordcloud, Settings, WordcloudSpec, Chart } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { mount } from 'enzyme';
@@ -61,6 +63,7 @@ const visParams: TagCloudRendererParams = {
   minFontSize: 12,
   maxFontSize: 70,
   showLabel: true,
+  isPreview: false,
 };
 
 const formattedData: WordcloudSpec['data'] = [
@@ -104,6 +107,7 @@ describe('TagCloudChart', function () {
       renderComplete: jest.fn(),
       syncColors: false,
       visType: 'tagcloud',
+      isDarkMode: false,
     };
 
     wrapperPropsWithColumnNames = {
@@ -134,6 +138,7 @@ describe('TagCloudChart', function () {
       renderComplete: jest.fn(),
       syncColors: false,
       visType: 'tagcloud',
+      isDarkMode: false,
     };
   });
 
@@ -193,5 +198,16 @@ describe('TagCloudChart', function () {
       ],
     ]);
     expect(wrapperPropsWithIndexes.fireEvent).toHaveBeenCalled();
+  });
+
+  test('should apply overrides at the right level', async () => {
+    const component = mount(
+      <TagCloudChart
+        {...wrapperPropsWithIndexes}
+        overrides={{ settings: { rotation: -90 }, chart: { title: 'Hello' } }}
+      />
+    );
+    expect(component.find(Chart).props().title).toBe('Hello');
+    expect(component.find(Settings).props().rotation).toBe(-90);
   });
 });

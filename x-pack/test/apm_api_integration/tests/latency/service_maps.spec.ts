@@ -15,7 +15,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -39,10 +39,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ? {
                   documentType: ApmDocumentType.TransactionMetric,
                   rollupInterval: RollupInterval.OneMinute,
+                  useDurationSummary: true,
                 }
               : {
                   documentType: ApmDocumentType.TransactionEvent,
                   rollupInterval: RollupInterval.None,
+                  useDurationSummary: false,
                 }),
           },
         },
@@ -71,7 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   let latencyMetricValues: Awaited<ReturnType<typeof getLatencyValues>>;
   let latencyTransactionValues: Awaited<ReturnType<typeof getLatencyValues>>;
-  registry.when('Service maps APIs', { config: 'trial', archives: [] }, () => {
+  registry.when('Service Maps APIs', { config: 'trial', archives: [] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;
@@ -85,7 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: serviceName, environment: 'development', agentName: 'go' })
           .instance('instance-b');
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_RATE)
@@ -110,8 +112,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
+      // FLAKY: https://github.com/elastic/kibana/issues/176976
       describe('compare latency value between service inventory and service maps', () => {
         before(async () => {
           [latencyTransactionValues, latencyMetricValues] = await Promise.all([

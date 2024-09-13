@@ -9,7 +9,9 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { buildEsQuery } from '@kbn/es-query';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { SummaryChartsAgg, SummaryChartsData } from './types';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { EntityFilter } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -82,23 +84,26 @@ export const useSummaryChartData: UseAlerts = ({
   signalIndexName,
   skip = false,
 }) => {
-  const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
+  const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<SummaryChartsData[]>([]);
 
+  const { uiSettings } = useKibana().services;
   const additionalFilters = useMemo(() => {
     try {
+      const config = getEsQueryConfig(uiSettings);
       return [
         buildEsQuery(
           undefined,
           query != null ? [query] : [],
-          filters?.filter((f) => f.meta.disabled === false) ?? []
+          filters?.filter((f) => f.meta.disabled === false) ?? [],
+          config
         ),
       ];
     } catch (e) {
       return [];
     }
-  }, [query, filters]);
+  }, [query, filters, uiSettings]);
 
   const {
     data,

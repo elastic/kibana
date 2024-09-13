@@ -99,7 +99,6 @@ describe('IndexActionConnectorFields', () => {
     const wrapper = await setup(connector);
 
     expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="indexRefreshCheckbox"]').exists()).toBeTruthy();
 
     // time field switch shouldn't show up initially
     expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeFalsy();
@@ -177,7 +176,6 @@ describe('IndexActionConnectorFields', () => {
     const wrapper = await setup(props);
 
     expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="indexRefreshCheckbox"]').exists()).toBeTruthy();
 
     // time related fields shouldn't show up
     expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeFalsy();
@@ -187,9 +185,6 @@ describe('IndexActionConnectorFields', () => {
       .find(EuiComboBox)
       .filter('[data-test-subj="connectorIndexesComboBox"]');
     expect(indexComboBox.prop('selectedOptions')).toEqual([{ label: indexName, value: indexName }]);
-
-    const refreshSwitch = wrapper.find(EuiSwitch).filter('[data-test-subj="indexRefreshCheckbox"]');
-    expect(refreshSwitch.prop('checked')).toEqual(false);
   });
 
   test('renders correctly when editing connector - refresh set to true', async () => {
@@ -208,7 +203,6 @@ describe('IndexActionConnectorFields', () => {
     const wrapper = await setup(props);
 
     expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="indexRefreshCheckbox"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeFalsy();
 
@@ -216,9 +210,6 @@ describe('IndexActionConnectorFields', () => {
       .find(EuiComboBox)
       .filter('[data-test-subj="connectorIndexesComboBox"]');
     expect(indexComboBox.prop('selectedOptions')).toEqual([{ label: indexName, value: indexName }]);
-
-    const refreshSwitch = wrapper.find(EuiSwitch).filter('[data-test-subj="indexRefreshCheckbox"]');
-    expect(refreshSwitch.prop('checked')).toEqual(true);
   });
 
   test('renders correctly when editing connector - with date type field mapping but no time field selected', async () => {
@@ -238,7 +229,6 @@ describe('IndexActionConnectorFields', () => {
 
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').exists()).toBeTruthy();
-      expect(wrapper.find('[data-test-subj="indexRefreshCheckbox"]').exists()).toBeTruthy();
       expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeTruthy();
       expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeFalsy();
     });
@@ -247,9 +237,6 @@ describe('IndexActionConnectorFields', () => {
       .find(EuiComboBox)
       .filter('[data-test-subj="connectorIndexesComboBox"]');
     expect(indexComboBox.prop('selectedOptions')).toEqual([{ label: indexName, value: indexName }]);
-
-    const refreshSwitch = wrapper.find(EuiSwitch).filter('[data-test-subj="indexRefreshCheckbox"]');
-    expect(refreshSwitch.prop('checked')).toEqual(false);
 
     const timeFieldSwitch = wrapper
       .find(EuiSwitch)
@@ -275,7 +262,6 @@ describe('IndexActionConnectorFields', () => {
     await waitFor(() => {
       wrapper.update();
       expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').exists()).toBeTruthy();
-      expect(wrapper.find('[data-test-subj="indexRefreshCheckbox"]').exists()).toBeTruthy();
       expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeTruthy();
       expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeTruthy();
     });
@@ -284,9 +270,6 @@ describe('IndexActionConnectorFields', () => {
       .find(EuiComboBox)
       .filter('[data-test-subj="connectorIndexesComboBox"]');
     expect(indexComboBox.prop('selectedOptions')).toEqual([{ label: indexName, value: indexName }]);
-
-    const refreshSwitch = wrapper.find(EuiSwitch).filter('[data-test-subj="indexRefreshCheckbox"]');
-    expect(refreshSwitch.prop('checked')).toEqual(false);
 
     const timeFieldSwitch = wrapper
       .find(EuiSwitch)
@@ -372,7 +355,7 @@ describe('IndexActionConnectorFields', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -380,8 +363,8 @@ describe('IndexActionConnectorFields', () => {
           actionTypeId: '.index',
           config: {
             index: 'test_es_index',
-            refresh: false,
             executionTimeField: '1',
+            refresh: false,
           },
           id: 'test',
           isDeprecated: false,
@@ -417,7 +400,7 @@ describe('IndexActionConnectorFields', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -425,7 +408,6 @@ describe('IndexActionConnectorFields', () => {
           actionTypeId: '.index',
           config: {
             index: 'test_es_index',
-            refresh: false,
           },
           id: 'test',
           isDeprecated: false,
@@ -458,7 +440,7 @@ describe('IndexActionConnectorFields', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({

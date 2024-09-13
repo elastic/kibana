@@ -6,33 +6,17 @@
  */
 
 import React from 'react';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+import {
+  TEST_PROCESS_INDEX,
+  TEST_SESSION_START_TIME,
+} from '../../../common/mocks/constants/session_view_process.mock';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { TTYPlayerDeps, TTYPlayer } from '.';
 import userEvent from '@testing-library/user-event';
 
 describe('TTYPlayer component', () => {
-  beforeAll(() => {
-    // https://stackoverflow.com/questions/39830580/jest-test-fails-typeerror-window-matchmedia-is-not-a-function
-    // xtermjs is using window.matchMedia, which isn't mocked in jest by default.
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: jest.fn().mockImplementation((query) => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addListener: jest.fn(), // Deprecated
-        removeListener: jest.fn(), // Deprecated
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        dispatchEvent: jest.fn(),
-      })),
-    });
-
-    global.ResizeObserver = require('resize-observer-polyfill');
-  });
-
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
@@ -51,10 +35,13 @@ describe('TTYPlayer component', () => {
 
     props = {
       show: true,
+      index: TEST_PROCESS_INDEX,
       sessionEntityId: mockSessionEntityId,
+      sessionStartTime: TEST_SESSION_START_TIME,
       onClose: jest.fn(),
       onJumpToEvent: jest.fn(),
       isFullscreen: false,
+      trackEvent: jest.fn(),
     };
   });
 
@@ -91,27 +78,21 @@ describe('TTYPlayer component', () => {
 
       const seekToEndBtn = renderResult.getByTestId('sessionView:TTYPlayerControlsEnd');
 
-      act(() => {
-        userEvent.click(seekToEndBtn);
-      });
+      await userEvent.click(seekToEndBtn);
 
       waitFor(() => expect(renderResult.queryAllByText('Data limit reached')).toHaveLength(1));
       expect(renderResult.queryByText('[ VIEW POLICIES ]')).toBeFalsy();
     });
 
     it('renders a message warning when max_bytes exceeded with link to policies page', async () => {
-      renderResult = mockedContext.render(
-        <TTYPlayer {...props} canAccessEndpointManagement={true} />
-      );
+      renderResult = mockedContext.render(<TTYPlayer {...props} canReadPolicyManagement={true} />);
 
       await waitForApiCall();
       await new Promise((r) => setTimeout(r, 10));
 
       const seekToEndBtn = renderResult.getByTestId('sessionView:TTYPlayerControlsEnd');
 
-      act(() => {
-        userEvent.click(seekToEndBtn);
-      });
+      await userEvent.click(seekToEndBtn);
 
       waitFor(() => expect(renderResult.queryAllByText('[ VIEW POLICIES ]')).toHaveLength(1));
     });

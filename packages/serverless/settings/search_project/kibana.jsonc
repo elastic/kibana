@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/serverless-search-settings",
+  "owner": "@elastic/search-kibana @elastic/kibana-management"
+}

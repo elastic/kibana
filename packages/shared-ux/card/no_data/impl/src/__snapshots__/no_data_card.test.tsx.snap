@@ -3,6 +3,7 @@
 exports[`NoDataCard props button 1`] = `
 <div
   css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+  data-test-subj="kbnRedirectAppLink"
 >
   <div
     class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
@@ -60,9 +61,11 @@ exports[`NoDataCard props button 1`] = `
       <div
         class="emotion-euiCard__footer"
       >
-        <button
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-          type="button"
+        <a
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+          data-test-subj="noDataDefaultFooterAction"
+          href="/app/integrations/browse"
+          rel="noreferrer"
         >
           <span
             class="emotion-euiButtonDisplayContent"
@@ -73,7 +76,7 @@ exports[`NoDataCard props button 1`] = `
               Button
             </span>
           </span>
-        </button>
+        </a>
       </div>
     </div>
   </div>
@@ -83,6 +86,7 @@ exports[`NoDataCard props button 1`] = `
 exports[`NoDataCard props extends EuiCardProps 1`] = `
 <div
   css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+  data-test-subj="kbnRedirectAppLink"
 >
   <div
     class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard custom_class emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
@@ -140,9 +144,11 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
       <div
         class="emotion-euiCard__footer"
       >
-        <button
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-          type="button"
+        <a
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+          data-test-subj="noDataDefaultFooterAction"
+          href="/app/integrations/browse"
+          rel="noreferrer"
         >
           <span
             class="emotion-euiButtonDisplayContent"
@@ -153,7 +159,7 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
               Button
             </span>
           </span>
-        </button>
+        </a>
       </div>
     </div>
   </div>
@@ -163,6 +169,7 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
 exports[`NoDataCard props href 1`] = `
 <div
   css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+  data-test-subj="kbnRedirectAppLink"
 >
   <div
     class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
@@ -220,9 +227,11 @@ exports[`NoDataCard props href 1`] = `
       <div
         class="emotion-euiCard__footer"
       >
-        <button
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-          type="button"
+        <a
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+          data-test-subj="noDataDefaultFooterAction"
+          href="#"
+          rel="noreferrer"
         >
           <span
             class="emotion-euiButtonDisplayContent"
@@ -233,7 +242,7 @@ exports[`NoDataCard props href 1`] = `
               Button
             </span>
           </span>
-        </button>
+        </a>
       </div>
     </div>
   </div>
@@ -243,6 +252,7 @@ exports[`NoDataCard props href 1`] = `
 exports[`NoDataCard props no access to Fleet 1`] = `
 <div
   css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+  data-test-subj="kbnRedirectAppLink"
 >
   <div
     class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-subdued-EuiCard"
@@ -308,6 +318,7 @@ exports[`NoDataCard props no access to Fleet 1`] = `
 exports[`NoDataCard renders 1`] = `
 <div
   css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+  data-test-subj="kbnRedirectAppLink"
 >
   <div
     class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
@@ -365,9 +376,11 @@ exports[`NoDataCard renders 1`] = `
       <div
         class="emotion-euiCard__footer"
       >
-        <button
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-          type="button"
+        <a
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+          data-test-subj="noDataDefaultFooterAction"
+          href="/app/integrations/browse"
+          rel="noreferrer"
         >
           <span
             class="emotion-euiButtonDisplayContent"
@@ -378,7 +391,7 @@ exports[`NoDataCard renders 1`] = `
               Card title
             </span>
           </span>
-        </button>
+        </a>
       </div>
     </div>
   </div>

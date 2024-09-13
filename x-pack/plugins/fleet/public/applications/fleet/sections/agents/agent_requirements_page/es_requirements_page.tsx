@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiText,
   EuiSpacer,
   EuiIcon,
@@ -22,14 +22,16 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
+import styled from 'styled-components';
+
 import { WithoutHeaderLayout } from '../../../layouts';
 import type { GetFleetStatusResponse } from '../../../types';
 import { useStartServices } from '../../../hooks';
 
-export const RequirementItem: React.FunctionComponent<{ isMissing: boolean }> = ({
-  isMissing,
-  children,
-}) => {
+export const RequirementItem: React.FunctionComponent<{
+  children: React.ReactNode;
+  isMissing: boolean;
+}> = ({ isMissing, children }) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart">
       <EuiFlexItem grow={false}>
@@ -48,15 +50,21 @@ export const RequirementItem: React.FunctionComponent<{ isMissing: boolean }> = 
   );
 };
 
+const borderColor = '#d3dae6';
+
+const StyledPageBody = styled(EuiPageBody)`
+  border: 1px solid ${borderColor};
+  border-radius: 5px;
+`;
+
 export const MissingESRequirementsPage: React.FunctionComponent<{
   missingRequirements: GetFleetStatusResponse['missing_requirements'];
 }> = ({ missingRequirements }) => {
   const { docLinks } = useStartServices();
-
   return (
     <WithoutHeaderLayout>
-      <EuiPageBody restrictWidth={820}>
-        <EuiPageContent hasBorder={true} hasShadow={false}>
+      <StyledPageBody restrictWidth={820}>
+        <EuiPageSection color="transparent">
           <EuiCallOut
             title={i18n.translate('xpack.fleet.setupPage.missingRequirementsCalloutTitle', {
               defaultMessage: 'Missing security requirements',
@@ -141,8 +149,8 @@ xpack.security.authc.api_key.enabled: true`}
               ),
             }}
           />
-        </EuiPageContent>
-      </EuiPageBody>
+        </EuiPageSection>
+      </StyledPageBody>
     </WithoutHeaderLayout>
   );
 };

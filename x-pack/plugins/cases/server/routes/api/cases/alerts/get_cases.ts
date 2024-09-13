@@ -6,8 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-import type { CasesByAlertIDRequest } from '../../../../../common/api';
+import type { caseApiV1 } from '../../../../../common/types/api';
 import { CASE_ALERTS_URL } from '../../../../../common/constants';
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';
@@ -20,16 +19,24 @@ export const getCasesByAlertIdRoute = createCasesRoute({
       alert_id: schema.string({ minLength: 1 }),
     }),
   },
+  routerOptions: {
+    access: 'public',
+    summary: `Get cases for an alert`,
+    tags: ['oas-tag:cases'],
+  },
   handler: async ({ context, request, response }) => {
     try {
       const alertID = request.params.alert_id;
 
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
-      const options = request.query as CasesByAlertIDRequest;
+      const options = request.query as caseApiV1.CasesByAlertIDRequest;
+
+      const res: caseApiV1.GetRelatedCasesByAlertResponse =
+        await casesClient.cases.getCasesByAlertID({ alertID, options });
 
       return response.ok({
-        body: await casesClient.cases.getCasesByAlertID({ alertID, options }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

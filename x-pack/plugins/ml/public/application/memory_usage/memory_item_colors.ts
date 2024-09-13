@@ -6,13 +6,13 @@
  */
 
 import {
-  euiPaletteComplimentary,
+  euiPaletteComplementary,
   euiPaletteForTemperature,
   euiPaletteGray,
-  euiPalettePositive,
+  euiPaletteGreen,
   euiPaletteWarm,
 } from '@elastic/eui';
-import { MlSavedObjectType } from '../../../common/types/saved_objects';
+import type { MlSavedObjectType } from '../../../common/types/saved_objects';
 
 type MemoryItem = MlSavedObjectType | 'jvm-heap-size' | 'estimated-available-memory';
 
@@ -21,13 +21,13 @@ export function getMemoryItemColor(typeIn: MemoryItem) {
     case 'anomaly-detector':
       return euiPaletteWarm(5)[1];
     case 'data-frame-analytics':
-      return euiPalettePositive(5)[2];
+      return euiPaletteGreen(5)[2];
     case 'trained-model':
       return euiPaletteForTemperature(5)[1];
     case 'estimated-available-memory':
       return euiPaletteGray(5)[0];
     case 'jvm-heap-size':
-      return euiPaletteComplimentary(5)[4];
+      return euiPaletteComplementary(5)[4];
     default:
       return euiPaletteGray(5)[4];
   }

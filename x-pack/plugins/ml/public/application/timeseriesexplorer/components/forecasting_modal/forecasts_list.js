@@ -14,7 +14,7 @@ import React from 'react';
 
 import { EuiButtonIcon, EuiIcon, EuiInMemoryTable, EuiText, EuiToolTip } from '@elastic/eui';
 
-import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -66,7 +66,7 @@ function getColumns(viewForecast) {
         return (
           <EuiButtonIcon
             onClick={() => viewForecast(forecast.forecast_id)}
-            iconType="visLine"
+            iconType="singleMetricViewer"
             aria-label={viewForecastAriaLabel}
           />
         );

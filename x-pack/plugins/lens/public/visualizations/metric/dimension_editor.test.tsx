@@ -5,51 +5,34 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file */
-
-import React, { FormEvent } from 'react';
-import { OperationDescriptor, VisualizationDimensionEditorProps } from '../../types';
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import faker from 'faker';
+import userEvent from '@testing-library/user-event';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { euiLightVars } from '@kbn/ui-theme';
 import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
-
-import { MetricVisualizationState } from './visualization';
+import { VisualizationDimensionEditorProps } from '../../types';
+import { MetricVisualizationState } from './types';
 import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
   SupportingVisType,
 } from './dimension_editor';
-import { HTMLAttributes, mount, ReactWrapper, shallow } from 'enzyme';
-import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { EuiButtonGroup, EuiColorPicker, PropsOf } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { LayoutDirection } from '@elastic/charts';
-import { act } from 'react-dom/test-utils';
-import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/color_picker';
-import { createMockFramePublicAPI } from '../../mocks';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { euiLightVars } from '@kbn/ui-theme';
-import { DebouncedInput } from '../../shared_components/debounced_input';
 import { DatasourcePublicAPI } from '../..';
-import { CollapseFunction } from '../../../common/expressions';
-
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
-
-  return {
-    ...original,
-    debounce: (fn: unknown) => fn,
-  };
-});
-
-const SELECTORS = {
-  PRIMARY_METRIC_EDITOR: '[data-test-subj="lnsMetricDimensionEditor_primary_metric"]',
-  SECONDARY_METRIC_EDITOR: '[data-test-subj="lnsMetricDimensionEditor_secondary_metric"]',
-  MAX_EDITOR: '[data-test-subj="lnsMetricDimensionEditor_maximum"]',
-  BREAKDOWN_EDITOR: '[data-test-subj="lnsMetricDimensionEditor_breakdown"]',
-};
+import { createMockFramePublicAPI, generateActiveData } from '../../mocks';
 
 // see https://github.com/facebook/jest/issues/4402#issuecomment-534516219
 const expectCalledBefore = (mock1: jest.Mock, mock2: jest.Mock) =>
   expect(mock1.mock.invocationCallOrder[0]).toBeLessThan(mock2.mock.invocationCallOrder[0]);
+
+const SELECTORS = {
+  PRIMARY_METRIC_EDITOR: 'lnsMetricDimensionEditor_primary_metric',
+  SECONDARY_METRIC_EDITOR: 'lnsMetricDimensionEditor_secondary_metric',
+  MAX_EDITOR: 'lnsMetricDimensionEditor_maximum',
+  BREAKDOWN_EDITOR: 'lnsMetricDimensionEditor_breakdown',
+  COLOR_PICKER: 'euiColorPickerAnchor',
+};
 
 describe('dimension editor', () => {
   const palette: PaletteOutput<CustomPaletteParams> = {
@@ -68,14 +51,18 @@ describe('dimension editor', () => {
     maxAccessor: 'max-metric-col-id',
     breakdownByAccessor: 'breakdown-col-id',
     collapseFn: 'sum',
-    subtitle: 'subtitle',
-    secondaryPrefix: 'extra-text',
+    subtitle: faker.lorem.word(5),
+    secondaryPrefix: faker.lorem.word(3),
     progressDirection: 'vertical',
     maxCols: 5,
-    color: 'static-color',
+    color: faker.internet.color(),
     palette,
     icon: 'tag',
     showBar: true,
+    titlesTextAlign: 'left',
+    valuesTextAlign: 'right',
+    iconAlign: 'left',
+    valueFontMode: 'default',
     trendlineLayerId: 'second',
     trendlineLayerType: 'metricTrendline',
     trendlineMetricAccessor: 'trendline-metric-col-id',
@@ -83,6 +70,18 @@ describe('dimension editor', () => {
     trendlineTimeAccessor: 'trendline-time-col-id',
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
   };
+
+  const nonNumericMetricFrame = createMockFramePublicAPI({
+    activeData: generateActiveData([
+      {
+        id: 'first',
+        rows: Array(3).fill({
+          'metric-col-id': faker.lorem.word(3),
+          'max-col-id': faker.random.number(),
+        }),
+      },
+    ]),
+  });
 
   let props: VisualizationDimensionEditorProps<MetricVisualizationState> & {
     paletteService: PaletteRegistry;
@@ -95,14 +94,24 @@ describe('dimension editor', () => {
       accessor: 'some-accessor',
       state: fullState,
       datasource: {
-        hasDefaultTimeField: jest.fn(),
+        hasDefaultTimeField: jest.fn(() => true),
         getOperationForColumnId: jest.fn(() => ({
           hasReducedTimeRange: false,
         })),
       } as unknown as DatasourcePublicAPI,
       removeLayer: jest.fn(),
       addLayer: jest.fn(),
-      frame: createMockFramePublicAPI(),
+      frame: createMockFramePublicAPI({
+        activeData: generateActiveData([
+          {
+            id: 'first',
+            rows: Array(3).fill({
+              'metric-col-id': faker.random.number(),
+              'secondary-metric-col-id': faker.random.number(),
+            }),
+          },
+        ]),
+      }),
       setState: jest.fn(),
       panelRef: {} as React.MutableRefObject<HTMLDivElement | null>,
       paletteService: chartPluginMock.createPaletteRegistry(),
@@ -112,442 +121,382 @@ describe('dimension editor', () => {
   afterEach(() => jest.clearAllMocks());
 
   describe('primary metric dimension', () => {
-    const accessor = 'primary-metric-col-id';
+    const accessor = 'metric-col-id';
     const metricAccessorState = { ...fullState, metricAccessor: accessor };
-
-    beforeEach(() => {
-      props.frame.activeData = {
-        first: {
-          type: 'datatable',
-          columns: [
-            {
-              id: accessor,
-              name: 'foo',
-              meta: {
-                type: 'number',
-              },
-            },
-          ],
-          rows: [],
-        },
-      };
-    });
-
-    class Harness {
-      public _wrapper;
-
-      constructor(
-        wrapper: ReactWrapper<HTMLAttributes, unknown, React.Component<{}, {}, unknown>>
-      ) {
-        this._wrapper = wrapper;
-      }
-
-      private get rootComponent() {
-        return this._wrapper.find(DimensionEditor);
-      }
-
-      public get colorPicker() {
-        return this._wrapper.find(EuiColorPicker);
-      }
-
-      public get currentState() {
-        return this.rootComponent.props().state;
-      }
-
-      public setColor(color: string) {
-        act(() => {
-          this.colorPicker.props().onChange!(color, {} as EuiColorPickerOutput);
-        });
-      }
-    }
-
     const mockSetState = jest.fn();
 
-    const getHarnessWithState = (state: MetricVisualizationState, datasource = props.datasource) =>
-      new Harness(
-        mountWithIntl(
-          <DimensionEditor
-            {...props}
-            datasource={datasource}
-            state={state}
-            setState={mockSetState}
-            accessor={accessor}
-          />
-        )
-      );
-
-    it('renders when the accessor matches', () => {
-      const component = shallow(
+    function renderPrimaryMetricEditor(overrides = {}) {
+      const rtlRender = render(
         <DimensionEditor
           {...props}
-          state={{ ...fullState, metricAccessor: accessor }}
+          state={metricAccessorState}
           accessor={accessor}
+          setState={mockSetState}
+          {...overrides}
         />
       );
 
-      expect(component.exists(SELECTORS.PRIMARY_METRIC_EDITOR)).toBeTruthy();
-      expect(component.exists(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeFalsy();
-      expect(component.exists(SELECTORS.MAX_EDITOR)).toBeFalsy();
-      expect(component.exists(SELECTORS.BREAKDOWN_EDITOR)).toBeFalsy();
+      const colorModeGroup = screen.queryByRole('group', { name: /Color by value/i });
+      const staticColorPicker = screen.queryByTestId(SELECTORS.COLOR_PICKER);
+
+      const typeColor = async (color: string) => {
+        if (!staticColorPicker) {
+          throw new Error('Static color picker not found');
+        }
+        await userEvent.clear(staticColorPicker);
+        await userEvent.type(staticColorPicker, color);
+      };
+
+      const clearColor = async () => {
+        if (!staticColorPicker) {
+          throw new Error('Static color picker not found');
+        }
+        await userEvent.clear(staticColorPicker);
+      };
+
+      return {
+        colorModeGroup,
+        staticColorPicker,
+        typeColor,
+        clearColor,
+        ...rtlRender,
+      };
+    }
+
+    it('renders when the accessor matches', () => {
+      renderPrimaryMetricEditor();
+      expect(screen.getByTestId(SELECTORS.PRIMARY_METRIC_EDITOR)).toBeInTheDocument();
+      expect(screen.queryByTestId(SELECTORS.SECONDARY_METRIC_EDITOR)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(SELECTORS.MAX_EDITOR)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(SELECTORS.BREAKDOWN_EDITOR)).not.toBeInTheDocument();
+    });
+
+    it('Color mode switch is shown when the primary metric is numeric', () => {
+      const { colorModeGroup } = renderPrimaryMetricEditor();
+      expect(colorModeGroup).toBeInTheDocument();
+    });
+
+    it('Color mode switch is not shown when the primary metric is non-numeric', () => {
+      const { colorModeGroup } = renderPrimaryMetricEditor({ frame: nonNumericMetricFrame });
+      expect(colorModeGroup).not.toBeInTheDocument();
     });
 
     describe('static color controls', () => {
       it('is hidden when dynamic coloring is enabled', () => {
-        const harnessWithPalette = getHarnessWithState({ ...metricAccessorState, palette });
-        expect(harnessWithPalette.colorPicker.exists()).toBeFalsy();
-
-        const harnessNoPalette = getHarnessWithState({
-          ...metricAccessorState,
-          palette: undefined,
+        const { staticColorPicker } = renderPrimaryMetricEditor({
+          state: { ...metricAccessorState, palette },
         });
-        expect(harnessNoPalette.colorPicker.exists()).toBeTruthy();
+        expect(staticColorPicker).not.toBeInTheDocument();
+      });
+      it('is visible if palette is not defined', () => {
+        const { staticColorPicker } = renderPrimaryMetricEditor({
+          state: { ...metricAccessorState, palette: undefined },
+        });
+        expect(staticColorPicker).toBeInTheDocument();
+      });
+      it('is visible when metric is non-numeric even if palette is set', () => {
+        const { staticColorPicker } = renderPrimaryMetricEditor({
+          frame: nonNumericMetricFrame,
+          state: { ...metricAccessorState, palette },
+        });
+        expect(staticColorPicker).toBeInTheDocument();
       });
 
       it('fills with default value', () => {
-        const localHarness = getHarnessWithState({
-          ...metricAccessorState,
-          palette: undefined,
-          color: undefined,
+        const { staticColorPicker } = renderPrimaryMetricEditor({
+          state: { ...metricAccessorState, palette: undefined, color: undefined },
         });
-        expect(localHarness.colorPicker.props().color).toBe(euiLightVars.euiColorPrimary);
+        expect(staticColorPicker).toHaveValue(euiLightVars.euiColorPrimary.toUpperCase());
       });
 
-      it('sets color', () => {
-        const localHarness = getHarnessWithState({
-          ...metricAccessorState,
-          palette: undefined,
-          color: 'some-color',
+      it('sets color', async () => {
+        const { typeColor, clearColor } = renderPrimaryMetricEditor({
+          state: { ...metricAccessorState, palette: undefined, color: faker.internet.color() },
         });
 
-        const newColor = 'new-color';
-        localHarness.setColor(newColor + 1);
-        localHarness.setColor(newColor + 2);
-        localHarness.setColor(newColor + 3);
-        localHarness.setColor('');
-        expect(mockSetState).toHaveBeenCalledTimes(4);
-        expect(mockSetState.mock.calls.map((args) => args[0].color)).toMatchInlineSnapshot(`
-          Array [
-            "new-color1",
-            "new-color2",
-            "new-color3",
-            undefined,
-          ]
-        `);
+        const newColor = faker.internet.color().toUpperCase();
+        await typeColor(newColor);
+        await waitFor(() =>
+          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ color: newColor }))
+        );
+        await clearColor();
+        await waitFor(() =>
+          expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ color: undefined }))
+        );
+
+        expect(mockSetState).toHaveBeenCalledTimes(2);
       });
     });
   });
 
   describe('secondary metric dimension', () => {
     const accessor = 'secondary-metric-col-id';
-
-    beforeEach(() => {
-      props.frame.activeData = {
-        first: {
-          type: 'datatable',
-          columns: [
-            {
-              id: accessor,
-              name: 'foo',
-              meta: {
-                type: 'number',
-              },
-            },
-          ],
-          rows: [],
-        },
-      };
-    });
-
-    it('renders when the accessor matches', () => {
-      const component = shallow(
+    function renderSecondaryMetricEditor(overrides = {}) {
+      const rtlRender = render(
         <DimensionEditor
           {...props}
           state={{ ...fullState, secondaryMetricAccessor: accessor }}
           accessor={accessor}
+          {...overrides}
         />
       );
 
-      expect(component.exists(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeTruthy();
-      expect(component.exists(SELECTORS.BREAKDOWN_EDITOR)).toBeFalsy();
-      expect(component.exists(SELECTORS.MAX_EDITOR)).toBeFalsy();
-      expect(component.exists(SELECTORS.PRIMARY_METRIC_EDITOR)).toBeFalsy();
+      const customPrefixTextbox = screen.queryByRole('textbox');
+      const typePrefix = async (prefix: string) => {
+        if (customPrefixTextbox === null) {
+          throw new Error('custom prefix textbox not found');
+        }
+        await userEvent.clear(customPrefixTextbox);
+        await userEvent.type(customPrefixTextbox, prefix);
+      };
+      return {
+        settingNone: () => screen.getByTitle(/none/i),
+        settingAuto: () => screen.getByTitle(/auto/i),
+        settingCustom: () => screen.getByTitle(/custom/i),
+        customPrefixTextbox,
+        typePrefix,
+        ...rtlRender,
+      };
+    }
+
+    it('renders when the accessor matches', () => {
+      renderSecondaryMetricEditor();
+      expect(screen.queryByTestId(SELECTORS.PRIMARY_METRIC_EDITOR)).not.toBeInTheDocument();
+      expect(screen.getByTestId(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeInTheDocument();
+      expect(screen.queryByTestId(SELECTORS.MAX_EDITOR)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(SELECTORS.BREAKDOWN_EDITOR)).not.toBeInTheDocument();
+    });
+
+    it(`doesn't break when layer data is missing`, () => {
+      renderSecondaryMetricEditor({ frame: { activeData: { first: undefined } } });
+      expect(screen.getByTestId(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeInTheDocument();
     });
 
     describe('metric prefix', () => {
       const NONE_PREFIX = '';
       const AUTO_PREFIX = undefined;
+      const localState = {
+        ...fullState,
+        secondaryPrefix: AUTO_PREFIX,
+        secondaryMetricAccessor: accessor,
+      };
+      it('correctly renders chosen auto prefix', () => {
+        const { settingAuto, settingCustom, settingNone, customPrefixTextbox } =
+          renderSecondaryMetricEditor({
+            state: localState,
+          });
 
-      it('activates the correct buttons', () => {
-        const setState = jest.fn();
-        const localState = {
-          ...fullState,
-          secondaryPrefix: AUTO_PREFIX,
-          secondaryMetricAccessor: accessor,
-        };
-        const component = mount(
-          <DimensionEditor {...props} state={localState} setState={setState} accessor={accessor} />
-        );
-
-        expect(component.find(EuiButtonGroup).props().idSelected).toContain('auto');
-
-        component.setProps({
-          state: {
-            ...localState,
-            secondaryPrefix: NONE_PREFIX,
-          },
-        });
-
-        expect(component.find(EuiButtonGroup).props().idSelected).toContain('none');
-
-        component.setProps({
-          state: {
-            ...localState,
-            secondaryPrefix: 'some custom prefix',
-          },
-        });
-
-        expect(component.find(EuiButtonGroup).props().idSelected).toContain('custom');
+        expect(settingAuto()).toHaveAttribute('aria-pressed', 'true');
+        expect(settingNone()).toHaveAttribute('aria-pressed', 'false');
+        expect(settingCustom()).toHaveAttribute('aria-pressed', 'false');
+        expect(customPrefixTextbox).not.toBeInTheDocument();
       });
 
-      it('clicking a button sets the prefix value', () => {
-        const setState = jest.fn();
-        const localState = {
-          ...fullState,
-          secondaryPrefix: AUTO_PREFIX,
-          secondaryMetricAccessor: accessor,
-        };
-        const component = mount(
-          <DimensionEditor {...props} state={localState} setState={setState} accessor={accessor} />
-        );
+      it('correctly renders chosen none prefix', () => {
+        const { settingAuto, settingCustom, settingNone, customPrefixTextbox } =
+          renderSecondaryMetricEditor({ state: { ...localState, secondaryPrefix: NONE_PREFIX } });
 
-        const newVal = 'Metric explanation';
-
-        component.find(EuiButtonGroup).props().onChange('some-id', newVal);
-
-        expect(setState).toHaveBeenCalledWith({ ...localState, secondaryPrefix: newVal });
+        expect(settingNone()).toHaveAttribute('aria-pressed', 'true');
+        expect(settingAuto()).toHaveAttribute('aria-pressed', 'false');
+        expect(settingCustom()).toHaveAttribute('aria-pressed', 'false');
+        expect(customPrefixTextbox).not.toBeInTheDocument();
       });
 
-      it('sets a custom prefix value', () => {
+      it('correctly renders custom prefix', () => {
+        const customPrefixState = { ...localState, secondaryPrefix: faker.lorem.word(3) };
+        const { settingAuto, settingCustom, settingNone, customPrefixTextbox } =
+          renderSecondaryMetricEditor({ state: customPrefixState });
+
+        expect(settingAuto()).toHaveAttribute('aria-pressed', 'false');
+        expect(settingNone()).toHaveAttribute('aria-pressed', 'false');
+        expect(settingCustom()).toHaveAttribute('aria-pressed', 'true');
+        expect(customPrefixTextbox).toHaveValue(customPrefixState.secondaryPrefix);
+      });
+
+      it('clicking on the buttons calls setState with a correct secondaryPrefix', async () => {
+        const customPrefix = faker.lorem.word(3);
         const setState = jest.fn();
-        const localState = {
-          ...fullState,
-          secondaryPrefix: 'foo',
-          secondaryMetricAccessor: accessor,
-        };
-        const component = mount(
-          <DimensionEditor {...props} state={localState} setState={setState} accessor={accessor} />
+
+        const { settingAuto, settingNone } = renderSecondaryMetricEditor({
+          setState,
+          state: { ...localState, secondaryPrefix: customPrefix },
+        });
+
+        await userEvent.click(settingNone());
+        expect(setState).toHaveBeenCalledWith(
+          expect.objectContaining({ secondaryPrefix: NONE_PREFIX })
         );
 
-        const buttonGroup = component.find(EuiButtonGroup);
+        await userEvent.click(settingAuto());
+        expect(setState).toHaveBeenCalledWith(
+          expect.objectContaining({ secondaryPrefix: AUTO_PREFIX })
+        );
+      });
 
-        // make sure that if the user was to select the "custom" option, they would get the default value
-        expect(buttonGroup.props().options[1].value).toBe('foo');
+      it('sets a custom prefix value', async () => {
+        const customPrefix = faker.lorem.word(3);
+        const setState = jest.fn();
 
-        const newVal = 'bar';
+        const { typePrefix } = renderSecondaryMetricEditor({
+          setState,
+          state: { ...localState, secondaryPrefix: customPrefix },
+        });
 
-        component.find(DebouncedInput).props().onChange(newVal);
+        const newCustomPrefix = faker.lorem.word(3);
+        await typePrefix(newCustomPrefix);
 
-        expect(setState).toHaveBeenCalledWith({ ...localState, secondaryPrefix: newVal });
+        await waitFor(() =>
+          expect(setState).toHaveBeenCalledWith(
+            expect.objectContaining({ secondaryPrefix: newCustomPrefix })
+          )
+        );
       });
     });
   });
 
   describe('maximum dimension', () => {
-    const accessor = 'max-col-id';
-
-    it('renders when the accessor matches', () => {
-      const component = shallow(
+    function renderMaximumDimension(overrides = {}) {
+      const accessor = 'max-col-id';
+      return render(
         <DimensionEditor
           {...props}
-          state={{ ...fullState, maxAccessor: accessor }}
           accessor={accessor}
+          state={{ ...fullState, maxAccessor: accessor }}
+          {...overrides}
         />
       );
+    }
 
-      expect(component.exists(SELECTORS.MAX_EDITOR)).toBeTruthy();
-      expect(component.exists(SELECTORS.PRIMARY_METRIC_EDITOR)).toBeFalsy();
-      expect(component.exists(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeFalsy();
-      expect(component.exists(SELECTORS.BREAKDOWN_EDITOR)).toBeFalsy();
+    it('renders when the accessor matches', () => {
+      renderMaximumDimension();
+      expect(screen.queryByTestId(SELECTORS.PRIMARY_METRIC_EDITOR)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(SELECTORS.SECONDARY_METRIC_EDITOR)).not.toBeInTheDocument();
+      expect(screen.getByTestId(SELECTORS.MAX_EDITOR)).toBeInTheDocument();
+      expect(screen.queryByTestId(SELECTORS.BREAKDOWN_EDITOR)).not.toBeInTheDocument();
     });
   });
 
   describe('breakdown-by dimension', () => {
     const accessor = 'breakdown-col-id';
 
-    class Harness {
-      public _wrapper;
-
-      constructor(
-        wrapper: ReactWrapper<HTMLAttributes, unknown, React.Component<{}, {}, unknown>>
-      ) {
-        this._wrapper = wrapper;
-      }
-
-      private get collapseSetting() {
-        return this._wrapper.find(CollapseSetting);
-      }
-
-      public get currentCollapseFn() {
-        return this.collapseSetting.props().value;
-      }
-
-      public setCollapseFn(fn: CollapseFunction) {
-        return this.collapseSetting.props().onChange(fn);
-      }
-
-      public setMaxCols(max: number) {
-        act(() => {
-          this._wrapper.find('EuiFieldNumber[data-test-subj="lnsMetric_max_cols"]').props()
-            .onChange!({
-            target: { value: String(max) },
-          } as unknown as FormEvent);
-        });
-      }
-    }
-
-    let harness: Harness;
     const mockSetState = jest.fn();
-
-    beforeEach(() => {
-      harness = new Harness(
-        mountWithIntl(
-          <DimensionEditor
-            {...props}
-            state={{ ...fullState, breakdownByAccessor: accessor }}
-            accessor={accessor}
-            setState={mockSetState}
-          />
-        )
-      );
-    });
 
     afterEach(() => mockSetState.mockClear());
 
-    it('renders when the accessor matches', () => {
-      const component = shallow(
+    function renderBreakdownEditor(overrides = {}) {
+      const rtlRender = render(
         <DimensionEditor
           {...props}
           state={{ ...fullState, breakdownByAccessor: accessor }}
           accessor={accessor}
+          setState={mockSetState}
+          {...overrides}
         />
       );
 
-      expect(component.exists(SELECTORS.BREAKDOWN_EDITOR)).toBeTruthy();
-      expect(component.exists(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeFalsy();
-      expect(component.exists(SELECTORS.MAX_EDITOR)).toBeFalsy();
-      expect(component.exists(SELECTORS.PRIMARY_METRIC_EDITOR)).toBeFalsy();
+      const selectCollapseBy = async (collapseFn: string) => {
+        const collapseBySelect = screen.getByLabelText(/collapse by/i);
+        await userEvent.selectOptions(collapseBySelect, collapseFn);
+      };
+
+      const setMaxCols = async (maxCols: number) => {
+        const maxColsInput = screen.getByLabelText(/layout columns/i);
+        await userEvent.clear(maxColsInput);
+        await userEvent.type(maxColsInput, maxCols.toString());
+      };
+
+      return {
+        ...rtlRender,
+        selectCollapseBy,
+        setMaxCols,
+      };
+    }
+
+    it('renders when the accessor matches', () => {
+      renderBreakdownEditor();
+      expect(screen.queryByTestId(SELECTORS.PRIMARY_METRIC_EDITOR)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(SELECTORS.SECONDARY_METRIC_EDITOR)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(SELECTORS.MAX_EDITOR)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(SELECTORS.BREAKDOWN_EDITOR)).toBeInTheDocument();
     });
 
-    it('supports setting a collapse function', () => {
-      expect(harness.currentCollapseFn).toBe(fullState.collapseFn);
-      const newCollapseFunc = 'min';
-      harness.setCollapseFn(newCollapseFunc);
-      expect(mockSetState).toHaveBeenCalledWith({ ...fullState, collapseFn: newCollapseFunc });
+    it('supports setting a collapse function', async () => {
+      const { selectCollapseBy } = renderBreakdownEditor();
+      const newCollapseFn = 'min';
+      await selectCollapseBy(newCollapseFn);
+
+      expect(mockSetState).toHaveBeenCalledWith({ ...fullState, collapseFn: newCollapseFn });
     });
 
-    it('sets max columns', () => {
-      harness.setMaxCols(1);
-      harness.setMaxCols(2);
-      harness.setMaxCols(3);
-      expect(mockSetState).toHaveBeenCalledTimes(3);
-      expect(mockSetState.mock.calls.map((args) => args[0].maxCols)).toMatchInlineSnapshot(`
-          Array [
-            1,
-            2,
-            3,
-          ]
-        `);
+    it('sets max columns', async () => {
+      const { setMaxCols } = renderBreakdownEditor();
+      await setMaxCols(1);
+      await waitFor(() =>
+        expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 1 }))
+      );
+      await setMaxCols(2);
+      await waitFor(() =>
+        expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 2 }))
+      );
+      await setMaxCols(3);
+      await waitFor(() =>
+        expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 3 }))
+      );
     });
   });
 
   describe('additional section', () => {
-    const accessor = 'primary-metric-col-id';
+    const accessor = 'metric-col-id';
     const metricAccessorState = { ...fullState, metricAccessor: accessor };
-
-    class Harness {
-      public _wrapper;
-
-      constructor(
-        wrapper: ReactWrapper<HTMLAttributes, unknown, React.Component<{}, {}, unknown>>
-      ) {
-        this._wrapper = wrapper;
-      }
-
-      private get rootComponent() {
-        return this._wrapper.find(DimensionEditorAdditionalSection);
-      }
-
-      public get currentState() {
-        return this.rootComponent.props().state;
-      }
-
-      private get supportingVisButtonGroup() {
-        return this._wrapper.find(
-          'EuiButtonGroup[data-test-subj="lnsMetric_supporting_visualization_buttons"]'
-        ) as unknown as ReactWrapper<PropsOf<typeof EuiButtonGroup>>;
-      }
-
-      public get currentSupportingVis() {
-        return this.supportingVisButtonGroup
-          .props()
-          .idSelected?.split('--')[1] as SupportingVisType;
-      }
-
-      public isDisabled(type: SupportingVisType) {
-        return this.supportingVisButtonGroup.props().options.find(({ id }) => id.includes(type))
-          ?.isDisabled;
-      }
-
-      public setSupportingVis(type: SupportingVisType) {
-        this.supportingVisButtonGroup.props().onChange(`some-id--${type}`);
-      }
-
-      private get progressDirectionControl() {
-        return this._wrapper.find(
-          'EuiButtonGroup[data-test-subj="lnsMetric_progress_direction_buttons"]'
-        ) as unknown as ReactWrapper<PropsOf<typeof EuiButtonGroup>>;
-      }
-
-      public get progressDirectionShowing() {
-        return this.progressDirectionControl.exists();
-      }
-
-      public setProgressDirection(direction: LayoutDirection) {
-        this.progressDirectionControl.props().onChange(direction);
-        this._wrapper.update();
-      }
-    }
-
     const mockSetState = jest.fn();
 
-    const getHarnessWithState = (state: MetricVisualizationState, datasource = props.datasource) =>
-      new Harness(
-        mountWithIntl(
-          <DimensionEditorAdditionalSection
-            {...props}
-            datasource={datasource}
-            state={state}
-            setState={mockSetState}
-            accessor={accessor}
-          />
-        )
+    afterEach(() => mockSetState.mockClear());
+
+    function renderAdditionalSectionEditor(overrides = {}) {
+      const rtlRender = render(
+        <DimensionEditorAdditionalSection
+          {...props}
+          setState={mockSetState}
+          state={metricAccessorState}
+          accessor={accessor}
+          {...overrides}
+        />
       );
+
+      const supportingVisOptions = {
+        none: screen.queryByTitle(/none/i),
+        // in eui when bar or line become disabled they change from input to button so we have to do this weird check
+        bar: screen.queryByTitle(/bar/i) || screen.queryByRole('button', { name: /bar/i }),
+        trendline: screen.queryByTitle(/line/i) || screen.queryByRole('button', { name: /line/i }),
+      };
+
+      const clickOnSupportingVis = async (type: SupportingVisType) => {
+        const supportingVis = supportingVisOptions[type];
+        if (!supportingVis) {
+          throw new Error(`Supporting visualization ${type} not found`);
+        }
+        await userEvent.click(supportingVis);
+      };
+
+      return {
+        progressDirectionShowing: screen.queryByTestId('lnsMetric_progress_direction_buttons'),
+        progressOptions: {
+          vertical: screen.queryByTitle(/vertical/i),
+          horizontal: screen.queryByTitle(/horizontal/i),
+        },
+        supportingVisOptions,
+        clickOnSupportingVis,
+        ...rtlRender,
+      };
+    }
 
     it.each([
       { name: 'secondary metric', accessor: metricAccessorState.secondaryMetricAccessor },
       { name: 'max', accessor: metricAccessorState.maxAccessor },
       { name: 'break down by', accessor: metricAccessorState.breakdownByAccessor },
     ])('doesnt show for the following dimension: %s', ({ accessor: testAccessor }) => {
-      expect(
-        shallow(
-          <DimensionEditorAdditionalSection
-            {...props}
-            state={metricAccessorState}
-            setState={mockSetState}
-            accessor={testAccessor}
-          />
-        ).isEmptyRender()
-      ).toBeTruthy();
+      const { container } = renderAdditionalSectionEditor({ accessor: testAccessor });
+      expect(container).toBeEmptyDOMElement();
     });
 
     describe('supporting visualizations', () => {
@@ -557,85 +506,99 @@ describe('dimension editor', () => {
       };
 
       describe('reflecting visualization state', () => {
-        it('should select the correct button', () => {
-          expect(
-            getHarnessWithState({ ...stateWOTrend, showBar: false, maxAccessor: undefined })
-              .currentSupportingVis
-          ).toBe<SupportingVisType>('none');
-          expect(
-            getHarnessWithState({ ...stateWOTrend, showBar: true }).currentSupportingVis
-          ).toBe<SupportingVisType>('bar');
-          expect(
-            getHarnessWithState(metricAccessorState).currentSupportingVis
-          ).toBe<SupportingVisType>('trendline');
+        it('when `showBar` is false and maximum value is not defined, option none should be selected', () => {
+          const { supportingVisOptions } = renderAdditionalSectionEditor({
+            state: { ...stateWOTrend, showBar: false, maxAccessor: undefined },
+          });
+          expect(supportingVisOptions.none).toHaveAttribute('aria-pressed', 'true');
         });
 
-        it('should disable bar when no max dimension', () => {
-          expect(
-            getHarnessWithState({
+        it('when `showBar` is true and maximum value is not defined, bar should be selected', () => {
+          const { supportingVisOptions } = renderAdditionalSectionEditor({
+            state: { ...stateWOTrend, showBar: true },
+          });
+          expect(supportingVisOptions.bar).toHaveAttribute('aria-pressed', 'true');
+        });
+
+        it('when `showBar` is true and trendline is defined, line should be selected', () => {
+          const { supportingVisOptions } = renderAdditionalSectionEditor({
+            state: metricAccessorState,
+          });
+          expect(supportingVisOptions.trendline).toHaveAttribute('aria-pressed', 'true');
+        });
+
+        it('should enable bar when max dimension exists', () => {
+          const { supportingVisOptions } = renderAdditionalSectionEditor({
+            state: {
               ...stateWOTrend,
               showBar: false,
               maxAccessor: 'something',
-            }).isDisabled('bar')
-          ).toBeFalsy();
-          expect(
-            getHarnessWithState({
+            },
+          });
+          expect(supportingVisOptions.bar).not.toBeDisabled();
+        });
+
+        it('should disable bar when max dimension does not exist', () => {
+          const { supportingVisOptions } = renderAdditionalSectionEditor({
+            state: {
               ...stateWOTrend,
               showBar: false,
               maxAccessor: undefined,
-            }).isDisabled('bar')
-          ).toBeTruthy();
+            },
+          });
+          expect(supportingVisOptions.bar).toBeDisabled();
         });
 
         it('should disable trendline when no default time field', () => {
-          expect(
-            getHarnessWithState(stateWOTrend, {
+          const { supportingVisOptions } = renderAdditionalSectionEditor({
+            datasource: {
+              ...props.datasource,
               hasDefaultTimeField: () => false,
-              getOperationForColumnId: (id) => ({} as OperationDescriptor),
-            } as DatasourcePublicAPI).isDisabled('trendline')
-          ).toBeTruthy();
-          expect(
-            getHarnessWithState(stateWOTrend, {
-              hasDefaultTimeField: () => true,
-              getOperationForColumnId: (id) => ({} as OperationDescriptor),
-            } as DatasourcePublicAPI).isDisabled('trendline')
-          ).toBeFalsy();
+            },
+          });
+          expect(supportingVisOptions.trendline).toBeDisabled();
+        });
+
+        it('should enable trendline when default time field exists', () => {
+          const { supportingVisOptions } = renderAdditionalSectionEditor();
+          expect(supportingVisOptions.trendline).not.toBeDisabled();
         });
       });
 
       it('should disable trendline when a metric dimension has a reduced time range', () => {
-        expect(
-          getHarnessWithState(stateWOTrend, {
-            hasDefaultTimeField: () => true,
-            getOperationForColumnId: (id) =>
-              ({
-                hasReducedTimeRange: id === stateWOTrend.metricAccessor,
-              } as OperationDescriptor),
-          } as DatasourcePublicAPI).isDisabled('trendline')
-        ).toBeTruthy();
-        expect(
-          getHarnessWithState(stateWOTrend, {
-            hasDefaultTimeField: () => true,
-            getOperationForColumnId: (id) =>
-              ({
-                hasReducedTimeRange: id === stateWOTrend.secondaryMetricAccessor,
-              } as OperationDescriptor),
-          } as DatasourcePublicAPI).isDisabled('trendline')
-        ).toBeTruthy();
+        const { supportingVisOptions } = renderAdditionalSectionEditor({
+          datasource: {
+            ...props.datasource,
+            getOperationForColumnId: (id: string) => ({
+              hasReducedTimeRange: id === stateWOTrend.metricAccessor,
+            }),
+          },
+        });
+        expect(supportingVisOptions.trendline).toBeDisabled();
+      });
+
+      it('should not show a trendline button group when primary metric dimension is non-numeric', () => {
+        const { container } = renderAdditionalSectionEditor({
+          frame: nonNumericMetricFrame,
+        });
+        expect(container).toBeEmptyDOMElement();
       });
 
       describe('responding to buttons', () => {
-        it('enables trendline', () => {
-          getHarnessWithState(stateWOTrend).setSupportingVis('trendline');
+        it('enables trendline', async () => {
+          const { clickOnSupportingVis } = renderAdditionalSectionEditor({ state: stateWOTrend });
+          await clickOnSupportingVis('trendline');
 
           expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
           expect(props.addLayer).toHaveBeenCalledWith('metricTrendline');
-
           expectCalledBefore(mockSetState, props.addLayer as jest.Mock);
         });
 
-        it('enables bar', () => {
-          getHarnessWithState(metricAccessorState).setSupportingVis('bar');
+        it('enables bar', async () => {
+          const { clickOnSupportingVis } = renderAdditionalSectionEditor({
+            state: metricAccessorState,
+          });
+          await clickOnSupportingVis('bar');
 
           expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: true });
           expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
@@ -643,15 +606,21 @@ describe('dimension editor', () => {
           expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
         });
 
-        it('selects none from bar', () => {
-          getHarnessWithState(stateWOTrend).setSupportingVis('none');
+        it('selects none from bar', async () => {
+          const { clickOnSupportingVis } = renderAdditionalSectionEditor({
+            state: stateWOTrend,
+          });
+          await clickOnSupportingVis('none');
 
           expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
           expect(props.removeLayer).not.toHaveBeenCalled();
         });
 
-        it('selects none from trendline', () => {
-          getHarnessWithState(metricAccessorState).setSupportingVis('none');
+        it('selects none from trendline', async () => {
+          const { clickOnSupportingVis } = renderAdditionalSectionEditor({
+            state: metricAccessorState,
+          });
+          await clickOnSupportingVis('none');
 
           expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: false });
           expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
@@ -662,30 +631,29 @@ describe('dimension editor', () => {
 
       describe('progress bar direction controls', () => {
         it('hides direction controls if bar not showing', () => {
-          expect(
-            getHarnessWithState({ ...stateWOTrend, showBar: false }).progressDirectionShowing
-          ).toBeFalsy();
+          const { progressDirectionShowing } = renderAdditionalSectionEditor({
+            state: { ...stateWOTrend, showBar: false },
+          });
+          expect(progressDirectionShowing).not.toBeInTheDocument();
         });
 
-        it('toggles progress direction', () => {
-          const harness = getHarnessWithState(metricAccessorState);
+        it('toggles progress direction', async () => {
+          const { progressOptions } = renderAdditionalSectionEditor({
+            state: metricAccessorState,
+          });
 
-          expect(harness.progressDirectionShowing).toBeTruthy();
-          expect(harness.currentState.progressDirection).toBe('vertical');
+          expect(progressOptions.vertical).toHaveAttribute('aria-pressed', 'true');
+          expect(progressOptions.horizontal).toHaveAttribute('aria-pressed', 'false');
+          if (progressOptions.horizontal === null) {
+            throw new Error('horizontal button not found');
+          }
 
-          harness.setProgressDirection('horizontal');
-          harness.setProgressDirection('vertical');
-          harness.setProgressDirection('horizontal');
+          await userEvent.click(progressOptions.horizontal);
 
-          expect(mockSetState).toHaveBeenCalledTimes(3);
-          expect(mockSetState.mock.calls.map((args) => args[0].progressDirection))
-            .toMatchInlineSnapshot(`
-              Array [
-                "horizontal",
-                "vertical",
-                "horizontal",
-              ]
-            `);
+          expect(mockSetState).toHaveBeenCalledWith({
+            ...metricAccessorState,
+            progressDirection: 'horizontal',
+          });
         });
       });
     });

@@ -57,8 +57,8 @@ describe('accessAgreementApp', () => {
     const mockRenderApp = jest.requireMock('./access_agreement_page').renderAccessAgreementPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(
-      coreStartMock.i18n,
-      { element: appMountParams.element, theme$: appMountParams.theme$ },
+      coreStartMock,
+      { element: appMountParams.element },
       {
         http: coreStartMock.http,
         notifications: coreStartMock.notifications,

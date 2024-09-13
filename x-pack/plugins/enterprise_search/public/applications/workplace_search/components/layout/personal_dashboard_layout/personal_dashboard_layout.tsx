@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import {
-  EuiPage,
-  EuiPageSideBar_Deprecated as EuiPageSideBar,
-  EuiPageBody,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
 import { AccountHeader, AccountSettingsSidebar, PrivateSourcesSidebar } from '..';
 import { FlashMessages } from '../../../../shared/flash_messages';
@@ -36,7 +29,7 @@ interface LayoutProps {
   pageChrome?: BreadcrumbTrail;
 }
 
-export const PersonalDashboardLayout: React.FC<LayoutProps> = ({
+export const PersonalDashboardLayout: FC<PropsWithChildren<LayoutProps>> = ({
   children,
   isLoading,
   pageChrome,
@@ -47,28 +40,36 @@ export const PersonalDashboardLayout: React.FC<LayoutProps> = ({
     <>
       {pageChrome && <SetWorkplaceSearchChrome trail={pageChrome} />}
       <AccountHeader />
-      <EuiPage className="personalDashboardLayout" paddingSize="none">
-        <EuiPageSideBar role="navigation" className="personalDashboardLayout__sideBar" sticky>
+      <EuiPageTemplate className="personalDashboardLayout" paddingSize="none" panelled>
+        <EuiPageTemplate.Sidebar
+          role="navigation"
+          className="personalDashboardLayout__sideBar"
+          sticky
+          minWidth="480px"
+        >
           {useRouteMatch(PRIVATE_SOURCES_PATH) && <PrivateSourcesSidebar />}
           {useRouteMatch(PERSONAL_SETTINGS_PATH) && <AccountSettingsSidebar />}
-        </EuiPageSideBar>
-        <EuiPageBody component="main" panelled role="main">
-          <EuiPageContentBody className="personalDashboardLayout__body" restrictWidth>
-            {readOnlyMode && (
-              <>
-                <EuiCallOut
-                  color="warning"
-                  iconType="lock"
-                  title={PERSONAL_DASHBOARD_READ_ONLY_MODE_WARNING}
-                />
-                <EuiSpacer />
-              </>
-            )}
-            <FlashMessages />
-            {isLoading ? <Loading /> : children}
-          </EuiPageContentBody>
-        </EuiPageBody>
-      </EuiPage>
+        </EuiPageTemplate.Sidebar>
+        <EuiPageTemplate.Section
+          className="personalDashboardLayout__body"
+          paddingSize="none"
+          restrictWidth
+        >
+          {readOnlyMode && (
+            <>
+              <EuiCallOut
+                color="warning"
+                iconType="lock"
+                title={PERSONAL_DASHBOARD_READ_ONLY_MODE_WARNING}
+              />
+              <EuiSpacer />
+            </>
+          )}
+          <FlashMessages />
+
+          {isLoading ? <Loading /> : children}
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
     </>
   );
 };

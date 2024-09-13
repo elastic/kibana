@@ -8,29 +8,33 @@
 import { isEmpty, isEqual } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
+import { css } from '@emotion/css';
 
-import type { FieldsEqlOptions } from '../../../../../../common/search_strategy';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import type {
+  EqlOptionsSelected,
+  FieldsEqlOptions,
+} from '../../../../../../common/search_strategy';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { EqlQueryBar } from '../../../../../detections/components/rules/eql_query_bar';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { EqlQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/eql_query_bar';
 
 import {
   debounceAsync,
   eqlValidator,
-} from '../../../../../detections/components/rules/eql_query_bar/validators';
-import type { FieldValueQueryBar } from '../../../../../detections/components/rules/query_bar';
+} from '../../../../../detection_engine/rule_creation_ui/components/eql_query_bar/validators';
+import type { FieldValueQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/query_bar';
 
 import type { FormSchema } from '../../../../../shared_imports';
 import { Form, UseField, useForm, useFormData } from '../../../../../shared_imports';
-import { timelineActions } from '../../../../store/timeline';
+import { timelineActions } from '../../../../store';
 import * as i18n from '../translations';
 import { getEqlOptions } from './selectors';
 
 interface TimelineEqlQueryBar {
   index: string[];
   eqlQueryBar: FieldValueQueryBar;
+  eqlOptions: EqlOptionsSelected;
 }
 
 const defaultValues = {
@@ -40,12 +44,16 @@ const defaultValues = {
     filters: [],
     saved_id: null,
   },
+  eqlOptions: {},
 };
 
 const schema: FormSchema<TimelineEqlQueryBar> = {
   index: {
     fieldsToValidateOnChange: ['index', 'eqlQueryBar'],
     validations: [],
+  },
+  eqlOptions: {
+    fieldsToValidateOnChange: ['eqlOptions', 'eqlQueryBar'],
   },
   eqlQueryBar: {
     validations: [
@@ -56,10 +64,11 @@ const schema: FormSchema<TimelineEqlQueryBar> = {
   },
 };
 
-const HiddenUseField = styled(UseField)`
+const hiddenUseFieldClassName = css`
   display: none;
 `;
 
+// eslint-disable-next-line react/display-name
 export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string }) => {
   const dispatch = useDispatch();
   const isInit = useRef(true);
@@ -74,32 +83,37 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const initialState = {
-    ...defaultValues,
-    index: selectedPatterns.sort(),
-    eqlQueryBar: {
-      ...defaultValues.eqlQueryBar,
-      query: { query: optionsSelected.query ?? '', language: 'eql' },
-    },
-  };
+  const initialState = useMemo(
+    () => ({
+      ...defaultValues,
+      index: [...selectedPatterns].sort(),
+      eqlQueryBar: {
+        ...defaultValues.eqlQueryBar,
+        query: { query: optionsSelected.query ?? '', language: 'eql' },
+      },
+    }),
+    [optionsSelected.query, selectedPatterns]
+  );
 
   const { form } = useForm<TimelineEqlQueryBar>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields } = form;
+  const { getFields, setFieldValue } = form;
 
   const onOptionsChange = useCallback(
-    (field: FieldsEqlOptions, value: string | undefined) =>
+    (field: FieldsEqlOptions, value: string | undefined) => {
       dispatch(
         timelineActions.updateEqlOptions({
           id: timelineId,
           field,
           value,
         })
-      ),
-    [dispatch, timelineId]
+      );
+      setFieldValue('eqlOptions', { ...optionsSelected, [field]: value });
+    },
+    [dispatch, optionsSelected, setFieldValue, timelineId]
   );
 
   const [{ eqlQueryBar: formEqlQueryBar }] = useFormData<TimelineEqlQueryBar>({
@@ -133,7 +147,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   useEffect(() => {
     const { index: indexField } = getFields();
-    const newIndexValue = selectedPatterns.sort();
+    const newIndexValue = [...selectedPatterns].sort();
     const indexFieldValue = (indexField.value as string[]).sort();
     if (!isEqual(indexFieldValue, newIndexValue)) {
       indexField.setValue(newIndexValue);
@@ -177,7 +191,8 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   return (
     <Form form={form} data-test-subj="EqlQueryBarTimeline">
-      <HiddenUseField key="Index" path="index" />
+      <UseField key="Index" path="index" className={hiddenUseFieldClassName} />
+      <UseField key="EqlOptions" path="eqlOptions" className={hiddenUseFieldClassName} />
       <UseField
         key="EqlQueryBar"
         path="eqlQueryBar"

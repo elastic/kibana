@@ -16,21 +16,23 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
+import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type {
-  getLazyOsqueryResults,
   getLazyLiveQueryField,
   getLazyOsqueryAction,
   getLazyOsqueryResponseActionTypeForm,
+  getLazyOsqueryResult,
 } from './shared_components';
 import type { useAllLiveQueries, UseAllLiveQueriesConfig } from './actions/use_all_live_queries';
+import type { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
 
 export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
+  OsqueryResult: ReturnType<typeof getLazyOsqueryResult>;
   OsqueryResults: ReturnType<typeof getLazyOsqueryResults>;
   LiveQueryField?: ReturnType<typeof getLazyLiveQueryField>;
   isOsqueryAvailable: (props: { agentId: string }) => boolean;
@@ -50,14 +52,14 @@ export interface StartPlugins {
   lens?: LensPublicStart;
   security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   timelines: TimelinesUIStart;
   appName?: string;
 }
 
 export interface SetupPlugins {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  cases?: CasesUiSetup;
+  cases?: CasesPublicSetup;
 }
 
 export type StartServices = CoreStart & StartPlugins;

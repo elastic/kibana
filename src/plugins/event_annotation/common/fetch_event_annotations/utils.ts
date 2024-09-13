@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { TimeBuckets, TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -11,20 +12,16 @@ import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugi
 import { omit, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { LineStyle } from '@kbn/visualization-ui-components';
+import type { AvailableAnnotationIcon, PointStyleProps } from '@kbn/event-annotation-common';
 import {
   ManualEventAnnotationOutput,
   ManualPointEventAnnotationOutput,
   ManualRangeEventAnnotationOutput,
 } from '../manual_event_annotation/types';
 import { QueryPointEventAnnotationOutput } from '../query_point_event_annotation/types';
-import {
-  annotationColumns,
-  AvailableAnnotationIcon,
-  EventAnnotationOutput,
-  LineStyle,
-  PointStyleProps,
-} from '../types';
+import { annotationColumns, EventAnnotationOutput } from '../types';
 
 export const isRangeAnnotation = (
   annotation: EventAnnotationOutput
@@ -179,10 +176,10 @@ export const postprocessAnnotations = (
 
         let extraFields: Record<string, string | number | string[] | number[]> = {};
         if (annotationConfig?.extraFields?.length) {
-          extraFields = annotationConfig.extraFields.reduce(
-            (acc, field) => ({ ...acc, [`field:${field}`]: row[fieldsColIdMap[field]] }),
-            {}
-          );
+          extraFields = annotationConfig.extraFields.reduce((acc, field) => {
+            acc[`field:${field}`] = row[fieldsColIdMap[field]];
+            return acc;
+          }, {} as typeof extraFields);
         }
         if (annotationConfig?.textField) {
           extraFields[`field:${annotationConfig.textField}`] =

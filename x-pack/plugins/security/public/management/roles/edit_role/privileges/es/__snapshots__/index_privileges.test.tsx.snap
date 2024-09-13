@@ -12,6 +12,7 @@ exports[`it renders without crashing 1`] = `
   }
   editable={true}
   indexPatterns={Array []}
+  indexType="indices"
   indicesAPIClient={
     Object {
       "getFields": [MockFunction],
@@ -23,6 +24,8 @@ exports[`it renders without crashing 1`] = `
         "_subscribe": [Function],
       },
       "getFeatures": [MockFunction],
+      "getLicenseType": [MockFunction],
+      "getUnavailableReason": [MockFunction],
       "hasAtLeast": [MockFunction],
       "isEnabled": [MockFunction],
       "isLicenseAvailable": [MockFunction],
@@ -34,6 +37,7 @@ exports[`it renders without crashing 1`] = `
       "elasticsearch": Object {
         "cluster": Array [],
         "indices": Array [],
+        "remote_cluster": Array [],
         "run_as": Array [],
       },
       "kibana": Array [],
@@ -42,6 +46,7 @@ exports[`it renders without crashing 1`] = `
   }
   validator={
     RoleValidator {
+      "buildFlavor": undefined,
       "shouldValidate": undefined,
     }
   }

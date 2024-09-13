@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SearchStatus } from './types';
@@ -19,7 +20,7 @@ describe('getSearchStatus', () => {
     };
   });
 
-  test('returns an error status if search is partial and not running', async () => {
+  test('returns a complete status if search is partial and not running', async () => {
     mockClient.asyncSearch.status.mockResolvedValue({
       body: {
         is_partial: true,
@@ -28,7 +29,7 @@ describe('getSearchStatus', () => {
       },
     });
     const res = await getSearchStatus(mockClient, '123');
-    expect(res.status).toBe(SearchStatus.ERROR);
+    expect(res.status).toBe(SearchStatus.COMPLETE);
   });
 
   test('returns an error status if completion_status is an error', async () => {

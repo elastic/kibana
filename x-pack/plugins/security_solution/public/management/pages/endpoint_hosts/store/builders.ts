@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import {
+  ENDPOINT_DEFAULT_SORT_DIRECTION,
+  ENDPOINT_DEFAULT_SORT_FIELD,
+} from '../../../../../common/endpoint/constants';
 import type { Immutable } from '../../../../../common/endpoint/types';
 import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
-import { createLoadedResourceState, createUninitialisedResourceState } from '../../../state';
+import { createUninitialisedResourceState } from '../../../state';
 import type { EndpointState } from '../types';
 
 export const initialEndpointPageState = (): Immutable<EndpointState> => {
@@ -16,18 +20,10 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     pageSize: 10,
     pageIndex: 0,
     total: 0,
+    sortDirection: ENDPOINT_DEFAULT_SORT_DIRECTION,
+    sortField: ENDPOINT_DEFAULT_SORT_FIELD,
     loading: false,
     error: undefined,
-    endpointDetails: {
-      hostDetails: {
-        details: undefined,
-        detailsLoading: false,
-        detailsError: undefined,
-      },
-    },
-    policyResponse: undefined,
-    policyResponseLoading: false,
-    policyResponseError: undefined,
     location: undefined,
     policyItems: [],
     selectedPolicyId: undefined,
@@ -44,10 +40,8 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     agentsWithEndpointsTotalError: undefined,
     endpointsTotal: 0,
     endpointsTotalError: undefined,
-    policyVersionInfo: undefined,
-    hostStatus: undefined,
     isolationRequestState: createUninitialisedResourceState(),
-    endpointPendingActions: createLoadedResourceState(new Map()),
     metadataTransformStats: createUninitialisedResourceState(),
+    isInitialized: false,
   };
 };

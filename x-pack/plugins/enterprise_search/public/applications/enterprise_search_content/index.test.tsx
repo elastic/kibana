@@ -12,22 +12,14 @@ import '../__mocks__/enterprise_search_url.mock';
 
 import React from 'react';
 
-import { Redirect } from 'react-router-dom';
-
 import { shallow } from 'enzyme';
 
 import { SetupGuide } from '../enterprise_search_overview/components/setup_guide';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
-import { ErrorConnecting } from './components/error_connecting';
 import { SearchIndicesRouter } from './components/search_indices';
-import { Settings } from './components/settings';
 
-import {
-  EnterpriseSearchContent,
-  EnterpriseSearchContentUnconfigured,
-  EnterpriseSearchContentConfigured,
-} from '.';
+import { EnterpriseSearchContent, EnterpriseSearchContentConfigured } from '.';
 
 describe('EnterpriseSearchContent', () => {
   it('always renders the Setup Guide', () => {
@@ -37,26 +29,12 @@ describe('EnterpriseSearchContent', () => {
   });
 
   it('renders VersionMismatchPage when there are mismatching versions', () => {
+    setMockValues({ config: { canDeployEntSearch: true, host: 'host' } });
     const wrapper = shallow(
       <EnterpriseSearchContent enterpriseSearchVersion="7.15.0" kibanaVersion="7.16.0" />
     );
 
     expect(wrapper.find(VersionMismatchPage)).toHaveLength(1);
-  });
-
-  it('renders EnterpriseSearchContentUnconfigured when config.host is not set', () => {
-    setMockValues({ config: { canDeployEntSearch: true, host: '' } });
-    const wrapper = shallow(<EnterpriseSearchContent />);
-
-    expect(wrapper.find(EnterpriseSearchContentUnconfigured)).toHaveLength(1);
-  });
-
-  it('renders ErrorConnecting when Enterprise Search is unavailable', () => {
-    setMockValues({ errorConnectingMessage: '502 Bad Gateway' });
-    const wrapper = shallow(<EnterpriseSearchContent />);
-
-    const errorConnection = wrapper.find(ErrorConnecting);
-    expect(errorConnection).toHaveLength(1);
   });
 
   it('renders EnterpriseSearchContentConfigured when config.host is set & available', () => {
@@ -70,18 +48,10 @@ describe('EnterpriseSearchContent', () => {
   });
 
   it('renders EnterpriseSearchContentConfigured when config.host is not set & Ent Search cannot be deployed', () => {
-    setMockValues({ errorConnectingMessage: '', config: { canDeployEntSearch: false, host: '' } });
+    setMockValues({ config: { canDeployEntSearch: false, host: '' }, errorConnectingMessage: '' });
     const wrapper = shallow(<EnterpriseSearchContent />);
 
     expect(wrapper.find(EnterpriseSearchContentConfigured)).toHaveLength(1);
-  });
-});
-
-describe('EnterpriseSearchContentUnconfigured', () => {
-  it('redirects to the Setup Guide', () => {
-    const wrapper = shallow(<EnterpriseSearchContentUnconfigured />);
-
-    expect(wrapper.find(Redirect)).toHaveLength(1);
   });
 });
 
@@ -90,6 +60,5 @@ describe('EnterpriseSearchContentConfigured', () => {
 
   it('renders engine routes', () => {
     expect(wrapper.find(SearchIndicesRouter)).toHaveLength(1);
-    expect(wrapper.find(Settings)).toHaveLength(1);
   });
 });

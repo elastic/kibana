@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import path from 'path';
 import { i18n } from '@kbn/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
-import { SampleDatasetSchema } from '../../lib/sample_dataset_registry_types';
+import { SampleDatasetProvider } from '../../lib/sample_dataset_registry_types';
 
 const ecommerceName = i18n.translate('home.sampleData.ecommerceSpecTitle', {
   defaultMessage: 'Sample eCommerce orders',
@@ -19,14 +20,17 @@ const ecommerceDescription = i18n.translate('home.sampleData.ecommerceSpecDescri
   defaultMessage: 'Sample data, visualizations, and dashboards for tracking eCommerce orders.',
 });
 
-export const ecommerceSpecProvider = function (): SampleDatasetSchema {
+export const ecommerceSpecProvider: SampleDatasetProvider = ({ staticAssets }) => {
   return {
     id: 'ecommerce',
     name: ecommerceName,
     description: ecommerceDescription,
-    previewImagePath: '/plugins/home/assets/sample_data_resources/ecommerce/dashboard.webp',
-    darkPreviewImagePath:
-      '/plugins/home/assets/sample_data_resources/ecommerce/dashboard_dark.webp',
+    previewImagePath: staticAssets.getPluginAssetHref(
+      '/sample_data_resources/ecommerce/dashboard.webp'
+    ),
+    darkPreviewImagePath: staticAssets.getPluginAssetHref(
+      '/sample_data_resources/ecommerce/dashboard_dark.webp'
+    ),
     overviewDashboard: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
     defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
     savedObjects: getSavedObjects(),
@@ -41,6 +45,6 @@ export const ecommerceSpecProvider = function (): SampleDatasetSchema {
       },
     ],
     status: 'not_installed',
-    iconPath: '/plugins/home/assets/sample_data_resources/ecommerce/icon.svg',
+    iconPath: staticAssets.getPluginAssetHref('/sample_data_resources/ecommerce/icon.svg'),
   };
 };

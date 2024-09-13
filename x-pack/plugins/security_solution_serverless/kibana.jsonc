@@ -1,0 +1,31 @@
+{
+  "type": "plugin",
+  "id": "@kbn/security-solution-serverless",
+  "owner": "@elastic/security-solution",
+  "description": "Serverless customizations for security.",
+  "plugin": {
+    "id": "securitySolutionServerless",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "securitySolutionServerless",
+    ],
+    "requiredPlugins": [
+      "kibanaReact",
+      "management",
+      "security",
+      "securitySolution",
+      "serverless",
+      "taskManager",
+      "cloud",
+      "fleet",
+      "actions",
+      "discover"
+    ],
+    "optionalPlugins": [
+      "securitySolutionEss",
+      "integrationAssistant"
+    ],
+  }
+}

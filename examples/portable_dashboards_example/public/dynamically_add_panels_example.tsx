@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo, useState } from 'react';
 
-import { DashboardContainer, LazyDashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
+import { AwaitingDashboardAPI, DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -22,20 +23,18 @@ import {
   VisualizeEmbeddable,
   VisualizeInput,
   VisualizeOutput,
-} from '@kbn/visualizations-plugin/public/embeddable/visualize_embeddable';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
+} from '@kbn/visualizations-plugin/public/legacy/embeddable/visualize_embeddable';
 
 const INPUT_KEY = 'portableDashboard:saveExample:input';
 
-const DashboardContainerRenderer = withSuspense(LazyDashboardContainerRenderer); // make this so we don't have two loading states - loading in the dashboard plugin instead
-
 export const DynamicByReferenceExample = () => {
   const [isSaving, setIsSaving] = useState(false);
-  const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer | undefined>();
+  const [dashboard, setdashboard] = useState<AwaitingDashboardAPI>();
 
   const onSave = async () => {
+    if (!dashboard) return;
     setIsSaving(true);
-    localStorage.setItem(INPUT_KEY, JSON.stringify(dashboardContainer!.getInput()));
+    localStorage.setItem(INPUT_KEY, JSON.stringify(dashboard.getInput()));
     // simulated async save await
     await new Promise((resolve) => setTimeout(resolve, 1000));
     setIsSaving(false);
@@ -56,44 +55,37 @@ export const DynamicByReferenceExample = () => {
 
   const resetPersistableInput = () => {
     localStorage.removeItem(INPUT_KEY);
-    if (dashboardContainer) {
-      const children = dashboardContainer.getChildIds();
+    if (dashboard) {
+      const children = dashboard.getChildIds();
       children.map((childId) => {
-        dashboardContainer.removeEmbeddable(childId);
+        dashboard.removeEmbeddable(childId);
       });
     }
   };
 
-  const addByReference = () => {
-    if (dashboardContainer) {
-      dashboardContainer.addFromLibrary();
-    }
-  };
-
   const addByValue = async () => {
-    if (dashboardContainer) {
-      dashboardContainer.addNewEmbeddable<VisualizeInput, VisualizeOutput, VisualizeEmbeddable>(
-        'visualization',
-        {
-          title: 'Sample Markdown Vis',
-          savedVis: {
-            type: 'markdown',
-            title: '',
-            data: { aggs: [], searchSource: {} },
-            params: {
-              fontSize: 12,
-              openLinksInNewTab: false,
-              markdown: '### By Value Visualization\nThis is a sample by value panel.',
-            },
+    if (!dashboard) return;
+    dashboard.addNewEmbeddable<VisualizeInput, VisualizeOutput, VisualizeEmbeddable>(
+      'visualization',
+      {
+        title: 'Sample Markdown Vis',
+        savedVis: {
+          type: 'markdown',
+          title: '',
+          data: { aggs: [], searchSource: {} },
+          params: {
+            fontSize: 12,
+            openLinksInNewTab: false,
+            markdown: '### By Value Visualization\nThis is a sample by value panel.',
           },
-        }
-      );
-    }
+        },
+      }
+    );
   };
 
   const disableButtons = useMemo(() => {
-    return dashboardContainer === undefined || isSaving;
-  }, [dashboardContainer, isSaving]);
+    return !dashboard || isSaving;
+  }, [dashboard, isSaving]);
 
   return (
     <>
@@ -114,7 +106,7 @@ export const DynamicByReferenceExample = () => {
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButton onClick={addByReference} isDisabled={disableButtons}>
+                <EuiButton onClick={() => dashboard?.addFromLibrary()} isDisabled={disableButtons}>
                   Add visualization from library
                 </EuiButton>
               </EuiFlexItem>
@@ -141,19 +133,17 @@ export const DynamicByReferenceExample = () => {
         </EuiFlexGroup>
         <EuiSpacer size="m" />
 
-        <DashboardContainerRenderer
+        <DashboardRenderer
           getCreationOptions={async () => {
             const persistedInput = getPersistableInput();
             return {
-              initialInput: {
+              getInitialInput: () => ({
                 ...persistedInput,
                 timeRange: { from: 'now-30d', to: 'now' }, // need to set the time range for the by value vis
-              },
+              }),
             };
           }}
-          onDashboardContainerLoaded={(container) => {
-            setDashboardContainer(container);
-          }}
+          ref={setdashboard}
         />
       </EuiPanel>
     </>

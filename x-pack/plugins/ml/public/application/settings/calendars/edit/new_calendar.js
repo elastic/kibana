@@ -16,11 +16,10 @@ import { getCalendarSettingsData, validateCalendarId } from './utils';
 import { CalendarForm } from './calendar_form';
 import { NewEventModal } from './new_event_modal';
 import { ImportModal } from './import_modal';
-import { ml } from '../../../services/ml_api_service';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { getDocLinks } from '../../../util/dependency_cache';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { HelpMenu } from '../../../components/help_menu';
 
 class NewCalendarUI extends Component {
@@ -54,6 +53,9 @@ class NewCalendarUI extends Component {
   }
 
   componentDidMount() {
+    this.toastNotificationService = toastNotificationServiceProvider(
+      this.props.kibana.services.notifications.toasts
+    );
     this.formSetup();
   }
 
@@ -69,7 +71,9 @@ class NewCalendarUI extends Component {
 
   async formSetup() {
     try {
-      const { jobIds, groupIds, calendars } = await getCalendarSettingsData();
+      const { jobIds, groupIds, calendars } = await getCalendarSettingsData(
+        this.props.kibana.services.mlServices.mlApi
+      );
 
       const jobIdOptions = jobIds.map((jobId) => ({ label: jobId }));
       const groupIdOptions = groupIds.map((groupId) => ({ label: groupId }));
@@ -118,10 +122,9 @@ class NewCalendarUI extends Component {
         isGlobalCalendar,
       });
     } catch (error) {
-      console.log(error);
       this.setState({ loading: false });
-      const { toasts } = this.props.kibana.services.notifications;
-      toasts.addDanger(
+      this.toastNotificationService.displayErrorToast(
+        error,
         i18n.translate('xpack.ml.calendarsEdit.errorWithLoadingCalendarFromDataErrorMessage', {
           defaultMessage: 'An error occurred loading calendar form data. Try refreshing the page.',
         })
@@ -142,6 +145,7 @@ class NewCalendarUI extends Component {
   };
 
   onCreate = async () => {
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
     const { formCalendarId } = this.state;
 
     if (this.isDuplicateId()) {
@@ -157,13 +161,12 @@ class NewCalendarUI extends Component {
       this.setState({ saving: true });
 
       try {
-        await ml.addCalendar(calendar);
+        await mlApi.addCalendar(calendar);
         await this.returnToCalendarsManagementPage();
       } catch (error) {
-        console.log('Error saving calendar', error);
         this.setState({ saving: false });
-        const { toasts } = this.props.kibana.services.notifications;
-        toasts.addDanger(
+        this.toastNotificationService.displayErrorToast(
+          error,
           i18n.translate('xpack.ml.calendarsEdit.errorWithCreatingCalendarErrorMessage', {
             defaultMessage: 'An error occurred creating calendar {calendarId}',
             values: { calendarId: calendar.calendarId },
@@ -174,17 +177,17 @@ class NewCalendarUI extends Component {
   };
 
   onEdit = async () => {
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
     const calendar = this.setUpCalendarForApi();
     this.setState({ saving: true });
 
     try {
-      await ml.updateCalendar(calendar);
+      await mlApi.updateCalendar(calendar);
       await this.returnToCalendarsManagementPage();
     } catch (error) {
-      console.log('Error saving calendar', error);
       this.setState({ saving: false });
-      const { toasts } = this.props.kibana.services.notifications;
-      toasts.addDanger(
+      this.toastNotificationService.displayErrorToast(
+        error,
         i18n.translate('xpack.ml.calendarsEdit.errorWithUpdatingCalendarErrorMessage', {
           defaultMessage:
             'An error occurred saving calendar {calendarId}. Try refreshing the page.',
@@ -330,7 +333,7 @@ class NewCalendarUI extends Component {
       isGlobalCalendar,
     } = this.state;
 
-    const helpLink = getDocLinks().links.ml.calendars;
+    const helpLink = this.props.kibana.services.docLinks.links.ml.calendars;
 
     let modal = '';
 

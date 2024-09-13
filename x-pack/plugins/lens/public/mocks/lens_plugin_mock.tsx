@@ -8,7 +8,8 @@
 import React from 'react';
 import { createFormulaPublicApi } from '../async_services';
 import { LensPublicStart } from '..';
-import { visualizationTypes } from '../visualizations/xy/types';
+import { visualizationSubtypes } from '../visualizations/xy/types';
+import { mockAllSuggestions } from './suggestions_mock';
 
 type Start = jest.Mocked<LensPublicStart>;
 
@@ -21,14 +22,18 @@ export const lensPluginMock = {
       SaveModalComponent: jest.fn(() => {
         return <span>Lens Save Modal Component</span>;
       }),
+      EditLensConfigPanelApi: jest
+        .fn()
+        .mockResolvedValue(() => <span>Lens Config Panel Component</span>),
       canUseEditor: jest.fn(() => true),
       navigateToPrefilledEditor: jest.fn(),
       getXyVisTypes: jest
         .fn()
-        .mockReturnValue(new Promise((resolve) => resolve(visualizationTypes))),
+        .mockReturnValue(new Promise((resolve) => resolve(visualizationSubtypes))),
 
       stateHelperApi: jest.fn().mockResolvedValue({
         formula: createFormulaPublicApi(),
+        suggestions: jest.fn().mockReturnValue(mockAllSuggestions),
       }),
     };
     return startContract;

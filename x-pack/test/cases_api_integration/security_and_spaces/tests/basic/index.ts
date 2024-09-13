@@ -15,6 +15,8 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('cases security and spaces enabled: basic', function () {
+    this.tags('skipFIPS');
+
     before(async () => {
       await createSpacesAndUsers(getService);
       // once a user profile is created the only way to remove it is to delete the user and roles, so best to activate
@@ -30,6 +32,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/assignees'));
     loadTestFile(require.resolve('./cases/push_case'));
     loadTestFile(require.resolve('./configure/get_connectors'));
+    loadTestFile(require.resolve('./attachments_framework/registered_persistable_state_basic'));
 
     // Internal routes
     loadTestFile(require.resolve('./internal/suggest_user_profiles'));
@@ -39,5 +42,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
 
     // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
     loadTestFile(require.resolve('../common/migrations'));
+
+    // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
+    loadTestFile(require.resolve('../common/kibana_alerting_cases_index'));
   });
 };

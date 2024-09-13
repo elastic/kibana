@@ -118,7 +118,7 @@ const searchUIConfig = {
 ...
 plugins: [
   AnalyticsPlugin({
-    client: getTracker();
+    client: getTracker()
   })
 ],
 ...

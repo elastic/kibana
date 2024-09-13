@@ -33,6 +33,7 @@ import {
   IndexSettingsTableRow,
   ReindexTableRow,
   ClusterSettingsTableRow,
+  HealthIndicatorTableRow,
 } from './deprecation_types';
 import { DeprecationTableColumns } from '../types';
 import { DEPRECATION_TYPE_MAP, PAGINATION_CONFIG } from '../constants';
@@ -126,6 +127,9 @@ const renderTableRowCells = (
     case 'reindex':
       return <ReindexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 
+    case 'healthIndicator':
+      return <HealthIndicatorTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+
     default:
       return <DefaultTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
   }
@@ -201,7 +205,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
     [sortConfig]
   );
 
-  const handleSearch = useCallback(({ query, error }) => {
+  const handleSearch = useCallback(({ query, error }: any) => {
     if (error) {
       setSearchError(error);
     } else {

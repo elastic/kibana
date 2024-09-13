@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -13,9 +14,10 @@ import {
   SearchSessionSavedObjectAttributesPre$8$0$0,
   SearchSessionSavedObjectAttributesPre$8$6$0,
 } from './search_session_migration';
-import { SavedObject } from '@kbn/core/types';
+import type { SavedObject } from '@kbn/core/server';
 import { SEARCH_SESSION_TYPE, SearchSessionStatus, SearchStatus } from '../../../common';
 import { SavedObjectMigrationContext } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
 describe('7.12.0 -> 7.13.0', () => {
   const mockCompletedSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$7$13$0> =
@@ -66,7 +68,9 @@ describe('7.12.0 -> 7.13.0', () => {
       references: [],
     };
 
-  const migration = searchSessionSavedObjectMigrations['7.13.0'];
+  const migration = SavedObjectsUtils.getMigrationFunction(
+    searchSessionSavedObjectMigrations['7.13.0']
+  );
   test('"completed" is populated from "touched" for completed session', () => {
     const migratedCompletedSession = migration(
       mockCompletedSessionSavedObject,
@@ -138,7 +142,9 @@ describe('7.13.0 -> 7.14.0', () => {
     references: [],
   };
 
-  const migration = searchSessionSavedObjectMigrations['7.14.0'];
+  const migration = SavedObjectsUtils.getMigrationFunction(
+    searchSessionSavedObjectMigrations['7.14.0']
+  );
   test('version is populated', () => {
     const migratedSession = migration(mockSessionSavedObject, {} as SavedObjectMigrationContext);
 
@@ -169,7 +175,9 @@ describe('7.13.0 -> 7.14.0', () => {
 });
 
 describe('7.14.0 -> 8.0.0', () => {
-  const migration = searchSessionSavedObjectMigrations['8.0.0'];
+  const migration = SavedObjectsUtils.getMigrationFunction(
+    searchSessionSavedObjectMigrations['8.0.0']
+  );
 
   test('Discover app URL generator migrates to locator', () => {
     const mockSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$8$0$0> = {
@@ -359,7 +367,9 @@ describe('7.14.0 -> 8.0.0', () => {
 });
 
 describe('8.0.0 -> 8.6.0', () => {
-  const migration = searchSessionSavedObjectMigrations['8.6.0'];
+  const migration = SavedObjectsUtils.getMigrationFunction(
+    searchSessionSavedObjectMigrations['8.6.0']
+  );
 
   const mockSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$8$6$0> = {
     id: 'id',

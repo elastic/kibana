@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './annotations.scss';
@@ -23,9 +24,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type {
@@ -34,10 +35,7 @@ import type {
   ManualRangeEventAnnotationRow,
 } from '@kbn/event-annotation-plugin/common';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import {
-  defaultAnnotationColor,
-  defaultAnnotationRangeColor,
-} from '@kbn/event-annotation-plugin/public';
+import { defaultAnnotationColor, defaultAnnotationRangeColor } from '@kbn/event-annotation-common';
 import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common/manual_event_annotation/types';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -48,7 +46,7 @@ import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers'
 export interface AnnotationsProps {
   groupedLineAnnotations: MergedAnnotation[];
   rangeAnnotations: ManualRangeEventAnnotationRow[];
-  formatter?: FieldFormat;
+  timeFormat?: string;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
   simpleView?: boolean;
@@ -273,7 +271,7 @@ RectAnnotation.displayName = 'RectAnnotation';
 export const Annotations = ({
   groupedLineAnnotations,
   rangeAnnotations,
-  formatter,
+  timeFormat,
   isHorizontal,
   paddingMap,
   simpleView,
@@ -358,18 +356,30 @@ export const Annotations = ({
             id={id}
             key={id}
             customTooltip={() => (
-              <div className="echTooltip xyAnnotationTooltip">
-                <div className="echTooltip__header">
-                  <EuiText size="xs">
-                    <h4>
-                      {formatter
-                        ? `${formatter.convert(time)} — ${formatter?.convert(endTime)}`
-                        : `${moment(time).toISOString()} — ${moment(endTime).toISOString()}`}
-                    </h4>
-                  </EuiText>
+              <EuiPanel
+                color="plain"
+                hasShadow={false}
+                hasBorder={false}
+                paddingSize="none"
+                borderRadius="none"
+                className="xyAnnotationTooltip"
+              >
+                <div className="xyAnnotationTooltip__row">
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="stopFilled" color={color} />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiTitle size="xxxs">
+                        <h6>{label}</h6>
+                      </EuiTitle>
+                      <EuiFlexItem>{`${moment(time).format(timeFormat)} — ${moment(endTime).format(
+                        timeFormat
+                      )}`}</EuiFlexItem>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </div>
-                <div className="xyAnnotationTooltipDetail">{label}</div>
-              </div>
+              </EuiPanel>
             )}
             dataValues={[
               {

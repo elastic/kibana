@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlPages } from '../constants/locator';
+import type { MlPages } from '../constants/locator';
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;
@@ -35,14 +35,6 @@ type DeepReadonlyObject<T> = {
   readonly [P in keyof T]: DeepReadonly<T[P]>;
 };
 
-export interface ListingPageUrlState {
-  pageSize: number;
-  pageIndex: number;
-  sortField: string;
-  sortDirection: string;
-  queryText?: string;
-}
-
 export type AppPageState<T> = {
   [key in MlPages]?: Partial<T>;
 };
@@ -52,3 +44,13 @@ type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
 export type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
 
 export type AwaitReturnType<T> = T extends PromiseLike<infer U> ? U : T;
+
+/**
+ * Removes an optional modifier from a property in a type.
+ */
+export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: Exclude<T[P], null> };
+
+/**
+ * Makes requested properties in a type optional
+ */
+export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

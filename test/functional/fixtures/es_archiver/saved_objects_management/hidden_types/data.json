@@ -9,7 +9,6 @@
         "title": "hidden object 1"
       },
       "type": "test-actions-export-hidden",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z"
     }
   }
@@ -26,7 +25,6 @@
         "title": "hidden object 2"
       },
       "type": "test-actions-export-hidden",
-      "migrationVersion": {},
       "updated_at": "2018-12-21T00:43:07.096Z"
     }
   }
@@ -35,8 +33,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
+    "index": ".kibana_analytics",
     "id": "visualization:75c3e060-1e7c-11e9-8488-65449e65d0ed",
     "source": {
       "visualization": {
@@ -50,13 +47,18 @@
         }
       },
       "type": "visualization",
-      "updated_at": "2019-01-22T19:32:31.206Z"
+      "updated_at": "2019-01-22T19:32:31.206Z",
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
     },
-    "references" : [
+    "references": [
       {
-        "name" : "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type" : "index-pattern",
-        "id" : "logstash-*"
+        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+        "type": "index-pattern",
+        "id": "logstash-*"
       }
     ]
   }
@@ -65,8 +67,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
+    "index": ".kibana_analytics",
     "id": "dashboard:i-exist",
     "source": {
       "dashboard": {
@@ -82,7 +83,13 @@
         }
       },
       "type": "dashboard",
-      "updated_at": "2019-01-22T19:32:47.232Z"
+      "updated_at": "2019-01-22T19:32:47.232Z",
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
     }
   }
 }
+

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -28,7 +29,6 @@ import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { EnrollmentToken } from '../common';
 import { DocLink } from './doc_link';
 import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SubmitErrorCallout } from './submit_error_callout';
@@ -38,6 +38,7 @@ import { useForm } from './use_form';
 import { useKibana } from './use_kibana';
 import { useVerification } from './use_verification';
 import { useVisibility } from './use_visibility';
+import type { EnrollmentToken } from '../common';
 
 export interface EnrollmentTokenFormValues {
   token: string;

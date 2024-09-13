@@ -10,10 +10,8 @@ import { castArray, groupBy } from 'lodash';
 import callsites from 'callsites';
 import { maybe } from '@kbn/apm-plugin/common/utils/maybe';
 import { joinByKey } from '@kbn/apm-plugin/common/utils/join_by_key';
-import {
-  ApmUsername,
-  APM_TEST_PASSWORD,
-} from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
+import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
+import { kbnTestConfig } from '@kbn/test';
 import { APMFtrConfigName } from '../configs';
 import { FtrProviderContext } from './ftr_provider_context';
 
@@ -155,7 +153,7 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
                 await supertest
                   .get('/api/ml/saved_objects/sync')
                   .set('kbn-xsrf', 'foo')
-                  .auth(ApmUsername.editorUser, APM_TEST_PASSWORD);
+                  .auth(ApmUsername.editorUser, kbnTestConfig.getUrlParts().password!);
               }
               if (condition.archives.length) {
                 log('Loaded all archives');
@@ -178,7 +176,7 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
               }
             };
 
-            describe(condition.archives.join(',') || 'no data', () => {
+            describe(condition.archives.join(',') || 'no archive', () => {
               before(runBefore);
 
               runs.forEach((run) => {

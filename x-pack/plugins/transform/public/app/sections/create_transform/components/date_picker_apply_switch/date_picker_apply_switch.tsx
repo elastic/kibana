@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 
 import { EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { StepDefineFormHook } from '../step_define';
+import type { StepDefineFormHook } from '../step_define';
 
 export const DatePickerApplySwitch: FC<StepDefineFormHook> = ({
   datePicker: {

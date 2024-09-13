@@ -6,46 +6,47 @@
  */
 
 import { EuiButtonIcon } from '@elastic/eui';
-import React, { useState } from 'react';
-import { GetInspectQuery } from '../../../../../../types';
+import React, { useState, memo, useCallback } from 'react';
 
+import { EsQuerySnapshot } from '@kbn/alerts-ui-shared';
 import { HoverVisibilityContainer } from './hover_visibility_container';
 
 import { ModalInspectQuery } from './modal';
 import * as i18n from './translations';
 
 export const BUTTON_CLASS = 'inspectButtonComponent';
+const VISIBILITY_CLASSES = [BUTTON_CLASS];
 
 interface InspectButtonContainerProps {
   hide?: boolean;
   children: React.ReactNode;
 }
 
-export const InspectButtonContainer: React.FC<InspectButtonContainerProps> = ({
-  children,
-  hide,
-}) => (
-  <HoverVisibilityContainer hide={hide} targetClassNames={[BUTTON_CLASS]}>
-    {children}
-  </HoverVisibilityContainer>
+export const InspectButtonContainer: React.FC<InspectButtonContainerProps> = memo(
+  ({ children, hide }) => (
+    <HoverVisibilityContainer hide={hide} targetClassNames={VISIBILITY_CLASSES}>
+      {children}
+    </HoverVisibilityContainer>
+  )
 );
 
 interface InspectButtonProps {
   onCloseInspect?: () => void;
   showInspectButton?: boolean;
-  getInspectQuery: GetInspectQuery;
+  querySnapshot: EsQuerySnapshot;
+  inspectTitle: string;
 }
 
-const InspectButtonComponent: React.FC<InspectButtonProps> = ({ getInspectQuery }) => {
+const InspectButtonComponent: React.FC<InspectButtonProps> = ({ querySnapshot, inspectTitle }) => {
   const [isShowingModal, setIsShowingModal] = useState(false);
 
-  const onOpenModal = () => {
+  const onOpenModal = useCallback(() => {
     setIsShowingModal(true);
-  };
+  }, []);
 
-  const onCloseModal = () => {
+  const onCloseModal = useCallback(() => {
     setIsShowingModal(false);
-  };
+  }, []);
 
   return (
     <>
@@ -62,7 +63,8 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({ getInspectQuery 
         <ModalInspectQuery
           closeModal={onCloseModal}
           data-test-subj="inspect-modal"
-          getInspectQuery={getInspectQuery}
+          querySnapshot={querySnapshot}
+          title={inspectTitle}
         />
       )}
     </>

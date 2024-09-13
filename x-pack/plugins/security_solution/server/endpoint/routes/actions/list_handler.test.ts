@@ -5,31 +5,27 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type { HttpApiTestSetupMock } from '../../mocks';
 import {
-  createMockEndpointAppContextServiceSetupContract,
-  createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
+  getRegisteredVersionedRouteMock,
+  createHttpApiTestSetupMock,
 } from '../../mocks';
 import { registerActionListRoutes } from './list';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { doesLogsEndpointActionsIndexExist } from '../../utils';
 import { getActionList, getActionListByStatus } from '../../services';
+import { CustomHttpRequestError } from '@kbn/osquery-plugin/server/common/error';
 
 jest.mock('../../utils');
 const mockDoesLogsEndpointActionsIndexExist = doesLogsEndpointActionsIndexExist as jest.Mock;
@@ -39,8 +35,8 @@ const mockGetActionList = getActionList as jest.Mock;
 const mockGetActionListByStatus = getActionListByStatus as jest.Mock;
 
 describe('Action List Handler', () => {
-  let endpointAppContextService: EndpointAppContextService;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
+  let apiTestSetup: HttpApiTestSetupMock;
 
   let actionListHandler: (
     query?: EndpointActionListRequestQuery
@@ -49,17 +45,11 @@ describe('Action List Handler', () => {
   beforeEach(() => {
     const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
     const routerMock = httpServiceMock.createRouter();
-    endpointAppContextService = new EndpointAppContextService();
-    endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
+    apiTestSetup = createHttpApiTestSetupMock();
+
     mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(true);
 
-    registerActionListRoutes(routerMock, {
-      logFactory: loggingSystemMock.create(),
-      service: endpointAppContextService,
-      config: () => Promise.resolve(createMockConfig()),
-      experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-    });
+    registerActionListRoutes(routerMock, apiTestSetup.endpointAppContextMock);
 
     actionListHandler = async (
       query?: EndpointActionListRequestQuery
@@ -68,17 +58,14 @@ describe('Action List Handler', () => {
         query,
       });
       mockResponse = httpServerMock.createResponseFactory();
-      const [, routeHandler]: [
-        RouteConfig<any, any, any, any>,
-        RequestHandler<
-          unknown,
-          EndpointActionListRequestQuery,
-          unknown,
-          SecuritySolutionRequestHandlerContext
-        >
-      ] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(BASE_ENDPOINT_ACTION_ROUTE)
-      )!;
+
+      const { routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        BASE_ENDPOINT_ACTION_ROUTE,
+        '2023-10-31'
+      );
+
       await routeHandler(
         coreMock.createCustomRequestHandlerContext(
           createRouteHandlerContext(esClientMock, savedObjectsClientMock.create())
@@ -91,17 +78,25 @@ describe('Action List Handler', () => {
     };
   });
 
-  afterEach(() => {
-    endpointAppContextService.stop();
-  });
-
   describe('Internals', () => {
-    const defaultParams = { pageSize: 10, page: 1, withAutomatedActions: true };
+    const defaultParams = { pageSize: 10, page: 1 };
     it('should return `notFound` when actions index does not exist', async () => {
       mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(false);
       await actionListHandler(defaultParams);
       expect(mockResponse.notFound).toHaveBeenCalledWith({
         body: 'index_not_found_exception',
+      });
+    });
+
+    it('should return `badRequest` when sentinel_one feature flag is not enabled and agentType is `sentinel_one`', async () => {
+      apiTestSetup.endpointAppContextMock.experimentalFeatures = {
+        ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
+        responseActionsSentinelOneV1Enabled: false,
+      };
+      await actionListHandler({ ...defaultParams, agentTypes: 'sentinel_one' });
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: new CustomHttpRequestError('[request body.agentTypes]: sentinel_one is disabled'),
       });
     });
 
@@ -121,13 +116,14 @@ describe('Action List Handler', () => {
       await actionListHandler({
         withOutputs: 'actionX',
         agentIds: 'agentX',
+        agentTypes: 'endpoint',
         commands: 'running-processes',
         statuses: 'failed',
         userIds: 'userX',
-        withAutomatedActions: true,
       });
       expect(mockGetActionListByStatus).toBeCalledWith(
         expect.objectContaining({
+          agentTypes: ['endpoint'],
           withOutputs: ['actionX'],
           elasticAgentIds: ['agentX'],
           commands: ['running-processes'],
@@ -155,12 +151,14 @@ describe('Action List Handler', () => {
       await actionListHandler({
         ...defaultParams,
         agentIds: 'agentX',
+        agentTypes: 'endpoint',
         commands: 'isolate',
         userIds: 'userX',
       });
 
       expect(mockGetActionList).toHaveBeenCalledWith(
         expect.objectContaining({
+          agentTypes: ['endpoint'],
           commands: ['isolate'],
           elasticAgentIds: ['agentX'],
           userIds: ['userX'],

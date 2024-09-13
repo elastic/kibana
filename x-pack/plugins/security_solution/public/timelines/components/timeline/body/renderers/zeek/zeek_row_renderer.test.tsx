@@ -12,10 +12,9 @@ import React from 'react';
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
-import '../../../../../../common/mock/match_media';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { zeekRowRenderer } from './zeek_row_renderer';
-import { TimelineId } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 
 jest.mock('../../../../../../common/lib/kibana');
 

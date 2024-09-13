@@ -6,15 +6,16 @@
  */
 
 import React from 'react';
-import { OverlayStart, SavedObjectsClientContract } from '@kbn/core/public';
 import { SaveResult } from '@kbn/saved-objects-plugin/public';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
+import { ContentClient } from '@kbn/content-management-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
 import { SaveModal, OnSaveGraphProps } from '../components/save_modal';
 
-export interface SaveWorkspaceServices {
-  overlays: OverlayStart;
-  savedObjectsClient: SavedObjectsClientContract;
+export interface SaveWorkspaceServices
+  extends Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'> {
+  contentClient: ContentClient;
 }
 
 export type SaveWorkspaceHandler = (

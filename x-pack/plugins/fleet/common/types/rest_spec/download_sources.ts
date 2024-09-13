@@ -10,7 +10,7 @@ import type { DownloadSourceBase, DownloadSource } from '../models';
 import type { ListResult } from './common';
 
 export interface GetOneDownloadSourceResponse {
-  item: DownloadSourceBase;
+  item: DownloadSource;
 }
 
 export interface DeleteDownloadSourceResponse {
@@ -40,6 +40,7 @@ export interface PostDownloadSourceRequest {
     name: string;
     host: string;
     is_default?: boolean;
+    proxy_id?: string | null;
   };
 }
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -39,6 +40,7 @@ import {
   setMetaDocMigrationComplete,
   setMetaDocMigrationStarted,
 } from './utils';
+import { buildPickupMappingsQuery } from '../core/build_pickup_mappings_query';
 
 export type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -56,7 +58,7 @@ export const nextActionMap = (context: MigratorContext) => {
   const client = context.elasticsearchClient;
   return {
     INIT: (state: InitState) =>
-      Actions.init({
+      Actions.fetchIndices({
         client,
         indices: [`${context.indexPrefix}_*`],
       }),
@@ -64,13 +66,17 @@ export const nextActionMap = (context: MigratorContext) => {
       Actions.createIndex({
         client,
         indexName: state.currentIndex,
+        aliases: state.creationAliases,
         mappings: state.indexMappings,
+        esCapabilities: context.esCapabilities,
       }),
     UPDATE_INDEX_MAPPINGS: (state: UpdateIndexMappingsState) =>
       Actions.updateAndPickupMappings({
         client,
         index: state.currentIndex,
         mappings: { properties: state.additiveMappingChanges },
+        batchSize: context.batchSize,
+        query: buildPickupMappingsQuery(Object.keys(state.additiveMappingChanges)),
       }),
     UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: (state: UpdateIndexMappingsWaitForTaskState) =>
       Actions.waitForPickupUpdatedMappingsTask({
@@ -84,7 +90,7 @@ export const nextActionMap = (context: MigratorContext) => {
         index: state.currentIndex,
         meta: setMetaMappingMigrationComplete({
           meta: state.currentIndexMeta,
-          versions: context.typeModelVersions,
+          versions: context.typeVirtualVersions,
         }),
       }),
     UPDATE_ALIASES: (state: UpdateAliasesState) =>
@@ -172,7 +178,7 @@ export const nextActionMap = (context: MigratorContext) => {
         index: state.currentIndex,
         meta: setMetaDocMigrationComplete({
           meta: state.currentIndexMeta,
-          versions: context.typeModelVersions,
+          versions: context.typeVirtualVersions,
         }),
       }),
     UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES: (
@@ -200,7 +206,7 @@ export const next = (context: MigratorContext) => {
       // instead of the union.
       const nextAction = map[state.controlState] as (
         state: State
-      ) => ReturnType<typeof map[AllActionStates]>;
+      ) => ReturnType<(typeof map)[AllActionStates]>;
       return delay(nextAction(state));
     }
   };

@@ -16,16 +16,17 @@ const RUN_FULLSTORY_TESTS = Boolean(FULLSTORY_ORG_ID && FULLSTORY_API_KEY);
 
 const CHAT_URL = process.env.CHAT_URL;
 const CHAT_IDENTITY_SECRET = process.env.CHAT_IDENTITY_SECRET;
+const CLOUD_TRIAL_END_DATE = new Date().toISOString(); // needed for chat to appear
 const RUN_CHAT_TESTS = Boolean(CHAT_URL);
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.base.js')
+    require.resolve('@kbn/test-suites-src/functional/config.base')
   );
 
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
@@ -83,6 +84,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               '--xpack.cloud.chat.enabled=true',
               `--xpack.cloud.chat.chatURL=${CHAT_URL}`,
               `--xpack.cloud.chatIdentitySecret=${CHAT_IDENTITY_SECRET}`,
+              `--xpack.cloud.trial_end_date="${CLOUD_TRIAL_END_DATE}"`,
             ]
           : []),
       ],
@@ -93,7 +95,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         'dateFormat:tz': 'UTC',
       },
     },
-    apps: kibanaFunctionalConfig.get('apps'),
+    apps: {
+      ...kibanaFunctionalConfig.get('apps'),
+      observability: {
+        pathname: '/app/observability',
+      },
+      security: {
+        pathname: '/app/security',
+      },
+    },
     screenshots: { directory: resolve(__dirname, 'screenshots') },
 
     junit: {

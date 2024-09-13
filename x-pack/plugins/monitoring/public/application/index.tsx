@@ -6,13 +6,12 @@
  */
 
 import { AppMountParameters, CoreStart, CoreTheme, MountPoint } from '@kbn/core/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import React, { useMemo } from 'react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import { Redirect, Router, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-import useObservable from 'react-use/lib/useObservable';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { Observable } from 'rxjs';
 import {
   CODE_PATH_APM,
@@ -22,7 +21,7 @@ import {
   CODE_PATH_KIBANA,
   CODE_PATH_LOGSTASH,
 } from '../../common/constants';
-import { MonitoringStartPluginDependencies } from '../types';
+import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../types';
 import { ExternalConfig, ExternalConfigContext } from './contexts/external_config_context';
 import { GlobalStateProvider } from './contexts/global_state_context';
 import { HeaderActionMenuContext } from './contexts/header_action_menu_context';
@@ -100,260 +99,253 @@ const MonitoringApp: React.FC<{
   theme$: Observable<CoreTheme>;
 }> = ({ core, plugins, externalConfig, setHeaderActionMenu, theme$ }) => {
   const history = createPreserveQueryHistory();
-
-  const darkModeObservable: Observable<boolean> = useMemo(
-    () => core.uiSettings!.get$('theme:darkMode'),
-    [core.uiSettings]
-  );
-  const darkMode = useObservable(darkModeObservable, core.uiSettings!.get('theme:darkMode'));
+  const startServices: MonitoringStartServices = { ...core, ...plugins };
 
   return (
-    <KibanaContextProvider services={{ ...core, ...plugins }}>
-      <EuiThemeProvider darkMode={darkMode}>
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <ExternalConfigContext.Provider value={externalConfig}>
-            <GlobalStateProvider
-              query={plugins.data.query}
-              toasts={core.notifications.toasts}
-              uiSettings={core.uiSettings}
-            >
-              <HeaderActionMenuContext.Provider value={{ setHeaderActionMenu, theme$ }}>
-                <MonitoringTimeContainer>
-                  <BreadcrumbContainer history={history}>
-                    <Router history={history}>
-                      <Switch>
-                        <Route path="/access-denied" component={AccessDeniedPage} />
-                        <Route path="/no-data" component={NoDataPage} />
-                        <Route path="/loading" component={LoadingPage} />
-                        <RouteInit
-                          path="/license"
-                          component={LicensePage}
-                          codePaths={['all']}
-                          fetchAllClusters={false}
-                        />
-                        <RouteInit
-                          path="/home"
-                          component={ClusterListing}
-                          codePaths={['all']}
-                          fetchAllClusters={true}
-                          unsetGlobalState={true}
-                        />
-                        <RouteInit
-                          path="/overview"
-                          component={ClusterOverview}
-                          codePaths={['all']}
-                          fetchAllClusters={false}
-                        />
+    <KibanaRenderContextProvider {...core}>
+      <KibanaContextProvider services={startServices}>
+        <ExternalConfigContext.Provider value={externalConfig}>
+          <GlobalStateProvider
+            query={plugins.data.query}
+            toasts={core.notifications.toasts}
+            uiSettings={core.uiSettings}
+          >
+            <HeaderActionMenuContext.Provider value={{ setHeaderActionMenu, theme$ }}>
+              <MonitoringTimeContainer>
+                <BreadcrumbContainer history={history}>
+                  <Router history={history}>
+                    <Routes>
+                      <Route path="/access-denied" component={AccessDeniedPage} />
+                      <Route path="/no-data" component={NoDataPage} />
+                      <Route path="/loading" component={LoadingPage} />
+                      <RouteInit
+                        path="/license"
+                        component={LicensePage}
+                        codePaths={['all']}
+                        fetchAllClusters={false}
+                      />
+                      <RouteInit
+                        path="/home"
+                        component={ClusterListing}
+                        codePaths={['all']}
+                        fetchAllClusters={true}
+                        unsetGlobalState={true}
+                      />
+                      <RouteInit
+                        path="/overview"
+                        component={ClusterOverview}
+                        codePaths={['all']}
+                        fetchAllClusters={false}
+                      />
 
-                        {/* ElasticSearch Views */}
-                        <RouteInit
-                          path="/elasticsearch/ml_jobs"
-                          component={ElasticsearchMLJobsPage}
-                          codePaths={[CODE_PATH_ELASTICSEARCH]}
-                          fetchAllClusters={false}
-                        />
+                      {/* ElasticSearch Views */}
+                      <RouteInit
+                        path="/elasticsearch/ml_jobs"
+                        component={ElasticsearchMLJobsPage}
+                        codePaths={[CODE_PATH_ELASTICSEARCH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/elasticsearch/ccr/:index/shard/:shardId"
-                          component={ElasticsearchCcrShardPage}
-                          codePaths={[CODE_PATH_ELASTICSEARCH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/elasticsearch/ccr/:index/shard/:shardId"
+                        component={ElasticsearchCcrShardPage}
+                        codePaths={[CODE_PATH_ELASTICSEARCH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/elasticsearch/ccr"
-                          component={ElasticsearchCcrPage}
-                          codePaths={[CODE_PATH_ELASTICSEARCH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/elasticsearch/ccr"
+                        component={ElasticsearchCcrPage}
+                        codePaths={[CODE_PATH_ELASTICSEARCH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/elasticsearch/indices/:index/advanced"
-                          component={ElasticsearchIndexAdvancedPage}
-                          codePaths={[CODE_PATH_ELASTICSEARCH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/elasticsearch/indices/:index/advanced"
+                        component={ElasticsearchIndexAdvancedPage}
+                        codePaths={[CODE_PATH_ELASTICSEARCH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/elasticsearch/indices/:index"
-                          component={ElasticsearchIndexPage}
-                          codePaths={[CODE_PATH_ELASTICSEARCH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/elasticsearch/indices/:index"
+                        component={ElasticsearchIndexPage}
+                        codePaths={[CODE_PATH_ELASTICSEARCH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/elasticsearch/indices"
-                          component={ElasticsearchIndicesPage}
-                          codePaths={[CODE_PATH_ELASTICSEARCH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/elasticsearch/indices"
+                        component={ElasticsearchIndicesPage}
+                        codePaths={[CODE_PATH_ELASTICSEARCH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/elasticsearch/nodes/:node/advanced"
-                          component={ElasticsearchNodeAdvancedPage}
-                          codePaths={[CODE_PATH_ELASTICSEARCH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/elasticsearch/nodes/:node/advanced"
+                        component={ElasticsearchNodeAdvancedPage}
+                        codePaths={[CODE_PATH_ELASTICSEARCH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/elasticsearch/nodes/:node"
-                          component={ElasticsearchNodePage}
-                          codePaths={[CODE_PATH_ELASTICSEARCH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/elasticsearch/nodes/:node"
+                        component={ElasticsearchNodePage}
+                        codePaths={[CODE_PATH_ELASTICSEARCH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/elasticsearch/nodes"
-                          component={ElasticsearchNodesPage}
-                          codePaths={[CODE_PATH_ELASTICSEARCH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/elasticsearch/nodes"
+                        component={ElasticsearchNodesPage}
+                        codePaths={[CODE_PATH_ELASTICSEARCH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/elasticsearch"
-                          component={ElasticsearchOverviewPage}
-                          codePaths={[CODE_PATH_ELASTICSEARCH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/elasticsearch"
+                        component={ElasticsearchOverviewPage}
+                        codePaths={[CODE_PATH_ELASTICSEARCH]}
+                        fetchAllClusters={false}
+                      />
 
-                        {/* Kibana Views */}
-                        <RouteInit
-                          path="/kibana/instances/:instance"
-                          component={KibanaInstancePage}
-                          codePaths={[CODE_PATH_KIBANA]}
-                          fetchAllClusters={false}
-                        />
+                      {/* Kibana Views */}
+                      <RouteInit
+                        path="/kibana/instances/:instance"
+                        component={KibanaInstancePage}
+                        codePaths={[CODE_PATH_KIBANA]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/kibana/instances"
-                          component={KibanaInstancesPage}
-                          codePaths={[CODE_PATH_KIBANA]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/kibana/instances"
+                        component={KibanaInstancesPage}
+                        codePaths={[CODE_PATH_KIBANA]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/kibana"
-                          component={KibanaOverviewPage}
-                          codePaths={[CODE_PATH_KIBANA]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/kibana"
+                        component={KibanaOverviewPage}
+                        codePaths={[CODE_PATH_KIBANA]}
+                        fetchAllClusters={false}
+                      />
 
-                        {/* Beats Views */}
-                        <RouteInit
-                          path="/beats/beat/:instance"
-                          component={BeatsInstancePage}
-                          codePaths={[CODE_PATH_BEATS]}
-                          fetchAllClusters={false}
-                        />
+                      {/* Beats Views */}
+                      <RouteInit
+                        path="/beats/beat/:instance"
+                        component={BeatsInstancePage}
+                        codePaths={[CODE_PATH_BEATS]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/beats/beats"
-                          component={BeatsInstancesPage}
-                          codePaths={[CODE_PATH_BEATS]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/beats/beats"
+                        component={BeatsInstancesPage}
+                        codePaths={[CODE_PATH_BEATS]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/beats"
-                          component={BeatsOverviewPage}
-                          codePaths={[CODE_PATH_BEATS]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/beats"
+                        component={BeatsOverviewPage}
+                        codePaths={[CODE_PATH_BEATS]}
+                        fetchAllClusters={false}
+                      />
 
-                        {/* Logstash Routes */}
-                        <RouteInit
-                          path="/logstash/nodes"
-                          component={LogStashNodesPage}
-                          codePaths={[CODE_PATH_LOGSTASH]}
-                          fetchAllClusters={false}
-                        />
+                      {/* Logstash Routes */}
+                      <RouteInit
+                        path="/logstash/nodes"
+                        component={LogStashNodesPage}
+                        codePaths={[CODE_PATH_LOGSTASH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/logstash/node/:uuid/advanced"
-                          component={LogStashNodeAdvancedPage}
-                          codePaths={[CODE_PATH_LOGSTASH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/logstash/node/:uuid/advanced"
+                        component={LogStashNodeAdvancedPage}
+                        codePaths={[CODE_PATH_LOGSTASH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/logstash/node/:uuid/pipelines"
-                          component={LogStashNodePipelinesPage}
-                          codePaths={[CODE_PATH_LOGSTASH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/logstash/node/:uuid/pipelines"
+                        component={LogStashNodePipelinesPage}
+                        codePaths={[CODE_PATH_LOGSTASH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/logstash/node/:uuid"
-                          component={LogStashNodePage}
-                          codePaths={[CODE_PATH_LOGSTASH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/logstash/node/:uuid"
+                        component={LogStashNodePage}
+                        codePaths={[CODE_PATH_LOGSTASH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/logstash/pipelines/:id/:hash?"
-                          component={LogStashPipelinePage}
-                          codePaths={[CODE_PATH_LOGSTASH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/logstash/pipelines/:id/:hash?"
+                        component={LogStashPipelinePage}
+                        codePaths={[CODE_PATH_LOGSTASH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/logstash/pipelines"
-                          component={LogStashPipelinesPage}
-                          codePaths={[CODE_PATH_LOGSTASH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/logstash/pipelines"
+                        component={LogStashPipelinesPage}
+                        codePaths={[CODE_PATH_LOGSTASH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/logstash"
-                          component={LogStashOverviewPage}
-                          codePaths={[CODE_PATH_LOGSTASH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/logstash"
+                        component={LogStashOverviewPage}
+                        codePaths={[CODE_PATH_LOGSTASH]}
+                        fetchAllClusters={false}
+                      />
 
-                        {/* APM Views */}
-                        <RouteInit
-                          path="/apm/instances/:instance"
-                          component={ApmInstancePage}
-                          codePaths={[CODE_PATH_APM]}
-                          fetchAllClusters={false}
-                        />
+                      {/* APM Views */}
+                      <RouteInit
+                        path="/apm/instances/:instance"
+                        component={ApmInstancePage}
+                        codePaths={[CODE_PATH_APM]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/apm/instances"
-                          component={ApmInstancesPage}
-                          codePaths={[CODE_PATH_APM]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/apm/instances"
+                        component={ApmInstancesPage}
+                        codePaths={[CODE_PATH_APM]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/apm"
-                          component={ApmOverviewPage}
-                          codePaths={[CODE_PATH_APM]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/apm"
+                        component={ApmOverviewPage}
+                        codePaths={[CODE_PATH_APM]}
+                        fetchAllClusters={false}
+                      />
 
-                        <RouteInit
-                          path="/enterprise_search"
-                          component={EntSearchOverviewPage}
-                          codePaths={[CODE_PATH_ENTERPRISE_SEARCH]}
-                          fetchAllClusters={false}
-                        />
+                      <RouteInit
+                        path="/enterprise_search"
+                        component={EntSearchOverviewPage}
+                        codePaths={[CODE_PATH_ENTERPRISE_SEARCH]}
+                        fetchAllClusters={false}
+                      />
 
-                        <Redirect
-                          to={{
-                            pathname: '/loading',
-                            search: history.location.search,
-                          }}
-                        />
-                      </Switch>
-                    </Router>
-                  </BreadcrumbContainer>
-                </MonitoringTimeContainer>
-              </HeaderActionMenuContext.Provider>
-            </GlobalStateProvider>
-          </ExternalConfigContext.Provider>
-        </KibanaThemeProvider>
-      </EuiThemeProvider>
-    </KibanaContextProvider>
+                      <Redirect
+                        to={{
+                          pathname: '/loading',
+                          search: history.location.search,
+                        }}
+                      />
+                    </Routes>
+                  </Router>
+                </BreadcrumbContainer>
+              </MonitoringTimeContainer>
+            </HeaderActionMenuContext.Provider>
+          </GlobalStateProvider>
+        </ExternalConfigContext.Provider>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
   );
 };

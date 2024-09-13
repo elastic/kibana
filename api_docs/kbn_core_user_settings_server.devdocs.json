@@ -1,0 +1,41 @@
+{
+  "id": "@kbn/core-user-settings-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-user-settings-server",
+        "id": "def-server.UserSettingsServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserSettingsServiceSetup",
+        "description": [],
+        "path": "packages/core/user-settings/core-user-settings-server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { EnabledFeatures } from '@kbn/spaces-plugin/public/management/edit_space/enabled_features';
+import type { EnabledFeatures } from '@kbn/spaces-plugin/public/management/components/enabled_features';
 import {
-  RESPONSE_ACTION_TYPES,
-  SUPPORTED_RESPONSE_ACTION_TYPES,
-} from '../../../common/detection_engine/rule_response_actions/schemas';
+  ResponseActionTypes,
+  ResponseActionTypesEnum,
+} from '../../../common/api/detection_engine/model/rule_response_actions';
 
 export interface ResponseActionType {
-  id: RESPONSE_ACTION_TYPES;
+  id: ResponseActionTypes;
   name: string;
   iconClass: string;
   disabled?: boolean;
@@ -24,13 +24,11 @@ interface EnabledFeatures {
 
 export const getSupportedResponseActions = (
   actionTypes: ResponseActionType[],
-  enabledFeatures: EnabledFeatures,
   userPermissions: EnabledFeatures
 ): ResponseActionType[] =>
   actionTypes.reduce((acc: ResponseActionType[], actionType) => {
-    const isEndpointAction = actionType.id === RESPONSE_ACTION_TYPES.ENDPOINT;
-    if (!enabledFeatures.endpoint && isEndpointAction) return acc;
-    if (SUPPORTED_RESPONSE_ACTION_TYPES.includes(actionType.id))
+    const isEndpointAction = actionType.id === ResponseActionTypesEnum['.endpoint'];
+    if (ResponseActionTypes.options.includes(actionType.id))
       return [
         ...acc,
         { ...actionType, disabled: isEndpointAction ? !userPermissions.endpoint : undefined },
@@ -38,15 +36,15 @@ export const getSupportedResponseActions = (
     return acc;
   }, []);
 
-export const responseActionTypes = [
+export const responseActionTypes: ResponseActionType[] = [
   {
-    id: RESPONSE_ACTION_TYPES.OSQUERY,
+    id: ResponseActionTypesEnum['.osquery'],
     name: 'Osquery',
     iconClass: 'logoOsquery',
   },
   {
-    id: RESPONSE_ACTION_TYPES.ENDPOINT,
-    name: 'Endpoint Security',
+    id: ResponseActionTypesEnum['.endpoint'],
+    name: 'Elastic Defend',
     iconClass: 'logoSecurity',
   },
 ];

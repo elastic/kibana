@@ -8,7 +8,7 @@ slug: /kibana-dev-docs/api/ml
 title: "ml"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the ml plugin
-date: 2023-04-18
+date: 2024-09-13
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'ml']
 ---
 import mlObj from './ml.devdocs.json';
@@ -21,9 +21,12 @@ Contact [@elastic/ml-ui](https://github.com/orgs/elastic/teams/ml-ui) for questi
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 259 | 9 | 83 | 40 |
+| 154 | 3 | 67 | 102 |
 
 ## Client
+
+### Setup
+<DocDefinitionList data={[mlObj.client.setup]}/>
 
 ### Start
 <DocDefinitionList data={[mlObj.client.start]}/>
@@ -39,9 +42,6 @@ Contact [@elastic/ml-ui](https://github.com/orgs/elastic/teams/ml-ui) for questi
 
 ### Interfaces
 <DocDefinitionList data={mlObj.client.interfaces}/>
-
-### Enums
-<DocDefinitionList data={mlObj.client.enums}/>
 
 ### Consts, variables and types
 <DocDefinitionList data={mlObj.client.misc}/>

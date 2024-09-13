@@ -6,10 +6,7 @@
  */
 
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type {
-  AnomalyChartsEmbeddableInput,
-  AnomalySwimlaneEmbeddableInput,
-} from '@kbn/ml-plugin/public/embeddables';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-plugin/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
@@ -76,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createMLTestDashboardIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -85,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await ml.testResources.deleteMLTestDashboard();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
     for (const testData of testDataList) {
@@ -463,7 +460,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 from: '2016-02-07T00:00:00.000Z',
                 to: '2016-02-11T23:59:54.000Z',
               },
-            } as AnomalySwimlaneEmbeddableInput;
+            } as AnomalySwimLaneEmbeddableState;
 
             expectedAttachment.id = stringHash(JSON.stringify(expectedAttachment)).toString();
 
@@ -523,7 +520,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const expectedAttachment = {
               jobIds: [testData.jobConfig.job_id],
               maxSeriesToPlot: 6,
-            } as AnomalyChartsEmbeddableInput;
+            };
 
             // @ts-expect-error Setting id to be undefined here
             // since time range expected is of the chart plotEarliest/plotLatest, not of the global time range
@@ -541,6 +538,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               expectedAttachment,
               6
             );
+          });
+        });
+
+        describe('Use anomaly table action to view in Discover', function () {
+          beforeEach(async () => {
+            await ml.navigation.navigateToAnomalyExplorer(
+              testData.jobConfig.job_id,
+              {
+                from: '2016-02-07T00%3A00%3A00.000Z',
+                to: '2016-02-11T23%3A59%3A54.000Z',
+              },
+              () => elasticChart.setNewChartUiDebugFlag(true)
+            );
+
+            await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+            await ml.commonUI.waitForDatePickerIndicatorLoaded();
+            await ml.swimLane.waitForSwimLanesToLoad();
+          });
+
+          it('should render the anomaly table', async () => {
+            await ml.testExecution.logTestStep('displays the anomalies table');
+            await ml.anomaliesTable.assertTableExists();
+
+            await ml.testExecution.logTestStep('anomalies table is not empty');
+            await ml.anomaliesTable.assertTableNotEmpty();
+          });
+
+          it('should click the Discover action in the anomaly table', async () => {
+            await ml.anomaliesTable.assertAnomalyActionsMenuButtonExists(0);
+            await ml.anomaliesTable.scrollRowIntoView(0);
+            await ml.anomaliesTable.assertAnomalyActionsMenuButtonEnabled(0, true);
+            await ml.anomaliesTable.assertAnomalyActionDiscoverButtonExists(0);
+            await ml.anomaliesTable.ensureAnomalyActionDiscoverButtonClicked(0);
           });
         });
       });

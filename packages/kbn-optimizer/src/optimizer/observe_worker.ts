@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { inspect } from 'util';
 
 import { fork, type ChildProcess } from 'child_process';
 import * as Rx from 'rxjs';
-import { map, takeUntil, first, ignoreElements } from 'rxjs/operators';
+import { map, takeUntil, first, ignoreElements } from 'rxjs';
 
 import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRemotes } from '../common';
 
@@ -61,6 +62,7 @@ function usingWorkerProc<T>(config: OptimizerConfig, fn: (proc: ChildProcess) =>
       const proc = fork(require.resolve('../worker/run_worker'), [], {
         execArgv: [
           `--require=@kbn/babel-register/install`,
+          '--openssl-legacy-provider',
           ...(inspectFlag && config.inspectWorkers
             ? [`${inspectFlag}=${inspectPortCounter++}`]
             : []),

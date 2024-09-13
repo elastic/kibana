@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -30,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickQuickSave();
     });
 
-    describe('Options List Control Editor selects relevant data views', async () => {
+    describe('Options List Control Editor selects relevant data views', () => {
       it('selects the default data view when the dashboard is blank', async () => {
         expect(await dashboardControls.optionsListEditorGetCurrentDataView(true)).to.eql(
           'logstash-*'
@@ -106,7 +107,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await saveButton.isEnabled()).to.be(true);
         await dashboardControls.controlsEditorSetDataView('animals-*');
         expect(await saveButton.isEnabled()).to.be(false);
-        await dashboardControls.controlsEditorSetfield('animal.keyword', OPTIONS_LIST_CONTROL);
+        await dashboardControls.controlsEditorSetfield('animal.keyword');
+        await dashboardControls.controlsEditorSetControlType(OPTIONS_LIST_CONTROL);
         await dashboardControls.controlEditorSave();
 
         const selectionString = await dashboardControls.optionsListGetSelectionsString(firstId);
@@ -141,6 +143,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clearUnsavedChanges();
       });
 
+      it('can change an existing control to a number field', async () => {
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.editExistingControl(firstId);
+        await dashboardControls.controlsEditorSetfield('weightLbs');
+        await dashboardControls.controlsEditorVerifySupportedControlTypes({
+          supportedTypes: [OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL],
+          selectedType: OPTIONS_LIST_CONTROL,
+        });
+        await dashboardControls.controlEditorSave();
+      });
+
       it('deletes an existing control', async () => {
         const firstId = (await dashboardControls.getAllControlIds())[0];
 
@@ -155,7 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'animals-*'
         );
         await testSubjects.missingOrFail('field-picker-select-isDog');
-        await dashboardControls.controlEditorCancel(true);
+        await dashboardControls.controlEditorCancel();
       });
     });
   });

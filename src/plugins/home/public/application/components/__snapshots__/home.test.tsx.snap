@@ -6,10 +6,9 @@ exports[`home change home route should render a link to change the default route
   pageHeader={
     Object {
       "bottomBorder": false,
-      "pageTitle": <FormattedMessage
+      "pageTitle": <Memo(MemoizedFormattedMessage)
         defaultMessage="Welcome home"
         id="home.header.title"
-        values={Object {}}
       />,
     }
   }
@@ -63,10 +62,9 @@ exports[`home directories should not render directory entry when showOnHomePage 
   pageHeader={
     Object {
       "bottomBorder": false,
-      "pageTitle": <FormattedMessage
+      "pageTitle": <Memo(MemoizedFormattedMessage)
         defaultMessage="Welcome home"
         id="home.header.title"
-        values={Object {}}
       />,
     }
   }
@@ -120,10 +118,9 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
   pageHeader={
     Object {
       "bottomBorder": false,
-      "pageTitle": <FormattedMessage
+      "pageTitle": <Memo(MemoizedFormattedMessage)
         defaultMessage="Welcome home"
         id="home.header.title"
-        values={Object {}}
       />,
     }
   }
@@ -189,10 +186,9 @@ exports[`home directories should render solutions in the "solution section" 1`] 
   pageHeader={
     Object {
       "bottomBorder": false,
-      "pageTitle": <FormattedMessage
+      "pageTitle": <Memo(MemoizedFormattedMessage)
         defaultMessage="Welcome home"
         id="home.header.title"
-        values={Object {}}
       />,
     }
   }
@@ -281,10 +277,9 @@ exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
   pageHeader={
     Object {
       "bottomBorder": false,
-      "pageTitle": <FormattedMessage
+      "pageTitle": <Memo(MemoizedFormattedMessage)
         defaultMessage="Welcome home"
         id="home.header.title"
-        values={Object {}}
       />,
     }
   }
@@ -308,8 +303,15 @@ exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
             Array [
               "./home#/getting_started",
             ],
+            Array [
+              "./home#/getting_started",
+            ],
           ],
           "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
             Object {
               "type": "return",
               "value": undefined,
@@ -335,8 +337,15 @@ exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
             Array [
               "./home#/getting_started",
             ],
+            Array [
+              "./home#/getting_started",
+            ],
           ],
           "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
             Object {
               "type": "return",
               "value": undefined,
@@ -362,10 +371,9 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
   pageHeader={
     Object {
       "bottomBorder": false,
-      "pageTitle": <FormattedMessage
+      "pageTitle": <Memo(MemoizedFormattedMessage)
         defaultMessage="Welcome home"
         id="home.header.title"
-        values={Object {}}
       />,
     }
   }
@@ -389,8 +397,15 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
             Array [
               "./home#/getting_started",
             ],
+            Array [
+              "./home#/getting_started",
+            ],
           ],
           "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
             Object {
               "type": "return",
               "value": undefined,
@@ -416,8 +431,15 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
             Array [
               "./home#/getting_started",
             ],
+            Array [
+              "./home#/getting_started",
+            ],
           ],
           "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
             Object {
               "type": "return",
               "value": undefined,
@@ -437,12 +459,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
 </_KibanaPageTemplate>
 `;
 
-exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `
-<Welcome
-  onSkip={[Function]}
-  urlBasePath="goober"
-/>
-`;
+exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `""`;
 
 exports[`home should render home component 1`] = `
 <_KibanaPageTemplate
@@ -450,10 +467,9 @@ exports[`home should render home component 1`] = `
   pageHeader={
     Object {
       "bottomBorder": false,
-      "pageTitle": <FormattedMessage
+      "pageTitle": <Memo(MemoizedFormattedMessage)
         defaultMessage="Welcome home"
         id="home.header.title"
-        values={Object {}}
       />,
     }
   }

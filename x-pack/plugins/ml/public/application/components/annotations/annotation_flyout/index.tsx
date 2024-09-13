@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { Component, FC, ReactNode, useCallback, useContext } from 'react';
+import type { FC, ReactNode } from 'react';
+import React, { Component, useCallback, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import { cloneDeep } from 'lodash';
 
 import {
@@ -26,29 +27,28 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 
-import { CommonProps } from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { context } from '@kbn/kibana-react-plugin/public';
+import { type MlPartitionFieldsType, ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
 import {
   ANNOTATION_MAX_LENGTH_CHARS,
   ANNOTATION_EVENT_USER,
 } from '../../../../../common/constants/annotations';
-import {
-  annotationsRefreshed,
+import type {
   AnnotationState,
   AnnotationUpdatesService,
 } from '../../../services/annotations_service';
+import { annotationsRefreshed } from '../../../services/annotations_service';
 import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
-import { ml } from '../../../services/ml_api_service';
-import { getToastNotifications } from '../../../util/dependency_cache';
 import {
   getAnnotationFieldName,
   getAnnotationFieldValue,
 } from '../../../../../common/types/annotations';
-import { PartitionFieldsType } from '../../../../../common/types/anomalies';
-import { PARTITION_FIELDS } from '../../../../../common/constants/anomalies';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
+import type { MlKibanaReactContextValue } from '../../../contexts/kibana';
 
 interface ViewableDetector {
   index: number;
@@ -78,6 +78,9 @@ interface State {
 }
 
 export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
+  static contextType = context;
+  declare context: MlKibanaReactContextValue;
+
   private deletionInProgress = false;
 
   public state: State = {
@@ -126,7 +129,6 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     if (this.deletionInProgress) return;
 
     const { annotationState } = this.state;
-    const toastNotifications = getToastNotifications();
 
     if (annotationState === null || annotationState._id === undefined) {
       return;
@@ -134,8 +136,10 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
 
     this.deletionInProgress = true;
 
+    const mlApi = this.context.services.mlServices.mlApi;
+    const toastNotifications = this.context.services.notifications.toasts;
     try {
-      await ml.annotations.deleteAnnotation(annotationState._id);
+      await mlApi.annotations.deleteAnnotation(annotationState._id);
       toastNotifications.addSuccess(
         i18n.translate(
           'xpack.ml.timeSeriesExplorer.timeSeriesChart.deletedAnnotationNotificationMessage',
@@ -219,7 +223,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     if (this.state.applyAnnotationToSeries && chartDetails?.entityData?.entities) {
       chartDetails.entityData.entities.forEach((entity: Entity) => {
         const { fieldName, fieldValue } = entity;
-        const fieldType = entity.fieldType as PartitionFieldsType;
+        const fieldType = entity.fieldType as MlPartitionFieldsType;
         annotation[getAnnotationFieldName(fieldType)] = fieldName;
         annotation[getAnnotationFieldValue(fieldType)] = fieldValue;
       });
@@ -228,7 +232,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     // if unchecked, remove all the partitions before indexing
     if (!this.state.applyAnnotationToSeries) {
       delete annotation.detector_index;
-      PARTITION_FIELDS.forEach((fieldType) => {
+      ML_PARTITION_FIELDS.forEach((fieldType) => {
         delete annotation[getAnnotationFieldName(fieldType)];
         delete annotation[getAnnotationFieldValue(fieldType)];
       });
@@ -237,11 +241,12 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     annotation.event = annotation.event ?? ANNOTATION_EVENT_USER;
     annotationUpdatesService.setValue(null);
 
-    ml.annotations
+    const mlApi = this.context.services.mlServices.mlApi;
+    const toastNotifications = this.context.services.notifications.toasts;
+    mlApi.annotations
       .indexAnnotation(annotation)
       .then(() => {
         annotationsRefreshed();
-        const toastNotifications = getToastNotifications();
         if (typeof annotation._id === 'undefined') {
           toastNotifications.addSuccess(
             i18n.translate(
@@ -265,7 +270,6 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
         }
       })
       .catch((resp) => {
-        const toastNotifications = getToastNotifications();
         if (typeof annotation._id === 'undefined') {
           toastNotifications.addDanger(
             i18n.translate(

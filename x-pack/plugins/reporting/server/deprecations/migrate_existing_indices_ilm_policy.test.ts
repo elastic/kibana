@@ -8,9 +8,6 @@
 import type { GetDeprecationsContext } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { ReportingCore } from '../core';
-import { createMockConfigSchema, createMockReportingCore } from '../test_helpers';
-
 import { getDeprecationsInfo } from './migrate_existing_indices_ilm_policy';
 
 type ScopedClusterClientMock = ReturnType<
@@ -20,12 +17,10 @@ type ScopedClusterClientMock = ReturnType<
 describe("Migrate existing indices' ILM policy deprecations", () => {
   let esClient: ScopedClusterClientMock;
   let deprecationsCtx: GetDeprecationsContext;
-  let reportingCore: ReportingCore;
 
   beforeEach(async () => {
     esClient = elasticsearchServiceMock.createScopedClusterClient();
     deprecationsCtx = { esClient, savedObjectsClient: savedObjectsClientMock.create() };
-    reportingCore = await createMockReportingCore(createMockConfigSchema());
   });
 
   const createIndexSettings = (lifecycleName: string) => ({
@@ -46,20 +41,20 @@ describe("Migrate existing indices' ILM policy deprecations", () => {
       indexB: createIndexSettings('kibana-reporting'),
     });
 
-    expect(await getDeprecationsInfo(deprecationsCtx, { reportingCore })).toMatchInlineSnapshot(`
+    expect(await getDeprecationsInfo(deprecationsCtx)).toMatchInlineSnapshot(`
       Array [
         Object {
           "correctiveActions": Object {
             "api": Object {
               "method": "PUT",
-              "path": "/api/reporting/deprecations/migrate_ilm_policy",
+              "path": "/internal/reporting/deprecations/migrate_ilm_policy",
             },
             "manualSteps": Array [
               "Update all reporting indices to use the \\"kibana-reporting\\" policy using the index settings API.",
             ],
           },
           "level": "warning",
-          "message": "New reporting indices will be managed by the \\"kibana-reporting\\" provisioned ILM policy. You must edit this policy to manage the report lifecycle. This change targets all indices prefixed with \\".reporting-*\\".",
+          "message": "New reporting indices will be managed by the \\"kibana-reporting\\" provisioned ILM policy. You must edit this policy to manage the report lifecycle. This change targets the hidden system index pattern \\".reporting-*,.kibana-reporting*\\".",
           "title": "Found reporting indices managed by custom ILM policy.",
         },
       ]
@@ -72,14 +67,10 @@ describe("Migrate existing indices' ILM policy deprecations", () => {
       indexB: createIndexSettings('kibana-reporting'),
     });
 
-    expect(await getDeprecationsInfo(deprecationsCtx, { reportingCore })).toMatchInlineSnapshot(
-      `Array []`
-    );
+    expect(await getDeprecationsInfo(deprecationsCtx)).toMatchInlineSnapshot(`Array []`);
 
     esClient.asInternalUser.indices.getSettings.mockResponse({});
 
-    expect(await getDeprecationsInfo(deprecationsCtx, { reportingCore })).toMatchInlineSnapshot(
-      `Array []`
-    );
+    expect(await getDeprecationsInfo(deprecationsCtx)).toMatchInlineSnapshot(`Array []`);
   });
 });

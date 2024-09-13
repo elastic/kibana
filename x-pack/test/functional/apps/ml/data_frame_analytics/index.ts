@@ -12,7 +12,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('machine learning - data frame analytics', function () {
-    this.tags(['ml', 'skipFirefox']);
+    this.tags(['ml']);
 
     before(async () => {
       await ml.securityCommon.createMlRoles();
@@ -27,6 +27,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.cleanMlRoles();
 
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote_small');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/bm_classification');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/egs_regression');
@@ -42,5 +43,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./regression_creation_saved_search'));
     loadTestFile(require.resolve('./classification_creation_saved_search'));
     loadTestFile(require.resolve('./outlier_detection_creation_saved_search'));
+    loadTestFile(require.resolve('./custom_urls'));
   });
 }

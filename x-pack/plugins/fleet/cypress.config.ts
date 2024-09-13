@@ -18,6 +18,10 @@ export default defineCypressConfig({
     runMode: 2,
   },
 
+  env: {
+    grepFilterSpecs: false,
+  },
+
   screenshotsFolder: '../../../target/kibana-fleet/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
@@ -26,14 +30,16 @@ export default defineCypressConfig({
   viewportWidth: 1440,
   screenshotOnRunFailure: true,
 
-  env: {
-    protocol: 'http',
-    hostname: 'localhost',
-    configport: '5601',
-  },
-
   e2e: {
     baseUrl: 'http://localhost:5601',
+
+    experimentalRunAllSpecs: true,
+    experimentalMemoryManagement: true,
+    numTestsKeptInMemory: 3,
+
+    specPattern: './cypress/e2e/**/*.cy.ts',
+    supportFile: './cypress/support/e2e.ts',
+
     setupNodeEvents(on, config) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/no_boundary_crossing
       return require('./cypress/plugins')(on, config);

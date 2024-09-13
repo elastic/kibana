@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const appMenu = getService('appsMenu');
-  const PageObjects = getPageObjects([
+  const { common, header, home, discover, dashboard, timePicker } = getPageObjects([
     'common',
     'header',
     'home',
@@ -32,14 +32,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('sample data dashboard', function describeIndexTests() {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
-      await PageObjects.common.sleep(5000);
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+      await common.sleep(5000);
+      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.home.addSampleDataSet('flights');
+      await header.waitUntilLoadingHasFinished();
+      await home.addSampleDataSet('flights');
       await retry.tryForTime(10000, async () => {
-        const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
+        const isInstalled = await home.isSampleDataSetInstalled('flights');
         expect(isInstalled).to.be(true);
       });
 
@@ -107,32 +107,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       // refresh page to make sure ui settings update is picked up
       await browser.refresh();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await appMenu.clickLink('Discover');
-      await PageObjects.discover.selectIndexPattern('Kibana Sample Data Flights');
-      await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
+      await discover.selectIndexPattern('Kibana Sample Data Flights');
+      await timePicker.setCommonlyUsedTime('sample_data range');
       await retry.try(async function () {
-        const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
+        const hitCount = parseInt(await discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
     });
 
     after(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.home.removeSampleDataSet('flights');
-      const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
+      await header.waitUntilLoadingHasFinished();
+      await home.removeSampleDataSet('flights');
+      const isInstalled = await home.isSampleDataSetInstalled('flights');
       expect(isInstalled).to.be(false);
     });
 
     it('should launch sample flights data set dashboard', async () => {
-      await appMenu.clickLink('Dashboard');
-      await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboard.navigateToApp();
+      await dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
+      await header.waitUntilLoadingHasFinished();
+      await timePicker.setCommonlyUsedTime('sample_data range');
+      await header.waitUntilLoadingHasFinished();
 
       // check at least one visualization
       await renderable.waitForRender();
@@ -141,11 +141,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await appMenu.clickLink('Discover');
       await retry.try(async function () {
-        const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
+        const hitCount = parseInt(await discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
-      await appMenu.clickLink('Dashboard');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await appMenu.clickLink('Dashboard', {
+        category: 'recentlyViewed',
+        closeCollapsibleNav: true,
+      });
+      await header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
       log.debug('Checking charts rendered');
       await elasticChart.waitForRenderComplete('xyVisChart');
@@ -154,11 +157,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('toggle from Discover to Dashboard attempt 1', async () => {
       await appMenu.clickLink('Discover');
       await retry.try(async function () {
-        const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
+        const hitCount = parseInt(await discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
-      await appMenu.clickLink('Dashboard');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await appMenu.clickLink('Dashboard', {
+        category: 'recentlyViewed',
+        closeCollapsibleNav: true,
+      });
+      await header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
       log.debug('Checking charts rendered');
       await elasticChart.waitForRenderComplete('xyVisChart');
@@ -167,11 +173,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('toggle from Discover to Dashboard attempt 2', async () => {
       await appMenu.clickLink('Discover');
       await retry.try(async function () {
-        const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
+        const hitCount = parseInt(await discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
-      await appMenu.clickLink('Dashboard');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await appMenu.clickLink('Dashboard', {
+        category: 'recentlyViewed',
+        closeCollapsibleNav: true,
+      });
+      await header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
       log.debug('Checking charts rendered');
       await elasticChart.waitForRenderComplete('xyVisChart');

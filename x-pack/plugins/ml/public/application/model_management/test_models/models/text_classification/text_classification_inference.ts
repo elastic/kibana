@@ -6,14 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import { processInferenceResult, processResponse } from './common';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getTextClassificationOutputComponent } from './text_classification_output';
-import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
+import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 
 export class TextClassificationInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;
@@ -30,9 +30,10 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
   constructor(
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
-    inputType: INPUT_TYPE
+    inputType: INPUT_TYPE,
+    deploymentId: string
   ) {
-    super(trainedModelsApi, model, inputType);
+    super(trainedModelsApi, model, inputType, deploymentId);
 
     this.initialize();
   }

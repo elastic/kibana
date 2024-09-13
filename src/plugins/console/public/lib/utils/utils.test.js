@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as utils from '.';
@@ -261,6 +262,85 @@ describe('Utils class', () => {
         { url: 'test', data: ['{\n  "f": "${v7}"\n}'] },
         { name: 'v7', value: '9893617a-a08f-4e5c-bc41-95610dc2ded8' },
         { url: 'test', data: ['{\n  "f": "9893617a-a08f-4e5c-bc41-95610dc2ded8"\n}'] }
+      );
+    });
+
+    it('with illegal double quotes should not replace variables in body', () => {
+      testVariables(
+        { url: 'test/_doc/${v8}', data: ['{\n  "f": ""${v8}""\n}'] },
+        { name: 'v8', value: '0' },
+        {
+          url: 'test/_doc/0',
+          data: ['{\n  "f": ""${v8}""\n}'],
+        }
+      );
+    });
+
+    it('with heredoc triple quotes should replace variables as strings in body', () => {
+      testVariables(
+        { url: 'test/_doc/${v9}', data: ['{\n  "f": """${v9}"""\n}'] },
+        { name: 'v9', value: '0' },
+        {
+          url: 'test/_doc/0',
+          data: ['{\n  "f": """0"""\n}'],
+        }
+      );
+    });
+
+    it('with illegal quadruple quotes should not replace variables in body', () => {
+      testVariables(
+        { url: 'test/_doc/${v10}', data: ['{\n  "f": """"${v10}""""\n}'] },
+        { name: 'v10', value: '0' },
+        {
+          url: 'test/_doc/0',
+          data: ['{\n  "f": """"${v10}""""\n}'],
+        }
+      );
+    });
+
+    it('with escaped pre quote should not replace variables in body', () => {
+      testVariables(
+        { url: 'test/_doc/${v11}', data: ['{\n  "f": "\\"${v11}"\n}'] },
+        { name: 'v11', value: '0' },
+        {
+          url: 'test/_doc/0',
+          data: ['{\n  "f": "\\"${v11}"\n}'],
+        }
+      );
+    });
+
+    it('with escaped pre triple quotes should not replace variables in body', () => {
+      testVariables(
+        { url: 'test/_doc/${v12}', data: ['{\n  "f": "\\"""${v12}"""\n}'] },
+        { name: 'v12', value: '0' },
+        {
+          url: 'test/_doc/0',
+          data: ['{\n  "f": "\\"""${v12}"""\n}'],
+        }
+      );
+    });
+
+    it('should replace variables in bulk request', () => {
+      testVariables(
+        {
+          url: '${v13}/_bulk',
+          data: [
+            '{"index": {"_id": "0"}}',
+            '{\n  "f": "${v13}"\n}',
+            '{"index": {"_id": "1"}}',
+            '{\n  "f": "${v13}"\n}',
+          ],
+        },
+        { name: 'v13', value: 'test' },
+        {
+          url: 'test/_bulk',
+          data: [
+            '{"index": {"_id": "0"}}',
+            '{\n  "f": "test"\n}',
+            '{"index": {"_id": "1"}}',
+            '{\n  "f": "test"\n}',
+          ],
+        }
       );
     });
   });

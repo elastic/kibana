@@ -8,24 +8,32 @@
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isProcessesAction } from '../service/response_actions/type_guards';
 import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
-import type {
-  ActionDetails,
-  EndpointActivityLogAction,
-  EndpointActivityLogActionResponse,
-  EndpointPendingActions,
-  LogsEndpointAction,
-  LogsEndpointActionResponse,
-  ProcessesEntry,
-  EndpointActionDataParameterTypes,
-  ActionResponseOutput,
-  ResponseActionGetFileOutputContent,
-  ResponseActionGetFileParameters,
-  ResponseActionsExecuteParameters,
-  ResponseActionExecuteOutputContent,
+import type { GetProcessesActionOutputContent } from '../types';
+import {
+  type ActionDetails,
+  type ActionResponseOutput,
+  ActivityLogItemTypes,
+  type EndpointActionDataParameterTypes,
+  type EndpointActionResponseDataOutput,
+  type EndpointActivityLogAction,
+  type EndpointActivityLogActionResponse,
+  type EndpointPendingActions,
+  type LogsEndpointAction,
+  type LogsEndpointActionResponse,
+  type ProcessesEntry,
+  type ResponseActionExecuteOutputContent,
+  type ResponseActionGetFileOutputContent,
+  type ResponseActionGetFileParameters,
+  type ResponseActionScanOutputContent,
+  type ResponseActionsExecuteParameters,
+  type ResponseActionScanParameters,
+  type ResponseActionUploadOutputContent,
+  type ResponseActionUploadParameters,
+  type WithAllKeys,
 } from '../types';
-import { ActivityLogItemTypes } from '../types';
 import {
   DEFAULT_EXECUTE_ACTION_TIMEOUT,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
@@ -34,48 +42,58 @@ import { getFileDownloadId } from '../service/response_actions/get_file_download
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
-  generate(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
+  generate<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    overrides: DeepPartial<LogsEndpointAction<TParameters, TOutputContent, TMeta>> = {}
+  ): LogsEndpointAction<TParameters, TOutputContent, TMeta> {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
-
-    return merge(
-      {
-        '@timestamp': timeStamp.toISOString(),
-        agent: {
-          id: [this.seededUUIDv4()],
-        },
-        EndpointActions: {
-          action_id: this.seededUUIDv4(),
-          expiration: this.randomFutureDate(timeStamp),
-          type: 'INPUT_ACTION',
-          input_type: 'endpoint',
-          data: {
-            command: this.randomResponseActionCommand(),
-            comment: this.randomString(15),
-            parameters: undefined,
-          },
-        },
-        error: undefined,
-        user: {
-          id: this.randomUser(),
-        },
-        rule: undefined,
+    const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
+      '@timestamp': timeStamp.toISOString(),
+      agent: {
+        id: [this.seededUUIDv4()],
       },
-      overrides
-    );
+      EndpointActions: {
+        action_id: this.seededUUIDv4(),
+        expiration: this.randomFutureDate(timeStamp),
+        type: 'INPUT_ACTION',
+        input_type: 'endpoint',
+        data: {
+          command: this.randomResponseActionCommand(),
+          comment: this.randomString(15),
+          parameters: undefined,
+        },
+      },
+      error: undefined,
+      user: {
+        id: this.randomUser(),
+      },
+      rule: undefined,
+    };
+
+    return merge(doc, overrides);
   }
 
-  generateActionEsHit(
-    overrides: DeepPartial<LogsEndpointAction> = {}
-  ): estypes.SearchHit<LogsEndpointAction> {
+  generateActionEsHit<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    overrides: DeepPartial<LogsEndpointAction<TParameters, TOutputContent, TMeta>> = {}
+  ): estypes.SearchHit<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
     return Object.assign(this.toEsSearchHit(this.generate(overrides)), {
       _index: `.ds-${ENDPOINT_ACTIONS_DS}-some_namespace`,
     });
   }
 
   /** Generates an endpoint action response */
-  generateResponse(
-    overrides: DeepPartial<LogsEndpointActionResponse> = {}
-  ): LogsEndpointActionResponse {
+  generateResponse<
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  >(
+    overrides: DeepPartial<LogsEndpointActionResponse<TOutputContent>> = {}
+  ): LogsEndpointActionResponse<TOutputContent> {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
     const startedAtTimes: number[] = [];
@@ -88,9 +106,13 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
     const command = overrides?.EndpointActions?.data?.command ?? this.randomResponseActionCommand();
     let output: ActionResponseOutput<
-      ResponseActionGetFileOutputContent | ResponseActionExecuteOutputContent
-    > = overrides?.EndpointActions?.data?.output as ActionResponseOutput<
-      ResponseActionGetFileOutputContent | ResponseActionExecuteOutputContent
+      | ResponseActionGetFileOutputContent
+      | ResponseActionExecuteOutputContent
+      | ResponseActionScanOutputContent
+    > = overrides?.EndpointActions?.data?.output as unknown as ActionResponseOutput<
+      | ResponseActionGetFileOutputContent
+      | ResponseActionExecuteOutputContent
+      | ResponseActionScanOutputContent
     >;
 
     if (command === 'get-file') {
@@ -114,10 +136,47 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
     }
 
+    if (command === 'scan') {
+      if (!output) {
+        output = {
+          type: 'json',
+          content: {
+            code: 'ra_scan_success_done',
+          },
+        };
+      }
+    }
+
     if (command === 'execute') {
       if (!output) {
         output = this.generateExecuteActionResponseOutput();
       }
+    }
+
+    if (command === 'upload' && !output) {
+      let uploadOutput = output as ActionResponseOutput<ResponseActionUploadOutputContent>;
+
+      if (overrides.error) {
+        uploadOutput = {
+          type: 'json',
+          content: {
+            code: 'ra_upload_some-error',
+            path: '',
+            disk_free_space: 0,
+          },
+        };
+      } else {
+        uploadOutput = {
+          type: 'json',
+          content: {
+            code: 'ra_upload_file-success',
+            path: '/disk1/file/saved/here',
+            disk_free_space: 4825566125475,
+          },
+        };
+      }
+
+      output = uploadOutput as typeof output;
     }
 
     return merge(
@@ -140,7 +199,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         error: undefined,
       },
       overrides
-    );
+    ) as LogsEndpointActionResponse<TOutputContent>;
   }
 
   generateResponseEsHit(
@@ -152,44 +211,58 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   generateActionDetails<
-    TOutputType extends object = object,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
-  >(
-    overrides: Partial<ActionDetails<TOutputType, TParameters>> = {}
-  ): ActionDetails<TOutputType, TParameters> {
-    const details: ActionDetails = merge(
-      {
-        agents: ['agent-a'],
-        command: 'isolate',
-        completedAt: '2022-04-30T16:08:47.449Z',
-        hosts: { 'agent-a': { name: 'Host-agent-a' } },
-        id: '123',
-        isCompleted: true,
-        isExpired: false,
-        wasSuccessful: true,
-        errors: undefined,
-        startedAt: '2022-04-27T16:08:47.449Z',
-        status: 'successful',
-        comment: 'thisisacomment',
-        createdBy: 'auserid',
-        parameters: undefined,
-        outputs: {},
-        agentState: {
-          'agent-a': {
-            errors: undefined,
-            isCompleted: true,
-            completedAt: '2022-04-30T16:08:47.449Z',
-            wasSuccessful: true,
-          },
-        },
-      },
-      overrides
-    );
+  >({
+    agents: overrideAgents,
+    command: overrideCommand,
+    ...overrides
+  }: DeepPartial<ActionDetails<TOutputContent, TParameters>> = {}): ActionDetails<
+    TOutputContent,
+    TParameters
+  > {
+    const agents = overrideAgents ? [...(overrideAgents as string[])] : ['agent-a'];
+    const command = overrideCommand ?? 'isolate';
 
-    if (details.command === 'get-file') {
+    const details: WithAllKeys<ActionDetails> = {
+      action: '123',
+      agents,
+      agentType: 'endpoint',
+      command,
+      completedAt: '2022-04-30T16:08:47.449Z',
+      hosts: agents.reduce((acc, agentId) => {
+        acc[agentId] = { name: `Host-${agentId}` };
+        return acc;
+      }, {} as ActionDetails['hosts']),
+      id: '123',
+      isCompleted: true,
+      isExpired: false,
+      wasSuccessful: true,
+      errors: undefined,
+      startedAt: '2022-04-27T16:08:47.449Z',
+      status: 'successful',
+      comment: 'thisisacomment',
+      createdBy: 'auserid',
+      parameters: undefined,
+      outputs: undefined,
+      agentState: agents.reduce((acc, agentId) => {
+        acc[agentId] = {
+          errors: undefined,
+          isCompleted: true,
+          completedAt: '2022-04-30T16:08:47.449Z',
+          wasSuccessful: true,
+        };
+        return acc;
+      }, {} as ActionDetails['agentState']),
+      alertIds: undefined,
+      ruleId: undefined,
+      ruleName: undefined,
+    };
+
+    if (command === 'get-file') {
       if (!details.parameters) {
         (
-          details as ActionDetails<
+          details as unknown as ActionDetails<
             ResponseActionGetFileOutputContent,
             ResponseActionGetFileParameters
           >
@@ -199,24 +272,75 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
 
       if (!details.outputs || Object.keys(details.outputs).length === 0) {
-        details.outputs = {
-          [details.agents[0]]: {
+        (
+          details as unknown as ActionDetails<
+            ResponseActionGetFileOutputContent,
+            ResponseActionGetFileParameters
+          >
+        ).outputs = details.agents.reduce<
+          ActionDetails<
+            ResponseActionGetFileOutputContent,
+            ResponseActionGetFileParameters
+          >['outputs']
+        >((acc = {}, agentId) => {
+          acc[agentId] = {
             type: 'json',
             content: {
               code: 'ra_get-file_success',
-              path: '/some/file/txt',
-              size: 1234,
               zip_size: 123,
+              contents: [
+                {
+                  path: '/some/file/txt',
+                  sha256: '1254',
+                  size: 1234,
+                  file_name: 'some-file.txt',
+                  type: 'file',
+                },
+              ],
             },
-          },
-        };
+          };
+          return acc;
+        }, {});
       }
     }
 
-    if (details.command === 'execute') {
+    if (command === 'scan') {
       if (!details.parameters) {
         (
-          details as ActionDetails<
+          details as unknown as ActionDetails<
+            ResponseActionScanOutputContent,
+            ResponseActionScanParameters
+          >
+        ).parameters = {
+          path: '/some/folder/to/scan',
+        };
+      }
+
+      if (!details.outputs || Object.keys(details.outputs).length === 0) {
+        (
+          details as unknown as ActionDetails<
+            ResponseActionScanOutputContent,
+            ResponseActionScanParameters
+          >
+        ).outputs = details.agents.reduce<
+          ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>['outputs']
+        >((acc = {}, agentId) => {
+          acc[agentId] = {
+            type: 'json',
+            content: {
+              code: 'ra_scan_success',
+            },
+          };
+
+          return acc;
+        }, {});
+      }
+    }
+
+    if (command === 'execute') {
+      if (!details.parameters) {
+        (
+          details as unknown as ActionDetails<
             ResponseActionExecuteOutputContent,
             ResponseActionsExecuteParameters
           >
@@ -229,18 +353,74 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
 
       if (!details.outputs || Object.keys(details.outputs).length === 0) {
-        details.outputs = {
-          [details.agents[0]]: this.generateExecuteActionResponseOutput({
+        (
+          details as unknown as ActionDetails<
+            ResponseActionExecuteOutputContent,
+            ResponseActionsExecuteParameters
+          >
+        ).outputs = details.agents.reduce<
+          ActionDetails<
+            ResponseActionExecuteOutputContent,
+            ResponseActionsExecuteParameters
+          >['outputs']
+        >((acc = {}, agentId) => {
+          acc[agentId] = this.generateExecuteActionResponseOutput({
             content: {
               output_file_id: getFileDownloadId(details, details.agents[0]),
-              ...overrides.outputs?.[details.agents[0]].content,
+              ...(overrides.outputs?.[details.agents[0]]?.content ?? {}),
             },
-          }),
-        };
+          });
+          return acc;
+        }, {});
       }
     }
 
-    return details as unknown as ActionDetails<TOutputType, TParameters>;
+    if (command === 'upload') {
+      const uploadActionDetails = details as unknown as ActionDetails<
+        ResponseActionUploadOutputContent,
+        ResponseActionUploadParameters
+      >;
+
+      uploadActionDetails.parameters = {
+        file_id: 'file-x-y-z',
+        file_name: 'foo.txt',
+        file_size: 1234,
+        file_sha256: 'file-hash-sha-256',
+      };
+
+      uploadActionDetails.outputs = details.agents.reduce<
+        ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>['outputs']
+      >((acc = {}, agentId) => {
+        acc[agentId] = {
+          type: 'json',
+          content: {
+            code: 'ra_upload_file-success',
+            path: '/path/to/uploaded/file',
+            disk_free_space: 1234567,
+          },
+        };
+        return acc;
+      }, {});
+    }
+
+    if (isProcessesAction(details)) {
+      details.outputs = agents.reduce((acc, agentId) => {
+        acc[agentId] = {
+          type: 'json',
+          content: {
+            code: 'success',
+            entries: this.randomResponseActionProcesses(),
+          },
+        };
+
+        return acc;
+      }, {} as Required<ActionDetails<GetProcessesActionOutputContent>>['outputs']);
+    }
+
+    return merge(details, overrides as ActionDetails) as unknown as ActionDetails<
+      TOutputContent,
+      TParameters
+    >;
   }
 
   randomGetFileFailureCode(): string {
@@ -255,6 +435,14 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       'ra_get-file_error_upload-api-unreachable',
       'ra_get-file_error_upload-timeout',
       'ra_get-file_error_queue-timeout',
+    ]);
+  }
+
+  randomScanFailureCode(): string {
+    return this.randomChoice([
+      'ra_scan_error_scan-invalid-input',
+      'ra_scan_error_not-found',
+      'ra_scan_error_scan-queue-quota',
     ]);
   }
 
@@ -273,9 +461,11 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     );
   }
 
-  generateActivityLogActionResponse(
-    overrides: DeepPartial<EndpointActivityLogActionResponse>
-  ): EndpointActivityLogActionResponse {
+  generateActivityLogActionResponse<
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  >(
+    overrides: DeepPartial<EndpointActivityLogActionResponse<TOutputContent>>
+  ): EndpointActivityLogActionResponse<TOutputContent> {
     return merge(
       {
         type: ActivityLogItemTypes.RESPONSE,
@@ -304,12 +494,13 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   generateExecuteActionResponseOutput(
-    overrides?: Partial<ActionResponseOutput<Partial<ResponseActionExecuteOutputContent>>>
+    overrides?: DeepPartial<ActionResponseOutput<ResponseActionExecuteOutputContent>>
   ): ActionResponseOutput<ResponseActionExecuteOutputContent> {
     return merge(
       {
         type: 'json',
         content: {
+          code: 'ra_execute_success_done',
           stdout: this.randomChoice([
             this.randomString(1280),
             this.randomString(3580),

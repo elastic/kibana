@@ -4,22 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
-import moment from 'moment';
-import { EuiFormLabel, EuiHorizontalRule, EuiSplitPanel } from '@elastic/eui';
-import { getUseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React, { useMemo, useState } from 'react';
+import moment, { Moment } from 'moment';
+import {
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiSplitPanel,
+} from '@elastic/eui';
+import {
+  FIELD_TYPES,
+  getUseField,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { Frequency } from '@kbn/rrule';
 import { getWeekdayInfo } from '../../helpers/get_weekday_info';
 import {
   DEFAULT_FREQUENCY_OPTIONS,
   DEFAULT_PRESETS,
   EndsOptions,
-  Frequency,
   RECURRENCE_END_OPTIONS,
 } from '../../constants';
 import * as i18n from '../../translations';
-import { ButtonGroupField } from '../fields/button_group_field';
-import { DatePickerField } from '../fields/date_picker_field';
 import { CustomRecurringSchedule } from './custom_recurring_schedule';
 import { recurringSummary } from '../../helpers/recurring_summary';
 import { getPresets } from '../../helpers/get_presets';
@@ -27,10 +37,17 @@ import { FormProps } from '../schema';
 
 const UseField = getUseField({ component: Field });
 
+export const toMoment = (value: string): Moment => moment(value);
+export const toString = (value: Moment): string => value.toISOString();
+
 export const RecurringSchedule: React.FC = React.memo(() => {
-  const [{ startDate, recurringSchedule }] = useFormData<FormProps>({
+  const [today] = useState<Moment>(moment());
+
+  const [{ startDate, endDate, timezone, recurringSchedule }] = useFormData<FormProps>({
     watch: [
       'startDate',
+      'endDate',
+      'timezone',
       'recurringSchedule.frequency',
       'recurringSchedule.interval',
       'recurringSchedule.ends',
@@ -95,22 +112,57 @@ export const RecurringSchedule: React.FC = React.memo(() => {
         ) : null}
         <UseField
           path="recurringSchedule.ends"
-          component={ButtonGroupField}
           componentProps={{
             'data-test-subj': 'ends-field',
-            legend: 'Recurrence ends',
-            options: RECURRENCE_END_OPTIONS,
+            euiFieldProps: {
+              legend: 'Recurrence ends',
+              options: RECURRENCE_END_OPTIONS,
+            },
           }}
         />
         {recurringSchedule?.ends === EndsOptions.ON_DATE ? (
-          <UseField
-            path="recurringSchedule.until"
-            component={DatePickerField}
-            componentProps={{
-              'data-test-subj': 'until-field',
-              showTimeSelect: false,
-            }}
-          />
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup alignItems="flexEnd">
+              <EuiFlexItem grow={3}>
+                <UseField
+                  path="recurringSchedule.until"
+                  config={{
+                    type: FIELD_TYPES.DATE_PICKER,
+                    label: '',
+                    defaultValue: moment(endDate).endOf('day').toISOString(),
+                    validations: [],
+                    serializer: toString,
+                    deserializer: toMoment,
+                  }}
+                  componentProps={{
+                    'data-test-subj': 'until-field',
+                    euiFieldProps: {
+                      showTimeSelect: false,
+                      minDate: today,
+                    },
+                  }}
+                />
+              </EuiFlexItem>
+              {timezone ? (
+                <EuiFlexItem grow={1}>
+                  <EuiComboBox
+                    data-test-subj="disabled-timezone-field"
+                    id="disabled-timezone"
+                    isDisabled
+                    singleSelection={{ asPlainText: true }}
+                    selectedOptions={[{ label: timezone[0] }]}
+                    isClearable={false}
+                    prepend={
+                      <EuiFormLabel htmlFor={'disabled-timezone'}>
+                        {i18n.CREATE_FORM_TIMEZONE}
+                      </EuiFormLabel>
+                    }
+                  />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </>
         ) : null}
         {recurringSchedule?.ends === EndsOptions.AFTER_X ? (
           <UseField

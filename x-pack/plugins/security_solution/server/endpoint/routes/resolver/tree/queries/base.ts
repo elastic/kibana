@@ -7,14 +7,17 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import type { ResolverSchema } from '../../../../../../common/endpoint/types';
+import { createSharedFilters } from '../../utils/shared_filters';
 import type { TimeRange } from '../utils';
 import { resolverFields } from '../utils';
 
 export interface ResolverQueryParams {
   readonly schema?: ResolverSchema;
+  readonly agentId?: string;
   readonly indexPatterns: string | string[];
-  readonly timeRange: TimeRange | undefined;
   readonly isInternalRequest?: boolean;
+  readonly shouldExcludeColdAndFrozenTiers?: boolean;
+  readonly timeRange: TimeRange | undefined;
   readonly resolverFields?: JsonValue[];
   getRangeFilter?: () => Array<{
     range: { '@timestamp': { gte: string; lte: string; format: string } };
@@ -23,12 +26,21 @@ export interface ResolverQueryParams {
 
 export class BaseResolverQuery implements ResolverQueryParams {
   readonly schema: ResolverSchema;
+  readonly agentId: string | undefined;
   readonly indexPatterns: string | string[];
-  readonly timeRange: TimeRange | undefined;
   readonly isInternalRequest?: boolean;
+  readonly shouldExcludeColdAndFrozenTiers?: boolean;
+  readonly timeRange: TimeRange | undefined;
   readonly resolverFields?: JsonValue[];
 
-  constructor({ schema, indexPatterns, timeRange, isInternalRequest }: ResolverQueryParams) {
+  constructor({
+    schema,
+    indexPatterns,
+    timeRange,
+    isInternalRequest,
+    shouldExcludeColdAndFrozenTiers,
+    agentId,
+  }: ResolverQueryParams) {
     const schemaOrDefault = schema
       ? schema
       : {
@@ -40,6 +52,14 @@ export class BaseResolverQuery implements ResolverQueryParams {
     this.indexPatterns = indexPatterns;
     this.timeRange = timeRange;
     this.isInternalRequest = isInternalRequest;
+    this.shouldExcludeColdAndFrozenTiers = shouldExcludeColdAndFrozenTiers;
+    this.agentId = agentId;
+  }
+
+  getColdAndFrozenTierFilter() {
+    return createSharedFilters({
+      excludeColdAndFrozenTiers: !!this.shouldExcludeColdAndFrozenTiers,
+    });
   }
 
   getRangeFilter() {

@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import { Teletype } from '../../../common/types/process_tree';
+import type { Teletype } from '../../../common';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
 import { ZOOM_IN, ZOOM_FIT, ZOOM_OUT } from './translations';
 import { useStyles } from './styles';
@@ -28,7 +28,7 @@ export interface TTYTextSizerDeps {
 const commonButtonProps: Partial<EuiButtonIconProps> = {
   display: 'empty',
   size: 's',
-  color: 'ghost',
+  color: 'text',
 };
 
 const LINE_HEIGHT_SCALE_RATIO = 1.3;
@@ -95,7 +95,7 @@ export const TTYTextSizer = ({
             iconType={fit ? 'expand' : 'minimize'}
             onClick={onToggleFit}
             size="s"
-            color="ghost"
+            color="text"
           />
         </EuiToolTip>
       </EuiFlexItem>

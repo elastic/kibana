@@ -5,23 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mount } from 'enzyme';
+import React, { useEffect } from 'react';
+import { render, waitFor } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
-import { waitFor } from '@testing-library/react';
-import '../../../common/mock/match_media';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-} from '../../../common/mock';
-import { DetectionEnginePage } from './detection_engine';
+import { mockGlobalState, TestProviders, createMockStore } from '../../../common/mock';
 import { useUserData } from '../../components/user_info';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { State } from '../../../common/store';
-import { createStore } from '../../../common/store';
 import { mockHistory, Router } from '../../../common/mock/router';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
@@ -29,6 +19,13 @@ import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_cont
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
+import * as alertFilterControlsPackage from '@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls';
+import { DetectionEnginePage } from './detection_engine';
+import type { AlertsTableComponentProps } from '../../components/alerts_table/alerts_grouping';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { useUpsellingMessage } from '../../../common/hooks/use_upselling';
+import { mockAlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls/mocks';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -38,9 +35,30 @@ jest.mock('../../../common/components/search_bar', () => ({
 jest.mock('../../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
+jest.mock('../../../common/hooks/use_space_id', () => ({
+  useSpaceId: () => 'default',
+}));
+jest.mock('@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls');
+
+const mockStatusCapture = jest.fn();
+const GroupedAlertsTable: React.FC<AlertsTableComponentProps> = ({
+  currentAlertStatusFilterValue,
+}) => {
+  useEffect(() => {
+    if (currentAlertStatusFilterValue) {
+      mockStatusCapture(currentAlertStatusFilterValue);
+    }
+  }, [currentAlertStatusFilterValue]);
+  return <span />;
+};
+
+jest.mock('../../components/alerts_table/alerts_grouping', () => ({
+  GroupedAlertsTable,
+}));
+
 jest.mock('../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../components/user_info');
-jest.mock('../../../common/containers/sourcerer');
+jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/components/link_to');
 jest.mock('../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
@@ -93,9 +111,6 @@ jest.mock('../../../common/lib/kibana', () => {
         cases: {
           ui: { getCasesContext: mockCasesContext },
         },
-        uiSettings: {
-          get: jest.fn(),
-        },
         timelines: { ...mockTimelines },
         data: {
           query: {
@@ -120,6 +135,15 @@ jest.mock('../../../common/lib/kibana', () => {
         sessionView: {
           getSessionView: jest.fn().mockReturnValue(<div />),
         },
+        notifications: {
+          toasts: {
+            addWarning: jest.fn(),
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+            addDanger: jest.fn(),
+            remove: jest.fn(),
+          },
+        },
       },
     }),
     useToasts: jest.fn().mockReturnValue({
@@ -131,23 +155,41 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../timelines/components/side_panel/hooks/use_detail_panel', () => {
-  return {
-    useDetailPanel: () => ({
-      openEventDetailsPanel: jest.fn(),
-      handleOnDetailsPanelClosed: () => {},
-      DetailsPanel: () => <div />,
-      shouldShowDetailsPanel: false,
-    }),
-  };
-});
+const dataViewId = 'security-solution-default';
 
-const state: State = {
+const stateWithBuildingBlockAlertsEnabled: State = {
   ...mockGlobalState,
+  dataTable: {
+    ...mockGlobalState.dataTable,
+    tableById: {
+      ...mockGlobalState.dataTable.tableById,
+      [TableId.test]: {
+        ...mockGlobalState.dataTable.tableById[TableId.test],
+        additionalFilters: {
+          showOnlyThreatIndicatorAlerts: false,
+          showBuildingBlockAlerts: true,
+        },
+      },
+    },
+  },
 };
 
-const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const stateWithThreatIndicatorsAlertEnabled: State = {
+  ...mockGlobalState,
+  dataTable: {
+    ...mockGlobalState.dataTable,
+    tableById: {
+      ...mockGlobalState.dataTable.tableById,
+      [TableId.test]: {
+        ...mockGlobalState.dataTable.tableById[TableId.test],
+        additionalFilters: {
+          showOnlyThreatIndicatorAlerts: true,
+          showBuildingBlockAlerts: false,
+        },
+      },
+    },
+  },
+};
 
 jest.mock('../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline', () => ({
   useAddBulkToTimelineAction: jest.fn(() => {}),
@@ -155,12 +197,15 @@ jest.mock('../../components/alerts_table/timeline_actions/use_add_bulk_to_timeli
 
 jest.mock('../../../common/components/visualization_actions/lens_embeddable');
 jest.mock('../../../common/components/page/use_refetch_by_session');
+jest.mock('../../../common/hooks/use_upselling');
 
 describe('DetectionEnginePageComponent', () => {
   beforeAll(() => {
+    (useListsConfig as jest.Mock).mockReturnValue({ loading: false, needsConfiguration: false });
     (useParams as jest.Mock).mockReturnValue({});
     (useUserData as jest.Mock).mockReturnValue([
       {
+        loading: false,
         hasIndexRead: true,
         canUserREAD: true,
       },
@@ -170,24 +215,30 @@ describe('DetectionEnginePageComponent', () => {
       indexPattern: {},
       browserFields: mockBrowserFields,
     });
+    jest
+      .spyOn(alertFilterControlsPackage, 'AlertFilterControls')
+      .mockImplementation(() => <span data-test-subj="filter-group__loading" />);
+    (useUpsellingMessage as jest.Mock).mockReturnValue('Go for Platinum!');
   });
-
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it('renders correctly', async () => {
-    const wrapper = mount(
-      <TestProviders store={store}>
+    const { getByTestId } = render(
+      <TestProviders>
         <Router history={mockHistory}>
           <DetectionEnginePage />
         </Router>
       </TestProviders>
     );
     await waitFor(() => {
-      expect(wrapper.find('FiltersGlobal').exists()).toBe(true);
+      expect(getByTestId('filter-group__loading')).toBeInTheDocument();
     });
   });
 
   it('renders the chart panels', async () => {
-    const wrapper = mount(
-      <TestProviders store={store}>
+    const { getByTestId } = render(
+      <TestProviders>
         <Router history={mockHistory}>
           <DetectionEnginePage />
         </Router>
@@ -195,7 +246,174 @@ describe('DetectionEnginePageComponent', () => {
     );
 
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="chartPanels"]').exists()).toBe(true);
+      expect(getByTestId('chartPanels')).toBeInTheDocument();
     });
+  });
+
+  it('should pass building block filter to the alert Page Controls', async () => {
+    render(
+      <TestProviders store={createMockStore(stateWithBuildingBlockAlertsEnabled)}>
+        <Router history={mockHistory}>
+          <DetectionEnginePage />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() =>
+      expect(jest.spyOn(alertFilterControlsPackage, 'AlertFilterControls')).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: [
+            {
+              meta: {
+                alias: null,
+                negate: true,
+                disabled: false,
+                type: 'exists',
+                key: 'kibana.alert.building_block_type',
+                value: 'exists',
+                index: dataViewId,
+              },
+              query: {
+                exists: {
+                  field: 'kibana.alert.building_block_type',
+                },
+              },
+            },
+          ],
+        }),
+        expect.anything()
+      )
+    );
+  });
+
+  it('should pass threat Indicator filter to the alert Page Controls', async () => {
+    render(
+      <TestProviders store={createMockStore(stateWithThreatIndicatorsAlertEnabled)}>
+        <Router history={mockHistory}>
+          <DetectionEnginePage />
+        </Router>
+      </TestProviders>
+    );
+
+    expect(jest.spyOn(alertFilterControlsPackage, 'AlertFilterControls')).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: [
+          {
+            meta: {
+              alias: null,
+              negate: true,
+              disabled: false,
+              type: 'exists',
+              key: 'kibana.alert.building_block_type',
+              value: 'exists',
+              index: dataViewId,
+            },
+            query: {
+              exists: {
+                field: 'kibana.alert.building_block_type',
+              },
+            },
+          },
+        ],
+      }),
+      expect.anything()
+    );
+  });
+
+  it('the pageFiltersUpdateHandler updates status when a multi status filter is passed', async () => {
+    jest.spyOn(alertFilterControlsPackage, 'AlertFilterControls').mockImplementationOnce(
+      mockAlertFilterControls([
+        {
+          meta: {
+            index: 'security-solution-default',
+            key: 'kibana.alert.workflow_status',
+            params: ['open', 'acknowledged'],
+          },
+        },
+      ])
+    );
+
+    render(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <DetectionEnginePage />
+        </Router>
+      </TestProviders>
+    );
+    // when statusFilter updates, we call mockStatusCapture in test mocks
+    expect(mockStatusCapture).toHaveBeenNthCalledWith(1, []);
+    expect(mockStatusCapture).toHaveBeenNthCalledWith(2, ['open', 'acknowledged']);
+  });
+
+  it('the pageFiltersUpdateHandler updates status when a single status filter is passed', async () => {
+    jest.spyOn(alertFilterControlsPackage, 'AlertFilterControls').mockImplementation(
+      mockAlertFilterControls([
+        {
+          meta: {
+            index: 'security-solution-default',
+            key: 'kibana.alert.workflow_status',
+            disabled: false,
+          },
+          query: {
+            match_phrase: {
+              'kibana.alert.workflow_status': 'open',
+            },
+          },
+        },
+        {
+          meta: {
+            index: 'security-solution-default',
+            key: 'kibana.alert.severity',
+            disabled: false,
+          },
+          query: {
+            match_phrase: {
+              'kibana.alert.severity': 'low',
+            },
+          },
+        },
+      ])
+    );
+
+    render(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <DetectionEnginePage />
+        </Router>
+      </TestProviders>
+    );
+    // when statusFilter updates, we call mockStatusCapture in test mocks
+    expect(mockStatusCapture).toHaveBeenNthCalledWith(1, []);
+    expect(mockStatusCapture).toHaveBeenNthCalledWith(2, ['open']);
+  });
+
+  it('the pageFiltersUpdateHandler clears status when no status filter is passed', async () => {
+    jest.spyOn(alertFilterControlsPackage, 'AlertFilterControls').mockImplementation(
+      mockAlertFilterControls([
+        {
+          meta: {
+            index: 'security-solution-default',
+            key: 'kibana.alert.severity',
+            disabled: false,
+          },
+          query: {
+            match_phrase: {
+              'kibana.alert.severity': 'low',
+            },
+          },
+        },
+      ])
+    );
+
+    render(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <DetectionEnginePage />
+        </Router>
+      </TestProviders>
+    );
+    // when statusFilter updates, we call mockStatusCapture in test mocks
+    expect(mockStatusCapture).toHaveBeenNthCalledWith(1, []);
+    expect(mockStatusCapture).toHaveBeenNthCalledWith(2, []);
   });
 });

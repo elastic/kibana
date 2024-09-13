@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { sortBy } from 'lodash';
 
-import { EuiIcon, EuiSideNavItemType, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiSideNavItemType, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { ManagementApp, ManagementSection } from '../../utils';
@@ -32,14 +33,19 @@ export const managementSidebarNav = ({
     const sortedManagementSections = sortBy(managementSections, 'order');
 
     return sortedManagementSections.reduce<Array<EuiSideNavItemType<any>>>((acc, section) => {
-      const apps = sortBy(section.getAppsEnabled(), 'order');
+      const apps = sortBy(
+        section.getAppsEnabled().filter((app) => !app.hideFromSidebar),
+        'order'
+      );
 
       if (apps.length) {
-        acc.push({
-          ...createNavItem(section, {
-            items: appsToNavItems(apps),
-          }),
-        });
+        if (!section.hideFromSidebar) {
+          acc.push({
+            ...createNavItem(section, {
+              items: appsToNavItems(apps),
+            }),
+          });
+        }
       }
 
       return acc;
@@ -53,21 +59,19 @@ export const managementSidebarNav = ({
       }),
     }));
 
-  interface TooltipWrapperProps {
+  interface HeaderWrapperProps {
     text: string;
     tip?: string;
   }
 
-  const TooltipWrapper = ({ text, tip }: TooltipWrapperProps) => (
-    <EuiToolTip content={tip} position="right">
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-        <EuiFlexItem grow={false}>{text}</EuiFlexItem>
+  const HeaderWrapper = ({ text, tip }: HeaderWrapperProps) => (
+    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+      <EuiFlexItem grow={false}>{text}</EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiIcon color="subdued" size="s" type="questionInCircle" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
+      <EuiFlexItem grow={false}>
+        <EuiIconTip content={tip} position="top" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   const createNavItem = <T extends ManagementItem>(
@@ -78,7 +82,7 @@ export const managementSidebarNav = ({
 
     return {
       id: item.id,
-      name: item.tip ? <TooltipWrapper text={item.title} tip={item.tip} /> : item.title,
+      name: item.tip ? <HeaderWrapper text={item.title} tip={item.tip} /> : item.title,
       isSelected: item.id === selectedId,
       icon: iconType ? <EuiIcon type={iconType} size="m" /> : undefined,
       'data-test-subj': item.id,

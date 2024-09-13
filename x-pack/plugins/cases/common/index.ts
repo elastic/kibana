@@ -15,8 +15,29 @@
 // For example, constants below could eventually be in a "kbn-cases-constants" instead.
 // See: https://docs.elastic.dev/kibana-dev-docs/key-concepts/platform-intro#public-plugin-api
 
+export type {
+  CasesBulkGetResponse,
+  CasePostRequest,
+  GetRelatedCasesByAlertResponse,
+  UserActionFindResponse,
+} from './types/api';
+export type { Case, Cases, RelatedCase } from './types/domain';
+export type {
+  CaseUI,
+  CasesUI,
+  CasesFindResponseUI,
+  Ecs,
+  CaseViewRefreshPropInterface,
+  CasesPermissions,
+  CasesCapabilities,
+  CasesStatus,
+} from './ui/types';
+
+export { CaseSeverity } from './types/domain';
+
 export {
   APP_ID,
+  FEATURE_ID,
   CASES_URL,
   SECURITY_SOLUTION_OWNER,
   OBSERVABILITY_OWNER,
@@ -27,32 +48,19 @@ export {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
   INTERNAL_BULK_GET_CASES_URL,
+  LENS_ATTACHMENT_TYPE,
+  INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  SAVED_OBJECT_TYPES,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASES_CONNECTORS_CAPABILITY,
+  GET_CONNECTORS_CONFIGURE_API_TAG,
+  CASES_SETTINGS_CAPABILITY,
 } from './constants';
 
-export {
-  CommentType,
-  CaseStatuses,
-  getCasesFromAlertsUrl,
-  throwErrors,
-  ExternalReferenceStorageType,
-} from './api';
-
-export type {
-  CaseResponse,
-  CasesBulkGetRequestCertainFields,
-  CasesBulkGetResponseCertainFields,
-} from './api';
-
-export type {
-  Case,
-  Ecs,
-  CasesFeatures,
-  CaseViewRefreshPropInterface,
-  CasesPermissions,
-} from './ui/types';
-
-export { StatusAll } from './ui/types';
-
-export { getCreateConnectorUrl, getAllConnectorsUrl } from './utils/connectors_api';
-export { createUICapabilities } from './utils/capabilities';
-export { getApiTags } from './utils/api_tags';
+export type { AttachmentAttributes } from './types/domain';
+export { ConnectorTypes, AttachmentType, ExternalReferenceStorageType } from './types/domain';
+export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl, throwErrors } from './api';
+export { createUICapabilities, type CasesUiCapabilities } from './utils/capabilities';
+export { getApiTags, type CasesApiTags } from './utils/api_tags';
+export { CaseMetricsFeature } from './types/api';
+export type { SingleCaseMetricsResponse, CasesMetricsResponse } from './types/api';

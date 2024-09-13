@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs';
 import { ISearchStrategy, PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
 import { EqlSearchStrategyResponse, EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy';
 import { EqlSearchResponse } from '../../../../common/search_strategy';
-import {
-  TimelineEqlRequestOptions,
-  TimelineEqlResponse,
-} from '../../../../common/search_strategy/timeline/events/eql';
+import { TimelineEqlResponse } from '../../../../common/search_strategy/timeline/events/eql';
 import { buildEqlDsl, parseEqlResponse } from './helpers';
+import { parseOptions } from './parse_options';
 
 export const timelineEqlSearchStrategyProvider = (
   data: PluginStart
@@ -21,7 +20,9 @@ export const timelineEqlSearchStrategyProvider = (
   const esEql = data.search.getSearchStrategy(EQL_SEARCH_STRATEGY);
   return {
     search: (request, options, deps) => {
-      const dsl = buildEqlDsl(request);
+      const parsedOptions = parseOptions(request);
+      const dsl = buildEqlDsl(parsedOptions);
+
       return esEql.search({ ...request, params: dsl }, options, deps).pipe(
         map((response) => {
           return {
@@ -33,7 +34,7 @@ export const timelineEqlSearchStrategyProvider = (
         }),
         mergeMap(async (esSearchRes) =>
           parseEqlResponse(
-            request,
+            parsedOptions,
             esSearchRes as unknown as EqlSearchStrategyResponse<EqlSearchResponse<unknown>>
           )
         )

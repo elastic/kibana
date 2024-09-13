@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import type { DataViewBase, Query } from '@kbn/es-query';
+import { DataViewBase, Query } from '@kbn/es-query';
 import { storiesOf } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { buildExistsFilter } from '@kbn/es-query';
+import { EuiButton, EuiComboBox } from '@elastic/eui';
 import { SearchBar, SearchBarProps } from '../search_bar';
 import { setIndexPatterns } from '../services';
 
@@ -83,6 +85,7 @@ const services = {
   uiSettings: {
     get: () => {},
   },
+  settings: { client: { get: () => {} } },
   savedObjects: action('savedObjects'),
   notifications: action('notifications'),
   http: {
@@ -172,11 +175,20 @@ const services = {
   },
 };
 
+const defaultCapabilities = {
+  savedObjectsManagement: {
+    edit: true,
+  },
+};
+
 setIndexPatterns({
   get: () => Promise.resolve(mockIndexPatterns[0]),
 } as unknown as DataViewsContract);
 
-function wrapSearchBarInContext(testProps: SearchBarProps<Query>) {
+function wrapSearchBarInContext(
+  testProps: Partial<SearchBarProps<Query>>,
+  capabilities: typeof defaultCapabilities = defaultCapabilities
+) {
   const defaultOptions = {
     appName: 'test',
     timeHistory: mockTimeHistory,
@@ -195,9 +207,16 @@ function wrapSearchBarInContext(testProps: SearchBarProps<Query>) {
     onFiltersUpdated: action('onFiltersUpdated'),
   } as unknown as SearchBarProps<Query>;
 
+  const kbnServices = {
+    ...services,
+    application: {
+      capabilities,
+    },
+  };
+
   return (
     <I18nProvider>
-      <KibanaContextProvider services={services}>
+      <KibanaContextProvider services={kbnServices}>
         <SearchBar<Query> {...defaultOptions} {...testProps} />
       </KibanaContextProvider>
     </I18nProvider>
@@ -217,7 +236,7 @@ storiesOf('SearchBar', module)
         },
         onChangeDataView: action('onChangeDataView'),
       },
-    } as SearchBarProps)
+    })
   )
   .add('with dataviewPicker enhanced', () =>
     wrapSearchBarInContext({
@@ -232,34 +251,56 @@ storiesOf('SearchBar', module)
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
       },
-    } as SearchBarProps)
+    })
   )
   .add('with filterBar off', () =>
     wrapSearchBarInContext({
       showFilterBar: false,
-    } as SearchBarProps)
+    })
   )
   .add('with query input off', () =>
     wrapSearchBarInContext({
       showQueryInput: false,
-    } as SearchBarProps)
+    })
   )
   .add('with date picker off', () =>
     wrapSearchBarInContext({
       showDatePicker: false,
-    } as SearchBarProps)
+    })
   )
-  .add('with date picker off', () =>
+  .add('with disabled "Save query" menu', () =>
     wrapSearchBarInContext({
-      showDatePicker: false,
-    } as SearchBarProps)
+      showSaveQuery: false,
+    })
+  )
+  .add('with hidden "Manage saved objects" link in "Load saved query" menu', () =>
+    wrapSearchBarInContext(
+      {},
+      {
+        savedObjectsManagement: {
+          edit: false,
+        },
+      }
+    )
+  )
+  .add('with the default date picker auto refresh interval on', () =>
+    wrapSearchBarInContext({
+      showDatePicker: true,
+      onRefreshChange: action('onRefreshChange'),
+    })
+  )
+  .add('with the default date picker auto refresh interval off', () =>
+    wrapSearchBarInContext({
+      showDatePicker: true,
+      isAutoRefreshDisabled: true,
+    })
   )
   .add('with only the date picker on', () =>
     wrapSearchBarInContext({
       showDatePicker: true,
       showFilterBar: false,
       showQueryInput: false,
-    } as SearchBarProps)
+    })
   )
   .add('with additional filters used for suggestions', () =>
     wrapSearchBarInContext({
@@ -446,6 +487,28 @@ storiesOf('SearchBar', module)
       },
     } as unknown as SearchBarProps)
   )
+  .add('with prepended controls', () =>
+    wrapSearchBarInContext({
+      prependFilterBar: (
+        <EuiComboBox
+          placeholder="Select option"
+          options={[
+            {
+              label: 'Filter 1',
+            },
+          ]}
+          fullWidth={false}
+          isClearable={true}
+        />
+      ),
+      showQueryInput: true,
+    })
+  )
+  .add('without switch query language', () =>
+    wrapSearchBarInContext({
+      disableQueryLanguageSwitcher: true,
+    })
+  )
   .add('show only query bar without submit', () =>
     wrapSearchBarInContext({
       showDatePicker: false,
@@ -453,7 +516,7 @@ storiesOf('SearchBar', module)
       showAutoRefreshOnly: false,
       showQueryInput: true,
       showSubmitButton: false,
-    } as SearchBarProps)
+    })
   )
   .add('show only datepicker without submit', () =>
     wrapSearchBarInContext({
@@ -462,7 +525,7 @@ storiesOf('SearchBar', module)
       showAutoRefreshOnly: false,
       showQueryInput: false,
       showSubmitButton: false,
-    } as SearchBarProps)
+    })
   )
   .add('show only query bar and timepicker without submit', () =>
     wrapSearchBarInContext({
@@ -471,7 +534,7 @@ storiesOf('SearchBar', module)
       showAutoRefreshOnly: false,
       showQueryInput: true,
       showSubmitButton: false,
-    } as SearchBarProps)
+    })
   )
   .add('with filter bar on but pinning option is hidden from menus', () =>
     wrapSearchBarInContext({
@@ -504,7 +567,7 @@ storiesOf('SearchBar', module)
       ],
     } as unknown as SearchBarProps)
   )
-  .add('with dataviewPicker with SQL', () =>
+  .add('with dataviewPicker with ES|QL', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -516,66 +579,66 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
+        textBasedLanguages: ['ESQL'],
       },
     } as SearchBarProps)
   )
-  .add('with dataviewPicker with SQL and sql query', () =>
+  .add('with dataviewPicker with ES|QL and ES|QL query', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
-          label: 'SQL',
-          title: 'SQL',
+          label: 'ES|QL',
+          title: 'ESQL',
         },
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
+        textBasedLanguages: ['ESQL'],
       },
-      query: { sql: 'SELECT field1, field2 FROM DATAVIEW' },
+      query: { esql: 'from dataview | project field1, field2' },
     } as unknown as SearchBarProps<Query>)
   )
-  .add('with dataviewPicker with SQL and large sql query', () =>
+  .add('with dataviewPicker with ES|QL and large ES|QL query', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
-          label: 'SQL',
-          title: 'SQL',
+          label: 'ES|QL',
+          title: 'ESQL',
         },
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
+        textBasedLanguages: ['ESQL'],
       },
       query: {
-        sql: 'SELECT field1, field2, field 3, field 4, field 5 FROM DATAVIEW WHERE field5 IS NOT NULL AND field4 IS NULL',
+        esql: 'from dataview | project field1, field2, field 3, field 4, field 5 | where field5 > 5 | stats var = avg(field3)',
       },
     } as unknown as SearchBarProps<Query>)
   )
-  .add('with dataviewPicker with SQL and errors in sql query', () =>
+  .add('with dataviewPicker with ES|QL and errors in ES|QL query', () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
         trigger: {
           'data-test-subj': 'dataView-switch-link',
-          label: 'SQL',
-          title: 'SQL',
+          label: 'ES|QL',
+          title: 'ESQL',
         },
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['SQL'],
+        textBasedLanguages: ['ESQL'],
       },
       textBasedLanguageModeErrors: [
         new Error(
-          '[essql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 1:16: Unknown column [field10]'
+          '[esql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 1:16: Unknown column [field10]'
         ),
       ],
-      query: { sql: 'SELECT field1, field10 FROM DATAVIEW' },
+      query: { esql: 'from dataview | project field10' },
     } as unknown as SearchBarProps<Query>)
   )
   .add('in disabled state', () =>
@@ -590,7 +653,7 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
       },
       isDisabled: true,
-    } as SearchBarProps)
+    })
   )
   .add('no submit button', () =>
     wrapSearchBarInContext({
@@ -604,7 +667,7 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
       },
       showSubmitButton: false,
-    } as SearchBarProps)
+    })
   )
   .add('submit button always as icon', () =>
     wrapSearchBarInContext({
@@ -618,7 +681,7 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
       },
       submitButtonStyle: 'iconOnly',
-    } as SearchBarProps)
+    })
   )
   .add('submit button always as a full button', () =>
     wrapSearchBarInContext({
@@ -632,5 +695,56 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
       },
       submitButtonStyle: 'full',
-    } as SearchBarProps)
+    })
+  )
+
+  .add('with renderQueryInputAppend prop', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+      },
+      submitButtonStyle: 'full',
+      renderQueryInputAppend: () => <EuiButton onClick={() => {}}>Append</EuiButton>,
+    })
+  )
+  .add('with additional query bar menu items', () =>
+    wrapSearchBarInContext({
+      showFilterBar: true,
+      additionalQueryBarMenuItems: {
+        items: [
+          {
+            name: 'Observability rule types',
+            icon: 'logoObservability',
+          },
+          {
+            name: 'Security rule types',
+            icon: 'logoSecurity',
+          },
+          {
+            name: 'Status',
+            panel: 'status-panel',
+          },
+        ],
+        panels: [
+          {
+            id: 'status-panel',
+            title: 'Status',
+            items: [
+              {
+                name: 'Active',
+              },
+              {
+                name: 'Inactive',
+              },
+            ],
+          },
+        ],
+      },
+    })
   );

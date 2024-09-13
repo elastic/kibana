@@ -34,6 +34,7 @@ export {
   isValidNamespace,
   LicenseService,
   isAgentUpgradeable,
+  getNotUpgradeableMessage,
   doesPackageHaveIntegrations,
   validatePackagePolicy,
   validatePackagePolicyConfig,
@@ -48,4 +49,3 @@ export { isPackageUpdatable } from './is_package_updatable';
 export { pkgKeyFromPackageInfo } from './pkg_key_from_package_info';
 export { createExtensionRegistrationCallback } from './ui_extensions';
 export { incrementPolicyName } from './increment_policy_name';
-export { generateNewAgentPolicyWithDefaults } from './generate_new_agent_policy';

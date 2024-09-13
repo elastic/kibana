@@ -8,26 +8,28 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
 import {
-  deleteAnalytics,
-  deleteAnalyticsAndDestIndex,
-  canDeleteIndex,
+  useDeleteAnalytics,
+  useDeleteAnalyticsAndDestIndex,
+  useCanDeleteIndex,
 } from '../../services/analytics_service';
 
-import {
-  isDataFrameAnalyticsRunning,
+import type {
   DataFrameAnalyticsListAction,
   DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
+import { isDataFrameAnalyticsRunning } from '../analytics_list/common';
 
 import { deleteActionNameText, DeleteActionName } from './delete_action_name';
 
-import { JobType } from '../../../../../../../common/types/saved_objects';
+import type { JobType } from '../../../../../../../common/types/saved_objects';
+
+import { getDestinationIndex } from '../../../../common/get_destination_index';
 
 const DF_ANALYTICS_JOB_TYPE: JobType = 'data-frame-analytics';
 
@@ -40,10 +42,10 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   const [isDeleteJobCheckModalVisible, setDeleteJobCheckModalVisible] = useState<boolean>(false);
   const [deleteItem, setDeleteItem] = useState(false);
   const [deleteTargetIndex, setDeleteTargetIndex] = useState<boolean>(true);
-  const [deleteIndexPattern, setDeleteIndexPattern] = useState<boolean>(true);
+  const [deleteDataView, setDeleteDataView] = useState<boolean>(true);
   const [userCanDeleteIndex, setUserCanDeleteIndex] = useState<boolean>(false);
   const [userCanDeleteDataView, setUserCanDeleteDataView] = useState<boolean>(false);
-  const [indexPatternExists, setIndexPatternExists] = useState<boolean>(false);
+  const [dataViewExists, setDataViewExists] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const {
@@ -51,17 +53,20 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
     application: { capabilities },
   } = useMlKibana().services;
 
-  const indexName = item?.config.dest.index ?? '';
+  const indexName = getDestinationIndex(item?.config);
 
   const toastNotificationService = useToastNotificationService();
+  const deleteAnalytics = useDeleteAnalytics();
+  const deleteAnalyticsAndDestIndex = useDeleteAnalyticsAndDestIndex();
+  const canDeleteIndex = useCanDeleteIndex();
 
-  const checkIndexPatternExists = async () => {
+  const checkDataViewExists = async () => {
     try {
-      const dv = (await dataViews.getIdsWithTitle()).find(({ title }) => title === indexName);
+      const dv = (await dataViews.getIdsWithTitle(true)).find(({ title }) => title === indexName);
       if (dv !== undefined) {
-        setIndexPatternExists(true);
+        setDataViewExists(true);
       } else {
-        setIndexPatternExists(false);
+        setDataViewExists(false);
       }
       setIsLoading(false);
     } catch (e) {
@@ -81,7 +86,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   };
   const checkUserIndexPermission = async () => {
     try {
-      const userCanDelete = await canDeleteIndex(indexName, toastNotificationService);
+      const userCanDelete = await canDeleteIndex(indexName);
       if (userCanDelete) {
         setUserCanDeleteIndex(true);
       }
@@ -91,7 +96,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
         capabilities.indexPatterns.save === true;
       setUserCanDeleteDataView(canDeleteDataView);
       if (canDeleteDataView === false) {
-        setDeleteIndexPattern(false);
+        setDeleteDataView(false);
       }
     } catch (e) {
       const error = extractErrorMessage(e);
@@ -114,7 +119,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
     setIsLoading(true);
     // Check if a data view exists corresponding to current DFA job
     // if data view does exist, show it to user
-    checkIndexPatternExists();
+    checkDataViewExists();
     // Check if an user has permission to delete the index & data view
     checkUserIndexPermission();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -127,21 +132,19 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
     setModalVisible(false);
 
     if (item !== undefined) {
-      if ((userCanDeleteIndex && deleteTargetIndex) || (userCanDeleteIndex && deleteIndexPattern)) {
+      if ((userCanDeleteIndex && deleteTargetIndex) || (userCanDeleteIndex && deleteDataView)) {
         deleteAnalyticsAndDestIndex(
           item.config,
-          item.stats,
           deleteTargetIndex,
-          indexPatternExists && deleteIndexPattern,
-          toastNotificationService
+          dataViewExists && deleteDataView
         );
       } else {
-        deleteAnalytics(item.config, item.stats, toastNotificationService);
+        deleteAnalytics(item.config);
       }
     }
   };
   const toggleDeleteIndex = () => setDeleteTargetIndex(!deleteTargetIndex);
-  const toggleDeleteIndexPattern = () => setDeleteIndexPattern(!deleteIndexPattern);
+  const toggleDeleteDataView = () => setDeleteDataView(!deleteDataView);
 
   const openModal = (newItem: DataFrameAnalyticsListRowEssentials) => {
     setItem(newItem);
@@ -179,9 +182,9 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
     closeModal,
     deleteAndCloseModal,
     deleteTargetIndex,
-    deleteIndexPattern,
+    deleteDataView,
     deleteItem,
-    indexPatternExists,
+    dataViewExists,
     isDeleteJobCheckModalVisible,
     isModalVisible,
     isLoading,
@@ -190,7 +193,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
     openModal,
     openDeleteJobCheckModal,
     toggleDeleteIndex,
-    toggleDeleteIndexPattern,
+    toggleDeleteDataView,
     userCanDeleteIndex,
     userCanDeleteDataView,
   };

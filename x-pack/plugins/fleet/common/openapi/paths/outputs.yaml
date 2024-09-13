@@ -1,7 +1,7 @@
 get:
   summary: List outputs
   tags:
-    - Outputs
+    - Fleet outputs
   responses:
     '200':
       description: OK
@@ -13,7 +13,7 @@ get:
               items:
                 type: array
                 items:
-                  $ref: ../components/schemas/output.yaml
+                  $ref: ../components/schemas/output_create_request.yaml
               total:
                 type: integer
               page:
@@ -26,7 +26,7 @@ get:
 post:
   summary: Create output
   tags:
-    - Outputs
+    - Fleet outputs
   responses:
     '200':
       description: OK
@@ -36,35 +36,13 @@ post:
             type: object
             properties:
               item:
-                $ref: ../components/schemas/output.yaml
+                $ref: ../components/schemas/output_create_request.yaml
     '400':
       $ref: ../components/responses/error.yaml
   requestBody:
+    required: true
     content:
       application/json:
         schema:
-          type: object
-          properties:
-            id:
-              type: string
-            name:
-              type: string
-            type:
-              type: string
-              enum: ['elasticsearch']
-            is_default:
-              type: boolean
-            is_default_monitoring:
-              type: boolean
-            hosts:
-              type: array
-              items:
-                type: string
-            ca_sha256:
-              type: string
-            config_yaml:
-              type: string
-          required:
-            - name
-            - type
+          $ref: ../components/schemas/output_create_request.yaml
   operationId: post-outputs

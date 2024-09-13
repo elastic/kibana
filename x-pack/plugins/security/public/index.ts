@@ -5,28 +5,34 @@
  * 2.0.
  */
 
-import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreStart, PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type { SecurityPluginSetup } from '@kbn/security-plugin-types-public';
 
 import type {
   PluginSetupDependencies,
   PluginStartDependencies,
-  SecurityPluginSetup,
   SecurityPluginStart,
 } from './plugin';
 import { SecurityPlugin } from './plugin';
 
-export type { SecurityPluginSetup, SecurityPluginStart };
-export type { AuthenticatedUser } from '../common/model';
-export type { SecurityLicense, SecurityLicenseFeatures } from '../common/licensing';
+export type { SecurityPluginStart, SecurityPluginSetup };
+export type { AuthenticatedUser, SecurityLicenseFeatures, SecurityLicense } from '../common';
 export type { UiApi, ChangePasswordProps, PersonalInfoProps } from './ui_api';
-export type { UserMenuLink, SecurityNavControlServiceStart } from './nav_control';
+
+export { ALL_SPACES_ID } from '../common/constants';
+
+// Re-export types from the plugin directly to enhance the developer experience for consumers of the Security plugin.
 export type {
+  AuthenticationServiceStart,
+  AuthenticationServiceSetup,
+  AuthorizationServiceStart,
+  AuthorizationServiceSetup,
+  SecurityNavControlServiceStart,
+  UserMenuLink,
   UserProfileBulkGetParams,
   UserProfileGetCurrentParams,
   UserProfileSuggestParams,
-} from './account_management';
-
-export type { AuthenticationServiceStart, AuthenticationServiceSetup } from './authentication';
+} from '@kbn/security-plugin-types-public';
 
 export const plugin: PluginInitializer<
   SecurityPluginSetup,
@@ -34,3 +40,6 @@ export const plugin: PluginInitializer<
   PluginSetupDependencies,
   PluginStartDependencies
 > = (initializerContext: PluginInitializerContext) => new SecurityPlugin(initializerContext);
+
+// services needed for rendering React using shared modules
+export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;

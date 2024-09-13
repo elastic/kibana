@@ -1,17 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 export const dashboardListingErrorStrings = {
   getErrorDeletingDashboardToast: () =>
     i18n.translate('dashboard.deleteError.toastDescription', {
       defaultMessage: 'Error encountered while deleting dashboard',
+    }),
+  getDuplicateTitleWarning: (value: string) =>
+    i18n.translate('dashboard.dashboardListingEditErrorTitle.duplicateWarning', {
+      defaultMessage: 'Saving "{value}" creates a duplicate title',
+      values: {
+        value,
+      },
     }),
 };
 
@@ -91,32 +100,32 @@ export const dashboardUnsavedListingStrings = {
       defaultMessage: 'Continue editing',
     }),
   getDiscardAriaLabel: (title: string) =>
-    i18n.translate('dashboard.listing.unsaved.discardAria', {
-      defaultMessage: 'Discard changes to {title}',
+    i18n.translate('dashboard.listing.unsaved.resetAria', {
+      defaultMessage: 'Reset changes to {title}',
       values: { title },
     }),
   getDiscardTitle: () =>
-    i18n.translate('dashboard.listing.unsaved.discardTitle', {
-      defaultMessage: 'Discard changes',
+    i18n.translate('dashboard.listing.unsaved.resetTitle', {
+      defaultMessage: 'Reset changes',
     }),
 };
 
-export const discardConfirmStrings = {
-  getDiscardTitle: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesTitle', {
-      defaultMessage: 'Discard changes to dashboard?',
+export const resetConfirmStrings = {
+  getResetTitle: () =>
+    i18n.translate('dashboard.resetChangesConfirmModal.resetChangesTitle', {
+      defaultMessage: 'Reset dashboard?',
     }),
-  getDiscardSubtitle: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
-      defaultMessage: `Once you discard your changes, there's no getting them back.`,
-    }),
-  getDiscardConfirmButtonText: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.confirmButtonLabel', {
-      defaultMessage: 'Discard changes',
-    }),
-  getDiscardCancelButtonText: () =>
-    i18n.translate('dashboard.discardChangesConfirmModal.cancelButtonLabel', {
-      defaultMessage: 'Cancel',
+  getResetSubtitle: (viewMode: ViewMode) =>
+    viewMode === ViewMode.EDIT
+      ? i18n.translate('dashboard.discardChangesConfirmModal.discardChangesDescription', {
+          defaultMessage: `All unsaved changes will be lost.`,
+        })
+      : i18n.translate('dashboard.resetChangesConfirmModal.resetChangesDescription', {
+          defaultMessage: `This dashboard will return to its last saved state.  You might lose changes to filters and queries.`,
+        }),
+  getResetConfirmButtonText: () =>
+    i18n.translate('dashboard.resetChangesConfirmModal.confirmButtonLabel', {
+      defaultMessage: 'Reset dashboard',
     }),
 };
 

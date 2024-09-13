@@ -15,7 +15,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FilterAggConfigRange } from '../types';
+import type { FilterAggConfigRange } from '../types';
 
 const BUTTON_SIZE = 40;
 /**
@@ -31,7 +31,7 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
   const includeTo = config?.includeTo ?? false;
 
   const updateConfig = useCallback(
-    (update) => {
+    (update: any) => {
       onChange({
         config: {
           ...config,

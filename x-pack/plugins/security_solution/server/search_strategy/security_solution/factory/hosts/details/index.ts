@@ -7,7 +7,7 @@
 
 import { get } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type {
   IScopedClusterClient,
   KibanaRequest,
@@ -17,7 +17,6 @@ import type {
   HostAggEsData,
   HostDetailsStrategyResponse,
   HostsQueries,
-  HostDetailsRequestOptions,
   EndpointFields,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
@@ -28,9 +27,9 @@ import { formatHostItem, getHostEndpoint } from './helpers';
 import type { EndpointAppContext } from '../../../../../endpoint/types';
 
 export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
-  buildDsl: (options: HostDetailsRequestOptions) => buildHostDetailsQuery(options),
+  buildDsl: (options) => buildHostDetailsQuery(options),
   parse: async (
-    options: HostDetailsRequestOptions,
+    options,
     response: IEsSearchResponse<HostAggEsData>,
     deps?: {
       esClient: IScopedClusterClient;

@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
-import { DashboardContainer, LazyDashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import {
   EuiButtonGroup,
   EuiFlexGroup,
@@ -18,35 +18,19 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import {
+  AwaitingDashboardAPI,
+  DashboardAPI,
+  DashboardRenderer,
+} from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import { useDashboardContainerContext } from '@kbn/dashboard-plugin/public';
-
-const DashboardContainerRenderer = withSuspense(LazyDashboardContainerRenderer);
 
 export const DualReduxExample = () => {
-  const [firstDashboardContainer, setFirstDashboardContainer] = useState<
-    DashboardContainer | undefined
-  >();
-  const [secondDashboardContainer, setSecondDashboardContainer] = useState<
-    DashboardContainer | undefined
-  >();
+  const [firstDashboardContainer, setFirstDashboardContainer] = useState<AwaitingDashboardAPI>();
+  const [secondDashboardContainer, setSecondDashboardContainer] = useState<AwaitingDashboardAPI>();
 
-  const FirstDashboardReduxWrapper = useMemo(() => {
-    if (firstDashboardContainer) return firstDashboardContainer.getReduxEmbeddableTools().Wrapper;
-  }, [firstDashboardContainer]);
-  const SecondDashboardReduxWrapper = useMemo(() => {
-    if (secondDashboardContainer) return secondDashboardContainer.getReduxEmbeddableTools().Wrapper;
-  }, [secondDashboardContainer]);
-
-  const ButtonControls = () => {
-    const {
-      useEmbeddableDispatch,
-      useEmbeddableSelector: select,
-      actions: { setViewMode },
-    } = useDashboardContainerContext();
-    const dispatch = useEmbeddableDispatch();
-    const viewMode = select((state) => state.explicitInput.viewMode);
+  const ButtonControls = ({ dashboard }: { dashboard: DashboardAPI }) => {
+    const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
 
     return (
       <EuiButtonGroup
@@ -64,9 +48,7 @@ export const DualReduxExample = () => {
           },
         ]}
         idSelected={viewMode}
-        onChange={(id, value) => {
-          dispatch(setViewMode(value));
-        }}
+        onChange={(id, value) => dashboard.dispatch.setViewMode(value)}
         type="single"
       />
     );
@@ -91,34 +73,18 @@ export const DualReduxExample = () => {
               <h3>Dashboard #1</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            {FirstDashboardReduxWrapper && (
-              <FirstDashboardReduxWrapper>
-                <ButtonControls />
-              </FirstDashboardReduxWrapper>
-            )}
+            {firstDashboardContainer && <ButtonControls dashboard={firstDashboardContainer} />}
             <EuiSpacer size="m" />
-            <DashboardContainerRenderer
-              onDashboardContainerLoaded={(container) => {
-                setFirstDashboardContainer(container);
-              }}
-            />
+            <DashboardRenderer ref={setFirstDashboardContainer} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h3>Dashboard #2</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            {SecondDashboardReduxWrapper && (
-              <SecondDashboardReduxWrapper>
-                <ButtonControls />
-              </SecondDashboardReduxWrapper>
-            )}
+            {secondDashboardContainer && <ButtonControls dashboard={secondDashboardContainer} />}
             <EuiSpacer size="m" />
-            <DashboardContainerRenderer
-              onDashboardContainerLoaded={(container) => {
-                setSecondDashboardContainer(container);
-              }}
-            />
+            <DashboardRenderer ref={setSecondDashboardContainer} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

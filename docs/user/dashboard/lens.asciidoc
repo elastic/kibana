@@ -39,15 +39,19 @@ Choose the data you want to visualize.
 
 Edit and delete.
 
-. To change the aggregation *Quick function* and display options, click the field in the layer pane. 
+. Click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to clear Lens visualization layers] on the panel, then **Edit visualization**. 
 
-. To delete a field, close the configuration options, then click *X* next to the field.
+. To change the aggregation *Quick function* and, click the field in the flyout. 
 
-. To duplicate a layer, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to duplicate Lens visualization layers] in the layer pane, then select *Duplicate layer*.
+. To delete a field, click image:dashboard/images/trash_can.png[Actions menu icon to delete a field, width=5%] next to the field.
 
-. To clear the layer configuration, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to clear Lens visualization layers] in the layer pane, then select *Clear layer*.
+. To duplicate a layer, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to duplicate Lens visualization layers] in the flyout, then select *Duplicate layer*.
 
-TIP: You can manually apply the changes you make, which is helpful when creating large and complex visualizations. To manually apply your changes, click *Settings* in the toolbar, then deselect *Auto-apply visualization changes*.
+. To clear the layer configuration, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to clear Lens visualization layers] in the flyout, then select *Clear layer*.
+
+. Click **Apply and close**. 
+
+TIP: Use the **Edit visualization** flyout to make edits without having to leave the dashboard, or click **Edit in Lens** to make edits using the Lens application.
 
 [float]
 [[change-the-fields]]
@@ -175,18 +179,34 @@ Compare your real-time data to the results that are offset by a time increment. 
 For a time shift example, refer to <<compare-time-ranges>>.
 
 [float]
-[[multi-metric-partition-chart]]
-==== Build a partition chart from multiple metrics
+[[create-partition-charts-with-multiple-metrics]]
+==== Create partition charts with multiple metrics
 
-By default, partition charts (e.g. pie) are built from one or more "slice-by" dimensions to define the partitions and a single metric dimension to define their size. However, you can also build a partition chart from multiple metric dimensions.
+To create partition charts, such as pie charts, configure one or more *Slice by* dimensions to define the partitions, and a *Metric* dimension to define the size. 
+To create partition charts with multiple metrics, use the layer settings. Multiple metrics are unsupported for mosaic visualizations.
 
-. Open the layer context menu at the top right of the layer panel.
+. In the layer pane, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the partition visualization layer], then select *Layer settings*.
 
-. Click *Layer settings*.
+. Select *Multiple metrics*.
 
-. Click the switch labeled *Multiple metrics*.
+. Click *X*.
 
-Note: this option is not available for mosaic charts.
+[float]
+[[improve-visualization-loading-time]]
+==== Improve visualization loading time
+
+preview::[]
+
+Data sampling allows you to improve the visualization loading time. To decrease the loading time, use a lower sampling percentage, which also decreases the accuracy. 
+Use low sampling percentages on large datasets.
+
+. In the **Edit visualization** flyout, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the partition visualization layer], then select *Layer settings*.
+
+. To select the *Sampling* percentage, use the slider.
+
+. Click *Apply and close*.
+
+. Click **Save**.
 
 [float]
 [[add-annotations]]
@@ -205,15 +225,20 @@ Annotations support two placement types:
 
 * *Custom query* &mdash; Displays annotations based on custom {es} queries. For detailed information about queries, check <<semi-structured-search>>. 
 
-Create the annotation layer. 
+Any annotation layer can be saved as an annotation group to the *Visualize Library* in order to reuse it in other visualizations. Any changes made to the annotation group will be reflected in all visualizations to which it is added.
 
-. In the layer pane, click *Add layer > Annotations*.
+Create a new annotation layer. 
+
+. In the layer pane, click *Add layer > Annotations > New annotation*.
 
 . Select the {data-source} for the annotation.
 
 . From the fields list, drag a field to the *Add an annotation* field.
 
 . To use global filters in the annotation, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the annotations layer], then select *Keep global filters* from the dropdown.
++
+When you add the visualization to dashboards, image:dashboard/images/lens_visualizationModifierPopup_8.8.0.png[Visualization modifier popup] appears, 
+which allows you to view settings changes to the visualization.
 
 Create static annotations.
 
@@ -242,6 +267,20 @@ Specify the annotation appearance.
 . If you created a custom query annotation, click *Add field* to add a field to the annotation tooltip.
 
 . To close, click *X*.
+
+Save the annotation group to the library. 
+
+. In the layer pane, on your annotation layer, click image:images/lens_saveAnnotationLayerButton_8.9.0.png[Save button on annotations layer].
+
+. Enter the *Title*, *Description*, and add any applicable <<managing-tags,*Tags*>>.
+
+. Click *Save group*.
+
+Add a library annotation group to a visualization.
+
+. In the layer pane, click *Add layer > Annotations > Load from library*.
+
+. Select the annotation group you want to use.
 
 [float]
 [[add-reference-lines]]
@@ -322,13 +361,69 @@ The following component menus are available:
 
 * *Labels* &mdash; Specifies how to display the labels for donut charts, pie charts, and treemaps. 
 
-* *Legend* &mdash; Specifies how to display the legend. For example, you can display the legend inside the visualization and truncate the legend values.
+* *Legend* &mdash; Specifies how to display the legend. You can choose to display the legend inside or outside the visualization, truncate the legend values when they're too long, and <<customize-visualization-legend,select additional statistics to show>>.
 
 * *Left axis*, *Bottom axis*, and *Right axis* &mdash; Specify how you want to display the chart axes. For example, add axis labels and change the orientation and bounds.
 
 [float]
+[[customize-visualization-legend]]
+===== Customize a visualization legend
+
+When creating or editing a visualization, you can customize the way the legend gets displayed, and the data it displays. To do that, look for the image:images/legend-icon.svg[Legend icon] icon.
+
+image::images/legend-popover.png[Menu with options to customize the legend of a visualization, width=40%]
+
+NOTE: The options available can vary based on the type of chart you're setting up. For example, showing additional statistics is only possible for time series charts.
+
+**Change the legend's display**
+
+With the **Visibility**, **Position**, and **Width** options, you can adjust the way the legend appears in or next to the visualization.
+
+**Truncate long labels**
+
+With the **Label truncation** option, you can keep your legend minimal in case of long labels that span over multiple lines.
+
+**Show additional statistics for time series charts**
+
+To make your legends as informative as possible, you can show some additional **Statistics** for charts with a timestamp on one of the axes, and add a **Series header**.
+
+**Bar**, **Line** and **Area** charts can show the following values:
+
+- **Average**: Average value considering all data points in the chart
+- **Median**: Median value considering all data points in the chart
+- **Minimum**: Minimum value considering all data points in the chart
+- **Maximum**: Maximum value considering all data points in the chart
+- **Range**: Difference between min and max values
+- **Last value**: Last value considering all data points in the chart
+- **Last non-null value:** Last non-null value
+- **First value**: First value considering all data points in the chart
+- **First non-null value**: First non-null value
+- **Difference**: Difference between first and last values
+- **Difference %**: % difference between first and last values
+- **Sum**: Sum of al values plotted in the chart
+- **Count**: number of data points plotted in the chart
+- **Distinct Count**: number of data points with different values plotted in the chart
+- **Variance**: Variance of all data points plotted in the chart
+- **Std Deviation**: Standard deviation of all data points plotted in the chart
+- **Current or last value**: The exact value of the current or last data point moused over
+
+
+//Not part of release
+//**Pie** charts can only show two static options:
+//- **Value**
+//- **Percentage**
+
+All statistics are computed based on the selected time range and the aggregated data points shown in the chart, rather than the original data coming from {es}. 
+
+For example, if the metric plotted in the chart is `Median(system.memory)` and the time range is *last 24 hours*, when you show the **Max** statistic in the Legend, the value that shows corresponds to the `Max[Median(system.memory)]` for the last 24 hours.
+
+image::images/statistics-in-legends.png[Additional statistics shown in the legend of a memory consumption bar chart]
+
+
+
+[float]
 [[explore-lens-data-in-discover]]
-=== Explore the data in Discover
+==== Explore the data in Discover
 
 When your visualization includes one data view, you can open and explore the visualization data in *Discover*.
 
@@ -577,4 +672,33 @@ Pagination in a data table is unsupported. To use pagination in data tables, cre
 [%collapsible]
 ====
 Specifying the color for a single data point, such as a single bar or line, is unsupported.
+====
+
+[discrete]
+[[dynamic-metric-coloring]]
+.*How does dynamic coloring work for the metric visualization?*
+[%collapsible]
+====
+In the color palette editor, if you select *Value type: Number* the colors are applied based on the *Primary metric* value.
+
+The *Primary metric* refers to the large number displayed in each tile.
+
+[role="screenshot"]
+image:images/lens_primaryMetric.png[Illustration of where to find the primary metric in a metric visualization.]
+
+
+If you select *Value type: Percent*, the primary metric values are mapped to a range between 0 and 100 percent. The bounds of the range depend on your configuration.
+
+The logic is as follows. If there is a Breakdown dimension for multiple visualization tiles:
+
+* When there is a *Maximum dimension*, the range is from zero to the value of your *Maximum dimension*.
+
+* When there is no *Maximum dimension*, the range is from the smallest primary metric values to the greatest primary metric values.
+
+If there is no Breakdown dimension for a single visualization tile:
+
+* When there is a *Maximum dimension*, the range is from zero to the value of your *Maximum dimension*.
+
+* When there is no *Maximum dimension*, *Value type: Percent* cannot be selected because there's no way to determine a range.
+
 ====

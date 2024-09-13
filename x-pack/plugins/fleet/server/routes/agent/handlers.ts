@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-import { readFile } from 'fs/promises';
-import Path from 'path';
-
-import { REPO_ROOT } from '@kbn/repo-info';
 import { uniq } from 'lodash';
-import semverGte from 'semver/functions/gte';
-import semverGt from 'semver/functions/gt';
-import semverCoerce from 'semver/functions/coerce';
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-
-import { appContextService } from '../../services';
-
-const MINIMUM_SUPPORTED_VERSION = '7.17.0';
 
 import type {
   GetAgentsResponse,
@@ -31,6 +20,7 @@ import type {
   GetAgentUploadsResponse,
   PostAgentReassignResponse,
   PostRetrieveAgentsByActionsResponse,
+  Agent,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -46,23 +36,33 @@ import type {
   PostBulkUpdateAgentTagsRequestSchema,
   GetActionStatusRequestSchema,
   GetAgentUploadFileRequestSchema,
+  DeleteAgentUploadFileRequestSchema,
   PostRetrieveAgentsByActionsRequestSchema,
+  FleetRequestHandler,
 } from '../../types';
-import { defaultFleetErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler, FleetNotFoundError } from '../../errors';
 import * as AgentService from '../../services/agents';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
+import { getAgentStatusForAgentPolicy } from '../../services/agents';
+import { isAgentInNamespace } from '../../services/spaces/agent_namespaces';
+import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
 
-export const getAgentHandler: RequestHandler<
+async function verifyNamespace(agent: Agent, namespace?: string) {
+  if (!(await isAgentInNamespace(agent, namespace))) {
+    throw new FleetNotFoundError(`${agent.id} not found in namespace`);
+  }
+}
+
+export const getAgentHandler: FleetRequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>,
   TypeOf<typeof GetOneAgentRequestSchema.query>
 > = async (context, request, response) => {
-  const coreContext = await context.core;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
-  const soClient = coreContext.savedObjects.client;
-
   try {
-    let agent = await AgentService.getAgentById(esClient, soClient, request.params.agentId);
+    const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+    const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
+
+    let agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
+    await verifyNamespace(agent, getCurrentNamespace(coreContext.savedObjects.client));
 
     if (request.query.withMetrics) {
       agent = (await fetchAndAssignAgentMetrics(esClientCurrentUser, [agent]))[0];
@@ -84,13 +84,16 @@ export const getAgentHandler: RequestHandler<
   }
 };
 
-export const deleteAgentHandler: RequestHandler<
+export const deleteAgentHandler: FleetRequestHandler<
   TypeOf<typeof DeleteAgentRequestSchema.params>
 > = async (context, request, response) => {
-  const coreContext = await context.core;
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
+    const agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
+    await verifyNamespace(agent, getCurrentNamespace(coreContext.savedObjects.client));
+
     await AgentService.deleteAgent(esClient, request.params.agentId);
 
     const body = {
@@ -110,12 +113,12 @@ export const deleteAgentHandler: RequestHandler<
   }
 };
 
-export const updateAgentHandler: RequestHandler<
+export const updateAgentHandler: FleetRequestHandler<
   TypeOf<typeof UpdateAgentRequestSchema.params>,
   undefined,
   TypeOf<typeof UpdateAgentRequestSchema.body>
 > = async (context, request, response) => {
-  const coreContext = await context.core;
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
 
@@ -128,6 +131,9 @@ export const updateAgentHandler: RequestHandler<
   }
 
   try {
+    const agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
+    await verifyNamespace(agent, getCurrentNamespace(soClient));
+
     await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
     const body = {
       item: await AgentService.getAgentById(esClient, soClient, request.params.agentId),
@@ -155,7 +161,7 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }
-    : { kuery: request.body.agents };
+    : { kuery: request.body.agents, showInactive: request.body.includeInactive };
 
   try {
     const results = await AgentService.updateAgentTags(
@@ -172,17 +178,16 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
   }
 };
 
-export const getAgentsHandler: RequestHandler<
+export const getAgentsHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetAgentsRequestSchema.query>
 > = async (context, request, response) => {
-  const coreContext = await context.core;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+  const { agentClient } = fleetContext;
   const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
-  const soClient = coreContext.savedObjects.client;
 
   try {
-    const agentRes = await AgentService.getAgentsByKuery(esClient, soClient, {
+    const agentRes = await agentClient.asCurrentUser.listAgents({
       page: request.query.page,
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,
@@ -261,7 +266,7 @@ export const putAgentsReassignHandlerDeprecated: RequestHandler<
   }
 };
 
-export const postAgentsReassignHandler: RequestHandler<
+export const postAgentReassignHandler: RequestHandler<
   TypeOf<typeof PostAgentReassignRequestSchema.params>,
   undefined,
   TypeOf<typeof PostAgentReassignRequestSchema.body>
@@ -284,7 +289,7 @@ export const postAgentsReassignHandler: RequestHandler<
   }
 };
 
-export const postBulkAgentsReassignHandler: RequestHandler<
+export const postBulkAgentReassignHandler: RequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PostBulkAgentReassignRequestSchema.body>
@@ -294,7 +299,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }
-    : { kuery: request.body.agents };
+    : { kuery: request.body.agents, showInactive: request.body.includeInactive };
 
   try {
     const results = await AgentService.reassignAgents(
@@ -310,19 +315,20 @@ export const postBulkAgentsReassignHandler: RequestHandler<
   }
 };
 
-export const getAgentStatusForAgentPolicyHandler: RequestHandler<
+export const getAgentStatusForAgentPolicyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetAgentStatusRequestSchema.query>
 > = async (context, request, response) => {
-  const coreContext = await context.core;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const soClient = coreContext.savedObjects.client;
   try {
-    const results = await AgentService.getAgentStatusForAgentPolicy(
+    const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const soClient = fleetContext.internalSoClient;
+    const results = await getAgentStatusForAgentPolicy(
       esClient,
       soClient,
       request.query.policyId,
-      request.query.kuery
+      request.query.kuery,
+      coreContext.savedObjects.client.getCurrentNamespace()
     );
 
     const body: GetAgentStatusResponse = { results };
@@ -363,33 +369,11 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
 
-// Read a static file generated at build time
 export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
-  const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
-  let versionsToDisplay: string[] = [];
-
-  const kibanaVersion = appContextService.getKibanaVersion();
-  const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version ?? kibanaVersion;
-
   try {
-    const file = await readFile(Path.join(REPO_ROOT, AGENT_VERSION_BUILD_FILE), 'utf-8');
+    const availableVersions = await AgentService.getAvailableVersions();
+    const body: GetAvailableVersionsResponse = { items: availableVersions };
 
-    // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
-    // De-dup and sort in descending order
-    const data: string[] = JSON.parse(file);
-
-    const versions = data
-      .map((item: any) => semverCoerce(item)?.version || '')
-      .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
-      .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
-    const parsedVersions = uniq(versions) as string[];
-
-    // Add current version if not already present
-    const hasCurrentVersion = parsedVersions.some((v) => v === kibanaVersionCoerced);
-    versionsToDisplay = !hasCurrentVersion
-      ? [kibanaVersionCoerced].concat(parsedVersions)
-      : parsedVersions;
-    const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
     return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
@@ -404,7 +388,11 @@ export const getActionStatusHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
-    const actionStatuses = await AgentService.getActionStatuses(esClient, request.query);
+    const actionStatuses = await AgentService.getActionStatuses(
+      esClient,
+      request.query,
+      getCurrentNamespace(coreContext.savedObjects.client)
+    );
     const body: GetActionStatusResponse = { items: actionStatuses };
     return response.ok({ body });
   } catch (error) {
@@ -458,6 +446,20 @@ export const getAgentUploadFileHandler: RequestHandler<
     );
 
     return response.ok(resp);
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const deleteAgentUploadFileHandler: RequestHandler<
+  TypeOf<typeof DeleteAgentUploadFileRequestSchema.params>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  try {
+    const resp = await AgentService.deleteAgentUploadFile(esClient, request.params.fileId);
+
+    return response.ok({ body: resp });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

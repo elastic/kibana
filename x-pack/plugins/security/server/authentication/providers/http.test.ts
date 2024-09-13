@@ -10,13 +10,14 @@ import { errors } from '@elastic/elasticsearch';
 import type { ScopeableRequest } from '@kbn/core/server';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
-import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { securityMock } from '../../mocks';
-import { AuthenticationResult } from '../authentication_result';
-import { DeauthenticationResult } from '../deauthentication_result';
 import type { MockAuthenticationProviderOptions } from './base.mock';
 import { mockAuthenticationProviderOptions } from './base.mock';
 import { HTTPAuthenticationProvider } from './http';
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { securityMock } from '../../mocks';
+import { ROUTE_TAG_ACCEPT_JWT } from '../../routes/tags';
+import { AuthenticationResult } from '../authentication_result';
+import { DeauthenticationResult } from '../deauthentication_result';
 
 function expectAuthenticateCall(
   mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
@@ -132,16 +133,123 @@ describe('HTTPAuthenticationProvider', () => {
         });
 
         await expect(provider.authenticate(request)).resolves.toEqual(
-          AuthenticationResult.succeeded({
-            ...user,
-            authentication_provider: { type: 'http', name: 'http' },
-          })
+          AuthenticationResult.succeeded(
+            { ...user, authentication_provider: { type: 'http', name: 'http' } },
+            { authHeaders: { authorization: header } }
+          )
         );
 
         expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
 
         expect(request.headers.authorization).toBe(header);
       }
+    });
+
+    it('succeeds for JWT authentication if not restricted to tagged routes.', async () => {
+      const header = 'Bearer header.body.signature';
+      const user = mockAuthenticatedUser({ authentication_realm: { name: 'jwt1', type: 'jwt' } });
+      const request = httpServerMock.createKibanaRequest({ headers: { authorization: header } });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+      mockOptions.client.asScoped.mockClear();
+
+      const provider = new HTTPAuthenticationProvider(mockOptions, {
+        supportedSchemes: new Set(['bearer']),
+      });
+
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          { authHeaders: { authorization: header } }
+        )
+      );
+
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
+
+      expect(request.headers.authorization).toBe(header);
+    });
+
+    it('succeeds for non-JWT authentication if JWT restricted to tagged routes.', async () => {
+      const header = 'Basic xxx';
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest({ headers: { authorization: header } });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+      mockOptions.client.asScoped.mockClear();
+
+      const provider = new HTTPAuthenticationProvider(mockOptions, {
+        supportedSchemes: new Set(['bearer', 'basic']),
+        jwt: { taggedRoutesOnly: true },
+      });
+
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          { authHeaders: { authorization: header } }
+        )
+      );
+
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
+
+      expect(request.headers.authorization).toBe(header);
+    });
+
+    it('succeeds for JWT authentication if restricted to tagged routes and route is tagged.', async () => {
+      const header = 'Bearer header.body.signature';
+      const user = mockAuthenticatedUser({ authentication_realm: { name: 'jwt1', type: 'jwt' } });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: header },
+        routeTags: [ROUTE_TAG_ACCEPT_JWT],
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+      mockOptions.client.asScoped.mockClear();
+
+      const provider = new HTTPAuthenticationProvider(mockOptions, {
+        supportedSchemes: new Set(['bearer']),
+        jwt: { taggedRoutesOnly: true },
+      });
+
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          { authHeaders: { authorization: header } }
+        )
+      );
+
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
+
+      expect(request.headers.authorization).toBe(header);
+    });
+
+    it('fails for JWT authentication if restricted to tagged routes and route is NOT tagged.', async () => {
+      const header = 'Bearer header.body.signature';
+      const user = mockAuthenticatedUser({ authentication_realm: { name: 'jwt1', type: 'jwt' } });
+      const request = httpServerMock.createKibanaRequest({ headers: { authorization: header } });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+      mockOptions.client.asScoped.mockClear();
+
+      const provider = new HTTPAuthenticationProvider(mockOptions, {
+        supportedSchemes: new Set(['bearer']),
+        jwt: { taggedRoutesOnly: true },
+      });
+
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
+
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
+
+      expect(request.headers.authorization).toBe(header);
     });
 
     it('fails if authentication via `authorization` header with supported scheme fails.', async () => {

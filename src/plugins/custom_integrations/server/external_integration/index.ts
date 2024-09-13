@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -34,6 +35,18 @@ export const integrations: ExternalIntegration[] = [
     }),
     docUrlTemplate: `https://serverlessrepo.aws.amazon.com/applications/eu-central-1/267093732750/elastic-serverless-forwarder`,
     categories: ['aws', 'observability'],
+  },
+  {
+    id: 'esc',
+    title: i18n.translate('customIntegrations.placeholders.EscTitle', {
+      defaultMessage: 'Confluent Cloud',
+    }),
+    icon: 'logo_confluent.svg',
+    description: i18n.translate('customIntegrations.placeholders.EscDescription', {
+      defaultMessage: 'Collect data from Confluent Cloud with the Elastic Sink Connector.',
+    }),
+    docUrlTemplate: `https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch`,
+    categories: ['message_queue', 'observability', 'security'],
   },
 ];
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
@@ -31,10 +32,11 @@ export interface CreateEsFileClientArgs {
    */
   elasticsearchClient: ElasticsearchClient;
   /**
-   * Treat the indices provided as Aliases. If set to true, ES `search()` will be used to
-   * retrieve the file info and content instead of `get()`. This is needed to ensure the
-   * content can be retrieved in cases where an index may have rolled over (ES `get()`
-   * needs a "real" index)
+   * Treat the indices provided as Aliases/Datastreams.
+   * When set to `true`:
+   * - additional ES calls will be made to get the real backing indexes
+   * - will not check if indexes exists and attempt to create them if not
+   * - an additional `@timestamp` property will be written to all documents (at root of document)
    */
   indexIsAlias?: boolean;
   /**
@@ -69,6 +71,7 @@ export function createEsFileClient(arg: CreateEsFileClientArgs): FileClient {
       id: NO_FILE_KIND,
       http: {},
       maxSizeBytes,
+      hashes: ['md5', 'sha1', 'sha256', 'sha512'],
     },
     new EsIndexFilesMetadataClient(metadataIndex, elasticsearchClient, logger, indexIsAlias),
     new ElasticsearchBlobStorageClient(
@@ -76,6 +79,7 @@ export function createEsFileClient(arg: CreateEsFileClientArgs): FileClient {
       blobStorageIndex,
       undefined,
       logger,
+      undefined,
       undefined,
       indexIsAlias
     ),

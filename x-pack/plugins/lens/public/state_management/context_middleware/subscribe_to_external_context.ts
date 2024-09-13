@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { delay, finalize, switchMap, tap } from 'rxjs/operators';
+import { delay, finalize, switchMap, tap } from 'rxjs';
 import { debounce, isEqual } from 'lodash';
 import { waitUntilNextSessionCompletes$, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { setState, LensGetState, LensDispatch } from '..';
+import { setExecutionContext, LensGetState, LensDispatch } from '..';
 import { getResolvedDateRange } from '../../utils';
 
 /**
@@ -21,14 +21,14 @@ export function subscribeToExternalContext(
 ) {
   const { query: queryService, search } = data;
   const { filterManager } = queryService;
-
   const dispatchFromExternal = (searchSessionId = search.session.start()) => {
     const globalFilters = filterManager.getFilters();
     const filters = isEqual(getState().lens.filters, globalFilters)
       ? null
       : { filters: globalFilters };
+
     dispatch(
-      setState({
+      setExecutionContext({
         searchSessionId,
         ...filters,
         resolvedDateRange: getResolvedDateRange(queryService.timefilter.timefilter),

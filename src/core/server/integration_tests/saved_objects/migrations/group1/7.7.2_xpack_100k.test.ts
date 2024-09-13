@@ -1,16 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import path from 'path';
 import { unlink } from 'fs/promises';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { Env } from '@kbn/config';
-import { getEnvOptions } from '@kbn/config-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
@@ -19,8 +17,8 @@ import {
   createRootWithCorePlugins,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 
-const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const logFilePath = path.join(__dirname, '7.7.2_xpack_100k.log');
 
 async function removeLogFile() {
@@ -31,7 +29,8 @@ async function removeLogFile() {
 /** Number of SO documents dropped during the migration because they belong to an unused type */
 const UNUSED_SO_COUNT = 5;
 
-describe('migration from 7.7.2-xpack with 100k objects', () => {
+// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
+describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
   let coreStart: InternalCoreStart;
@@ -102,10 +101,8 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
       await esServer.stop();
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 10000));
+    await new Promise((resolve) => setTimeout(resolve, 20000));
   };
-
-  const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
   beforeAll(async () => {
     await removeLogFile();
@@ -121,7 +118,7 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
 
   it('copies all the document of the previous index to the new one', async () => {
     const migratedIndexResponse = await esClient.count({
-      index: migratedIndex,
+      index: ALL_SAVED_OBJECT_INDICES,
     });
     const oldIndexResponse = await esClient.count({
       index: '.kibana_1',

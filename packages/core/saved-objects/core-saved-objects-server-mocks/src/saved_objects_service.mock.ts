@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -29,6 +30,7 @@ import {
   savedObjectsImporterMock,
 } from '@kbn/core-saved-objects-import-export-server-mocks';
 import { migrationMocks } from '@kbn/core-saved-objects-migration-server-mocks';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
@@ -41,6 +43,10 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
     createExporter: jest.fn(),
     createImporter: jest.fn(),
     getTypeRegistry: jest.fn(),
+    getDefaultIndex: jest.fn(),
+    getIndexForType: jest.fn(),
+    getIndicesForTypes: jest.fn(),
+    getAllIndices: jest.fn(),
   };
 
   startContrat.getScopedClient.mockReturnValue(savedObjectsClientMock.create());
@@ -49,13 +55,21 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
   startContrat.getTypeRegistry.mockReturnValue(typeRegistry ?? typeRegistryMock.create());
   startContrat.createExporter.mockReturnValue(savedObjectsExporterMock.create());
   startContrat.createImporter.mockReturnValue(savedObjectsImporterMock.create());
+  startContrat.getDefaultIndex.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
+  startContrat.getIndexForType.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
+  startContrat.getIndicesForTypes.mockReturnValue([MAIN_SAVED_OBJECT_INDEX]);
+  startContrat.getAllIndices.mockReturnValue([MAIN_SAVED_OBJECT_INDEX]);
 
   return startContrat;
 };
 
 const createInternalStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegistry>) => {
-  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> =
-    createStartContractMock(typeRegistry);
+  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> = {
+    ...createStartContractMock(typeRegistry),
+    metrics: {
+      migrationDuration: 0,
+    },
+  };
 
   return internalStartContract;
 };
@@ -67,10 +81,10 @@ const createSetupContractMock = () => {
     setSecurityExtension: jest.fn(),
     setSpacesExtension: jest.fn(),
     registerType: jest.fn(),
-    getKibanaIndex: jest.fn(),
+    getDefaultIndex: jest.fn(),
   };
 
-  setupContract.getKibanaIndex.mockReturnValue('.kibana');
+  setupContract.getDefaultIndex.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
 
   return setupContract;
 };

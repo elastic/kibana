@@ -5,35 +5,27 @@
  * 2.0.
  */
 
-import type { ConfigType } from '../../../../config';
-import type { SetupPlugins } from '../../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
-import { getPrebuiltRulesAndTimelinesStatusRoute } from './get_prebuilt_rules_and_timelines_status/route';
-import { getPrebuiltRulesStatusRoute } from './get_prebuilt_rules_status/route';
-import { installPrebuiltRulesAndTimelinesRoute } from './install_prebuilt_rules_and_timelines/route';
-import { generateAssetsRoute } from './generate_assets/route';
-import { reviewRuleInstallationRoute } from './review_rule_installation/route';
-import { reviewRuleUpgradeRoute } from './review_rule_upgrade/route';
+import { getPrebuiltRulesAndTimelinesStatusRoute } from './get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route';
+import { getPrebuiltRulesStatusRoute } from './get_prebuilt_rules_status/get_prebuilt_rules_status_route';
+import { installPrebuiltRulesAndTimelinesRoute } from './install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route';
+import { reviewRuleInstallationRoute } from './review_rule_installation/review_rule_installation_route';
+import { reviewRuleUpgradeRoute } from './review_rule_upgrade/review_rule_upgrade_route';
+import { performRuleInstallationRoute } from './perform_rule_installation/perform_rule_installation_route';
+import { performRuleUpgradeRoute } from './perform_rule_upgrade/perform_rule_upgrade_route';
+import { bootstrapPrebuiltRulesRoute } from './bootstrap_prebuilt_rules/bootstrap_prebuilt_rules';
 
-export const registerPrebuiltRulesRoutes = (
-  router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  security: SetupPlugins['security']
-) => {
-  const { prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled } = config.experimentalFeatures;
-
+export const registerPrebuiltRulesRoutes = (router: SecuritySolutionPluginRouter) => {
   // Legacy endpoints that we're going to deprecate
-  getPrebuiltRulesAndTimelinesStatusRoute(router, security);
+  getPrebuiltRulesAndTimelinesStatusRoute(router);
   installPrebuiltRulesAndTimelinesRoute(router);
 
-  if (prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled) {
-    // New endpoints for the rule upgrade and installation workflows
-    getPrebuiltRulesStatusRoute(router);
-    reviewRuleInstallationRoute(router);
-    reviewRuleUpgradeRoute(router);
-
-    // Helper endpoints for development and testing. Should be removed later.
-    generateAssetsRoute(router);
-  }
+  // New endpoints for the rule upgrade and installation workflows
+  getPrebuiltRulesStatusRoute(router);
+  performRuleInstallationRoute(router);
+  performRuleUpgradeRoute(router);
+  reviewRuleInstallationRoute(router);
+  reviewRuleUpgradeRoute(router);
+  bootstrapPrebuiltRulesRoute(router);
 };

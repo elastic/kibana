@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { map, uniq } from 'lodash';
+import { flatMap, uniq } from 'lodash';
 import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,
@@ -24,7 +24,8 @@ import {
   CLOUD_DEFEND_FLEET_PACKAGE_KUERY,
   INTEGRATION_PACKAGE_NAME,
 } from '../../common/constants';
-import { POLICIES_PACKAGE_POLICY_PREFIX, PoliciesQueryParams } from '../../common/schemas/policy';
+import { POLICIES_PACKAGE_POLICY_PREFIX } from '../../common/constants';
+import type { PoliciesQueryParams } from '../../common';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
@@ -88,9 +89,15 @@ async function addDataViewToAllSpaces(savedObjectsClient: SavedObjectsClientCont
     perPage: 100,
   });
 
-  cloudDefendDataViews.saved_objects.forEach((dataView) => {
-    savedObjectsClient.updateObjectsSpaces([{ id: dataView.id, type: 'index-pattern' }], ['*'], []);
-  });
+  await Promise.all(
+    cloudDefendDataViews.saved_objects.map((dataView) =>
+      savedObjectsClient.updateObjectsSpaces(
+        [{ id: dataView.id, type: 'index-pattern' }],
+        ['*'],
+        []
+      )
+    )
+  );
 }
 
 export const getCloudDefendAgentPolicies = async (
@@ -98,7 +105,7 @@ export const getCloudDefendAgentPolicies = async (
   packagePolicies: PackagePolicy[],
   agentPolicyService: AgentPolicyServiceInterface
 ): Promise<AgentPolicy[]> =>
-  agentPolicyService.getByIds(soClient, uniq(map(packagePolicies, 'policy_id')), {
+  agentPolicyService.getByIds(soClient, uniq(flatMap(packagePolicies, 'policy_ids')), {
     withPackagePolicies: true,
     ignoreMissing: true,
   });

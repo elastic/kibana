@@ -7,9 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
-import type { CommentRequest } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { caseDomainV1 } from '../../../../common/types/domain';
+import type { attachmentApiV1 } from '../../../../common/types/api';
 
 export const postCommentRoute = createCasesRoute({
   method: 'post',
@@ -19,15 +20,23 @@ export const postCommentRoute = createCasesRoute({
       case_id: schema.string(),
     }),
   },
+  routerOptions: {
+    access: 'public',
+    summary: `Add a case comment or alert`,
+    tags: ['oas-tag:cases'],
+    description: 'Each case can have a maximum of 1,000 alerts.',
+    // You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
-      const comment = request.body as CommentRequest;
+      const comment = request.body as attachmentApiV1.AttachmentRequest;
+      const res: caseDomainV1.Case = await casesClient.attachments.add({ caseId, comment });
 
       return response.ok({
-        body: await casesClient.attachments.add({ caseId, comment }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

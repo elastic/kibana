@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -13,7 +14,7 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { TableHeader } from './table_header';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
+import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 
 const defaultUiSettings = {

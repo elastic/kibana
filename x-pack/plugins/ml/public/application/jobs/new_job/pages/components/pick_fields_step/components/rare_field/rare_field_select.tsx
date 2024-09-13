@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-
+import type { FC } from 'react';
+import React from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import type { Field, SplitField } from '@kbn/ml-anomaly-utils';
 import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
-import { Field, SplitField } from '../../../../../../../../../common/types/fields';
 
 interface DropDownLabel {
   label: string;

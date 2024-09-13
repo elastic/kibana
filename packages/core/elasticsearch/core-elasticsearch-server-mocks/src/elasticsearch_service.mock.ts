@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -18,12 +19,15 @@ import {
 import type {
   ElasticsearchClientConfig,
   ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
   ElasticsearchServicePreboot,
+  ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
 import type {
   ElasticsearchConfig,
   ElasticsearchService,
   InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
   ElasticsearchStatusMeta,
   NodesVersionCompatibility,
   ClusterInfo,
@@ -40,12 +44,14 @@ export type MockedElasticSearchServiceSetup = jest.Mocked<
   };
 };
 
-export interface MockedElasticSearchServiceStart {
+export type MockedElasticSearchServiceStart = jest.Mocked<
+  Omit<ElasticsearchServiceStart, 'client' | 'createClient'>
+> & {
   client: ClusterClientMock;
   createClient: jest.MockedFunction<
     (type: string, config?: Partial<ElasticsearchClientConfig>) => CustomClusterClientMock
   >;
-}
+};
 
 const createPrebootContractMock = () => {
   const prebootContract: MockedElasticSearchServicePreboot = {
@@ -69,6 +75,7 @@ const createStartContractMock = () => {
   const startContract: MockedElasticSearchServiceStart = {
     client: elasticsearchClientMock.createClusterClient(),
     createClient: jest.fn((type: string) => elasticsearchClientMock.createCustomClusterClient()),
+    getCapabilities: jest.fn().mockReturnValue(createCapabilities()),
   };
   return startContract;
 };
@@ -90,6 +97,7 @@ const createInternalSetupContractMock = () => {
       cluster_uuid: 'cluster-uuid',
       cluster_name: 'cluster-name',
       cluster_version: '8.0.0',
+      cluster_build_flavor: 'default',
     }),
     status$: new BehaviorSubject<ServiceStatus<ElasticsearchStatusMeta>>({
       level: ServiceStatusLevels.available,
@@ -100,7 +108,21 @@ const createInternalSetupContractMock = () => {
   return internalSetupContract;
 };
 
-const createInternalStartContractMock = createStartContractMock;
+type MockedInternalElasticsearchServiceStart = jest.Mocked<
+  Omit<InternalElasticsearchServiceStart, 'client' | 'createClient'>
+> &
+  Pick<MockedElasticSearchServiceStart, 'client' | 'createClient'>;
+
+const createInternalStartContractMock = () => {
+  const startContract = createStartContractMock();
+  const internalStartContractMock: MockedInternalElasticsearchServiceStart = {
+    ...startContract,
+    metrics: {
+      elasticsearchWaitTime: 0,
+    },
+  };
+  return internalStartContractMock;
+};
 
 type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
 const createMock = () => {
@@ -117,7 +139,17 @@ const createMock = () => {
   return mocked;
 };
 
+const createCapabilities = (
+  parts: Partial<ElasticsearchCapabilities> = {}
+): ElasticsearchCapabilities => {
+  return {
+    serverless: false,
+    ...parts,
+  };
+};
+
 export const elasticsearchServiceMock = {
+  ...elasticsearchClientMock,
   create: createMock,
   createInternalPreboot: createInternalPrebootContractMock,
   createPreboot: createPrebootContractMock,
@@ -125,6 +157,5 @@ export const elasticsearchServiceMock = {
   createSetup: createSetupContractMock,
   createInternalStart: createInternalStartContractMock,
   createStart: createStartContractMock,
-
-  ...elasticsearchClientMock,
+  createCapabilities,
 };

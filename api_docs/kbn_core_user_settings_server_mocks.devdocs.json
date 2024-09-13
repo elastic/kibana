@@ -1,0 +1,86 @@
+{
+  "id": "@kbn/core-user-settings-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-user-settings-server-mocks",
+        "id": "def-server.userSettingsServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "userSettingsServiceMock",
+        "description": [],
+        "path": "packages/core/user-settings/core-user-settings-server-mocks/src/user_settings_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-settings-server-mocks",
+            "id": "def-server.userSettingsServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
+              "<",
+              "UserSettingsService",
+              ">>"
+            ],
+            "path": "packages/core/user-settings/core-user-settings-server-mocks/src/user_settings_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-settings-server-mocks",
+            "id": "def-server.userSettingsServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalUserSettingsServiceSetup",
+              ">"
+            ],
+            "path": "packages/core/user-settings/core-user-settings-server-mocks/src/user_settings_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

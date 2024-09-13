@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pageObjects } from './page_objects';
@@ -31,9 +32,13 @@ export default async function ({ readConfigFile }) {
         '--savedObjects.maxImportPayloadBytes=10485760',
         // override default to not allow hiddenFromHttpApis saved object types access to the HTTP Apis. see https://github.com/elastic/dev/issues/2200
         '--savedObjects.allowHttpApiAccess=false',
-
+        // disable internal API restriction. See https://github.com/elastic/kibana/issues/163654
+        '--server.restrictInternalApis=false',
         // to be re-enabled once kibana/issues/102552 is completed
         '--xpack.reporting.enabled=false',
+
+        // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
+        `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
       ],
     },
 

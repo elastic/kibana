@@ -1,0 +1,253 @@
+{
+  "id": "@kbn/react-kibana-context-theme",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/react-kibana-context-theme",
+        "id": "def-public.KibanaThemeProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaThemeProvider",
+        "description": [
+          "\nA Kibana-specific theme provider that uses the Kibana theme service to customize the EUI theme.\n\nIf the theme provider is missing a parent EuiProvider, one will automatically be rendered instead."
+        ],
+        "signature": [
+          "({ theme, children, ...props }: ",
+          {
+            "pluginId": "@kbn/react-kibana-context-theme",
+            "scope": "public",
+            "docId": "kibKbnReactKibanaContextThemePluginApi",
+            "section": "def-public.KibanaThemeProviderProps",
+            "text": "KibanaThemeProviderProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/react/kibana_context/theme/theme_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-theme",
+            "id": "def-public.KibanaThemeProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/react-kibana-context-theme",
+                "scope": "public",
+                "docId": "kibKbnReactKibanaContextThemePluginApi",
+                "section": "def-public.KibanaThemeProviderProps",
+                "text": "KibanaThemeProviderProps"
+              }
+            ],
+            "path": "packages/react/kibana_context/theme/theme_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-theme",
+        "id": "def-public.wrapWithTheme",
+        "type": "Function",
+        "tags": [],
+        "label": "wrapWithTheme",
+        "description": [
+          "\nA React HOC that wraps a component with the `KibanaThemeProvider`."
+        ],
+        "signature": [
+          "(node: React.ReactNode, theme: ",
+          {
+            "pluginId": "@kbn/react-kibana-context-common",
+            "scope": "public",
+            "docId": "kibKbnReactKibanaContextCommonPluginApi",
+            "section": "def-public.ThemeServiceStart",
+            "text": "ThemeServiceStart"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/react/kibana_context/theme/with_theme.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-theme",
+            "id": "def-public.wrapWithTheme.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "node",
+            "description": [
+              "The node to wrap."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "packages/react/kibana_context/theme/with_theme.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-theme",
+            "id": "def-public.wrapWithTheme.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "theme",
+            "description": [
+              "The `ThemeServiceStart` API."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/react-kibana-context-common",
+                "scope": "public",
+                "docId": "kibKbnReactKibanaContextCommonPluginApi",
+                "section": "def-public.ThemeServiceStart",
+                "text": "ThemeServiceStart"
+              }
+            ],
+            "path": "packages/react/kibana_context/theme/with_theme.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/react-kibana-context-theme",
+        "id": "def-public.KibanaTheme",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaTheme",
+        "description": [
+          "\nThe representation of the Kibana theme, (not to be confused with the EUI theme)."
+        ],
+        "path": "packages/react/kibana_context/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-theme",
+            "id": "def-public.KibanaTheme.darkMode",
+            "type": "boolean",
+            "tags": [],
+            "label": "darkMode",
+            "description": [
+              "is dark mode enabled or not"
+            ],
+            "path": "packages/react/kibana_context/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-theme",
+        "id": "def-public.KibanaThemeProviderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaThemeProviderProps",
+        "description": [
+          "\nProps for the `KibanaThemeProvider`."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/react-kibana-context-theme",
+            "scope": "public",
+            "docId": "kibKbnReactKibanaContextThemePluginApi",
+            "section": "def-public.KibanaThemeProviderProps",
+            "text": "KibanaThemeProviderProps"
+          },
+          " extends EuiProps<{}>"
+        ],
+        "path": "packages/react/kibana_context/theme/theme_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-theme",
+            "id": "def-public.KibanaThemeProviderProps.theme",
+            "type": "Object",
+            "tags": [],
+            "label": "theme",
+            "description": [
+              "The `ThemeServiceStart` API."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/react-kibana-context-common",
+                "scope": "public",
+                "docId": "kibKbnReactKibanaContextCommonPluginApi",
+                "section": "def-public.ThemeServiceStart",
+                "text": "ThemeServiceStart"
+              }
+            ],
+            "path": "packages/react/kibana_context/theme/theme_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/react-kibana-context-theme",
+        "id": "def-public.defaultTheme",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultTheme",
+        "description": [
+          "\nThe default `KibanaTheme` for use in Storybook, Jest, or initialization.  At\nruntime, the theme should always be provided by the `ThemeService`."
+        ],
+        "path": "packages/react/kibana_context/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-theme",
+            "id": "def-public.defaultTheme.darkMode",
+            "type": "boolean",
+            "tags": [],
+            "label": "darkMode",
+            "description": [],
+            "signature": [
+              "false"
+            ],
+            "path": "packages/react/kibana_context/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

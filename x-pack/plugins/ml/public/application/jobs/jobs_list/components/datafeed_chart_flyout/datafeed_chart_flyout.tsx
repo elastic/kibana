@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -27,45 +28,47 @@ import {
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
+import type {
+  CustomAnnotationTooltip,
+  LineAnnotationDatum,
+  LineAnnotationEvent,
+  RectAnnotationDatum,
+  RectAnnotationEvent,
+} from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,
   Chart,
   CurveType,
-  CustomAnnotationTooltip,
+  LEGACY_LIGHT_THEME,
   LineAnnotation,
   LineSeries,
-  LineAnnotationDatum,
   Position,
   RectAnnotation,
-  RectAnnotationDatum,
   ScaleType,
   Settings,
   timeFormatter,
-  RectAnnotationEvent,
-  LineAnnotationEvent,
   Tooltip,
   TooltipType,
 } from '@elastic/charts';
-
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
-import {
+import type {
   CombinedJobWithStats,
-  ModelSnapshot,
   MlSummaryJob,
+  ModelSnapshot,
 } from '../../../../../../common/types/anomaly_detection_jobs';
-import { JobMessage } from '../../../../../../common/types/audit_message';
-import { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
+import type { JobMessage } from '../../../../../../common/types/audit_message';
+import type { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { useMlApiContext } from '../../../../contexts/kibana';
-import { useCurrentEuiTheme } from '../../../../components/color_range_legend';
+import { useCurrentThemeVars, useMlApi } from '../../../../contexts/kibana';
 import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
 import { EditQueryDelay } from './edit_query_delay';
-import { CHART_DIRECTION, ChartDirectionType, CHART_SIZE } from './constants';
+import type { ChartDirectionType } from './constants';
+import { CHART_DIRECTION, CHART_SIZE } from './constants';
 import { loadFullJob } from '../utils';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
-import { fillMissingChartData, type ChartDataWithNullValues } from './fill_missing_chart_data';
+import { type ChartDataWithNullValues, fillMissingChartData } from './fill_missing_chart_data';
 
 const dateFormatter = timeFormatter('MM-DD HH:mm:ss');
 const MAX_CHART_POINTS = 480;
@@ -107,6 +110,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   onClose,
   onModelSnapshotAnnotationClick,
 }) => {
+  const mlApi = useMlApi();
   const [data, setData] = useState<{
     datafeedConfig: CombinedJobWithStats['datafeed_config'] | undefined;
     bucketSpan: string | undefined;
@@ -140,12 +144,10 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   const {
     getModelSnapshots,
     results: { getDatafeedResultChartData },
-  } = useMlApiContext();
+  } = useMlApi();
   const { displayErrorToast } = useToastNotificationService();
-  const { euiTheme } = useCurrentEuiTheme();
-
+  const { euiTheme } = useCurrentThemeVars();
   const handleChange = (date: moment.Moment) => setEndDate(date);
-
   const handleEndDateChange = (direction: ChartDirectionType) => {
     if (data.bucketSpan === undefined) return;
 
@@ -211,7 +213,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
 
   const getJobAndSnapshotData = useCallback(async () => {
     try {
-      const job: CombinedJobWithStats = await loadFullJob(jobId);
+      const job: CombinedJobWithStats = await loadFullJob(mlApi, jobId);
       const modelSnapshotResultsLine: LineAnnotationDatumWithModelSnapshot[] = [];
       const modelSnapshotsResp = await getModelSnapshots(jobId);
       const modelSnapshots = modelSnapshotsResp.model_snapshots ?? [];
@@ -271,7 +273,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
       <EuiFlyout
         size="m"
         ownFocus
-        onClose={onClose.bind(null, false)}
+        onClose={onClose}
         aria-label={i18n.translate('xpack.ml.jobsList.datafeedChart.datafeedChartFlyoutAriaLabel', {
           defaultMessage: 'Datafeed chart flyout',
         })}
@@ -423,7 +425,6 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                               annotations.lines[0].datum.modelSnapshot
                             );
                           }}
-                          // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                           theme={{
                             lineSeriesStyle: {
                               point: {
@@ -431,6 +432,9 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                               },
                             },
                           }}
+                          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+                          baseTheme={LEGACY_LIGHT_THEME}
+                          locale={i18n.getLocale()}
                         />
                         <Axis
                           id="bottom"
@@ -656,6 +660,7 @@ export const JobListDatafeedChartFlyout: FC<JobListDatafeedChartFlyoutProps> = (
   unsetShowFunction,
   refreshJobs,
 }) => {
+  const mlApi = useMlApi();
   const [isVisible, setIsVisible] = useState(false);
   const [job, setJob] = useState<MlSummaryJob | undefined>();
   const [jobWithStats, setJobWithStats] = useState<CombinedJobWithStats | undefined>();
@@ -672,9 +677,11 @@ export const JobListDatafeedChartFlyout: FC<JobListDatafeedChartFlyoutProps> = (
   const showRevertModelSnapshot = useCallback(async () => {
     // Need to load the full job with stats, as the model snapshot
     // flyout needs the timestamp of the last result.
-    const fullJob: CombinedJobWithStats = await loadFullJob(job!.id);
+    const fullJob: CombinedJobWithStats = await loadFullJob(mlApi, job!.id);
     setJobWithStats(fullJob);
     setIsRevertModelSnapshotFlyoutVisible(true);
+    // exclude mlApi from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job]);
 
   useEffect(() => {

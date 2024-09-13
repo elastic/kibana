@@ -13,8 +13,8 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
-import type { EncryptedSavedObjectsService } from '../crypto';
 import { getDescriptorNamespace } from './get_descriptor_namespace';
+import type { EncryptedSavedObjectsService } from '../crypto';
 
 /**
  * @internal Only exported for unit testing.
@@ -22,13 +22,13 @@ import { getDescriptorNamespace } from './get_descriptor_namespace';
 export interface Params {
   baseTypeRegistry: ISavedObjectTypeRegistry;
   service: Readonly<EncryptedSavedObjectsService>;
-  getCurrentUser: () => AuthenticatedUser | undefined;
+  getCurrentUser: () => Promise<AuthenticatedUser | undefined>;
 }
 
 export class SavedObjectsEncryptionExtension implements ISavedObjectsEncryptionExtension {
   readonly _baseTypeRegistry: ISavedObjectTypeRegistry;
   readonly _service: Readonly<EncryptedSavedObjectsService>;
-  readonly _getCurrentUser: () => AuthenticatedUser | undefined;
+  readonly _getCurrentUser: () => Promise<AuthenticatedUser | undefined>;
 
   constructor({ baseTypeRegistry, service, getCurrentUser }: Params) {
     this._baseTypeRegistry = baseTypeRegistry;
@@ -51,6 +51,7 @@ export class SavedObjectsEncryptionExtension implements ISavedObjectsEncryptionE
         type: response.type,
         namespace: getDescriptorNamespace(this._baseTypeRegistry, response.type, namespace),
       };
+      const user = await this._getCurrentUser();
       // Error is returned when decryption fails, and in this case encrypted attributes will be
       // stripped from the returned attributes collection. That will let consumer decide whether to
       // fail or handle recovery gracefully.
@@ -58,7 +59,7 @@ export class SavedObjectsEncryptionExtension implements ISavedObjectsEncryptionE
         normalizedDescriptor,
         response.attributes as Record<string, unknown>,
         originalAttributes as Record<string, unknown>,
-        { user: this._getCurrentUser() }
+        { user }
       );
 
       return { ...response, attributes, ...(error && { error }) };
@@ -82,8 +83,7 @@ export class SavedObjectsEncryptionExtension implements ISavedObjectsEncryptionE
       id,
       namespace: getDescriptorNamespace(this._baseTypeRegistry, type, namespace),
     };
-    return this._service.encryptAttributes(normalizedDescriptor, attributes, {
-      user: this._getCurrentUser(),
-    });
+    const user = await this._getCurrentUser();
+    return this._service.encryptAttributes(normalizedDescriptor, attributes, { user });
   }
 }

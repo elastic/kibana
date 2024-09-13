@@ -8,18 +8,19 @@
 import './dimension_container.scss';
 
 import React from 'react';
-import { FlyoutContainer } from './flyout_container';
+import { FlyoutContainer } from '../../../shared_components/flyout_container';
 
 export function DimensionContainer({
   panel,
   ...props
 }: {
   isOpen: boolean;
-  handleClose: () => boolean;
+  handleClose: () => void;
   panel: React.ReactElement | null;
-  groupLabel: string;
+  label: string;
   isFullscreen: boolean;
   panelRef: (el: HTMLDivElement) => void;
+  isInlineEditing?: boolean;
 }) {
   return <FlyoutContainer {...props}>{panel}</FlyoutContainer>;
 }

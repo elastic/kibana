@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
@@ -12,11 +13,12 @@ import { ActionItem } from './cell_action_item';
 import { usePartitionActions } from '../hooks/actions';
 import { ExtraActionsPopOver } from './extra_actions_popover';
 import { ExtraActionsButton } from './extra_actions_button';
-import { CellActionExecutionContext } from '../types';
+import type { CellActionExecutionContext } from '../types';
 import { useLoadActions } from '../hooks/use_load_actions';
 
 interface InlineActionsProps {
   actionContext: CellActionExecutionContext;
+  anchorPosition: 'rightCenter' | 'downCenter';
   showActionTooltips: boolean;
   visibleCellActions: number;
   disabledActionTypes: string[];
@@ -24,6 +26,7 @@ interface InlineActionsProps {
 
 export const InlineActions: React.FC<InlineActionsProps> = ({
   actionContext,
+  anchorPosition,
   showActionTooltips,
   visibleCellActions,
   disabledActionTypes,
@@ -47,10 +50,9 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
       data-test-subj="inlineActions"
       className={`inlineActions ${isPopoverOpen ? 'inlineActions-popoverOpen' : ''}`}
     >
-      {visibleActions.map((action, index) => (
-        <EuiFlexItem grow={false}>
+      {visibleActions.map((action) => (
+        <EuiFlexItem grow={false} key={`action-item-${action.id}`}>
           <ActionItem
-            key={`action-item-${index}`}
             action={action}
             actionContext={actionContext}
             showTooltip={showActionTooltips}
@@ -62,6 +64,7 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
           <ExtraActionsPopOver
             actions={extraActions}
             actionContext={actionContext}
+            anchorPosition={anchorPosition}
             button={button}
             closePopOver={closePopOver}
             isOpen={isPopoverOpen}

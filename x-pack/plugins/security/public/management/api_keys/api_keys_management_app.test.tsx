@@ -5,107 +5,66 @@
  * 2.0.
  */
 
-jest.mock('./api_keys_grid', () => ({
-  APIKeysGridPage: (props: any) => JSON.stringify(props, null, 2),
-}));
-
 import { act } from '@testing-library/react';
+import { noop } from 'lodash';
 
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import type { Unmount } from '@kbn/management-plugin/public/types';
 
-import { securityMock } from '../../mocks';
 import { apiKeysManagementApp } from './api_keys_management_app';
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { securityMock } from '../../mocks';
+
+const element = document.body.appendChild(document.createElement('div'));
 
 describe('apiKeysManagementApp', () => {
-  it('create() returns proper management app descriptor', () => {
+  it('renders application and sets breadcrumbs', async () => {
     const { getStartServices } = coreMock.createSetup();
+    const coreStartMock = coreMock.createStart();
+    getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
     const { authc } = securityMock.createSetup();
-
-    expect(apiKeysManagementApp.create({ authc, getStartServices: getStartServices as any }))
-      .toMatchInlineSnapshot(`
-      Object {
-        "id": "api_keys",
-        "mount": [Function],
-        "order": 30,
-        "title": "API keys",
-      }
-    `);
-  });
-
-  it('mount() works for the `grid` page', async () => {
-    const coreStart = coreMock.createSetup();
-    const { authc } = securityMock.createSetup();
-
-    const startServices = await coreStart.getStartServices();
-
-    const [{ application }] = startServices;
-    application.capabilities = {
-      ...application.capabilities,
+    const setBreadcrumbs = jest.fn();
+    const history = scopedHistoryMock.create({ pathname: '/' });
+    coreStartMock.application.capabilities = {
+      ...coreStartMock.application.capabilities,
       api_keys: {
         save: true,
       },
     };
 
-    const docTitle = startServices[0].chrome.docTitle;
+    coreStartMock.http.post.mockResolvedValue({
+      apiKeys: [],
+      canManageCrossClusterApiKeys: true,
+      canManageApiKeys: true,
+      canManageOwnApiKeys: true,
+      aggregations: {},
+      aggregationsTotal: 0,
+    });
 
-    const container = document.createElement('div');
+    authc.getCurrentUser.mockResolvedValue(
+      mockAuthenticatedUser({
+        username: 'elastic',
+        full_name: '',
+        email: '',
+        enabled: true,
+        roles: ['superuser'],
+      })
+    );
 
-    const setBreadcrumbs = jest.fn();
-
-    let unmount: Unmount;
-
+    let unmount: Unmount = noop;
     await act(async () => {
-      unmount = await apiKeysManagementApp
-        .create({ authc, getStartServices: () => Promise.resolve(startServices) as any })
-        .mount({
-          basePath: '/some-base-path',
-          element: container,
-          setBreadcrumbs,
-          history: scopedHistoryMock.create(),
-          theme$: themeServiceMock.createTheme$(),
-        });
+      unmount = await apiKeysManagementApp.create({ authc, getStartServices }).mount({
+        basePath: '/',
+        element,
+        setBreadcrumbs,
+        history,
+        theme: coreStartMock.theme,
+        theme$: themeServiceMock.createTheme$(), // needed as a deprecated field in ManagementAppMountParams
+      });
     });
 
-    expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([{ text: 'API keys' }]);
-    expect(docTitle.change).toHaveBeenCalledWith(['API keys']);
-    expect(docTitle.reset).not.toHaveBeenCalled();
-    expect(container).toMatchInlineSnapshot(`
-      <div>
-        {
-        "history": {
-          "action": "PUSH",
-          "length": 1,
-          "location": {
-            "pathname": "/",
-            "search": "",
-            "hash": ""
-          }
-        },
-        "notifications": {
-          "toasts": {}
-        },
-        "apiKeysAPIClient": {
-          "http": {
-            "basePath": {
-              "basePath": "",
-              "serverBasePath": ""
-            },
-            "anonymousPaths": {},
-            "externalUrl": {}
-          }
-        },
-        "readOnly": false
-      }
-      </div>
-    `);
+    expect(setBreadcrumbs).toHaveBeenLastCalledWith([{ text: 'API keys' }]);
 
-    act(() => {
-      unmount!();
-    });
-
-    expect(docTitle.reset).toHaveBeenCalledTimes(1);
-    expect(container).toMatchInlineSnapshot(`<div />`);
+    unmount();
   });
 });

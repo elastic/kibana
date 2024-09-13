@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/public';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import type { EventEnrichmentRequestOptions } from '../../../api/search_strategy';
 
-import type { CtiEnrichment, CtiEventEnrichmentRequestOptions } from '.';
+import type { CtiEnrichment } from '.';
 import { CtiQueries } from '.';
 
 export const buildEventEnrichmentRequestOptionsMock = (
-  overrides: Partial<CtiEventEnrichmentRequestOptions> = {}
-): CtiEventEnrichmentRequestOptions => ({
+  overrides: Partial<EventEnrichmentRequestOptions> = {}
+): EventEnrichmentRequestOptions => ({
   defaultIndex: ['filebeat-*'],
   eventFields: {
     'file.hash.md5': '1eee2bf3f56d8abed72da2bc523e7431',

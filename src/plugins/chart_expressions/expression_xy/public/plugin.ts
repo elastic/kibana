@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import moment from 'moment';
@@ -12,7 +13,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CoreSetup, CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import { EventAnnotationPluginSetup } from '@kbn/event-annotation-plugin/public';
+import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './types';
 import {
@@ -37,7 +38,7 @@ export interface XYPluginStartDependencies {
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginStart;
-  eventAnnotation: EventAnnotationPluginSetup;
+  eventAnnotation: EventAnnotationPluginStart;
   usageCollection?: UsageCollectionStart;
 }
 
@@ -53,7 +54,7 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
 export class ExpressionXyPlugin {
   public setup(
     core: CoreSetup<XYPluginStartDependencies>,
-    { expressions, charts }: SetupDeps
+    { expressions, charts: _charts }: SetupDeps
   ): ExpressionXyPluginSetup {
     expressions.registerFunction(yAxisConfigFunction);
     expressions.registerFunction(dataDecorationConfigFunction);
@@ -98,13 +99,14 @@ export class ExpressionXyPlugin {
         eventAnnotationService,
         timeZone: getTimeZone(core.uiSettings),
         timeFormat: core.uiSettings.get('dateFormat'),
+        startServices: coreStart,
       };
     };
 
     expressions.registerRenderer(getXyChartRenderer({ getStartDeps }));
   }
 
-  public start(core: CoreStart): ExpressionXyPluginStart {}
+  public start(_core: CoreStart): ExpressionXyPluginStart {}
 
   public stop() {}
 }

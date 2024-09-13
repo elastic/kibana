@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
+import type { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
 import { LensGetState, LensStoreDeps } from '.';
 import { setToggleFullscreen } from './lens_slice';
 
-/** cancels updates to the store that don't change the state */
 export const fullscreenMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {
   return (next: Dispatch) => (action: Action) => {
     if (setToggleFullscreen.match(action)) {

@@ -19,23 +19,11 @@ export const SpacesSavedObjectMappings = deepFreeze({
         },
       },
     },
-    description: {
-      type: 'text',
-    },
-    initials: {
-      type: 'keyword',
-    },
-    color: {
+    solution: {
       type: 'keyword',
     },
     disabledFeatures: {
       type: 'keyword',
-    },
-    // This field isn't included in the mappings since it doesn't need to be indexed or searched, but it will still
-    // appear in the `_source` field of the `space` document.
-    // imageUrl: { type: 'text' },
-    _reserved: {
-      type: 'boolean',
     },
   },
 } as const);

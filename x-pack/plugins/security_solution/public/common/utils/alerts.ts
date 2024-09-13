@@ -8,6 +8,9 @@
 import { merge } from '@kbn/std';
 import { isPlainObject } from 'lodash';
 import type { Ecs } from '@kbn/cases-plugin/common';
+import { TableId } from '@kbn/securitysolution-data-table';
+import type { GroupOption } from '@kbn/grouping';
+import * as i18n from './translations';
 
 export const buildAlertsQuery = (alertIds: string[]) => {
   if (alertIds.length === 0) {
@@ -118,3 +121,47 @@ export interface Alert {
   signal: Signal;
   [key: string]: unknown;
 }
+
+// generates default grouping option for alerts table
+export const getDefaultGroupingOptions = (tableId: TableId): GroupOption[] => {
+  if (tableId === TableId.alertsOnAlertsPage || tableId === TableId.alertsRiskInputs) {
+    return [
+      {
+        label: i18n.ruleName,
+        key: 'kibana.alert.rule.name',
+      },
+      {
+        label: i18n.userName,
+        key: 'user.name',
+      },
+      {
+        label: i18n.hostName,
+        key: 'host.name',
+      },
+      {
+        label: i18n.sourceIP,
+        key: 'source.ip',
+      },
+    ];
+  } else if (tableId === TableId.alertsOnRuleDetailsPage) {
+    return [
+      {
+        label: i18n.sourceAddress,
+        key: 'source.address',
+      },
+      {
+        label: i18n.userName,
+        key: 'user.name',
+      },
+      {
+        label: i18n.hostName,
+        key: 'host.name',
+      },
+      {
+        label: i18n.destinationAddress,
+        key: 'destination.address,',
+      },
+    ];
+  }
+  return [];
+};

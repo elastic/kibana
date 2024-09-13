@@ -24,12 +24,15 @@
       "kibanaReact",
       "management",
       "esUiShared",
+      "unifiedSearch",
+      "embeddable"
     ],
     "optionalPlugins": [
       "usageCollection",
       "security",
       "monitoringCollection",
-      "spaces"
+      "spaces",
+      "serverless",
     ],
     "extraPublicDirs": [
       "common",

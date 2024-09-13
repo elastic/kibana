@@ -18,19 +18,17 @@ import type {
   SavedObjectsServiceSetup,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { EncryptedSavedObjectsService } from '../crypto';
 import { getDescriptorNamespace, normalizeNamespace } from './get_descriptor_namespace';
 import { SavedObjectsEncryptionExtension } from './saved_objects_encryption_extension';
+import type { EncryptedSavedObjectsService } from '../crypto';
 
 export { normalizeNamespace };
 
 interface SetupSavedObjectsParams {
   service: PublicMethodsOf<EncryptedSavedObjectsService>;
   savedObjects: SavedObjectsServiceSetup;
-  security?: SecurityPluginSetup;
   getStartServices: StartServicesAccessor;
 }
 
@@ -78,7 +76,6 @@ export interface EncryptedSavedObjectsClient {
 export function setupSavedObjects({
   service,
   savedObjects,
-  security,
   getStartServices,
 }: SetupSavedObjectsParams): ClientInstanciator {
   // Register custom saved object extension that will encrypt, decrypt and strip saved object
@@ -87,7 +84,10 @@ export function setupSavedObjects({
     return new SavedObjectsEncryptionExtension({
       baseTypeRegistry,
       service,
-      getCurrentUser: () => security?.authc.getCurrentUser(request) ?? undefined,
+      getCurrentUser: async () => {
+        const [{ security }] = await getStartServices();
+        return security.authc.getCurrentUser(request) ?? undefined;
+      },
     });
   });
 
@@ -118,7 +118,7 @@ export function setupSavedObjects({
             {
               type,
               id,
-              namespace: getDescriptorNamespace(typeRegistry, type, options?.namespace),
+              namespace: getDescriptorNamespace(typeRegistry, type, savedObject.namespaces),
             },
             savedObject.attributes as Record<string, unknown>
           )) as T,
@@ -148,7 +148,7 @@ export function setupSavedObjects({
                   namespace: getDescriptorNamespace(
                     typeRegistry,
                     savedObject.type,
-                    findOptions.namespaces
+                    savedObject.namespaces
                   ),
                 };
 

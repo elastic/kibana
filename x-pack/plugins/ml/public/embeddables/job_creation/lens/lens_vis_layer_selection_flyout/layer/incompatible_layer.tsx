@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
-import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_lens';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import { extractErrorMessage } from '../../../../../../common/util/errors';
+import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_lens';
 
 interface Props {
   layer: LayerResult;

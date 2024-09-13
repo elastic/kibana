@@ -1,0 +1,2754 @@
+{
+  "id": "@kbn/ml-data-frame-analytics-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.getAnalysisType",
+        "type": "Function",
+        "tags": [],
+        "label": "getAnalysisType",
+        "description": [
+          "\nHelper function to get the analysis type of a DFA configuration\n"
+        ],
+        "signature": [
+          "(analysis: ",
+          "MlDataframeAnalysisContainer",
+          ") => \"unknown\" | ",
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.DataFrameAnalysisConfigType",
+            "text": "DataFrameAnalysisConfigType"
+          }
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.getAnalysisType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "analysis",
+            "description": [
+              "The analysis configuration"
+            ],
+            "signature": [
+              "MlDataframeAnalysisContainer"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.getDefaultPredictionFieldName",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultPredictionFieldName",
+        "description": [
+          "\nHelper function to get the default prediction field name\n"
+        ],
+        "signature": [
+          "(analysis: ",
+          "MlDataframeAnalysisContainer",
+          ") => string"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.getDefaultPredictionFieldName.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "analysis",
+            "description": [
+              "The analysis configuration"
+            ],
+            "signature": [
+              "MlDataframeAnalysisContainer"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.getDependentVar",
+        "type": "Function",
+        "tags": [],
+        "label": "getDependentVar",
+        "description": [
+          "\nHelper function to get the dependent variable of a DFA configuration\n"
+        ],
+        "signature": [
+          "(analysis: ",
+          "MlDataframeAnalysisContainer",
+          ") => string"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.getDependentVar.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "analysis",
+            "description": [
+              "The analysis configuration"
+            ],
+            "signature": [
+              "MlDataframeAnalysisContainer"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.getNumTopClasses",
+        "type": "Function",
+        "tags": [],
+        "label": "getNumTopClasses",
+        "description": [
+          "\nGet the `num_top_classes` attribute of a DFA classification configuration\n"
+        ],
+        "signature": [
+          "(analysis: ",
+          "MlDataframeAnalysisContainer",
+          ") => number | undefined"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/get_num_top_classes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.getNumTopClasses.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "analysis",
+            "description": [
+              "The analysis configuration"
+            ],
+            "signature": [
+              "MlDataframeAnalysisContainer"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/get_num_top_classes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.getNumTopFeatureImportanceValues",
+        "type": "Function",
+        "tags": [],
+        "label": "getNumTopFeatureImportanceValues",
+        "description": [
+          "\nGet the `num_top_feature_importance_values` attribute of DFA regression and classification configurations\n"
+        ],
+        "signature": [
+          "(analysis: ",
+          "MlDataframeAnalysisContainer",
+          ") => number | undefined"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/get_num_top_feature_importance_values.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.getNumTopFeatureImportanceValues.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "analysis",
+            "description": [
+              "The analysis configuration"
+            ],
+            "signature": [
+              "MlDataframeAnalysisContainer"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/get_num_top_feature_importance_values.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.getPredictionFieldName",
+        "type": "Function",
+        "tags": [],
+        "label": "getPredictionFieldName",
+        "description": [
+          "\nHelper function to get the prediction field name of a DFA configuration\n"
+        ],
+        "signature": [
+          "(analysis: ",
+          "MlDataframeAnalysisContainer",
+          ") => string | undefined"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.getPredictionFieldName.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "analysis",
+            "description": [
+              "The analysis configuration"
+            ],
+            "signature": [
+              "MlDataframeAnalysisContainer"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.getTrainingPercent",
+        "type": "Function",
+        "tags": [],
+        "label": "getTrainingPercent",
+        "description": [
+          "\nHelper function to get the training percent of a DFA configuration\n"
+        ],
+        "signature": [
+          "(analysis: ",
+          "MlDataframeAnalysisContainer",
+          ") => number | undefined"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.getTrainingPercent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "analysis",
+            "description": [
+              "The analysis configuration"
+            ],
+            "signature": [
+              "MlDataframeAnalysisContainer"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.isClassificationAnalysis",
+        "type": "Function",
+        "tags": [],
+        "label": "isClassificationAnalysis",
+        "description": [
+          "\nType guard for DFA classification analysis configurations\n"
+        ],
+        "signature": [
+          "(arg: unknown) => arg is ",
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.ClassificationAnalysis",
+            "text": "ClassificationAnalysis"
+          }
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.isClassificationAnalysis.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "The config to identify"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.isClassificationFeatureImportanceBaseline",
+        "type": "Function",
+        "tags": [],
+        "label": "isClassificationFeatureImportanceBaseline",
+        "description": [
+          "\nType guard for classification feature importance baseline\n"
+        ],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.isClassificationFeatureImportanceBaseline.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "The baseline to identify"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.isClassificationTotalFeatureImportance",
+        "type": "Function",
+        "tags": [],
+        "label": "isClassificationTotalFeatureImportance",
+        "description": [
+          "\nType guard for total feature importance\n"
+        ],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.isClassificationTotalFeatureImportance.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "The feature importance to identify"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.isDataFrameAnalyticsConfigs",
+        "type": "Function",
+        "tags": [],
+        "label": "isDataFrameAnalyticsConfigs",
+        "description": [
+          "\nType guard for a DFA config\n"
+        ],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.isDataFrameAnalyticsConfigs.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "The config to identify"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.isOutlierAnalysis",
+        "type": "Function",
+        "tags": [],
+        "label": "isOutlierAnalysis",
+        "description": [
+          "\nType guard for DFA outlier analysis configurations\n"
+        ],
+        "signature": [
+          "(arg: unknown) => arg is ",
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.OutlierAnalysis",
+            "text": "OutlierAnalysis"
+          }
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.isOutlierAnalysis.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "The config to identify"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.isRegressionAnalysis",
+        "type": "Function",
+        "tags": [],
+        "label": "isRegressionAnalysis",
+        "description": [
+          "\nType guard for DFA regression analysis configurations\n"
+        ],
+        "signature": [
+          "(arg: unknown) => arg is ",
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.RegressionAnalysis",
+            "text": "RegressionAnalysis"
+          }
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.isRegressionAnalysis.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "The config to identify"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.isRegressionFeatureImportanceBaseline",
+        "type": "Function",
+        "tags": [],
+        "label": "isRegressionFeatureImportanceBaseline",
+        "description": [
+          "\nType guard for regression feature importance baseline\n"
+        ],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.isRegressionFeatureImportanceBaseline.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "The baseline to identify"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.isRegressionTotalFeatureImportance",
+        "type": "Function",
+        "tags": [],
+        "label": "isRegressionTotalFeatureImportance",
+        "description": [
+          "\nType guard for regression total feature importance\n"
+        ],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.isRegressionTotalFeatureImportance.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "The feature importance to identify"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.sortExplorationResultsFields",
+        "type": "Function",
+        "tags": [],
+        "label": "sortExplorationResultsFields",
+        "description": [
+          "\nUsed to sort columns:\n- Anchor on the left ml.outlier_score, ml.is_training, <predictedField>, <actual>\n- string based columns are moved to the left\n- feature_influence/feature_importance fields get moved next to the corresponding field column\n- overall fields get sorted alphabetically\n"
+        ],
+        "signature": [
+          "(a: string, b: string, jobConfig: ",
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.DataFrameAnalyticsConfig",
+            "text": "DataFrameAnalyticsConfig"
+          },
+          ") => number"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.sortExplorationResultsFields.$1",
+            "type": "string",
+            "tags": [],
+            "label": "a",
+            "description": [
+              "First field name to compare for sorting"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.sortExplorationResultsFields.$2",
+            "type": "string",
+            "tags": [],
+            "label": "b",
+            "description": [
+              "Second field name to compare for sorting"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.sortExplorationResultsFields.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "jobConfig",
+            "description": [
+              "The DFA analysis config"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-frame-analytics-utils",
+                "scope": "common",
+                "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+                "section": "def-common.DataFrameAnalyticsConfig",
+                "text": "DataFrameAnalyticsConfig"
+              }
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.AnalyticsMapEdgeElement",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnalyticsMapEdgeElement",
+        "description": [
+          "\nInterface for an edge element for the map view"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.AnalyticsMapEdgeElement.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [
+              "\nInner data of the edge element"
+            ],
+            "signature": [
+              "{ id: string; source: string; target: string; }"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.AnalyticsMapNodeElement",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnalyticsMapNodeElement",
+        "description": [
+          "\nInterface for a node element for the map view"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.AnalyticsMapNodeElement.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [
+              "\nInner data of the node element"
+            ],
+            "signature": [
+              "{ id: string; label: string; type: string; analysisType?: string | undefined; isRoot?: boolean | undefined; }"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.AnalyticsMapReturnType",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnalyticsMapReturnType",
+        "description": [
+          "\nInterface for DFA map return type"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.AnalyticsMapReturnType.elements",
+            "type": "Array",
+            "tags": [],
+            "label": "elements",
+            "description": [
+              "\nMap elements"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-frame-analytics-utils",
+                "scope": "common",
+                "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+                "section": "def-common.MapElements",
+                "text": "MapElements"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.AnalyticsMapReturnType.details",
+            "type": "Object",
+            "tags": [],
+            "label": "details",
+            "description": [
+              "\nTransform, job or index details"
+            ],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.AnalyticsMapReturnType.error",
+            "type": "Any",
+            "tags": [],
+            "label": "error",
+            "description": [
+              "\nError"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.ClassFeatureImportance",
+        "type": "Interface",
+        "tags": [],
+        "label": "ClassFeatureImportance",
+        "description": [
+          "\nES result class feature importance"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.ClassFeatureImportance.class_name",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "class_name",
+            "description": [
+              "\nThe class name"
+            ],
+            "signature": [
+              "string | number | boolean"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.ClassFeatureImportance.importance",
+            "type": "number",
+            "tags": [],
+            "label": "importance",
+            "description": [
+              "\nThe importance"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.ClassFeatureImportanceSummary",
+        "type": "Interface",
+        "tags": [],
+        "label": "ClassFeatureImportanceSummary",
+        "description": [
+          "\nES result for class feature importance summary"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.ClassFeatureImportanceSummary.class_name",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "class_name",
+            "description": [
+              "\nThe class name"
+            ],
+            "signature": [
+              "string | number | boolean"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.ClassFeatureImportanceSummary.importance",
+            "type": "Object",
+            "tags": [],
+            "label": "importance",
+            "description": [
+              "\nThe importance"
+            ],
+            "signature": [
+              "{ max: number; min: number; mean_magnitude: number; }"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.ClassificationAnalysis",
+        "type": "Interface",
+        "tags": [],
+        "label": "ClassificationAnalysis",
+        "description": [
+          "\nInterface for classification job configuation"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.ClassificationAnalysis.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: Classification",
+            "description": [
+              "\nKey spec for interface"
+            ],
+            "signature": [
+              "[key: string]:  Classification"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.ClassificationAnalysis.classification",
+            "type": "Object",
+            "tags": [],
+            "label": "classification",
+            "description": [
+              "\nOutlier detection options"
+            ],
+            "signature": [
+              "Classification"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.ClassificationEvaluateResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ClassificationEvaluateResponse",
+        "description": [
+          "\nInterface for classification evaluate response"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.ClassificationEvaluateResponse.classification",
+            "type": "Object",
+            "tags": [],
+            "label": "classification",
+            "description": [
+              "\nClassification evaluation"
+            ],
+            "signature": [
+              "{ multiclass_confusion_matrix?: { confusion_matrix: ",
+              {
+                "pluginId": "@kbn/ml-data-frame-analytics-utils",
+                "scope": "common",
+                "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+                "section": "def-common.ConfusionMatrix",
+                "text": "ConfusionMatrix"
+              },
+              "[]; } | undefined; recall?: { classes: EvalClass[]; avg_recall: number; } | undefined; accuracy?: { classes: EvalClass[]; overall_accuracy: number; } | undefined; auc_roc?: { curve?: ",
+              {
+                "pluginId": "@kbn/ml-data-frame-analytics-utils",
+                "scope": "common",
+                "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+                "section": "def-common.RocCurveItem",
+                "text": "RocCurveItem"
+              },
+              "[] | undefined; value: number; } | undefined; }"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.ClassificationFeatureImportanceBaseline",
+        "type": "Interface",
+        "tags": [],
+        "label": "ClassificationFeatureImportanceBaseline",
+        "description": [
+          "\nBaseline interface for ES result classification feature importance"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.ClassificationFeatureImportanceBaseline.classes",
+            "type": "Array",
+            "tags": [],
+            "label": "classes",
+            "description": [
+              "\nClasses"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-frame-analytics-utils",
+                "scope": "common",
+                "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+                "section": "def-common.FeatureImportanceClassBaseline",
+                "text": "FeatureImportanceClassBaseline"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.ClassificationTotalFeatureImportance",
+        "type": "Interface",
+        "tags": [],
+        "label": "ClassificationTotalFeatureImportance",
+        "description": [
+          "\nES result classification total feature importance"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.ClassificationTotalFeatureImportance.feature_name",
+            "type": "string",
+            "tags": [],
+            "label": "feature_name",
+            "description": [
+              "\nThe feature name"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.ClassificationTotalFeatureImportance.classes",
+            "type": "Array",
+            "tags": [],
+            "label": "classes",
+            "description": [
+              "\nThe classes, array of ClassFeatureImportanceSummary"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-frame-analytics-utils",
+                "scope": "common",
+                "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+                "section": "def-common.ClassFeatureImportanceSummary",
+                "text": "ClassFeatureImportanceSummary"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.ConfusionMatrix",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConfusionMatrix",
+        "description": [
+          "\nInterface for confusion matrix"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.ConfusionMatrix.actual_class",
+            "type": "string",
+            "tags": [],
+            "label": "actual_class",
+            "description": [
+              "\nActual class"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.ConfusionMatrix.actual_class_doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "actual_class_doc_count",
+            "description": [
+              "\nActual class doc count"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.ConfusionMatrix.predicted_classes",
+            "type": "Array",
+            "tags": [],
+            "label": "predicted_classes",
+            "description": [
+              "\nArray of predicted classes"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-frame-analytics-utils",
+                "scope": "common",
+                "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+                "section": "def-common.PredictedClass",
+                "text": "PredictedClass"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.ConfusionMatrix.other_predicted_class_doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "other_predicted_class_doc_count",
+            "description": [
+              "\nDoc count of other predicted classes"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.DataFrameAnalyticsConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataFrameAnalyticsConfig",
+        "description": [
+          "\nInterface for a DFA config with fix for estypes provided types"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.DataFrameAnalyticsConfig",
+            "text": "DataFrameAnalyticsConfig"
+          },
+          " extends Omit<",
+          "MlDataframeAnalyticsSummary",
+          ", \"analyzed_fields\">"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.DataFrameAnalyticsConfig.analyzed_fields",
+            "type": "Object",
+            "tags": [],
+            "label": "analyzed_fields",
+            "description": [
+              "\nOptional analyzed fields"
+            ],
+            "signature": [
+              "MlDataframeAnalysisAnalyzedFields",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.DataFrameAnalyticsConfig._meta",
+            "type": "Object",
+            "tags": [],
+            "label": "_meta",
+            "description": [
+              "\nOptional meta data"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-frame-analytics-utils",
+                "scope": "common",
+                "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+                "section": "def-common.DataFrameAnalyticsMeta",
+                "text": "DataFrameAnalyticsMeta"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.DataFrameAnalyticsMeta",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataFrameAnalyticsMeta",
+        "description": [
+          "\nMeta data for a DFA job"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.DataFrameAnalyticsMeta.custom_urls",
+            "type": "Array",
+            "tags": [],
+            "label": "custom_urls",
+            "description": [
+              "\nOptional custom urls"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.MlUrlConfig",
+                "text": "MlUrlConfig"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.DataFrameAnalyticsMeta.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: any",
+            "description": [
+              "\nKey spec for interface"
+            ],
+            "signature": [
+              "[key: string]:  any"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.DataFrameAnalyticsStats",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataFrameAnalyticsStats",
+        "description": [
+          "\nInterface for DFA stats"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.DataFrameAnalyticsStats",
+            "text": "DataFrameAnalyticsStats"
+          },
+          " extends Omit<",
+          "MlDataframeAnalytics",
+          ", \"state\">"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.DataFrameAnalyticsStats.failure_reason",
+            "type": "string",
+            "tags": [],
+            "label": "failure_reason",
+            "description": [
+              "\nOptional failure reason"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.DataFrameAnalyticsStats.state",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "state",
+            "description": [
+              "\nTask state"
+            ],
+            "signature": [
+              "\"analyzing\" | \"reindexing\" | ",
+              "MlDataframeState"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.DeleteDataFrameAnalyticsWithIndexStatus",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeleteDataFrameAnalyticsWithIndexStatus",
+        "description": [
+          "\nInterface for DFA API response for deletion status"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.DeleteDataFrameAnalyticsWithIndexStatus.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [
+              "\nSuccess"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.DeleteDataFrameAnalyticsWithIndexStatus.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [
+              "\nOptional error"
+            ],
+            "signature": [
+              "ErrorResponseBase",
+              " | ",
+              "Boom",
+              "<any> | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.EvaluateMetrics",
+        "type": "Interface",
+        "tags": [],
+        "label": "EvaluateMetrics",
+        "description": [
+          "\nInterface for evalute metrics"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.EvaluateMetrics.classification",
+            "type": "Object",
+            "tags": [],
+            "label": "classification",
+            "description": [
+              "\nClassification evalute metrics"
+            ],
+            "signature": [
+              "{ accuracy?: object | undefined; recall?: object | undefined; multiclass_confusion_matrix?: object | undefined; auc_roc?: { include_curve: boolean; class_name: string; } | undefined; }"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.EvaluateMetrics.regression",
+            "type": "Object",
+            "tags": [],
+            "label": "regression",
+            "description": [
+              "\nRegression evaluate metrics"
+            ],
+            "signature": [
+              "{ r_squared: object; mse: object; msle: object; huber: object; }"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.FeatureImportance",
+        "type": "Interface",
+        "tags": [],
+        "label": "FeatureImportance",
+        "description": [
+          "\nES result feature importance interface\nTODO We should separate the interface because classes/importance\nisn't both optional but either/or."
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.FeatureImportance.feature_name",
+            "type": "string",
+            "tags": [],
+            "label": "feature_name",
+            "description": [
+              "\nThe feature name"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.FeatureImportance.classes",
+            "type": "Array",
+            "tags": [],
+            "label": "classes",
+            "description": [
+              "\nOptional classes"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-frame-analytics-utils",
+                "scope": "common",
+                "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+                "section": "def-common.ClassFeatureImportance",
+                "text": "ClassFeatureImportance"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.FeatureImportance.importance",
+            "type": "number",
+            "tags": [],
+            "label": "importance",
+            "description": [
+              "\nOptional importance"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.FeatureImportanceClassBaseline",
+        "type": "Interface",
+        "tags": [],
+        "label": "FeatureImportanceClassBaseline",
+        "description": [
+          "\nBaseline interface for ES result feature importance class"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.FeatureImportanceClassBaseline.class_name",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "class_name",
+            "description": [
+              "\nClass name"
+            ],
+            "signature": [
+              "string | number | boolean"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.FeatureImportanceClassBaseline.baseline",
+            "type": "number",
+            "tags": [],
+            "label": "baseline",
+            "description": [
+              "\nBaseline"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.FieldSelectionItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldSelectionItem",
+        "description": [
+          "\nInterface for field selection item"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.FieldSelectionItem",
+            "text": "FieldSelectionItem"
+          },
+          " extends Omit<",
+          "MlDataframeAnalyticsFieldSelection",
+          ", \"mapping_types\">"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.FieldSelectionItem.mapping_types",
+            "type": "Array",
+            "tags": [
+              "type"
+            ],
+            "label": "mapping_types",
+            "description": [
+              "\nOptional mapping types"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.OutlierAnalysis",
+        "type": "Interface",
+        "tags": [],
+        "label": "OutlierAnalysis",
+        "description": [
+          "\nInterface for outlier analysis job configuation"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.OutlierAnalysis.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: {}",
+            "description": [
+              "\nKey spec for interface"
+            ],
+            "signature": [
+              "[key: string]:  {}"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.OutlierAnalysis.outlier_detection",
+            "type": "Object",
+            "tags": [],
+            "label": "outlier_detection",
+            "description": [
+              "\nOutlier detection options"
+            ],
+            "signature": [
+              "{ compute_feature_influence?: boolean | undefined; }"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.PredictedClass",
+        "type": "Interface",
+        "tags": [],
+        "label": "PredictedClass",
+        "description": [
+          "\nInterface for predicted class"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.PredictedClass.predicted_class",
+            "type": "string",
+            "tags": [],
+            "label": "predicted_class",
+            "description": [
+              "\nPredicted class"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.PredictedClass.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [
+              "\nCount"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.RegressionAnalysis",
+        "type": "Interface",
+        "tags": [],
+        "label": "RegressionAnalysis",
+        "description": [
+          "\nInterface for regression analysis job configuation"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.RegressionAnalysis.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: Regression",
+            "description": [
+              "\nKey spec for interface"
+            ],
+            "signature": [
+              "[key: string]:  Regression"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.RegressionAnalysis.regression",
+            "type": "Object",
+            "tags": [],
+            "label": "regression",
+            "description": [
+              "\nRegression options"
+            ],
+            "signature": [
+              "Regression"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.RegressionFeatureImportanceBaseline",
+        "type": "Interface",
+        "tags": [],
+        "label": "RegressionFeatureImportanceBaseline",
+        "description": [
+          "\nBaseline interface for ES result regression feature importance"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.RegressionFeatureImportanceBaseline.baseline",
+            "type": "number",
+            "tags": [],
+            "label": "baseline",
+            "description": [
+              "\nBaseline"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.RegressionFeatureImportanceSummary",
+        "type": "Interface",
+        "tags": [],
+        "label": "RegressionFeatureImportanceSummary",
+        "description": [
+          "\nES result regression feature importance summary"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.RegressionFeatureImportanceSummary.max",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [
+              "\nMax feature importance"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.RegressionFeatureImportanceSummary.min",
+            "type": "number",
+            "tags": [],
+            "label": "min",
+            "description": [
+              "\nMin feature importance"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.RegressionFeatureImportanceSummary.mean_magnitude",
+            "type": "number",
+            "tags": [],
+            "label": "mean_magnitude",
+            "description": [
+              "\nMean magnitude"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.RegressionTotalFeatureImportance",
+        "type": "Interface",
+        "tags": [],
+        "label": "RegressionTotalFeatureImportance",
+        "description": [
+          "\nES result for regression total feature importance"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.RegressionTotalFeatureImportance.feature_name",
+            "type": "string",
+            "tags": [],
+            "label": "feature_name",
+            "description": [
+              "\nFeature name"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.RegressionTotalFeatureImportance.importance",
+            "type": "Object",
+            "tags": [],
+            "label": "importance",
+            "description": [
+              "\nImportance"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-frame-analytics-utils",
+                "scope": "common",
+                "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+                "section": "def-common.RegressionFeatureImportanceSummary",
+                "text": "RegressionFeatureImportanceSummary"
+              }
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.RocCurveItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "RocCurveItem",
+        "description": [
+          "\nData item for ROC curve"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.RocCurveItem.fpr",
+            "type": "number",
+            "tags": [],
+            "label": "fpr",
+            "description": [
+              "\nFPR"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.RocCurveItem.threshold",
+            "type": "number",
+            "tags": [],
+            "label": "threshold",
+            "description": [
+              "\nThreshold"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.RocCurveItem.tpr",
+            "type": "number",
+            "tags": [],
+            "label": "tpr",
+            "description": [
+              "\nTPR"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.TopClass",
+        "type": "Interface",
+        "tags": [],
+        "label": "TopClass",
+        "description": [
+          "\nES result top class interface"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.TopClass.class_name",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "class_name",
+            "description": [
+              "\nThe class name"
+            ],
+            "signature": [
+              "string | number | boolean"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.TopClass.class_probability",
+            "type": "number",
+            "tags": [],
+            "label": "class_probability",
+            "description": [
+              "\nThe class probability"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.TopClass.class_score",
+            "type": "number",
+            "tags": [],
+            "label": "class_score",
+            "description": [
+              "\nThe class score"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.TrackTotalHitsSearchResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "TrackTotalHitsSearchResponse",
+        "description": [
+          "\nInterface for a search response's track total hits option"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.TrackTotalHitsSearchResponse.hits",
+            "type": "Object",
+            "tags": [],
+            "label": "hits",
+            "description": [
+              "\nInner structure of the response"
+            ],
+            "signature": [
+              "{ total: { value: number; relation: string; }; hits: any[]; }"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.UpdateDataFrameAnalyticsConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdateDataFrameAnalyticsConfig",
+        "description": [
+          "\nInterface for a requect object to update a DFA job"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.UpdateDataFrameAnalyticsConfig.allow_lazy_start",
+            "type": "string",
+            "tags": [],
+            "label": "allow_lazy_start",
+            "description": [
+              "\nOptional allow lazy start"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.UpdateDataFrameAnalyticsConfig.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nOptional description"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.UpdateDataFrameAnalyticsConfig.model_memory_limit",
+            "type": "string",
+            "tags": [],
+            "label": "model_memory_limit",
+            "description": [
+              "\nOptional model memory limit"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.UpdateDataFrameAnalyticsConfig.max_num_threads",
+            "type": "number",
+            "tags": [],
+            "label": "max_num_threads",
+            "description": [
+              "\nOptional max num threads"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+            "id": "def-common.UpdateDataFrameAnalyticsConfig._meta",
+            "type": "Object",
+            "tags": [],
+            "label": "_meta",
+            "description": [
+              "\nOptional meta data"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-data-frame-analytics-utils",
+                "scope": "common",
+                "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+                "section": "def-common.DataFrameAnalyticsMeta",
+                "text": "DataFrameAnalyticsMeta"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.ANALYSIS_ADVANCED_FIELDS",
+        "type": "Enum",
+        "tags": [],
+        "label": "ANALYSIS_ADVANCED_FIELDS",
+        "description": [
+          "\nEnum for a DFA configuration's advanced fields"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.OUTLIER_ANALYSIS_METHOD",
+        "type": "Enum",
+        "tags": [],
+        "label": "OUTLIER_ANALYSIS_METHOD",
+        "description": [
+          "\nEnum for a DFA configuration's outlier analysis method"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.AnalysisConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "AnalysisConfig",
+        "description": [
+          "\nAlias of estypes.MlDataframeAnalysisContainer"
+        ],
+        "signature": [
+          "MlDataframeAnalysisContainer"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.DataFrameAnalysisConfigType",
+        "type": "Type",
+        "tags": [],
+        "label": "DataFrameAnalysisConfigType",
+        "description": [
+          "\nUnion type of DFA anlaysis config types"
+        ],
+        "signature": [
+          "\"outlier_detection\" | \"regression\" | \"classification\""
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.DataFrameAnalyticsId",
+        "type": "Type",
+        "tags": [],
+        "label": "DataFrameAnalyticsId",
+        "description": [
+          "\nData frame analytics id"
+        ],
+        "signature": [
+          "string"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.DataFrameTaskStateType",
+        "type": "Type",
+        "tags": [],
+        "label": "DataFrameTaskStateType",
+        "description": [
+          "\nUnion type of DFA task states"
+        ],
+        "signature": [
+          "\"analyzing\" | \"reindexing\" | ",
+          "MlDataframeState"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.DEFAULT_REGRESSION_COLUMNS",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_REGRESSION_COLUMNS",
+        "description": [
+          "\nDefault regression columns"
+        ],
+        "signature": [
+          "8"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.DEFAULT_RESULTS_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_RESULTS_FIELD",
+        "description": [
+          "\nDefault results field"
+        ],
+        "signature": [
+          "\"ml\""
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.DfAnalyticsExplainResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "DfAnalyticsExplainResponse",
+        "description": [
+          "\nAlias for estypes.MlExplainDataFrameAnalyticsResponse"
+        ],
+        "signature": [
+          "MlExplainDataFrameAnalyticsResponse"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.FEATURE_IMPORTANCE",
+        "type": "string",
+        "tags": [],
+        "label": "FEATURE_IMPORTANCE",
+        "description": [
+          "\nFeature importance constant"
+        ],
+        "signature": [
+          "\"feature_importance\""
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.FEATURE_INFLUENCE",
+        "type": "string",
+        "tags": [],
+        "label": "FEATURE_INFLUENCE",
+        "description": [
+          "\nFeature influence constant"
+        ],
+        "signature": [
+          "\"feature_influence\""
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.FeatureImportanceBaseline",
+        "type": "Type",
+        "tags": [],
+        "label": "FeatureImportanceBaseline",
+        "description": [
+          "\nUnion type of feature importance baseline types"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.ClassificationFeatureImportanceBaseline",
+            "text": "ClassificationFeatureImportanceBaseline"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.RegressionFeatureImportanceBaseline",
+            "text": "RegressionFeatureImportanceBaseline"
+          }
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.FeatureImportanceClassName",
+        "type": "Type",
+        "tags": [],
+        "label": "FeatureImportanceClassName",
+        "description": [
+          "\nUnion type for ES result feature importance class name"
+        ],
+        "signature": [
+          "string | number | boolean"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.FeatureProcessor",
+        "type": "Type",
+        "tags": [],
+        "label": "FeatureProcessor",
+        "description": [
+          "\nAlias for estypes.MlDataframeAnalysisFeatureProcessor"
+        ],
+        "signature": [
+          "MlDataframeAnalysisFeatureProcessor"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.JobMapNodeTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "JobMapNodeTypes",
+        "description": [
+          "\nUnion type of JOB_MAP_NODE_TYPES"
+        ],
+        "signature": [
+          "\"index\" | \"transform\" | \"analytics\" | \"analytics-job-missing\" | \"trainedModel\" | \"ingestPipeline\""
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.MapElements",
+        "type": "Type",
+        "tags": [],
+        "label": "MapElements",
+        "description": [
+          "\nUnion type of map node and edge elements"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.AnalyticsMapEdgeElement",
+            "text": "AnalyticsMapEdgeElement"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.AnalyticsMapNodeElement",
+            "text": "AnalyticsMapNodeElement"
+          }
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.ML__ID_COPY",
+        "type": "string",
+        "tags": [],
+        "label": "ML__ID_COPY",
+        "description": [
+          "\nES field name for copy of the doc _id"
+        ],
+        "signature": [
+          "\"ml__id_copy\""
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.ML__INCREMENTAL_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ML__INCREMENTAL_ID",
+        "description": [
+          "\nES field name for ML's incremental id"
+        ],
+        "signature": [
+          "\"ml__incremental_id\""
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN",
+        "type": "number",
+        "tags": [],
+        "label": "NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN",
+        "description": [
+          "\nMinimum value for feature importance"
+        ],
+        "signature": [
+          "0"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.OUTLIER_SCORE",
+        "type": "string",
+        "tags": [],
+        "label": "OUTLIER_SCORE",
+        "description": [
+          "\nOutlier score constant"
+        ],
+        "signature": [
+          "\"outlier_score\""
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.TOP_CLASSES",
+        "type": "string",
+        "tags": [],
+        "label": "TOP_CLASSES",
+        "description": [
+          "\nTop classes constant"
+        ],
+        "signature": [
+          "\"top_classes\""
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.TopClasses",
+        "type": "Type",
+        "tags": [],
+        "label": "TopClasses",
+        "description": [
+          "\nArray of TopClass"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.TopClass",
+            "text": "TopClass"
+          },
+          "[]"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.TotalFeatureImportance",
+        "type": "Type",
+        "tags": [],
+        "label": "TotalFeatureImportance",
+        "description": [
+          "\nUnion type of total feature importance types"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.ClassificationTotalFeatureImportance",
+            "text": "ClassificationTotalFeatureImportance"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.RegressionTotalFeatureImportance",
+            "text": "RegressionTotalFeatureImportance"
+          }
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.TRAINING_PERCENT_MAX",
+        "type": "number",
+        "tags": [],
+        "label": "TRAINING_PERCENT_MAX",
+        "description": [
+          "\nMaximum training percent"
+        ],
+        "signature": [
+          "100"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.TRAINING_PERCENT_MIN",
+        "type": "number",
+        "tags": [],
+        "label": "TRAINING_PERCENT_MIN",
+        "description": [
+          "\nMinimum training percent"
+        ],
+        "signature": [
+          "1"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.ANALYSIS_CONFIG_TYPE",
+        "type": "Object",
+        "tags": [],
+        "label": "ANALYSIS_CONFIG_TYPE",
+        "description": [
+          "\nCustom enum for DFA config types"
+        ],
+        "signature": [
+          "{ readonly OUTLIER_DETECTION: \"outlier_detection\"; readonly REGRESSION: \"regression\"; readonly CLASSIFICATION: \"classification\"; }"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.BASIC_NUMERICAL_TYPES",
+        "type": "Object",
+        "tags": [],
+        "label": "BASIC_NUMERICAL_TYPES",
+        "description": [
+          "\nSet of basic numerical types"
+        ],
+        "signature": [
+          "Set<",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
+          ">"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.DATA_FRAME_TASK_STATE",
+        "type": "Object",
+        "tags": [],
+        "label": "DATA_FRAME_TASK_STATE",
+        "description": [
+          "\nCustom enum for DFA task states"
+        ],
+        "signature": [
+          "{ readonly ANALYZING: \"analyzing\"; readonly FAILED: \"failed\"; readonly REINDEXING: \"reindexing\"; readonly STARTED: \"started\"; readonly STARTING: \"starting\"; readonly STOPPED: \"stopped\"; }"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.EXTENDED_NUMERICAL_TYPES",
+        "type": "Object",
+        "tags": [],
+        "label": "EXTENDED_NUMERICAL_TYPES",
+        "description": [
+          "\nSet of extended numerical types"
+        ],
+        "signature": [
+          "Set<",
+          {
+            "pluginId": "@kbn/field-types",
+            "scope": "common",
+            "docId": "kibKbnFieldTypesPluginApi",
+            "section": "def-common.ES_FIELD_TYPES",
+            "text": "ES_FIELD_TYPES"
+          },
+          ">"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.INDEX_CREATED_BY",
+        "type": "Object",
+        "tags": [],
+        "label": "INDEX_CREATED_BY",
+        "description": [
+          "\nCustom enum for the metadata to be stored about which tool was used to create an index"
+        ],
+        "signature": [
+          "{ readonly FILE_DATA_VISUALIZER: \"file-data-visualizer\"; readonly DATA_FRAME_ANALYTICS: \"data-frame-analytics\"; }"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
+        "id": "def-common.JOB_MAP_NODE_TYPES",
+        "type": "Object",
+        "tags": [],
+        "label": "JOB_MAP_NODE_TYPES",
+        "description": [
+          "\nCustom enum for job map node types for the DFA map view"
+        ],
+        "signature": [
+          "{ readonly ANALYTICS: \"analytics\"; readonly ANALYTICS_JOB_MISSING: \"analytics-job-missing\"; readonly TRANSFORM: \"transform\"; readonly INDEX: \"index\"; readonly TRAINED_MODEL: \"trainedModel\"; readonly INGEST_PIPELINE: \"ingestPipeline\"; }"
+        ],
+        "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

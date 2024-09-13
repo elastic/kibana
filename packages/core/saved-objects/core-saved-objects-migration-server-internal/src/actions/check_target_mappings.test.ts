@@ -1,79 +1,266 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Either from 'fp-ts/lib/Either';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { checkTargetMappings } from './check_target_mappings';
-import { diffMappings } from '../core/build_active_mappings';
+import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
+import { checkTargetTypesMappings } from './check_target_mappings';
+import { getBaseMappings } from '../core';
 
-jest.mock('../core/build_active_mappings');
+const indexTypes = ['type1', 'type2', 'type3'];
 
-const diffMappingsMock = diffMappings as jest.MockedFn<typeof diffMappings>;
+const properties: SavedObjectsMappingProperties = {
+  ...getBaseMappings().properties,
+  type1: { type: 'long' },
+  type2: { type: 'long' },
+};
 
-const actualMappings: IndexMapping = {
-  properties: {
-    field: { type: 'integer' },
+const migrationMappingPropertyHashes = {
+  type1: 'someHash',
+  type2: 'anotherHash',
+};
+
+const legacyMappings: IndexMapping = {
+  properties,
+  dynamic: 'strict',
+  _meta: {
+    migrationMappingPropertyHashes,
   },
 };
 
-const expectedMappings: IndexMapping = {
-  properties: {
-    field: { type: 'long' },
+const outdatedModelVersions = {
+  type1: '10.1.0',
+  type2: '10.2.0',
+  type3: '10.4.0',
+};
+
+const modelVersions = {
+  type1: '10.1.0',
+  type2: '10.3.0',
+  type3: '10.5.0',
+};
+
+const latestMappingsVersions = {
+  type1: '10.1.0',
+  type2: '10.2.0', // type is on '10.3.0' but its mappings were last updated on 10.2.0
+  type3: '10.5.0',
+};
+
+const appMappings: IndexMapping = {
+  properties,
+  dynamic: 'strict',
+  _meta: {
+    migrationMappingPropertyHashes, // deprecated, but preserved to facilitate rollback
+    mappingVersions: modelVersions,
   },
 };
 
-describe('checkTargetMappings', () => {
+describe('checkTargetTypesMappings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('returns match=false if source mappings are not defined', async () => {
-    const task = checkTargetMappings({
-      expectedMappings,
+  describe('when index mappings are missing required properties', () => {
+    it("returns 'index_mappings_incomplete' if index mappings are not defined", async () => {
+      const task = checkTargetTypesMappings({
+        indexTypes,
+        appMappings,
+        latestMappingsVersions,
+      });
+
+      const result = await task();
+      expect(result).toEqual(Either.left({ type: 'index_mappings_incomplete' as const }));
     });
 
-    const result = await task();
-    expect(diffMappings).not.toHaveBeenCalled();
-    expect(result).toEqual(Either.right({ match: false }));
+    it("returns 'index_mappings_incomplete' if index mappings do not define _meta", async () => {
+      const task = checkTargetTypesMappings({
+        indexTypes,
+        appMappings,
+        indexMappings: {
+          properties,
+          dynamic: 'strict',
+        },
+        latestMappingsVersions,
+      });
+
+      const result = await task();
+      expect(result).toEqual(Either.left({ type: 'index_mappings_incomplete' as const }));
+    });
+
+    it("returns 'index_mappings_incomplete' if index mappings do not define migrationMappingPropertyHashes nor mappingVersions", async () => {
+      const task = checkTargetTypesMappings({
+        indexTypes,
+        appMappings,
+        indexMappings: {
+          properties,
+          dynamic: 'strict',
+          _meta: {},
+        },
+        latestMappingsVersions,
+      });
+
+      const result = await task();
+      expect(result).toEqual(Either.left({ type: 'index_mappings_incomplete' as const }));
+    });
+
+    it("returns 'index_mappings_incomplete' if index mappings define a different value for 'dynamic' property", async () => {
+      const task = checkTargetTypesMappings({
+        indexTypes,
+        appMappings,
+        indexMappings: {
+          properties,
+          dynamic: false,
+          _meta: appMappings._meta,
+        },
+        latestMappingsVersions,
+      });
+
+      const result = await task();
+      expect(result).toEqual(Either.left({ type: 'index_mappings_incomplete' as const }));
+    });
   });
 
-  it('calls diffMappings() with the source and target mappings', async () => {
-    const task = checkTargetMappings({
-      actualMappings,
-      expectedMappings,
+  describe('when index mappings have all required properties', () => {
+    describe('when some core properties (aka root fields) have changed', () => {
+      it('returns the list of fields that have changed', async () => {
+        const task = checkTargetTypesMappings({
+          indexTypes,
+          appMappings,
+          indexMappings: {
+            ...legacyMappings,
+            properties: {
+              ...legacyMappings.properties,
+              references: {
+                properties: {
+                  ...legacyMappings.properties.references.properties,
+                  description: { type: 'text' },
+                },
+              },
+            },
+          },
+          latestMappingsVersions,
+        });
+
+        const result = await task();
+        expect(result).toEqual(
+          Either.left({
+            type: 'types_changed' as const,
+            // types are flagged as changed cause we have not provided a hashToVersionMap
+            updatedTypes: ['type1', 'type2'],
+          })
+        );
+      });
     });
 
-    await task();
-    expect(diffMappings).toHaveBeenCalledTimes(1);
-    expect(diffMappings).toHaveBeenCalledWith(actualMappings, expectedMappings);
-  });
+    describe('when core properties have NOT changed', () => {
+      describe('when index mappings ONLY contain the legacy hashes', () => {
+        describe('and legacy hashes match the current model versions', () => {
+          it('returns a types_match response', async () => {
+            const task = checkTargetTypesMappings({
+              indexTypes,
+              appMappings,
+              indexMappings: legacyMappings,
+              hashToVersionMap: {
+                'type1|someHash': '10.1.0',
+                'type2|anotherHash': '10.2.0',
+                // type 3 is a new type
+              },
+              latestMappingsVersions,
+            });
 
-  it('returns match=true if diffMappings() match', async () => {
-    diffMappingsMock.mockReturnValueOnce(undefined);
+            const result = await task();
+            expect(result).toEqual(
+              Either.right({
+                type: 'types_match' as const,
+              })
+            );
+          });
+        });
 
-    const task = checkTargetMappings({
-      actualMappings,
-      expectedMappings,
+        describe('and legacy hashes do NOT match the current model versions', () => {
+          it('returns the list of updated SO types', async () => {
+            const task = checkTargetTypesMappings({
+              indexTypes,
+              appMappings,
+              indexMappings: legacyMappings,
+              hashToVersionMap: {
+                'type1|someHash': '10.1.0',
+                'type2|anotherHash': '10.1.0', // type2's mappings were updated on 10.2.0
+              },
+              latestMappingsVersions,
+            });
+
+            const result = await task();
+            expect(result).toEqual(
+              Either.left({
+                type: 'types_changed' as const,
+                updatedTypes: ['type2'],
+              })
+            );
+          });
+        });
+      });
+
+      describe('when index mappings contain the mappingVersions', () => {
+        describe('and mappingVersions match', () => {
+          it('returns a types_match response', async () => {
+            const task = checkTargetTypesMappings({
+              indexTypes,
+              appMappings,
+              indexMappings: {
+                ...appMappings,
+                _meta: {
+                  ...appMappings._meta,
+                  mappingVersions: {
+                    type1: '10.1.0',
+                    type2: '10.2.0', // type 2 was still on 10.2.0, but 10.3.0 does not bring mappings changes
+                    type3: '10.5.0',
+                  },
+                },
+              },
+              latestMappingsVersions,
+            });
+
+            const result = await task();
+            expect(result).toEqual(
+              Either.right({
+                type: 'types_match' as const,
+              })
+            );
+          });
+        });
+
+        describe('and mappingVersions do NOT match', () => {
+          it('returns the list of updated SO types', async () => {
+            const task = checkTargetTypesMappings({
+              indexTypes,
+              appMappings,
+              indexMappings: {
+                properties,
+                dynamic: 'strict',
+                _meta: {
+                  mappingVersions: outdatedModelVersions,
+                },
+              },
+              latestMappingsVersions,
+            });
+
+            const result = await task();
+            expect(result).toEqual(
+              Either.left({
+                type: 'types_changed' as const,
+                updatedTypes: ['type3'],
+              })
+            );
+          });
+        });
+      });
     });
-
-    const result = await task();
-    expect(result).toEqual(Either.right({ match: true }));
-  });
-
-  it('returns match=false if diffMappings() finds differences', async () => {
-    diffMappingsMock.mockReturnValueOnce({ changedProp: 'field' });
-
-    const task = checkTargetMappings({
-      actualMappings,
-      expectedMappings,
-    });
-
-    const result = await task();
-    expect(result).toEqual(Either.right({ match: false }));
   });
 });

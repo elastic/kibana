@@ -13,8 +13,8 @@ export type Event = Exclude<IEvent, undefined>;
 
 interface CreateAlertEventLogRecordParams {
   executionId?: string;
-  ruleId: string;
-  ruleType: UntypedNormalizedRuleType;
+  ruleId?: string;
+  ruleType?: UntypedNormalizedRuleType;
   action: string;
   spaceId?: string;
   consumer?: string;
@@ -31,9 +31,9 @@ interface CreateAlertEventLogRecordParams {
     scheduleDelay?: number;
   };
   savedObjects: Array<{
-    type: string;
-    id: string;
-    typeId: string;
+    type?: string;
+    id?: string;
+    typeId?: string;
     relation?: string;
   }>;
   flapping?: boolean;
@@ -42,6 +42,8 @@ interface CreateAlertEventLogRecordParams {
     ongoing: number;
     recovered: number;
   };
+  maintenanceWindowIds?: string[];
+  ruleRevision?: number;
 }
 
 export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecordParams): Event {
@@ -60,6 +62,8 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     flapping,
     alertUuid,
     alertSummary,
+    maintenanceWindowIds,
+    ruleRevision,
   } = params;
   const alerting =
     params.instanceId || group || alertSummary
@@ -84,7 +88,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     event: {
       action,
       kind: 'alert',
-      category: [ruleType.producer],
+      ...(ruleType?.producer ? { category: [ruleType?.producer] } : {}),
       ...(state?.start ? { start: state.start as string } : {}),
       ...(state?.end ? { end: state.end as string } : {}),
       ...(state?.duration !== undefined ? { duration: state.duration as string } : {}),
@@ -92,9 +96,11 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     kibana: {
       alert: {
         ...(flapping !== undefined ? { flapping } : {}),
+        ...(maintenanceWindowIds ? { maintenance_window_ids: maintenanceWindowIds } : {}),
         ...(alertUuid ? { uuid: alertUuid } : {}),
         rule: {
-          rule_type_id: ruleType.id,
+          ...(ruleRevision !== undefined ? { revision: ruleRevision } : {}),
+          ...(ruleType?.id ? { rule_type_id: ruleType.id } : {}),
           ...(consumer ? { consumer } : {}),
           ...(executionId
             ? {
@@ -119,9 +125,9 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     ...(message ? { message } : {}),
     rule: {
       id: ruleId,
-      license: ruleType.minimumLicenseRequired,
-      category: ruleType.id,
-      ruleset: ruleType.producer,
+      ...(ruleType?.minimumLicenseRequired ? { license: ruleType.minimumLicenseRequired } : {}),
+      ...(ruleType?.id ? { category: ruleType.id } : {}),
+      ...(ruleType?.producer ? { ruleset: ruleType.producer } : {}),
       ...(params.ruleName ? { name: params.ruleName } : {}),
     },
   };

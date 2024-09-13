@@ -25,20 +25,30 @@ export {
   PageLoading,
   PageError,
   SectionLoading,
-  EuiCodeEditor,
+  useAuthorizationContext,
+  NotAuthorizedSection,
+  WithPrivileges,
+  AuthorizationProvider,
 } from '@kbn/es-ui-shared-plugin/public';
 
-export type { FormSchema, FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+export type {
+  FormSchema,
+  FieldConfig,
+  FieldHook,
+  FieldValidateResponse,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export {
   FIELD_TYPES,
   VALIDATION_TYPES,
   useForm,
   useFormData,
+  useFormIsModified,
   Form,
   getUseField,
   UseField,
   FormDataProvider,
+  getFieldValidityAndErrorMessage,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export {
@@ -50,8 +60,14 @@ export {
 export {
   getFormRow,
   Field,
+  FormRow,
+  TextField,
+  SelectField,
   ToggleField,
+  NumericField,
   JsonEditorField,
+  ComboBoxField,
+  RadioGroupField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 export { isJSON } from '@kbn/es-ui-shared-plugin/static/validators/string';
@@ -60,6 +76,7 @@ export {
   createKibanaReactContext,
   reactRouterNavigate,
   useKibana,
-  KibanaThemeProvider,
   useExecutionContext,
 } from '@kbn/kibana-react-plugin/public';
+
+export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

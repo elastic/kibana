@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -20,24 +21,28 @@ import {
   EuiText,
   EUI_MODAL_CANCEL_BUTTON,
 } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { pluginServices } from '../services/plugin_services';
-import { createConfirmStrings, discardConfirmStrings } from './_dashboard_listing_strings';
+import { createConfirmStrings, resetConfirmStrings } from './_dashboard_listing_strings';
 
 export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';
 
-export const confirmDiscardUnsavedChanges = (discardCallback: () => void) => {
+export const confirmDiscardUnsavedChanges = (
+  discardCallback: () => void,
+  viewMode: ViewMode = ViewMode.EDIT // we want to show the danger modal on the listing page
+) => {
   const {
     overlays: { openConfirm },
   } = pluginServices.getServices();
 
-  openConfirm(discardConfirmStrings.getDiscardSubtitle(), {
-    confirmButtonText: discardConfirmStrings.getDiscardConfirmButtonText(),
-    cancelButtonText: discardConfirmStrings.getDiscardCancelButtonText(),
-    buttonColor: 'danger',
+  openConfirm(resetConfirmStrings.getResetSubtitle(viewMode), {
+    confirmButtonText: resetConfirmStrings.getResetConfirmButtonText(),
+    buttonColor: viewMode === ViewMode.EDIT ? 'danger' : 'primary',
+    maxWidth: 500,
     defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-    title: discardConfirmStrings.getDiscardTitle(),
+    title: resetConfirmStrings.getResetTitle(),
   }).then((isConfirmed) => {
     if (isConfirmed) {
       discardCallback();
@@ -53,9 +58,8 @@ export const confirmCreateWithUnsaved = (
   const descriptionId = 'confirmDiscardOrKeepDescription';
 
   const {
-    settings: {
-      theme: { theme$ },
-    },
+    analytics,
+    settings: { i18n, theme },
     overlays: { openModal },
   } = pluginServices.getServices();
 
@@ -116,7 +120,7 @@ export const confirmCreateWithUnsaved = (
           </div>
         </EuiOutsideClickDetector>
       </EuiFocusTrap>,
-      { theme$ }
+      { analytics, i18n, theme }
     ),
     {
       'data-test-subj': 'dashboardCreateConfirmModal',

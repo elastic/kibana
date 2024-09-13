@@ -24,10 +24,11 @@ export async function mountManagementSection(
   config: ClientConfigType,
   params: ManagementAppMountParams
 ) {
-  const { element, setBreadcrumbs, history, theme$ } = params;
+  const { element, setBreadcrumbs, history } = params;
   const [core] = await coreSetup.getStartServices();
   const {
     chrome: { docTitle },
+    settings,
   } = core;
 
   docTitleService.setup(docTitle.change);
@@ -37,12 +38,13 @@ export async function mountManagementSection(
     core,
     config,
     services: {
+      uiSettings: coreSetup.uiSettings,
+      settings,
       httpService,
       uiMetricService: services.uiMetricService,
       i18n,
       history,
     },
-    theme$,
   };
 
   const unmountAppCallback = renderApp(element, appDependencies);

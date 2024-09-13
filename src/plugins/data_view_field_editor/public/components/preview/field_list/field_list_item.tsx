@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
@@ -23,8 +24,10 @@ import { useFieldPreviewContext } from '../field_preview_context';
 import { IsUpdatingIndicator } from '../is_updating_indicator';
 import { ImagePreviewModal } from '../image_preview_modal';
 import type { DocumentField } from './field_list';
+import { PreviewState } from '../types';
+import { useStateSelector } from '../../../state_utils';
 
-interface Props {
+export interface PreviewListItemProps {
   field: DocumentField;
   toggleIsPinned?: (name: string) => void;
   hasScriptError?: boolean;
@@ -32,13 +35,16 @@ interface Props {
   isFromScript?: boolean;
 }
 
-export const PreviewListItem: React.FC<Props> = ({
+const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
+
+export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   field: { key, value, formattedValue, isPinned = false },
   toggleIsPinned,
   hasScriptError,
   isFromScript = false,
 }) => {
-  const { isLoadingPreview } = useFieldPreviewContext();
+  const { controller } = useFieldPreviewContext();
+  const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
 
   const [isPreviewImageModalVisible, setIsPreviewImageModalVisible] = useState(false);
 

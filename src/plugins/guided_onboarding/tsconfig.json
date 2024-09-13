@@ -7,17 +7,19 @@
 
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
     "@kbn/cloud-plugin",
     "@kbn/guided-onboarding",
-    "@kbn/i18n-react",
     "@kbn/core-application-browser-mocks",
     "@kbn/core-notifications-browser-mocks",
+    "@kbn/config-schema",
+    "@kbn/core-plugins-server",
     "@kbn/test-jest-helpers",
     "@kbn/i18n",
     "@kbn/core-http-browser",
     "@kbn/core-http-browser-mocks",
     "@kbn/config-schema",
+    "@kbn/features-plugin",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

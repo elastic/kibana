@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { createVersionedRouterMock } from '@kbn/core-http-router-server-mocks';
 import { get } from 'lodash';
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -95,6 +96,10 @@ export class RouterMock implements IRouter {
     return get(this.contextMock.core.elasticsearch.client.asCurrentUser, path);
   }
 
+  getMockESApiFnAsSecondaryAuthUser(path: string): jest.Mock {
+    return get(this.contextMock.core.elasticsearch.client.asSecondaryAuthUser, path);
+  }
+
   runRequest({ method, path, ...mockRequest }: RequestMock) {
     const handler = this.cacheHandlers[method][path];
 
@@ -104,4 +109,6 @@ export class RouterMock implements IRouter {
 
     return handler(this.contextMock, mockRequest, responseMock);
   }
+
+  versioned = createVersionedRouterMock();
 }

@@ -6,26 +6,37 @@
  */
 
 import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  loggingSystemMock,
+  savedObjectsClientMock,
+  securityServiceMock,
+} from '@kbn/core/server/mocks';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 
-import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
+import {
+  createFileServiceFactoryMock,
+  createFileServiceMock,
+} from '@kbn/files-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
-
-import type { CasesFindRequest } from '../../common/api';
-import type { CasesClient } from '.';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import type { CasesSearchRequest } from '../../common/types/api';
+import type { CasesClient, CasesClientInternal } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
 import type { CasesSubClient } from './cases/client';
-import type { ConfigureSubClient } from './configure/client';
+import type { ConfigureSubClient, InternalConfigureSubClient } from './configure/client';
 import type { CasesClientFactory } from './factory';
 import type { MetricsSubClient } from './metrics/client';
 import type { UserActionsSubClient } from './user_actions/client';
 
-import { CaseStatuses } from '../../common';
-import { CaseSeverity } from '../../common/api';
+import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
 import { SortFieldCase } from '../../public/containers/types';
 import {
   createExternalReferenceAttachmentTypeRegistryMock,
@@ -48,16 +59,19 @@ type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 const createCasesSubClientMock = (): CasesSubClientMock => {
   return {
     create: jest.fn(),
-    find: jest.fn(),
+    bulkCreate: jest.fn(),
+    search: jest.fn(),
     resolve: jest.fn(),
     get: jest.fn(),
     bulkGet: jest.fn(),
     push: jest.fn(),
-    update: jest.fn(),
+    bulkUpdate: jest.fn(),
     delete: jest.fn(),
     getTags: jest.fn(),
     getReporters: jest.fn(),
     getCasesByAlertID: jest.fn(),
+    getCategories: jest.fn(),
+    replaceCustomField: jest.fn(),
   };
 };
 
@@ -112,6 +126,16 @@ const createConfigureSubClientMock = (): ConfigureSubClientMock => {
   };
 };
 
+type InternalConfigureSubClientMock = jest.Mocked<InternalConfigureSubClient>;
+
+const createInternalConfigureSubClientMock = (): InternalConfigureSubClientMock => {
+  return {
+    getMappings: jest.fn(),
+    createMappings: jest.fn(),
+    updateMappings: jest.fn(),
+  };
+};
+
 export interface CasesClientMock extends CasesClient {
   cases: CasesSubClientMock;
   attachments: AttachmentsSubClientMock;
@@ -127,6 +151,16 @@ export const createCasesClientMock = (): CasesClientMock => {
     metrics: createMetricsSubClientMock(),
   };
   return client as unknown as CasesClientMock;
+};
+
+type CasesClientInternalMock = jest.Mocked<CasesClientInternal>;
+
+export const createCasesClientInternalMock = (): CasesClientInternalMock => {
+  const client: PublicContract<CasesClientInternal> = {
+    configuration: createInternalConfigureSubClientMock(),
+  };
+
+  return client as unknown as CasesClientInternalMock;
 };
 
 export type CasesClientFactoryMock = jest.Mocked<CasesClientFactory>;
@@ -192,9 +226,34 @@ export const createCasesClientMockArgs = () => {
   };
 };
 
-export const createCasesClientMockFindRequest = (
-  overwrites?: CasesFindRequest
-): CasesFindRequest => ({
+export const createCasesClientFactoryMockArgs = () => {
+  return {
+    securityPluginSetup: securityMock.createSetup(),
+    securityPluginStart: securityMock.createStart(),
+    securityServiceStart: securityServiceMock.createStart(),
+    spacesPluginStart: spacesMock.createStart(),
+    featuresPluginStart: featuresPluginMock.createSetup(),
+    actionsPluginStart: actionsMock.createStart(),
+    licensingPluginStart: licensingMock.createStart(),
+    notifications: notificationsMock.createStart(),
+    ruleRegistry: { getRacClientWithRequest: jest.fn(), alerting: alertsMock.createStart() },
+    filesPluginStart: { fileServiceFactory: createFileServiceFactoryMock() },
+    publicBaseUrl: 'https//example.com',
+    lensEmbeddableFactory: jest.fn().mockReturnValue(
+      makeLensEmbeddableFactory(
+        () => ({}),
+        () => ({}),
+        {}
+      )
+    ),
+    externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
+    persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
+  };
+};
+
+export const createCasesClientMockSearchRequest = (
+  overwrites?: CasesSearchRequest
+): CasesSearchRequest => ({
   search: '',
   searchFields: ['title', 'description'],
   severity: CaseSeverity.LOW,
@@ -205,5 +264,6 @@ export const createCasesClientMockFindRequest = (
   owner: [],
   sortField: SortFieldCase.createdAt,
   sortOrder: 'desc',
+  customFields: {},
   ...overwrites,
 });

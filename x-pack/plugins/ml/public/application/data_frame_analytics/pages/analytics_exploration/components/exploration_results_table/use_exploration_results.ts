@@ -7,58 +7,63 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { EuiDataGridColumn } from '@elastic/eui';
-
-import { CoreSetup } from '@kbn/core/public';
+import type { EuiDataGridColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { MlApiServices } from '../../../../../services/ml_api_service';
-
-import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
-
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import {
+  getPredictionFieldName,
+  getDefaultPredictionFieldName,
+  isClassificationAnalysis,
+  isRegressionAnalysis,
+  sortExplorationResultsFields,
+  DEFAULT_RESULTS_FIELD,
+  FEATURE_IMPORTANCE,
+  ML__ID_COPY,
+  TOP_CLASSES,
+  type DataFrameAnalyticsConfig,
+  type FeatureImportanceBaseline,
+} from '@kbn/ml-data-frame-analytics-utils';
 import {
   getDataGridSchemasFromFieldTypes,
   getFieldType,
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
-  UseIndexDataReturnType,
-} from '../../../../../components/data_grid';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
-import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import {
-  getPredictionFieldName,
-  getDefaultPredictionFieldName,
-  isClassificationAnalysis,
-} from '../../../../../../../common/util/analytics_utils';
-import { FEATURE_IMPORTANCE, TOP_CLASSES } from '../../../../common/constants';
-import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
-import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
-import { isRegressionAnalysis } from '../../../../common/analytics';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
+  type UseIndexDataReturnType,
+} from '@kbn/ml-data-grid';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
+import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
+
+import { getIndexData, getIndexFields } from '../../../../common';
 import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
-import { FeatureImportanceBaseline } from '../../../../../../../common/types/feature_importance';
 import { useExplorationDataGrid } from './use_exploration_data_grid';
 
 export const useExplorationResults = (
-  indexPattern: DataView | undefined,
+  dataView: DataView | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
-  searchQuery: SavedSearchQuery,
-  toastNotifications: CoreSetup['notifications']['toasts'],
-  mlApiServices: MlApiServices
+  searchQuery: estypes.QueryDslQueryContainer
 ): UseIndexDataReturnType => {
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useMlKibana();
+  const mlApi = useMlApi();
   const [baseline, setBaseLine] = useState<FeatureImportanceBaseline | undefined>();
 
   const trainedModelsApiService = useTrainedModelsApiService();
 
   const needsDestIndexFields =
-    indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
+    dataView !== undefined && dataView.title === jobConfig?.source.index[0];
 
   const columns: EuiDataGridColumn[] = [];
 
   if (jobConfig !== undefined) {
     const resultsField = jobConfig.dest.results_field!;
-    const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
+    const { fieldTypes } = getIndexFields(mlApi, jobConfig, needsDestIndexFields);
     columns.push(
       ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField).sort((a: any, b: any) =>
         sortExplorationResultsFields(a.id, b.id, jobConfig)
@@ -79,7 +84,7 @@ export const useExplorationResults = (
   // passed on to `getIndexData`.
   useEffect(() => {
     const options = { didCancel: false };
-    getIndexData(jobConfig, dataGrid, searchQuery, options);
+    getIndexData(mlApi, jobConfig, dataGrid, searchQuery, options);
     return () => {
       options.didCancel = true;
     };
@@ -88,10 +93,9 @@ export const useExplorationResults = (
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
-    () =>
-      indexPattern !== undefined ? new DataLoader(indexPattern, toastNotifications) : undefined,
+    () => (dataView !== undefined ? new DataLoader(dataView, mlApi) : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [indexPattern]
+    [dataView]
   );
 
   const fetchColumnChartsData = async function () {
@@ -109,7 +113,7 @@ export const useExplorationResults = (
         dataGrid.setColumnCharts(columnChartsData);
       }
     } catch (e) {
-      showDataGridColumnChartErrorMessageToast(e, toastNotifications);
+      showDataGridColumnChartErrorMessageToast(e, toasts);
     }
   };
 
@@ -157,7 +161,7 @@ export const useExplorationResults = (
     } catch (e) {
       const error = extractErrorMessage(e);
 
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.ml.dataframe.analytics.explorationResults.baselineErrorMessageToast',
           {
@@ -168,7 +172,7 @@ export const useExplorationResults = (
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mlApiServices, jobConfig]);
+  }, [jobConfig]);
 
   useEffect(() => {
     getAnalyticsBaseline();
@@ -177,7 +181,7 @@ export const useExplorationResults = (
 
   const resultsField = jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD;
   const renderCellValue = useRenderCellValue(
-    indexPattern,
+    dataView,
     dataGrid.pagination,
     dataGrid.tableItems,
     resultsField

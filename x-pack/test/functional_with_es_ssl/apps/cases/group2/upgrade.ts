@@ -62,8 +62,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         },
         secrets: { email: 'elastic@elastic.co', apiToken: '123' },
       });
-
-      await cases.navigation.navigateToSingleCase('cases', CASE_ID);
     });
 
     after(async () => {
@@ -75,18 +73,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Case view page', function () {
+      before(async () => {
+        await cases.navigation.navigateToSingleCase('cases', CASE_ID);
+      });
+
       it('does not show any error toasters', async () => {
-        expect(await toasts.getToastCount()).to.be(0);
+        expect(await toasts.getCount()).to.be(0);
       });
 
       it('shows the title correctly', async () => {
-        const title = await testSubjects.find('header-page-title');
+        const title = await testSubjects.find('editable-title-header-value');
         expect(await title.getVisibleText()).equal('Upgrade test in Kibana');
       });
 
       it('shows the description correctly', async () => {
         const desc = await find.byCssSelector(
-          '[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]'
+          '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]'
         );
 
         expect(await desc.getVisibleText()).equal(`Testing upgrade! Let's see how it goes.`);
@@ -112,7 +114,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the first comment correctly', async () => {
         const comment = await find.byCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
 
         expect(await comment.getVisibleText()).equal(`This is interesting. I am curious also.`);
@@ -127,7 +129,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the second comment correctly', async () => {
         const comments = await find.allByCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
         const secondComment = comments[1];
 
@@ -140,7 +142,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the third comment correctly', async () => {
         const comments = await find.allByCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
         const thirdComment = comments[2];
 
@@ -200,7 +202,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the fourth comment correctly', async () => {
         const comments = await find.allByCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
 
         const thirdComment = comments[3];
@@ -283,6 +285,73 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the assignees section', async () => {
         await testSubjects.exists('case-view-assignees');
+      });
+    });
+
+    describe('Cases table', function () {
+      before(async () => {
+        await cases.navigation.navigateToApp();
+      });
+
+      it('does not show any error toasters', async () => {
+        expect(await toasts.getCount()).to.be(0);
+      });
+
+      it('shows the title correctly', async () => {
+        const title = await testSubjects.find('case-details-link');
+        expect(await title.getVisibleText()).equal('Upgrade test in Kibana');
+      });
+
+      it('shows the tags correctly', async () => {
+        const tags = ['upgrade', 'test', 'kibana'];
+
+        for (const tag of tags) {
+          const tagElement = await testSubjects.find(`case-table-column-tags-${tag}`);
+          expect(await tagElement.getVisibleText()).equal(tag);
+        }
+      });
+
+      it('shows the status correctly', async () => {
+        const status = await testSubjects.find('case-status-badge-open');
+        expect(await status.getVisibleText()).equal('Open');
+      });
+
+      it('shows the severity correctly', async () => {
+        const severity = await testSubjects.find('case-table-column-severity-low');
+        expect(await severity.getVisibleText()).equal('Low');
+      });
+
+      it('shows the count of comments correctly', async () => {
+        const comments = await testSubjects.find('case-table-column-commentCount');
+        expect(await comments.getVisibleText()).equal('4');
+      });
+
+      it('shows the creation date correctly', async () => {
+        const comments = await testSubjects.find('case-table-column-createdAt');
+        expect(await comments.getVisibleText()).equal('Jul 22, 2022 @ 13:40:43');
+      });
+
+      it('shows the update date correctly', async () => {
+        const comments = await testSubjects.find('case-table-column-updatedAt');
+        expect(await comments.getVisibleText()).equal('Jul 22, 2022 @ 13:46:32');
+      });
+
+      it('shows the external service column correctly', async () => {
+        const link = await testSubjects.find('case-table-column-external');
+        const upToDate = await testSubjects.find('case-table-column-external-upToDate');
+
+        expect(await link.getVisibleText()).equal('ROC-526');
+        expect(await upToDate.getVisibleText()).equal('is up to date');
+      });
+
+      it('shows the counts correctly', async () => {
+        const openCases = await testSubjects.find('openStatsHeader');
+        const inProgressCases = await testSubjects.find('inProgressStatsHeader');
+        const closedCases = await testSubjects.find('closedStatsHeader');
+
+        expect(await openCases.getVisibleText()).equal('Open cases\n1');
+        expect(await inProgressCases.getVisibleText()).equal('In progress cases\n0');
+        expect(await closedCases.getVisibleText()).equal('Closed cases\n0');
       });
     });
   });

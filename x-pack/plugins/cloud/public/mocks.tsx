@@ -5,26 +5,38 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
-import { CloudStart } from '.';
+import type { CloudSetup, CloudStart } from './types';
 
-function createSetupMock() {
+function createSetupMock(): jest.Mocked<CloudSetup> {
   return {
     cloudId: 'mock-cloud-id',
+    deploymentId: 'mock-deployment-id',
     isCloudEnabled: true,
     cname: 'cname',
     baseUrl: 'base-url',
     deploymentUrl: 'deployment-url',
     profileUrl: 'profile-url',
     organizationUrl: 'organization-url',
+    elasticsearchUrl: 'elasticsearch-url',
+    kibanaUrl: 'kibana-url',
+    cloudHost: 'cloud-host',
+    cloudDefaultPort: '443',
     isElasticStaffOwned: true,
     trialEndDate: new Date('2020-10-01T14:13:12Z'),
     registerCloudService: jest.fn(),
+    onboarding: {},
+    isServerlessEnabled: false,
+    serverless: {
+      projectId: undefined,
+      projectName: undefined,
+      projectType: undefined,
+    },
   };
 }
 
-const getContextProvider: () => React.FC =
+const getContextProvider: () => FC<PropsWithChildren<unknown>> =
   () =>
   ({ children }) =>
     <>{children}</>;
@@ -34,8 +46,13 @@ const createStartMock = (): jest.Mocked<CloudStart> => ({
   cloudId: 'mock-cloud-id',
   isCloudEnabled: true,
   deploymentUrl: 'deployment-url',
+  billingUrl: 'billing-url',
   profileUrl: 'profile-url',
   organizationUrl: 'organization-url',
+  isServerlessEnabled: false,
+  serverless: {
+    projectId: undefined,
+  },
 });
 
 export const cloudMock = {

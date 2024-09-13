@@ -121,7 +121,15 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   const minDate = useMemo(
     // If the initial schedule is earlier than now, set minDate to it
     // Set minDate to now if the initial schedule is in the future
-    () => moment.min(moment(), moment(initialSchedule?.rRule.dtstart ?? undefined)),
+    () =>
+      moment
+        .min(moment(), moment(initialSchedule?.rRule.dtstart ?? undefined))
+        // Allow the time on minDate to be earlier than the current time
+        // This is useful especially when the user is trying to create a recurring schedule
+        // that starts today, and should start at a time earlier than the current time on future
+        // occurrences
+        .hour(0)
+        .minute(0),
     [initialSchedule]
   );
 
@@ -146,9 +154,21 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
           ...(initialSchedule.rRule.until ? { until: moment(initialSchedule.rRule.until) } : {}),
         } as RecurrenceSchedule);
 
+    // Ensure intitial datetimes are displayed in the initial timezone
+    const startMoment = moment(initialSchedule.rRule.dtstart).tz(initialSchedule.rRule.tzid);
+    const dtstartOffsetToKibanaTz = moment()
+      .tz(defaultTz)
+      .year(startMoment.year())
+      .month(startMoment.month())
+      .date(startMoment.date())
+      .hour(startMoment.hour())
+      .minute(startMoment.minute())
+      .second(startMoment.second())
+      .millisecond(startMoment.millisecond())
+      .toISOString();
     return {
-      startDT: moment(initialSchedule.rRule.dtstart),
-      endDT: moment(initialSchedule.rRule.dtstart).add(initialSchedule.duration, 'ms'),
+      startDT: moment(dtstartOffsetToKibanaTz),
+      endDT: moment(dtstartOffsetToKibanaTz).add(initialSchedule.duration, 'ms'),
       isRecurring,
       recurrenceSchedule,
       selectedTimezone: [{ label: initialSchedule.rRule.tzid }],
@@ -176,7 +196,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   }, [setSelectingEndDate]);
 
   const selectStartDT = useCallback(
-    (date, clearEndDT) => {
+    (date: Moment, clearEndDT: boolean) => {
       setStartDT(moment.max(date, minDate));
       if (clearEndDT) {
         setEndDT(null);
@@ -187,8 +207,8 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
     [setStartDT, setSelectingEndDate, minDate]
   );
   const selectEndDT = useCallback(
-    (date) => {
-      setEndDT(date);
+    (date: Moment) => {
+      setEndDT(date.add(1, 'minutes'));
       setSelectingEndTime(true);
       setSelectingEndDate(false);
     },
@@ -196,10 +216,9 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   );
 
   const onSelectFromInline = useCallback(
-    (date) => {
+    (date: Moment) => {
       const dateAsMoment = moment(date);
-      const newDateAfterStart =
-        !startDT || dateAsMoment.isAfter(startDT) || dateAsMoment.isSame(startDT);
+      const newDateAfterStart = !startDT || dateAsMoment.isSameOrAfter(startDT);
       const isEndDateTimeChange =
         dateAsMoment.isSame(endDT, 'day') && !dateAsMoment.isSame(endDT, 'minute');
       const isStartDateTimeChange =
@@ -209,6 +228,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
 
       const applyToEndDate =
         !isStartDateTimeChange && (selectingEndDate || (isEndDateTimeChange && selectingEndTime));
+
       if (applyToEndDate && newDateAfterStart) {
         selectEndDT(date);
       } else selectStartDT(date, !isStartDateTimeChange);
@@ -218,6 +238,19 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
 
   const onClickSaveSchedule = useCallback(() => {
     if (!startDT || !endDT) return;
+
+    const tzid = selectedTimezone[0].label ?? defaultTz;
+    // Convert the dtstart from Kibana timezone to the selected timezone
+    const dtstart = moment()
+      .tz(tzid)
+      .year(startDT.year())
+      .month(startDT.month())
+      .date(startDT.date())
+      .hour(startDT.hour())
+      .minute(startDT.minute())
+      .second(startDT.second())
+      .toISOString();
+
     const recurrence =
       isRecurring && recurrenceSchedule
         ? recurrenceSchedule
@@ -227,8 +260,8 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
     onSaveSchedule({
       id: initialSchedule?.id ?? uuidv4(),
       rRule: {
-        dtstart: startDT.toISOString(),
-        tzid: selectedTimezone[0].label ?? defaultTz,
+        dtstart,
+        tzid,
         ...recurrence,
       },
       duration: endDT.valueOf() - startDT.valueOf(),
@@ -284,7 +317,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
                 selected={endDT}
                 onChange={setEndDT}
                 minDate={startDT ?? minDate}
-                isInvalid={startDT?.isAfter(endDT)}
+                isInvalid={startDT?.isSameOrAfter(endDT)}
               />
             }
           />
@@ -330,8 +363,8 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       <EuiSpacer size="m" />
       <EuiSwitch
         compressed
-        label={i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.reucrringSwitch', {
-          defaultMessage: 'Make recurring',
+        label={i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.repeatSwitch', {
+          defaultMessage: 'Repeat',
         })}
         onChange={() => setIsRecurring(!isRecurring)}
         checked={isRecurring}
@@ -351,7 +384,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       <EuiButton
         fill
         fullWidth
-        disabled={!startDT || !endDT || startDT.isAfter(endDT) || startDT.isBefore(minDate)}
+        disabled={!startDT || !endDT || startDT.isSameOrAfter(endDT) || startDT.isBefore(minDate)}
         onClick={onClickSaveSchedule}
         isLoading={isLoading}
         data-test-subj="scheduler-saveSchedule"

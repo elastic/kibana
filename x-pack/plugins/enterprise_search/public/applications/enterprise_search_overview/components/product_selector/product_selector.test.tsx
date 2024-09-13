@@ -11,44 +11,46 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { ErrorStateCallout } from '../../../shared/error_state';
 
-import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
-
-import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
-import { ProductSelector } from '.';
+import { ElasticsearchProductCard } from './elasticsearch_product_card';
 
-const props = {
-  access: {},
-  isWorkplaceSearchAdmin: true,
-};
+import { ProductSelector } from '.';
 
 describe('ProductSelector', () => {
   it('renders the overview page, product cards, & setup guide CTAs with no host set', () => {
     setMockValues({ config: { canDeployEntSearch: true, host: '' } });
-    const wrapper = shallow(<ProductSelector {...props} />);
+    const wrapper = shallow(<ProductSelector />);
 
-    expect(wrapper.find(ProductCard)).toHaveLength(3);
+    expect(wrapper.find(ElasticsearchProductCard)).toHaveLength(1);
     expect(wrapper.find(SetupGuideCta)).toHaveLength(1);
   });
 
   it('renders the trial callout', () => {
     setMockValues({ config: { canDeployEntSearch: true, host: 'localhost' } });
-    const wrapper = shallow(<ProductSelector {...props} />);
+    const wrapper = shallow(<ProductSelector />);
 
     expect(wrapper.find(TrialCallout)).toHaveLength(1);
   });
 
-  it('passes correct URL when Workplace Search user is not an admin', () => {
-    setMockValues({ config: { canDeployEntSearch: true, host: '' } });
-    const wrapper = shallow(<ProductSelector {...props} isWorkplaceSearchAdmin={false} />);
+  it('does not render connection error callout without an error', () => {
+    setMockValues({ config: { canDeployEntSearch: true, host: 'localhost' } });
+    const wrapper = shallow(<ProductSelector />);
 
-    expect(wrapper.find(ProductCard).last().prop('url')).toEqual(
-      WORKPLACE_SEARCH_PLUGIN.NON_ADMIN_URL
-    );
+    expect(wrapper.find(ErrorStateCallout)).toHaveLength(0);
+  });
+
+  it('does render connection error callout with an error', () => {
+    setMockValues({
+      config: { canDeployEntSearch: true, host: 'localhost' },
+      errorConnectingMessage: '502 Bad Gateway',
+    });
+    const wrapper = shallow(<ProductSelector />);
+
+    expect(wrapper.find(ErrorStateCallout)).toHaveLength(1);
   });
 
   describe('access checks when host is set', () => {
@@ -56,37 +58,18 @@ describe('ProductSelector', () => {
       setMockValues({ config: { canDeployEntSearch: true, host: 'localhost' } });
     });
 
-    it('does not render the App Search card if the user does not have access to AS', () => {
-      const wrapper = shallow(
-        <ProductSelector
-          {...props}
-          access={{ hasAppSearchAccess: false, hasWorkplaceSearchAccess: true }}
-        />
-      );
+    it('does not render the Setup CTA when there is a host', () => {
+      const wrapper = shallow(<ProductSelector />);
 
-      expect(wrapper.find(ProductCard)).toHaveLength(2);
-      expect(wrapper.find('[data-test-subj="productCard-workplaceSearch"]')).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="productCard-elasticsearch"]')).toHaveLength(1);
+      expect(wrapper.find(ElasticsearchProductCard)).toHaveLength(1);
+      expect(wrapper.find(SetupGuideCta)).toHaveLength(0);
     });
 
-    it('does not render the Workplace Search card if the user does not have access to WS', () => {
-      const wrapper = shallow(
-        <ProductSelector
-          {...props}
-          access={{ hasAppSearchAccess: true, hasWorkplaceSearchAccess: false }}
-        />
-      );
+    it('does not render EnterpriseSearch card without access', () => {
+      const wrapper = shallow(<ProductSelector />);
 
-      expect(wrapper.find(ProductCard)).toHaveLength(2);
-      expect(wrapper.find('[data-test-subj="productCard-appSearch"]')).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="productCard-elasticsearch"]')).toHaveLength(1);
-    });
-
-    it('renders empty prompt and no cards or license callout if the user does not have access', () => {
-      const wrapper = shallow(<ProductSelector {...props} />);
-
-      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
-      expect(wrapper.find(ProductCard)).toHaveLength(0);
+      expect(wrapper.find(ElasticsearchProductCard)).toHaveLength(1);
+      expect(wrapper.find(SetupGuideCta)).toHaveLength(0);
     });
   });
 });

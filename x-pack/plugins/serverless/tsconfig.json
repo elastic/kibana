@@ -1,0 +1,32 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/serverless-project-switcher",
+    "@kbn/serverless-types",
+    "@kbn/utils",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-chrome-browser-internal",
+    "@kbn/cloud-plugin",
+    "@kbn/serverless-common-settings",
+    "@kbn/shared-ux-chrome-navigation",
+    "@kbn/i18n",
+    "@kbn/management-cards-navigation",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-render",
+  ]
+}

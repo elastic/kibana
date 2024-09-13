@@ -13,13 +13,13 @@ import {
   EuiSpacer,
   EuiPageHeader,
   EuiTitle,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiDragDropContext,
   EuiDroppable,
   EuiDraggable,
   EuiButtonIconProps,
   EuiEmptyPrompt,
+  EuiPageBody,
 } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
@@ -167,8 +167,8 @@ export const Library: React.FC = () => {
     <>
       <SetPageChrome trail={['Library']} />
       <EuiPageHeader pageTitle="Library" />
-      <EuiPageContent hasBorder>
-        <EuiPageContentBody>
+      <EuiPageBody panelled hasBorder>
+        <EuiPageSection>
           <EuiTitle size="m">
             <h2>Result</h2>
           </EuiTitle>
@@ -540,8 +540,8 @@ export const Library: React.FC = () => {
 
           <EuiSpacer />
           <EuiSpacer />
-        </EuiPageContentBody>
-      </EuiPageContent>
+        </EuiPageSection>
+      </EuiPageBody>
     </>
   );
 };

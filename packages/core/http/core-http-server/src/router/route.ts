@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RouteValidatorFullConfig } from './route_validator';
+import type { RouteValidator } from './route_validator';
 
 /**
  * The set of valid body.output
@@ -64,6 +65,11 @@ export interface RouteConfigOptionsBody {
   accepts?: RouteContentType | RouteContentType[] | string | string[];
 
   /**
+   * A mime type string overriding the 'Content-Type' header value received.
+   */
+  override?: string;
+
+  /**
    * Limits the size of incoming payloads to the specified byte count. Allowing very large payloads may cause the server to run out of memory.
    *
    * Default value: The one set in the kibana.yml config file under the parameter `server.maxPayload`.
@@ -81,7 +87,7 @@ export interface RouteConfigOptionsBody {
    *
    * Default value: 'data', unless no validation.body is provided in the route definition. In that case the default is 'stream' to alleviate memory pressure.
    */
-  output?: typeof validBodyOutput[number];
+  output?: (typeof validBodyOutput)[number];
 
   /**
    * Determines if the incoming payload is processed or presented raw. Available values:
@@ -94,6 +100,16 @@ export interface RouteConfigOptionsBody {
    */
   parse?: boolean | 'gunzip';
 }
+
+/**
+ * Route access level.
+ *
+ * Public routes are stable and intended for external access and are subject to
+ * stricter change management and have long term maintenance windows.
+ *
+ * @remark as of 9.0, access to internal routes is restricted by default. See https://github.com/elastic/kibana/issues/163654.
+ */
+export type RouteAccess = 'public' | 'internal';
 
 /**
  * Additional route options.
@@ -126,11 +142,9 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *           In the future, may require an incomming request to contain a specified header.
    * - internal. The route is internal and intended for internal access only.
    *
-   * If not declared, infers access from route path:
-   * - access =`internal` for '/internal' route path prefix
-   * - access = `public` for everything else
+   * Defaults to 'internal' If not declared,
    */
-  access?: 'public' | 'internal';
+  access?: RouteAccess;
 
   /**
    * Additional metadata tag strings to attach to the route.
@@ -156,6 +170,52 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
      */
     idleSocket?: number;
   };
+
+  /**
+   * Short summary of this route. Required for all routes used in OAS documentation.
+   *
+   * @example
+   * ```ts
+   * router.get({
+   *  path: '/api/foo/{id}',
+   *  access: 'public',
+   *  summary: `Get foo resources for an ID`,
+   * })
+   * ```
+   */
+  summary?: string;
+
+  /**
+   * Optional API description, which supports [CommonMark](https://spec.commonmark.org) markdown formatting
+   *
+   * @example
+   * ```ts
+   * router.get({
+   *  path: '/api/foo/{id}',
+   *  access: 'public',
+   *  summary: `Get foo resources for an ID`,
+   *  description: `Foo resources require **X** and **Y** `read` permissions to access.`,
+   * })
+   * ```
+   */
+  description?: string;
+
+  /**
+   * Setting this to `true` declares this route to be deprecated. Consumers SHOULD
+   * refrain from usage of this route.
+   *
+   * @remarks This will be surfaced in OAS documentation.
+   */
+  deprecated?: boolean;
+
+  /**
+   * Release version or date that this route will be removed
+   * Use with `deprecated: true`
+   *
+   * @remarks This will be surfaced in OAS documentation.
+   * @example 9.0.0
+   */
+  discontinued?: string;
 }
 
 /**
@@ -234,7 +294,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * });
    * ```
    */
-  validate: RouteValidatorFullConfig<P, Q, B> | false;
+  validate: RouteValidator<P, Q, B> | (() => RouteValidator<P, Q, B>) | false;
 
   /**
    * Additional route options {@link RouteConfigOptions}.

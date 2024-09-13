@@ -5,15 +5,39 @@
  * 2.0.
  */
 
+import type { ResultLinks } from '../../common/app';
 import { lazyLoadModules } from '../lazy_load_bundle';
-import type { FileDataVisualizerSpec, IndexDataVisualizerSpec } from '../application';
+import type {
+  DataDriftSpec,
+  FileDataVisualizerSpec,
+  IndexDataVisualizerSpec,
+} from '../application';
 
-export async function getFileDataVisualizerComponent(): Promise<() => FileDataVisualizerSpec> {
-  const modules = await lazyLoadModules();
-  return () => modules.FileDataVisualizer;
+export interface SpecWithLinks<T> {
+  resultLinks: ResultLinks;
+  component: T;
 }
 
-export async function getIndexDataVisualizerComponent(): Promise<() => IndexDataVisualizerSpec> {
-  const modules = await lazyLoadModules();
-  return () => modules.IndexDataVisualizer;
+export function getComponents(resultLinks: ResultLinks) {
+  async function getFileDataVisualizerComponent(): Promise<
+    () => SpecWithLinks<FileDataVisualizerSpec>
+  > {
+    const modules = await lazyLoadModules(resultLinks);
+    return () => ({ component: modules.FileDataVisualizer, resultLinks });
+  }
+
+  async function getIndexDataVisualizerComponent(): Promise<() => IndexDataVisualizerSpec> {
+    const modules = await lazyLoadModules(resultLinks);
+    return () => modules.IndexDataVisualizer;
+  }
+
+  async function getDataDriftComponent(): Promise<() => DataDriftSpec> {
+    const modules = await lazyLoadModules(resultLinks);
+    return () => modules.DataDrift;
+  }
+  return {
+    getFileDataVisualizerComponent,
+    getIndexDataVisualizerComponent,
+    getDataDriftComponent,
+  };
 }

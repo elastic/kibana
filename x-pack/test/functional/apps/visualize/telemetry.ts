@@ -14,7 +14,7 @@ interface UiCounterEvent {
 }
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
+  const { dashboard, timePicker } = getPageObjects(['dashboard', 'timePicker']);
 
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
@@ -32,12 +32,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         `x-pack/test/functional/fixtures/kbn_archiver/dashboard/with_by_value_visualizations`
       );
+      await kibanaServer.uiSettings.update({
+        'histogram:maxBars': 100,
+        'visualization:visualize:legacyHeatmapChartsLibrary': true,
+      });
 
       await retry.try(async () => {
-        await PageObjects.common.navigateToApp('dashboard');
-        await PageObjects.dashboard.loadSavedDashboard('visualizations');
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('visualizations');
+        await timePicker.setDefaultAbsoluteRange();
+        await dashboard.waitForRenderComplete();
 
         uiCounterEvents = await usageCollection.getUICounterEvents();
 
@@ -49,6 +53,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/dashboard/with_by_value_visualizations'
       );
+      await kibanaServer.uiSettings.update({
+        'histogram:maxBars': 1000,
+        'visualization:visualize:legacyHeatmapChartsLibrary': false,
+      });
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
@@ -73,16 +81,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         checkTelemetry(`render_lens_${i}`));
     });
 
-    describe('should render visualization once', async () => {
+    describe('should render visualization once', () => {
       let initialRenderCountMap: Record<string, number> = {};
       let afterRefreshRenderCountMap: Record<string, number> = {};
 
       before(async function () {
-        const sharedItemsCount = Number(await PageObjects.dashboard.getSharedItemsCount());
+        const sharedItemsCount = Number(await dashboard.getSharedItemsCount());
         initialRenderCountMap = await renderable.getRenderCount(sharedItemsCount);
 
         await queryBar.clickQuerySubmitButton();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
 
         afterRefreshRenderCountMap = await renderable.getRenderCount(sharedItemsCount);
       });

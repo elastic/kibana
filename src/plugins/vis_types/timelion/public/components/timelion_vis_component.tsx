@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo, useRef } from 'react';
@@ -17,6 +18,9 @@ import {
   LegendPositionConfig,
   LayoutDirection,
   Placement,
+  Tooltip,
+  LegendValue,
+  BrushEndListener,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
@@ -25,6 +29,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
 import {
@@ -111,15 +116,13 @@ export const TimelionVisComponent = ({
   const chartRef = useRef<Chart>(null);
   const chart = seriesList.list;
   const chartsService = getCharts();
-
-  const chartTheme = chartsService.theme.useChartsTheme();
   const chartBaseTheme = chartsService.theme.useChartsBaseTheme();
 
   const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
     isDateHistogram: true,
   });
 
-  const brushEndListener = useCallback(
+  const brushEndListener = useCallback<BrushEndListener>(
     ({ x }) => {
       if (!x) {
         return;
@@ -198,26 +201,26 @@ export const TimelionVisComponent = ({
         </EuiTitle>
       )}
       <Chart ref={chartRef} renderer="canvas" size={{ width: '100%' }}>
+        <Tooltip
+          snap={true}
+          headerFormatter={({ value }) => tickFormat(value)}
+          type={TooltipType.VerticalCursor}
+        />
         <Settings
           debugState={window._echDebugStateFlag ?? false}
           onBrushEnd={brushEndListener}
           showLegend={legend.showLegend}
-          showLegendExtra={true}
+          legendValues={[LegendValue.CurrentAndLastValue]}
           legendPosition={legend.legendPosition}
           onRenderChange={onRenderChange}
           onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
           externalPointerEvents={{
             tooltip: { visible: syncTooltips, placement: Placement.Right },
           }}
-          theme={chartTheme}
           baseTheme={chartBaseTheme}
-          tooltip={{
-            snap: true,
-            headerFormatter: ({ value }) => tickFormat(value),
-            type: TooltipType.VerticalCursor,
-          }}
           ariaLabel={ariaLabel}
           ariaUseDefaultSummary={!ariaLabel}
+          locale={i18n.getLocale()}
         />
 
         <Axis

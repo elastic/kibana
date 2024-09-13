@@ -6,7 +6,7 @@
  */
 
 import type { Client, estypes } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type {
   IndexName,
@@ -15,15 +15,21 @@ import type {
   MappingTypeMapping,
   Name,
 } from '@elastic/elasticsearch/lib/api/types';
-import { wrapErrorIfNeeded } from './utils';
+import type { KbnClient } from '@kbn/test';
+import { isServerlessKibanaFlavor } from '../utils/kibana_status';
+import { fetchFleetLatestAvailableAgentVersion } from '../utils/fetch_fleet_version';
+import { createToolingLogger, wrapErrorIfNeeded } from './utils';
 import { DEFAULT_ALERTS_INDEX } from '../../constants';
 import { EndpointRuleAlertGenerator } from '../data_generators/endpoint_rule_alert_generator';
 
 export interface IndexEndpointRuleAlertsOptions {
   esClient: Client;
   endpointAgentId: string;
+  endpointHostname?: string;
+  endpointIsolated?: boolean;
   count?: number;
   log?: ToolingLog;
+  kbnClient?: KbnClient;
 }
 
 export interface IndexedEndpointRuleAlerts {
@@ -39,25 +45,43 @@ export interface DeletedIndexedEndpointRuleAlerts {
  * Loads alerts for Endpoint directly into the internal index that the Endpoint Rule would have
  * written them to for a given endpoint
  * @param esClient
+ * @param kbnClient
  * @param endpointAgentId
+ * @param endpointHostname
+ * @param endpointIsolated
  * @param count
  * @param log
  */
 export const indexEndpointRuleAlerts = async ({
   esClient,
+  kbnClient,
   endpointAgentId,
+  endpointHostname,
+  endpointIsolated,
   count = 1,
-  log = new ToolingLog(),
+  log = createToolingLogger(),
 }: IndexEndpointRuleAlertsOptions): Promise<IndexedEndpointRuleAlerts> => {
   log.verbose(`Indexing ${count} endpoint rule alerts`);
 
   await ensureEndpointRuleAlertsIndexExists(esClient);
 
+  let version = kibanaPackageJson.version;
+  if (kbnClient) {
+    const isServerless = await isServerlessKibanaFlavor(kbnClient);
+    if (isServerless) {
+      version = await fetchFleetLatestAvailableAgentVersion(kbnClient);
+    }
+  }
+
   const alertsGenerator = new EndpointRuleAlertGenerator();
   const indexedAlerts: estypes.IndexResponse[] = [];
 
   for (let n = 0; n < count; n++) {
-    const alert = alertsGenerator.generate({ agent: { id: endpointAgentId } });
+    const alert = alertsGenerator.generate({
+      agent: { id: endpointAgentId, version },
+      host: { hostname: endpointHostname },
+      ...(endpointIsolated ? { Endpoint: { state: { isolation: endpointIsolated } } } : {}),
+    });
     const indexedAlert = await esClient.index({
       index: `${DEFAULT_ALERTS_INDEX}-default`,
       refresh: 'wait_for',
@@ -78,7 +102,7 @@ export const indexEndpointRuleAlerts = async ({
 export const deleteIndexedEndpointRuleAlerts = async (
   esClient: Client,
   indexedAlerts: IndexedEndpointRuleAlerts['alerts'],
-  log = new ToolingLog()
+  log = createToolingLogger()
 ): Promise<DeletedIndexedEndpointRuleAlerts> => {
   let response: estypes.BulkResponse = {
     took: 0,
@@ -117,14 +141,17 @@ const ensureEndpointRuleAlertsIndexExists = async (esClient: Client): Promise<vo
     indexMappings.mappings._meta.kibana.version = kibanaPackageJson.version;
   }
 
+  const doesIndexExist = await esClient.indices.exists({ index: indexMappings.index });
+
+  if (doesIndexExist) {
+    return;
+  }
   try {
     await esClient.indices.create({
       index: indexMappings.index,
-      body: {
-        settings: indexMappings.settings,
-        mappings: indexMappings.mappings,
-        aliases: indexMappings.aliases,
-      },
+      settings: indexMappings.settings,
+      mappings: indexMappings.mappings,
+      aliases: indexMappings.aliases,
     });
   } catch (error) {
     // ignore error that indicate index is already created
@@ -5475,10 +5502,6 @@ const getAlertsIndexMappings = (): IndexMappings => {
         index: {
           auto_expand_replicas: '0-1',
           hidden: 'true',
-          lifecycle: {
-            name: '.alerts-ilm-policy',
-            rollover_alias: '.alerts-security.alerts-default',
-          },
           mapping: {
             total_fields: {
               limit: 1900,

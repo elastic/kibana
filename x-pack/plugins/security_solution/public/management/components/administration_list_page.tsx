@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { PropsWithChildren } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import {
   EuiPageHeader,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
@@ -29,7 +28,9 @@ interface AdministrationListPageProps {
   headerBackComponent?: React.ReactNode;
 }
 
-export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
+export const AdministrationListPage = memo<
+  PropsWithChildren<AdministrationListPageProps & CommonProps>
+>(
   ({
     title,
     subtitle,
@@ -77,16 +78,9 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
             <EuiSpacer size="l" />
           </>
         )}
-
-        <EuiPageContent
-          hasBorder={false}
-          hasShadow={false}
-          paddingSize="none"
-          color="transparent"
-          borderRadius="none"
-        >
-          <EuiPageContentBody restrictWidth={restrictWidth}>{children}</EuiPageContentBody>
-        </EuiPageContent>
+        <EuiPageSection paddingSize="none" color="transparent" restrictWidth={restrictWidth}>
+          {children}
+        </EuiPageSection>
       </div>
     );
   }

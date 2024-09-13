@@ -1,31 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Observable, ReplaySubject, Subscription } from 'rxjs';
 import {
-  map,
-  distinctUntilChanged,
-  filter,
-  debounceTime,
-  timeoutWith,
-  startWith,
-} from 'rxjs/operators';
-import { sortBy } from 'lodash';
+  BehaviorSubject,
+  merge,
+  Observable,
+  ReplaySubject,
+  Subject,
+  type Subscription,
+} from 'rxjs';
+import { map, distinctUntilChanged, filter, tap, debounceTime, takeUntil, delay } from 'rxjs';
 import { isDeepStrictEqual } from 'util';
 import type { PluginName } from '@kbn/core-base-common';
 import { ServiceStatusLevels, type CoreStatus, type ServiceStatus } from '@kbn/core-status-common';
 import { getSummaryStatus } from './get_summary_status';
+import type { PluginStatus } from './types';
 
 const STATUS_TIMEOUT_MS = 30 * 1000; // 30 seconds
 
 const defaultStatus: ServiceStatus = {
   level: ServiceStatusLevels.unavailable,
-  summary: `Status check timed out after ${STATUS_TIMEOUT_MS / 1000}s`,
+  summary: 'Status not yet available',
 };
 
 export interface Deps {
@@ -36,16 +37,15 @@ export interface Deps {
 interface PluginData {
   [name: PluginName]: {
     name: PluginName;
-    depth: number; // depth of this plugin in the dependency tree (root plugins will have depth = 1)
     dependencies: PluginName[];
     reverseDependencies: PluginName[];
-    reportedStatus?: ServiceStatus;
-    derivedStatus: ServiceStatus;
+    reportedStatus?: PluginStatus;
+    derivedStatus: PluginStatus;
   };
 }
 
-interface PluginStatus {
-  [name: PluginName]: ServiceStatus;
+interface PluginsStatus {
+  [name: PluginName]: PluginStatus;
 }
 
 interface ReportedStatusSubscriptions {
@@ -53,28 +53,38 @@ interface ReportedStatusSubscriptions {
 }
 
 export class PluginsStatusService {
-  private coreStatus: CoreStatus = { elasticsearch: defaultStatus, savedObjects: defaultStatus };
+  private coreStatus: CoreStatus = {
+    elasticsearch: { ...defaultStatus },
+    savedObjects: { ...defaultStatus },
+  };
   private pluginData: PluginData;
   private rootPlugins: PluginName[]; // root plugins are those that do not have any dependencies
   private orderedPluginNames: PluginName[];
+  private start$ = new Subject<void>();
   private pluginData$ = new ReplaySubject<PluginData>(1);
-  private pluginStatus: PluginStatus = {};
-  private pluginStatus$ = new BehaviorSubject<PluginStatus>(this.pluginStatus);
+  private pluginStatus: PluginsStatus = {};
+  private pluginStatus$ = new BehaviorSubject<PluginsStatus>(this.pluginStatus);
   private reportedStatusSubscriptions: ReportedStatusSubscriptions = {};
-  private isReportingStatus: Record<PluginName, boolean> = {};
+  private reportingStatus: Record<PluginName, boolean> = {};
   private newRegistrationsAllowed = true;
   private coreSubscription: Subscription;
 
   constructor(deps: Deps, private readonly statusTimeoutMs: number = STATUS_TIMEOUT_MS) {
     this.pluginData = this.initPluginData(deps.pluginDependencies);
     this.rootPlugins = this.getRootPlugins();
-    this.orderedPluginNames = this.getOrderedPluginNames();
+    // plugin dependencies keys are already sorted
+    this.orderedPluginNames = [...deps.pluginDependencies.keys()];
 
     this.coreSubscription = deps.core$
-      .pipe(debounceTime(10))
-      .subscribe((coreStatus: CoreStatus) => {
-        this.coreStatus = coreStatus;
-        this.updateRootPluginsStatuses();
+      .pipe(
+        debounceTime(10),
+        tap((coreStatus) => (this.coreStatus = coreStatus)),
+        map((serviceStatuses) => getSummaryStatus({ serviceStatuses })),
+        // no need to recalculate plugins statuses if core status hasn't changed
+        distinctUntilChanged((previous, current) => previous.level === current.level)
+      )
+      .subscribe((derivedCoreStatus: ServiceStatus) => {
+        this.updateRootPluginsStatuses(derivedCoreStatus);
         this.updateDependantStatuses(this.rootPlugins);
         this.emitCurrentStatus();
       });
@@ -93,60 +103,71 @@ export class PluginsStatusService {
       );
     }
 
-    this.isReportingStatus[plugin] = true;
+    this.reportingStatus[plugin] = true;
     // unsubscribe from any previous subscriptions. Ideally plugins should register a status Observable only once
     this.reportedStatusSubscriptions[plugin]?.unsubscribe();
 
     // delete any derived statuses calculated before the custom status Observable was registered
     delete this.pluginStatus[plugin];
 
-    this.reportedStatusSubscriptions[plugin] = status$
-      // Set a timeout for externally-defined status Observables
-      .pipe(
-        timeoutWith(this.statusTimeoutMs, status$.pipe(startWith(defaultStatus))),
-        distinctUntilChanged()
-      )
+    const firstEmissionTimeout$ = this.start$.pipe(
+      delay(this.statusTimeoutMs),
+      map(() => ({
+        level: ServiceStatusLevels.unavailable,
+        summary: `Status check timed out after ${
+          this.statusTimeoutMs < 1000
+            ? `${this.statusTimeoutMs}ms`
+            : `${this.statusTimeoutMs / 1000}s`
+        }`,
+      })),
+      takeUntil(status$)
+    );
+
+    this.reportedStatusSubscriptions[plugin] = merge(firstEmissionTimeout$, status$)
+      .pipe(distinctUntilChanged())
       .subscribe((status) => {
-        const levelChanged = this.updatePluginReportedStatus(plugin, status);
+        const { levelChanged, summaryChanged } = this.updatePluginReportedStatus(plugin, status);
 
         if (levelChanged) {
           this.updateDependantStatuses([plugin]);
         }
 
-        this.emitCurrentStatus();
+        if (levelChanged || summaryChanged) {
+          this.emitCurrentStatus();
+        }
       });
   }
 
-  /**
-   * Prevent plugins from registering status Observables
-   */
-  public blockNewRegistrations() {
+  public start() {
+    // Prevent plugins from registering status Observables
     this.newRegistrationsAllowed = false;
+    this.start$.next();
+    this.start$.complete();
   }
 
   /**
    * Obtain an Observable of the status of all the plugins
-   * @returns {Observable<Record<PluginName, ServiceStatus>>} An Observable that will yield the current status of all plugins
+   * @returns {Observable<Record<PluginName, PluginStatus>>} An Observable that will yield the current status of all plugins
    */
-  public getAll$(): Observable<Record<PluginName, ServiceStatus>> {
+  public getAll$(): Observable<Record<PluginName, PluginStatus>> {
     return this.pluginStatus$.asObservable().pipe(
       // do not emit until we have a status for all plugins
       filter((all) => Object.keys(all).length === this.orderedPluginNames.length),
-      distinctUntilChanged<Record<PluginName, ServiceStatus>>(isDeepStrictEqual)
+      distinctUntilChanged<Record<PluginName, PluginStatus>>(isDeepStrictEqual)
     );
   }
 
   /**
    * Obtain an Observable of the status of the dependencies of the given plugin
    * @param {PluginName} plugin the name of the plugin whose dependencies' status must be retreived
-   * @returns {Observable<Record<PluginName, ServiceStatus>>} An Observable that will yield the current status of the plugin's dependencies
+   * @returns {Observable<Record<PluginName, PluginStatus>>} An Observable that will yield the current status of the plugin's dependencies
    */
-  public getDependenciesStatus$(plugin: PluginName): Observable<Record<PluginName, ServiceStatus>> {
+  public getDependenciesStatus$(plugin: PluginName): Observable<Record<PluginName, PluginStatus>> {
     const directDependencies = this.pluginData[plugin].dependencies;
 
     return this.getAll$().pipe(
       map((allStatus) => {
-        const dependenciesStatus: Record<PluginName, ServiceStatus> = {};
+        const dependenciesStatus: Record<PluginName, PluginStatus> = {};
         directDependencies.forEach((dep) => (dependenciesStatus[dep] = allStatus[dep]));
         return dependenciesStatus;
       }),
@@ -157,13 +178,13 @@ export class PluginsStatusService {
   /**
    * Obtain an Observable of the derived status of the given plugin
    * @param {PluginName} plugin the name of the plugin whose derived status must be retrieved
-   * @returns {Observable<ServiceStatus>} An Observable that will yield the derived status of the plugin
+   * @returns {Observable<PluginStatus>} An Observable that will yield the derived status of the plugin
    */
-  public getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus> {
+  public getDerivedStatus$(plugin: PluginName): Observable<PluginStatus> {
     return this.pluginData$.asObservable().pipe(
       map((pluginData) => pluginData[plugin]?.derivedStatus),
-      filter((status: ServiceStatus | undefined): status is ServiceStatus => !!status),
-      distinctUntilChanged<ServiceStatus>(isDeepStrictEqual)
+      filter((status: PluginStatus | undefined): status is PluginStatus => !!status),
+      distinctUntilChanged<PluginStatus>(isDeepStrictEqual)
     );
   }
 
@@ -187,23 +208,20 @@ export class PluginsStatusService {
   private initPluginData(pluginDependencies: ReadonlyMap<PluginName, PluginName[]>): PluginData {
     const pluginData: PluginData = {};
 
-    if (pluginDependencies) {
-      pluginDependencies.forEach((dependencies, name) => {
-        pluginData[name] = {
-          name,
-          depth: 0,
-          dependencies,
-          reverseDependencies: [],
-          derivedStatus: defaultStatus,
-        };
-      });
+    pluginDependencies.forEach((dependencies, name) => {
+      pluginData[name] = {
+        name,
+        dependencies,
+        reverseDependencies: [],
+        derivedStatus: defaultStatus,
+      };
+    });
 
-      pluginDependencies.forEach((dependencies, name) => {
-        dependencies.forEach((dependency) => {
-          pluginData[dependency].reverseDependencies.push(name);
-        });
+    pluginDependencies.forEach((dependencies, name) => {
+      dependencies.forEach((dependency) => {
+        pluginData[dependency].reverseDependencies.push(name);
       });
-    }
+    });
 
     return pluginData;
   }
@@ -220,49 +238,15 @@ export class PluginsStatusService {
   }
 
   /**
-   * Obtain a list of plugins names, ordered by depth.
-   * @see {calculateDepthRecursive}
-   * @returns {PluginName[]} a list of plugins, ordered by depth + name
-   */
-  private getOrderedPluginNames(): PluginName[] {
-    this.rootPlugins.forEach((plugin) => {
-      this.calculateDepthRecursive(plugin, 1);
-    });
-
-    return sortBy(Object.values(this.pluginData), ['depth', 'name']).map(({ name }) => name);
-  }
-
-  /**
-   * Calculate the depth of the given plugin, knowing that it's has at least the specified depth
-   * The depth of a plugin is determined by how many levels of dependencies the plugin has above it.
-   * We define root plugins as depth = 1, plugins that only depend on root plugins will have depth = 2
-   * and so on so forth
-   * @param {PluginName} plugin the name of the plugin whose depth must be calculated
-   * @param {number} depth the minimum depth that we know for sure this plugin has
-   */
-  private calculateDepthRecursive(plugin: PluginName, depth: number): void {
-    const pluginData = this.pluginData[plugin];
-    pluginData.depth = Math.max(pluginData.depth, depth);
-    const newDepth = depth + 1;
-    pluginData.reverseDependencies.forEach((revDep) =>
-      this.calculateDepthRecursive(revDep, newDepth)
-    );
-  }
-
-  /**
    * Updates the root plugins statuses according to the current core services status
    */
-  private updateRootPluginsStatuses(): void {
-    const derivedStatus = getSummaryStatus(Object.entries(this.coreStatus), {
-      allAvailableSummary: `All dependencies are available`,
-    });
-
+  private updateRootPluginsStatuses(derivedCoreStatus: ServiceStatus): void {
     // note that the derived status is the same for all root plugins
-    this.rootPlugins.forEach((plugin) => {
-      this.pluginData[plugin].derivedStatus = derivedStatus;
-      if (!this.isReportingStatus[plugin]) {
+    this.rootPlugins.forEach((pluginName) => {
+      this.pluginData[pluginName].derivedStatus = derivedCoreStatus;
+      if (!this.reportingStatus[pluginName]) {
         // this root plugin has NOT registered any status Observable. Thus, its status is derived from core
-        this.pluginStatus[plugin] = derivedStatus;
+        this.pluginStatus[pluginName] = derivedCoreStatus;
       }
     });
   }
@@ -285,7 +269,7 @@ export class PluginsStatusService {
       const current = this.orderedPluginNames[i];
       if (toCheck.has(current)) {
         // update the current plugin status
-        this.updatePluginStatus(current);
+        this.updatePluginsStatus(current);
         // flag all its reverse dependencies to be checked
         // TODO flag them only IF the status of this plugin has changed, seems to break some tests
         this.pluginData[current].reverseDependencies.forEach((revDep) => toCheck.add(revDep));
@@ -298,11 +282,11 @@ export class PluginsStatusService {
    * Optionally, if the plugin has not registered a custom status Observable, update its "current" status as well
    * @param {PluginName} plugin The name of the plugin to be updated
    */
-  private updatePluginStatus(plugin: PluginName): void {
-    const newStatus = this.determinePluginStatus(plugin);
+  private updatePluginsStatus(plugin: PluginName): void {
+    const newStatus = this.determineDerivedStatus(plugin);
     this.pluginData[plugin].derivedStatus = newStatus;
 
-    if (!this.isReportingStatus[plugin]) {
+    if (!this.reportingStatus[plugin]) {
       // this plugin has NOT registered any status Observable.
       // Thus, its status is derived from its dependencies + core
       this.pluginStatus[plugin] = newStatus;
@@ -310,45 +294,53 @@ export class PluginsStatusService {
   }
 
   /**
-   * Deterime the current plugin status, taking into account its reported status, its derived status
-   * and the status of the core services
-   * @param {PluginName} plugin the name of the plugin whose status must be determined
-   * @returns {ServiceStatus} The status of the plugin
+   * Determine the plugin's derived status (taking into account dependencies and core services)
+   * @param {PluginName} pluginName the name of the plugin whose status must be determined
+   * @returns {PluginStatus} The status of the plugin
    */
-  private determinePluginStatus(plugin: PluginName): ServiceStatus {
-    const coreStatus: Array<[PluginName, ServiceStatus]> = Object.entries(this.coreStatus);
-    const newLocal = this.pluginData[plugin];
-
-    let depsStatus: Array<[PluginName, ServiceStatus]> = [];
-
-    if (Object.keys(this.isReportingStatus).length) {
+  private determineDerivedStatus(pluginName: PluginName): PluginStatus {
+    if (Object.keys(this.reportingStatus).length) {
       // if at least one plugin has registered a status Observable... take into account plugin dependencies
-      depsStatus = newLocal.dependencies.map((dependency) => [
-        dependency,
-        this.pluginData[dependency].reportedStatus || this.pluginData[dependency].derivedStatus,
-      ]);
+      const pluginData = this.pluginData[pluginName];
+
+      const dependenciesStatuses = Object.fromEntries(
+        pluginData.dependencies.map((dependency) => [
+          dependency,
+          this.pluginData[dependency].reportedStatus ?? this.pluginData[dependency].derivedStatus,
+        ])
+      );
+      return getSummaryStatus({
+        serviceStatuses: this.coreStatus,
+        pluginStatuses: dependenciesStatuses,
+      });
+    } else {
+      // no plugins have registered a status Observable... infer status from Core services only
+      return getSummaryStatus({
+        serviceStatuses: this.coreStatus,
+      });
     }
-
-    const newStatus = getSummaryStatus([...coreStatus, ...depsStatus], {
-      allAvailableSummary: `All dependencies are available`,
-    });
-
-    return newStatus;
   }
 
   /**
-   * Updates the reported status for the given plugin, along with the status of its dependencies tree.
-   * @param {PluginName} plugin The name of the plugin whose reported status must be updated
-   * @param {ServiceStatus} reportedStatus The newly reported status for that plugin
-   * @return {boolean} true if the level of the reported status changed
+   * Updates the reported status for the given plugin.
+   * @param {PluginName} pluginName The name of the plugin whose reported status must be updated
+   * @param {ServiceStatus} status The newly reported status for that plugin
+   * @return {Object} indicating whether the level and/or the summary have changed
    */
-  private updatePluginReportedStatus(plugin: PluginName, reportedStatus: ServiceStatus): boolean {
-    const previousReportedStatus = this.pluginData[plugin].reportedStatus;
+  private updatePluginReportedStatus(pluginName: PluginName, status: ServiceStatus) {
+    const previousReportedStatus = this.pluginData[pluginName].reportedStatus;
 
-    this.pluginData[plugin].reportedStatus = reportedStatus;
-    this.pluginStatus[plugin] = reportedStatus;
+    const reportedStatus: PluginStatus = {
+      ...status,
+      reported: true,
+    };
+    this.pluginData[pluginName].reportedStatus = reportedStatus;
+    this.pluginStatus[pluginName] = reportedStatus;
 
-    return previousReportedStatus?.level !== reportedStatus.level;
+    return {
+      levelChanged: previousReportedStatus?.level !== reportedStatus.level,
+      summaryChanged: previousReportedStatus?.summary !== reportedStatus.summary,
+    };
   }
 
   /**

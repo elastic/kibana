@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DataView, DataViewField, METRIC_TYPES } from '@kbn/data-plugin/common';
@@ -12,6 +13,7 @@ import { Operations } from '../../constants';
 import { isMetricWithField, getStdDeviationFormula, ExtendedColumnConverterArgs } from '../convert';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from '../convert/supported_metrics';
 import {
+  getAggIdAndValue,
   getFieldNameFromField,
   getMetricFromParentPipelineAgg,
   isPercentileAgg,
@@ -125,7 +127,7 @@ const getFormulaForPercentile = (
   selector: string,
   reducedTimeRange?: string
 ) => {
-  const percentile = Number(agg.aggId?.split('.')[1]);
+  const percentile = Number(getAggIdAndValue(agg.aggId)[1]);
   const op = SUPPORTED_METRICS[agg.aggType];
   if (!isValidAgg(visType, agg, dataView) || !op) {
     return null;

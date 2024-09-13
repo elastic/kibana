@@ -1,0 +1,16 @@
+openapi: 3.0.0
+info:
+  title: New Terms Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    NewTermsFields:
+      type: array
+      items:
+        type: string
+      minItems: 1
+      maxItems: 3
+    HistoryWindowStart:
+      $ref: '../../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'

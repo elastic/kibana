@@ -11,10 +11,9 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
       >
         <EuiTitle>
           <h2>
-            <FormattedMessage
-              defaultMessage="Usage Data"
+            <MemoizedFormattedMessage
+              defaultMessage="Usage collection"
               id="telemetry.usageDataTitle"
-              values={Object {}}
             />
           </h2>
         </EuiTitle>
@@ -24,16 +23,15 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
           color="primary"
           iconType="spacesApp"
           title={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
               id="telemetry.callout.appliesSettingTitle"
               values={
                 Object {
                   "allOfKibanaText": <strong>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="all of Kibana"
                       id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
-                      values={Object {}}
                     />
                   </strong>,
                 }
@@ -44,97 +42,96 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
         <EuiSpacer
           size="s"
         />
-        <lazy
-          docLinks={
-            Object {
-              "legal": Object {
-                "privacyStatement": "https://some-host/some-url",
-              },
-            }
-          }
-          enableSaving={true}
-          handleChange={[Function]}
-          loading={false}
-          setting={
-            Object {
-              "ariaName": "Provide usage data",
-              "category": Array [],
-              "defVal": true,
-              "description": <React.Fragment>
-                <p>
-                  <FormattedMessage
-                    defaultMessage="Enabling data usage collection helps us manage and improve our products and services. See our {privacyStatementLink} for more details."
-                    id="telemetry.telemetryConfigAndLinkDescription"
-                    values={
-                      Object {
-                        "privacyStatementLink": <EuiLink
-                          href="https://some-host/some-url"
-                          target="_blank"
-                        >
-                          <FormattedMessage
-                            defaultMessage="Privacy Statement"
-                            id="telemetry.readOurUsageDataPrivacyStatementLinkText"
-                            values={Object {}}
-                          />
-                        </EuiLink>,
+        <FieldRowProvider
+          showDanger={[Function]}
+          validateChange={[Function]}
+        >
+          <ForwardRef
+            field={
+              Object {
+                "ariaAttributes": Object {
+                  "ariaLabel": "Share usage with Elastic",
+                },
+                "categories": Array [
+                  "general",
+                ],
+                "defaultValue": true,
+                "defaultValueDisplay": "true",
+                "deprecation": undefined,
+                "description": <React.Fragment>
+                  <p>
+                    <Memo(MemoizedFormattedMessage)
+                      defaultMessage="Enabling usage collection allows us to learn what our users are most interested in, so we can improve our products and services. Refer to our {privacyStatementLink}."
+                      id="telemetry.telemetryConfigAndLinkDescription"
+                      values={
+                        Object {
+                          "privacyStatementLink": <EuiLink
+                            href="https://some-host/some-url"
+                            target="_blank"
+                          >
+                            <Memo(MemoizedFormattedMessage)
+                              defaultMessage="Privacy Statement"
+                              id="telemetry.readOurUsageDataPrivacyStatementLinkText"
+                            />
+                          </EuiLink>,
+                        }
                       }
-                    }
-                  />
-                </p>
-                <p>
-                  <FormattedMessage
-                    defaultMessage="See examples of the {clusterData} and {securityData} that we collect."
-                    id="telemetry.seeExampleOfClusterDataAndEndpointSecuity"
-                    values={
-                      Object {
-                        "clusterData": <EuiLink
-                          data-test-id="cluster_data_example"
-                          onClick={[Function]}
-                        >
-                          <FormattedMessage
-                            defaultMessage="cluster data"
-                            id="telemetry.clusterData"
-                            values={Object {}}
-                          />
-                        </EuiLink>,
-                        "securityData": <EuiLink
-                          data-test-id="endpoint_security_example"
-                          href="https://www.elastic.co/guide/en/security/current/advanced-settings.html#telemetry-settings"
-                          target="_blank"
-                        >
-                          <FormattedMessage
-                            defaultMessage="security data"
-                            id="telemetry.securityData"
-                            values={Object {}}
-                          />
-                        </EuiLink>,
+                    />
+                  </p>
+                  <p>
+                    <Memo(MemoizedFormattedMessage)
+                      defaultMessage="See examples of the {clusterData} and {securityData} that we collect."
+                      id="telemetry.seeExampleOfClusterDataAndEndpointSecuity"
+                      values={
+                        Object {
+                          "clusterData": <EuiLink
+                            data-test-id="cluster_data_example"
+                            onClick={[Function]}
+                          >
+                            <Memo(MemoizedFormattedMessage)
+                              defaultMessage="cluster data"
+                              id="telemetry.clusterData"
+                            />
+                          </EuiLink>,
+                          "securityData": <EuiLink
+                            data-test-id="endpoint_security_example"
+                            href="https://www.elastic.co/guide/en/security/current/advanced-settings.html#telemetry-settings"
+                            target="_blank"
+                          >
+                            <Memo(MemoizedFormattedMessage)
+                              defaultMessage="security data"
+                              id="telemetry.securityData"
+                            />
+                          </EuiLink>,
+                        }
                       }
-                    }
-                  />
-                </p>
-              </React.Fragment>,
-              "displayName": "Provide usage data",
-              "isCustom": true,
-              "isOverridden": false,
-              "name": "telemetry:enabled",
-              "requiresPageReload": false,
-              "type": "boolean",
-              "value": true,
+                    />
+                  </p>
+                </React.Fragment>,
+                "displayName": "Share usage with Elastic",
+                "groupId": "Share usage with Elastic-group",
+                "id": "Usage collection",
+                "isCustom": true,
+                "isDefaultValue": true,
+                "isOverridden": false,
+                "isReadOnly": false,
+                "metric": undefined,
+                "name": "Share usage with Elastic",
+                "options": Object {
+                  "labels": Object {},
+                  "values": Array [],
+                },
+                "order": undefined,
+                "requiresPageReload": false,
+                "savedValue": true,
+                "type": "boolean",
+                "unsavedFieldId": "Usage collection-unsaved",
+              }
             }
-          }
-          toasts={
-            Object {
-              "add": [MockFunction],
-              "addDanger": [MockFunction],
-              "addError": [MockFunction],
-              "addInfo": [MockFunction],
-              "addSuccess": [MockFunction],
-              "addWarning": [MockFunction],
-              "get$": [MockFunction],
-              "remove": [MockFunction],
-            }
-          }
-        />
+            isSavingEnabled={true}
+            onFieldChange={[Function]}
+          />
+        </FieldRowProvider>
       </_EuiSplitPanelInner>
     </EuiForm>
   </_EuiSplitPanelOuter>
@@ -153,16 +150,8 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
   enableSaving={true}
   intl={
     Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
+      "$t": [Function],
+      "defaultFormats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -196,22 +185,22 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         },
         "relative": Object {
           "days": Object {
-            "units": "day",
+            "style": "long",
           },
           "hours": Object {
-            "units": "hour",
+            "style": "long",
           },
           "minutes": Object {
-            "units": "minute",
+            "style": "long",
           },
           "months": Object {
-            "units": "month",
+            "style": "long",
           },
           "seconds": Object {
-            "units": "second",
+            "style": "long",
           },
           "years": Object {
-            "units": "year",
+            "style": "long",
           },
         },
         "time": Object {
@@ -238,22 +227,38 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
           },
         },
       },
+      "defaultLocale": "en",
+      "fallbackOnEmptyString": true,
+      "formatDate": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatNumberToParts": [Function],
+      "formatPlural": [Function],
+      "formatRelativeTime": [Function],
+      "formatTime": [Function],
+      "formatTimeToParts": [Function],
+      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
         "getMessageFormat": [Function],
         "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
       },
       "locale": "en",
       "messages": Object {},
-      "now": [Function],
       "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
+      "onWarn": [Function],
+      "timeZone": undefined,
     }
   }
-  onQueryMatchChange={[MockFunction]}
   showAppliesSettingMessage={true}
   telemetryService={
     TelemetryService {
@@ -261,6 +266,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "currentKibanaVersion": "mock_kibana_version",
       "defaultConfig": Object {
         "allowChangingOptInStatus": false,
+        "appendServerlessChannelsSuffix": false,
         "banner": true,
         "labels": Object {},
         "optIn": true,
@@ -281,6 +287,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
           "register": [MockFunction],
         },
         "basePath": BasePath {
+          "assetsHrefBase": "",
           "basePath": "",
           "get": [Function],
           "prepend": [Function],
@@ -302,6 +309,9 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         "patch": [MockFunction],
         "post": [MockFunction],
         "put": [MockFunction],
+        "staticAssets": Object {
+          "getPluginAssetHref": [MockFunction],
+        },
       },
       "isScreenshotMode": false,
       "notifications": Object {

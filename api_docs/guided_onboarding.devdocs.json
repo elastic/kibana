@@ -26,9 +26,9 @@
               "(httpClient: ",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               },
               ", isCloudEnabled: boolean) => void"
@@ -47,9 +47,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
+                    "section": "def-public.HttpSetup",
                     "text": "HttpSetup"
                   }
                 ],
@@ -690,7 +690,15 @@
                 "section": "def-common.GuideStepIds",
                 "text": "GuideStepIds"
               },
-              ") => Promise<{ pluginState: ",
+              ", params?: ",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideParams",
+                "text": "GuideParams"
+              },
+              " | undefined) => Promise<{ pluginState: ",
               {
                 "pluginId": "guidedOnboarding",
                 "scope": "common",
@@ -745,6 +753,28 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.completeGuideStep.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideParams",
+                    "text": "GuideParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -930,6 +960,17 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingApi.isEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -948,7 +989,28 @@
       "path": "src/plugins/guided_onboarding/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "guidedOnboarding",
+          "id": "def-public.GuidedOnboardingPluginSetup.cloud",
+          "type": "Object",
+          "tags": [],
+          "label": "cloud",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "cloud",
+              "scope": "public",
+              "docId": "kibCloudPluginApi",
+              "section": "def-public.CloudSetup",
+              "text": "CloudSetup"
+            }
+          ],
+          "path": "src/plugins/guided_onboarding/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -1176,7 +1238,7 @@
         "label": "API_BASE_PATH",
         "description": [],
         "signature": [
-          "\"/api/guided_onboarding\""
+          "\"/internal/guided_onboarding\""
         ],
         "path": "src/plugins/guided_onboarding/common/constants.ts",
         "deprecated": false,

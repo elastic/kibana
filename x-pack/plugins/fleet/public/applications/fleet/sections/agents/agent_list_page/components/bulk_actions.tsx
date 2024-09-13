@@ -24,7 +24,7 @@ import {
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useLicense } from '../../../../hooks';
-import { LICENSE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common/constants';
+import { LICENSE_FOR_SCHEDULE_UPGRADE, AGENTS_PREFIX } from '../../../../../../../common/constants';
 import { ExperimentalFeaturesService } from '../../../../services';
 
 import { getCommonTags } from '../utils';
@@ -35,24 +35,24 @@ import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
 
 export interface Props {
-  totalAgents: number;
-  totalInactiveAgents: number;
+  nAgentsInTable: number;
+  totalManagedAgentIds: string[];
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
-  visibleAgents: Agent[];
+  agentsOnCurrentPage: Agent[];
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   allTags: string[];
   agentPolicies: AgentPolicy[];
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
-  totalAgents,
-  totalInactiveAgents,
+  nAgentsInTable,
+  totalManagedAgentIds,
   selectionMode,
   currentQuery,
   selectedAgents,
-  visibleAgents,
+  agentsOnCurrentPage,
   refreshAgents,
   allTags,
   agentPolicies,
@@ -68,19 +68,33 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
-  const [updateModalState, setUpgradeModalState] = useState({ isOpen: false, isScheduled: false });
+  const [upgradeModalState, setUpgradeModalState] = useState({
+    isOpen: false,
+    isScheduled: false,
+    isUpdating: false,
+  });
   const [isTagAddVisible, setIsTagAddVisible] = useState<boolean>(false);
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] =
     useState<boolean>(false);
 
-  // Check if user is working with only inactive agents
-  const atLeastOneActiveAgentSelected =
+  // update the query removing the "managed" agents
+  const selectionQuery = useMemo(() => {
+    if (totalManagedAgentIds.length) {
+      const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${totalManagedAgentIds
+        .map((id) => `"${id}"`)
+        .join(' or ')})`;
+      return `(${currentQuery}) AND NOT (${excludedKuery})`;
+    } else {
+      return currentQuery;
+    }
+  }, [currentQuery, totalManagedAgentIds]);
+
+  const agents = selectionMode === 'manual' ? selectedAgents : selectionQuery;
+  const agentCount =
     selectionMode === 'manual'
-      ? !!selectedAgents.find((agent) => agent.active)
-      : totalAgents > totalInactiveAgents;
-  const totalActiveAgents = totalAgents - totalInactiveAgents;
-  const agentCount = selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents;
-  const agents = selectionMode === 'manual' ? selectedAgents : currentQuery;
+      ? selectedAgents.length
+      : nAgentsInTable - totalManagedAgentIds?.length;
+
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
   const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
 
@@ -94,7 +108,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="tag" size="m" />,
-      disabled: !atLeastOneActiveAgentSelected,
       onClick: (event: any) => {
         setTagsPopoverButton((event.target as Element).closest('button')!);
         setIsTagAddVisible(!isTagAddVisible);
@@ -109,28 +122,9 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="pencil" size="m" />,
-      disabled: !atLeastOneActiveAgentSelected,
       onClick: () => {
         closeMenu();
         setIsReassignFlyoutOpen(true);
-      },
-    },
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.unenrollAgents"
-          data-test-subj="agentBulkActionsUnenroll"
-          defaultMessage="Unenroll {agentCount, plural, one {# agent} other {# agents}}"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      icon: <EuiIcon type="trash" size="m" />,
-      disabled: !atLeastOneActiveAgentSelected,
-      onClick: () => {
-        closeMenu();
-        setIsUnenrollModalOpen(true);
       },
     },
     {
@@ -145,10 +139,9 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="refresh" size="m" />,
-      disabled: !atLeastOneActiveAgentSelected,
       onClick: () => {
         closeMenu();
-        setUpgradeModalState({ isOpen: true, isScheduled: false });
+        setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: false });
       },
     },
     {
@@ -163,34 +156,68 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="timeRefresh" size="m" />,
-      disabled: !atLeastOneActiveAgentSelected || !isLicenceAllowingScheduleUpgrade,
+      disabled: !isLicenceAllowingScheduleUpgrade,
       onClick: () => {
         closeMenu();
-        setUpgradeModalState({ isOpen: true, isScheduled: true });
+        setUpgradeModalState({ isOpen: true, isScheduled: true, isUpdating: false });
       },
     },
-  ];
-
-  if (diagnosticFileUploadEnabled) {
-    menuItems.push({
+    {
       name: (
         <FormattedMessage
-          id="xpack.fleet.agentBulkActions.requestDiagnostics"
-          data-test-subj="agentBulkActionsRequestDiagnostics"
-          defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
+          id="xpack.fleet.agentBulkActions.restartUpgradeAgents"
+          data-test-subj="agentBulkActionsRestartUpgrade"
+          defaultMessage="Restart upgrade {agentCount, plural, one {# agent} other {# agents}}"
           values={{
             agentCount,
           }}
         />
       ),
-      icon: <EuiIcon type="download" size="m" />,
-      disabled: !atLeastOneActiveAgentSelected,
+      icon: <EuiIcon type="refresh" size="m" />,
       onClick: () => {
         closeMenu();
-        setIsRequestDiagnosticsModalOpen(true);
+        setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: true });
       },
-    });
-  }
+    },
+    ...(diagnosticFileUploadEnabled
+      ? [
+          {
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentBulkActions.requestDiagnostics"
+                data-test-subj="agentBulkActionsRequestDiagnostics"
+                defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
+                values={{
+                  agentCount,
+                }}
+              />
+            ),
+            icon: <EuiIcon type="download" size="m" />,
+            onClick: () => {
+              closeMenu();
+              setIsRequestDiagnosticsModalOpen(true);
+            },
+          },
+        ]
+      : []),
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.unenrollAgents"
+          data-test-subj="agentBulkActionsUnenroll"
+          defaultMessage="Unenroll {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      icon: <EuiIcon type="trash" size="m" />,
+      onClick: () => {
+        closeMenu();
+        setIsUnenrollModalOpen(true);
+      },
+    },
+  ];
 
   const panels = [
     {
@@ -200,8 +227,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   ];
 
   const getSelectedTagsFromAgents = useMemo(
-    () => getCommonTags(agents, visibleAgents ?? [], agentPolicies),
-    [agents, visibleAgents, agentPolicies]
+    () => getCommonTags(agents, agentsOnCurrentPage ?? [], agentPolicies),
+    [agents, agentsOnCurrentPage, agentPolicies]
   );
 
   return (
@@ -229,14 +256,15 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           />
         </EuiPortal>
       )}
-      {updateModalState.isOpen && (
+      {upgradeModalState.isOpen && (
         <EuiPortal>
           <AgentUpgradeAgentModal
             agents={agents}
             agentCount={agentCount}
-            isScheduled={updateModalState.isScheduled}
+            isScheduled={upgradeModalState.isScheduled}
+            isUpdating={upgradeModalState.isUpdating}
             onClose={() => {
-              setUpgradeModalState({ isOpen: false, isScheduled: false });
+              setUpgradeModalState({ isOpen: false, isScheduled: false, isUpdating: false });
               refreshAgents();
             }}
           />

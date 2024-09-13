@@ -9,24 +9,31 @@ import { ISavedObjectsRepository, SavedObjectsBulkResponse } from '@kbn/core/ser
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   ActionTypeRegistryContract as ConnectorTypeRegistryContract,
-  PreConfiguredAction as PreconfiguredConnector,
+  InMemoryConnector,
+  UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS,
 } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
+import { ExecutionResponseItem, ExecutionResponseType } from './create_execute_function';
+import { ActionsConfigurationUtilities } from './actions_config';
+import { hasReachedTheQueuedActionsLimit } from './lib/has_reached_queued_actions_limit';
 
-// This allowlist should only contain connector types that don't require API keys for
-// execution.
-const ALLOWED_CONNECTOR_TYPE_IDS = ['.email'];
 interface CreateBulkUnsecuredExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
   connectorTypeRegistry: ConnectorTypeRegistryContract;
-  preconfiguredConnectors: PreconfiguredConnector[];
+  inMemoryConnectors: InMemoryConnector[];
+  configurationUtilities: ActionsConfigurationUtilities;
 }
 
 export interface ExecuteOptions
   extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects'> {
   id: string;
+}
+
+export interface ExecutionResponse {
+  errors: boolean;
+  items: ExecutionResponseItem[];
 }
 
 interface ActionTaskParams
@@ -42,33 +49,46 @@ export type BulkUnsecuredExecutionEnqueuer<T> = (
 export function createBulkUnsecuredExecutionEnqueuerFunction({
   taskManager,
   connectorTypeRegistry,
-  preconfiguredConnectors,
-}: CreateBulkUnsecuredExecuteFunctionOptions): BulkUnsecuredExecutionEnqueuer<void> {
+  inMemoryConnectors,
+  configurationUtilities,
+}: CreateBulkUnsecuredExecuteFunctionOptions): BulkUnsecuredExecutionEnqueuer<ExecutionResponse> {
   return async function execute(
     internalSavedObjectsRepository: ISavedObjectsRepository,
     actionsToExecute: ExecuteOptions[]
   ) {
-    const connectorTypeIds: Record<string, string> = {};
-    const connectorIds = [...new Set(actionsToExecute.map((action) => action.id))];
-
-    const notPreconfiguredConnectors = connectorIds.filter(
-      (connectorId) =>
-        preconfiguredConnectors.find((connector) => connector.id === connectorId) == null
+    const { hasReachedLimit, numberOverLimit } = await hasReachedTheQueuedActionsLimit(
+      taskManager,
+      configurationUtilities,
+      actionsToExecute.length
     );
-
-    if (notPreconfiguredConnectors.length > 0) {
-      throw new Error(
-        `${notPreconfiguredConnectors.join(
-          ','
-        )} are not preconfigured connectors and can't be scheduled for unsecured actions execution`
+    let actionsOverLimit: ExecuteOptions[] = [];
+    if (hasReachedLimit) {
+      actionsOverLimit = actionsToExecute.splice(
+        actionsToExecute.length - numberOverLimit,
+        numberOverLimit
       );
     }
 
-    const connectors: PreconfiguredConnector[] = connectorIds
+    const connectorTypeIds: Record<string, string> = {};
+    const connectorIds = [...new Set(actionsToExecute.map((action) => action.id))];
+
+    const notInMemoryConnectors = connectorIds.filter(
+      (connectorId) => inMemoryConnectors.find((connector) => connector.id === connectorId) == null
+    );
+
+    if (notInMemoryConnectors.length > 0) {
+      throw new Error(
+        `${notInMemoryConnectors.join(
+          ','
+        )} are not in-memory connectors and can't be scheduled for unsecured actions execution`
+      );
+    }
+
+    const connectors: InMemoryConnector[] = connectorIds
       .map((connectorId) =>
-        preconfiguredConnectors.find((pConnector) => pConnector.id === connectorId)
+        inMemoryConnectors.find((inMemoryConnector) => inMemoryConnector.id === connectorId)
       )
-      .filter(Boolean) as PreconfiguredConnector[];
+      .filter(Boolean) as InMemoryConnector[];
 
     connectors.forEach((connector) => {
       const { id, actionTypeId } = connector;
@@ -76,7 +96,7 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
         connectorTypeRegistry.ensureActionTypeEnabled(actionTypeId);
       }
 
-      if (!ALLOWED_CONNECTOR_TYPE_IDS.includes(actionTypeId)) {
+      if (UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS.includes(actionTypeId)) {
         throw new Error(
           `${actionTypeId} actions cannot be scheduled for unsecured actions execution`
         );
@@ -132,6 +152,23 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
       };
     });
     await taskManager.bulkSchedule(taskInstances);
+
+    return {
+      errors: actionsOverLimit.length > 0,
+      items: actionsToExecute
+        .map((a) => ({
+          id: a.id,
+          response: ExecutionResponseType.SUCCESS,
+          actionTypeId: connectorTypeIds[a.id],
+        }))
+        .concat(
+          actionsOverLimit.map((a) => ({
+            id: a.id,
+            response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+            actionTypeId: connectorTypeIds[a.id],
+          }))
+        ),
+    };
   };
 }
 

@@ -4,5 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { getSecuritySolutionDashboardsRoute } from './get_security_solution_dashboards';
-export { getSecuritySolutionTagsRoute } from './get_security_solution_tags';
+import type { Logger } from '@kbn/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../types';
+import { getDashboardsByTagsRoute } from './get_dashboards_by_tags';
+
+export const registerDashboardsRoutes = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+  getDashboardsByTagsRoute(router, logger);
+};

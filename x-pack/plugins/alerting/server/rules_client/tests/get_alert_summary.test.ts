@@ -7,7 +7,12 @@
 
 import { omit, mean } from 'lodash';
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -21,6 +26,9 @@ import { SavedObject } from '@kbn/core/server';
 import { EventsFactory } from '../../lib/alert_summary_from_event_log.test';
 import { RawRule } from '../../types';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -30,6 +38,7 @@ const eventLogClient = eventLogClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -40,16 +49,24 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
+  backfillClient: backfillClientMock.create(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -69,7 +86,7 @@ const RuleIntervalSeconds = 1;
 
 const BaseRuleSavedObject: SavedObject<RawRule> = {
   id: '1',
-  type: 'alert',
+  type: RULE_SAVED_OBJECT_TYPE,
   attributes: {
     enabled: true,
     name: 'rule-name',
@@ -163,6 +180,7 @@ describe('getAlertSummary()', () => {
             "flapping": true,
             "muted": false,
             "status": "Active",
+            "tracked": true,
             "uuid": "uuid-1",
           },
           "alert-muted-no-activity": Object {
@@ -171,6 +189,7 @@ describe('getAlertSummary()', () => {
             "flapping": false,
             "muted": true,
             "status": "OK",
+            "tracked": true,
             "uuid": undefined,
           },
           "alert-previously-active": Object {
@@ -179,6 +198,7 @@ describe('getAlertSummary()', () => {
             "flapping": false,
             "muted": false,
             "status": "OK",
+            "tracked": true,
             "uuid": "uuid-2",
           },
         },
@@ -189,6 +209,7 @@ describe('getAlertSummary()', () => {
         "lastRun": "2019-02-12T21:01:32.479Z",
         "muteAll": false,
         "name": "rule-name",
+        "revision": 0,
         "ruleTypeId": "123",
         "status": "Active",
         "statusEndDate": "2019-02-12T21:01:22.479Z",
@@ -351,7 +372,7 @@ describe('getAlertSummary()', () => {
     eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(AlertSummaryFindEventsResult);
 
     const dateStart = 'ain"t no way this will get parsed as a date';
-    expect(rulesClient.getAlertSummary({ id: '1', dateStart })).rejects.toMatchInlineSnapshot(
+    await expect(rulesClient.getAlertSummary({ id: '1', dateStart })).rejects.toMatchInlineSnapshot(
       `[Error: Invalid date for parameter dateStart: "ain"t no way this will get parsed as a date"]`
     );
   });
@@ -360,7 +381,9 @@ describe('getAlertSummary()', () => {
     unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('OMG!'));
     eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(AlertSummaryFindEventsResult);
 
-    expect(rulesClient.getAlertSummary({ id: '1' })).rejects.toMatchInlineSnapshot(`[Error: OMG!]`);
+    await expect(rulesClient.getAlertSummary({ id: '1' })).rejects.toMatchInlineSnapshot(
+      `[Error: OMG!]`
+    );
   });
 
   test('findEvents throws an error', async () => {

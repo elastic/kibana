@@ -17,8 +17,758 @@
     "objects": []
   },
   "common": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.Cluster",
+        "type": "Class",
+        "tags": [],
+        "label": "Cluster",
+        "description": [],
+        "path": "packages/kbn-es/src/cluster.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.Cluster.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-es/src/cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ log = defaultLog, ssl = false }",
+                "description": [],
+                "signature": [
+                  "{ log?: ",
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  },
+                  " | undefined; ssl?: boolean | undefined; }"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.Cluster.installSource",
+            "type": "Function",
+            "tags": [],
+            "label": "installSource",
+            "description": [
+              "\nBuilds and installs ES from source"
+            ],
+            "signature": [
+              "(options: ",
+              "InstallSourceOptions",
+              ") => Promise<{ installPath: string; disableEsTmpDir: boolean; }>"
+            ],
+            "path": "packages/kbn-es/src/cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.installSource.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "InstallSourceOptions"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.Cluster.downloadSnapshot",
+            "type": "Function",
+            "tags": [],
+            "label": "downloadSnapshot",
+            "description": [
+              "\nDownload ES from a snapshot"
+            ],
+            "signature": [
+              "(options: ",
+              "DownloadSnapshotOptions",
+              ") => Promise<{ downloadPath: string; }>"
+            ],
+            "path": "packages/kbn-es/src/cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.downloadSnapshot.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "DownloadSnapshotOptions"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.Cluster.installSnapshot",
+            "type": "Function",
+            "tags": [],
+            "label": "installSnapshot",
+            "description": [
+              "\nDownload and installs ES from a snapshot"
+            ],
+            "signature": [
+              "(options: ",
+              "InstallSnapshotOptions",
+              ") => Promise<{ installPath: string; disableEsTmpDir: boolean; }>"
+            ],
+            "path": "packages/kbn-es/src/cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.installSnapshot.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "InstallSnapshotOptions"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.Cluster.installArchive",
+            "type": "Function",
+            "tags": [],
+            "label": "installArchive",
+            "description": [
+              "\nInstalls ES from a local tar"
+            ],
+            "signature": [
+              "(archivePath: string, options?: ",
+              "InstallArchiveOptions",
+              " | undefined) => Promise<{ installPath: string; disableEsTmpDir: boolean; }>"
+            ],
+            "path": "packages/kbn-es/src/cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.installArchive.$1",
+                "type": "string",
+                "tags": [],
+                "label": "archivePath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.installArchive.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "InstallArchiveOptions",
+                  " | undefined"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.Cluster.extractDataDirectory",
+            "type": "Function",
+            "tags": [],
+            "label": "extractDataDirectory",
+            "description": [
+              "\nUnpacks a tar or zip file containing the data directory for an ES cluster."
+            ],
+            "signature": [
+              "(installPath: string, archivePath: string, extractDirName?: string) => Promise<void>"
+            ],
+            "path": "packages/kbn-es/src/cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.extractDataDirectory.$1",
+                "type": "string",
+                "tags": [],
+                "label": "installPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.extractDataDirectory.$2",
+                "type": "string",
+                "tags": [],
+                "label": "archivePath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.extractDataDirectory.$3",
+                "type": "string",
+                "tags": [],
+                "label": "extractDirName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.Cluster.installPlugins",
+            "type": "Function",
+            "tags": [],
+            "label": "installPlugins",
+            "description": [
+              "\nInstalls comma separated list of ES plugins to the specified path"
+            ],
+            "signature": [
+              "(installPath: string, plugins: string, esJavaOpts?: string | undefined) => Promise<void>"
+            ],
+            "path": "packages/kbn-es/src/cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.installPlugins.$1",
+                "type": "string",
+                "tags": [],
+                "label": "installPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.installPlugins.$2",
+                "type": "string",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.installPlugins.$3",
+                "type": "string",
+                "tags": [],
+                "label": "esJavaOpts",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.Cluster.configureKeystoreWithSecureSettingsFiles",
+            "type": "Function",
+            "tags": [],
+            "label": "configureKeystoreWithSecureSettingsFiles",
+            "description": [],
+            "signature": [
+              "(installPath: string, secureSettingsFiles: string[][]) => Promise<void>"
+            ],
+            "path": "packages/kbn-es/src/cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.configureKeystoreWithSecureSettingsFiles.$1",
+                "type": "string",
+                "tags": [],
+                "label": "installPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.configureKeystoreWithSecureSettingsFiles.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "secureSettingsFiles",
+                "description": [],
+                "signature": [
+                  "string[][]"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.Cluster.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [
+              "\nStarts ES and returns resolved promise once started"
+            ],
+            "signature": [
+              "(installPath: string, options: ",
+              "EsClusterExecOptions",
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-es/src/cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.start.$1",
+                "type": "string",
+                "tags": [],
+                "label": "installPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "EsClusterExecOptions"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.Cluster.run",
+            "type": "Function",
+            "tags": [],
+            "label": "run",
+            "description": [
+              "\nStarts Elasticsearch and waits for Elasticsearch to exit"
+            ],
+            "signature": [
+              "(installPath: string, options: ",
+              "EsClusterExecOptions",
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-es/src/cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.run.$1",
+                "type": "string",
+                "tags": [],
+                "label": "installPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.run.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "EsClusterExecOptions"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.Cluster.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [
+              "\nStops ES process, if it's running"
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/kbn-es/src/cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.Cluster.kill",
+            "type": "Function",
+            "tags": [],
+            "label": "kill",
+            "description": [
+              "\nStops ES process without waiting for it to shutdown gracefully"
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/kbn-es/src/cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.Cluster.runServerless",
+            "type": "Function",
+            "tags": [],
+            "label": "runServerless",
+            "description": [
+              "\nRuns an Elasticsearch Serverless Docker cluster and returns node names"
+            ],
+            "signature": [
+              "(options: ",
+              "ServerlessOptions",
+              ") => Promise<string[]>"
+            ],
+            "path": "packages/kbn-es/src/cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.runServerless.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ServerlessOptions"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.Cluster.runDocker",
+            "type": "Function",
+            "tags": [],
+            "label": "runDocker",
+            "description": [
+              "\nRun an Elasticsearch Docker container"
+            ],
+            "signature": [
+              "(options: ",
+              "DockerOptions",
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-es/src/cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es",
+                "id": "def-common.Cluster.runDocker.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "DockerOptions"
+                ],
+                "path": "packages/kbn-es/src/cluster.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.getDockerFileMountPath",
+        "type": "Function",
+        "tags": [],
+        "label": "getDockerFileMountPath",
+        "description": [
+          "\nRemoves REPO_ROOT from hostPath. Keep the rest to avoid filename collisions.\nReturns the path where a file will be mounted inside the ES or ES serverless container.\n/root/kibana/package/foo/bar.json => /usr/share/elasticsearch/files/package/foo/bar.json"
+        ],
+        "signature": [
+          "(hostPath: string) => string"
+        ],
+        "path": "packages/kbn-es/src/utils/docker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.getDockerFileMountPath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "hostPath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-es/src/utils/docker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.maybeCreateDockerNetwork",
+        "type": "Function",
+        "tags": [],
+        "label": "maybeCreateDockerNetwork",
+        "description": [
+          "\nSetup elastic Docker network if needed"
+        ],
+        "signature": [
+          "(log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "packages/kbn-es/src/utils/docker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.maybeCreateDockerNetwork.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-es/src/utils/docker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.readRolesDescriptorsFromResource",
+        "type": "Function",
+        "tags": [],
+        "label": "readRolesDescriptorsFromResource",
+        "description": [],
+        "signature": [
+          "(resourcePath: string) => any"
+        ],
+        "path": "packages/kbn-es/src/utils/read_roles_from_resource.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.readRolesDescriptorsFromResource.$1",
+            "type": "string",
+            "tags": [],
+            "label": "resourcePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-es/src/utils/read_roles_from_resource.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.readRolesFromResource",
+        "type": "Function",
+        "tags": [],
+        "label": "readRolesFromResource",
+        "description": [],
+        "signature": [
+          "(resourcePath: string) => string[]"
+        ],
+        "path": "packages/kbn-es/src/utils/read_roles_from_resource.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.readRolesFromResource.$1",
+            "type": "string",
+            "tags": [],
+            "label": "resourcePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-es/src/utils/read_roles_from_resource.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/es",
         "id": "def-common.run",
@@ -51,11 +801,159 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.verifyDockerInstalled",
+        "type": "Function",
+        "tags": [],
+        "label": "verifyDockerInstalled",
+        "description": [
+          "\nVerify that Docker is installed locally"
+        ],
+        "signature": [
+          "(log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "packages/kbn-es/src/utils/docker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.verifyDockerInstalled.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-es/src/utils/docker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.ArtifactLicense",
+        "type": "Type",
+        "tags": [],
+        "label": "ArtifactLicense",
+        "description": [],
+        "signature": [
+          "\"basic\" | \"trial\""
+        ],
+        "path": "packages/kbn-es/src/artifact.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.ELASTIC_SERVERLESS_SUPERUSER",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_SERVERLESS_SUPERUSER",
+        "description": [],
+        "signature": [
+          "\"elastic_serverless\""
+        ],
+        "path": "packages/kbn-es/src/utils/serverless_file_realm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.ELASTIC_SERVERLESS_SUPERUSER_PASSWORD",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_SERVERLESS_SUPERUSER_PASSWORD",
+        "description": [],
+        "signature": [
+          "\"changeme\""
+        ],
+        "path": "packages/kbn-es/src/utils/serverless_file_realm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.SERVERLESS_NODES",
+        "type": "Array",
+        "tags": [],
+        "label": "SERVERLESS_NODES",
+        "description": [],
+        "signature": [
+          "Omit<ServerlessEsNodeArgs, \"image\">[]"
+        ],
+        "path": "packages/kbn-es/src/utils/docker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.SERVERLESS_ROLES_ROOT_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "SERVERLESS_ROLES_ROOT_PATH",
+        "description": [],
+        "path": "packages/kbn-es/src/paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.ServerlessProjectType",
+        "type": "Type",
+        "tags": [],
+        "label": "ServerlessProjectType",
+        "description": [],
+        "signature": [
+          "\"security\" | \"es\" | \"oblt\""
+        ],
+        "path": "packages/kbn-es/src/utils/docker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.STATEFUL_ROLES_ROOT_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "STATEFUL_ROLES_ROOT_PATH",
+        "description": [],
+        "path": "packages/kbn-es/src/paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/es",
         "id": "def-common.SYSTEM_INDICES_SUPERUSER",
@@ -69,29 +967,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/es",
-        "id": "def-common.Cluster",
-        "type": "Object",
-        "tags": [],
-        "label": "Cluster",
-        "description": [],
-        "signature": [
-          "typeof ",
-          {
-            "pluginId": "@kbn/es",
-            "scope": "common",
-            "docId": "kibKbnEsPluginApi",
-            "section": "def-common.Cluster",
-            "text": "Cluster"
-          }
-        ],
-        "path": "packages/kbn-es/src/cluster.js",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

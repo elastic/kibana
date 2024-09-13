@@ -7,13 +7,11 @@
     "id": "cloudSecurityPosture",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "cloudSecurityPosture"
-    ],
+    "configPath": ["xpack", "cloudSecurityPosture"],
     "requiredPlugins": [
       "navigation",
       "data",
+      "dataViews",
       "fleet",
       "unifiedSearch",
       "taskManager",
@@ -21,14 +19,13 @@
       "charts",
       "discover",
       "cloud",
-      "licensing"
+      "licensing",
+      "share",
+      "kibanaUtils",
+      "alerting",
+      "spaces"
     ],
-    "optionalPlugins": [
-      "usageCollection"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "usageCollection"
-    ]
+    "optionalPlugins": ["usageCollection"],
+    "requiredBundles": ["kibanaReact", "usageCollection"]
   }
 }

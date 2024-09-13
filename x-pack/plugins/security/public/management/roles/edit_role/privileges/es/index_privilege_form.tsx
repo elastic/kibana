@@ -9,41 +9,49 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiComboBox,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiHorizontalRule,
+  EuiPanel,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
+import { CodeEditorField } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
 import type { monaco } from '@kbn/monaco';
+import type { Cluster } from '@kbn/remote-clusters-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { RoleIndexPrivilege } from '../../../../../../common/model';
+import { RemoteClusterComboBox } from './remote_clusters_combo_box';
+import type { RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../../../../common';
 import type { IndicesAPIClient } from '../../../indices_api_client';
 import type { RoleValidator } from '../../validate_role';
 
-const fromOption = (option: any) => option.label;
-const toOption = (value: string) => ({ label: value });
+const fromOption = (option: EuiComboBoxOptionOption) => option.label;
+const toOption = (value: string): EuiComboBoxOptionOption => ({ label: value });
 
 interface Props {
   formIndex: number;
-  indexPrivilege: RoleIndexPrivilege;
+  indexType: 'indices' | 'remote_indices';
+  indexPrivilege: RoleIndexPrivilege | RoleRemoteIndexPrivilege;
+  remoteClusters?: Cluster[];
   indexPatterns: string[];
   availableIndexPrivileges: string[];
   indicesAPIClient: PublicMethodsOf<IndicesAPIClient>;
-  onChange: (indexPrivilege: RoleIndexPrivilege) => void;
+  onChange: (indexPrivilege: RoleIndexPrivilege | RoleRemoteIndexPrivilege) => void;
   onDelete: () => void;
   isRoleReadOnly: boolean;
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
   validator: RoleValidator;
+  isDarkMode?: boolean;
 }
 
 interface State {
@@ -89,22 +97,29 @@ export class IndexPrivilegeForm extends Component<Props, State> {
   public render() {
     return (
       <Fragment>
-        <EuiHorizontalRule />
-        <EuiFlexGroup className="index-privilege-form">
-          <EuiFlexItem>{this.getPrivilegeForm()}</EuiFlexItem>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup alignItems="center" responsive={false} className="index-privilege-form">
+          <EuiFlexItem>
+            <EuiPanel color="subdued">{this.getPrivilegeForm()}</EuiPanel>
+          </EuiFlexItem>
           {!this.props.isRoleReadOnly && (
             <EuiFlexItem grow={false}>
-              <EuiFormRow hasEmptyLabelSpace>
-                <EuiButtonIcon
-                  aria-label={i18n.translate(
-                    'xpack.security.management.editRole.indexPrivilegeForm.deleteSpacePrivilegeAriaLabel',
-                    { defaultMessage: 'Delete index privilege' }
-                  )}
-                  color={'danger'}
-                  onClick={this.props.onDelete}
-                  iconType={'trash'}
-                />
-              </EuiFormRow>
+              <EuiButtonIcon
+                aria-label={
+                  this.props.indexType === 'remote_indices'
+                    ? i18n.translate(
+                        'xpack.security.management.editRole.indexPrivilegeForm.deleteRemoteIndexPrivilegeAriaLabel',
+                        { defaultMessage: 'Delete remote index privilege' }
+                      )
+                    : i18n.translate(
+                        'xpack.security.management.editRole.indexPrivilegeForm.deleteIndexPrivilegeAriaLabel',
+                        { defaultMessage: 'Delete index privilege' }
+                      )
+                }
+                color={'danger'}
+                onClick={this.props.onDelete}
+                iconType={'trash'}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -114,18 +129,70 @@ export class IndexPrivilegeForm extends Component<Props, State> {
 
   private getPrivilegeForm = () => {
     return (
-      <Fragment>
-        <EuiFlexGroup>
+      <>
+        <EuiFlexGrid
+          css={css`
+            grid-template-columns: repeat(
+              ${this.props.indexType === 'remote_indices' ? 3 : 2},
+              minmax(0, 1fr)
+            );
+            @media (max-width: ${euiThemeVars.euiBreakpoints.s}px) {
+              grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+          `}
+        >
+          {this.props.indexType === 'remote_indices' ? (
+            <EuiFlexItem>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.indexPrivilegeForm.clustersFormRowLabel"
+                    defaultMessage="Remote clusters"
+                  />
+                }
+                fullWidth
+                {...this.props.validator.validateRemoteIndexPrivilegeClustersField(
+                  this.props.indexPrivilege as RoleRemoteIndexPrivilege
+                )}
+              >
+                <RemoteClusterComboBox
+                  data-test-subj={`clustersInput${this.props.formIndex}`}
+                  selectedOptions={('clusters' in this.props.indexPrivilege &&
+                  this.props.indexPrivilege.clusters
+                    ? this.props.indexPrivilege.clusters
+                    : []
+                  ).map(toOption)}
+                  onCreateOption={this.onCreateClusterOption}
+                  onChange={this.onClustersChange}
+                  isDisabled={this.props.isRoleReadOnly}
+                  placeholder={i18n.translate(
+                    'xpack.security.management.editRole.indexPrivilegeForm.clustersPlaceholder',
+                    { defaultMessage: 'Add a remote cluster…' }
+                  )}
+                  remoteClusters={this.props.remoteClusters ?? []}
+                  type="remote_indexes"
+                  fullWidth
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem>
             <EuiFormRow
               label={
-                <FormattedMessage
-                  id="xpack.security.management.editRole.indexPrivilegeForm.indicesFormRowLabel"
-                  defaultMessage="Indices"
-                />
+                this.props.indexType === 'remote_indices' ? (
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.indexPrivilegeForm.remoteIndicesFormRowLabel"
+                    defaultMessage="Remote indices"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.indexPrivilegeForm.indicesFormRowLabel"
+                    defaultMessage="Indices"
+                  />
+                )
               }
-              fullWidth={true}
-              {...this.props.validator.validateIndexPrivilege(this.props.indexPrivilege)}
+              fullWidth
+              {...this.props.validator.validateIndexPrivilegeNamesField(this.props.indexPrivilege)}
             >
               <EuiComboBox
                 data-test-subj={`indicesInput${this.props.formIndex}`}
@@ -134,6 +201,11 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 onCreateOption={this.onCreateIndexPatternOption}
                 onChange={this.onIndexPatternsChange}
                 isDisabled={this.props.isRoleReadOnly}
+                placeholder={i18n.translate(
+                  'xpack.security.management.editRole.indexPrivilegeForm.indicesPlaceholder',
+                  { defaultMessage: 'Add an index pattern…' }
+                )}
+                fullWidth
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -145,7 +217,10 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                   defaultMessage="Privileges"
                 />
               }
-              fullWidth={true}
+              fullWidth
+              {...this.props.validator.validateIndexPrivilegePrivilegesField(
+                this.props.indexPrivilege
+              )}
             >
               <EuiComboBox
                 data-test-subj={`privilegesInput${this.props.formIndex}`}
@@ -154,22 +229,29 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 onChange={this.onPrivilegeChange}
                 onCreateOption={this.onCreateCustomPrivilege}
                 isDisabled={this.props.isRoleReadOnly}
+                placeholder={i18n.translate(
+                  'xpack.security.management.editRole.indexPrivilegeForm.privilegesPlaceholder',
+                  { defaultMessage: 'Add an action…' }
+                )}
+                fullWidth
               />
             </EuiFormRow>
           </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer />
+        </EuiFlexGrid>
 
         {this.getFieldLevelControls()}
-
         {this.getGrantedDocumentsControl()}
-      </Fragment>
+      </>
     );
   };
 
   private loadFLSOptions = (indexNames: string[], force = false) => {
-    if (!force && (this.isFieldListLoading || indexNames.length === 0)) return;
+    if (
+      this.props.indexType === 'remote_indices' ||
+      (!force && (this.isFieldListLoading || indexNames.length === 0))
+    ) {
+      return;
+    }
 
     this.isFieldListLoading = true;
     this.setState({
@@ -189,17 +271,20 @@ export class IndexPrivilegeForm extends Component<Props, State> {
   };
 
   private getFieldLevelControls = () => {
-    const { allowFieldLevelSecurity, allowDocumentLevelSecurity, indexPrivilege, isRoleReadOnly } =
-      this.props;
+    const { allowFieldLevelSecurity, indexPrivilege, isRoleReadOnly } = this.props;
+    const { grant, except } = this.getFieldSecurity(indexPrivilege);
 
     if (!allowFieldLevelSecurity) {
       return null;
     }
 
-    const { grant, except } = this.getFieldSecurity(indexPrivilege);
+    if (isRoleReadOnly && !this.state.fieldSecurityExpanded) {
+      return null;
+    }
 
     return (
       <>
+        <EuiSpacer />
         <EuiFlexGroup direction="column">
           {!isRoleReadOnly && (
             <EuiFlexItem>
@@ -230,7 +315,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                         defaultMessage="Granted fields"
                       />
                     }
-                    fullWidth={true}
+                    fullWidth
                     className="indexPrivilegeForm__grantedFieldsRow"
                     helpText={
                       !isRoleReadOnly && grant.length === 0 ? (
@@ -250,6 +335,11 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                       isDisabled={this.props.isRoleReadOnly}
                       async={true}
                       isLoading={this.state.isFieldListLoading}
+                      placeholder={i18n.translate(
+                        'xpack.security.management.editRole.indexPrivilegeForm.fieldPlaceholder',
+                        { defaultMessage: 'Add a field pattern…' }
+                      )}
+                      fullWidth
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
@@ -261,7 +351,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                         defaultMessage="Denied fields"
                       />
                     }
-                    fullWidth={true}
+                    fullWidth
                     className="indexPrivilegeForm__deniedFieldsRow"
                   >
                     <EuiComboBox
@@ -273,6 +363,11 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                       isDisabled={isRoleReadOnly}
                       async={true}
                       isLoading={this.state.isFieldListLoading}
+                      placeholder={i18n.translate(
+                        'xpack.security.management.editRole.indexPrivilegeForm.deniedFieldPlaceholder',
+                        { defaultMessage: 'Add a field pattern…' }
+                      )}
+                      fullWidth
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
@@ -280,7 +375,6 @@ export class IndexPrivilegeForm extends Component<Props, State> {
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-        {allowDocumentLevelSecurity && <EuiSpacer />}
       </>
     );
   };
@@ -292,64 +386,72 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       return null;
     }
 
+    if (this.props.isRoleReadOnly && !this.state.queryExpanded) {
+      return null;
+    }
+
     return (
-      <EuiFlexGroup direction="column">
-        {!this.props.isRoleReadOnly && (
-          <EuiFlexItem>
-            <EuiSwitch
-              data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
-              label={
-                <FormattedMessage
-                  id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
-                  defaultMessage="Grant read privileges to specific documents"
-                />
-              }
-              compressed={true}
-              checked={this.state.queryExpanded}
-              onChange={this.toggleDocumentQuery}
-              disabled={isRoleReadOnly}
-            />
-          </EuiFlexItem>
-        )}
-        {this.state.queryExpanded && (
-          <EuiFlexItem>
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryFormRowLabel"
-                  defaultMessage="Granted documents query"
-                />
-              }
-              fullWidth={true}
-              data-test-subj={`queryInput${this.props.formIndex}`}
-            >
-              <CodeEditorField
-                languageId="xjson"
-                width="100%"
-                fullWidth={true}
-                height={this.state.documentQueryEditorHeight}
-                aria-label={i18n.translate(
-                  'xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryEditorAriaLabel',
-                  {
-                    defaultMessage: 'Granted documents query editor',
-                  }
-                )}
-                value={indexPrivilege.query ?? ''}
-                onChange={this.onQueryChange}
-                options={{
-                  readOnly: this.props.isRoleReadOnly,
-                  minimap: {
-                    enabled: false,
-                  },
-                  // Prevent an empty form from showing an error
-                  renderValidationDecorations: indexPrivilege.query ? 'editable' : 'off',
-                }}
-                editorDidMount={this.editorDidMount}
+      <>
+        <EuiSpacer />
+        <EuiFlexGroup direction="column">
+          {!this.props.isRoleReadOnly && (
+            <EuiFlexItem>
+              <EuiSwitch
+                data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
+                label={
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
+                    defaultMessage="Grant read privileges to specific documents"
+                  />
+                }
+                compressed={true}
+                checked={this.state.queryExpanded}
+                onChange={this.toggleDocumentQuery}
+                disabled={isRoleReadOnly}
               />
-            </EuiFormRow>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+          {this.state.queryExpanded && (
+            <EuiFlexItem>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryFormRowLabel"
+                    defaultMessage="Granted documents query"
+                  />
+                }
+                fullWidth
+                data-test-subj={`queryInput${this.props.formIndex}`}
+              >
+                <CodeEditorField
+                  languageId="xjson"
+                  width="100%"
+                  fullWidth
+                  height={this.state.documentQueryEditorHeight}
+                  aria-label={i18n.translate(
+                    'xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryEditorAriaLabel',
+                    {
+                      defaultMessage: 'Granted documents query editor',
+                    }
+                  )}
+                  value={indexPrivilege.query ?? ''}
+                  onChange={this.onQueryChange}
+                  useDarkTheme={this.props.isDarkMode}
+                  options={{
+                    readOnly: this.props.isRoleReadOnly,
+                    minimap: {
+                      enabled: false,
+                    },
+                    // Prevent an empty form from showing an error
+                    renderValidationDecorations: indexPrivilege.query ? 'editable' : 'off',
+                  }}
+                  editorDidMount={this.editorDidMount}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </>
     );
   };
 
@@ -442,6 +544,27 @@ export class IndexPrivilegeForm extends Component<Props, State> {
         },
       });
     }
+  };
+
+  private onCreateClusterOption = (option: any) => {
+    const nextClusters = (
+      'clusters' in this.props.indexPrivilege && this.props.indexPrivilege.clusters
+        ? this.props.indexPrivilege.clusters
+        : []
+    ).concat([option]);
+
+    this.props.onChange({
+      ...this.props.indexPrivilege,
+      clusters: nextClusters,
+    });
+  };
+
+  private onClustersChange = (nextOptions: EuiComboBoxOptionOption[]) => {
+    const clusters = nextOptions.map(fromOption);
+    this.props.onChange({
+      ...this.props.indexPrivilege,
+      clusters,
+    });
   };
 
   private onCreateIndexPatternOption = (option: any) => {
@@ -548,12 +671,14 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 
-  private getFieldSecurity = (indexPrivilege: RoleIndexPrivilege) => {
+  private getFieldSecurity = (indexPrivilege: RoleIndexPrivilege | RoleRemoteIndexPrivilege) => {
     const { grant = [], except = [] } = indexPrivilege.field_security || {};
     return { grant, except };
   };
 
-  private isFieldSecurityConfigured = (indexPrivilege: RoleIndexPrivilege) => {
+  private isFieldSecurityConfigured = (
+    indexPrivilege: RoleIndexPrivilege | RoleRemoteIndexPrivilege
+  ) => {
     const { grant, except } = this.getFieldSecurity(indexPrivilege);
     return except.length > 0 || (grant.length > 0 && !_.isEqual(grant, ['*']));
   };

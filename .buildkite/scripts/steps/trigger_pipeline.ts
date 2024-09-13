@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BuildkiteClient } from '#pipeline-utils';
@@ -11,6 +12,7 @@ import { BuildkiteClient } from '#pipeline-utils';
 const pipelineSlug = process.argv[2];
 const branch = process.argv[3] || 'main';
 const commit = process.argv[4] || 'HEAD';
+const kibanaBuildId = process.argv[5] || '';
 
 (async () => {
   try {
@@ -18,6 +20,9 @@ const commit = process.argv[4] || 'HEAD';
     const build = await client.triggerBuild(pipelineSlug, {
       commit,
       branch,
+      env: {
+        ...(kibanaBuildId && { KIBANA_BUILD_ID: kibanaBuildId }),
+      },
       ignore_pipeline_branch_filters: true, // Required because of a Buildkite bug
     });
     console.log(`Triggered build: ${build.web_url}`);

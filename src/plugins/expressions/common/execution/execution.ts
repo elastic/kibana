@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -26,8 +27,8 @@ import {
   ReplaySubject,
   Subscription,
 } from 'rxjs';
-import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
-import { now, AbortError } from '@kbn/kibana-utils-plugin/common';
+import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs';
+import { now, AbortError, calculateObjectHash } from '@kbn/kibana-utils-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
@@ -55,6 +56,10 @@ type UnwrapReturnType<Function extends (...args: any[]) => unknown> =
     ? UnwrapObservable<ReturnType<Function>>
     : Awaited<ReturnType<Function>>;
 
+export interface FunctionCacheItem {
+  value: unknown;
+  time: number;
+}
 /**
  * The result returned after an expression function execution.
  */
@@ -69,6 +74,8 @@ export interface ExecutionResult<Output> {
    */
   result: Output;
 }
+
+const maxCacheSize = 1000;
 
 const createAbortErrorValue = () =>
   createError({
@@ -235,6 +242,7 @@ export class Execution<
    * @private
    */
   private readonly childExecutions: Execution[] = [];
+  private cacheTimeout: number = 30000;
 
   /**
    * Contract is a public representation of `Execution` instances. Contract we
@@ -248,7 +256,11 @@ export class Execution<
     return this.context.inspectorAdapters;
   }
 
-  constructor(public readonly execution: ExecutionParams, private readonly logger?: Logger) {
+  constructor(
+    public readonly execution: ExecutionParams,
+    private readonly logger?: Logger,
+    private readonly functionCache: Map<string, FunctionCacheItem> = new Map()
+  ) {
     const { executor } = execution;
 
     this.contract = new ExecutionContract<Input, Output, InspectorAdapters>(this);
@@ -278,6 +290,7 @@ export class Execution<
         ? () => execution.params.kibanaRequest!
         : undefined,
       variables: execution.params.variables || {},
+      allowCache: this.execution.params.allowCache,
       types: executor.getTypes(),
       abortSignal: this.abortController.signal,
       inspectorAdapters,
@@ -420,18 +433,20 @@ export class Execution<
             : of(resolvedArgs);
 
           return args$.pipe(
-            tap((args) => this.execution.params.debug && Object.assign(head.debug, { args })),
+            tap((args) => this.execution.params.debug && Object.assign(head.debug ?? {}, { args })),
             switchMap((args) => this.invokeFunction(fn, input, args)),
             this.execution.params.partial ? identity : last(),
             switchMap((output) => (getType(output) === 'error' ? throwError(output) : of(output))),
-            tap((output) => this.execution.params.debug && Object.assign(head.debug, { output })),
+            tap(
+              (output) => this.execution.params.debug && Object.assign(head.debug ?? {}, { output })
+            ),
             switchMap((output) => this.invokeChain<ChainOutput>(tail, output)),
             catchError((rawError) => {
               const error = createError(rawError);
               error.error.message = `[${fnName}] > ${error.error.message}`;
 
               if (this.execution.params.debug) {
-                Object.assign(head.debug, { error, rawError, success: false });
+                Object.assign(head.debug ?? {}, { error, rawError, success: false });
               }
 
               return of(error);
@@ -440,7 +455,7 @@ export class Execution<
         }),
         finalize(() => {
           if (this.execution.params.debug) {
-            Object.assign(head.debug, { duration: now() - timeStart });
+            Object.assign(head.debug ?? {}, { duration: now() - timeStart });
           }
         })
       );
@@ -452,42 +467,75 @@ export class Execution<
     input: unknown,
     args: Record<string, unknown>
   ): Observable<UnwrapReturnType<Fn['fn']>> {
-    return of(input).pipe(
-      map((currentInput) => this.cast(currentInput, fn.inputTypes)),
-      switchMap((normalizedInput) => of(fn.fn(normalizedInput, args, this.context))),
-      switchMap(
-        (fnResult) =>
-          (isObservable(fnResult)
-            ? fnResult
-            : from(isPromise(fnResult) ? fnResult : [fnResult])) as Observable<
-            UnwrapReturnType<Fn['fn']>
-          >
-      ),
-      map((output) => {
-        // Validate that the function returned the type it said it would.
-        // This isn't required, but it keeps function developers honest.
-        const returnType = getType(output);
-        const expectedType = fn.type;
-        if (expectedType && returnType !== expectedType) {
-          throw new Error(
-            `Function '${fn.name}' should return '${expectedType}',` +
-              ` actually returned '${returnType}'`
-          );
-        }
+    let hash: string | undefined;
+    let lastValue: unknown;
+    let completionFlag = false;
 
-        // Validate the function output against the type definition's validate function.
-        const type = this.context.types[fn.type];
-        if (type && type.validate) {
-          try {
-            type.validate(output);
-          } catch (e) {
-            throw new Error(`Output of '${fn.name}' is not a valid type '${fn.type}': ${e}`);
+    return of(input)
+      .pipe(
+        map((currentInput) => this.cast(currentInput, fn.inputTypes)),
+        switchMap((normalizedInput) => {
+          if (fn.allowCache && this.context.allowCache) {
+            hash = calculateObjectHash([
+              fn.name,
+              normalizedInput,
+              args,
+              this.context.getSearchContext(),
+            ]);
           }
-        }
+          if (hash && this.functionCache.has(hash)) {
+            const cached = this.functionCache.get(hash);
+            if (cached && Date.now() - cached.time < this.cacheTimeout) {
+              return of(cached.value);
+            }
+          }
+          return of(fn.fn(normalizedInput, args, this.context));
+        }),
+        switchMap((fnResult) => {
+          return (
+            isObservable(fnResult) ? fnResult : from(isPromise(fnResult) ? fnResult : [fnResult])
+          ) as Observable<UnwrapReturnType<Fn['fn']>>;
+        }),
+        map((output) => {
+          // Validate that the function returned the type it said it would.
+          // This isn't required, but it keeps function developers honest.
+          const returnType = getType(output);
+          const expectedType = fn.type;
+          if (expectedType && returnType !== expectedType) {
+            throw new Error(
+              `Function '${fn.name}' should return '${expectedType}',` +
+                ` actually returned '${returnType}'`
+            );
+          }
 
-        return output;
-      })
-    );
+          // Validate the function output against the type definition's validate function.
+          const type = this.context.types[fn.type];
+          if (type && type.validate) {
+            try {
+              type.validate(output);
+            } catch (e) {
+              throw new Error(`Output of '${fn.name}' is not a valid type '${fn.type}': ${e}`);
+            }
+          }
+
+          lastValue = output;
+
+          return output;
+        }),
+        finalize(() => {
+          if (completionFlag && hash) {
+            while (this.functionCache.size >= maxCacheSize) {
+              this.functionCache.delete(this.functionCache.keys().next().value);
+            }
+            this.functionCache.set(hash, { value: lastValue, time: Date.now() });
+          }
+        })
+      )
+      .pipe(
+        tap({
+          complete: () => (completionFlag = true), // Set flag true only on successful completion
+        })
+      );
   }
 
   public cast<Type = unknown>(value: unknown, toTypeNames?: string[]): Type {

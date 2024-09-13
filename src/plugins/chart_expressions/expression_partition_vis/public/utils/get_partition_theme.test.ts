@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
@@ -144,9 +145,16 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
     });
   });
 
-  it('should return adjusted padding settings if dimensions are specified', () => {
+  it('should return adjusted padding settings if dimensions are specified and is on aggBased editor', () => {
     const specifiedDimensions = { width: 2000, height: 2000 };
-    const theme = getPartitionTheme(chartType, visParams, chartTheme, specifiedDimensions);
+    const theme = getPartitionTheme(
+      chartType,
+      visParams,
+      chartTheme,
+      specifiedDimensions,
+      undefined,
+      true
+    );
 
     expect(theme).toEqual({
       ...getStaticThemeOptions(chartTheme, visParams),
@@ -233,7 +241,6 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
 
       expect(theme).toEqual({
         ...getStaticThemeOptions(chartTheme, visParams),
-        chartPaddings: { top: 500, bottom: 500, left: 500, right: 500 },
         partition: {
           ...getStaticThemePartition(chartTheme, visParams),
           outerSizeRatio: rescaleFactor,
@@ -263,7 +270,6 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
 
       expect(theme).toEqual({
         ...getStaticThemeOptions(chartTheme, vParams),
-        chartPaddings: { top: 500, bottom: 500, left: 500, right: 500 },
         partition: {
           ...getStaticThemePartition(chartTheme, vParams),
           outerSizeRatio: 0.5,
@@ -285,7 +291,6 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
 
       expect(theme).toEqual({
         ...getStaticThemeOptions(chartTheme, vParams),
-        chartPaddings: { top: 500, bottom: 500, left: 500, right: 500 },
         partition: {
           ...getStaticThemePartition(chartTheme, vParams),
           linkLabel: linkLabelWithEnoughSpace(vParams),
@@ -420,7 +425,14 @@ const runTreemapMosaicTestSuites = (chartType: ChartTypes, visParams: PartitionV
 
   it('should return fullfilled padding settings if dimensions are specified', () => {
     const specifiedDimensions = { width: 2000, height: 2000 };
-    const theme = getPartitionTheme(chartType, visParams, chartTheme, specifiedDimensions);
+    const theme = getPartitionTheme(
+      chartType,
+      visParams,
+      chartTheme,
+      specifiedDimensions,
+      undefined,
+      true
+    );
 
     expect(theme).toEqual({
       ...getStaticThemeOptions(chartTheme, visParams),

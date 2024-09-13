@@ -1,35 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export const PLUGIN_ID = 'discover';
 export const APP_ICON = 'discoverApp';
-export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
-export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
-export const SAMPLE_ROWS_PER_PAGE_SETTING = 'discover:sampleRowsPerPage';
-export const SORT_DEFAULT_ORDER_SETTING = 'discover:sort:defaultOrder';
-export const SEARCH_ON_PAGE_LOAD_SETTING = 'discover:searchOnPageLoad';
-export const DOC_HIDE_TIME_COLUMN_SETTING = 'doc_table:hideTimeColumn';
-export const FIELDS_LIMIT_SETTING = 'fields:popularLimit';
-export const CONTEXT_DEFAULT_SIZE_SETTING = 'context:defaultSize';
-export const CONTEXT_STEP_SETTING = 'context:step';
-export const CONTEXT_TIE_BREAKER_FIELDS_SETTING = 'context:tieBreakerFields';
-export const DOC_TABLE_LEGACY = 'doc_table:legacy';
-export const MODIFY_COLUMNS_ON_SWITCH = 'discover:modifyColumnsOnSwitch';
-export const SEARCH_FIELDS_FROM_SOURCE = 'discover:searchFieldsFromSource';
-export const MAX_DOC_FIELDS_DISPLAYED = 'discover:maxDocFieldsDisplayed';
-export const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
-export const SHOW_MULTIFIELDS = 'discover:showMultiFields';
-export const TRUNCATE_MAX_HEIGHT = 'truncate:maxHeight';
-export const ROW_HEIGHT_OPTION = 'discover:rowHeightOption';
-export const SEARCH_EMBEDDABLE_TYPE = 'search';
-export const HIDE_ANNOUNCEMENTS = 'hideAnnouncements';
-export const SHOW_LEGACY_FIELD_TOP_VALUES = 'discover:showLegacyFieldTopValues';
-export const ENABLE_SQL = 'discover:enableSql';
 
-export { DISCOVER_APP_LOCATOR, DiscoverAppLocatorDefinition } from './locator';
-export type { DiscoverAppLocator, DiscoverAppLocatorParams } from './locator';
+export { DISCOVER_APP_LOCATOR, DiscoverAppLocatorDefinition } from './app_locator';
+export type {
+  DiscoverAppLocator,
+  DiscoverAppLocatorParams,
+  MainHistoryLocationState,
+} from './app_locator';
+
+export { DiscoverESQLLocatorDefinition } from './esql_locator';
+export type { DiscoverESQLLocator, DiscoverESQLLocatorParams } from './esql_locator';

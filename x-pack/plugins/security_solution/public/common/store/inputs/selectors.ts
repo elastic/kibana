@@ -13,6 +13,15 @@ import type { State } from '../types';
 
 import type { InputsModel, InputsRange, GlobalQuery } from './model';
 
+const defaultQuery = {
+  id: 'kql',
+  inspect: null,
+  isInspected: false,
+  loading: false,
+  refetch: null,
+  selectedInspectIndex: 0,
+};
+
 const selectInputs = (state: State): InputsModel => state.inputs;
 
 const selectGlobal = (state: State): InputsRange => state.inputs.global;
@@ -24,25 +33,12 @@ const selectSocTrends = (state: State): InputsState['socTrends'] | undefined =>
   state.inputs.socTrends;
 
 const selectGlobalQuery = (state: State, id: string): GlobalQuery =>
-  state.inputs.global.queries.find((q) => q.id === id) || {
-    id: 'kql',
-    inspect: null,
-    isInspected: false,
-    loading: false,
-    refetch: null,
-    selectedInspectIndex: 0,
-  };
+  state.inputs.global.queries.find((q) => q.id === id) || defaultQuery;
 
 const selectTimelineQuery = (state: State, id: string): GlobalQuery =>
   state.inputs.timeline.queries.find((q) => q.id === id) ||
-  state.inputs.global.queries.find((q) => q.id === id) || {
-    id: 'kql',
-    inspect: null,
-    isInspected: false,
-    loading: false,
-    refetch: null,
-    selectedInspectIndex: 0,
-  };
+  state.inputs.global.queries.find((q) => q.id === id) ||
+  defaultQuery;
 
 export const inputsSelector = () => createSelector(selectInputs, (inputs) => inputs);
 

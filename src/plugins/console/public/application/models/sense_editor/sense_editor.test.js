@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './sense_editor.test.mocks';
@@ -39,7 +40,10 @@ describe('Editor', () => {
     oldUrl = global.URL;
     olldWindow = { ...global.window };
     global.URL = URL;
-    global.window = Object.create(window);
+    Object.defineProperty(global, 'window', {
+      value: Object.create(window),
+      writable: true,
+    });
     Object.defineProperty(window, 'location', {
       value: {
         origin: 'http://localhost:5620',
@@ -610,6 +614,25 @@ curl -XGET "http://localhost:5620/api/spaces/space" -H \"kbn-xsrf: reporting\"`.
       const curl = await input.getRequestsAsCURL('http://localhost:9200', {
         start: { lineNumber: 1 },
         end: { lineNumber: 6 },
+      });
+      expect(curl).toContain('valueA');
+      expect(curl).toContain('valueB');
+    });
+
+    it('should replace variables in bulk request', async () => {
+      storage.set('variables', [
+        { name: 'exampleVariableA', value: 'valueA' },
+        { name: 'exampleVariableB', value: 'valueB' },
+      ]);
+      input
+        ?.getCoreEditor()
+        .setValue(
+          'POST _bulk\n{"index": {"_id": "0"}}\n{"field" : "${exampleVariableA}"}\n{"index": {"_id": "1"}}\n{"field" : "${exampleVariableB}"}\n',
+          false
+        );
+      const curl = await input.getRequestsAsCURL('http://localhost:9200', {
+        start: { lineNumber: 1 },
+        end: { lineNumber: 4 },
       });
       expect(curl).toContain('valueA');
       expect(curl).toContain('valueB');

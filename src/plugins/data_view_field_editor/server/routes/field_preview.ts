@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
-import { HttpResponsePayload } from '@kbn/core/server';
-
-import { API_BASE_PATH } from '../../common/constants';
+import { FIELD_PREVIEW_PATH as path } from '../../common/constants';
 import { RouteDependencies } from '../types';
 import { handleEsError } from '../shared_imports';
 
@@ -29,12 +28,38 @@ const bodySchema = schema.object({
   document: schema.object({}, { unknowns: 'allow' }),
 });
 
+const responseSchema = () => {
+  const geoPoint = schema.object({
+    type: schema.literal('Point'),
+    coordinates: schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 }),
+  });
+  const valueSchema = schema.oneOf([schema.boolean(), schema.number(), schema.string(), geoPoint]);
+
+  return schema.object({
+    values: schema.oneOf([
+      // composite field
+      schema.recordOf(schema.string(), schema.arrayOf(valueSchema)),
+      // primitive field
+      schema.arrayOf(valueSchema),
+    ]),
+    error: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    status: schema.maybe(schema.number()),
+  });
+};
+
 export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void => {
-  router.post(
+  router.versioned.post({ path, access: 'internal' }).addVersion(
     {
-      path: `${API_BASE_PATH}/field_preview`,
+      version: '1',
       validate: {
-        body: bodySchema,
+        request: {
+          body: bodySchema,
+        },
+        response: {
+          200: {
+            body: responseSchema,
+          },
+        },
       },
     },
     async (ctx, req, res) => {
@@ -51,17 +76,17 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
 
       try {
         // client types need to be update to support this request format
+        // when it does, supply response types
         // @ts-expect-error
         const { result } = await client.asCurrentUser.scriptsPainlessExecute(body);
-        const fieldValue = result as HttpResponsePayload;
 
-        return res.ok({ body: { values: fieldValue } });
+        return res.ok({ body: { values: result } });
       } catch (error) {
         // Assume invalid painless script was submitted
         // Return 200 with error object
         const handleCustomError = () => {
           return res.ok({
-            body: { values: [], ...error.body },
+            body: { values: [], error: error.body?.error, status: error.statusCode },
           });
         };
 

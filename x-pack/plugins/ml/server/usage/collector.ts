@@ -6,9 +6,9 @@
  */
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import { AnomalyResultType } from '../../common/types/anomalies';
-import { MlAnomalyDetectionJobsHealthRuleParams } from '../../common/types/alerts';
+import type { MlAnomalyDetectionJobsHealthRuleParams } from '../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../common/util/alerts';
 
 export interface MlUsageData {
@@ -31,7 +31,10 @@ export interface MlUsageData {
   };
 }
 
-export function registerCollector(usageCollection: UsageCollectionSetup, kibanaIndex: string) {
+export function registerCollector(
+  usageCollection: UsageCollectionSetup,
+  getIndexForType: (type: string) => Promise<string>
+) {
   const collector = usageCollection.makeUsageCollector<MlUsageData>({
     type: 'ml',
     schema: {
@@ -86,11 +89,12 @@ export function registerCollector(usageCollection: UsageCollectionSetup, kibanaI
         },
       },
     },
-    isReady: () => !!kibanaIndex,
+    isReady: () => true,
     fetch: async ({ esClient }) => {
+      const alertIndex = await getIndexForType('alert');
       const result = await esClient.search(
         {
-          index: kibanaIndex,
+          index: alertIndex,
           size: 0,
           body: {
             query: {
@@ -121,7 +125,7 @@ export function registerCollector(usageCollection: UsageCollectionSetup, kibanaI
       const aggResponse = result.aggregations as {
         count_by_result_type: {
           buckets: Array<{
-            key: AnomalyResultType;
+            key: MlAnomalyResultType;
             doc_count: number;
           }>;
         };
@@ -137,7 +141,7 @@ export function registerCollector(usageCollection: UsageCollectionSetup, kibanaI
         };
       }>(
         {
-          index: kibanaIndex,
+          index: alertIndex,
           size: 10000,
           body: {
             query: {

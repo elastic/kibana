@@ -8,6 +8,11 @@
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import expect from '@kbn/expect';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
+import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 
 function findFeature(layer, callbackFn) {
   for (let i = 0; i < layer.length; i++) {
@@ -22,16 +27,58 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('getTile', () => {
+    const defaultParams = {
+      geometryFieldName: 'geo.coordinates',
+      hasLabels: false,
+      index: 'logstash-*',
+      requestBody: {
+        fields: [
+          'bytes',
+          'machine.os.raw',
+          {
+            field: '@timestamp',
+            format: 'epoch_millis',
+          },
+        ],
+        query: {
+          bool: {
+            filter: [
+              {
+                match_all: {},
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    format: 'strict_date_optional_time',
+                    gte: '2015-09-20T00:00:00.000Z',
+                    lte: '2015-09-20T01:00:00.000Z',
+                  },
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          },
+        },
+        runtime_mappings: {
+          hour_of_day: {
+            script: {
+              source: "// !@#$%^&*()_+ %%%\nemit(doc['timestamp'].value.getHour());",
+            },
+            type: 'long',
+          },
+        },
+        size: 10000,
+      },
+    };
+
     it('should return ES vector tile containing documents and metadata', async () => {
       const resp = await supertest
-        .get(
-          `/api/maps/mvt/getTile/2/1/1.pbf\
-?geometryFieldName=geo.coordinates\
-&hasLabels=false\
-&index=logstash-*\
-&requestBody=(_source:!f,fields:!(bytes,machine.os.raw,(field:'@timestamp',format:epoch_millis)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),size:10000)`
-        )
+        .get(`/internal/maps/mvt/getTile/2/1/1.pbf?${getTileUrlParams(defaultParams)}`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .responseType('blob')
         .expect(200);
 
@@ -87,15 +134,15 @@ export default function ({ getService }) {
     });
 
     it('should return ES vector tile containing label features when hasLabels is true', async () => {
+      const tileUrlParams = getTileUrlParams({
+        ...defaultParams,
+        hasLabels: true,
+      });
       const resp = await supertest
-        .get(
-          `/api/maps/mvt/getTile/2/1/1.pbf\
-?geometryFieldName=geo.coordinates\
-&hasLabels=true\
-&index=logstash-*\
-&requestBody=(_source:!f,fields:!(bytes,machine.os.raw,(field:'@timestamp',format:epoch_millis)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),size:10000)`
-        )
+        .get(`/internal/maps/mvt/getTile/2/1/1.pbf?${tileUrlParams}`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .responseType('blob')
         .expect(200);
 
@@ -132,17 +179,45 @@ export default function ({ getService }) {
     });
 
     it('should return error when index does not exist', async () => {
+      const tileUrlParams = getTileUrlParams({
+        ...defaultParams,
+        index: 'notRealIndex',
+      });
       await supertest
-        .get(
-          `/api/maps/mvt/getTile/2/1/1.pbf\
-?geometryFieldName=geo.coordinates\
-&hasLabels=false\
-&index=notRealIndex\
-&requestBody=(_source:!f,fields:!(bytes,machine.os.raw,(field:'@timestamp',format:epoch_millis)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),size:10000)`
-        )
+        .get(`/internal/maps/mvt/getTile/2/1/1.pbf?${tileUrlParams}`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .responseType('blob')
         .expect(404);
+    });
+
+    it('should return elasticsearch error', async () => {
+      const tileUrlParams = getTileUrlParams({
+        ...defaultParams,
+        requestBody: {
+          ...defaultParams.requestBody,
+          query: {
+            error_query: {
+              indices: [
+                {
+                  error_type: 'exception',
+                  message: 'local shard failure message 123',
+                  name: 'logstash-*',
+                },
+              ],
+            },
+          },
+        },
+      });
+      const resp = await supertest
+        .get(`/internal/maps/mvt/getTile/2/1/1.pbf?${tileUrlParams}`)
+        .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(400);
+
+      expect(resp.body.error.reason).to.be('all shards failed');
     });
   });
 }

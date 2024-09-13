@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { getAlertIconTooltipContent } from '../../../common/utils/alert_icon_tooltip_content';
 import { ALERT_ICONS } from '../../../common/constants';
-import { ProcessEvent, ProcessEventAlertCategory } from '../../../common/types/process_tree';
+import type { ProcessEvent, ProcessEventAlertCategory } from '../../../common';
 import { useStyles } from './styles';
 import { DetailPanelAlertActions } from '../detail_panel_alert_actions';
 import { dataOrDash } from '../../utils/data_or_dash';
@@ -64,12 +64,12 @@ export const DetailPanelAlertListItem = ({
   const { args, name: processName } = event.process ?? {};
   const { event: processEvent } = event;
   const forceState = !isInvestigated ? 'open' : undefined;
-  const category = Array.isArray(processEvent?.category)
-    ? processEvent?.category?.[0]
-    : processEvent?.category;
-  const processEventAlertCategory = category ?? ProcessEventAlertCategory.process;
+  const category = (
+    Array.isArray(processEvent?.category) ? processEvent?.category?.[0] : processEvent?.category
+  ) as ProcessEventAlertCategory;
+  const processEventAlertCategory: ProcessEventAlertCategory = category ?? 'process';
   const alertCategoryDetailDisplayText =
-    category !== ProcessEventAlertCategory.process
+    category !== 'process'
       ? `${dataOrDash(processName)} ${getAlertCategoryDisplayText(event, category)}`
       : dataOrDash(args?.join(' '));
   const alertIconTooltipContent = getAlertIconTooltipContent(processEventAlertCategory);

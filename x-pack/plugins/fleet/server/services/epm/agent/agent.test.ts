@@ -5,9 +5,30 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
+import type { Logger } from '@kbn/core/server';
+
+import { appContextService } from '../..';
+
 import { compileTemplate } from './agent';
 
+jest.mock('../../app_context');
+
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
+
+let mockedLogger: jest.Mocked<Logger>;
+
 describe('compileTemplate', () => {
+  beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+  });
+
   it('should work', () => {
     const streamTemplate = `
 input: log
@@ -306,6 +327,25 @@ input: logs
     });
   });
 
+  it('should support $$$$ yaml values at root level', () => {
+    const streamTemplate = `
+input: logs
+{{custom}}
+    `;
+    const vars = {
+      custom: {
+        type: 'yaml',
+        value: 'test: $$$$',
+      },
+    };
+
+    const output = compileTemplate(vars, streamTemplate);
+    expect(output).toEqual({
+      input: 'logs',
+      test: '$$$$',
+    });
+  });
+
   it('should suport !!str for string values', () => {
     const stringTemplate = `
 my-package:
@@ -361,5 +401,60 @@ paths:
     expect(() => compileTemplate(vars, streamTemplate)).toThrowError(
       'Error while compiling agent template: options.inverse is not a function'
     );
+  });
+});
+
+describe('encode', () => {
+  it('should correctly percent encode a string', () => {
+    const streamTemplate = `
+    hosts: 
+      - sqlserver://{{url_encode username}}:{{url_encode password}}@{{hosts}}`;
+
+    const vars = {
+      username: { value: 'db_elastic_agent@?#:', type: 'text' },
+      password: { value: 'dbelasticagent[!#@2023', type: 'password' },
+      hosts: { value: 'localhost', type: 'text' },
+    };
+
+    const output = compileTemplate(vars, streamTemplate);
+    expect(output).toEqual({
+      hosts: ['sqlserver://db_elastic_agent%40%3F%23%3A:dbelasticagent%5B%21%23%402023@localhost'],
+    });
+  });
+
+  it('should correctly encode parts of the URI of the form domain\\username', () => {
+    const streamTemplate = `
+    hosts: 
+      - sqlserver://{{url_encode username}}:{{url_encode password}}@{{hosts}}`;
+
+    const vars = {
+      username: { value: 'domain\\username', type: 'text' },
+      password: { value: 'dbelasticagent[!#@2023', type: 'password' },
+      hosts: { value: 'localhost', type: 'text' },
+    };
+
+    const output = compileTemplate(vars, streamTemplate);
+    expect(output).toEqual({
+      hosts: ['sqlserver://domain%5Cusername:dbelasticagent%5B%21%23%402023@localhost'],
+    });
+  });
+
+  it('should handle special characters which are not encoded by default', () => {
+    const streamTemplate = `
+    hosts: 
+      - sqlserver://{{url_encode username}}:{{url_encode password}}@{{hosts}}`;
+
+    const vars = {
+      username: { value: 'db_elastic_agent', type: 'text' },
+      password: { value: "Special Characters: ! * ( )'", type: 'password' },
+      hosts: { value: 'localhost', type: 'text' },
+    };
+
+    const output = compileTemplate(vars, streamTemplate);
+    expect(output).toEqual({
+      hosts: [
+        'sqlserver://db_elastic_agent:Special%20Characters%3A%20%21%20%2A%20%28%20%29%27@localhost',
+      ],
+    });
   });
 });

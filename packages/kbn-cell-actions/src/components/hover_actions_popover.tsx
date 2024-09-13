@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiPopover, EuiScreenReaderOnly } from '@elastic/eui';
@@ -17,7 +18,7 @@ import { ExtraActionsButton } from './extra_actions_button';
 import { ACTIONS_AREA_LABEL, YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
 import { partitionActions } from '../hooks/actions';
 import { ExtraActionsPopOverWithAnchor } from './extra_actions_popover';
-import { CellActionExecutionContext } from '../types';
+import type { CellActionExecutionContext } from '../types';
 import { useLoadActionsFn } from '../hooks/use_load_actions';
 
 /** This class is added to the document body while dragging */
@@ -36,6 +37,7 @@ const hoverContentWrapperCSS = css`
 const HOVER_INTENT_DELAY = 100; // ms
 
 interface Props {
+  anchorPosition: 'downCenter' | 'rightCenter';
   children: React.ReactNode;
   visibleCellActions: number;
   actionContext: CellActionExecutionContext;
@@ -44,6 +46,7 @@ interface Props {
 }
 
 export const HoverActionsPopover: React.FC<Props> = ({
+  anchorPosition,
   children,
   visibleCellActions,
   actionContext,
@@ -115,12 +118,17 @@ export const HoverActionsPopover: React.FC<Props> = ({
     );
   }, [onMouseEnter, closeExtraActions, children]);
 
+  const panelStyle = useMemo(
+    () => (anchorPosition === 'rightCenter' ? { marginTop: euiThemeVars.euiSizeS } : {}),
+    [anchorPosition]
+  );
+
   return (
     <>
       <div onMouseLeave={closePopover}>
         <EuiPopover
-          panelStyle={PANEL_STYLE}
-          anchorPosition={'downCenter'}
+          panelStyle={{ ...PANEL_STYLE, ...panelStyle }}
+          anchorPosition={anchorPosition}
           button={content}
           closePopover={closePopover}
           hasArrow={false}
@@ -128,13 +136,17 @@ export const HoverActionsPopover: React.FC<Props> = ({
           panelPaddingSize="none"
           repositionOnScroll
           ownFocus={false}
-          data-test-subj={'hoverActionsPopover'}
+          panelProps={{ 'data-test-subj': 'hoverActionsPopover' }}
           aria-label={ACTIONS_AREA_LABEL}
         >
           {showHoverContent && (
             <div css={hoverContentWrapperCSS}>
               <EuiScreenReaderOnly>
-                <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field.name)}</p>
+                <p>
+                  {YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(
+                    actionContext.data.map(({ field }) => field.name).join(', ')
+                  )}
+                </p>
               </EuiScreenReaderOnly>
               {visibleActions.map((action) => (
                 <ActionItem
@@ -142,6 +154,7 @@ export const HoverActionsPopover: React.FC<Props> = ({
                   action={action}
                   actionContext={actionContext}
                   showTooltip={showActionTooltips}
+                  onClick={closePopover}
                 />
               ))}
               {extraActions.length > 0 && (
@@ -155,6 +168,7 @@ export const HoverActionsPopover: React.FC<Props> = ({
         </EuiPopover>
       </div>
       <ExtraActionsPopOverWithAnchor
+        anchorPosition={anchorPosition}
         actions={extraActions}
         anchorRef={contentRef}
         actionContext={actionContext}

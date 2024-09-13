@@ -1,19 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`entity_draggable renders correctly against snapshot 1`] = `
-<CellActions
-  field={
+<SecurityCellActions
+  data={
     Object {
-      "aggregatable": true,
-      "name": "entity-name",
-      "type": "keyword",
+      "field": "entity-name",
       "value": "entity-value",
     }
   }
-  mode="hover"
+  mode="hover-down"
   triggerId="security-default-cellActions"
   visibleCellActions={5}
 >
   entity-name: "entity-value"
-</CellActions>
+</SecurityCellActions>
 `;

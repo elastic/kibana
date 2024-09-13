@@ -1,23 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable max-classes-per-file */
 
-import { EuiFlyout } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutResizable } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import type { OverlayFlyoutOpenOptions, OverlayFlyoutStart } from '@kbn/core-overlays-browser';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 /**
  * A FlyoutRef is a reference to an opened flyout panel. It offers methods to
@@ -60,6 +62,7 @@ class FlyoutRef implements OverlayRef {
 }
 
 interface StartDeps {
+  analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
   targetDomElement: Element;
@@ -70,7 +73,7 @@ export class FlyoutService {
   private activeFlyout: FlyoutRef | null = null;
   private targetDomElement: Element | null = null;
 
-  public start({ i18n, theme, targetDomElement }: StartDeps): OverlayFlyoutStart {
+  public start({ analytics, i18n, theme, targetDomElement }: StartDeps): OverlayFlyoutStart {
     this.targetDomElement = targetDomElement;
 
     return {
@@ -100,12 +103,27 @@ export class FlyoutService {
           }
         };
 
-        render(
-          <CoreContextProvider i18n={i18n} theme={theme}>
+        const getWrapper = (children: JSX.Element) => {
+          return options?.isResizable ? (
+            <EuiFlyoutResizable
+              {...options}
+              onClose={onCloseFlyout}
+              ref={React.createRef()}
+              maxWidth={Number(options?.maxWidth)}
+            >
+              {children}
+            </EuiFlyoutResizable>
+          ) : (
             <EuiFlyout {...options} onClose={onCloseFlyout}>
-              <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
+              {children}
             </EuiFlyout>
-          </CoreContextProvider>,
+          );
+        };
+
+        render(
+          <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
+            {getWrapper(<MountWrapper mount={mount} className="kbnOverlayMountWrapper" />)}
+          </KibanaRenderContextProvider>,
           this.targetDomElement
         );
 

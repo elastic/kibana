@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DropType } from '../types';
+import { DragDropAction } from './providers';
 
 export interface HumanData {
   label: string;
@@ -21,6 +23,7 @@ export interface HumanData {
 
 export interface Ghost {
   children: React.ReactElement;
+  className?: string;
   style: React.CSSProperties;
 }
 
@@ -55,47 +58,36 @@ export type DropIdentifier = DragDropIdentifier & {
  */
 export type DropHandler = (dropped: DragDropIdentifier, dropType?: DropType) => void;
 
-export type RegisteredDropTargets = Record<string, DropIdentifier | undefined> | undefined;
+export type RegisteredDropTargets = Record<string, DropIdentifier> | undefined;
 
-/**
- * The shape of the drag / drop context.
- */
 export interface DragContextState {
   /**
    * The item being dragged or undefined.
    */
   dragging?: DraggingIdentifier;
-
   /**
    * keyboard mode
    */
   keyboardMode: boolean;
   /**
-   * keyboard mode
+   * currently selected drop target
    */
-  setKeyboardMode: (mode: boolean) => void;
+  hoveredDropTarget?: DropIdentifier;
   /**
-   * Set the item being dragged.
+   * currently registered drop targets
    */
-  setDragging: (dragging?: DraggingIdentifier) => void;
-
-  activeDropTarget?: DropIdentifier;
-
   dropTargetsByOrder: RegisteredDropTargets;
-
-  setActiveDropTarget: (newTarget?: DropIdentifier) => void;
-
-  setA11yMessage: (message: string) => void;
-  registerDropTarget: (order: number[], dropTarget?: DropIdentifier) => void;
 
   /**
    * Customizable data-test-subj prefix
    */
   dataTestSubjPrefix: string;
-
-  /**
-   * A custom callback for telemetry
-   * @param event
-   */
-  onTrackUICounterEvent?: (event: string) => void;
 }
+
+export type CustomMiddleware = (action: DragDropAction) => void;
+
+export type DragContextValue = [
+  state: DragContextState,
+  dispatch: React.Dispatch<DragDropAction>,
+  customMiddleware?: CustomMiddleware
+];

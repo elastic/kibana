@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getModelVersionDelta } from './get_version_delta';
@@ -12,12 +13,12 @@ describe('getModelVersionDelta', () => {
   it('generates an upward delta', () => {
     const result = getModelVersionDelta({
       currentVersions: {
-        a: 1,
-        b: 1,
+        a: '10.1.0',
+        b: '10.1.0',
       },
       targetVersions: {
-        a: 2,
-        b: 3,
+        a: '10.2.0',
+        b: '10.3.0',
       },
       deletedTypes: [],
     });
@@ -26,13 +27,40 @@ describe('getModelVersionDelta', () => {
     expect(result.diff).toEqual([
       {
         name: 'a',
-        current: 1,
-        target: 2,
+        current: '10.1.0',
+        target: '10.2.0',
       },
       {
         name: 'b',
-        current: 1,
-        target: 3,
+        current: '10.1.0',
+        target: '10.3.0',
+      },
+    ]);
+  });
+
+  it('accepts adding types for upward delta', () => {
+    const result = getModelVersionDelta({
+      currentVersions: {
+        a: '10.1.0',
+      },
+      targetVersions: {
+        a: '10.2.0',
+        b: '10.1.0',
+      },
+      deletedTypes: [],
+    });
+
+    expect(result.status).toEqual('upward');
+    expect(result.diff).toEqual([
+      {
+        name: 'a',
+        current: '10.1.0',
+        target: '10.2.0',
+      },
+      {
+        name: 'b',
+        current: undefined,
+        target: '10.1.0',
       },
     ]);
   });
@@ -40,12 +68,12 @@ describe('getModelVersionDelta', () => {
   it('generates a downward delta', () => {
     const result = getModelVersionDelta({
       currentVersions: {
-        a: 4,
-        b: 2,
+        a: '10.4.0',
+        b: '10.2.0',
       },
       targetVersions: {
-        a: 1,
-        b: 1,
+        a: '10.1.0',
+        b: '7.17.2',
       },
       deletedTypes: [],
     });
@@ -54,13 +82,40 @@ describe('getModelVersionDelta', () => {
     expect(result.diff).toEqual([
       {
         name: 'a',
-        current: 4,
-        target: 1,
+        current: '10.4.0',
+        target: '10.1.0',
       },
       {
         name: 'b',
-        current: 2,
-        target: 1,
+        current: '10.2.0',
+        target: '7.17.2',
+      },
+    ]);
+  });
+
+  it('accepts removing types for downward delta', () => {
+    const result = getModelVersionDelta({
+      currentVersions: {
+        a: '10.4.0',
+        b: '10.2.0',
+      },
+      targetVersions: {
+        a: '10.1.0',
+      },
+      deletedTypes: [],
+    });
+
+    expect(result.status).toEqual('downward');
+    expect(result.diff).toEqual([
+      {
+        name: 'a',
+        current: '10.4.0',
+        target: '10.1.0',
+      },
+      {
+        name: 'b',
+        current: '10.2.0',
+        target: undefined,
       },
     ]);
   });
@@ -68,12 +123,12 @@ describe('getModelVersionDelta', () => {
   it('generates a noop delta', () => {
     const result = getModelVersionDelta({
       currentVersions: {
-        a: 4,
-        b: 2,
+        a: '10.4.0',
+        b: '8.9.2',
       },
       targetVersions: {
-        a: 4,
-        b: 2,
+        a: '10.4.0',
+        b: '8.9.2',
       },
       deletedTypes: [],
     });
@@ -85,11 +140,11 @@ describe('getModelVersionDelta', () => {
   it('ignores deleted types', () => {
     const result = getModelVersionDelta({
       currentVersions: {
-        a: 1,
-        b: 3,
+        a: '10.1.0',
+        b: '10.3.0',
       },
       targetVersions: {
-        a: 2,
+        a: '10.2.0',
       },
       deletedTypes: ['b'],
     });
@@ -98,8 +153,8 @@ describe('getModelVersionDelta', () => {
     expect(result.diff).toEqual([
       {
         name: 'a',
-        current: 1,
-        target: 2,
+        current: '10.1.0',
+        target: '10.2.0',
       },
     ]);
   });
@@ -108,12 +163,12 @@ describe('getModelVersionDelta', () => {
     expect(() =>
       getModelVersionDelta({
         currentVersions: {
-          a: 1,
-          b: 2,
+          a: '10.1.0',
+          b: '10.2.0',
         },
         targetVersions: {
-          a: 2,
-          b: 1,
+          a: '10.2.0',
+          b: '10.1.0',
         },
         deletedTypes: [],
       })

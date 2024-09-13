@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { expectFixtureEql } from './helper/expect_fixture_eql';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus, getChecksDateRange } from './helper/make_checks';
 
@@ -17,18 +17,22 @@ export default function ({ getService }: FtrProviderContext) {
     const dateRangeStart = new Date().toISOString();
     const dateRangeEnd = new Date().toISOString();
 
-    describe('when no data is present', async () => {
+    describe('when no data is present', () => {
       it('returns a null snapshot', async () => {
         const apiResponse = await supertest.get(API_URLS.SNAPSHOT_COUNT).query({
           dateRangeStart,
           dateRangeEnd,
         });
 
-        expectFixtureEql(apiResponse.body, 'snapshot_empty');
+        expect(apiResponse.body).to.eql({
+          total: 0,
+          up: 0,
+          down: 0,
+        });
       });
     });
 
-    describe('when data is present', async () => {
+    describe('when data is present', () => {
       const numUpMonitors = 10;
       const numDownMonitors = 7;
       const numIps = 2;
@@ -38,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       [true, false].forEach((includeTimespan: boolean) => {
         [true, false].forEach((includeObserver: boolean) => {
-          describe(`with timespans=${includeTimespan} and observer=${includeObserver}`, async () => {
+          describe(`with timespans=${includeTimespan} and observer=${includeObserver}`, () => {
             before(async () => {
               const promises: Array<Promise<any>> = [];
 
@@ -82,7 +86,11 @@ export default function ({ getService }: FtrProviderContext) {
                 dateRangeEnd: dateRange.end,
               });
 
-              expectFixtureEql(apiResponse.body, 'snapshot');
+              expect(apiResponse.body).to.eql({
+                total: 17,
+                up: 10,
+                down: 7,
+              });
             });
           });
         });

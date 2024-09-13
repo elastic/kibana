@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './sense_editor.test.mocks';
@@ -80,7 +81,7 @@ describe('Integration', () => {
           });
         }
       }
-      kb.setActiveApi(testApi);
+      kb._test.setActiveApi(testApi);
       const { cursor } = testToRun;
       senseEditor.update(editorValue, true).then(() => {
         senseEditor.getCoreEditor().moveCursorToPosition(cursor);
@@ -196,7 +197,7 @@ describe('Integration', () => {
     endpoints: {
       _search: {
         methods: ['GET', 'POST'],
-        patterns: ['{indices}/_search', '_search'],
+        patterns: ['{index}/_search', '_search'],
         data_autocomplete_rules: {
           query: {
             match_all: {},
@@ -981,7 +982,7 @@ describe('Integration', () => {
       {
         name: 'Cursor rows after request end',
         cursor: { lineNumber: 5, column: 1 },
-        autoCompleteSet: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'],
+        autoCompleteSet: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'PATCH'],
         prefixToAdd: '',
         suffixToAdd: ' ',
       },
@@ -996,7 +997,7 @@ describe('Integration', () => {
   const CLUSTER_KB = {
     endpoints: {
       _search: {
-        patterns: ['_search', '{indices}/_search'],
+        patterns: ['_search', '{index}/_search'],
         url_params: {
           search_type: ['count', 'query_then_fetch'],
           scroll: '10m',

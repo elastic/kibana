@@ -6,13 +6,10 @@
  */
 
 import { merge } from 'lodash';
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
-import type { CasesMetricsRequest, CasesMetricsResponse } from '../../../common/api';
-import { CasesMetricsRequestRt, CasesMetricsResponseRt, throwErrors } from '../../../common/api';
+import type { CasesMetricsRequest, CasesMetricsResponse } from '../../../common/types/api';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { CasesMetricsRequestRt, CasesMetricsResponseRt } from '../../../common/types/api';
 import { createCaseError } from '../../common/error';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
@@ -25,12 +22,9 @@ export const getCasesMetrics = async (
 ): Promise<CasesMetricsResponse> => {
   const { logger } = clientArgs;
 
-  const queryParams = pipe(
-    CasesMetricsRequestRt.decode(params),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
-
   try {
+    const queryParams = decodeWithExcessOrThrow(CasesMetricsRequestRt)(params);
+
     const handlers = buildHandlers(queryParams, casesClient, clientArgs);
 
     const computedMetrics = await Promise.all(
@@ -43,7 +37,7 @@ export const getCasesMetrics = async (
       return merge(acc, metric);
     }, {}) as CasesMetricsResponse;
 
-    return CasesMetricsResponseRt.encode(mergedResults);
+    return decodeOrThrow(CasesMetricsResponseRt)(mergedResults);
   } catch (error) {
     throw createCaseError({
       logger,

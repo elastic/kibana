@@ -16,10 +16,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   let version: string = '';
   const find = getService('find');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/118272
-  describe.skip('feature controls saved objects management', () => {
+  describe('feature controls saved objects management', () => {
     before(async () => {
-      version = await kibanaServer.version.get();
+      // version = await kibanaServer.version.get();
+      // Using the version below instead because we don't need the extra `-SNAPSHOT` bit
+      version = (await kibanaServer.status.get()).version.number;
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/feature_controls/security'
       );
@@ -75,34 +76,43 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('shows all saved objects', async () => {
           const objects = await PageObjects.savedObjects.getRowTitles();
-          expect(objects).to.eql([
-            `Advanced Settings [${version}]`,
-            'A Dashboard',
-            'logstash-*',
-            'A Pie',
-          ]);
+          expect(objects.sort()).to.eql(
+            [
+              'logstash-*',
+              'A Pie',
+              'A Dashboard',
+              `Global Settings [${version}]`,
+              `Advanced Settings [${version}]`,
+            ].sort()
+          );
         });
 
         it('can view all saved objects in applications', async () => {
           const bools = await PageObjects.savedObjects.getTableSummary();
-          expect(bools).to.eql([
-            {
-              title: `Advanced Settings [${version}]`,
-              canViewInApp: false,
-            },
-            {
-              title: 'A Dashboard',
-              canViewInApp: true,
-            },
-            {
-              title: 'logstash-*',
-              canViewInApp: true,
-            },
-            {
-              title: 'A Pie',
-              canViewInApp: true,
-            },
-          ]);
+          expect(bools.sort((a, b) => a.title.localeCompare(b.title))).to.eql(
+            [
+              {
+                title: 'logstash-*',
+                canViewInApp: true,
+              },
+              {
+                title: 'A Pie',
+                canViewInApp: true,
+              },
+              {
+                title: 'A Dashboard',
+                canViewInApp: true,
+              },
+              {
+                title: `Global Settings [${version}]`,
+                canViewInApp: false,
+              },
+              {
+                title: `Advanced Settings [${version}]`,
+                canViewInApp: false,
+              },
+            ].sort((a, b) => a.title.localeCompare(b.title))
+          );
         });
 
         it('can delete all saved objects', async () => {
@@ -194,34 +204,43 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('shows all saved objects', async () => {
           const objects = await PageObjects.savedObjects.getRowTitles();
-          expect(objects).to.eql([
-            `Advanced Settings [${version}]`,
-            'A Dashboard',
-            'logstash-*',
-            'A Pie',
-          ]);
+          expect(objects.sort()).to.eql(
+            [
+              'logstash-*',
+              'A Pie',
+              'A Dashboard',
+              `Global Settings [${version}]`,
+              `Advanced Settings [${version}]`,
+            ].sort()
+          );
         });
 
         it('cannot view any saved objects in applications', async () => {
           const bools = await PageObjects.savedObjects.getTableSummary();
-          expect(bools).to.eql([
-            {
-              title: `Advanced Settings [${version}]`,
-              canViewInApp: false,
-            },
-            {
-              title: 'A Dashboard',
-              canViewInApp: false,
-            },
-            {
-              title: 'logstash-*',
-              canViewInApp: false,
-            },
-            {
-              title: 'A Pie',
-              canViewInApp: false,
-            },
-          ]);
+          expect(bools.sort((a, b) => a.title.localeCompare(b.title))).to.eql(
+            [
+              {
+                title: 'logstash-*',
+                canViewInApp: false,
+              },
+              {
+                title: 'A Pie',
+                canViewInApp: false,
+              },
+              {
+                title: 'A Dashboard',
+                canViewInApp: false,
+              },
+              {
+                title: `Global Settings [${version}]`,
+                canViewInApp: false,
+              },
+              {
+                title: `Advanced Settings [${version}]`,
+                canViewInApp: false,
+              },
+            ].sort((a, b) => a.title.localeCompare(b.title))
+          );
         });
 
         it(`can't delete all saved objects`, async () => {
@@ -234,9 +253,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // From https://github.com/elastic/kibana/issues/59588 edit view became read-only json view
       // test description changed from "edit" to "inspect"
       // Skipping the test to allow code owners to delete or modify the test.
-      //
-      // FLAKY: https://github.com/elastic/kibana/issues/116048
-      describe.skip('inspect visualization', () => {
+      describe('inspect visualization', () => {
         before(async () => {
           await PageObjects.settings.navigateTo();
           await PageObjects.settings.clickKibanaSavedObjects();

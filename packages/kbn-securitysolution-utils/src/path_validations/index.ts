@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
 
-export const FILENAME_WILDCARD_WARNING = i18n.translate('utils.filename.wildcardWarning', {
-  defaultMessage: `Using wildcards in file paths can impact Endpoint performance`,
+export const WILDCARD_WARNING = i18n.translate('utils.wildcardWarning', {
+  defaultMessage: `Using wildcards can impact Endpoint performance`,
 });
 
 export const FILEPATH_WARNING = i18n.translate('utils.filename.pathWarning', {
@@ -33,7 +34,11 @@ export type TrustedAppConditionEntryField =
   | 'process.hash.*'
   | 'process.executable.caseless'
   | 'process.Ext.code_signature';
-export type BlocklistConditionEntryField = 'file.hash.*' | 'file.path' | 'file.Ext.code_signature';
+export type BlocklistConditionEntryField =
+  | 'file.hash.*'
+  | 'file.path'
+  | 'file.Ext.code_signature'
+  | 'file.path.caseless';
 export type AllConditionEntryFields =
   | TrustedAppConditionEntryField
   | BlocklistConditionEntryField
@@ -47,37 +52,81 @@ export enum OperatingSystem {
 
 export type EntryTypes = 'match' | 'wildcard' | 'match_any';
 export type TrustedAppEntryTypes = Extract<EntryTypes, 'match' | 'wildcard'>;
+export type EventFiltersTypes = EntryTypes | 'exists' | 'nested';
 
-export const validateFilePathInput = ({
+export const validatePotentialWildcardInput = ({
+  field = '',
   os,
   value = '',
 }: {
+  field?: string;
   os: OperatingSystem;
   value?: string;
 }): string | undefined => {
   const textInput = value.trim();
+  if (field === 'file.path.text') {
+    return validateFilePathInput({ os, value: textInput });
+  }
+  return validateWildcardInput(textInput);
+};
+
+export const validateFilePathInput = ({
+  os,
+  value,
+}: {
+  os: OperatingSystem;
+  value: string;
+}): string | undefined => {
   const isValidFilePath = isPathValid({
     os,
     field: 'file.path.text',
     type: 'wildcard',
-    value: textInput,
+    value,
   });
   const hasSimpleFileName = hasSimpleExecutableName({
     os,
     type: 'wildcard',
-    value: textInput,
+    value,
   });
 
-  if (!textInput.length) {
+  if (!value.length) {
     return FILEPATH_WARNING;
   }
 
   if (isValidFilePath) {
     if (hasSimpleFileName !== undefined && !hasSimpleFileName) {
-      return FILENAME_WILDCARD_WARNING;
+      return WILDCARD_WARNING;
     }
   } else {
     return FILEPATH_WARNING;
+  }
+};
+
+export const validateWildcardInput = (value: string | string[]): string | undefined => {
+  const wildcardRegex = /[*?]/;
+  if (Array.isArray(value)) {
+    const doesAnyValueContainWildcardInput = value.some((v) => wildcardRegex.test(v));
+    if (doesAnyValueContainWildcardInput) {
+      return WILDCARD_WARNING;
+    }
+  } else {
+    if (wildcardRegex.test(value)) {
+      return WILDCARD_WARNING;
+    }
+  }
+};
+
+export const validateHasWildcardWithWrongOperator = ({
+  operator,
+  value,
+}: {
+  operator: TrustedAppEntryTypes | EventFiltersTypes;
+  value: string | string[];
+}): boolean => {
+  if (operator !== 'wildcard' && validateWildcardInput(value)) {
+    return true;
+  } else {
+    return false;
   }
 };
 

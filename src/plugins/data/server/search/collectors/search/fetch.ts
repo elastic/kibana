@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
@@ -13,11 +14,12 @@ interface SearchTelemetry {
   'search-telemetry': CollectedUsage;
 }
 
-export function fetchProvider(kibanaIndex: string) {
+export function fetchProvider(getIndexForType: (type: string) => Promise<string>) {
   return async ({ esClient }: CollectorFetchContext): Promise<ReportedUsage> => {
+    const searchIndex = await getIndexForType('search-telemetry');
     const esResponse = await esClient.search<SearchTelemetry>(
       {
-        index: kibanaIndex,
+        index: searchIndex,
         body: {
           query: { term: { type: { value: 'search-telemetry' } } },
         },

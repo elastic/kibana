@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import LaunchDarkly, {
+import {
   type LDClient,
   type LDFlagSet,
   type LDLogLevel,
-  type LDUser,
-} from 'launchdarkly-node-server-sdk';
+  type LDSingleKindContext,
+} from '@launchdarkly/node-server-sdk';
+import { init, basicLogger } from '@launchdarkly/node-server-sdk';
 import type { Logger } from '@kbn/core/server';
 
 export interface LaunchDarklyClientConfig {
@@ -41,12 +42,12 @@ export interface LaunchDarklyGetAllFlags {
 
 export class LaunchDarklyClient {
   private readonly launchDarklyClient: LDClient;
-  private launchDarklyUser?: LDUser;
+  private launchDarklyUser?: LDSingleKindContext;
 
   constructor(ldConfig: LaunchDarklyClientConfig, private readonly logger: Logger) {
-    this.launchDarklyClient = LaunchDarkly.init(ldConfig.sdk_key, {
+    this.launchDarklyClient = init(ldConfig.sdk_key, {
       application: { id: `kibana-server`, version: ldConfig.kibana_version },
-      logger: LaunchDarkly.basicLogger({ level: ldConfig.client_log_level }),
+      logger: basicLogger({ level: ldConfig.client_log_level }),
       // For some reason, the stream API does not work in Kibana. `.waitForInitialization()` hangs forever (doesn't throw, neither logs any errors).
       // Using polling for now until we resolve that issue.
       // Relevant issue: https://github.com/launchdarkly/node-server-sdk/issues/132
@@ -59,19 +60,11 @@ export class LaunchDarklyClient {
   }
 
   public updateUserMetadata(userMetadata: LaunchDarklyUserMetadata) {
-    const { userId, name, firstName, lastName, email, avatar, ip, country, ...custom } =
-      userMetadata;
+    const { userId, ...userMetadataWithoutUserId } = userMetadata;
     this.launchDarklyUser = {
+      ...userMetadataWithoutUserId,
+      kind: 'user',
       key: userId,
-      name,
-      firstName,
-      lastName,
-      email,
-      avatar,
-      ip,
-      country,
-      // This casting is needed because LDUser does not allow `Record<string, undefined>`
-      custom: custom as Record<string, string | boolean | number>,
     };
   }
 

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
+import React, { lazy, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic/eui';
-import { AlertStatusValues } from '@kbn/alerting-plugin/common';
+import { AlertStatusValues, ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERT_RULE_UUID, AlertConsumers } from '@kbn/rule-data-utils';
+import { ALERT_TABLE_GENERIC_CONFIG_ID } from '../../../constants';
+import { AlertTableConfigRegistry } from '../../../alert_table_config_registry';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import {
@@ -17,7 +20,7 @@ import {
 } from '../../common/components/with_bulk_rule_api_operations';
 import './rule.scss';
 import type { RuleEventLogListProps } from './rule_event_log_list';
-import { AlertListItem } from './types';
+import { AlertListItem, RefreshToken } from './types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
 import {
@@ -34,14 +37,15 @@ import {
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
 const RuleDefinition = lazy(() => import('./rule_definition'));
+const AlertsTable = lazy(() => import('../../alerts_table/alerts_table_state'));
 
-type RuleProps = {
+export type RuleComponentProps = {
   rule: Rule;
   ruleType: RuleType;
   readOnly: boolean;
   ruleSummary: RuleSummary;
   requestRefresh: () => Promise<void>;
-  refreshToken?: number;
+  refreshToken?: RefreshToken;
   numberOfExecutions: number;
   onChangeDuration: (length: number) => void;
   durationEpoch?: number;
@@ -64,19 +68,23 @@ export function RuleComponent({
   onChangeDuration,
   durationEpoch = Date.now(),
   isLoadingChart,
-}: RuleProps) {
-  const { ruleTypeRegistry, actionTypeRegistry } = useKibana().services;
+}: RuleComponentProps) {
+  const { ruleTypeRegistry, actionTypeRegistry, alertsTableConfigurationRegistry } =
+    useKibana().services;
 
   const alerts = Object.entries(ruleSummary.alerts)
     .map(([alertId, alert]) => alertToListItem(durationEpoch, alertId, alert))
     .sort((leftAlert, rightAlert) => leftAlert.sortPriority - rightAlert.sortPriority);
 
-  const onMuteAction = async (alert: AlertListItem) => {
-    await (alert.isMuted
-      ? unmuteAlertInstance(rule, alert.alert)
-      : muteAlertInstance(rule, alert.alert));
-    requestRefresh();
-  };
+  const onMuteAction = useCallback(
+    async (alert: AlertListItem) => {
+      await (alert.isMuted
+        ? unmuteAlertInstance(rule, alert.alert)
+        : muteAlertInstance(rule, alert.alert));
+      requestRefresh();
+    },
+    [muteAlertInstance, requestRefresh, rule, unmuteAlertInstance]
+  );
 
   const healthColor = getRuleHealthColor(rule);
   const statusMessage = getRuleStatusMessage({
@@ -86,7 +94,25 @@ export function RuleComponent({
     executionStatusTranslations: rulesStatusesTranslationsMapping,
   });
 
-  const renderRuleAlertList = () => {
+  const renderRuleAlertList = useCallback(() => {
+    if (ruleType.hasAlertsMappings || ruleType.hasFieldsForAAD) {
+      return (
+        <AlertsTable
+          id="rule-detail-alerts-table"
+          configurationId={ALERT_TABLE_GENERIC_CONFIG_ID}
+          alertsTableConfigurationRegistry={
+            alertsTableConfigurationRegistry as AlertTableConfigRegistry
+          }
+          featureIds={
+            (rule.consumer === ALERTING_FEATURE_ID
+              ? [ruleType.producer]
+              : [rule.consumer]) as AlertConsumers[]
+          }
+          query={{ bool: { filter: { term: { [ALERT_RULE_UUID]: rule.id } } } }}
+          showAlertStatusWithFlapping
+        />
+      );
+    }
     return suspendedComponentWithProps(
       RuleAlertList,
       'xl'
@@ -95,7 +121,17 @@ export function RuleComponent({
       readOnly,
       onMuteAction,
     });
-  };
+  }, [
+    alerts,
+    alertsTableConfigurationRegistry,
+    onMuteAction,
+    readOnly,
+    rule.consumer,
+    rule.id,
+    ruleType.hasAlertsMappings,
+    ruleType.hasFieldsForAAD,
+    ruleType.producer,
+  ]);
 
   const tabs = [
     {
@@ -152,6 +188,7 @@ export function RuleComponent({
             healthColor={healthColor}
             statusMessage={statusMessage}
             requestRefresh={requestRefresh}
+            refreshToken={refreshToken}
           />
         </EuiFlexItem>
         {suspendedComponentWithProps(
@@ -189,6 +226,7 @@ export function alertToListItem(
   const start = alert?.activeStartDate ? new Date(alert.activeStartDate) : undefined;
   const duration = start ? durationEpoch - start.valueOf() : 0;
   const sortPriority = getSortPriorityByStatus(alert?.status);
+  const tracked = !!alert?.tracked;
   return {
     alert: alertId,
     status,
@@ -197,6 +235,8 @@ export function alertToListItem(
     isMuted,
     sortPriority,
     flapping: alert.flapping,
+    tracked,
+    ...(alert.maintenanceWindowIds ? { maintenanceWindowIds: alert.maintenanceWindowIds } : {}),
   };
 }
 

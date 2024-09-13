@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CaseResponse } from '../../../common/api';
+import type { Case } from '../../../common/types/domain';
 import { format } from './itsm_format';
 
 describe('ITSM formatter', () => {
@@ -14,7 +14,7 @@ describe('ITSM formatter', () => {
     connector: {
       fields: { severity: '2', urgency: '2', impact: '2', category: 'software', subcategory: 'os' },
     },
-  } as CaseResponse;
+  } as Case;
 
   it('it formats correctly', async () => {
     const res = await format(theCase, []);
@@ -26,7 +26,7 @@ describe('ITSM formatter', () => {
   });
 
   it('it formats correctly when fields do not exist ', async () => {
-    const invalidFields = { connector: { fields: null } } as CaseResponse;
+    const invalidFields = { connector: { fields: null } } as Case;
     const res = await format(invalidFields, []);
     expect(res).toEqual({
       severity: null,

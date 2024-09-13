@@ -6,13 +6,12 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
-import styled, { css } from 'styled-components';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { useAllCasesNavigation } from '../../common/navigation';
 import { LinkIcon } from '../link_icon';
-import type { SubtitleProps } from '../subtitle';
-import { Subtitle } from '../subtitle';
 import { Title } from './title';
 import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -22,66 +21,42 @@ interface HeaderProps {
   isLoading?: boolean;
 }
 
-const Header = styled.header.attrs({
-  className: 'casesHeaderPage',
-})<HeaderProps>`
-  ${({ border, theme }) => css`
-    margin-bottom: ${theme.eui.euiSizeL};
-
-    ${border &&
-    css`
-      border-bottom: ${theme.eui.euiBorderThin};
-      padding-bottom: ${theme.eui.euiSizeL};
-      .euiProgress {
-        top: ${theme.eui.euiSizeL};
-      }
-    `}
-  `}
-`;
-Header.displayName = 'Header';
-
-const FlexItem = styled(EuiFlexItem)`
-  display: block;
-`;
-FlexItem.displayName = 'FlexItem';
-
-const LinkBack = styled.div.attrs({
-  className: 'casesHeaderPage__linkBack',
-})`
-  ${({ theme }) => css`
-    font-size: ${theme.eui.euiFontSizeXS};
-    line-height: ${theme.eui.euiLineHeight};
-    margin-bottom: ${theme.eui.euiSizeS};
-  `}
-`;
-LinkBack.displayName = 'LinkBack';
-
 export interface HeaderPageProps extends HeaderProps {
   showBackButton?: boolean;
   children?: React.ReactNode;
-  subtitle?: SubtitleProps['items'];
-  subtitle2?: SubtitleProps['items'];
   title: string | React.ReactNode;
   titleNode?: React.ReactElement;
   'data-test-subj'?: string;
 }
+
+const getHeaderCss = (euiTheme: EuiThemeComputed<{}>, border?: boolean) => css`
+  margin-bottom: ${euiTheme.size.l};
+  ${border &&
+  css`
+    border-bottom: ${euiTheme.border.thin};
+    padding-bottom: ${euiTheme.size.l};
+    .euiProgress {
+      top: ${euiTheme.size.l};
+    }
+  `}
+`;
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   showBackButton = false,
   border,
   children,
   isLoading,
-  subtitle,
-  subtitle2,
   title,
   titleNode,
   'data-test-subj': dataTestSubj,
 }) => {
   const { releasePhase } = useCasesContext();
-  const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
+  const { navigateToAllCases } = useAllCasesNavigation();
+  const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const navigateToAllCasesClick = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       if (e) {
         e.preventDefault();
       }
@@ -91,36 +66,50 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   );
 
   return (
-    <Header border={border} data-test-subj={dataTestSubj}>
+    <header css={getHeaderCss(euiTheme, border)} data-test-subj={dataTestSubj}>
       <EuiFlexGroup alignItems="center">
-        <FlexItem>
+        <EuiFlexItem
+          css={css`
+            overflow: hidden;
+            display: block;
+          `}
+        >
           {showBackButton && (
-            <LinkBack>
+            <div
+              className="casesHeaderPage__linkBack"
+              css={css`
+                font-size: ${xsFontSize};
+                margin-bottom: ${euiTheme.size.s};
+              `}
+            >
               <LinkIcon
                 dataTestSubj="backToCases"
                 onClick={navigateToAllCasesClick}
-                href={getAllCasesUrl()}
                 iconType="arrowLeft"
               >
                 {i18n.BACK_TO_ALL}
               </LinkIcon>
-            </LinkBack>
+            </div>
           )}
 
           {titleNode || <Title title={title} releasePhase={releasePhase} />}
 
-          {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
-          {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
           {border && isLoading && <EuiProgress size="xs" color="accent" />}
-        </FlexItem>
+        </EuiFlexItem>
 
         {children && (
-          <FlexItem data-test-subj="header-page-supplements" grow={false}>
+          <EuiFlexItem
+            data-test-subj="header-page-supplements"
+            css={css`
+              display: block;
+            `}
+            grow={false}
+          >
             {children}
-          </FlexItem>
+          </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </Header>
+    </header>
   );
 };
 HeaderPageComponent.displayName = 'HeaderPage';

@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'settings']);
+  const { common, dashboard } = getPageObjects(['common', 'dashboard']);
   const a11y = getService('a11y');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardSettings = getService('dashboardSettings');
@@ -18,25 +19,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dashboard', () => {
     const dashboardName = 'Dashboard Listing A11y';
-    const clonedDashboardName = 'Dashboard Listing A11y Copy';
+    const clonedDashboardName = 'Dashboard Listing A11y (1)';
 
-    it('dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+    it('navitate to dashboard app', async () => {
+      await common.navigateToApp('dashboard');
       await a11y.testAppSnapshot();
     });
 
     it('create dashboard button', async () => {
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.clickNewDashboard();
       await a11y.testAppSnapshot();
     });
 
     it('save empty dashboard', async () => {
-      await PageObjects.dashboard.saveDashboard(dashboardName);
+      await dashboard.saveDashboard(dashboardName);
       await a11y.testAppSnapshot();
     });
 
     it('Open Edit mode', async () => {
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.switchToEditMode();
       await a11y.testAppSnapshot();
     });
 
@@ -57,17 +58,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('save the dashboard', async () => {
-      await PageObjects.dashboard.saveDashboard(dashboardName);
+      await dashboard.saveDashboard(dashboardName, { saveAsNew: false });
       await a11y.testAppSnapshot();
     });
 
-    it('Open Edit mode', async () => {
-      await PageObjects.dashboard.switchToEditMode();
+    it('Open Edit mode again', async () => {
+      await dashboard.switchToEditMode();
       await a11y.testAppSnapshot();
     });
 
     it('open settings flyout', async () => {
-      await PageObjects.dashboard.openSettingsFlyout();
+      await dashboard.openSettingsFlyout();
       await a11y.testAppSnapshot();
     });
 
@@ -86,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Open add panel', async () => {
+    it('Open add panel again', async () => {
       await dashboardAddPanel.clickOpenAddPanel();
       await a11y.testAppSnapshot();
     });
@@ -105,40 +106,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Exit out of edit mode', async () => {
-      await PageObjects.dashboard.clickCancelOutOfEditMode(false);
+      await dashboard.clickCancelOutOfEditMode(false);
       await a11y.testAppSnapshot();
     });
 
     it('Discard changes', async () => {
-      await PageObjects.common.clickConfirmOnModal();
-      await PageObjects.dashboard.getIsInViewMode();
+      await common.clickConfirmOnModal();
+      await dashboard.getIsInViewMode();
       await a11y.testAppSnapshot();
     });
 
     // https://github.com/elastic/kibana/issues/153597
     it.skip('Test full screen', async () => {
-      await PageObjects.dashboard.clickFullScreenMode();
+      await dashboard.clickFullScreenMode();
       await a11y.testAppSnapshot();
     });
 
     // https://github.com/elastic/kibana/issues/153597
     it.skip('Exit out of full screen mode', async () => {
-      await PageObjects.dashboard.exitFullScreenMode();
+      await dashboard.exitFullScreenMode();
       await a11y.testAppSnapshot();
     });
 
     it('Make a clone of the dashboard', async () => {
-      await PageObjects.dashboard.clickClone();
-      await a11y.testAppSnapshot();
-    });
-
-    it('Confirm clone with *copy* appended', async () => {
-      await PageObjects.dashboard.confirmClone();
+      await dashboard.duplicateDashboard();
       await a11y.testAppSnapshot();
     });
 
     it('Dashboard listing table', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.gotoDashboardLandingPage();
       await a11y.testAppSnapshot();
     });
 
@@ -147,8 +143,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.checkListingSelectAllCheckbox();
       await listingTable.clickDeleteSelected();
       await a11y.testAppSnapshot();
-      await PageObjects.common.clickConfirmOnModal();
-      await listingTable.searchForItemWithName('');
+      await common.clickConfirmOnModal();
+      await listingTable.isShowingEmptyPromptCreateNewButton();
     });
   });
 }

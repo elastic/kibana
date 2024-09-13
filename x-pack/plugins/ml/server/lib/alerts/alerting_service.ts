@@ -8,36 +8,51 @@
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
-import { Duration } from 'moment/moment';
-import { memoize } from 'lodash';
+import type { Duration } from 'moment/moment';
+import { capitalize, get, memoize, pick } from 'lodash';
 import {
   FIELD_FORMAT_IDS,
-  IFieldFormat,
-  SerializedFieldFormat,
+  type IFieldFormat,
+  type SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { isDefined } from '@kbn/ml-is-defined';
-import { MlClient } from '../ml_client';
+import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import {
+  getEntityFieldName,
+  getEntityFieldValue,
+  type MlAnomalyRecordDoc,
+  type MlAnomalyResultType,
+  ML_ANOMALY_RESULT_TYPE,
+} from '@kbn/ml-anomaly-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { getAnomalyDescription } from '../../../common/util/anomaly_description';
+import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
+import type { MlClient } from '../ml_client';
+import type {
   MlAnomalyDetectionAlertParams,
   MlAnomalyDetectionAlertPreviewRequest,
 } from '../../routes/schemas/alerting_schema';
-import { ANOMALY_RESULT_TYPE } from '../../../common/constants/anomalies';
-import { AnomalyRecordDoc, AnomalyResultType } from '../../../common/types/anomalies';
-import {
+import type {
   AlertExecutionResult,
   InfluencerAnomalyAlertDoc,
   PreviewResponse,
   PreviewResultsKeys,
   RecordAnomalyAlertDoc,
   TopHitsResultsKeys,
+  TopInfluencerAADDoc,
+  TopRecordAADDoc,
 } from '../../../common/types/alerts';
-import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
+import type {
+  AnomalyDetectionAlertContext,
+  AnomalyDetectionAlertPayload,
+} from './register_anomaly_detection_alert_type';
 import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
-import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
-import { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
-import type { AwaitReturnType } from '../../../common/types/common';
+import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 import type { GetDataViewsService } from '../data_views_utils';
 
@@ -52,7 +67,7 @@ type AggResultsResponse = { key?: number } & {
 };
 
 interface AnomalyESQueryParams {
-  resultType: AnomalyResultType;
+  resultType: MlAnomalyResultType;
   /** Appropriate score field for requested result type. */
   anomalyScoreField: string;
   anomalyScoreThreshold: number;
@@ -73,10 +88,11 @@ const TIME_RANGE_PADDING = 10;
 export function buildExplorerUrl(
   jobIds: string[],
   timeRange: { from: string; to: string; mode?: string },
-  type: AnomalyResultType,
+  type: MlAnomalyResultType,
+  spaceId: string,
   r?: AlertExecutionResult
 ): string {
-  const isInfluencerResult = type === ANOMALY_RESULT_TYPE.INFLUENCER;
+  const isInfluencerResult = type === ML_ANOMALY_RESULT_TYPE.INFLUENCER;
 
   /**
    * Disabled until Anomaly Explorer page is fixed and properly
@@ -141,7 +157,11 @@ export function buildExplorerUrl(
       },
     },
   };
-  return `/app/ml/explorer/?_g=${encodeURIComponent(
+
+  const spacePathComponent: string =
+    !spaceId || spaceId === DEFAULT_SPACE_ID ? '' : `/s/${spaceId}`;
+
+  return `${spacePathComponent}/app/ml/explorer/?_g=${encodeURIComponent(
     rison.encode(globalState)
   )}&_a=${encodeURIComponent(rison.encode(appState))}`;
 }
@@ -150,10 +170,19 @@ export function buildExplorerUrl(
  * Mapping for result types and corresponding score fields.
  */
 const resultTypeScoreMapping = {
-  [ANOMALY_RESULT_TYPE.BUCKET]: 'anomaly_score',
-  [ANOMALY_RESULT_TYPE.RECORD]: 'record_score',
-  [ANOMALY_RESULT_TYPE.INFLUENCER]: 'influencer_score',
+  [ML_ANOMALY_RESULT_TYPE.BUCKET]: 'anomaly_score',
+  [ML_ANOMALY_RESULT_TYPE.RECORD]: 'record_score',
+  [ML_ANOMALY_RESULT_TYPE.INFLUENCER]: 'influencer_score',
 };
+
+export interface AnomalyDetectionAlertFieldFormatters {
+  numberFormatter: IFieldFormat['convert'];
+  fieldFormatters: Record<string, IFieldFormat['convert']>;
+}
+
+export interface AnomalyDetectionRuleState {
+  contextFieldFormatters?: AnomalyDetectionAlertFieldFormatters;
+}
 
 /**
  * Alerting related server-side methods
@@ -166,7 +195,9 @@ export function alertingServiceProvider(
   getFieldsFormatRegistry: FieldFormatsRegistryProvider,
   getDataViewsService: GetDataViewsService
 ) {
-  type FieldFormatters = AwaitReturnType<ReturnType<typeof getFormatters>>;
+  let jobs: MlJob[] = [];
+
+  let contextFieldFormatters: AnomalyDetectionAlertFieldFormatters | undefined;
 
   /**
    * Provides formatters based on the data view of the datafeed index pattern
@@ -186,10 +217,13 @@ export function alertingServiceProvider(
         }, {} as Record<string, IFieldFormat['convert']>)
       : {};
 
-    return {
+    // store formatters to pass to the executor state update
+    contextFieldFormatters = {
       numberFormatter: numberFormatter.convert.bind(numberFormatter),
       fieldFormatters,
     };
+
+    return contextFieldFormatters;
   });
 
   /**
@@ -200,8 +234,8 @@ export function alertingServiceProvider(
       try {
         const dataViewsService = await getDataViewsService();
 
-        const dataViews = await dataViewsService.find(indexPattern);
-        const dataView = dataViews.find(({ title }) => title === indexPattern);
+        const dataViews = await dataViewsService.findLazy(indexPattern);
+        const dataView = dataViews.find((dView) => dView.getIndexPattern() === indexPattern);
 
         if (!dataView) return;
 
@@ -212,7 +246,7 @@ export function alertingServiceProvider(
     }
   );
 
-  const getAggResultsLabel = (resultType: AnomalyResultType) => {
+  const getAggResultsLabel = (resultType: MlAnomalyResultType) => {
     return {
       aggGroupLabel: `${resultType}_results` as PreviewResultsKeys,
       topHitsLabel: `top_${resultType}_hits` as TopHitsResultsKeys,
@@ -225,20 +259,20 @@ export function alertingServiceProvider(
    * @param severity
    */
   const getResultTypeAggRequest = (
-    resultType: AnomalyResultType,
+    resultType: MlAnomalyResultType,
     severity: number,
     useInitialScore?: boolean
   ) => {
-    const influencerScoreField = getScoreFields(ANOMALY_RESULT_TYPE.INFLUENCER, useInitialScore);
-    const recordScoreField = getScoreFields(ANOMALY_RESULT_TYPE.RECORD, useInitialScore);
-    const bucketScoreField = getScoreFields(ANOMALY_RESULT_TYPE.BUCKET, useInitialScore);
+    const influencerScoreField = getScoreFields(ML_ANOMALY_RESULT_TYPE.INFLUENCER, useInitialScore);
+    const recordScoreField = getScoreFields(ML_ANOMALY_RESULT_TYPE.RECORD, useInitialScore);
+    const bucketScoreField = getScoreFields(ML_ANOMALY_RESULT_TYPE.BUCKET, useInitialScore);
 
     return {
       influencer_results: {
         filter: {
           range: {
             [influencerScoreField]: {
-              gte: resultType === ANOMALY_RESULT_TYPE.INFLUENCER ? severity : 0,
+              gte: resultType === ML_ANOMALY_RESULT_TYPE.INFLUENCER ? severity : 0,
             },
           },
         },
@@ -274,7 +308,7 @@ export function alertingServiceProvider(
         filter: {
           range: {
             [recordScoreField]: {
-              gte: resultType === ANOMALY_RESULT_TYPE.RECORD ? severity : 0,
+              gte: resultType === ML_ANOMALY_RESULT_TYPE.RECORD ? severity : 0,
             },
           },
         },
@@ -317,7 +351,7 @@ export function alertingServiceProvider(
           },
         },
       },
-      ...(resultType === ANOMALY_RESULT_TYPE.BUCKET
+      ...(resultType === ML_ANOMALY_RESULT_TYPE.BUCKET
         ? {
             bucket_results: {
               filter: {
@@ -361,15 +395,15 @@ export function alertingServiceProvider(
   /**
    * Provides a key for alert instance.
    */
-  const getAlertInstanceKey = (source: AnomalyRecordDoc): string => {
+  const getAlertInstanceKey = (source: MlAnomalyRecordDoc): string => {
     return source.job_id;
   };
 
-  const getScoreFields = (resultType: AnomalyResultType, useInitialScore?: boolean) => {
+  const getScoreFields = (resultType: MlAnomalyResultType, useInitialScore?: boolean) => {
     return `${useInitialScore ? 'initial_' : ''}${resultTypeScoreMapping[resultType]}`;
   };
 
-  const getRecordKey = (source: AnomalyRecordDoc): string => {
+  const getRecordKey = (source: MlAnomalyRecordDoc): string => {
     let alertInstanceKey = `${source.job_id}_${source.timestamp}`;
 
     const fieldName = getEntityFieldName(source);
@@ -381,15 +415,154 @@ export function alertingServiceProvider(
     return alertInstanceKey;
   };
 
+  const getAlertMessage = (
+    resultType: MlAnomalyResultType,
+    source: Record<string, unknown>
+  ): string => {
+    let message = i18n.translate('xpack.ml.alertTypes.anomalyDetectionAlertingRule.alertMessage', {
+      defaultMessage:
+        'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
+    });
+
+    if (resultType === ML_ANOMALY_RESULT_TYPE.RECORD) {
+      const recordSource = source as MlAnomalyRecordDoc;
+
+      const detectorsByJob = jobs.reduce((acc, job) => {
+        acc[job.job_id] = job.analysis_config.detectors.reduce((innterAcc, detector) => {
+          innterAcc[detector.detector_index!] = detector.detector_description;
+          return innterAcc;
+        }, {} as Record<number, string | undefined>);
+        return acc;
+      }, {} as Record<string, Record<number, string | undefined>>);
+
+      const detectorDescription = get(detectorsByJob, [
+        recordSource.job_id,
+        recordSource.detector_index,
+      ]);
+
+      const record = {
+        source: recordSource,
+        detector: detectorDescription ?? recordSource.function_description,
+        severity: recordSource.record_score,
+      } as MlAnomaliesTableRecordExtended;
+      const entityName = getEntityFieldName(recordSource);
+      if (entityName !== undefined) {
+        record.entityName = entityName;
+        record.entityValue = getEntityFieldValue(recordSource);
+      }
+
+      const { anomalyDescription, mvDescription } = getAnomalyDescription(record);
+
+      const anomalyDescriptionSummary = `${anomalyDescription}${
+        mvDescription ? ` (${mvDescription})` : ''
+      }`;
+
+      let actual = recordSource.actual;
+      let typical = recordSource.typical;
+      if (
+        (!isDefined(actual) || !isDefined(typical)) &&
+        Array.isArray(recordSource.causes) &&
+        recordSource.causes.length === 1
+      ) {
+        actual = recordSource.causes[0].actual;
+        typical = recordSource.causes[0].typical;
+      }
+
+      let metricChangeDescription = '';
+      if (isDefined(actual) && isDefined(typical)) {
+        metricChangeDescription = capitalize(getMetricChangeDescription(actual, typical).message);
+      }
+
+      message = `${anomalyDescriptionSummary}. ${
+        metricChangeDescription ? `${metricChangeDescription}.` : ''
+      }`;
+    }
+
+    return message;
+  };
+
+  /**
+   * Returns a callback for formatting elasticsearch aggregation response
+   * to the alert-as-data document.
+   * @param resultType
+   */
+  const getResultsToPayloadFormatter = (
+    resultType: MlAnomalyResultType,
+    useInitialScore: boolean = false
+  ) => {
+    const resultsLabel = getAggResultsLabel(resultType);
+
+    return (
+      v: AggResultsResponse
+    ): Omit<AnomalyDetectionAlertPayload, typeof ALERT_URL> | undefined => {
+      const aggTypeResults = v[resultsLabel.aggGroupLabel];
+      if (aggTypeResults.doc_count === 0) {
+        return;
+      }
+      const requestedAnomalies = aggTypeResults[resultsLabel.topHitsLabel].hits.hits;
+      const topAnomaly = requestedAnomalies[0];
+      const timestamp = topAnomaly._source.timestamp;
+
+      const message = getAlertMessage(resultType, topAnomaly._source);
+
+      return {
+        [ALERT_REASON]: message,
+        job_id: [...new Set(requestedAnomalies.map((h) => h._source.job_id))][0],
+        is_interim: requestedAnomalies.some((h) => h._source.is_interim),
+        anomaly_timestamp: timestamp,
+        anomaly_score: [topAnomaly._source[getScoreFields(resultType, useInitialScore)]],
+        top_records: v.record_results.top_record_hits.hits.hits.map((h) => {
+          const { actual, typical } = getTypicalAndActualValues(h._source);
+          return pick<RecordAnomalyAlertDoc>(
+            {
+              ...h._source,
+              typical,
+              actual,
+            },
+            [
+              'job_id',
+              'record_score',
+              'initial_record_score',
+              'detector_index',
+              'is_interim',
+              'timestamp',
+              'partition_field_name',
+              'partition_field_value',
+              'function',
+              'actual',
+              'typical',
+            ]
+          ) as TopRecordAADDoc;
+        }) as TopRecordAADDoc[],
+        top_influencers: v.influencer_results.top_influencer_hits.hits.hits.map((influencerDoc) => {
+          return pick<InfluencerAnomalyAlertDoc>(
+            {
+              ...influencerDoc._source,
+            },
+            [
+              'job_id',
+              'influencer_field_name',
+              'influencer_field_value',
+              'influencer_score',
+              'initial_influencer_score',
+              'is_interim',
+              'timestamp',
+            ]
+          ) as TopInfluencerAADDoc;
+        }) as TopInfluencerAADDoc[],
+      };
+    };
+  };
+
   /**
    * Returns a callback for formatting elasticsearch aggregation response
    * to the alert context.
    * @param resultType
    */
-  const getResultsFormatter = (
-    resultType: AnomalyResultType,
+  const getResultsToContextFormatter = (
+    resultType: MlAnomalyResultType,
     useInitialScore: boolean = false,
-    formatters: FieldFormatters
+    formatters: AnomalyDetectionAlertFieldFormatters
   ) => {
     const resultsLabel = getAggResultsLabel(resultType);
     return (v: AggResultsResponse): AlertExecutionResult | undefined => {
@@ -402,14 +575,12 @@ export function alertingServiceProvider(
       const alertInstanceKey = getAlertInstanceKey(topAnomaly._source);
       const timestamp = topAnomaly._source.timestamp;
       const bucketSpanInSeconds = topAnomaly._source.bucket_span;
+      const message = getAlertMessage(resultType, topAnomaly._source);
 
       return {
         count: aggTypeResults.doc_count,
         key: v.key,
-        message: i18n.translate('xpack.ml.alertTypes.anomalyDetectionAlertingRule.alertMessage', {
-          defaultMessage:
-            'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
-        }),
+        message,
         alertInstanceKey,
         jobIds: [...new Set(requestedAnomalies.map((h) => h._source.job_id))],
         isInterim: requestedAnomalies.some((h) => h._source.is_interim),
@@ -434,7 +605,7 @@ export function alertingServiceProvider(
             typical: typical?.map((t) => formatter(t)),
             actual: actual?.map((a) => formatter(a)),
             score: Math.floor(
-              h._source[getScoreFields(ANOMALY_RESULT_TYPE.RECORD, useInitialScore)]
+              h._source[getScoreFields(ML_ANOMALY_RESULT_TYPE.RECORD, useInitialScore)]
             ),
             unique_key: getRecordKey(h._source),
           };
@@ -443,7 +614,7 @@ export function alertingServiceProvider(
           return {
             ...h._source,
             score: Math.floor(
-              h._source[getScoreFields(ANOMALY_RESULT_TYPE.INFLUENCER, useInitialScore)]
+              h._source[getScoreFields(ML_ANOMALY_RESULT_TYPE.INFLUENCER, useInitialScore)]
             ),
             unique_key: `${h._source.timestamp}_${h._source.influencer_field_name}_${h._source.influencer_field_value}`,
           };
@@ -458,7 +629,7 @@ export function alertingServiceProvider(
    * @param previewTimeInterval - Relative time interval to test the alert condition
    * @param checkIntervalGap - Interval between alert executions
    */
-  const fetchAnomalies = async (
+  const fetchPreviewResults = async (
     params: MlAnomalyDetectionAlertParams,
     previewTimeInterval?: string,
     checkIntervalGap?: Duration
@@ -471,13 +642,15 @@ export function alertingServiceProvider(
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
     const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).jobs;
 
+    jobs = jobsResponse;
+
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
       throw new Error("Couldn't find the job with provided id");
     }
 
     const maxBucket = resolveMaxTimeInterval(
-      jobsResponse.map((v) => v.analysis_config.bucket_span)
+      jobsResponse.map((v) => v.analysis_config.bucket_span!)
     );
 
     if (maxBucket === undefined) {
@@ -518,7 +691,7 @@ export function alertingServiceProvider(
             },
             {
               terms: {
-                result_type: Object.values(ANOMALY_RESULT_TYPE) as string[],
+                result_type: Object.values(ML_ANOMALY_RESULT_TYPE) as string[],
               },
             },
             ...(params.includeInterim
@@ -558,9 +731,10 @@ export function alertingServiceProvider(
 
     const resultsLabel = getAggResultsLabel(params.resultType);
 
-    const fieldsFormatters = await getFormatters(datafeeds![0]!.indices[0]);
+    const fieldsFormatters =
+      contextFieldFormatters ?? (await getFormatters(datafeeds![0]!.indices[0]));
 
-    const formatter = getResultsFormatter(
+    const formatter = getResultsToContextFormatter(
       params.resultType,
       !!previewTimeInterval,
       fieldsFormatters
@@ -606,6 +780,9 @@ export function alertingServiceProvider(
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
     const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).jobs;
 
+    // Cache jobs response
+    jobs = jobsResponse;
+
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
       return;
@@ -616,7 +793,7 @@ export function alertingServiceProvider(
     const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
 
     const maxBucketInSeconds = resolveMaxTimeInterval(
-      jobsResponse.map((v) => v.analysis_config.bucket_span)
+      jobsResponse.map((v) => v.analysis_config.bucket_span!)
     );
 
     if (maxBucketInSeconds === undefined) {
@@ -650,7 +827,7 @@ export function alertingServiceProvider(
    */
   const fetchResult = async (
     params: AnomalyESQueryParams
-  ): Promise<AlertExecutionResult | undefined> => {
+  ): Promise<AggResultsResponse | undefined> => {
     const {
       resultType,
       jobIds,
@@ -660,7 +837,6 @@ export function alertingServiceProvider(
       anomalyScoreField,
       includeInterimResults,
       anomalyScoreThreshold,
-      indexPattern,
     } = params;
 
     const requestBody = {
@@ -673,7 +849,7 @@ export function alertingServiceProvider(
             },
             {
               terms: {
-                result_type: Object.values(ANOMALY_RESULT_TYPE) as string[],
+                result_type: Object.values(ML_ANOMALY_RESULT_TYPE) as string[],
               },
             },
             {
@@ -751,9 +927,44 @@ export function alertingServiceProvider(
       prev.max_score.value > current.max_score.value ? prev : current
     );
 
-    const formatters = await getFormatters(indexPattern);
+    return topResult;
+  };
 
-    return getResultsFormatter(params.resultType, false, formatters)(topResult);
+  const getFormatted = async (
+    indexPattern: string,
+    resultType: MlAnomalyDetectionAlertParams['resultType'],
+    spaceId: string,
+    value: AggResultsResponse
+  ): Promise<
+    | { payload: AnomalyDetectionAlertPayload; context: AnomalyDetectionAlertContext; name: string }
+    | undefined
+  > => {
+    const formatters = contextFieldFormatters ?? (await getFormatters(indexPattern));
+
+    const context = getResultsToContextFormatter(resultType, false, formatters)(value);
+    const payload = getResultsToPayloadFormatter(resultType, false)(value);
+
+    if (!context || !payload) return;
+
+    const anomalyExplorerUrl = buildExplorerUrl(
+      context.jobIds,
+      { from: context.bucketRange.start, to: context.bucketRange.end },
+      resultType,
+      spaceId,
+      context
+    );
+
+    return {
+      payload: {
+        ...payload,
+        [ALERT_URL]: anomalyExplorerUrl,
+      },
+      context: {
+        ...context,
+        anomalyExplorerUrl,
+      },
+      name: context.alertInstanceKey,
+    };
   };
 
   return {
@@ -761,11 +972,21 @@ export function alertingServiceProvider(
      * Return the result of an alert condition execution.
      *
      * @param params - Alert params
+     * @param spaceId
      */
     execute: async (
-      params: MlAnomalyDetectionAlertParams
+      params: MlAnomalyDetectionAlertParams,
+      spaceId: string,
+      state?: AnomalyDetectionRuleState
     ): Promise<
-      { context: AnomalyDetectionAlertContext; name: string; isHealthy: boolean } | undefined
+      | {
+          payload: AnomalyDetectionAlertPayload;
+          context: AnomalyDetectionAlertContext;
+          name: string;
+          isHealthy: boolean;
+          stateUpdate: AnomalyDetectionRuleState;
+        }
+      | undefined
     > => {
       const queryParams = await getQueryParams(params);
 
@@ -775,48 +996,75 @@ export function alertingServiceProvider(
 
       const result = await fetchResult(queryParams);
 
-      if (result) {
-        const anomalyExplorerUrl = buildExplorerUrl(
-          result.jobIds,
-          { from: result.bucketRange.start, to: result.bucketRange.end },
-          params.resultType,
-          result
+      if (state && isPopulatedObject(state?.contextFieldFormatters)) {
+        contextFieldFormatters = state.contextFieldFormatters;
+      }
+
+      const formattedResult = result
+        ? await getFormatted(queryParams.indexPattern, queryParams.resultType, spaceId, result)
+        : undefined;
+
+      const stateUpdate: AnomalyDetectionRuleState = {
+        contextFieldFormatters,
+      };
+
+      if (!formattedResult) {
+        // If no anomalies found, report as recovered.
+
+        const url = buildExplorerUrl(
+          queryParams.jobIds,
+          {
+            from: `now-${queryParams.lookBackTimeInterval}`,
+            to: 'now',
+            mode: 'relative',
+          },
+          queryParams.resultType,
+          spaceId
         );
 
-        const executionResult = {
-          ...result,
-          anomalyExplorerUrl,
-        };
+        const contextMessage = i18n.translate(
+          'xpack.ml.alertTypes.anomalyDetectionAlertingRule.recoveredMessage',
+          {
+            defaultMessage:
+              'No anomalies have been found in the past {lookbackInterval} that exceed the severity threshold of {severity}.',
+            values: {
+              severity: queryParams.anomalyScoreThreshold,
+              lookbackInterval: queryParams.lookBackTimeInterval,
+            },
+          }
+        );
 
-        return { context: executionResult, name: result.alertInstanceKey, isHealthy: false };
+        const payloadMessage = i18n.translate(
+          'xpack.ml.alertTypes.anomalyDetectionAlertingRule.recoveredReason',
+          {
+            defaultMessage:
+              'No anomalies have been found in the consecutive bucket after the alert was triggered.',
+          }
+        );
+
+        return {
+          name: '',
+          isHealthy: true,
+          payload: {
+            [ALERT_URL]: url,
+            [ALERT_REASON]: payloadMessage,
+            job_id: queryParams.jobIds[0],
+          },
+          context: {
+            anomalyExplorerUrl: url,
+            jobIds: queryParams.jobIds,
+            message: contextMessage,
+          } as AnomalyDetectionAlertContext,
+          stateUpdate,
+        };
       }
 
       return {
-        name: '',
-        isHealthy: true,
-        context: {
-          anomalyExplorerUrl: buildExplorerUrl(
-            queryParams.jobIds,
-            {
-              from: `now-${queryParams.lookBackTimeInterval}`,
-              to: 'now',
-              mode: 'relative',
-            },
-            queryParams.resultType
-          ),
-          jobIds: queryParams.jobIds,
-          message: i18n.translate(
-            'xpack.ml.alertTypes.anomalyDetectionAlertingRule.recoveredMessage',
-            {
-              defaultMessage:
-                'No anomalies have been found in the past {lookbackInterval} that exceed the severity threshold of {severity}.',
-              values: {
-                severity: queryParams.anomalyScoreThreshold,
-                lookbackInterval: queryParams.lookBackTimeInterval,
-              },
-            }
-          ),
-        } as AnomalyDetectionAlertContext,
+        context: formattedResult.context,
+        payload: formattedResult.payload,
+        name: formattedResult.name,
+        isHealthy: false,
+        stateUpdate,
       };
     },
     /**
@@ -830,16 +1078,16 @@ export function alertingServiceProvider(
       timeRange,
       sampleSize,
     }: MlAnomalyDetectionAlertPreviewRequest): Promise<PreviewResponse> => {
-      const res = await fetchAnomalies(alertParams, timeRange);
+      const previewResults = await fetchPreviewResults(alertParams, timeRange);
 
-      if (!res) {
+      if (!previewResults) {
         throw Boom.notFound(`No results found`);
       }
 
       return {
         // sum of all alert responses within the time range
-        count: res.length,
-        results: res.slice(0, sampleSize),
+        count: previewResults.length,
+        results: previewResults.slice(0, sampleSize),
       };
     },
   };

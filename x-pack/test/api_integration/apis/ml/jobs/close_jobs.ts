@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG, DATAFEED_CONFIG } from './common_jobs';
 
@@ -26,9 +26,9 @@ export default ({ getService }: FtrProviderContext) => {
     expectedResponsecode: number
   ): Promise<any> {
     const { body, status } = await supertest
-      .post('/api/ml/jobs/close_jobs')
+      .post('/internal/ml/jobs/close_jobs')
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send(requestBody);
     ml.api.assertResponseStatusCode(expectedResponsecode, status, body);
 
@@ -46,12 +46,12 @@ export default ({ getService }: FtrProviderContext) => {
   describe('close_jobs', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
     after(async () => {
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
     beforeEach(async () => {

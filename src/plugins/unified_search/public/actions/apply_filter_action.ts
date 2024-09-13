@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
-import { ThemeServiceSetup } from '@kbn/core/public';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { CoreSetup } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IncompatibleActionError, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 // for cleanup esFilters need to fix the issue https://github.com/elastic/kibana/issues/131292
 import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
@@ -22,7 +22,11 @@ export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
 export interface ApplyGlobalFilterActionContext {
   filters: Filter[];
   timeFieldName?: string;
-  embeddable?: IEmbeddable;
+  // Need to make this unknown to prevent circular dependencies.
+  // Apps using this property will need to cast to `IEmbeddable`.
+  // TODO: We should consider moving these commonly used types into a separate package to avoid circular dependencies
+  // https://github.com/elastic/kibana/issues/163994
+  embeddable?: unknown;
   // controlledBy is an optional key in filter.meta that identifies the owner of a filter
   // Pass controlledBy to cleanup an existing filter(s) owned by embeddable prior to adding new filters
   controlledBy?: string;
@@ -35,11 +39,13 @@ async function isCompatible(context: ApplyGlobalFilterActionContext) {
 export function createFilterAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract,
-  theme: ThemeServiceSetup
+  core: CoreSetup,
+  id: string = ACTION_GLOBAL_APPLY_FILTER,
+  type: string = ACTION_GLOBAL_APPLY_FILTER
 ): UiActionsActionDefinition<ApplyGlobalFilterActionContext> {
   return {
-    type: ACTION_GLOBAL_APPLY_FILTER,
-    id: ACTION_GLOBAL_APPLY_FILTER,
+    type,
+    id,
     order: 100,
     getIconType: () => 'filter',
     getDisplayName: () => {
@@ -60,6 +66,7 @@ export function createFilterAction(
       let selectedFilters: Filter[] = filters;
 
       if (selectedFilters.length > 1) {
+        const [coreStart] = await core.getStartServices();
         const indexPatterns = await Promise.all(
           filters.map((filter) => {
             return getIndexPatterns().get(filter.meta.index!);
@@ -81,7 +88,7 @@ export function createFilterAction(
                   resolve(filterSelection);
                 }
               ),
-              { theme$: theme.theme$ }
+              coreStart
             ),
             {
               'data-test-subj': 'test',

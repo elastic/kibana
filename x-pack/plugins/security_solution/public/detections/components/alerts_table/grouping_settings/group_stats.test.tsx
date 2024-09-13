@@ -51,7 +51,7 @@ describe('getStats', () => {
     });
     expect(
       badgesUserName.find(
-        (badge) => badge.badge != null && badge.title === `IP's:` && badge.badge.value === 1
+        (badge) => badge.badge != null && badge.title === `Hosts:` && badge.badge.value === 1
       )
     ).toBeTruthy();
   });

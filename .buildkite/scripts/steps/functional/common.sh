@@ -21,3 +21,4 @@ if [[ -d "$cacheDir" ]]; then
 fi
 
 is_test_execution_step
+

@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { validateVersion } from '@kbn/object-versioning/lib/utils';
+
+import { getContentClientFactory } from '../content_client';
 import { ContentType } from './content_type';
 import { EventBus } from './event_bus';
-import type { ContentStorage, ContentTypeDefinition } from './types';
+import type { ContentStorage, ContentTypeDefinition, MSearchConfig } from './types';
 import type { ContentCrud } from './crud';
 
 export class ContentRegistry {
@@ -23,7 +26,9 @@ export class ContentRegistry {
    * @param contentType The content type to register
    * @param config The content configuration
    */
-  register<S extends ContentStorage<any> = ContentStorage>(definition: ContentTypeDefinition<S>) {
+  register<S extends ContentStorage<any, any, MSearchConfig<any, any>> = ContentStorage>(
+    definition: ContentTypeDefinition<S>
+  ) {
     if (this.types.has(definition.id)) {
       throw new Error(`Content [${definition.id}] is already registered`);
     }
@@ -43,6 +48,15 @@ export class ContentRegistry {
     );
 
     this.types.set(contentType.id, contentType);
+
+    const contentClient = getContentClientFactory({ contentRegistry: this })(contentType.id);
+
+    return {
+      /**
+       * Client getters to interact with the registered content type.
+       */
+      contentClient,
+    };
   }
 
   getContentType(id: string): ContentType {

@@ -26,6 +26,7 @@ export interface Actions<Args, Result> {
 
 export interface CreateApiOptions<Result> {
   clearFlashMessagesOnMakeRequest: boolean;
+  key: string; // for logics that use a key as a prop
   requestBreakpointMS?: number;
   showErrorFlash: boolean;
   showSuccessFlashFn?: (result: Result) => string;
@@ -77,21 +78,25 @@ export const createApiLogic = <Result, Args>(
       },
     }),
     path: ['enterprise_search', 'api', ...path],
+    // @ts-expect-error upgrade typescript v5.1.6
     reducers: () => ({
       apiStatus: [
         {
           status: Status.IDLE,
         },
         {
+          // @ts-expect-error upgrade typescript v5.1.6
           apiError: (_, error) => ({
             error,
             status: Status.ERROR,
           }),
           apiReset: () => ({ status: Status.IDLE }),
+          // @ts-expect-error upgrade typescript v5.1.6
           apiSuccess: (_, data) => ({
             data,
             status: Status.SUCCESS,
           }),
+          // @ts-expect-error upgrade typescript v5.1.6
           makeRequest: ({ data }) => {
             return {
               data,

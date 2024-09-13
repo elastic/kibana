@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 require('@kbn/babel-register').install();
@@ -32,7 +33,7 @@ const APACHE_2_0_LICENSE_HEADER = `
  */
 `;
 
-const OLD_DUAL_LICENSE_HEADER = `
+const DUAL_ELV1_SSPL1_LICENSE_HEADER = `
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -42,13 +43,24 @@ const OLD_DUAL_LICENSE_HEADER = `
  */
 `;
 
-const DUAL_LICENSE_HEADER = `
+const DUAL_ELV2_SSPL1_LICENSE_HEADER = `
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0 and the Server Side Public License, v 1; you may not use this file except
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
+ */
+`;
+
+const TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER = `
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 `;
 
@@ -60,7 +72,7 @@ const OLD_ELASTIC_LICENSE_HEADER = `
  */
 `;
 
-const ELASTIC_LICENSE_HEADER = `
+const ELV2_LICENSE_HEADER = `
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -173,10 +185,11 @@ const DEV_PATTERNS = [
   ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
   'packages/kbn-interpreter/tasks/**/*',
   'src/dev/**/*',
-  'x-pack/{dev-tools,tasks,test,build_chromium}/**/*',
+  'x-pack/{dev-tools,tasks,test,test_serverless,build_chromium}/**/*',
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
+  'packages/kbn-esql-validation-autocomplete/scripts/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -245,13 +258,18 @@ const RESTRICTED_IMPORTS = [
   },
   {
     name: 'react-router-dom',
-    importNames: ['Route'],
+    importNames: ['Router', 'Switch', 'Route'],
     message: 'Please use @kbn/shared-ux-router instead',
   },
   {
     name: '@kbn/kibana-react-plugin/public',
     importNames: ['Route'],
     message: 'Please use @kbn/shared-ux-router instead',
+  },
+  {
+    name: 'rxjs/operators',
+    message:
+      'Please, use rxjs instead: rxjs/operators is just a subset, unnecessarily duplicating the package import.',
   },
 ];
 
@@ -289,9 +307,24 @@ module.exports = {
         'jsx-a11y/click-events-have-key-events': 'off',
       },
     },
-
     /**
-     * Files that require dual-license headers, settings
+     * FormatJS linter for i18n code.
+     * https://formatjs.io/docs/tooling/linter
+     */
+    {
+      files: [
+        'src/**/*.{js,mjs,ts,tsx}',
+        'x-pack/**/*.{js,mjs,ts,tsx}',
+        'packages/**/*.{js,mjs,ts,tsx}',
+      ],
+      plugins: ['formatjs'],
+      rules: {
+        'formatjs/enforce-default-message': ['error', 'anything'],
+        'formatjs/enforce-description': 'off',
+      },
+    },
+    /**
+     * Files that require triple-license headers, settings
      * are overridden below for files that require Elastic
      * Licence headers
      */
@@ -301,7 +334,7 @@ module.exports = {
         '@kbn/eslint/require-license-header': [
           'error',
           {
-            license: DUAL_LICENSE_HEADER,
+            license: TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
           },
         ],
         '@kbn/eslint/disallow-license-headers': [
@@ -309,8 +342,9 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -343,9 +377,10 @@ module.exports = {
           'error',
           {
             licenses: [
-              DUAL_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -378,7 +413,7 @@ module.exports = {
         '@kbn/eslint/require-license-header': [
           'error',
           {
-            license: ELASTIC_LICENSE_HEADER,
+            license: ELV2_LICENSE_HEADER,
           },
         ],
         '@kbn/eslint/disallow-license-headers': [
@@ -386,8 +421,9 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              DUAL_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -418,9 +454,10 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              DUAL_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -447,9 +484,10 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              DUAL_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -475,10 +513,11 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              DUAL_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               KBN_HANDLEBARS_HEADER,
@@ -507,9 +546,10 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              DUAL_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -535,9 +575,10 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              DUAL_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -567,9 +608,10 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
-              DUAL_LICENSE_HEADER,
-              ELASTIC_LICENSE_HEADER,
-              OLD_DUAL_LICENSE_HEADER,
+              TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER,
+              DUAL_ELV2_SSPL1_LICENSE_HEADER,
+              DUAL_ELV1_SSPL1_LICENSE_HEADER,
+              ELV2_LICENSE_HEADER,
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
@@ -591,17 +633,23 @@ module.exports = {
         '**/*.test.js',
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
-        'x-pack/plugins/apm/**/*.js',
+        'x-pack/plugins/observability_solution/apm/**/*.js',
         'test/*/config.ts',
         'test/*/config_open.ts',
         'test/*/*.config.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
-        'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
+        'test/server_integration/**/*.ts',
+        'x-pack/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
         'x-pack/test/performance/**/*.ts',
         '**/cypress.config.{js,ts}',
+        'x-pack/test_serverless/**/config*.ts',
+        'x-pack/test_serverless/*/test_suites/**/*',
+        'x-pack/test/profiling_api_integration/**/*.ts',
+        'x-pack/test/security_solution_api_integration/*/test_suites/**/*',
+        'x-pack/test/security_solution_api_integration/**/config*.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -636,7 +684,7 @@ module.exports = {
       files: ['scripts/**/*.js', 'src/setup_node_env/**/*.js'],
       rules: {
         'import/no-commonjs': 'off',
-        'prefer-object-spread/prefer-object-spread': 'off',
+        'prefer-object-spread': 'off',
         'no-var': 'off',
         'prefer-const': 'off',
         'prefer-destructuring': 'off',
@@ -665,11 +713,11 @@ module.exports = {
      */
     {
       files: [
-        'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
+        'packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/scroll_into_view_if_necessary.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
-        'prefer-object-spread/prefer-object-spread': 'off',
+        'prefer-object-spread': 'off',
         'no-var': 'off',
         'prefer-const': 'off',
         'prefer-destructuring': 'off',
@@ -705,7 +753,7 @@ module.exports = {
       excludedFiles: ['**/integration_tests/**/*'],
       rules: {
         'import/no-commonjs': 'off',
-        'prefer-object-spread/prefer-object-spread': 'off',
+        'prefer-object-spread': 'off',
         'no-restricted-syntax': [
           'error',
           'ImportDeclaration',
@@ -722,7 +770,7 @@ module.exports = {
     {
       files: ['**/*.test.{js,mjs,ts,tsx}'],
       rules: {
-        'jest/valid-describe': 'error',
+        'jest/valid-describe-callback': 'error',
       },
     },
 
@@ -865,10 +913,11 @@ module.exports = {
      */
     {
       files: [
-        'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/apm/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/exploratory_view/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/ux/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/slo/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -880,17 +929,14 @@ module.exports = {
           },
         ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-        'react-hooks/exhaustive-deps': [
-          'error',
-          { additionalHooks: '^(useFetcher|useProgressiveFetcher|useBreadcrumb)$' },
-        ],
       },
     },
     {
       files: [
-        'x-pack/plugins/apm/**/*.stories.*',
-        'x-pack/plugins/observability/**/*.stories.*',
-        'x-pack/plugins/exploratory_view/**/*.stories.*',
+        'x-pack/plugins/observability_solution/apm/**/*.stories.*',
+        'x-pack/plugins/observability_solution/observability/**/*.stories.*',
+        'x-pack/plugins/observability_solution/exploratory_view/**/*.stories.*',
+        'x-pack/plugins/observability_solution/slo/**/*.stories.*',
       ],
       rules: {
         'react/function-component-definition': [
@@ -904,20 +950,44 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/synthetics/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/infra/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/**/*.{ts,tsx}',
+        'x-pack/packages/observability/**/*.{ts,tsx}',
+      ],
+      rules: {
+        'react-hooks/exhaustive-deps': [
+          'error',
+          {
+            additionalHooks:
+              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$',
+          },
+        ],
+      },
+    },
+    {
+      files: [
+        'x-pack/plugins/aiops/**/*.tsx',
+        'x-pack/plugins/observability_solution/**/*.tsx',
+        'src/plugins/ai_assistant_management/**/*.tsx',
+        'x-pack/packages/observability/**/*.{ts,tsx}',
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
       },
     },
     {
+      files: [
+        'x-pack/plugins/observability_solution/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+      ],
+      rules: {
+        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
+        '@kbn/i18n/i18n_translate_should_start_with_the_right_id': 'warn',
+        '@kbn/i18n/formatted_message_should_start_with_the_right_id': 'warn',
+      },
+    },
+    {
       // require explicit return types in route handlers for performance reasons
-      files: ['x-pack/plugins/apm/server/**/route.ts'],
+      files: ['x-pack/plugins/observability_solution/apm/server/**/route.ts'],
       rules: {
         '@typescript-eslint/explicit-function-return-type': [
           'error',
@@ -927,20 +997,11 @@ module.exports = {
         ],
       },
     },
-    // Profiling
-    {
-      files: ['x-pack/plugins/profiling/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-        'react-hooks/exhaustive-deps': [
-          'error',
-          { additionalHooks: '^(useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$' },
-        ],
-      },
-    },
     {
       // disable imports from legacy uptime plugin
-      files: ['x-pack/plugins/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}'],
+      files: [
+        'x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}',
+      ],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -969,8 +1030,48 @@ module.exports = {
     },
 
     /**
+     * Integration assistant overrides
+     */
+    {
+      // front end and common typescript and javascript files only
+      files: [
+        'x-pack/plugins/integration_assistant/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/integration_assistant/common/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'import/no-nodejs-modules': 'error',
+        'no-duplicate-imports': 'off',
+        '@typescript-eslint/no-duplicate-imports': 'error',
+        '@typescript-eslint/consistent-type-imports': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents UI code from importing server side code and then webpack including it when doing builds
+            patterns: ['**/server/*'],
+          },
+        ],
+      },
+    },
+
+    /**
+     * ML overrides
+     */
+    {
+      files: [
+        'x-pack/plugins/aiops/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/data_visualizer/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/transform/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/ml/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
+
+    /**
      * Security Solution overrides. These rules below are maintained and owned by
-     * the people within the security-solution-platform team. Please see ping them
+     * the people within the security-detection-engine team. Please see ping them
      * or check with them if you are encountering issues, have suggestions, or would
      * like to add, change, or remove any particular rule. Linters, Typescript, and rules
      * evolve and change over time just like coding styles, so please do not hesitate to
@@ -980,13 +1081,21 @@ module.exports = {
       // front end and common typescript and javascript files only
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/common/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/kbn-ecs-data-quality-dashboard/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/elastic_assistant/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security_solution_ess/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security_solution_serverless/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security_solution_ess/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security_solution_serverless/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/common/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
@@ -1007,17 +1116,33 @@ module.exports = {
       // This should be a very small set as most linter rules are useful for tests as well.
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
-        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{ts,tsx}',
+        'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
+        'x-pack/plugins/integration_assistant/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
+        'x-pack/packages/security-solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
+        'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
+        'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       excludedFiles: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/elastic_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/integration_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/packages/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/packages/security-solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'packages/kbn-cell-actions/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-non-null-assertion': 'error',
@@ -1027,10 +1152,18 @@ module.exports = {
       // typescript only for front and back end
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
-        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{ts,tsx}',
+        'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
+        'x-pack/plugins/integration_assistant/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
+        'x-pack/packages/security-solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
+        'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
+        'packages/kbn-cell-actions/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-this-alias': 'error',
@@ -1059,10 +1192,19 @@ module.exports = {
       // typescript and javascript for front and back end
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/elastic_assistant/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/integration_assistant/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-langchain/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-data-stream-adapter/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
@@ -1140,12 +1282,12 @@ module.exports = {
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
+        'react/sort-default-props': 'error',
         'react/void-dom-elements-no-children': 'error',
         'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
-        'react/jsx-sort-default-props': 'error',
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
@@ -1154,8 +1296,15 @@ module.exports = {
       overrides: [
         {
           files: [
+            'x-pack/packages/security-solution/features/**/*.{js,mjs,ts,tsx}',
+            'x-pack/packages/security-solution/navigation/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+            'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
+            'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
+            'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
+            'x-pack/packages/kbn-data-stream-adapter/**/*.{js,mjs,ts,tsx}',
+            'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
           ],
           rules: {
             '@typescript-eslint/consistent-type-imports': 'error',
@@ -1173,7 +1322,7 @@ module.exports = {
 
     /**
      * Lists overrides. These rules below are maintained and owned by
-     * the people within the security-solution-platform team. Please see ping them
+     * the people within the security-detection-engine team. Please see ping them
      * or check with them if you are encountering issues, have suggestions, or would
      * like to add, change, or remove any particular rule. Linters, Typescript, and rules
      * evolve and change over time just like coding styles, so please do not hesitate to
@@ -1233,12 +1382,33 @@ module.exports = {
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-comp': 'error',
+        'react/sort-default-props': 'error',
         'react/void-dom-elements-no-children': 'error',
         'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
-        'react/jsx-sort-default-props': 'error',
+      },
+    },
+    {
+      files: [
+        'test/{accessibility,*functional*}/apps/**/*.{js,ts}',
+        'test/*api_integration*/**/*.{js,ts}',
+        'x-pack/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
+        'x-pack/test/*api_integration*/**/*.{js,ts}',
+        'x-pack/test_serverless/{functional,api_integration}/test_suites/**/*.{js,ts}',
+      ],
+      extends: ['plugin:mocha/recommended'],
+      plugins: ['mocha'],
+      env: {
+        mocha: true,
+      },
+      rules: {
+        'mocha/no-mocha-arrows': 'off',
+        'mocha/no-exports': 'off',
+        'mocha/no-setup-in-describe': 'off',
+        'mocha/no-nested-tests': 'off',
+        'mocha/no-skipped-tests': 'off',
       },
     },
     {
@@ -1449,6 +1619,9 @@ module.exports = {
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
         ],
+        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
+        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
+        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
       },
     },
     /**
@@ -1481,6 +1654,17 @@ module.exports = {
       excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+
+    /**
+     * Serverless Search overrides
+     */
+    {
+      // All files
+      files: ['x-pack/plugins/serverless_search/**/*.{ts,tsx}', 'packages/kbn-search-*'],
+      rules: {
+        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
       },
     },
 

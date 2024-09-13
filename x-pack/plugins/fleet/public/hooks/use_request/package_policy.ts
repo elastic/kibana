@@ -24,6 +24,8 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types/rest_spec';
 
+import { API_VERSIONS } from '../../../common/constants';
+
 import type { RequestError } from './use_request';
 import { sendRequest, sendRequestForRq, useRequest } from './use_request';
 
@@ -31,6 +33,7 @@ export const sendCreatePackagePolicy = (body: CreatePackagePolicyRequest['body']
   return sendRequest<CreatePackagePolicyResponse>({
     path: packagePolicyRouteService.getCreatePath(),
     method: 'post',
+    version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
   });
 };
@@ -42,6 +45,7 @@ export const sendUpdatePackagePolicy = (
   return sendRequest<UpdatePackagePolicyResponse>({
     path: packagePolicyRouteService.getUpdatePath(packagePolicyId),
     method: 'put',
+    version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
   });
 };
@@ -50,23 +54,32 @@ export const sendDeletePackagePolicy = (body: DeletePackagePoliciesRequest['body
   return sendRequest<PostDeletePackagePoliciesResponse>({
     path: packagePolicyRouteService.getDeletePath(),
     method: 'post',
+    version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
   });
 };
 
-export function useGetPackagePoliciesQuery(query: GetPackagePoliciesRequest['query']) {
-  return useQuery<GetPackagePoliciesResponse, RequestError>(['packagePolicies'], () =>
-    sendRequestForRq<GetPackagePoliciesResponse>({
-      method: 'get',
-      path: packagePolicyRouteService.getListPath(),
-      query,
-    })
+export function useGetPackagePoliciesQuery(
+  query: GetPackagePoliciesRequest['query'],
+  options: Partial<{ enabled: boolean }> = {}
+) {
+  return useQuery<GetPackagePoliciesResponse, RequestError>(
+    ['packagePolicies'],
+    () =>
+      sendRequestForRq<GetPackagePoliciesResponse>({
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+        path: packagePolicyRouteService.getListPath(),
+        query,
+      }),
+    options
   );
 }
 
 export function useGetPackagePolicies(query: GetPackagePoliciesRequest['query']) {
   return useRequest<GetPackagePoliciesResponse>({
     method: 'get',
+    version: API_VERSIONS.public.v1,
     path: packagePolicyRouteService.getListPath(),
     query,
   });
@@ -75,6 +88,7 @@ export function useGetPackagePolicies(query: GetPackagePoliciesRequest['query'])
 export const sendGetPackagePolicies = (query: GetPackagePoliciesRequest['query']) => {
   return sendRequest<GetPackagePoliciesResponse>({
     method: 'get',
+    version: API_VERSIONS.public.v1,
     path: packagePolicyRouteService.getListPath(),
     query,
   });
@@ -86,6 +100,7 @@ export const useGetOnePackagePolicyQuery = (packagePolicyId: string) => {
     () =>
       sendRequestForRq<GetOnePackagePolicyResponse>({
         method: 'get',
+        version: API_VERSIONS.public.v1,
         path: packagePolicyRouteService.getInfoPath(packagePolicyId),
       })
   );
@@ -95,6 +110,7 @@ export const useGetOnePackagePolicy = (packagePolicyId: string) => {
   return useRequest<GetOnePackagePolicyResponse>({
     path: packagePolicyRouteService.getInfoPath(packagePolicyId),
     method: 'get',
+    version: API_VERSIONS.public.v1,
   });
 };
 
@@ -102,6 +118,7 @@ export const sendGetOnePackagePolicy = (packagePolicyId: string) => {
   return sendRequest<GetOnePackagePolicyResponse>({
     path: packagePolicyRouteService.getInfoPath(packagePolicyId),
     method: 'get',
+    version: API_VERSIONS.public.v1,
   });
 };
 
@@ -124,6 +141,7 @@ export function useUpgradePackagePolicyDryRunQuery(
       sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
         path: packagePolicyRouteService.getDryRunPath(),
         method: 'post',
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify(body),
       }),
     { enabled }
@@ -145,6 +163,7 @@ export function sendUpgradePackagePolicyDryRun(
   return sendRequest<UpgradePackagePolicyDryRunResponse>({
     path: packagePolicyRouteService.getDryRunPath(),
     method: 'post',
+    version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
   });
 }
@@ -154,14 +173,19 @@ export function useUpgradePackagePoliciesMutation() {
     UpgradePackagePolicyDryRunResponse,
     RequestError,
     { packagePolicyIds: string[] }
-  >(({ packagePolicyIds }) =>
-    sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
-      path: packagePolicyRouteService.getUpgradePath(),
-      method: 'post',
-      body: JSON.stringify({
-        packagePolicyIds,
+  >(
+    ({ packagePolicyIds }) =>
+      sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
+        path: packagePolicyRouteService.getUpgradePath(),
+        method: 'post',
+        version: API_VERSIONS.public.v1,
+        body: JSON.stringify({
+          packagePolicyIds,
+        }),
       }),
-    })
+    {
+      retry: false,
+    }
   );
 }
 
@@ -169,6 +193,7 @@ export function sendUpgradePackagePolicy(packagePolicyIds: string[]) {
   return sendRequest<UpgradePackagePolicyResponse>({
     path: packagePolicyRouteService.getUpgradePath(),
     method: 'post',
+    version: API_VERSIONS.public.v1,
     body: JSON.stringify({
       packagePolicyIds,
     }),
@@ -179,5 +204,6 @@ export function sendGetOrphanedIntegrationPolicies() {
   return sendRequest({
     path: packagePolicyRouteService.getOrphanedIntegrationPoliciesPath(),
     method: 'get',
+    version: API_VERSIONS.public.v1,
   });
 }

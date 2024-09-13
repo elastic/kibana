@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
-  AppNavLinkStatus,
   AppStatus,
   type PublicAppInfo,
   type PublicAppDeepLinkInfo,
@@ -19,8 +19,7 @@ const app = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   id: 'some-id',
   title: 'some-title',
   status: AppStatus.accessible,
-  navLinkStatus: AppNavLinkStatus.default,
-  searchable: true,
+  visibleIn: ['globalSearch'],
   appRoute: `/app/some-id`,
   keywords: [],
   deepLinks: [],
@@ -31,8 +30,7 @@ const deepLink = (props: Partial<PublicAppDeepLinkInfo> = {}): PublicAppDeepLink
   id: 'some-deep-link-id',
   title: 'my deep link',
   path: '/my-deep-link',
-  navLinkStatus: AppNavLinkStatus.default,
-  searchable: true,
+  visibleIn: ['globalSearch'],
   deepLinks: [],
   keywords: [],
   ...props,
@@ -49,16 +47,18 @@ describe('toNavLink', () => {
         order: 12,
         tooltip: 'tooltip',
         euiIconType: 'my-icon',
+        visibleIn: ['sideNav'],
       }),
       basePath
     );
-    expect(link.properties).toEqual(
+    expect(link?.properties).toEqual(
       expect.objectContaining({
         id: 'id',
         title: 'title',
         order: 12,
         tooltip: 'tooltip',
         euiIconType: 'my-icon',
+        visibleIn: ['sideNav'],
       })
     );
   });
@@ -70,7 +70,7 @@ describe('toNavLink', () => {
       }),
       basePath
     );
-    expect(link.properties.baseUrl).toEqual('http://localhost/base-path/my-route/my-path');
+    expect(link?.properties.baseUrl).toEqual('http://localhost/base-path/my-route/my-path');
   });
 
   it('generates the `url` property', () => {
@@ -80,7 +80,7 @@ describe('toNavLink', () => {
       }),
       basePath
     );
-    expect(link.properties.url).toEqual('/base-path/my-route/my-path');
+    expect(link?.properties.url).toEqual('/base-path/my-route/my-path');
 
     link = toNavLink(
       app({
@@ -89,136 +89,28 @@ describe('toNavLink', () => {
       }),
       basePath
     );
-    expect(link.properties.url).toEqual('/base-path/my-route/my-path/some/default/path');
+    expect(link?.properties.url).toEqual('/base-path/my-route/my-path/some/default/path');
   });
 
-  it('uses the application status when the navLinkStatus is set to default', () => {
+  it('does not return navLink if the app status is inaccessible', () => {
     expect(
       toNavLink(
         app({
-          navLinkStatus: AppNavLinkStatus.default,
-          status: AppStatus.accessible,
-        }),
-        basePath
-      ).properties
-    ).toEqual(
-      expect.objectContaining({
-        disabled: false,
-        hidden: false,
-      })
-    );
-
-    expect(
-      toNavLink(
-        app({
-          navLinkStatus: AppNavLinkStatus.default,
           status: AppStatus.inaccessible,
         }),
         basePath
-      ).properties
-    ).toEqual(
-      expect.objectContaining({
-        disabled: false,
-        hidden: true,
-      })
-    );
-  });
-
-  it('uses the navLinkStatus of the application to set the hidden and disabled properties', () => {
-    expect(
-      toNavLink(
-        app({
-          navLinkStatus: AppNavLinkStatus.visible,
-        }),
-        basePath
-      ).properties
-    ).toEqual(
-      expect.objectContaining({
-        disabled: false,
-        hidden: false,
-      })
-    );
-
-    expect(
-      toNavLink(
-        app({
-          navLinkStatus: AppNavLinkStatus.hidden,
-        }),
-        basePath
-      ).properties
-    ).toEqual(
-      expect.objectContaining({
-        disabled: false,
-        hidden: true,
-      })
-    );
-
-    expect(
-      toNavLink(
-        app({
-          navLinkStatus: AppNavLinkStatus.disabled,
-        }),
-        basePath
-      ).properties
-    ).toEqual(
-      expect.objectContaining({
-        disabled: true,
-        hidden: false,
-      })
-    );
+      )
+    ).toBe(null);
   });
 
   describe('deepLink parameter', () => {
-    it('should be hidden and not disabled by default', () => {
-      expect(toNavLink(app(), basePath, deepLink()).properties).toEqual(
-        expect.objectContaining({
-          disabled: false,
-          hidden: true,
-        })
-      );
-    });
-
-    it('should not be hidden when navLinkStatus is visible', () => {
-      expect(
-        toNavLink(
-          app(),
-          basePath,
-          deepLink({
-            navLinkStatus: AppNavLinkStatus.visible,
-          })
-        ).properties
-      ).toEqual(
-        expect.objectContaining({
-          disabled: false,
-          hidden: false,
-        })
-      );
-    });
-
-    it('should be disabled when navLinkStatus is disabled', () => {
-      expect(
-        toNavLink(
-          app(),
-          basePath,
-          deepLink({
-            navLinkStatus: AppNavLinkStatus.disabled,
-          })
-        ).properties
-      ).toEqual(
-        expect.objectContaining({
-          disabled: true,
-          hidden: false,
-        })
-      );
-    });
-
     it('should have href, baseUrl and url containing the path', () => {
       const testApp = app({
         appRoute: '/app/app-id',
         defaultPath: '/default-path',
       });
 
-      expect(toNavLink(testApp, basePath).properties).toEqual(
+      expect(toNavLink(testApp, basePath)?.properties).toEqual(
         expect.objectContaining({
           baseUrl: 'http://localhost/base-path/app/app-id',
           url: '/base-path/app/app-id/default-path',
@@ -234,7 +126,7 @@ describe('toNavLink', () => {
             id: 'deep-link-id',
             path: '/my-deep-link',
           })
-        ).properties
+        )?.properties
       ).toEqual(
         expect.objectContaining({
           baseUrl: 'http://localhost/base-path/app/app-id',
@@ -245,10 +137,10 @@ describe('toNavLink', () => {
     });
 
     it('should use the main app category', () => {
-      expect(toNavLink(app(), basePath, deepLink()).properties.category).toBeUndefined();
+      expect(toNavLink(app(), basePath, deepLink())?.properties.category).toBeUndefined();
 
       const category = { id: 'some-category', label: 'some category' };
-      expect(toNavLink(app({ category }), basePath, deepLink()).properties.category).toEqual(
+      expect(toNavLink(app({ category }), basePath, deepLink())?.properties.category).toEqual(
         category
       );
     });

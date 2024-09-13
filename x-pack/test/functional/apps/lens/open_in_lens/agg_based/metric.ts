@@ -39,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert to Lens', async () => {
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
       const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(1);
@@ -48,8 +48,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'Count',
           subtitle: undefined,
           extraText: '',
-          value: '14.01K',
-          color: 'rgba(245, 247, 250, 1)',
+          value: '14,005',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -62,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectField('machine.ram', 'metrics');
       await visEditor.clickGo();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -78,8 +79,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'Average machine.ram',
           subtitle: undefined,
           extraText: '',
-          value: '13.1B',
-          color: 'rgba(245, 247, 250, 1)',
+          value: '13,104,036,080.615',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -91,7 +93,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectAggregation('Max Bucket', 'metrics');
       await visEditor.clickGo();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -108,8 +110,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'Overall Max of Count',
           subtitle: undefined,
           extraText: '',
-          value: '1.44K',
-          color: 'rgba(245, 247, 250, 1)',
+          value: '1,437',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -146,7 +149,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await backgroundButton.click();
       await visEditor.clickGo();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -162,8 +165,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'osx',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '13.23B',
-          color: 'rgba(245, 247, 250, 1)',
+          value: '13,228,964,670.613',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -171,8 +175,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'win 7',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '13.19B',
-          color: 'rgba(245, 247, 250, 1)',
+          value: '13,186,695,551.251',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -180,8 +185,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'win xp',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '13.07B',
-          color: 'rgba(245, 247, 250, 1)',
+          value: '13,073,190,186.423',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -189,8 +195,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'win 8',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '13.03B',
-          color: 'rgba(245, 247, 250, 1)',
+          value: '13,031,579,645.108',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -198,8 +205,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'ios',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '13.01B',
-          color: 'rgba(245, 247, 250, 1)',
+          value: '13,009,497,206.823',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -208,7 +216,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: undefined,
           extraText: undefined,
           value: undefined,
-          color: 'rgba(0, 0, 0, 0)',
+          color: 'rgba(255, 255, 255, 1)',
+          trendlineColor: undefined,
           showingBar: false,
           showingTrendline: false,
         },
@@ -216,7 +225,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dimensions[0].click();
 
-      await lens.openPalettePanel('lnsMetric');
+      await lens.openPalettePanel();
       const colorStops = await lens.getPaletteColorStops();
 
       expect(colorStops).to.eql([

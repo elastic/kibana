@@ -6,21 +6,20 @@
  */
 
 import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
-import { useUpdateAlertsStatus } from '../../../common/components/toolbar/bulk_actions/use_update_alerts';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import type { AlertWorkflowStatus } from '../../../common/types';
 import { FILTER_CLOSED, FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 import * as i18n from '../translations';
-import { getUpdateAlertsQuery } from '../../components/alerts_table/actions';
 import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
+import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
 interface UseBulkAlertActionItemsArgs {
   /* Table ID for which this hook is being used */
@@ -43,9 +42,9 @@ export const useBulkAlertActionItems = ({
   to,
   refetch: refetchProp,
 }: UseBulkAlertActionItemsArgs) => {
+  const { hasIndexWrite } = useAlertsPrivileges();
   const { startTransaction } = useStartTransaction();
 
-  const { updateAlertStatus } = useUpdateAlertsStatus();
   const { addSuccess, addError, addWarning } = useAppToasts();
 
   const onAlertStatusUpdateSuccess = useCallback(
@@ -92,8 +91,6 @@ export const useBulkAlertActionItems = ({
     [addError]
   );
 
-  const { selectedPatterns } = useSourcererDataView(scopeId);
-
   const getOnAction = useCallback(
     (status: AlertWorkflowStatus) => {
       const onActionClick: BulkActionsConfig['onClick'] = async (
@@ -103,27 +100,26 @@ export const useBulkAlertActionItems = ({
         clearSelection,
         refresh
       ) => {
-        const ids = items.map((item) => item._id);
-        let query: Record<string, unknown> = getUpdateAlertsQuery(ids).query;
-
-        if (isSelectAllChecked) {
-          const timeFilter = buildTimeRangeFilter(from, to);
-          query = buildEsQuery(undefined, [], [...timeFilter, ...filters], undefined);
-        }
-        if (query) {
-          startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
-        } else if (items.length > 1) {
-          startTransaction({ name: APM_USER_INTERACTIONS.BULK_STATUS_UPDATE });
-        } else {
-          startTransaction({ name: APM_USER_INTERACTIONS.STATUS_UPDATE });
-        }
-
         try {
+          let ids: string[] | undefined = items.map((item) => item._id);
+          let query: Record<string, unknown> | undefined;
+
+          if (isSelectAllChecked) {
+            const timeFilter = buildTimeRangeFilter(from, to);
+            query = buildEsQuery(undefined, [], [...timeFilter, ...filters], undefined);
+            ids = undefined;
+            startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
+          } else if (items.length > 1) {
+            startTransaction({ name: APM_USER_INTERACTIONS.BULK_STATUS_UPDATE });
+          } else {
+            startTransaction({ name: APM_USER_INTERACTIONS.STATUS_UPDATE });
+          }
+
           setAlertLoading(true);
           const response = await updateAlertStatus({
-            index: selectedPatterns.join(','),
             status,
             query,
+            signalIds: ids,
           });
 
           setAlertLoading(false);
@@ -150,8 +146,6 @@ export const useBulkAlertActionItems = ({
     [
       onAlertStatusUpdateFailure,
       onAlertStatusUpdateSuccess,
-      updateAlertStatus,
-      selectedPatterns,
       startTransaction,
       filters,
       from,
@@ -180,7 +174,11 @@ export const useBulkAlertActionItems = ({
     [getOnAction]
   );
 
-  return [FILTER_OPEN, FILTER_CLOSED, FILTER_ACKNOWLEDGED].map((status) =>
-    getUpdateAlertStatusAction(status as AlertWorkflowStatus)
-  );
+  return useMemo(() => {
+    return hasIndexWrite
+      ? [FILTER_OPEN, FILTER_CLOSED, FILTER_ACKNOWLEDGED].map((status) => {
+          return getUpdateAlertStatusAction(status as AlertWorkflowStatus);
+        })
+      : [];
+  }, [getUpdateAlertStatusAction, hasIndexWrite]);
 };

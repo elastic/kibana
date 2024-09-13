@@ -6,16 +6,14 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { EuiFieldNumber } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
-import { EuiFormRow } from '@elastic/eui';
-import { shallow, mount } from 'enzyme';
+import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { createMockedIndexPattern } from '../../mocks';
 import { percentileRanksOperation } from '.';
 import { FormBasedLayer } from '../../types';
@@ -23,21 +21,11 @@ import type { PercentileRanksIndexPatternColumn } from './percentile_ranks';
 import { TermsIndexPatternColumn } from './terms';
 import { IndexPattern } from '../../../../types';
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
-
-  return {
-    ...original,
-    debounce: (fn: unknown) => fn,
-  };
-});
-
 const uiSettingsMock = {} as IUiSettingsClient;
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
-  savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
@@ -58,6 +46,12 @@ const defaultProps = {
 describe('percentile ranks', () => {
   let layer: FormBasedLayer;
   const InlineOptions = percentileRanksOperation.paramEditor!;
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(() => {
     layer = {
@@ -273,7 +267,7 @@ describe('percentile ranks', () => {
   describe('param editor', () => {
     it('should render current percentile rank', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      render(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -282,15 +276,14 @@ describe('percentile ranks', () => {
           currentColumn={layer.columns.col2 as PercentileRanksIndexPatternColumn}
         />
       );
-
-      const input = instance.find('[data-test-subj="lns-indexPattern-percentile_ranks-input"]');
-
-      expect(input.prop('value')).toEqual('100');
+      expect(screen.getByLabelText('Percentile ranks value')).toHaveValue(100);
     });
 
-    it('should update state on change', () => {
+    it('should update state on change', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
-      const instance = mount(
+      render(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -300,17 +293,9 @@ describe('percentile ranks', () => {
         />
       );
 
-      const input = instance
-        .find('[data-test-subj="lns-indexPattern-percentile_ranks-input"]')
-        .find(EuiFieldNumber);
-
-      act(() => {
-        input.prop('onChange')!({
-          currentTarget: { value: '103' },
-        } as React.ChangeEvent<HTMLInputElement>);
-      });
-
-      instance.update();
+      const input = screen.getByLabelText('Percentile ranks value');
+      await user.type(input, '{backspace}{backspace}{backspace}103');
+      jest.advanceTimersByTime(256);
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer.columns.col2,
@@ -321,9 +306,32 @@ describe('percentile ranks', () => {
       });
     });
 
-    it('should not update on invalid input, but show invalid value locally', () => {
+    it('should not update on invalid input, but show invalid value locally', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
-      const instance = mount(
+      render(
+        <InlineOptions
+          {...defaultProps}
+          layer={layer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col2"
+          currentColumn={layer.columns.col2 as PercentileRanksIndexPatternColumn}
+        />
+      );
+      const input = screen.getByLabelText('Percentile ranks value');
+      await user.type(input, '{backspace}{backspace}{backspace}');
+      jest.advanceTimersByTime(256);
+      expect(updateLayerSpy).not.toHaveBeenCalled();
+      expect(screen.getByTestId('lns-indexPattern-percentile_ranks-input')).toHaveValue(null);
+      expect(screen.getByText('Percentile ranks value must be a number')).toBeInTheDocument();
+    });
+
+    it('should support decimals on dimension edit', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      const updateLayerSpy = jest.fn();
+      render(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -333,32 +341,33 @@ describe('percentile ranks', () => {
         />
       );
 
-      const input = instance
-        .find('[data-test-subj="lns-indexPattern-percentile_ranks-input"]')
-        .find(EuiFieldNumber);
+      const input = screen.getByLabelText('Percentile ranks value');
+      await user.type(input, '{backspace}{backspace}{backspace}10.5');
+      jest.advanceTimersByTime(256);
+      expect(updateLayerSpy).toHaveBeenCalled();
+    });
 
-      act(() => {
-        input.prop('onChange')!({
-          currentTarget: { value: 'miaou' },
-        } as React.ChangeEvent<HTMLInputElement>);
-      });
+    it('should not support decimals on inline edit', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      const updateLayerSpy = jest.fn();
+      const { container } = render(
+        <InlineOptions
+          {...defaultProps}
+          layer={layer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col2"
+          currentColumn={layer.columns.col2 as PercentileRanksIndexPatternColumn}
+          paramEditorCustomProps={{ isInline: true }}
+        />
+      );
 
-      instance.update();
-
+      const input = screen.getByLabelText('Percentile ranks value');
+      await user.type(input, '{backspace}{backspace}{backspace}10.5');
+      jest.advanceTimersByTime(256);
       expect(updateLayerSpy).not.toHaveBeenCalled();
-
-      expect(
-        instance
-          .find('[data-test-subj="lns-indexPattern-percentile_ranks-form"]')
-          .find(EuiFormRow)
-          .prop('isInvalid')
-      ).toEqual(true);
-      expect(
-        instance
-          .find('[data-test-subj="lns-indexPattern-percentile_ranks-input"]')
-          .find(EuiFieldNumber)
-          .prop('value')
-      ).toEqual('miaou');
+      expect(screen.getByTestId('lns-indexPattern-percentile_ranks-input')).toHaveValue(10.5);
+      expect(container.querySelector('[data-euiicon-type="warning"]')).toBeInTheDocument();
     });
   });
 });

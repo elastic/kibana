@@ -11,4 +11,11 @@ export {
   ComparatorFnNames,
   getHumanReadableComparator,
 } from './comparator';
-export { STACK_ALERTS_FEATURE_ID } from './constants';
+
+export type { EsqlTable } from './esql_query_utils';
+export { rowToDocument, transformDatatableToEsqlTable, toEsQueryHits } from './esql_query_utils';
+
+export {
+  ES_QUERY_MAX_HITS_PER_EXECUTION,
+  ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
+} from './constants';

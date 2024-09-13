@@ -15,6 +15,7 @@ import {
   ElasticsearchClient,
 } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
+import { NORMALIZED_FIELD_TYPES } from '../../../common';
 
 const bodySchema = schema.object({
   indexPatterns: schema.arrayOf(schema.string()),
@@ -40,7 +41,7 @@ export function createFieldsRoute(logger: Logger, router: IRouter, baseRoute: st
     req: KibanaRequest<unknown, unknown, RequestBody>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
-    logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
+    logger.debug(() => `route ${path} request: ${JSON.stringify(req.body)}`);
 
     let rawFields: RawFields;
 
@@ -62,7 +63,7 @@ export function createFieldsRoute(logger: Logger, router: IRouter, baseRoute: st
 
     const result = { fields: getFieldsFromRawFields(rawFields) };
 
-    logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
+    logger.debug(() => `route ${path} response: ${JSON.stringify(result)}`);
     return res.ok({ body: result });
   }
 }
@@ -118,7 +119,7 @@ function getFieldsFromRawFields(rawFields: RawFields): Field[] {
     if (!type || type.startsWith('_')) continue;
     if (!values) continue;
 
-    const normalizedType = normalizedFieldTypes[type] || type;
+    const normalizedType = NORMALIZED_FIELD_TYPES[type] || type;
     const aggregatable = values.aggregatable;
     const searchable = values.searchable;
 
@@ -128,15 +129,3 @@ function getFieldsFromRawFields(rawFields: RawFields): Field[] {
   result.sort((a, b) => a.name.localeCompare(b.name));
   return result;
 }
-
-const normalizedFieldTypes: Record<string, string> = {
-  long: 'number',
-  integer: 'number',
-  short: 'number',
-  byte: 'number',
-  double: 'number',
-  float: 'number',
-  half_float: 'number',
-  scaled_float: 'number',
-  unsigned_long: 'number',
-};

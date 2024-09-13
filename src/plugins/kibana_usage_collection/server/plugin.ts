@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -39,7 +40,6 @@ import {
   registerLocalizationUsageCollector,
   registerUiCountersUsageCollector,
   registerConfigUsageCollector,
-  registerUsageCountersRollups,
   registerUsageCountersUsageCollector,
   registerSavedObjectsCountUsageCollector,
   registerEventLoopDelaysCollector,
@@ -72,7 +72,6 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
   public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
     registerEbtCounters(coreSetup.analytics, usageCollection);
-    usageCollection.createUsageCounter('uiCounters');
     this.eventLoopUsageCounter = usageCollection.createUsageCounter('eventLoop');
     coreSetup.coreUsageData.registerUsageCounter(usageCollection.createUsageCounter('core'));
     this.registerUsageCollectors(
@@ -123,22 +122,21 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     pluginStop$: Subject<void>,
     registerType: SavedObjectsRegisterType
   ) {
-    const kibanaIndex = coreSetup.savedObjects.getKibanaIndex();
     const getSavedObjectsClient = () => this.savedObjectsClient;
     const getUiSettingsClient = () => this.uiSettingsClient;
     const getCoreUsageDataService = () => this.coreUsageData!;
 
-    registerUiCountersUsageCollector(usageCollection);
+    registerUiCountersUsageCollector(usageCollection, this.logger);
 
-    registerUsageCountersRollups(
-      this.logger.get('usage-counters-rollup'),
-      getSavedObjectsClient,
-      pluginStop$
-    );
-    registerUsageCountersUsageCollector(usageCollection);
+    registerUsageCountersUsageCollector(usageCollection, this.logger);
 
     registerOpsStatsCollector(usageCollection, metric$);
-    registerKibanaUsageCollector(usageCollection, kibanaIndex);
+
+    const getIndicesForTypes = (types: string[]) =>
+      coreSetup
+        .getStartServices()
+        .then(([coreStart]) => coreStart.savedObjects.getIndicesForTypes(types));
+    registerKibanaUsageCollector(usageCollection, getIndicesForTypes);
 
     const coreStartPromise = coreSetup.getStartServices().then(([coreStart]) => coreStart);
     const getAllSavedObjectTypes = async () => {
@@ -148,7 +146,19 @@ export class KibanaUsageCollectionPlugin implements Plugin {
         .getAllTypes()
         .map(({ name }) => name);
     };
-    registerSavedObjectsCountUsageCollector(usageCollection, getAllSavedObjectTypes);
+
+    const getSoClientWithHiddenIndices = async () => {
+      const coreStart = await coreStartPromise;
+
+      const allSoTypes = await getAllSavedObjectTypes();
+      return coreStart.savedObjects.createInternalRepository(allSoTypes);
+    };
+
+    registerSavedObjectsCountUsageCollector(
+      usageCollection,
+      getAllSavedObjectTypes,
+      getSoClientWithHiddenIndices
+    );
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
     registerApplicationUsageCollector(

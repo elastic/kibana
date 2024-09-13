@@ -6,6 +6,7 @@
  */
 import { keyBy, keys, merge } from 'lodash';
 import type { RequestHandler } from '@kbn/core/server';
+import pMap from 'p-map';
 
 import type { DataStream } from '../../types';
 import { KibanaSavedObjectType } from '../../../common/types';
@@ -120,7 +121,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
     );
 
     // Query additional information for each data stream
-    const dataStreamPromises = dataStreamNames.map(async (dataStreamName) => {
+    const queryDataStreamInfo = async (dataStreamName: string) => {
       const dataStream = dataStreams[dataStreamName];
 
       const dataStreamResponse: DataStream = {
@@ -197,13 +198,18 @@ export const getListHandler: RequestHandler = async (context, request, response)
       }
 
       return dataStreamResponse;
-    });
+    };
 
     // Return final data streams objects sorted by last activity, descending
     // After filtering out data streams that are missing dataset/namespace/type/package fields
-    body.data_streams = (await Promise.all(dataStreamPromises))
+    body.data_streams = (
+      await pMap(dataStreamNames, (dataStreamName) => queryDataStreamInfo(dataStreamName), {
+        concurrency: 50,
+      })
+    )
       .filter(({ dataset, namespace, type }) => dataset && namespace && type)
       .sort((a, b) => b.last_activity_ms - a.last_activity_ms);
+
     return response.ok({
       body,
     });

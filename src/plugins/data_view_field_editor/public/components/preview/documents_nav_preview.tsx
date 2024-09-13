@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -27,14 +29,13 @@ const docIdSelector = (state: PreviewState) => {
     customId: state.customId,
   };
 };
+const fetchDocErrorSelector = (state: PreviewState) => state.fetchDocError;
 
 export const DocumentsNavPreview = () => {
-  const {
-    documents: { loadSingle, loadFromCluster, fetchDocError },
-    controller,
-  } = useFieldPreviewContext();
+  const { controller } = useFieldPreviewContext();
   const { goToPreviousDocument: prev, goToNextDocument: next } = controller;
   const { documentId, customId } = useStateSelector(controller.state$, docIdSelector);
+  const fetchDocError = useStateSelector(controller.state$, fetchDocErrorSelector);
 
   const isInvalid = fetchDocError?.code === 'DOC_NOT_FOUND';
 
@@ -45,9 +46,9 @@ export const DocumentsNavPreview = () => {
   const onDocumentIdChange = useCallback(
     (e: React.SyntheticEvent<HTMLInputElement>) => {
       const nextId = (e.target as HTMLInputElement).value;
-      loadSingle(nextId);
+      controller.setCustomDocIdToLoad(nextId);
     },
-    [loadSingle]
+    [controller]
   );
 
   return (
@@ -75,7 +76,7 @@ export const DocumentsNavPreview = () => {
                 color="primary"
                 size="xs"
                 flush="left"
-                onClick={() => loadFromCluster()}
+                onClick={() => controller.fetchSampleDocuments()}
                 data-test-subj="loadDocsFromClusterButton"
               >
                 {i18n.translate(

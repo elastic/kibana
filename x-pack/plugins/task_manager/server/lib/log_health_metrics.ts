@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
+import { Observable } from 'rxjs';
 import { Logger, DocLinksServiceSetup } from '@kbn/core/server';
 import { HealthStatus } from '../monitoring';
 import { TaskManagerConfig } from '../config';
@@ -23,6 +24,29 @@ let lastLogLevel: LogLevel | null = null;
 export function resetLastLogLevel() {
   lastLogLevel = null;
 }
+
+export function setupIntervalLogging(
+  monitoredHealth$: Observable<MonitoredHealth>,
+  logger: Logger,
+  minutes: number
+) {
+  let monitoredHealth: MonitoredHealth | undefined;
+  monitoredHealth$.subscribe((m) => {
+    monitoredHealth = m;
+  });
+
+  setInterval(onInterval, 1000 * 60 * minutes);
+
+  function onInterval() {
+    const meta = { tags: ['task-manager-background-node-health'] };
+    if (!monitoredHealth) {
+      return logger.warn('unable to log health metrics, not initialized yet', meta);
+    }
+
+    logger.info(`background node health: ${JSON.stringify(monitoredHealth)}`, meta);
+  }
+}
+
 export function logHealthMetrics(
   monitoredHealth: MonitoredHealth,
   logger: Logger,
@@ -40,12 +64,9 @@ export function logHealthMetrics(
       capacity_estimation: undefined,
     },
   };
-  const statusWithoutCapacity = calculateHealthStatus(
-    healthWithoutCapacity,
-    config,
-    shouldRunTasks,
-    logger
-  );
+  const healthStatus = calculateHealthStatus(healthWithoutCapacity, config, shouldRunTasks, logger);
+
+  const statusWithoutCapacity = healthStatus?.status;
   if (statusWithoutCapacity === HealthStatus.Warning) {
     logLevel = LogLevel.Warn;
   } else if (statusWithoutCapacity === HealthStatus.Error && !isEmpty(monitoredHealth.stats)) {

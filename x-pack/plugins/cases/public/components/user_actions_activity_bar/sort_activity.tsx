@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiSelect } from '@elastic/eui';
-import type { EuiSelectOption } from '@elastic/eui';
+import type { EuiSelectProps, EuiSelectOption } from '@elastic/eui';
 
 import * as i18n from './translations';
 import type { UserActivitySortOrder } from './types';
@@ -18,7 +18,7 @@ interface FilterActivityProps {
   onOrderChange: (sortOrder: UserActivitySortOrder) => void;
 }
 
-export const SortOptions: EuiSelectOption[] = [
+export const sortOptions: EuiSelectOption[] = [
   {
     value: 'desc',
     text: i18n.NEWEST,
@@ -31,7 +31,7 @@ export const SortOptions: EuiSelectOption[] = [
 
 export const SortActivity = React.memo<FilterActivityProps>(
   ({ sortOrder, onOrderChange, isLoading = false }) => {
-    const onChange = useCallback(
+    const onChange = useCallback<NonNullable<EuiSelectProps['onChange']>>(
       (e) => {
         onOrderChange(e.target.value as UserActivitySortOrder);
       },
@@ -44,8 +44,9 @@ export const SortActivity = React.memo<FilterActivityProps>(
         data-test-subj="user-actions-sort-select"
         isLoading={isLoading}
         onChange={onChange}
-        options={SortOptions}
+        options={sortOptions}
         value={sortOrder}
+        aria-label={i18n.SORTED_BY_ARIA_LABEL}
       />
     );
   }

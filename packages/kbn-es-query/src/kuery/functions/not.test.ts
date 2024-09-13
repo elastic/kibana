@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { nodeTypes } from '../node_types';
@@ -12,8 +13,7 @@ import { DataViewBase } from '../../..';
 
 import * as ast from '../ast';
 import * as not from './not';
-
-jest.mock('../grammar');
+import { KqlNotFunctionNode } from './not';
 
 const childNode = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 
@@ -40,7 +40,7 @@ describe('kuery functions', () => {
 
     describe('toElasticsearchQuery', () => {
       test("should wrap a subquery in an ES bool query's must_not clause", () => {
-        const node = nodeTypes.function.buildNode('not', childNode);
+        const node = nodeTypes.function.buildNode('not', childNode) as KqlNotFunctionNode;
         const result = not.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
@@ -50,6 +50,14 @@ describe('kuery functions', () => {
         expect(Object.keys(result.bool!).length).toBe(1);
 
         expect(result.bool!.must_not).toEqual(ast.toElasticsearchQuery(childNode, indexPattern));
+      });
+    });
+
+    describe('toKqlExpression', () => {
+      test('with one sub-expression', () => {
+        const node = nodeTypes.function.buildNode('not', childNode) as KqlNotFunctionNode;
+        const result = not.toKqlExpression(node);
+        expect(result).toBe('NOT extension: jpg');
       });
     });
   });

@@ -7,68 +7,115 @@
 
 import React from 'react';
 import { Visualization } from '../../../types';
-import { createMockVisualization, createMockFramePublicAPI, FrameMock } from '../../../mocks';
-import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
-import { mountWithProvider } from '../../../mocks';
-import { ReactWrapper } from 'enzyme';
 import {
-  selectAutoApplyEnabled,
-  updateVisualizationState,
-  disableAutoApply,
-  selectTriggerApplyChanges,
-} from '../../../state_management';
-import { enableAutoApply, setChangesApplied } from '../../../state_management/lens_slice';
+  createMockVisualization,
+  createMockFramePublicAPI,
+  FrameMock,
+  renderWithReduxStore,
+} from '../../../mocks';
+import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
+import { updateVisualizationState, LensAppState } from '../../../state_management';
+import { setChangesApplied } from '../../../state_management/lens_slice';
 import { LensInspector } from '../../../lens_inspector_service';
+import { screen } from '@testing-library/react';
+import faker from 'faker';
+import { SettingsMenu } from '../../../app_plugin/settings_menu';
 
 describe('workspace_panel_wrapper', () => {
   let mockVisualization: jest.Mocked<Visualization>;
   let mockFrameAPI: FrameMock;
+  const ToolbarComponentMock = jest.fn(() => null);
+
+  const renderWorkspacePanelWrapper = (
+    propsOverrides = {},
+    { preloadedState }: { preloadedState: Partial<LensAppState> } = { preloadedState: {} }
+  ) => {
+    const { store, ...rtlRender } = renderWithReduxStore(
+      <>
+        <WorkspacePanelWrapper
+          framePublicAPI={mockFrameAPI}
+          visualizationId="myVis"
+          visualizationMap={{
+            myVis: { ...mockVisualization, ToolbarComponent: ToolbarComponentMock },
+          }}
+          datasourceMap={{}}
+          datasourceStates={{}}
+          isFullscreen={false}
+          lensInspector={{} as unknown as LensInspector}
+          getUserMessages={() => []}
+          children={<span />}
+          displayOptions={undefined}
+          {...propsOverrides}
+        />
+        <SettingsMenu
+          anchorElement={document.createElement('button')}
+          isOpen
+          onClose={jest.fn()}
+          {...propsOverrides}
+        />
+      </>,
+      {},
+      { preloadedState }
+    );
+
+    const getApplyChangesToolbar = () => {
+      return screen.queryByTestId('lnsApplyChanges__toolbar');
+    };
+
+    const toggleAutoApply = () => {
+      const autoApplyToggle = screen.getByTestId('lnsToggleAutoApply');
+      autoApplyToggle.click();
+    };
+
+    const isAutoApplyOn = () => {
+      const autoApplyToggle = screen.getByTestId('lnsToggleAutoApply');
+      return autoApplyToggle.getAttribute('aria-checked') === 'true';
+    };
+
+    const editVisualization = () => {
+      store.dispatch(
+        updateVisualizationState({
+          visualizationId: store.getState().lens.visualization.activeId as string,
+          newState: { something: 'changed' },
+        })
+      );
+    };
+
+    return {
+      getApplyChangesToolbar,
+      toggleAutoApply,
+      isAutoApplyOn,
+      store,
+      editVisualization,
+      ...rtlRender,
+    };
+  };
 
   beforeEach(() => {
     mockVisualization = createMockVisualization();
     mockFrameAPI = createMockFramePublicAPI();
+    ToolbarComponentMock.mockClear();
   });
 
   it('should render its children', async () => {
-    const MyChild = () => <span>The child elements</span>;
-    const { instance } = await mountWithProvider(
-      <WorkspacePanelWrapper
-        framePublicAPI={mockFrameAPI}
-        visualizationState={{}}
-        visualizationId="myVis"
-        visualizationMap={{ myVis: mockVisualization }}
-        datasourceMap={{}}
-        datasourceStates={{}}
-        isFullscreen={false}
-        lensInspector={{} as unknown as LensInspector}
-        getUserMessages={() => []}
-      >
-        <MyChild />
-      </WorkspacePanelWrapper>
-    );
-
-    expect(instance.find(MyChild)).toHaveLength(1);
+    const customElementText = faker.random.word();
+    renderWorkspacePanelWrapper({ children: <span>{customElementText}</span> });
+    expect(screen.getByText(customElementText)).toBeInTheDocument();
   });
 
   it('should call the toolbar renderer if provided', async () => {
-    const renderToolbarMock = jest.fn();
     const visState = { internalState: 123 };
-    await mountWithProvider(
-      <WorkspacePanelWrapper
-        framePublicAPI={mockFrameAPI}
-        visualizationState={visState}
-        children={<span />}
-        visualizationId="myVis"
-        visualizationMap={{ myVis: { ...mockVisualization, renderToolbar: renderToolbarMock } }}
-        datasourceMap={{}}
-        datasourceStates={{}}
-        isFullscreen={false}
-        lensInspector={{} as unknown as LensInspector}
-        getUserMessages={() => []}
-      />
+    renderWorkspacePanelWrapper(
+      {},
+      {
+        preloadedState: {
+          visualization: { activeId: 'myVis', state: visState },
+          datasourceStates: {},
+        },
+      }
     );
 
-    expect(renderToolbarMock).toHaveBeenCalledWith(expect.any(Element), {
+    expect(ToolbarComponentMock).toHaveBeenCalledWith({
       state: visState,
       frame: mockFrameAPI,
       setState: expect.anything(),
@@ -76,126 +123,44 @@ describe('workspace_panel_wrapper', () => {
   });
 
   describe('auto-apply controls', () => {
-    class Harness {
-      private _instance: ReactWrapper;
-
-      constructor(instance: ReactWrapper) {
-        this._instance = instance;
-      }
-
-      update() {
-        this._instance.update();
-      }
-
-      private get applyChangesButton() {
-        return this._instance.find('button[data-test-subj="lnsApplyChanges__toolbar"]');
-      }
-
-      applyChanges() {
-        this.applyChangesButton.simulate('click');
-      }
-
-      public get applyChangesExists() {
-        return this.applyChangesButton.exists();
-      }
-
-      public get applyChangesDisabled() {
-        if (!this.applyChangesExists) {
-          throw Error('apply changes button doesnt exist');
-        }
-        return this.applyChangesButton.prop('disabled');
-      }
-    }
-
-    let store: Awaited<ReturnType<typeof mountWithProvider>>['lensStore'];
-    let harness: Harness;
-    beforeEach(async () => {
-      const { instance, lensStore } = await mountWithProvider(
-        <WorkspacePanelWrapper
-          framePublicAPI={mockFrameAPI}
-          visualizationState={{}}
-          visualizationId="myVis"
-          visualizationMap={{ myVis: mockVisualization }}
-          datasourceMap={{}}
-          datasourceStates={{}}
-          isFullscreen={false}
-          lensInspector={{} as unknown as LensInspector}
-          getUserMessages={() => []}
-        >
-          <div />
-        </WorkspacePanelWrapper>
-      );
-
-      store = lensStore;
-      harness = new Harness(instance);
-    });
-
     it('shows and hides apply-changes button depending on whether auto-apply is enabled', async () => {
-      store.dispatch(disableAutoApply());
-      harness.update();
-
-      expect(harness.applyChangesExists).toBeTruthy();
-
-      store.dispatch(enableAutoApply());
-      harness.update();
-
-      expect(harness.applyChangesExists).toBeFalsy();
-
-      store.dispatch(disableAutoApply());
-      harness.update();
-
-      expect(harness.applyChangesExists).toBeTruthy();
+      const { toggleAutoApply, getApplyChangesToolbar } = renderWorkspacePanelWrapper();
+      toggleAutoApply();
+      expect(getApplyChangesToolbar()).toBeInTheDocument();
+      toggleAutoApply();
+      expect(getApplyChangesToolbar()).not.toBeInTheDocument();
+      toggleAutoApply();
+      expect(getApplyChangesToolbar()).toBeInTheDocument();
     });
 
     it('apply-changes button applies changes', () => {
-      store.dispatch(disableAutoApply());
-      harness.update();
-
-      expect(selectAutoApplyEnabled(store.getState())).toBeFalsy();
-      expect(harness.applyChangesDisabled).toBeTruthy();
+      const { store, toggleAutoApply, getApplyChangesToolbar, editVisualization } =
+        renderWorkspacePanelWrapper();
+      toggleAutoApply();
+      expect(getApplyChangesToolbar()).toBeDisabled();
 
       // make a change
-      store.dispatch(
-        updateVisualizationState({
-          visualizationId: store.getState().lens.visualization.activeId as string,
-          newState: { something: 'changed' },
-        })
-      );
-      // simulate workspace panel behavior
+      editVisualization();
+      // // simulate workspace panel behavior
       store.dispatch(setChangesApplied(false));
-      harness.update();
 
-      expect(harness.applyChangesDisabled).toBeFalsy();
+      expect(getApplyChangesToolbar()).not.toBeDisabled();
 
-      harness.applyChanges();
-
-      expect(selectTriggerApplyChanges(store.getState())).toBeTruthy();
-      // simulate workspace panel behavior
+      // // simulate workspace panel behavior
       store.dispatch(setChangesApplied(true));
-      harness.update();
-
-      expect(harness.applyChangesDisabled).toBeTruthy();
+      expect(getApplyChangesToolbar()).toBeDisabled();
     });
 
     it('enabling auto apply while having unapplied changes works', () => {
-      // setup
-      store.dispatch(disableAutoApply());
-      store.dispatch(
-        updateVisualizationState({
-          visualizationId: store.getState().lens.visualization.activeId as string,
-          newState: { something: 'changed' },
-        })
-      );
-      store.dispatch(setChangesApplied(false)); // simulate workspace panel behavior
-      harness.update();
-
-      expect(harness.applyChangesDisabled).toBeFalsy();
-      expect(harness.applyChangesExists).toBeTruthy();
-
-      store.dispatch(enableAutoApply());
-      harness.update();
-
-      expect(harness.applyChangesExists).toBeFalsy();
+      const { store, toggleAutoApply, getApplyChangesToolbar, editVisualization } =
+        renderWorkspacePanelWrapper();
+      toggleAutoApply();
+      editVisualization();
+      // simulate workspace panel behavior
+      store.dispatch(setChangesApplied(false));
+      expect(getApplyChangesToolbar()).not.toBeDisabled();
+      toggleAutoApply();
+      expect(getApplyChangesToolbar()).not.toBeInTheDocument();
     });
   });
 });

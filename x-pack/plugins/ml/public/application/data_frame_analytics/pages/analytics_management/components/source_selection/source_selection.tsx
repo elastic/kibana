@@ -5,29 +5,31 @@
  * 2.0.
  */
 
-import React, { useState, FC } from 'react';
-
-import {
-  EuiCallOut,
-  EuiSpacer,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
-
+import type { FC } from 'react';
+import React, { useState } from 'react';
+import { EuiCallOut, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-
+import { CreateDataViewButton } from '../../../../../components/create_data_view_button';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
-import { getDataViewAndSavedSearch, isCcsIndexPattern } from '../../../../../util/index_utils';
+import {
+  getDataViewAndSavedSearchCallback,
+  isCcsIndexPattern,
+} from '../../../../../util/index_utils';
 
 const fixedPageSize: number = 20;
 
 export const SourceSelection: FC = () => {
   const {
-    services: { http, uiSettings, savedObjectsManagement },
+    services: {
+      savedSearch: savedSearchService,
+      data: { dataViews: dataViewsService },
+      contentManagement,
+      uiSettings,
+    },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
 
@@ -38,8 +40,8 @@ export const SourceSelection: FC = () => {
   const onSearchSelected = async (
     id: string,
     type: string,
-    fullName: string,
-    savedObject: SavedObjectCommon
+    fullName?: string,
+    savedObject?: SavedObjectCommon
   ) => {
     // Kibana data views including `:` are cross-cluster search indices
     // and are not supported by Data Frame Analytics yet. For saved searches
@@ -47,11 +49,14 @@ export const SourceSelection: FC = () => {
     // the selection before redirecting and show an error callout instead.
     let dataViewName = '';
 
-    if (type === 'index-pattern') {
+    if (type === 'index-pattern' && savedObject) {
       dataViewName = getNestedProperty(savedObject, 'attributes.title');
     } else if (type === 'search') {
       try {
-        const dataViewAndSavedSearch = await getDataViewAndSavedSearch(id);
+        const dataViewAndSavedSearch = await getDataViewAndSavedSearchCallback({
+          savedSearchService,
+          dataViewsService,
+        })(id);
         dataViewName = dataViewAndSavedSearch.dataView?.title ?? '';
       } catch (error) {
         // an unexpected error has occurred. This could be caused by a saved search for which the data view no longer exists.
@@ -68,14 +73,14 @@ export const SourceSelection: FC = () => {
       }
     }
 
-    if (isCcsIndexPattern(dataViewName)) {
+    if (isCcsIndexPattern(dataViewName) && savedObject) {
       setIsCcsCallOut(true);
       if (type === 'search') {
         setCcsCallOutBodyText(
           i18n.translate(
             'xpack.ml.dataFrame.analytics.create.searchSelection.CcsErrorCallOutBody',
             {
-              defaultMessage: `The saved search '{savedSearchTitle}' uses the data view '{dataViewName}'.`,
+              defaultMessage: `The saved search ''{savedSearchTitle}'' uses the data view ''{dataViewName}''.`,
               values: {
                 savedSearchTitle: getNestedProperty(savedObject, 'attributes.title'),
                 dataViewName,
@@ -99,7 +104,7 @@ export const SourceSelection: FC = () => {
   return (
     <div data-test-subj="mlDFAPageSourceSelection">
       <EuiPageBody restrictWidth={1200}>
-        <EuiPageContent hasShadow={false} hasBorder={true}>
+        <EuiPanel hasShadow={false} hasBorder>
           {isCcsCallOut && (
             <>
               <EuiCallOut
@@ -142,22 +147,27 @@ export const SourceSelection: FC = () => {
                 type: 'index-pattern',
                 getIconForSavedObject: () => 'indexPatternApp',
                 name: i18n.translate(
-                  'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.indexPattern',
+                  'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.dataView',
                   {
                     defaultMessage: 'Data view',
                   }
                 ),
-                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={fixedPageSize}
             services={{
+              contentClient: contentManagement.client,
               uiSettings,
-              http,
-              savedObjectsManagement,
             }}
-          />
-        </EuiPageContent>
+          >
+            <CreateDataViewButton
+              onDataViewCreated={(dataView) => {
+                onSearchSelected(dataView.id!, 'index-pattern', dataView.getIndexPattern());
+              }}
+              allowAdHocDataView={true}
+            />
+          </SavedObjectFinder>
+        </EuiPanel>
       </EuiPageBody>
     </div>
   );

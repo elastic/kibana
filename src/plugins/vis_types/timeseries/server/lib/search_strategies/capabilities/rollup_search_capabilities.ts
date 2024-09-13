@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { get, has } from 'lodash';
 import { leastCommonInterval, isCalendarInterval } from '../lib/interval_helper';
 
@@ -54,13 +56,10 @@ export class RollupSearchCapabilities extends DefaultSearchCapabilities {
     });
 
     const getFields = (fields: { [key: string]: any }) =>
-      Object.keys(fields).reduce(
-        (acc, item) => ({
-          ...acc,
-          [item]: true,
-        }),
-        this.createUiRestriction({})
-      );
+      Object.keys(fields).reduce((acc, item) => {
+        acc[item] = true;
+        return acc;
+      }, this.createUiRestriction({}) as Record<string, boolean>);
 
     return Object.keys(this.availableMetrics).reduce(
       (acc, item) => ({

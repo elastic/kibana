@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import dedent from 'dedent';
@@ -49,35 +50,33 @@ export const buildSnapshots: Command = {
     del.sync(outputDir);
     Fs.mkdirSync(outputDir, { recursive: true });
 
-    for (const license of ['oss', 'trial']) {
-      for (const platform of ['darwin', 'win32', 'linux']) {
-        log.info('Building', platform, license === 'trial' ? 'default' : 'oss', 'snapshot');
-        await log.indent(4, async () => {
-          const snapshotPath = await buildSnapshot({
-            license,
-            sourcePath: options.sourcePath,
-            log,
-            platform,
-          });
-
-          const filename = basename(snapshotPath);
-          const outputPath = resolve(outputDir, filename);
-          const hash = createHash('sha512');
-          await pipelineAsync(
-            Fs.createReadStream(snapshotPath),
-            new Transform({
-              transform(chunk, _, cb) {
-                hash.update(chunk);
-                cb(undefined, chunk);
-              },
-            }),
-            Fs.createWriteStream(outputPath)
-          );
-
-          Fs.writeFileSync(`${outputPath}.sha512`, `${hash.digest('hex')}  ${filename}`);
-          log.success('snapshot and shasum written to', outputPath);
+    for (const platform of ['darwin', 'win32', 'linux']) {
+      log.info('Building', platform, 'default snapshot');
+      await log.indent(4, async () => {
+        const snapshotPath = await buildSnapshot({
+          license: 'trial',
+          sourcePath: options.sourcePath,
+          log,
+          platform,
         });
-      }
+
+        const filename = basename(snapshotPath);
+        const outputPath = resolve(outputDir, filename);
+        const hash = createHash('sha512');
+        await pipelineAsync(
+          Fs.createReadStream(snapshotPath),
+          new Transform({
+            transform(chunk, _, cb) {
+              hash.update(chunk);
+              cb(undefined, chunk);
+            },
+          }),
+          Fs.createWriteStream(outputPath)
+        );
+
+        Fs.writeFileSync(`${outputPath}.sha512`, `${hash.digest('hex')}  ${filename}`);
+        log.success('snapshot and shasum written to', outputPath);
+      });
     }
   },
 };

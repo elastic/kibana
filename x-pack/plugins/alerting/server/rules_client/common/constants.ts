@@ -10,11 +10,13 @@ import {
   AlertingAuthorizationFilterOpts,
 } from '../../authorization';
 
-// NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
-export const extractedSavedObjectParamReferenceNamePrefix = 'param:';
+export {
+  systemConnectorActionRefPrefix,
+  preconfiguredConnectorActionRefPrefix,
+} from '../../../common';
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
-export const preconfiguredConnectorActionRefPrefix = 'preconfigured:';
+export const extractedSavedObjectParamReferenceNamePrefix = 'param:';
 
 export const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,

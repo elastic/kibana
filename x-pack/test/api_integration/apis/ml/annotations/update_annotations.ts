@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { ANNOTATION_TYPE } from '@kbn/ml-plugin/common/constants/annotations';
 import { Annotation } from '@kbn/ml-plugin/common/types/annotations';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { testSetupJobConfigs, jobIds, testSetupAnnotations } from './common_jobs';
 
@@ -60,16 +60,16 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .put('/api/ml/annotations/index')
+        .put('/internal/ml/annotations/index')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader())
         .send(annotationUpdateRequestBody);
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body._id).to.eql(originalAnnotation._id);
       expect(body.result).to.eql('updated');
 
-      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id);
+      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id!);
 
       if (updatedAnnotation) {
         Object.keys(commonAnnotationUpdateRequestBody).forEach((key) => {
@@ -91,16 +91,16 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .put('/api/ml/annotations/index')
+        .put('/internal/ml/annotations/index')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader())
         .send(annotationUpdateRequestBody);
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body._id).to.eql(originalAnnotation._id);
       expect(body.result).to.eql('updated');
 
-      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id);
+      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id!);
       if (updatedAnnotation) {
         Object.keys(commonAnnotationUpdateRequestBody).forEach((key) => {
           const field = key as keyof Annotation;
@@ -122,16 +122,16 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .put('/api/ml/annotations/index')
+        .put('/internal/ml/annotations/index')
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader())
         .send(annotationUpdateRequestBody);
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');
 
-      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id);
+      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id!);
       expect(updatedAnnotation).to.eql(originalAnnotation._source);
     });
 
@@ -151,13 +151,13 @@ export default ({ getService }: FtrProviderContext) => {
         _id: originalAnnotation._id,
       };
       const { body, status } = await supertest
-        .put('/api/ml/annotations/index')
+        .put('/internal/ml/annotations/index')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader())
         .send(annotationUpdateRequestBodyWithMissingFields);
       ml.api.assertResponseStatusCode(200, status, body);
 
-      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id);
+      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id!);
       if (updatedAnnotation) {
         Object.keys(annotationUpdateRequestBodyWithMissingFields).forEach((key) => {
           if (key !== '_id') {

@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, useContext } from 'react';
+import type { FC } from 'react';
+import React, { useContext } from 'react';
+import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
+import { useDashboardService } from '../../../../../../../../../services/dashboard_service';
 import { CustomUrls } from '../../../../../../../../../components/custom_urls/custom_urls';
-import { UrlConfig } from '../../../../../../../../../../../common/types/custom_urls';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
-import { CombinedJob } from '../../../../../../../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '../../../../../../../../../../../common/types/anomaly_detection_jobs';
 
 export const CustomUrlsSelection: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
 
-  const setCustomUrls = (customUrls: UrlConfig[]) => {
+  const setCustomUrls = (customUrls: MlUrlConfig[]) => {
     jobCreator.customUrls = customUrls;
     jobCreatorUpdate();
   };
@@ -24,6 +26,7 @@ export const CustomUrlsSelection: FC = () => {
     ...jobCreator.jobConfig,
     datafeed_config: jobCreator.datafeedConfig,
   };
+  const dashboardService = useDashboardService();
 
   return (
     <Description>
@@ -32,6 +35,7 @@ export const CustomUrlsSelection: FC = () => {
         jobCustomUrls={jobCreator.customUrls ?? []}
         setCustomUrls={setCustomUrls}
         editMode="modal"
+        dashboardService={dashboardService}
       />
     </Description>
   );

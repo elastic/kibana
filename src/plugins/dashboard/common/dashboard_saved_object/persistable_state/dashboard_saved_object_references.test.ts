@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
   extractReferences,
   injectReferences,
-  InjectDeps,
-  ExtractDeps,
+  InjectExtractDeps,
 } from './dashboard_saved_object_references';
 
 import {
@@ -18,6 +18,7 @@ import {
   createInject,
 } from '../../dashboard_container/persistable_state/dashboard_container_references';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
+import { DashboardAttributes } from '../../content_management';
 
 const embeddablePersistableStateServiceMock = createEmbeddablePersistableStateServiceMock();
 const dashboardInject = createInject(embeddablePersistableStateServiceMock);
@@ -38,182 +39,25 @@ embeddablePersistableStateServiceMock.inject.mockImplementation((state, referenc
 
   return state;
 });
-const deps: InjectDeps & ExtractDeps = {
+const deps: InjectExtractDeps = {
   embeddablePersistableStateService: embeddablePersistableStateServiceMock,
 };
 
-describe('legacy extract references', () => {
-  test('extracts references from panelsJSON', () => {
-    const doc = {
-      id: '1',
-      attributes: {
-        foo: true,
-        panelsJSON: JSON.stringify([
-          {
-            type: 'visualization',
-            id: '1',
-            title: 'Title 1',
-            version: '7.0.0',
-          },
-          {
-            type: 'visualization',
-            id: '2',
-            title: 'Title 2',
-            version: '7.0.0',
-          },
-        ]),
-      },
-      references: [],
-    };
-    const updatedDoc = extractReferences(doc, deps);
-
-    expect(updatedDoc).toMatchInlineSnapshot(`
-      Object {
-        "attributes": Object {
-          "foo": true,
-          "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"version\\":\\"7.0.0\\",\\"panelRefName\\":\\"panel_0\\"},{\\"title\\":\\"Title 2\\",\\"version\\":\\"7.0.0\\",\\"panelRefName\\":\\"panel_1\\"}]",
-        },
-        "references": Array [
-          Object {
-            "id": "1",
-            "name": "panel_0",
-            "type": "visualization",
-          },
-          Object {
-            "id": "2",
-            "name": "panel_1",
-            "type": "visualization",
-          },
-        ],
-      }
-    `);
-  });
-
-  test('fails when "type" attribute is missing from a panel', () => {
-    const doc = {
-      id: '1',
-      attributes: {
-        foo: true,
-        panelsJSON: JSON.stringify([
-          {
-            id: '1',
-            title: 'Title 1',
-            version: '7.0.0',
-          },
-        ]),
-      },
-      references: [],
-    };
-    expect(() => extractReferences(doc, deps)).toThrowErrorMatchingInlineSnapshot(
-      `"\\"type\\" attribute is missing from panel \\"0\\""`
-    );
-  });
-
-  test('passes when "id" attribute is missing from a panel', () => {
-    const doc = {
-      id: '1',
-      attributes: {
-        foo: true,
-        panelsJSON: JSON.stringify([
-          {
-            type: 'visualization',
-            title: 'Title 1',
-            version: '7.9.1',
-          },
-        ]),
-      },
-      references: [],
-    };
-    expect(extractReferences(doc, deps)).toMatchInlineSnapshot(`
-      Object {
-        "attributes": Object {
-          "foo": true,
-          "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\"}]",
-        },
-        "references": Array [],
-      }
-    `);
-  });
-
-  // https://github.com/elastic/kibana/issues/93772
-  test('passes when received older RAW SO with older panels', () => {
-    const doc = {
-      id: '1',
-      attributes: {
-        hits: 0,
-        timeFrom: 'now-16h/h',
-        timeTo: 'now',
-        refreshInterval: {
-          display: '1 minute',
-          section: 2,
-          value: 60000,
-          pause: false,
-        },
-        description: '',
-        uiStateJSON: '{"P-1":{"vis":{"legendOpen":false}}}',
-        title: 'Errors/Fatals/Warnings dashboard',
-        timeRestore: true,
-        version: 1,
-        panelsJSON:
-          '[{"col":1,"id":"544891f0-2cf2-11e8-9735-93e95b055f48","panelIndex":1,"row":1,"size_x":12,"size_y":8,"type":"visualization"}]',
-        optionsJSON: '{"darkTheme":true}',
-        kibanaSavedObjectMeta: {
-          searchSourceJSON:
-            '{"highlightAll":true,"filter":[{"query":{"query_string":{"analyze_wildcard":true,"query":"*"}}}]}',
-        },
-      },
-      references: [],
-    };
-    const updatedDoc = extractReferences(doc, deps);
-
-    expect(updatedDoc).toMatchInlineSnapshot(`
-      Object {
-        "attributes": Object {
-          "description": "",
-          "hits": 0,
-          "kibanaSavedObjectMeta": Object {
-            "searchSourceJSON": "{\\"highlightAll\\":true,\\"filter\\":[{\\"query\\":{\\"query_string\\":{\\"analyze_wildcard\\":true,\\"query\\":\\"*\\"}}}]}",
-          },
-          "optionsJSON": "{\\"darkTheme\\":true}",
-          "panelsJSON": "[{\\"col\\":1,\\"panelIndex\\":1,\\"row\\":1,\\"size_x\\":12,\\"size_y\\":8,\\"panelRefName\\":\\"panel_0\\"}]",
-          "refreshInterval": Object {
-            "display": "1 minute",
-            "pause": false,
-            "section": 2,
-            "value": 60000,
-          },
-          "timeFrom": "now-16h/h",
-          "timeRestore": true,
-          "timeTo": "now",
-          "title": "Errors/Fatals/Warnings dashboard",
-          "uiStateJSON": "{\\"P-1\\":{\\"vis\\":{\\"legendOpen\\":false}}}",
-          "version": 1,
-        },
-        "references": Array [
-          Object {
-            "id": "544891f0-2cf2-11e8-9735-93e95b055f48",
-            "name": "panel_0",
-            "type": "visualization",
-          },
-        ],
-      }
-    `);
-
-    const panel = JSON.parse(updatedDoc.attributes.panelsJSON as string)[0];
-
-    // unknown older panel keys are left untouched
-    expect(panel).toHaveProperty('col');
-    expect(panel).toHaveProperty('row');
-    expect(panel).toHaveProperty('size_x');
-    expect(panel).toHaveProperty('size_y');
-  });
-});
+const commonAttributes: DashboardAttributes = {
+  kibanaSavedObjectMeta: { searchSourceJSON: '' },
+  timeRestore: false,
+  panelsJSON: '',
+  version: 1,
+  description: '',
+  title: '',
+};
 
 describe('extractReferences', () => {
   test('extracts references from panelsJSON', () => {
     const doc = {
       id: '1',
       attributes: {
+        ...commonAttributes,
         foo: true,
         panelsJSON: JSON.stringify([
           {
@@ -239,8 +83,15 @@ describe('extractReferences', () => {
     expect(updatedDoc).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
+          "description": "",
           "foo": true,
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "",
+          },
           "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"panelIndex\\":\\"panel-1\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"panelRefName\\":\\"panel_panel-1\\"},{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"panelIndex\\":\\"panel-2\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"panelRefName\\":\\"panel_panel-2\\"}]",
+          "timeRestore": false,
+          "title": "",
+          "version": 1,
         },
         "references": Array [
           Object {
@@ -262,6 +113,7 @@ describe('extractReferences', () => {
     const doc = {
       id: '1',
       attributes: {
+        ...commonAttributes,
         foo: true,
         panelsJSON: JSON.stringify([
           {
@@ -274,7 +126,7 @@ describe('extractReferences', () => {
       references: [],
     };
     expect(() => extractReferences(doc, deps)).toThrowErrorMatchingInlineSnapshot(
-      `"\\"type\\" attribute is missing from panel \\"0\\""`
+      `"\\"type\\" attribute is missing from panel \\"undefined\\""`
     );
   });
 
@@ -282,6 +134,7 @@ describe('extractReferences', () => {
     const doc = {
       id: '1',
       attributes: {
+        ...commonAttributes,
         foo: true,
         panelsJSON: JSON.stringify([
           {
@@ -296,8 +149,15 @@ describe('extractReferences', () => {
     expect(extractReferences(doc, deps)).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
+          "description": "",
           "foo": true,
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "",
+          },
           "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\"}]",
+          "timeRestore": false,
+          "title": "",
+          "version": 1,
         },
         "references": Array [],
       }
@@ -308,6 +168,7 @@ describe('extractReferences', () => {
 describe('injectReferences', () => {
   test('returns injected attributes', () => {
     const attributes = {
+      ...commonAttributes,
       id: '1',
       title: 'test',
       panelsJSON: JSON.stringify([
@@ -339,9 +200,15 @@ describe('injectReferences', () => {
 
     expect(newAttributes).toMatchInlineSnapshot(`
       Object {
+        "description": "",
         "id": "1",
+        "kibanaSavedObjectMeta": Object {
+          "searchSourceJSON": "",
+        },
         "panelsJSON": "[{\\"version\\":\\"7.9.0\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\"},{\\"version\\":\\"7.9.0\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"id\\":\\"2\\"}]",
+        "timeRestore": false,
         "title": "test",
+        "version": 1,
       }
     `);
   });
@@ -350,11 +217,12 @@ describe('injectReferences', () => {
     const attributes = {
       id: '1',
       title: 'test',
-    };
+    } as unknown as DashboardAttributes;
     const newAttributes = injectReferences({ attributes, references: [] }, deps);
     expect(newAttributes).toMatchInlineSnapshot(`
       Object {
         "id": "1",
+        "panelsJSON": "[]",
         "title": "test",
       }
     `);
@@ -362,6 +230,7 @@ describe('injectReferences', () => {
 
   test('skips when panelsJSON is not an array', () => {
     const attributes = {
+      ...commonAttributes,
       id: '1',
       panelsJSON: '{}',
       title: 'test',
@@ -369,15 +238,22 @@ describe('injectReferences', () => {
     const newAttributes = injectReferences({ attributes, references: [] }, deps);
     expect(newAttributes).toMatchInlineSnapshot(`
       Object {
+        "description": "",
         "id": "1",
-        "panelsJSON": "{}",
+        "kibanaSavedObjectMeta": Object {
+          "searchSourceJSON": "",
+        },
+        "panelsJSON": "[]",
+        "timeRestore": false,
         "title": "test",
+        "version": 1,
       }
     `);
   });
 
   test('skips a panel when panelRefName is missing', () => {
     const attributes = {
+      ...commonAttributes,
       id: '1',
       title: 'test',
       panelsJSON: JSON.stringify([
@@ -400,15 +276,22 @@ describe('injectReferences', () => {
     const newAttributes = injectReferences({ attributes, references }, deps);
     expect(newAttributes).toMatchInlineSnapshot(`
       Object {
+        "description": "",
         "id": "1",
-        "panelsJSON": "[{\\"version\\":\\"\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\"},{\\"version\\":\\"\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\"}]",
+        "kibanaSavedObjectMeta": Object {
+          "searchSourceJSON": "",
+        },
+        "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\"},{\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\"}]",
+        "timeRestore": false,
         "title": "test",
+        "version": 1,
       }
     `);
   });
 
   test(`fails when it can't find the reference in the array`, () => {
     const attributes = {
+      ...commonAttributes,
       id: '1',
       title: 'test',
       panelsJSON: JSON.stringify([

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
 import { EuiSpacer, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { TextInput } from '../text_input';
-import { QuestionAnsweringInference } from './question_answering_inference';
+import type { QuestionAnsweringInference } from './question_answering_inference';
 import { INPUT_TYPE, RUNNING_STATE } from '../inference_base';
 
 const QuestionInput: FC<{

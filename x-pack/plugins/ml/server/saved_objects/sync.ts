@@ -16,7 +16,11 @@ import type {
 } from '../../common/types/saved_objects';
 import { checksFactory } from './checks';
 import type { JobStatus } from './checks';
-import { getSavedObjectClientError, getJobDetailsFromTrainedModel } from './util';
+import {
+  getSavedObjectClientError,
+  getJobDetailsFromTrainedModel,
+  mlFunctionsFactory,
+} from './util';
 
 export interface JobSpaceOverrides {
   overrides: {
@@ -38,9 +42,11 @@ export function syncSavedObjectsFactory(
       datafeedsRemoved: {},
     };
 
+    const { getDatafeeds, getTrainedModels } = mlFunctionsFactory(client);
+
     const [datafeeds, models, status] = await Promise.all([
-      client.asInternalUser.ml.getDatafeeds(),
-      client.asInternalUser.ml.getTrainedModels(),
+      getDatafeeds(),
+      getTrainedModels(),
       checkStatus(),
     ]);
 
@@ -55,7 +61,7 @@ export function syncSavedObjectsFactory(
       if (job.checks.savedObjectExits === false) {
         const type = 'anomaly-detector';
         if (results.savedObjectsCreated[type] === undefined) {
-          results.savedObjectsCreated[type] = {};
+          results.savedObjectsCreated[type] = Object.create(null);
         }
         if (simulate === true) {
           results.savedObjectsCreated[type]![job.jobId] = { success: true };
@@ -82,7 +88,7 @@ export function syncSavedObjectsFactory(
       if (job.checks.savedObjectExits === false) {
         const type = 'data-frame-analytics';
         if (results.savedObjectsCreated[type] === undefined) {
-          results.savedObjectsCreated[type] = {};
+          results.savedObjectsCreated[type] = Object.create(null);
         }
         if (simulate === true) {
           results.savedObjectsCreated[type]![job.jobId] = { success: true };
@@ -107,40 +113,46 @@ export function syncSavedObjectsFactory(
       }
     }
 
-    for (const model of status.jobs['trained-model']) {
-      if (model.checks.savedObjectExits === false) {
-        const { modelId } = model;
-        const type = 'trained-model';
-        if (results.savedObjectsCreated[type] === undefined) {
-          results.savedObjectsCreated[type] = {};
-        }
-        if (simulate === true) {
-          results.savedObjectsCreated[type]![modelId] = { success: true };
-        } else {
-          // create model saved objects for models which are missing them
-          tasks.push(async () => {
-            try {
-              const mod = models.trained_model_configs.find((m) => m.model_id === modelId);
-              if (mod === undefined) {
+    if (models !== null) {
+      for (const model of status.jobs['trained-model']) {
+        if (model.checks.savedObjectExits === false) {
+          const { modelId } = model;
+          const type = 'trained-model';
+          if (results.savedObjectsCreated[type] === undefined) {
+            results.savedObjectsCreated[type] = Object.create(null);
+          }
+          if (simulate === true) {
+            results.savedObjectsCreated[type]![modelId] = { success: true };
+          } else {
+            // create model saved objects for models which are missing them
+            tasks.push(async () => {
+              try {
+                const mod = models.trained_model_configs.find((m) => m.model_id === modelId);
+                if (mod === undefined) {
+                  results.savedObjectsCreated[type]![modelId] = {
+                    success: false,
+                    error: `trained model ${modelId} not found`,
+                  };
+                  return;
+                }
+                const job = getJobDetailsFromTrainedModel(mod);
+                await mlSavedObjectService.createTrainedModel(modelId, job);
+                if (modelId.startsWith('.')) {
+                  // if the model id starts with a dot, it is an internal model and should be in all spaces
+                  await mlSavedObjectService.updateTrainedModelsSpaces([modelId], ['*'], []);
+                }
+                results.savedObjectsCreated[type]![modelId] = {
+                  success: true,
+                };
+              } catch (error) {
                 results.savedObjectsCreated[type]![modelId] = {
                   success: false,
-                  error: `trained model ${modelId} not found`,
-                };
-                return;
-              }
-              const job = getJobDetailsFromTrainedModel(mod);
-              await mlSavedObjectService.createTrainedModel(modelId, job);
-              results.savedObjectsCreated[type]![modelId] = {
-                success: true,
-              };
-            } catch (error) {
-              results.savedObjectsCreated[type]![modelId] = {
-                success: false,
 
-                error: getSavedObjectClientError(error),
-              };
-            }
-          });
+                  error: getSavedObjectClientError(error),
+                };
+              }
+            });
+          }
         }
       }
     }
@@ -149,7 +161,7 @@ export function syncSavedObjectsFactory(
       if (job.checks.jobExists === false) {
         const type = 'anomaly-detector';
         if (results.savedObjectsDeleted[type] === undefined) {
-          results.savedObjectsDeleted[type] = {};
+          results.savedObjectsDeleted[type] = Object.create(null);
         }
         if (simulate === true) {
           results.savedObjectsDeleted[type]![job.jobId] = { success: true };
@@ -179,7 +191,7 @@ export function syncSavedObjectsFactory(
       if (job.checks.jobExists === false) {
         const type = 'data-frame-analytics';
         if (results.savedObjectsDeleted[type] === undefined) {
-          results.savedObjectsDeleted[type] = {};
+          results.savedObjectsDeleted[type] = Object.create(null);
         }
         if (simulate === true) {
           results.savedObjectsDeleted[type]![job.jobId] = { success: true };
@@ -213,7 +225,7 @@ export function syncSavedObjectsFactory(
         const { modelId, namespaces } = model;
         const type = 'trained-model';
         if (results.savedObjectsDeleted[type] === undefined) {
-          results.savedObjectsDeleted[type] = {};
+          results.savedObjectsDeleted[type] = Object.create(null);
         }
 
         if (simulate === true) {
@@ -242,71 +254,74 @@ export function syncSavedObjectsFactory(
       }
     }
 
-    for (const job of status.savedObjects['anomaly-detector']) {
-      const type = 'anomaly-detector';
-      if (
-        (job.checks.datafeedExists === true && job.datafeedId === null) ||
-        (job.checks.datafeedExists === true &&
-          job.datafeedId !== null &&
-          adJobsById[job.jobId] &&
-          adJobsById[job.jobId].datafeedId !== job.datafeedId)
-      ) {
-        if (results.datafeedsAdded[type] === undefined) {
-          results.datafeedsAdded[type] = {};
-        }
-        // add datafeed id for jobs where the datafeed exists but the id is missing from the saved object
-        // or if the datafeed id in the saved object is not the same as the one attached to the job in es
-        if (simulate === true) {
-          results.datafeedsAdded[type]![job.jobId] = { success: true };
-        } else {
-          const df = datafeeds.datafeeds.find((d) => d.job_id === job.jobId);
-          const jobId = job.jobId;
-          const datafeedId = df?.datafeed_id;
+    if (datafeeds !== null) {
+      for (const job of status.savedObjects['anomaly-detector']) {
+        const type = 'anomaly-detector';
+        if (
+          (job.checks.datafeedExists === true && job.datafeedId === null) ||
+          (job.checks.datafeedExists === true &&
+            job.datafeedId !== null &&
+            adJobsById[job.jobId] &&
+            adJobsById[job.jobId].datafeedId !== job.datafeedId)
+        ) {
+          if (results.datafeedsAdded[type] === undefined) {
+            results.datafeedsAdded[type] = Object.create(null);
+          }
+          // add datafeed id for jobs where the datafeed exists but the id is missing from the saved object
+          // or if the datafeed id in the saved object is not the same as the one attached to the job in es
+          if (simulate === true) {
+            results.datafeedsAdded[type]![job.jobId] = { success: true };
+          } else {
+            const df = datafeeds.datafeeds.find((d) => d.job_id === job.jobId);
+            const jobId = job.jobId;
+            const datafeedId = df?.datafeed_id;
 
-          tasks.push(async () => {
-            try {
-              if (datafeedId !== undefined) {
-                await mlSavedObjectService.addDatafeed(datafeedId, jobId);
+            tasks.push(async () => {
+              try {
+                if (datafeedId !== undefined) {
+                  await mlSavedObjectService.addDatafeed(datafeedId, jobId);
+                }
+                results.datafeedsAdded[type]![job.jobId] = { success: true };
+              } catch (error) {
+                results.datafeedsAdded[type]![job.jobId] = {
+                  success: false,
+
+                  error: getSavedObjectClientError(error),
+                };
               }
-              results.datafeedsAdded[type]![job.jobId] = { success: true };
-            } catch (error) {
-              results.datafeedsAdded[type]![job.jobId] = {
-                success: false,
+            });
+          }
+        } else if (
+          job.checks.jobExists === true &&
+          job.checks.datafeedExists === false &&
+          job.datafeedId !== null &&
+          job.datafeedId !== undefined
+        ) {
+          if (results.datafeedsRemoved[type] === undefined) {
+            results.datafeedsRemoved[type] = Object.create(null);
+          }
+          // remove datafeed id for jobs where the datafeed no longer exists but the id is populated in the saved object
+          if (simulate === true) {
+            results.datafeedsRemoved[type]![job.jobId] = { success: true };
+          } else {
+            const datafeedId = job.datafeedId;
+            tasks.push(async () => {
+              try {
+                await mlSavedObjectService.deleteDatafeed(datafeedId);
+                results.datafeedsRemoved[type]![job.jobId] = { success: true };
+              } catch (error) {
+                results.datafeedsRemoved[type]![job.jobId] = {
+                  success: false,
 
-                error: getSavedObjectClientError(error),
-              };
-            }
-          });
-        }
-      } else if (
-        job.checks.jobExists === true &&
-        job.checks.datafeedExists === false &&
-        job.datafeedId !== null &&
-        job.datafeedId !== undefined
-      ) {
-        if (results.datafeedsRemoved[type] === undefined) {
-          results.datafeedsRemoved[type] = {};
-        }
-        // remove datafeed id for jobs where the datafeed no longer exists but the id is populated in the saved object
-        if (simulate === true) {
-          results.datafeedsRemoved[type]![job.jobId] = { success: true };
-        } else {
-          const datafeedId = job.datafeedId;
-          tasks.push(async () => {
-            try {
-              await mlSavedObjectService.deleteDatafeed(datafeedId);
-              results.datafeedsRemoved[type]![job.jobId] = { success: true };
-            } catch (error) {
-              results.datafeedsRemoved[type]![job.jobId] = {
-                success: false,
-
-                error: getSavedObjectClientError(error),
-              };
-            }
-          });
+                  error: getSavedObjectClientError(error),
+                };
+              }
+            });
+          }
         }
       }
     }
+
     await Promise.allSettled(tasks.map((t) => t()));
     return results;
   }

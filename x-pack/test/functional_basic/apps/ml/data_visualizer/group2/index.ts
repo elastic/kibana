@@ -12,7 +12,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('machine learning basic license - data visualizer - group 2', function () {
-    this.tags(['skipFirefox', 'ml']);
+    this.tags(['skipFirefox', 'ml', 'skipFIPS']);
 
     before(async () => {
       await ml.securityCommon.createMlRoles();
@@ -25,8 +25,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await ml.testResources.deleteSavedSearches();
 
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_ecommerce');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_module_sample_ecommerce');
 
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_sample_ecommerce');

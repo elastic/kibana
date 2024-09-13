@@ -1,5 +1,21 @@
 openapi: 3.0.0
-tags: []
+tags:
+  - name: Data streams
+  - name: Elastic Agents
+  - name: Elastic Agent actions
+  - name: Elastic Agent binary download sources
+  - name: Elastic Agent policies
+  - name: Elastic Agent status
+  - name: Elastic Package Manager (EPM)
+  - name: Fleet enrollment API keys
+  - name: Fleet internals
+  - name: Fleet Server hosts
+  - name: Fleet Kubernetes
+  - name: Fleet outputs
+  - name: Fleet package policies
+  - name: Fleet proxies
+  - name: Fleet service tokens
+  - name: Fleet uninstall tokens
 info:
   title: Fleet
   description: OpenAPI schema for Fleet API endpoints
@@ -10,158 +26,178 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: 'http://localhost:5601/api/fleet'
-    description: local
+  - url: 'http://KIBANA_HOST:5601'
 paths:
   # Fleet internals
-  /health_check:
+  /api/fleet/health_check:
     $ref: paths/health_check.yaml
-  /setup:
+  /api/fleet/setup:
     $ref: paths/setup.yaml
-  /settings:
+  /api/fleet/settings:
     $ref: paths/settings.yaml
-  /service-tokens:
+  # /internal/fleet/settings/enrollment:
+  #   servers:
+  #     - url: 'http://KIBANA_HOST:5601/internal/fleet'
+  #       description: Used for Fleet internals and not supported
+  #   $ref: paths/settings_enrollment.yaml
+  /api/fleet/service-tokens:
     $ref: paths/service_tokens_deprecated.yaml
-  /service_tokens:
+  /api/fleet/service_tokens:
     $ref: paths/service_tokens.yaml
 
   # EPM / integrations endpoints
-  /epm/verification_key_id:
+  /api/fleet/epm/verification_key_id:
     $ref: paths/epm@verification_key_id.yaml
-  /epm/categories:
+  /api/fleet/epm/bulk_assets:
+    $ref: paths/epm@bulk_assets.yaml
+  /api/fleet/epm/categories:
     $ref: paths/epm@categories.yaml
-  /epm/packages/limited:
+  /api/fleet/epm/packages/limited:
     $ref: paths/epm@limited_list.yaml
-  /epm/packages:
+  /api/fleet/epm/packages:
     $ref: paths/epm@packages.yaml
-  /epm/packages/_bulk:
+  /api/fleet/epm/packages/_bulk:
     $ref: paths/epm@packages_bulk.yaml
-  '/epm/packages/{pkgkey}':
+  '/api/fleet/epm/packages/{pkgkey}':
     $ref: 'paths/epm@packages@{pkgkey}_deprecated.yaml'
-  '/epm/packages/{pkgName}/{pkgVersion}':
+  '/api/fleet/epm/packages/{pkgName}/{pkgVersion}':
     $ref: 'paths/epm@packages@{pkg_name}@{pkg_version}.yaml'
-  '/epm/packages/{pkgName}/{pkgVersion}/{filePath}':
+  '/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize':
+    $ref: 'paths/epm@packages@{pkg_name}@{pkg_version}@transforms@authorize.yaml'
+  '/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}':
     $ref: paths/epm@get_file.yaml
-  '/epm/packages/{pkgName}/stats':
+  '/api/fleet/epm/packages/{pkgName}/stats':
     $ref: 'paths/epm@packages@{pkg_name}@stats.yaml'
+  '/api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs':
+    $ref: 'paths/epm@templates@{pkg_name}@{pkg_version}@inputs.yaml'
 
   # Agent endpoints
-  /agents/setup:
+  /api/fleet/agents/setup:
     $ref: paths/agents@setup.yaml
-  /agent-status:
+  /api/fleet/agent-status:
     $ref: paths/agent_status_deprecated.yaml
-  /agent_status:
+  /api/fleet/agent_status:
     $ref: paths/agent_status.yaml
-  /agent_status/data:
+  /api/fleet/agent_status/data:
     $ref: paths/agent_status@data.yaml
-  /agents:
+  /api/fleet/agents:
     $ref: paths/agents.yaml
-  /agents/bulk_upgrade:
+  /api/fleet/agents/bulk_upgrade:
     $ref: paths/agents@bulk_upgrade.yaml
-  /agents/action_status:
+  /api/fleet/agents/action_status:
     $ref: paths/agents@action_status.yaml
-  '/agents/{agentId}':
+  '/api/fleet/agents/{agentId}':
     $ref: 'paths/agents@{agent_id}.yaml'
-  '/agents/{agentId}/actions':
+  '/api/fleet/agents/{agentId}/actions':
     $ref: 'paths/agents@{agent_id}@actions.yaml'
-  '/agents/{agentId}/actions/{actionId}/cancel':
-    $ref: 'paths/agents@{agent_id}@actions@{action_id}@cancel.yaml'
-  '/agents/files@{fileId}@{fileName}':
+  '/api/fleet/agents/actions/{actionId}/cancel':
+    $ref: 'paths/agents@actions@{action_id}@cancel.yaml'
+  '/api/fleet/agents/files/{fileId}/{fileName}':
     $ref: 'paths/agents@files@{file_id}@{file_name}.yaml'
-  '/agents/{agentId}/reassign':
+  '/api/fleet/agents/files/{fileId}':
+    $ref: 'paths/agents@files@{file_id}.yaml'
+  '/api/fleet/agents/{agentId}/reassign':
     $ref: 'paths/agents@{agent_id}@reassign.yaml'
-  '/agents/{agentId}/unenroll':
+  '/api/fleet/agents/{agentId}/unenroll':
     $ref: 'paths/agents@{agent_id}@unenroll.yaml'
-  '/agents/{agentId}/upgrade':
+  '/api/fleet/agents/{agentId}/upgrade':
     $ref: 'paths/agents@{agent_id}@upgrade.yaml'
-  '/agents/{agentId}/uploads':
+  '/api/fleet/agents/{agentId}/uploads':
     $ref: 'paths/agents@{agent_id}@uploads.yaml'
-  '/agents/bulk_reassign':
+  '/api/fleet/agents/bulk_reassign':
     $ref: 'paths/agents@bulk_reassign.yaml'
-  '/agents/bulk_unenroll':
+  '/api/fleet/agents/bulk_unenroll':
     $ref: 'paths/agents@bulk_unenroll.yaml'
-  '/agents/bulk_update_agent_tags':
+  '/api/fleet/agents/bulk_update_agent_tags':
     $ref: 'paths/agents@bulk_update_tags.yaml'
-  /agents/tags:
+  /api/fleet/agents/tags:
     $ref: paths/agent_tags.yaml
-  '/agents/{agentId}/request_diagnostics':
+  '/api/fleet/agents/{agentId}/request_diagnostics':
     $ref: 'paths/agents@{agent_id}@request_diagnostics.yaml'
-  /agents/bulk_request_diagnostics:
+  /api/fleet/agents/bulk_request_diagnostics:
     $ref: 'paths/agents@bulk_request_diagnostics.yaml'
 
   #  Agent policies endpoints
-  /agent_policies:
+  /api/fleet/agent_policies:
     $ref: paths/agent_policies.yaml
-  '/agent_policies/{agentPolicyId}':
+  '/api/fleet/agent_policies/{agentPolicyId}':
     $ref: 'paths/agent_policies@{agent_policy_id}.yaml'
-  '/agent_policies/{agentPolicyId}/copy':
+  '/api/fleet/agent_policies/{agentPolicyId}/copy':
     $ref: 'paths/agent_policies@{agent_policy_id}@copy.yaml'
-  '/agent_policies/{agentPolicyId}/full':
+  '/api/fleet/agent_policies/{agentPolicyId}/full':
     $ref: 'paths/agent_policies@{agent_policy_id}@full.yaml'
-  '/agent_policies/{agentPolicyId}/download':
+  '/api/fleet/agent_policies/{agentPolicyId}/download':
     $ref: 'paths/agent_policies@{agent_policy_id}@download.yaml'
-  /agent_policies/_bulk_get:
+  /api/fleet/agent_policies/_bulk_get:
     $ref: paths/agent_policies@_bulk_get.yaml
-  /agent_policies/delete:
+  /api/fleet/agent_policies/delete:
     $ref: paths/agent_policies@delete.yaml
 
   # Data streams endpoints
-  /data_streams:
+  /api/fleet/data_streams:
     $ref: paths/data_streams.yaml
 
   #  Enrollment endpoints
-  /enrollment-api-keys:
+  /api/fleet/enrollment-api-keys:
     $ref: paths/enrollment_api_keys_deprecated.yaml
-  '/enrollment-api-keys/{keyId}':
+  '/api/fleet/enrollment-api-keys/{keyId}':
     $ref: 'paths/enrollment_api_keys@{key_id}_deprecated.yaml'
-  /enrollment_api_keys:
+  /api/fleet/enrollment_api_keys:
     $ref: paths/enrollment_api_keys.yaml
-  '/enrollment_api_keys/{keyId}':
+  '/api/fleet/enrollment_api_keys/{keyId}':
     $ref: 'paths/enrollment_api_keys@{key_id}.yaml'
 
   #  Package policies endpoints
-  /package_policies:
+  /api/fleet/package_policies:
     $ref: paths/package_policies.yaml
-  /package_policies/_bulk_get:
+  /api/fleet/package_policies/_bulk_get:
     $ref: paths/package_policies@_bulk_get.yaml
-  /package_policies/delete:
+  /api/fleet/package_policies/delete:
     $ref: paths/package_policies@delete.yaml
-  /package_policies/upgrade:
+  /api/fleet/package_policies/upgrade:
     $ref: paths/package_policies@upgrade.yaml
-  /package_policies/upgrade/dryrun:
+  /api/fleet/package_policies/upgrade/dryrun:
     $ref: paths/package_policies@upgrade_dryrun.yaml
-  '/package_policies/{packagePolicyId}':
+  '/api/fleet/package_policies/{packagePolicyId}':
     $ref: 'paths/package_policies@{package_policy_id}.yaml'
 
   # Outputs
-  /outputs:
+  /api/fleet/outputs:
     $ref: paths/outputs.yaml
-  /outputs/{outputId}:
+  '/api/fleet/outputs/{outputId}':
     $ref: paths/outputs@{output_id}.yaml
-  /logstash_api_keys:
+  '/api/fleet/outputs/{outputId}/health':
+    $ref: paths/output_health@{output_id}.yaml
+  /api/fleet/logstash_api_keys:
     $ref: paths/logstash_api_keys.yaml
 
   # Agent binary download sources
-  /agent_download_sources:
+  /api/fleet/agent_download_sources:
     $ref: paths/agent_download_sources.yaml
-  /agent_download_sources/{sourceId}:
+  '/api/fleet/agent_download_sources/{sourceId}':
     $ref: paths/agent_download_sources@{source_id}.yaml
 
   # Fleet server hosts
-  /fleet_server_hosts:
+  /api/fleet/fleet_server_hosts:
     $ref: paths/fleet_server_hosts.yaml
-  /fleet_server_hosts/{itemId}:
+  '/api/fleet/fleet_server_hosts/{itemId}':
     $ref: paths/fleet_server_hosts@{item_id}.yaml
 
   # Fleet proxies
-  /proxies:
+  /api/fleet/proxies:
     $ref: paths/proxies.yaml
-  /proxies/{itemId}:
+  '/api/fleet/proxies/{itemId}':
     $ref: paths/proxies@{item_id}.yaml
 
   # K8s
-  /kubernetes:
+  /api/fleet/kubernetes:
     $ref: paths/kubernetes.yaml
+
+  # Uninstall tokens
+  /api/fleet/uninstall_tokens:
+    $ref: paths/uninstall_tokens.yaml
+  '/api/fleet/uninstall_tokens/{uninstallTokenId}':
+    $ref: paths/uninstall_tokens@{uninstall_token_id}.yaml
 components:
   securitySchemes:
     basicAuth:

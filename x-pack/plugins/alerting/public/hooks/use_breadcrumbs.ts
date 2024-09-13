@@ -10,25 +10,38 @@ import { ChromeBreadcrumb } from '@kbn/core/public';
 import { MouseEvent, useEffect } from 'react';
 import { useKibana } from '../utils/kibana_react';
 import { useNavigation } from './use_navigation';
-import { APP_ID, AlertingDeepLinkId, IAlertingDeepLinkId } from '../config';
+import {
+  MANAGEMENT_APP_ID,
+  MaintenanceWindowDeepLinkIds,
+  MAINTENANCE_WINDOW_DEEP_LINK_IDS,
+} from '../../common';
 
-const breadcrumbTitle: Record<IAlertingDeepLinkId, string> = {
-  [AlertingDeepLinkId.maintenanceWindows]: i18n.translate(
+const breadcrumbTitle: Record<MaintenanceWindowDeepLinkIds, string> = {
+  [MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows]: i18n.translate(
     'xpack.alerting.breadcrumbs.maintenanceWindowsLinkText',
     {
       defaultMessage: 'Maintenance Windows',
     }
   ),
-  [AlertingDeepLinkId.maintenanceWindowsCreate]: i18n.translate(
+  [MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsCreate]: i18n.translate(
     'xpack.alerting.breadcrumbs.createMaintenanceWindowsLinkText',
     {
       defaultMessage: 'Create',
     }
   ),
+  [MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsEdit]: i18n.translate(
+    'xpack.alerting.breadcrumbs.editMaintenanceWindowsLinkText',
+    {
+      defaultMessage: 'Edit',
+    }
+  ),
 };
 
-const topLevelBreadcrumb: Record<string, IAlertingDeepLinkId> = {
-  [AlertingDeepLinkId.maintenanceWindowsCreate]: AlertingDeepLinkId.maintenanceWindows,
+const topLevelBreadcrumb: Record<string, MaintenanceWindowDeepLinkIds> = {
+  [MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsCreate]:
+    MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows,
+  [MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsEdit]:
+    MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows,
 };
 
 function addClickHandlers(
@@ -54,7 +67,7 @@ function getTitleFromBreadCrumbs(breadcrumbs: ChromeBreadcrumb[]) {
   return breadcrumbs.map(({ text }) => text?.toString() ?? '').reverse();
 }
 
-export const useBreadcrumbs = (pageDeepLink: IAlertingDeepLinkId) => {
+export const useBreadcrumbs = (pageDeepLink: MaintenanceWindowDeepLinkIds) => {
   const {
     services: {
       chrome: { docTitle, setBreadcrumbs },
@@ -62,7 +75,7 @@ export const useBreadcrumbs = (pageDeepLink: IAlertingDeepLinkId) => {
     },
   } = useKibana();
   const setTitle = docTitle.change;
-  const { getAppUrl } = useNavigation(APP_ID);
+  const { getAppUrl } = useNavigation(MANAGEMENT_APP_ID);
 
   useEffect(() => {
     const breadcrumbs = [

@@ -11,13 +11,11 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionResult, ActionsClient } from '@kbn/actions-plugin/server';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
-  GetCaseConnectorsResponse,
-  CaseConnector,
-  CaseUserActionInjectedAttributes,
-  CaseExternalServiceBasic,
   GetCaseConnectorsPushDetails,
-} from '../../../common/api';
-import { GetCaseConnectorsResponseRt } from '../../../common/api';
+  GetCaseConnectorsResponse,
+} from '../../../common/types/api';
+import { GetCaseConnectorsResponseRt } from '../../../common/types/api';
+import { decodeOrThrow } from '../../common/runtime_types';
 import {
   isConnectorUserAction,
   isCreateCaseUserAction,
@@ -30,6 +28,12 @@ import { Operations } from '../../authorization';
 import type { GetConnectorsRequest } from './types';
 import type { CaseConnectorActivity } from '../../services/user_actions/types';
 import type { CaseUserActionService } from '../../services';
+import type {
+  CaseConnector,
+  ExternalService,
+  UserActionAttributes,
+} from '../../../common/types/domain';
+import { ConnectorTypes } from '../../../common/types/domain';
 
 export const getConnectors = async (
   { caseId }: GetConnectorsRequest,
@@ -50,7 +54,7 @@ export const getConnectors = async (
 
     await checkConnectorsAuthorization({ authorization, connectors, latestUserAction });
 
-    const results = await getConnectorsInfo({
+    const res = await getConnectorsInfo({
       caseId,
       actionsClient,
       connectors,
@@ -59,7 +63,7 @@ export const getConnectors = async (
       logger,
     });
 
-    return GetCaseConnectorsResponseRt.encode(results);
+    return decodeOrThrow(GetCaseConnectorsResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve the case connectors case id: ${caseId}: ${error}`,
@@ -75,7 +79,7 @@ const checkConnectorsAuthorization = async ({
   authorization,
 }: {
   connectors: CaseConnectorActivity[];
-  latestUserAction?: SavedObject<CaseUserActionInjectedAttributes>;
+  latestUserAction?: SavedObject<UserActionAttributes>;
   authorization: PublicMethodsOf<Authorization>;
 }) => {
   const entities: OwnerEntity[] = latestUserAction
@@ -113,7 +117,7 @@ const checkConnectorsAuthorization = async ({
 interface EnrichedPushInfo {
   latestPushDate: Date;
   oldestPushDate: Date;
-  externalService: CaseExternalServiceBasic;
+  externalService: ExternalService;
   connectorFieldsUsedInPush: CaseConnector;
 }
 
@@ -127,7 +131,7 @@ const getConnectorsInfo = async ({
 }: {
   caseId: string;
   connectors: CaseConnectorActivity[];
-  latestUserAction?: SavedObject<CaseUserActionInjectedAttributes>;
+  latestUserAction?: SavedObject<UserActionAttributes>;
   actionsClient: PublicMethodsOf<ActionsClient>;
   userActionService: CaseUserActionService;
   logger: CasesClientArgs['logger'];
@@ -139,7 +143,33 @@ const getConnectorsInfo = async ({
     await getActionConnectors(actionsClient, logger, connectorIds),
   ]);
 
-  return createConnectorInfoResult({ actionConnectors, connectors, pushInfo, latestUserAction });
+  /**
+   * TODO: Remove when all connectors support the status and
+   * the severity user actions or if there is a mechanism to
+   * define supported user actions per connector type
+   */
+  const hasAdditionalUserActionsConnector = actionConnectors.some(
+    (actionConnector) =>
+      actionConnector.actionTypeId === ConnectorTypes.casesWebhook ||
+      actionConnector.actionTypeId === ConnectorTypes.theHive
+  );
+  let latestAdditionalUserActionConnector: SavedObject<UserActionAttributes> | undefined;
+  if (hasAdditionalUserActionsConnector) {
+    // if cases webhook connector, we need to fetch latestUserAction again because
+    // the cases webhook connector includes extra fields other case connectors do not track
+    latestAdditionalUserActionConnector = await userActionService.getMostRecentUserAction(
+      caseId,
+      true
+    );
+  }
+
+  return createConnectorInfoResult({
+    actionConnectors,
+    connectors,
+    pushInfo,
+    latestUserAction,
+    latestAdditionalUserActionConnector,
+  });
 };
 
 const getActionConnectors = async (
@@ -148,7 +178,7 @@ const getActionConnectors = async (
   ids: string[]
 ): Promise<ActionResult[]> => {
   try {
-    return await actionsClient.getBulk(ids);
+    return await actionsClient.getBulk({ ids });
   } catch (error) {
     // silent error and log it
     logger.error(`Failed to retrieve action connectors in the get case connectors route: ${error}`);
@@ -158,7 +188,7 @@ const getActionConnectors = async (
 
 interface PushDetails {
   connectorId: string;
-  externalService: CaseExternalServiceBasic;
+  externalService: ExternalService;
   mostRecentPush: Date;
   oldestPush: Date;
 }
@@ -224,8 +254,8 @@ const getPushDetails = (activity: CaseConnectorActivity[]) => {
 };
 
 const getExternalServiceFromSavedObject = (
-  savedObject: SavedObject<CaseUserActionInjectedAttributes> | undefined
-): CaseExternalServiceBasic | undefined => {
+  savedObject: SavedObject<UserActionAttributes> | undefined
+): ExternalService | undefined => {
   if (savedObject != null && isPushedUserAction(savedObject.attributes)) {
     return savedObject.attributes.payload.externalService;
   }
@@ -248,7 +278,7 @@ const isDateValid = (date: Date): boolean => {
 };
 
 const getConnectorInfoFromSavedObject = (
-  savedObject: SavedObject<CaseUserActionInjectedAttributes> | undefined
+  savedObject: SavedObject<UserActionAttributes> | undefined
 ): CaseConnector | undefined => {
   if (
     savedObject != null &&
@@ -264,11 +294,13 @@ const createConnectorInfoResult = ({
   connectors,
   pushInfo,
   latestUserAction,
+  latestAdditionalUserActionConnector,
 }: {
   actionConnectors: ActionResult[];
   connectors: CaseConnectorActivity[];
   pushInfo: Map<string, EnrichedPushInfo>;
-  latestUserAction?: SavedObject<CaseUserActionInjectedAttributes>;
+  latestUserAction?: SavedObject<UserActionAttributes>;
+  latestAdditionalUserActionConnector?: SavedObject<UserActionAttributes>;
 }) => {
   const results: GetCaseConnectorsResponse = {};
   const actionConnectorsMap = new Map(
@@ -279,7 +311,17 @@ const createConnectorInfoResult = ({
     const connectorDetails = actionConnectorsMap.get(aggregationConnector.connectorId);
     const connector = getConnectorInfoFromSavedObject(aggregationConnector.fields);
 
-    const latestUserActionCreatedAt = getDate(latestUserAction?.attributes.created_at);
+    const latestUserActionCreatedAt = getDate(
+      /**
+       * TODO: Remove when all connectors support the status and
+       * the severity user actions or if there is a mechanism to
+       * define supported user actions per connector type
+       */
+      connectorDetails?.actionTypeId === ConnectorTypes.casesWebhook ||
+        connectorDetails?.actionTypeId === ConnectorTypes.theHive
+        ? latestAdditionalUserActionConnector?.attributes.created_at
+        : latestUserAction?.attributes.created_at
+    );
 
     if (connector != null) {
       const enrichedPushInfo = pushInfo.get(aggregationConnector.connectorId);

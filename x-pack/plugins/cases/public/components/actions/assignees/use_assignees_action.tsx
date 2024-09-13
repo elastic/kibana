@@ -7,14 +7,14 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import type { Case } from '../../../../common';
+import type { CaseUI, CasesUI } from '../../../../common';
 import type { UseActionProps } from '../types';
 import { useItemsAction } from '../use_items_action';
 import * as i18n from './translations';
 
 export const useAssigneesAction = ({ onAction, onActionSuccess, isDisabled }: UseActionProps) => {
   const { isFlyoutOpen, onFlyoutClosed, onSaveItems, openFlyout, isActionDisabled } =
-    useItemsAction<Case['assignees']>({
+    useItemsAction<CaseUI['assignees']>({
       fieldKey: 'assignees',
       isDisabled,
       onAction,
@@ -27,7 +27,7 @@ export const useAssigneesAction = ({ onAction, onActionSuccess, isDisabled }: Us
         })),
     });
 
-  const getAction = (selectedCases: Case[]) => {
+  const getAction = (selectedCases: CasesUI) => {
     return {
       name: i18n.EDIT_ASSIGNEES,
       onClick: () => openFlyout(selectedCases),

@@ -9,12 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import {
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiPageSection, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
 import { SectionError, Error, PageError } from '../../../shared_imports';
 import { useDecodedParams } from '../../lib';
@@ -156,7 +151,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
         ? {
             data: {
               error: i18n.translate('xpack.snapshotRestore.editPolicy.policyNotFoundErrorMessage', {
-                defaultMessage: `The policy '{name}' does not exist.`,
+                defaultMessage: `The policy ''{name}'' does not exist.`,
                 values: {
                   name,
                 },
@@ -200,7 +195,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
   }
 
   return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+    <EuiPageSection restrictWidth style={{ width: '100%' }}>
       <EuiPageHeader
         pageTitle={
           <span data-test-subj="pageTitle">
@@ -242,6 +237,6 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
         onSave={onSave}
         onCancel={onCancel}
       />
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };

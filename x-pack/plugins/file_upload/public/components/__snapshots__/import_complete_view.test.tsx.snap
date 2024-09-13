@@ -4,6 +4,12 @@ exports[`Should render error when upload fails from elasticsearch request failur
 <Provider
   services={
     Object {
+      "settings": Object {
+        "get": [MockFunction],
+      },
+      "theme": Object {
+        "theme$": [MockFunction],
+      },
       "uiSettings": Object {
         "get": [MockFunction],
       },
@@ -98,6 +104,12 @@ exports[`Should render error when upload fails from http request timeout 1`] = `
 <Provider
   services={
     Object {
+      "settings": Object {
+        "get": [MockFunction],
+      },
+      "theme": Object {
+        "theme$": [MockFunction],
+      },
       "uiSettings": Object {
         "get": [MockFunction],
       },
@@ -192,6 +204,12 @@ exports[`Should render success 1`] = `
 <Provider
   services={
     Object {
+      "settings": Object {
+        "get": [MockFunction],
+      },
+      "theme": Object {
+        "theme$": [MockFunction],
+      },
       "uiSettings": Object {
         "get": [MockFunction],
       },
@@ -324,20 +342,18 @@ exports[`Should render success 1`] = `
   />
   <EuiText>
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="To modify the index, go to "
         id="xpack.fileUpload.importComplete.indexModsMsg"
-        values={Object {}}
       />
       <a
         data-test-subj="indexManagementNewIndexLink"
         href="abc/app/management/kibana/dataViews"
         target="_blank"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Index Management."
           id="xpack.fileUpload.importComplete.indexMgmtLink"
-          values={Object {}}
         />
       </a>
     </p>
@@ -349,6 +365,12 @@ exports[`Should render warning when some features failed import 1`] = `
 <Provider
   services={
     Object {
+      "settings": Object {
+        "get": [MockFunction],
+      },
+      "theme": Object {
+        "theme$": [MockFunction],
+      },
       "uiSettings": Object {
         "get": [MockFunction],
       },
@@ -497,20 +519,18 @@ exports[`Should render warning when some features failed import 1`] = `
   />
   <EuiText>
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="To modify the index, go to "
         id="xpack.fileUpload.importComplete.indexModsMsg"
-        values={Object {}}
       />
       <a
         data-test-subj="indexManagementNewIndexLink"
         href="abc/app/management/kibana/dataViews"
         target="_blank"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Index Management."
           id="xpack.fileUpload.importComplete.indexMgmtLink"
-          values={Object {}}
         />
       </a>
     </p>

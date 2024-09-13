@@ -1,26 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { join } from 'path';
-import { merge } from 'lodash';
+import { merge, isEmpty } from 'lodash';
 import { execSync } from 'child_process';
-// deep import to avoid loading the whole package
 import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
 import type { AgentConfigOptions } from 'elastic-apm-node';
 import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-rum';
+import { getFlattenedObject } from '@kbn/std';
+import type { ApmConfigSchema } from './apm_config';
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
 const DEFAULT_CONFIG: AgentConfigOptions = {
   active: true,
   contextPropagationOnly: true,
   environment: 'development',
-  logUncaughtExceptions: true,
   globalLabels: {},
 };
 
@@ -50,6 +51,18 @@ const CENTRALIZED_SERVICE_DIST_CONFIG: AgentConfigOptions = {
   transactionSampleRate: 0.1,
 };
 
+interface KibanaRawConfig {
+  elastic?: {
+    apm?: ApmConfigSchema;
+  };
+  path?: {
+    data?: string;
+  };
+  server?: {
+    uuid?: string;
+  };
+}
+
 export class ApmConfiguration {
   private baseConfig?: AgentConfigOptions;
   private kibanaVersion: string;
@@ -57,7 +70,7 @@ export class ApmConfiguration {
 
   constructor(
     private readonly rootDir: string,
-    private readonly rawKibanaConfig: Record<string, any>,
+    private readonly rawKibanaConfig: KibanaRawConfig,
     private readonly isDistributable: boolean
   ) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -67,10 +80,25 @@ export class ApmConfiguration {
   }
 
   public getConfig(serviceName: string): AgentConfigOptions {
-    return {
+    const kibanaConfig = this.getConfigFromKibanaConfig();
+    const { servicesOverrides = {} } = merge(kibanaConfig, this.getConfigFromEnv(kibanaConfig));
+
+    let baseConfig = {
       ...this.getBaseConfig(),
       serviceName,
     };
+
+    const serviceOverride = servicesOverrides[serviceName];
+    if (serviceOverride) {
+      baseConfig = merge({}, baseConfig, serviceOverride);
+    }
+
+    return baseConfig;
+  }
+
+  public isUsersRedactionEnabled(): boolean {
+    const { redactUsers = true } = this.getConfigFromKibanaConfig();
+    return redactUsers;
   }
 
   private getBaseConfig() {
@@ -103,6 +131,15 @@ export class ApmConfiguration {
       ) {
         this.baseConfig = merge(this.baseConfig, centralizedConfig);
       }
+
+      if (this.baseConfig?.globalLabels) {
+        // Global Labels need to be a key/value pair...
+        // Dotted names will be renamed to underscored ones by the agent, but we need to provide key/value pairs
+        // https://github.com/elastic/apm-agent-nodejs/issues/4096#issuecomment-2181621221
+        this.baseConfig.globalLabels = getFlattenedObject(
+          this.baseConfig.globalLabels as Record<string, unknown>
+        );
+      }
     }
 
     return this.baseConfig;
@@ -113,9 +150,18 @@ export class ApmConfiguration {
    */
   private getConfigFromEnv(configFromKibanaConfig: AgentConfigOptions): AgentConfigOptions {
     const config: AgentConfigOptions = {};
+    const servicesOverrides: Record<string, AgentConfigOptions> = {};
 
     if (process.env.ELASTIC_APM_ACTIVE === 'true') {
       config.active = true;
+    }
+
+    if (process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE === 'false') {
+      merge(servicesOverrides, {
+        'kibana-frontend': {
+          active: false,
+        },
+      });
     }
 
     if (process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY === 'true') {
@@ -147,6 +193,10 @@ export class ApmConfiguration {
       config.secretToken = process.env.ELASTIC_APM_SECRET_TOKEN;
     }
 
+    if (process.env.ELASTIC_APM_API_KEY) {
+      config.apiKey = process.env.ELASTIC_APM_API_KEY;
+    }
+
     if (process.env.ELASTIC_APM_GLOBAL_LABELS) {
       config.globalLabels = Object.fromEntries(
         process.env.ELASTIC_APM_GLOBAL_LABELS.split(',').map((p) => {
@@ -156,6 +206,10 @@ export class ApmConfiguration {
       );
     }
 
+    if (!isEmpty(servicesOverrides)) {
+      merge(config, { servicesOverrides });
+    }
+
     return config;
   }
 
@@ -163,7 +217,7 @@ export class ApmConfiguration {
    * Get the elastic.apm configuration from the --config file, supersedes the
    * default config.
    */
-  private getConfigFromKibanaConfig(): AgentConfigOptions {
+  private getConfigFromKibanaConfig(): ApmConfigSchema {
     return this.rawKibanaConfig?.elastic?.apm ?? {};
   }
 
@@ -263,7 +317,8 @@ export class ApmConfiguration {
    * Reads APM configuration from different sources and merges them together.
    */
   private getConfigFromAllSources(): AgentConfigOptions {
-    const configFromKibanaConfig = this.getConfigFromKibanaConfig();
+    const { servicesOverrides, redactUsers, ...configFromKibanaConfig } =
+      this.getConfigFromKibanaConfig();
     const configFromEnv = this.getConfigFromEnv(configFromKibanaConfig);
     const config = merge({}, configFromKibanaConfig, configFromEnv);
 

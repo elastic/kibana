@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Readable } from 'stream';
@@ -25,6 +26,7 @@ interface CollectSavedObjectsOptions {
   objectLimit: number;
   filter?: (obj: SavedObject) => boolean;
   supportedTypes: string[];
+  managed?: boolean;
 }
 
 export async function collectSavedObjects({
@@ -32,6 +34,7 @@ export async function collectSavedObjects({
   objectLimit,
   filter,
   supportedTypes,
+  managed,
 }: CollectSavedObjectsOptions) {
   const errors: SavedObjectsImportFailure[] = [];
   const entries: Array<{ type: string; id: string }> = [];
@@ -68,6 +71,9 @@ export async function collectSavedObjects({
       return {
         ...obj,
         ...(!obj.migrationVersion && !obj.typeMigrationVersion ? { typeMigrationVersion: '' } : {}),
+        // override any managed flag on an object with that given as an option otherwise set the default to avoid having to do that with a core migration transform
+        // this is a bulk operation, applied to all objects being imported
+        ...{ managed: managed ?? obj.managed ?? false },
       };
     }),
     createConcatStream([]),

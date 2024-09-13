@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiCallOut,
   EuiCode,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -25,28 +25,105 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../../../../../common/constants';
+import { stripSearchPrefix } from '../../../../../common/utils/strip_search_prefix';
+
 import { docLinks } from '../../../shared/doc_links';
 
-import { DocumentsLogic } from './documents_logic';
+import { KibanaLogic } from '../../../shared/kibana';
+
+import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
+
+import {
+  AccessControlIndexSelector,
+  AccessControlSelectorOption,
+} from './components/access_control_index_selector/access_control_index_selector';
 import { IndexNameLogic } from './index_name_logic';
+import { IndexViewLogic } from './index_view_logic';
+
+import './index_mappings.scss';
 
 export const SearchIndexIndexMappings: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
-  const { makeMappingRequest } = useActions(DocumentsLogic);
-  const { mappingData } = useValues(DocumentsLogic);
+  const { hasDocumentLevelSecurityFeature, isHiddenIndex } = useValues(IndexViewLogic);
+  const { indexMappingComponent, productFeatures } = useValues(KibanaLogic);
+
+  const IndexMappingComponent = useMemo(() => indexMappingComponent, []);
+
+  const [selectedIndexType, setSelectedIndexType] =
+    useState<AccessControlSelectorOption['value']>('content-index');
+  const indexToShow =
+    selectedIndexType === 'content-index'
+      ? indexName
+      : stripSearchPrefix(indexName, CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX);
+  const { makeRequest: makeMappingRequest } = useActions(mappingsWithPropsApiLogic(indexToShow));
+  const { error } = useValues(mappingsWithPropsApiLogic(indexToShow));
+  const shouldShowAccessControlSwitch =
+    hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
+  const isAccessControlIndexNotFound =
+    shouldShowAccessControlSwitch && error?.body?.statusCode === 404;
 
   useEffect(() => {
-    makeMappingRequest({ indexName });
-  }, [indexName]);
+    makeMappingRequest({ indexName: indexToShow });
+  }, [indexToShow, indexName]);
 
   return (
     <>
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>
-          <EuiCodeBlock language="json" isCopyable>
-            {JSON.stringify(mappingData, null, 2)}
-          </EuiCodeBlock>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {shouldShowAccessControlSwitch && (
+              <EuiFlexItem grow={false} className="enterpriseSearchMappingsSelector">
+                <AccessControlIndexSelector
+                  onChange={setSelectedIndexType}
+                  valueOfSelected={selectedIndexType}
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow>
+              {isAccessControlIndexNotFound ? (
+                <EuiCallOut
+                  size="m"
+                  title={i18n.translate(
+                    'xpack.enterpriseSearch.content.searchIndex.mappings.noIndex.title',
+                    { defaultMessage: 'Access Control Index not found' }
+                  )}
+                  iconType="iInCircle"
+                >
+                  <p>
+                    {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.noIndex', {
+                      defaultMessage:
+                        "An Access Control Index won't be created until you enable document-level security and run your first access control sync.",
+                    })}
+                  </p>
+                </EuiCallOut>
+              ) : (
+                <>
+                  {IndexMappingComponent ? (
+                    <IndexMappingComponent
+                      index={{
+                        aliases: [],
+                        hidden: isHiddenIndex,
+                        isFrozen: false,
+                        name: indexToShow,
+                      }}
+                      showAboutMappings={false}
+                    />
+                  ) : (
+                    <EuiCallOut
+                      color="danger"
+                      iconType="warn"
+                      title={i18n.translate(
+                        'xpack.enterpriseSearch.content.searchIndex.mappings.noMappingsComponent',
+                        { defaultMessage: 'Mappings component not found' }
+                      )}
+                    />
+                  )}
+                </>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiPanel grow={false} hasShadow={false} hasBorder>
@@ -69,19 +146,24 @@ export const SearchIndexIndexMappings: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.content.searchIndex.mappings.description"
-                  defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type (such as {keyword}, {number}, or {date}) and additional subfields. These index mappings determine the functions available in your relevance tuning and search experience."
+                  defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type (such as {keyword}, {number}, or {date}) and additional subfields. By default, search optimized mappings are used which can be customized as needed to best fit your search use case."
                   values={{
+                    date: <EuiCode>date</EuiCode>,
                     keyword: <EuiCode>keyword</EuiCode>,
                     number: <EuiCode>number</EuiCode>,
-                    date: <EuiCode>date</EuiCode>,
                   }}
                 />
               </p>
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiLink href={docLinks.elasticsearchMapping} target="_blank" external>
+            <EuiLink
+              data-test-subj="enterpriseSearchSearchIndexIndexMappingsLearnHowToCustomizeIndexMappingsAndSettingsLink"
+              href={docLinks.connectorsMappings}
+              target="_blank"
+              external
+            >
               {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.docLink', {
-                defaultMessage: 'Learn more',
+                defaultMessage: 'Learn how to customize index mappings and settings',
               })}
             </EuiLink>
           </EuiPanel>
@@ -112,7 +194,12 @@ export const SearchIndexIndexMappings: React.FC = () => {
               </p>
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiLink href={docLinks.ingestPipelines} target="_blank" external>
+            <EuiLink
+              data-test-subj="enterpriseSearchSearchIndexIndexMappingsLearnMoreLink"
+              href={docLinks.ingestPipelines}
+              target="_blank"
+              external
+            >
               {i18n.translate('xpack.enterpriseSearch.content.searchIndex.transform.docLink', {
                 defaultMessage: 'Learn more',
               })}

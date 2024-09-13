@@ -39,7 +39,7 @@ export function createTimeSeriesQueryRoute(
     req: KibanaRequest<unknown, unknown, TimeSeriesQuery>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
-    logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
+    logger.debug(() => `route ${path} request: ${JSON.stringify(req.body)}`);
 
     const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
     const result = await timeSeriesQuery({
@@ -48,7 +48,7 @@ export function createTimeSeriesQueryRoute(
       query: req.body,
     });
 
-    logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
+    logger.debug(() => `route ${path} response: ${JSON.stringify(result)}`);
     return res.ok({ body: result });
   }
 }

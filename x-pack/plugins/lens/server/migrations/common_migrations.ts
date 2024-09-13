@@ -37,7 +37,7 @@ import {
   LensDocShape860,
 } from './types';
 import { DOCUMENT_FIELD_NAME } from '../../common/constants';
-import type { LegacyMetricState } from '../../common/types';
+import { RowHeightMode, type LegacyMetricState } from '../../common/types';
 import { isPartitionShape } from '../../common/visualizations';
 import { LensDocShape } from './saved_object_migrations';
 
@@ -228,7 +228,7 @@ export const commonEnhanceTableRowHeight = (
   const visState810 = attributes.state.visualization as VisState810;
   const newAttributes = cloneDeep(attributes);
   const vizState = newAttributes.state.visualization as VisState820;
-  vizState.rowHeight = visState810.fitRowToContent ? 'auto' : 'single';
+  vizState.rowHeight = visState810.fitRowToContent ? RowHeightMode.auto : RowHeightMode.single;
   vizState.rowHeightLines = visState810.fitRowToContent ? 2 : 1;
   return newAttributes as LensDocShape810<VisState820>;
 };
@@ -323,7 +323,7 @@ export const getLensCustomVisualizationMigrations = (
       const migrationMap: MigrateFunctionsObject = {};
       const currentMigrations = migrationGetter();
       for (const version in currentMigrations) {
-        if (currentMigrations.hasOwnProperty(version)) {
+        if (Object.hasOwn(currentMigrations, version)) {
           migrationMap[version] = getApplyCustomVisualizationMigrationToLens(
             id,
             currentMigrations[version]
@@ -502,7 +502,11 @@ export const commonMigratePartitionChartGroups = (
   }>
 ): LensDocShape850<{
   shape: string;
-  layers: Array<{ primaryGroups?: string[]; secondaryGroups?: string[] }>;
+  layers: Array<{
+    primaryGroups?: string[];
+    secondaryGroups?: string[];
+    [key: string]: unknown; // unknown carryover key/values
+  }>;
 }> => {
   if (
     attributes.state.visualization?.layers &&
@@ -570,4 +574,71 @@ export const commonMigratePartitionMetrics = (attributes: LensDocShape860<unknow
     shape: string;
     layers: Array<{ metrics: string[] }>;
   }>;
+};
+
+export const commonMigrateMetricFormatter = (attributes: LensDocShape860<unknown>) => {
+  if (attributes.visualizationType !== 'lnsMetric') {
+    return attributes as LensDocShape860<unknown>;
+  }
+  if (!attributes.state.datasourceStates.formBased) {
+    return attributes as LensDocShape860<unknown>;
+  }
+
+  type LayersType = LensDocShape860['state']['datasourceStates']['formBased']['layers'];
+
+  const updatedLayersWithCompactFormatters: LayersType = {};
+  for (const [layerId, layer] of Object.entries(
+    attributes.state.datasourceStates.formBased.layers
+  )) {
+    const newColumns: Record<string, Record<string, unknown>> = {};
+    for (const [id, column] of Object.entries(layer.columns)) {
+      const params = column.params as {
+        format?: { id: string; params: Record<string, string | boolean> };
+      };
+      if (column.isBucketed) {
+        newColumns[id] = column;
+      } else {
+        // When value formatting is set to Default, assume nothing
+        // Bytes and bits are already compact
+        if (!params?.format || ['bytes', 'bits'].includes(params.format.id)) {
+          newColumns[id] = column;
+        } else {
+          // Metric only support numeric values
+          // suffix is not taken into account as it wasn't possible in metric visualization before this version
+          newColumns[id] = {
+            ...column,
+            params: {
+              ...params,
+              format: {
+                ...params?.format,
+                id: params?.format.id || 'number',
+                params: {
+                  ...params?.format?.params,
+                  compact: true,
+                },
+              },
+            },
+          };
+        }
+      }
+    }
+    updatedLayersWithCompactFormatters[layerId] = {
+      ...layer,
+      columns: newColumns,
+    };
+  }
+
+  return {
+    ...attributes,
+    state: {
+      ...attributes.state,
+      datasourceStates: {
+        ...attributes.state.datasourceStates,
+        formBased: {
+          ...attributes.state.datasourceStates.formBased,
+          layers: updatedLayersWithCompactFormatters,
+        },
+      },
+    },
+  };
 };

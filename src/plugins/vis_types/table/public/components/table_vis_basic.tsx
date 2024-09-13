@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { memo, useCallback, useMemo, useRef } from 'react';
@@ -15,14 +16,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { orderBy } from 'lodash';
-
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { createTableVisCell } from './table_vis_cell';
 import { TableContext, TableVisConfig, TableVisUseUiStateProps } from '../types';
 import { usePagination } from '../utils';
 import { TableVisControls } from './table_vis_controls';
 import { createGridColumns } from './table_vis_columns';
+import { sortNullsLast } from './utils';
 
 interface TableVisBasicProps {
   fireEvent: IInterpreterRenderHandlers['event'];
@@ -45,13 +45,14 @@ export const TableVisBasic = memo(
     const { columns, rows, formattedColumns } = table;
 
     // custom sorting is in place until the EuiDataGrid sorting gets rid of flaws -> https://github.com/elastic/eui/issues/4108
-    const sortedRows = useMemo(
-      () =>
-        sort.columnIndex !== null && sort.direction
-          ? orderBy(rows, columns[sort.columnIndex]?.id, sort.direction)
-          : rows,
-      [columns, rows, sort]
-    );
+    const sortedRows = useMemo(() => {
+      if (sort.columnIndex !== null && sort.direction) {
+        const id = columns[sort.columnIndex]?.id;
+        return sortNullsLast(rows, sort.direction, id);
+      }
+
+      return rows;
+    }, [columns, rows, sort.columnIndex, sort.direction]);
 
     // renderCellValue is a component which renders a cell based on column and row indexes
     const renderCellValue = useMemo(
@@ -109,7 +110,7 @@ export const TableVisBasic = memo(
         defaultMessage: 'Data table visualization',
       });
 
-    const onColumnResize: EuiDataGridProps['onColumnResize'] = useCallback(
+    const onColumnResize = useCallback<NonNullable<EuiDataGridProps['onColumnResize']>>(
       ({ columnId, width }) => {
         const colIndex = columns.findIndex((c) => c.id === columnId);
         setColumnsWidth({

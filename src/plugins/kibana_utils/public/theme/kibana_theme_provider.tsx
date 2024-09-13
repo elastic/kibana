@@ -1,55 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiProvider, EuiProviderProps } from '@elastic/eui';
-import createCache from '@emotion/cache';
-import type { FC } from 'react';
-import React, { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
+import React, { FC, PropsWithChildren } from 'react';
+import { Observable } from 'rxjs';
 
-import type { CoreTheme } from '@kbn/core/public';
-import { getColorMode } from './utils';
+import { EuiProviderProps } from '@elastic/eui';
+import { CoreTheme } from '@kbn/core-theme-browser';
+import { KibanaThemeProvider as KbnThemeProvider } from '@kbn/react-kibana-context-theme';
 
-interface KibanaThemeProviderProps {
+export interface KibanaThemeProviderProps {
   theme$: Observable<CoreTheme>;
   modify?: EuiProviderProps<{}>['modify'];
+  children: React.ReactNode;
 }
 
-const defaultTheme: CoreTheme = {
-  darkMode: false,
-};
-
-const globalCache = createCache({
-  key: 'eui',
-  container: document.querySelector(`meta[name="eui-global"]`) as HTMLElement,
-});
-const emotionCache = createCache({
-  key: 'css',
-  container: document.querySelector(`meta[name="emotion"]`) as HTMLElement,
-});
-emotionCache.compat = true;
-
-/**
- * Copied from the `kibana_react` plugin, to avoid cyclical dependency
- */
-export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, modify, children }) => {
-  const theme = useObservable(theme$, defaultTheme);
-  const colorMode = useMemo(() => getColorMode(theme), [theme]);
-  return (
-    <EuiProvider
-      colorMode={colorMode}
-      cache={{ default: emotionCache, global: globalCache }}
-      globalStyles={false}
-      utilityClasses={false}
-      modify={modify}
-    >
-      {children}
-    </EuiProvider>
-  );
-};
+/** @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context-theme */
+export const KibanaThemeProvider: FC<PropsWithChildren<KibanaThemeProviderProps>> = ({
+  theme$,
+  modify,
+  children,
+}) => <KbnThemeProvider {...{ theme: { theme$ }, modify }}>{children}</KbnThemeProvider>;

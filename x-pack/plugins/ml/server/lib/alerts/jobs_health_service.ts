@@ -6,42 +6,52 @@
  */
 
 import { groupBy, keyBy, memoize, partition } from 'lodash';
-import { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { MlJob } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isDefined } from '@kbn/ml-is-defined';
-import { MlClient } from '../ml_client';
-import { JobSelection } from '../../routes/schemas/alerting_schema';
-import { datafeedsProvider, DatafeedsService } from '../../models/job_service/datafeeds';
-import { ALL_JOBS_SELECTION, HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
-import { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
-import { GetGuards } from '../../shared_services/shared_services';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
+import type { MlClient } from '../ml_client';
+import type { JobSelection } from '../../routes/schemas/alerting_schema';
+import { datafeedsProvider, type DatafeedsService } from '../../models/job_service/datafeeds';
 import {
+  ALERT_DATAFEED_RESULTS,
+  ALERT_DELAYED_DATA_RESULTS,
+  ALERT_JOB_ERRORS_RESULTS,
+  ALERT_MML_RESULTS,
+  ALL_JOBS_SELECTION,
+  HEALTH_CHECK_NAMES,
+} from '../../../common/constants/alerts';
+import type { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
+import type { GetGuards } from '../../shared_services/shared_services';
+import type {
+  AnomalyDetectionJobHealthAlertPayload,
   AnomalyDetectionJobsHealthAlertContext,
-  DelayedDataResponse,
+  DelayedDataPayloadResponse,
   JobsErrorsResponse,
   JobsHealthExecutorOptions,
-  MmlTestResponse,
+  MmlTestPayloadResponse,
   NotStartedDatafeedResponse,
 } from './register_jobs_monitoring_rule_type';
 import {
   getResultJobsHealthRuleConfig,
   resolveLookbackInterval,
 } from '../../../common/util/alerts';
-import { AnnotationService } from '../../models/annotation_service/annotation';
+import type { AnnotationService } from '../../models/annotation_service/annotation';
 import { annotationServiceProvider } from '../../models/annotation_service';
 import { parseInterval } from '../../../common/util/parse_interval';
 import {
   jobAuditMessagesProvider,
-  JobAuditMessagesService,
+  type JobAuditMessagesService,
 } from '../../models/job_audit_messages/job_audit_messages';
 import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 
 export interface TestResult {
   name: string;
   context: AnomalyDetectionJobsHealthAlertContext;
+  payload: AnomalyDetectionJobHealthAlertPayload;
   /**
-   * Indicates if the health check is  successful.
+   * Indicates if the health check is successful.
    */
   isHealthy: boolean;
 }
@@ -61,11 +71,34 @@ export function jobsHealthServiceProvider(
    */
   const getFormatters = memoize(async () => {
     const fieldFormatsRegistry = await getFieldsFormatRegistry();
-    const dateFormatter = fieldFormatsRegistry.deserialize({ id: 'date' });
-    const bytesFormatter = fieldFormatsRegistry.deserialize({ id: 'bytes' });
+    const dateFormat = fieldFormatsRegistry.deserialize({ id: 'date' });
+    const bytesFormat = fieldFormatsRegistry.deserialize({ id: 'bytes' });
+
+    const dateFormatter = dateFormat.convert.bind(dateFormat);
+    const bytesFormatter = bytesFormat.convert.bind(bytesFormat);
+
     return {
-      dateFormatter: dateFormatter.convert.bind(dateFormatter),
-      bytesFormatter: bytesFormatter.convert.bind(bytesFormatter),
+      dateFormatter,
+      bytesFormatter,
+      mmlResultsFormatter: (payload: MmlTestPayloadResponse) => {
+        return {
+          job_id: payload.job_id,
+          memory_status: payload.memory_status,
+          log_time: dateFormatter(payload.log_time),
+          model_bytes: bytesFormatter(payload.model_bytes),
+          model_bytes_memory_limit: bytesFormatter(payload.model_bytes_memory_limit),
+          peak_model_bytes: bytesFormatter(payload.peak_model_bytes),
+          model_bytes_exceeded: bytesFormatter(payload.model_bytes_exceeded),
+        };
+      },
+      delayedDataFormatter: (payload: DelayedDataPayloadResponse) => {
+        return {
+          job_id: payload.job_id,
+          annotation: payload.annotation,
+          missed_docs_count: payload.missed_docs_count,
+          end_timestamp: dateFormatter(payload.end_timestamp),
+        };
+      },
     };
   });
 
@@ -189,10 +222,8 @@ export function jobsHealthServiceProvider(
      * Gets the model memory report for opened jobs.
      * @param jobIds
      */
-    async getMmlReport(jobIds: string[]): Promise<MmlTestResponse[]> {
+    async getMmlReport(jobIds: string[]): Promise<MmlTestPayloadResponse[]> {
       const jobsStats = await getJobStats(jobIds);
-
-      const { dateFormatter, bytesFormatter } = await getFormatters();
 
       return jobsStats
         .filter((j) => j.state === 'opened')
@@ -200,11 +231,11 @@ export function jobsHealthServiceProvider(
           return {
             job_id: jobId,
             memory_status: modelSizeStats.memory_status,
-            log_time: dateFormatter(modelSizeStats.log_time),
-            model_bytes: bytesFormatter(modelSizeStats.model_bytes),
-            model_bytes_memory_limit: bytesFormatter(modelSizeStats.model_bytes_memory_limit),
-            peak_model_bytes: bytesFormatter(modelSizeStats.peak_model_bytes),
-            model_bytes_exceeded: bytesFormatter(modelSizeStats.model_bytes_exceeded),
+            log_time: modelSizeStats.log_time,
+            model_bytes: modelSizeStats.model_bytes,
+            model_bytes_memory_limit: modelSizeStats.model_bytes_memory_limit!,
+            peak_model_bytes: modelSizeStats.peak_model_bytes!,
+            model_bytes_exceeded: modelSizeStats.model_bytes_exceeded!,
           };
         });
     },
@@ -221,7 +252,7 @@ export function jobsHealthServiceProvider(
       jobs: MlJob[],
       timeInterval: string | null,
       docsCount: number | null
-    ): Promise<[DelayedDataResponse[], DelayedDataResponse[]]> {
+    ): Promise<[DelayedDataPayloadResponse[], DelayedDataPayloadResponse[]]> {
       const jobIds = getJobIds(jobs);
       const datafeeds = await getDatafeeds(jobIds);
 
@@ -234,8 +265,6 @@ export function jobsHealthServiceProvider(
 
       const defaultLookbackInterval = resolveLookbackInterval(resultJobs, datafeeds!);
       const earliestMs = getDelayedDataLookbackTimestamp(timeInterval, defaultLookbackInterval);
-
-      const { dateFormatter } = await getFormatters();
 
       const annotationsData = (
         await annotationService.getDelayedDataAnnotations({
@@ -268,12 +297,6 @@ export function jobsHealthServiceProvider(
             v.end_timestamp > getDelayedDataLookbackTimestamp(timeInterval, jobLookbackInterval);
 
           return isEndTimestampWithinRange;
-        })
-        .map((v) => {
-          return {
-            ...v,
-            end_timestamp: dateFormatter(v.end_timestamp),
-          };
         });
 
       return partition(annotationsData, (v) => {
@@ -343,28 +366,28 @@ export function jobsHealthServiceProvider(
           const datafeedResults = isHealthy ? startedDatafeeds : notStartedDatafeeds;
           const { count, jobsString } = getJobsAlertingMessageValues(datafeedResults);
 
+          const message = isHealthy
+            ? i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedRecoveryMessage', {
+                defaultMessage:
+                  'Datafeed is started for {count, plural, one {job} other {jobs}} {jobsString}',
+                values: { count, jobsString },
+              })
+            : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedStateMessage', {
+                defaultMessage:
+                  'Datafeed is not started for {count, plural, one {job} other {jobs}} {jobsString}',
+                values: { count, jobsString },
+              });
+
           results.push({
             isHealthy,
             name: HEALTH_CHECK_NAMES.datafeed.name,
+            payload: {
+              [ALERT_REASON]: message,
+              [ALERT_DATAFEED_RESULTS]: datafeedResults,
+            },
             context: {
               results: datafeedResults,
-              message: isHealthy
-                ? i18n.translate(
-                    'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedRecoveryMessage',
-                    {
-                      defaultMessage:
-                        'Datafeed is started for {count, plural, one {job} other {jobs}} {jobsString}',
-                      values: { count, jobsString },
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedStateMessage',
-                    {
-                      defaultMessage:
-                        'Datafeed is not started for {count, plural, one {job} other {jobs}} {jobsString}',
-                      values: { count, jobsString },
-                    }
-                  ),
+              message,
             },
           });
         }
@@ -424,12 +447,22 @@ export function jobsHealthServiceProvider(
             }
           }
 
+          const mmlResults = isHealthy
+            ? okJobs
+            : [...(hardLimitJobs ?? []), ...(softLimitJobs ?? [])];
+
+          const { mmlResultsFormatter } = await getFormatters();
+
           results.push({
             isHealthy,
             name: HEALTH_CHECK_NAMES.mml.name,
             context: {
-              results: isHealthy ? okJobs : [...(hardLimitJobs ?? []), ...(softLimitJobs ?? [])],
+              results: mmlResults.map(mmlResultsFormatter),
               message,
+            },
+            payload: {
+              [ALERT_REASON]: message,
+              [ALERT_MML_RESULTS]: mmlResults,
             },
           });
         }
@@ -446,23 +479,33 @@ export function jobsHealthServiceProvider(
         const isHealthy = exceededThresholdAnnotations.length === 0;
         const { count, jobsString } = getJobsAlertingMessageValues(exceededThresholdAnnotations);
 
+        const message = isHealthy
+          ? i18n.translate(
+              'xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataRecoveryMessage',
+              {
+                defaultMessage: 'No data delay has occurred.',
+              }
+            )
+          : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataMessage', {
+              defaultMessage:
+                '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {is} other {are}} suffering from delayed data.',
+              values: { count, jobsString },
+            });
+
+        const delayedDataResults = isHealthy
+          ? withinThresholdAnnotations
+          : exceededThresholdAnnotations;
+
         results.push({
           isHealthy,
           name: HEALTH_CHECK_NAMES.delayedData.name,
           context: {
-            results: isHealthy ? withinThresholdAnnotations : exceededThresholdAnnotations,
-            message: isHealthy
-              ? i18n.translate(
-                  'xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataRecoveryMessage',
-                  {
-                    defaultMessage: 'No data delay has occurred.',
-                  }
-                )
-              : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataMessage', {
-                  defaultMessage:
-                    '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {is} other {are}} suffering from delayed data.',
-                  values: { count, jobsString },
-                }),
+            results: delayedDataResults.map((await getFormatters()).delayedDataFormatter),
+            message,
+          },
+          payload: {
+            [ALERT_REASON]: message,
+            [ALERT_DELAYED_DATA_RESULTS]: delayedDataResults,
           },
         });
       }
@@ -472,25 +515,31 @@ export function jobsHealthServiceProvider(
         const { count, jobsString } = getJobsAlertingMessageValues(response);
         const isHealthy = response.length === 0;
 
+        const message = isHealthy
+          ? i18n.translate(
+              'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesRecoveredMessage',
+              {
+                defaultMessage:
+                  'No errors in the {count, plural, one {job} other {jobs}} messages.',
+                values: { count },
+              }
+            )
+          : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesMessage', {
+              defaultMessage:
+                '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {contains} other {contain}} errors in the messages.',
+              values: { count, jobsString },
+            });
+
         results.push({
           isHealthy,
           name: HEALTH_CHECK_NAMES.errorMessages.name,
           context: {
             results: response,
-            message: isHealthy
-              ? i18n.translate(
-                  'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesRecoveredMessage',
-                  {
-                    defaultMessage:
-                      'No errors in the {count, plural, one {job} other {jobs}} messages.',
-                    values: { count },
-                  }
-                )
-              : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesMessage', {
-                  defaultMessage:
-                    '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {contains} other {contain}} errors in the messages.',
-                  values: { count, jobsString },
-                }),
+            message,
+          },
+          payload: {
+            [ALERT_REASON]: message,
+            [ALERT_JOB_ERRORS_RESULTS]: response,
           },
         });
       }

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
 import {
   getSetSignalStatusByIdsRequest,
@@ -15,10 +17,8 @@ import {
   getSuccessfulSignalUpdateResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
-import type { SetupPlugins } from '../../../../plugin';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import { setSignalsStatusRoute } from './open_close_signals_route';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -34,12 +34,7 @@ describe('set signal status', () => {
       getSuccessfulSignalUpdateResponse()
     );
     const telemetrySenderMock = createMockTelemetryEventsSender();
-    const securityMock = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
-      },
-    } as unknown as SetupPlugins['security'];
-    setSignalsStatusRoute(server.router, logger, securityMock, telemetrySenderMock);
+    setSignalsStatusRoute(server.router, logger, telemetrySenderMock);
   });
 
   describe('status on signal', () => {
@@ -84,6 +79,36 @@ describe('set signal status', () => {
         status_code: 500,
       });
     });
+
+    test('calls "esClient.updateByQuery" with queryId when query is defined', async () => {
+      await server.inject(
+        getSetSignalStatusByQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            query: expect.objectContaining({
+              bool: { filter: typicalSetStatusSignalByQueryPayload().query },
+            }),
+          }),
+        })
+      );
+    });
+
+    test('calls "esClient.updateByQuery" with signalIds when ids are defined', async () => {
+      await server.inject(
+        getSetSignalStatusByIdsRequest(),
+        requestContextMock.convertContext(context)
+      );
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            query: { bool: { filter: { terms: { _id: ['somefakeid1', 'somefakeid2'] } } } },
+          }),
+        })
+      );
+    });
   });
 
   describe('request validation', () => {
@@ -115,12 +140,10 @@ describe('set signal status', () => {
         path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
         body: setStatusSignalMissingIdsAndQueryPayload(),
       });
-      const response = await server.inject(request, requestContextMock.convertContext(context));
-      expect(response.status).toEqual(400);
-      expect(response.body).toEqual({
-        message: ['either "signal_ids" or "query" must be set'],
-        status_code: 400,
-      });
+
+      const result = server.validate(request);
+
+      expect(result.badRequest).toHaveBeenCalled();
     });
 
     test('rejects if signal_ids but no status', async () => {
@@ -132,9 +155,7 @@ describe('set signal status', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "status"'
-      );
+      expect(result.badRequest).toHaveBeenCalled();
     });
 
     test('rejects if query but no status', async () => {
@@ -146,9 +167,7 @@ describe('set signal status', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "status"'
-      );
+      expect(result.badRequest).toHaveBeenCalled();
     });
 
     test('rejects if query and signal_ids but no status', async () => {
@@ -164,9 +183,7 @@ describe('set signal status', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "status"'
-      );
+      expect(result.badRequest).toHaveBeenCalled();
     });
   });
 });

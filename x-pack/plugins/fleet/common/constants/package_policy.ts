@@ -5,6 +5,15 @@
  * 2.0.
  */
 
-export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
+export const LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
+
+export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'fleet-package-policies';
 
 export const PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES = ['auto_configure', 'create_doc'];
+
+export const inputsFormat = {
+  Simplified: 'simplified',
+  Legacy: 'legacy',
+} as const;
+
+export const LICENCE_FOR_MULTIPLE_AGENT_POLICIES = 'enterprise';

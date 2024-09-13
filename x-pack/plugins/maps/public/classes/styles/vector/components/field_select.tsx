@@ -6,35 +6,18 @@
  */
 
 import React from 'react';
-
-import {
-  EuiComboBox,
-  EuiComboBoxProps,
-  EuiComboBoxOptionOption,
-  EuiHighlight,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
+import { EuiComboBox, EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
-import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import {
+  FIELD_ORIGIN,
+  MIDDLE_TRUNCATION_PROPS,
+  SINGLE_SELECTION_AS_TEXT_PROPS,
+  VECTOR_STYLES,
+} from '../../../../../common/constants';
 import { StyleField } from '../style_fields_helper';
-
-function renderOption(
-  option: EuiComboBoxOptionOption<StyleField>,
-  searchValue: string,
-  contentClassName: string
-) {
-  const fieldIcon = option.value ? <FieldIcon type={option.value.type} fill="none" /> : null;
-  return (
-    <EuiFlexGroup className={contentClassName} gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={null}>{fieldIcon}</EuiFlexItem>
-      <EuiFlexItem>
-        <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
 
 function groupFieldsByOrigin(fields: StyleField[]) {
   const fieldsByOriginMap = new Map<FIELD_ORIGIN, StyleField[]>();
@@ -53,9 +36,13 @@ function groupFieldsByOrigin(fields: StyleField[]) {
       .map((field) => {
         return {
           value: field,
+          name: field.name,
           label: field.label,
           disabled: field.isUnsupported,
           title: field.unsupportedMsg,
+          prepend: field.type ? (
+            <FieldIcon type={field.type} fill="none" className="eui-alignMiddle" />
+          ) : null,
         };
       })
       .sort((a, b) => {
@@ -129,19 +116,25 @@ export function FieldSelect({ fields, selectedFieldName, onChange, styleName, ..
     }
   }
 
+  const options = groupFieldsByOrigin(fields);
+
+  const panelMinWidth = calculateWidthFromEntries(fields, ['label']);
+
   return (
     <EuiComboBox
       selectedOptions={selectedOption ? [selectedOption] : []}
-      options={groupFieldsByOrigin(fields)}
+      options={options}
       onChange={onFieldChange}
-      singleSelection={{ asPlainText: true }}
       isClearable={false}
       fullWidth
       placeholder={i18n.translate('xpack.maps.styles.vector.selectFieldPlaceholder', {
         defaultMessage: 'Select a field',
       })}
-      renderOption={renderOption}
       data-test-subj={`styleFieldSelect_${styleName}`}
+      singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
+      truncationProps={MIDDLE_TRUNCATION_PROPS}
+      inputPopoverProps={{ panelMinWidth }}
+      optionMatcher={comboBoxFieldOptionMatcher}
       {...rest}
     />
   );

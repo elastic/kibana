@@ -19,16 +19,15 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
 
-import styled from 'styled-components';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { EditSavedQueryForm } from './form';
 import { useDeleteSavedQuery, useUpdateSavedQuery, useSavedQuery } from '../../../saved_queries';
 
-const StyledEuiCallOut = styled(EuiCallOut)`
-  margin: 10px;
-`;
+const euiCalloutCss = {
+  margin: '10px',
+};
 
 const EditSavedQueryPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
@@ -41,12 +40,9 @@ const EditSavedQueryPageComponent = () => {
   const updateSavedQueryMutation = useUpdateSavedQuery({ savedQueryId });
   const deleteSavedQueryMutation = useDeleteSavedQuery({ savedQueryId });
 
-  useBreadcrumbs('saved_query_edit', { savedQueryName: savedQueryDetails?.attributes?.id ?? '' });
+  useBreadcrumbs('saved_query_edit', { savedQueryName: savedQueryDetails?.saved_object_id ?? '' });
 
-  const elasticPrebuiltQuery = useMemo(
-    () => !!savedQueryDetails?.attributes?.prebuilt,
-    [savedQueryDetails]
-  );
+  const elasticPrebuiltQuery = useMemo(() => !!savedQueryDetails?.prebuilt, [savedQueryDetails]);
   const viewMode = useMemo(
     () => !permissions.writeSavedQueries || elasticPrebuiltQuery,
     [permissions.writeSavedQueries, elasticPrebuiltQuery]
@@ -87,16 +83,16 @@ const EditSavedQueryPageComponent = () => {
                     defaultMessage='"{savedQueryId}" details'
                     // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                     values={{
-                      savedQueryId: savedQueryDetails?.attributes?.id ?? '',
+                      savedQueryId: savedQueryDetails?.id ?? '',
                     }}
                   />
                   {elasticPrebuiltQuery && (
-                    <StyledEuiCallOut size="s">
+                    <EuiCallOut css={euiCalloutCss} size="s">
                       <FormattedMessage
                         id="xpack.osquery.viewSavedQuery.prebuiltInfo"
                         defaultMessage="This is a prebuilt Elastic query, and it cannot be edited."
                       />
-                    </StyledEuiCallOut>
+                    </EuiCallOut>
                   )}
                 </>
               ) : (
@@ -105,7 +101,7 @@ const EditSavedQueryPageComponent = () => {
                   defaultMessage='Edit "{savedQueryId}"'
                   // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                   values={{
-                    savedQueryId: savedQueryDetails?.attributes?.id ?? '',
+                    savedQueryId: savedQueryDetails?.id ?? '',
                   }}
                 />
               )}
@@ -114,7 +110,7 @@ const EditSavedQueryPageComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [elasticPrebuiltQuery, savedQueryDetails?.attributes?.id, savedQueryListProps, viewMode]
+    [elasticPrebuiltQuery, savedQueryDetails?.id, savedQueryListProps, viewMode]
   );
 
   const RightColumn = useMemo(
@@ -130,7 +126,7 @@ const EditSavedQueryPageComponent = () => {
   );
 
   const handleSubmit = useCallback(
-    async (payload) => {
+    async (payload: any) => {
       await updateSavedQueryMutation.mutateAsync(payload);
     },
     [updateSavedQueryMutation]
@@ -146,7 +142,7 @@ const EditSavedQueryPageComponent = () => {
     >
       {!isLoading && !isEmpty(savedQueryDetails) && (
         <EditSavedQueryForm
-          defaultValue={savedQueryDetails?.attributes}
+          defaultValue={savedQueryDetails}
           handleSubmit={handleSubmit}
           viewMode={viewMode}
         />

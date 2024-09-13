@@ -6,12 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function serverLogTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   describe('server-log action', () => {
     let serverLogActionId: string;
@@ -30,6 +33,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         is_missing_secrets: false,
         name: 'A server.log action',
@@ -46,6 +50,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'A server.log action',
         connector_type_id: '.server-log',
@@ -67,6 +72,23 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.eql('ok');
+
+      const events: IValidatedEvent[] = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: 'default',
+          type: 'action',
+          id: serverLogActionId,
+          provider: 'actions',
+          actions: new Map([
+            ['execute-start', { equal: 1 }],
+            ['execute', { equal: 1 }],
+          ]),
+        });
+      });
+
+      const executeEvent = events[1];
+      expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
     });
   });
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { ReactElement, useCallback, useMemo } from 'react';
@@ -29,6 +30,7 @@ import { PLUGIN_ID } from '../../../common';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverTourContext, DiscoverTourContextProps } from './discover_tour_context';
 import { DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';
+import { useIsEsqlMode } from '../../application/main/hooks/use_is_esql_mode';
 
 const MAX_WIDTH = 350;
 
@@ -198,14 +200,9 @@ const tourConfig: EuiTourState = {
   tourSubtitle: '',
 };
 
-export const DiscoverTourProvider = ({
-  children,
-  isPlainRecord,
-}: {
-  children: ReactElement;
-  isPlainRecord: boolean;
-}) => {
+export const DiscoverTourProvider = ({ children }: { children: ReactElement }) => {
   const services = useDiscoverServices();
+  const isEsqlMode = useIsEsqlMode();
   const prependToBasePath = services.core.http.basePath.prepend;
   const getAssetPath = useCallback(
     (imageName: string) => {
@@ -215,13 +212,13 @@ export const DiscoverTourProvider = ({
   );
   const tourSteps = useMemo(
     () =>
-      isPlainRecord
+      isEsqlMode
         ? prepareTourSteps(
             [ADD_FIELDS_STEP, ORDER_TABLE_COLUMNS_STEP, CHANGE_ROW_HEIGHT_STEP],
             getAssetPath
           )
         : prepareTourSteps(tourStepDefinitions, getAssetPath),
-    [getAssetPath, isPlainRecord]
+    [getAssetPath, isEsqlMode]
   );
   const [steps, actions, reducerState] = useEuiTour(tourSteps, tourConfig);
   const currentTourStep = reducerState.currentTourStep;
@@ -295,7 +292,7 @@ export const DiscoverTourStepFooterAction: React.FC<{
             onClick={onFinishTour}
             data-test-subj="discoverTourButtonSkip"
           >
-            {EuiI18n({ token: 'core.euiTourStep.skipTour', default: 'Skip tour' })}
+            {EuiI18n({ token: 'core.euiTourFooter.skipTour', default: 'Skip tour' })}
           </EuiButtonEmpty>
         </EuiFlexItem>
       )}
@@ -306,7 +303,7 @@ export const DiscoverTourStepFooterAction: React.FC<{
             onClick={onFinishTour}
             data-test-subj="discoverTourButtonEnd"
           >
-            {EuiI18n({ token: 'core.euiTourStep.endTour', default: 'End tour' })}
+            {EuiI18n({ token: 'core.euiTourFooter.endTour', default: 'End tour' })}
           </EuiButton>
         ) : (
           <EuiButton
@@ -314,7 +311,7 @@ export const DiscoverTourStepFooterAction: React.FC<{
             onClick={onNextTourStep}
             data-test-subj="discoverTourButtonNext"
           >
-            {EuiI18n({ token: 'core.euiTourStep.nextStep', default: 'Next' })}
+            {EuiI18n({ token: 'core.euiTourFooter.nextStep', default: 'Next' })}
           </EuiButton>
         )}
       </EuiFlexItem>

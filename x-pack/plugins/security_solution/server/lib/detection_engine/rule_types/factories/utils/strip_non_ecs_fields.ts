@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
 
 import { isPlainObject, cloneDeep, isArray } from 'lodash';
 
@@ -57,18 +57,19 @@ const ecsObjectFields = getEcsObjectFields();
 
 /**
  * checks if path is a valid Ecs object type (object or flattened)
+ * geo_point also can be object
  */
 const getIsEcsFieldObject = (path: string) => {
   const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
-  return ['object', 'flattened'].includes(ecsField?.type) || ecsObjectFields[path];
+  return ['object', 'flattened', 'geo_point'].includes(ecsField?.type) || ecsObjectFields[path];
 };
 
 /**
  * checks if path is in Ecs mapping
  */
-const getIsEcsField = (path: string) => {
+export const getIsEcsField = (path: string): boolean => {
   const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
-  const isEcsField = !!ecsField || ecsObjectFields[path];
+  const isEcsField = Boolean(!!ecsField || ecsObjectFields[path]);
 
   return isEcsField;
 };
@@ -116,6 +117,11 @@ const computeIsEcsCompliant = (value: SourceField, path: string) => {
 
   const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
   const isEcsFieldObject = getIsEcsFieldObject(path);
+
+  // do not validate geo_point, since it's very complex type that can be string/array/object
+  if (ecsField?.type === 'geo_point') {
+    return true;
+  }
 
   // validate if value is a long type
   if (ecsField?.type === 'long') {
@@ -174,7 +180,7 @@ export const stripNonEcsFields = (doc: SourceFieldRecord): StripNonEcsFieldsRetu
   ) => {
     const fullPath = [parentPath, documentKey].filter(Boolean).join('.');
     // if document array, traverse through each item w/o changing documentKey, parent, parentPath
-    if (isArray(document)) {
+    if (isArray(document) && document.length > 0) {
       document.slice().forEach((value) => {
         traverseAndDeleteInObj(value, documentKey, parent, parentPath);
       });
@@ -188,6 +194,9 @@ export const stripNonEcsFields = (doc: SourceFieldRecord): StripNonEcsFieldsRetu
       if (isArray(documentReference)) {
         const indexToDelete = documentReference.findIndex((item) => item === document);
         documentReference.splice(indexToDelete, 1);
+        if (documentReference.length === 0) {
+          delete parent[documentKey];
+        }
       } else {
         delete parent[documentKey];
       }

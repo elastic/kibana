@@ -9,7 +9,7 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { ActionConnector, ActionTypeIndex, ActionTypeModel, RuleAction } from '../../../types';
+import { ActionConnector, ActionTypeIndex, ActionTypeModel, RuleUiAction } from '../../../types';
 import { getValidConnectors } from '../common/connectors';
 
 interface ConnectorOption {
@@ -19,7 +19,8 @@ interface ConnectorOption {
 }
 
 interface SelectionProps {
-  actionItem: RuleAction;
+  allowGroupConnector?: string[];
+  actionItem: RuleUiAction;
   accordionIndex: number;
   actionTypesIndex: ActionTypeIndex;
   actionTypeRegistered: ActionTypeModel;
@@ -30,6 +31,7 @@ interface SelectionProps {
 export const ConnectorsSelection = React.memo(ConnectorsSelectionComponent);
 
 function ConnectorsSelectionComponent({
+  allowGroupConnector,
   actionItem,
   accordionIndex,
   actionTypesIndex,
@@ -38,13 +40,19 @@ function ConnectorsSelectionComponent({
   onConnectorSelected,
 }: SelectionProps) {
   const validConnectors = useMemo(
-    () => getValidConnectors(connectors, actionItem, actionTypesIndex),
-    [actionItem, actionTypesIndex, connectors]
+    () => getValidConnectors(connectors, actionItem, actionTypesIndex, allowGroupConnector),
+    [actionItem, actionTypesIndex, allowGroupConnector, connectors]
   );
 
   const selectedConnectors = useMemo(
-    () => getValueOfSelectedConnector(actionItem.id, validConnectors, actionTypeRegistered),
-    [actionItem.id, validConnectors, actionTypeRegistered]
+    () =>
+      getValueOfSelectedConnector(
+        actionItem.id,
+        validConnectors,
+        actionTypeRegistered,
+        allowGroupConnector
+      ),
+    [actionItem.id, validConnectors, actionTypeRegistered, allowGroupConnector]
   );
 
   const options = useMemo(
@@ -83,7 +91,8 @@ function ConnectorsSelectionComponent({
 const getValueOfSelectedConnector = (
   actionItemId: string,
   connectors: ActionConnector[],
-  actionTypeRegistered: ActionTypeModel
+  actionTypeRegistered: ActionTypeModel,
+  allowGroupConnector: string[] = []
 ): Array<EuiComboBoxOptionOption<ConnectorOption>> => {
   const selectedConnector = connectors.find((connector) => connector.id === actionItemId);
 

@@ -7,32 +7,30 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type {
   NetworkDnsStrategyResponse,
-  NetworkQueries,
-  NetworkDnsRequestOptions,
   NetworkDnsEdges,
+  NetworkQueries,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import type { SecuritySolutionFactory } from '../../types';
 
 import { getDnsEdges } from './helpers';
 import { buildDnsQuery } from './query.dns_network.dsl';
+import type { SecuritySolutionFactory } from '../../types';
 
 export const networkDns: SecuritySolutionFactory<NetworkQueries.dns> = {
-  // @ts-expect-error dns_name_query_count is incompatbile. Maybe<string>' is not assignable to type 'string | undefined
-  buildDsl: (options: NetworkDnsRequestOptions) => {
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildDnsQuery(options);
   },
   parse: async (
-    options: NetworkDnsRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkDnsStrategyResponse> => {
     const { activePage, fakePossibleCount } = options.pagination;

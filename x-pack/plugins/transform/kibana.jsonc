@@ -19,21 +19,23 @@
       "management",
       "features",
       "share",
+      "savedSearch",
       "triggersActionsUi",
       "fieldFormats",
       "unifiedSearch",
       "charts",
       "savedObjectsFinder",
-      "savedObjectsManagement"
+      "savedObjectsManagement",
+      "contentManagement",
     ],
     "optionalPlugins": [
+      "dataViewEditor",
       "security",
       "usageCollection",
       "spaces",
       "alerting"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "esUiShared",
       "discover",
       "kibanaUtils",

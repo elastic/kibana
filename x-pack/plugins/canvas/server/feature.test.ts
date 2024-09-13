@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { ReportingStart } from '@kbn/reporting-plugin/server/types';
 import { getCanvasFeature } from './feature';
+import { reportingMock } from '@kbn/reporting-plugin/server/mocks';
+import { ReportingStart } from '@kbn/reporting-plugin/server/types';
 
 let mockReportingPlugin: ReportingStart;
 beforeEach(() => {
-  mockReportingPlugin = {
-    usesUiCapabilities: () => false,
-  };
+  mockReportingPlugin = reportingMock.createStart();
 });
 
 it('Provides a feature declaration ', () => {
@@ -79,15 +78,17 @@ it('Provides a feature declaration ', () => {
           ],
         },
       },
+      "scope": Array [
+        "spaces",
+        "security",
+      ],
       "subFeatures": Array [],
     }
   `);
 });
 
 it(`Calls on Reporting whether to include Generate PDF as a sub-feature`, () => {
-  mockReportingPlugin = {
-    usesUiCapabilities: () => true,
-  };
+  mockReportingPlugin.usesUiCapabilities = () => true;
   expect(getCanvasFeature({ reporting: mockReportingPlugin })).toMatchInlineSnapshot(`
     Object {
       "app": Array [
@@ -155,6 +156,10 @@ it(`Calls on Reporting whether to include Generate PDF as a sub-feature`, () => 
           ],
         },
       },
+      "scope": Array [
+        "spaces",
+        "security",
+      ],
       "subFeatures": Array [
         Object {
           "name": "Reporting",

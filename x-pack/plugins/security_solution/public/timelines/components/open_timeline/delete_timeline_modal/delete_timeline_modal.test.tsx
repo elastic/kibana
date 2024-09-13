@@ -12,7 +12,7 @@ import { useParams } from 'react-router-dom';
 import { DeleteTimelineModal } from './delete_timeline_modal';
 
 import * as i18n from '../translations';
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -24,7 +24,7 @@ jest.mock('react-router-dom', () => {
 
 describe('DeleteTimelineModal', () => {
   beforeAll(() => {
-    (useParams as jest.Mock).mockReturnValue({ tabName: TimelineType.default });
+    (useParams as jest.Mock).mockReturnValue({ tabName: TimelineTypeEnum.default });
   });
 
   test('it renders the expected title when a timeline is selected', () => {
@@ -134,7 +134,7 @@ describe('DeleteTimelineModal', () => {
 
 describe('DeleteTimelineTemplateModal', () => {
   beforeAll(() => {
-    (useParams as jest.Mock).mockReturnValue({ tabName: TimelineType.template });
+    (useParams as jest.Mock).mockReturnValue({ tabName: TimelineTypeEnum.template });
   });
 
   test('it renders a deletion warning', () => {

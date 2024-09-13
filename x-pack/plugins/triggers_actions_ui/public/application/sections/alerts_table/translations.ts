@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-export { CASES } from '../translations';
+export { CASES, MAINTENANCE_WINDOWS } from '../translations';
 
 export const ALERTS_TABLE_CONF_ERROR_TITLE = i18n.translate(
   'xpack.triggersActionsUI.alertsTable.configuration.errorTitle',
@@ -29,9 +29,37 @@ export const ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL = i18n.translate(
   }
 );
 
-export const ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.leadingControl.viewDetails',
+export const ALERTS_TABLE_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsTable.title',
   {
-    defaultMessage: 'View details',
+    defaultMessage: 'Alerts table',
+  }
+);
+
+export const ALERTS_TABLE_FILTERS_ERROR_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.alertsTable.filters.errorTitle',
+  {
+    defaultMessage: 'Unsupported alerts filters set',
+  }
+);
+
+export const ALERTS_TABLE_UNKNOWN_ERROR_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.alertsTable.unknownErrorTitle',
+  {
+    defaultMessage: 'Cannot display alerts',
+  }
+);
+
+export const ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE = i18n.translate(
+  'xpack.triggersActionsUI.alertsTable.unknownErrorBody',
+  {
+    defaultMessage: 'An error occurred while rendering the alerts table',
+  }
+);
+
+export const ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.alertsTable.unknownErrorCopyToClipboardLabel',
+  {
+    defaultMessage: 'Copy error to clipboard',
   }
 );

@@ -16,94 +16,187 @@ const tags = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
 export default function createAggregateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const createRule = async (overrides = {}) => {
-    const { body: createdRule } = await supertest
-      .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-      .set('kbn-xsrf', 'foo')
-      .send(getTestRuleData(overrides))
-      .expect(200);
-
-    return createdRule.id;
-  };
-
   describe('getRuleTags', () => {
     const objectRemover = new ObjectRemover(supertest);
+    const createRule = async (overrides = {}) => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData(overrides))
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      return createdRule.id;
+    };
 
     afterEach(() => objectRemover.removeAll());
 
-    it('should get rule tags when there are no rules', async () => {
-      const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_tags`
-      );
+    describe('get rule tags when there are no rules', function () {
+      this.tags('skipFIPS');
+      it('should get rule tags when there are no rules', async () => {
+        const response = await supertest
+          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_tags`)
+          .expect(200);
 
-      expect(response.status).to.eql(200);
-      expect(response.body.rule_tags.filter((tag: string) => tag !== 'foo')).to.eql([]);
+        expect(response.body).to.eql({
+          data: [],
+          per_page: 50,
+          page: 1,
+          total: 0,
+        });
+      });
     });
 
-    it('should get rule tags from all rules', async () => {
-      await Promise.all(
-        tags.map(async (tag) => {
-          const ruleId = await createRule({ tags: [tag] });
-          objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
-        })
-      );
+    describe('get rule tags from all rules', function () {
+      this.tags('skipFIPS');
+      it('should get rule tags from all rules', async () => {
+        await Promise.all(
+          tags.map(async (tag, index) => {
+            await createRule({ tags: [tag, `${tag}_${index}`] });
+          })
+        );
 
-      const ruleId = await createRule({ tags: ['a', 'b', 'c'] });
-      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+        await createRule({ tags: ['a', 'b', 'c', '1', '2'] });
 
-      const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_tags`
-      );
+        const response = await supertest
+          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_tags`)
+          .expect(200);
 
-      expect(response.status).to.eql(200);
-      expect(response.body.rule_tags.filter((tag: string) => tag !== 'foo').sort()).to.eql(
-        tags.sort()
-      );
+        expect(response.body).to.eql({
+          data: [
+            '1',
+            '2',
+            'a',
+            'a_0',
+            'b',
+            'b_1',
+            'c',
+            'c_2',
+            'd',
+            'd_3',
+            'e',
+            'e_4',
+            'f',
+            'f_5',
+            'g',
+            'g_6',
+            'h',
+            'h_7',
+            'i',
+            'i_8',
+            'j',
+            'j_9',
+          ],
+          per_page: 50,
+          page: 1,
+          total: 22,
+        });
+      });
     });
 
-    it('should paginate rule tags', async () => {
-      await Promise.all(
-        tags.map(async (tag) => {
-          const ruleId = await createRule({ tags: [tag] });
-          objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
-        })
-      );
+    describe('paginate rule tags', function () {
+      this.tags('skipFIPS');
+      it('should paginate rule tags', async () => {
+        await createRule({
+          tags: ['1', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '110'],
+        });
+        await createRule({
+          tags: ['2', '20', '21', '22', '23', '24', '25', '26', '1', '111', '1111'],
+        });
+        await createRule({
+          tags: ['3', '30', '31', '32', '33', '34', '35', '36', '37', '1', '111', '11_11'],
+        });
 
-      const ruleId = await createRule({ tags: ['foo'] });
-      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+        let response = await supertest
+          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_tags?page=1&per_page=10`)
+          .expect(200);
 
-      const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_tags?max_tags=5`
-      );
+        expect(response.body).to.eql({
+          data: ['1', '10', '11', '110', '111', '1111', '11_11', '12', '13', '14'],
+          per_page: 10,
+          page: 1,
+          total: 32,
+        });
 
-      expect(response.status).to.eql(200);
-      expect(response.body.rule_tags).to.eql(tags.sort().slice(0, 5));
+        response = await supertest
+          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_tags?page=2&per_page=10`)
+          .expect(200);
 
-      const paginatedResponse = await supertest.get(
-        `${getUrlPrefix(
-          Spaces.space1.id
-        )}/internal/alerting/rules/_tags?max_tags=5&after=${JSON.stringify({
-          tags: 'e',
-        })}`
-      );
+        expect(response.body).to.eql({
+          data: ['15', '16', '17', '18', '19', '2', '20', '21', '22', '23'],
+          per_page: 10,
+          page: 2,
+          total: 32,
+        });
 
-      expect(paginatedResponse.status).to.eql(200);
-      expect(paginatedResponse.body.rule_tags).to.eql(['f', 'foo', 'g', 'h', 'i']);
+        response = await supertest
+          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_tags?page=4&per_page=10`)
+          .expect(200);
+
+        expect(response.body).to.eql({
+          data: ['36', '37'],
+          per_page: 10,
+          page: 4,
+          total: 32,
+        });
+      });
     });
 
-    it('should search rule tags', async () => {
-      await Promise.all(
-        tags.map(async (tag) => {
-          const ruleId = await createRule({ tags: [tag] });
-          objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
-        })
-      );
+    it('should search and paginate rule tags', async () => {
+      await createRule({
+        tags: ['1', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '110'],
+      });
+      await createRule({
+        tags: ['2', '20', '21', '22', '23', '24', '25', '26', '1', '111', '1111'],
+      });
+      await createRule({
+        tags: ['3', '30', '31', '32', '33', '34', '35', '36', '37', '1', '11111', '11_11'],
+      });
 
-      const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_tags?search=a`
-      );
+      let response = await supertest
+        .get(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/internal/alerting/rules/_tags?page=1&per_page=5&search=1`
+        )
+        .expect(200);
 
-      expect(response.body.rule_tags.filter((tag: string) => tag !== 'foo')).to.eql(['a']);
+      expect(response.body).to.eql({
+        data: ['1', '10', '11', '110', '111'],
+        per_page: 5,
+        page: 1,
+        total: 16,
+      });
+
+      response = await supertest
+        .get(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/internal/alerting/rules/_tags?page=2&per_page=5&search=1`
+        )
+        .expect(200);
+
+      expect(response.body).to.eql({
+        data: ['1111', '11111', '11_11', '12', '13'],
+        per_page: 5,
+        page: 2,
+        total: 16,
+      });
+
+      response = await supertest
+        .get(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/internal/alerting/rules/_tags?page=1&per_page=5&search=11`
+        )
+        .expect(200);
+
+      expect(response.body).to.eql({
+        data: ['11', '110', '111', '1111', '11111'],
+        per_page: 5,
+        page: 1,
+        total: 6,
+      });
     });
   });
 }

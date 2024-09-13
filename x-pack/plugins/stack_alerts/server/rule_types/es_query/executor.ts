@@ -4,26 +4,46 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '@kbn/core/server';
-import { parseDuration } from '@kbn/alerting-plugin/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
+import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+  ALERT_URL,
+} from '@kbn/rule-data-utils';
+
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import { get } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { ComparatorFns } from '../../../common';
 import {
   addMessages,
   EsQueryRuleActionContext,
   getContextConditionsDescription,
 } from './action_context';
-import { ExecutorOptions, OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
+import {
+  ExecutorOptions,
+  OnlyEsQueryRuleParams,
+  OnlySearchSourceRuleParams,
+  OnlyEsqlQueryRuleParams,
+} from './types';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { fetchEsQuery } from './lib/fetch_es_query';
 import { EsQueryRuleParams } from './rule_type_params';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
-import { isEsQueryRule } from './util';
+import { isEsqlQueryRule, isSearchSourceRule } from './util';
+import { fetchEsqlQuery } from './lib/fetch_esql_query';
+import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '..';
 
 export async function executor(core: CoreSetup, options: ExecutorOptions<EsQueryRuleParams>) {
-  const esQueryRule = isEsQueryRule(options.params.searchType);
+  const searchSourceRule = isSearchSourceRule(options.params.searchType);
+  const esqlQueryRule = isEsqlQueryRule(options.params.searchType);
   const {
     rule: { id: ruleId, name },
     services,
@@ -31,12 +51,17 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     state,
     spaceId,
     logger,
+    getTimeRange,
   } = options;
-  const { alertFactory, scopedClusterClient, searchSourceClient, share, dataViews } = services;
+  const { alertsClient, ruleResultService, scopedClusterClient, share } = services;
+
+  if (!alertsClient) {
+    throw new AlertsClientError();
+  }
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
   const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const alertLimit = alertFactory.alertLimit.getValue();
+  const alertLimit = alertsClient.getAlertLimitValue();
   const compareFn = ComparatorFns.get(params.thresholdComparator);
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
@@ -50,8 +75,41 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   // avoid counting a document multiple times.
   // latestTimestamp will be ignored if set for grouped queries
   let latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
-  const { parsedResults, dateStart, dateEnd, link } = esQueryRule
-    ? await fetchEsQuery({
+  const { dateStart, dateEnd } = getTimeRange(`${params.timeWindowSize}${params.timeWindowUnit}`);
+
+  const { parsedResults, link, index, query } = searchSourceRule
+    ? await fetchSearchSourceQuery({
+        ruleId,
+        alertLimit,
+        params: params as OnlySearchSourceRuleParams,
+        latestTimestamp,
+        spacePrefix,
+        services: {
+          share,
+          getSearchSourceClient: services.getSearchSourceClient,
+          logger,
+          getDataViews: services.getDataViews,
+          ruleResultService,
+        },
+        dateStart,
+        dateEnd,
+      })
+    : esqlQueryRule
+    ? await fetchEsqlQuery({
+        ruleId,
+        alertLimit,
+        params: params as OnlyEsqlQueryRuleParams,
+        spacePrefix,
+        publicBaseUrl,
+        services: {
+          share,
+          scopedClusterClient,
+          logger,
+        },
+        dateStart,
+        dateEnd,
+      })
+    : await fetchEsQuery({
         ruleId,
         name,
         alertLimit,
@@ -62,26 +120,28 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         services: {
           scopedClusterClient,
           logger,
+          ruleResultService,
         },
-      })
-    : await fetchSearchSourceQuery({
-        ruleId,
-        alertLimit,
-        params: params as OnlySearchSourceRuleParams,
-        latestTimestamp,
-        spacePrefix,
-        services: {
-          share,
-          searchSourceClient,
-          logger,
-          dataViews,
-        },
+        dateStart,
+        dateEnd,
       });
-
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
     const alertId = result.group;
     const value = result.value ?? result.count;
+
+    // check hits for dates out of range
+    if (!esqlQueryRule) {
+      checkHitsForDateOutOfRange(
+        logger,
+        ruleId,
+        result.hits,
+        params.timeField,
+        dateStart,
+        dateEnd,
+        query
+      );
+    }
 
     // group aggregations use the bucket selector agg to compare conditions
     // within the ES query, so only 'met' results are returned, therefore we don't need
@@ -97,10 +157,12 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       value,
       hits: result.hits,
       link,
+      sourceFields: result.sourceFields,
     };
     const baseActiveContext: EsQueryRuleActionContext = {
       ...baseContext,
       conditions: getContextConditionsDescription({
+        searchType: params.searchType,
         comparator: params.thresholdComparator,
         threshold: params.threshold,
         aggType: params.aggType,
@@ -108,19 +170,34 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
     } as EsQueryRuleActionContext;
+
     const actionContext = addMessages({
       ruleName: name,
       baseContext: baseActiveContext,
       params,
       ...(isGroupAgg ? { group: alertId } : {}),
+      index,
     });
-    const alert = alertFactory.create(
-      alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId
-    );
-    alert
-      // store the params we would need to recreate the query that led to this alert instance
-      .replaceState({ latestTimestamp, dateStart, dateEnd })
-      .scheduleActions(ActionGroupId, actionContext);
+
+    const id = alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId;
+    const ecsGroups = getEcsGroups(result.groups);
+
+    alertsClient.report({
+      id,
+      actionGroup: ActionGroupId,
+      state: { latestTimestamp, dateStart, dateEnd },
+      context: actionContext,
+      payload: {
+        [ALERT_URL]: actionContext.link,
+        [ALERT_REASON]: actionContext.message,
+        [ALERT_TITLE]: actionContext.title,
+        [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
+        [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
+        [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
+        ...ecsGroups,
+        ...actionContext.sourceFields,
+      },
+    });
     if (!isGroupAgg) {
       // update the timestamp based on the current search results
       const firstValidTimefieldSort = getValidTimefieldSort(
@@ -131,12 +208,11 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       }
     }
   }
+  alertsClient.setAlertLimitReached(parsedResults.truncated);
 
-  alertFactory.alertLimit.setLimitReached(parsedResults.truncated);
-
-  const { getRecoveredAlerts } = alertFactory.done();
+  const { getRecoveredAlerts } = alertsClient;
   for (const recoveredAlert of getRecoveredAlerts()) {
-    const alertId = recoveredAlert.getId();
+    const alertId = recoveredAlert.alert.getId();
     const baseRecoveryContext: EsQueryRuleActionContext = {
       title: name,
       date: currentTimestamp,
@@ -144,6 +220,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       hits: [],
       link,
       conditions: getContextConditionsDescription({
+        searchType: params.searchType,
         comparator: params.thresholdComparator,
         threshold: params.threshold,
         isRecovered: true,
@@ -151,6 +228,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         aggField: params.aggField,
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
+      sourceFields: [],
     } as EsQueryRuleActionContext;
     const recoveryContext = addMessages({
       ruleName: name,
@@ -158,57 +236,100 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       params,
       isRecovered: true,
       ...(isGroupAgg ? { group: alertId } : {}),
+      index,
     });
-    recoveredAlert.setContext(recoveryContext);
+    alertsClient.setAlertData({
+      id: alertId,
+      context: recoveryContext,
+      payload: {
+        [ALERT_URL]: recoveryContext.link,
+        [ALERT_REASON]: recoveryContext.message,
+        [ALERT_TITLE]: recoveryContext.title,
+        [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
+        [ALERT_EVALUATION_VALUE]: `${recoveryContext.value}`,
+        [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
+      },
+    });
   }
   return { state: { latestTimestamp } };
 }
 
-function getInvalidWindowSizeError(windowValue: string) {
-  return i18n.translate('xpack.stackAlerts.esQuery.invalidWindowSizeErrorMessage', {
-    defaultMessage: 'invalid format for windowSize: "{windowValue}"',
-    values: {
-      windowValue,
-    },
-  });
+// diagnostic to help solve a puzzle of sometimes returning documents
+// not matching the expected time range; usually kql using ccs.
+function checkHitsForDateOutOfRange(
+  logger: Logger,
+  ruleId: string,
+  hits: Array<estypes.SearchHit<unknown>>,
+  timeField: string | undefined,
+  dateStart: string,
+  dateEnd: string,
+  query: unknown
+) {
+  if (!timeField) return;
+
+  const epochStart = new Date(dateStart).getTime();
+  const epochEnd = new Date(dateEnd).getTime();
+  const messageMeta = { tags: ['query-result-out-of-time-range'] };
+
+  const messagePrefix = `For rule '${ruleId}'`;
+  const usingQuery = `using query <${JSON.stringify(query)}>`;
+  const hitsWereReturned = 'hits were returned with invalid time range';
+
+  let errors = 0;
+  if (isNaN(epochStart)) {
+    errors++;
+    logger.error(
+      `${messagePrefix}, ${hitsWereReturned} start date '${dateStart}' from field '${timeField}' ${usingQuery}`,
+      messageMeta
+    );
+  }
+
+  if (isNaN(epochEnd)) {
+    errors++;
+    logger.error(
+      `${messagePrefix}, ${hitsWereReturned} end date '${dateEnd}' from field '${timeField}' ${usingQuery}`,
+      messageMeta
+    );
+  }
+
+  if (errors > 0) return;
+
+  const outsideTimeRange = 'outside the query time range';
+
+  for (const hit of hits) {
+    const dateVal = get(hit, `_source.${timeField}`);
+    const epochDate = getEpochDateFromString(dateVal);
+
+    if (epochDate) {
+      if (epochDate < epochStart || epochDate > epochEnd) {
+        const message = `the hit with date '${dateVal}' from field '${timeField}' is ${outsideTimeRange}`;
+        const queryString = `Query: <${JSON.stringify(query)}>`;
+        const document = `Document: <${JSON.stringify(hit)}>`;
+        logger.error(`${messagePrefix}, ${message}. ${queryString}. ${document}`, messageMeta);
+      }
+    }
+  }
 }
 
-function getInvalidQueryError(query: string) {
-  return i18n.translate('xpack.stackAlerts.esQuery.invalidQueryErrorMessage', {
-    defaultMessage: 'invalid query specified: "{query}" - query must be JSON',
-    values: {
-      query,
-    },
-  });
-}
-
-export function getSearchParams(queryParams: OnlyEsQueryRuleParams) {
-  const date = Date.now();
-  const { esQuery, timeWindowSize, timeWindowUnit } = queryParams;
-
-  let parsedQuery;
+function getEpochDateFromString(dateString: string): number | null {
+  let date: Date;
   try {
-    parsedQuery = JSON.parse(esQuery);
-  } catch (err) {
-    throw new Error(getInvalidQueryError(esQuery));
+    date = new Date(dateString);
+  } catch (e) {
+    return null;
   }
 
-  if (parsedQuery && !parsedQuery.query) {
-    throw new Error(getInvalidQueryError(esQuery));
-  }
+  const time = date.getTime();
+  if (!isNaN(time)) return time;
 
-  const window = `${timeWindowSize}${timeWindowUnit}`;
-  let timeWindow: number;
-  try {
-    timeWindow = parseDuration(window);
-  } catch (err) {
-    throw new Error(getInvalidWindowSizeError(window));
-  }
+  // if not a valid date string, try it as a stringified number
+  const dateNum = parseInt(dateString, 10);
+  if (isNaN(dateNum)) return null;
 
-  const dateStart = new Date(date - timeWindow).toISOString();
-  const dateEnd = new Date(date).toISOString();
+  const timeFromNumber = new Date(dateNum).getTime();
+  if (isNaN(timeFromNumber)) return null;
 
-  return { parsedQuery, dateStart, dateEnd };
+  return timeFromNumber;
 }
 
 export function getValidTimefieldSort(

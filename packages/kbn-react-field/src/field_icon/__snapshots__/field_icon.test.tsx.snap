@@ -99,7 +99,7 @@ exports[`FieldIcon renders known field types dense_vector is rendered 1`] = `
 <EuiToken
   aria-label="dense_vector"
   className="kbnFieldIcon"
-  iconType="tokenDenseVector"
+  iconType="tokenVectorDense"
   size="s"
   title="dense_vector"
 />
@@ -265,6 +265,16 @@ exports[`FieldIcon renders known field types rank_features is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types semantic_text is rendered 1`] = `
+<EuiToken
+  aria-label="semantic_text"
+  className="kbnFieldIcon"
+  iconType="tokenSemanticText"
+  size="s"
+  title="semantic_text"
+/>
+`;
+
 exports[`FieldIcon renders known field types shape is rendered 1`] = `
 <EuiToken
   aria-label="shape"
@@ -272,6 +282,16 @@ exports[`FieldIcon renders known field types shape is rendered 1`] = `
   iconType="tokenShape"
   size="s"
   title="shape"
+/>
+`;
+
+exports[`FieldIcon renders known field types sparse_vector is rendered 1`] = `
+<EuiToken
+  aria-label="sparse_vector"
+  className="kbnFieldIcon"
+  iconType="tokenVectorSparse"
+  size="s"
+  title="sparse_vector"
 />
 `;
 

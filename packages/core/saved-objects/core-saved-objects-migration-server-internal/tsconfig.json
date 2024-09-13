@@ -9,6 +9,7 @@
   },
   "include": [
     "**/*.ts",
+    "src/hash_to_version_map.json"
   ],
   "kbn_references": [
     "@kbn/logging",
@@ -26,11 +27,13 @@
     "@kbn/core-doc-links-server-mocks",
     "@kbn/core-logging-server-internal",
     "@kbn/core-saved-objects-base-server-mocks",
-    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/doc-links",
     "@kbn/safer-lodash-set",
     "@kbn/logging-mocks",
     "@kbn/core-saved-objects-base-server-mocks",
+    "@kbn/core-elasticsearch-server-internal",
+    "@kbn/core-node-server",
+    "@kbn/core-elasticsearch-server-mocks",
   ],
   "exclude": [
     "target/**/*",

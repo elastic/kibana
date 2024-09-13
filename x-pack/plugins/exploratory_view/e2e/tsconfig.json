@@ -1,9 +1,0 @@
-{
-  "extends": "../../../../tsconfig.base.json",
-  "exclude": ["tmp", "target/**/*"],
-  "include": ["./**/*"],
-  "compilerOptions": {
-    "outDir": "target/types",
-    "types": [ "node"],
-  },
-}

@@ -1,13 +1,63 @@
 type: array
 default: []
-required:
-  - group
-  - id
-  - params
 nullable: true
 items:
   type: object
+  required:
+  - group
+  - id
+  - params
+  description: >
+    An action that runs under defined conditions.
   properties:
+    alerts_filter:
+      type: object
+      description:  >
+        Conditions that affect whether the action runs.
+        If you specify multiple conditions, all conditions must be met for the action to run.
+        For example, if an alert occurs within the specified time frame and matches the query, the action runs.
+      properties:
+        query:
+          type: object
+          description: Defines a query filter that determines whether the action runs.
+          properties:
+            kql:
+              type: string
+              description: A filter written in Kibana Query Language (KQL).
+            filters:
+              type: array
+              items:
+                $ref: 'filter.yaml'
+        timeframe:
+          type: object
+          description: Defines a period that limits whether the action runs.
+          properties:
+            days:
+              type: array
+              description: Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.
+              items:
+                type: integer
+              example: [1,2,3,4,5]
+            hours:
+              type: object
+              description: >
+                Defines the range of time in a day that the action can run.
+                If the `start` value is `00:00` and the `end` value is `24:00`, actions be generated all day.
+              properties:
+                end:
+                  type: string
+                  description: The end of the time frame in 24-hour notation (`hh:mm`).
+                  example: 17:00
+                start:
+                  type: string
+                  description: The start of the time frame in 24-hour notation (`hh:mm`).
+                  example: 08:00
+            timezone:
+              type: string
+              description: >
+                The ISO time zone for the `hours` values.
+                Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.
+              example: Europe/Madrid
     connector_type_id:
       type: string
       description: The type of connector. This property appears in responses but cannot be set in requests.
@@ -16,22 +66,27 @@ items:
     frequency:
       type: object
       description: >
-        The parameters that affect how often actions are generated.
+        The properties that affect how often actions are generated.
+        If the rule type supports setting `summary` to `true`, the action can be a summary of alerts at the specified notification interval.
+        Otherwise, an action runs for each alert at the specified notification interval.
         NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.
       required:
         - notify_when
         - summary
       properties:
         notify_when:
-          $ref: 'notify_when.yaml'
+          $ref: 'notify_when_action.yaml'
         summary:
           type: boolean
           description: Indicates whether the action is a summary.
         throttle:
-          $ref: 'throttle.yaml'
+          $ref: 'throttle_action.yaml'
     group:
       type: string
-      description: The group name for the actions. If you don't need to group actions, set to `default`.
+      description: >
+        The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered).
+        Each rule type has a list of valid action group names.
+        If you don't need to group actions, set to `default`.
       example: default
     id:
       type: string
@@ -41,3 +96,7 @@ items:
       type: object
       description: The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.
       additionalProperties: true
+    uuid:
+      type: string
+      description: A universally unique identifier (UUID) for the action.
+      example: 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61

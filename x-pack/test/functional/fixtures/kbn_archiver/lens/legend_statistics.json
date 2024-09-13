@@ -1,0 +1,763 @@
+{
+  "attributes": {
+    "description": "",
+    "state": {
+      "adHocDataViews": {},
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "c61a8afb-a185-4fae-a064-fb3846f6c451": {
+              "columnOrder": [
+                "c3d9cb9f-e96f-44dd-b3a5-8441f986b6ea",
+                "2bc6ebe0-16cc-44a2-b888-9c9932fb89b8"
+              ],
+              "columns": {
+                "2bc6ebe0-16cc-44a2-b888-9c9932fb89b8": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Count of records",
+                  "operationType": "count",
+                  "params": {
+                    "emptyAsNull": true
+                  },
+                  "scale": "ratio",
+                  "sourceField": "___records___"
+                },
+                "c3d9cb9f-e96f-44dd-b3a5-8441f986b6ea": {
+                  "dataType": "date",
+                  "isBucketed": true,
+                  "label": "@timestamp",
+                  "operationType": "date_histogram",
+                  "params": {
+                    "dropPartials": false,
+                    "includeEmptyRows": true,
+                    "interval": "auto"
+                  },
+                  "scale": "interval",
+                  "sourceField": "@timestamp"
+                }
+              },
+              "incompleteColumns": {},
+              "sampling": 1
+            }
+          }
+        },
+        "indexpattern": {
+          "layers": {}
+        },
+        "textBased": {
+          "layers": {}
+        }
+      },
+      "filters": [],
+      "internalReferences": [],
+      "query": {
+        "language": "kuery",
+        "query": ""
+      },
+      "visualization": {
+        "axisTitlesVisibilitySettings": {
+          "x": true,
+          "yLeft": true,
+          "yRight": true
+        },
+        "fittingFunction": "None",
+        "gridlinesVisibilitySettings": {
+          "x": true,
+          "yLeft": true,
+          "yRight": true
+        },
+        "labelsOrientation": {
+          "x": 0,
+          "yLeft": 0,
+          "yRight": 0
+        },
+        "layers": [
+          {
+            "accessors": [
+              "2bc6ebe0-16cc-44a2-b888-9c9932fb89b8"
+            ],
+            "colorMapping": {
+              "assignments": [],
+              "colorMode": {
+                "type": "categorical"
+              },
+              "paletteId": "eui_amsterdam_color_blind",
+              "specialAssignments": [
+                {
+                  "color": {
+                    "type": "loop"
+                  },
+                  "rule": {
+                    "type": "other"
+                  },
+                  "touched": false
+                }
+              ]
+            },
+            "layerId": "c61a8afb-a185-4fae-a064-fb3846f6c451",
+            "layerType": "data",
+            "position": "top",
+            "seriesType": "bar_stacked",
+            "showGridlines": false,
+            "xAccessor": "c3d9cb9f-e96f-44dd-b3a5-8441f986b6ea"
+          }
+        ],
+        "legend": {
+          "isVisible": true,
+          "position": "right",
+          "showSingleSeries": true
+        },
+        "valuesInLegend": true,
+        "preferredSeriesType": "bar_stacked",
+        "tickLabelsVisibilitySettings": {
+          "x": true,
+          "yLeft": true,
+          "yRight": true
+        },
+        "valueLabels": "hide"
+      }
+    },
+    "title": "xyValuesInLegendTrue",
+    "visualizationType": "lnsXY"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2024-04-18T13:53:59.791Z",
+  "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "id": "506bcb94-71cc-4acf-8c63-cc2d486af3fb",
+  "managed": false,
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logstash-*",
+      "name": "indexpattern-datasource-layer-c61a8afb-a185-4fae-a064-fb3846f6c451",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "typeMigrationVersion": "8.9.0",
+  "updated_at": "2024-04-18T13:53:59.791Z",
+  "version": "WzEzMywxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "state": {
+      "adHocDataViews": {},
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "c61a8afb-a185-4fae-a064-fb3846f6c451": {
+              "columnOrder": [
+                "c3d9cb9f-e96f-44dd-b3a5-8441f986b6ea",
+                "2bc6ebe0-16cc-44a2-b888-9c9932fb89b8"
+              ],
+              "columns": {
+                "2bc6ebe0-16cc-44a2-b888-9c9932fb89b8": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Count of records",
+                  "operationType": "count",
+                  "params": {
+                    "emptyAsNull": true
+                  },
+                  "scale": "ratio",
+                  "sourceField": "___records___"
+                },
+                "c3d9cb9f-e96f-44dd-b3a5-8441f986b6ea": {
+                  "dataType": "date",
+                  "isBucketed": true,
+                  "label": "@timestamp",
+                  "operationType": "date_histogram",
+                  "params": {
+                    "dropPartials": false,
+                    "includeEmptyRows": true,
+                    "interval": "auto"
+                  },
+                  "scale": "interval",
+                  "sourceField": "@timestamp"
+                }
+              },
+              "incompleteColumns": {},
+              "sampling": 1
+            }
+          }
+        },
+        "indexpattern": {
+          "layers": {}
+        },
+        "textBased": {
+          "layers": {}
+        }
+      },
+      "filters": [],
+      "internalReferences": [],
+      "query": {
+        "language": "kuery",
+        "query": ""
+      },
+      "visualization": {
+        "axisTitlesVisibilitySettings": {
+          "x": true,
+          "yLeft": true,
+          "yRight": true
+        },
+        "fittingFunction": "None",
+        "gridlinesVisibilitySettings": {
+          "x": true,
+          "yLeft": true,
+          "yRight": true
+        },
+        "labelsOrientation": {
+          "x": 0,
+          "yLeft": 0,
+          "yRight": 0
+        },
+        "layers": [
+          {
+            "accessors": [
+              "2bc6ebe0-16cc-44a2-b888-9c9932fb89b8"
+            ],
+            "colorMapping": {
+              "assignments": [],
+              "colorMode": {
+                "type": "categorical"
+              },
+              "paletteId": "eui_amsterdam_color_blind",
+              "specialAssignments": [
+                {
+                  "color": {
+                    "type": "loop"
+                  },
+                  "rule": {
+                    "type": "other"
+                  },
+                  "touched": false
+                }
+              ]
+            },
+            "layerId": "c61a8afb-a185-4fae-a064-fb3846f6c451",
+            "layerType": "data",
+            "position": "top",
+            "seriesType": "bar_stacked",
+            "showGridlines": false,
+            "xAccessor": "c3d9cb9f-e96f-44dd-b3a5-8441f986b6ea"
+          }
+        ],
+        "legend": {
+          "isVisible": true,
+          "position": "right",
+          "showSingleSeries": true
+        },
+        "valuesInLegend": false,
+        "preferredSeriesType": "bar_stacked",
+        "tickLabelsVisibilitySettings": {
+          "x": true,
+          "yLeft": true,
+          "yRight": true
+        },
+        "valueLabels": "hide"
+      }
+    },
+    "title": "xyValuesInLegendFalse",
+    "visualizationType": "lnsXY"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2024-04-18T13:53:59.791Z",
+  "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "id": "506bcb94-71cc-4acf-8c63-cc2d486s96dc",
+  "managed": false,
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logstash-*",
+      "name": "indexpattern-datasource-layer-c61a8afb-a185-4fae-a064-fb3846f6c451",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "typeMigrationVersion": "8.9.0",
+  "updated_at": "2024-04-18T13:53:59.791Z",
+  "version": "WzEzMywxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "state": {
+      "adHocDataViews": {},
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "c61a8afb-a185-4fae-a064-fb3846f6c451": {
+              "columnOrder": [
+                "c3d9cb9f-e96f-44dd-b3a5-8441f986b6ea",
+                "2bc6ebe0-16cc-44a2-b888-9c9932fb89b8"
+              ],
+              "columns": {
+                "2bc6ebe0-16cc-44a2-b888-9c9932fb89b8": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Count of records",
+                  "operationType": "count",
+                  "params": {
+                    "emptyAsNull": true
+                  },
+                  "scale": "ratio",
+                  "sourceField": "___records___"
+                },
+                "c3d9cb9f-e96f-44dd-b3a5-8441f986b6ea": {
+                  "dataType": "date",
+                  "isBucketed": true,
+                  "label": "@timestamp",
+                  "operationType": "date_histogram",
+                  "params": {
+                    "dropPartials": false,
+                    "includeEmptyRows": true,
+                    "interval": "auto"
+                  },
+                  "scale": "interval",
+                  "sourceField": "@timestamp"
+                }
+              },
+              "incompleteColumns": {},
+              "sampling": 1
+            }
+          }
+        },
+        "indexpattern": {
+          "layers": {}
+        },
+        "textBased": {
+          "layers": {}
+        }
+      },
+      "filters": [],
+      "internalReferences": [],
+      "query": {
+        "language": "kuery",
+        "query": ""
+      },
+      "visualization": {
+        "axisTitlesVisibilitySettings": {
+          "x": true,
+          "yLeft": true,
+          "yRight": true
+        },
+        "fittingFunction": "None",
+        "gridlinesVisibilitySettings": {
+          "x": true,
+          "yLeft": true,
+          "yRight": true
+        },
+        "labelsOrientation": {
+          "x": 0,
+          "yLeft": 0,
+          "yRight": 0
+        },
+        "layers": [
+          {
+            "accessors": [
+              "2bc6ebe0-16cc-44a2-b888-9c9932fb89b8"
+            ],
+            "colorMapping": {
+              "assignments": [],
+              "colorMode": {
+                "type": "categorical"
+              },
+              "paletteId": "eui_amsterdam_color_blind",
+              "specialAssignments": [
+                {
+                  "color": {
+                    "type": "loop"
+                  },
+                  "rule": {
+                    "type": "other"
+                  },
+                  "touched": false
+                }
+              ]
+            },
+            "layerId": "c61a8afb-a185-4fae-a064-fb3846f6c451",
+            "layerType": "data",
+            "position": "top",
+            "seriesType": "bar_stacked",
+            "showGridlines": false,
+            "xAccessor": "c3d9cb9f-e96f-44dd-b3a5-8441f986b6ea"
+          }
+        ],
+        "legend": {
+          "isVisible": true,
+          "position": "right",
+          "showSingleSeries": true,
+          "legendStats": [
+            "currentAndLastValue"
+          ]
+        },
+        "preferredSeriesType": "bar_stacked",
+        "tickLabelsVisibilitySettings": {
+          "x": true,
+          "yLeft": true,
+          "yRight": true
+        },
+        "valueLabels": "hide"
+      }
+    },
+    "title": "xyLegendStats",
+    "visualizationType": "lnsXY"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2024-04-18T13:53:59.791Z",
+  "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "id": "506bcb94-71cc-4acf-8c63-ee6c486s96dc",
+  "managed": false,
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logstash-*",
+      "name": "indexpattern-datasource-layer-c61a8afb-a185-4fae-a064-fb3846f6c451",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "typeMigrationVersion": "8.9.0",
+  "updated_at": "2024-04-18T13:53:59.791Z",
+  "version": "WzEzMywxXQ=="
+}
+
+
+
+{
+  "attributes": {
+    "description": "",
+    "state": {
+      "adHocDataViews": {},
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "c61a8afb-a185-4fae-a064-fb3846f6c451": {
+              "columnOrder": [
+                "b997b7b4-14e1-49bf-a289-345fff2f8a54"
+              ],
+              "columns": {
+                "b997b7b4-14e1-49bf-a289-345fff2f8a54": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Count of records",
+                  "operationType": "count",
+                  "params": {
+                    "emptyAsNull": true
+                  },
+                  "scale": "ratio",
+                  "sourceField": "___records___"
+                }
+              },
+              "incompleteColumns": {},
+              "sampling": 1
+            }
+          }
+        },
+        "indexpattern": {
+          "layers": {}
+        },
+        "textBased": {
+          "layers": {}
+        }
+      },
+      "filters": [],
+      "internalReferences": [],
+      "query": {
+        "language": "kuery",
+        "query": ""
+      },
+      "visualization": {
+        "layers": [
+          {
+            "categoryDisplay": "default",
+            "colorMapping": {
+              "assignments": [],
+              "colorMode": {
+                "type": "categorical"
+              },
+              "paletteId": "eui_amsterdam_color_blind",
+              "specialAssignments": [
+                {
+                  "color": {
+                    "type": "loop"
+                  },
+                  "rule": {
+                    "type": "other"
+                  },
+                  "touched": false
+                }
+              ]
+            },
+            "layerId": "c61a8afb-a185-4fae-a064-fb3846f6c451",
+            "layerType": "data",
+            "legendDisplay": "default",
+            "metrics": [
+              "b997b7b4-14e1-49bf-a289-345fff2f8a54"
+            ],
+            "nestedLegend": false,
+            "numberDisplay": "percent",
+            "primaryGroups": [],
+            "showValuesInLegend": true
+          }
+        ],
+        "shape": "waffle"
+      }
+    },
+    "title": "waffleValuesInLegendTrue",
+    "visualizationType": "lnsPie"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2024-04-18T14:13:02.458Z",
+  "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "id": "7d70df7d-f73f-42eb-9970-df1473e7eedc",
+  "managed": false,
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logstash-*",
+      "name": "indexpattern-datasource-layer-c61a8afb-a185-4fae-a064-fb3846f6c451",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "typeMigrationVersion": "8.9.0",
+  "updated_at": "2024-04-18T14:13:02.458Z",
+  "version": "WzEzNiwxXQ=="
+}
+
+
+{
+  "attributes": {
+    "description": "",
+    "state": {
+      "adHocDataViews": {},
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "c61a8afb-a185-4fae-a064-fb3846f6c451": {
+              "columnOrder": [
+                "b997b7b4-14e1-49bf-a289-345fff2f8a54"
+              ],
+              "columns": {
+                "b997b7b4-14e1-49bf-a289-345fff2f8a54": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Count of records",
+                  "operationType": "count",
+                  "params": {
+                    "emptyAsNull": true
+                  },
+                  "scale": "ratio",
+                  "sourceField": "___records___"
+                }
+              },
+              "incompleteColumns": {},
+              "sampling": 1
+            }
+          }
+        },
+        "indexpattern": {
+          "layers": {}
+        },
+        "textBased": {
+          "layers": {}
+        }
+      },
+      "filters": [],
+      "internalReferences": [],
+      "query": {
+        "language": "kuery",
+        "query": ""
+      },
+      "visualization": {
+        "layers": [
+          {
+            "categoryDisplay": "default",
+            "colorMapping": {
+              "assignments": [],
+              "colorMode": {
+                "type": "categorical"
+              },
+              "paletteId": "eui_amsterdam_color_blind",
+              "specialAssignments": [
+                {
+                  "color": {
+                    "type": "loop"
+                  },
+                  "rule": {
+                    "type": "other"
+                  },
+                  "touched": false
+                }
+              ]
+            },
+            "layerId": "c61a8afb-a185-4fae-a064-fb3846f6c451",
+            "layerType": "data",
+            "legendDisplay": "default",
+            "metrics": [
+              "b997b7b4-14e1-49bf-a289-345fff2f8a54"
+            ],
+            "nestedLegend": false,
+            "numberDisplay": "percent",
+            "primaryGroups": [],
+            "showValuesInLegend": false
+          }
+        ],
+        "shape": "waffle"
+      }
+    },
+    "title": "waffleValuesInLegendFalse",
+    "visualizationType": "lnsPie"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2024-04-18T14:13:02.458Z",
+  "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "id": "7d70df7d-f73f-42eb-9970-df1473e7aaf4",
+  "managed": false,
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logstash-*",
+      "name": "indexpattern-datasource-layer-c61a8afb-a185-4fae-a064-fb3846f6c451",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "typeMigrationVersion": "8.9.0",
+  "updated_at": "2024-04-18T14:13:02.458Z",
+  "version": "WzEzNiwxXQ=="
+}
+
+
+{
+  "attributes": {
+    "description": "",
+    "state": {
+      "adHocDataViews": {},
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "c61a8afb-a185-4fae-a064-fb3846f6c451": {
+              "columnOrder": [
+                "b997b7b4-14e1-49bf-a289-345fff2f8a54"
+              ],
+              "columns": {
+                "b997b7b4-14e1-49bf-a289-345fff2f8a54": {
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Count of records",
+                  "operationType": "count",
+                  "params": {
+                    "emptyAsNull": true
+                  },
+                  "scale": "ratio",
+                  "sourceField": "___records___"
+                }
+              },
+              "incompleteColumns": {},
+              "sampling": 1
+            }
+          }
+        },
+        "indexpattern": {
+          "layers": {}
+        },
+        "textBased": {
+          "layers": {}
+        }
+      },
+      "filters": [],
+      "internalReferences": [],
+      "query": {
+        "language": "kuery",
+        "query": ""
+      },
+      "visualization": {
+        "layers": [
+          {
+            "categoryDisplay": "default",
+            "colorMapping": {
+              "assignments": [],
+              "colorMode": {
+                "type": "categorical"
+              },
+              "paletteId": "eui_amsterdam_color_blind",
+              "specialAssignments": [
+                {
+                  "color": {
+                    "type": "loop"
+                  },
+                  "rule": {
+                    "type": "other"
+                  },
+                  "touched": false
+                }
+              ]
+            },
+            "layerId": "c61a8afb-a185-4fae-a064-fb3846f6c451",
+            "layerType": "data",
+            "legendDisplay": "default",
+            "metrics": [
+              "b997b7b4-14e1-49bf-a289-345fff2f8a54"
+            ],
+            "nestedLegend": false,
+            "numberDisplay": "percent",
+            "primaryGroups": [],
+            "legendStats": [
+              "value"
+            ]
+          }
+        ],
+        "shape": "waffle"
+      }
+    },
+    "title": "waffleLegendStats",
+    "visualizationType": "lnsPie"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2024-04-18T14:13:02.458Z",
+  "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "id": "7d70df7d-f73f-42eb-9970-df1590e1aaf4",
+  "managed": false,
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logstash-*",
+      "name": "indexpattern-datasource-layer-c61a8afb-a185-4fae-a064-fb3846f6c451",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "typeMigrationVersion": "8.9.0",
+  "updated_at": "2024-04-18T14:13:02.458Z",
+  "version": "WzEzNiwxXQ=="
+}

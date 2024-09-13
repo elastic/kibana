@@ -5,6 +5,7 @@
   },
   "include": [
     "keystore/**/*",
+    "profiler/**/*",
     "serve/**/*",
     "*.js",
   ],
@@ -17,7 +18,6 @@
     "@kbn/config",
     "@kbn/dev-utils",
     "@kbn/apm-config-loader",
-    "@kbn/babel-register",
   ],
   "exclude": [
     "target/**/*",

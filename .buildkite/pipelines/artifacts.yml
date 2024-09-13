@@ -2,8 +2,11 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/build.sh
     label: Build Kibana Artifacts
     agents:
-      queue: c2-16
-    timeout_in_minutes: 60
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: c2-standard-16
+    timeout_in_minutes: 120
     retry:
       automatic:
         - exit_status: '*'
@@ -14,7 +17,13 @@ steps:
   - command: TEST_PACKAGE=deb .buildkite/scripts/steps/package_testing/test.sh
     label: Artifact Testing
     agents:
-      queue: n2-4-virt
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      enableNestedVirtualization: true
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-4
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -24,7 +33,13 @@ steps:
   - command: TEST_PACKAGE=rpm .buildkite/scripts/steps/package_testing/test.sh
     label: Artifact Testing
     agents:
-      queue: n2-4-virt
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      enableNestedVirtualization: true
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-4
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -34,7 +49,13 @@ steps:
   - command: TEST_PACKAGE=docker .buildkite/scripts/steps/package_testing/test.sh
     label: Artifact Testing
     agents:
-      queue: n2-4-virt
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      enableNestedVirtualization: true
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-4
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -44,27 +65,55 @@ steps:
   - command: KIBANA_DOCKER_CONTEXT=default .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
-      queue: n2-2
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-2
     timeout_in_minutes: 30
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
 
-  - command: KIBANA_DOCKER_CONTEXT=ubi8 .buildkite/scripts/steps/artifacts/docker_context.sh
+  - command: KIBANA_DOCKER_CONTEXT=ubi .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
-      queue: n2-2
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-2
     timeout_in_minutes: 30
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
 
-  - command: KIBANA_DOCKER_CONTEXT=ubi9 .buildkite/scripts/steps/artifacts/docker_context.sh
+  - command: KIBANA_DOCKER_CONTEXT=wolfi .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
-      queue: n2-2
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: KIBANA_DOCKER_CONTEXT=ironbank .buildkite/scripts/steps/artifacts/docker_context.sh
+    label: 'Docker Context Verification'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-2
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -77,8 +126,13 @@ steps:
       - exit_status: 255
       - exit_status: -1
     agents:
-      queue: n2-2
-    timeout_in_minutes: 30
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-2
+    timeout_in_minutes: 60
     if: "build.env('RELEASE_BUILD') == null || build.env('RELEASE_BUILD') == '' || build.env('RELEASE_BUILD') == 'false'"
     retry:
       automatic:
@@ -99,5 +153,10 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/publish.sh
     label: 'Publish Kibana Artifacts'
     agents:
-      queue: n2-2
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-2
     timeout_in_minutes: 30

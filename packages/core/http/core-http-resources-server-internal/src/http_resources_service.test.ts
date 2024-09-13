@@ -1,15 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getApmConfigMock } from './http_resources_service.test.mocks';
-
 import type { RouteConfig } from '@kbn/core-http-server';
-
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
@@ -29,11 +27,6 @@ describe('HttpResources service', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   const kibanaRequest = httpServerMock.createKibanaRequest();
   const context = createCoreRequestHandlerContextMock();
-  const apmConfig = { mockApmConfig: true };
-
-  beforeEach(() => {
-    getApmConfigMock.mockReturnValue(apmConfig);
-  });
 
   describe('#createRegistrar', () => {
     beforeEach(() => {
@@ -62,6 +55,20 @@ describe('HttpResources service', () => {
           register = await initializer();
         });
 
+        it('registration defaults to "public" access', () => {
+          register(routeConfig, async (ctx, req, res) => res.ok());
+          const [[registeredRouteConfig]] = router.get.mock.calls;
+          expect(registeredRouteConfig.options?.access).toBe('public');
+        });
+
+        it('registration can set access to "internal"', () => {
+          register({ ...routeConfig, options: { access: 'internal' } }, async (ctx, req, res) =>
+            res.ok()
+          );
+          const [[registeredRouteConfig]] = router.get.mock.calls;
+          expect(registeredRouteConfig.options?.access).toBe('internal');
+        });
+
         describe('renderCoreApp', () => {
           it('formats successful response', async () => {
             register(routeConfig, async (ctx, req, res) => {
@@ -79,9 +86,6 @@ describe('HttpResources service', () => {
               },
               {
                 isAnonymousPage: false,
-                vars: {
-                  apmConfig,
-                },
               }
             );
           });
@@ -104,9 +108,6 @@ describe('HttpResources service', () => {
               },
               {
                 isAnonymousPage: true,
-                vars: {
-                  apmConfig,
-                },
               }
             );
           });

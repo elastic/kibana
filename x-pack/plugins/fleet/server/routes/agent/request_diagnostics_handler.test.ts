@@ -17,6 +17,8 @@ import {
   httpServerMock,
 } from '@kbn/core/server/mocks';
 
+import type { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
+
 import { getAgentById } from '../../services/agents';
 import * as AgentService from '../../services/agents';
 
@@ -31,7 +33,12 @@ describe('request diagnostics handler', () => {
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
   let mockContext: RequestHandlerContext;
-  let mockRequest: KibanaRequest<{ agentId: string }, undefined, undefined, any>;
+  let mockRequest: KibanaRequest<
+    { agentId: string },
+    undefined,
+    { additional_metrics: RequestDiagnosticsAdditionalMetrics[] },
+    any
+  >;
 
   beforeEach(() => {
     mockSavedObjectsClient = savedObjectsClientMock.create();
@@ -50,11 +57,15 @@ describe('request diagnostics handler', () => {
         },
       },
     } as unknown as RequestHandlerContext;
-    mockRequest = httpServerMock.createKibanaRequest({ params: { agentId: 'agent1' } });
+    mockRequest = httpServerMock.createKibanaRequest({
+      params: { agentId: 'agent1' },
+      body: { additional_metrics: ['CPU'] },
+    });
   });
 
   it('should return ok if agent supports request diagnostics', async () => {
     mockGetAgentById.mockResolvedValueOnce({
+      active: true,
       local_metadata: { elastic: { agent: { version: '8.7.0' } } },
     });
 
@@ -65,6 +76,7 @@ describe('request diagnostics handler', () => {
 
   it('should retur error if agent does not support request diagnostics', async () => {
     mockGetAgentById.mockResolvedValueOnce({
+      active: true,
       local_metadata: { elastic: { agent: { version: '8.6.0' } } },
     });
 

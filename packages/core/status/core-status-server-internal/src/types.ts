@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Observable } from 'rxjs';
@@ -26,3 +27,27 @@ export interface InternalStatusServiceSetup
     getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus>;
   };
 }
+
+/** @internal */
+export interface NamedStatus extends ServiceStatus {
+  name: string; // the name of the service / plugin
+}
+
+/** @internal */
+export interface NamedServiceStatus extends ServiceStatus, NamedStatus {}
+
+/** @internal */
+export interface LoggableServiceStatus extends NamedServiceStatus {
+  repeats?: number; // whether this status has been reported repeatedly recently (and how many times)
+}
+
+/** @internal */
+export interface PluginStatus extends ServiceStatus {
+  reported?: boolean; // whether this status is reported (true) or inferred (false)
+}
+
+/** @internal */
+export interface NamedPluginStatus extends PluginStatus, NamedStatus {}
+
+/** @internal */
+export interface LoggablePluginStatus extends PluginStatus, LoggableServiceStatus {}

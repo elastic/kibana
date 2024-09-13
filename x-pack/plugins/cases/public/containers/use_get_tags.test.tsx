@@ -20,16 +20,20 @@ describe('useGetTags', () => {
   const abortCtrl = new AbortController();
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('calls getTags api', async () => {
     const spyOnGetTags = jest.spyOn(api, 'getTags');
     const { waitForNextUpdate } = renderHook(() => useGetTags(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
     await waitForNextUpdate();
-    expect(spyOnGetTags).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+    expect(spyOnGetTags).toBeCalledWith({
+      owner: [SECURITY_SOLUTION_OWNER],
+      signal: abortCtrl.signal,
+    });
   });
 
   it('displays and error toast when an error occurs', async () => {
@@ -40,7 +44,9 @@ describe('useGetTags', () => {
       throw new Error('Something went wrong');
     });
     const { waitForNextUpdate } = renderHook(() => useGetTags(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
     await waitForNextUpdate();
     expect(addError).toBeCalled();

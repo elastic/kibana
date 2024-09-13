@@ -7,16 +7,18 @@
 
 import type { Observable } from 'rxjs';
 
+import type { BuildFlavor } from '@kbn/config/src/types';
 import type {
   CoreStart,
   ISavedObjectsRepository,
   KibanaRequest,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 
-import type { ConfigType } from '../config';
 import type { ISpacesClient } from './spaces_client';
 import { SpacesClient } from './spaces_client';
+import type { ConfigType } from '../config';
 
 /**
  * For consumption by the security plugin only.
@@ -72,7 +74,10 @@ export class SpacesClientService {
 
   private clientWrapper?: SpacesClientWrapper;
 
-  constructor(private readonly debugLogger: (message: string) => void) {}
+  constructor(
+    private readonly debugLogger: (message: string) => void,
+    private readonly buildFlavour: BuildFlavor
+  ) {}
 
   public setup({ config$ }: SetupDeps): SpacesClientServiceSetup {
     config$.subscribe((nextConfig) => {
@@ -95,7 +100,7 @@ export class SpacesClientService {
     };
   }
 
-  public start(coreStart: CoreStart): SpacesClientServiceStart {
+  public start(coreStart: CoreStart, features: FeaturesPluginStart): SpacesClientServiceStart {
     const nonGlobalTypes = coreStart.savedObjects
       .getTypeRegistry()
       .getAllTypes()
@@ -117,7 +122,9 @@ export class SpacesClientService {
           this.debugLogger,
           this.config,
           this.repositoryFactory!(request, coreStart.savedObjects),
-          nonGlobalTypeNames
+          nonGlobalTypeNames,
+          this.buildFlavour,
+          features
         );
         if (this.clientWrapper) {
           return this.clientWrapper(request, baseClient);

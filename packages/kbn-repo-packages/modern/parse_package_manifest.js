@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const Path = require('path');
@@ -62,6 +63,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     requiredPlugins,
     optionalPlugins,
     requiredBundles,
+    runtimePluginDependencies,
     enabledOnAnonymousPages,
     type,
     __category__,
@@ -99,6 +101,14 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     throw err(
       `plugin.requiredPlugins`,
       optionalPlugins,
+      `must be an array of strings in camel or snake case`
+    );
+  }
+
+  if (runtimePluginDependencies !== undefined && !isArrOfIds(runtimePluginDependencies)) {
+    throw err(
+      `plugin.runtimePluginDependencies`,
+      runtimePluginDependencies,
       `must be an array of strings in camel or snake case`
     );
   }
@@ -154,6 +164,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     requiredPlugins,
     optionalPlugins,
     requiredBundles,
+    runtimePluginDependencies,
     enabledOnAnonymousPages,
     extraPublicDirs,
     [PLUGIN_CATEGORY]: __category__,
@@ -269,7 +280,12 @@ function validatePackageManifest(parsed, repoRoot, path) {
   };
 
   // return if this is one of the more basic types of package types
-  if (type === 'shared-server' || type === 'functional-tests' || type === 'test-helper') {
+  if (
+    type === 'shared-server' ||
+    type === 'functional-tests' ||
+    type === 'test-helper' ||
+    type === 'core'
+  ) {
     return {
       type,
       ...base,

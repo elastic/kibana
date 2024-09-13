@@ -7,14 +7,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
-import {
-  I18nStart,
-  ScopedHistory,
-  ApplicationStart,
-  UnmountCallback,
-  CoreTheme,
-} from '@kbn/core/public';
+import { ScopedHistory, ApplicationStart, UnmountCallback, CoreStart } from '@kbn/core/public';
 import { DocLinksStart, ExecutionContextStart } from '@kbn/core/public';
 
 import {
@@ -22,29 +15,34 @@ import {
   ILicense,
   KibanaContextProvider,
   APP_WRAPPER_CLASS,
+  KibanaRenderContextProvider,
   RedirectAppLinks,
-  KibanaThemeProvider,
 } from '../shared_imports';
 import { App } from './app';
 import { BreadcrumbService } from './services/breadcrumbs';
 
 export const renderApp = (
+  startServices: CoreStart,
   element: Element,
-  I18nContext: I18nStart['Context'],
   history: ScopedHistory,
   application: ApplicationStart,
   breadcrumbService: BreadcrumbService,
   license: ILicense,
-  theme$: Observable<CoreTheme>,
   docLinks: DocLinksStart,
   executionContext: ExecutionContextStart,
   cloud?: CloudSetup
 ): UnmountCallback => {
-  const { getUrlForApp } = application;
+  const { navigateToUrl, getUrlForApp } = application;
+  const { overlays, http } = startServices;
+
   render(
-    <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
-      <I18nContext>
-        <KibanaThemeProvider theme$={theme$}>
+    <KibanaRenderContextProvider {...startServices}>
+      <div className={APP_WRAPPER_CLASS}>
+        <RedirectAppLinks
+          coreStart={{
+            application,
+          }}
+        >
           <KibanaContextProvider
             services={{
               cloud,
@@ -53,13 +51,17 @@ export const renderApp = (
               getUrlForApp,
               docLinks,
               executionContext,
+              navigateToUrl,
+              overlays,
+              http,
+              history,
             }}
           >
             <App history={history} />
           </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nContext>
-    </RedirectAppLinks>,
+        </RedirectAppLinks>
+      </div>
+    </KibanaRenderContextProvider>,
     element
   );
 

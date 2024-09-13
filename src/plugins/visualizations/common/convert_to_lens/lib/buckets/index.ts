@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
@@ -21,6 +22,7 @@ import { getFieldNameFromField, getLabel, isSchemaConfig } from '../utils';
 
 export type BucketAggs =
   | BUCKET_TYPES.TERMS
+  | BUCKET_TYPES.SIGNIFICANT_TERMS
   | BUCKET_TYPES.DATE_HISTOGRAM
   | BUCKET_TYPES.FILTERS
   | BUCKET_TYPES.RANGE
@@ -28,6 +30,7 @@ export type BucketAggs =
 
 const SUPPORTED_BUCKETS: string[] = [
   BUCKET_TYPES.TERMS,
+  BUCKET_TYPES.SIGNIFICANT_TERMS,
   BUCKET_TYPES.DATE_HISTOGRAM,
   BUCKET_TYPES.FILTERS,
   BUCKET_TYPES.RANGE,
@@ -64,6 +67,7 @@ export const getBucketColumns = (
     case BUCKET_TYPES.HISTOGRAM:
       return convertToRangeColumn(agg.aggId ?? '', agg.aggParams, label, dataView, isSplit);
     case BUCKET_TYPES.TERMS:
+    case BUCKET_TYPES.SIGNIFICANT_TERMS:
       const fieldName = getFieldNameFromField(agg.aggParams.field);
       if (!fieldName) {
         return null;

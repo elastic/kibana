@@ -8,8 +8,8 @@
 import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { GetProcessesRequestBody } from '../../../../common/api/endpoint';
 import type {
-  ProcessesRequestBody,
   ResponseActionApiResponse,
   GetProcessesActionOutputContent,
 } from '../../../../common/endpoint/types/actions';
@@ -24,22 +24,23 @@ export const useSendGetEndpointProcessesRequest = (
   customOptions?: UseMutationOptions<
     ResponseActionApiResponse<GetProcessesActionOutputContent>,
     IHttpFetchError,
-    ProcessesRequestBody
+    GetProcessesRequestBody
   >
 ): UseMutationResult<
   ResponseActionApiResponse<GetProcessesActionOutputContent>,
   IHttpFetchError,
-  ProcessesRequestBody
+  GetProcessesRequestBody
 > => {
   return useMutation<
     ResponseActionApiResponse<GetProcessesActionOutputContent>,
     IHttpFetchError,
-    ProcessesRequestBody
-  >((getRunningProcessesData: ProcessesRequestBody) => {
+    GetProcessesRequestBody
+  >((getRunningProcessesData: GetProcessesRequestBody) => {
     return KibanaServices.get().http.post<
       ResponseActionApiResponse<GetProcessesActionOutputContent>
     >(GET_PROCESSES_ROUTE, {
       body: JSON.stringify(getRunningProcessesData),
+      version: '2023-10-31',
     });
   }, customOptions);
 };

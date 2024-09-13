@@ -9,8 +9,6 @@ import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
 
-/* eslint-disable react/display-name */
-
 import React, { memo } from 'react';
 
 interface StyledSVGCube {
@@ -23,13 +21,16 @@ import type { NodeDataStatus } from '../../types';
 /**
  * Icon representing a process node.
  */
+// eslint-disable-next-line react/display-name
 export const CubeForProcess = memo(function ({
+  id,
   className,
   size = '2.15em',
   state,
   isOrigin,
   'data-test-subj': dataTestSubj,
 }: {
+  id: string;
   'data-test-subj'?: string;
   /**
    * The state of the process's node data (for endpoint the process's lifecycle events)
@@ -40,8 +41,8 @@ export const CubeForProcess = memo(function ({
   isOrigin?: boolean;
   className?: string;
 }) {
-  const { cubeSymbol, strokeColor } = useCubeAssets(state, false);
-  const { processCubeActiveBacking } = useSymbolIDs();
+  const { cubeSymbol, strokeColor } = useCubeAssets(id, state, false);
+  const { processCubeActiveBacking } = useSymbolIDs({ id });
 
   return (
     <StyledSVG
@@ -55,7 +56,7 @@ export const CubeForProcess = memo(function ({
     >
       <desc>
         {i18n.translate('xpack.securitySolution.resolver.node_icon', {
-          defaultMessage: `{state, select, running {Running Process} terminated {Terminated Process} loading {Loading Process} error {Error Process}}`,
+          defaultMessage: `{state, select, running {Running Process} terminated {Terminated Process} loading {Loading Process} error {Error Process} other {Unknown Process State}}`,
           values: { state },
         })}
       </desc>

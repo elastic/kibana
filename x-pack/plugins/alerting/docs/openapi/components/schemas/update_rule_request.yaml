@@ -1,5 +1,5 @@
 title: Update rule request
-description: >-
+description: >
   The update rule API request body varies depending on the type of rule and actions.
 type: object
 required:
@@ -9,6 +9,8 @@ required:
 properties:
   actions:
     $ref: 'actions.yaml'
+  alert_delay:
+    $ref: 'alert_delay.yaml'
   name:
     type: string
     description: The name of the rule.

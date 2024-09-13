@@ -7,9 +7,10 @@
 
 import { Plugin, CoreSetup } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -28,10 +29,11 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'ObservabilityFixture',
       app: ['kibana'],
       category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       cases: ['observabilityFixture'],
       privileges: {
         all: {
-          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles', 'casesGetConnectorsConfigure'],
           app: ['kibana'],
           cases: {
             all: ['observabilityFixture'],
@@ -43,7 +45,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           ui: [],
         },
         read: {
-          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles', 'casesGetConnectorsConfigure'],
           app: ['kibana'],
           cases: {
             read: ['observabilityFixture'],

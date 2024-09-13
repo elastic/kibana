@@ -377,7 +377,9 @@ describe('Test pipeline', () => {
         // Click the "Configuration" tab
         await actions.clickProcessorConfigurationTab();
         // Verify type selector has not changed
-        expect(find('processorTypeSelector.input').text()).toBe('Set');
+        expect(
+          find('processorTypeSelector.input').find('input[role="combobox"]').props().value
+        ).toBe('Set');
       });
     });
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pick } from 'lodash';
@@ -16,7 +17,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { OPTIONS_LIST_DASHBOARD_NAME } from '.';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const retry = getService('retry');
   const queryBar = getService('queryBar');
   const pieChart = getService('pieChart');
   const elasticChart = getService('elasticChart');
@@ -40,11 +40,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let controlId: string;
 
     const returnToDashboard = async () => {
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
       await header.waitUntilLoadingHasFinished();
       await elasticChart.setNewChartUiDebugFlag();
       await dashboard.loadSavedDashboard(OPTIONS_LIST_DASHBOARD_NAME);
       await dashboard.ensureDashboardIsInEditMode();
+      await header.waitUntilLoadingHasFinished();
     };
 
     before(async () => {
@@ -66,13 +67,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickQuickSave();
     });
 
-    describe('Applies query settings to controls', async () => {
-      it('Applies dashboard query to options list control', async () => {
-        await queryBar.setQuery('animal.keyword : "dog" ');
+    describe('Applies query settings to controls', () => {
+      it('Malformed query throws an error', async () => {
+        await queryBar.setQuery('animal.keyword : "dog" error');
         await queryBar.submitQuery(); // quicker than clicking the submit button, but hides the time picker
-        await dashboard.waitForRenderComplete();
         await header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('control-frame-error');
+      });
 
+      it('Can recover from malformed query error', async () => {
+        await queryBar.setQuery('animal.keyword : "dog"');
+        await queryBar.submitQuery();
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('control-frame-error');
+      });
+
+      it('Applies dashboard query to options list control', async () => {
         const suggestions = pick(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, [
           'ruff',
           'bark',
@@ -85,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           invalidSelections: [],
         });
         await queryBar.setQuery('');
-        await queryBar.clickQuerySubmitButton(); // ensures that the time picker is visible for the next test
+        await queryBar.clickQuerySubmitButton(); // slower than submitQuery but ensures that the time picker is visible for the next test
       });
 
       it('Applies dashboard time range to options list control', async () => {
@@ -94,7 +104,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Jan 1, 2017 @ 00:00:00.000',
           'Jan 1, 2017 @ 00:00:00.000'
         );
-        await dashboard.waitForRenderComplete();
         await header.waitUntilLoadingHasFinished();
 
         await dashboardControls.optionsListOpenPopover(controlId);
@@ -103,14 +112,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await timePicker.setDefaultDataRange();
       });
 
-      describe('dashboard filters', async () => {
+      describe('dashboard filters', () => {
         before(async () => {
           await filterBar.addFilter({
             field: 'sound.keyword',
             operation: 'is one of',
             value: ['bark', 'bow ow ow', 'ruff'],
           });
-          await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
         });
 
@@ -128,20 +136,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('Does not apply disabled dashboard filters to options list control', async () => {
           await filterBar.toggleFilterEnabled('sound.keyword');
-          await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
           await dashboardControls.ensureAvailableOptionsEqual(controlId, {
             suggestions: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS,
             invalidSelections: [],
           });
           await filterBar.toggleFilterEnabled('sound.keyword');
-          await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
         });
 
         it('Negated filters apply to options control', async () => {
           await filterBar.toggleFilterNegated('sound.keyword');
-          await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
 
           const suggestions = pick(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, [
@@ -163,11 +168,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Selections made in control apply to dashboard', async () => {
+    describe('Selections made in control apply to dashboard', () => {
       it('Shows available options in options list', async () => {
         await queryBar.setQuery('');
         await queryBar.submitQuery();
-        await dashboard.waitForRenderComplete();
         await header.waitUntilLoadingHasFinished();
         await dashboardControls.ensureAvailableOptionsEqual(controlId, {
           suggestions: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS,
@@ -218,16 +222,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Applies options list control options to dashboard', async () => {
-        await retry.try(async () => {
-          expect(await pieChart.getPieSliceCount()).to.be(2);
-        });
+        await dashboard.waitForRenderComplete();
+        expect(await pieChart.getPieSliceCount()).to.be(2);
       });
 
       it('Applies options list control options to dashboard by default on open', async () => {
         await dashboard.gotoDashboardLandingPage();
         await header.waitUntilLoadingHasFinished();
         await dashboard.clickUnsavedChangesContinueEditing(OPTIONS_LIST_DASHBOARD_NAME);
-        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
         expect(await pieChart.getPieSliceCount()).to.be(2);
 
         const selectionString = await dashboardControls.optionsListGetSelectionsString(controlId);
@@ -236,13 +239,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('excluding selections has expected results', async () => {
         await dashboard.clickQuickSave();
-        await dashboard.waitForRenderComplete();
+        await header.waitUntilLoadingHasFinished();
 
         await dashboardControls.optionsListOpenPopover(controlId);
         await dashboardControls.optionsListPopoverSetIncludeSelections(false);
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-        await dashboard.waitForRenderComplete();
 
+        await dashboard.waitForRenderComplete();
         expect(await pieChart.getPieSliceCount()).to.be(5);
         await dashboard.clearUnsavedChanges();
       });
@@ -251,31 +254,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListOpenPopover(controlId);
         await dashboardControls.optionsListPopoverSetIncludeSelections(true);
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-        await dashboard.waitForRenderComplete();
 
+        await dashboard.waitForRenderComplete();
         expect(await pieChart.getPieSliceCount()).to.be(2);
         await dashboard.clearUnsavedChanges();
       });
 
-      it('changes to selections can be discarded', async () => {
-        await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSelectOption('bark');
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-        let selections = await dashboardControls.optionsListGetSelectionsString(controlId);
-        expect(selections).to.equal('hiss, grr, bark');
+      describe('discarding changes', () => {
+        describe('changes can be discarded', () => {
+          let selections = '';
 
-        await dashboard.clickCancelOutOfEditMode();
-        selections = await dashboardControls.optionsListGetSelectionsString(controlId);
-        expect(selections).to.equal('hiss, grr');
-      });
+          beforeEach(async () => {
+            await dashboardControls.optionsListOpenPopover(controlId);
+            await dashboardControls.optionsListPopoverSelectOption('bark');
+            await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+            selections = await dashboardControls.optionsListGetSelectionsString(controlId);
+            expect(selections).to.equal('hiss, grr, bark');
+          });
 
-      it('dashboard does not load with unsaved changes when changes are discarded', async () => {
-        await dashboard.switchToEditMode();
-        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+          afterEach(async () => {
+            selections = await dashboardControls.optionsListGetSelectionsString(controlId);
+            expect(selections).to.equal('hiss, grr');
+          });
+
+          it('by clicking the discard changes button', async () => {
+            await dashboard.clickDiscardChanges();
+          });
+
+          it('by switching to view mode', async () => {
+            await dashboard.clickCancelOutOfEditMode();
+          });
+        });
+
+        it('dashboard does not load with unsaved changes when changes are discarded', async () => {
+          await dashboard.switchToEditMode();
+          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        });
       });
     });
 
-    describe('Test data view runtime field', async () => {
+    describe('Test data view runtime field', () => {
       const FIELD_NAME = 'testRuntimeField';
       const FIELD_VALUES = {
         G:
@@ -324,8 +342,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListOpenPopover(controlId);
         await dashboardControls.optionsListPopoverSelectOption('B');
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-        await dashboard.waitForRenderComplete();
 
+        await dashboard.waitForRenderComplete();
         expect(await pieChart.getPieChartLabels()).to.eql(['bark', 'bow ow ow']);
       });
 
@@ -343,7 +361,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Test exists query', async () => {
+    describe('Test exists query', () => {
       const newDocuments: Array<{ index: string; id: string }> = [];
 
       const addDocument = async (index: string, document: string) => {
@@ -372,10 +390,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         controlId = (await dashboardControls.getAllControlIds())[0];
         await header.waitUntilLoadingHasFinished();
-        await dashboard.waitForRenderComplete();
       });
 
       it('creating exists query has expected results', async () => {
+        await dashboard.waitForRenderComplete();
         expect((await pieChart.getPieChartValues())[0]).to.be(6);
         await dashboardControls.optionsListOpenPopover(controlId);
         await dashboardControls.optionsListPopoverSelectExists();

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -30,6 +31,7 @@ import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 import { typeRegistryInstanceMock } from '../saved_objects_service.test.mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { EXPORT_ALL_TYPES_TOKEN } from '@kbn/core-saved-objects-import-export-server-internal';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);
@@ -147,6 +149,20 @@ describe('validateTypes', () => {
   it('returns undefined if all types are allowed', () => {
     expect(validateTypes(allowedTypes, allowedTypes)).toBeUndefined();
     expect(validateTypes(['config'], allowedTypes)).toBeUndefined();
+  });
+  it('supports the all types token', () => {
+    expect(validateTypes([EXPORT_ALL_TYPES_TOKEN], allowedTypes)).toBeUndefined();
+    expect(validateTypes([EXPORT_ALL_TYPES_TOKEN, allowedTypes[0]], allowedTypes)).toBeUndefined();
+  });
+  it('returns an error message for non-allowed types even with the all types token', () => {
+    expect(
+      validateTypes(
+        [EXPORT_ALL_TYPES_TOKEN, 'not-allowed-type', 'not-allowed-type-2'],
+        allowedTypes
+      )
+    ).toMatchInlineSnapshot(
+      `"Trying to export non-exportable type(s): not-allowed-type, not-allowed-type-2"`
+    );
   });
 });
 
@@ -347,7 +363,11 @@ describe('throwIfAnyTypeNotVisibleByAPI', () => {
 
 describe('logWarnOnExternalRequest', () => {
   let logger: MockedLogger;
-  const firstPartyRequestHeaders = { 'kbn-version': 'a', referer: 'b' };
+  const firstPartyRequestHeaders = {
+    'kbn-version': 'a',
+    referer: 'b',
+    'x-elastic-internal-origin': 'foo',
+  };
   const kibRequest = httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders });
   const extRequest = httpServerMock.createKibanaRequest();
 
@@ -362,7 +382,7 @@ describe('logWarnOnExternalRequest', () => {
     logWarnOnExternalRequest({
       method: 'get',
       path: '/resolve/{type}/{id}',
-      req: extRequest,
+      request: extRequest,
       logger,
     });
     expect(logger.warn).toHaveBeenCalledTimes(1);
@@ -375,7 +395,7 @@ describe('logWarnOnExternalRequest', () => {
     logWarnOnExternalRequest({
       method: 'post',
       path: '/_bulk_resolve',
-      req: extRequest,
+      request: extRequest,
       logger,
     });
     expect(logger.warn).toHaveBeenCalledTimes(1);
@@ -388,14 +408,14 @@ describe('logWarnOnExternalRequest', () => {
     logWarnOnExternalRequest({
       method: 'get',
       path: '/resolve/{type}/{id}',
-      req: kibRequest,
+      request: kibRequest,
       logger,
     });
     expect(logger.warn).toHaveBeenCalledTimes(0);
     logWarnOnExternalRequest({
       method: 'post',
       path: '/_bulk_resolve',
-      req: kibRequest,
+      request: kibRequest,
       logger,
     });
     expect(logger.warn).toHaveBeenCalledTimes(0);

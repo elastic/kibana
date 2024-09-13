@@ -41,4 +41,21 @@ describe('useCaseViewNavigation', () => {
       });
     });
   });
+
+  it('calls navigateToApp with correct arguments and bypass current app id', () => {
+    const { result, waitFor } = renderHook(() => useCaseViewNavigation('superAppId'), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    act(() => {
+      result.current.navigateToCaseView({ caseId: 'test-id' });
+    });
+
+    waitFor(() => {
+      expect(navigateToApp).toHaveBeenCalledWith('superAppId', {
+        deepLinkId: 'cases',
+        path: '/test-id',
+      });
+    });
+  });
 });

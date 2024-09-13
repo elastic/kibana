@@ -1,0 +1,432 @@
+{
+  "id": "@kbn/core-plugins-contracts-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-plugins-contracts-browser",
+        "id": "def-public.FoundPluginContractResolverResponseItem",
+        "type": "Interface",
+        "tags": [
+          "see"
+        ],
+        "label": "FoundPluginContractResolverResponseItem",
+        "description": [
+          "\nContract resolver response for found plugins.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-plugins-contracts-browser",
+            "scope": "public",
+            "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+            "section": "def-public.FoundPluginContractResolverResponseItem",
+            "text": "FoundPluginContractResolverResponseItem"
+          },
+          "<ContractType>"
+        ],
+        "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-contracts-browser",
+            "id": "def-public.FoundPluginContractResolverResponseItem.found",
+            "type": "boolean",
+            "tags": [],
+            "label": "found",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-contracts-browser",
+            "id": "def-public.FoundPluginContractResolverResponseItem.contract",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "contract",
+            "description": [],
+            "signature": [
+              "ContractType"
+            ],
+            "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-contracts-browser",
+        "id": "def-public.NotFoundPluginContractResolverResponseItem",
+        "type": "Interface",
+        "tags": [
+          "see"
+        ],
+        "label": "NotFoundPluginContractResolverResponseItem",
+        "description": [
+          "\nContract resolver response for not found plugins.\n"
+        ],
+        "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-contracts-browser",
+            "id": "def-public.NotFoundPluginContractResolverResponseItem.found",
+            "type": "boolean",
+            "tags": [],
+            "label": "found",
+            "description": [],
+            "signature": [
+              "false"
+            ],
+            "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-contracts-browser",
+        "id": "def-public.PluginsServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginsServiceSetup",
+        "description": [
+          "\nSetup contract of Core's `plugins` service.\n"
+        ],
+        "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-contracts-browser",
+            "id": "def-public.PluginsServiceSetup.onSetup",
+            "type": "Function",
+            "tags": [
+              "experimental"
+            ],
+            "label": "onSetup",
+            "description": [
+              "\nReturns a promise that will resolve with the requested plugin setup contracts once all plugins have been set up.\n\nIf called when plugins are already setup, the returned promise will resolve instantly.\n\nThe API can only be used to resolve required dependencies, optional dependencies, or dependencies explicitly\ndefined as `runtimePluginDependencies` in the calling plugin's manifest, otherwise the API will throw at call time.\n\n**Important:** This API should only be used when trying to address cyclic dependency issues that can't easily\nbe solved otherwise. This is meant to be a temporary workaround only supposed to be used until a better solution\nis made available.\nTherefore, by using this API, you implicitly agree to:\n- consider it as technical debt and open an issue to track the tech debt resolution\n- accept that this is only a temporary solution, and will comply to switching to the long term solution when asked by the Core team\n"
+            ],
+            "signature": [
+              "<T extends ",
+              {
+                "pluginId": "@kbn/core-plugins-contracts-browser",
+                "scope": "public",
+                "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+                "section": "def-public.PluginContractMap",
+                "text": "PluginContractMap"
+              },
+              ">(...pluginNames: (keyof T)[]) => Promise<",
+              {
+                "pluginId": "@kbn/core-plugins-contracts-browser",
+                "scope": "public",
+                "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+                "section": "def-public.PluginContractResolverResponse",
+                "text": "PluginContractResolverResponse"
+              },
+              "<T>>"
+            ],
+            "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-plugins-contracts-browser",
+                "id": "def-public.PluginsServiceSetup.onSetup.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "pluginNames",
+                "description": [],
+                "signature": [
+                  "(keyof T)[]"
+                ],
+                "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-contracts-browser",
+            "id": "def-public.PluginsServiceSetup.onStart",
+            "type": "Function",
+            "tags": [
+              "experimental"
+            ],
+            "label": "onStart",
+            "description": [
+              "\nReturns a promise that will resolve with the requested plugin start contracts once all plugins have been started.\n\nIf called when plugins are already started, the returned promise will resolve instantly.\n\nThe API can only be used to resolve required dependencies, optional dependencies, or dependencies explicitly\ndefined as `runtimePluginDependencies` in the calling plugin's manifest, otherwise the API will throw at call time.\n\n**Important:** This API should only be used when trying to address cyclic dependency issues that can't easily\nbe solved otherwise. This is meant to be a temporary workaround only supposed to be used until a better solution\nis made available.\nTherefore, by using this API, you implicitly agree to:\n- consider it as technical debt and open an issue to track the tech debt resolution\n- accept that this is only a temporary solution, and will comply to switching to the long term solution when asked by the Core team\n"
+            ],
+            "signature": [
+              "<T extends ",
+              {
+                "pluginId": "@kbn/core-plugins-contracts-browser",
+                "scope": "public",
+                "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+                "section": "def-public.PluginContractMap",
+                "text": "PluginContractMap"
+              },
+              ">(...pluginNames: (keyof T)[]) => Promise<",
+              {
+                "pluginId": "@kbn/core-plugins-contracts-browser",
+                "scope": "public",
+                "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+                "section": "def-public.PluginContractResolverResponse",
+                "text": "PluginContractResolverResponse"
+              },
+              "<T>>"
+            ],
+            "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-plugins-contracts-browser",
+                "id": "def-public.PluginsServiceSetup.onStart.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "pluginNames",
+                "description": [],
+                "signature": [
+                  "(keyof T)[]"
+                ],
+                "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-contracts-browser",
+        "id": "def-public.PluginsServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginsServiceStart",
+        "description": [
+          "\nStart contract of Core's `plugins` service.\n"
+        ],
+        "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-contracts-browser",
+            "id": "def-public.PluginsServiceStart.onStart",
+            "type": "Function",
+            "tags": [
+              "experimental"
+            ],
+            "label": "onStart",
+            "description": [
+              "\nReturns a promise that will resolve with the requested plugin start contracts once all plugins have been started.\n\nIf called when plugins are already started, the returned promise will resolve instantly.\n\nThe API can only be used to resolve required dependencies, optional dependencies, or dependencies explicitly\ndefined as `runtimePluginDependencies` in the calling plugin's manifest, otherwise the API will throw at call time.\n\n**Important:** This API should only be used when trying to address cyclic dependency issues that can't easily\nbe solved otherwise. This is meant to be a temporary workaround only supposed to be used until a better solution\nis made available.\nTherefore, by using this API, you implicitly agree to:\n- consider it as technical debt and open an issue to track the tech debt resolution\n- accept that this is only a temporary solution, and will comply to switching to the long term solution when asked by the Core team\n"
+            ],
+            "signature": [
+              "<T extends ",
+              {
+                "pluginId": "@kbn/core-plugins-contracts-browser",
+                "scope": "public",
+                "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+                "section": "def-public.PluginContractMap",
+                "text": "PluginContractMap"
+              },
+              ">(...pluginNames: (keyof T)[]) => Promise<",
+              {
+                "pluginId": "@kbn/core-plugins-contracts-browser",
+                "scope": "public",
+                "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+                "section": "def-public.PluginContractResolverResponse",
+                "text": "PluginContractResolverResponse"
+              },
+              "<T>>"
+            ],
+            "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-plugins-contracts-browser",
+                "id": "def-public.PluginsServiceStart.onStart.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "pluginNames",
+                "description": [],
+                "signature": [
+                  "(keyof T)[]"
+                ],
+                "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-plugins-contracts-browser",
+        "id": "def-public.PluginContractMap",
+        "type": "Type",
+        "tags": [
+          "see"
+        ],
+        "label": "PluginContractMap",
+        "description": [
+          "\nA record of plugin contracts.\n"
+        ],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
+        "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-contracts-browser",
+        "id": "def-public.PluginContractResolver",
+        "type": "Type",
+        "tags": [],
+        "label": "PluginContractResolver",
+        "description": [
+          "\nA plugin contract resolver, allowing to retrieve plugin contracts at runtime.\n\nPlease refer to {@link PluginsServiceSetup} and {@link PluginsServiceStart} for more documentation and examples.\n"
+        ],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "@kbn/core-plugins-contracts-browser",
+            "scope": "public",
+            "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+            "section": "def-public.PluginContractMap",
+            "text": "PluginContractMap"
+          },
+          ">(...pluginNames: (keyof T)[]) => Promise<",
+          {
+            "pluginId": "@kbn/core-plugins-contracts-browser",
+            "scope": "public",
+            "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+            "section": "def-public.PluginContractResolverResponse",
+            "text": "PluginContractResolverResponse"
+          },
+          "<T>>"
+        ],
+        "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-contracts-browser",
+            "id": "def-public.PluginContractResolver.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "pluginNames",
+            "description": [],
+            "signature": [
+              "(keyof T)[]"
+            ],
+            "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-contracts-browser",
+        "id": "def-public.PluginContractResolverResponse",
+        "type": "Type",
+        "tags": [
+          "see"
+        ],
+        "label": "PluginContractResolverResponse",
+        "description": [
+          "\nResponse from a plugin contract resolver request.\n"
+        ],
+        "signature": [
+          "{ [Key in keyof ContractMap]: ",
+          {
+            "pluginId": "@kbn/core-plugins-contracts-browser",
+            "scope": "public",
+            "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+            "section": "def-public.PluginContractResolverResponseItem",
+            "text": "PluginContractResolverResponseItem"
+          },
+          "<ContractMap[Key]>; }"
+        ],
+        "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-contracts-browser",
+        "id": "def-public.PluginContractResolverResponseItem",
+        "type": "Type",
+        "tags": [
+          "see"
+        ],
+        "label": "PluginContractResolverResponseItem",
+        "description": [
+          "\nContract resolver response.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-plugins-contracts-browser",
+            "scope": "public",
+            "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+            "section": "def-public.NotFoundPluginContractResolverResponseItem",
+            "text": "NotFoundPluginContractResolverResponseItem"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-plugins-contracts-browser",
+            "scope": "public",
+            "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+            "section": "def-public.FoundPluginContractResolverResponseItem",
+            "text": "FoundPluginContractResolverResponseItem"
+          },
+          "<ContractType>"
+        ],
+        "path": "packages/core/plugins/core-plugins-contracts-browser/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

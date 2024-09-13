@@ -9,6 +9,7 @@ import { of } from 'rxjs';
 import { LocationDescriptorObject } from 'history';
 
 import {
+  coreMock,
   uiSettingsServiceMock,
   notificationServiceMock,
   httpServiceMock,
@@ -18,6 +19,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { AppDeps } from '../../../public/application/app';
 import { LicenseStatus } from '../../../common/types/license_status';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 class MockTimeBuckets {
   setBounds(_domain: any) {
@@ -30,6 +32,7 @@ class MockTimeBuckets {
   }
 }
 
+const coreStart = coreMock.createStart();
 const history = scopedHistoryMock.create();
 history.createHref.mockImplementation((location: LocationDescriptorObject) => {
   return `${location.pathname}${location.search ? '?' + location.search : ''}`;
@@ -41,9 +44,12 @@ export const mockContextValue: AppDeps = {
   setBreadcrumbs: jest.fn(),
   createTimeBuckets: () => new MockTimeBuckets(),
   uiSettings: uiSettingsServiceMock.createSetupContract(),
+  settings: settingsServiceMock.createStartContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,
-  theme: {
-    useChartsTheme: jest.fn(),
+  i18n: coreStart.i18n,
+  theme: coreStart.theme,
+  chartsTheme: {
+    useChartsBaseTheme: jest.fn(),
   } as any,
   // For our test harness, we don't use this mocked out http service
   http: httpServiceMock.createSetupContract(),

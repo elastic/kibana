@@ -25,6 +25,10 @@ required:
 properties:
   assignees:
     $ref: 'assignees.yaml'
+  category:
+    type: string
+    description: The case category.
+    nullable: true
   closed_at:
     type: string
     format: date-time
@@ -35,16 +39,18 @@ properties:
     title: Case response properties for comments
     description: An array of comment objects for the case.
     type: array
+    maxItems: 10000
     items:
-      discriminator:
-        propertyName: type
       oneOf:
         - $ref: 'alert_comment_response_properties.yaml'
         - $ref: 'user_comment_response_properties.yaml'
+      discriminator:
+        propertyName: type
+        mapping:
+          alert: 'alert_comment_response_properties.yaml'
+          user: 'user_comment_response_properties.yaml'
   connector:
     title: Case response properties for connectors
-    discriminator:
-      propertyName: type
     oneOf:
       - $ref: 'connector_properties_none.yaml'
       - $ref: 'connector_properties_cases_webhook.yaml'
@@ -53,12 +59,29 @@ properties:
       - $ref: 'connector_properties_servicenow.yaml'
       - $ref: 'connector_properties_servicenow_sir.yaml'
       - $ref: 'connector_properties_swimlane.yaml'
+    discriminator:
+      propertyName: type
+      mapping:
+        .none: 'connector_properties_none.yaml'
+        .cases-webhook: 'connector_properties_cases_webhook.yaml'
+        .jira: 'connector_properties_jira.yaml'
+        .resilient: 'connector_properties_resilient.yaml'
+        .servicenow: 'connector_properties_servicenow.yaml'
+        .servicenow-sir: 'connector_properties_servicenow_sir.yaml'
+        .swimlane: 'connector_properties_swimlane.yaml'
   created_at:
     type: string
     format: date-time
     example: '2022-05-13T09:16:17.416Z'
   created_by:
     $ref: 'case_response_created_by_properties.yaml'
+  customFields:
+    type: array
+    description: Custom field values for the case.
+    items:
+      type: object
+      properties:
+        $ref: 'case_customfields.yaml'
   description:
     type: string
     example: A case description.
@@ -81,9 +104,9 @@ properties:
   settings:
     $ref: 'settings.yaml'
   severity:
-    $ref: 'severity_property.yaml'
+    $ref: 'case_severity.yaml'
   status:
-    $ref: 'status.yaml'
+    $ref: 'case_status.yaml'
   tags:
     type: array
     items:

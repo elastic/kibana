@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -25,7 +26,7 @@ import {
 } from '@elastic/eui';
 import type { UrlService } from '@kbn/share-plugin/common/url_service';
 import { ApplicationStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 type FlyoutProps = Omit<EuiFlyoutProps, 'onClose'>;
 interface ViewApiRequestFlyoutProps {
@@ -111,7 +112,12 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
           )}
         </div>
         <EuiSpacer size="s" />
-        <EuiCodeBlock language="json" data-test-subj="apiRequestFlyoutBody">
+        <EuiCodeBlock
+          language="json"
+          data-test-subj="apiRequestFlyoutBody"
+          overflowHeight={1200}
+          isVirtualized
+        >
           {request}
         </EuiCodeBlock>
       </EuiFlyoutBody>
@@ -133,13 +139,15 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
 export const ViewApiRequestFlyout = (props: ViewApiRequestFlyoutProps) => {
   if (props.application) {
     return (
-      <RedirectAppLinks
-        application={props.application}
-        className={APP_WRAPPER_CLASS}
-        data-test-subj="apiRequestFlyoutRedirectWrapper"
-      >
-        <ApiRequestFlyout {...props} />
-      </RedirectAppLinks>
+      <div className={APP_WRAPPER_CLASS} data-test-subj="apiRequestFlyoutRedirectWrapper">
+        <RedirectAppLinks
+          coreStart={{
+            application: props.application,
+          }}
+        >
+          <ApiRequestFlyout {...props} />
+        </RedirectAppLinks>
+      </div>
     );
   }
 

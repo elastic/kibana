@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
@@ -24,8 +25,8 @@ import { setupConfig } from './routes_test_utils';
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 const testTypes = [
-  { name: 'index-pattern', hide: false },
-  { name: 'hidden-type', hide: true },
+  { name: 'index-pattern', hide: false }, // multi-namespace type
+  { name: 'hidden-type', hide: true }, // hidden
   { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
 ];
 
@@ -67,7 +68,8 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
 
     const config = setupConfig();
-    registerUpdateRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+    registerUpdateRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });
@@ -101,6 +103,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     expect(result.body).toEqual(clientResponse);
     expect(coreUsageStatsClient.incrementSavedObjectsUpdate).toHaveBeenCalledWith({
       request: expect.anything(),
+      types: ['index-pattern'],
     });
   });
 
@@ -117,7 +120,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
       'index-pattern',
       'logstash-*',
       { title: 'Testing' },
-      { version: 'foo' }
+      { version: 'foo', migrationVersionCompatibility: 'raw' }
     );
   });
 

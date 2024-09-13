@@ -6,7 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { BulkGetAttachmentsRequest } from '../../../../common/api';
+import { BulkGetAttachmentsRequestRt } from '../../../../common/types/api/attachment/v1';
+import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
+import type { attachmentApiV1 } from '../../../../common/types/api';
 
 import { INTERNAL_BULK_GET_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -26,13 +28,18 @@ export const bulkGetAttachmentsRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
-      const body = request.body as BulkGetAttachmentsRequest;
+
+      const requestBody: attachmentApiV1.BulkGetAttachmentsRequest = decodeWithExcessOrThrow(
+        BulkGetAttachmentsRequestRt
+      )(request.body);
+
+      const res: attachmentApiV1.BulkGetAttachmentsResponse = await client.attachments.bulkGet({
+        caseID: request.params.case_id,
+        attachmentIDs: requestBody.ids,
+      });
 
       return response.ok({
-        body: await client.attachments.bulkGet({
-          caseID: request.params.case_id,
-          attachmentIDs: body.ids,
-        }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { alertApiV1 } from '../../../../common/types/api';
 
 import { CASE_DETAILS_ALERTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -19,6 +20,12 @@ export const getAllAlertsAttachedToCaseRoute = createCasesRoute({
       case_id: schema.string({ minLength: 1 }),
     }),
   },
+  routerOptions: {
+    access: 'public',
+    summary: `Get all alerts for a case`,
+    tags: ['oas-tag:cases'],
+    // description: 'You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you\'re seeking.',
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseId = request.params.case_id;
@@ -26,8 +33,12 @@ export const getAllAlertsAttachedToCaseRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
+      const res: alertApiV1.AlertResponse = await casesClient.attachments.getAllAlertsAttachToCase({
+        caseId,
+      });
+
       return response.ok({
-        body: await casesClient.attachments.getAllAlertsAttachToCase({ caseId }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

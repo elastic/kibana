@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -15,6 +16,8 @@ import { Welcome } from './welcome';
 
 let mockHasIntegrationsPermission = true;
 const mockNavigateToUrl = jest.fn();
+let mockIsEnabled = false;
+
 jest.mock('../kibana_services', () => ({
   getServices: () => ({
     getBasePath: () => 'path',
@@ -30,6 +33,9 @@ jest.mock('../kibana_services', () => ({
           integrations: mockHasIntegrationsPermission,
         },
       },
+    },
+    guidedOnboardingService: {
+      isEnabled: mockIsEnabled,
     },
   }),
 }));
@@ -234,7 +240,8 @@ describe('home', () => {
       expect(component.find(Welcome).exists()).toBe(false);
     });
 
-    test('should redirect to guided onboarding on Cloud instead of welcome screen', async () => {
+    test('should redirect to guided onboarding on Cloud instead of welcome screen if guided onboarding is enabled', async () => {
+      mockIsEnabled = true;
       const isCloudEnabled = true;
       const hasUserDataView = jest.fn(async () => false);
 

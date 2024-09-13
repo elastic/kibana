@@ -49,6 +49,7 @@ describe('getRuleExecutionLogRoute', () => {
         rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
         rule_name: 'rule_name',
         space_ids: ['namespace'],
+        maintenance_window_ids: [],
       },
       {
         id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -72,6 +73,7 @@ describe('getRuleExecutionLogRoute', () => {
         rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
         rule_name: 'rule_name',
         space_ids: ['namespace'],
+        maintenance_window_ids: ['test-id-1'],
       },
     ],
   };
@@ -143,7 +145,7 @@ describe('getRuleExecutionLogRoute', () => {
       ['notFound']
     );
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(
       `[Error: Saved object [alert/1] not found]`
     );
   });

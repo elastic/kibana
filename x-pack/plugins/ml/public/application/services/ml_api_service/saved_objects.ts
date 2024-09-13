@@ -8,11 +8,11 @@
 // Service for managing job saved objects
 
 import { useMemo } from 'react';
+import { ML_INTERNAL_BASE_PATH, ML_EXTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import { useMlKibana } from '../../contexts/kibana';
 
-import { HttpService } from '../http_service';
+import type { HttpService } from '../http_service';
 
-import { basePath } from '.';
 import type {
   JobType,
   MlSavedObjectType,
@@ -28,8 +28,9 @@ import type {
 export const savedObjectsApiProvider = (httpService: HttpService) => ({
   jobsSpaces() {
     return httpService.http<JobsSpacesResponse>({
-      path: `${basePath()}/saved_objects/jobs_spaces`,
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/jobs_spaces`,
       method: 'GET',
+      version: '1',
     });
   },
   updateJobsSpaces(
@@ -40,61 +41,69 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
   ) {
     const body = JSON.stringify({ jobType, jobIds, spacesToAdd, spacesToRemove });
     return httpService.http<SavedObjectResult>({
-      path: `${basePath()}/saved_objects/update_jobs_spaces`,
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/update_jobs_spaces`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
   removeItemFromCurrentSpace(mlSavedObjectType: MlSavedObjectType, ids: string[]) {
     const body = JSON.stringify({ mlSavedObjectType, ids });
     return httpService.http<SavedObjectResult>({
-      path: `${basePath()}/saved_objects/remove_item_from_current_space`,
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/remove_item_from_current_space`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
   syncSavedObjects(simulate: boolean = false) {
     return httpService.http<SyncSavedObjectResponse>({
-      path: `${basePath()}/saved_objects/sync`,
+      path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/sync`,
       method: 'GET',
       query: { simulate },
+      version: '2023-10-31',
     });
   },
   initSavedObjects(simulate: boolean = false) {
     return httpService.http<InitializeSavedObjectResponse>({
-      path: `${basePath()}/saved_objects/initialize`,
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/initialize`,
       method: 'GET',
       query: { simulate },
+      version: '1',
     });
   },
   syncCheck(mlSavedObjectType?: MlSavedObjectType) {
     const body = JSON.stringify({ mlSavedObjectType });
     return httpService.http<SyncCheckResponse>({
-      path: `${basePath()}/saved_objects/sync_check`,
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/sync_check`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
   canDeleteMLSpaceAwareItems(mlSavedObjectType: MlSavedObjectType, ids: string[]) {
     const body = JSON.stringify({ ids });
     return httpService.http<CanDeleteMLSpaceAwareItemsResponse>({
-      path: `${basePath()}/saved_objects/can_delete_ml_space_aware_item/${mlSavedObjectType}`,
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/can_delete_ml_space_aware_item/${mlSavedObjectType}`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
   trainedModelsSpaces() {
     return httpService.http<TrainedModelsSpacesResponse>({
-      path: `${basePath()}/saved_objects/trained_models_spaces`,
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/trained_models_spaces`,
       method: 'GET',
+      version: '1',
     });
   },
   updateModelsSpaces(modelIds: string[], spacesToAdd: string[], spacesToRemove: string[]) {
     const body = JSON.stringify({ modelIds, spacesToAdd, spacesToRemove });
     return httpService.http<SavedObjectResult>({
-      path: `${basePath()}/saved_objects/update_trained_models_spaces`,
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/update_trained_models_spaces`,
       method: 'POST',
       body,
+      version: '1',
     });
   },
 });

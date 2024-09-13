@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -38,7 +39,7 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-nats.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/nats.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/nats.svg'),
     artifacts: {
       dashboards: [
         {
@@ -54,7 +55,7 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/nats_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/nats_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),

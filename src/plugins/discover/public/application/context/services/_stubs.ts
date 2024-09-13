@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import sinon from 'sinon';
 import moment from 'moment';
 import { of } from 'rxjs';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
-import { EsHitRecord } from '../../../types';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 
 type SortHit = {
   [key in string]: number; // timeField name
@@ -44,10 +45,13 @@ export function createSearchSourceStub(hits: EsHitRecord[], timeField?: string) 
   const searchSourceStub: any = {
     _stubHits: hits,
     _stubTimeField: timeField,
-    _createStubHit: (timestamp: number, tiebreaker = 0) => ({
-      [searchSourceStub._stubTimeField]: timestamp,
-      sort: [timestamp, tiebreaker],
-    }),
+    _createStubHit: (timestamp: number, tiebreaker = 0) => {
+      const value = new Date(timestamp).toISOString();
+      return {
+        [searchSourceStub._stubTimeField]: value,
+        sort: [value, tiebreaker],
+      };
+    },
     setParent: sinon.spy(() => searchSourceStub),
     setField: sinon.spy(() => searchSourceStub),
     removeField: sinon.spy(() => searchSourceStub),
@@ -74,13 +78,13 @@ export function createContextSearchSourceStub(timeFieldName: string) {
     const sortDirection = lastSort[0][timeField].order;
     const sortFunction =
       sortDirection === 'asc'
-        ? (first: SortHit, second: SortHit) => first[timeField] - second[timeField]
-        : (first: SortHit, second: SortHit) => second[timeField] - first[timeField];
+        ? (first: SortHit, second: SortHit) => (first[timeField] < second[timeField] ? -1 : 1)
+        : (first: SortHit, second: SortHit) => (second[timeField] < first[timeField] ? -1 : 1);
     const filteredHits = searchSourceStub._stubHits
       .filter(
         (hit: SortHit) =>
-          moment(hit[timeField]).isSameOrAfter(timeRange.gte) &&
-          moment(hit[timeField]).isSameOrBefore(timeRange.lte)
+          moment(hit[timeField]).isSameOrAfter(moment(timeRange.gte)) &&
+          moment(hit[timeField]).isSameOrBefore(moment(timeRange.lte))
       )
       .sort(sortFunction);
 

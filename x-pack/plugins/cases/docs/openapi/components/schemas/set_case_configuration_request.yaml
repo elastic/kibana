@@ -1,0 +1,38 @@
+title: Set case configuration request
+description: External connection details, such as the closure type and default connector for cases.
+type: object
+required:
+  - closure_type
+  - connector
+  - owner
+properties:
+  closure_type:
+    $ref: 'closure_types.yaml'
+  connector:
+    description: An object that contains the connector configuration.
+    type: object
+    properties:
+      $ref: 'case_configure_connector_properties.yaml'
+    required:
+      - fields
+      - id
+      - name
+      - type
+  customFields:
+    type: array
+    description: Custom fields case configuration.
+    minItems: 0
+    maxItems: 10
+    items:
+      type: object
+      required:
+        - key
+        - label
+        - required
+        - type
+      properties:
+        $ref: 'case_configure_customfields.yaml'
+  owner:
+    $ref: 'owners.yaml'
+  templates:
+    $ref: 'templates.yaml'

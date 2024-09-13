@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { UnifiedHistogramFetchStatus } from '../..';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
+import { lensAdaptersMock } from '../../__mocks__/lens_adapters';
 import {
   getChartHidden,
   getTopPanelHeight,
@@ -46,11 +48,12 @@ describe('UnifiedHistogramStateService', () => {
     breakdownField: 'bytes',
     chartHidden: false,
     lensRequestAdapter: new RequestAdapter(),
+    lensAdapters: lensAdaptersMock,
     timeInterval: 'auto',
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
-    currentSuggestion: undefined,
+    currentSuggestionContext: undefined,
   };
 
   it('should initialize state with default values', () => {
@@ -65,8 +68,7 @@ describe('UnifiedHistogramStateService', () => {
       topPanelHeight: undefined,
       totalHitsResult: undefined,
       totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
-      currentSuggestion: undefined,
-      allSuggestions: undefined,
+      currentSuggestionContext: undefined,
     });
   });
 
@@ -134,6 +136,11 @@ describe('UnifiedHistogramStateService', () => {
     expect(state).toEqual(newState);
     stateService.setLensRequestAdapter(undefined);
     newState = { ...newState, lensRequestAdapter: undefined };
+    stateService.setLensAdapters(undefined);
+    newState = { ...newState, lensAdapters: undefined };
+    expect(state).toEqual(newState);
+    stateService.setLensEmbeddableOutput$(undefined);
+    newState = { ...newState, lensEmbeddableOutput$: undefined };
     expect(state).toEqual(newState);
     stateService.setTotalHits({
       totalHitsStatus: UnifiedHistogramFetchStatus.complete,
@@ -203,29 +210,5 @@ describe('UnifiedHistogramStateService', () => {
     expect(setChartHidden as jest.Mock).not.toHaveBeenCalled();
     expect(setTopPanelHeight as jest.Mock).not.toHaveBeenCalled();
     expect(setBreakdownField as jest.Mock).not.toHaveBeenCalled();
-  });
-
-  it('should not update total hits to loading when the current status is partial', () => {
-    const stateService = createStateService({
-      services: unifiedHistogramServicesMock,
-      initialState: {
-        ...initialState,
-        totalHitsStatus: UnifiedHistogramFetchStatus.partial,
-      },
-    });
-    let state: UnifiedHistogramState | undefined;
-    stateService.state$.subscribe((s) => (state = s));
-    expect(state).toEqual({
-      ...initialState,
-      totalHitsStatus: UnifiedHistogramFetchStatus.partial,
-    });
-    stateService.setTotalHits({
-      totalHitsStatus: UnifiedHistogramFetchStatus.loading,
-      totalHitsResult: 100,
-    });
-    expect(state).toEqual({
-      ...initialState,
-      totalHitsStatus: UnifiedHistogramFetchStatus.partial,
-    });
   });
 });

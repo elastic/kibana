@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { FleetAuthzRouter } from '../../services/security';
+import { API_VERSIONS } from '../../../common/constants';
 
 import { FLEET_PROXY_API_ROUTES } from '../../../common/constants';
 import {
@@ -22,58 +23,78 @@ import {
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: FLEET_PROXY_API_ROUTES.LIST_PATTERN,
-      validate: false,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readSettings: true },
       },
-    },
-    getAllFleetProxyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: false,
+      },
+      getAllFleetProxyHandler
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
       path: FLEET_PROXY_API_ROUTES.CREATE_PATTERN,
-      validate: PostFleetProxyRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
-    },
-    postFleetProxyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: PostFleetProxyRequestSchema },
+      },
+      postFleetProxyHandler
+    );
 
-  router.put(
-    {
+  router.versioned
+    .put({
       path: FLEET_PROXY_API_ROUTES.UPDATE_PATTERN,
-      validate: PutFleetProxyRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
-    },
-    putFleetProxyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: PutFleetProxyRequestSchema },
+      },
+      putFleetProxyHandler
+    );
 
-  router.get(
-    {
-      path: FLEET_PROXY_API_ROUTES.DELETE_PATTERN,
-      validate: GetOneFleetProxyRequestSchema,
+  router.versioned
+    .get({
+      path: FLEET_PROXY_API_ROUTES.INFO_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readSettings: true },
       },
-    },
-    getFleetProxyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetOneFleetProxyRequestSchema },
+      },
+      getFleetProxyHandler
+    );
 
-  router.delete(
-    {
+  router.versioned
+    .delete({
       path: FLEET_PROXY_API_ROUTES.DELETE_PATTERN,
-      validate: GetOneFleetProxyRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
-    },
-    deleteFleetProxyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetOneFleetProxyRequestSchema },
+      },
+      deleteFleetProxyHandler
+    );
 };

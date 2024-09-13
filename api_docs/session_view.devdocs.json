@@ -53,20 +53,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "sessionView",
-        "id": "def-public.EventAction",
-        "type": "Enum",
-        "tags": [],
-        "label": "EventAction",
-        "description": [],
-        "path": "x-pack/plugins/session_view/common/types/process_tree/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "sessionView",
@@ -97,21 +84,2043 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [
+    "interfaces": [
       {
         "parentPluginId": "sessionView",
-        "id": "def-common.EventAction",
-        "type": "Enum",
+        "id": "def-common.Aggregate",
+        "type": "Interface",
         "tags": [],
-        "label": "EventAction",
+        "label": "Aggregate",
         "description": [],
-        "path": "x-pack/plugins/session_view/common/types/process_tree/index.ts",
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Aggregate.key",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Aggregate.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.AlertStatusEventEntityIdMap",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertStatusEventEntityIdMap",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.AlertStatusEventEntityIdMap.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[alertUuid: string]: { status: string; processEntityId: string; }",
+            "description": [],
+            "signature": [
+              "[alertUuid: string]:  { status: string; processEntityId: string; }"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.AlertTypeCount",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertTypeCount",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.AlertTypeCount.category",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "signature": [
+              "\"all\" | ",
+              "EventCategory"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.AlertTypeCount.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.IOLine",
+        "type": "Interface",
+        "tags": [],
+        "label": "IOLine",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.IOLine.event",
+            "type": "Object",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEvent",
+                "text": "ProcessEvent"
+              }
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.IOLine.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.Process",
+        "type": "Interface",
+        "tags": [],
+        "label": "Process",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.events",
+            "type": "Array",
+            "tags": [],
+            "label": "events",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEvent",
+                "text": "ProcessEvent"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.alerts",
+            "type": "Array",
+            "tags": [],
+            "label": "alerts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEvent",
+                "text": "ProcessEvent"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.children",
+            "type": "Array",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.Process",
+                "text": "Process"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.orphans",
+            "type": "Array",
+            "tags": [],
+            "label": "orphans",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.Process",
+                "text": "Process"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.parent",
+            "type": "Object",
+            "tags": [],
+            "label": "parent",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.Process",
+                "text": "Process"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.autoExpand",
+            "type": "boolean",
+            "tags": [],
+            "label": "autoExpand",
+            "description": [],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.searchMatched",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "searchMatched",
+            "description": [],
+            "signature": [
+              "number[] | null"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.addEvent",
+            "type": "Function",
+            "tags": [],
+            "label": "addEvent",
+            "description": [],
+            "signature": [
+              "(event: ",
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEvent",
+                "text": "ProcessEvent"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "sessionView",
+                "id": "def-common.Process.addEvent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "sessionView",
+                    "scope": "common",
+                    "docId": "kibSessionViewPluginApi",
+                    "section": "def-common.ProcessEvent",
+                    "text": "ProcessEvent"
+                  }
+                ],
+                "path": "x-pack/plugins/session_view/common/types/v1.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.addAlert",
+            "type": "Function",
+            "tags": [],
+            "label": "addAlert",
+            "description": [],
+            "signature": [
+              "(alert: ",
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEvent",
+                "text": "ProcessEvent"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "sessionView",
+                "id": "def-common.Process.addAlert.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "alert",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "sessionView",
+                    "scope": "common",
+                    "docId": "kibSessionViewPluginApi",
+                    "section": "def-common.ProcessEvent",
+                    "text": "ProcessEvent"
+                  }
+                ],
+                "path": "x-pack/plugins/session_view/common/types/v1.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.addChild",
+            "type": "Function",
+            "tags": [],
+            "label": "addChild",
+            "description": [],
+            "signature": [
+              "(child: ",
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.Process",
+                "text": "Process"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "sessionView",
+                "id": "def-common.Process.addChild.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "child",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "sessionView",
+                    "scope": "common",
+                    "docId": "kibSessionViewPluginApi",
+                    "section": "def-common.Process",
+                    "text": "Process"
+                  }
+                ],
+                "path": "x-pack/plugins/session_view/common/types/v1.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.clearSearch",
+            "type": "Function",
+            "tags": [],
+            "label": "clearSearch",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.hasOutput",
+            "type": "Function",
+            "tags": [],
+            "label": "hasOutput",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.hasAlerts",
+            "type": "Function",
+            "tags": [],
+            "label": "hasAlerts",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.getAlerts",
+            "type": "Function",
+            "tags": [],
+            "label": "getAlerts",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEvent",
+                "text": "ProcessEvent"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.updateAlertsStatus",
+            "type": "Function",
+            "tags": [],
+            "label": "updateAlertsStatus",
+            "description": [],
+            "signature": [
+              "(updatedAlertsStatus: ",
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.AlertStatusEventEntityIdMap",
+                "text": "AlertStatusEventEntityIdMap"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "sessionView",
+                "id": "def-common.Process.updateAlertsStatus.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "updatedAlertsStatus",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "sessionView",
+                    "scope": "common",
+                    "docId": "kibSessionViewPluginApi",
+                    "section": "def-common.AlertStatusEventEntityIdMap",
+                    "text": "AlertStatusEventEntityIdMap"
+                  }
+                ],
+                "path": "x-pack/plugins/session_view/common/types/v1.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.hasExec",
+            "type": "Function",
+            "tags": [],
+            "label": "hasExec",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.getOutput",
+            "type": "Function",
+            "tags": [],
+            "label": "getOutput",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.getDetails",
+            "type": "Function",
+            "tags": [],
+            "label": "getDetails",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEvent",
+                "text": "ProcessEvent"
+              }
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.isUserEntered",
+            "type": "Function",
+            "tags": [],
+            "label": "isUserEntered",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.getChildren",
+            "type": "Function",
+            "tags": [],
+            "label": "getChildren",
+            "description": [],
+            "signature": [
+              "(verboseMode: boolean) => ",
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.Process",
+                "text": "Process"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "sessionView",
+                "id": "def-common.Process.getChildren.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "verboseMode",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/plugins/session_view/common/types/v1.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.isVerbose",
+            "type": "Function",
+            "tags": [],
+            "label": "isVerbose",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.getEndTime",
+            "type": "Function",
+            "tags": [],
+            "label": "getEndTime",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Process.isDescendantOf",
+            "type": "Function",
+            "tags": [],
+            "label": "isDescendantOf",
+            "description": [],
+            "signature": [
+              "(process: ",
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.Process",
+                "text": "Process"
+              },
+              ") => boolean"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "sessionView",
+                "id": "def-common.Process.isDescendantOf.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "process",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "sessionView",
+                    "scope": "common",
+                    "docId": "kibSessionViewPluginApi",
+                    "section": "def-common.Process",
+                    "text": "Process"
+                  }
+                ],
+                "path": "x-pack/plugins/session_view/common/types/v1.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.ProcessEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcessEvent",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEvent.timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "'@timestamp'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEvent.event",
+            "type": "Object",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              "{ kind?: ",
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.EventKind",
+                "text": "EventKind"
+              },
+              " | undefined; category?: ",
+              "EventCategory",
+              " | ",
+              "EventCategory",
+              "[] | undefined; action?: ",
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.EventAction",
+                "text": "EventAction"
+              },
+              " | ",
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.EventAction",
+                "text": "EventAction"
+              },
+              "[] | undefined; type?: string | string[] | undefined; id?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEvent.file",
+            "type": "Object",
+            "tags": [],
+            "label": "file",
+            "description": [],
+            "signature": [
+              "{ extension?: string | undefined; path?: string | undefined; name?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEvent.network",
+            "type": "Object",
+            "tags": [],
+            "label": "network",
+            "description": [],
+            "signature": [
+              "ProcessEventNetwork",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEvent.destination",
+            "type": "Object",
+            "tags": [],
+            "label": "destination",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEventIPAddress",
+                "text": "ProcessEventIPAddress"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEvent.source",
+            "type": "Object",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEventIPAddress",
+                "text": "ProcessEventIPAddress"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEvent.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [],
+            "signature": [
+              "User",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEvent.group",
+            "type": "Object",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "signature": [
+              "Group",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEvent.host",
+            "type": "Object",
+            "tags": [],
+            "label": "host",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEventHost",
+                "text": "ProcessEventHost"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEvent.process",
+            "type": "Object",
+            "tags": [],
+            "label": "process",
+            "description": [],
+            "signature": [
+              "ProcessSelf",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEvent.kibana",
+            "type": "Object",
+            "tags": [],
+            "label": "kibana",
+            "description": [],
+            "signature": [
+              "{ alert?: ",
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEventAlert",
+                "text": "ProcessEventAlert"
+              },
+              " | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEvent.container",
+            "type": "Object",
+            "tags": [],
+            "label": "container",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEventContainer",
+                "text": "ProcessEventContainer"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEvent.orchestrator",
+            "type": "Object",
+            "tags": [],
+            "label": "orchestrator",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEventOrchestrator",
+                "text": "ProcessEventOrchestrator"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEvent.cloud",
+            "type": "Object",
+            "tags": [],
+            "label": "cloud",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEventCloud",
+                "text": "ProcessEventCloud"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.ProcessEventAlert",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcessEventAlert",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventAlert.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventAlert.reason",
+            "type": "string",
+            "tags": [],
+            "label": "reason",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventAlert.workflow_status",
+            "type": "string",
+            "tags": [],
+            "label": "workflow_status",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventAlert.status",
+            "type": "string",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventAlert.original_time",
+            "type": "string",
+            "tags": [],
+            "label": "original_time",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventAlert.original_event",
+            "type": "Object",
+            "tags": [],
+            "label": "original_event",
+            "description": [],
+            "signature": [
+              "{ action?: ",
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.EventAction",
+                "text": "EventAction"
+              },
+              " | ",
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.EventAction",
+                "text": "EventAction"
+              },
+              "[] | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventAlert.rule",
+            "type": "Object",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              "ProcessEventAlertRule",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.ProcessEventCloud",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcessEventCloud",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventCloud.instance",
+            "type": "Object",
+            "tags": [],
+            "label": "instance",
+            "description": [],
+            "signature": [
+              "{ name?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventCloud.account",
+            "type": "Object",
+            "tags": [],
+            "label": "account",
+            "description": [],
+            "signature": [
+              "{ id?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventCloud.project",
+            "type": "Object",
+            "tags": [],
+            "label": "project",
+            "description": [],
+            "signature": [
+              "{ id?: string | undefined; name?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventCloud.provider",
+            "type": "string",
+            "tags": [],
+            "label": "provider",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventCloud.region",
+            "type": "string",
+            "tags": [],
+            "label": "region",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.ProcessEventContainer",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcessEventContainer",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventContainer.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventContainer.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventContainer.image",
+            "type": "Object",
+            "tags": [],
+            "label": "image",
+            "description": [],
+            "signature": [
+              "{ name?: string | undefined; tag?: string | undefined; hash?: { all?: string | undefined; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.ProcessEventHost",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcessEventHost",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventHost.architecture",
+            "type": "string",
+            "tags": [],
+            "label": "architecture",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventHost.hostname",
+            "type": "string",
+            "tags": [],
+            "label": "hostname",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventHost.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventHost.ip",
+            "type": "Array",
+            "tags": [],
+            "label": "ip",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventHost.mac",
+            "type": "Array",
+            "tags": [],
+            "label": "mac",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventHost.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventHost.os",
+            "type": "Object",
+            "tags": [],
+            "label": "os",
+            "description": [],
+            "signature": [
+              "{ family?: string | undefined; full?: string | undefined; kernel?: string | undefined; name?: string | undefined; platform?: string | undefined; version?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventHost.boot",
+            "type": "Object",
+            "tags": [],
+            "label": "boot",
+            "description": [],
+            "signature": [
+              "{ id?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.ProcessEventIPAddress",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcessEventIPAddress",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventIPAddress.address",
+            "type": "string",
+            "tags": [],
+            "label": "address",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventIPAddress.ip",
+            "type": "string",
+            "tags": [],
+            "label": "ip",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventIPAddress.port",
+            "type": "number",
+            "tags": [],
+            "label": "port",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.ProcessEventOrchestrator",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcessEventOrchestrator",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventOrchestrator.resource",
+            "type": "Object",
+            "tags": [],
+            "label": "resource",
+            "description": [],
+            "signature": [
+              "{ name?: string | undefined; type?: string | undefined; ip?: string | undefined; parent?: { type?: string | undefined; } | undefined; labels?: string[] | undefined; annotations?: string[] | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventOrchestrator.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventOrchestrator.cluster",
+            "type": "Object",
+            "tags": [],
+            "label": "cluster",
+            "description": [],
+            "signature": [
+              "{ name?: string | undefined; id?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.ProcessEventResults",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcessEventResults",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventResults.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventResults.events",
+            "type": "Array",
+            "tags": [],
+            "label": "events",
+            "description": [],
+            "signature": [
+              "any[] | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.ProcessEventsPage",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcessEventsPage",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventsPage.events",
+            "type": "Array",
+            "tags": [],
+            "label": "events",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEvent",
+                "text": "ProcessEvent"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventsPage.cursor",
+            "type": "string",
+            "tags": [],
+            "label": "cursor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessEventsPage.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.ProcessFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcessFields",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.entity_id",
+            "type": "string",
+            "tags": [],
+            "label": "entity_id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.args",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.args_count",
+            "type": "number",
+            "tags": [],
+            "label": "args_count",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.command_line",
+            "type": "string",
+            "tags": [],
+            "label": "command_line",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.executable",
+            "type": "string",
+            "tags": [],
+            "label": "executable",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.interactive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "interactive",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.working_directory",
+            "type": "string",
+            "tags": [],
+            "label": "working_directory",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.pid",
+            "type": "number",
+            "tags": [],
+            "label": "pid",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.start",
+            "type": "string",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.end",
+            "type": "string",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [],
+            "signature": [
+              "User",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.group",
+            "type": "Object",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "signature": [
+              "Group",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.supplemental_groups",
+            "type": "Array",
+            "tags": [],
+            "label": "supplemental_groups",
+            "description": [],
+            "signature": [
+              "Group",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.exit_code",
+            "type": "number",
+            "tags": [],
+            "label": "exit_code",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.entry_meta",
+            "type": "Object",
+            "tags": [],
+            "label": "entry_meta",
+            "description": [],
+            "signature": [
+              "EntryMeta",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessFields.tty",
+            "type": "Object",
+            "tags": [],
+            "label": "tty",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.Teletype",
+                "text": "Teletype"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.ProcessStartMarker",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcessStartMarker",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessStartMarker.event",
+            "type": "Object",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "sessionView",
+                "scope": "common",
+                "docId": "kibSessionViewPluginApi",
+                "section": "def-common.ProcessEvent",
+                "text": "ProcessEvent"
+              }
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessStartMarker.line",
+            "type": "number",
+            "tags": [],
+            "label": "line",
+            "description": [],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.ProcessStartMarker.maxBytesExceeded",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "maxBytesExceeded",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.Teletype",
+        "type": "Interface",
+        "tags": [],
+        "label": "Teletype",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Teletype.char_device",
+            "type": "Object",
+            "tags": [],
+            "label": "char_device",
+            "description": [],
+            "signature": [
+              "{ major?: number | undefined; minor?: number | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Teletype.rows",
+            "type": "number",
+            "tags": [],
+            "label": "rows",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-common.Teletype.columns",
+            "type": "number",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/session_view/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "sessionView",
@@ -124,6 +2133,75 @@
           "\"process.entry_leader.entity_id\""
         ],
         "path": "x-pack/plugins/session_view/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.EventAction",
+        "type": "Type",
+        "tags": [],
+        "label": "EventAction",
+        "description": [],
+        "signature": [
+          "\"end\" | \"fork\" | \"exec\" | \"text_output\" | \"executed\""
+        ],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.EventKind",
+        "type": "Type",
+        "tags": [],
+        "label": "EventKind",
+        "description": [],
+        "signature": [
+          "\"event\" | \"signal\""
+        ],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.ProcessEventAlertCategory",
+        "type": "Type",
+        "tags": [],
+        "label": "ProcessEventAlertCategory",
+        "description": [],
+        "signature": [
+          "\"all\" | ",
+          "EventCategory"
+        ],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.ProcessMap",
+        "type": "Type",
+        "tags": [],
+        "label": "ProcessMap",
+        "description": [],
+        "signature": [
+          "{ [key: string]: ",
+          {
+            "pluginId": "sessionView",
+            "scope": "common",
+            "docId": "kibSessionViewPluginApi",
+            "section": "def-common.Process",
+            "text": "Process"
+          },
+          "; }"
+        ],
+        "path": "x-pack/plugins/session_view/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

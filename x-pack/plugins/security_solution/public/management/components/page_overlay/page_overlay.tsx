@@ -15,15 +15,7 @@ import type { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
-import {
-  FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET,
-  TIMELINE_EUI_POPOVER_PANEL_ZINDEX,
-  TIMELINE_OVERRIDES_CSS_STYLESHEET,
-} from '../../../common/components/page';
-import {
-  SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME,
-  TIMELINE_EUI_THEME_ZINDEX_LEVEL,
-} from '../../../timelines/components/timeline/styles';
+import { FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET } from '../../../common/components/page';
 
 const OverlayRootContainer = styled.div`
   border: none;
@@ -32,14 +24,16 @@ const OverlayRootContainer = styled.div`
   position: fixed;
   overflow: hidden;
 
-  top: calc((${({ theme: { eui } }) => eui.euiHeaderHeightCompensation} * 2));
+  top: var(--euiFixedHeadersOffset, 0);
   bottom: 0;
   right: 0;
 
-  height: calc(100% - ${({ theme: { eui } }) => eui.euiHeaderHeightCompensation} * 2);
+  height: calc(100% - var(--euiFixedHeadersOffset, 0));
   width: 100%;
 
-  z-index: ${({ theme: { eui } }) => eui.euiZFlyout};
+  z-index: ${({ theme: { eui } }) =>
+    eui.euiZFlyout +
+    3}; // we need to have this response div rendered above the timeline flyout (with z-index at 1002)
 
   background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade};
 
@@ -89,18 +83,6 @@ const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   }
 
   //-------------------------------------------------------------------------------------------
-  // Style overrides for when Page Overlay is shown over SecuritySolutionPageWrapper component
-  //-------------------------------------------------------------------------------------------
-  // That page wrapper includes several global EUI styles that can conflict with content shown
-  // from inside of this Page Overlay component.
-  //-------------------------------------------------------------------------------------------
-  // Eui Confirm Dialog mask overlay should be displayed above any other popovers
-  //-------------------------------------------------------------------------------------------
-  body.${PAGE_OVERLAY_DOCUMENT_BODY_OVER_PAGE_WRAPPER_CLASSNAME} .euiOverlayMask[data-relative-to-header="above"] {
-    z-index: ${TIMELINE_EUI_POPOVER_PANEL_ZINDEX};
-  }
-
-  //-------------------------------------------------------------------------------------------
   // Style overrides for when Page Overlay is in full screen mode
   //-------------------------------------------------------------------------------------------
   // Needs to override some position of EUI components to ensure they are displayed correctly
@@ -108,32 +90,6 @@ const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   //-------------------------------------------------------------------------------------------
   body.${PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME} {
     ${FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET}
-  }
-
-  //-------------------------------------------------------------------------------------------
-  // TIMELINE SPECIFIC STYLES
-  //-------------------------------------------------------------------------------------------
-  // The timeline overlay uses a custom z-index, which causes issues with any other content that
-  // is normally appended to the 'document.body' directly (like popups, masks, flyouts, etc).
-  // The styles below will be applied anytime the timeline is opened/visible and attempts to
-  // mitigate the issues around z-index so that content that is shown after the PageOverlay is
-  // opened is displayed properly.
-  //-------------------------------------------------------------------------------------------
-  body.${SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME}.${PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME} {
-    .${PAGE_OVERLAY_CSS_CLASSNAME},
-    .euiOverlayMask,
-    .euiFlyout {
-      z-index: ${({ theme: { eui } }) => eui[TIMELINE_EUI_THEME_ZINDEX_LEVEL]};
-    }
-
-    // Confirm Dialog mask overlay should be displayed above any other popover
-    .euiOverlayMask[data-relative-to-header="above"] {
-      z-index: ${TIMELINE_EUI_POPOVER_PANEL_ZINDEX};
-    }
-
-    // Other Timeline overrides from AppGlobalStyle:
-    // x-pack/plugins/security_solution/public/common/components/page/index.tsx
-    ${TIMELINE_OVERRIDES_CSS_STYLESHEET}
   }
 `;
 
@@ -241,9 +197,9 @@ export const PageOverlay = memo<PageOverlayProps>(
     const isMounted = useIsMounted();
     const showInFullScreen = useHasFullScreenContent();
     const [openedOnPathName, setOpenedOnPathName] = useState<null | string>(null);
-    const portalEleRef = useRef<Node>();
+    const portalEleRef = useRef<HTMLElement | null>();
 
-    const setPortalEleRef: EuiPortalProps['portalRef'] = useCallback((node) => {
+    const setPortalEleRef = useCallback<NonNullable<EuiPortalProps['portalRef']>>((node) => {
       portalEleRef.current = node;
     }, []);
 
@@ -299,7 +255,6 @@ export const PageOverlay = memo<PageOverlayProps>(
     useEffect(() => {
       if (
         isMounted() &&
-        onHide &&
         hideOnUrlPathnameChange &&
         !isHidden &&
         openedOnPathName &&

@@ -1,15 +1,21 @@
 {
   "mget": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "force_synthetic_source": "__flag__",
-      "stored_fields": [],
-      "preference": "random",
+      "preference": "",
       "realtime": "__flag__",
       "refresh": "__flag__",
       "routing": "",
-      "_source": [],
+      "_source": "__flag__",
       "_source_excludes": [],
-      "_source_includes": []
+      "_source_includes": [],
+      "stored_fields": [
+        "false"
+      ]
     },
     "methods": [
       "GET",
@@ -17,8 +23,12 @@
     ],
     "patterns": [
       "_mget",
-      "{indices}/_mget"
+      "{index}/_mget"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-get.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-get.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

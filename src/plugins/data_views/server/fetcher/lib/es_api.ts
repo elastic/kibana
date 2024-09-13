@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryDslQueryContainer } from '../../../common/types';
 import { convertEsError } from './errors';
 
@@ -45,6 +47,9 @@ interface FieldCapsApiParams {
   fieldCapsOptions?: { allow_no_indices: boolean; include_unmapped?: boolean };
   indexFilter?: QueryDslQueryContainer;
   fields?: string[];
+  expandWildcards?: ExpandWildcard;
+  fieldTypes?: string[];
+  includeEmptyFields?: boolean;
 }
 
 /**
@@ -69,6 +74,9 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
       include_unmapped: false,
     },
     fields = ['*'],
+    expandWildcards,
+    fieldTypes,
+    includeEmptyFields,
   } = params;
   try {
     return await callCluster.fieldCaps(
@@ -77,11 +85,18 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
         fields,
         ignore_unavailable: true,
         index_filter: indexFilter,
+        expand_wildcards: expandWildcards,
+        types: fieldTypes,
+        include_empty_fields: includeEmptyFields ?? true,
         ...fieldCapsOptions,
       },
       { meta: true }
     );
   } catch (error) {
+    // return an empty set for closed indices
+    if (error.message.startsWith('cluster_block_exception')) {
+      return { body: { indices: [], fields: {} } };
+    }
     throw convertEsError(indices, error);
   }
 }

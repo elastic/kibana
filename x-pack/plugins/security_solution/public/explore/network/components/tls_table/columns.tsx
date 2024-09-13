@@ -35,8 +35,6 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
       getRowItemsWithActions({
         values: issuers,
         fieldName: 'tls.server.issuer',
-        fieldType: 'keyword',
-        aggregatable: true,
         idPrefix: `${tableId}-${_id}-table-issuers`,
       }),
   },
@@ -50,8 +48,6 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
       getRowItemsWithActions({
         values: subjects,
         fieldName: 'tls.server.subject',
-        fieldType: 'keyword',
-        aggregatable: true,
         idPrefix: `${tableId}-${_id}-table-subjects`,
       }),
   },
@@ -65,8 +61,6 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
       getRowItemsWithActions({
         values: sha1 ? [sha1] : undefined,
         fieldName: 'tls.server.hash.sha1',
-        fieldType: 'keyword',
-        aggregatable: true,
         idPrefix: `${tableId}-${sha1}-table-sha1`,
       }),
   },
@@ -80,8 +74,6 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
       getRowItemsWithActions({
         values: ja3,
         fieldName: 'tls.server.ja3s',
-        fieldType: 'keyword',
-        aggregatable: true,
         idPrefix: `${tableId}-${_id}-table-ja3`,
       }),
   },
@@ -95,8 +87,6 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
       getRowItemsWithActions({
         values: notAfter,
         fieldName: 'tls.server.not_after',
-        fieldType: 'date',
-        aggregatable: false,
         idPrefix: `${tableId}-${_id}-table-notAfter`,
         render: (validUntil) => (
           <LocalizedDateTooltip date={moment(new Date(validUntil)).toDate()}>

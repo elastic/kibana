@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pollSearch } from './poll_search';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 
 describe('pollSearch', () => {
-  function getMockedSearch$(resolveOnI = 1, finishWithError = false) {
+  function getMockedSearch$(resolveOnI = 1) {
     let counter = 0;
     return jest.fn().mockImplementation(() => {
       counter++;
@@ -19,7 +20,7 @@ describe('pollSearch', () => {
         if (lastCall) {
           resolve({
             isRunning: false,
-            isPartial: finishWithError,
+            isPartial: false,
             rawResponse: {},
           });
         } else {
@@ -57,15 +58,6 @@ describe('pollSearch', () => {
     expect(cancelFn).toBeCalledTimes(0);
   });
 
-  test('Throws Error on ES error response', async () => {
-    const searchFn = getMockedSearch$(2, true);
-    const cancelFn = jest.fn();
-    const poll = pollSearch(searchFn, cancelFn).toPromise();
-    await expect(poll).rejects.toThrow(Error);
-    expect(searchFn).toBeCalledTimes(2);
-    expect(cancelFn).toBeCalledTimes(0);
-  });
-
   test('Throws AbortError on empty response', async () => {
     const searchFn = jest.fn().mockResolvedValue(undefined);
     const cancelFn = jest.fn();
@@ -83,7 +75,26 @@ describe('pollSearch', () => {
       abortSignal: abortController.signal,
     }).toPromise();
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    abortController.abort();
+
+    await expect(poll).rejects.toThrow(AbortError);
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    expect(searchFn).toBeCalledTimes(1);
+    expect(cancelFn).toBeCalledTimes(1);
+  });
+
+  test('Does not leak unresolved promises on cancel', async () => {
+    const searchFn = getMockedSearch$(20);
+    const cancelFn = jest.fn().mockRejectedValueOnce({ error: 'Oh no!' });
+    const abortController = new AbortController();
+    const poll = pollSearch(searchFn, cancelFn, {
+      abortSignal: abortController.signal,
+    }).toPromise();
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
     abortController.abort();
 
     await expect(poll).rejects.toThrow(AbortError);
@@ -99,7 +110,7 @@ describe('pollSearch', () => {
     const cancelFn = jest.fn();
     const subscription = pollSearch(searchFn, cancelFn).subscribe(() => {});
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 300));
     subscription.unsubscribe();
     await new Promise((resolve) => setTimeout(resolve, 1000));
 

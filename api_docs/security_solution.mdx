@@ -8,7 +8,7 @@ slug: /kibana-dev-docs/api/securitySolution
 title: "securitySolution"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the securitySolution plugin
-date: 2023-04-18
+date: 2024-09-13
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'securitySolution']
 ---
 import securitySolutionObj from './security_solution.devdocs.json';
@@ -21,18 +21,24 @@ Contact [@elastic/security-solution](https://github.com/orgs/elastic/teams/secur
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 117 | 0 | 76 | 27 |
+| 192 | 0 | 123 | 33 |
 
 ## Client
 
 ### Setup
 <DocDefinitionList data={[securitySolutionObj.client.setup]}/>
 
+### Start
+<DocDefinitionList data={[securitySolutionObj.client.start]}/>
+
 ### Classes
 <DocDefinitionList data={securitySolutionObj.client.classes}/>
 
 ### Interfaces
 <DocDefinitionList data={securitySolutionObj.client.interfaces}/>
+
+### Consts, variables and types
+<DocDefinitionList data={securitySolutionObj.client.misc}/>
 
 ## Server
 
@@ -52,6 +58,12 @@ Contact [@elastic/security-solution](https://github.com/orgs/elastic/teams/secur
 <DocDefinitionList data={securitySolutionObj.server.misc}/>
 
 ## Common
+
+### Objects
+<DocDefinitionList data={securitySolutionObj.common.objects}/>
+
+### Enums
+<DocDefinitionList data={securitySolutionObj.common.enums}/>
 
 ### Consts, variables and types
 <DocDefinitionList data={securitySolutionObj.common.misc}/>

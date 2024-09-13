@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { useValues } from 'kea';
 
@@ -19,25 +19,32 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { KibanaLogic } from '../../../shared/kibana';
 import { isConnectorIndex } from '../../utils/indices';
 
 import { languageToText } from '../../utils/language_to_text';
 
 import { ConnectorOverviewPanels } from './connector/connector_overview_panels';
-import { NATIVE_CONNECTORS } from './connector/constants';
 import { NameAndDescriptionStats } from './name_and_description_stats';
 import { OverviewLogic } from './overview.logic';
 
 export const ConnectorTotalStats: React.FC = () => {
   const { indexData, isError, isLoading } = useValues(OverviewLogic);
+  const { connectorTypes } = useValues(KibanaLogic);
   const hideStats = isLoading || isError;
+  const NATIVE_CONNECTORS = useMemo(
+    () => connectorTypes.filter(({ isNative }) => isNative),
+    [connectorTypes]
+  );
 
   if (!isConnectorIndex(indexData)) {
     return <></>;
   }
 
-  const stats: EuiStatProps[] = [
+  const stats: EuiStatProps[] & { 'data-test-subj'?: string } = [
     {
+      // @ts-expect-error upgrade typescript v4.9.5
+      'data-test-subj': 'entSearchContent-indexOverview-totalStats-ingestionType',
       description: i18n.translate(
         'xpack.enterpriseSearch.content.searchIndex.totalStats.ingestionTypeCardLabel',
         {
@@ -53,6 +60,8 @@ export const ConnectorTotalStats: React.FC = () => {
       ),
     },
     {
+      // @ts-expect-error upgrade typescript v4.9.5
+      'data-test-subj': 'entSearchContent-indexOverview-totalStats-connectorType',
       description: i18n.translate('xpack.enterpriseSearch.connector.connectorTypePanel.title', {
         defaultMessage: 'Connector type',
       }),
@@ -85,7 +94,7 @@ export const ConnectorTotalStats: React.FC = () => {
         {stats.map((item, index) => (
           <EuiFlexItem key={index}>
             <EuiPanel color="primary" hasShadow={false} paddingSize="l">
-              <EuiStat titleSize="m" {...item} />
+              <EuiStat titleSize="s" {...item} />
             </EuiPanel>
           </EuiFlexItem>
         ))}

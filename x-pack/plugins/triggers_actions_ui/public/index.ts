@@ -11,9 +11,10 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import { Plugin } from './plugin';
 
 export type {
-  RuleAction,
   Rule,
+  RuleAction,
   RuleType,
+  RuleTypeIndex,
   RuleTypeModel,
   RuleStatusFilterProps,
   RuleStatus,
@@ -36,13 +37,13 @@ export type {
   AlertsTableFlyoutBaseProps,
   RuleEventLogListProps,
   AlertTableFlyoutComponent,
-  GetRenderCellValue,
   FieldBrowserOptions,
   FieldBrowserProps,
   RuleDefinitionProps,
   RulesListVisibleColumns,
   AlertSummaryTimeRange,
   NotifyWhenSelectOptions,
+  RuleCreationValidConsumer,
 } from './types';
 
 export type {
@@ -70,15 +71,14 @@ export {
 
 export type { ConnectorFormSchema } from './application/sections/action_connector_form';
 
+export { getCategory } from './application/sections/field_browser/helpers';
+
 export type { ConfigFieldSchema, SecretsFieldSchema } from './application/components';
 
 export {
-  ButtonGroupField,
-  HiddenField,
   JsonEditorWithMessageVariables,
   JsonFieldWrapper,
   MustacheTextFieldWrapper,
-  PasswordField,
   SimpleConnectorForm,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
@@ -86,11 +86,13 @@ export {
 } from './application/components';
 
 export {
-  AlertProvidedActionVariables,
   hasMustacheTokens,
   templateActionVariable,
   updateActionConnector,
+  executeAction,
 } from './application/lib';
+
+export { AlertProvidedActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/action_variables';
 
 export type { ActionGroupWithCondition } from './application/sections';
 
@@ -101,7 +103,7 @@ export function plugin(context: PluginInitializerContext) {
 }
 
 export { useKibana } from './common';
-export type { AggregationType, Comparator, ValidNormalizedTypes } from './common';
+export type { AggregationType, ValidNormalizedTypes } from './common';
 
 export {
   WhenExpression,
@@ -116,13 +118,13 @@ export {
   getIndexOptions,
   firstFieldOption,
   getTimeFieldOptions,
+  getTimeOptions,
   GroupByExpression,
-  COMPARATORS,
   connectorDeprecatedMessage,
   deprecatedMessage,
 } from './common';
 
-export { useLoadRuleTypes, useSubAction } from './application/hooks';
+export { useLoadRuleTypesQuery, useSubAction } from './application/hooks';
 
 export type {
   TriggersAndActionsUIPublicPluginSetup,
@@ -135,14 +137,23 @@ export { loadRuleSummary } from './application/lib/rule_api/rule_summary';
 export { bulkDeleteRules } from './application/lib/rule_api/bulk_delete';
 export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
 export { loadRule } from './application/lib/rule_api/get_rule';
+export { loadRuleTypes } from './application/lib/rule_api/rule_types';
 export { suspendedComponentWithProps } from './application/lib/suspended_component_with_props';
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
 export { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
-export type { TriggersAndActionsUiServices } from './application/app';
+export type { TriggersAndActionsUiServices } from './application/rules_app';
 export type { BulkOperationAttributes, BulkOperationResponse } from './types';
 
 export const getNotifyWhenOptions = async () => {
   const { NOTIFY_WHEN_OPTIONS } = await import('./application/sections/rule_form/rule_notify_when');
   return NOTIFY_WHEN_OPTIONS;
 };
+
+export { transformRule } from './application/lib/rule_api/common_transformations';
+
+export { validateActionFilterQuery } from './application/lib/value_validators';
+
+export { useBulkUntrackAlerts } from './application/sections/alerts_table/hooks/use_bulk_untrack_alerts';
+
+export { AlertsTableContext } from './application/sections/alerts_table/contexts/alerts_table_context';

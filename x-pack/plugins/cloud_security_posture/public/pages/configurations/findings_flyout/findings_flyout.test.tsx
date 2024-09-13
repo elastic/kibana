@@ -5,12 +5,12 @@
  * 2.0.
  */
 import React from 'react';
+import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import userEvent from '@testing-library/user-event';
 import { FindingsRuleFlyout } from './findings_flyout';
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../../test/test_provider';
-import { mockFindingsHit } from '../__mocks__/findings';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
+import { mockFindingsHit, mockWizFinding } from '../__mocks__/findings';
 
 const onPaginate = jest.fn();
 
@@ -21,7 +21,7 @@ const TestComponent = ({ ...overrideProps }) => (
       flyoutIndex={0}
       findingsCount={2}
       onPaginate={onPaginate}
-      findings={mockFindingsHit}
+      finding={mockFindingsHit}
       {...overrideProps}
     />
   </TestProvider>
@@ -43,18 +43,28 @@ describe('<FindingsFlyout/>', () => {
       getByText(mockFindingsHit.resource.id);
       getByText(mockFindingsHit.resource.name);
       getAllByText(mockFindingsHit.rule.section);
-      getByText(LATEST_FINDINGS_INDEX_DEFAULT_NS);
+      getByText(CDR_MISCONFIGURATIONS_INDEX_PATTERN);
       mockFindingsHit.rule.tags.forEach((tag) => {
         getAllByText(tag);
       });
     });
+
+    it('displays missing info callout when data source is not CSP', () => {
+      const { getByText } = render(<TestComponent finding={mockWizFinding} />);
+      getByText('Some fields not provided by Wiz');
+    });
+
+    it('does not display missing info callout when data source is CSP', () => {
+      const { queryByText } = render(<TestComponent finding={mockFindingsHit} />);
+      const missingInfoCallout = queryByText('Some fields not provided by Wiz');
+      expect(missingInfoCallout).toBeNull();
+    });
   });
 
   describe('Rule Tab', () => {
-    it('displays rule text details', () => {
+    it('displays rule text details', async () => {
       const { getByText, getAllByText } = render(<TestComponent />);
-
-      userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
 
       getAllByText(mockFindingsHit.rule.name);
       getByText(mockFindingsHit.rule.benchmark.name);
@@ -63,23 +73,55 @@ describe('<FindingsFlyout/>', () => {
         getAllByText(tag);
       });
     });
+
+    it('displays missing info callout when data source is not CSP', async () => {
+      const { getByText } = render(<TestComponent finding={mockWizFinding} />);
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
+
+      getByText('Some fields not provided by Wiz');
+    });
+
+    it('does not display missing info callout when data source is CSP', async () => {
+      const { queryByText } = render(<TestComponent finding={mockFindingsHit} />);
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
+
+      const missingInfoCallout = queryByText('Some fields not provided by Wiz');
+      expect(missingInfoCallout).toBeNull();
+    });
   });
 
-  describe('Resource Tab', () => {
-    it('displays resource name and id', () => {
+  describe('Table Tab', () => {
+    it('displays resource name and id', async () => {
       const { getAllByText } = render(<TestComponent />);
-
-      userEvent.click(screen.getByTestId('findings_flyout_tab_resource'));
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_table'));
 
       getAllByText(mockFindingsHit.resource.name);
       getAllByText(mockFindingsHit.resource.id);
+    });
+
+    it('does not display missing info callout for 3Ps', async () => {
+      const { queryByText } = render(<TestComponent finding={mockWizFinding} />);
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_table'));
+
+      const missingInfoCallout = queryByText('Some fields not provided by Wiz');
+      expect(missingInfoCallout).toBeNull();
+    });
+  });
+
+  describe('JSON Tab', () => {
+    it('does not display missing info callout for 3Ps', async () => {
+      const { queryByText } = render(<TestComponent finding={mockWizFinding} />);
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_json'));
+
+      const missingInfoCallout = queryByText('Some fields not provided by Wiz');
+      expect(missingInfoCallout).toBeNull();
     });
   });
 
   it('should allow pagination with next', async () => {
     const { getByTestId } = render(<TestComponent />);
 
-    userEvent.click(getByTestId('pagination-button-next'));
+    await userEvent.click(getByTestId('pagination-button-next'));
 
     expect(onPaginate).toHaveBeenCalledWith(1);
   });
@@ -87,7 +129,7 @@ describe('<FindingsFlyout/>', () => {
   it('should allow pagination with previous', async () => {
     const { getByTestId } = render(<TestComponent flyoutIndex={1} />);
 
-    userEvent.click(getByTestId('pagination-button-previous'));
+    await userEvent.click(getByTestId('pagination-button-previous'));
 
     expect(onPaginate).toHaveBeenCalledWith(0);
   });

@@ -14,7 +14,6 @@ import {
   EuiPage,
   EuiPageBody,
   EuiFlexGroup,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiScreenReaderOnly,
   EuiTitle,
 } from '@elastic/eui';
@@ -103,7 +102,7 @@ export const ApmMetrics = ({
     <EuiPage>
       <EuiPageBody>
         <EuiScreenReaderOnly>
-          <h1>{titles.heading as FormattedMessage}</h1>
+          <h1>{titles.heading as string}</h1>
         </EuiScreenReaderOnly>
         <EuiPanel>
           <StatusComponent stats={stats} />
@@ -117,13 +116,13 @@ export const ApmMetrics = ({
           <EuiFlexGroup wrap>{createCharts(topSeries, props)}</EuiFlexGroup>
         </EuiPanel>
         <EuiSpacer size="m" />
-        <EuiPageContent>
+        <EuiPanel>
           <EuiTitle>
             <h3>{title}</h3>
           </EuiTitle>
           <EuiSpacer size="m" />
           <EuiFlexGroup wrap>{createCharts(seriesToShow, props)}</EuiFlexGroup>
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

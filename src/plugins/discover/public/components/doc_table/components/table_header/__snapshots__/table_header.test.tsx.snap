@@ -31,7 +31,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Sort time descending"
-          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
           data-test-subj="docTableHeaderFieldSort_time"
           style="width: 12px; height: 12px;"
           type="button"
@@ -59,7 +59,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove first column"
-          class="euiButtonIcon euiButtonIcon--xSmall kbnDocTableHeader__move emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon kbnDocTableHeader__move emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="docTableRemoveHeader-first"
           style="width: 12px; height: 12px;"
           type="button"
@@ -77,7 +77,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Move first column to the right"
-          class="euiButtonIcon euiButtonIcon--xSmall kbnDocTableHeader__move emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon kbnDocTableHeader__move emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="docTableMoveRightHeader-first"
           style="width: 12px; height: 12px;"
           type="button"
@@ -105,7 +105,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove middle column"
-          class="euiButtonIcon euiButtonIcon--xSmall kbnDocTableHeader__move emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon kbnDocTableHeader__move emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="docTableRemoveHeader-middle"
           style="width: 12px; height: 12px;"
           type="button"
@@ -123,7 +123,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Move middle column to the left"
-          class="euiButtonIcon euiButtonIcon--xSmall kbnDocTableHeader__move emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon kbnDocTableHeader__move emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="docTableMoveLeftHeader-middle"
           style="width: 12px; height: 12px;"
           type="button"
@@ -141,7 +141,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Move middle column to the right"
-          class="euiButtonIcon euiButtonIcon--xSmall kbnDocTableHeader__move emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon kbnDocTableHeader__move emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="docTableMoveRightHeader-middle"
           style="width: 12px; height: 12px;"
           type="button"
@@ -169,7 +169,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove last column"
-          class="euiButtonIcon euiButtonIcon--xSmall kbnDocTableHeader__move emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon kbnDocTableHeader__move emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="docTableRemoveHeader-last"
           style="width: 12px; height: 12px;"
           type="button"
@@ -187,7 +187,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
       >
         <button
           aria-label="Move last column to the left"
-          class="euiButtonIcon euiButtonIcon--xSmall kbnDocTableHeader__move emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon kbnDocTableHeader__move emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="docTableMoveLeftHeader-last"
           style="width: 12px; height: 12px;"
           type="button"
@@ -226,7 +226,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove first column"
-          class="euiButtonIcon euiButtonIcon--xSmall kbnDocTableHeader__move emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon kbnDocTableHeader__move emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="docTableRemoveHeader-first"
           style="width: 12px; height: 12px;"
           type="button"
@@ -244,7 +244,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Move first column to the right"
-          class="euiButtonIcon euiButtonIcon--xSmall kbnDocTableHeader__move emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon kbnDocTableHeader__move emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="docTableMoveRightHeader-first"
           style="width: 12px; height: 12px;"
           type="button"
@@ -272,7 +272,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove middle column"
-          class="euiButtonIcon euiButtonIcon--xSmall kbnDocTableHeader__move emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon kbnDocTableHeader__move emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="docTableRemoveHeader-middle"
           style="width: 12px; height: 12px;"
           type="button"
@@ -290,7 +290,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Move middle column to the left"
-          class="euiButtonIcon euiButtonIcon--xSmall kbnDocTableHeader__move emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon kbnDocTableHeader__move emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="docTableMoveLeftHeader-middle"
           style="width: 12px; height: 12px;"
           type="button"
@@ -308,7 +308,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Move middle column to the right"
-          class="euiButtonIcon euiButtonIcon--xSmall kbnDocTableHeader__move emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon kbnDocTableHeader__move emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="docTableMoveRightHeader-middle"
           style="width: 12px; height: 12px;"
           type="button"
@@ -336,7 +336,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Remove last column"
-          class="euiButtonIcon euiButtonIcon--xSmall kbnDocTableHeader__move emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon kbnDocTableHeader__move emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="docTableRemoveHeader-last"
           style="width: 12px; height: 12px;"
           type="button"
@@ -354,7 +354,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
       >
         <button
           aria-label="Move last column to the left"
-          class="euiButtonIcon euiButtonIcon--xSmall kbnDocTableHeader__move emotion-euiButtonIcon-empty-text-hoverStyles"
+          class="euiButtonIcon kbnDocTableHeader__move emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="docTableMoveLeftHeader-last"
           style="width: 12px; height: 12px;"
           type="button"

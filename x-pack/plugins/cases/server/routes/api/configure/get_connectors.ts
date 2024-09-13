@@ -15,6 +15,13 @@ import { createCasesRoute } from '../create_cases_route';
 export const getConnectorsRoute = createCasesRoute({
   method: 'get',
   path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
+  routerOptions: {
+    tags: ['access:casesGetConnectorsConfigure', 'oas-tag:cases'],
+    access: 'public',
+    summary: 'Get case connectors',
+    description: 'Retrieves information about connectors that are supported for use in cases.',
+    // You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+  },
   handler: async ({ context, response }) => {
     try {
       const caseContext = await context.cases;

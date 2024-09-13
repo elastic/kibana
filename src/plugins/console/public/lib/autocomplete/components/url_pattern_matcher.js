@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
@@ -19,7 +20,7 @@ import { FullRequestComponent } from './full_request_component';
 
 /**
  * @param parametrizedComponentFactories a dict of the following structure
- * that will be used as a fall back for pattern parameters (i.e.: {indices})
+ * that will be used as a fall back for pattern parameters (i.e.: {index})
  * {
  *   indices: function (part, parent) {
  *      return new SharedComponent(part, parent)
@@ -33,7 +34,7 @@ export class UrlPatternMatcher {
     // We'll group endpoints by the methods which are attached to them,
     //to avoid suggesting endpoints that are incompatible with the
     //method that the user has entered.
-    ['HEAD', 'GET', 'PUT', 'POST', 'DELETE'].forEach((method) => {
+    ['HEAD', 'GET', 'PUT', 'POST', 'DELETE', 'PATCH'].forEach((method) => {
       this[method] = {
         rootComponent: new SharedComponent('ROOT'),
         parametrizedComponentFactories: parametrizedComponentFactories || {

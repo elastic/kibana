@@ -12,10 +12,12 @@ import type {
   MetaOrUndefined,
   _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
-import { transformListItemToElasticQuery } from '../utils';
-import { UpdateEsListItemSchema } from '../../schemas/elastic_query';
+import {
+  checkVersionConflict,
+  transformListItemToElasticQuery,
+  waitUntilDocumentIndexed,
+} from '../utils';
 
 import { getListItem } from './get_list_item';
 
@@ -28,6 +30,8 @@ export interface UpdateListItemOptions {
   user: string;
   meta: MetaOrUndefined;
   dateNow?: string;
+  isPatch?: boolean;
+  refresh?: boolean;
 }
 
 export const updateListItem = async ({
@@ -39,6 +43,8 @@ export const updateListItem = async ({
   user,
   meta,
   dateNow,
+  isPatch = false,
+  refresh = false,
 }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
   const updatedAt = dateNow ?? new Date().toISOString();
   const listItem = await getListItem({ esClient, id, listItemIndex });
@@ -53,30 +59,76 @@ export const updateListItem = async ({
     if (elasticQuery == null) {
       return null;
     } else {
-      const doc: UpdateEsListItemSchema = {
+      checkVersionConflict(_version, listItem._version);
+      const keyValues = Object.entries(elasticQuery).map(([key, keyValue]) => ({
+        key,
+        value: keyValue,
+      }));
+
+      const params = {
+        // when assigning undefined in painless, it will remove property and wil set it to null
+        // for patch we don't want to remove unspecified value in payload
+        assignEmpty: !isPatch,
+        keyValues,
         meta,
         updated_at: updatedAt,
         updated_by: user,
-        ...elasticQuery,
       };
 
-      const response = await esClient.update({
-        ...decodeVersion(_version),
-        body: {
-          doc,
-        },
-        id: listItem.id,
+      const response = await esClient.updateByQuery({
+        conflicts: 'proceed',
         index: listItemIndex,
-        refresh: 'wait_for',
+        query: {
+          ids: {
+            values: [id],
+          },
+        },
+        refresh,
+        script: {
+          lang: 'painless',
+          params,
+          source: `
+              for (int i; i < params.keyValues.size(); i++) {
+                def entry = params.keyValues[i];
+                ctx._source[entry.key] = entry.value;
+              }
+              if (params.assignEmpty == true || params.containsKey('meta')) {
+                ctx._source.meta = params.meta;
+              }
+              ctx._source.updated_at = params.updated_at;
+              ctx._source.updated_by = params.updated_by;
+              // needed for list items that were created before migration to data streams
+              if (ctx._source.containsKey('@timestamp') == false) {
+                ctx._source['@timestamp'] = ctx._source.created_at;
+              }
+          `,
+        },
       });
+
+      let updatedOCCVersion: string | undefined;
+      if (response.updated) {
+        const checkIfListUpdated = async (): Promise<void> => {
+          const updatedListItem = await getListItem({ esClient, id, listItemIndex });
+          if (updatedListItem?._version === listItem._version) {
+            throw Error('List item has not been re-indexed in time');
+          }
+          updatedOCCVersion = updatedListItem?._version;
+        };
+
+        await waitUntilDocumentIndexed(checkIfListUpdated);
+      } else {
+        throw Error('No list item has been updated');
+      }
+
       return {
-        _version: encodeHitVersion(response),
+        '@timestamp': listItem['@timestamp'],
+        _version: updatedOCCVersion,
         created_at: listItem.created_at,
         created_by: listItem.created_by,
         deserializer: listItem.deserializer,
-        id: response._id,
+        id,
         list_id: listItem.list_id,
-        meta: meta ?? listItem.meta,
+        meta: isPatch ? meta ?? listItem.meta : meta,
         serializer: listItem.serializer,
         tie_breaker_id: listItem.tie_breaker_id,
         type: listItem.type,

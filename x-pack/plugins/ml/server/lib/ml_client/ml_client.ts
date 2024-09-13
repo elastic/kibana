@@ -6,17 +6,18 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { MLSavedObjectService } from '../../saved_objects';
-import { getJobDetailsFromTrainedModel } from '../../saved_objects/util';
-import { JobType } from '../../../common/types/saved_objects';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
-import { Job, Datafeed } from '../../../common/types/anomaly_detection_jobs';
+import type { MLSavedObjectService } from '../../saved_objects';
+import { getJobDetailsFromTrainedModel } from '../../saved_objects/util';
+import type { JobType } from '../../../common/types/saved_objects';
+
+import type { Job, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { searchProvider } from './search';
 
-import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
 import { MLJobNotFound, MLModelNotFound } from './errors';
-import {
+import type {
   MlClient,
   MlClientParams,
   MlGetADParams,
@@ -130,6 +131,17 @@ export function getMlClient(
     if (modelIds.length) {
       await checkModelIds(modelIds, allowWildcards);
     }
+  }
+
+  function switchDeploymentId(
+    p: Parameters<MlClient['stopTrainedModelDeployment']>
+  ): Parameters<MlClient['stopTrainedModelDeployment']> {
+    const [params] = p;
+    if (params.deployment_id !== undefined) {
+      params.model_id = params.deployment_id;
+      delete params.deployment_id;
+    }
+    return p;
   }
 
   async function checkModelIds(modelIds: string[], allowWildcards: boolean = false) {
@@ -492,19 +504,23 @@ export function getMlClient(
     },
     async updateTrainedModelDeployment(...p: Parameters<MlClient['updateTrainedModelDeployment']>) {
       await modelIdsCheck(p);
-      const { model_id: modelId, number_of_allocations: numberOfAllocations } = p[0];
+
+      const { deployment_id: deploymentId, number_of_allocations: numberOfAllocations } = p[0];
       return client.asInternalUser.transport.request({
         method: 'POST',
-        path: `/_ml/trained_models/${modelId}/deployment/_update`,
+        path: `/_ml/trained_models/${deploymentId}/deployment/_update`,
         body: { number_of_allocations: numberOfAllocations },
       });
     },
     async stopTrainedModelDeployment(...p: Parameters<MlClient['stopTrainedModelDeployment']>) {
       await modelIdsCheck(p);
+      switchDeploymentId(p);
+
       return mlClient.stopTrainedModelDeployment(...p);
     },
     async inferTrainedModel(...p: Parameters<MlClient['inferTrainedModel']>) {
       await modelIdsCheck(p);
+      switchDeploymentId(p);
       // Temporary workaround for the incorrect inferTrainedModelDeployment function in the esclient
       if (
         // @ts-expect-error TS complains it's always false

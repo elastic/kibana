@@ -6,16 +6,25 @@
  */
 
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
-import { JobCreatorType, isMultiMetricJobCreator } from '../job_creator';
-import { mlResultsService, ModelPlotOutputResults } from '../../../../services/results_service';
-import { TimeBuckets } from '../../../../util/time_buckets';
-import { getSeverityType } from '../../../../../../common/util/anomaly_utils';
+
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils';
+import { getSeverityType, ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import type { TimeBuckets } from '@kbn/ml-time-buckets';
+
 import { parseInterval } from '../../../../../../common/util/parse_interval';
-import { ANOMALY_SEVERITY } from '../../../../../../common/constants/anomalies';
-import { getScoresByRecord } from './searches';
-import { ChartLoader } from '../chart_loader';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
-import { ES_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
+
+import type { ModelPlotOutputResults } from '../../../../services/results_service';
+import {
+  mlResultsServiceProvider,
+  type MlResultsService,
+} from '../../../../services/results_service';
+
+import type { JobCreatorType } from '../job_creator';
+import { isMultiMetricJobCreator } from '../job_creator';
+import type { ChartLoader } from '../chart_loader';
+
+import { getScoresByRecord } from './searches';
 
 export interface Results {
   progress: number;
@@ -33,7 +42,7 @@ export interface ModelItem {
 export interface Anomaly {
   time: number;
   value: number;
-  severity: ANOMALY_SEVERITY;
+  severity: ML_ANOMALY_SEVERITY;
 }
 
 const emptyModelItem = {
@@ -60,6 +69,7 @@ export class ResultsLoader {
   private _lastModelTimeStamp: number = 0;
   private _lastResultsTimeout: any = null;
   private _chartLoader: ChartLoader;
+  private _mlResultsService: MlResultsService;
 
   private _results: Results = {
     progress: 0,
@@ -75,6 +85,7 @@ export class ResultsLoader {
     this._chartInterval = chartInterval;
     this._results$ = new BehaviorSubject(this._results);
     this._chartLoader = chartLoader;
+    this._mlResultsService = mlResultsServiceProvider(jobCreator.mlApi);
 
     jobCreator.subscribeToProgress(this.progressSubscriber);
   }
@@ -156,7 +167,7 @@ export class ResultsLoader {
       return { [dtrIndex]: [emptyModelItem] };
     }
     const resp = await lastValueFrom(
-      mlResultsService.getModelPlotOutput(
+      this._mlResultsService.getModelPlotOutput(
         this._jobCreator.jobId,
         dtrIndex,
         [],
@@ -208,7 +219,7 @@ export class ResultsLoader {
   }
 
   private async _loadJobAnomalyData(dtrIndex: number): Promise<Record<number, Anomaly[]>> {
-    const resp = await mlResultsService.getScoresByBucket(
+    const resp = await this._mlResultsService.getScoresByBucket(
       [this._jobCreator.jobId],
       this._jobCreator.start,
       this._jobCreator.end,
@@ -231,6 +242,7 @@ export class ResultsLoader {
 
   private async _loadDetectorsAnomalyData(): Promise<Record<number, Anomaly[]>> {
     const resp = await getScoresByRecord(
+      this._jobCreator.mlApi,
       this._jobCreator.jobId,
       this._jobCreator.start,
       this._jobCreator.end,

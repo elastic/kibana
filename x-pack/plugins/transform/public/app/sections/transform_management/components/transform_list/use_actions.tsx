@@ -7,14 +7,15 @@
 
 import React from 'react';
 
-import { EuiTableActionsColumnType } from '@elastic/eui';
+import type { EuiTableActionsColumnType } from '@elastic/eui';
 
-import { TransformListRow } from '../../../../common';
+import { ReauthorizeActionModal, useReauthorizeAction } from '../action_reauthorize';
+import type { TransformListRow } from '../../../../common';
 
 import { useCloneAction } from '../action_clone';
 import { useDeleteAction, DeleteActionModal } from '../action_delete';
 import { useDiscoverAction } from '../action_discover';
-import { EditTransformFlyout } from '../edit_transform_flyout';
+import { EditTransformFlyout } from '../../../edit_transform';
 import { useEditAction } from '../action_edit';
 import { useResetAction, ResetActionModal } from '../action_reset';
 import { useScheduleNowAction } from '../action_schedule_now';
@@ -37,6 +38,7 @@ export const useActions = ({
   const deleteAction = useDeleteAction(forceDisable);
   const discoverAction = useDiscoverAction(forceDisable);
   const editAction = useEditAction(forceDisable, transformNodes);
+  const reauthorizeAction = useReauthorizeAction(forceDisable, transformNodes);
   const resetAction = useResetAction(forceDisable);
   const scheduleNowAction = useScheduleNowAction(forceDisable, transformNodes);
   const startAction = useStartAction(forceDisable, transformNodes);
@@ -49,7 +51,7 @@ export const useActions = ({
         {resetAction.isModalVisible && <ResetActionModal {...resetAction} />}
         {startAction.isModalVisible && <StartActionModal {...startAction} />}
         {stopAction.isModalVisible && <StopActionModal {...stopAction} />}
-
+        {reauthorizeAction.isModalVisible && <ReauthorizeActionModal {...reauthorizeAction} />}
         <EditTransformFlyout {...editAction} />
         {deleteAction.isModalVisible && <DeleteActionModal {...deleteAction} />}
       </>
@@ -63,6 +65,7 @@ export const useActions = ({
       editAction.action,
       cloneAction.action,
       deleteAction.action,
+      reauthorizeAction.action,
       resetAction.action,
     ],
   };

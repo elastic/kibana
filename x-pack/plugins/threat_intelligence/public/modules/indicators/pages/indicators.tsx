@@ -5,24 +5,26 @@
  * 2.0.
  */
 
-import React, { FC, VFC } from 'react';
+import React, { FC, VFC, PropsWithChildren } from 'react';
 import { useBlockListContext } from '../hooks/use_block_list_context';
 import { BlockListProvider } from '../containers/block_list_provider';
 import { BlockListFlyout } from '../../block_list/containers/flyout';
-import { IndicatorsBarChartWrapper } from '../components/barchart';
-import { IndicatorsTable } from '../components/table';
-import { useAggregatedIndicators, useIndicators, useSourcererDataView } from '../hooks';
+import { IndicatorsBarChartWrapper } from '../components/barchart/wrapper';
+import { IndicatorsTable } from '../components/table/table';
+import { useAggregatedIndicators } from '../hooks/use_aggregated_indicators';
+import { useIndicators } from '../hooks/use_indicators';
+import { useSourcererDataView } from '../hooks/use_sourcerer_data_view';
 import { DefaultPageLayout } from '../../../components/layout';
-import { useFilters } from '../../query_bar';
+import { useFilters } from '../../query_bar/hooks/use_filters';
 import { FiltersGlobal } from '../../../containers/filters_global';
 import { FieldTypesProvider } from '../../../containers/field_types_provider';
 import { InspectorProvider } from '../../../containers/inspector';
-import { useColumnSettings } from '../components/table/hooks';
+import { useColumnSettings } from '../hooks/use_column_settings';
 import { IndicatorsFilters } from '../containers/filters';
 import { UpdateStatus } from '../../../components/update_status';
-import { QueryBar } from '../../query_bar/query_bar';
+import { QueryBar } from '../../query_bar/components/query_bar';
 
-const IndicatorsPageProviders: FC = ({ children }) => (
+const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <IndicatorsFilters>
     <FieldTypesProvider>
       <InspectorProvider>
@@ -35,7 +37,7 @@ const IndicatorsPageProviders: FC = ({ children }) => (
 const IndicatorsPageContent: VFC = () => {
   const { blockListIndicatorValue } = useBlockListContext();
 
-  const { browserFields, indexPattern } = useSourcererDataView();
+  const { browserFields, indexPattern, sourcererDataView } = useSourcererDataView();
 
   const columnSettings = useColumnSettings();
 
@@ -81,7 +83,7 @@ const IndicatorsPageContent: VFC = () => {
         <FiltersGlobal>
           <QueryBar
             queries={[indicatorChartQuery, indicatorListQuery]}
-            indexPattern={indexPattern}
+            sourcererDataView={sourcererDataView}
           />
         </FiltersGlobal>
 

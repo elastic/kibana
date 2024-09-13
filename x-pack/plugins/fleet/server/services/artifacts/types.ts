@@ -72,6 +72,12 @@ export type ListArtifactsProps = Pick<ListWithKuery, 'perPage' | 'page' | 'kuery
   sortField?: string | keyof ArtifactElasticsearchProperties;
 };
 
+export type FetchAllArtifactsOptions = Pick<ListWithKuery, 'perPage' | 'kuery' | 'sortOrder'> & {
+  sortField?: string | keyof ArtifactElasticsearchProperties;
+  /** If false, then the `body` property of the Artifact will be excluded from the results. Default is `true` */
+  includeArtifactBody?: boolean;
+};
+
 /**
  * The interface exposed out of Fleet's Artifact service via the client class
  */
@@ -86,9 +92,13 @@ export interface ArtifactsClientInterface {
 
   deleteArtifact(id: string): Promise<void>;
 
+  bulkDeleteArtifacts(ids: string[]): Promise<Error[]>;
+
   listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>>;
 
   encodeContent(content: ArtifactsClientCreateOptions['content']): Promise<ArtifactEncodedMetadata>;
 
   generateHash(content: string): string;
+
+  fetchAll(options?: FetchAllArtifactsOptions): AsyncIterable<Artifact[]>;
 }

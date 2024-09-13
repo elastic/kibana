@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useContext, useState } from 'react';
-import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { AlertsTableContext } from '../contexts/alerts_table_context';
 import { BulkActionsVerbs } from '../../../../types';
-import { BulkActionsContext } from '../bulk_actions/context';
 
 type PaginationProps = RuleRegistrySearchRequestPagination & {
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
 };
 
 export type UsePagination = (props: PaginationProps) => {
-  pagination: RuleRegistrySearchRequestPagination;
   onChangePageSize: (pageSize: number) => void;
   onChangePageIndex: (pageIndex: number) => void;
   onPaginateFlyoutNext: () => void;
@@ -24,14 +23,16 @@ export type UsePagination = (props: PaginationProps) => {
 };
 
 export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationProps) {
-  const [, updateBulkActionsState] = useContext(BulkActionsContext);
+  const {
+    bulkActions: [, updateBulkActionsState],
+  } = useContext(AlertsTableContext);
   const [pagination, setPagination] = useState<RuleRegistrySearchRequestPagination>({
     pageIndex,
     pageSize,
   });
   const [flyoutAlertIndex, setFlyoutAlertIndex] = useState<number>(-1);
   const onChangePageSize = useCallback(
-    (_pageSize) => {
+    (_pageSize: number) => {
       setPagination((state) => ({
         ...state,
         pageSize: _pageSize,
@@ -43,7 +44,7 @@ export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationP
     [updateBulkActionsState, onPageChange]
   );
   const onChangePageIndex = useCallback(
-    (_pageIndex) => {
+    (_pageIndex: number) => {
       setPagination((state) => ({ ...state, pageIndex: _pageIndex }));
       updateBulkActionsState({ action: BulkActionsVerbs.clear });
       onPageChange({ pageIndex: _pageIndex, pageSize: pagination.pageSize });
@@ -74,6 +75,25 @@ export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationP
     },
     [onChangePageIndex, pagination.pageIndex, pagination.pageSize]
   );
+
+  useEffect(() => {
+    setPagination((prevPagination) => {
+      const newPagination = { ...prevPagination };
+      let updated = false;
+      if (prevPagination.pageIndex !== pageIndex) {
+        updated = true;
+        newPagination.pageIndex = pageIndex;
+      }
+      if (prevPagination.pageSize !== pageSize) {
+        updated = true;
+        newPagination.pageSize = pageSize;
+      }
+      if (updated === true) {
+        return newPagination;
+      }
+      return prevPagination;
+    });
+  }, [pageIndex, pageSize]);
 
   return {
     pagination,

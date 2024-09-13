@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CustomIntegrationsPlugin } from './plugin';
@@ -145,6 +146,18 @@ describe('CustomIntegrationsPlugin', () => {
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
           categories: ['aws', 'observability'],
+        },
+        {
+          id: 'placeholder.esc',
+          title: 'Confluent Cloud',
+          description: 'Collect data from Confluent Cloud with the Elastic Sink Connector.',
+          type: 'ui_link',
+          shipper: 'placeholders',
+          uiInternalPath: '',
+          uiExternalLink: 'https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch',
+          isBeta: false,
+          icons: [{ type: 'svg', src: undefined }],
+          categories: ['message_queue', 'observability', 'security'],
         },
       ]);
     });

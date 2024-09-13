@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-/* eslint-disable react/no-danger */
 
 import React, { FunctionComponent } from 'react';
 
@@ -223,6 +222,7 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
   const sansFont = getInter(url);
   const codeFont = getRoboto(url);
 
+  /* eslint-disable react/no-danger */
   return (
     <style
       dangerouslySetInnerHTML={{
@@ -257,4 +257,5 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
       }}
     />
   );
+  /* eslint-enable react/no-danger */
 };

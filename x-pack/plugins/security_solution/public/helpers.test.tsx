@@ -14,8 +14,8 @@ import {
   parseRoute,
   isSubPluginAvailable,
   getSubPluginRoutesByCapabilities,
-  RedirectRoute,
   getField,
+  isDashboardViewPath,
 } from './helpers';
 import type { StartedSubPlugins } from './types';
 import {
@@ -23,6 +23,10 @@ import {
   noCasesCapabilities,
   readCasesCapabilities,
 } from './cases_test_utils';
+import { createStartServicesMock } from './common/lib/kibana/kibana_react.mock';
+import { set } from '@kbn/safer-lodash-set';
+
+const mockServices = createStartServicesMock();
 
 describe('public helpers parseRoute', () => {
   it('should properly parse hash route', () => {
@@ -74,15 +78,20 @@ describe('public helpers parseRoute', () => {
 
 describe('#getSubPluginRoutesByCapabilities', () => {
   const mockRender = () => null;
+
   const mockSubPlugins = {
     alerts: { routes: [{ path: 'alerts', render: mockRender }] },
     cases: { routes: [{ path: 'cases', render: mockRender }] },
   } as unknown as StartedSubPlugins;
   it('cases routes should return NoPrivilegesPage component when cases plugin is NOT available ', () => {
-    const routes = getSubPluginRoutesByCapabilities(mockSubPlugins, {
-      [SERVER_APP_ID]: { show: true, crud: false },
-      [CASES_FEATURE_ID]: noCasesCapabilities(),
-    } as unknown as Capabilities);
+    const routes = getSubPluginRoutesByCapabilities(
+      mockSubPlugins,
+      set(mockServices, 'application.capabilities', {
+        [SERVER_APP_ID]: { show: true, crud: false },
+        [CASES_FEATURE_ID]: noCasesCapabilities(),
+      })
+    );
+
     const casesRoute = routes.find((r) => r.path === 'cases');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const CasesView = (casesRoute?.component ?? mockRender) as React.ComponentType<any>;
@@ -95,10 +104,13 @@ describe('#getSubPluginRoutesByCapabilities', () => {
   });
 
   it('alerts should return NoPrivilegesPage component when siem plugin is NOT available ', () => {
-    const routes = getSubPluginRoutesByCapabilities(mockSubPlugins, {
-      [SERVER_APP_ID]: { show: false, crud: false },
-      [CASES_FEATURE_ID]: readCasesCapabilities(),
-    } as unknown as Capabilities);
+    const routes = getSubPluginRoutesByCapabilities(
+      mockSubPlugins,
+      set(mockServices, 'application.capabilities', {
+        [SERVER_APP_ID]: { show: false, crud: false },
+        [CASES_FEATURE_ID]: readCasesCapabilities(),
+      })
+    );
     const alertsRoute = routes.find((r) => r.path === 'alerts');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const AlertsView = (alertsRoute?.component ?? mockRender) as React.ComponentType<any>;
@@ -111,10 +123,13 @@ describe('#getSubPluginRoutesByCapabilities', () => {
   });
 
   it('should return NoPrivilegesPage for each route when both plugins are NOT available ', () => {
-    const routes = getSubPluginRoutesByCapabilities(mockSubPlugins, {
-      [SERVER_APP_ID]: { show: false, crud: false },
-      [CASES_FEATURE_ID]: noCasesCapabilities(),
-    } as unknown as Capabilities);
+    const routes = getSubPluginRoutesByCapabilities(
+      mockSubPlugins,
+      set(mockServices, 'application.capabilities', {
+        [SERVER_APP_ID]: { show: false, crud: false },
+        [CASES_FEATURE_ID]: noCasesCapabilities(),
+      })
+    );
     const casesRoute = routes.find((r) => r.path === 'cases');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const CasesView = (casesRoute?.component ?? mockRender) as React.ComponentType<any>;
@@ -194,92 +209,6 @@ describe('#isSubPluginAvailable', () => {
   });
 });
 
-describe('RedirectRoute', () => {
-  it('RedirectRoute should redirect to overview page when siem and case privileges are all', () => {
-    const mockCapabilitities = {
-      [SERVER_APP_ID]: { show: true, crud: true },
-      [CASES_FEATURE_ID]: allCasesCapabilities(),
-    } as unknown as Capabilities;
-    expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
-      <Redirect
-        to="/get_started"
-      />
-    `);
-  });
-
-  it('RedirectRoute should redirect to overview page when siem and case privileges are read', () => {
-    const mockCapabilitities = {
-      [SERVER_APP_ID]: { show: true, crud: false },
-      [CASES_FEATURE_ID]: readCasesCapabilities(),
-    } as unknown as Capabilities;
-    expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
-      <Redirect
-        to="/get_started"
-      />
-    `);
-  });
-
-  it('RedirectRoute should redirect to overview page when siem and case privileges are off', () => {
-    const mockCapabilitities = {
-      [SERVER_APP_ID]: { show: false, crud: false },
-      [CASES_FEATURE_ID]: noCasesCapabilities(),
-    } as unknown as Capabilities;
-    expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
-      <Redirect
-        to="/get_started"
-      />
-    `);
-  });
-
-  it('RedirectRoute should redirect to overview page when siem privilege is read and case privilege is all', () => {
-    const mockCapabilitities = {
-      [SERVER_APP_ID]: { show: true, crud: false },
-      [CASES_FEATURE_ID]: allCasesCapabilities(),
-    } as unknown as Capabilities;
-    expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
-      <Redirect
-        to="/get_started"
-      />
-    `);
-  });
-
-  it('RedirectRoute should redirect to overview page when siem privilege is read and case privilege is read', () => {
-    const mockCapabilitities = {
-      [SERVER_APP_ID]: { show: true, crud: false },
-      [CASES_FEATURE_ID]: allCasesCapabilities(),
-    } as unknown as Capabilities;
-    expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
-      <Redirect
-        to="/get_started"
-      />
-    `);
-  });
-
-  it('RedirectRoute should redirect to cases page when siem privilege is none and case privilege is read', () => {
-    const mockCapabilitities = {
-      [SERVER_APP_ID]: { show: false, crud: false },
-      [CASES_FEATURE_ID]: readCasesCapabilities(),
-    } as unknown as Capabilities;
-    expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
-      <Redirect
-        to="/cases"
-      />
-    `);
-  });
-
-  it('RedirectRoute should redirect to cases page when siem privilege is none and case privilege is all', () => {
-    const mockCapabilitities = {
-      [SERVER_APP_ID]: { show: false, crud: false },
-      [CASES_FEATURE_ID]: allCasesCapabilities(),
-    } as unknown as Capabilities;
-    expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
-      <Redirect
-        to="/cases"
-      />
-    `);
-  });
-});
-
 describe('public helpers getField', () => {
   it('should return the same value for signal.rule fields as for kibana.alert.rule fields', () => {
     const signalRuleName = getField(mockEcsDataWithAlert, 'signal.rule.name');
@@ -326,5 +255,25 @@ describe('public helpers getField', () => {
     const signalQuery = getField(mockAlertWithParameters, 'signal.rule.query');
     const aadQuery = getField(mockAlertWithParameters, `${ALERT_RULE_PARAMETERS}.query`);
     expect(signalQuery).toEqual(aadQuery);
+  });
+});
+
+describe('isDashboardViewPath', () => {
+  it('returns true for dashboard view path', () => {
+    expect(isDashboardViewPath('/dashboards/59c085c3-394d-49ab-a83a-56a63f38aa5f')).toEqual(true);
+  });
+
+  it('returns true for dashboard edit path', () => {
+    expect(isDashboardViewPath('/dashboards/59c085c3-394d-49ab-a83a-56a63f38aa5f/edit')).toEqual(
+      true
+    );
+  });
+
+  it('returns true for dashboard creation path', () => {
+    expect(isDashboardViewPath('/dashboards/create')).toEqual(true);
+  });
+
+  it('returns false for dashboard listing path', () => {
+    expect(isDashboardViewPath('/dashboards')).toEqual(false);
   });
 });

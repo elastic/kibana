@@ -9,19 +9,16 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { riskScore } from '.';
-import type { IEsSearchResponse } from '@kbn/data-plugin/public';
-import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
-import type {
-  HostRiskScore,
-  RiskScoreRequestOptions,
-} from '../../../../../../common/search_strategy';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import type { HostRiskScore } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../../common/search_strategy';
-import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
-import type { EndpointAppContext } from '../../../../../endpoint/types';
 import * as buildQuery from './query.risk_score.dsl';
 import { get } from 'lodash/fp';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
+import type { RiskScoreRequestOptions } from '../../../../../../common/api/search_strategy';
+import { RiskQueries } from '../../../../../../common/api/search_strategy';
 
 export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
   rawResponse: {
@@ -45,9 +42,19 @@ export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
               name: 'testUsername',
               risk: {
                 rule_risks: [],
-                calculated_level: RiskSeverity.high,
+                calculated_level: RiskSeverity.High,
                 calculated_score_norm: 75,
                 multipliers: [],
+                id_field: '',
+                id_value: '',
+                calculated_score: 0,
+                category_1_score: 0,
+                category_1_count: 0,
+                category_2_score: 0,
+                category_2_count: 0,
+                notes: [],
+                inputs: [],
+                '@timestamp': '',
               },
             },
           },
@@ -62,40 +69,36 @@ export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
 };
 
 const searchMock = jest.fn();
-
+const ALERT_INDEX_PATTERN = '.test-alerts-security.alerts';
+const TEST_SPACE_ID = 'test-default';
 const mockDeps = {
-  esClient: {} as IScopedClusterClient,
-  ruleDataClient: {
-    ...(ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts') as IRuleDataClient),
-    getReader: jest.fn((_options?: { namespace?: string }) => ({
+  esClient: {
+    asCurrentUser: {
       search: searchMock,
-      getDynamicIndexPattern: jest.fn(),
-    })),
+    },
+  } as unknown as IScopedClusterClient,
+  ruleDataClient: {
+    ...(ruleRegistryMocks.createRuleDataClient(ALERT_INDEX_PATTERN) as IRuleDataClient),
   },
   savedObjectsClient: {} as SavedObjectsClientContract,
-  endpointContext: {
-    logFactory: {
-      get: jest.fn().mockReturnValue({
-        warn: jest.fn(),
-      }),
-    },
-    config: jest.fn().mockResolvedValue({}),
-    experimentalFeatures: {
-      ...allowedExperimentalValues,
-    },
-    service: {} as EndpointAppContextService,
-  } as EndpointAppContext,
+  endpointContext: createMockEndpointAppContext(),
   request: {} as KibanaRequest,
+  spaceId: TEST_SPACE_ID,
 };
 
 export const mockOptions: RiskScoreRequestOptions = {
   defaultIndex: ['logs-*'],
   riskScoreEntity: RiskScoreEntity.host,
   includeAlertsCount: true,
+  factoryQueryType: RiskQueries.hostsRiskScore,
 };
 
 describe('buildRiskScoreQuery search strategy', () => {
   const buildKpiRiskScoreQuery = jest.spyOn(buildQuery, 'buildRiskScoreQuery');
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
@@ -112,6 +115,12 @@ describe('buildRiskScoreQuery search strategy', () => {
     );
 
     expect(get('data[0].alertsCount', result)).toBeUndefined();
+  });
+
+  test('should search alerts on the alerts index pattern', async () => {
+    await riskScore.parse(mockOptions, mockSearchStrategyResponse, mockDeps);
+
+    expect(searchMock.mock.calls[0][0].index).toEqual(`${ALERT_INDEX_PATTERN}${TEST_SPACE_ID}`);
   });
 
   test('should enhance data with alerts count', async () => {
@@ -166,5 +175,30 @@ describe('buildRiskScoreQuery search strategy', () => {
     const result = await riskScore.parse(mockOptions, mockSearchStrategyResponse, mockDeps);
 
     expect(get('data[0].oldestAlertTimestamp', result)).toBe(oldestAlertTimestamp);
+  });
+
+  test('should filter enhance query by time range', async () => {
+    await riskScore.parse(
+      {
+        ...mockOptions,
+        alertsTimerange: {
+          from: 'now-5m',
+          to: 'now',
+          interval: '1m',
+        },
+      },
+      mockSearchStrategyResponse,
+      mockDeps
+    );
+
+    expect(searchMock.mock.calls[0][0].query.bool.filter).toEqual(
+      expect.arrayContaining([
+        {
+          range: {
+            '@timestamp': { format: 'strict_date_optional_time', gte: 'now-5m', lte: 'now' },
+          },
+        },
+      ])
+    );
   });
 });

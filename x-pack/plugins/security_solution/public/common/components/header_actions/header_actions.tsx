@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import type { EuiDataGridSorting } from '@elastic/eui';
-import { EuiButtonIcon, EuiCheckbox, EuiToolTip, useDataGridColumnSorting } from '@elastic/eui';
+import React, { useMemo, useCallback, memo } from 'react';
+import type { EuiDataGridSorting, EuiDataGridSchemaDetector } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useDataGridColumnSorting, EuiCheckbox } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
@@ -16,24 +16,25 @@ import { TimelineTabs, TimelineId } from '../../../../common/types';
 import { isFullScreen } from '../../../timelines/components/timeline/body/column_headers';
 import { isActiveTimeline } from '../../../helpers';
 import { getColumnHeader } from '../../../timelines/components/timeline/body/column_headers/helpers';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { timelineActions } from '../../../timelines/store';
 import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
 import { useKibana } from '../../lib/kibana';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
 import { EventsTh, EventsThContent } from '../../../timelines/components/timeline/styles';
 import { StatefulRowRenderersBrowser } from '../../../timelines/components/row_renderers_browser';
 import { EXIT_FULL_SCREEN } from '../exit_full_screen/translations';
-import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 import { EventsSelect } from '../../../timelines/components/timeline/body/column_headers/events_select';
 import * as i18n from './translations';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { selectTimelineById } from '../../../timelines/store/selectors';
 
 const SortingColumnsContainer = styled.div`
   button {
     color: ${({ theme }) => theme.eui.euiColorPrimary};
   }
 
-  .euiPopover .euiButtonEmpty .euiButtonContent {
+  .euiPopover .euiButtonEmpty {
     padding: 0;
 
     .euiButtonEmpty__text {
@@ -65,217 +66,236 @@ const ActionsContainer = styled.div`
   display: flex;
 `;
 
-const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
-  width,
-  browserFields,
-  columnHeaders,
-  isEventViewer = false,
-  isSelectAllChecked,
-  onSelectAll,
-  showEventsSelect,
-  showSelectAllCheckbox,
-  sort,
-  tabType,
-  timelineId,
-  fieldBrowserOptions,
-}) => {
-  const { triggersActionsUi } = useKibana().services;
-  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
-  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
-  const dispatch = useDispatch();
+// Defined statically to reduce rerenders
+const emptySchema = {};
+const emptySchemaDetectors: EuiDataGridSchemaDetector[] = [];
 
-  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { defaultColumns } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
-
-  const toggleFullScreen = useCallback(() => {
-    if (timelineId === TimelineId.active) {
-      setTimelineFullScreen(!timelineFullScreen);
-    } else {
-      setGlobalFullScreen(!globalFullScreen);
-    }
-  }, [
+const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
+  ({
+    width,
+    browserFields,
+    columnHeaders,
+    isEventViewer = false,
+    isSelectAllChecked,
+    onSelectAll,
+    showEventsSelect,
+    showSelectAllCheckbox,
+    showFullScreenToggle = true,
+    sort,
+    tabType,
     timelineId,
-    setTimelineFullScreen,
-    timelineFullScreen,
-    setGlobalFullScreen,
-    globalFullScreen,
-  ]);
+    fieldBrowserOptions,
+  }) => {
+    const { triggersActionsUi } = useKibana().services;
+    const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
+    const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
+    const dispatch = useDispatch();
 
-  const fullScreen = useMemo(
-    () =>
-      isFullScreen({
-        globalFullScreen,
-        isActiveTimelines: isActiveTimeline(timelineId),
-        timelineFullScreen,
-      }),
-    [globalFullScreen, timelineFullScreen, timelineId]
-  );
-  const handleSelectAllChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onSelectAll({ isSelected: event.currentTarget.checked });
-    },
-    [onSelectAll]
-  );
+    const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+      'unifiedComponentsInTimelineDisabled'
+    );
 
-  const onSortColumns = useCallback(
-    (cols: EuiDataGridSorting['columns']) =>
-      dispatch(
-        timelineActions.updateSort({
-          id: timelineId,
-          sort: cols.map(({ id, direction }) => {
-            const columnHeader = columnHeaders.find((ch) => ch.id === id);
-            const columnType = columnHeader?.type ?? '';
-            const esTypes = columnHeader?.esTypes ?? [];
+    const { defaultColumns } = useDeepEqualSelector((state) =>
+      selectTimelineById(state, timelineId)
+    );
 
-            return {
-              columnId: id,
-              columnType,
-              esTypes,
-              sortDirection: direction as SortDirection,
-            };
-          }),
-        })
-      ),
-    [columnHeaders, dispatch, timelineId]
-  );
-
-  const sortedColumns = useMemo(
-    () => ({
-      onSort: onSortColumns,
-      columns:
-        sort?.map<{ id: string; direction: 'asc' | 'desc' }>(({ columnId, sortDirection }) => ({
-          id: columnId,
-          direction: sortDirection as 'asc' | 'desc',
-        })) ?? [],
-    }),
-    [onSortColumns, sort]
-  );
-  const displayValues = useMemo(
-    () =>
-      columnHeaders?.reduce((acc, ch) => ({ ...acc, [ch.id]: ch.displayAsText ?? ch.id }), {}) ??
-      {},
-    [columnHeaders]
-  );
-
-  const myColumns = useMemo(
-    () =>
-      columnHeaders?.map(({ aggregatable, displayAsText, id, type }) => ({
-        id,
-        isSortable: aggregatable,
-        displayAsText,
-        schema: type,
-      })) ?? [],
-    [columnHeaders]
-  );
-
-  const onResetColumns = useCallback(() => {
-    dispatch(timelineActions.updateColumns({ id: timelineId, columns: defaultColumns }));
-  }, [defaultColumns, dispatch, timelineId]);
-
-  const onToggleColumn = useCallback(
-    (columnId: string) => {
-      if (columnHeaders.some(({ id }) => id === columnId)) {
-        dispatch(
-          timelineActions.removeColumn({
-            columnId,
-            id: timelineId,
-          })
-        );
+    const toggleFullScreen = useCallback(() => {
+      if (timelineId === TimelineId.active) {
+        setTimelineFullScreen(!timelineFullScreen);
       } else {
-        dispatch(
-          timelineActions.upsertColumn({
-            column: getColumnHeader(columnId, defaultColumns),
-            id: timelineId,
-            index: 1,
-          })
-        );
+        setGlobalFullScreen(!globalFullScreen);
       }
-    },
-    [columnHeaders, dispatch, timelineId, defaultColumns]
-  );
+    }, [
+      timelineId,
+      setTimelineFullScreen,
+      timelineFullScreen,
+      setGlobalFullScreen,
+      globalFullScreen,
+    ]);
 
-  const ColumnSorting = useDataGridColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
+    const fullScreen = useMemo(
+      () =>
+        isFullScreen({
+          globalFullScreen,
+          isActiveTimelines: isActiveTimeline(timelineId),
+          timelineFullScreen,
+        }),
+      [globalFullScreen, timelineFullScreen, timelineId]
+    );
+    const handleSelectAllChange = useCallback(
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        onSelectAll({ isSelected: event.currentTarget.checked });
+      },
+      [onSelectAll]
+    );
 
-  return (
-    <ActionsContainer>
-      {showSelectAllCheckbox && (
-        <EventsTh role="checkbox">
-          <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            <EuiCheckbox
-              data-test-subj="select-all-events"
-              id={'select-all-events'}
-              checked={isSelectAllChecked}
-              onChange={handleSelectAllChange}
-            />
-          </EventsThContent>
-        </EventsTh>
-      )}
+    const onSortColumns = useCallback(
+      (cols: EuiDataGridSorting['columns']) =>
+        dispatch(
+          timelineActions.updateSort({
+            id: timelineId,
+            sort: cols.map(({ id, direction }) => {
+              const columnHeader = columnHeaders.find((ch) => ch.id === id);
+              const columnType = columnHeader?.type ?? '';
+              const esTypes = columnHeader?.esTypes ?? [];
 
-      <EventsTh role="button">
-        <FieldBrowserContainer>
-          {triggersActionsUi.getFieldBrowser({
-            browserFields,
-            columnIds: columnHeaders.map(({ id }) => id),
-            onResetColumns,
-            onToggleColumn,
-            options: fieldBrowserOptions,
-          })}
-        </FieldBrowserContainer>
-      </EventsTh>
+              return {
+                columnId: id,
+                columnType,
+                esTypes,
+                sortDirection: direction as SortDirection,
+              };
+            }),
+          })
+        ),
+      [columnHeaders, dispatch, timelineId]
+    );
 
-      <EventsTh role="button">
-        <StatefulRowRenderersBrowser
-          data-test-subj="row-renderers-browser"
-          timelineId={timelineId}
-        />
-      </EventsTh>
+    const sortedColumns = useMemo(
+      () => ({
+        onSort: onSortColumns,
+        columns:
+          sort?.map<{ id: string; direction: 'asc' | 'desc' }>(({ columnId, sortDirection }) => ({
+            id: columnId,
+            direction: sortDirection as 'asc' | 'desc',
+          })) ?? [],
+      }),
+      [onSortColumns, sort]
+    );
+    const displayValues = useMemo(
+      () =>
+        columnHeaders?.reduce((acc, ch) => ({ ...acc, [ch.id]: ch.displayAsText ?? ch.id }), {}) ??
+        {},
+      [columnHeaders]
+    );
 
-      <EventsTh role="button">
-        <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-          <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
-            <EuiButtonIcon
-              aria-label={
-                isFullScreen({
-                  globalFullScreen,
-                  isActiveTimelines: isActiveTimeline(timelineId),
-                  timelineFullScreen,
-                })
-                  ? EXIT_FULL_SCREEN
-                  : i18n.FULL_SCREEN
-              }
-              className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
-              color={fullScreen ? 'ghost' : 'primary'}
-              data-test-subj={
-                // a full screen button gets created for timeline and for the host page
-                // this sets the data-test-subj for each case so that tests can differentiate between them
-                isActiveTimeline(timelineId) ? 'full-screen-active' : 'full-screen'
-              }
-              iconType="fullScreen"
-              onClick={toggleFullScreen}
-            />
-          </EuiToolTip>
-        </EventsThContent>
-      </EventsTh>
-      {tabType !== TimelineTabs.eql && (
-        <EventsTh role="button" data-test-subj="timeline-sorting-fields">
-          <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            <EuiToolTip content={i18n.SORT_FIELDS}>
-              <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
-            </EuiToolTip>
-          </EventsThContent>
-        </EventsTh>
-      )}
+    const myColumns = useMemo(
+      () =>
+        columnHeaders?.map(({ aggregatable, displayAsText, id, type }) => ({
+          id,
+          isSortable: aggregatable,
+          displayAsText,
+          schema: type,
+        })) ?? [],
+      [columnHeaders]
+    );
 
-      {showEventsSelect && (
-        <EventsTh role="button">
-          <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            <EventsSelect checkState="unchecked" timelineId={timelineId} />
-          </EventsThContent>
-        </EventsTh>
-      )}
-    </ActionsContainer>
-  );
-};
+    const onResetColumns = useCallback(() => {
+      dispatch(timelineActions.updateColumns({ id: timelineId, columns: defaultColumns }));
+    }, [defaultColumns, dispatch, timelineId]);
+
+    const onToggleColumn = useCallback(
+      (columnId: string) => {
+        if (columnHeaders.some(({ id }) => id === columnId)) {
+          dispatch(
+            timelineActions.removeColumn({
+              columnId,
+              id: timelineId,
+            })
+          );
+        } else {
+          dispatch(
+            timelineActions.upsertColumn({
+              column: getColumnHeader(columnId, defaultColumns),
+              id: timelineId,
+              index: 1,
+            })
+          );
+        }
+      },
+      [columnHeaders, dispatch, timelineId, defaultColumns]
+    );
+
+    const ColumnSorting = useDataGridColumnSorting({
+      columns: myColumns,
+      sorting: sortedColumns,
+      schema: emptySchema,
+      schemaDetectors: emptySchemaDetectors,
+      displayValues,
+    });
+
+    return (
+      <ActionsContainer data-test-subj="header-actions-container">
+        {showSelectAllCheckbox && (
+          <EventsTh role="checkbox">
+            <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+              <EuiCheckbox
+                data-test-subj="select-all-events"
+                id={'select-all-events'}
+                checked={isSelectAllChecked}
+                onChange={handleSelectAllChange}
+              />
+            </EventsThContent>
+          </EventsTh>
+        )}
+        {fieldBrowserOptions && (
+          <EventsTh role="button">
+            <FieldBrowserContainer>
+              {triggersActionsUi.getFieldBrowser({
+                browserFields,
+                columnIds: columnHeaders.map(({ id }) => id),
+                onResetColumns,
+                onToggleColumn,
+                options: fieldBrowserOptions,
+              })}
+            </FieldBrowserContainer>
+          </EventsTh>
+        )}
+
+        {unifiedComponentsInTimelineDisabled && (
+          <EventsTh role="button">
+            <StatefulRowRenderersBrowser timelineId={timelineId} />
+          </EventsTh>
+        )}
+        {showFullScreenToggle && (
+          <EventsTh role="button">
+            <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+              <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
+                <EuiButtonIcon
+                  aria-label={
+                    isFullScreen({
+                      globalFullScreen,
+                      isActiveTimelines: isActiveTimeline(timelineId),
+                      timelineFullScreen,
+                    })
+                      ? EXIT_FULL_SCREEN
+                      : i18n.FULL_SCREEN
+                  }
+                  display={fullScreen ? 'fill' : 'empty'}
+                  color="primary"
+                  data-test-subj={
+                    // a full screen button gets created for timeline and for the host page
+                    // this sets the data-test-subj for each case so that tests can differentiate between them
+                    isActiveTimeline(timelineId) ? 'full-screen-active' : 'full-screen'
+                  }
+                  iconType="fullScreen"
+                  onClick={toggleFullScreen}
+                />
+              </EuiToolTip>
+            </EventsThContent>
+          </EventsTh>
+        )}
+        {tabType !== TimelineTabs.eql && unifiedComponentsInTimelineDisabled && (
+          <EventsTh role="button" data-test-subj="timeline-sorting-fields">
+            <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+              <EuiToolTip content={i18n.SORT_FIELDS}>
+                <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
+              </EuiToolTip>
+            </EventsThContent>
+          </EventsTh>
+        )}
+
+        {showEventsSelect && (
+          <EventsTh role="button">
+            <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+              <EventsSelect checkState="unchecked" timelineId={timelineId} />
+            </EventsThContent>
+          </EventsTh>
+        )}
+      </ActionsContainer>
+    );
+  }
+);
 HeaderActionsComponent.displayName = 'HeaderActionsComponent';
 
 export const HeaderActions = React.memo(HeaderActionsComponent);

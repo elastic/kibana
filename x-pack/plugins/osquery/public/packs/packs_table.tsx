@@ -14,11 +14,10 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiToolTip,
-  EuiLoadingContent,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
 import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
@@ -28,11 +27,11 @@ import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
 import type { PackSavedObject } from './types';
 
-const UpdatedBy = styled.span`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
+const updatedAtCss = {
+  whiteSpace: 'nowrap' as const,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+};
 
 const EMPTY_ARRAY: PackSavedObject[] = [];
 
@@ -42,8 +41,8 @@ const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string })
 
 const ScheduledQueryName = React.memo(ScheduledQueryNameComponent);
 
-const renderName = (_: unknown, item: { id: string; attributes: { name: string } }) => (
-  <ScheduledQueryName id={item.id} name={item.attributes.name} />
+const renderName = (_: unknown, item: PackSavedObject) => (
+  <ScheduledQueryName id={item.saved_object_id} name={item.name} />
 );
 
 export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?: string[] }) => {
@@ -87,28 +86,25 @@ const PacksTableComponent = () => {
   const { data, isLoading } = usePacks({});
 
   const renderAgentPolicy = useCallback(
-    (agentPolicyIds) => <AgentPoliciesPopover agentPolicyIds={agentPolicyIds} />,
+    (agentPolicyIds: any) => <AgentPoliciesPopover agentPolicyIds={agentPolicyIds} />,
     []
   );
 
   const renderQueries = useCallback(
-    (queries) => <>{(queries && Object.keys(queries).length) ?? 0}</>,
+    (queries: any) => <>{(queries && Object.keys(queries).length) ?? 0}</>,
     []
   );
 
-  const renderActive = useCallback((_, item) => <ActiveStateSwitch item={item} />, []);
+  const renderActive = useCallback((_: any, item: any) => <ActiveStateSwitch item={item} />, []);
 
-  const renderUpdatedAt = useCallback((updatedAt, item) => {
+  const renderUpdatedAt = useCallback((updatedAt: any, item: any) => {
     if (!updatedAt) return '-';
 
-    const updatedBy =
-      item.attributes.updated_by !== item.attributes.created_by
-        ? ` @ ${item.attributes.updated_by}`
-        : '';
+    const updatedBy = item.updated_by !== item.created_by ? ` @ ${item.updated_by}` : '';
 
     return updatedAt ? (
       <EuiToolTip content={`${moment(updatedAt).fromNow()}${updatedBy}`}>
-        <UpdatedBy>{`${moment(updatedAt).fromNow()}${updatedBy}`}</UpdatedBy>
+        <span css={updatedAtCss}>{`${moment(updatedAt).fromNow()}${updatedBy}`}</span>
       </EuiToolTip>
     ) : (
       '-'
@@ -119,24 +115,29 @@ const PacksTableComponent = () => {
     (item) => () =>
       push('/live_queries/new', {
         form: {
-          packId: item.id,
+          packId: item.saved_object_id,
         },
       }),
     [push]
   );
 
   const renderPlayAction = useCallback(
-    (item, enabled) => {
+    (item: any, enabled: any) => {
       const playText = i18n.translate('xpack.osquery.packs.table.runActionAriaLabel', {
         defaultMessage: 'Run {packName}',
         values: {
-          packName: item.attributes.name,
+          packName: item.name,
         },
       });
 
       return (
         <EuiToolTip position="top" content={playText}>
-          <EuiButtonIcon iconType="play" onClick={handlePlayClick(item)} isDisabled={!enabled} />
+          <EuiButtonIcon
+            iconType="play"
+            onClick={handlePlayClick(item)}
+            isDisabled={!enabled}
+            data-test-subj={`play-${item.name}-button`}
+          />
         </EuiToolTip>
       );
     },
@@ -146,11 +147,11 @@ const PacksTableComponent = () => {
   const columns: Array<EuiBasicTableColumn<PackSavedObject>> = useMemo(
     () => [
       {
-        field: 'attributes.name',
+        field: 'name',
         name: i18n.translate('xpack.osquery.packs.table.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        sortable: (item) => item.attributes.name.toLowerCase(),
+        sortable: (item) => item.name.toLowerCase(),
         render: renderName,
       },
       {
@@ -162,7 +163,7 @@ const PacksTableComponent = () => {
         render: renderAgentPolicy,
       },
       {
-        field: 'attributes.queries',
+        field: 'queries',
         name: i18n.translate('xpack.osquery.packs.table.numberOfQueriesColumnTitle', {
           defaultMessage: 'Number of queries',
         }),
@@ -170,7 +171,7 @@ const PacksTableComponent = () => {
         width: '150px',
       },
       {
-        field: 'attributes.created_by',
+        field: 'created_by',
         name: i18n.translate('xpack.osquery.packs.table.createdByColumnTitle', {
           defaultMessage: 'Created by',
         }),
@@ -178,14 +179,14 @@ const PacksTableComponent = () => {
         truncateText: true,
       },
       {
-        field: 'attributes.updated_at',
+        field: 'updated_at',
         name: 'Last updated',
         sortable: (item) => (item.updated_at ? Date.parse(item.updated_at) : 0),
         truncateText: true,
         render: renderUpdatedAt,
       },
       {
-        field: 'attributes.enabled',
+        field: 'enabled',
         name: i18n.translate('xpack.osquery.packs.table.activeColumnTitle', {
           defaultMessage: 'Active',
         }),
@@ -221,7 +222,7 @@ const PacksTableComponent = () => {
   const sorting = useMemo(
     () => ({
       sort: {
-        field: 'attributes.name',
+        field: 'name',
         direction: 'asc' as const,
       },
     }),
@@ -229,7 +230,7 @@ const PacksTableComponent = () => {
   );
 
   if (isLoading) {
-    return <EuiLoadingContent lines={10} />;
+    return <EuiSkeletonText lines={10} />;
   }
 
   return (

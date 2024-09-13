@@ -9,24 +9,44 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { Status } from '../../../../../common/types/api';
 import {
   Connector,
   FeatureName,
   IngestPipelineParams,
   SyncStatus,
-} from '../../../../../common/types/connectors';
+  IngestionStatus,
+  IngestionMethod,
+} from '@kbn/search-connectors';
+
+import { Status } from '../../../../../common/types/api';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { flashSuccessToast } from '../../../shared/flash_messages';
+import { KibanaLogic } from '../../../shared/kibana';
 
+import {
+  StartAccessControlSyncApiLogic,
+  StartAccessControlSyncArgs,
+} from '../../api/connector/start_access_control_sync_api_logic';
+import {
+  StartIncrementalSyncApiLogic,
+  StartIncrementalSyncArgs,
+} from '../../api/connector/start_incremental_sync_api_logic';
 import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync_api_logic';
+import {
+  ConnectorConfigurationApiLogic,
+  PostConnectorConfigurationActions,
+} from '../../api/connector/update_connector_configuration_api_logic';
 import {
   CachedFetchIndexApiLogic,
   CachedFetchIndexApiLogicActions,
 } from '../../api/index/cached_fetch_index_api_logic';
 
 import { FetchIndexApiResponse } from '../../api/index/fetch_index_api_logic';
-import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
+import { ElasticsearchViewIndex } from '../../types';
+import {
+  hasDocumentLevelSecurityFeature,
+  hasIncrementalSyncFeature,
+} from '../../utils/connector_helpers';
 import {
   getIngestionMethod,
   getIngestionStatus,
@@ -41,6 +61,8 @@ import { CrawlerLogic } from './crawler/crawler_logic';
 import { IndexNameLogic } from './index_name_logic';
 
 type StartSyncApiActions = Actions<StartSyncArgs, {}>;
+type StartIncrementalSyncApiActions = Actions<StartIncrementalSyncArgs, {}>;
+type StartAccessControlSyncApiActions = Actions<StartAccessControlSyncArgs, {}>;
 
 export interface IndexViewActions {
   cancelSyncs(): void;
@@ -50,14 +72,19 @@ export interface IndexViewActions {
   fetchIndex: () => void;
   fetchIndexApiSuccess: CachedFetchIndexApiLogicActions['apiSuccess'];
   makeFetchIndexRequest: CachedFetchIndexApiLogicActions['makeRequest'];
+  makeStartAccessControlSyncRequest: StartAccessControlSyncApiActions['makeRequest'];
+  makeStartIncrementalSyncRequest: StartIncrementalSyncApiActions['makeRequest'];
   makeStartSyncRequest: StartSyncApiActions['makeRequest'];
   recheckIndex: () => void;
   resetFetchIndexApi: CachedFetchIndexApiLogicActions['apiReset'];
   resetRecheckIndexLoading: () => void;
+  startAccessControlSync(): void;
   startFetchIndexPoll: CachedFetchIndexApiLogicActions['startPolling'];
+  startIncrementalSync(): void;
   startSync(): void;
   stopFetchIndexPoll(): CachedFetchIndexApiLogicActions['stopPolling'];
   stopFetchIndexPoll(): void;
+  updateConfigurationApiSuccess: PostConnectorConfigurationActions['apiSuccess'];
 }
 
 export interface IndexViewValues {
@@ -69,7 +96,9 @@ export interface IndexViewValues {
   fetchIndexApiStatus: Status;
   hasAdvancedFilteringFeature: boolean;
   hasBasicFilteringFeature: boolean;
+  hasDocumentLevelSecurityFeature: boolean;
   hasFilteringFeature: boolean;
+  hasIncrementalSyncFeature: boolean;
   htmlExtraction: boolean | undefined;
   index: ElasticsearchViewIndex | undefined;
   indexData: typeof CachedFetchIndexApiLogic.values.indexData;
@@ -77,15 +106,16 @@ export interface IndexViewValues {
   ingestionMethod: IngestionMethod;
   ingestionStatus: IngestionStatus;
   isCanceling: boolean;
+  isHiddenIndex: boolean;
   isInitialLoading: typeof CachedFetchIndexApiLogic.values.isInitialLoading;
   isSyncing: boolean;
   isWaitingForSync: boolean;
   lastUpdated: string | null;
-  localSyncNowValue: boolean; // holds local value after update so UI updates correctly
   pipelineData: IngestPipelineParams | undefined;
   recheckIndexLoading: boolean;
   resetFetchIndexLoading: boolean;
   syncStatus: SyncStatus | null;
+  syncTriggeredLocally: boolean; // holds local value after update so UI updates correctly
 }
 
 export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewActions>>({
@@ -93,6 +123,8 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     fetchIndex: true,
     recheckIndex: true,
     resetRecheckIndexLoading: true,
+    startAccessControlSync: true,
+    startIncrementalSync: true,
     startSync: true,
   },
   connect: {
@@ -108,8 +140,20 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
         'startPolling as startFetchIndexPoll',
         'stopPolling as stopFetchIndexPoll',
       ],
+      ConnectorConfigurationApiLogic,
+      ['apiSuccess as updateConfigurationApiSuccess'],
       StartSyncApiLogic,
       ['apiSuccess as startSyncApiSuccess', 'makeRequest as makeStartSyncRequest'],
+      StartIncrementalSyncApiLogic,
+      [
+        'apiSuccess as startIncrementalSyncApiSuccess',
+        'makeRequest as makeStartIncrementalSyncRequest',
+      ],
+      StartAccessControlSyncApiLogic,
+      [
+        'apiSuccess as startAccessControlSyncApiSuccess',
+        'makeRequest as makeStartAccessControlSyncRequest',
+      ],
       CrawlerLogic,
       ['fetchCrawlerData'],
     ],
@@ -151,27 +195,58 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     setIndexName: ({ indexName }) => {
       actions.startFetchIndexPoll(indexName);
     },
+    startAccessControlSync: () => {
+      if (
+        isConnectorIndex(values.fetchIndexApiData) &&
+        values.hasDocumentLevelSecurityFeature &&
+        KibanaLogic.values.productFeatures.hasDocumentLevelSecurityEnabled
+      ) {
+        actions.makeStartAccessControlSyncRequest({
+          connectorId: values.fetchIndexApiData.connector.id,
+        });
+      }
+    },
+    startIncrementalSync: () => {
+      if (
+        isConnectorIndex(values.fetchIndexApiData) &&
+        values.hasIncrementalSyncFeature &&
+        KibanaLogic.values.productFeatures.hasIncrementalSyncEnabled
+      ) {
+        actions.makeStartIncrementalSyncRequest({
+          connectorId: values.fetchIndexApiData.connector.id,
+        });
+      }
+    },
     startSync: () => {
       if (isConnectorIndex(values.fetchIndexApiData)) {
         actions.makeStartSyncRequest({ connectorId: values.fetchIndexApiData.connector.id });
       }
     },
+    updateConfigurationApiSuccess: ({ configuration }) => {
+      if (isConnectorIndex(values.fetchIndexApiData)) {
+        actions.fetchIndexApiSuccess({
+          ...values.fetchIndexApiData,
+          connector: { ...values.fetchIndexApiData.connector, configuration },
+        });
+      }
+    },
   }),
   path: ['enterprise_search', 'content', 'index_view_logic'],
   reducers: {
-    localSyncNowValue: [
-      false,
-      {
-        fetchIndexApiSuccess: (_, index) =>
-          isConnectorIndex(index) ? index.connector.sync_now : false,
-        startSyncApiSuccess: () => true,
-      },
-    ],
     recheckIndexLoading: [
       false,
       {
         recheckIndex: () => true,
         resetRecheckIndexLoading: () => false,
+      },
+    ],
+    syncTriggeredLocally: [
+      false,
+      {
+        fetchIndexApiSuccess: () => false,
+        startAccessControlSync: () => true,
+        startIncrementalSync: () => true,
+        startSyncApiSuccess: () => true,
       },
     ],
   },
@@ -193,7 +268,11 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     ],
     error: [
       () => [selectors.connector],
-      (connector: Connector | undefined) => connector?.error || connector?.last_sync_error || null,
+      (connector: Connector | undefined) =>
+        connector?.error ||
+        connector?.last_sync_error ||
+        connector?.last_access_control_sync_error ||
+        null,
     ],
     hasAdvancedFilteringFeature: [
       () => [selectors.connector],
@@ -211,9 +290,17 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
             connector.features[FeatureName.FILTERING_RULES]
           : false,
     ],
+    hasDocumentLevelSecurityFeature: [
+      () => [selectors.connector],
+      (connector?: Connector) => hasDocumentLevelSecurityFeature(connector),
+    ],
     hasFilteringFeature: [
       () => [selectors.hasAdvancedFilteringFeature, selectors.hasBasicFilteringFeature],
       (advancedFeature: boolean, basicFeature: boolean) => advancedFeature || basicFeature,
+    ],
+    hasIncrementalSyncFeature: [
+      () => [selectors.connector],
+      (connector?: Connector) => hasIncrementalSyncFeature(connector),
     ],
     htmlExtraction: [
       () => [selectors.connector],
@@ -234,14 +321,20 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       () => [selectors.indexData],
       (data: FetchIndexApiResponse | undefined) => isConnectorIndex(data),
     ],
+    isHiddenIndex: [
+      () => [selectors.indexData],
+      (data: FetchIndexApiResponse | undefined) =>
+        data?.hidden || (data?.name ?? '').startsWith('.'),
+    ],
     isSyncing: [
       () => [selectors.indexData, selectors.syncStatus],
       (indexData: FetchIndexApiResponse | null, syncStatus: SyncStatus) =>
         indexData?.has_in_progress_syncs || syncStatus === SyncStatus.IN_PROGRESS,
     ],
     isWaitingForSync: [
-      () => [selectors.fetchIndexApiData, selectors.localSyncNowValue],
-      (data, localSyncNowValue) => data?.connector?.sync_now || localSyncNowValue,
+      () => [selectors.indexData, selectors.syncTriggeredLocally],
+      (indexData: FetchIndexApiResponse | null, syncTriggeredLocally: boolean) =>
+        indexData?.has_pending_syncs || syncTriggeredLocally || false,
     ],
     lastUpdated: [() => [selectors.fetchIndexApiData], (data) => getLastUpdated(data)],
     pipelineData: [

@@ -6,6 +6,8 @@
  */
 
 import {
+  EuiBadge,
+  EuiBadgeGroup,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -18,24 +20,41 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiIconTip,
-  EuiPageTemplate_Deprecated as EuiPageTemplate,
+  EuiKeyPadMenu,
+  EuiKeyPadMenuItem,
+  EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { Form, FormikProvider, useFormik, useFormikContext } from 'formik';
 import type { FunctionComponent } from 'react';
 import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { UserAvatar } from '@kbn/user-profile-components';
+import {
+  FormChangesProvider,
+  FormField,
+  FormLabel,
+  FormRow,
+  OptionalText,
+  useFormChanges,
+  useFormChangesContext,
+} from '@kbn/security-form-components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import type { DarkModeValue, UserProfileData } from '@kbn/user-profile-components';
+import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
 
-import type { AuthenticatedUser, UserProfileAvatarData } from '../../../common';
+import { createImageHandler, getRandomColor, VALID_HEX_COLOR } from './utils';
+import type { AuthenticatedUser } from '../../../common';
+import { IMAGE_FILE_TYPES } from '../../../common/constants';
 import {
   canUserChangeDetails,
   canUserChangePassword,
@@ -44,23 +63,32 @@ import {
 } from '../../../common/model';
 import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
-import {
-  FormChangesProvider,
-  useFormChanges,
-  useFormChangesContext,
-} from '../../components/form_changes';
-import { FormField } from '../../components/form_field';
-import { FormLabel } from '../../components/form_label';
-import { FormRow, OptionalText } from '../../components/form_row';
 import { ChangePasswordModal } from '../../management/users/edit_user/change_password_modal';
 import { isUserReserved } from '../../management/users/user_utils';
-import { createImageHandler, getRandomColor, IMAGE_FILE_TYPES, VALID_HEX_COLOR } from './utils';
+
+const formRowCSS = css`
+  .euiFormRow__label {
+    flex: 1;
+  }
+`;
 
 export interface UserProfileProps {
   user: AuthenticatedUser;
-  data?: {
-    avatar?: UserProfileAvatarData;
-  };
+  data?: UserProfileData;
+}
+
+export interface UserDetailsEditorProps {
+  user: AuthenticatedUser;
+}
+
+export interface UserSettingsEditorProps {
+  formik: ReturnType<typeof useUserProfileForm>;
+  isThemeOverridden: boolean;
+  isOverriddenThemeDarkMode: boolean;
+}
+
+export interface UserRoleProps {
+  user: AuthenticatedUser;
 }
 
 export interface UserProfileFormValues {
@@ -74,11 +102,14 @@ export interface UserProfileFormValues {
       color: string;
       imageUrl: string;
     };
+    userSettings: {
+      darkMode: DarkModeValue;
+    };
   };
   avatarType: 'initials' | 'image';
 }
 
-function UserDetailsEditor({ user }: { user: AuthenticatedUser }) {
+const UserDetailsEditor: FunctionComponent<UserDetailsEditorProps> = ({ user }) => {
   const { services } = useKibana<CoreStart>();
 
   const canChangeDetails = canUserChangeDetails(user, services.application.capabilities);
@@ -105,37 +136,171 @@ function UserDetailsEditor({ user }: { user: AuthenticatedUser }) {
       }
     >
       <FormRow
+        css={formRowCSS}
         label={
           <FormLabel for="user.full_name">
-            <FormattedMessage
-              id="xpack.security.accountManagement.userProfile.fullNameLabel"
-              defaultMessage="Full name"
-            />
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <FormattedMessage
+                id="xpack.security.accountManagement.userProfile.fullNameLabel"
+                defaultMessage="Full name"
+              />
+              <OptionalText />
+            </EuiFlexGroup>
           </FormLabel>
         }
-        labelAppend={<OptionalText />}
         fullWidth
       >
-        <FormField name="user.full_name" fullWidth />
+        <FormField name="user.full_name" data-test-subj={'userProfileFullName'} fullWidth />
       </FormRow>
 
       <FormRow
+        css={formRowCSS}
         label={
           <FormLabel for="user.email">
-            <FormattedMessage
-              id="xpack.security.accountManagement.userProfile.emailLabel"
-              defaultMessage="Email address"
-            />
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <FormattedMessage
+                id="xpack.security.accountManagement.userProfile.emailLabel"
+                defaultMessage="Email address"
+              />
+              <OptionalText />
+            </EuiFlexGroup>
           </FormLabel>
         }
-        labelAppend={<OptionalText />}
         fullWidth
       >
-        <FormField type="email" name="user.email" fullWidth />
+        <FormField type="email" name="user.email" data-test-subj={'userProfileEmail'} fullWidth />
       </FormRow>
     </EuiDescribedFormGroup>
   );
-}
+};
+
+const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
+  formik,
+  isThemeOverridden,
+  isOverriddenThemeDarkMode,
+}) => {
+  if (!formik.values.data) {
+    return null;
+  }
+
+  let idSelected = formik.values.data.userSettings.darkMode;
+
+  if (isThemeOverridden) {
+    if (isOverriddenThemeDarkMode) {
+      idSelected = 'dark';
+    } else {
+      idSelected = 'light';
+    }
+  }
+
+  interface ThemeKeyPadItem {
+    id: string;
+    label: string;
+    icon: string;
+  }
+
+  const themeItem = ({ id, label, icon }: ThemeKeyPadItem) => {
+    return (
+      <EuiKeyPadMenuItem
+        name={id}
+        label={label}
+        data-test-subj={`themeKeyPadItem${label}`}
+        checkable="single"
+        isSelected={idSelected === id}
+        isDisabled={isThemeOverridden}
+        onChange={() => formik.setFieldValue('data.userSettings.darkMode', id)}
+      >
+        <EuiIcon type={icon} size="l" />
+      </EuiKeyPadMenuItem>
+    );
+  };
+
+  const themeMenu = (themeOverridden: boolean) => {
+    const themeKeyPadMenu = (
+      <EuiKeyPadMenu
+        aria-label={i18n.translate(
+          'xpack.security.accountManagement.userProfile.userSettings.themeGroupDescription',
+          {
+            defaultMessage: 'Elastic theme',
+          }
+        )}
+        data-test-subj="themeMenu"
+        checkable={{
+          legend: (
+            <FormLabel for="data.userSettings.darkMode">
+              <FormattedMessage
+                id="xpack.security.accountManagement.userProfile.userSettings.theme"
+                defaultMessage="Mode"
+              />
+            </FormLabel>
+          ),
+        }}
+      >
+        {themeItem({
+          id: '',
+          label: i18n.translate('xpack.security.accountManagement.userProfile.defaultModeButton', {
+            defaultMessage: 'Space default',
+          }),
+          icon: 'spaces',
+        })}
+        {themeItem({
+          id: 'light',
+          label: i18n.translate('xpack.security.accountManagement.userProfile.lightModeButton', {
+            defaultMessage: 'Light',
+          }),
+          icon: 'sun',
+        })}
+        {themeItem({
+          id: 'dark',
+          label: i18n.translate('xpack.security.accountManagement.userProfile.darkModeButton', {
+            defaultMessage: 'Dark',
+          }),
+          icon: 'moon',
+        })}
+      </EuiKeyPadMenu>
+    );
+    return themeOverridden ? (
+      <EuiToolTip
+        data-test-subj="themeOverrideTooltip"
+        content={
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.overriddenMessage"
+            defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+          />
+        }
+      >
+        {themeKeyPadMenu}
+      </EuiToolTip>
+    ) : (
+      themeKeyPadMenu
+    );
+  };
+
+  return (
+    <EuiDescribedFormGroup
+      fullWidth
+      fieldFlexItemProps={{ style: { alignSelf: 'flex-start' } }}
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.userSettingsTitle"
+            defaultMessage="Theme"
+          />
+        </h2>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.themeFormGroupDescription"
+          defaultMessage="Select the appearance of your interface."
+        />
+      }
+    >
+      <FormRow name="data.userSettings.darkMode" fullWidth>
+        {themeMenu(isThemeOverridden)}
+      </FormRow>
+    </EuiDescribedFormGroup>
+  );
+};
 
 function UserAvatarEditor({
   user,
@@ -272,7 +437,18 @@ function UserAvatarEditor({
               )
             }
             onChange={createImageHandler((imageUrl) => {
-              formik.setFieldValue('data.avatar.imageUrl', imageUrl ?? '');
+              if (!imageUrl) {
+                formik.setFieldError(
+                  'data.avatar.imageUrl',
+                  i18n.translate(
+                    'xpack.security.accountManagement.userProfile.imageUrlRequiredError',
+                    { defaultMessage: 'Upload an image.' }
+                  )
+                );
+                formik.setFieldTouched('data.avatar.imageUrl', true);
+              } else {
+                formik.setFieldValue('data.avatar.imageUrl', imageUrl ?? '');
+              }
             })}
             validate={{
               required: i18n.translate(
@@ -430,6 +606,68 @@ function UserPasswordEditor({
   );
 }
 
+const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
+  const { euiTheme } = useEuiTheme();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
+  const closePopover = () => setIsPopoverOpen(false);
+
+  const [firstRole] = user.roles;
+  const remainingRoles = user.roles.slice(1);
+
+  const renderMoreRoles = () => {
+    const button = (
+      <EuiButtonEmpty size="xs" onClick={onButtonClick} data-test-subj="userRolesExpand">
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.rolesCountLabel"
+          defaultMessage="+{count} more"
+          values={{ count: remainingRoles.length }}
+        />
+      </EuiButtonEmpty>
+    );
+    return (
+      <EuiPopover
+        panelPaddingSize="s"
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        data-test-subj="userRolesPopover"
+      >
+        <EuiBadgeGroup
+          gutterSize="xs"
+          data-test-subj="remainingRoles"
+          style={{
+            maxWidth: '200px',
+          }}
+        >
+          {remainingRoles.map((role) => (
+            <EuiBadge color="hollow" key={role}>
+              {role}
+            </EuiBadge>
+          ))}
+        </EuiBadgeGroup>
+      </EuiPopover>
+    );
+  };
+
+  return (
+    <>
+      <div
+        style={{
+          maxWidth: euiTheme.breakpoint.m / 6,
+          display: 'inline-block',
+        }}
+      >
+        <EuiBadge key={firstRole} color="hollow" data-test-subj={`role${firstRole}`}>
+          {firstRole}
+        </EuiBadge>
+      </div>
+      {remainingRoles.length ? renderMoreRoles() : null}
+    </>
+  );
+};
+
 export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data }) => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<CoreStart>();
@@ -442,6 +680,11 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
   const isCloudUser = user.elastic_cloud_user;
 
+  const { isThemeOverridden, isOverriddenThemeDarkMode } = determineIfThemeOverridden(
+    services.settings.client,
+    services.theme
+  );
+
   const rightSideItems = [
     {
       title: (
@@ -450,7 +693,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           defaultMessage="Username"
         />
       ),
-      description: user.username as string | undefined,
+      description: user.username as string | undefined | JSX.Element,
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.usernameHelpText"
@@ -497,88 +740,127 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
     });
   }
 
-  return (
-    <FormikProvider value={formik}>
-      <FormChangesProvider value={formChanges}>
-        <Breadcrumb
-          text={i18n.translate('xpack.security.accountManagement.userProfile.title', {
-            defaultMessage: 'Profile',
-          })}
-        >
-          {showChangePasswordForm ? (
-            <ChangePasswordModal
-              username={user.username}
-              onCancel={() => setShowChangePasswordForm(false)}
-              onSuccess={() => setShowChangePasswordForm(false)}
-            />
-          ) : null}
+  rightSideItems.push({
+    title: (
+      <FormattedMessage
+        id="xpack.security.accountManagement.userProfile.rolesLabel"
+        defaultMessage="{roles, plural,
+            one {Role}
+            other {Roles}
+          }"
+        values={{ roles: user.roles.length }}
+      />
+    ),
+    description: <UserRoles user={user} />,
+    helpText: (
+      <FormattedMessage
+        id="xpack.security.accountManagement.userProfile.rolesHelpText"
+        defaultMessage="Roles control access and permissions across the Elastic Stack."
+      />
+    ),
+    testSubj: 'userRoles',
+  });
 
-          <EuiPageTemplate
-            className="eui-fullHeight"
-            pageHeader={{
-              pageTitle: (
-                <FormattedMessage
-                  id="xpack.security.accountManagement.userProfile.title"
-                  defaultMessage="Profile"
-                />
-              ),
-              pageTitleProps: { id: titleId },
-              rightSideItems: rightSideItems.reverse().map((item) => (
-                <EuiDescriptionList
-                  textStyle="reverse"
-                  listItems={[
-                    {
-                      title: (
-                        <EuiText color={euiTheme.colors.darkestShade} size="s">
-                          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-                            <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
-                            <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
-                              <EuiIconTip type="questionInCircle" content={item.helpText} />
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiText>
-                      ),
-                      description: (
-                        <span data-test-subj={item.testSubj}>
-                          {item.description || (
-                            <EuiText color={euiTheme.colors.disabledText} size="s">
-                              <FormattedMessage
-                                id="xpack.security.accountManagement.userProfile.noneProvided"
-                                defaultMessage="None provided"
-                              />
-                            </EuiText>
-                          )}
-                        </span>
-                      ),
-                    },
-                  ]}
-                  compressed
-                />
-              )),
-            }}
-            bottomBar={formChanges.count > 0 ? <SaveChangesBottomBar /> : null}
-            bottomBarProps={{ paddingSize: 'm', position: 'fixed' }}
-            restrictWidth={1000}
+  return (
+    <>
+      <FormikProvider value={formik}>
+        <FormChangesProvider value={formChanges}>
+          <Breadcrumb
+            text={i18n.translate('xpack.security.accountManagement.userProfile.title', {
+              defaultMessage: 'Profile',
+            })}
           >
-            <Form aria-labelledby={titleId}>
-              <UserDetailsEditor user={user} />
-              {isCloudUser ? null : <UserAvatarEditor user={user} formik={formik} />}
-              <UserPasswordEditor
-                user={user}
-                onShowPasswordForm={() => setShowChangePasswordForm(true)}
+            {showChangePasswordForm ? (
+              <ChangePasswordModal
+                username={user.username}
+                onCancel={() => setShowChangePasswordForm(false)}
+                onSuccess={() => setShowChangePasswordForm(false)}
               />
-            </Form>
-            <EuiSpacer />
-          </EuiPageTemplate>
-        </Breadcrumb>
-      </FormChangesProvider>
-    </FormikProvider>
+            ) : null}
+
+            <KibanaPageTemplate className="eui-fullHeight" restrictWidth={1000}>
+              <KibanaPageTemplate.Header
+                pageTitle={
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.userProfile.title"
+                    defaultMessage="Profile"
+                  />
+                }
+                id={titleId}
+                rightSideItems={rightSideItems.reverse().map((item) => (
+                  <EuiDescriptionList
+                    textStyle="reverse"
+                    listItems={[
+                      {
+                        title: (
+                          <EuiText color={euiTheme.colors.darkestShade} size="s">
+                            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+                              <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
+                              <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
+                                <EuiIconTip type="questionInCircle" content={item.helpText} />
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </EuiText>
+                        ),
+                        description: (
+                          <span data-test-subj={item.testSubj}>
+                            {item.description || (
+                              <EuiText color={euiTheme.colors.disabledText} size="s">
+                                <FormattedMessage
+                                  id="xpack.security.accountManagement.userProfile.noneProvided"
+                                  defaultMessage="None provided"
+                                />
+                              </EuiText>
+                            )}
+                          </span>
+                        ),
+                      },
+                    ]}
+                    compressed
+                  />
+                ))}
+              />
+              <KibanaPageTemplate.Section>
+                <Form aria-labelledby={titleId}>
+                  <UserDetailsEditor user={user} />
+                  {isCloudUser ? null : <UserAvatarEditor user={user} formik={formik} />}
+                  <UserPasswordEditor
+                    user={user}
+                    onShowPasswordForm={() => setShowChangePasswordForm(true)}
+                  />
+                  {isCloudUser ? null : (
+                    <UserSettingsEditor
+                      formik={formik}
+                      isThemeOverridden={isThemeOverridden}
+                      isOverriddenThemeDarkMode={isOverriddenThemeDarkMode}
+                    />
+                  )}
+                </Form>
+              </KibanaPageTemplate.Section>
+              {formChanges.count > 0 ? (
+                <KibanaPageTemplate.BottomBar
+                  paddingSize="m"
+                  position="fixed"
+                  data-test-subj={'userProfileBottomBar'}
+                >
+                  <SaveChangesBottomBar />
+                </KibanaPageTemplate.BottomBar>
+              ) : null}
+            </KibanaPageTemplate>
+          </Breadcrumb>
+        </FormChangesProvider>
+      </FormikProvider>
+    </>
   );
 };
 
 export function useUserProfileForm({ user, data }: UserProfileProps) {
   const { services } = useKibana<CoreStart>();
-  const { userProfiles, users } = useSecurityApiClients();
+  const { users } = useSecurityApiClients();
+
+  const { update, showSuccessNotification } = useUpdateUserProfile({
+    notificationSuccess: { enabled: false },
+  });
 
   const [initialValues, resetInitialValues] = useState<UserProfileFormValues>({
     user: {
@@ -592,12 +874,16 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
             color: data.avatar?.color || getUserAvatarColor(user),
             imageUrl: data.avatar?.imageUrl || '',
           },
+          userSettings: {
+            darkMode: data.userSettings?.darkMode || '',
+          },
         }
       : undefined,
     avatarType: data?.avatar?.imageUrl ? 'image' : 'initials',
   });
 
   const [validateOnBlurOrChange, setValidateOnBlurOrChange] = useState(false);
+
   const formik = useFormik<UserProfileFormValues>({
     onSubmit: async (values) => {
       const submitActions = [];
@@ -616,7 +902,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       // Update profile only if it's available for the current user.
       if (values.data) {
         submitActions.push(
-          userProfiles.update(
+          update(
             values.avatarType === 'image'
               ? values.data
               : { ...values.data, avatar: { ...values.data.avatar, imageUrl: null } }
@@ -640,11 +926,12 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       }
 
       resetInitialValues(values);
-      services.notifications.toasts.addSuccess(
-        i18n.translate('xpack.security.accountManagement.userProfile.submitSuccessTitle', {
-          defaultMessage: 'Profile updated',
-        })
-      );
+
+      let isRefreshRequired = false;
+      if (initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode) {
+        isRefreshRequired = true;
+      }
+      showSuccessNotification({ isRefreshRequired });
     },
     initialValues,
     enableReinitialize: true,
@@ -709,7 +996,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={formik.handleReset} color="ghost">
+        <EuiButtonEmpty onClick={formik.handleReset} color="text">
           <FormattedMessage
             id="xpack.security.accountManagement.userProfile.discardChangesButton"
             defaultMessage="Discard"
@@ -719,6 +1006,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
       <EuiFlexItem grow={false}>
         <EuiButton
           onClick={formik.submitForm}
+          data-test-subj="saveProfileChangesButton"
           isLoading={formik.isSubmitting}
           isDisabled={formik.submitCount > 0 && !formik.isValid}
           color="success"
@@ -735,3 +1023,16 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
     </EuiFlexGroup>
   );
 };
+
+function determineIfThemeOverridden(
+  settingsClient: IUiSettingsClient,
+  theme: ThemeServiceStart
+): {
+  isThemeOverridden: boolean;
+  isOverriddenThemeDarkMode: boolean;
+} {
+  return {
+    isThemeOverridden: settingsClient.isOverridden('theme:darkMode'),
+    isOverriddenThemeDarkMode: theme.getTheme().darkMode,
+  };
+}

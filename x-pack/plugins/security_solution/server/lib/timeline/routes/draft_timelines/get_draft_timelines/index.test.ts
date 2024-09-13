@@ -6,7 +6,7 @@
  */
 
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { TimelineType } from '../../../../../../common/types/timeline';
+import { TimelineTypeEnum } from '../../../../../../common/api/timeline';
 
 import {
   serverMock,
@@ -34,7 +34,6 @@ describe('get draft timelines', () => {
   beforeEach(() => {
     jest.resetModules();
     jest.resetAllMocks();
-    jest.restoreAllMocks();
     jest.clearAllMocks();
 
     server = serverMock.create();
@@ -82,7 +81,7 @@ describe('get draft timelines', () => {
         mockGetDraftTimeline.mockResolvedValue({
           timeline: [],
         });
-        const req = getDraftTimelinesRequest(TimelineType.default);
+        const req = getDraftTimelinesRequest(TimelineTypeEnum.default);
         const response = await server.inject(req, requestContextMock.convertContext(context));
         expect(mockPersistTimeline).toHaveBeenCalled();
         expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
@@ -106,7 +105,7 @@ describe('get draft timelines', () => {
         });
 
         const response = await server.inject(
-          getDraftTimelinesRequest(TimelineType.default),
+          getDraftTimelinesRequest(TimelineTypeEnum.default),
           requestContextMock.convertContext(context)
         );
         expect(mockPersistTimeline).not.toHaveBeenCalled();

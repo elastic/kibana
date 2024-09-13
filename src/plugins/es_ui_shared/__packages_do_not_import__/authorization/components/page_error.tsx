@@ -1,18 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiSpacer,
-  EuiEmptyPrompt,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
+import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 import { Error } from '../types';
 
 interface Props {
@@ -41,35 +38,34 @@ export const PageError: React.FunctionComponent<Props> = ({
   const message = error?.message;
 
   const errorContent = (
-    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-      <EuiEmptyPrompt
-        title={<h2>{title}</h2>}
-        body={
-          error && (
-            <>
-              {cause ? (
-                message || errorString
-              ) : (
-                <p className="eui-textBreakWord">{message || errorString}</p>
-              )}
-              {cause && (
-                <>
-                  <EuiSpacer size="s" />
-                  <ul>
-                    {cause.map((causeMsg, i) => (
-                      <li key={i}>{causeMsg}</li>
-                    ))}
-                  </ul>
-                </>
-              )}
-            </>
-          )
-        }
-        iconType="warning"
-        actions={actions}
-        {...rest}
-      />
-    </EuiPageContent>
+    <EuiPageTemplate.EmptyPrompt
+      title={<h2>{title}</h2>}
+      body={
+        error && (
+          <>
+            {cause ? (
+              message || errorString
+            ) : (
+              <p className="eui-textBreakWord">{message || errorString}</p>
+            )}
+            {cause && (
+              <>
+                <EuiSpacer size="s" />
+                <ul>
+                  {cause.map((causeMsg, i) => (
+                    <li key={i}>{causeMsg}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </>
+        )
+      }
+      iconType="warning"
+      color="danger"
+      actions={actions}
+      {...rest}
+    />
   );
 
   if (isCentered) {

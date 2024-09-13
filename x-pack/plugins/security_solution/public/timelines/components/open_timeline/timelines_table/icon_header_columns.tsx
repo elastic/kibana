@@ -6,14 +6,14 @@
  */
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import type { EuiTableFieldDataColumnType, HorizontalAlignment } from '@elastic/eui';
 import React from 'react';
 
 import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { getNotesCount, getPinnedEventCount } from '../helpers';
 import * as i18n from '../translations';
 import type { FavoriteTimelineResult, OpenTimelineResult } from '../types';
-import type { TimelineTypeLiteralWithNull } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/types/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 /**
  * Returns the columns that have icon headers
@@ -21,11 +21,11 @@ import { TimelineType } from '../../../../../common/types/timeline';
 export const getIconHeaderColumns = ({
   timelineType,
 }: {
-  timelineType: TimelineTypeLiteralWithNull;
-}) => {
+  timelineType: TimelineType | null;
+}): Array<EuiTableFieldDataColumnType<object>> => {
   const columns = {
     note: {
-      align: 'center',
+      align: 'center' as HorizontalAlignment,
       field: 'eventIdToNoteIds',
       name: (
         <EuiToolTip content={i18n.NOTES}>
@@ -40,7 +40,7 @@ export const getIconHeaderColumns = ({
       width: ACTION_COLUMN_WIDTH,
     },
     pinnedEvent: {
-      align: 'center',
+      align: 'center' as HorizontalAlignment,
       field: 'pinnedEventIds',
       name: (
         <EuiToolTip content={i18n.PINNED_EVENTS}>
@@ -57,7 +57,7 @@ export const getIconHeaderColumns = ({
       width: ACTION_COLUMN_WIDTH,
     },
     favorite: {
-      align: 'center',
+      align: 'center' as HorizontalAlignment,
       field: 'favorite',
       name: (
         <EuiToolTip content={i18n.FAVORITES}>
@@ -76,5 +76,5 @@ export const getIconHeaderColumns = ({
   };
   const templateColumns = [columns.note, columns.favorite];
   const defaultColumns = [columns.pinnedEvent, columns.note, columns.favorite];
-  return timelineType === TimelineType.template ? templateColumns : defaultColumns;
+  return timelineType === TimelineTypeEnum.template ? templateColumns : defaultColumns;
 };

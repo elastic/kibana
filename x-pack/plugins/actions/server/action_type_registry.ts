@@ -7,18 +7,19 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { RunContext, TaskManagerSetupContract, TaskCost } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
 import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
 import {
   ActionType,
-  PreConfiguredAction,
+  InMemoryConnector,
   ActionTypeConfig,
   ActionTypeSecrets,
   ActionTypeParams,
 } from './types';
+import { isBidirectionalConnectorType } from './lib/bidirectional_connectors';
 
 export interface ActionTypeRegistryOpts {
   licensing: LicensingPluginSetup;
@@ -26,7 +27,7 @@ export interface ActionTypeRegistryOpts {
   taskRunnerFactory: TaskRunnerFactory;
   actionsConfigUtils: ActionsConfigurationUtilities;
   licenseState: ILicenseState;
-  preconfiguredActions: PreConfiguredAction[];
+  inMemoryConnectors: InMemoryConnector[];
 }
 
 export class ActionTypeRegistry {
@@ -35,7 +36,7 @@ export class ActionTypeRegistry {
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly actionsConfigUtils: ActionsConfigurationUtilities;
   private readonly licenseState: ILicenseState;
-  private readonly preconfiguredActions: PreConfiguredAction[];
+  private readonly inMemoryConnectors: InMemoryConnector[];
   private readonly licensing: LicensingPluginSetup;
 
   constructor(constructorParams: ActionTypeRegistryOpts) {
@@ -43,7 +44,7 @@ export class ActionTypeRegistry {
     this.taskRunnerFactory = constructorParams.taskRunnerFactory;
     this.actionsConfigUtils = constructorParams.actionsConfigUtils;
     this.licenseState = constructorParams.licenseState;
-    this.preconfiguredActions = constructorParams.preconfiguredActions;
+    this.inMemoryConnectors = constructorParams.inMemoryConnectors;
     this.licensing = constructorParams.licensing;
   }
 
@@ -78,21 +79,53 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Returns true if action type is enabled or it is a preconfigured action type.
+   * Returns true if action type is enabled or preconfigured.
+   * An action type can be disabled but used with a preconfigured action.
+   * This does not apply to system actions as those can be disabled.
    */
   public isActionExecutable(
     actionId: string,
     actionTypeId: string,
     options: { notifyUsage: boolean } = { notifyUsage: false }
   ) {
+    const validLicense = this.licenseState.isLicenseValidForActionType(
+      this.get(actionTypeId),
+      options
+    ).isValid;
+    if (validLicense === false) return false;
+
     const actionTypeEnabled = this.isActionTypeEnabled(actionTypeId, options);
+    const inMemoryConnector = this.inMemoryConnectors.find(
+      (connector) => connector.id === actionId
+    );
+
     return (
       actionTypeEnabled ||
       (!actionTypeEnabled &&
-        this.preconfiguredActions.find(
-          (preconfiguredAction) => preconfiguredAction.id === actionId
-        ) !== undefined)
+        (inMemoryConnector?.isPreconfigured === true || inMemoryConnector?.isSystemAction === true))
     );
+  }
+
+  /**
+   * Returns true if the action type is a system action type
+   */
+  public isSystemActionType = (actionTypeId: string): boolean =>
+    Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
+
+  /**
+   * Returns the kibana privileges of a system action type
+   */
+  public getSystemActionKibanaPrivileges<Params extends ActionTypeParams = ActionTypeParams>(
+    actionTypeId: string,
+    params?: Params
+  ): string[] {
+    const actionType = this.actionTypes.get(actionTypeId);
+
+    if (!actionType?.isSystemActionType) {
+      return [];
+    }
+
+    return actionType?.getKibanaPrivileges?.({ params }) ?? [];
   }
 
   /**
@@ -142,6 +175,15 @@ export class ActionTypeRegistry {
       );
     }
 
+    if (!actionType.isSystemActionType && actionType.getKibanaPrivileges) {
+      throw new Error(
+        i18n.translate('xpack.actions.actionTypeRegistry.register.invalidKibanaPrivileges', {
+          defaultMessage:
+            'Kibana privilege authorization is only supported for system action types',
+        })
+      );
+    }
+
     const maxAttempts = this.actionsConfigUtils.getMaxAttempts({
       actionTypeId: actionType.id,
       actionTypeMaxAttempts: actionType.maxAttempts,
@@ -152,6 +194,7 @@ export class ActionTypeRegistry {
       [`actions:${actionType.id}`]: {
         title: actionType.name,
         maxAttempts,
+        cost: TaskCost.Tiny,
         createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
       },
     });
@@ -190,19 +233,26 @@ export class ActionTypeRegistry {
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
   public list(featureId?: string): CommonActionType[] {
-    return Array.from(this.actionTypes)
-      .filter(([_, actionType]) =>
-        featureId ? actionType.supportedFeatureIds.includes(featureId) : true
-      )
-      .map(([actionTypeId, actionType]) => ({
-        id: actionTypeId,
-        name: actionType.name,
-        minimumLicenseRequired: actionType.minimumLicenseRequired,
-        enabled: this.isActionTypeEnabled(actionTypeId),
-        enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
-        enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
-        supportedFeatureIds: actionType.supportedFeatureIds,
-      }));
+    return (
+      Array.from(this.actionTypes)
+        .filter(([_, actionType]) =>
+          featureId ? actionType.supportedFeatureIds.includes(featureId) : true
+        )
+        // Temporarily don't return SentinelOne and Crowdstrike connector for Security Solution Rule Actions
+        .filter(([actionTypeId]) =>
+          featureId ? !isBidirectionalConnectorType(actionTypeId) : true
+        )
+        .map(([actionTypeId, actionType]) => ({
+          id: actionTypeId,
+          name: actionType.name,
+          minimumLicenseRequired: actionType.minimumLicenseRequired,
+          enabled: this.isActionTypeEnabled(actionTypeId),
+          enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
+          enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
+          supportedFeatureIds: actionType.supportedFeatureIds,
+          isSystemActionType: !!actionType.isSystemActionType,
+        }))
+    );
   }
 
   /**

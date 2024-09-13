@@ -16,7 +16,9 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
+import { initUpdateObjectsSpacesApi } from './update_objects_spaces';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -28,7 +30,6 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { initUpdateObjectsSpacesApi } from './update_objects_spaces';
 
 describe('update_objects_spaces', () => {
   const spacesSavedObjects = createSpaces();
@@ -43,7 +44,7 @@ describe('update_objects_spaces', () => {
     const { savedObjects, savedObjectsClient } = createMockSavedObjectsService(spaces);
     coreStart.savedObjects = savedObjects;
 
-    const clientService = new SpacesClientService(jest.fn());
+    const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -55,18 +56,19 @@ describe('update_objects_spaces', () => {
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
       spacesClientService: clientServiceStart,
     });
     initUpdateObjectsSpacesApi({
-      externalRouter: router,
+      router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
+      isServerless: false,
     });
 
     const [[updateObjectsSpaces, updateObjectsSpacesRouteHandler]] = router.post.mock.calls;

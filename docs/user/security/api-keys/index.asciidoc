@@ -3,18 +3,17 @@
 === API Keys
 
 
-API keys enable you to create secondary credentials so that you can send
-requests on behalf of a user. Secondary credentials have
-the same or lower access rights.
+API keys are security mechanisms used to authenticate and authorize access to {es} resources. They ensure that only authorized users or applications interact with {es}.
 
-For example, if you extract data from an {es} cluster on a daily
-basis, you might create an API key tied to your credentials,
-configure it with minimum access,
-and then put the API credentials into a cron job.
-Or, you might create API keys to automate ingestion of new data from
-remote sources, without a live user interaction.
+For example, if you extract data from an {es} cluster on a daily basis, you might create an API key tied to your credentials, configure it with minimum access, and then put the API credentials into a cron job. Or you might create API keys to automate ingestion of new data from remote sources, without a live user interaction.
 
-To manage API keys, open the main menu, then click *Stack Management > API Keys*.
+You can use {kib} to manage your different API keys:
+
+* User API key: allows external services to access the Elastic Stack on behalf of a user.
+* Cross-cluster API key: allows other clusters to connect to this cluster.
+* Managed API key: created and managed by Kibana to run background tasks.
+
+To manage API keys, open the main menu, then click *Stack Management > Security > API Keys*.
 
 [role="screenshot"]
 image:images/api-keys.png["API Keys UI"]
@@ -23,51 +22,45 @@ image:images/api-keys.png["API Keys UI"]
 [[api-keys-security-privileges]]
 === Security privileges
 
-You must have the `manage_security`, `manage_api_key`, or the `manage_own_api_key` 
-cluster privileges to use API keys in {kib}.  API keys can also be seen in a readonly view with access to the page and the `read_security` cluster privilege. To manage roles, open the main menu, then click 
-*Stack Management > Roles*, or use the <<role-management-api, {kib} Role Management API>>. 
+* To use API keys in {kib}, you must have the `manage_security`, `manage_api_key`, or the `manage_own_api_key` cluster privileges.
+* To delete API keys, you must have the `manage_api_key` or `manage_own_api_key` privileges.
+* To create or update a *user API key*, you must have the `manage_api_key` or the `manage_own_api_key` privilege.
+* To create or update a *cross-cluster API key*, you must have the `manage_security` privilege and an Enterprise license.
+* To have a read-only view on the API keys, you must have access to the page and the `read_security` cluster privilege.
 
+To manage roles, open the main menu, then click  *Stack Management > Security > Roles*, or use the <<role-management-api, {kib} Role Management API>>.
 
 [float]
 [[create-api-key]]
 === Create an API key
 
-To create an API key, open the main menu, then click *Stack Management > API Keys > Create API key*.
+To create an API key, open the main menu, then click *Stack Management > Security > API Keys > Create API key*.
 
 [role="screenshot"]
-image:images/create-api-key.png["Create API Key UI"]
-
-Once created, you can copy the API key (Base64 encoded) and use it to send requests to {es} on your behalf. For example:
-
-[source,bash]
-curl --location --request GET 'http://localhost:5601/api/security/role' \
---header 'Content-Type: application/json;charset=UTF-8' \
---header 'kbn-xsrf: true' \
---header 'Authorization: ApiKey aVZlLUMzSUJuYndxdDJvN0k1bU46aGxlYUpNS2lTa2FKeVZua1FnY1VEdw==' \
+image:images/create-ccr-api-key.png["Create API Key UI"]
 
 
-[IMPORTANT]
-============================================================================
-API keys are intended for programmatic access to {kib} and {es}. Do not use API keys to authenticate access via a web browser.
-============================================================================
+Refer to the {ref}/security-api-create-api-key.html[create API key] documentation to learn more about creating user API keys.
+
+Refer to the {ref}/security-api-create-cross-cluster-api-key.html[create cross-cluster API key] documentation to learn more about creating cross-cluster API keys.
 
 [float]
 [[udpate-api-key]]
 === Update an API key
 
-To update an API key, open the main menu, click *Stack Management > API Keys*, and then click on the name of the key.
+To update an API key, open the main menu, click *Stack Management > Security > API Keys*, and then click on the name of the key. You cannot update the name or the type of API key.
 
-You can only update the `Restrict privileges` and `metadata` fields.
+Refer to the {ref}/security-api-update-api-key.html[update API key] documentation to learn more about updating user API keys.
+
+Refer to the {ref}/security-api-update-cross-cluster-api-key.html[update cross-cluster API key] documentation to learn more about updating cross-cluster API keys.
 
 [float]
 [[view-api-keys]]
 === View and delete API keys
 
-The *API Keys* feature in Kibana lists your API keys, including the name, date created, and status. If an API key expires, its status changes from `Active` to `Expired`.
+The *API Keys* feature in {kib} lists your API keys, including the name, date created, and status. If an API key expires, its status changes from `Active` to `Expired`.
 
-If you have `manage_security` or `manage_api_key` permissions,
-you can view the API keys of all users, and see which API key was
-created by which user in which realm.
+If you have `manage_security` or `manage_api_key` permissions, you can view the API keys of all users, and see which API key was created by which user in which realm.
 If you have only the `manage_own_api_key` permission, you see only a list of your own keys.
 
-You can delete API keys individually or in bulk.
+You can delete API keys individually or in bulk, but you need the `manage_api_keys` or `manage_own_api_key` privileges. 

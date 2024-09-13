@@ -5,93 +5,67 @@
  * 2.0.
  */
 
-import { isEmpty, debounce } from 'lodash/fp';
-import { useState, useEffect, useRef } from 'react';
-import type { HttpSetup, ToastsApi } from '@kbn/core/public';
-import type { ActionConnector } from '../../../../common/api';
+import { useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import type { HttpSetup } from '@kbn/core/public';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { useQuery } from '@tanstack/react-query';
+import { isEmpty, noop } from 'lodash';
+import { SEARCH_DEBOUNCE_MS } from '../../../../common/constants';
+import type { ActionConnector } from '../../../../common/types/domain';
 import { getIssues } from './api';
 import type { Issues } from './types';
 import * as i18n from './translations';
+import { useCasesToast } from '../../../common/use_cases_toast';
+import type { ServerError } from '../../../types';
+import { connectorsQueriesKeys } from '../constants';
 
 interface Props {
   http: HttpSetup;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
-  actionConnector?: ActionConnector;
   query: string | null;
+  actionConnector?: ActionConnector;
+  onDebounce?: () => void;
 }
 
-export interface UseGetIssues {
-  issues: Issues;
-  isLoading: boolean;
-}
+export const useGetIssues = ({ http, actionConnector, query, onDebounce = noop }: Props) => {
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
 
-export const useGetIssues = ({
-  http,
-  actionConnector,
-  toastNotifications,
-  query,
-}: Props): UseGetIssues => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [issues, setIssues] = useState<Issues>([]);
-  const didCancel = useRef(false);
-  const abortCtrl = useRef(new AbortController());
+  useDebounce(
+    () => {
+      setDebouncedQuery(query);
+      onDebounce();
+    },
+    SEARCH_DEBOUNCE_MS,
+    [query]
+  );
 
-  useEffect(() => {
-    const fetchData = debounce(500, async () => {
-      if (!actionConnector || isEmpty(query)) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        abortCtrl.current = new AbortController();
-        setIsLoading(true);
-
-        const res = await getIssues({
-          http,
-          signal: abortCtrl.current.signal,
-          connectorId: actionConnector.id,
-          title: query ?? '',
-        });
-
-        if (!didCancel.current) {
-          setIsLoading(false);
-          setIssues(res.data ?? []);
-          if (res.status && res.status === 'error') {
-            toastNotifications.addDanger({
-              title: i18n.ISSUES_API_ERROR,
-              text: `${res.serviceMessage ?? res.message}`,
-            });
-          }
+  const { showErrorToast } = useCasesToast();
+  return useQuery<ActionTypeExecutorResult<Issues>, ServerError>(
+    connectorsQueriesKeys.jiraGetIssues(actionConnector?.id ?? '', debouncedQuery ?? ''),
+    ({ signal }) => {
+      return getIssues({
+        http,
+        signal,
+        connectorId: actionConnector?.id ?? '',
+        title: query ?? '',
+      });
+    },
+    {
+      enabled: Boolean(actionConnector) && !isEmpty(query),
+      staleTime: 60 * 1000, // one minute
+      onSuccess: (res) => {
+        if (res.status && res.status === 'error') {
+          showErrorToast(new Error(i18n.ISSUES_API_ERROR), {
+            title: i18n.ISSUES_API_ERROR,
+            toastMessage: `${res.serviceMessage ?? res.message}`,
+          });
         }
-      } catch (error) {
-        if (!didCancel.current) {
-          setIsLoading(false);
-          if (error.name !== 'AbortError') {
-            toastNotifications.addDanger({
-              title: i18n.ISSUES_API_ERROR,
-              text: error.message,
-            });
-          }
-        }
-      }
-    });
-
-    didCancel.current = false;
-    abortCtrl.current.abort();
-    fetchData();
-
-    return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
-    };
-  }, [http, actionConnector, toastNotifications, query]);
-
-  return {
-    issues,
-    isLoading,
-  };
+      },
+      onError: (error: ServerError) => {
+        showErrorToast(error, { title: i18n.ISSUES_API_ERROR });
+      },
+    }
+  );
 };
+
+export type UseGetIssues = ReturnType<typeof useGetIssues>;

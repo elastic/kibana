@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { MobileDevice, apm, ApmFields } from '@kbn/apm-synthtrace-client';
@@ -15,10 +16,21 @@ import type {
 } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 type DeviceMetadata = DeviceInfo & OSInfo;
+
+const modelIdentifiersWithCrashes = [
+  'SM-G930F',
+  'HUAWEI P2-0000',
+  'Pixel 3a',
+  'LG K10',
+  'iPhone11,8',
+  'Watch6,8',
+  'iPad12,2',
+];
 
 const ANDROID_DEVICES: DeviceMetadata[] = [
   {
@@ -318,7 +330,7 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
   const { numDevices = 10 } = scenarioOpts || {};
 
   return {
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const androidDevices = [...Array(numDevices).keys()].map((index) => {
         const deviceMetadata = ANDROID_DEVICES[randomInt(ANDROID_DEVICES.length)];
         const geoNetwork = GEO_AND_NETWORK[randomInt(GEO_AND_NETWORK.length)];
@@ -354,34 +366,40 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
           device.startNewSession();
           const framework =
             device.fields['device.manufacturer'] === 'Apple' ? 'iOS' : 'Android Activity';
+          const couldCrash = modelIdentifiersWithCrashes.includes(
+            device.fields['device.model.identifier'] ?? ''
+          );
+          const startTx = device
+            .transaction('Start View - View Appearing', framework)
+            .timestamp(timestamp)
+            .duration(500)
+            .success()
+            .children(
+              device
+                .span({
+                  spanName: 'onCreate',
+                  spanType: 'app',
+                  spanSubtype: 'external',
+                  'service.target.type': 'http',
+                  'span.destination.service.resource': 'external',
+                })
+                .duration(50)
+                .success()
+                .timestamp(timestamp + 20),
+              device
+                .httpSpan({
+                  spanName: 'GET backend:1234',
+                  httpMethod: 'GET',
+                  httpUrl: 'https://backend:1234/api/start',
+                })
+                .duration(800)
+                .failure()
+                .timestamp(timestamp + 400)
+            );
           return [
-            device
-              .transaction('Start View - View Appearing', framework)
-              .timestamp(timestamp)
-              .duration(500)
-              .success()
-              .children(
-                device
-                  .span({
-                    spanName: 'onCreate',
-                    spanType: 'app',
-                    spanSubtype: 'external',
-                    'service.target.type': 'http',
-                    'span.destination.service.resource': 'external',
-                  })
-                  .duration(50)
-                  .success()
-                  .timestamp(timestamp + 20),
-                device
-                  .httpSpan({
-                    spanName: 'GET backend:1234',
-                    httpMethod: 'GET',
-                    httpUrl: 'https://backend:1234/api/start',
-                  })
-                  .duration(800)
-                  .failure()
-                  .timestamp(timestamp + 400)
-              ),
+            couldCrash && index % 2 === 0
+              ? startTx.errors(device.crash({ message: 'error' }).timestamp(timestamp))
+              : startTx,
             device
               .transaction('Second View - View Appearing', framework)
               .timestamp(10000 + timestamp)
@@ -418,7 +436,23 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
         });
       };
 
-      return [...androidDevices, ...iOSDevices].map((device) => sessionTransactions(device));
+      const appLaunchMetrics = (device: MobileDevice) => {
+        return clickRate.generator((timestamp, index) =>
+          device
+            .appMetrics({
+              'application.launch.time': 100 * (index + 1),
+            })
+            .timestamp(timestamp)
+        );
+      };
+
+      return withClient(apmEsClient, [
+        ...androidDevices.flatMap((device) => [
+          sessionTransactions(device),
+          appLaunchMetrics(device),
+        ]),
+        ...iOSDevices.map((device) => sessionTransactions(device)),
+      ]);
     },
   };
 };

@@ -11,32 +11,34 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFormRow,
-  EuiSuperSelect,
-  EuiRange,
-  EuiHorizontalRule,
+  EuiComboBox,
+  EuiIcon,
+  EuiFieldNumber,
   EuiButtonGroup,
-  EuiColorPicker,
-  euiPaletteColorBlind,
-  EuiToolTip,
+  EuiFlexItem,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import type { Position } from '@elastic/charts';
-import type { PaletteRegistry } from '@kbn/coloring';
+import { LegendValue, Position } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { useDebouncedValue } from '@kbn/visualization-utils';
+import { type PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { PieLayerState, PieVisualizationState, SharedPieLayerState } from '../../../common/types';
-import { LegendDisplay } from '../../../common/constants';
-import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../../types';
-import {
-  ToolbarPopover,
-  LegendSettingsPopover,
-  useDebouncedValue,
-  PalettePicker,
-} from '../../shared_components';
+import { EmptySizeRatios, PieVisualizationState, SharedPieLayerState } from '../../../common/types';
+import { LegendDisplay, NumberDisplay } from '../../../common/constants';
+import { VisualizationToolbarProps } from '../../types';
+import { ToolbarPopover, LegendSettingsPopover } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
-import { shouldShowValuesInLegend } from './render_helpers';
-import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { getDefaultColorForMultiMetricDimension, isCollapsed } from './visualization';
+import { getLegendStats } from './render_helpers';
+
+const partitionLegendValues = [
+  {
+    value: LegendValue.Value,
+    label: i18n.translate('xpack.lens.shared.legendValues.value', {
+      defaultMessage: 'Value',
+    }),
+  },
+];
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -66,8 +68,12 @@ const legendOptions: Array<{
   },
 ];
 
-const emptySizeRatioLabel = i18n.translate('xpack.lens.pieChart.emptySizeRatioLabel', {
-  defaultMessage: 'Inner area size',
+const PANEL_STYLE = {
+  width: '500px',
+};
+
+const emptySizeRatioLabel = i18n.translate('xpack.lens.pieChart.donutHole', {
+  defaultMessage: 'Donut hole',
 });
 
 export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
@@ -95,36 +101,36 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   );
 
   const onCategoryDisplayChange = useCallback(
-    (option) => onStateChange({ categoryDisplay: option }),
+    (option: unknown) => onStateChange({ categoryDisplay: option }),
     [onStateChange]
   );
 
   const onNumberDisplayChange = useCallback(
-    (option) => onStateChange({ numberDisplay: option }),
+    (option: unknown) => onStateChange({ numberDisplay: option }),
     [onStateChange]
   );
 
   const onPercentDecimalsChange = useCallback(
-    (option) => {
+    (option: unknown) => {
       onStateChange({ percentDecimals: option });
     },
     [onStateChange]
   );
 
   const onLegendDisplayChange = useCallback(
-    (optionId) => {
+    (optionId: unknown) => {
       onStateChange({ legendDisplay: legendOptions.find(({ id }) => id === optionId)!.value });
     },
     [onStateChange]
   );
 
   const onLegendPositionChange = useCallback(
-    (id) => onStateChange({ legendPosition: id as Position }),
+    (id: unknown) => onStateChange({ legendPosition: id as Position }),
     [onStateChange]
   );
 
   const onNestedLegendChange = useCallback(
-    (id) => onStateChange({ nestedLegend: !layer.nestedLegend }),
+    (id: unknown) => onStateChange({ nestedLegend: !layer.nestedLegend }),
     [layer, onStateChange]
   );
 
@@ -134,28 +140,43 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   }, [layer, onStateChange]);
 
   const onLegendMaxLinesChange = useCallback(
-    (val) => onStateChange({ legendMaxLines: val }),
+    (val: unknown) => onStateChange({ legendMaxLines: val }),
     [onStateChange]
   );
 
   const onLegendSizeChange = useCallback(
-    (val) => onStateChange({ legendSize: val }),
+    (val: unknown) => onStateChange({ legendSize: val }),
     [onStateChange]
   );
 
-  const onValueInLegendChange = useCallback(() => {
-    onStateChange({
-      showValuesInLegend: !shouldShowValuesInLegend(layer, state.shape),
-    });
-  }, [layer, state.shape, onStateChange]);
+  const onLegendStatsChange = useCallback(
+    (legendStats: unknown) => {
+      onStateChange({ legendStats });
+    },
+    [onStateChange]
+  );
 
   const onEmptySizeRatioChange = useCallback(
-    (sizeId) => {
-      const emptySizeRatio = emptySizeRatioOptions?.find(({ id }) => id === sizeId)?.value;
-      onStateChange({ emptySizeRatio });
+    ([option]: Array<EuiComboBoxOptionOption<string>>) => {
+      if (option.value === 'none') {
+        setState({ ...state, shape: 'pie', layers: [{ ...layer, emptySizeRatio: undefined }] });
+      } else {
+        const emptySizeRatio = emptySizeRatioOptions?.find(({ id }) => id === option.value)?.value;
+        setState({
+          ...state,
+          shape: 'donut',
+          layers: [{ ...layer, emptySizeRatio }],
+        });
+      }
     },
-    [emptySizeRatioOptions, onStateChange]
+    [emptySizeRatioOptions, layer, setState, state]
   );
+  const selectedOption = emptySizeRatioOptions
+    ? emptySizeRatioOptions.find(
+        ({ value }) =>
+          value === (state.shape === 'pie' ? 0 : layer.emptySizeRatio ?? EmptySizeRatios.SMALL)
+      )
+    : undefined;
 
   if (!layer) {
     return null;
@@ -167,121 +188,137 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   ).truncateText;
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-      <ToolbarPopover
-        title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
-          defaultMessage: 'Labels',
-        })}
-        isDisabled={Boolean(isToolbarPopoverDisabled)}
-        type="labels"
-        groupPosition="left"
-        buttonDataTestSubj="lnsLabelsButton"
-      >
-        {categoryOptions.length ? (
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.pieChart.labelPositionLabel', {
-              defaultMessage: 'Position',
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      {emptySizeRatioOptions?.length && selectedOption ? (
+        <EuiFlexItem grow={false}>
+          <ToolbarPopover
+            title={i18n.translate('xpack.lens.pieChart.appearanceLabel', {
+              defaultMessage: 'Appearance',
             })}
-            fullWidth
-            display="columnCompressed"
+            type="visualOptions"
+            buttonDataTestSubj="lnsVisualOptionsButton"
+            data-test-subj="lnsVisualOptionsPopover"
           >
-            <EuiSuperSelect
-              compressed
-              valueOfSelected={layer.categoryDisplay}
-              options={categoryOptions}
-              onChange={onCategoryDisplayChange}
-            />
-          </EuiFormRow>
-        ) : null}
-
-        {numberOptions.length && layer.categoryDisplay !== 'hide' ? (
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.pieChart.numberLabels', {
-              defaultMessage: 'Values',
-            })}
-            fullWidth
-            display="columnCompressed"
-          >
-            <EuiSuperSelect
-              compressed
-              valueOfSelected={layer.numberDisplay}
-              options={numberOptions}
-              onChange={onNumberDisplayChange}
-            />
-          </EuiFormRow>
-        ) : null}
-
-        {numberOptions.length + categoryOptions.length ? <EuiHorizontalRule margin="s" /> : null}
-
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.pieChart.percentDecimalsLabel', {
-            defaultMessage: 'Maximum decimal places for percent',
-          })}
-          fullWidth
-          display="rowCompressed"
-        >
-          <DecimalPlaceSlider
-            value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
-            setValue={onPercentDecimalsChange}
-          />
-        </EuiFormRow>
-      </ToolbarPopover>
-      {emptySizeRatioOptions?.length ? (
-        <ToolbarPopover
-          title={i18n.translate('xpack.lens.pieChart.visualOptionsLabel', {
-            defaultMessage: 'Visual options',
-          })}
-          type="visualOptions"
-          groupPosition="center"
-          buttonDataTestSubj="lnsVisualOptionsButton"
-        >
-          <EuiFormRow label={emptySizeRatioLabel} display="columnCompressed" fullWidth>
-            <EuiButtonGroup
-              isFullWidth
-              name="emptySizeRatio"
-              buttonSize="compressed"
-              legend={emptySizeRatioLabel}
-              options={emptySizeRatioOptions}
-              idSelected={
-                emptySizeRatioOptions.find(({ value }) => value === layer.emptySizeRatio)?.id ??
-                'emptySizeRatioOption-small'
-              }
-              onChange={onEmptySizeRatioChange}
-              data-test-subj="lnsEmptySizeRatioButtonGroup"
-            />
-          </EuiFormRow>
-        </ToolbarPopover>
+            <EuiFormRow label={emptySizeRatioLabel} display="columnCompressed" fullWidth>
+              <EuiComboBox
+                fullWidth
+                compressed
+                data-test-subj="lnsEmptySizeRatioOption"
+                aria-label={i18n.translate('xpack.lens.pieChart.donutHole', {
+                  defaultMessage: 'Donut hole',
+                })}
+                onChange={onEmptySizeRatioChange}
+                isClearable={false}
+                options={emptySizeRatioOptions.map(({ id, label, icon }) => ({
+                  value: id,
+                  label,
+                  prepend: icon ? <EuiIcon type={icon} /> : undefined,
+                }))}
+                selectedOptions={[{ value: selectedOption.id, label: selectedOption.label }]}
+                singleSelection={{ asPlainText: true }}
+                prepend={selectedOption?.icon ? <EuiIcon type={selectedOption.icon} /> : undefined}
+              />
+            </EuiFormRow>
+          </ToolbarPopover>
+        </EuiFlexItem>
       ) : null}
-      <LegendSettingsPopover
-        legendOptions={legendOptions}
-        mode={layer.legendDisplay}
-        onDisplayChange={onLegendDisplayChange}
-        valueInLegend={shouldShowValuesInLegend(layer, state.shape)}
-        renderValueInLegendSwitch={
-          'showValues' in PartitionChartsMeta[state.shape]?.legend ?? false
-        }
-        onValueInLegendChange={onValueInLegendChange}
-        position={layer.legendPosition}
-        onPositionChange={onLegendPositionChange}
-        renderNestedLegendSwitch={
-          !PartitionChartsMeta[state.shape]?.legend.hideNestedLegendSwitch &&
-          layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0) > 1
-        }
-        nestedLegend={Boolean(layer.nestedLegend)}
-        onNestedLegendChange={onNestedLegendChange}
-        shouldTruncate={layer.truncateLegend ?? defaultTruncationValue}
-        onTruncateLegendChange={onTruncateLegendChange}
-        maxLines={layer?.legendMaxLines}
-        onMaxLinesChange={onLegendMaxLinesChange}
-        legendSize={legendSize}
-        onLegendSizeChange={onLegendSizeChange}
-        showAutoLegendSizeOption={hadAutoLegendSize}
-      />
+      <EuiFlexItem grow={false}>
+        <ToolbarPopover
+          title={i18n.translate('xpack.lens.pieChart.titlesAndTextLabel', {
+            defaultMessage: 'Titles and text',
+          })}
+          isDisabled={Boolean(isToolbarPopoverDisabled)}
+          type="titlesAndText"
+          panelStyle={PANEL_STYLE}
+        >
+          {categoryOptions.length ? (
+            <EuiFormRow
+              label={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
+                defaultMessage: 'Slice labels',
+              })}
+              fullWidth
+              display="columnCompressed"
+            >
+              <EuiButtonGroup
+                legend={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
+                  defaultMessage: 'Slice labels',
+                })}
+                options={categoryOptions}
+                idSelected={layer.categoryDisplay}
+                onChange={onCategoryDisplayChange}
+                buttonSize="compressed"
+                isFullWidth
+              />
+            </EuiFormRow>
+          ) : null}
+
+          {numberOptions.length && layer.categoryDisplay !== 'hide' ? (
+            <>
+              <EuiFormRow
+                label={i18n.translate('xpack.lens.pieChart.sliceValues', {
+                  defaultMessage: 'Slice values',
+                })}
+                fullWidth
+                display="columnCompressed"
+              >
+                <EuiButtonGroup
+                  legend={i18n.translate('xpack.lens.pieChart.sliceValues', {
+                    defaultMessage: 'Slice values',
+                  })}
+                  options={numberOptions}
+                  idSelected={layer.numberDisplay}
+                  onChange={onNumberDisplayChange}
+                  buttonSize="compressed"
+                  isFullWidth
+                />
+              </EuiFormRow>
+              {layer.numberDisplay === NumberDisplay.PERCENT && (
+                <EuiFormRow label=" " fullWidth display="columnCompressed">
+                  <DecimalPlaceInput
+                    value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
+                    setValue={onPercentDecimalsChange}
+                  />
+                </EuiFormRow>
+              )}
+            </>
+          ) : null}
+        </ToolbarPopover>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <LegendSettingsPopover<PartitionLegendValue>
+          groupPosition={'none'}
+          legendOptions={legendOptions}
+          mode={layer.legendDisplay}
+          onDisplayChange={onLegendDisplayChange}
+          legendStats={getLegendStats(layer, state.shape)}
+          allowedLegendStats={
+            PartitionChartsMeta[state.shape]?.legend.defaultLegendStats
+              ? partitionLegendValues
+              : undefined
+          }
+          onLegendStatsChange={onLegendStatsChange}
+          position={layer.legendPosition}
+          onPositionChange={onLegendPositionChange}
+          renderNestedLegendSwitch={
+            !PartitionChartsMeta[state.shape]?.legend.hideNestedLegendSwitch &&
+            layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0) > 1
+          }
+          nestedLegend={Boolean(layer.nestedLegend)}
+          onNestedLegendChange={onNestedLegendChange}
+          shouldTruncate={layer.truncateLegend ?? defaultTruncationValue}
+          onTruncateLegendChange={onTruncateLegendChange}
+          maxLines={layer?.legendMaxLines}
+          onMaxLinesChange={onLegendMaxLinesChange}
+          legendSize={legendSize}
+          onLegendSizeChange={onLegendSizeChange}
+          showAutoLegendSizeOption={hadAutoLegendSize}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
-const DecimalPlaceSlider = ({
+const DecimalPlaceInput = ({
   value,
   setValue,
 }: {
@@ -296,12 +333,14 @@ const DecimalPlaceSlider = ({
     { allowFalsyValue: true }
   );
   return (
-    <EuiRange
+    <EuiFieldNumber
       data-test-subj="indexPattern-dimension-formatDecimals"
       value={inputValue}
       min={0}
       max={10}
-      showInput
+      prepend={i18n.translate('xpack.lens.pieChart.decimalPlaces', {
+        defaultMessage: 'Decimal places',
+      })}
       compressed
       onChange={(e) => {
         handleInputChange(Number(e.currentTarget.value));
@@ -309,183 +348,3 @@ const DecimalPlaceSlider = ({
     />
   );
 };
-
-type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
-  paletteService: PaletteRegistry;
-};
-
-export function DimensionEditor(props: DimensionEditorProps) {
-  const currentLayer = props.state.layers.find((layer) => layer.layerId === props.layerId);
-
-  if (!currentLayer) {
-    return null;
-  }
-
-  const firstNonCollapsedColumnId = currentLayer.primaryGroups.find(
-    (id) => !isCollapsed(id, currentLayer)
-  );
-
-  const showColorPicker =
-    currentLayer.metrics.includes(props.accessor) && currentLayer.allowMultipleMetrics;
-
-  return (
-    <>
-      {props.accessor === firstNonCollapsedColumnId && (
-        <PalettePicker
-          palettes={props.paletteService}
-          activePalette={props.state.palette}
-          setPalette={(newPalette) => {
-            props.setState({ ...props.state, palette: newPalette });
-          }}
-        />
-      )}
-      {showColorPicker && <StaticColorControls {...props} currentLayer={currentLayer} />}
-    </>
-  );
-}
-
-function StaticColorControls({
-  state,
-  paletteService,
-  accessor,
-  setState,
-  datasource,
-  currentLayer,
-}: DimensionEditorProps & { currentLayer: PieLayerState }) {
-  const colorLabel = i18n.translate('xpack.lens.pieChart.color', {
-    defaultMessage: 'Color',
-  });
-
-  const disabledMessage = currentLayer.primaryGroups.length
-    ? ['pie', 'donut'].includes(state.shape)
-      ? i18n.translate('xpack.lens.pieChart.colorPicker.disabledBecauseSliceBy', {
-          defaultMessage:
-            'You are unable to apply custom colors to individual slices when the layer includes one or more "Slice by" dimensions.',
-        })
-      : i18n.translate('xpack.lens.pieChart.colorPicker.disabledBecauseGroupBy', {
-          defaultMessage:
-            'You are unable to apply custom colors to individual slices when the layer includes one or more "Group by" dimensions.',
-        })
-    : '';
-
-  const defaultColor = getDefaultColorForMultiMetricDimension({
-    layer: currentLayer,
-    columnId: accessor,
-    paletteService,
-    datasource,
-  });
-
-  const setColor = useCallback(
-    (color: string) => {
-      const newColorsByDimension = { ...currentLayer.colorsByDimension };
-
-      if (color) {
-        newColorsByDimension[accessor] = color;
-      } else {
-        delete newColorsByDimension[accessor];
-      }
-
-      setState({
-        ...state,
-        layers: state.layers.map((layer) =>
-          layer.layerId === currentLayer.layerId
-            ? {
-                ...layer,
-                colorsByDimension: newColorsByDimension,
-              }
-            : layer
-        ),
-      });
-    },
-    [accessor, currentLayer.colorsByDimension, currentLayer.layerId, setState, state]
-  );
-
-  const { inputValue: currentColor, handleInputChange: handleColorChange } =
-    useDebouncedValue<string>(
-      {
-        onChange: setColor,
-        value: currentLayer.colorsByDimension?.[accessor] || defaultColor,
-      },
-      { allowFalsyValue: true }
-    );
-
-  const isDisabled = Boolean(disabledMessage);
-
-  const renderColorPicker = () => (
-    <EuiColorPicker
-      fullWidth
-      compressed
-      disabled={isDisabled}
-      isClearable={true}
-      placeholder={
-        isDisabled
-          ? i18n.translate('xpack.lens.pieChart.colorPicker.auto', {
-              defaultMessage: 'Auto',
-            })
-          : defaultColor
-      }
-      onChange={(color: string) => handleColorChange(color)}
-      color={isDisabled ? '' : currentColor}
-      aria-label={colorLabel}
-      showAlpha={false}
-      swatches={euiPaletteColorBlind()}
-    />
-  );
-
-  return (
-    <EuiFormRow display="columnCompressed" fullWidth label={colorLabel}>
-      {disabledMessage ? (
-        <EuiToolTip
-          position="top"
-          delay="long"
-          anchorClassName="eui-displayBlock"
-          content={disabledMessage}
-        >
-          {renderColorPicker()}
-        </EuiToolTip>
-      ) : (
-        renderColorPicker()
-      )}
-    </EuiFormRow>
-  );
-}
-
-export function DimensionDataExtraEditor(
-  props: VisualizationDimensionEditorProps<PieVisualizationState> & {
-    paletteService: PaletteRegistry;
-  }
-) {
-  const currentLayer = props.state.layers.find((layer) => layer.layerId === props.layerId);
-
-  if (!currentLayer) {
-    return null;
-  }
-
-  return (
-    <>
-      {[...currentLayer.primaryGroups, ...(currentLayer.secondaryGroups ?? [])].includes(
-        props.accessor
-      ) && (
-        <CollapseSetting
-          value={currentLayer?.collapseFns?.[props.accessor] || ''}
-          onChange={(collapseFn) => {
-            props.setState({
-              ...props.state,
-              layers: props.state.layers.map((layer) =>
-                layer.layerId !== props.layerId
-                  ? layer
-                  : {
-                      ...layer,
-                      collapseFns: {
-                        ...layer.collapseFns,
-                        [props.accessor]: collapseFn,
-                      },
-                    }
-              ),
-            });
-          }}
-        />
-      )}
-    </>
-  );
-}

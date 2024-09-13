@@ -19,14 +19,14 @@ export async function writeDataToIndex(
     if (!indexExists) {
       throw new Error(
         i18n.translate('xpack.maps.indexData.indexExists', {
-          defaultMessage: `Index: '{index}' not found. A valid index must be provided`,
+          defaultMessage: `Index: ''{index}'' not found. A valid index must be provided`,
           values: {
             index,
           },
         })
       );
     }
-    const settings: WriteSettings = { index, body: data, refresh: true };
+    const settings: WriteSettings = { index, body: data, refresh: 'wait_for' };
     const resp = await asCurrentUser.index(settings);
     // @ts-expect-error always false
     if (resp.result === 'Error') {

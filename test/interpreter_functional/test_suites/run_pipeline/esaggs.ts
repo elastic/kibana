@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -23,6 +24,7 @@ export default function ({
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
   let expectExpression: ExpectExpression;
 
   const expectClientToMatchServer = async (title: string, expression: string) => {
@@ -89,6 +91,43 @@ export default function ({
           expression
         ).getResponse();
         expect(getCell(result, 0, 0)).to.be(7452);
+      });
+    });
+
+    describe('loads a saved search', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'test/functional/fixtures/kbn_archiver/saved_search.json'
+        );
+      });
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'test/functional/fixtures/kbn_archiver/saved_search.json'
+        );
+      });
+
+      const expression = `
+        kibana_context savedSearchId="ab12e3c0-f231-11e6-9486-733b1ac9221a"
+        | esaggs index={indexPatternLoad id='logstash-*'}
+        aggs={aggCount id="1" enabled=true schema="metric"}
+      `;
+
+      it('correctly applies filter from saved search', async () => {
+        const result = await expectExpression('esaggs_saved_searches', expression).getResponse();
+        expect(getCell(result, 0, 0)).to.be(119);
+      });
+
+      it('correctly applies filter - on the server', async () => {
+        await supertest
+          .post('/api/interpreter_functional/run_expression')
+          .set('kbn-xsrf', 'anything')
+          .send({ expression, input: undefined })
+          .expect(200)
+          .expect(({ body }) => {
+            expect(body.columns[0].meta.index).to.be('logstash-*');
+            expect(body.columns[0].meta.source).to.be('esaggs');
+            expect(getCell(body, 0, 0)).to.be(119);
+          });
       });
     });
 

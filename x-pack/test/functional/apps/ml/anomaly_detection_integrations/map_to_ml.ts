@@ -23,8 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
     await ml.dashboardEmbeddables.assertDashboardPanelExists(selectedPanelTitle);
 
-    const header = await dashboardPanelActions.getPanelHeading(selectedPanelTitle);
-    await dashboardPanelActions.openContextMenuMorePanel(header);
+    await dashboardPanelActions.openContextMenuByTitle(selectedPanelTitle);
   }
 
   describe('create jobs from dashboard map', function () {
@@ -36,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
 
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await kibanaServer.importExport.load(dashboardArchive);
       await browser.setWindowSize(1920, 1080);
     });
@@ -47,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
     });
 
     afterEach(async () => {
@@ -62,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 
@@ -77,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
 
-      await ml.testExecution.logTestStep('Exploror page loaded');
+      await ml.testExecution.logTestStep('Explorer page loaded');
       await ml.lensVisualizations.anomalyExplorerPageLoaded();
 
       await ml.testExecution.logTestStep('pre-fills the job selection');

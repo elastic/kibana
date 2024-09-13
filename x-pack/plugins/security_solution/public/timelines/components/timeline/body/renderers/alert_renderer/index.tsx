@@ -8,11 +8,10 @@
 import { get } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 
 import { AlertField } from './alert_field';
 import type { RowRenderer } from '../../../../../../../common/types';
-import { RowRendererId } from '../../../../../../../common/types';
+import { RowRendererIdEnum } from '../../../../../../../common/api/timeline';
 import {
   ID,
   DESTINATION_IP,
@@ -52,12 +51,8 @@ export const ALERT_RENDERER_FIELDS = [
   USER_NAME,
 ];
 
-const AlertRendererFlexGroup = styled(EuiFlexGroup)`
-  gap: ${({ theme }) => theme.eui.euiSizeXS};
-`;
-
 export const alertRenderer: RowRenderer = {
-  id: RowRendererId.alert,
+  id: RowRendererIdEnum.alert,
   isInstance: (ecs) => eventKindMatches(get('event.kind', ecs)),
   renderRow: ({ contextId = DEFAULT_CONTEXT_ID, data, isDraggable, scopeId }) => {
     const eventId = get(ID, data);
@@ -77,12 +72,7 @@ export const alertRenderer: RowRenderer = {
     return (
       <RowRendererContainer>
         <Details data-test-subj="alertRenderer">
-          <AlertRendererFlexGroup
-            alignItems="center"
-            gutterSize="none"
-            justifyContent="center"
-            wrap={true}
-          >
+          <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="center" wrap={true}>
             <AlertField
               contextId={contextId}
               data-test-subj={EVENT_CATEGORY}
@@ -232,7 +222,7 @@ export const alertRenderer: RowRenderer = {
               scopeId={scopeId}
               values={kibanaAlertRuleName}
             />
-          </AlertRendererFlexGroup>
+          </EuiFlexGroup>
         </Details>
       </RowRendererContainer>
     );

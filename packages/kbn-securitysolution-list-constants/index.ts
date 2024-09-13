@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { deepFreeze } from '@kbn/std';
@@ -20,8 +21,8 @@ export const LIST_PRIVILEGES_URL = `${LIST_URL}/privileges`;
  * Internal value list routes
  */
 export const INTERNAL_LIST_URL = '/internal/lists';
-export const FIND_LISTS_BY_SIZE = `${INTERNAL_LIST_URL}/_find_lists_by_size` as const;
-export const EXCEPTION_FILTER = `${INTERNAL_LIST_URL}/_create_filter` as const;
+export const INTERNAL_FIND_LISTS_BY_SIZE = `${INTERNAL_LIST_URL}/_find_lists_by_size` as const;
+export const INTERNAL_EXCEPTION_FILTER = `${INTERNAL_LIST_URL}/_create_filter` as const;
 
 /**
  * Exception list routes

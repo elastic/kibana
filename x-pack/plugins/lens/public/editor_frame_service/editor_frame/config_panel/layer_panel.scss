@@ -41,117 +41,54 @@
   }
 
   // Add border to the top of the next same panel
-  & + & {
+  &+& {
     border-top: $euiBorderThin;
     margin-top: 0;
   }
 
-  & > * {
+  &>* {
     margin-bottom: 0;
   }
 
   // Targeting EUI class as we are unable to apply a class to this element in component
   &,
   .euiFormRow__fieldWrapper {
-    & > * + * {
-      margin-top: $euiSize;
+    &>*+* {
+      margin-top: $euiSizeS;
     }
   }
 }
 
 .lnsLayerPanel__group {
-  margin: (-$euiSizeS) (-$euiSize);
-  padding: $euiSizeS $euiSize;
-}
-
-.lnsLayerPanel__dimension {
-  @include euiFontSizeS;
-  border-radius: $euiBorderRadius;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  min-height: $euiSizeXXL;
-  position: relative;
-
-  // NativeRenderer is messing this up
-  > div {
-    flex-grow: 1;
-  }
-}
-
-.lnsLayerPanel__dimension--empty {
-  &:focus,
-  &:focus-within {
-    @include euiFocusRing;
-  }
-}
-
-.lnsLayerPanel__dimensionContainer {
-  position: relative;
-
-  & + & {
-    margin-top: $euiSizeS;
-  }
-}
-
-.lnsLayerPanel__dimensionRemove {
-  margin-right: $euiSizeS;
-}
-
-.lnsLayerPanel__triggerText {
-  width: 100%;
-  padding: $euiSizeS;
-  min-height: $euiSizeXXL - 2;
-  word-break: break-word;
-  font-weight: $euiFontWeightRegular;
-}
-
-.domDragDrop-isReplacing {
-  .lnsLayerPanel__triggerText {
-    text-decoration: line-through;
-  }
-}
-
-.lnsLayerPanel__triggerTextLabel {
-  transition: background-color $euiAnimSpeedFast ease-in-out;
-}
-
-.lnsLayerPanel__triggerTextContent {
-  // Make EUI button content not centered
-  justify-content: flex-start;
-  padding: 0 !important; // sass-lint:disable-line no-important
-  color: $euiTextSubduedColor;
+  margin: (-$euiSizeXS) (-$euiSize);
+  padding: $euiSizeXS $euiSize;
 }
 
 .lnsLayerPanel__styleEditor {
   padding: $euiSize;
 }
 
-.lnsLayerPanel__colorIndicator {
-  margin-left: $euiSizeS;
+// Start dimension style overrides
+
+.lnsLayerPanel__dimensionContainer {
+  position: relative;
+
+  &+& {
+    margin-top: $euiSizeS;
+  }
 }
 
-.lnsLayerPanel__paletteContainer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-}
-
-.lnsLayerPanel__palette {
-  border-radius: 0 0 ($euiBorderRadius - 1px) ($euiBorderRadius - 1px);
-
-  &::after {
-    border: none;
+.domDroppable--replacing {
+  .dimensionTrigger__textLabel {
+    text-decoration: line-through;
   }
 }
 
 // Added .lnsLayerPanel__dimension specificity required for animation style override
 .lnsLayerPanel__dimension .lnsLayerPanel__dimensionLink {
-  width: 100%;
-
   &:focus {
-    @include passDownFocusRing('.lnsLayerPanel__triggerTextLabel');
+    @include passDownFocusRing('.dimensionTrigger__textLabel');
     background-color: transparent;
+    text-decoration-thickness: $euiBorderWidthThin !important;
   }
 }

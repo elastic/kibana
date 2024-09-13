@@ -1,14 +1,9 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-    "../../../typings/**/*",
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -17,8 +12,23 @@
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/i18n",
     "@kbn/config-schema",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/object-versioning",
+    "@kbn/content-management-utils",
+    "@kbn/content-management-plugin",
+    "@kbn/es-query",
+    "@kbn/utility-types-jest",
+    "@kbn/expressions-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/saved-objects-plugin",
+    "@kbn/es-query",
+    "@kbn/logging",
+    "@kbn/core-plugins-server",
+    "@kbn/utility-types",
+    "@kbn/search-types",
+    "@kbn/discover-utils",
+    "@kbn/unified-data-table",
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { css } from '@emotion/react';
 // @ts-expect-error
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
-import {
-  HEADER_BANNER_HEIGHT,
-  WORKPAD_CANVAS_BUFFER,
-  DEFAULT_WORKPAD_CSS,
-} from '../../../common/lib/constants';
+import { WORKPAD_CANVAS_BUFFER, DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
 import { CommitFn, CanvasPage } from '../../../types';
 import { WorkpadShortcuts } from './workpad_shortcuts.component';
 
@@ -71,7 +67,17 @@ export const Workpad: FC<Props> = ({
   zoomOut,
   zoomScale,
 }) => {
-  const headerBannerOffset = hasHeaderBanner ? HEADER_BANNER_HEIGHT : 0;
+  const headerBannerOffset = useMemo(() => {
+    if (!hasHeaderBanner) return 0;
+    if (typeof document === 'undefined') return 0;
+
+    // Get the banner height from the CSS variable value
+    const headerHeightFromCSS = getComputedStyle(document.documentElement).getPropertyValue(
+      '--kbnHeaderBannerHeight'
+    );
+    // Remove the CSS unit
+    return parseInt(headerHeightFromCSS, 10);
+  }, [hasHeaderBanner]);
 
   const bufferStyle = {
     height: isFullscreen ? height : (height + 2 * WORKPAD_CANVAS_BUFFER) * zoomScale,

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { nodeTypes } from '../node_types';
@@ -13,7 +14,7 @@ import { DataViewBase } from '../../..';
 import * as ast from '../ast';
 
 import * as or from './or';
-jest.mock('../grammar');
+import { KqlOrFunctionNode } from './or';
 
 const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
 const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');
@@ -43,7 +44,10 @@ describe('kuery functions', () => {
 
     describe('toElasticsearchQuery', () => {
       test("should wrap subqueries in an ES bool query's should clause", () => {
-        const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
+        const node = nodeTypes.function.buildNode('or', [
+          childNode1,
+          childNode2,
+        ]) as KqlOrFunctionNode;
         const result = or.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
@@ -57,10 +61,30 @@ describe('kuery functions', () => {
       });
 
       test('should require one of the clauses to match', () => {
-        const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
+        const node = nodeTypes.function.buildNode('or', [
+          childNode1,
+          childNode2,
+        ]) as KqlOrFunctionNode;
         const result = or.toElasticsearchQuery(node, indexPattern);
 
         expect(result.bool).toHaveProperty('minimum_should_match', 1);
+      });
+    });
+
+    describe('toKqlExpression', () => {
+      test('with one sub-expression', () => {
+        const node = nodeTypes.function.buildNode('or', [childNode1]) as KqlOrFunctionNode;
+        const result = or.toKqlExpression(node);
+        expect(result).toBe('(machine.os: osx)');
+      });
+
+      test('with two sub-expressions', () => {
+        const node = nodeTypes.function.buildNode('or', [
+          childNode1,
+          childNode2,
+        ]) as KqlOrFunctionNode;
+        const result = or.toKqlExpression(node);
+        expect(result).toBe('(machine.os: osx OR extension: jpg)');
       });
     });
   });

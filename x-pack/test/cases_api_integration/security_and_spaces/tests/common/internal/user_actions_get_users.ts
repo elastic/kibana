@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { Cookie } from 'tough-cookie';
 import { UserProfile } from '@kbn/security-plugin/common';
-import { GetCaseUsersResponseRt } from '@kbn/cases-plugin/common/api';
+import { GetCaseUsersResponseRt } from '@kbn/cases-plugin/common/types/api';
 import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
@@ -42,6 +42,10 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
+
+  // Use simple image data URL to match server side validation of image type
+  const IMAGE_URL_TEST =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAIBJREFUeF7t14ERACAMAjG6/9A6yMcROEuOe9tb+J0A/AAnoAPCHTglSAEKUIACFAgngEEMYhCDGAwjYAxhEIMYxCAGMRhOAIMYxCAGMRhGwBrEIAYxiEEMYjCcAAYxiEEMYjCMgDWIQQxiEIMYxGA4AQxiEIMYxGAYAWsQg3UGPw2Yf8EFsz4JAAAAAElFTkSuQmCC';
 
   describe('user_actions_get_users', () => {
     afterEach(async () => {
@@ -160,7 +164,7 @@ export default ({ getService }: FtrProviderContext): void => {
           req: {
             initials: 'ES',
             color: '#6092C0',
-            imageUrl: 'my-image',
+            imageUrl: IMAGE_URL_TEST,
           },
           headers: superUserHeaders,
         });
@@ -430,6 +434,67 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(assignees).to.eql([]);
           expect(unassignedUsers).to.eql([]);
+        });
+
+        it('does not throw with imageUrl set to null', async () => {
+          await updateUserProfileAvatar({
+            supertest,
+            req: {
+              // @ts-expect-error: types are not correct
+              initials: null,
+              // @ts-expect-error: types are not correct
+              color: null,
+              imageUrl: null,
+            },
+            headers: superUserHeaders,
+          });
+
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest(),
+            200,
+            null,
+            superUserHeaders
+          );
+
+          const res = await getCaseUsers({
+            caseId: postedCase.id,
+            supertest,
+          });
+
+          expect(res.participants[0].avatar).to.eql({});
+          expect(res.reporter.avatar).to.eql({});
+        });
+
+        it('does not return any avatar data if they are not a string', async () => {
+          await updateUserProfileAvatar({
+            supertest,
+            req: {
+              // @ts-expect-error: types are not correct
+              initials: 4,
+              // @ts-expect-error: types are not correct
+              color: true,
+              // @ts-expect-error: types are not correct
+              imageUrl: [],
+            },
+            headers: superUserHeaders,
+          });
+
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest(),
+            200,
+            null,
+            superUserHeaders
+          );
+
+          const res = await getCaseUsers({
+            caseId: postedCase.id,
+            supertest,
+          });
+
+          expect(res.participants[0].avatar).to.eql({});
+          expect(res.reporter.avatar).to.eql({});
         });
       });
     });

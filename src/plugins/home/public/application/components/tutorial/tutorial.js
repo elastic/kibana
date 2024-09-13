@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
@@ -18,7 +19,7 @@ import * as StatusCheckStates from './status_check_states';
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getServices } from '../../kibana_services';
-import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -360,7 +361,7 @@ class TutorialUi extends React.Component {
   render() {
     let content;
     if (this.state.notFound) {
-      content = (
+      return (
         <KibanaPageTemplate
           isEmptyState={true}
           pageHeader={{
@@ -435,7 +436,11 @@ class TutorialUi extends React.Component {
       );
     }
 
-    return <KibanaPageTemplate template="empty">{content}</KibanaPageTemplate>;
+    return (
+      <KibanaPageTemplate template="empty">
+        <KibanaPageTemplate.Section>{content}</KibanaPageTemplate.Section>
+      </KibanaPageTemplate>
+    );
   }
 }
 

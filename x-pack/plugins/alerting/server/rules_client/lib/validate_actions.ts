@@ -11,12 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { validateHours } from '../../routes/lib/validate_hours';
 import { RawRule, RuleNotifyWhen } from '../../types';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { NormalizedAlertAction } from '../types';
+import { NormalizedAlertAction, NormalizedSystemAction } from '../types';
 import { RulesClientContext } from '../types';
 import { parseDuration } from '../../lib';
 
 export type ValidateActionsData = Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {
   actions: NormalizedAlertAction[];
+  systemActions?: NormalizedSystemAction[];
 };
 
 export async function validateActions(
@@ -25,7 +26,7 @@ export async function validateActions(
   data: ValidateActionsData,
   allowMissingConnectorSecrets?: boolean
 ): Promise<void> {
-  const { actions, notifyWhen, throttle } = data;
+  const { actions, notifyWhen, throttle, systemActions = [] } = data;
   const hasRuleLevelNotifyWhen = typeof notifyWhen !== 'undefined';
   const hasRuleLevelThrottle = Boolean(throttle);
   if (actions.length === 0) {
@@ -34,8 +35,9 @@ export async function validateActions(
 
   const errors = [];
 
-  const uniqueActions = new Set(actions.map((action) => action.uuid));
-  if (uniqueActions.size < actions.length) {
+  const allActions = [...actions, ...systemActions];
+  const uniqueActions = new Set(allActions.map((action) => action.uuid));
+  if (uniqueActions.size < allActions.length) {
     errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.hasDuplicatedUuid', {
         defaultMessage: 'Actions have duplicated UUIDs',
@@ -46,10 +48,14 @@ export async function validateActions(
   // check for actions using connectors with missing secrets
   const actionsClient = await context.getActionsClient();
   const actionIds = [...new Set(actions.map((action) => action.id))];
-  const actionResults = (await actionsClient.getBulk(actionIds)) || [];
+
+  const actionResults =
+    (await actionsClient.getBulk({ ids: actionIds, throwIfSystemAction: false })) || [];
+
   const actionsUsingConnectorsWithMissingSecrets = actionResults.filter(
     (result) => result.isMissingSecrets
   );
+
   if (actionsUsingConnectorsWithMissingSecrets.length) {
     if (allowMissingConnectorSecrets) {
       context.logger.error(
@@ -91,6 +97,7 @@ export async function validateActions(
   // check for actions using frequency params if the rule has rule-level frequency params defined
   if (hasRuleLevelNotifyWhen || hasRuleLevelThrottle) {
     const actionsWithFrequency = actions.filter((action) => Boolean(action.frequency));
+
     if (actionsWithFrequency.length) {
       errors.push(
         i18n.translate('xpack.alerting.rulesClient.validateActions.mixAndMatchFreqParams', {
@@ -104,6 +111,7 @@ export async function validateActions(
     }
   } else {
     const actionsWithoutFrequency = actions.filter((action) => !action.frequency);
+
     if (actionsWithoutFrequency.length) {
       errors.push(
         i18n.translate('xpack.alerting.rulesClient.validateActions.notAllActionsWithFreq', {
@@ -122,7 +130,7 @@ export async function validateActions(
   const actionWithInvalidTimeframe = [];
   const actionsWithInvalidTimeRange = [];
   const actionsWithInvalidDays = [];
-  const actionsWithAlertsFilterWithoutSummaryGetter = [];
+  const actionsWithAlertsFilterWithoutAlertsMapping = [];
 
   for (const action of actions) {
     const { alertsFilter } = action;
@@ -137,8 +145,8 @@ export async function validateActions(
 
     if (alertsFilter) {
       // Action has alertsFilter but the ruleType does not support AAD
-      if (!ruleType.getSummarizedAlerts) {
-        actionsWithAlertsFilterWithoutSummaryGetter.push(action);
+      if (!ruleType.alerts) {
+        actionsWithAlertsFilterWithoutAlertsMapping.push(action);
       }
 
       // alertsFilter must have at least one of query and timeframe
@@ -154,7 +162,6 @@ export async function validateActions(
         ) {
           actionWithInvalidTimeframe.push(action);
         }
-        // alertsFilter time range filter's start time can't be before end time
         if (alertsFilter.timeframe.hours) {
           if (
             validateHours(alertsFilter.timeframe.hours.start) ||
@@ -176,7 +183,7 @@ export async function validateActions(
     errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidThrottles', {
         defaultMessage:
-          'Action throttle cannot be shorter than the schedule interval of {scheduleIntervalText}: {groups}',
+          'Action frequency cannot be shorter than the schedule interval of {scheduleIntervalText}: {groups}',
         values: {
           scheduleIntervalText: data.schedule.interval,
           groups: actionsWithInvalidThrottles
@@ -238,14 +245,14 @@ export async function validateActions(
     );
   }
 
-  if (actionsWithAlertsFilterWithoutSummaryGetter.length > 0) {
+  if (actionsWithAlertsFilterWithoutAlertsMapping.length > 0) {
     errors.push(
       i18n.translate(
         'xpack.alerting.rulesClient.validateActions.actionsWithAlertsFilterWithoutSummaryGetter',
         {
           defaultMessage: `This ruleType ({ruleType}) can't have an action with Alerts Filter. Actions: [{uuids}]`,
           values: {
-            uuids: actionsWithAlertsFilterWithoutSummaryGetter.map((a) => a.uuid).join(', '),
+            uuids: actionsWithAlertsFilterWithoutAlertsMapping.map((a) => a.uuid).join(', '),
             ruleType: ruleType.name,
           },
         }

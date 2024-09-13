@@ -1,18 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { useEffect } from 'react';
 import { History } from 'history';
+
 export function useUrl({
   history,
-  resetSavedSearch,
+  savedSearchId,
+  onNewUrl,
 }: {
   history: History;
-  resetSavedSearch: (val?: string) => void;
+  savedSearchId: string | undefined;
+  onNewUrl: () => void;
 }) {
   /**
    * Url / Routing logic
@@ -22,10 +27,10 @@ export function useUrl({
     // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
     // to reload the page in a right way
     const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
-      if (!search && !hash && pathname === '/') {
-        resetSavedSearch();
+      if (pathname === '/' && !search && !hash && !savedSearchId) {
+        onNewUrl();
       }
     });
     return () => unlistenHistoryBasePath();
-  }, [history, resetSavedSearch]);
+  }, [history, savedSearchId, onNewUrl]);
 }

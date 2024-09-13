@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
-import { Transform, TransformType, TypeTransforms, TransformFn } from '../types';
+import { Transform, TransformType, TypeTransforms, TransformFn, TypeVersionSchema } from '../types';
 import { DocumentDowngradePipeline } from './downgrade_pipeline';
 
 // snake case is way better for migration function names in this very specific scenario.
@@ -28,6 +29,10 @@ describe('DocumentMigratorPipeline', () => {
     ...parts,
   });
 
+  const createSchema = (): jest.MockedFunction<TypeVersionSchema> => {
+    return jest.fn().mockImplementation((doc: unknown) => doc);
+  };
+
   const latestVersions = (
     parts: Partial<Record<TransformType, string>> = {}
   ): Record<TransformType, string> => ({
@@ -46,7 +51,9 @@ describe('DocumentMigratorPipeline', () => {
 
     return {
       transforms,
+      immediateVersion: latestVersions(versions),
       latestVersion: latestVersions(versions),
+      versionSchemas: {},
     };
   };
 
@@ -179,7 +186,7 @@ describe('DocumentMigratorPipeline', () => {
     expect(outputDoc.typeMigrationVersion).toEqual('8.7.0');
   });
 
-  it('throws trying to apply a transform without down fn', () => {
+  it('skips transforms without down fn', () => {
     const document = createDoc({
       id: 'foo-1',
       type: 'foo',
@@ -219,9 +226,10 @@ describe('DocumentMigratorPipeline', () => {
       targetTypeVersion: '8.5.0',
     });
 
-    expect(() => pipeline.run()).toThrowErrorMatchingInlineSnapshot(
-      `"Could not apply transformation migrate:8.7.0: no down conversion registered"`
-    );
+    pipeline.run();
+
+    expect(migrate8_6_0_down).toHaveBeenCalledTimes(1);
+    expect(migrate8_8_0_down).toHaveBeenCalledTimes(1);
   });
 
   it('throws trying to downgrade to a higher version', () => {
@@ -602,5 +610,114 @@ describe('DocumentMigratorPipeline', () => {
     expect(core8_9_0_down).toHaveBeenCalledTimes(1);
 
     expect(outputDoc.coreMigrationVersion).toEqual('8.7.0');
+  });
+
+  it('accepts converting documents from higher versions than the last known', () => {
+    const document = createDoc({
+      id: 'foo-1',
+      type: 'foo',
+      typeMigrationVersion: '8.10.0',
+    });
+
+    const migrate8_8_0_up = createTransformFn();
+    const migrate8_8_0_down = createTransformFn();
+
+    const fooTransforms = getTypeTransforms([
+      {
+        transformType: TransformType.Migrate,
+        version: '8.8.0',
+        transform: migrate8_8_0_up,
+        transformDown: migrate8_8_0_down,
+      },
+    ]);
+
+    const pipeline = new DocumentDowngradePipeline({
+      document,
+      kibanaVersion: '8.8.0',
+      typeTransforms: fooTransforms,
+      targetTypeVersion: '8.7.0',
+    });
+
+    const { document: outputDoc } = pipeline.run();
+
+    expect(migrate8_8_0_up).not.toHaveBeenCalled();
+
+    expect(migrate8_8_0_down).toHaveBeenCalledTimes(1);
+    expect(migrate8_8_0_down).toHaveBeenCalledWith(document);
+
+    expect(outputDoc.typeMigrationVersion).toEqual('8.7.0');
+  });
+
+  describe('version schemas', () => {
+    it('apply the correct version schema', () => {
+      const document = createDoc({
+        id: 'foo-1',
+        type: 'foo',
+        typeMigrationVersion: '8.9.0',
+      });
+
+      const schema_8_7_0 = createSchema();
+      const schema_8_8_0 = createSchema();
+      const schema_8_9_0 = createSchema();
+
+      const transforms: TypeTransforms = {
+        transforms: [],
+        latestVersion: latestVersions(),
+        immediateVersion: latestVersions(),
+        versionSchemas: {
+          '8.7.0': schema_8_7_0,
+          '8.8.0': schema_8_8_0,
+          '8.9.0': schema_8_9_0,
+        },
+      };
+
+      const pipeline = new DocumentDowngradePipeline({
+        document,
+        kibanaVersion: '8.8.0',
+        typeTransforms: transforms,
+        targetTypeVersion: '8.7.0',
+      });
+
+      const { document: outputDoc } = pipeline.run();
+
+      expect(outputDoc.typeMigrationVersion).toEqual('8.7.0');
+      expect(schema_8_7_0).toHaveBeenCalledTimes(1);
+      expect(schema_8_8_0).not.toHaveBeenCalled();
+      expect(schema_8_9_0).not.toHaveBeenCalled();
+    });
+
+    it('does not apply the schema if the exact version is missing', () => {
+      const document = createDoc({
+        id: 'foo-1',
+        type: 'foo',
+        typeMigrationVersion: '8.9.0',
+      });
+
+      const schema_8_8_0 = createSchema();
+      const schema_8_9_0 = createSchema();
+
+      const transforms: TypeTransforms = {
+        transforms: [],
+        latestVersion: latestVersions(),
+        immediateVersion: latestVersions(),
+        versionSchemas: {
+          '8.8.0': schema_8_8_0,
+          '8.9.0': schema_8_9_0,
+        },
+      };
+
+      const pipeline = new DocumentDowngradePipeline({
+        document,
+        kibanaVersion: '8.8.0',
+        typeTransforms: transforms,
+        targetTypeVersion: '8.7.0',
+      });
+
+      const { document: outputDoc } = pipeline.run();
+
+      expect(outputDoc.typeMigrationVersion).toEqual('8.7.0');
+      expect(schema_8_8_0).not.toHaveBeenCalled();
+      expect(schema_8_9_0).not.toHaveBeenCalled();
+    });
   });
 });

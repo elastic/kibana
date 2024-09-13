@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SingleCaseMetricsResponse } from '../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../common/types/api';
 import { AggregationHandler } from './aggregation_handler';
 import type { AggregationBuilder, SingleCaseBaseHandlerCommonOptions } from './types';
 

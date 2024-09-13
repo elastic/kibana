@@ -5,40 +5,38 @@
  * 2.0.
  */
 
-import type { CustomRequestHandlerContext, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
+import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { IRouter } from '@kbn/core-http-server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
+import type { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type {
   PdfScreenshotOptions as BasePdfScreenshotOptions,
   PngScreenshotOptions as BasePngScreenshotOptions,
   ScreenshottingStart,
 } from '@kbn/screenshotting-plugin/server';
-import type {
-  AuthenticatedUser,
-  SecurityPluginSetup,
-  SecurityPluginStart,
-} from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { Writable } from 'stream';
-import type { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
-import type { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '../common/types';
-import type { ReportingConfigType } from './config';
-import type { ReportingCore } from './core';
-import type { ReportTaskParams } from './lib/tasks';
+
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 /**
  * Plugin Setup Contract
  */
 export interface ReportingSetup {
+  registerExportTypes: ExportTypesRegistry['register'];
   /**
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
    */
@@ -53,55 +51,12 @@ export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-/**
- * Internal Types
- */
-
-// default fn type for CreateJobFnFactory
-export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
-  jobParams: JobParamsType,
-  context: ReportingRequestHandlerContext,
-  req: KibanaRequest
-) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
-
-// default fn type for RunTaskFnFactory
-export type RunTaskFn<TaskPayloadType = BasePayload> = (
-  jobId: string,
-  payload: ReportTaskParams<TaskPayloadType>['payload'],
-  cancellationToken: CancellationToken,
-  stream: Writable
-) => Promise<TaskRunResult>;
-
-export type CreateJobFnFactory<CreateJobFnType> = (
-  reporting: ReportingCore,
-  logger: Logger
-) => CreateJobFnType;
-
-export type RunTaskFnFactory<RunTaskFnType> = (
-  reporting: ReportingCore,
-  logger: Logger
-) => RunTaskFnType;
-
-export interface ExportTypeDefinition<
-  CreateJobFnType = CreateJobFn | null,
-  RunTaskFnType = RunTaskFn
-> {
-  id: string;
-  name: string;
-  jobType: string;
-  jobContentEncoding?: string;
-  jobContentExtension: string;
-  createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase
-  runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
-  validLicenses: string[];
-}
-
 export interface ReportingSetupDeps {
   features: FeaturesPluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
+  taskManager: TaskManagerSetupContract;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
-  taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -110,9 +65,8 @@ export interface ReportingStartDeps {
   discover: DiscoverServerPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
-  screenshotting: ScreenshottingStart;
-  security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
+  screenshotting?: ScreenshottingStart;
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
@@ -121,6 +75,23 @@ export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
 
 export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
 
+/**
+ * Interface of a response to an HTTP request for our plugin to generate a report.
+ * @public
+ */
+export interface ReportingJobResponse {
+  /**
+   * Contractual field with Watcher: used to automate download of the report once it is finished
+   * @public
+   */
+  path: string;
+  /**
+   * Details of a new report job that was requested
+   * @public
+   */
+  job: ReportApiJSON;
+}
+
 export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
 }
@@ -128,5 +99,3 @@ export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'ti
 export interface PngScreenshotOptions extends Omit<BasePngScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
 }
-
-export type { BaseParams, BasePayload };

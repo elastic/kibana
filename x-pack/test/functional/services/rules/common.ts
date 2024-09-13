@@ -42,16 +42,12 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
     async defineIndexThresholdAlert(alertName: string) {
       await browser.refresh();
       await this.clickCreateAlertButton();
+      await testSubjects.click(`.index-threshold-SelectOption`);
       await testSubjects.scrollIntoView('ruleNameInput');
       await testSubjects.setValue('ruleNameInput', alertName);
-      await testSubjects.click(`.index-threshold-SelectOption`);
       await testSubjects.scrollIntoView('selectIndexExpression');
       await testSubjects.click('selectIndexExpression');
-      const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
-      await indexComboBox.click();
-      await indexComboBox.type('k');
-      const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-      await filterSelectItem.click();
+      await comboBox.set('thresholdIndexesComboBox', 'k');
       await testSubjects.click('thresholdAlertTimeFieldSelect');
       await retry.try(async () => {
         const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
@@ -74,10 +70,10 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await testSubjects.click('ofExpressionPopover');
       const ofComboBox = await find.byCssSelector('#ofField');
       await ofComboBox.click();
-      const ofOptionsString = await comboBox.getOptionsList('availablefieldsOptionsComboBox');
+      const ofOptionsString = await comboBox.getOptionsList('availableFieldsOptionsComboBox');
       const ofOptions = ofOptionsString.trim().split('\n');
       expect(ofOptions.length > 0).to.be(true);
-      await comboBox.set('availablefieldsOptionsComboBox', ofOptions[0]);
+      await comboBox.set('availableFieldsOptionsComboBox', ofOptions[0]);
     },
   };
 }

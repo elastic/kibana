@@ -18,10 +18,19 @@ import { sampleDocNoSortId } from '../__mocks__/es_results';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { hasTimestampFields } from '../utils/utils';
+import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine';
 
 jest.mock('../utils/utils', () => ({
   ...jest.requireActual('../utils/utils'),
   getExceptions: () => [],
+  hasTimestampFields: jest.fn(async () => {
+    return {
+      foundNoIndices: false,
+      warningMessage: undefined,
+    };
+  }),
+  hasReadIndexPrivileges: jest.fn(async () => undefined),
 }));
 
 jest.mock('../utils/get_list_client', () => ({
@@ -34,16 +43,22 @@ jest.mock('../utils/get_list_client', () => ({
 describe('Custom Query Alerts', () => {
   const mocks = createRuleTypeMocks();
   const licensing = licensingMock.createSetup();
+  const publicBaseUrl = 'http://somekibanabaseurl.com';
+  const mockedStatusLogger = ruleExecutionLogMock.forExecutors.create();
+  const ruleStatusLogger = () => Promise.resolve(mockedStatusLogger);
 
   const { dependencies, executor, services } = mocks;
-  const { alerting, lists, logger, ruleDataClient } = dependencies;
+  const { actions, alerting, lists, logger, ruleDataClient } = dependencies;
   const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
+    actions,
     lists,
     logger,
     config: createMockConfig(),
     ruleDataClient,
-    ruleExecutionLoggerFactory: () => Promise.resolve(ruleExecutionLogMock.forExecutors.create()),
+    ruleExecutionLoggerFactory: ruleStatusLogger,
     version: '8.3',
+    publicBaseUrl,
+    alerting,
   });
   const eventsTelemetry = createMockTelemetryEventsSender(true);
 
@@ -142,6 +157,64 @@ describe('Custom Query Alerts', () => {
     await executor({ params });
 
     expect((await ruleDataClient.getWriter()).bulk).toHaveBeenCalled();
-    expect(eventsTelemetry.queueTelemetryEvents).toHaveBeenCalled();
+    expect(eventsTelemetry.sendAsync).toHaveBeenCalled();
+  });
+
+  it('sends an alert when events are found and logs a warning when hasTimestampFields throws an error', async () => {
+    (hasTimestampFields as jest.Mock).mockImplementationOnce(async () => {
+      throw Error('hastTimestampFields test error');
+    });
+    const queryAlertType = securityRuleTypeWrapper(
+      createQueryAlertType({
+        eventsTelemetry,
+        licensing,
+        scheduleNotificationResponseActionsService: () => null,
+        experimentalFeatures: allowedExperimentalValues,
+        logger,
+        version: '1.0.0',
+        id: QUERY_RULE_TYPE_ID,
+        name: 'Custom Query Rule',
+      })
+    );
+
+    alerting.registerType(queryAlertType);
+
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          hits: [sampleDocNoSortId()],
+          sequences: [],
+          events: [],
+          total: {
+            relation: 'eq',
+            value: 1,
+          },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          skipped: 0,
+          successful: 1,
+          total: 1,
+        },
+      })
+    );
+
+    const params = getQueryRuleParams();
+
+    await executor({ params });
+
+    expect((await ruleDataClient.getWriter()).bulk).toHaveBeenCalled();
+    expect(eventsTelemetry.sendAsync).toHaveBeenCalled();
+    // ensures that the last status written is a warning status
+    // and that status contains the error message
+    expect(mockedStatusLogger.logStatusChange).lastCalledWith(
+      expect.objectContaining({
+        newStatus: RuleExecutionStatusEnum['partial failure'],
+        message:
+          "Check privileges failed to execute Error: hastTimestampFields test error, The rule's max alerts per run setting (10000) is greater than the Kibana alerting limit (1000). The rule will only write a maximum of 1000 alerts per rule run.",
+      })
+    );
   });
 });

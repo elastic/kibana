@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
@@ -62,6 +63,18 @@ describe('SavedObjectsManagementActionRegistry', () => {
       setup.register(action);
       expect(() => setup.register(action)).toThrowErrorMatchingInlineSnapshot(
         `"Saved Objects Management Action with id 'my-action' already exists"`
+      );
+    });
+
+    it('does not register spaces share and copy actions when SpacesApi.hasOnlyDefaultSpace is true', () => {
+      const action = createAction('foo');
+      setup.register(action);
+      const start = service.start(spacesPluginMock.createStartContract(true));
+      expect(start.getAll()).toEqual(
+        expect.not.arrayContaining([
+          expect.any(ShareToSpaceSavedObjectsManagementAction),
+          expect.any(CopyToSpaceSavedObjectsManagementAction),
+        ])
       );
     });
   });

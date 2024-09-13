@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pipe, forEach } from 'lodash/fp';
-import { escapeKuery, KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
 
 import { getFlattenedObject } from '@kbn/std';
 
@@ -24,6 +25,7 @@ export function filterArgsToKuery({
   extension,
   mimeType,
   kind,
+  kindToExclude,
   meta,
   name,
   status,
@@ -43,10 +45,21 @@ export function filterArgsToKuery({
         .map((value) =>
           nodeBuilder.is(
             `${attrPrefix}.${fieldName}`,
-            isWildcard ? nodeTypes.wildcard.buildNode(value) : escapeKuery(value)
+            isWildcard ? nodeTypes.wildcard.buildNode(value) : value
           )
         );
       kueryExpressions.push(nodeBuilder.or(orExpressions));
+    }
+  };
+
+  const addExcludeFilters = (fieldName: keyof FileMetadata | string, values: string[] = []) => {
+    if (values.length) {
+      const andExpressions = values
+        .filter(Boolean)
+        .map((value) =>
+          nodeTypes.function.buildNode('not', nodeBuilder.is(`${attrPrefix}.${fieldName}`, value))
+        );
+      kueryExpressions.push(nodeBuilder.and(andExpressions));
     }
   };
 
@@ -56,6 +69,7 @@ export function filterArgsToKuery({
   addFilters('extension', extension);
   addFilters('mime_type', mimeType);
   addFilters('user.id', user);
+  addExcludeFilters('FileKind', kindToExclude);
 
   if (meta) {
     const addMetaFilters = pipe(

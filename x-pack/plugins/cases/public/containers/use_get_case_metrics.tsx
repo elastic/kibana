@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { SingleCaseMetrics, SingleCaseMetricsFeature } from './types';
+import type { SingleCaseMetricsFeature } from './types';
 import { useToasts } from '../common/lib/kibana';
 import { getSingleCaseMetrics } from './api';
 import type { ServerError } from '../types';
@@ -15,19 +15,11 @@ import { casesQueriesKeys } from './constants';
 
 export const useGetCaseMetrics = (caseId: string, features: SingleCaseMetricsFeature[]) => {
   const toasts = useToasts();
-  const abortCtrlRef = new AbortController();
   return useQuery(
     casesQueriesKeys.caseMetrics(caseId, features),
-    async () => {
-      const response: SingleCaseMetrics = await getSingleCaseMetrics(
-        caseId,
-        features,
-        abortCtrlRef.signal
-      );
-      return {
-        metrics: response,
-      };
-    },
+    async ({ signal }) => ({
+      metrics: await getSingleCaseMetrics(caseId, features, signal),
+    }),
     {
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IScopedClusterClient, CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { savedObjectClientsFactory } from '../util';
 import { syncSavedObjectsFactory } from '../sync';
-import { mlSavedObjectServiceFactory, JobObject } from '../service';
+import type { JobObject } from '../service';
+import { mlSavedObjectServiceFactory } from '../service';
 import { mlLog } from '../../lib/log';
 import { ML_JOB_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import { createJobSpaceOverrides } from './space_overrides';
@@ -106,10 +107,22 @@ export function jobSavedObjectsInitializationFactory(
     //   index: '.ml-config',
     // });
     // return body.count > 0;
+    let adJobsCount = 0;
+    let dfaJobsCount = 0;
 
-    const adJobs = await client.asInternalUser.ml.getJobs();
-    const dfaJobs = await client.asInternalUser.ml.getDataFrameAnalytics();
-    return adJobs.count > 0 || dfaJobs.count > 0;
+    try {
+      const adJobs = await client.asInternalUser.ml.getJobs();
+      adJobsCount = adJobs.count;
+    } catch (error) {
+      mlLog.debug(`Error fetching ML anomaly detection jobs ${JSON.stringify(error)}`);
+    }
+    try {
+      const dfaJobs = await client.asInternalUser.ml.getDataFrameAnalytics();
+      dfaJobsCount = dfaJobs.count;
+    } catch (error) {
+      mlLog.debug(`Error fetching ML data frame analytics jobs ${JSON.stringify(error)}`);
+    }
+    return adJobsCount > 0 || dfaJobsCount > 0;
   }
 
   return { initializeJobs };

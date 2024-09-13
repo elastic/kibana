@@ -1,0 +1,29 @@
+{
+  "search_application.put": {
+    "data_autocomplete_rules": {
+      "__template": {
+        "indices": []
+      },
+      "indices": ["{index}"],
+      "template": {
+        "script": {
+          "__template": {
+            "source": {
+              "query": {
+                "query_string": {
+                  "query": "{{query_string}}",
+                  "default_field": "{{default_field}}"
+                }
+              }
+            },
+            "params": {
+              "query_string": "*",
+              "default_field": "*"
+            }
+          },
+          "__scope_link": "GLOBAL.script"
+        }
+      }
+    }
+  }
+}

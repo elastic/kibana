@@ -23,6 +23,8 @@ export interface TourContextValue {
   incrementStep: (tourId: SecurityStepId) => void;
   isTourShown: (tourId: SecurityStepId) => boolean;
   setStep: (tourId: SecurityStepId, step: AlertsCasesTourSteps) => void;
+  hidden: boolean;
+  setAllTourStepsHidden: (h: boolean) => void;
 }
 
 const initialState: TourContextValue = {
@@ -31,39 +33,53 @@ const initialState: TourContextValue = {
   incrementStep: () => {},
   isTourShown: () => false,
   setStep: () => {},
+  hidden: false,
+  setAllTourStepsHidden: () => {},
 };
 
 const TourContext = createContext<TourContextValue>(initialState);
 
 export const RealTourContextProvider = ({ children }: { children: ReactChild }) => {
-  const { guidedOnboardingApi } = useKibana().services.guidedOnboarding;
+  const { guidedOnboarding } = useKibana().services;
+  const [hidden, setHidden] = useState(false);
+
+  const setAllTourStepsHidden = useCallback((h: boolean) => {
+    setHidden(h);
+  }, []);
 
   const isRulesTourActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$(siemGuideId, SecurityStepId.rules).pipe(
-      // if no result after 30s the observable will error, but the error handler will just emit false
-      timeout(30000),
-      catchError((error) => of(false))
-    ) ?? of(false),
+    guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$(siemGuideId, SecurityStepId.rules)
+      .pipe(
+        // if no result after 30s the observable will error, but the error handler will just emit false
+        timeout(30000),
+        catchError((error) => of(false))
+      ) ?? of(false),
     false
   );
   const isAlertsCasesTourActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$(siemGuideId, SecurityStepId.alertsCases).pipe(
-      // if no result after 30s the observable will error, but the error handler will just emit false
-      timeout(30000),
-      catchError((error) => of(false))
-    ) ?? of(false),
+    guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$(siemGuideId, SecurityStepId.alertsCases)
+      .pipe(
+        // if no result after 30s the observable will error, but the error handler will just emit false
+        timeout(30000),
+        catchError((error) => of(false))
+      ) ?? of(false),
     false
   );
 
   const tourStatus = useMemo(
     () => ({
-      [SecurityStepId.rules]: isRulesTourActive,
-      [SecurityStepId.alertsCases]: isAlertsCasesTourActive,
+      [SecurityStepId.rules]: { active: isRulesTourActive, hidden: false },
+      [SecurityStepId.alertsCases]: { active: isAlertsCasesTourActive, hidden: false },
     }),
     [isRulesTourActive, isAlertsCasesTourActive]
   );
 
-  const isTourShown = useCallback((tourId: SecurityStepId) => tourStatus[tourId], [tourStatus]);
+  const isTourShown = useCallback(
+    (tourId: SecurityStepId) => tourStatus[tourId].active,
+    [tourStatus]
+  );
   const [activeStep, _setActiveStep] = useState<number>(1);
 
   const incrementStep = useCallback((tourId: SecurityStepId) => {
@@ -79,12 +95,12 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
   const [completeStep, setCompleteStep] = useState<null | SecurityStepId>(null);
 
   useEffect(() => {
-    if (!completeStep || !guidedOnboardingApi) {
+    if (!completeStep || !guidedOnboarding?.guidedOnboardingApi) {
       return;
     }
     let ignore = false;
     const complete = async () => {
-      await guidedOnboardingApi.completeGuideStep(siemGuideId, completeStep);
+      await guidedOnboarding?.guidedOnboardingApi?.completeGuideStep(siemGuideId, completeStep);
       if (!ignore) {
         setCompleteStep(null);
         _setActiveStep(1);
@@ -94,19 +110,23 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
     return () => {
       ignore = true;
     };
-  }, [completeStep, guidedOnboardingApi]);
+  }, [completeStep, guidedOnboarding]);
 
   const endTourStep = useCallback((tourId: SecurityStepId) => {
     setCompleteStep(tourId);
   }, []);
 
-  const context = {
-    activeStep,
-    endTourStep,
-    incrementStep,
-    isTourShown,
-    setStep,
-  };
+  const context = useMemo(() => {
+    return {
+      hidden,
+      setAllTourStepsHidden,
+      activeStep,
+      endTourStep,
+      incrementStep,
+      isTourShown,
+      setStep,
+    };
+  }, [activeStep, endTourStep, hidden, incrementStep, isTourShown, setAllTourStepsHidden, setStep]);
 
   return <TourContext.Provider value={context}>{children}</TourContext.Provider>;
 };

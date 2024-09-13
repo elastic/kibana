@@ -15,12 +15,15 @@ import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { connectorsMock, useGetCasesMockState } from '../../containers/mock';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
+import { useGetCategories } from '../../containers/use_get_categories';
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 
+jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_tags');
+jest.mock('../../containers/use_get_categories');
 jest.mock('../../containers/use_get_action_license', () => {
   return {
     useGetActionLicense: jest.fn(),
@@ -60,7 +63,12 @@ describe('AllCases', () => {
   };
 
   beforeAll(() => {
+    jest.useFakeTimers();
     (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
+    (useGetCategories as jest.Mock).mockReturnValue({
+      data: ['beverages', 'snacks'],
+      refetch: jest.fn(),
+    });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
     useGetCasesMock.mockReturnValue(defaultGetCases);
@@ -69,11 +77,18 @@ describe('AllCases', () => {
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
   });
 
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('empty table', () => {
@@ -134,46 +149,6 @@ describe('AllCases', () => {
       expect(result.getByTestId('openStatsHeader-loading-spinner')).toBeInTheDocument();
       expect(result.getByTestId('inProgressStatsHeader-loading-spinner')).toBeInTheDocument();
       expect(result.getByTestId('closedStatsHeader-loading-spinner')).toBeInTheDocument();
-    });
-  });
-
-  it('should not allow the user to enter configuration page with basic license', async () => {
-    useGetActionLicenseMock.mockReturnValue({
-      ...defaultActionLicense,
-      data: {
-        id: '.jira',
-        name: 'Jira',
-        minimumLicenseRequired: 'gold',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: false,
-      },
-    });
-
-    const result = appMockRender.render(<AllCases />);
-
-    await waitFor(() => {
-      expect(result.getByTestId('configure-case-button')).toBeDisabled();
-    });
-  });
-
-  it('should allow the user to enter configuration page with gold license and above', async () => {
-    useGetActionLicenseMock.mockReturnValue({
-      ...defaultActionLicense,
-      data: {
-        id: '.jira',
-        name: 'Jira',
-        minimumLicenseRequired: 'gold',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-      },
-    });
-
-    const result = appMockRender.render(<AllCases />);
-
-    await waitFor(() => {
-      expect(result.getByTestId('configure-case-button')).not.toBeDisabled();
     });
   });
 

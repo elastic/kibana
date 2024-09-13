@@ -10,16 +10,8 @@ export * from './details';
 export * from './last_event_time';
 export * from './eql';
 
-export enum TimelineEventsQueries {
-  all = 'eventsAll',
-  details = 'eventsDetails',
-  kpi = 'eventsKpi',
-  lastEventTime = 'eventsLastEventTime',
-}
-
 export const EntityType = {
-  ALERTS: 'alerts',
   EVENTS: 'events',
   SESSIONS: 'sessions',
 } as const;
-export type EntityType = typeof EntityType[keyof typeof EntityType];
+export type EntityType = (typeof EntityType)[keyof typeof EntityType];

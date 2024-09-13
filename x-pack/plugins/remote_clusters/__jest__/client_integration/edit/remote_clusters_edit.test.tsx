@@ -66,7 +66,7 @@ describe('Edit Remote cluster', () => {
   test('should populate the form fields with the values from the remote cluster loaded', () => {
     expect(actions.nameInput.getValue()).toBe(REMOTE_CLUSTER_EDIT_NAME);
     // seeds input for sniff connection is not shown on Cloud
-    expect(actions.seedsInput.getValue()).toBe(REMOTE_CLUSTER_EDIT.seeds.join(''));
+    expect(actions.seedsInput.getValue()).toBe(REMOTE_CLUSTER_EDIT.seeds?.join(''));
     expect(actions.skipUnavailableSwitch.isChecked()).toBe(REMOTE_CLUSTER_EDIT.skipUnavailable);
   });
 
@@ -77,12 +77,13 @@ describe('Edit Remote cluster', () => {
   describe('on cloud', () => {
     const cloudUrl = 'cloud-url';
     const defaultCloudPort = '9400';
-    test('existing cluster that defaults to cloud url (default port)', async () => {
+    test('existing cluster that has the same TLS server name as the host in the remote address', async () => {
       const cluster: Cluster = {
         name: REMOTE_CLUSTER_EDIT_NAME,
         mode: 'proxy',
         proxyAddress: `${cloudUrl}:${defaultCloudPort}`,
         serverName: cloudUrl,
+        securityModel: 'certificate',
       };
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([cluster]);
 
@@ -91,16 +92,17 @@ describe('Edit Remote cluster', () => {
       });
       component.update();
 
-      expect(actions.cloudUrlInput.exists()).toBe(true);
-      expect(actions.cloudUrlInput.getValue()).toBe(cloudUrl);
+      expect(actions.cloudRemoteAddressInput.exists()).toBe(true);
+      expect(actions.cloudRemoteAddressInput.getValue()).toBe(`${cloudUrl}:${defaultCloudPort}`);
+      expect(actions.tlsServerNameInput.exists()).toBe(false);
     });
 
-    test('existing cluster that defaults to manual input (non-default port)', async () => {
+    test("existing cluster that doesn't have a TLS server name", async () => {
       const cluster: Cluster = {
         name: REMOTE_CLUSTER_EDIT_NAME,
         mode: 'proxy',
         proxyAddress: `${cloudUrl}:9500`,
-        serverName: cloudUrl,
+        securityModel: 'certificate',
       };
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([cluster]);
 
@@ -109,18 +111,18 @@ describe('Edit Remote cluster', () => {
       });
       component.update();
 
-      expect(actions.cloudUrlInput.exists()).toBe(false);
-
-      expect(actions.proxyAddressInput.exists()).toBe(true);
-      expect(actions.serverNameInput.exists()).toBe(true);
+      expect(actions.cloudRemoteAddressInput.exists()).toBe(true);
+      expect(actions.cloudRemoteAddressInput.getValue()).toBe(`${cloudUrl}:9500`);
+      expect(actions.tlsServerNameInput.exists()).toBe(true);
     });
 
-    test('existing cluster that defaults to manual input (proxy address is different from server name)', async () => {
+    test('existing cluster that has remote address different from TLS server name)', async () => {
       const cluster: Cluster = {
         name: REMOTE_CLUSTER_EDIT_NAME,
         mode: 'proxy',
         proxyAddress: `${cloudUrl}:${defaultCloudPort}`,
         serverName: 'another-value',
+        securityModel: 'certificate',
       };
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([cluster]);
 
@@ -129,10 +131,9 @@ describe('Edit Remote cluster', () => {
       });
       component.update();
 
-      expect(actions.cloudUrlInput.exists()).toBe(false);
-
-      expect(actions.proxyAddressInput.exists()).toBe(true);
-      expect(actions.serverNameInput.exists()).toBe(true);
+      expect(actions.cloudRemoteAddressInput.exists()).toBe(true);
+      expect(actions.cloudRemoteAddressInput.getValue()).toBe(`${cloudUrl}:${defaultCloudPort}`);
+      expect(actions.tlsServerNameInput.exists()).toBe(true);
     });
   });
 });

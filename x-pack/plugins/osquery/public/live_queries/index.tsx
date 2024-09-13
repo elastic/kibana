@@ -6,7 +6,7 @@
  */
 
 import { castArray, isEmpty, pickBy } from 'lodash';
-import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiCode, EuiSkeletonText, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useContext, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -26,6 +26,7 @@ interface LiveQueryProps {
   agentPolicyIds?: string[];
   onSuccess?: () => void;
   query?: string;
+  timeout?: number;
   savedQueryId?: string;
   ecs_mapping?: ECSMapping;
   agentsField?: boolean;
@@ -55,6 +56,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   hideAgentsField,
   packId,
   agentSelection,
+  timeout,
 }) => {
   const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
@@ -93,14 +95,15 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
       query: initialQuery,
       savedQueryId,
       ecs_mapping,
+      timeout,
       packId,
     };
 
     return !isEmpty(pickBy(initialValue, (value) => !isEmpty(value))) ? initialValue : undefined;
-  }, [alertIds, ecs_mapping, initialAgentSelection, initialQuery, packId, savedQueryId]);
+  }, [alertIds, ecs_mapping, initialAgentSelection, initialQuery, packId, savedQueryId, timeout]);
 
   if (isLoading) {
-    return <EuiLoadingContent lines={10} />;
+    return <EuiSkeletonText lines={10} />;
   }
 
   if (!hasActionResultsPrivileges) {

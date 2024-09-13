@@ -6,11 +6,11 @@
  */
 
 import moment from 'moment-timezone';
-import { AnomalyRecordDoc } from '../../../common/types/anomalies';
+import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import { formatValue } from './format_value';
 
 describe('ML - formatValue formatter', () => {
-  const timeOfWeekRecord: AnomalyRecordDoc = {
+  const timeOfWeekRecord: MlAnomalyRecordDoc = {
     job_id: 'gallery_time_of_week',
     result_type: 'record',
     probability: 0.012818,
@@ -27,7 +27,7 @@ describe('ML - formatValue formatter', () => {
     function_description: 'time',
   };
 
-  const timeOfDayRecord: AnomalyRecordDoc = {
+  const timeOfDayRecord: MlAnomalyRecordDoc = {
     job_id: 'gallery_time_of_day',
     result_type: 'record',
     probability: 0.012818,

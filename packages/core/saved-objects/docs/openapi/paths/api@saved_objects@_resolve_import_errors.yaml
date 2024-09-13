@@ -1,0 +1,122 @@
+post:
+  summary: Resolve import errors
+  operationId: resolveImportErrors
+  description: |
+    To resolve errors from the Import objects API, you can:
+
+    * Retry certain saved objects
+    * Overwrite specific saved objects
+    * Change references to different saved objects
+
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  tags:
+    - saved objects
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - in: query
+      name: compatibilityMode
+      schema:
+        type: boolean
+      required: false
+      description: |
+        Applies various adjustments to the saved objects that are being imported to maintain compatibility between different Kibana versions. When enabled during the initial import, also enable when resolving import errors. This option cannot be used with the `createNewCopies` option.
+    - in: query
+      name: createNewCopies
+      schema:
+        type: boolean
+      required: false
+      description: |
+        Creates copies of the saved objects, regenerates each object ID, and resets the origin. When enabled during the initial import, also enable when resolving import errors.
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          required:
+            - retries
+          properties:
+            file:
+              description: The same file given to the import API.
+              type: string
+              format: binary
+            retries:
+              description: The retry operations, which can specify how to resolve different types of errors.
+              type: array
+              items:
+                type: object
+                required:
+                  - type
+                  - id
+                properties:
+                  type:
+                    description: The saved object type.
+                    type: string
+                  id:
+                    description: The saved object ID.
+                    type: string
+                  overwrite:
+                    description: When set to `true`, the source object overwrites the conflicting destination object. When set to `false`, does nothing.
+                    type: boolean
+                  destinationId:
+                    description: Specifies the destination ID that the imported object should have, if different from the current ID.
+                    type: string
+                  replaceReferences:
+                    description: A list of `type`, `from`, and `to` used to change the object references.
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        from:
+                          type: string
+                        to:
+                          type: string
+                  ignoreMissingReferences:
+                    description: When set to `true`, ignores missing reference errors. When set to `false`, does nothing.
+                    type: boolean
+        examples:
+          resolveImportErrorsRequest:
+            $ref: '../components/examples/resolve_missing_reference_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                description: |
+                  Indicates a successful import. When set to `false`, some objects may not have been created. For additional information, refer to the `errors` and `successResults` properties.
+              successCount:
+                type: number
+                description: |
+                  Indicates the number of successfully resolved records.
+              errors:
+                type: array
+                description: |
+                  Specifies the objects that failed to resolve.
+
+                  NOTE: One object can result in multiple errors, which requires separate steps to resolve. For instance, a `missing_references` error and a `conflict` error.
+                items:
+                  type: object
+              successResults:
+                type: array
+                description: |
+                  Indicates the objects that are successfully imported, with any metadata if applicable.
+
+                  NOTE: Objects are only created when all resolvable errors are addressed, including conflict and missing references.
+                items:
+                  type: object
+          examples:
+            resolveImportErrorsResponse:
+              $ref: '../components/examples/resolve_missing_reference_response.yaml'
+    '400':
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'

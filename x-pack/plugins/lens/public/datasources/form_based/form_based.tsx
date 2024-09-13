@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
@@ -16,16 +14,17 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
+import { type DraggingIdentifier } from '@kbn/dom-drag-drop';
+import { DimensionTrigger } from '@kbn/visualization-ui-components';
+import memoizeOne from 'memoize-one';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -39,8 +38,8 @@ import type {
   IndexPatternRef,
   DataSourceInfo,
   UserMessage,
-  FrameDatasourceAPI,
   StateSetter,
+  IndexPatternMap,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -64,13 +63,14 @@ import {
 
 import {
   getFiltersInLayer,
-  getShardFailuresWarningMessages,
+  getSearchWarningMessages,
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
   getNotifiableFeatures,
+  getUnsupportedOperationsWarningMessage,
 } from './utils';
-import { isDraggedDataViewField } from '../../utils';
+import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
@@ -98,9 +98,9 @@ import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
-import { FormBasedLayer } from '../..';
-import { DimensionTrigger } from '../../shared_components/dimension_trigger';
+import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
+import { EDITOR_INVALID_DIMENSION } from '../../user_messages_ids';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -111,24 +111,66 @@ function wrapOnDot(str?: string) {
   return str ? str.replace(/\./g, '.\u200B') : '';
 }
 
+const getSelectedFieldsFromColumns = memoizeOne(
+  (columns: GenericIndexPatternColumn[]) =>
+    columns
+      .flatMap((c) => {
+        if (operationDefinitionMap[c.operationType]?.getCurrentFields) {
+          return operationDefinitionMap[c.operationType]?.getCurrentFields?.(c) || [];
+        } else if ('sourceField' in c) {
+          return c.sourceField;
+        }
+      })
+      .filter(nonNullable),
+  isEqual
+);
+
+function getSortingHint(column: GenericIndexPatternColumn, dataView?: IndexPattern | DataView) {
+  if (column.dataType === 'string') {
+    const fieldTypes =
+      'sourceField' in column ? dataView?.getFieldByName(column.sourceField)?.esTypes : undefined;
+    return fieldTypes?.[0] || undefined;
+  }
+  if (isColumnOfType<LastValueIndexPatternColumn>('last_value', column)) {
+    return column.dataType;
+  }
+}
+
+export const removeColumn: Datasource<FormBasedPrivateState>['removeColumn'] = ({
+  prevState,
+  layerId,
+  columnId,
+  indexPatterns,
+}) => {
+  const indexPattern = indexPatterns?.[prevState.layers[layerId]?.indexPatternId];
+  if (!indexPattern) {
+    throw new Error('indexPatterns is not passed to the function');
+  }
+  return mergeLayer({
+    state: prevState,
+    layerId,
+    newLayer: deleteColumn({
+      layer: prevState.layers[layerId],
+      columnId,
+      indexPattern,
+    }),
+  });
+};
+
 export function columnToOperation(
   column: GenericIndexPatternColumn,
   uniqueLabel?: string,
   dataView?: IndexPattern | DataView
 ): OperationDescriptor {
   const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange } = column;
-  const fieldTypes =
-    'sourceField' in column ? dataView?.getFieldByName(column.sourceField)?.esTypes : undefined;
+
   return {
     dataType: normalizeOperationDataType(dataType),
     isBucketed,
     scale,
     label: uniqueLabel || label,
     isStaticValue: operationType === 'static_value',
-    sortingHint:
-      column.dataType === 'string' && fieldTypes?.includes(ES_FIELD_TYPES.VERSION)
-        ? 'version'
-        : undefined,
+    sortingHint: getSortingHint(column, dataView),
     hasTimeShift: Boolean(timeShift),
     hasReducedTimeRange: Boolean(reducedTimeRange),
     interval: isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
@@ -168,13 +210,15 @@ export function getFormBasedDatasource({
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
-  const uiSettings = core.uiSettings;
+  const { uiSettings } = core;
 
   const DATASOURCE_ID = 'formBased';
+  const ALIAS_IDS = ['indexpattern'];
 
   // Not stateful. State is persisted to the frame
   const formBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState> = {
     id: DATASOURCE_ID,
+    alias: ALIAS_IDS,
 
     initialize(
       persistedState?: FormBasedPersistedState,
@@ -186,7 +230,7 @@ export function getFormBasedDatasource({
       return loadInitialState({
         persistedState,
         references,
-        defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
+        defaultIndexPatternId: uiSettings.get('defaultIndex'),
         storage,
         initialContext,
         indexPatternRefs,
@@ -278,18 +322,7 @@ export function getFormBasedDatasource({
       return Object.keys(state?.layers);
     },
 
-    removeColumn({ prevState, layerId, columnId, indexPatterns }) {
-      const indexPattern = indexPatterns[prevState.layers[layerId]?.indexPatternId];
-      return mergeLayer({
-        state: prevState,
-        layerId,
-        newLayer: deleteColumn({
-          layer: prevState.layers[layerId],
-          columnId,
-          indexPattern,
-        }),
-      });
-    },
+    removeColumn,
 
     initializeDimension(
       state,
@@ -411,213 +444,112 @@ export function getFormBasedDatasource({
     },
 
     getSelectedFields(state) {
-      const fields: string[] = [];
-      Object.values(state?.layers)?.forEach((l) => {
-        const { columns } = l;
-        Object.values(columns).forEach((c) => {
-          if (operationDefinitionMap[c.operationType]?.getCurrentFields) {
-            fields.push(...(operationDefinitionMap[c.operationType]?.getCurrentFields?.(c) || []));
-          } else if ('sourceField' in c) {
-            fields.push(c.sourceField);
-          }
-        });
-      });
-      return fields;
-    },
-
-    toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) =>
-      toExpression(state, layerId, indexPatterns, uiSettings, dateRange, searchSessionId),
-
-    renderLayerSettings(domElement, props) {
-      render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <I18nProvider>
-            <KibanaContextProvider
-              services={{
-                ...core,
-                data,
-                dataViews,
-                fieldFormats,
-                charts,
-                unifiedSearch,
-                share,
-              }}
-            >
-              <LayerSettingsPanel {...props} />
-            </KibanaContextProvider>
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
+      return getSelectedFieldsFromColumns(
+        Object.values(state?.layers)?.flatMap((l) => Object.values(l.columns))
       );
     },
 
-    renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<FormBasedPrivateState>) {
+    toExpression: (state, layerId, indexPatterns, dateRange, nowInstant, searchSessionId) =>
+      toExpression(
+        state,
+        layerId,
+        indexPatterns,
+        uiSettings,
+        dateRange,
+        nowInstant,
+        searchSessionId
+      ),
+
+    LayerSettingsComponent(props) {
+      return <LayerSettingsPanel {...props} />;
+    },
+    DataPanelComponent(props: DatasourceDataPanelProps<FormBasedPrivateState>) {
       const { onChangeIndexPattern, ...otherProps } = props;
       const layerFields = formBasedDatasource?.getSelectedFields?.(props.state);
-
-      render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <I18nProvider>
-            <KibanaContextProvider
-              services={{
-                ...core,
-                data,
-                dataViews,
-                fieldFormats,
-                charts,
-                unifiedSearch,
-                share,
-              }}
-            >
-              <FormBasedDataPanel
-                data={data}
-                dataViews={dataViews}
-                fieldFormats={fieldFormats}
-                charts={charts}
-                indexPatternFieldEditor={dataViewFieldEditor}
-                {...otherProps}
-                core={core}
-                uiActions={uiActions}
-                onIndexPatternRefresh={onRefreshIndexPattern}
-                layerFields={layerFields}
-              />
-            </KibanaContextProvider>
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
+      return (
+        <FormBasedDataPanel
+          data={data}
+          dataViews={dataViews}
+          fieldFormats={fieldFormats}
+          charts={charts}
+          indexPatternFieldEditor={dataViewFieldEditor}
+          {...otherProps}
+          core={core}
+          uiActions={uiActions}
+          onIndexPatternRefresh={onRefreshIndexPattern}
+          layerFields={layerFields}
+        />
       );
     },
-
-    uniqueLabels(state: FormBasedPrivateState) {
+    uniqueLabels(state: FormBasedPrivateState, indexPatternsMap: IndexPatternMap) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
-      const counts = {} as Record<string, number>;
 
-      const makeUnique = (label: string) => {
-        let uniqueLabel = label;
+      const uniqueLabelGenerator = getUniqueLabelGenerator();
 
-        while (counts[uniqueLabel] >= 0) {
-          const num = ++counts[uniqueLabel];
-          uniqueLabel = i18n.translate('xpack.lens.indexPattern.uniqueLabel', {
-            defaultMessage: '{label} [{num}]',
-            values: { label, num },
-          });
-        }
-
-        counts[uniqueLabel] = 0;
-        return uniqueLabel;
-      };
       Object.values(layers).forEach((layer) => {
         if (!layer.columns) {
           return;
         }
         Object.entries(layer.columns).forEach(([columnId, column]) => {
-          columnLabelMap[columnId] = makeUnique(column.label);
+          columnLabelMap[columnId] = uniqueLabelGenerator(
+            column.customLabel
+              ? column.label
+              : operationDefinitionMap[column.operationType].getDefaultLabel(
+                  column,
+                  layer.columns,
+                  indexPatternsMap[layer.indexPatternId]
+                )
+          );
         });
       });
 
       return columnLabelMap;
     },
 
-    renderDimensionTrigger: (
-      domElement: Element,
-      props: DatasourceDimensionTriggerProps<FormBasedPrivateState>
-    ) => {
-      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state);
+    DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<FormBasedPrivateState>) => {
+      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
       const uniqueLabel = columnLabelMap[props.columnId];
       const formattedLabel = wrapOnDot(uniqueLabel);
 
-      render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <I18nProvider>
-            <KibanaContextProvider
-              services={{
-                appName: 'lens',
-                storage,
-                uiSettings,
-                data,
-                fieldFormats,
-                savedObjects: core.savedObjects,
-                docLinks: core.docLinks,
-                unifiedSearch,
-              }}
-            >
-              <DimensionTrigger id={props.columnId} label={formattedLabel} />
-            </KibanaContextProvider>
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
+      return <DimensionTrigger id={props.columnId} label={formattedLabel} />;
+    },
+
+    DimensionEditorComponent: (props: DatasourceDimensionEditorProps<FormBasedPrivateState>) => {
+      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
+
+      return (
+        <FormBasedDimensionEditor
+          uiSettings={uiSettings}
+          storage={storage}
+          fieldFormats={fieldFormats}
+          http={core.http}
+          data={data}
+          unifiedSearch={unifiedSearch}
+          dataViews={dataViews}
+          uniqueLabel={columnLabelMap[props.columnId]}
+          notifications={core.notifications}
+          {...props}
+        />
       );
     },
 
-    renderDimensionEditor: (
-      domElement: Element,
-      props: DatasourceDimensionEditorProps<FormBasedPrivateState>
-    ) => {
-      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state);
-
-      render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <I18nProvider>
-            <KibanaContextProvider
-              services={{
-                appName: 'lens',
-                storage,
-                uiSettings,
-                data,
-                fieldFormats,
-                savedObjects: core.savedObjects,
-                docLinks: core.docLinks,
-                http: core.http,
-                unifiedSearch,
-              }}
-            >
-              <FormBasedDimensionEditor
-                uiSettings={uiSettings}
-                storage={storage}
-                fieldFormats={fieldFormats}
-                savedObjectsClient={core.savedObjects.client}
-                http={core.http}
-                data={data}
-                unifiedSearch={unifiedSearch}
-                dataViews={dataViews}
-                uniqueLabel={columnLabelMap[props.columnId]}
-                notifications={core.notifications}
-                {...props}
-              />
-            </KibanaContextProvider>
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
-      );
-    },
-
-    renderLayerPanel: (
-      domElement: Element,
-      props: DatasourceLayerPanelProps<FormBasedPrivateState>
-    ) => {
+    LayerPanelComponent: (props: DatasourceLayerPanelProps<FormBasedPrivateState>) => {
       const { onChangeIndexPattern, ...otherProps } = props;
-      render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <LayerPanel
-            onChangeIndexPattern={(indexPatternId) => {
-              triggerActionOnIndexPatternChange({
-                indexPatternId,
-                state: props.state,
-                layerId: props.layerId,
-                uiActions,
-              });
-              onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
-            }}
-            {...otherProps}
-          />
-        </KibanaThemeProvider>,
-        domElement
+      return (
+        <LayerPanel
+          onChangeIndexPattern={(indexPatternId) => {
+            triggerActionOnIndexPatternChange({
+              indexPatternId,
+              state: props.state,
+              layerId: props.layerId,
+              uiActions,
+            });
+            onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
+          }}
+          {...otherProps}
+        />
       );
-    },
-
-    canCloseDimensionEditor: (state) => {
-      return !state.isDimensionClosePrevented;
     },
 
     getDropProps,
@@ -734,12 +666,13 @@ export function getFormBasedDatasource({
     },
 
     getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<FormBasedPrivateState>) {
-      const columnLabelMap = formBasedDatasource.uniqueLabels(state);
+      const columnLabelMap = formBasedDatasource.uniqueLabels(state, indexPatterns);
       const layer = state.layers[layerId];
       const visibleColumnIds = layer.columnOrder.filter((colId) => !isReferenced(layer, colId));
 
       return {
         datasourceId: DATASOURCE_ID,
+        datasourceAliasIds: ALIAS_IDS,
         getTableSpec: () => {
           // consider also referenced columns in this case
           // but map fields to the top referencing column
@@ -816,67 +749,68 @@ export function getFormBasedDatasource({
     getDatasourceSuggestionsForVisualizeField,
     getDatasourceSuggestionsForVisualizeCharts,
 
-    getUserMessages(state, { frame: frameDatasourceAPI, setState, visualizationInfo }) {
+    getUserMessages(state, { frame: framePublicAPI, setState, visualizationInfo }) {
       if (!state) {
         return [];
       }
 
-      const layerErrorMessages = getLayerErrorMessages(
-        state,
-        frameDatasourceAPI,
-        setState,
-        core,
-        data
-      );
+      const layerErrorMessages = getLayerErrorMessages(state, framePublicAPI, setState, core, data);
 
       const dimensionErrorMessages = getInvalidDimensionErrorMessages(
         state,
         layerErrorMessages,
         (layerId, columnId) => {
           const layer = state.layers[layerId];
-          return !isColumnInvalid(
+          const column = layer.columns[columnId];
+          const indexPattern = framePublicAPI.dataViews.indexPatterns[layer.indexPatternId];
+          if (!column || !indexPattern) {
+            // this is a different issue that should be catched earlier
+            return false;
+          }
+          return isColumnInvalid(
             layer,
+            column,
             columnId,
-            frameDatasourceAPI.dataViews.indexPatterns[layer.indexPatternId],
-            frameDatasourceAPI.dateRange
+            indexPattern,
+            framePublicAPI.dateRange,
+            uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
           );
         }
       );
 
-      const warningMessages = [
-        ...[
-          ...(getStateTimeShiftWarningMessages(
-            data.datatableUtilities,
-            state,
-            frameDatasourceAPI
-          ) || []),
-        ].map((longMessage) => {
-          const message: UserMessage = {
-            severity: 'warning',
-            fixableInEditor: true,
-            displayLocations: [{ id: 'toolbar' }],
-            shortMessage: '',
-            longMessage,
-          };
+      const timeShiftWarningMessages = getStateTimeShiftWarningMessages(
+        data.datatableUtilities,
+        state,
+        framePublicAPI
+      );
 
-          return message;
-        }),
-        ...getPrecisionErrorWarningMessages(
-          data.datatableUtilities,
-          state,
-          frameDatasourceAPI,
-          core.docLinks,
-          setState
-        ),
-      ];
+      const precisionErrorWarningMsg = getPrecisionErrorWarningMessages(
+        data.datatableUtilities,
+        state,
+        framePublicAPI,
+        core.docLinks,
+        setState
+      );
 
-      const infoMessages = getNotifiableFeatures(state, frameDatasourceAPI, visualizationInfo);
+      const unsupportedOpsWarningMsg = getUnsupportedOperationsWarningMessage(
+        state,
+        framePublicAPI,
+        core.docLinks
+      );
 
-      return layerErrorMessages.concat(dimensionErrorMessages, warningMessages, infoMessages);
+      const infoMessages = getNotifiableFeatures(state, framePublicAPI, visualizationInfo);
+
+      return layerErrorMessages.concat(
+        dimensionErrorMessages,
+        timeShiftWarningMessages,
+        precisionErrorWarningMsg,
+        unsupportedOpsWarningMsg,
+        infoMessages
+      );
     },
 
     getSearchWarningMessages: (state, warning, request, response) => {
-      return [...getShardFailuresWarningMessages(state, warning, request, response, core.theme)];
+      return getSearchWarningMessages(state, warning, request, response, core.theme);
     },
 
     checkIntegrity: (state, indexPatterns) => {
@@ -922,6 +856,14 @@ export function getFormBasedDatasource({
     },
     getUsedDataViews: (state) => {
       return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
+    },
+    injectReferencesToLayers: (state, references) => {
+      const layers =
+        references && state ? injectReferences(state, references).layers : state?.layers;
+      return {
+        ...state,
+        layers,
+      };
     },
 
     getDatasourceInfo: async (state, references, dataViewsService) => {
@@ -973,17 +915,18 @@ function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedL
     columns: {},
     columnOrder: [],
     sampling: 1,
+    ignoreGlobalFilters: false,
   };
 }
 
 function getLayerErrorMessages(
   state: FormBasedPrivateState,
-  frameDatasourceAPI: FrameDatasourceAPI,
+  framePublicAPI: FramePublicAPI,
   setState: StateSetter<FormBasedPrivateState, unknown>,
   core: CoreStart,
   data: DataPublicPluginStart
-) {
-  const indexPatterns = frameDatasourceAPI.dataViews.indexPatterns;
+): UserMessage[] {
+  const indexPatterns = framePublicAPI.dataViews.indexPatterns;
 
   const layerErrors: UserMessage[][] = Object.entries(state.layers)
     .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
@@ -993,6 +936,7 @@ function getLayerErrorMessages(
         []
       ).map((error) => {
         const message: UserMessage = {
+          uniqueId: typeof error === 'string' ? error : error.uniqueId,
           severity: 'error',
           fixableInEditor: true,
           displayLocations:
@@ -1010,7 +954,7 @@ function getLayerErrorMessages(
                   <EuiButton
                     data-test-subj="errorFixAction"
                     onClick={async () => {
-                      const newState = await error.fixAction?.newState(frameDatasourceAPI);
+                      const newState = await error.fixAction?.newState(framePublicAPI);
                       if (newState) {
                         setState(newState);
                       }
@@ -1071,7 +1015,7 @@ function getLayerErrorMessages(
 function getInvalidDimensionErrorMessages(
   state: FormBasedPrivateState,
   currentErrorMessages: UserMessage[],
-  isValidColumn: (layerId: string, columnId: string) => boolean
+  isInvalidColumn: (layerId: string, columnId: string) => boolean
 ) {
   // generate messages for invalid columns
   const columnErrorMessages: UserMessage[] = Object.keys(state.layers)
@@ -1088,8 +1032,9 @@ function getInvalidDimensionErrorMessages(
           continue;
         }
 
-        if (!isValidColumn(layerId, columnId)) {
+        if (isInvalidColumn(layerId, columnId)) {
           messages.push({
+            uniqueId: EDITOR_INVALID_DIMENSION,
             severity: 'error',
             displayLocations: [{ id: 'dimensionButton', dimensionId: columnId }],
             fixableInEditor: true,

@@ -8,11 +8,9 @@
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import {
-  getDetailPanelIndexName,
   getPageOfIndices,
   getPager,
   getFilter,
-  isDetailPanelOpen,
   getSortField,
   isSortAscending,
   getIndicesAsArray,
@@ -22,13 +20,10 @@ import {
 } from '../../../../store/selectors';
 import {
   filterChanged,
-  closeDetailPanel,
-  openDetailPanel,
   pageChanged,
   pageSizeChanged,
   sortChanged,
   loadIndices,
-  reloadIndices,
   toggleChanged,
 } from '../../../../store/actions';
 
@@ -37,8 +32,6 @@ import { IndexTable as PresentationComponent } from './index_table';
 const mapStateToProps = (state, props) => {
   return {
     allIndices: getIndicesAsArray(state),
-    isDetailPanelOpen: isDetailPanelOpen(state),
-    detailPanelIndexName: getDetailPanelIndexName(state),
     indices: getPageOfIndices(state, props),
     pager: getPager(state, props),
     filter: getFilter(state),
@@ -67,17 +60,8 @@ const mapDispatchToProps = (dispatch) => {
     toggleChanged: (toggleName, toggleValue) => {
       dispatch(toggleChanged({ toggleName, toggleValue }));
     },
-    openDetailPanel: (indexName) => {
-      dispatch(openDetailPanel({ indexName }));
-    },
-    closeDetailPanel: () => {
-      dispatch(closeDetailPanel());
-    },
     loadIndices: () => {
       dispatch(loadIndices());
-    },
-    reloadIndices: (indexNames, options) => {
-      dispatch(reloadIndices(indexNames, options));
     },
   };
 };

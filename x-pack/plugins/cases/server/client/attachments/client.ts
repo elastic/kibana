@@ -5,14 +5,12 @@
  * 2.0.
  */
 
+import type { Case, Attachments, Attachment } from '../../../common/types/domain';
 import type {
   AlertResponse,
-  AllCommentsResponse,
+  AttachmentsFindResponse,
   BulkGetAttachmentsResponse,
-  CaseResponse,
-  CommentResponse,
-  CommentsResponse,
-} from '../../../common/api';
+} from '../../../common/types/api';
 import type { CasesClient } from '../client';
 
 import type { CasesClientInternal } from '../client_internal';
@@ -23,7 +21,7 @@ import type {
   AddArgs,
   DeleteAllArgs,
   DeleteArgs,
-  FindArgs,
+  FindCommentsArgs,
   GetAllAlertsAttachToCase,
   GetAllArgs,
   GetArgs,
@@ -45,8 +43,8 @@ export interface AttachmentsSubClient {
   /**
    * Adds an attachment to a case.
    */
-  add(params: AddArgs): Promise<CaseResponse>;
-  bulkCreate(params: BulkCreateArgs): Promise<CaseResponse>;
+  add(params: AddArgs): Promise<Case>;
+  bulkCreate(params: BulkCreateArgs): Promise<Case>;
   bulkGet(params: BulkGetArgs): Promise<BulkGetAttachmentsResponse>;
   /**
    * Deletes all attachments associated with a single case.
@@ -60,7 +58,7 @@ export interface AttachmentsSubClient {
   /**
    * Retrieves all comments matching the search criteria.
    */
-  find(findArgs: FindArgs): Promise<CommentsResponse>;
+  find(findArgs: FindCommentsArgs): Promise<AttachmentsFindResponse>;
   /**
    * Retrieves all alerts attach to a case given a single case ID
    */
@@ -68,17 +66,17 @@ export interface AttachmentsSubClient {
   /**
    * Gets all attachments for a single case.
    */
-  getAll(getAllArgs: GetAllArgs): Promise<AllCommentsResponse>;
+  getAll(getAllArgs: GetAllArgs): Promise<Attachments>;
   /**
    * Retrieves a single attachment for a case.
    */
-  get(getArgs: GetArgs): Promise<CommentResponse>;
+  get(getArgs: GetArgs): Promise<Attachment>;
   /**
    * Updates a specific attachment.
    *
    * The request must include all fields for the attachment. Even the fields that are not changing.
    */
-  update(updateArgs: UpdateArgs): Promise<CaseResponse>;
+  update(updateArgs: UpdateArgs): Promise<Case>;
 }
 
 /**

@@ -1,36 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldSpec, DataView, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
-import type { Filter, Query, BoolQuery, TimeRange } from '@kbn/es-query';
+import { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
-import type { OptionsListSortingType } from './suggestions_sorting';
 import type { DataControlInput } from '../types';
+import { OptionsListSelection } from './options_list_selections';
+import { OptionsListSearchTechnique } from './suggestions_searching';
+import type { OptionsListSortingType } from './suggestions_sorting';
 
-export const OPTIONS_LIST_CONTROL = 'optionsListControl';
+export const OPTIONS_LIST_CONTROL = 'optionsListControl'; // TODO: Replace with OPTIONS_LIST_CONTROL_TYPE
 
 export interface OptionsListEmbeddableInput extends DataControlInput {
+  searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;
-  selectedOptions?: string[];
+  selectedOptions?: OptionsListSelection[];
   existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
   hideActionBar?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
+  placeholder?: string;
   hideSort?: boolean;
   exclude?: boolean;
-  placeholder?: string;
 }
 
-export interface OptionsListSuggestions {
-  [key: string]: { doc_count: number };
-}
+export type OptionsListSuggestions = Array<{ value: OptionsListSelection; docCount?: number }>;
 
 /**
  * The Options list response is returned from the serverside Options List route.
@@ -38,7 +40,7 @@ export interface OptionsListSuggestions {
 export interface OptionsListSuccessResponse {
   suggestions: OptionsListSuggestions;
   totalCardinality?: number; // total cardinality will be undefined when `useExpensiveQueries` is `false`
-  invalidSelections?: string[];
+  invalidSelections?: OptionsListSelection[];
 }
 
 /**
@@ -61,29 +63,29 @@ export type OptionsListResponse = OptionsListSuccessResponse | OptionsListFailur
  */
 export type OptionsListRequest = Omit<
   OptionsListRequestBody,
-  'filters' | 'fieldName' | 'fieldSpec' | 'textFieldName'
+  'filters' | 'fieldName' | 'fieldSpec'
 > & {
-  allowExpensiveQueries: boolean;
   timeRange?: TimeRange;
-  runPastTimeout?: boolean;
   dataView: DataView;
   filters?: Filter[];
   field: FieldSpec;
-  query?: Query;
+  query?: Query | AggregateQuery;
 };
 
 /**
  * The Options list request body is sent to the serverside Options List route and is used to create the ES query.
  */
-export interface OptionsListRequestBody {
+export interface OptionsListRequestBody
+  extends Pick<
+    OptionsListEmbeddableInput,
+    'fieldName' | 'searchTechnique' | 'sort' | 'selectedOptions'
+  > {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
   allowExpensiveQueries: boolean;
-  sort?: OptionsListSortingType;
+  ignoreValidations?: boolean;
   filters?: Array<{ bool: BoolQuery }>;
-  selectedOptions?: string[];
   runPastTimeout?: boolean;
   searchString?: string;
   fieldSpec?: FieldSpec;
-  fieldName: string;
   size: number;
 }

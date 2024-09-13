@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { IEsSearchResponse, SearchRequest } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { get, getOr } from 'lodash/fp';
-
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { AggregationsMinAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsMinAggregate, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SecuritySolutionFactory } from '../../types';
 import type {
-  RiskScoreRequestOptions,
   RiskQueries,
   BucketItem,
   HostRiskScore,
@@ -27,7 +26,7 @@ import { getTotalCount } from '../../cti/event_enrichment/helpers';
 export const riskScore: SecuritySolutionFactory<
   RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore
 > = {
-  buildDsl: (options: RiskScoreRequestOptions) => {
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
@@ -35,10 +34,11 @@ export const riskScore: SecuritySolutionFactory<
     return buildRiskScoreQuery(options);
   },
   parse: async (
-    options: RiskScoreRequestOptions,
+    options,
     response: IEsSearchResponse,
     deps?: {
       spaceId?: string;
+      esClient: IScopedClusterClient;
       ruleDataClient?: IRuleDataClient | null;
     }
   ) => {
@@ -54,7 +54,15 @@ export const riskScore: SecuritySolutionFactory<
 
     const enhancedData =
       deps && options.includeAlertsCount
-        ? await enhanceData(data, names, nameField, deps.ruleDataClient, deps.spaceId)
+        ? await enhanceData(
+            data,
+            names,
+            nameField,
+            deps.esClient,
+            deps.ruleDataClient,
+            deps.spaceId,
+            options.alertsTimerange
+          )
         : data;
 
     return {
@@ -74,24 +82,22 @@ async function enhanceData(
   data: Array<HostRiskScore | UserRiskScore>,
   names: string[],
   nameField: string,
+  esClient: IScopedClusterClient,
   ruleDataClient?: IRuleDataClient | null,
-  spaceId?: string
+  spaceId?: string,
+  timerange?: TimeRange
 ): Promise<Array<HostRiskScore | UserRiskScore>> {
-  const ruleDataReader = ruleDataClient?.getReader({ namespace: spaceId });
-  const query = getAlertsQueryForEntity(names, nameField);
-  const response = await ruleDataReader?.search(query);
+  const indexPattern = ruleDataClient?.indexNameWithNamespace(spaceId ?? 'default');
+  const query = getAlertsQueryForEntity(names, nameField, timerange, indexPattern);
+  const response = await esClient.asCurrentUser.search(query);
   const buckets: EnhancedDataBucket[] = getOr([], 'aggregations.alertsByEntity.buckets', response);
 
-  const enhancedAlertsDataByEntityName: Record<
-    string,
-    { count: number; oldestAlertTimestamp: string }
-  > = buckets.reduce(
-    (acc, { key, doc_count: count, oldestAlertTimestamp }) => ({
-      ...acc,
-      [key]: { count, oldestAlertTimestamp: oldestAlertTimestamp.value_as_string },
-    }),
-    {}
-  );
+  const enhancedAlertsDataByEntityName = buckets.reduce<
+    Record<string, { count: number; oldestAlertTimestamp: string }>
+  >((acc, { key, doc_count: count, oldestAlertTimestamp }) => {
+    acc[key] = { count, oldestAlertTimestamp: oldestAlertTimestamp.value_as_string as string };
+    return acc;
+  }, {});
 
   return data.map((risk) => ({
     ...risk,
@@ -101,26 +107,47 @@ async function enhanceData(
   }));
 }
 
-const getAlertsQueryForEntity = (names: string[], nameField: string): SearchRequest => ({
-  size: 0,
-  query: {
-    bool: {
-      filter: [
-        { term: { 'kibana.alert.workflow_status': 'open' } },
-        { terms: { [nameField]: names } },
-      ],
-    },
-  },
-  aggs: {
-    alertsByEntity: {
-      terms: {
-        field: nameField,
+const getAlertsQueryForEntity = (
+  names: string[],
+  nameField: string,
+  timerange: TimeRange | undefined,
+  indexPattern: string | undefined
+): SearchRequest => {
+  return {
+    size: 0,
+    index: indexPattern,
+    query: {
+      bool: {
+        filter: [
+          { term: { 'kibana.alert.workflow_status': 'open' } },
+          { terms: { [nameField]: names } },
+          ...(timerange
+            ? [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: timerange.from,
+                      lte: timerange.to,
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+              ]
+            : []),
+        ],
       },
-      aggs: {
-        oldestAlertTimestamp: {
-          min: { field: '@timestamp' },
+    },
+    aggs: {
+      alertsByEntity: {
+        terms: {
+          field: nameField,
+        },
+        aggs: {
+          oldestAlertTimestamp: {
+            min: { field: '@timestamp' },
+          },
         },
       },
     },
-  },
-});
+  };
+};

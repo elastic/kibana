@@ -16,12 +16,18 @@ const cleanMeta = (str: string) => (str.charAt(0).toUpperCase() + str.slice(1)).
 export const resultToOption = (
   result: GlobalSearchResult,
   searchTagIds: string[],
-  getTag?: SavedObjectTaggingPluginStart['ui']['getTag']
+  getTagList?: SavedObjectTaggingPluginStart['ui']['getTagList']
 ): EuiSelectableTemplateSitewideOption => {
   const { id, title, url, icon, type, meta = {} } = result;
   const { tagIds = [], categoryLabel = '' } = meta as { tagIds: string[]; categoryLabel: string };
   // only displaying icons for applications and integrations
-  const useIcon = type === 'application' || type === 'integration';
+  const useIcon =
+    type === 'application' ||
+    type === 'integration' ||
+    type.toLowerCase() === 'enterprise search' ||
+    type.toLowerCase() === 'search' ||
+    type.toLowerCase() === 'index' ||
+    type.toLowerCase() === 'connector';
   const option: EuiSelectableTemplateSitewideOption = {
     key: id,
     label: title,
@@ -36,12 +42,24 @@ export const resultToOption = (
       ? [{ text: categoryLabel }]
       : [{ text: cleanMeta((meta.displayName as string) ?? type) }];
 
-  if (getTag && tagIds.length) {
-    // TODO #85189 - refactor to use TagList instead of getTag
-    // Casting to Tag[] because we know all our IDs will be valid here, no need to check for undefined
-    option.append = (
-      <ResultTagList tags={tagIds.map(getTag) as Tag[]} searchTagIds={searchTagIds} />
-    );
+  if (tagIds.length && getTagList) {
+    const tagList = getTagList();
+    const tags: Tag[] = [];
+    for (let i = 0; i < tagIds.length; i++) {
+      const foundTag = tagList.find((tag) => tag.id === tagIds[i]);
+      if (!foundTag) {
+        //  eslint-disable-next-line no-console
+        console.warn(
+          `SearchBar: Tag with id "${tagIds[i]}" not found. Tag "${tagIds[i]}" is referenced by the search result "${result.type}:${result.id}". Skipping displaying the missing tag.`
+        );
+      } else {
+        tags.push(foundTag);
+      }
+    }
+
+    if (tags.length) {
+      option.append = <ResultTagList tags={tags} searchTagIds={searchTagIds} />;
+    }
   }
 
   return option;

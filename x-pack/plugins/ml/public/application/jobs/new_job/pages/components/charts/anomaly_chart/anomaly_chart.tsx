@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { Chart, Settings, TooltipType } from '@elastic/charts';
-import { ModelItem, Anomaly } from '../../../../common/results_loader';
+import type { FC } from 'react';
+import React from 'react';
+import { Chart, Settings, TooltipType, Tooltip, LEGACY_LIGHT_THEME } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
+import type { ModelItem, Anomaly } from '../../../../common/results_loader';
 import { Anomalies } from '../common/anomalies';
 import { ModelBounds } from './model_bounds';
 import { Line } from './line';
 import { Scatter } from './scatter';
 import { Axes } from '../common/axes';
 import { getXRange } from '../common/utils';
-import { LineChartPoint } from '../../../../common/chart_loader';
+import type { LineChartPoint } from '../../../../common/chart_loader';
 import { LoadingWrapper } from '../loading_wrapper';
 
 export enum CHART_TYPE {
@@ -47,10 +49,12 @@ export const AnomalyChart: FC<Props> = ({
     <div style={{ width, height }} data-test-subj={`mlAnomalyChart ${CHART_TYPE[chartType]}`}>
       <LoadingWrapper height={height} hasData={data.length > 0} loading={loading}>
         <Chart>
+          <Tooltip type={TooltipType.None} />
           <Settings
-            // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
+            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+            baseTheme={LEGACY_LIGHT_THEME}
             xDomain={xDomain}
-            tooltip={TooltipType.None}
+            locale={i18n.getLocale()}
           />
           <Axes chartData={data} />
           <Anomalies anomalyData={anomalyData} />

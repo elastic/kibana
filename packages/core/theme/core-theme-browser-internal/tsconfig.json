@@ -13,12 +13,13 @@
     "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/core-base-common",
     "@kbn/core-injected-metadata-browser-internal",
     "@kbn/core-theme-browser",
-    "@kbn/core-i18n-browser",
     "@kbn/core-injected-metadata-browser-mocks",
     "@kbn/test-jest-helpers",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/core-injected-metadata-common-internal",
+    "@kbn/ui-theme",
   ],
   "exclude": [
     "target/**/*",

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -119,6 +120,8 @@ describe('Querybar Menu component', () => {
           ],
         }),
       },
+      additionalQueryBarMenuItems: {},
+      queryBarMenuRef: React.createRef(),
     };
   });
   it('should not render the popover if the openQueryBarMenu prop is false', async () => {
@@ -230,7 +233,7 @@ describe('Querybar Menu component', () => {
     expect(languageSwitcher.length).toBeTruthy();
   });
 
-  it('should render the save query quick buttons', async () => {
+  it('should render the save query quick button', async () => {
     const newProps = {
       ...props,
       openQueryBarMenu: true,
@@ -247,6 +250,7 @@ describe('Querybar Menu component', () => {
           },
           filters: [],
         },
+        namespaces: ['default'],
       },
     };
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
@@ -254,10 +258,6 @@ describe('Querybar Menu component', () => {
       '[data-test-subj="saved-query-management-save-changes-button"]'
     );
     expect(saveChangesButton.length).toBeTruthy();
-    const saveChangesAsNewButton = component.find(
-      '[data-test-subj="saved-query-management-save-as-new-button"]'
-    );
-    expect(saveChangesAsNewButton.length).toBeTruthy();
   });
 
   it('should render all filter panel options by default', async () => {
@@ -345,5 +345,66 @@ describe('Querybar Menu component', () => {
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
     expect(component.find('[data-test-subj="filter-sets-removeAllFilters"]').length).toBeFalsy();
+  });
+
+  it('should render additional menu items', async () => {
+    const newProps: QueryBarMenuProps = {
+      ...props,
+      openQueryBarMenu: true,
+      showFilterBar: true,
+      additionalQueryBarMenuItems: {
+        items: [
+          {
+            name: 'Test additional query bar menu item',
+            'data-test-subj': 'additional-query-bar-menu-item',
+          },
+        ],
+      },
+    };
+    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    expect(component.find('[data-test-subj="additional-query-bar-menu-item"]').length).toBeTruthy();
+  });
+
+  it('should render additional menu panels', async () => {
+    const newProps: QueryBarMenuProps = {
+      ...props,
+      openQueryBarMenu: true,
+      showFilterBar: true,
+      additionalQueryBarMenuItems: {
+        items: [
+          {
+            name: 'Go to nested menu',
+            'data-test-subj': 'additional-query-bar-menu-panel-link',
+            panel: 'panel-1',
+          },
+        ],
+        panels: [
+          {
+            id: 'panel-1',
+            title: 'Grouped additional query bar menu items',
+            items: [
+              {
+                name: 'Test additional query bar menu item',
+                'data-test-subj': 'additional-query-bar-nested-menu-item',
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    component
+      .find('[data-test-subj="additional-query-bar-menu-panel-link"]')
+      .first()
+      .simulate('click');
+
+    await waitFor(() => {
+      component.update();
+      expect(
+        component.find('[data-test-subj="additional-query-bar-nested-menu-item"]').length
+      ).toBeTruthy();
+    });
   });
 });

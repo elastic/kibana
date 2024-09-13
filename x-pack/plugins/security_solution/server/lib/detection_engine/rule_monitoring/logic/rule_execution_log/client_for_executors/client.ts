@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { sum } from 'lodash';
 import type { Duration } from 'moment';
-import type { Logger } from '@kbn/core/server';
 
 import type {
-  PublicRuleResultService,
   PublicRuleMonitoringService,
+  PublicRuleResultService,
 } from '@kbn/alerting-plugin/server/types';
 import type {
-  RuleExecutionMetrics,
   RuleExecutionSettings,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
-import {
+  RuleExecutionStatus,
   LogLevel,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import {
   logLevelFromExecutionStatus,
   LogLevelSetting,
   logLevelToNumber,
-  RuleExecutionStatus,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+  RuleExecutionStatusEnum,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
-import { truncateValue } from '../utils/normalization';
-import type { ExtMeta } from '../utils/console_logging';
+import type { ExtMeta } from '../../utils/console_logging';
+import { truncateValue } from '../../utils/normalization';
 import { getCorrelationIds } from './correlation_ids';
 
 import type { IEventLogWriter } from '../event_log/event_log_writer';
@@ -37,8 +37,10 @@ import type {
   RuleExecutionContext,
   StatusChangeArgs,
 } from './client_interface';
+import type { RuleExecutionMetrics } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
+import { LogLevelEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 
-export const createClientForExecutors = (
+export const createRuleExecutionLogClientForExecutors = (
   settings: RuleExecutionSettings,
   eventLog: IEventLogWriter,
   logger: Logger,
@@ -50,7 +52,7 @@ export const createClientForExecutors = (
   const baseLogSuffix = baseCorrelationIds.getLogSuffix();
   const baseLogMeta = baseCorrelationIds.getLogMeta();
 
-  const { executionId, ruleId, ruleUuid, ruleName, ruleType, spaceId } = context;
+  const { executionId, ruleId, ruleUuid, ruleName, ruleRevision, ruleType, spaceId } = context;
 
   const client: IRuleExecutionLogForExecutors = {
     get context() {
@@ -58,23 +60,23 @@ export const createClientForExecutors = (
     },
 
     trace(...messages: string[]): void {
-      writeMessage(messages, LogLevel.trace);
+      writeMessage(messages, LogLevelEnum.trace);
     },
 
     debug(...messages: string[]): void {
-      writeMessage(messages, LogLevel.debug);
+      writeMessage(messages, LogLevelEnum.debug);
     },
 
     info(...messages: string[]): void {
-      writeMessage(messages, LogLevel.info);
+      writeMessage(messages, LogLevelEnum.info);
     },
 
     warn(...messages: string[]): void {
-      writeMessage(messages, LogLevel.warn);
+      writeMessage(messages, LogLevelEnum.warn);
     },
 
     error(...messages: string[]): void {
-      writeMessage(messages, LogLevel.error);
+      writeMessage(messages, LogLevelEnum.error);
     },
 
     async logStatusChange(args: StatusChangeArgs): Promise<void> {
@@ -106,19 +108,19 @@ export const createClientForExecutors = (
 
   const writeMessageToConsole = (message: string, logLevel: LogLevel, logMeta: ExtMeta): void => {
     switch (logLevel) {
-      case LogLevel.trace:
+      case LogLevelEnum.trace:
         logger.trace(`${message} ${baseLogSuffix}`, logMeta);
         break;
-      case LogLevel.debug:
+      case LogLevelEnum.debug:
         logger.debug(`${message} ${baseLogSuffix}`, logMeta);
         break;
-      case LogLevel.info:
+      case LogLevelEnum.info:
         logger.info(`${message} ${baseLogSuffix}`, logMeta);
         break;
-      case LogLevel.warn:
+      case LogLevelEnum.warn:
         logger.warn(`${message} ${baseLogSuffix}`, logMeta);
         break;
-      case LogLevel.error:
+      case LogLevelEnum.error:
         logger.error(`${message} ${baseLogSuffix}`, logMeta);
         break;
       default:
@@ -140,6 +142,7 @@ export const createClientForExecutors = (
       ruleId,
       ruleUuid,
       ruleName,
+      ruleRevision,
       ruleType,
       spaceId,
       executionId,
@@ -150,7 +153,7 @@ export const createClientForExecutors = (
 
   const writeExceptionToConsole = (e: unknown, message: string, logMeta: ExtMeta): void => {
     const logReason = e instanceof Error ? e.stack ?? e.message : String(e);
-    writeMessageToConsole(`${message}. Reason: ${logReason}`, LogLevel.error, logMeta);
+    writeMessageToConsole(`${message}. Reason: ${logReason}`, LogLevelEnum.error, logMeta);
   };
 
   const writeStatusChangeToConsole = (args: NormalizedStatusChangeArgs, logMeta: ExtMeta): void => {
@@ -161,9 +164,9 @@ export const createClientForExecutors = (
   };
 
   const writeStatusChangeToRuleObject = async (args: NormalizedStatusChangeArgs): Promise<void> => {
-    const { newStatus, message, metrics } = args;
+    const { newStatus, message, metrics, userError } = args;
 
-    if (newStatus === RuleExecutionStatus.running) {
+    if (newStatus === RuleExecutionStatusEnum.running) {
       return;
     }
 
@@ -185,9 +188,9 @@ export const createClientForExecutors = (
       ruleMonitoringService.setLastRunMetricsGapDurationS(executionGapDurationS);
     }
 
-    if (newStatus === RuleExecutionStatus.failed) {
-      ruleResultService.addLastRunError(message);
-    } else if (newStatus === RuleExecutionStatus['partial failure']) {
+    if (newStatus === RuleExecutionStatusEnum.failed) {
+      ruleResultService.addLastRunError(message, userError ?? false);
+    } else if (newStatus === RuleExecutionStatusEnum['partial failure']) {
       ruleResultService.addLastRunWarning(message);
     }
 
@@ -202,6 +205,7 @@ export const createClientForExecutors = (
         ruleId,
         ruleUuid,
         ruleName,
+        ruleRevision,
         ruleType,
         spaceId,
         executionId,
@@ -213,6 +217,7 @@ export const createClientForExecutors = (
       ruleId,
       ruleUuid,
       ruleName,
+      ruleRevision,
       ruleType,
       spaceId,
       executionId,
@@ -228,16 +233,17 @@ interface NormalizedStatusChangeArgs {
   newStatus: RuleExecutionStatus;
   message: string;
   metrics?: RuleExecutionMetrics;
+  userError?: boolean;
 }
 
 const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChangeArgs => {
-  if (args.newStatus === RuleExecutionStatus.running) {
+  if (args.newStatus === RuleExecutionStatusEnum.running) {
     return {
       newStatus: args.newStatus,
       message: '',
     };
   }
-  const { newStatus, message, metrics } = args;
+  const { newStatus, message, metrics, userError } = args;
 
   return {
     newStatus,
@@ -250,6 +256,7 @@ const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChan
           execution_gap_duration_s: normalizeGap(metrics.executionGap),
         }
       : undefined,
+    userError,
   };
 };
 

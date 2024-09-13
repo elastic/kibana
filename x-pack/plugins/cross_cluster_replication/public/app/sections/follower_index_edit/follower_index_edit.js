@@ -10,13 +10,7 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  EuiButton,
-  EuiConfirmModal,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiButton, EuiConfirmModal, EuiPageSection, EuiPageTemplate } from '@elastic/eui';
 
 import { setBreadcrumbs, listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -103,11 +97,7 @@ export class FollowerIndexEdit extends PureComponent {
   closeConfirmModal = () => this.setState({ showConfirmModal: false });
 
   renderLoading(loadingTitle) {
-    return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <SectionLoading>{loadingTitle}</SectionLoading>
-      </EuiPageContent>
-    );
+    return <SectionLoading>{loadingTitle}</SectionLoading>;
   }
 
   renderGetFollowerIndexError(error) {
@@ -123,7 +113,7 @@ export class FollowerIndexEdit extends PureComponent {
             error: i18n.translate(
               'xpack.crossClusterReplication.followerIndexEditForm.loadingErrorMessage',
               {
-                defaultMessage: `The follower index '{name}' does not exist.`,
+                defaultMessage: `The follower index ''{name}'' does not exist.`,
                 values: { name },
               }
             ),
@@ -131,33 +121,32 @@ export class FollowerIndexEdit extends PureComponent {
         : error;
 
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-        <EuiEmptyPrompt
-          iconType="warning"
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexEditForm.loadingErrorTitle"
-                defaultMessage="Error loading follower index"
-              />
-            </h2>
-          }
-          body={<p>{errorMessage}</p>}
-          actions={
-            <EuiButton
-              {...reactRouterNavigate(this.props.history, `/follower_indices`)}
-              color="danger"
-              flush="left"
-              iconType="arrowLeft"
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexEditForm.viewFollowerIndicesButtonLabel"
-                defaultMessage="View follower indices"
-              />
-            </EuiButton>
-          }
-        />
-      </EuiPageContent>
+      <EuiPageTemplate.EmptyPrompt
+        color="danger"
+        iconType="warning"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexEditForm.loadingErrorTitle"
+              defaultMessage="Error loading follower index"
+            />
+          </h2>
+        }
+        body={<p>{errorMessage}</p>}
+        actions={
+          <EuiButton
+            {...reactRouterNavigate(this.props.history, `/follower_indices`)}
+            color="danger"
+            flush="left"
+            iconType="arrowLeft"
+          >
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexEditForm.viewFollowerIndicesButtonLabel"
+              defaultMessage="View follower indices"
+            />
+          </EuiButton>
+        }
+      />
     );
   }
 
@@ -169,7 +158,7 @@ export class FollowerIndexEdit extends PureComponent {
     const title = i18n.translate(
       'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.title',
       {
-        defaultMessage: `Update follower index '{id}'?`,
+        defaultMessage: `Update follower index ''{id}''?`,
         values: { id: followerIndexId },
       }
     );
@@ -257,7 +246,7 @@ export class FollowerIndexEdit extends PureComponent {
           }
 
           return (
-            <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+            <EuiPageSection restrictWidth style={{ width: '100%' }}>
               <FollowerIndexPageTitle
                 title={
                   <FormattedMessage
@@ -284,7 +273,7 @@ export class FollowerIndexEdit extends PureComponent {
               />
 
               {showConfirmModal && this.renderConfirmModal()}
-            </EuiPageContentBody>
+            </EuiPageSection>
           );
         }}
       </RemoteClustersProvider>

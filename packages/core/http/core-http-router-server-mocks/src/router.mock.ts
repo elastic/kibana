@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { URL } from 'url';
@@ -12,7 +13,7 @@ import { stringify } from 'query-string';
 import { hapiMocks } from '@kbn/hapi-mocks';
 import { schema } from '@kbn/config-schema';
 import type {
-  IRouterWithVersion,
+  IRouter,
   KibanaRequest,
   RouteMethod,
   RouteValidationSpec,
@@ -21,9 +22,9 @@ import type {
   KibanaResponseFactory,
 } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
-import { createVersionedRouterMock } from './versioned_router.mock';
+import { createVersionedRouterMock, type MockedVersionedRouter } from './versioned_router.mock';
 
-export type RouterMock = jest.Mocked<IRouterWithVersion<any>>;
+export type RouterMock = jest.Mocked<IRouter<any>> & { versioned: MockedVersionedRouter };
 
 function createRouterMock({ routerPath = '' }: { routerPath?: string } = {}): RouterMock {
   return {
@@ -73,7 +74,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   routeTags,
   routeAuthRequired,
   validation = {},
-  kibanaRouteOptions = { xsrfRequired: true, access: 'public' },
+  kibanaRouteOptions = { xsrfRequired: true, access: 'internal' },
   kibanaRequestState = {
     requestId: '123',
     requestUuid: '123e4567-e89b-12d3-a456-426614174000',
@@ -117,10 +118,26 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   );
 }
 
+function createFakeKibanaRequestMock({
+  headers = { accept: 'something/html' },
+}: {
+  headers?: Record<string, string>;
+}): KibanaRequest {
+  const fakeRequest = {
+    headers,
+    path: '/',
+  };
+
+  return CoreKibanaRequest.from(fakeRequest);
+}
+
 const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
   ok: jest.fn(),
+  created: jest.fn(),
   accepted: jest.fn(),
   noContent: jest.fn(),
+  multiStatus: jest.fn(),
+  notModified: jest.fn(),
   custom: jest.fn(),
   redirected: jest.fn(),
   badRequest: jest.fn(),
@@ -128,6 +145,7 @@ const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
   forbidden: jest.fn(),
   notFound: jest.fn(),
   conflict: jest.fn(),
+  unprocessableContent: jest.fn(),
   customError: jest.fn(),
   file: jest.fn(),
 });
@@ -135,5 +153,6 @@ const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
 export const mockRouter = {
   create: createRouterMock,
   createKibanaRequest: createKibanaRequestMock,
+  createFakeKibanaRequest: createFakeKibanaRequestMock,
   createResponseFactory: createResponseFactoryMock,
 };

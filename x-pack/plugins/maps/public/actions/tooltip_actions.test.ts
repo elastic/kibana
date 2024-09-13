@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+jest.mock('../kibana_services', () => ({
+  getEMSSettings() {
+    return {
+      isEMSUrlSet() {
+        return false;
+      },
+    };
+  },
+}));
+
 import { TooltipState } from '../../common/descriptor_types';
 import { openOnClickTooltip } from './tooltip_actions';
 import { MapStoreState } from '../reducers/store';

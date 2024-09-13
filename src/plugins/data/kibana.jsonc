@@ -27,9 +27,7 @@
       "management"
     ],
     "optionalPlugins": [
-      "usageCollection",
-      "taskManager",
-      "security"
+      "usageCollection"
     ],
     "requiredBundles": [
       "kibanaUtils",

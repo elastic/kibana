@@ -6,10 +6,12 @@
  */
 
 import { createSelector, defaultMemoize } from 'reselect';
+import type { State } from '../../common/store/types';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
 import type {
+  AnalyzerById,
   ResolverState,
   IsometricTaxiLayout,
   DataState,
@@ -18,6 +20,15 @@ import type {
 } from '../types';
 import type { EventStats } from '../../../common/endpoint/types';
 import * as nodeModel from '../../../common/endpoint/models/node';
+
+export const selectAnalyzer = (state: State): AnalyzerById => state.analyzer;
+
+export const selectAnalyzerById = (state: State, id: string): ResolverState => state.analyzer[id];
+
+export const analyzerByIdSelector = createSelector(
+  selectAnalyzer,
+  (analyzer: AnalyzerById) => analyzer
+);
 
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
@@ -31,6 +42,18 @@ export const projectionMatrix = composeSelectors(
 export const translation = composeSelectors(cameraStateSelector, cameraSelectors.translation);
 
 export const detectedBounds = composeSelectors(dataStateSelector, dataSelectors.detectedBounds);
+
+export const agentId = composeSelectors(dataStateSelector, dataSelectors.agentId);
+
+export const overriddenTimeBounds = composeSelectors(
+  dataStateSelector,
+  dataSelectors.overriddenTimeBounds
+);
+
+export const currentAppliedTimeRange = composeSelectors(
+  dataStateSelector,
+  dataSelectors.currentAppliedTimeRange
+);
 
 /**
  * A matrix that when applied to a Vector2 converts it from screen coordinates to world coordinates.

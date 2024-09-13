@@ -34,6 +34,7 @@ import {
 } from '../../../../shared_imports';
 import { LegacyIndexTemplatesDeprecation } from '../../../components';
 import { useLoadIndexTemplates } from '../../../services/api';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { documentationService } from '../../../services/documentation';
 import { useAppContext, useServices } from '../../../app_context';
 import {
@@ -47,16 +48,22 @@ import { TemplateTable } from './template_table';
 import { TemplateDetails } from './template_details';
 import { LegacyTemplateTable } from './legacy_templates/template_table';
 
-type FilterName = 'managed' | 'cloudManaged' | 'system';
+type FilterName = 'managed' | 'deprecated' | 'cloudManaged' | 'system';
 interface MatchParams {
   templateName?: string;
 }
 
 function filterTemplates(templates: TemplateListItem[], types: string[]): TemplateListItem[] {
   return templates.filter((template) => {
+    // Exclude deprecated templates by default, unless 'deprecated' is specified in types
+    if (template.deprecated && !types.includes('deprecated')) {
+      return false;
+    }
+
     if (template._kbnMeta.type === 'default') {
       return true;
     }
+
     return types.includes(template._kbnMeta.type);
   });
 }
@@ -80,12 +87,22 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
     page: 'indexManagementIndexTemplatesTab',
   });
 
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.templates);
+  }, []);
+
   const [filters, setFilters] = useState<Filters<FilterName>>({
     managed: {
       name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewManagedTemplateLabel', {
         defaultMessage: 'Managed templates',
       }),
       checked: 'on',
+    },
+    deprecated: {
+      name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewDeprecatedTemplateLabel', {
+        defaultMessage: 'Deprecated templates',
+      }),
+      checked: 'off',
     },
     cloudManaged: {
       name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewCloudManagedTemplateLabel', {
@@ -142,7 +159,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   const renderHeader = () => (
     // flex-grow: 0 is needed here because the parent element is a flex column and the header would otherwise expand.
-    <EuiFlexGroup alignItems="center" gutterSize="s" style={{ flexGrow: 0 }}>
+    <EuiFlexGroup alignItems="center" gutterSize="m" style={{ flexGrow: 0 }}>
       <EuiFlexItem grow={true}>
         <EuiText color="subdued">
           <FormattedMessage

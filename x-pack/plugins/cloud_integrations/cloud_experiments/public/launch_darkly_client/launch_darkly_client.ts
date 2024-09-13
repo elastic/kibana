@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { type LDClient, type LDUser, type LDLogLevel } from 'launchdarkly-js-client-sdk';
+import {
+  type LDClient,
+  type LDSingleKindContext,
+  type LDLogLevel,
+} from 'launchdarkly-js-client-sdk';
+import { BehaviorSubject, filter, firstValueFrom, switchMap } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 
 export interface LaunchDarklyClientConfig {
   client_id: string;
@@ -15,65 +21,84 @@ export interface LaunchDarklyClientConfig {
 export interface LaunchDarklyUserMetadata
   extends Record<string, string | boolean | number | undefined> {
   userId: string;
-  // We are not collecting any of the above, but this is to match the LDUser first-level definition
-  name?: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  avatar?: string;
-  ip?: string;
-  country?: string;
 }
 
 export class LaunchDarklyClient {
-  private launchDarklyClient?: LDClient;
+  private initialized = false;
+  private canceled = false;
+  private launchDarklyClientSub$ = new BehaviorSubject<LDClient | null>(null);
+  private loadingClient$ = new BehaviorSubject<boolean>(true);
+  private launchDarklyClient$ = this.loadingClient$.pipe(
+    // To avoid a racing condition when trying to get a variation before the client is ready
+    // we use the `switchMap` operator to ensure we only return the client when it has been initialized.
+    filter((loading) => !loading),
+    switchMap(() => this.launchDarklyClientSub$)
+  );
 
   constructor(
     private readonly ldConfig: LaunchDarklyClientConfig,
-    private readonly kibanaVersion: string
+    private readonly kibanaVersion: string,
+    private readonly logger: Logger
   ) {}
 
   public async updateUserMetadata(userMetadata: LaunchDarklyUserMetadata) {
-    const { userId, name, firstName, lastName, email, avatar, ip, country, ...custom } =
-      userMetadata;
-    const launchDarklyUser: LDUser = {
+    if (this.canceled) return;
+
+    const { userId, ...userMetadataWithoutUserId } = userMetadata;
+    const launchDarklyUser: LDSingleKindContext = {
+      ...userMetadataWithoutUserId,
+      kind: 'user',
       key: userId,
-      name,
-      firstName,
-      lastName,
-      email,
-      avatar,
-      ip,
-      country,
-      // This casting is needed because LDUser does not allow `Record<string, undefined>`
-      custom: custom as Record<string, string | boolean | number>,
     };
-    if (this.launchDarklyClient) {
-      await this.launchDarklyClient.identify(launchDarklyUser);
+
+    let launchDarklyClient: LDClient | null = null;
+    if (this.initialized) {
+      launchDarklyClient = await this.getClient();
+    }
+
+    if (launchDarklyClient) {
+      await launchDarklyClient.identify(launchDarklyUser);
     } else {
+      this.initialized = true;
       const { initialize, basicLogger } = await import('launchdarkly-js-client-sdk');
-      this.launchDarklyClient = initialize(this.ldConfig.client_id, launchDarklyUser, {
+      launchDarklyClient = initialize(this.ldConfig.client_id, launchDarklyUser, {
         application: { id: 'kibana-browser', version: this.kibanaVersion },
         logger: basicLogger({ level: this.ldConfig.client_log_level }),
       });
+      this.launchDarklyClientSub$.next(launchDarklyClient);
+      this.loadingClient$.next(false);
     }
   }
 
   public async getVariation<Data>(configKey: string, defaultValue: Data): Promise<Data> {
-    if (!this.launchDarklyClient) return defaultValue; // Skip any action if no LD User is defined
-    await this.launchDarklyClient.waitForInitialization();
-    return await this.launchDarklyClient.variation(configKey, defaultValue);
+    const launchDarklyClient = await this.getClient();
+    if (!launchDarklyClient) return defaultValue; // Skip any action if no LD User is defined
+    await launchDarklyClient.waitForInitialization();
+    return await launchDarklyClient.variation(configKey, defaultValue);
   }
 
   public reportMetric(metricName: string, meta?: unknown, value?: number): void {
-    if (!this.launchDarklyClient) return; // Skip any action if no LD User is defined
-    this.launchDarklyClient.track(metricName, meta, value);
+    this.getClient().then((launchDarklyClient) => {
+      if (!launchDarklyClient) return; // Skip any action if no LD User is defined
+      launchDarklyClient.track(metricName, meta, value);
+    });
   }
 
   public stop() {
-    this.launchDarklyClient
-      ?.flush()
-      // eslint-disable-next-line no-console
-      .catch((err) => console.warn(err));
+    this.getClient().then((launchDarklyClient) => {
+      launchDarklyClient?.flush().catch((err) => {
+        this.logger.warn(err);
+      });
+    });
+  }
+
+  public cancel() {
+    this.initialized = true;
+    this.canceled = true;
+    this.loadingClient$.next(false);
+  }
+
+  private getClient(): Promise<LDClient | null> {
+    return firstValueFrom(this.launchDarklyClient$, { defaultValue: null });
   }
 }

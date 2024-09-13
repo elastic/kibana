@@ -5,37 +5,36 @@
  * 2.0.
  */
 
-import {
-  ACTION,
-  APPLIES_TO,
-  FILTER_TYPE,
-  OPERATOR,
-} from '../../../../common/constants/detector_rule';
-
 import { cloneDeep } from 'lodash';
-import { ml } from '../../services/ml_api_service';
-import { mlJobService } from '../../services/job_service';
+
 import { i18n } from '@kbn/i18n';
+import {
+  ML_DETECTOR_RULE_ACTION,
+  ML_DETECTOR_RULE_APPLIES_TO,
+  ML_DETECTOR_RULE_FILTER_TYPE,
+  ML_DETECTOR_RULE_OPERATOR,
+} from '@kbn/ml-anomaly-utils';
+
 import { processCreatedBy } from '../../../../common/util/job_utils';
 
 export function getNewConditionDefaults() {
   return {
-    applies_to: APPLIES_TO.ACTUAL,
-    operator: OPERATOR.LESS_THAN,
+    applies_to: ML_DETECTOR_RULE_APPLIES_TO.ACTUAL,
+    operator: ML_DETECTOR_RULE_OPERATOR.LESS_THAN,
     value: 1,
   };
 }
 
 export function getNewRuleDefaults() {
   return {
-    actions: [ACTION.SKIP_RESULT],
+    actions: [ML_DETECTOR_RULE_ACTION.SKIP_RESULT],
     conditions: [],
   };
 }
 
 export function getScopeFieldDefaults(filterListIds) {
   const defaults = {
-    filter_type: FILTER_TYPE.INCLUDE,
+    filter_type: ML_DETECTOR_RULE_FILTER_TYPE.INCLUDE,
     enabled: false, // UI-only property to show field as enabled in Scope section.
   };
 
@@ -69,7 +68,7 @@ export function isValidRule(rule) {
   return isValid;
 }
 
-export function saveJobRule(job, detectorIndex, ruleIndex, editedRule) {
+export function saveJobRule(mlJobService, job, detectorIndex, ruleIndex, editedRule, mlApi) {
   const detector = job.analysis_config.detectors[detectorIndex];
 
   // Filter out any scope expression where the UI=specific 'enabled'
@@ -102,16 +101,16 @@ export function saveJobRule(job, detectorIndex, ruleIndex, editedRule) {
     }
   }
 
-  return updateJobRules(job, detectorIndex, rules);
+  return updateJobRules(mlJobService, job, detectorIndex, rules, mlApi);
 }
 
-export function deleteJobRule(job, detectorIndex, ruleIndex) {
+export function deleteJobRule(mlJobService, job, detectorIndex, ruleIndex, mlApi) {
   const detector = job.analysis_config.detectors[detectorIndex];
   let customRules = [];
   if (detector.custom_rules !== undefined && ruleIndex < detector.custom_rules.length) {
     customRules = cloneDeep(detector.custom_rules);
     customRules.splice(ruleIndex, 1);
-    return updateJobRules(job, detectorIndex, customRules);
+    return updateJobRules(mlJobService, job, detectorIndex, customRules, mlApi);
   } else {
     return Promise.reject(
       new Error(
@@ -127,7 +126,7 @@ export function deleteJobRule(job, detectorIndex, ruleIndex) {
   }
 }
 
-export function updateJobRules(job, detectorIndex, rules) {
+export function updateJobRules(mlJobService, job, detectorIndex, rules, mlApi) {
   // Pass just the detector with the edited rule to the updateJob endpoint.
   const jobId = job.job_id;
   const jobData = {
@@ -145,11 +144,10 @@ export function updateJobRules(job, detectorIndex, rules) {
     processCreatedBy(customSettings);
     jobData.custom_settings = customSettings;
   }
-
   return new Promise((resolve, reject) => {
-    ml.updateJob({ jobId: jobId, job: jobData })
+    mlApi
+      .updateJob({ jobId: jobId, job: jobData })
       .then(() => {
-        // Refresh the job data in the job service before resolving.
         mlJobService
           .refreshJob(jobId)
           .then(() => {
@@ -167,9 +165,9 @@ export function updateJobRules(job, detectorIndex, rules) {
 
 // Updates an ML filter used in the scope part of a rule,
 // adding an item to the filter with the specified ID.
-export function addItemToFilter(item, filterId) {
+export function addItemToFilter(item, filterId, mlApi) {
   return new Promise((resolve, reject) => {
-    ml.filters
+    mlApi.filters
       .updateFilter(filterId, undefined, [item], undefined)
       .then((updatedFilter) => {
         resolve(updatedFilter);
@@ -191,7 +189,7 @@ export function buildRuleDescription(rule) {
       actionsText += ' AND ';
     }
     switch (action) {
-      case ACTION.SKIP_RESULT:
+      case ML_DETECTOR_RULE_ACTION.SKIP_RESULT:
         actionsText += i18n.translate('xpack.ml.ruleEditor.ruleDescription.resultActionTypeText', {
           defaultMessage: 'result',
           description:
@@ -199,7 +197,7 @@ export function buildRuleDescription(rule) {
             'xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText',
         });
         break;
-      case ACTION.SKIP_MODEL_UPDATE:
+      case ML_DETECTOR_RULE_ACTION.SKIP_MODEL_UPDATE:
         actionsText += i18n.translate(
           'xpack.ml.ruleEditor.ruleDescription.modelUpdateActionTypeText',
           {
@@ -273,9 +271,9 @@ export function buildRuleDescription(rule) {
 
 export function filterTypeToText(filterType) {
   switch (filterType) {
-    case FILTER_TYPE.INCLUDE:
+    case ML_DETECTOR_RULE_FILTER_TYPE.INCLUDE:
       return i18n.translate('xpack.ml.ruleEditor.includeFilterTypeText', { defaultMessage: 'in' });
-    case FILTER_TYPE.EXCLUDE:
+    case ML_DETECTOR_RULE_FILTER_TYPE.EXCLUDE:
       return i18n.translate('xpack.ml.ruleEditor.excludeFilterTypeText', {
         defaultMessage: 'not in',
       });
@@ -287,16 +285,16 @@ export function filterTypeToText(filterType) {
 
 export function appliesToText(appliesTo) {
   switch (appliesTo) {
-    case APPLIES_TO.ACTUAL:
+    case ML_DETECTOR_RULE_APPLIES_TO.ACTUAL:
       return i18n.translate('xpack.ml.ruleEditor.actualAppliesTypeText', {
         defaultMessage: 'actual',
       });
-    case APPLIES_TO.TYPICAL:
+    case ML_DETECTOR_RULE_APPLIES_TO.TYPICAL:
       return i18n.translate('xpack.ml.ruleEditor.typicalAppliesTypeText', {
         defaultMessage: 'typical',
       });
 
-    case APPLIES_TO.DIFF_FROM_TYPICAL:
+    case ML_DETECTOR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL:
       return i18n.translate('xpack.ml.ruleEditor.diffFromTypicalAppliesTypeText', {
         defaultMessage: 'diff from typical',
       });
@@ -308,22 +306,22 @@ export function appliesToText(appliesTo) {
 
 export function operatorToText(operator) {
   switch (operator) {
-    case OPERATOR.LESS_THAN:
+    case ML_DETECTOR_RULE_OPERATOR.LESS_THAN:
       return i18n.translate('xpack.ml.ruleEditor.lessThanOperatorTypeText', {
         defaultMessage: 'less than',
       });
 
-    case OPERATOR.LESS_THAN_OR_EQUAL:
+    case ML_DETECTOR_RULE_OPERATOR.LESS_THAN_OR_EQUAL:
       return i18n.translate('xpack.ml.ruleEditor.lessThanOrEqualToOperatorTypeText', {
         defaultMessage: 'less than or equal to',
       });
 
-    case OPERATOR.GREATER_THAN:
+    case ML_DETECTOR_RULE_OPERATOR.GREATER_THAN:
       return i18n.translate('xpack.ml.ruleEditor.greaterThanOperatorTypeText', {
         defaultMessage: 'greater than',
       });
 
-    case OPERATOR.GREATER_THAN_OR_EQUAL:
+    case ML_DETECTOR_RULE_OPERATOR.GREATER_THAN_OR_EQUAL:
       return i18n.translate('xpack.ml.ruleEditor.greaterThanOrEqualToOperatorTypeText', {
         defaultMessage: 'greater than or equal to',
       });
@@ -350,13 +348,13 @@ export function getAppliesToValueFromAnomaly(anomaly, appliesTo) {
   }
 
   switch (appliesTo) {
-    case APPLIES_TO.ACTUAL:
+    case ML_DETECTOR_RULE_APPLIES_TO.ACTUAL:
       return actualValue;
 
-    case APPLIES_TO.TYPICAL:
+    case ML_DETECTOR_RULE_APPLIES_TO.TYPICAL:
       return typicalValue;
 
-    case APPLIES_TO.DIFF_FROM_TYPICAL:
+    case ML_DETECTOR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL:
       if (actual !== undefined && typical !== undefined) {
         return Math.abs(actualValue - typicalValue);
       }

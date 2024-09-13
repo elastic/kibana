@@ -33,7 +33,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       expect(response.status).to.be(200);
-      expect(response.body?.fieldCandidates.length).to.be(14);
+      // If the source indices are empty, there will be no field candidates
+      // because of the `include_empty_fields: false` option in the query.
+      expect(response.body?.fieldCandidates.length).to.be(0);
     });
   });
 
@@ -48,7 +50,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.status).to.eql(200);
-        expect(response.body?.fieldCandidates.length).to.be(69);
+        expect(response.body?.fieldCandidates.length).to.be(81);
       });
     }
   );

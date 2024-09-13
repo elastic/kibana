@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { Readable } from 'stream';
@@ -12,35 +13,22 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2022-01-01T00:00:00.000Z').getTime();
   const end = new Date('2022-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function fetchTraces({
-    traceId,
-    query,
-  }: {
-    traceId: string;
-    query: { start: string; end: string; entryTransactionId: string };
-  }) {
-    return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/traces/{traceId}`,
-      params: {
-        path: { traceId },
-        query,
-      },
-    });
-  }
-
   registry.when('Trace does not exist', { config: 'basic', archives: [] }, () => {
     it('handles empty state', async () => {
-      const response = await fetchTraces({
-        traceId: 'foo',
-        query: {
-          start: new Date(start).toISOString(),
-          end: new Date(end).toISOString(),
-          entryTransactionId: 'foo',
+      const response = await apmApiClient.readUser({
+        endpoint: `GET /internal/apm/traces/{traceId}`,
+        params: {
+          path: { traceId: 'foo' },
+          query: {
+            start: new Date(start).toISOString(),
+            end: new Date(end).toISOString(),
+            entryTransactionId: 'foo',
+          },
         },
       });
 
@@ -51,16 +39,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           traceDocs: [],
           errorDocs: [],
           spanLinksCountById: {},
-          traceItemCount: 0,
+          traceDocsTotal: 0,
           maxTraceItems: 5000,
         },
       });
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177545
   registry.when('Trace exists', { config: 'basic', archives: [] }, () => {
     let entryTransactionId: string;
     let serviceATraceId: string;
+
     before(async () => {
       const instanceJava = apm
         .service({ name: 'synth-apple', environment: 'production', agentName: 'java' })
@@ -100,25 +90,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       entryTransactionId = serialized[0]['transaction.id']!;
       serviceATraceId = serialized[0]['trace.id']!;
 
-      await synthtraceEsClient.index(Readable.from(unserialized));
+      await apmSynthtraceEsClient.index(Readable.from(unserialized));
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('return trace', () => {
-      let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
+      let traces: APIReturnType<'GET /internal/apm/traces/{traceId}'>;
       before(async () => {
-        const response = await fetchTraces({
-          traceId: serviceATraceId,
-          query: {
-            start: new Date(start).toISOString(),
-            end: new Date(end).toISOString(),
-            entryTransactionId,
+        const response = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/traces/{traceId}`,
+          params: {
+            path: { traceId: serviceATraceId },
+            query: {
+              start: new Date(start).toISOString(),
+              end: new Date(end).toISOString(),
+              entryTransactionId,
+            },
           },
         });
+
         expect(response.status).to.eql(200);
         traces = response.body;
       });
+
       it('returns some errors', () => {
         expect(traces.traceItems.errorDocs.length).to.be.greaterThan(0);
         expect(traces.traceItems.errorDocs[0].error.exception?.[0].message).to.eql(

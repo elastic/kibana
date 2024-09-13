@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { PINNED_EVENT_URL } from '../../../../common/constants';
-import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
+import type { PinnedEvent } from '../../../../common/api/timeline';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const persistPinnedEvent = async ({
@@ -15,7 +15,7 @@ export const persistPinnedEvent = async ({
 }: {
   eventId: string;
   pinnedEventId?: string | null;
-  timelineId?: string | null;
+  timelineId: string;
 }) => {
   let requestBody;
   try {
@@ -26,6 +26,7 @@ export const persistPinnedEvent = async ({
   const response = await KibanaServices.get().http.patch<PinnedEvent | null>(PINNED_EVENT_URL, {
     method: 'PATCH',
     body: requestBody,
+    version: '2023-10-31',
   });
   return response;
 };

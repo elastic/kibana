@@ -6,7 +6,9 @@
  */
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { ConnectorMappingsAttributes } from '../../../common/api';
+import type { ConnectorMappingResponse } from '../../../common/types/api';
+import { ConnectorMappingResponseRt } from '../../../common/types/api';
+import { decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import type { CreateMappingsArgs } from './types';
@@ -15,7 +17,7 @@ import { casesConnectors } from '../../connectors';
 export const createMappings = async (
   { connector, owner, refresh }: CreateMappingsArgs,
   clientArgs: CasesClientArgs
-): Promise<ConnectorMappingsAttributes[]> => {
+): Promise<ConnectorMappingResponse> => {
   const {
     unsecuredSavedObjectsClient,
     services: { connectorMappingsService },
@@ -41,7 +43,13 @@ export const createMappings = async (
       refresh,
     });
 
-    return theMapping.attributes.mappings;
+    const res = {
+      id: theMapping.id,
+      version: theMapping.version,
+      mappings: theMapping.attributes.mappings,
+    };
+
+    return decodeOrThrow(ConnectorMappingResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to create mapping connector id: ${connector.id} type: ${connector.type}: ${error}`,

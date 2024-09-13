@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { DependencyList } from 'react';
-import { MlPluginStart } from '..';
-import { MlLocatorParams } from '../../common/types/locator';
+import type { DependencyList } from 'react';
+import type { MlPluginSetup } from '..';
+import type { MlLocatorParams } from '../../common/types/locator';
 
 /**
  * Provides a URL to ML plugin page
  * TODO remove basePath parameter
  */
 export const useMlHref = (
-  ml: MlPluginStart | undefined,
+  ml: MlPluginSetup | undefined,
   basePath: string | undefined,
   params: MlLocatorParams,
   dependencies?: DependencyList

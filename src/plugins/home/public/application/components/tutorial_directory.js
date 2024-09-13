@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
@@ -16,7 +17,7 @@ import { SampleDataTab } from '@kbn/home-sample-data-tab';
 import { i18n } from '@kbn/i18n';
 import { Synopsis } from './synopsis';
 import { getServices } from '../kibana_services';
-import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { getTutorials } from '../load_tutorials';
 
 const SAMPLE_DATA_TAB_ID = 'sampleData';
@@ -40,10 +41,10 @@ class TutorialDirectoryUi extends React.Component {
         }),
         content: <SampleDataTab />,
       },
-      ...extraTabs.map(({ id, name, component: Component }) => ({
+      ...extraTabs.map(({ id, name, getComponent }) => ({
         id,
         name,
-        content: <Component />,
+        content: getComponent(),
       })),
     ];
 
@@ -257,7 +258,7 @@ class TutorialDirectoryUi extends React.Component {
           rightSideItems: headerLinks ? [headerLinks] : [],
         }}
       >
-        {this.renderTabContent()}
+        <KibanaPageTemplate.Section>{this.renderTabContent()}</KibanaPageTemplate.Section>
       </KibanaPageTemplate>
     );
   }

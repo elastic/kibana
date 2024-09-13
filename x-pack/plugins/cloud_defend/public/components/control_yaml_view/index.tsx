@@ -6,20 +6,24 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiForm } from '@elastic/eui';
-import { CodeEditor, YamlLang } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, YamlLang } from '@kbn/code-editor';
 import { monaco } from '@kbn/monaco';
 import { uniq } from 'lodash';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
 import { useConfigModel } from './hooks/use_config_model';
 import {
-  getInputFromPolicy,
   validateStringValuesForCondition,
-  getSelectorsAndResponsesFromYaml,
   validateMaxSelectorsAndResponses,
+  validateBlockRestrictions,
 } from '../../common/utils';
+import {
+  getInputFromPolicy,
+  getSelectorsAndResponsesFromYaml,
+} from '../../../common/utils/helpers';
 import * as i18n from './translations';
-import { ViewDeps, SelectorConditionsMap, SelectorCondition } from '../../types';
+import { ViewDeps, SelectorConditionsMap } from '../../types';
+import { SelectorCondition } from '../../../common';
 
 const { editor } = monaco;
 
@@ -39,12 +43,13 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
   const currentModel = useConfigModel(configuration);
 
   // not all validations can be done via json-schema
-  const validateAdditional = useCallback((value) => {
+  const validateAdditional = useCallback((value: any) => {
     const errors: string[] = [];
 
     const { selectors, responses } = getSelectorsAndResponsesFromYaml(value);
 
     errors.push(...validateMaxSelectorsAndResponses(selectors, responses));
+    errors.push(...validateBlockRestrictions(selectors, responses));
 
     // validate selectors
     selectors.forEach((selector) => {
@@ -61,7 +66,11 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
     // validate responses
     responses.forEach((response) => {
       // for now we force 'alert' action if 'block' action added.
-      if (response.actions.includes('block') && !response.actions.includes('alert')) {
+      if (
+        response.actions &&
+        response.actions.includes('block') &&
+        !response.actions.includes('alert')
+      ) {
         errors.push(i18n.errorAlertActionRequired);
       }
     });
@@ -70,6 +79,8 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
   }, []);
 
   useEffect(() => {
+    if (!show) return;
+
     // for on mount
     const otherErrors = validateAdditional(configuration);
     if (otherErrors.length !== additionalErrors.length) {
@@ -103,11 +114,19 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
     return () => {
       listener.dispose();
     };
-  }, [editorErrors, onChange, policy, additionalErrors.length, validateAdditional, configuration]);
+  }, [
+    editorErrors,
+    onChange,
+    policy,
+    additionalErrors.length,
+    validateAdditional,
+    configuration,
+    show,
+  ]);
 
   const onYamlChange = useCallback(
-    (value) => {
-      if (input?.vars) {
+    (value: any) => {
+      if (show && input?.vars) {
         input.vars.configuration.value = value;
 
         const errs = validateAdditional(value);
@@ -119,7 +138,7 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
         });
       }
     },
-    [editorErrors.length, input?.vars, onChange, policy, validateAdditional]
+    [editorErrors.length, input?.vars, onChange, policy, show, validateAdditional]
   );
 
   return (

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -13,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SelectOption, SwitchOption } from '@kbn/vis-default-editor-plugin/public';
-import { Labels } from '@kbn/charts-plugin/public';
+import type { LabelRotation, Labels } from '@kbn/charts-plugin/public';
 
 import { TruncateLabelsOption } from '../../common';
 import { getRotateOptions } from '../../../collections';
@@ -34,7 +35,8 @@ function LabelOptions({
 }: LabelOptionsProps) {
   const setAxisLabelRotate = useCallback(
     (paramName: 'rotate', value: Labels['rotate']) => {
-      setAxisLabel(paramName, Number(value));
+      const rotation = Number(value) as LabelRotation;
+      setAxisLabel(paramName, rotation);
     },
     [setAxisLabel]
   );
@@ -96,6 +98,7 @@ function LabelOptions({
               options={rotateOptions}
               paramName="rotate"
               value={axisLabels.rotate}
+              // @ts-ignore ts upgrade v4.7.4
               setValue={setAxisLabelRotate}
             />
           </EuiToolTip>

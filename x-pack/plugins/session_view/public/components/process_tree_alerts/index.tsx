@@ -7,13 +7,12 @@
 
 import React, { useState, useEffect, useRef, MouseEvent, useCallback, useMemo } from 'react';
 import { useStyles } from './styles';
-import {
+import type {
   ProcessEventAlertCategory,
-  DefaultAlertFilterType,
   ProcessEvent,
   ProcessEventAlert,
   AlertTypeCount,
-} from '../../../common/types/process_tree';
+} from '../../../common';
 import { ProcessTreeAlert } from '../process_tree_alert';
 import { DEFAULT_ALERT_FILTER_VALUE, MOUSE_EVENT_PLACEHOLDER } from '../../../common/constants';
 import { ProcessTreeAlertsFilter } from '../process_tree_alerts_filter';
@@ -36,9 +35,8 @@ export function ProcessTreeAlerts({
   onShowAlertDetails,
 }: ProcessTreeAlertsDeps) {
   const [selectedAlert, setSelectedAlert] = useState<ProcessEventAlert | null>(null);
-  const [selectedProcessEventAlertCategory, setSelectedProcessEventAlertCategory] = useState<
-    ProcessEventAlertCategory | DefaultAlertFilterType
-  >(DEFAULT_ALERT_FILTER_VALUE);
+  const [selectedProcessEventAlertCategory, setSelectedProcessEventAlertCategory] =
+    useState<ProcessEventAlertCategory>(DEFAULT_ALERT_FILTER_VALUE);
   const styles = useStyles();
 
   useEffect(() => {
@@ -82,12 +80,8 @@ export function ProcessTreeAlerts({
     [onAlertSelected]
   );
 
-  const handleProcessEventAlertCategorySelected = useCallback((eventCategory) => {
-    if (ProcessEventAlertCategory.hasOwnProperty(eventCategory)) {
-      setSelectedProcessEventAlertCategory(eventCategory);
-    } else {
-      setSelectedProcessEventAlertCategory(ProcessEventAlertCategory.all);
-    }
+  const handleProcessEventAlertCategorySelected = useCallback((eventCategory: any) => {
+    setSelectedProcessEventAlertCategory(eventCategory);
   }, []);
 
   const filteredProcessEventAlerts = useMemo(() => {

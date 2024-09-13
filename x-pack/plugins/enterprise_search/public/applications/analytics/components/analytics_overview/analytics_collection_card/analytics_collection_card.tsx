@@ -10,7 +10,15 @@ import React, { MouseEvent } from 'react';
 import { parsePath } from 'history';
 import { useValues } from 'kea';
 
-import { AreaSeries, Chart, CurveType, ScaleType, Settings } from '@elastic/charts';
+import {
+  AreaSeries,
+  Chart,
+  CurveType,
+  ScaleType,
+  Settings,
+  Tooltip,
+  LEGACY_LIGHT_THEME,
+} from '@elastic/charts';
 import {
   EuiBadge,
   EuiCard,
@@ -93,7 +101,6 @@ const getChartStatus = (metric: number | null): ChartStatus => {
   if (metric && metric < 0) return ChartStatus.DECREASE;
   return ChartStatus.CONSTANT;
 };
-
 export const AnalyticsCollectionCard: React.FC<
   AnalyticsCollectionCardProps & AnalyticsCollectionCardLensProps
 > = ({ collection, isLoading, isCreatedByEngine, subtitle, data, metric, secondaryMetric }) => {
@@ -176,6 +183,8 @@ export const AnalyticsCollectionCard: React.FC<
       {!isLoading && data?.some(([, y]) => y && y !== 0) && (
         <Chart size={['100%', 130]} css={cardStyles.chart}>
           <Settings
+            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+            baseTheme={LEGACY_LIGHT_THEME}
             theme={{
               areaSeriesStyle: {
                 area: {
@@ -191,8 +200,9 @@ export const AnalyticsCollectionCard: React.FC<
               chartMargins: { bottom: 0, left: 0, right: 0, top: 0 },
             }}
             showLegend={false}
-            tooltip="none"
+            locale={i18n.getLocale()}
           />
+          <Tooltip type="none" />
           <AreaSeries
             id={collection.name}
             data={data}
@@ -332,6 +342,5 @@ export const AnalyticsCollectionCardWithLens = withLensData<
       visualizationType: 'lnsMetric',
     };
   },
-  getDataViewQuery: ({ collection }) => collection.events_datastream,
   initialValues,
 });

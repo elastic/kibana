@@ -1,0 +1,37 @@
+# @kbn-doc-linker partial
+
+
+required:
+  - windowSize
+  - windowUnit
+  - environment
+  - anomalySeverityType
+properties:
+  serviceName:
+    type: string
+    description: The service name from APM
+  transactionType:
+    type: string
+    description: The transaction type from APM
+  windowSize:
+    type: number
+    example: 6
+    description: The window size
+  windowUnit:
+    type: string
+    description: The window size unit
+    enum:
+      - "m"
+      - "h"
+      - "d"
+  environment:
+    type: string
+    description: The environment from APM
+  anomalySeverityType:
+    type: string
+    description: The anomaly threshold value
+    enum:
+      - critical
+      - major
+      - minor
+      - warning

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -21,39 +24,49 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
 import type { Query } from '@kbn/es-query';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
-import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
-import { useCasesModal } from '../contexts/kibana/use_cases_modal';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
-  OVERALL_LABEL,
-  SWIMLANE_TYPE,
-  SwimlaneType,
-  VIEW_BY_JOB_LABEL,
-} from './explorer_constants';
-import { AddSwimlaneToDashboardControl } from './dashboard_controls/add_swimlane_to_dashboard_controls';
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
+} from '@kbn/presentation-util-plugin/public';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
+import { useCasesModal } from '../contexts/kibana/use_cases_modal';
+import type { AnomalySwimLaneEmbeddableState } from '../..';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
+import type { SwimlaneType } from './explorer_constants';
+import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { useMlKibana } from '../contexts/kibana';
-import { ExplorerState } from './reducers/explorer_reducer';
+import type { ExplorerState } from './reducers/explorer_reducer';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
-import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
+import type {
+  AppStateSelectedCells,
+  OverallSwimlaneData,
+  ViewBySwimLaneData,
+} from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
 import { SeverityControl } from '../components/severity_control';
 import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
 import { MlTooltipComponent } from '../components/chart_tooltip';
-import { SwimlaneAnnotationContainer, Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
+import { SwimlaneAnnotationContainer } from './swimlane_annotation_container';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
-import { useTimeBuckets } from '../components/custom_hooks/use_time_buckets';
-import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
+import { SwimLaneWrapper } from './alerts';
+import { Y_AXIS_LABEL_WIDTH } from './constants';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -66,6 +79,15 @@ interface AnomalyTimelineProps {
   explorerState: ExplorerState;
 }
 
+const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
+
+function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) {
+  return {
+    title: getDefaultSwimlanePanelTitle(jobIds).concat(queryString ? `- ${queryString}` : ''),
+    id: htmlIdGenerator()(),
+  };
+}
+
 export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
   ({ explorerState }) => {
     const {
@@ -73,6 +95,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
         application: { capabilities },
         charts: chartsService,
         cases,
+        embeddable,
+        uiSettings,
       },
     } = useMlKibana();
 
@@ -88,11 +112,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     );
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isAddDashboardsActive, setIsAddDashboardActive] = useState(false);
 
     const canEditDashboards = capabilities.dashboard?.createNew ?? false;
 
-    const timeBuckets = useTimeBuckets();
+    const timeBuckets = useTimeBuckets(uiSettings);
 
     const { overallAnnotations } = explorerState;
 
@@ -146,6 +169,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     const [severityUpdate, setSeverityUpdate] = useState(
       anomalyTimelineStateService.getSwimLaneSeverity()
     );
+
+    const [selectedSwimlane, setSelectedSwimlane] = useState<SwimlaneType | undefined>();
 
     const timeRange = getTimeBoundsFromSelection(selectedCells);
 
@@ -210,8 +235,38 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               defaultMessage="Add to dashboard"
             />
           ),
-          onClick: closePopoverOnAction(setIsAddDashboardActive.bind(null, true)),
+          panel: 'addToDashboardPanel',
           'data-test-subj': 'mlAnomalyTimelinePanelAddToDashboardButton',
+        });
+
+        panels.push({
+          id: 'addToDashboardPanel',
+          size: 's',
+          title: i18n.translate('xpack.ml.explorer.addToDashboardLabel', {
+            defaultMessage: 'Add to dashboard',
+          }),
+          items: [
+            {
+              name: (
+                <FormattedMessage id="xpack.ml.explorer.overallLabel" defaultMessage="Overall" />
+              ),
+
+              onClick: closePopoverOnAction(setSelectedSwimlane.bind(null, SWIMLANE_TYPE.OVERALL)),
+              'data-test-subj': 'mlAnomalyTimelinePanelAddOverallToDashboardButton',
+            },
+            {
+              name: (
+                <FormattedMessage
+                  id="xpack.ml.explorer.viewByFieldLabel"
+                  defaultMessage="View by {viewByField}"
+                  values={{ viewByField: viewBySwimlaneFieldName }}
+                />
+              ),
+
+              onClick: closePopoverOnAction(setSelectedSwimlane.bind(null, SWIMLANE_TYPE.VIEW_BY)),
+              'data-test-subj': 'mlAnomalyTimelinePanelAddViewByToDashboardButton',
+            },
+          ],
         });
       }
 
@@ -246,7 +301,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                   defaultMessage="Overall"
                 />
               ),
-              onClick: closePopoverOnAction(openCasesModal.bind(null, 'overall')),
+              onClick: closePopoverOnAction(openCasesModal.bind(null, SWIMLANE_TYPE.OVERALL)),
               'data-test-subj': 'mlAnomalyTimelinePanelAttachOverallButton',
             },
             {
@@ -257,7 +312,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                   values={{ viewByField: viewBySwimlaneFieldName }}
                 />
               ),
-              onClick: closePopoverOnAction(openCasesModal.bind(null, 'viewBy')),
+              onClick: closePopoverOnAction(openCasesModal.bind(null, SWIMLANE_TYPE.VIEW_BY)),
               'data-test-subj': 'mlAnomalyTimelinePanelAttachViewByButton',
             },
           ],
@@ -298,6 +353,45 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
+      ({ dashboardId, newTitle, newDescription }) => {
+        if (!selectedJobs) return;
+
+        const stateTransfer = embeddable!.getStateTransfer();
+
+        const jobIds = selectedJobs.map((j) => j.id);
+
+        const config = getDefaultEmbeddablePanelConfig(jobIds, queryString);
+
+        const embeddableInput: Partial<AnomalySwimLaneEmbeddableState> = {
+          id: config.id,
+          title: newTitle,
+          description: newDescription,
+          jobIds,
+          swimlaneType: selectedSwimlane,
+          ...(selectedSwimlane === SWIMLANE_TYPE.VIEW_BY
+            ? { viewBy: viewBySwimlaneFieldName }
+            : {}),
+          ...(queryString !== undefined
+            ? { query: { query: queryString, language: SEARCH_QUERY_LANGUAGE.KUERY } as Query }
+            : {}),
+        };
+
+        const state = {
+          input: embeddableInput,
+          type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+        };
+
+        const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
+
+        stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+          state,
+          path,
+        });
+      },
+      [embeddable, queryString, selectedJobs, selectedSwimlane, viewBySwimlaneFieldName]
+    );
+
     return (
       <>
         <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
@@ -320,7 +414,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             {menuPanels[0].items!.length > 0 ? (
               <EuiFlexItem
                 grow={false}
-                css={{ 'margin-left': 'auto !important', 'align-self': 'baseline' }}
+                css={{ marginLeft: 'auto !important', alignSelf: 'baseline' }}
               >
                 <EuiPopover
                   button={
@@ -368,10 +462,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               </>
             )}
 
-            <EuiFlexItem grow={true} css={{ 'max-width': '500px' }}>
+            <EuiFlexItem grow={true} css={{ maxWidth: '500px' }}>
               <SeverityControl
                 value={severityUpdate ?? 0}
-                onChange={useCallback((update) => {
+                onChange={useCallback((update: any) => {
                   setSeverityUpdate(update);
                 }, [])}
               />
@@ -419,6 +513,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
+
           {annotationXDomain && Array.isArray(annotations) && annotations.length > 0 ? (
             <>
               <MlTooltipComponent>
@@ -435,29 +530,35 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             </>
           ) : null}
 
-          <SwimlaneContainer
-            id="overall"
-            data-test-subj="mlAnomalyExplorerSwimlaneOverall"
-            filterActive={filterActive}
-            timeBuckets={timeBuckets}
-            swimlaneData={overallSwimlaneData as OverallSwimlaneData}
-            swimlaneType={SWIMLANE_TYPE.OVERALL}
+          <SwimLaneWrapper
             selection={overallCellSelection}
-            onCellsSelection={setSelectedCells}
-            onResize={onResize}
-            isLoading={loading}
-            noDataWarning={
-              <EuiText textAlign={'center'}>
-                <h5>
-                  <NoOverallData />
-                </h5>
-              </EuiText>
-            }
-            showTimeline={false}
-            showLegend={false}
-            yAxisWidth={Y_AXIS_LABEL_WIDTH}
-            chartsService={chartsService}
-          />
+            swimlaneContainerWidth={swimlaneContainerWidth}
+            swimLaneData={overallSwimlaneData as OverallSwimlaneData}
+          >
+            <SwimlaneContainer
+              id="overall"
+              data-test-subj="mlAnomalyExplorerSwimlaneOverall"
+              filterActive={filterActive}
+              timeBuckets={timeBuckets}
+              swimlaneData={overallSwimlaneData as OverallSwimlaneData}
+              swimlaneType={SWIMLANE_TYPE.OVERALL}
+              selection={overallCellSelection}
+              onCellsSelection={setSelectedCells}
+              onResize={onResize}
+              isLoading={loading}
+              noDataWarning={
+                <EuiText textAlign={'center'}>
+                  <h5>
+                    <NoOverallData />
+                  </h5>
+                </EuiText>
+              }
+              showTimeline={false}
+              showLegend={false}
+              yAxisWidth={Y_AXIS_LABEL_WIDTH}
+              chartsService={chartsService}
+            />
+          </SwimLaneWrapper>
 
           <EuiSpacer size="m" />
           {viewBySwimlaneOptions.length > 0 && (
@@ -513,19 +614,21 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             />
           )}
         </EuiPanel>
-        {isAddDashboardsActive && selectedJobs && (
-          <AddSwimlaneToDashboardControl
-            onClose={async (callback) => {
-              setIsAddDashboardActive(false);
-              if (callback) {
-                await callback();
-              }
+        {selectedSwimlane && selectedJobs ? (
+          <SavedObjectSaveModalDashboard
+            canSaveByReference={false}
+            objectType={i18n.translate('xpack.ml.cases.anomalySwimLane.displayName', {
+              defaultMessage: 'Anomaly swim lane',
+            })}
+            documentInfo={{
+              title: getDefaultSwimlanePanelTitle(selectedJobs.map(({ id }) => id)),
             }}
-            jobIds={selectedJobs.map(({ id }) => id)}
-            viewBy={viewBySwimlaneFieldName!}
-            queryString={queryString}
+            onClose={() => {
+              setSelectedSwimlane(undefined);
+            }}
+            onSave={onSaveCallback}
           />
-        )}
+        ) : null}
       </>
     );
   },

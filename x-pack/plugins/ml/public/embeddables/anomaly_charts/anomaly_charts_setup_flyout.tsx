@@ -6,56 +6,72 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
-import { lastValueFrom } from 'rxjs';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
-import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
-import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import { getDefaultExplorerChartsPanelTitle } from './anomaly_charts_embeddable';
+import type { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { tracksOverlays } from '@kbn/presentation-containers';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { HttpService } from '../../application/services/http_service';
-import { AnomalyChartsEmbeddableInput } from '..';
-import { resolveJobSelection } from '../common/resolve_job_selection';
+import type { AnomalyChartsEmbeddableState } from '..';
 import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
+import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
+import { getMlGlobalServices } from '../../application/util/get_services';
+import type { MlStartDependencies } from '../../plugin';
 
 export async function resolveEmbeddableAnomalyChartsUserInput(
   coreStart: CoreStart,
-  input?: AnomalyChartsEmbeddableInput
-): Promise<Partial<AnomalyChartsEmbeddableInput>> {
-  const { http, overlays } = coreStart;
-
-  const anomalyDetectorService = new AnomalyDetectorService(new HttpService(http));
+  pluginStart: MlStartDependencies,
+  parentApi: unknown,
+  focusedPanelId: string,
+  input?: Partial<Pick<AnomalyChartsEmbeddableState, 'title' | 'jobIds' | 'maxSeriesToPlot'>>
+): Promise<Pick<AnomalyChartsEmbeddableState, 'jobIds' | 'title' | 'maxSeriesToPlot'>> {
+  const { http, overlays, ...startServices } = coreStart;
+  const adJobsApiService = jobsApiProvider(new HttpService(http));
+  const mlServices = getMlGlobalServices(coreStart, pluginStart.data.dataViews);
+  const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
   return new Promise(async (resolve, reject) => {
     try {
-      const { jobIds } = await resolveJobSelection(coreStart, input?.jobIds);
-      const title = input?.title ?? getDefaultExplorerChartsPanelTitle(jobIds);
-      const jobs = await lastValueFrom(anomalyDetectorService.getJobs$(jobIds));
-      const influencers = anomalyDetectorService.extractInfluencers(jobs);
-      influencers.push(VIEW_BY_JOB_LABEL);
-      const { theme$ } = coreStart.theme;
-      const modalSession = overlays.openModal(
+      const flyoutSession = overlays.openFlyout(
         toMountPoint(
-          wrapWithTheme(
+          <KibanaContextProvider services={{ ...coreStart, ...pluginStart, mlServices }}>
             <AnomalyChartsInitializer
-              defaultTitle={title}
               initialInput={input}
-              onCreate={({ panelTitle, maxSeriesToPlot }) => {
-                modalSession.close();
+              onCreate={({ jobIds, title, maxSeriesToPlot }) => {
                 resolve({
                   jobIds,
-                  title: panelTitle,
+                  title,
                   maxSeriesToPlot,
-                });
+                } as Pick<AnomalyChartsEmbeddableState, 'jobIds' | 'title' | 'maxSeriesToPlot'>);
+                flyoutSession.close();
+                overlayTracker?.clearOverlays();
               }}
               onCancel={() => {
-                modalSession.close();
                 reject();
+                flyoutSession.close();
+                overlayTracker?.clearOverlays();
               }}
-            />,
-            theme$
-          )
-        )
+              adJobsApiService={adJobsApiService}
+            />
+          </KibanaContextProvider>,
+          startServices
+        ),
+        {
+          type: 'push',
+          ownFocus: true,
+          size: 's',
+          onClose: () => {
+            reject();
+            flyoutSession.close();
+            overlayTracker?.clearOverlays();
+          },
+          'data-test-subj': 'mlAnomalyChartsEmbeddableInitializer',
+        }
       );
+      if (tracksOverlays(parentApi)) {
+        parentApi.openOverlay(flyoutSession, {
+          focusedPanelId,
+        });
+      }
     } catch (error) {
       reject(error);
     }

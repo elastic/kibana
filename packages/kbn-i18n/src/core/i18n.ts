@@ -1,43 +1,53 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import memoizeIntlConstructor from 'intl-format-cache';
-import IntlMessageFormat from 'intl-messageformat';
-import IntlRelativeFormat from 'intl-relativeformat';
+import { createIntl, createIntlCache, IntlConfig, IntlShape } from '@formatjs/intl';
+import type { MessageDescriptor } from '@formatjs/intl';
+import { handleIntlError } from './error_handler';
 
-import { Translation } from '../translation';
-import { Formats, formats as EN_FORMATS } from './formats';
-import { hasValues, isObject, isString, mergeAll } from './helper';
-import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
-
-// Add all locale data to `IntlMessageFormat`.
-import './locales';
+import { Translation, TranslationInput } from '../translation';
+import { defaultEnFormats } from './formats';
+import { FormatXMLElementFn, PrimitiveType } from './types';
 
 const EN_LOCALE = 'en';
-const translationsForLocale: Record<string, Translation> = {};
-const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
-
-let defaultLocale = EN_LOCALE;
-let currentLocale = EN_LOCALE;
-let formats = EN_FORMATS;
-
-IntlMessageFormat.defaultLocale = defaultLocale;
-IntlRelativeFormat.defaultLocale = defaultLocale;
+const defaultLocale = EN_LOCALE;
 
 /**
- * Returns message by the given message id.
- * @param id - path to the message
+ * Currently we are depending on this singleton pattern to
+ * update the locale. This is mainly to make it easier on developers
+ * to use i18n by importing it anywhere in their code and using it directly
+ * without having to pass it around.
+ * This pattern has several limitations and can cause unexpected bugs. The main limitation
+ * is that we cannot server multiple locales on the server side based on the user requested
+ * locale.
  */
-function getMessageById(id: string): string | undefined {
-  const translation = getTranslation();
-  return translation.messages ? translation.messages[id] : undefined;
-}
+let intl: IntlShape<string>;
+let isInitialized = false;
+/**
+ * ideally here we would be using a `throw new Error()` if i18n.translate is called before init();
+ * to make sure i18n is initialized before any message is attempting to be translated.
+ *
+ * Especially since these messages will go unnoticed since the translations might be provided in the translation files
+ * but Kibana will use the default message since the locales are not loaded yet.
+ *
+ * we need to get there at some point but this means removing all static i18n imports from the server side.
+ */
+intl = createIntl({
+  locale: defaultLocale,
+  defaultFormats: defaultEnFormats,
+  defaultLocale,
+  onError: () => void 0,
+});
 
+export const getIsInitialized = () => {
+  return isInitialized;
+};
 /**
  * Normalizes locale to make it consistent with IntlMessageFormat locales
  * @param locale
@@ -48,114 +58,69 @@ function normalizeLocale(locale: string) {
 
 /**
  * Provides a way to register translations with the engine
- * @param newTranslation
- * @param [locale = messages.locale]
  */
-export function addTranslation(newTranslation: Translation, locale = newTranslation.locale) {
-  if (!locale || !isString(locale)) {
+export function activateTranslation(newTranslation: TranslationInput) {
+  if (!newTranslation.locale || typeof newTranslation.locale !== 'string') {
     throw new Error('[I18n] A `locale` must be a non-empty string to add messages.');
   }
+  const config: IntlConfig<string> = {
+    locale: normalizeLocale(newTranslation.locale),
+    messages: newTranslation.messages,
+    defaultFormats: defaultEnFormats,
+    defaultLocale,
+    onError: handleIntlError,
+  };
 
-  if (newTranslation.locale && newTranslation.locale !== locale) {
-    throw new Error(
-      '[I18n] A `locale` in the translation object is different from the one provided as a second argument.'
-    );
+  // formatJS differentiates between `formats: undefined` and unset `formats`.
+  if (newTranslation.formats) {
+    config.formats = newTranslation.formats;
   }
 
-  const normalizedLocale = normalizeLocale(locale);
-  const existingTranslation = translationsForLocale[normalizedLocale] || { messages: {} };
-
-  translationsForLocale[normalizedLocale] = {
-    formats: newTranslation.formats || existingTranslation.formats,
-    locale: newTranslation.locale || existingTranslation.locale,
-    messages: {
-      ...existingTranslation.messages,
-      ...newTranslation.messages,
-    },
-  };
+  const cache = createIntlCache();
+  intl = createIntl(config, cache);
 }
 
 /**
  * Returns messages for the current language
  */
 export function getTranslation(): Translation {
-  return translationsForLocale[currentLocale] || { messages: {} };
-}
-
-/**
- * Tells the engine which language to use by given language key
- * @param locale
- */
-export function setLocale(locale: string) {
-  if (!locale || !isString(locale)) {
-    throw new Error('[I18n] A `locale` must be a non-empty string.');
-  }
-
-  currentLocale = normalizeLocale(locale);
+  return {
+    messages: intl.messages,
+    locale: intl.locale,
+    defaultLocale: intl.defaultLocale,
+    defaultFormats: intl.defaultFormats,
+    formats: intl.formats,
+  };
 }
 
 /**
  * Returns the current locale
+ * Shortcut to getTranslation().locale
  */
 export function getLocale() {
-  return currentLocale;
-}
-
-/**
- * Tells the library which language to fallback when missing translations
- * @param locale
- */
-export function setDefaultLocale(locale: string) {
-  if (!locale || !isString(locale)) {
-    throw new Error('[I18n] A `locale` must be a non-empty string.');
-  }
-
-  defaultLocale = normalizeLocale(locale);
-  IntlMessageFormat.defaultLocale = defaultLocale;
-  IntlRelativeFormat.defaultLocale = defaultLocale;
-}
-
-export function getDefaultLocale() {
-  return defaultLocale;
-}
-
-/**
- * Supplies a set of options to the underlying formatter
- * [Default format options used as the prototype of the formats]
- * {@link https://github.com/yahoo/intl-messageformat/blob/master/src/core.js#L62}
- * These are used when constructing the internal Intl.NumberFormat
- * and Intl.DateTimeFormat instances.
- * @param newFormats
- * @param [newFormats.number]
- * @param [newFormats.date]
- * @param [newFormats.time]
- */
-export function setFormats(newFormats: Formats) {
-  if (!isObject(newFormats) || !hasValues(newFormats)) {
-    throw new Error('[I18n] A `formats` must be a non-empty object.');
-  }
-
-  formats = mergeAll(formats, newFormats);
-}
-
-/**
- * Returns current formats
- */
-export function getFormats() {
-  return formats;
-}
-
-/**
- * Returns array of locales having translations
- */
-export function getRegisteredLocales() {
-  return Object.keys(translationsForLocale);
+  return intl.locale;
 }
 
 export interface TranslateArguments {
-  values?: Record<string, string | number | boolean | Date | null | undefined>;
-  defaultMessage: string;
-  description?: string;
+  /**
+   * Will be used unless translation was successful
+   */
+  defaultMessage: MessageDescriptor['defaultMessage'];
+  /**
+   * Message description, used by translators and other devs to understand the message context.
+   */
+  description?: MessageDescriptor['description'];
+  /**
+   * values to pass into translation
+   */
+  values?: Record<string, PrimitiveType | FormatXMLElementFn<string, string>>;
+  /**
+   * Whether to treat HTML/XML tags as string literal
+   * instead of parsing them as tag token.
+   * When this is false we only allow simple tags without
+   * any attributes
+   */
+  ignoreTag?: boolean;
 }
 
 /**
@@ -164,41 +129,31 @@ export interface TranslateArguments {
  * @param [options]
  * @param [options.values] - values to pass into translation
  * @param [options.defaultMessage] - will be used unless translation was successful
+ * @param [options.description] - message description, used by translators and other devs to understand the message context.
+ * @param [options.ignoreTag] - Whether to treat HTML/XML tags as string literal instead of parsing them as tag token. When this is false we only allow simple tags without any attributes
  */
-export function translate(id: string, { values = {}, defaultMessage }: TranslateArguments) {
-  const shouldUsePseudoLocale = isPseudoLocale(currentLocale);
-
-  if (!id || !isString(id)) {
+export function translate(
+  id: string,
+  { values = {}, description, defaultMessage, ignoreTag }: TranslateArguments
+): string {
+  if (!id || typeof id !== 'string') {
     throw new Error('[I18n] An `id` must be a non-empty string to translate a message.');
   }
 
-  const message = shouldUsePseudoLocale ? defaultMessage : getMessageById(id);
-
-  if (!message && !defaultMessage) {
-    throw new Error(`[I18n] Cannot format message: "${id}". Default message must be provided.`);
-  }
-
-  if (message) {
-    try {
-      // We should call `format` even for messages without any value references
-      // to let it handle escaped curly braces `\\{` that are the part of the text itself
-      // and not value reference boundaries.
-      const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(values);
-
-      return shouldUsePseudoLocale
-        ? translateUsingPseudoLocale(formattedMessage)
-        : formattedMessage;
-    } catch (e) {
-      throw new Error(
-        `[I18n] Error formatting message: "${id}" for locale: "${getLocale()}".\n${e}`
-      );
-    }
-  }
-
   try {
-    const msg = getMessageFormat(defaultMessage, getDefaultLocale(), getFormats());
+    if (!defaultMessage) {
+      throw new Error('Missing `defaultMessage`.');
+    }
 
-    return msg.format(values);
+    return intl.formatMessage(
+      {
+        id,
+        defaultMessage,
+        description,
+      },
+      values,
+      { ignoreTag, shouldParseSkeletons: true }
+    );
   } catch (e) {
     throw new Error(`[I18n] Error formatting the default message for: "${id}".\n${e}`);
   }
@@ -208,20 +163,13 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
  * Initializes the engine
  * @param newTranslation
  */
-export function init(newTranslation?: Translation) {
-  if (!newTranslation) {
+export function init(newTranslation?: TranslationInput) {
+  if (typeof newTranslation?.locale !== 'string') {
     return;
   }
 
-  addTranslation(newTranslation);
-
-  if (newTranslation.locale) {
-    setLocale(newTranslation.locale);
-  }
-
-  if (newTranslation.formats) {
-    setFormats(newTranslation.formats);
-  }
+  activateTranslation(newTranslation);
+  isInitialized = true;
 }
 
 /**
@@ -235,9 +183,15 @@ export async function load(translationsUrl: string) {
     credentials: 'same-origin',
   });
 
-  if (response.status >= 300) {
+  if (response.status >= 400) {
     throw new Error(`Translations request failed with status code: ${response.status}`);
   }
 
-  init(await response.json());
+  const newTranslation = await response.json();
+  if (!newTranslation || !newTranslation.locale || typeof newTranslation.locale !== 'string') {
+    return;
+  }
+
+  init(newTranslation);
+  isInitialized = true;
 }

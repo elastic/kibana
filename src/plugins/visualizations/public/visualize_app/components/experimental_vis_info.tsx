@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { memo } from 'react';
@@ -22,7 +23,7 @@ export const InfoComponent = () => {
     <FormattedMessage
       id="visualizations.experimentalVisInfoText"
       defaultMessage="It may be changed or removed completely in a future release.
-          Elastic will take a best effort approach to fix any issues, but features
+          Elastic will work to fix any issues, but features
           in technical preview are not subject to the support SLA of official GA features.
           For feedback, please create an issue in {githubLink}."
       values={{

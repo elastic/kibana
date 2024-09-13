@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -17,6 +18,8 @@ import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { DiscoverServices } from '../../../../build_services';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 
 const defaultServices = {
   ...discoverServiceMock,
@@ -62,9 +65,11 @@ describe('Document Explorer Update callout', () => {
   it('should start a tour when the button is clicked', () => {
     const result = mountWithIntl(
       <KibanaContextProvider services={defaultServices}>
-        <DiscoverTourProvider isPlainRecord={false}>
-          <DocumentExplorerUpdateCallout />
-        </DiscoverTourProvider>
+        <DiscoverMainProvider value={getDiscoverStateMock({})}>
+          <DiscoverTourProvider>
+            <DocumentExplorerUpdateCallout />
+          </DiscoverTourProvider>
+        </DiscoverMainProvider>
       </KibanaContextProvider>
     );
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrService } from '../../ftr_provider_context';
@@ -19,6 +20,7 @@ export class DashboardVisualizationsService extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly discover = this.ctx.getPageObject('discover');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
+  private readonly unifiedFieldList = this.ctx.getPageObject('unifiedFieldList');
 
   async createAndAddTSVBVisualization(name: string) {
     this.log.debug(`createAndAddTSVBVisualization(${name})`);
@@ -30,6 +32,8 @@ export class DashboardVisualizationsService extends FtrService {
     await this.dashboardAddPanel.clickAddNewEmbeddableLink('metrics');
     await this.visualize.clickVisualBuilder();
     await this.visualize.saveVisualizationExpectSuccess(name);
+    await this.header.waitUntilLoadingHasFinished();
+    await this.dashboard.waitForRenderComplete();
   }
 
   async createSavedSearch({
@@ -52,7 +56,7 @@ export class DashboardVisualizationsService extends FtrService {
 
     if (fields) {
       for (let i = 0; i < fields.length; i++) {
-        await this.discover.clickFieldListItemAdd(fields[i]);
+        await this.unifiedFieldList.clickFieldListItemAdd(fields[i]);
       }
     }
 
@@ -80,6 +84,7 @@ export class DashboardVisualizationsService extends FtrService {
       await this.dashboard.switchToEditMode();
     }
     await this.dashboardAddPanel.addSavedSearch(name);
+    await this.dashboard.waitForRenderComplete();
   }
 
   async createAndAddMarkdown({ name, markdown }: { name: string; markdown: string }) {
@@ -95,31 +100,7 @@ export class DashboardVisualizationsService extends FtrService {
       saveAsNew: false,
       redirectToOrigin: true,
     });
-  }
-
-  async createAndEmbedMetric(name: string) {
-    this.log.debug(`createAndEmbedMetric(${name})`);
-    const inViewMode = await this.dashboard.getIsInViewMode();
-    if (inViewMode) {
-      await this.dashboard.switchToEditMode();
-    }
-    await this.dashboardAddPanel.clickEditorMenuButton();
-    await this.dashboardAddPanel.clickAggBasedVisualizations();
-    await this.dashboardAddPanel.clickVisType('metric');
-    await this.testSubjects.click('savedObjectTitlelogstash-*');
-    await this.testSubjects.exists('visualizesaveAndReturnButton');
-    await this.testSubjects.click('visualizesaveAndReturnButton');
-  }
-
-  async createAndEmbedMarkdown({ name, markdown }: { name: string; markdown: string }) {
-    this.log.debug(`createAndEmbedMarkdown(${markdown})`);
-    const inViewMode = await this.dashboard.getIsInViewMode();
-    if (inViewMode) {
-      await this.dashboard.switchToEditMode();
-    }
-    await this.dashboardAddPanel.clickMarkdownQuickButton();
-    await this.visEditor.setMarkdownTxt(markdown);
-    await this.visEditor.clickGo();
-    await this.testSubjects.click('visualizesaveAndReturnButton');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.dashboard.waitForRenderComplete();
   }
 }

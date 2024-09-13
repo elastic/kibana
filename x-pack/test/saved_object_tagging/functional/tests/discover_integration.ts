@@ -20,6 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'timePicker',
     'discover',
   ]);
+  const retry = getService('retry');
 
   /**
    * Select tags in the searchbar's tag filter.
@@ -47,6 +48,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const searchTitles = await Promise.all(
         searchTitleWrappers.map((entry) => entry.getVisibleText())
       );
+      searchTitles.sort();
+      savedSearchTitles.sort();
       expect(searchTitles).to.eql(savedSearchTitles);
     });
   };
@@ -118,6 +121,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('allows to create a tag from the tag selector', async () => {
         await PageObjects.discover.clickSaveSearchButton();
+        const searchName = 'search-with-new-tag';
+        // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
+        await retry.waitFor(
+          `saved search title is set to ${searchName} and save button is clickable`,
+          async () => {
+            const saveButton = await testSubjects.find('confirmSaveSavedObjectButton');
+            await testSubjects.setValue('savedObjectTitle', searchName);
+            return (await saveButton.getAttribute('disabled')) !== 'true';
+          }
+        );
         await testSubjects.setValue('savedObjectTitle', 'search-with-new-tag');
         await testSubjects.click('savedObjectTagSelector');
         await testSubjects.click(`tagSelectorOption-action__create`);
@@ -131,6 +144,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
           {
             submit: true,
+            clearWithKeyboard: true,
           }
         );
         expect(await tagModal.isOpened()).to.be(false);

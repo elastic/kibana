@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SwimlaneConnectorType } from '../../../common/api';
+import { SwimlaneConnectorType } from '../../../common/types/domain';
 
 export const connector = {
   id: '123',
@@ -14,6 +14,7 @@ export const connector = {
   config: {},
   isPreconfigured: false,
   isDeprecated: false,
+  isSystemAction: false,
 };
 
 export const swimlaneConnector = {
@@ -31,6 +32,17 @@ export const swimlaneConnector = {
   },
   isPreconfigured: false,
   isDeprecated: false,
+  isSystemAction: false,
+};
+
+export const theHiveConnector = {
+  id: '123',
+  name: 'My connector',
+  actionTypeId: '.thehive',
+  config: {},
+  isPreconfigured: false,
+  isDeprecated: false,
+  isSystemAction: false,
 };
 
 export const issues = [
@@ -44,8 +56,8 @@ export const issues = [
 export const choices = [
   {
     dependent_value: '',
-    label: 'Priviledge Escalation',
-    value: 'Priviledge Escalation',
+    label: 'Privilege Escalation',
+    value: 'Privilege Escalation',
     element: 'category',
   },
   {
@@ -144,4 +156,30 @@ export const severity = [
 export const incidentTypes = [
   { id: 17, name: 'Communication error (fax; email)' },
   { id: 1001, name: 'Custom type' },
+];
+
+export const resilientIncidentTypes = [
+  {
+    id: 19,
+    name: 'Malware',
+  },
+  {
+    id: 21,
+    name: 'Denial of Service',
+  },
+];
+
+export const resilientSeverity = [
+  {
+    id: 4,
+    name: 'Low',
+  },
+  {
+    id: 5,
+    name: 'Medium',
+  },
+  {
+    id: 6,
+    name: 'High',
+  },
 ];

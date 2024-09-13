@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { get } from 'lodash';
@@ -12,7 +13,7 @@ import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
 import { KibanaContext } from '@kbn/data-plugin/public';
 import { TimelionSuccessResponse } from './helpers/timelion_request_handler';
-import { TIMELION_VIS_NAME } from './timelion_vis_type';
+import { TIMELION_VIS_NAME } from '../common/constants';
 import { TimelionVisDependencies } from './plugin';
 
 type Input = KibanaContext | null;

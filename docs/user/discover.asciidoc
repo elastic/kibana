@@ -82,20 +82,22 @@ that shows all the documents that match your search.
 By default, the document table includes a column for the time field and a column that lists all other fields in the document.
 You’ll modify the document table to display your fields of interest.
 
-. In the sidebar, enter `ma` to in the search field to find the `manufacturer` field.
+. In the sidebar, enter `ma` in the search field to find the `manufacturer` field.
 +
 [role="screenshot"]
 image:images/discover-sidebar-available-fields.png[Fields list that displays the top five search results, width=50%]
++
+NOTE: You can use wildcards in field searches.  For example, `goe*dest` finds `geo.dest` and `geo.src.dest`.
 
 . In the *Available fields* list, click `manufacturer` to view its most popular values.
 +
 **Discover** shows the top 10 values and the number of records used to calculate those values.
 
 . Click image:images/add-icon.png[Add icon] to toggle the field into the document table.
+You can also drag the field from the *Available fields* list into the document table.
 +
 [role="screenshot"]
 image::images/discover-add-icon.png[How to add a field as a column in the table, width="50%"]
-
 
 . Find the `customer_first_name` and `customer_last_name` fields and add
 them to the document table. Your table should look similar to this:
@@ -111,14 +113,18 @@ column header, and then select *Move left* or *Move right*.
 +
 * To copy the name or values in a column to the clipboard, click the column header and select the desired **Copy** option.
 +
-* For keyboard shortcuts on the document table, click
-image:images/keyboard-shortcut-icon.png[icon button for opening list of keyboard shortcuts, width=24px].
-+
 * To view more of the document table,
 click
 image:images/chart-icon.png[icon button for opening Show/Hide chart menu, width=24px]
 to open the *Chart options* menu,
 and then select *Hide chart*.
++
+* For keyboard shortcuts on the document table, click
+image:images/keyboard-shortcut-icon.png[icon button for opening list of keyboard shortcuts, width=24px].
++
+* To set the row height to one or more lines, or automatically
+adjust the height to fit the contents, click
+image:images/row-height-icon.png[icon to open the Row height pop-up, width=24px].
 +
 * To toggle the table in and out of fullscreen mode, click the fullscreen icon
 image:images/fullscreen-icon.png[icon to display the document table in fullscreen mode].
@@ -270,6 +276,10 @@ If a field can be {ref}/search-aggregations.html[aggregated], you can quickly
 visualize it from **Discover**.
 
 . In the sidebar, find and then click `day_of_week`.
++
+[role="screenshot"]
+image:images/discover-day-of-week.png[Top values for the day_of_week field, plus Visualize button, width=50%]
+
 
 . In the popup, click **Visualize**.
 +
@@ -324,14 +334,24 @@ For more about this and other rules provided in {alert-features}, go to <<alerti
 
 * <<document-explorer, Configure the chart and document table>> to better meet your needs.
 
+[float]
+=== Troubleshooting
+
+* {blog-ref}troubleshooting-guide-common-issues-kibana-discover-load[Learn how to resolve common issues with Discover.]
+
 
 --
-include::{kib-repo-dir}/discover/document-explorer.asciidoc[]
+include::{kibana-root}/docs/discover/document-explorer.asciidoc[]
 
-include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
+include::{kibana-root}/docs/discover/search-for-relevance.asciidoc[]
 
-include::{kib-repo-dir}/discover/save-search.asciidoc[]
+include::{kibana-root}/docs/discover/save-search.asciidoc[]
 
-include::{kib-repo-dir}/discover/field-statistics.asciidoc[]
+include::{kibana-root}/docs/discover/field-statistics.asciidoc[]
 
-include::{kib-repo-dir}/discover/search-sessions.asciidoc[]
+include::{kibana-root}/docs/discover/log-pattern-analysis.asciidoc[]
+
+include::{kibana-root}/docs/discover/search-sessions.asciidoc[]
+
+include::{kibana-root}/docs/discover/try-esql.asciidoc[]
+

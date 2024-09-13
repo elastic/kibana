@@ -11,6 +11,7 @@ import { EuiSwitch, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { CARDINALITY_ID, CARDINALITY_NAME } from '@kbn/lens-formula-docs';
 import { OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 
@@ -19,7 +20,6 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
-  combineErrorMessages,
   isColumnOfType,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
@@ -40,7 +40,6 @@ const supportedTypes = new Set([
 ]);
 
 const SCALE = 'ratio';
-const OPERATION_TYPE = 'unique_count';
 const IS_BUCKETED = false;
 
 function ofName(name: string, timeShift: string | undefined, reducedTimeRange: string | undefined) {
@@ -61,7 +60,7 @@ function ofName(name: string, timeShift: string | undefined, reducedTimeRange: s
 }
 
 export interface CardinalityIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: typeof OPERATION_TYPE;
+  operationType: typeof CARDINALITY_ID;
   params?: {
     emptyAsNull?: boolean;
     format?: ValueFormatConfig;
@@ -74,10 +73,8 @@ export const cardinalityOperation: OperationDefinition<
   {},
   true
 > = {
-  type: OPERATION_TYPE,
-  displayName: i18n.translate('xpack.lens.indexPattern.cardinality', {
-    defaultMessage: 'Unique count',
-  }),
+  type: CARDINALITY_ID,
+  displayName: CARDINALITY_NAME,
   allowAsReference: true,
   input: 'field',
   getPossibleOperationForField: ({
@@ -95,11 +92,10 @@ export const cardinalityOperation: OperationDefinition<
       return { dataType: 'number', isBucketed: IS_BUCKETED, scale: SCALE };
     }
   },
-  getErrorMessage: (layer, columnId, indexPattern) =>
-    combineErrorMessages([
-      getInvalidFieldMessage(layer, columnId, indexPattern),
-      getColumnReducedTimeRangeError(layer, columnId, indexPattern),
-    ]),
+  getErrorMessage: (layer, columnId, indexPattern) => [
+    ...getInvalidFieldMessage(layer, columnId, indexPattern),
+    ...getColumnReducedTimeRangeError(layer, columnId, indexPattern),
+  ],
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 
@@ -113,7 +109,7 @@ export const cardinalityOperation: OperationDefinition<
   filterable: true,
   shiftable: true,
   canReduceTimeRange: true,
-  getDefaultLabel: (column, indexPattern) =>
+  getDefaultLabel: (column, columns, indexPattern) =>
     ofName(
       getSafeName(column.sourceField, indexPattern),
       column.timeShift,
@@ -123,7 +119,7 @@ export const cardinalityOperation: OperationDefinition<
     return {
       label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
       dataType: 'number',
-      operationType: OPERATION_TYPE,
+      operationType: CARDINALITY_ID,
       scale: SCALE,
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
@@ -204,23 +200,6 @@ export const cardinalityOperation: OperationDefinition<
       label: ofName(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
       sourceField: field.name,
     };
-  },
-  documentation: {
-    section: 'elasticsearch',
-    signature: i18n.translate('xpack.lens.indexPattern.cardinality.signature', {
-      defaultMessage: 'field: string',
-    }),
-    description: i18n.translate('xpack.lens.indexPattern.cardinality.documentation.markdown', {
-      defaultMessage: `
-Calculates the number of unique values of a specified field. Works for number, string, date and boolean values.
-
-Example: Calculate the number of different products:
-\`unique_count(product.name)\`
-
-Example: Calculate the number of different products from the "clothes" group:
-\`unique_count(product.name, kql='product.group=clothes')\`
-      `,
-    }),
   },
   quickFunctionDocumentation: i18n.translate(
     'xpack.lens.indexPattern.cardinality.documentation.quick',

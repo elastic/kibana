@@ -184,6 +184,15 @@ export class TooltipControl extends Component<Props, {}> {
         continue;
       }
 
+      // masking must use paint property "opacity" to hide features in order to support feature state
+      // therefore, there is no way to remove masked features with queryRenderedFeatures
+      // masked features must be removed via manual filtering
+      const masks = layer.getMasks();
+      const maskHiddingFeature = masks.find((mask) => mask.isFeatureMasked(mbFeature));
+      if (maskHiddingFeature) {
+        continue;
+      }
+
       const featureId = layer.getFeatureId(mbFeature);
       if (featureId === undefined) {
         continue;
@@ -313,7 +322,7 @@ export class TooltipControl extends Component<Props, {}> {
       (accumulator: string[], layer: ILayer) => {
         // tooltips are only supported for vector layers, filter out all other layer types
         return layer.isVisible() && isVectorLayer(layer)
-          ? accumulator.concat((layer as IVectorLayer).getMbTooltipLayerIds())
+          ? accumulator.concat(layer.getMbTooltipLayerIds())
           : accumulator;
       },
       []

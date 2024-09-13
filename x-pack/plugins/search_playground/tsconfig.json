@@ -1,0 +1,48 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "__mocks__/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-http-browser",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/security-plugin",
+    "@kbn/user-profile-components",
+    "@kbn/shared-ux-router",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/navigation-plugin",
+    "@kbn/core-http-server",
+    "@kbn/share-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/cases-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/langchain",
+    "@kbn/logging",
+    "@kbn/react-kibana-context-render",
+    "@kbn/doc-links",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/analytics",
+    "@kbn/usage-collection-plugin",
+    "@kbn/console-plugin",
+    "@kbn/utility-types",
+    "@kbn/kibana-utils-plugin"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

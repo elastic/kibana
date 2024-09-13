@@ -107,7 +107,7 @@ describe('useDeleteAction', () => {
     await waitFor(() => {
       expect(result.current.isModalVisible).toBe(false);
       expect(onActionSuccess).toHaveBeenCalled();
-      expect(deleteSpy).toHaveBeenCalledWith(['basic-case-id'], expect.anything());
+      expect(deleteSpy).toHaveBeenCalledWith({ caseIds: ['basic-case-id'] });
     });
   });
 

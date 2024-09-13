@@ -1,35 +1,53 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of, BehaviorSubject, firstValueFrom } from 'rxjs';
+import { of, BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 
-import { ServiceStatus, ServiceStatusLevels, CoreStatus } from '@kbn/core-status-common';
-import { InternalStatusServiceSetup } from './types';
-import { StatusService, StatusServiceSetupDeps } from './status_service';
-import { first, take, toArray } from 'rxjs/operators';
+import { type ServiceStatus, ServiceStatusLevels, type CoreStatus } from '@kbn/core-status-common';
+import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
+import { first, take, toArray } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import { ServiceStatusLevelSnapshotSerializer } from './test_helpers';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+
+import {
+  logCoreStatusChangesMock,
+  logPluginsStatusChangesMock,
+  logOverallStatusChangesMock,
+} from './status_service.test.mocks';
+import { StatusService, type StatusServiceSetupDeps } from './status_service';
+import { ServiceStatusLevelSnapshotSerializer } from './test_helpers';
+import type { InternalStatusServiceSetup } from './types';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
 describe('StatusService', () => {
   let service: StatusService;
+  let logger: jest.Mocked<ILoggingSystem>;
 
   beforeEach(() => {
-    service = new StatusService(mockCoreContext.create());
+    logger = loggingSystemMock.create();
+    service = new StatusService(mockCoreContext.create({ logger }));
+  });
+
+  afterEach(() => {
+    loggingSystemMock.clear(logger);
+    logCoreStatusChangesMock.mockReset();
+    logPluginsStatusChangesMock.mockReset();
+    logOverallStatusChangesMock.mockReset();
   });
 
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -47,7 +65,7 @@ describe('StatusService', () => {
     summary: 'This is critical!',
   };
 
-  const setupDeps = (overrides: Partial<StatusServiceSetupDeps>): StatusServiceSetupDeps => {
+  const setupDeps = (overrides: Partial<StatusServiceSetupDeps> = {}): StatusServiceSetupDeps => {
     return {
       analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
       elasticsearch: {
@@ -65,7 +83,32 @@ describe('StatusService', () => {
     };
   };
 
-  describe('setup', () => {
+  describe('#preboot', () => {
+    it('registers `status` route', async () => {
+      const configService = configServiceMock.create();
+      configService.atPath.mockReturnValue(new BehaviorSubject({ allowAnonymous: true }));
+      service = new StatusService(mockCoreContext.create({ configService }));
+
+      const prebootRouterMock: RouterMock = mockRouter.create();
+      const httpPreboot = httpServiceMock.createInternalPrebootContract();
+      httpPreboot.registerRoutes.mockImplementation((path, callback) =>
+        callback(prebootRouterMock)
+      );
+      await service.preboot({ http: httpPreboot });
+
+      expect(prebootRouterMock.get).toHaveBeenCalledTimes(1);
+      expect(prebootRouterMock.get).toHaveBeenCalledWith(
+        {
+          path: '/api/status',
+          options: { authRequired: false, tags: ['api'], access: 'public' },
+          validate: false,
+        },
+        expect.any(Function)
+      );
+    });
+  });
+
+  describe('#setup', () => {
     describe('core$', () => {
       it('rolls up core status observables into single observable', async () => {
         const setup = await service.setup(
@@ -191,7 +234,7 @@ describe('StatusService', () => {
         );
         expect(await setup.overall$.pipe(first()).toPromise()).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
       });
 
@@ -211,15 +254,15 @@ describe('StatusService', () => {
         const subResult3 = await setup.overall$.pipe(first()).toPromise();
         expect(subResult1).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
         expect(subResult2).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
         expect(subResult3).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
       });
 
@@ -264,15 +307,17 @@ describe('StatusService', () => {
               "detail": "See the status page for more information",
               "level": degraded,
               "meta": Object {
-                "affectedServices": Array [
+                "affectedPlugins": Array [],
+                "failingPlugins": Array [],
+                "failingServices": Array [
                   "savedObjects",
                 ],
               },
-              "summary": "1 service is degraded: savedObjects",
+              "summary": "1 service(s) and 0 plugin(s) are degraded: savedObjects",
             },
             Object {
               "level": available,
-              "summary": "All services are available",
+              "summary": "All services and plugins are available",
             },
           ]
         `);
@@ -314,15 +359,17 @@ describe('StatusService', () => {
               "detail": "See the status page for more information",
               "level": degraded,
               "meta": Object {
-                "affectedServices": Array [
+                "affectedPlugins": Array [],
+                "failingPlugins": Array [],
+                "failingServices": Array [
                   "savedObjects",
                 ],
               },
-              "summary": "1 service is degraded: savedObjects",
+              "summary": "1 service(s) and 0 plugin(s) are degraded: savedObjects",
             },
             Object {
               "level": available,
-              "summary": "All services are available",
+              "summary": "All services and plugins are available",
             },
           ]
         `);
@@ -343,7 +390,7 @@ describe('StatusService', () => {
         );
         expect(await setup.coreOverall$.pipe(first()).toPromise()).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
       });
 
@@ -360,7 +407,7 @@ describe('StatusService', () => {
         );
         expect(await setup.coreOverall$.pipe(first()).toPromise()).toMatchObject({
           level: ServiceStatusLevels.critical,
-          summary: '1 service is critical: savedObjects',
+          summary: '1 service(s) and 0 plugin(s) are critical: savedObjects',
         });
       });
 
@@ -382,15 +429,15 @@ describe('StatusService', () => {
 
         expect(subResult1).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
         expect(subResult2).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
         expect(subResult3).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '2 services are degraded: elasticsearch, savedObjects',
+          summary: '2 service(s) and 0 plugin(s) are degraded: elasticsearch, savedObjects',
         });
       });
 
@@ -435,11 +482,13 @@ describe('StatusService', () => {
               "detail": "See the status page for more information",
               "level": degraded,
               "meta": Object {
-                "affectedServices": Array [
+                "affectedPlugins": Array [],
+                "failingPlugins": Array [],
+                "failingServices": Array [
                   "savedObjects",
                 ],
               },
-              "summary": "1 service is degraded: savedObjects",
+              "summary": "1 service(s) and 0 plugin(s) are degraded: savedObjects",
             },
             Object {
               "level": available,
@@ -485,11 +534,13 @@ describe('StatusService', () => {
               "detail": "See the status page for more information",
               "level": degraded,
               "meta": Object {
-                "affectedServices": Array [
+                "affectedPlugins": Array [],
+                "failingPlugins": Array [],
+                "failingServices": Array [
                   "savedObjects",
                 ],
               },
-              "summary": "1 service is degraded: savedObjects",
+              "summary": "1 service(s) and 0 plugin(s) are degraded: savedObjects",
             },
             Object {
               "level": available,
@@ -497,45 +548,6 @@ describe('StatusService', () => {
             },
           ]
         `);
-      });
-    });
-
-    describe('preboot status routes', () => {
-      let prebootRouterMock: RouterMock;
-      beforeEach(async () => {
-        prebootRouterMock = mockRouter.create();
-      });
-
-      it('does not register `status` route if anonymous access is not allowed', async () => {
-        const httpSetup = httpServiceMock.createInternalSetupContract();
-        httpSetup.registerPrebootRoutes.mockImplementation((path, callback) =>
-          callback(prebootRouterMock)
-        );
-        await service.setup(setupDeps({ http: httpSetup }));
-
-        expect(prebootRouterMock.get).not.toHaveBeenCalled();
-      });
-
-      it('registers `status` route if anonymous access is allowed', async () => {
-        const configService = configServiceMock.create();
-        configService.atPath.mockReturnValue(new BehaviorSubject({ allowAnonymous: true }));
-        service = new StatusService(mockCoreContext.create({ configService }));
-
-        const httpSetup = httpServiceMock.createInternalSetupContract();
-        httpSetup.registerPrebootRoutes.mockImplementation((path, callback) =>
-          callback(prebootRouterMock)
-        );
-        await service.setup(setupDeps({ http: httpSetup }));
-
-        expect(prebootRouterMock.get).toHaveBeenCalledTimes(1);
-        expect(prebootRouterMock.get).toHaveBeenCalledWith(
-          {
-            path: '/api/status',
-            options: { authRequired: false, tags: ['api'] },
-            validate: expect.anything(),
-          },
-          expect.any(Function)
-        );
       });
     });
 
@@ -553,17 +565,17 @@ describe('StatusService', () => {
         const { context$ } = analyticsMock.registerContextProvider.mock.calls[0][0];
         await expect(firstValueFrom(context$.pipe(take(2), toArray()))).resolves
           .toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "overall_status_level": "initializing",
-                "overall_status_summary": "Kibana is starting up",
-              },
-              Object {
-                "overall_status_level": "available",
-                "overall_status_summary": "All services are available",
-              },
-            ]
-          `);
+          Array [
+            Object {
+              "overall_status_level": "initializing",
+              "overall_status_summary": "Kibana is starting up",
+            },
+            Object {
+              "overall_status_level": "available",
+              "overall_status_summary": "All services and plugins are available",
+            },
+          ]
+        `);
       });
 
       test('registers and reports an event', async () => {
@@ -577,11 +589,55 @@ describe('StatusService', () => {
             "core-overall_status_changed",
             Object {
               "overall_status_level": "available",
-              "overall_status_summary": "All services are available",
+              "overall_status_summary": "All services and plugins are available",
             },
           ]
         `);
       });
+    });
+  });
+
+  describe('#start', () => {
+    it('calls logCoreStatusChangesMock with the right params', async () => {
+      await service.setup(setupDeps());
+      await service.start();
+
+      expect(logCoreStatusChangesMock).toHaveBeenCalledTimes(1);
+      expect(logCoreStatusChangesMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logger: expect.any(Object),
+          core$: expect.any(Observable),
+          stop$: expect.any(Observable),
+        })
+      );
+    });
+
+    it('calls logPluginsStatusChangesMock with the right params', async () => {
+      await service.setup(setupDeps());
+      await service.start();
+
+      expect(logPluginsStatusChangesMock).toHaveBeenCalledTimes(1);
+      expect(logPluginsStatusChangesMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logger: expect.any(Object),
+          plugins$: expect.any(Observable),
+          stop$: expect.any(Observable),
+        })
+      );
+    });
+
+    it('calls logOverallStatusChangesMock with the right params', async () => {
+      await service.setup(setupDeps());
+      await service.start();
+
+      expect(logOverallStatusChangesMock).toHaveBeenCalledTimes(1);
+      expect(logOverallStatusChangesMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logger: expect.any(Object),
+          overall$: expect.any(Observable),
+          stop$: expect.any(Observable),
+        })
+      );
     });
   });
 });

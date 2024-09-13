@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -18,17 +19,26 @@ export type TelemetryEnv = 'staging' | 'prod';
 export interface GetTelemetryChannelEndpointConfig {
   channelName: ChannelName;
   env: TelemetryEnv;
+  appendServerlessChannelsSuffix: boolean;
 }
 
-export function getChannel(channelName: ChannelName): string {
+export function getChannel(
+  channelName: ChannelName,
+  appendServerlessChannelsSuffix: boolean
+): string {
+  let channel: string;
   switch (channelName) {
     case 'snapshot':
-      return TELEMETRY_CHANNELS.SNAPSHOT_CHANNEL;
+      channel = TELEMETRY_CHANNELS.SNAPSHOT_CHANNEL;
+      break;
     case 'optInStatus':
-      return TELEMETRY_CHANNELS.OPT_IN_STATUS_CHANNEL;
+      channel = TELEMETRY_CHANNELS.OPT_IN_STATUS_CHANNEL;
+      break;
     default:
       throw new Error(`Unknown telemetry channel ${channelName}.`);
   }
+
+  return appendServerlessChannelsSuffix ? `${channel}-serverless` : channel;
 }
 
 export function getBaseUrl(env: TelemetryEnv): string {
@@ -45,9 +55,10 @@ export function getBaseUrl(env: TelemetryEnv): string {
 export function getTelemetryChannelEndpoint({
   channelName,
   env,
+  appendServerlessChannelsSuffix,
 }: GetTelemetryChannelEndpointConfig): string {
   const baseUrl = getBaseUrl(env);
-  const channelPath = getChannel(channelName);
+  const channelPath = getChannel(channelName, appendServerlessChannelsSuffix);
 
-  return `${baseUrl}${channelPath}/${ENDPOINT_VERSION}/send`;
+  return `${baseUrl}${ENDPOINT_VERSION}/send/${channelPath}`;
 }

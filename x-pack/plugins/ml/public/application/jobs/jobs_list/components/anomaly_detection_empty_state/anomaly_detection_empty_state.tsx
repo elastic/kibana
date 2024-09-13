@@ -5,25 +5,19 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiLink,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
 import adImage from './anomaly_detection_kibana.png';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../../contexts/kibana';
-import { checkPermission } from '../../../../capabilities/check_capabilities';
+import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check';
 
 export const AnomalyDetectionEmptyState: FC = () => {
-  const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
+  const canCreateJob = usePermissionCheck('canCreateJob');
+  const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();
 
   const {
     services: { docLinks },
@@ -46,12 +40,11 @@ export const AnomalyDetectionEmptyState: FC = () => {
       hasBorder={false}
       hasShadow={false}
       icon={<EuiImage size="fullWidth" src={adImage} alt="anomaly_detection" />}
-      color="subdued"
       title={
         <h2>
           <FormattedMessage
             id="xpack.ml.overview.anomalyDetection.createFirstJobMessage"
-            defaultMessage="Create your first anomaly detection job"
+            defaultMessage="Start detecting anomalies"
           />
         </h2>
       }
@@ -65,43 +58,25 @@ export const AnomalyDetectionEmptyState: FC = () => {
           </p>
         </>
       }
-      actions={
+      actions={[
         <EuiButton
           color="primary"
           onClick={redirectToCreateJobSelectIndexPage}
-          fill
-          iconType="plusInCircle"
           isDisabled={disableCreateAnomalyDetectionJob}
           data-test-subj="mlCreateNewJobButton"
         >
           <FormattedMessage
             id="xpack.ml.overview.anomalyDetection.createJobButtonText"
-            defaultMessage="Create job"
+            defaultMessage="Create anomaly detection job"
           />
-        </EuiButton>
-      }
-      footer={
-        <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h3>
-                <FormattedMessage
-                  id="xpack.ml.common.learnMoreQuestion"
-                  defaultMessage="Want to learn more?"
-                />
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink href={docLinks.links.ml.anomalyDetection} target="_blank" external>
-              <FormattedMessage
-                id="xpack.ml.common.readDocumentationLink"
-                defaultMessage="Read documentation"
-              />
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
+        </EuiButton>,
+        <EuiLink href={docLinks.links.ml.anomalyDetection} target="_blank" external>
+          <FormattedMessage
+            id="xpack.ml.common.readDocumentationLink"
+            defaultMessage="Read documentation"
+          />
+        </EuiLink>,
+      ]}
       data-test-subj="mlAnomalyDetectionEmptyState"
     />
   );

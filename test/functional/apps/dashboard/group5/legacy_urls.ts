@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
+  const { dashboard, header, timePicker, visualize, visEditor } = getPageObjects([
     'dashboard',
     'header',
-    'common',
     'timePicker',
     'visualize',
     'visEditor',
@@ -38,11 +38,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
       await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
-      await PageObjects.dashboard.saveDashboard('legacyTest', { waitDialogIsClosed: true });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboard.saveDashboard('legacyTest', {
+        waitDialogIsClosed: true,
+        saveAsNew: true,
+      });
+      await header.waitUntilLoadingHasFinished();
       const currentUrl = await browser.getCurrentUrl();
       await log.debug(`Current url is ${currentUrl}`);
       testDashboardId = /#\/view\/(.+)\?/.exec(currentUrl)![1];
@@ -54,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.gotoDashboardLandingPage();
       await listingTable.deleteItem('legacyTest', testDashboardId);
       await security.testUser.restoreDefaults();
     });
@@ -63,11 +66,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('redirects from old kibana app URL', async () => {
         const url = `${kibanaLegacyBaseUrl}#/dashboard/${testDashboardId}`;
         await browser.get(url, true);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await elasticChart.setNewChartUiDebugFlag(true);
-        await PageObjects.timePicker.setDefaultDataRange();
+        await timePicker.setDefaultDataRange();
 
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
         await pieChart.expectPieSliceCount(5);
       });
 
@@ -75,27 +78,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const url = `${kibanaVisualizeBaseUrl}#/dashboard/${testDashboardId}`;
         await browser.get(url, true);
         await elasticChart.setNewChartUiDebugFlag(true);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.timePicker.setDefaultDataRange();
+        await header.waitUntilLoadingHasFinished();
+        await timePicker.setDefaultDataRange();
 
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
         await pieChart.expectPieSliceCount(5);
       });
 
       it('resolves markdown link', async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickMarkdownWidget();
-        await PageObjects.visEditor.setMarkdownTxt(`[abc](#/dashboard/${testDashboardId})`);
-        await PageObjects.visEditor.clickGo();
+        await visualize.navigateToNewVisualization();
+        await visualize.clickMarkdownWidget();
+        await visEditor.setMarkdownTxt(`[abc](#/dashboard/${testDashboardId})`);
+        await visEditor.clickGo();
 
-        await PageObjects.visualize.saveVisualizationExpectSuccess('legacy url markdown');
+        await visualize.saveVisualizationExpectSuccess('legacy url markdown');
 
-        (await find.byLinkText('abc')).click();
+        await (await find.byLinkText('abc')).click();
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.timePicker.setDefaultDataRange();
+        await header.waitUntilLoadingHasFinished();
+        await timePicker.setDefaultDataRange();
 
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
         await pieChart.expectPieSliceCount(5);
       });
 
@@ -104,20 +107,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.goBack();
         // back to last app
         await browser.goBack();
-        await PageObjects.visEditor.expectMarkdownTextArea();
+        await visEditor.expectMarkdownTextArea();
         await browser.goForward();
       });
 
       it('resolves markdown link from dashboard', async () => {
-        await PageObjects.common.navigateToApp('dashboard');
-        await PageObjects.dashboard.clickNewDashboard();
+        await dashboard.navigateToApp();
+        await dashboard.clickNewDashboard();
         await dashboardAddPanel.addVisualization('legacy url markdown');
-        (await find.byLinkText('abc')).click();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await (await find.byLinkText('abc')).click();
+        await header.waitUntilLoadingHasFinished();
         await elasticChart.setNewChartUiDebugFlag(true);
-        await PageObjects.timePicker.setDefaultDataRange();
+        await timePicker.setDefaultDataRange();
 
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
         await pieChart.expectPieSliceCount(5);
       });
     });

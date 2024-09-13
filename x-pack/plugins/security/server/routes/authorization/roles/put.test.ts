@@ -10,11 +10,11 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/server';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
+import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
-import { GLOBAL_RESOURCE } from '../../../../common/constants';
+import { definePutRolesRoutes } from './put';
 import { securityFeatureUsageServiceMock } from '../../../feature_usage/index.mock';
 import { routeDefinitionParamsMock } from '../../index.mock';
-import { definePutRolesRoutes } from './put';
 
 const application = 'kibana-.kibana';
 const privilegeMap = {
@@ -325,6 +325,8 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_cluster: undefined,
+                remote_indices: undefined,
                 run_as: [],
                 applications: [],
               },
@@ -358,6 +360,7 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_indices: undefined,
                 run_as: [],
                 applications: [
                   {
@@ -400,6 +403,7 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_indices: undefined,
                 run_as: [],
                 applications: [
                   {
@@ -440,6 +444,7 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_indices: undefined,
                 run_as: [],
                 applications: [
                   {
@@ -460,6 +465,7 @@ describe('PUT role', () => {
     putRoleTest(`creates role with everything`, {
       name: 'foo-role',
       payload: {
+        description: 'test description',
         metadata: {
           foo: 'test-metadata',
         },
@@ -471,6 +477,18 @@ describe('PUT role', () => {
                 grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
                 except: ['test-field-security-except-1', 'test-field-security-except-2'],
               },
+              names: ['test-index-name-1', 'test-index-name-2'],
+              privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+              query: `{ "match": { "title": "foo" } }`,
+            },
+          ],
+          remote_indices: [
+            {
+              field_security: {
+                grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                except: ['test-field-security-except-1', 'test-field-security-except-2'],
+              },
+              clusters: ['test-cluster-name-1', 'test-cluster-name-2'],
               names: ['test-index-name-1', 'test-index-name-2'],
               privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
               query: `{ "match": { "title": "foo" } }`,
@@ -524,12 +542,25 @@ describe('PUT role', () => {
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
+                description: 'test description',
                 indices: [
                   {
                     field_security: {
                       grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
                       except: ['test-field-security-except-1', 'test-field-security-except-2'],
                     },
+                    names: ['test-index-name-1', 'test-index-name-2'],
+                    privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                    query: `{ "match": { "title": "foo" } }`,
+                  },
+                ],
+                remote_indices: [
+                  {
+                    field_security: {
+                      grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                      except: ['test-field-security-except-1', 'test-field-security-except-2'],
+                    },
+                    clusters: ['test-cluster-name-1', 'test-cluster-name-2'],
                     names: ['test-index-name-1', 'test-index-name-2'],
                     privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
                     query: `{ "match": { "title": "foo" } }`,
@@ -656,6 +687,7 @@ describe('PUT role', () => {
                     query: `{ "match": { "title": "foo" } }`,
                   },
                 ],
+                remote_indices: undefined,
                 metadata: { foo: 'test-metadata' },
                 run_as: ['test-run-as-1', 'test-run-as-2'],
               },
@@ -759,6 +791,7 @@ describe('PUT role', () => {
                     privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
                   },
                 ],
+                remote_indices: undefined,
                 metadata: { foo: 'test-metadata' },
                 run_as: ['test-run-as-1', 'test-run-as-2'],
               },
@@ -796,6 +829,7 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_indices: undefined,
                 run_as: [],
                 applications: [
                   {
@@ -840,6 +874,7 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_indices: undefined,
                 run_as: [],
                 applications: [
                   {
@@ -884,12 +919,67 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_indices: undefined,
                 run_as: [],
                 applications: [
                   {
                     application: 'kibana-.kibana',
                     privileges: ['feature_unknown_feature.sub_feature_privilege_1'],
                     resources: ['*'],
+                  },
+                ],
+                metadata: undefined,
+              },
+            },
+          ],
+        },
+        statusCode: 204,
+        result: undefined,
+      },
+    });
+
+    putRoleTest(`creates role with remote_cluster privileges`, {
+      name: 'foo-role-remote-cluster',
+      payload: {
+        kibana: [],
+        elasticsearch: {
+          remote_cluster: [
+            {
+              clusters: ['cluster1', 'cluster2'],
+              privileges: ['monitor_enrich'],
+            },
+            {
+              clusters: ['cluster3', 'cluster4'],
+              privileges: ['monitor_enrich'],
+            },
+          ],
+        },
+      },
+      apiResponses: {
+        get: () => ({}),
+        put: () => {},
+      },
+      asserts: {
+        recordSubFeaturePrivilegeUsage: false,
+        apiArguments: {
+          get: [{ name: 'foo-role-remote-cluster' }, { ignore: [404] }],
+          put: [
+            {
+              name: 'foo-role-remote-cluster',
+              body: {
+                applications: [],
+                cluster: [],
+                indices: [],
+                remote_indices: undefined,
+                run_as: [],
+                remote_cluster: [
+                  {
+                    clusters: ['cluster1', 'cluster2'],
+                    privileges: ['monitor_enrich'],
+                  },
+                  {
+                    clusters: ['cluster3', 'cluster4'],
+                    privileges: ['monitor_enrich'],
                   },
                 ],
                 metadata: undefined,

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import path from 'path';
@@ -31,9 +32,6 @@ interface BuildSnapshotOptions {
  *   :distribution:archives:darwin-tar:assemble
  *   :distribution:archives:linux-tar:assemble
  *   :distribution:archives:windows-zip:assemble
- *   :distribution:archives:oss-darwin-tar:assemble
- *   :distribution:archives:oss-linux-tar:assemble
- *   :distribution:archives:oss-windows-zip:assemble
  */
 export async function buildSnapshot({
   license,
@@ -67,15 +65,13 @@ export async function buildSnapshot({
 }
 
 export function archiveForPlatform(platform: NodeJS.Platform, license: string) {
-  const taskPrefix = license === 'oss' ? 'oss-' : '';
-
   switch (platform) {
     case 'darwin':
-      return { format: 'tar', ext: 'tar.gz', task: `${taskPrefix}darwin-tar`, platform: 'darwin' };
+      return { format: 'tar', ext: 'tar.gz', task: 'darwin-tar', platform: 'darwin' };
     case 'win32':
-      return { format: 'zip', ext: 'zip', task: `${taskPrefix}windows-zip`, platform: 'windows' };
+      return { format: 'zip', ext: 'zip', task: 'windows-zip', platform: 'windows' };
     case 'linux':
-      return { format: 'tar', ext: 'tar.gz', task: `${taskPrefix}linux-tar`, platform: 'linux' };
+      return { format: 'tar', ext: 'tar.gz', task: 'linux-tar', platform: 'linux' };
     default:
       throw new Error(`unsupported platform: ${platform}`);
   }

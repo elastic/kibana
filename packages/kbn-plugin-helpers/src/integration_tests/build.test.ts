@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -39,6 +40,9 @@ it('builds a generated plugin into a viable archive', async () => {
     process.execPath,
     ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'],
     {
+      env: {
+        NODE_OPTIONS: '--openssl-legacy-provider',
+      },
       cwd: REPO_ROOT,
       all: true,
     }
@@ -51,7 +55,8 @@ it('builds a generated plugin into a viable archive', async () => {
   };
 
   expect(filterLogs(generateProc.all)).toMatchInlineSnapshot(`
-    " succ 🎉
+    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/current/production.html#openssl-legacy-provider
+     succ 🎉
 
           Your plugin has been created in plugins/foo_test_plugin
     "
@@ -61,16 +66,23 @@ it('builds a generated plugin into a viable archive', async () => {
     process.execPath,
     ['../../scripts/plugin_helpers', 'build', '--kibana-version', '7.5.0'],
     {
+      env: {
+        NODE_OPTIONS: '--openssl-legacy-provider',
+      },
       cwd: PLUGIN_DIR,
       all: true,
     }
   );
 
   expect(filterLogs(buildProc.all)).toMatchInlineSnapshot(`
-    " info deleting the build and target directories
+    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/current/production.html#openssl-legacy-provider
+     info deleting the build and target directories
+     info run bazel and build required artifacts for the optimizer
+     succ bazel run successfully and artifacts were created
      info running @kbn/optimizer
      │ succ browser bundle created at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public
      │ info stopping @kbn/optimizer
+     info compressing js and css bundles found at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public to brotli
      info copying assets from \`public/assets\` to build
      info copying server source into the build and converting with babel
      info running yarn to install dependencies
@@ -85,6 +97,7 @@ it('builds a generated plugin into a viable archive', async () => {
 
   expect(files).toMatchInlineSnapshot(`
     Array [
+      "kibana/fooTestPlugin/.i18nrc.json",
       "kibana/fooTestPlugin/common/index.js",
       "kibana/fooTestPlugin/kibana.json",
       "kibana/fooTestPlugin/node_modules/.yarn-integrity",

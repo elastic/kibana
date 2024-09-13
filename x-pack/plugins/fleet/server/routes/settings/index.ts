@@ -5,84 +5,111 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
+import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
-
 import { SETTINGS_API_ROUTES } from '../../constants';
-import type { FleetRequestHandler } from '../../types';
-import { PutSettingsRequestSchema, GetSettingsRequestSchema } from '../../types';
-import { defaultFleetErrorHandler } from '../../errors';
-import { settingsService, agentPolicyService, appContextService } from '../../services';
+import {
+  PutSettingsRequestSchema,
+  GetSettingsRequestSchema,
+  GetEnrollmentSettingsRequestSchema,
+  GetSpaceSettingsRequestSchema,
+  PutSpaceSettingsRequestSchema,
+} from '../../types';
+import type { FleetConfigType } from '../../config';
 
-export const getSettingsHandler: FleetRequestHandler = async (context, request, response) => {
-  const soClient = (await context.fleet).internalSoClient;
+import { getEnrollmentSettingsHandler } from './enrollment_settings_handler';
 
-  try {
-    const settings = await settingsService.getSettings(soClient);
-    const body = {
-      item: settings,
-    };
-    return response.ok({ body });
-  } catch (error) {
-    if (error.isBoom && error.output.statusCode === 404) {
-      return response.notFound({
-        body: { message: `Settings not found` },
-      });
-    }
+import {
+  getSettingsHandler,
+  getSpaceSettingsHandler,
+  putSettingsHandler,
+  putSpaceSettingsHandler,
+} from './settings_handler';
 
-    return defaultFleetErrorHandler({ error, response });
+export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
+  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+  if (experimentalFeatures.useSpaceAwareness) {
+    router.versioned
+      .get({
+        path: SETTINGS_API_ROUTES.SPACE_INFO_PATTERN,
+        fleetAuthz: (authz) => {
+          return (
+            authz.fleet.readSettings ||
+            authz.integrations.writeIntegrationPolicies ||
+            authz.fleet.allAgentPolicies
+          );
+        },
+        description: `Get space settings`,
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: { request: GetSpaceSettingsRequestSchema },
+        },
+        getSpaceSettingsHandler
+      );
+
+    router.versioned
+      .put({
+        path: SETTINGS_API_ROUTES.SPACE_UPDATE_PATTERN,
+        fleetAuthz: {
+          fleet: { allSettings: true },
+        },
+        description: `Put space settings`,
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: { request: PutSpaceSettingsRequestSchema },
+        },
+        putSpaceSettingsHandler
+      );
   }
-};
 
-export const putSettingsHandler: FleetRequestHandler<
-  undefined,
-  undefined,
-  TypeOf<typeof PutSettingsRequestSchema.body>
-> = async (context, request, response) => {
-  const soClient = (await context.fleet).internalSoClient;
-  const esClient = (await context.core).elasticsearch.client.asInternalUser;
-  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
-
-  try {
-    const settings = await settingsService.saveSettings(soClient, request.body);
-    await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, {
-      user: user || undefined,
-    });
-    const body = {
-      item: settings,
-    };
-    return response.ok({ body });
-  } catch (error) {
-    if (error.isBoom && error.output.statusCode === 404) {
-      return response.notFound({
-        body: { message: `Settings not found` },
-      });
-    }
-
-    return defaultFleetErrorHandler({ error, response });
-  }
-};
-
-export const registerRoutes = (router: FleetAuthzRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: SETTINGS_API_ROUTES.INFO_PATTERN,
-      validate: GetSettingsRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readSettings: true },
       },
-    },
-    getSettingsHandler
-  );
-  router.put(
-    {
+      description: `Get settings`,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetSettingsRequestSchema },
+      },
+      getSettingsHandler
+    );
+  router.versioned
+    .put({
       path: SETTINGS_API_ROUTES.UPDATE_PATTERN,
-      validate: PutSettingsRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
-    },
-    putSettingsHandler
-  );
+      description: `Update settings`,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: PutSettingsRequestSchema },
+      },
+      putSettingsHandler
+    );
+  router.versioned
+    .get({
+      path: SETTINGS_API_ROUTES.ENROLLMENT_INFO_PATTERN,
+      fleetAuthz: (authz) => {
+        return authz.fleet.addAgents || authz.fleet.addFleetServers;
+      },
+      description: `Get enrollment settings`,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetEnrollmentSettingsRequestSchema },
+      },
+      getEnrollmentSettingsHandler
+    );
 };

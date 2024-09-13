@@ -1,19 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsType, SavedObjectsFieldMapping } from '@kbn/core/server';
-import { FILE_SO_TYPE } from '../../common';
+import { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
 import type { FileMetadata } from '../../common';
+import { BaseFileMetadata, FILE_SO_TYPE } from '../../common';
 
 type Properties = Record<
-  keyof Omit<FileMetadata, 'Alt' | 'Compression' | 'ChunkSize' | 'hash'>,
+  keyof Omit<FileMetadata, 'Alt' | 'Compression' | 'ChunkSize'>,
   SavedObjectsFieldMapping
 >;
+
+export type SupportedFileHashAlgorithm = keyof Pick<
+  Required<Required<BaseFileMetadata>['hash']>,
+  'md5' | 'sha1' | 'sha256' | 'sha512'
+>;
+
+export type FileHashObj = Partial<Record<SupportedFileHashAlgorithm, string>>;
 
 const properties: Properties = {
   created: {
@@ -45,6 +53,10 @@ const properties: Properties = {
   },
   FileKind: {
     type: 'keyword',
+  },
+  hash: {
+    dynamic: false,
+    properties: {},
   },
 };
 

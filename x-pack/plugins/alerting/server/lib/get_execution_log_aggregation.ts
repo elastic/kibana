@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { KueryNode } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
@@ -14,7 +15,7 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { parseDuration } from '.';
 import { IExecutionLog, IExecutionLogResult, EMPTY_EXECUTION_KPI_RESULT } from '../../common';
 
-const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
+const DEFAULT_MAX_BUCKETS_LIMIT = 10000; // do not retrieve more than this number of executions. UI limits 1000 to display, but we need to fetch all 10000 to accurately reflect the KPIs
 const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;
 
 const RULE_ID_FIELD = 'rule.id';
@@ -41,6 +42,7 @@ const NUMBER_OF_NEW_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.alert_co
 const NUMBER_OF_RECOVERED_ALERTS_FIELD =
   'kibana.alert.rule.execution.metrics.alert_counts.recovered';
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
+const MAINTENANCE_WINDOW_IDS_FIELD = 'kibana.alert.maintenance_window_ids';
 
 const Millis2Nanos = 1000 * 1000;
 
@@ -69,6 +71,7 @@ interface IExecutionUuidKpiAggBucket extends estypes.AggregationsStringTermsBuck
     ruleExecutionOutcomes: IActionExecution;
   };
 }
+
 interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketKeys {
   timeoutMessage: estypes.AggregationsMultiBucketBase;
   ruleExecution: {
@@ -82,7 +85,8 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
     numActiveAlerts: estypes.AggregationsMaxAggregate;
     numRecoveredAlerts: estypes.AggregationsMaxAggregate;
     numNewAlerts: estypes.AggregationsMaxAggregate;
-    outcomeAndMessage: estypes.AggregationsTopHitsAggregate;
+    outcomeMessageAndMaintenanceWindow: estypes.AggregationsTopHitsAggregate;
+    maintenanceWindowIds: estypes.AggregationsTopHitsAggregate;
   };
   actionExecution: {
     actionOutcomes: IActionExecution;
@@ -101,9 +105,7 @@ export interface ExecutionUuidKPIAggResult<TBucket = IExecutionUuidKpiAggBucket>
 
 interface ExcludeExecuteStartAggResult extends estypes.AggregationsAggregateBase {
   executionUuid: ExecutionUuidAggResult;
-  executionUuidCardinality: {
-    executionUuidCardinality: estypes.AggregationsCardinalityAggregate;
-  };
+  executionUuidCardinality: estypes.AggregationsCardinalityAggregate; // This is an accurate type even though we're actually using a sum bucket agg
 }
 
 interface ExcludeExecuteStartKpiAggResult extends estypes.AggregationsAggregateBase {
@@ -298,19 +300,35 @@ export function getExecutionLogAggregation({
       },
       aggs: {
         // Get total number of executions
-        executionUuidCardinality: {
-          filter: {
-            bool: {
-              ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
-              must: [getProviderAndActionFilter('alerting', 'execute')],
-            },
+        executionUuidCardinalityBuckets: {
+          terms: {
+            field: EXECUTION_UUID_FIELD,
+            size: DEFAULT_MAX_BUCKETS_LIMIT,
+            order: formatSortForTermSort([{ timestamp: { order: 'desc' } }]),
           },
           aggs: {
-            executionUuidCardinality: {
-              cardinality: {
-                field: EXECUTION_UUID_FIELD,
+            ruleExecution: {
+              filter: {
+                bool: {
+                  ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
+                  must: [getProviderAndActionFilter('alerting', 'execute')],
+                },
+              },
+              aggs: {
+                executeStartTime: {
+                  min: {
+                    field: START_FIELD,
+                  },
+                },
               },
             },
+          },
+        },
+        // Cardinality aggregation isn't accurate for this use case because we want to limit the cardinality
+        // to DEFAULT_MAX_BUCKETS_LIMIT. Instead, we sum the buckets and call it a cardinality.
+        executionUuidCardinality: {
+          sum_bucket: {
+            buckets_path: 'executionUuidCardinalityBuckets>ruleExecution._count',
           },
         },
         executionUuid: {
@@ -401,7 +419,7 @@ export function getExecutionLogAggregation({
                     field: DURATION_FIELD,
                   },
                 },
-                outcomeAndMessage: {
+                outcomeMessageAndMaintenanceWindow: {
                   top_hits: {
                     size: 1,
                     _source: {
@@ -414,6 +432,7 @@ export function getExecutionLogAggregation({
                         SPACE_ID_FIELD,
                         RULE_NAME_FIELD,
                         ALERTING_OUTCOME_FIELD,
+                        MAINTENANCE_WINDOW_IDS_FIELD,
                       ],
                     },
                   },
@@ -485,20 +504,30 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const actionExecutionError =
     actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
 
-  const outcomeAndMessage = bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source ?? {};
-  let status = outcomeAndMessage.kibana?.alerting?.outcome ?? '';
+  const outcomeMessageAndMaintenanceWindow =
+    bucket?.ruleExecution?.outcomeMessageAndMaintenanceWindow?.hits?.hits[0]?._source ?? {};
+  let status = outcomeMessageAndMaintenanceWindow.kibana?.alerting?.outcome ?? '';
   if (isEmpty(status)) {
-    status = outcomeAndMessage.event?.outcome ?? '';
+    status = outcomeMessageAndMaintenanceWindow.event?.outcome ?? '';
   }
-  const outcomeMessage = outcomeAndMessage.message ?? '';
-  const outcomeErrorMessage = outcomeAndMessage.error?.message ?? '';
+  const outcomeMessage = outcomeMessageAndMaintenanceWindow.message ?? '';
+  const outcomeErrorMessage = outcomeMessageAndMaintenanceWindow.error?.message ?? '';
   const message =
     status === 'failure' ? `${outcomeMessage} - ${outcomeErrorMessage}` : outcomeMessage;
-  const version = outcomeAndMessage.kibana?.version ?? '';
+  const version = outcomeMessageAndMaintenanceWindow.kibana?.version ?? '';
 
-  const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule?.id ?? '' : '';
-  const spaceIds = outcomeAndMessage ? outcomeAndMessage?.kibana?.space_ids ?? [] : [];
-  const ruleName = outcomeAndMessage ? outcomeAndMessage.rule?.name ?? '' : '';
+  const ruleId = outcomeMessageAndMaintenanceWindow
+    ? outcomeMessageAndMaintenanceWindow?.rule?.id ?? ''
+    : '';
+  const spaceIds = outcomeMessageAndMaintenanceWindow
+    ? outcomeMessageAndMaintenanceWindow?.kibana?.space_ids ?? []
+    : [];
+  const maintenanceWindowIds = outcomeMessageAndMaintenanceWindow
+    ? outcomeMessageAndMaintenanceWindow.kibana?.alert?.maintenance_window_ids ?? []
+    : [];
+  const ruleName = outcomeMessageAndMaintenanceWindow
+    ? outcomeMessageAndMaintenanceWindow.rule?.name ?? ''
+    : '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
@@ -520,6 +549,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     rule_id: ruleId,
     space_ids: spaceIds,
     rule_name: ruleName,
+    maintenance_window_ids: maintenanceWindowIds,
   };
 }
 
@@ -577,8 +607,31 @@ function formatExecutionKPIAggBuckets(buckets: IExecutionUuidKpiAggBucket[]) {
   return objToReturn;
 }
 
+function validTotalHitsLimitationOnExecutionLog(esHitsTotal: estypes.SearchTotalHits) {
+  if (
+    esHitsTotal &&
+    esHitsTotal.relation &&
+    esHitsTotal.value &&
+    esHitsTotal.relation === 'gte' &&
+    esHitsTotal.value === 10000
+  ) {
+    throw Boom.entityTooLarge(
+      i18n.translate('xpack.alerting.feature.executionLogAggs.limitationQueryMsg', {
+        defaultMessage:
+          'Results are limited to 10,000 documents, refine your search to see others.',
+      }),
+      EMPTY_EXECUTION_LOG_RESULT
+    );
+  }
+}
+
 export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectResult) {
-  const { aggregations } = results;
+  const { aggregations, hits } = results;
+
+  if (hits && hits.total) {
+    validTotalHitsLimitationOnExecutionLog(hits.total as estypes.SearchTotalHits);
+  }
+
   if (!aggregations || !aggregations.excludeExecuteStart) {
     return EMPTY_EXECUTION_KPI_RESULT;
   }
@@ -590,7 +643,11 @@ export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectRe
 export function formatExecutionLogResult(
   results: AggregateEventsBySavedObjectResult
 ): IExecutionLogResult {
-  const { aggregations } = results;
+  const { aggregations, hits } = results;
+
+  if (hits && hits.total) {
+    validTotalHitsLimitationOnExecutionLog(hits.total as estypes.SearchTotalHits);
+  }
 
   if (!aggregations || !aggregations.excludeExecuteStart) {
     return EMPTY_EXECUTION_LOG_RESULT;
@@ -598,7 +655,7 @@ export function formatExecutionLogResult(
 
   const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartAggResult;
 
-  const total = aggs.executionUuidCardinality.executionUuidCardinality.value;
+  const total = aggs.executionUuidCardinality.value;
   const buckets = aggs.executionUuid.buckets;
 
   return {
@@ -618,18 +675,18 @@ export function getNumExecutions(dateStart: Date, dateEnd: Date, ruleSchedule: s
 
 export function formatSortForBucketSort(sort: estypes.Sort) {
   return (sort as estypes.SortCombinations[]).map((s) =>
-    Object.keys(s).reduce(
-      (acc, curr) => ({ ...acc, [ExecutionLogSortFields[curr]]: get(s, curr) }),
-      {}
-    )
+    Object.keys(s).reduce((acc, curr) => {
+      (acc as Record<string, unknown>)[ExecutionLogSortFields[curr]] = get(s, curr);
+      return acc;
+    }, {})
   );
 }
 
 export function formatSortForTermSort(sort: estypes.Sort) {
   return (sort as estypes.SortCombinations[]).map((s) =>
-    Object.keys(s).reduce(
-      (acc, curr) => ({ ...acc, [ExecutionLogSortFields[curr]]: get(s, `${curr}.order`) }),
-      {}
-    )
+    Object.keys(s).reduce((acc, curr) => {
+      (acc as Record<string, unknown>)[ExecutionLogSortFields[curr]] = get(s, `${curr}.order`);
+      return acc;
+    }, {})
   );
 }

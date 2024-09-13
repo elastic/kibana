@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CaseStatuses } from '../../../common/api';
+import type { CaseStatuses } from '../../../common/types/domain';
 import type { AlertInfo } from '../../common/types';
 
 interface Alert {
@@ -43,7 +43,7 @@ export interface UpdateAlertCasesRequest {
   caseIds: string[];
 }
 
-export interface RemoveAlertsFromCaseRequest {
+export interface RemoveCaseIdFromAlertsRequest {
   alerts: AlertInfo[];
   caseId: string;
 }

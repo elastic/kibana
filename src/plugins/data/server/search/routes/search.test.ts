@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
@@ -14,20 +15,28 @@ import { registerSearchRoute } from './search';
 import { DataPluginStart } from '../../plugin';
 import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
 import * as indexNotFoundException from '../../../common/search/test_data/index_not_found_exception.json';
-import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { KbnSearchError } from '../report_search_error';
 
 describe('Search service', () => {
   let mockCoreSetup: MockedKeys<CoreSetup<{}, DataPluginStart>>;
 
-  function mockEsError(message: string, statusCode: number, attributes?: Record<string, any>) {
-    return new KbnServerError(message, statusCode, attributes);
+  function mockEsError(message: string, statusCode: number, errBody?: Record<string, any>) {
+    return new KbnSearchError(message, statusCode, errBody);
   }
 
   async function runMockSearch(mockContext: any, mockRequest: any, mockResponse: any) {
     registerSearchRoute(mockCoreSetup.http.createRouter());
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const handler = mockRouter.post.mock.calls[0][1];
+    const handler = mockRouter.versioned.post.mock.results[0].value.addVersion.mock.calls[0][1];
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
+  }
+
+  async function runMockDelete(mockContext: any, mockRequest: any, mockResponse: any) {
+    registerSearchRoute(mockCoreSetup.http.createRouter());
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const handler = mockRouter.versioned.delete.mock.results[0].value.addVersion.mock.calls[0][1];
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
   }
 
@@ -104,7 +113,10 @@ describe('Search service', () => {
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.statusCode).toBe(400);
     expect(error.body.message).toBe('search_phase_execution_exception');
-    expect(error.body.attributes).toBe(searchPhaseException.error);
+    expect(error.body.attributes).toEqual({
+      error: searchPhaseException.error,
+      rawResponse: undefined,
+    });
   });
 
   it('handler returns an error response if the search throws an index not found error', async () => {
@@ -130,7 +142,10 @@ describe('Search service', () => {
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.statusCode).toBe(404);
     expect(error.body.message).toBe('index_not_found_exception');
-    expect(error.body.attributes).toBe(indexNotFoundException.error);
+    expect(error.body.attributes).toEqual({
+      error: indexNotFoundException.error,
+      rawResponse: undefined,
+    });
   });
 
   it('handler returns an error response if the search throws a general error', async () => {
@@ -155,5 +170,27 @@ describe('Search service', () => {
     expect(error.statusCode).toBe(500);
     expect(error.body.message).toBe('This is odd');
     expect(error.body.attributes).toBe(undefined);
+  });
+
+  it('DELETE request calls cancel with the given ID and strategy', async () => {
+    const mockContext = {
+      search: {
+        cancel: jest.fn(),
+      },
+    };
+
+    const id = '1234';
+    const strategy = 'foo';
+    const params = { id, strategy };
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params,
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await runMockDelete(mockContext, mockRequest, mockResponse);
+
+    expect(mockContext.search.cancel).toBeCalled();
+    expect(mockContext.search.cancel).toBeCalledWith(id, { strategy });
   });
 });

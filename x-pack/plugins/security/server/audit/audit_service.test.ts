@@ -16,11 +16,8 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
-import { licenseMock } from '../../common/licensing/index.mock';
-import type { ConfigType } from '../config';
-import { ConfigSchema, createConfig } from '../config';
-import type { AuditEvent } from './audit_events';
 import {
   AuditService,
   createLoggingConfig,
@@ -28,6 +25,9 @@ import {
   getForwardedFor,
   RECORD_USAGE_INTERVAL,
 } from './audit_service';
+import { licenseMock } from '../../common/licensing/index.mock';
+import type { ConfigType } from '../config';
+import { ConfigSchema, createConfig } from '../config';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 
@@ -52,6 +52,7 @@ const recordAuditLoggingUsage = jest.fn();
 beforeEach(() => {
   logger.info.mockClear();
   logging.configure.mockClear();
+  logger.isLevelEnabled.mockClear().mockReturnValue(true);
   recordAuditLoggingUsage.mockClear();
   http.registerOnPostAuth.mockClear();
 });
@@ -321,6 +322,41 @@ describe('#asScoped', () => {
     expect(logger.info).not.toHaveBeenCalled();
     audit.stop();
   });
+
+  it('does not log to audit logger if info logging level is disabled', async () => {
+    logger.isLevelEnabled.mockReturnValue(false);
+
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+    const request = httpServerMock.createKibanaRequest({
+      socket: { remoteAddress: '3.3.3.3' } as Socket,
+      headers: {
+        'x-forwarded-for': '1.1.1.1, 2.2.2.2',
+      },
+      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+    });
+
+    await auditSetup.asScoped(request).log({
+      message: 'MESSAGE',
+      event: { action: 'ACTION' },
+      http: { request: { method: 'GET' } },
+    });
+
+    expect(logger.info).not.toHaveBeenCalled();
+    expect(logger.isLevelEnabled).toHaveBeenCalledTimes(1);
+    expect(logger.isLevelEnabled).toHaveBeenCalledWith('info');
+
+    audit.stop();
+  });
 });
 
 describe('#withoutRequest', () => {
@@ -546,6 +582,7 @@ describe('#filterEvent', () => {
     expect(filterEvent(event, [{ types: ['NO_MATCH', 'access'] }])).toBeFalsy();
     expect(filterEvent(event, [{ outcomes: ['NO_MATCH', 'success'] }])).toBeFalsy();
     expect(filterEvent(event, [{ spaces: ['NO_MATCH', 'default'] }])).toBeFalsy();
+    expect(filterEvent(event, [{ users: ['NO_MATCH', 'jdoe'] }])).toBeFalsy();
   });
 
   test('keeps event when one criteria per rule does not match', () => {
@@ -557,6 +594,7 @@ describe('#filterEvent', () => {
           types: ['access'],
           outcomes: ['success'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
         {
           actions: ['http_request'],
@@ -564,6 +602,7 @@ describe('#filterEvent', () => {
           types: ['access'],
           outcomes: ['success'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
         {
           actions: ['http_request'],
@@ -571,6 +610,7 @@ describe('#filterEvent', () => {
           types: ['NO_MATCH'],
           outcomes: ['success'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
         {
           actions: ['http_request'],
@@ -578,6 +618,7 @@ describe('#filterEvent', () => {
           types: ['access'],
           outcomes: ['NO_MATCH'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
         {
           actions: ['http_request'],
@@ -585,6 +626,15 @@ describe('#filterEvent', () => {
           types: ['access'],
           outcomes: ['success'],
           spaces: ['NO_MATCH'],
+          users: ['jdoe'],
+        },
+        {
+          actions: ['http_request'],
+          categories: ['web'],
+          types: ['access'],
+          outcomes: ['success'],
+          spaces: ['default'],
+          users: ['NO_MATCH'],
         },
       ])
     ).toBeTruthy();
@@ -615,6 +665,7 @@ describe('#filterEvent', () => {
           types: ['access'],
           outcomes: ['success'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
       ])
     ).toBeTruthy();
@@ -645,6 +696,7 @@ describe('#filterEvent', () => {
           types: ['access', 'NO_MATCH'],
           outcomes: ['success'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
       ])
     ).toBeTruthy();
@@ -659,6 +711,7 @@ describe('#filterEvent', () => {
           types: ['NO_MATCH'],
           outcomes: ['NO_MATCH'],
           spaces: ['NO_MATCH'],
+          users: ['NO_MATCH'],
         },
         {
           actions: ['http_request'],
@@ -666,6 +719,7 @@ describe('#filterEvent', () => {
           types: ['access'],
           outcomes: ['success'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
       ])
     ).toBeFalsy();
@@ -696,6 +750,7 @@ describe('#filterEvent', () => {
           types: ['access'],
           outcomes: ['success'],
           spaces: ['default'],
+          users: ['jdoe'],
         },
       ])
     ).toBeFalsy();

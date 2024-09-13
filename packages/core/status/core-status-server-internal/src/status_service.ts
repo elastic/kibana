@@ -1,42 +1,48 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
-  Observable,
+  type Observable,
   combineLatest,
-  Subscription,
+  type Subscription,
   Subject,
   firstValueFrom,
   tap,
   BehaviorSubject,
 } from 'rxjs';
-import { map, distinctUntilChanged, shareReplay, debounceTime, takeUntil } from 'rxjs/operators';
+import { map, distinctUntilChanged, shareReplay, takeUntil, debounceTime } from 'rxjs';
 import { isDeepStrictEqual } from 'util';
 
-import type { RootSchema } from '@kbn/analytics-client';
+import type { RootSchema } from '@elastic/ebt/client';
 import type { Logger, LogMeta } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginName } from '@kbn/core-base-common';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { InternalEnvironmentServiceSetup } from '@kbn/core-environment-server-internal';
-import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type {
+  InternalHttpServiceSetup,
+  InternalHttpServicePreboot,
+} from '@kbn/core-http-server-internal';
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import type { ServiceStatus, CoreStatus } from '@kbn/core-status-common';
-import { registerStatusRoute } from './routes';
+import { type ServiceStatus, type CoreStatus } from '@kbn/core-status-common';
+import { registerStatusRoute, registerPrebootStatusRoute } from './routes';
 
-import { statusConfig as config, StatusConfigType } from './status_config';
+import { statusConfig as config, type StatusConfigType } from './status_config';
 import type { InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
 import { PluginsStatusService } from './cached_plugins_status';
-import { getOverallStatusChanges } from './log_overall_status';
+import { logCoreStatusChanges } from './log_core_services_status';
+import { logPluginsStatusChanges } from './log_plugins_status';
+import { logOverallStatusChanges } from './log_overall_status';
 
 interface StatusLogMeta extends LogMeta {
   kibana: { status: ServiceStatus };
@@ -45,6 +51,10 @@ interface StatusLogMeta extends LogMeta {
 interface StatusAnalyticsPayload {
   overall_status_level: string;
   overall_status_summary: string;
+}
+
+export interface StatusServicePrebootDeps {
+  http: InternalHttpServicePreboot;
 }
 
 export interface StatusServiceSetupDeps {
@@ -63,6 +73,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   private readonly config$: Observable<StatusConfigType>;
   private readonly stop$ = new Subject<void>();
 
+  private core$?: Observable<CoreStatus>;
   private overall$?: Observable<ServiceStatus>;
   private pluginsStatus?: PluginsStatusService;
   private subscriptions: Subscription[] = [];
@@ -70,6 +81,12 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('status');
     this.config$ = coreContext.configService.atPath<StatusConfigType>(config.path);
+  }
+
+  public async preboot({ http }: StatusServicePrebootDeps) {
+    http.registerRoutes('', (router) => {
+      registerPrebootStatusRoute({ router });
+    });
   }
 
   public async setup({
@@ -83,17 +100,14 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     coreUsageData,
   }: StatusServiceSetupDeps) {
     const statusConfig = await firstValueFrom(this.config$);
-    const core$ = this.setupCoreStatus({ elasticsearch, savedObjects });
+    const core$ = (this.core$ = this.setupCoreStatus({ elasticsearch, savedObjects }));
     this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
 
     this.overall$ = combineLatest([core$, this.pluginsStatus.getAll$()]).pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
       debounceTime(80),
-      map(([coreStatus, pluginsStatus]) => {
-        const summary = getSummaryStatus([
-          ...Object.entries(coreStatus),
-          ...Object.entries(pluginsStatus),
-        ]);
+      map(([serviceStatuses, pluginStatuses]) => {
+        const summary = getSummaryStatus({ serviceStatuses, pluginStatuses });
         this.logger.debug<StatusLogMeta>(`Recalculated overall status`, {
           kibana: {
             status: summary,
@@ -110,8 +124,8 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     const coreOverall$ = core$.pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
       debounceTime(25),
-      map((coreStatus) => {
-        const coreOverall = getSummaryStatus([...Object.entries(coreStatus)]);
+      map((serviceStatuses) => {
+        const coreOverall = getSummaryStatus({ serviceStatuses });
         this.logger.debug<StatusLogMeta>(`Recalculated core overall status`, {
           kibana: {
             status: coreOverall,
@@ -149,19 +163,6 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       ...commonRouteDeps,
     });
 
-    if (commonRouteDeps.config.allowAnonymous) {
-      http.registerPrebootRoutes('', (prebootRouter) => {
-        registerStatusRoute({
-          router: prebootRouter,
-          ...commonRouteDeps,
-          config: {
-            ...commonRouteDeps.config,
-            allowAnonymous: true,
-          },
-        });
-      });
-    }
-
     return {
       core$,
       coreOverall$,
@@ -179,11 +180,8 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     if (!this.pluginsStatus || !this.overall$) {
       throw new Error(`StatusService#setup must be called before #start`);
     }
-    this.pluginsStatus.blockNewRegistrations();
-
-    getOverallStatusChanges(this.overall$, this.stop$).subscribe((message) => {
-      this.logger.info(message);
-    });
+    this.pluginsStatus.start();
+    this.logStatusChanges();
   }
 
   public stop() {
@@ -246,5 +244,25 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       // This way we see from the context the previous status and the current one.
       tap((statusPayload) => analytics.reportEvent(overallStatusChangedEventName, statusPayload))
     ).subscribe(context$);
+  }
+
+  private logStatusChanges() {
+    logCoreStatusChanges({
+      logger: this.logger.get('core'),
+      core$: this.core$!,
+      stop$: this.stop$,
+    });
+
+    logPluginsStatusChanges({
+      logger: this.logger.get('plugins'),
+      plugins$: this.pluginsStatus!.getAll$(),
+      stop$: this.stop$,
+    });
+
+    logOverallStatusChanges({
+      logger: this.logger,
+      overall$: this.overall$!,
+      stop$: this.stop$,
+    });
   }
 }

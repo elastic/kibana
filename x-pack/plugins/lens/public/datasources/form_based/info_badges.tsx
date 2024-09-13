@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormBasedLayer } from '../..';
+import { InfoBadge } from '../../shared_components/info_badges/info_badge';
 import { FramePublicAPI, VisualizationInfo } from '../../types';
 import { getSamplingValue } from './utils';
 
@@ -22,38 +22,27 @@ export function ReducedSamplingSectionEntries({
   visualizationInfo: VisualizationInfo;
   dataViews: FramePublicAPI['dataViews'];
 }) {
-  const { euiTheme } = useEuiTheme();
   return (
     <>
       {layers.map(([id, layer], layerIndex) => {
         const dataView = dataViews.indexPatterns[layer.indexPatternId];
+        const layerInfo = visualizationInfo.layers.find(({ layerId, label }) => layerId === id);
         const layerTitle =
-          visualizationInfo.layers.find(({ layerId }) => layerId === id)?.label ||
+          layerInfo?.label ||
           i18n.translate('xpack.lens.indexPattern.samplingPerLayer.fallbackLayerName', {
             defaultMessage: 'Data layer',
           });
+        const layerPalette = layerInfo?.palette;
         return (
-          <li
-            key={`${layerTitle}-${dataView}-${layerIndex}`}
-            data-test-subj={`lns-feature-badges-reducedSampling-${layerIndex}`}
-            css={css`
-              margin: ${euiTheme.size.base} 0 0;
-            `}
+          <InfoBadge
+            title={layerTitle}
+            index={layerIndex}
+            dataView={dataView.id}
+            palette={layerPalette}
+            data-test-subj-prefix="lns-feature-badges-reducedSampling"
           >
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">{layerTitle}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-                css={css`
-                  padding-right: 0;
-                `}
-              >
-                <EuiText size="s">{`${Number(getSamplingValue(layer)) * 100}%`}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </li>
+            <EuiText size="s">{`${Number(getSamplingValue(layer)) * 100}%`}</EuiText>
+          </InfoBadge>
         );
       })}
     </>

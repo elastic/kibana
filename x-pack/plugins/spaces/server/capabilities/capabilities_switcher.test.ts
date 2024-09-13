@@ -10,21 +10,23 @@ import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
+import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 import type { Space } from '../../common';
 import type { PluginsStart } from '../plugin';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
-import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 
 const features = [
   {
     id: 'feature_1',
     name: 'Feature 1',
     app: [],
+    scope: ['spaces', 'security'],
   },
   {
     id: 'feature_2',
     name: 'Feature 2',
     app: ['feature2'],
+    scope: ['spaces', 'security'],
     catalogue: ['feature2Entry'],
     management: {
       kibana: ['somethingElse'],
@@ -44,6 +46,7 @@ const features = [
     id: 'feature_3',
     name: 'Feature 3',
     app: ['feature3_app'],
+    scope: ['spaces', 'security'],
     catalogue: ['feature3Entry'],
     management: {
       kibana: ['indices'],
@@ -64,6 +67,7 @@ const features = [
     id: 'feature_4',
     name: 'Feature 4',
     app: ['feature3', 'feature3_app'],
+    scope: ['spaces', 'security'],
     catalogue: ['feature3Entry'],
     management: {
       kibana: ['indices'],

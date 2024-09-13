@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FleetProxy } from '../../../types';
+import type { DownloadSource, FleetProxy } from '../../../types';
 
 function getfleetServerHostsEnrollArgs(
   apiKey: string,
-  fleetServerHosts: string[],
+  fleetServerHost: string,
   fleetProxy?: FleetProxy
 ) {
   const proxyHeadersArgs = fleetProxy?.proxy_headers
@@ -20,47 +20,67 @@ function getfleetServerHostsEnrollArgs(
       }, '')
     : '';
   const proxyArgs = fleetProxy ? ` --proxy-url=${fleetProxy.url}${proxyHeadersArgs}` : '';
-  return `--url=${fleetServerHosts[0]} --enrollment-token=${apiKey}${proxyArgs}`;
+  return `--url=${fleetServerHost || `FLEET_SERVER_HOST`} --enrollment-token=${apiKey}${proxyArgs}`;
 }
 
 export const ManualInstructions = ({
   apiKey,
-  fleetServerHosts,
+  fleetServerHost,
   fleetProxy,
-  kibanaVersion,
+  downloadSource,
+  agentVersion: agentVersion,
+  gcpProjectId = '<PROJECT_ID>',
+  gcpOrganizationId = '<ORGANIZATION_ID>',
+  gcpAccountType,
 }: {
   apiKey: string;
-  fleetServerHosts: string[];
+  fleetServerHost: string;
   fleetProxy?: FleetProxy;
-  kibanaVersion: string;
+  downloadSource?: DownloadSource;
+  agentVersion: string;
+  gcpProjectId?: string;
+  gcpOrganizationId?: string;
+  gcpAccountType?: string;
 }) => {
-  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts, fleetProxy);
+  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHost, fleetProxy);
+  const downloadBaseUrl = downloadSource
+    ? downloadSource.host.endsWith('/')
+      ? downloadSource.host.substring(0, downloadSource.host.length - 1)
+      : downloadSource.host
+    : 'https://artifacts.elastic.co/downloads';
+
+  const fleetServerUrl = enrollArgs?.split('--url=')?.pop()?.split('--enrollment')[0];
+  const enrollmentToken = enrollArgs?.split('--enrollment-token=')[1];
 
   const k8sCommand = 'kubectl apply -f elastic-agent-managed-kubernetes.yml';
 
-  const linuxCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
-tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
-cd elastic-agent-${kibanaVersion}-linux-x86_64
+  const linuxCommand = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-linux-x86_64.tar.gz
+tar xzvf elastic-agent-${agentVersion}-linux-x86_64.tar.gz
+cd elastic-agent-${agentVersion}-linux-x86_64
 sudo ./elastic-agent install ${enrollArgs}`;
 
-  const macCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
-tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
-cd elastic-agent-${kibanaVersion}-darwin-x86_64
+  const macCommand = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-darwin-aarch64.tar.gz
+tar xzvf elastic-agent-${agentVersion}-darwin-aarch64.tar.gz
+cd elastic-agent-${agentVersion}-darwin-aarch64
 sudo ./elastic-agent install ${enrollArgs}`;
 
   const windowsCommand = `$ProgressPreference = 'SilentlyContinue'
-Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
-Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip -DestinationPath .
-cd elastic-agent-${kibanaVersion}-windows-x86_64
+Invoke-WebRequest -Uri ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-windows-x86_64.zip -OutFile elastic-agent-${agentVersion}-windows-x86_64.zip
+Expand-Archive .\\elastic-agent-${agentVersion}-windows-x86_64.zip -DestinationPath .
+cd elastic-agent-${agentVersion}-windows-x86_64
 .\\elastic-agent.exe install ${enrollArgs}`;
 
-  const linuxDebCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-amd64.deb
-sudo dpkg -i elastic-agent-${kibanaVersion}-amd64.deb
+  const linuxDebCommand = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-amd64.deb
+sudo dpkg -i elastic-agent-${agentVersion}-amd64.deb
 sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
 
-  const linuxRpmCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-x86_64.rpm
-sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm
+  const linuxRpmCommand = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-x86_64.rpm
+sudo rpm -vi elastic-agent-${agentVersion}-x86_64.rpm
 sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
+
+  const googleCloudShellCommand = `gcloud config set project ${gcpProjectId} && ${
+    gcpAccountType === 'organization-account' ? `ORG_ID=${gcpOrganizationId}` : ``
+  } FLEET_URL=${fleetServerUrl?.trim()} ENROLLMENT_TOKEN=${enrollmentToken} STACK_VERSION=${agentVersion} ./deploy.sh`;
 
   return {
     linux: linuxCommand,
@@ -69,5 +89,7 @@ sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \n
     deb: linuxDebCommand,
     rpm: linuxRpmCommand,
     kubernetes: k8sCommand,
+    cloudFormation: '',
+    googleCloudShell: googleCloudShellCommand,
   };
 };

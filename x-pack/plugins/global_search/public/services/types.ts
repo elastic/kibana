@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 /**
  * Options for the server-side {@link GlobalSearchPluginStart.find | find API}
@@ -25,4 +26,9 @@ export interface GlobalSearchFindOptions {
    * If/when provided and emitting, the result observable will be completed and no further result emission will be performed.
    */
   aborted$?: Observable<void>;
+  /**
+   * A ES client of type IScopedClusterClient is passed to the `find` call.
+   * When performing calls to ES, the interested provider can utilize this parameter to identify the specific cluster.
+   */
+  client?: IScopedClusterClient;
 }

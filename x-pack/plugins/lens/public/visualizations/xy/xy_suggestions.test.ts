@@ -10,35 +10,16 @@ import type { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } 
 import {
   State,
   XYState,
-  visualizationTypes,
+  visualizationSubtypes,
   XYAnnotationLayerConfig,
   XYDataLayerConfig,
 } from './types';
 import { generateId } from '../../id_generator';
-import { getXyVisualization } from './xy_visualization';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
-import type { PaletteOutput } from '@kbn/coloring';
+import { type PaletteOutput, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { getVisualizationSubtypeId } from './visualization_helpers';
 
 jest.mock('../../id_generator');
-
-const xyVisualization = getXyVisualization({
-  paletteService: chartPluginMock.createPaletteRegistry(),
-  fieldFormats: fieldFormatsServiceMock.createStartContract(),
-  useLegacyTimeAxis: false,
-  kibanaTheme: themeServiceMock.createStartContract(),
-  eventAnnotationService: eventAnnotationServiceMock,
-  core: coreMock.createStart(),
-  storage: {} as IStorageWrapper,
-  data: dataPluginMock.createStartContract(),
-  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-});
 
 describe('xy_suggestions', () => {
   function numCol(columnId: string): TableSuggestionColumn {
@@ -245,8 +226,8 @@ describe('xy_suggestions', () => {
       },
     });
 
-    expect(suggestions).toHaveLength(visualizationTypes.length);
-    expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
+    expect(suggestions).toHaveLength(visualizationSubtypes.length);
+    expect(suggestions.map(({ state }) => getVisualizationSubtypeId(state))).toEqual([
       'line',
       'bar',
       'bar_horizontal',
@@ -272,8 +253,8 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    expect(suggestions).toHaveLength(visualizationTypes.length);
-    expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
+    expect(suggestions).toHaveLength(visualizationSubtypes.length);
+    expect(suggestions.map(({ state }) => getVisualizationSubtypeId(state))).toEqual([
       'bar_stacked',
       'bar',
       'bar_horizontal',
@@ -300,11 +281,11 @@ describe('xy_suggestions', () => {
       keptLayerIds: ['first', 'second'],
     });
 
-    expect(suggestions).toHaveLength(visualizationTypes.length);
+    expect(suggestions).toHaveLength(visualizationSubtypes.length);
     expect(suggestions.map(({ state }) => state.layers.length)).toEqual([
       1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     ]);
-    expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
+    expect(suggestions.map(({ state }) => getVisualizationSubtypeId(state))).toEqual([
       'bar_stacked',
       'bar',
       'bar_horizontal',
@@ -345,8 +326,8 @@ describe('xy_suggestions', () => {
       },
     });
 
-    expect(suggestions).toHaveLength(visualizationTypes.length);
-    expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
+    expect(suggestions).toHaveLength(visualizationSubtypes.length);
+    expect(suggestions.map(({ state }) => getVisualizationSubtypeId(state))).toEqual([
       'line',
       'bar',
       'bar_horizontal',
@@ -395,8 +376,8 @@ describe('xy_suggestions', () => {
       },
     });
 
-    expect(suggestions).toHaveLength(visualizationTypes.length);
-    expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
+    expect(suggestions).toHaveLength(visualizationSubtypes.length);
+    expect(suggestions.map(({ state }) => getVisualizationSubtypeId(state))).toEqual([
       'line',
       'bar',
       'bar_horizontal',
@@ -407,6 +388,69 @@ describe('xy_suggestions', () => {
       'area',
       'area_stacked',
       'area_percentage_stacked',
+    ]);
+    expect(suggestions.map(({ state }) => state.layers.map((l) => l.layerId))).toEqual([
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
+    ]);
+  });
+
+  test('suggests mixed xy chart keeping original subType when switching from another x y chart with multiple layers', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    const suggestions = getSuggestions({
+      allowMixed: true,
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: ['first', 'second'],
+      state: {
+        legend: { isVisible: true, position: 'bottom' },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'bar',
+            xAccessor: 'date',
+            accessors: ['bytes'],
+            splitAccessor: undefined,
+          },
+          {
+            layerId: 'second',
+            layerType: LayerTypes.DATA,
+            seriesType: 'line',
+            xAccessor: undefined,
+            accessors: [],
+            splitAccessor: undefined,
+          },
+        ],
+      },
+    });
+
+    expect(suggestions).toHaveLength(visualizationSubtypes.length);
+    expect(suggestions.map(({ state }) => getVisualizationSubtypeId(state))).toEqual([
+      'line', // line + line = line
+      'mixed', // any other combination is mixed
+      'mixed',
+      'mixed',
+      'mixed',
+      'mixed',
+      'mixed',
+      'mixed',
+      'mixed',
+      'mixed',
     ]);
     expect(suggestions.map(({ state }) => state.layers.map((l) => l.layerId))).toEqual([
       ['first', 'second'],
@@ -434,7 +478,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(visualizationTypes.length - 1);
+    expect(rest).toHaveLength(visualizationSubtypes.length - 1);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -461,7 +505,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(visualizationTypes.length - 1);
+    expect(rest).toHaveLength(visualizationSubtypes.length - 1);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -507,7 +551,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(visualizationTypes.length - 1);
+    expect(rest).toHaveLength(visualizationSubtypes.length - 1);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -551,7 +595,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(visualizationTypes.length - 1);
+    expect(rest).toHaveLength(visualizationSubtypes.length - 1);
     expect(suggestion.title).toEqual('Bar vertical stacked');
     expect(suggestion.state).toEqual(
       expect.objectContaining({
@@ -692,7 +736,7 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
       },
       keptLayerIds: [],
-      mainPalette,
+      mainPalette: { type: 'legacyPalette', value: mainPalette },
     });
 
     expect((suggestion.state.layers as XYDataLayerConfig[])[0].palette).toEqual(mainPalette);
@@ -708,7 +752,7 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
       },
       keptLayerIds: [],
-      mainPalette,
+      mainPalette: { type: 'legacyPalette', value: mainPalette },
     });
 
     expect((suggestion.state.layers as XYDataLayerConfig[])[0].palette).toEqual(undefined);
@@ -842,13 +886,19 @@ describe('xy_suggestions', () => {
       keptLayerIds: ['first'],
     });
 
-    expect(suggestions).toHaveLength(visualizationTypes.length);
+    expect(suggestions).toHaveLength(visualizationSubtypes.length);
 
     expect(suggestions[0].hide).toEqual(false);
     expect(suggestions[0].state).toEqual({
       ...currentState,
       preferredSeriesType: 'line',
-      layers: [{ ...currentState.layers[0], seriesType: 'line' }],
+      layers: [
+        {
+          ...currentState.layers[0],
+          seriesType: 'line',
+          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+        },
+      ],
     });
     expect(suggestions[0].title).toEqual('Line chart');
   });
@@ -885,19 +935,31 @@ describe('xy_suggestions', () => {
       keptLayerIds: ['first'],
     });
 
-    expect(rest).toHaveLength(visualizationTypes.length - 2);
+    expect(rest).toHaveLength(visualizationSubtypes.length - 2);
     expect(seriesSuggestion.state).toEqual({
       ...currentState,
       preferredSeriesType: 'line',
-      layers: [{ ...currentState.layers[0], seriesType: 'line' }],
+      layers: [
+        {
+          ...currentState.layers[0],
+          seriesType: 'line',
+          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+        },
+      ],
     });
     expect(stackSuggestion.state).toEqual({
       ...currentState,
       preferredSeriesType: 'bar_stacked',
-      layers: [{ ...currentState.layers[0], seriesType: 'bar_stacked' }],
+      layers: [
+        {
+          ...currentState.layers[0],
+          seriesType: 'bar_stacked',
+          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+        },
+      ],
     });
     expect(seriesSuggestion.title).toEqual('Line chart');
-    expect(stackSuggestion.title).toEqual('Stacked');
+    expect(stackSuggestion.title).toEqual('Bar vertical stacked');
   });
 
   test('suggests a flipped chart for unchanged table and existing bar chart on ordinal x axis', () => {
@@ -929,7 +991,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(visualizationTypes.length - 1);
+    expect(rest).toHaveLength(visualizationSubtypes.length - 1);
     expect(suggestion.state.preferredSeriesType).toEqual('bar_horizontal');
     expect(
       (suggestion.state.layers as XYDataLayerConfig[]).every(
@@ -970,7 +1032,7 @@ describe('xy_suggestions', () => {
     const visibleSuggestions = suggestions.filter((suggestion) => !suggestion.hide);
     expect(visibleSuggestions).toContainEqual(
       expect.objectContaining({
-        title: 'Stacked',
+        title: 'Bar vertical stacked',
         state: expect.objectContaining({ preferredSeriesType: 'bar_stacked' }),
       })
     );
@@ -1016,6 +1078,7 @@ describe('xy_suggestions', () => {
           ...currentState.layers[0],
           xAccessor: 'product',
           splitAccessor: 'category',
+          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
         },
       ],
     });
@@ -1061,6 +1124,7 @@ describe('xy_suggestions', () => {
           ...currentState.layers[0],
           xAccessor: 'category',
           splitAccessor: 'product',
+          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
         },
       ],
     });
@@ -1107,6 +1171,7 @@ describe('xy_suggestions', () => {
           ...currentState.layers[0],
           xAccessor: 'timestamp',
           splitAccessor: 'product',
+          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
         },
       ],
     });

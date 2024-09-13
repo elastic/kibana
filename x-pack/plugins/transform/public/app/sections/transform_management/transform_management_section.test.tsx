@@ -5,17 +5,25 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { renderReactTestingLibraryWithI18n } from '@kbn/test-jest-helpers';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { TransformManagementSection } from './transform_management_section';
 
 jest.mock('../../../shared_imports');
+jest.mock('../../services/navigation');
+
+const queryClient = new QueryClient();
 
 describe('Transform: <TransformManagementSection />', () => {
   test('Minimal initialization', () => {
-    const wrapper = shallow(<TransformManagementSection />);
+    const { container } = renderReactTestingLibraryWithI18n(
+      <QueryClientProvider client={queryClient}>
+        <TransformManagementSection />
+      </QueryClientProvider>
+    );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toContain('Missing permission');
   });
 });

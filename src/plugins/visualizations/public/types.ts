@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsMigrationVersion, ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type {
+  CoreStart,
+  SavedObjectsMigrationVersion,
+  ResolvedSimpleSavedObject,
+} from '@kbn/core/public';
 import {
   IAggConfigs,
   SerializedSearchSourceFields,
@@ -16,9 +21,20 @@ import {
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/public';
 
+import type { TableListTab } from '@kbn/content-management-tabbed-table-list-view';
 import type { Vis } from './vis';
 import type { PersistedState } from './persisted_state';
 import type { VisParams, SerializedVis } from '../common';
+
+export type StartServices = Pick<
+  CoreStart,
+  // used extensively in visualizations
+  | 'overlays'
+  // used for react rendering utilities
+  | 'analytics'
+  | 'i18n'
+  | 'theme'
+>;
 
 export type { Vis, SerializedVis, VisParams };
 export interface SavedVisState {
@@ -54,6 +70,7 @@ export interface VisSavedObject extends ISavedVis {
   searchSource?: ISearchSource;
   version?: string;
   tags?: string[];
+  managed: boolean;
 }
 
 export interface SaveVisOptions {
@@ -78,7 +95,7 @@ export interface VisToExpressionAstParams {
   abortSignal?: AbortSignal;
 }
 
-export type VisToExpressionAst<TVisParams = VisParams> = (
+export type VisToExpressionAst<TVisParams extends VisParams = VisParams> = (
   vis: Vis<TVisParams>,
   params: VisToExpressionAstParams
 ) => Promise<ExpressionAstExpression> | ExpressionAstExpression;
@@ -94,3 +111,5 @@ export interface VisEditorOptionsProps<VisParamType = unknown> {
   setValidity(isValid: boolean): void;
   setTouched(isTouched: boolean): void;
 }
+
+export type ListingViewRegistry = Pick<Set<TableListTab>, 'add'>;

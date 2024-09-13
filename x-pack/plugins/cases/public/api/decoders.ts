@@ -9,22 +9,20 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { createToasterPlainError } from '../containers/utils';
-import { throwErrors } from '../../common';
 import type {
   CasesFindResponse,
   CasesStatusResponse,
+  CasesBulkGetResponse,
   CasesMetricsResponse,
-  CasesBulkGetResponseCertainFields,
-  CaseResponse,
-} from '../../common/api';
+} from '../../common/types/api';
 import {
   CasesFindResponseRt,
   CasesStatusResponseRt,
-  CasesResponseRt,
-  getTypeForCertainFieldsFromArray,
+  CasesBulkGetResponseRt,
   CasesMetricsResponseRt,
-} from '../../common/api';
+} from '../../common/types/api';
+import { createToasterPlainError } from '../containers/utils';
+import { throwErrors } from '../../common';
 
 export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
   pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
@@ -41,12 +39,8 @@ export const decodeCasesMetricsResponse = (metrics?: CasesMetricsResponse) =>
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-export const decodeCasesBulkGetResponse = <Field extends keyof CaseResponse = keyof CaseResponse>(
-  res: CasesBulkGetResponseCertainFields<Field>,
-  fields?: string[]
-) => {
-  const typeToDecode = getTypeForCertainFieldsFromArray(CasesResponseRt, fields);
-  pipe(typeToDecode.decode(res.cases), fold(throwErrors(createToasterPlainError), identity));
+export const decodeCasesBulkGetResponse = (res: CasesBulkGetResponse) => {
+  pipe(CasesBulkGetResponseRt.decode(res), fold(throwErrors(createToasterPlainError), identity));
 
   return res;
 };

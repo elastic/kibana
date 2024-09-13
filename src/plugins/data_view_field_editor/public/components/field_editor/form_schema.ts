@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-
+import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '@kbn/data-views-plugin/common';
 import { fieldValidators, FieldConfig, RuntimeType, ValidationFunc } from '../../shared_imports';
-import type { Context } from '../preview';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
+import type { PreviewState } from '../preview/types';
 
-const { containsCharsField, emptyField, numberGreaterThanField } = fieldValidators;
+const { containsCharsField, emptyField, numberGreaterThanField, maxLengthField } = fieldValidators;
 const i18nTexts = {
   invalidScriptErrorMessage: i18n.translate(
     'indexPatternFieldEditor.editor.form.scriptEditorPainlessValidationMessage',
@@ -25,7 +26,7 @@ const i18nTexts = {
 
 // Validate the painless **script**
 const painlessScriptValidator: ValidationFunc = async ({ customData: { provider } }) => {
-  const previewError = (await provider()) as Context['error'];
+  const previewError = (await provider()) as PreviewState['previewResponse']['error'];
 
   if (previewError && previewError.code === 'PAINLESS_SCRIPT_ERROR') {
     return {
@@ -110,6 +111,36 @@ export const schema = {
       },
     ],
   },
+  customDescription: {
+    label: i18n.translate('indexPatternFieldEditor.editor.form.customDescriptionLabel', {
+      defaultMessage: 'Custom description',
+    }),
+    validations: [
+      {
+        validator: emptyField(
+          i18n.translate(
+            'indexPatternFieldEditor.editor.form.validations.customDescriptionIsRequiredErrorMessage',
+            {
+              defaultMessage: 'Give a description to the field.',
+            }
+          )
+        ),
+      },
+      {
+        validator: maxLengthField({
+          length: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
+          message: i18n.translate(
+            'indexPatternFieldEditor.editor.form.validations.customDescriptionMaxLengthErrorMessage',
+            {
+              values: { length: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH },
+              defaultMessage:
+                'The length of the description is too long. The maximum length is {length} characters.',
+            }
+          ),
+        }),
+      },
+    ],
+  },
   popularity: {
     label: i18n.translate('indexPatternFieldEditor.editor.form.popularityLabel', {
       defaultMessage: 'Popularity',
@@ -144,6 +175,9 @@ export const schema = {
   },
   __meta__: {
     isCustomLabelVisible: {
+      defaultValue: false,
+    },
+    isCustomDescriptionVisible: {
       defaultValue: false,
     },
     isValueVisible: {

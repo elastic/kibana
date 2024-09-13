@@ -1,0 +1,128 @@
+{{~#if type~}}
+  {{~> (concat "type_" type)~}}
+  {{~#if nullable}}.nullable(){{/if~}}
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
+  {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
+{{~/if~}}
+
+{{~#if $ref~}}
+  {{~#if (isCircularRef $ref)~}}
+    z.lazy(() => {{referenceName}})
+  {{~else~}}
+    {{referenceName}}
+  {{~/if~}}
+  {{~#if nullable}}.nullable(){{/if~}}
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
+  {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
+  {{~#if (eq x-modify "partial")}}.partial(){{/if~}}
+  {{~#if (eq x-modify "required")}}.required(){{/if~}}
+{{~/if~}}
+
+{{~#if allOf~}}
+  {{~#each allOf~}}
+    {{~#if @first~}}
+      {{> zod_schema_item }}
+    {{~else~}}
+      .merge({{> zod_schema_item }})
+    {{~/if~}}
+  {{~/each~}}
+{{~/if~}}
+
+{{~#if anyOf~}}
+  {{#if discriminator}}
+    z.discriminatedUnion('{{discriminator.propertyName}}', [
+  {{else}}
+    z.union([ 
+  {{/if}}
+  {{~#each anyOf~}}
+    {{~> zod_schema_item ~}},
+  {{~/each~}}
+  ])
+  {{~#if nullable}}.nullable(){{/if~}}
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
+{{~/if~}}
+
+{{~#if oneOf~}}
+  {{#if discriminator}}
+    z.discriminatedUnion('{{discriminator.propertyName}}', [
+  {{else}}
+    z.union([ 
+  {{/if}}
+  {{~#each oneOf~}}
+    {{~> zod_schema_item ~}},
+  {{~/each~}}
+  ])
+  {{~#if nullable}}.nullable(){{/if~}}
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
+{{~/if~}}
+
+{{#if (isUnknown .)}}
+z.unknown()
+{{/if}}
+
+{{~#*inline "type_array"~}}
+  z.array({{~> zod_schema_item items ~}})
+  {{~#if minItems}}.min({{minItems}}){{/if~}}
+  {{~#if maxItems}}.max({{maxItems}}){{/if~}}
+{{~/inline~}}
+
+{{~#*inline "type_boolean"~}}
+  z.boolean()
+{{~/inline~}}
+
+{{~#*inline "type_integer"~}}
+  z.number().int()
+  {{~#if minimum includeZero=true}}.min({{minimum}}){{/if~}}
+  {{~#if maximum includeZero=true}}.max({{maximum}}){{/if~}}
+{{~/inline~}}
+
+{{~#*inline "type_number"~}}
+  z.number()
+  {{~#if minimum includeZero=true}}.min({{minimum}}){{/if~}}
+  {{~#if maximum includeZero=true}}.max({{maximum}}){{/if~}}
+{{~/inline~}}
+
+{{~#*inline "type_object"~}}
+  z.object({
+    {{#each properties}}
+      {{#if description}}
+      /** 
+      * {{{description}}} 
+      */
+      {{/if}}
+      '{{@key}}':{{~> zod_schema_item requiredBool=(includes ../required @key)~}},
+    {{/each}}
+  })
+  {{~#if (eq additionalProperties false)}}.strict(){{/if~}}
+  {{~#if additionalProperties}}
+    {{~#if (eq additionalProperties true)~}}
+      .catchall(z.unknown())
+    {{~else~}}
+      .catchall({{> zod_schema_item additionalProperties}})
+    {{~/if~}}
+  {{~/if~}}
+  {{~#if (eq x-modify "partial")}}.partial(){{/if~}}
+  {{~#if (eq x-modify "required")}}.required(){{/if~}}
+{{~/inline~}}
+
+{{~#*inline "type_string"~}}
+  {{~#if enum~}}
+    {{~#if (isSingle enum)~}}
+      z.literal("{{first enum}}")
+    {{~else~}}
+      z.enum([
+        {{~#each enum~}}
+          "{{.}}",
+        {{~/each~}}
+      ])
+    {{~/if~}}
+  {{~else~}}
+  z.string()
+  {{~#if minLength}}.min({{minLength}}){{/if~}}
+  {{~#if maxLength}}.max({{maxLength}}){{/if~}}
+  {{~#if (eq format 'date-time')}}.datetime(){{/if~}}
+  {{~#if (eq format 'date-math')}}.superRefine(isValidDateMath){{/if~}}
+  {{~#if (eq format 'uuid')}}.uuid(){{/if~}}
+  {{~#if pattern}}.regex(/{{pattern}}/){{/if~}}
+  {{~/if~}}
+{{~/inline~}}

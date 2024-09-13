@@ -21,8 +21,9 @@ import { delay } from '../lib/delay';
 import { pick, times } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression } from '@kbn/es-query';
+import { getEsNames } from './names';
 
-type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
+type MockedLogger = ReturnType<(typeof loggingSystemMock)['createLogger']>;
 
 let logger: MockedLogger;
 let clusterClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -34,6 +35,7 @@ beforeEach(() => {
   clusterClientAdapter = new ClusterClientAdapter({
     logger,
     elasticsearchClientPromise: Promise.resolve(clusterClient),
+    esNames: getEsNames('kibana'),
     wait: () => Promise.resolve(true),
   });
 });
@@ -47,7 +49,8 @@ describe('indexDocument', () => {
     });
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
-      body: [{ create: { _index: 'event-log', require_alias: true } }, { message: 'foo' }],
+      body: [{ create: {} }, { message: 'foo' }],
+      index: 'kibana-event-log-ds',
     });
   });
 
@@ -58,7 +61,7 @@ describe('indexDocument', () => {
       return logger.error.mock.calls.length !== 0;
     });
 
-    const expectedMessage = `error writing bulk events: "expected failure"; docs: [{"create":{"_index":"event-log","require_alias":true}},{"message":"foo"}]`;
+    const expectedMessage = `error writing bulk events: "expected failure"; docs: [{"create":{}},{"message":"foo"}]`;
     expect(logger.error).toHaveBeenCalledWith(expectedMessage);
   });
 });
@@ -95,14 +98,12 @@ describe('buffering documents', () => {
 
     const expectedBody = [];
     for (let i = 0; i < EVENT_BUFFER_LENGTH - 1; i++) {
-      expectedBody.push(
-        { create: { _index: 'event-log', require_alias: true } },
-        { message: `foo ${i}` }
-      );
+      expectedBody.push({ create: {} }, { message: `foo ${i}` });
     }
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
       body: expectedBody,
+      index: 'kibana-event-log-ds',
     });
   });
 
@@ -118,18 +119,17 @@ describe('buffering documents', () => {
 
     const expectedBody = [];
     for (let i = 0; i < EVENT_BUFFER_LENGTH; i++) {
-      expectedBody.push(
-        { create: { _index: 'event-log', require_alias: true } },
-        { message: `foo ${i}` }
-      );
+      expectedBody.push({ create: {} }, { message: `foo ${i}` });
     }
 
     expect(clusterClient.bulk).toHaveBeenNthCalledWith(1, {
       body: expectedBody,
+      index: 'kibana-event-log-ds',
     });
 
     expect(clusterClient.bulk).toHaveBeenNthCalledWith(2, {
-      body: [{ create: { _index: 'event-log', require_alias: true } }, { message: `foo 100` }],
+      body: [{ create: {} }, { message: `foo 100` }],
+      index: 'kibana-event-log-ds',
     });
   });
 
@@ -154,102 +154,29 @@ describe('buffering documents', () => {
     for (let i = 0; i < 10; i++) {
       const expectedBody = [];
       for (let j = 0; j < EVENT_BUFFER_LENGTH; j++) {
-        expectedBody.push(
-          { create: { _index: 'event-log', require_alias: true } },
-          { message: `foo ${i * EVENT_BUFFER_LENGTH + j}` }
-        );
+        expectedBody.push({ create: {} }, { message: `foo ${i * EVENT_BUFFER_LENGTH + j}` });
       }
 
       expect(clusterClient.bulk).toHaveBeenNthCalledWith(i + 1, {
+        index: 'kibana-event-log-ds',
         body: expectedBody,
       });
     }
   });
 });
 
-describe('doesIlmPolicyExist', () => {
-  // ElasticsearchError can be a bit random in shape, we need an any here
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const notFoundError = new Error('Not found') as any;
-  notFoundError.statusCode = 404;
-
-  test('should call cluster with proper arguments', async () => {
-    await clusterClientAdapter.doesIlmPolicyExist('foo');
-    expect(clusterClient.transport.request).toHaveBeenCalledWith({
-      method: 'GET',
-      path: '/_ilm/policy/foo',
-    });
-  });
-
-  test('should return false when 404 error is returned by Elasticsearch', async () => {
-    clusterClient.transport.request.mockRejectedValue(notFoundError);
-    await expect(clusterClientAdapter.doesIlmPolicyExist('foo')).resolves.toEqual(false);
-  });
-
-  test('should throw error when error is not 404', async () => {
-    clusterClient.transport.request.mockRejectedValue(new Error('Fail'));
-    await expect(
-      clusterClientAdapter.doesIlmPolicyExist('foo')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"error checking existance of ilm policy: Fail"`);
-  });
-
-  test('should return true when no error is thrown', async () => {
-    await expect(clusterClientAdapter.doesIlmPolicyExist('foo')).resolves.toEqual(true);
-  });
-});
-
-describe('createIlmPolicy', () => {
-  test('should call cluster client with given policy', async () => {
-    clusterClient.transport.request.mockResolvedValue({ success: true });
-    await clusterClientAdapter.createIlmPolicy('foo', { args: true });
-    expect(clusterClient.transport.request).toHaveBeenCalledWith({
-      method: 'PUT',
-      path: '/_ilm/policy/foo',
-      body: { args: true },
-    });
-  });
-
-  test('should throw error when call cluster client throws', async () => {
-    clusterClient.transport.request.mockRejectedValue(new Error('Fail'));
-    await expect(
-      clusterClientAdapter.createIlmPolicy('foo', { args: true })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"error creating ilm policy: Fail"`);
-  });
-});
-
 describe('doesIndexTemplateExist', () => {
   test('should call cluster with proper arguments', async () => {
     await clusterClientAdapter.doesIndexTemplateExist('foo');
-    expect(clusterClient.indices.existsTemplate).toHaveBeenCalledWith({
+    expect(clusterClient.indices.existsIndexTemplate).toHaveBeenCalledWith({
       name: 'foo',
     });
-  });
-
-  test('should return true when call cluster to legacy template API returns true', async () => {
-    clusterClient.indices.existsTemplate.mockResponse(true);
-    clusterClient.indices.existsIndexTemplate.mockResponse(false);
-    await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(true);
   });
 
   test('should return true when call cluster to index template API returns true', async () => {
     clusterClient.indices.existsTemplate.mockResponse(false);
     clusterClient.indices.existsIndexTemplate.mockResponse(true);
     await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(true);
-  });
-
-  test('should return false when both call cluster calls returns false', async () => {
-    clusterClient.indices.existsTemplate.mockResponse(false);
-    clusterClient.indices.existsIndexTemplate.mockResponse(false);
-    await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(false);
-  });
-
-  test('should throw error when call cluster to legacy template API throws an error', async () => {
-    clusterClient.indices.existsTemplate.mockRejectedValue(new Error('Fail'));
-    await expect(
-      clusterClientAdapter.doesIndexTemplateExist('foo')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error checking existence of index template: Fail"`
-    );
   });
 
   test('should throw error when call cluster to index template API throws an error', async () => {
@@ -520,48 +447,69 @@ describe('setIndexAliasToHidden', () => {
   });
 });
 
-describe('doesAliasExist', () => {
-  test('should call cluster with proper arguments', async () => {
-    await clusterClientAdapter.doesAliasExist('foo');
-    expect(clusterClient.indices.existsAlias).toHaveBeenCalledWith({
+export const GetDataStreamsResponse: estypes.IndicesGetDataStreamResponse = {
+  data_streams: [
+    {
       name: 'foo',
+      timestamp_field: { name: '@timestamp' },
+      status: 'GREEN' as estypes.HealthStatus,
+      generation: 0,
+      indices: [],
+      template: '',
+      hidden: true,
+      prefer_ilm: false,
+      next_generation_managed_by: 'Index Lifecycle Management',
+    },
+  ],
+};
+
+describe('doesDataStreamExist', () => {
+  test('should call cluster with proper arguments', async () => {
+    clusterClient.indices.getDataStream.mockResponse(GetDataStreamsResponse);
+    await clusterClientAdapter.doesDataStreamExist('foo');
+
+    expect(clusterClient.indices.getDataStream).toHaveBeenCalledWith({
+      name: 'foo',
+      expand_wildcards: 'all',
     });
   });
 
   test('should return true when call cluster returns true', async () => {
-    clusterClient.indices.existsAlias.mockResponse(true);
-    await expect(clusterClientAdapter.doesAliasExist('foo')).resolves.toEqual(true);
+    clusterClient.indices.getDataStream.mockResponse(GetDataStreamsResponse);
+    await expect(clusterClientAdapter.doesDataStreamExist('foo')).resolves.toEqual(true);
   });
 
   test('should return false when call cluster returns false', async () => {
-    clusterClient.indices.existsAlias.mockResponse(false);
-    await expect(clusterClientAdapter.doesAliasExist('foo')).resolves.toEqual(false);
+    clusterClient.indices.getDataStream.mockResponse({ data_streams: [] });
+    await expect(clusterClientAdapter.doesDataStreamExist('foo')).resolves.toEqual(false);
+  });
+
+  test('should return false when call cluster returns false from 404', async () => {
+    clusterClient.indices.getDataStream.mockRejectedValue({ meta: { statusCode: 404 } });
+    await expect(clusterClientAdapter.doesDataStreamExist('foo')).resolves.toEqual(false);
   });
 
   test('should throw error when call cluster throws an error', async () => {
-    clusterClient.indices.existsAlias.mockRejectedValue(new Error('Fail'));
+    clusterClient.indices.getDataStream.mockRejectedValue(new Error('Fail'));
     await expect(
-      clusterClientAdapter.doesAliasExist('foo')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error checking existance of initial index: Fail"`
-    );
+      clusterClientAdapter.doesDataStreamExist('foo')
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"error checking existance of data stream: Fail"`);
   });
 });
 
 describe('createIndex', () => {
   test('should call cluster with proper arguments', async () => {
-    await clusterClientAdapter.createIndex('foo');
-    expect(clusterClient.indices.create).toHaveBeenCalledWith({
-      index: 'foo',
-      body: {},
+    await clusterClientAdapter.createDataStream('foo');
+    expect(clusterClient.indices.createDataStream).toHaveBeenCalledWith({
+      name: 'foo',
     });
   });
 
   test('should throw error when not getting an error of type resource_already_exists_exception', async () => {
-    clusterClient.indices.create.mockRejectedValue(new Error('Fail'));
+    clusterClient.indices.createDataStream.mockRejectedValue(new Error('Fail'));
     await expect(
-      clusterClientAdapter.createIndex('foo')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"error creating initial index: Fail"`);
+      clusterClientAdapter.createDataStream('foo')
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"error creating data stream: Fail"`);
   });
 
   test(`shouldn't throw when an error of type resource_already_exists_exception is thrown`, async () => {
@@ -574,7 +522,7 @@ describe('createIndex', () => {
       },
     };
     clusterClient.indices.create.mockRejectedValue(err);
-    await clusterClientAdapter.createIndex('foo');
+    await clusterClientAdapter.createDataStream('foo');
   });
 });
 
@@ -727,6 +675,13 @@ describe('aggregateEventsBySavedObject', () => {
           ],
         },
       },
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
+        },
+      },
     });
   });
 });
@@ -823,6 +778,13 @@ describe('aggregateEventsWithAuthFilter', () => {
               doc_count: 2,
             },
           ],
+        },
+      },
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
         },
       },
     });
@@ -971,6 +933,13 @@ describe('aggregateEventsWithAuthFilter', () => {
               doc_count: 2,
             },
           ],
+        },
+      },
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
         },
       },
     });

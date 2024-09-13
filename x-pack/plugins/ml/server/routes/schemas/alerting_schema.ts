@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils';
 import { ALERT_PREVIEW_SAMPLE_SIZE } from '../../../common/constants/alerts';
-import { ANOMALY_RESULT_TYPE } from '../../../common/constants/anomalies';
 
 const jobsSelectionSchema = schema.object(
   {
@@ -32,9 +33,9 @@ export const mlAnomalyDetectionAlertParams = schema.object({
   severity: schema.number({ min: 0, max: 100 }),
   /** Result type to alert upon  */
   resultType: schema.oneOf([
-    schema.literal(ANOMALY_RESULT_TYPE.RECORD),
-    schema.literal(ANOMALY_RESULT_TYPE.BUCKET),
-    schema.literal(ANOMALY_RESULT_TYPE.INFLUENCER),
+    schema.literal(ML_ANOMALY_RESULT_TYPE.RECORD),
+    schema.literal(ML_ANOMALY_RESULT_TYPE.BUCKET),
+    schema.literal(ML_ANOMALY_RESULT_TYPE.INFLUENCER),
   ]),
   includeInterim: schema.boolean({ defaultValue: true }),
   /** User's override for the lookback interval */

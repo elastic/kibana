@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Chance from 'chance';
@@ -13,7 +14,11 @@ import { mockCreateOrUpgradeSavedConfig } from './ui_settings_client.test.mock';
 import { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { UiSettingsClient } from './ui_settings_client';
-import { CannotOverrideError } from '../ui_settings_errors';
+import {
+  CannotOverrideError,
+  ValidationBadValueError,
+  ValidationSettingNotFoundError,
+} from '../ui_settings_errors';
 
 const logger = loggingSystemMock.create().get();
 
@@ -64,7 +69,12 @@ describe('ui settings', () => {
       await uiSettings.setMany({ one: 'value' });
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, { one: 'value' });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        ID,
+        { one: 'value' },
+        { refresh: false }
+      );
     });
 
     it('updates several values in one operation', async () => {
@@ -72,10 +82,15 @@ describe('ui settings', () => {
       await uiSettings.setMany({ one: 'value', another: 'val' });
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
-        one: 'value',
-        another: 'val',
-      });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        ID,
+        {
+          one: 'value',
+          another: 'val',
+        },
+        { refresh: false }
+      );
     });
 
     it('automatically creates the savedConfig if it is missing', async () => {
@@ -159,9 +174,14 @@ describe('ui settings', () => {
       await uiSettings.set('one', 'value');
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
-        one: 'value',
-      });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        ID,
+        {
+          one: 'value',
+        },
+        { refresh: false }
+      );
     });
 
     it('validates value if a schema presents', async () => {
@@ -202,7 +222,12 @@ describe('ui settings', () => {
       await uiSettings.remove('one');
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, { one: null });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        ID,
+        { one: null },
+        { refresh: false }
+      );
     });
 
     it('does not fail validation', async () => {
@@ -246,7 +271,12 @@ describe('ui settings', () => {
       await uiSettings.removeMany(['one']);
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, { one: null });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        ID,
+        { one: null },
+        { refresh: false }
+      );
     });
 
     it('updates several values in one operation', async () => {
@@ -254,11 +284,16 @@ describe('ui settings', () => {
       await uiSettings.removeMany(['one', 'two', 'three']);
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
-        one: null,
-        two: null,
-        three: null,
-      });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        ID,
+        {
+          one: null,
+          two: null,
+          three: null,
+        },
+        { refresh: false }
+      );
     });
 
     it('does not fail validation', async () => {
@@ -699,6 +734,48 @@ describe('ui settings', () => {
     it('returns true if overrides defined and key is overridden', () => {
       const { uiSettings } = setup({ overrides: { foo: true, bar: true } });
       expect(uiSettings.isOverridden('bar')).toBe(true);
+    });
+  });
+
+  describe('#validate()', () => {
+    it('returns a correct validation response for an existing setting key and an invalid value', async () => {
+      const defaults = { foo: { schema: schema.number() } };
+      const { uiSettings } = setup({ defaults });
+
+      expect(await uiSettings.validate('foo', 'testValue')).toMatchObject({
+        valid: false,
+        errorMessage: 'expected value of type [number] but got [string]',
+      });
+    });
+
+    it('returns a correct validation response for an existing setting key and a valid value', async () => {
+      const defaults = { foo: { schema: schema.number() } };
+      const { uiSettings } = setup({ defaults });
+
+      expect(await uiSettings.validate('foo', 5)).toMatchObject({ valid: true });
+    });
+
+    it('throws for a non-existing setting key', async () => {
+      const { uiSettings } = setup();
+
+      try {
+        await uiSettings.validate('bar', 5);
+      } catch (error) {
+        expect(error).toBeInstanceOf(ValidationSettingNotFoundError);
+        expect(error.message).toBe('Setting with a key [bar] does not exist.');
+      }
+    });
+
+    it('throws for a null value', async () => {
+      const defaults = { foo: { schema: schema.number() } };
+      const { uiSettings } = setup({ defaults });
+
+      try {
+        await uiSettings.validate('foo', null);
+      } catch (error) {
+        expect(error).toBeInstanceOf(ValidationBadValueError);
+        expect(error.message).toBe('No value was specified.');
+      }
     });
   });
 

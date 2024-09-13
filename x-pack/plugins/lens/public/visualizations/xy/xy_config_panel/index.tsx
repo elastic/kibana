@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Position, ScaleType } from '@elastic/charts';
+import { LegendValue, Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
+import { TooltipWrapper } from '@kbn/visualization-utils';
+import { LegendSize, XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../../types';
 import { State, XYState, AxesSettingsConfig } from '../types';
-import { isHorizontalChart } from '../state_helpers';
+import { hasBarSeries, isHorizontalChart } from '../state_helpers';
 import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { getAxesConfiguration, getXDomain, GroupsConfiguration } from '../axes_configuration';
+import { getAxesConfiguration, getXDomain, AxisGroupConfiguration } from '../axes_configuration';
 import { VisualOptionsPopover } from './visual_options_popover';
+import { TextPopover } from './titles_and_text_popover';
 import { getScaleType } from '../to_expression';
-import { TooltipWrapper } from '../../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
 import { getDataLayers } from '../visualization_helpers';
 
@@ -32,12 +33,9 @@ export function updateLayer(
   layer: UnwrapArray<State['layers']>,
   index: number
 ): State {
-  const newLayers = [...state.layers];
-  newLayers[index] = layer;
-
   return {
     ...state,
-    layers: newLayers,
+    layers: state.layers.map((l, i) => (i === index ? layer : l)),
   };
 }
 
@@ -71,16 +69,17 @@ const legendOptions: Array<{
 
 const getDataBounds = function (
   activeData: FramePublicAPI['activeData'],
-  axes: GroupsConfiguration
+  axes: AxisGroupConfiguration[]
 ) {
   const groups: Partial<Record<string, { min: number; max: number }>> = {};
   axes.forEach((axis) => {
-    let min = Number.MAX_VALUE;
-    let max = Number.MIN_VALUE;
+    let min = Number.MAX_SAFE_INTEGER;
+    let max = -Number.MAX_SAFE_INTEGER;
     axis.series.forEach((series) => {
       activeData?.[series.layer]?.rows.forEach((row) => {
         const value = row[series.accessor];
-        if (!Number.isNaN(value)) {
+        // TODO: add tests for null value
+        if (value !== null && Number.isFinite(value)) {
           if (value < min) {
             min = value;
           }
@@ -90,7 +89,7 @@ const getDataBounds = function (
         }
       });
     });
-    if (min !== Number.MAX_VALUE && max !== Number.MIN_VALUE) {
+    if (min !== Number.MAX_SAFE_INTEGER && max !== -Number.MAX_SAFE_INTEGER) {
       groups[axis.groupId] = {
         min: Math.round((min + Number.EPSILON) * 100) / 100,
         max: Math.round((max + Number.EPSILON) * 100) / 100,
@@ -101,7 +100,7 @@ const getDataBounds = function (
   return groups;
 };
 
-function hasPercentageAxis(axisGroups: GroupsConfiguration, groupId: string, state: XYState) {
+function hasPercentageAxis(axisGroups: AxisGroupConfiguration[], groupId: string, state: XYState) {
   return Boolean(
     axisGroups
       .find((group) => group.groupId === groupId)
@@ -120,11 +119,177 @@ const axisKeyToTitleMapping: Record<keyof AxesSettingsConfig, 'xTitle' | 'yTitle
     yRight: 'yRightTitle',
   };
 
+const xyLegendValues: Array<{
+  value: XYLegendValue;
+  label: string;
+  toolTipContent: string;
+}> = [
+  {
+    value: LegendValue.Average,
+    label: i18n.translate('xpack.lens.shared.legendValues.average', {
+      defaultMessage: 'Average',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.averageDesc', {
+      defaultMessage: 'Average of all values in the series.',
+    }),
+  },
+  {
+    value: LegendValue.Median,
+    label: i18n.translate('xpack.lens.shared.legendValues.median', {
+      defaultMessage: 'Median',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.medianDesc', {
+      defaultMessage: 'Median value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.Min,
+    label: i18n.translate('xpack.lens.shared.legendValues.min', {
+      defaultMessage: 'Minimum',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.minDesc', {
+      defaultMessage: 'Minimum value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.Max,
+    label: i18n.translate('xpack.lens.shared.legendValues.max', {
+      defaultMessage: 'Maximum',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.maxDesc', {
+      defaultMessage: 'Maximum value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.Range,
+    label: i18n.translate('xpack.lens.shared.legendValues.range', {
+      defaultMessage: 'Range',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.rangeDesc', {
+      defaultMessage: 'Difference between the min and the max in the series.',
+    }),
+  },
+  {
+    value: LegendValue.LastValue,
+    label: i18n.translate('xpack.lens.shared.legendValues.lastValue', {
+      defaultMessage: 'Last value',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.lastValueDesc', {
+      defaultMessage: 'Last value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.LastNonNullValue,
+    label: i18n.translate('xpack.lens.shared.legendValues.lastNonNullValue', {
+      defaultMessage: 'Last non-null value',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.lastNonNullValueDesc', {
+      defaultMessage: 'Last non-null value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.FirstValue,
+    label: i18n.translate('xpack.lens.shared.legendValues.firstValue', {
+      defaultMessage: 'First value',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.firstValueDesc', {
+      defaultMessage: 'First value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.FirstNonNullValue,
+    label: i18n.translate('xpack.lens.shared.legendValues.firstNonNullValue', {
+      defaultMessage: 'First non-null value',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.firstNonNullValueDesc', {
+      defaultMessage: 'First non-null value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.Difference,
+    label: i18n.translate('xpack.lens.shared.legendValues.diff', {
+      defaultMessage: 'Difference',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.diffDesc', {
+      defaultMessage: 'Difference between first and last value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.DifferencePercent,
+    label: i18n.translate('xpack.lens.shared.legendValues.diffPercent', {
+      defaultMessage: 'Difference %',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.diffPercentDesc', {
+      defaultMessage: 'Difference in percent between first and last value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.Total,
+    label: i18n.translate('xpack.lens.shared.legendValues.total', {
+      defaultMessage: 'Sum',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.totalDesc', {
+      defaultMessage: 'The sum of all values in the series.',
+    }),
+  },
+  {
+    value: LegendValue.Count,
+    label: i18n.translate('xpack.lens.shared.legendValues.count', {
+      defaultMessage: 'Count',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.countDesc', {
+      defaultMessage: 'Count of all the values in the series.',
+    }),
+  },
+  {
+    value: LegendValue.DistinctCount,
+    label: i18n.translate('xpack.lens.shared.legendValues.distinctCount', {
+      defaultMessage: 'Distinct count',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.distinctCountDesc', {
+      defaultMessage: 'Count of distinct values in the series.',
+    }),
+  },
+  {
+    value: LegendValue.Variance,
+    label: i18n.translate('xpack.lens.shared.legendValues.variance', {
+      defaultMessage: 'Variance',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.varianceDesc', {
+      defaultMessage: 'Variance of all the values in the series.',
+    }),
+  },
+  {
+    value: LegendValue.StdDeviation,
+    label: i18n.translate('xpack.lens.shared.legendValues.stdDev', {
+      defaultMessage: 'Std deviation',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.stdDevDesc', {
+      defaultMessage: 'Standard deviation of all the values in the series.',
+    }),
+  },
+  // Moved to the bottom to limit its usage. It could cause some UX issues due to the dynamic nature
+  // of the data displayed
+  {
+    value: LegendValue.CurrentAndLastValue,
+    label: i18n.translate('xpack.lens.shared.legendValues.currentValue', {
+      defaultMessage: 'Current or last value',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.currentValueDesc', {
+      defaultMessage:
+        'Value of the bucket being hovered or the last bucket value when not hovering.',
+    }),
+  },
+];
+
+const defaultLegendTitle = i18n.translate('xpack.lens.xyChart.legendTitle', {
+  defaultMessage: 'Legend',
+});
+
 export const XyToolbar = memo(function XyToolbar(
   props: VisualizationToolbarProps<State> & { useLegacyTimeAxis?: boolean }
 ) {
   const { state, setState, frame, useLegacyTimeAxis } = props;
-
   const dataLayers = getDataLayers(state?.layers);
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
   const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, frame.activeData);
@@ -211,7 +376,7 @@ export const XyToolbar = memo(function XyToolbar(
   );
   const nonOrdinalXAxis = dataLayers.every(
     (layer) =>
-      !layer.xAccessor ||
+      layer.xAccessor &&
       getScaleType(
         props.frame.datasourceLayers[layer.layerId]?.getOperationForColumnId(layer.xAccessor) ??
           null,
@@ -262,24 +427,39 @@ export const XyToolbar = memo(function XyToolbar(
         return seriesType?.includes('bar') || seriesType?.includes('area');
       })
   );
-  const setLeftExtent = useCallback(
-    (extent: AxisExtentConfig | undefined) => {
+
+  const setScaleWithExtentFn = useCallback(
+    (extentKey: 'yLeftExtent' | 'yRightExtent', scaleKey: 'yLeftScale' | 'yRightScale') =>
+      (extent?: AxisExtentConfig, scale?: YScaleType) => {
+        setState({
+          ...state,
+          [extentKey]: extent,
+          [scaleKey]: scale,
+        });
+      },
+    [setState, state]
+  );
+
+  const setExtentFn = useCallback(
+    (extentKey: 'xExtent' | 'yLeftExtent' | 'yRightExtent') => (extent?: AxisExtentConfig) => {
       setState({
         ...state,
-        yLeftExtent: extent,
+        [extentKey]: extent,
       });
     },
     [setState, state]
   );
-  const setXExtent = useCallback(
-    (extent: AxisExtentConfig | undefined) => {
+
+  const setScaleFn = useCallback(
+    (scaleKey: 'yLeftScale' | 'yRightScale') => (scale?: YScaleType) => {
       setState({
         ...state,
-        xExtent: extent,
+        [scaleKey]: scale,
       });
     },
     [setState, state]
   );
+
   const hasBarOrAreaOnRightAxis = Boolean(
     axisGroups
       .find((group) => group.groupId === 'right')
@@ -287,15 +467,6 @@ export const XyToolbar = memo(function XyToolbar(
         const seriesType = dataLayers.find((l) => l.layerId === series.layer)?.seriesType;
         return seriesType?.includes('bar') || seriesType?.includes('area');
       })
-  );
-  const setRightExtent = useCallback(
-    (extent: AxisExtentConfig | undefined) => {
-      setState({
-        ...state,
-        yRightExtent: extent,
-      });
-    },
-    [setState, state]
   );
 
   const filteredBarLayers = dataLayers.filter((layer) => layer.seriesType.includes('bar'));
@@ -333,126 +504,24 @@ export const XyToolbar = memo(function XyToolbar(
 
   const legendSize = state.legend.legendSize;
 
-  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
-
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-          <VisualOptionsPopover
+        <VisualOptionsPopover
+          state={state}
+          setState={setState}
+          datasourceLayers={frame.datasourceLayers}
+        />
+      </EuiFlexItem>
+      {hasBarSeries(state.layers) && (
+        <EuiFlexItem grow={false}>
+          <TextPopover
             state={state}
             setState={setState}
             datasourceLayers={frame.datasourceLayers}
           />
-
-          <LegendSettingsPopover
-            legendOptions={legendOptions}
-            mode={legendMode}
-            location={state?.legend.isInside ? 'inside' : 'outside'}
-            onLocationChange={(location) => {
-              setState({
-                ...state,
-                legend: {
-                  ...state.legend,
-                  isInside: location === 'inside',
-                },
-              });
-            }}
-            onDisplayChange={(optionId) => {
-              const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
-              if (newMode === 'auto') {
-                setState({
-                  ...state,
-                  legend: {
-                    ...state.legend,
-                    isVisible: true,
-                    showSingleSeries: false,
-                  },
-                });
-              } else if (newMode === 'show') {
-                setState({
-                  ...state,
-                  legend: {
-                    ...state.legend,
-                    isVisible: true,
-                    showSingleSeries: true,
-                  },
-                });
-              } else if (newMode === 'hide') {
-                setState({
-                  ...state,
-                  legend: {
-                    ...state.legend,
-                    isVisible: false,
-                    showSingleSeries: false,
-                  },
-                });
-              }
-            }}
-            position={state?.legend.position}
-            horizontalAlignment={state?.legend.horizontalAlignment}
-            verticalAlignment={state?.legend.verticalAlignment}
-            floatingColumns={state?.legend.floatingColumns}
-            onFloatingColumnsChange={(val) => {
-              setState({
-                ...state,
-                legend: { ...state.legend, floatingColumns: val },
-              });
-            }}
-            maxLines={state?.legend.maxLines}
-            onMaxLinesChange={(val) => {
-              setState({
-                ...state,
-                legend: { ...state.legend, maxLines: val },
-              });
-            }}
-            shouldTruncate={state?.legend.shouldTruncate ?? defaultParamsFromDatasources}
-            onTruncateLegendChange={() => {
-              const current = state?.legend.shouldTruncate ?? defaultParamsFromDatasources;
-              setState({
-                ...state,
-                legend: { ...state.legend, shouldTruncate: !current },
-              });
-            }}
-            onPositionChange={(id) => {
-              setState({
-                ...state,
-                legend: { ...state.legend, position: id as Position },
-              });
-            }}
-            onAlignmentChange={(value) => {
-              const [vertical, horizontal] = value.split('_');
-              const verticalAlignment = vertical as LegendSettingsPopoverProps['verticalAlignment'];
-              const horizontalAlignment =
-                horizontal as LegendSettingsPopoverProps['horizontalAlignment'];
-
-              setState({
-                ...state,
-                legend: { ...state.legend, verticalAlignment, horizontalAlignment },
-              });
-            }}
-            renderValueInLegendSwitch={nonOrdinalXAxis}
-            valueInLegend={state?.valuesInLegend}
-            onValueInLegendChange={() => {
-              setState({
-                ...state,
-                valuesInLegend: !state.valuesInLegend,
-              });
-            }}
-            legendSize={legendSize}
-            onLegendSizeChange={(newLegendSize) => {
-              setState({
-                ...state,
-                legend: {
-                  ...state.legend,
-                  legendSize: newLegendSize,
-                },
-              });
-            }}
-            showAutoLegendSizeOption={hadAutoLegendSize}
-          />
-        </EuiFlexGroup>
-      </EuiFlexItem>
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
@@ -484,19 +553,15 @@ export const XyToolbar = memo(function XyToolbar(
               }
               orientation={labelsOrientation.yLeft}
               setOrientation={onLabelsOrientationChange}
-              isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
+              isTitleVisible={axisTitlesVisibilitySettings.yLeft}
               extent={state?.yLeftExtent || { mode: 'full' }}
-              setExtent={setLeftExtent}
+              setExtent={setExtentFn('yLeftExtent')}
               hasBarOrAreaOnAxis={hasBarOrAreaOnLeftAxis}
               dataBounds={dataBounds.left}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'left', state)}
               scale={state?.yLeftScale}
-              setScale={(scale) => {
-                setState({
-                  ...state,
-                  yLeftScale: scale,
-                });
-              }}
+              setScale={setScaleFn('yLeftScale')}
+              setScaleWithExtent={setScaleWithExtentFn('yLeftExtent', 'yLeftScale')}
             />
           </TooltipWrapper>
 
@@ -511,7 +576,7 @@ export const XyToolbar = memo(function XyToolbar(
             toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
             orientation={labelsOrientation.x}
             setOrientation={onLabelsOrientationChange}
-            isAxisTitleVisible={axisTitlesVisibilitySettings.x}
+            isTitleVisible={axisTitlesVisibilitySettings.x}
             endzonesVisible={!state?.hideEndzones}
             setEndzoneVisibility={onChangeEndzoneVisiblity}
             currentTimeMarkerVisible={state?.showCurrentTimeMarker}
@@ -522,7 +587,7 @@ export const XyToolbar = memo(function XyToolbar(
               isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
             }
             extent={hasNumberHistogram ? state?.xExtent || { mode: 'dataBounds' } : undefined}
-            setExtent={setXExtent}
+            setExtent={setExtentFn('xExtent')}
             dataBounds={xDataBounds}
           />
 
@@ -556,21 +621,129 @@ export const XyToolbar = memo(function XyToolbar(
               orientation={labelsOrientation.yRight}
               setOrientation={onLabelsOrientationChange}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'right', state)}
-              isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
+              isTitleVisible={axisTitlesVisibilitySettings.yRight}
               extent={state?.yRightExtent || { mode: 'full' }}
-              setExtent={setRightExtent}
+              setExtent={setExtentFn('yRightExtent')}
               hasBarOrAreaOnAxis={hasBarOrAreaOnRightAxis}
               dataBounds={dataBounds.right}
               scale={state?.yRightScale}
-              setScale={(scale) => {
-                setState({
-                  ...state,
-                  yRightScale: scale,
-                });
-              }}
+              setScale={setScaleFn('yRightScale')}
+              setScaleWithExtent={setScaleWithExtentFn('yRightExtent', 'yRightScale')}
             />
           </TooltipWrapper>
         </EuiFlexGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <LegendSettingsPopover
+          legendOptions={legendOptions}
+          mode={legendMode}
+          location={state?.legend.isInside ? 'inside' : 'outside'}
+          onLocationChange={(location) => {
+            setState({
+              ...state,
+              legend: {
+                ...state.legend,
+                isInside: location === 'inside',
+              },
+            });
+          }}
+          titlePlaceholder={
+            frame.activeData?.[dataLayers[0].layerId]?.columns.find(
+              (col) => col.id === dataLayers[0].splitAccessor
+            )?.name ?? defaultLegendTitle
+          }
+          legendTitle={state?.legend.title}
+          onLegendTitleChange={({ title, visible }) => {
+            setState({
+              ...state,
+              legend: {
+                ...state.legend,
+                title,
+                isTitleVisible: visible,
+              },
+            });
+          }}
+          isTitleVisible={state?.legend.isTitleVisible}
+          onDisplayChange={(optionId) => {
+            const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
+            setState({
+              ...state,
+              legend: {
+                ...state.legend,
+                isVisible: newMode !== 'hide',
+                showSingleSeries: newMode === 'show',
+              },
+            });
+          }}
+          position={state?.legend.position}
+          horizontalAlignment={state?.legend.horizontalAlignment}
+          verticalAlignment={state?.legend.verticalAlignment}
+          floatingColumns={state?.legend.floatingColumns}
+          onFloatingColumnsChange={(val) => {
+            setState({
+              ...state,
+              legend: { ...state.legend, floatingColumns: val },
+            });
+          }}
+          maxLines={state?.legend.maxLines}
+          onMaxLinesChange={(val) => {
+            setState({
+              ...state,
+              legend: { ...state.legend, maxLines: val },
+            });
+          }}
+          shouldTruncate={state?.legend.shouldTruncate ?? defaultParamsFromDatasources}
+          onTruncateLegendChange={() => {
+            const current = state?.legend.shouldTruncate ?? defaultParamsFromDatasources;
+            setState({
+              ...state,
+              legend: { ...state.legend, shouldTruncate: !current },
+            });
+          }}
+          onPositionChange={(id) => {
+            setState({
+              ...state,
+              legend: { ...state.legend, position: id as Position },
+            });
+          }}
+          onAlignmentChange={(value) => {
+            const [vertical, horizontal] = value.split('_');
+            const verticalAlignment = vertical as LegendSettingsPopoverProps['verticalAlignment'];
+            const horizontalAlignment =
+              horizontal as LegendSettingsPopoverProps['horizontalAlignment'];
+
+            setState({
+              ...state,
+              legend: { ...state.legend, verticalAlignment, horizontalAlignment },
+            });
+          }}
+          allowedLegendStats={nonOrdinalXAxis ? xyLegendValues : undefined}
+          legendStats={state?.legend.legendStats}
+          onLegendStatsChange={(legendStats, hasConvertedToTable) => {
+            setState({
+              ...state,
+              legend: {
+                ...state.legend,
+                legendStats,
+                isVisible: true,
+                showSingleSeries: true,
+                ...(hasConvertedToTable ? { legendSize: LegendSize.AUTO } : {}),
+              },
+            });
+          }}
+          legendSize={legendSize}
+          onLegendSizeChange={(newLegendSize) => {
+            setState({
+              ...state,
+              legend: {
+                ...state.legend,
+                legendSize: newLegendSize,
+              },
+            });
+          }}
+          showAutoLegendSizeOption={true}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

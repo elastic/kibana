@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { map, filter, startWith, buffer, share } from 'rxjs/operators';
+import { map, filter, startWith, buffer, share } from 'rxjs';
 import { JsonObject } from '@kbn/utility-types';
 import { combineLatest, Observable, zip } from 'rxjs';
 import { isOk, Ok } from '../lib/result_type';
-import { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';
+import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { isTaskRunEvent, isTaskManagerStatEvent } from '../task_events';
@@ -17,7 +17,7 @@ import {
   AveragedStat,
   calculateRunningAverage,
   createRunningAveragedStat,
-} from './task_run_calcultors';
+} from './task_run_calculators';
 import { HealthStatus } from './monitoring_stats_stream';
 
 export interface EphemeralTaskStat extends JsonObject {
@@ -35,7 +35,7 @@ export interface SummarizedEphemeralTaskStat extends JsonObject {
 export function createEphemeralTaskAggregator(
   ephemeralTaskLifecycle: EphemeralTaskLifecycle,
   runningAverageWindowSize: number,
-  maxWorkers: number
+  capacity: number
 ): AggregatedStatProvider<EphemeralTaskStat> {
   const ephemeralTaskRunEvents$ = ephemeralTaskLifecycle.events.pipe(
     filter((taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent))
@@ -70,7 +70,7 @@ export function createEphemeralTaskAggregator(
     map(([tasksRanSincePreviousQueueSize, ephemeralQueueSize]) => ({
       queuedTasks: ephemeralQueuedTasksQueue(ephemeralQueueSize),
       executionsPerCycle: ephemeralQueueExecutionsPerCycleQueue(tasksRanSincePreviousQueueSize),
-      load: ephemeralTaskLoadQueue(calculateWorkerLoad(maxWorkers, tasksRanSincePreviousQueueSize)),
+      load: ephemeralTaskLoadQueue(calculateWorkerLoad(capacity, tasksRanSincePreviousQueueSize)),
     })),
     startWith({
       queuedTasks: [],

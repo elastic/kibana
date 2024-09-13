@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  ENTITY_FIELD_OPERATIONS,
-  EntityFieldOperation,
-} from '../../../../../../../common/util/anomaly_utils';
+import type { MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
+import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
 import { blurButtonOnClick } from '../../../../../util/component_utils';
 import './_entity_filter.scss';
 
@@ -19,7 +18,7 @@ interface EntityFilterProps {
   onFilter: (params: {
     influencerFieldName: string;
     influencerFieldValue: string;
-    action: EntityFieldOperation;
+    action: MlEntityFieldOperation;
   }) => void;
   influencerFieldName: string;
   influencerFieldValue: string;
@@ -46,7 +45,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
             onFilter({
               influencerFieldName,
               influencerFieldValue,
-              action: ENTITY_FIELD_OPERATIONS.ADD,
+              action: ML_ENTITY_FIELD_OPERATIONS.ADD,
             });
           })}
           iconType="plusInCircle"
@@ -71,7 +70,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
             onFilter({
               influencerFieldName,
               influencerFieldValue,
-              action: ENTITY_FIELD_OPERATIONS.REMOVE,
+              action: ML_ENTITY_FIELD_OPERATIONS.REMOVE,
             });
           })}
           iconType="minusInCircle"

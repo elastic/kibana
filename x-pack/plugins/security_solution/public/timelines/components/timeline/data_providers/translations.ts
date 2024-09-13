@@ -169,3 +169,10 @@ export const GROUP_AREA_ARIA_LABEL = (group: number) =>
     values: { group },
     defaultMessage: 'You are in group {group}',
   });
+
+export const FILTER_OR_SEARCH_WITH_KQL = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.filterOrSearchWithKql',
+  {
+    defaultMessage: 'Filter or Search with KQL',
+  }
+);

@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { Inspect, Maybe, SearchHit } from '../../../common';
-import type { RequestBasicOptions } from '../..';
-
-export type NetworkOverviewRequestOptions = RequestBasicOptions;
 
 export interface NetworkOverviewStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;

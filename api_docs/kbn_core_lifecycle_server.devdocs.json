@@ -11,18 +11,10 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-lifecycle-server",
-        "id": "def-common.CorePreboot",
+        "id": "def-server.CorePreboot",
         "type": "Interface",
         "tags": [],
         "label": "CorePreboot",
@@ -35,7 +27,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CorePreboot.analytics",
+            "id": "def-server.CorePreboot.analytics",
             "type": "Object",
             "tags": [],
             "label": "analytics",
@@ -44,63 +36,21 @@
             ],
             "signature": [
               "{ optIn: (optInConfig: ",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.OptInConfig",
-                "text": "OptInConfig"
-              },
+              "OptInConfig",
               ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.TelemetryCounter",
-                "text": "TelemetryCounter"
-              },
+              "TelemetryCounter",
               ">; registerEventType: <EventTypeData>(eventTypeOps: ",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.EventTypeOpts",
-                "text": "EventTypeOpts"
-              },
+              "EventTypeOpts",
               "<EventTypeData>) => void; registerShipper: <Shipper extends ",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.IShipper",
-                "text": "IShipper"
-              },
+              "IShipper",
               ", ShipperConfig>(Shipper: ",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.ShipperClassConstructor",
-                "text": "ShipperClassConstructor"
-              },
+              "ShipperClassConstructor",
               "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.RegisterShipperOpts",
-                "text": "RegisterShipperOpts"
-              },
+              "RegisterShipperOpts",
               " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.ContextProviderOpts",
-                "text": "ContextProviderOpts"
-              },
+              "ContextProviderOpts",
               "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server/src/core_preboot.ts",
@@ -109,7 +59,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CorePreboot.elasticsearch",
+            "id": "def-server.CorePreboot.elasticsearch",
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
@@ -119,9 +69,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.ElasticsearchServicePreboot",
+                "section": "def-server.ElasticsearchServicePreboot",
                 "text": "ElasticsearchServicePreboot"
               }
             ],
@@ -131,7 +81,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CorePreboot.http",
+            "id": "def-server.CorePreboot.http",
             "type": "Object",
             "tags": [],
             "label": "http",
@@ -141,17 +91,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpServicePreboot",
+                "section": "def-server.HttpServicePreboot",
                 "text": "HttpServicePreboot"
               },
               "<",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
               ">"
@@ -162,7 +112,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CorePreboot.preboot",
+            "id": "def-server.CorePreboot.preboot",
             "type": "Object",
             "tags": [],
             "label": "preboot",
@@ -172,9 +122,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-preboot-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCorePrebootServerPluginApi",
-                "section": "def-common.PrebootServicePreboot",
+                "section": "def-server.PrebootServicePreboot",
                 "text": "PrebootServicePreboot"
               }
             ],
@@ -187,7 +137,7 @@
       },
       {
         "parentPluginId": "@kbn/core-lifecycle-server",
-        "id": "def-common.CoreSetup",
+        "id": "def-server.CoreSetup",
         "type": "Interface",
         "tags": [],
         "label": "CoreSetup",
@@ -197,9 +147,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-lifecycle-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreLifecycleServerPluginApi",
-            "section": "def-common.CoreSetup",
+            "section": "def-server.CoreSetup",
             "text": "CoreSetup"
           },
           "<TPluginsStart, TStart>"
@@ -210,7 +160,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreSetup.analytics",
+            "id": "def-server.CoreSetup.analytics",
             "type": "Object",
             "tags": [],
             "label": "analytics",
@@ -219,63 +169,21 @@
             ],
             "signature": [
               "{ optIn: (optInConfig: ",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.OptInConfig",
-                "text": "OptInConfig"
-              },
+              "OptInConfig",
               ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.TelemetryCounter",
-                "text": "TelemetryCounter"
-              },
+              "TelemetryCounter",
               ">; registerEventType: <EventTypeData>(eventTypeOps: ",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.EventTypeOpts",
-                "text": "EventTypeOpts"
-              },
+              "EventTypeOpts",
               "<EventTypeData>) => void; registerShipper: <Shipper extends ",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.IShipper",
-                "text": "IShipper"
-              },
+              "IShipper",
               ", ShipperConfig>(Shipper: ",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.ShipperClassConstructor",
-                "text": "ShipperClassConstructor"
-              },
+              "ShipperClassConstructor",
               "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.RegisterShipperOpts",
-                "text": "RegisterShipperOpts"
-              },
+              "RegisterShipperOpts",
               " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.ContextProviderOpts",
-                "text": "ContextProviderOpts"
-              },
+              "ContextProviderOpts",
               "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts",
@@ -284,7 +192,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreSetup.capabilities",
+            "id": "def-server.CoreSetup.capabilities",
             "type": "Object",
             "tags": [],
             "label": "capabilities",
@@ -294,9 +202,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-capabilities-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                "section": "def-common.CapabilitiesSetup",
+                "section": "def-server.CapabilitiesSetup",
                 "text": "CapabilitiesSetup"
               }
             ],
@@ -306,7 +214,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreSetup.customBranding",
+            "id": "def-server.CoreSetup.customBranding",
             "type": "Object",
             "tags": [],
             "label": "customBranding",
@@ -316,9 +224,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-custom-branding-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreCustomBrandingServerPluginApi",
-                "section": "def-common.CustomBrandingSetup",
+                "section": "def-server.CustomBrandingSetup",
                 "text": "CustomBrandingSetup"
               }
             ],
@@ -328,7 +236,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreSetup.docLinks",
+            "id": "def-server.CoreSetup.docLinks",
             "type": "Object",
             "tags": [],
             "label": "docLinks",
@@ -338,9 +246,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-doc-links-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreDocLinksServerPluginApi",
-                "section": "def-common.DocLinksServiceSetup",
+                "section": "def-server.DocLinksServiceSetup",
                 "text": "DocLinksServiceSetup"
               }
             ],
@@ -350,7 +258,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreSetup.elasticsearch",
+            "id": "def-server.CoreSetup.elasticsearch",
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
@@ -360,9 +268,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.ElasticsearchServiceSetup",
+                "section": "def-server.ElasticsearchServiceSetup",
                 "text": "ElasticsearchServiceSetup"
               }
             ],
@@ -372,7 +280,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreSetup.executionContext",
+            "id": "def-server.CoreSetup.executionContext",
             "type": "Object",
             "tags": [],
             "label": "executionContext",
@@ -382,9 +290,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-execution-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreExecutionContextServerPluginApi",
-                "section": "def-common.ExecutionContextSetup",
+                "section": "def-server.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
               }
             ],
@@ -394,7 +302,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreSetup.http",
+            "id": "def-server.CoreSetup.http",
             "type": "CompoundType",
             "tags": [],
             "label": "http",
@@ -404,25 +312,25 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpServiceSetup",
+                "section": "def-server.HttpServiceSetup",
                 "text": "HttpServiceSetup"
               },
               "<",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
               "> & { resources: ",
               {
                 "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResources",
+                "section": "def-server.HttpResources",
                 "text": "HttpResources"
               },
               "; }"
@@ -433,7 +341,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreSetup.i18n",
+            "id": "def-server.CoreSetup.i18n",
             "type": "Object",
             "tags": [],
             "label": "i18n",
@@ -443,9 +351,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-i18n-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreI18nServerPluginApi",
-                "section": "def-common.I18nServiceSetup",
+                "section": "def-server.I18nServiceSetup",
                 "text": "I18nServiceSetup"
               }
             ],
@@ -455,7 +363,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreSetup.logging",
+            "id": "def-server.CoreSetup.logging",
             "type": "Object",
             "tags": [],
             "label": "logging",
@@ -465,9 +373,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-common.LoggingServiceSetup",
+                "section": "def-server.LoggingServiceSetup",
                 "text": "LoggingServiceSetup"
               }
             ],
@@ -477,7 +385,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreSetup.metrics",
+            "id": "def-server.CoreSetup.metrics",
             "type": "Object",
             "tags": [],
             "label": "metrics",
@@ -487,9 +395,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.MetricsServiceSetup",
+                "section": "def-server.MetricsServiceSetup",
                 "text": "MetricsServiceSetup"
               }
             ],
@@ -499,7 +407,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreSetup.savedObjects",
+            "id": "def-server.CoreSetup.savedObjects",
             "type": "Object",
             "tags": [],
             "label": "savedObjects",
@@ -509,9 +417,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsServiceSetup",
+                "section": "def-server.SavedObjectsServiceSetup",
                 "text": "SavedObjectsServiceSetup"
               }
             ],
@@ -521,7 +429,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreSetup.status",
+            "id": "def-server.CoreSetup.status",
             "type": "Object",
             "tags": [],
             "label": "status",
@@ -531,9 +439,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-status-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreStatusServerPluginApi",
-                "section": "def-common.StatusServiceSetup",
+                "section": "def-server.StatusServiceSetup",
                 "text": "StatusServiceSetup"
               }
             ],
@@ -543,7 +451,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreSetup.uiSettings",
+            "id": "def-server.CoreSetup.uiSettings",
             "type": "Object",
             "tags": [],
             "label": "uiSettings",
@@ -553,9 +461,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-common.UiSettingsServiceSetup",
+                "section": "def-server.UiSettingsServiceSetup",
                 "text": "UiSettingsServiceSetup"
               }
             ],
@@ -565,7 +473,29 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreSetup.deprecations",
+            "id": "def-server.CoreSetup.userSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "userSettings",
+            "description": [
+              "{@link UserSettingsServiceSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUserSettingsServerPluginApi",
+                "section": "def-server.UserSettingsServiceSetup",
+                "text": "UserSettingsServiceSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreSetup.deprecations",
             "type": "Object",
             "tags": [],
             "label": "deprecations",
@@ -575,9 +505,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-deprecations-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-common.DeprecationsServiceSetup",
+                "section": "def-server.DeprecationsServiceSetup",
                 "text": "DeprecationsServiceSetup"
               }
             ],
@@ -587,7 +517,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreSetup.getStartServices",
+            "id": "def-server.CoreSetup.getStartServices",
             "type": "Function",
             "tags": [],
             "label": "getStartServices",
@@ -598,9 +528,9 @@
               "() => Promise<[",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-server.CoreStart",
                 "text": "CoreStart"
               },
               ", TPluginsStart, TStart]>"
@@ -610,13 +540,79 @@
             "trackAdoption": false,
             "returnComment": [],
             "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreSetup.plugins",
+            "type": "Object",
+            "tags": [],
+            "label": "plugins",
+            "description": [
+              "{@link PluginsServiceSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-plugins-contracts-server",
+                "scope": "server",
+                "docId": "kibKbnCorePluginsContractsServerPluginApi",
+                "section": "def-server.PluginsServiceSetup",
+                "text": "PluginsServiceSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreSetup.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [
+              "{@link SecurityServiceSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.SecurityServiceSetup",
+                "text": "SecurityServiceSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreSetup.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [
+              "{@link UserProfileServiceSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUserProfileServerPluginApi",
+                "section": "def-server.UserProfileServiceSetup",
+                "text": "UserProfileServiceSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-lifecycle-server",
-        "id": "def-common.CoreStart",
+        "id": "def-server.CoreStart",
         "type": "Interface",
         "tags": [],
         "label": "CoreStart",
@@ -629,7 +625,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreStart.analytics",
+            "id": "def-server.CoreStart.analytics",
             "type": "Object",
             "tags": [],
             "label": "analytics",
@@ -638,23 +634,11 @@
             ],
             "signature": [
               "{ optIn: (optInConfig: ",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.OptInConfig",
-                "text": "OptInConfig"
-              },
+              "OptInConfig",
               ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.TelemetryCounter",
-                "text": "TelemetryCounter"
-              },
+              "TelemetryCounter",
               ">; }"
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server/src/core_start.ts",
@@ -663,7 +647,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreStart.capabilities",
+            "id": "def-server.CoreStart.capabilities",
             "type": "Object",
             "tags": [],
             "label": "capabilities",
@@ -673,9 +657,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-capabilities-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                "section": "def-common.CapabilitiesStart",
+                "section": "def-server.CapabilitiesStart",
                 "text": "CapabilitiesStart"
               }
             ],
@@ -685,7 +669,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreStart.customBranding",
+            "id": "def-server.CoreStart.customBranding",
             "type": "Object",
             "tags": [],
             "label": "customBranding",
@@ -695,9 +679,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-custom-branding-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreCustomBrandingServerPluginApi",
-                "section": "def-common.CustomBrandingStart",
+                "section": "def-server.CustomBrandingStart",
                 "text": "CustomBrandingStart"
               }
             ],
@@ -707,7 +691,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreStart.docLinks",
+            "id": "def-server.CoreStart.docLinks",
             "type": "Object",
             "tags": [],
             "label": "docLinks",
@@ -717,9 +701,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-doc-links-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreDocLinksServerPluginApi",
-                "section": "def-common.DocLinksServiceSetup",
+                "section": "def-server.DocLinksServiceSetup",
                 "text": "DocLinksServiceSetup"
               }
             ],
@@ -729,7 +713,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreStart.elasticsearch",
+            "id": "def-server.CoreStart.elasticsearch",
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
@@ -739,9 +723,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.ElasticsearchServiceStart",
+                "section": "def-server.ElasticsearchServiceStart",
                 "text": "ElasticsearchServiceStart"
               }
             ],
@@ -751,7 +735,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreStart.executionContext",
+            "id": "def-server.CoreStart.executionContext",
             "type": "Object",
             "tags": [],
             "label": "executionContext",
@@ -761,9 +745,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-execution-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreExecutionContextServerPluginApi",
-                "section": "def-common.ExecutionContextSetup",
+                "section": "def-server.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
               }
             ],
@@ -773,7 +757,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreStart.http",
+            "id": "def-server.CoreStart.http",
             "type": "Object",
             "tags": [],
             "label": "http",
@@ -783,9 +767,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpServiceStart",
+                "section": "def-server.HttpServiceStart",
                 "text": "HttpServiceStart"
               }
             ],
@@ -795,7 +779,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreStart.metrics",
+            "id": "def-server.CoreStart.metrics",
             "type": "Object",
             "tags": [],
             "label": "metrics",
@@ -805,9 +789,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.MetricsServiceSetup",
+                "section": "def-server.MetricsServiceSetup",
                 "text": "MetricsServiceSetup"
               }
             ],
@@ -817,7 +801,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreStart.savedObjects",
+            "id": "def-server.CoreStart.savedObjects",
             "type": "Object",
             "tags": [],
             "label": "savedObjects",
@@ -827,9 +811,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsServiceStart",
+                "section": "def-server.SavedObjectsServiceStart",
                 "text": "SavedObjectsServiceStart"
               }
             ],
@@ -839,7 +823,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
-            "id": "def-common.CoreStart.uiSettings",
+            "id": "def-server.CoreStart.uiSettings",
             "type": "Object",
             "tags": [],
             "label": "uiSettings",
@@ -849,10 +833,76 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-common.UiSettingsServiceStart",
+                "section": "def-server.UiSettingsServiceStart",
                 "text": "UiSettingsServiceStart"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreStart.plugins",
+            "type": "Object",
+            "tags": [],
+            "label": "plugins",
+            "description": [
+              "{@link PluginsServiceStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-plugins-contracts-server",
+                "scope": "server",
+                "docId": "kibKbnCorePluginsContractsServerPluginApi",
+                "section": "def-server.PluginsServiceStart",
+                "text": "PluginsServiceStart"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreStart.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [
+              "{@link SecurityServiceStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.SecurityServiceStart",
+                "text": "SecurityServiceStart"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreStart.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [
+              "{@link UserProfileServiceStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUserProfileServerPluginApi",
+                "section": "def-server.UserProfileService",
+                "text": "UserProfileService"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server/src/core_start.ts",
@@ -867,7 +917,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-lifecycle-server",
-        "id": "def-common.StartServicesAccessor",
+        "id": "def-server.StartServicesAccessor",
         "type": "Type",
         "tags": [],
         "label": "StartServicesAccessor",
@@ -878,9 +928,9 @@
           "() => Promise<[",
           {
             "pluginId": "@kbn/core-lifecycle-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreLifecycleServerPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-server.CoreStart",
             "text": "CoreStart"
           },
           ", TPluginsStart, TStart]>"
@@ -893,6 +943,14 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

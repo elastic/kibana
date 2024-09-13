@@ -1,96 +1,120 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { MutableRefObject, useCallback, useMemo, useRef } from 'react';
-import {
-  EuiDataGridRefProps,
-  EuiLoadingSpinner,
-  type EuiDataGridColumnCellAction,
-} from '@elastic/eui';
+import type { MutableRefObject } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import type { EuiDataGridRefProps } from '@elastic/eui';
+import { type EuiDataGridColumnCellAction } from '@elastic/eui';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type {
   CellAction,
   CellActionCompatibilityContext,
   CellActionExecutionContext,
-  CellActionField,
   CellActionsProps,
+  CellActionFieldValue,
 } from '../types';
 import { useBulkLoadActions } from './use_load_actions';
 
-interface BulkField extends Pick<CellActionField, 'name' | 'type'> {
-  /**
-   * Array containing all the values of the field in the visible page, indexed by rowIndex
-   */
-  values: Array<string | string[] | null | undefined>;
-}
-
 export interface UseDataGridColumnsCellActionsProps
-  extends Pick<CellActionsProps, 'triggerId' | 'metadata' | 'disabledActionTypes'> {
-  fields: BulkField[];
+  extends Pick<CellActionsProps, 'metadata' | 'disabledActionTypes'> {
+  /**
+   * Optional trigger ID to used to retrieve the cell actions.
+   * returns empty array if not provided
+   */
+  triggerId?: string;
+  /**
+   * fields array, used to determine which actions to load.
+   * returns empty array if not provided
+   */
+  fields?: FieldSpec[];
+  /**
+   * Function to get the cell value for a given field name and row index.
+   * the `rowIndex` parameter is absolute, not relative to the current page
+   */
+  getCellValue: (fieldName: string, rowIndex: number) => CellActionFieldValue;
+  /**
+   * ref to the EuiDataGrid instance
+   */
   dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 }
 export type UseDataGridColumnsCellActions<
   P extends UseDataGridColumnsCellActionsProps = UseDataGridColumnsCellActionsProps
 > = (props: P) => EuiDataGridColumnCellAction[][];
 
+const emptyActions: EuiDataGridColumnCellAction[][] = [];
+
 export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
   fields,
+  getCellValue,
   triggerId,
   metadata,
   dataGridRef,
   disabledActionTypes = [],
 }) => {
-  const bulkContexts: CellActionCompatibilityContext[] = useMemo(
-    () =>
-      fields.map(({ values, ...field }) => ({
-        field, // we are getting the actions for the whole column field, so the compatibility check will be done without the value
-        trigger: { id: triggerId },
-        metadata,
-      })),
-    [fields, triggerId, metadata]
-  );
+  const [cellActions, setCellActions] = useState<EuiDataGridColumnCellAction[][]>(emptyActions);
+
+  const bulkContexts: CellActionCompatibilityContext[] | undefined = useMemo(() => {
+    if (!triggerId || !fields?.length) {
+      return undefined;
+    }
+    return fields.map((field) => ({
+      data: [{ field }],
+      trigger: { id: triggerId },
+      metadata,
+    }));
+  }, [fields, triggerId, metadata]);
 
   const { loading, value: columnsActions } = useBulkLoadActions(bulkContexts, {
     disabledActionTypes,
   });
 
-  const columnsCellActions = useMemo<EuiDataGridColumnCellAction[][]>(() => {
-    if (loading) {
-      return fields.map(() => [
-        () => <EuiLoadingSpinner size="s" data-test-subj="dataGridColumnCellAction-loading" />,
-      ]);
+  useEffect(() => {
+    // no-op
+    if (loading || !triggerId || !columnsActions?.length || !fields?.length) {
+      return;
     }
-    if (!columnsActions) {
-      return [];
+
+    // Check for a temporary inconsistency because `useBulkLoadActions` takes one render loop before setting `loading` to true.
+    // It will eventually update to a consistent state
+    if (columnsActions.length !== fields.length) {
+      return;
     }
-    return columnsActions.map((actions, columnIndex) =>
-      actions.map((action) =>
-        createColumnCellAction({
-          action,
-          metadata,
-          triggerId,
-          field: fields[columnIndex],
-          dataGridRef,
-        })
+
+    setCellActions(
+      columnsActions.map((actions, columnIndex) =>
+        actions.map((action) =>
+          createColumnCellAction({
+            action,
+            field: fields[columnIndex],
+            getCellValue,
+            metadata,
+            triggerId,
+            dataGridRef,
+          })
+        )
       )
     );
-  }, [columnsActions, fields, loading, metadata, triggerId, dataGridRef]);
+  }, [columnsActions, fields, getCellValue, loading, metadata, triggerId, dataGridRef]);
 
-  return columnsCellActions;
+  return cellActions;
 };
 
 interface CreateColumnCellActionParams
-  extends Pick<UseDataGridColumnsCellActionsProps, 'triggerId' | 'metadata' | 'dataGridRef'> {
-  field: BulkField;
+  extends Pick<UseDataGridColumnsCellActionsProps, 'getCellValue' | 'metadata' | 'dataGridRef'> {
+  field: FieldSpec;
+  triggerId: string;
   action: CellAction;
 }
 const createColumnCellAction = ({
-  field,
   action,
+  field,
+  getCellValue,
   metadata,
   triggerId,
   dataGridRef,
@@ -100,11 +124,15 @@ const createColumnCellAction = ({
     const buttonRef = useRef<HTMLAnchorElement | null>(null);
 
     const actionContext: CellActionExecutionContext = useMemo(() => {
-      const { name, type, values } = field;
-      // rowIndex refers to all pages, we need to use the row index relative to the page to get the value
-      const value = values[rowIndex % values.length];
+      const { name } = field;
+      const value = getCellValue(name, rowIndex);
       return {
-        field: { name, type, value },
+        data: [
+          {
+            field,
+            value,
+          },
+        ],
         trigger: { id: triggerId },
         nodeRef,
         metadata,
@@ -126,7 +154,7 @@ const createColumnCellAction = ({
         aria-label={action.getDisplayName(actionContext)}
         title={action.getDisplayName(actionContext)}
         data-test-subj={`dataGridColumnCellAction-${action.id}`}
-        iconType={action.getIconType(actionContext)!}
+        iconType={action.getIconType(actionContext) ?? ''}
         onClick={onClick}
       >
         {action.getDisplayName(actionContext)}
@@ -161,7 +189,7 @@ const getParentCellElement = (element?: HTMLElement | null): HTMLElement | null 
   if (element == null) {
     return null;
   }
-  if (element.nodeName === 'div' && element.getAttribute('role') === 'gridcell') {
+  if (element.nodeName === 'DIV' && element.getAttribute('role') === 'gridcell') {
     return element;
   }
   return getParentCellElement(element.parentElement);

@@ -24,9 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { XJsonMode } from '@kbn/ace';
-
-const xJsonMode = new XJsonMode();
+import { CodeEditor } from '@kbn/code-editor';
 
 import { WatchHistoryItem } from '../../../../models/watch_history_item';
 
@@ -43,7 +41,7 @@ import { SimulateWatchResultsFlyout } from './simulate_watch_results_flyout';
 import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
 import { useAppContext } from '../../../../app_context';
 
-import { XJson, EuiCodeEditor } from '../../../../shared_imports';
+import { XJson } from '../../../../shared_imports';
 
 const { useXJsonMode } = XJson;
 
@@ -369,18 +367,22 @@ export const JsonWatchEditSimulate = ({
             fullWidth
             errors={executeWatchErrors}
           >
-            <EuiCodeEditor
-              mode={xJsonMode}
-              width="100%"
-              height="200px"
-              theme="textmate"
+            <CodeEditor
+              languageId="json"
+              value={xJson}
+              data-test-subj="jsonEditor"
+              height={200}
+              options={{
+                fontSize: 12,
+                tabSize: 2,
+                scrollBeyondLastLine: false,
+              }}
               aria-label={i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputAriaLabel',
                 {
                   defaultMessage: 'Code editor',
                 }
               )}
-              value={xJson}
               onChange={(xjson: string) => {
                 setXJson(xjson);
                 setExecuteDetails(

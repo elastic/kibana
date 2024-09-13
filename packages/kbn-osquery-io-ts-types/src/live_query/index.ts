@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as t from 'io-ts';
+import { inRangeRt } from '@kbn/io-ts-utils';
 
 export const id = t.string;
 export type Id = t.TypeOf<typeof id>;
@@ -48,6 +50,11 @@ export const interval = t.string;
 export type Interval = t.TypeOf<typeof interval>;
 export const intervalOrUndefined = t.union([interval, t.undefined]);
 export type IntervalOrUndefined = t.TypeOf<typeof intervalOrUndefined>;
+
+export const timeout = inRangeRt(60, 60 * 15);
+export type Timeout = t.TypeOf<typeof timeout>;
+export const timeoutOrUndefined = t.union([timeout, t.undefined]);
+export type TimeoutOrUndefined = t.TypeOf<typeof timeoutOrUndefined>;
 
 export const snapshot = t.boolean;
 export type Snapshot = t.TypeOf<typeof snapshot>;

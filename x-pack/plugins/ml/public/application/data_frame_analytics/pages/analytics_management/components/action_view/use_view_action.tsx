@@ -7,14 +7,20 @@
 
 import React, { useCallback, useMemo } from 'react';
 
-import { getAnalysisType } from '../../../../common/analytics';
+import {
+  getAnalysisType,
+  type DataFrameAnalysisConfigType,
+} from '@kbn/ml-data-frame-analytics-utils';
+
 import { useMlLocator, useNavigateToPath } from '../../../../../contexts/kibana';
 
-import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
+import type {
+  DataFrameAnalyticsListAction,
+  DataFrameAnalyticsListRow,
+} from '../analytics_list/common';
 
 import { getViewLinkStatus } from './get_view_link_status';
 import { viewActionButtonText, ViewButton } from './view_button';
-import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 export type ViewAction = ReturnType<typeof useViewAction>;

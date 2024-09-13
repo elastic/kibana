@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
@@ -17,6 +18,7 @@ import {
 } from '@kbn/saved-objects-management-plugin/public';
 import { Query } from '@kbn/es-query';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { EmbeddablePublicPlugin, EmbeddableSetup, EmbeddableStart } from '../plugin';
 export interface TestPluginReturn {
   plugin: EmbeddablePublicPlugin;
@@ -65,6 +67,8 @@ export const testPlugin = (
         uiActions: uiActionsPluginMock.createStartContract(),
         savedObjectsManagement:
           savedObjectsManagementMock as unknown as SavedObjectsManagementPluginStart,
+        usageCollection: { reportUiCounter: jest.fn() },
+        contentManagement: contentManagementMock.createStartContract(),
       });
       return start;
     },

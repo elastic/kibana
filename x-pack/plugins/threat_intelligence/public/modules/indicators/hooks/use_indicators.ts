@@ -9,7 +9,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useQuery } from '@tanstack/react-query';
 import { EuiDataGridSorting } from '@elastic/eui';
-import { useInspector, useKibana } from '../../../hooks';
+import { useInspector } from '../../../hooks/use_inspector';
+import { useKibana } from '../../../hooks/use_kibana';
 import { Indicator } from '../../../../common/types/indicator';
 import { useSourcererDataView } from './use_sourcerer_data_view';
 import { createFetchIndicators, FetchParams, Pagination } from '../services/fetch_indicators';
@@ -64,11 +65,10 @@ export const useIndicators = ({
     },
   } = useKibana();
   const { selectedPatterns } = useSourcererDataView();
-
   const { inspectorAdapters } = useInspector();
 
   const onChangeItemsPerPage = useCallback(
-    (pageSize) =>
+    (pageSize: any) =>
       setPagination((currentPagination) => ({
         ...currentPagination,
         pageSize,
@@ -78,7 +78,7 @@ export const useIndicators = ({
   );
 
   const onChangePage = useCallback(
-    (pageIndex) => setPagination((currentPagination) => ({ ...currentPagination, pageIndex })),
+    (pageIndex: any) => setPagination((currentPagination) => ({ ...currentPagination, pageIndex })),
     []
   );
 

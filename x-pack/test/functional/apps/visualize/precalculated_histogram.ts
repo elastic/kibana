@@ -10,7 +10,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'visualize', 'discover', 'visChart', 'visEditor']);
+  const { common, visualize, discover, visChart, visEditor, unifiedFieldList } = getPageObjects([
+    'common',
+    'visualize',
+    'discover',
+    'visChart',
+    'visEditor',
+    'unifiedFieldList',
+  ]);
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
 
@@ -26,28 +33,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('appears correctly in discover', async function () {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.clickFieldListItemAdd('histogram-content');
-      const rowData = await PageObjects.discover.getDocTableIndex(1);
+      await common.navigateToApp('discover');
+      await discover.waitUntilSearchingHasFinished();
+      await unifiedFieldList.clickFieldListItemAdd('histogram-content');
+      const rowData = await discover.getDocTableIndex(1);
       expect(rowData).to.contain('"values":[0.3,1,3,4.2,4.8]');
     });
 
     describe('works in visualizations', () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewAggBasedVisualization();
-        await PageObjects.visualize.clickDataTable();
-        await PageObjects.visualize.clickNewSearch('histogram-test');
-        await PageObjects.visChart.waitForVisualization();
-        await PageObjects.visEditor.clickMetricEditor();
+        await visualize.navigateToNewAggBasedVisualization();
+        await visualize.clickDataTable();
+        await visualize.clickNewSearch('histogram-test');
+        await visChart.waitForVisualization();
+        await visEditor.clickMetricEditor();
       });
 
       const renderTableForAggregation = async (aggregation: string) => {
-        await PageObjects.visEditor.selectAggregation(aggregation, 'metrics');
-        await PageObjects.visEditor.selectField('histogram-content', 'metrics');
-        await PageObjects.visEditor.clickGo();
+        await visEditor.selectAggregation(aggregation, 'metrics');
+        await visEditor.selectField('histogram-content', 'metrics');
+        await visEditor.clickGo();
 
-        return await PageObjects.visChart.getTableVisContent();
+        return visChart.getTableVisContent();
       };
 
       it('with percentiles aggregation', async () => {
@@ -55,7 +62,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(data[0]).to.have.property('length', 7);
         // Percentile values are not deterministic, so we can't check for the exact values here,
         // but just check they are all within the given range
-        // see https://github.com/elastic/elasticsearch/issues/49225
         expect(data[0].every((p: string) => Number(p) >= 0.3 && Number(p) <= 5)).to.be(true);
       });
 
@@ -70,13 +76,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('with median aggregation', async () => {
-        // Percentile values (which are used by median behind the scenes) are not deterministic,
-        // so we can't check for the exact values here, but just check they are all within the given range
-        // see https://github.com/elastic/elasticsearch/issues/49225
         const data = await renderTableForAggregation('Median');
         const value = Number(data[0][0]);
-        expect(value).to.be.above(3.0);
-        expect(value).to.be.below(3.3);
+        // Percentile values are not deterministic, so we can't check for the exact values here,
+        // but just check they are all within the given range
+        expect(value).to.be.above(2.9);
+        expect(value).to.be.below(3.1);
       });
 
       it('with sum aggregation', async () => {

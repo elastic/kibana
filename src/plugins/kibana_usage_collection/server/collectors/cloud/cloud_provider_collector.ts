@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom, type Observable } from 'rxjs';
-import AbortController from 'abort-controller';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CloudDetector } from './detector';
 
@@ -28,7 +28,7 @@ export function registerCloudProviderUsageCollector(
 
   const cloudDetector = new CloudDetector();
   // determine the cloud service in the background
-  cloudDetector.detectCloudService(ac.signal);
+  cloudDetector.detectCloudService(ac.signal).catch(() => {});
 
   const collector = usageCollection.makeUsageCollector<Usage | undefined>({
     type: 'cloud_provider',

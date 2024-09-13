@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -37,6 +38,17 @@ describe('#resolve()', () => {
       Object {
         "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/node_modules/foo/index.js,
         "nodeModule": "foo",
+        "type": "file",
+      }
+    `);
+  });
+
+  it('resolves nested node_module imports', () => {
+    expect(resolver.resolve('bar', Path.join(FIXTURES_DIR, 'packages', 'box')))
+      .toMatchInlineSnapshot(`
+      Object {
+        "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/packages/box/node_modules/bar/index.js,
+        "nodeModule": "bar",
         "type": "file",
       }
     `);

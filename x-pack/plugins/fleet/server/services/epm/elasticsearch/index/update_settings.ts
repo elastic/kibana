@@ -9,6 +9,8 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { appContextService } from '../../..';
+
 import { retryTransientEsErrors } from '../retry';
 
 export async function updateIndexSettings(
@@ -16,6 +18,8 @@ export async function updateIndexSettings(
   index: string,
   settings: IndicesIndexSettings
 ): Promise<void> {
+  const logger = appContextService.getLogger();
+
   if (index) {
     try {
       await retryTransientEsErrors(() =>
@@ -25,7 +29,8 @@ export async function updateIndexSettings(
         })
       );
     } catch (err) {
-      throw new Error(`could not update index settings for ${index}`);
+      // No need to throw error and block installation process
+      logger.debug(`Could not update index settings for ${index} because ${err}`);
     }
   }
 }

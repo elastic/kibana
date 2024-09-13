@@ -239,7 +239,7 @@ This query returns the following:
 <1> Most run durations fall within the first bucket (0 - 1 seconds).
 <2> A single rule with id `41893910-6bca-11eb-9e0d-85d233e3ee35` took between 30 and 31 seconds to run.
 
-Use the <<get-rule-api,get rule API>> to retrieve additional information about rules that take a long time to run.
+Use the get rule API to retrieve additional information about rules that take a long time to run.
 
 [float]
 [[rule-cannot-decrypt-api-key]]
@@ -263,7 +263,7 @@ This error happens when the `xpack.encryptedSavedObjects.encryptionKey` value us
 | The other {kib} instance might be trying to run the rule using a different encryption key than what the rule was created with. Ensure the encryption keys among all the {kib} instances are the same, and setting <<xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys, decryption only keys>> for previously used encryption keys.
 
 | If other scenarios don't apply.
-| Generate a new API key for the rule by disabling then enabling the rule.
+| Generate a new API key for the rule. For example, in *{stack-manage-app} > {rules-ui}*, select *Update API key* from the action menu.
 
 |===
 

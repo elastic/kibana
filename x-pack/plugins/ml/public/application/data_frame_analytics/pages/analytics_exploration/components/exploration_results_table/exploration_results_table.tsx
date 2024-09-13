@@ -5,45 +5,32 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type {
+  DataFrameAnalyticsConfig,
+  DataFrameTaskStateType,
+} from '@kbn/ml-data-frame-analytics-utils';
 
-import { getToastNotifications } from '../../../../../util/dependency_cache';
-import { useMlKibana } from '../../../../../contexts/kibana';
-
-import { DataFrameAnalyticsConfig } from '../../../../common';
-import { ResultsSearchQuery } from '../../../../common/analytics';
-
-import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
+import type { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSectionResults } from '../expandable_section';
 
 import { useExplorationResults } from './use_exploration_results';
 
 interface Props {
-  indexPattern: DataView;
+  dataView: DataView;
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DataFrameTaskStateType;
-  needsDestIndexPattern: boolean;
+  needsDestDataView: boolean;
   searchQuery: ResultsSearchQuery;
 }
 
 export const ExplorationResultsTable: FC<Props> = React.memo(
-  ({ indexPattern, jobConfig, needsDestIndexPattern, searchQuery }) => {
-    const {
-      services: {
-        mlServices: { mlApiServices },
-      },
-    } = useMlKibana();
-
-    const classificationData = useExplorationResults(
-      indexPattern,
-      jobConfig,
-      searchQuery,
-      getToastNotifications(),
-      mlApiServices
-    );
+  ({ dataView, jobConfig, needsDestDataView, searchQuery }) => {
+    const classificationData = useExplorationResults(dataView, jobConfig, searchQuery);
 
     if (jobConfig === undefined || classificationData === undefined) {
       return null;
@@ -53,10 +40,10 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
       <div data-test-subj="mlDFAnalyticsExplorationTablePanel">
         <ExpandableSectionResults
           indexData={classificationData}
-          indexPattern={indexPattern}
+          dataView={dataView}
           resultsField={jobConfig?.dest.results_field}
           jobConfig={jobConfig}
-          needsDestIndexPattern={needsDestIndexPattern}
+          needsDestDataView={needsDestDataView}
           searchQuery={searchQuery}
         />
       </div>

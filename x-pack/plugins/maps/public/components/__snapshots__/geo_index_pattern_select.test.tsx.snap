@@ -3,87 +3,16 @@
 exports[`should render 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    error="Data view does not contain any geospatial fields"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    isInvalid={true}
+    error=""
+    isInvalid={false}
     label="Data view"
-    labelType="label"
   >
     <MockIndexPatternSelect
       data-test-subj="mapGeoIndexPatternSelect"
-      indexPatternId="indexPatternId"
+      indexPatternId="weblogs"
       isClearable={false}
       isDisabled={false}
-      isInvalid={true}
-      onChange={[Function]}
-      onNoIndexPatterns={[Function]}
-      placeholder="Select data view"
-    />
-  </EuiFormRow>
-</Fragment>
-`;
-
-exports[`should render no index pattern warning when there are no matching index patterns 1`] = `
-<Fragment>
-  <EuiCallOut
-    color="warning"
-    title="Couldn't find any data views"
-  >
-    <p>
-      <FormattedMessage
-        defaultMessage="You'll need to "
-        id="xpack.maps.noIndexPattern.doThisPrefixDescription"
-        values={Object {}}
-      />
-      <EuiLink
-        href="abc//app/management/kibana/dataViews"
-      >
-        <FormattedMessage
-          defaultMessage="Create a data view."
-          id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
-          values={Object {}}
-        />
-      </EuiLink>
-    </p>
-    <p>
-      <FormattedMessage
-        defaultMessage="Don't have any data? "
-        id="xpack.maps.noIndexPattern.hintDescription"
-        values={Object {}}
-      />
-      <EuiLink
-        href="abc//app/home#/tutorial_directory/sampleData"
-      >
-        <FormattedMessage
-          defaultMessage="Get started with some sample data sets."
-          id="xpack.maps.noIndexPattern.getStartedLinkText"
-          values={Object {}}
-        />
-      </EuiLink>
-    </p>
-  </EuiCallOut>
-  <EuiSpacer
-    size="s"
-  />
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    error="Data view does not contain any geospatial fields"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    isInvalid={true}
-    label="Data view"
-    labelType="label"
-  >
-    <MockIndexPatternSelect
-      data-test-subj="mapGeoIndexPatternSelect"
-      indexPatternId="indexPatternId"
-      isClearable={false}
-      isDisabled={true}
-      isInvalid={true}
+      isInvalid={false}
       onChange={[Function]}
       onNoIndexPatterns={[Function]}
       placeholder="Select data view"

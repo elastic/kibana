@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf, Type } from '@kbn/config-schema';
+import { schema, TypeOf, Type, offeringBasedSchema } from '@kbn/config-schema';
 import { getConfigPath } from '@kbn/utils';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 import { labelsSchema } from './telemetry_labels';
@@ -33,6 +34,11 @@ const configSchema = schema.object({
   sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {
     defaultValue: 'server',
   }),
+  appendServerlessChannelsSuffix: offeringBasedSchema({
+    serverless: schema.literal(true),
+    traditional: schema.literal(false),
+    options: { defaultValue: schema.contextRef('serverless') },
+  }),
   // Used for extra enrichment of telemetry
   labels: labelsSchema,
 });
@@ -44,10 +50,14 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
   exposeToBrowser: {
     banner: true,
     allowChangingOptInStatus: true,
+    appendServerlessChannelsSuffix: true,
     optIn: true,
     sendUsageFrom: true,
     sendUsageTo: true,
     hidePrivacyStatement: true,
+    labels: true,
+  },
+  dynamicConfig: {
     labels: true,
   },
   deprecations: () => [

@@ -9,21 +9,21 @@ import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
+import { CreateUserPage } from './create_user_page';
 import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
-import { CreateUserPage } from './create_user_page';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
+  useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));
 
 describe('CreateUserPage', () => {
   jest.setTimeout(15_000);
 
   const coreStart = coreMock.createStart();
-  const theme$ = themeServiceMock.createTheme$();
   let history = createMemoryHistory({ initialEntries: ['/create'] });
   const authc = securityMock.createSetup().authc;
 
@@ -45,7 +45,7 @@ describe('CreateUserPage', () => {
     coreStart.http.post.mockResolvedValue({});
 
     const { findByRole, findByLabelText } = render(
-      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+      <Providers services={coreStart} authc={authc} history={history}>
         <CreateUserPage />
       </Providers>
     );
@@ -80,7 +80,7 @@ describe('CreateUserPage', () => {
     };
 
     render(
-      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+      <Providers services={coreStart} authc={authc} history={history}>
         <CreateUserPage />
       </Providers>
     );
@@ -103,7 +103,7 @@ describe('CreateUserPage', () => {
     ]);
 
     const { findAllByText, findByRole, findByLabelText } = render(
-      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+      <Providers services={coreStart} authc={authc} history={history}>
         <CreateUserPage />
       </Providers>
     );

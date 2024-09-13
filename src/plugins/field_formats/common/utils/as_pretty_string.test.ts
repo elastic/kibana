@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { asPrettyString } from './as_pretty_string';
@@ -29,5 +30,9 @@ describe('asPrettyString', () => {
   test('Converts other non-string values into strings', () => {
     expect(asPrettyString(true)).toBe('true');
     expect(asPrettyString(123)).toBe('123');
+  });
+
+  test('Converts Symbol into strings', () => {
+    expect(asPrettyString(Symbol('hello'))).toBe('Symbol(hello)');
   });
 });

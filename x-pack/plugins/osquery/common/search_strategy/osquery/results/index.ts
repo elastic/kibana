@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 
 import type { Inspect, Maybe, SortField } from '../../common';
 import type { RequestOptionsPaginated } from '../..';
@@ -21,5 +21,6 @@ export interface ResultsStrategyResponse extends IEsSearchResponse {
 export interface ResultsRequestOptions extends Omit<RequestOptionsPaginated, 'sort'> {
   actionId: string;
   agentId?: string;
+  startDate?: string;
   sort: SortField[];
 }

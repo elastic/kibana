@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import type { EcsEvent } from '@elastic/ecs';
+
 import type {
   SavedObjectReferenceWithContext,
   SavedObjectsFindResult,
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
-import { isBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve';
+import { isBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/internals/internal_bulk_resolve';
 import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -41,20 +43,24 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import type { EcsEvent } from '@kbn/ecs';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import type {
+  Actions,
+  AuditLogger,
+  CheckPrivilegesResponse,
+  CheckSavedObjectsPrivileges,
+} from '@kbn/security-plugin-types-server';
 
-import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
-import type { AuditLogger } from '../audit';
-import { savedObjectEvent } from '../audit';
-import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
-import type { CheckPrivilegesResponse } from '../authorization/types';
 import { isAuthorizedInAllSpaces } from './authorization_utils';
+import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
+import { savedObjectEvent } from '../audit';
 
 interface Params {
   actions: Actions;
   auditLogger: AuditLogger;
   errors: SavedObjectsClient['errors'];
   checkPrivileges: CheckSavedObjectsPrivileges;
+  getCurrentUser: () => AuthenticatedUser | null;
 }
 
 /**
@@ -116,7 +122,7 @@ export interface AddAuditEventParams {
    * Relevant saved object information
    * object containing type & id strings
    */
-  savedObject?: { type: string; id: string };
+  savedObject?: { type: string; id: string; name?: string };
   /**
    * Array of spaces being added. For
    * UPDATE_OBJECTS_SPACES action only
@@ -289,16 +295,18 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   private readonly auditLogger: AuditLogger;
   private readonly errors: SavedObjectsClient['errors'];
   private readonly checkPrivilegesFunc: CheckSavedObjectsPrivileges;
+  private readonly getCurrentUserFunc: () => AuthenticatedUser | null;
   private readonly actionMap: Map<
     SecurityAction,
     { authzAction?: string; auditAction?: AuditAction }
   >;
 
-  constructor({ actions, auditLogger, errors, checkPrivileges }: Params) {
+  constructor({ actions, auditLogger, errors, checkPrivileges, getCurrentUser }: Params) {
     this.actions = actions;
     this.auditLogger = auditLogger;
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
+    this.getCurrentUserFunc = getCurrentUser;
 
     // This comment block is a quick reference for the action map, which maps authorization actions
     // and audit actions to a "security action" as used by the authorization methods.
@@ -1212,7 +1220,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       types: new Set(typesAndSpaces.keys()),
       spaces: spacesToAuthorize,
       enforceMap: typesAndSpaces,
-      auditOptions: { useSuccessOutcome: true },
+      auditOptions: { objects: auditableObjects, useSuccessOutcome: true },
     });
 
     return objects.map((result) => {
@@ -1374,6 +1382,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         ...(!isOnlySpace && { deleteFromSpaces: [spaceId] }),
       });
     });
+  }
+
+  getCurrentUser() {
+    return this.getCurrentUserFunc();
   }
 }
 

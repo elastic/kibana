@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ExecutorType } from '../types';
 import { ExecutorParams, SubActionConnectorType } from './types';
@@ -17,7 +18,10 @@ const isFunction = (v: unknown): v is Function => {
 const getConnectorErrorMsg = (actionId: string, connector: { id: string; name: string }) =>
   `Connector id: ${actionId}. Connector name: ${connector.name}. Connector type: ${connector.id}`;
 
-export const buildExecutor = <Config, Secrets>({
+export const buildExecutor = <
+  Config extends Record<string, unknown>,
+  Secrets extends Record<string, unknown>
+>({
   configurationUtilities,
   connector,
   logger,
@@ -26,17 +30,26 @@ export const buildExecutor = <Config, Secrets>({
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }): ExecutorType<Config, Secrets, ExecutorParams, unknown> => {
-  return async ({ actionId, params, config, secrets, services }) => {
+  return async ({
+    actionId,
+    params,
+    config,
+    secrets,
+    services,
+    request,
+    connectorUsageCollector,
+  }) => {
     const subAction = params.subAction;
     const subActionParams = params.subActionParams;
 
-    const service = new connector.Service({
+    const service = connector.getService({
       connector: { id: actionId, type: connector.id },
       config,
       secrets,
       configurationUtilities,
       logger,
       services,
+      request,
     });
 
     const subActions = service.getSubActions();
@@ -76,11 +89,14 @@ export const buildExecutor = <Config, Secrets>({
       try {
         action.schema.validate(subActionParams);
       } catch (reqValidationError) {
-        throw new Error(`Request validation failed (${reqValidationError})`);
+        throw createTaskRunError(
+          new Error(`Request validation failed (${reqValidationError})`),
+          TaskErrorSource.USER
+        );
       }
     }
 
-    const data = await func.call(service, subActionParams);
+    const data = await func.call(service, subActionParams, connectorUsageCollector);
     return { status: 'ok', data: data ?? {}, actionId };
   };
 };

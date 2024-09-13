@@ -6,6 +6,7 @@
  */
 
 import { EuiButtonIcon, EuiLink } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableDataType } from '@elastic/eui';
 import { omit } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
@@ -16,7 +17,8 @@ import * as i18n from '../translations';
 import type { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { TimelineType } from '../../../../../common/types/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
+import { TimelineId } from '../../../../../common/types';
 
 const LineClampTextContainer = styled.span`
   text-overflow: ellipsis;
@@ -41,8 +43,9 @@ export const getCommonColumns = ({
   onToggleShowNotes: OnToggleShowNotes;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
   timelineType: TimelineType | null;
-}) => [
+}): Array<EuiBasicTableColumn<object>> => [
   {
+    dataType: 'auto' as EuiTableDataType,
     isExpander: true,
     render: ({ notes, savedObjectId }: OpenTimelineResult) =>
       notes != null && notes.length > 0 && savedObjectId != null ? (
@@ -53,7 +56,7 @@ export const getCommonColumns = ({
               ? onToggleShowNotes(omit(savedObjectId, itemIdToExpandedNotesRowMap))
               : onToggleShowNotes({
                   ...itemIdToExpandedNotesRowMap,
-                  [savedObjectId]: <NotePreviews notes={notes} />,
+                  [savedObjectId]: <NotePreviews notes={notes} timelineId={TimelineId.active} />,
                 })
           }
           aria-label={itemIdToExpandedNotesRowMap[savedObjectId] ? i18n.COLLAPSE : i18n.EXPAND}
@@ -63,13 +66,14 @@ export const getCommonColumns = ({
     width: ACTION_COLUMN_WIDTH,
   },
   {
-    dataType: 'string',
+    dataType: 'string' as EuiTableDataType,
     field: 'title',
-    name: timelineType === TimelineType.default ? i18n.TIMELINE_NAME : i18n.TIMELINE_TEMPLATE_NAME,
+    name:
+      timelineType === TimelineTypeEnum.default ? i18n.TIMELINE_NAME : i18n.TIMELINE_TEMPLATE_NAME,
     render: (title: string, timelineResult: OpenTimelineResult) =>
       timelineResult.savedObjectId != null ? (
         <EuiLink
-          data-test-subj={`title-${timelineResult.savedObjectId}`}
+          data-test-subj={`timeline-title-${timelineResult.savedObjectId}`}
           onClick={() =>
             onOpenTimeline({
               duplicate: false,
@@ -91,7 +95,7 @@ export const getCommonColumns = ({
     sortable: false,
   },
   {
-    dataType: 'string',
+    dataType: 'string' as EuiTableDataType,
     field: 'description',
     name: i18n.DESCRIPTION,
     render: (description: string) => (
@@ -102,7 +106,7 @@ export const getCommonColumns = ({
     sortable: false,
   },
   {
-    dataType: 'date',
+    dataType: 'date' as EuiTableDataType,
     field: 'updated',
     name: i18n.LAST_MODIFIED,
     render: (date: number, timelineResult: OpenTimelineResult) => (

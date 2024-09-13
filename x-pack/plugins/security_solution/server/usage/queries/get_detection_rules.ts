@@ -14,6 +14,7 @@ import type {
 import {
   SIGNALS_ID,
   EQL_RULE_TYPE_ID,
+  ESQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
@@ -40,6 +41,7 @@ export const getDetectionRules = async ({
   const filter = [
     `${filterAttribute}: ${SIGNALS_ID}`,
     `${filterAttribute}: ${EQL_RULE_TYPE_ID}`,
+    `${filterAttribute}: ${ESQL_RULE_TYPE_ID}`,
     `${filterAttribute}: ${ML_RULE_TYPE_ID}`,
     `${filterAttribute}: ${QUERY_RULE_TYPE_ID}`,
     `${filterAttribute}: ${SAVED_QUERY_RULE_TYPE_ID}`,
@@ -55,7 +57,7 @@ export const getDetectionRules = async ({
     filter,
   };
   logger.debug(
-    `Getting detection rules with point in time (PIT) query:', ${JSON.stringify(query)}`
+    () => `Getting detection rules with point in time (PIT) query:', ${JSON.stringify(query)}`
   );
   const finder = savedObjectsClient.createPointInTimeFinder<RuleSearchResult>(query);
   let responses: Array<SavedObjectsFindResult<RuleSearchResult>> = [];
@@ -72,7 +74,7 @@ export const getDetectionRules = async ({
   }
 
   try {
-    finder.close();
+    await finder.close();
   } catch (exception) {
     // This is just a pre-caution in case the finder does a throw we don't want to blow up
     // the response. We have seen this within e2e test containers but nothing happen in normal

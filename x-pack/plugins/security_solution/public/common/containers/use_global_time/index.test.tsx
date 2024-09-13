@@ -37,23 +37,77 @@ describe('useGlobalTime', () => {
     expect(result1.to).toBe(0);
   });
 
-  test('clear all queries at unmount when clearAllQuery is set to true', () => {
-    const { unmount } = renderHook(() => useGlobalTime());
+  test('clear query at unmount when setQuery has been called', () => {
+    const { result, unmount } = renderHook(() => useGlobalTime());
+    act(() => {
+      result.current.setQuery({
+        id: 'query-2',
+        inspect: { dsl: [], response: [] },
+        loading: false,
+        refetch: () => {},
+        searchSessionId: 'session-1',
+      });
+    });
+
     unmount();
-    expect(mockDispatch.mock.calls[0][0].type).toEqual(
-      'x-pack/security_solution/local/inputs/DELETE_ALL_QUERY'
+    expect(mockDispatch.mock.calls.length).toBe(2);
+    expect(mockDispatch.mock.calls[1][0].type).toEqual(
+      'x-pack/security_solution/local/inputs/DELETE_QUERY'
     );
   });
 
-  test('do NOT clear all queries at unmount when clearAllQuery is set to false.', () => {
-    const { unmount } = renderHook(() => useGlobalTime(false));
+  test('do NOT clear query at unmount when setQuery has not been called', () => {
+    const { unmount } = renderHook(() => useGlobalTime());
     unmount();
     expect(mockDispatch.mock.calls.length).toBe(0);
   });
 
-  test('do NOT clear all queries when setting state and clearAllQuery is set to true', () => {
-    const { rerender } = renderHook(() => useGlobalTime());
-    act(() => rerender());
-    expect(mockDispatch.mock.calls.length).toBe(0);
+  test('do clears only the dismounted queries at unmount when setQuery is called', () => {
+    const { result, unmount } = renderHook(() => useGlobalTime());
+
+    act(() => {
+      result.current.setQuery({
+        id: 'query-1',
+        inspect: { dsl: [], response: [] },
+        loading: false,
+        refetch: () => {},
+        searchSessionId: 'session-1',
+      });
+    });
+
+    act(() => {
+      result.current.setQuery({
+        id: 'query-2',
+        inspect: { dsl: [], response: [] },
+        loading: false,
+        refetch: () => {},
+        searchSessionId: 'session-1',
+      });
+    });
+
+    const { result: theOneWillNotBeDismounted } = renderHook(() => useGlobalTime());
+
+    act(() => {
+      theOneWillNotBeDismounted.current.setQuery({
+        id: 'query-3h',
+        inspect: { dsl: [], response: [] },
+        loading: false,
+        refetch: () => {},
+        searchSessionId: 'session-1',
+      });
+    });
+    unmount();
+    expect(mockDispatch).toHaveBeenCalledTimes(5);
+    expect(mockDispatch.mock.calls[3][0].payload.id).toEqual('query-1');
+
+    expect(mockDispatch.mock.calls[3][0].type).toEqual(
+      'x-pack/security_solution/local/inputs/DELETE_QUERY'
+    );
+
+    expect(mockDispatch.mock.calls[4][0].payload.id).toEqual('query-2');
+
+    expect(mockDispatch.mock.calls[4][0].type).toEqual(
+      'x-pack/security_solution/local/inputs/DELETE_QUERY'
+    );
   });
 });

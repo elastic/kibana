@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { dirname, resolve } from 'path';
@@ -89,6 +90,7 @@ export const schema = Joi.object()
     rootTags: Joi.array().items(Joi.string()),
     testFiles: Joi.array().items(Joi.string()),
     testRunner: Joi.func(),
+    serverless: Joi.boolean().default(false),
 
     suiteFiles: Joi.object()
       .keys({
@@ -192,6 +194,7 @@ export const schema = Joi.object()
         elasticsearch: urlPartsSchema({
           requiredKeys: ['port'],
         }),
+        fleetserver: urlPartsSchema(),
       })
       .default(),
 
@@ -199,7 +202,7 @@ export const schema = Joi.object()
       .keys({
         license: Joi.valid('basic', 'trial', 'gold').default('basic'),
         from: Joi.string().default('snapshot'),
-        serverArgs: Joi.array().items(Joi.string()),
+        serverArgs: Joi.array().items(Joi.string()).default([]),
         esJavaOpts: Joi.string(),
         dataArchive: Joi.string(),
         ssl: Joi.boolean().default(false),
@@ -208,6 +211,14 @@ export const schema = Joi.object()
             scheme: /https?/,
           }),
         }),
+        files: Joi.array().items(Joi.string()),
+      })
+      .default(),
+
+    esServerlessOptions: Joi.object()
+      .keys({
+        host: Joi.string().ip(),
+        resources: Joi.array().items(Joi.string()).default([]),
       })
       .default(),
 

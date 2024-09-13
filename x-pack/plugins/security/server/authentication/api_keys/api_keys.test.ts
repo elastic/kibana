@@ -15,10 +15,10 @@ import {
 } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
 
-import { ALL_SPACES_ID } from '../../../common/constants';
-import type { SecurityLicense } from '../../../common/licensing';
-import { licenseMock } from '../../../common/licensing/index.mock';
 import { APIKeys } from './api_keys';
+import type { SecurityLicense } from '../../../common';
+import { ALL_SPACES_ID } from '../../../common/constants';
+import { licenseMock } from '../../../common/licensing/index.mock';
 
 const encodeToBase64 = (str: string) => Buffer.from(str).toString('base64');
 
@@ -30,6 +30,7 @@ describe('API Keys', () => {
   >;
   let mockLicense: jest.Mocked<SecurityLicense>;
   let logger: Logger;
+  const roleDescriptors: { [key: string]: any } = { foo: true };
 
   beforeEach(() => {
     mockValidateKibanaPrivileges.mockReset().mockReturnValue({ validationErrors: [] });
@@ -140,6 +141,56 @@ describe('API Keys', () => {
     });
   });
 
+  describe('areCrossClusterAPIKeysEnabled()', () => {
+    it('returns false when security feature is disabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+
+      const result = await apiKeys.areCrossClusterAPIKeysEnabled();
+      expect(result).toEqual(false);
+      expect(mockClusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('returns false when the operation completes without error (which should never happen)', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockClusterClient.asInternalUser.transport.request.mockResolvedValueOnce({});
+
+      const result = await apiKeys.areCrossClusterAPIKeysEnabled();
+      expect(result).toEqual(false);
+      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns false when the exception metadata indicates cross cluster api keys are disabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockClusterClient.asInternalUser.transport.request.mockRejectedValueOnce({
+        statusCode: 404,
+      });
+
+      const result = await apiKeys.areCrossClusterAPIKeysEnabled();
+      expect(result).toEqual(false);
+      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'PUT',
+        path: '/_security/cross_cluster/api_key/kibana-api-key-service-test',
+        body: {},
+      });
+    });
+
+    it('returns true when the exception metadata indicates cross cluster api keys are enabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockClusterClient.asInternalUser.transport.request.mockRejectedValueOnce({
+        statusCode: 400,
+        body: { error: { type: 'action_request_validation_exception' } },
+      });
+
+      const result = await apiKeys.areCrossClusterAPIKeysEnabled();
+      expect(result).toEqual(true);
+      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'PUT',
+        path: '/_security/cross_cluster/api_key/kibana-api-key-service-test',
+        body: {},
+      });
+    });
+  });
+
   describe('create()', () => {
     it('returns null when security feature is disabled', async () => {
       mockLicense.isEnabled.mockReturnValue(false);
@@ -177,7 +228,7 @@ describe('API Keys', () => {
       expect(mockScopedClusterClient.asCurrentUser.security.createApiKey).not.toHaveBeenCalled();
     });
 
-    it('calls `createApiKey` with proper parameters', async () => {
+    it('calls `createApiKey` with proper parameters when type is `rest` or not defined', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
 
       mockScopedClusterClient.asCurrentUser.security.createApiKey.mockResponseOnce({
@@ -189,8 +240,42 @@ describe('API Keys', () => {
       });
       const result = await apiKeys.create(httpServerMock.createKibanaRequest(), {
         name: 'key-name',
-        role_descriptors: { foo: true },
+        role_descriptors: roleDescriptors,
         expiration: '1d',
+      });
+
+      expect(result).toEqual({
+        api_key: 'abc123',
+        expiration: '1d',
+        id: '123',
+        name: 'key-name',
+      });
+      expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
+      expect(mockScopedClusterClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+      expect(mockScopedClusterClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
+        body: {
+          name: 'key-name',
+          role_descriptors: roleDescriptors,
+          expiration: '1d',
+        },
+      });
+    });
+
+    it('creates cross-cluster API key when type is `cross_cluster`', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+
+      mockScopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        id: '123',
+        name: 'key-name',
+        expiration: '1d',
+        api_key: 'abc123',
+      });
+      const result = await apiKeys.create(httpServerMock.createKibanaRequest(), {
+        type: 'cross_cluster',
+        name: 'key-name',
+        expiration: '1d',
+        access: {},
+        metadata: {},
       });
       expect(result).toEqual({
         api_key: 'abc123',
@@ -199,11 +284,15 @@ describe('API Keys', () => {
         name: 'key-name',
       });
       expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
-      expect(mockScopedClusterClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
+      expect(mockScopedClusterClient.asCurrentUser.security.createApiKey).not.toHaveBeenCalled();
+      expect(mockScopedClusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/cross_cluster/api_key',
         body: {
           name: 'key-name',
-          role_descriptors: { foo: true },
           expiration: '1d',
+          access: {},
+          metadata: {},
         },
       });
     });
@@ -256,7 +345,7 @@ describe('API Keys', () => {
 
       const result = await apiKeys.update(httpServerMock.createKibanaRequest(), {
         id: 'test_id',
-        role_descriptors: { foo: true },
+        role_descriptors: roleDescriptors,
         metadata: {},
       });
 
@@ -283,7 +372,7 @@ describe('API Keys', () => {
 
       const result = await apiKeys.update(httpServerMock.createKibanaRequest(), {
         id: 'test_id',
-        role_descriptors: { foo: true },
+        role_descriptors: roleDescriptors,
         metadata: {},
       });
 
@@ -298,6 +387,33 @@ describe('API Keys', () => {
         id: 'test_id',
         role_descriptors: { foo: true },
         metadata: {},
+      });
+    });
+
+    it('updates cross-cluster API key when type is `cross_cluster`', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+
+      mockScopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        updated: true,
+      });
+      const result = await apiKeys.update(httpServerMock.createKibanaRequest(), {
+        type: 'cross_cluster',
+        id: '123',
+        access: {},
+        metadata: {},
+      });
+      expect(result).toEqual({
+        updated: true,
+      });
+      expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
+      expect(mockScopedClusterClient.asCurrentUser.security.updateApiKey).not.toHaveBeenCalled();
+      expect(mockScopedClusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'PUT',
+        path: '/_security/cross_cluster/api_key/123',
+        body: {
+          access: {},
+          metadata: {},
+        },
       });
     });
   });
@@ -359,7 +475,7 @@ describe('API Keys', () => {
         }),
         {
           name: 'test_api_key',
-          role_descriptors: { foo: true },
+          role_descriptors: roleDescriptors,
           expiration: '1d',
         }
       );
@@ -398,7 +514,48 @@ describe('API Keys', () => {
         }),
         {
           name: 'test_api_key',
-          role_descriptors: { foo: true },
+          role_descriptors: roleDescriptors,
+          expiration: '1d',
+        }
+      );
+      expect(result).toEqual({
+        api_key: 'abc123',
+        id: '123',
+        name: 'key-name',
+        encoded: 'utf8',
+      });
+      expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+        body: {
+          api_key: {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+            expiration: '1d',
+          },
+          grant_type: 'access_token',
+          access_token: 'foo-access-token',
+        },
+      });
+    });
+
+    it('calls `grantApiKey` with proper parameters for the Bearer scheme with client authentication', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+        id: '123',
+        name: 'key-name',
+        api_key: 'abc123',
+        encoded: 'utf8',
+      });
+      const result = await apiKeys.grantAsInternalUser(
+        httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `Bearer foo-access-token`,
+            'es-client-authentication': 'SharedSecret secret',
+          },
+        }),
+        {
+          name: 'test_api_key',
+          role_descriptors: roleDescriptors,
           expiration: '1d',
         }
       );
@@ -418,6 +575,10 @@ describe('API Keys', () => {
           },
           grant_type: 'access_token',
           access_token: 'foo-access-token',
+          client_authentication: {
+            scheme: 'SharedSecret',
+            value: 'secret',
+          },
         },
       });
     });
@@ -433,7 +594,7 @@ describe('API Keys', () => {
           }),
           {
             name: 'test_api_key',
-            role_descriptors: { foo: true },
+            role_descriptors: roleDescriptors,
             expiration: '1d',
           }
         )

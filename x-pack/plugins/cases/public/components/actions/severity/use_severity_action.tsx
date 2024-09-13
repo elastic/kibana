@@ -7,16 +7,16 @@
 
 import { useCallback } from 'react';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import { CaseSeverity } from '../../../../common/api';
+import { CaseSeverity } from '../../../../common/types/domain';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
-import type { Case } from '../../../../common';
+import type { CasesUI } from '../../../../common';
 
 import * as i18n from './translations';
 import type { UseActionProps } from '../types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { severities } from '../../severity/config';
 
-const getSeverityToasterMessage = (severity: CaseSeverity, cases: Case[]): string => {
+const getSeverityToasterMessage = (severity: CaseSeverity, cases: CasesUI): string => {
   const totalCases = cases.length;
   const caseTitle = totalCases === 1 ? cases[0].title : '';
 
@@ -39,7 +39,7 @@ interface UseSeverityActionProps extends UseActionProps {
   selectedSeverity?: CaseSeverity;
 }
 
-const shouldDisableSeverity = (cases: Case[], severity: CaseSeverity) =>
+const shouldDisableSeverity = (cases: CasesUI, severity: CaseSeverity) =>
   cases.every((theCase) => theCase.severity === severity);
 
 export const useSeverityAction = ({
@@ -54,7 +54,7 @@ export const useSeverityAction = ({
   const isActionDisabled = isDisabled || !canUpdateSeverity;
 
   const handleUpdateCaseSeverity = useCallback(
-    (selectedCases: Case[], severity: CaseSeverity) => {
+    (selectedCases: CasesUI, severity: CaseSeverity) => {
       onAction();
       const casesToUpdate = selectedCases.map((theCase) => ({
         severity,
@@ -76,7 +76,7 @@ export const useSeverityAction = ({
   const getSeverityIcon = (severity: CaseSeverity): string =>
     selectedSeverity && selectedSeverity === severity ? 'check' : 'empty';
 
-  const getActions = (selectedCases: Case[]): EuiContextMenuPanelItemDescriptor[] => {
+  const getActions = (selectedCases: CasesUI): EuiContextMenuPanelItemDescriptor[] => {
     return [
       {
         name: severities[CaseSeverity.LOW].label,

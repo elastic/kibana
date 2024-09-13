@@ -18,8 +18,8 @@ import {
   Position,
   ScaleType,
   Settings,
-  Tooltip,
   TooltipType,
+  Tooltip,
 } from '@elastic/charts';
 
 import { XYChartElementEvent } from '@elastic/charts/dist/specs/settings';
@@ -42,8 +42,7 @@ const DEFAULT_STROKE_WIDTH = 1;
 const HOVER_STROKE_WIDTH = 3;
 const CHART_HEIGHT = 490;
 
-interface AnalyticsCollectionChartProps extends WithLensDataInputProps {
-  dataViewQuery: string;
+interface AnalyticsCollectionChartProps extends Pick<WithLensDataInputProps, 'timeRange'> {
   selectedChart: FilterBy | null;
   setSelectedChart(chart: FilterBy): void;
 }
@@ -63,8 +62,7 @@ export const AnalyticsCollectionChart: React.FC<
   const { uiSettings, charts: chartSettings } = useValues(KibanaLogic);
   const fromDateParsed = DateMath.parse(timeRange.from);
   const toDataParsed = DateMath.parse(timeRange.to);
-  const chartTheme = chartSettings.theme.useChartsTheme();
-  const baseChartTheme = chartSettings.theme.useChartsBaseTheme();
+  const baseChartTheme = chartSettings?.theme.useChartsBaseTheme();
   const charts = useMemo(
     () => [
       {
@@ -128,7 +126,6 @@ export const AnalyticsCollectionChart: React.FC<
   ) : (
     <Chart size={['100%', CHART_HEIGHT]}>
       <Settings
-        theme={chartTheme}
         baseTheme={baseChartTheme}
         showLegend={false}
         onElementClick={(elements) => {
@@ -146,6 +143,7 @@ export const AnalyticsCollectionChart: React.FC<
           }
         }}
         onElementOut={() => setHoverChart(null)}
+        locale={i18n.getLocale()}
       />
 
       {charts.map(({ data: chartData, id, name, chartColor }) => (
@@ -191,7 +189,7 @@ export const AnalyticsCollectionChart: React.FC<
 
       <Tooltip
         headerFormatter={(tooltipData) =>
-          moment(tooltipData.value).format(uiSettings.get('dateFormat'))
+          moment(tooltipData.value).format(uiSettings?.get('dateFormat'))
         }
         maxTooltipItems={1}
         type={TooltipType.VerticalCursor}
@@ -303,6 +301,5 @@ export const AnalyticsCollectionChartWithLens = withLensData<
       visualizationType: 'lnsXY',
     };
   },
-  getDataViewQuery: (props) => props.dataViewQuery,
   initialValues,
 });

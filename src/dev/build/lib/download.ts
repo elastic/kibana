@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { openSync, writeSync, unlinkSync, closeSync, statSync } from 'fs';
@@ -15,10 +16,6 @@ import { createHash } from 'crypto';
 import Axios from 'axios';
 import { isAxiosResponseError } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
-
-// https://github.com/axios/axios/tree/ffea03453f77a8176c51554d5f6c3c6829294649/lib/adapters
-// @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests
-import AxiosHttpAdapter from 'axios/lib/adapters/http';
 
 import { mkdirp } from './fs';
 
@@ -78,7 +75,7 @@ export async function downloadToDisk({
       const response = await Axios.request({
         url,
         responseType: 'stream',
-        adapter: AxiosHttpAdapter,
+        adapter: 'http',
       });
 
       if (response.status !== 200) {
@@ -112,7 +109,7 @@ export async function downloadToDisk({
         const downloadedSha = hash.digest('hex');
         if (downloadedSha !== shaChecksum) {
           throw new Error(
-            `Downloaded checksum ${downloadedSha} does not match the expected ${shaAlgorithm} checksum.`
+            `Downloaded checksum ${downloadedSha} does not match the expected (${shaAlgorithm}) checksum ${shaChecksum}, for file: ${url}.`
           );
         }
       }
@@ -171,7 +168,7 @@ export async function downloadToString({
       const resp = await Axios.request<string>({
         url,
         method: 'GET',
-        adapter: AxiosHttpAdapter,
+        adapter: 'http',
         responseType: 'text',
         validateStatus: !expectStatus ? undefined : (status) => status === expectStatus,
       });

@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { useIOLines } from '../tty_player/hooks';
-import { ProcessEventsPage } from '../../../common/types/process_tree';
+import type { ProcessEventsPage } from '../../../common';
 import { TTYSearchBar, TTYSearchBarDeps } from '.';
 
 // TTYSearchBar is a HOC to SessionViewSearchBar which is already well tested
@@ -62,7 +62,7 @@ describe('TTYSearchBar component', () => {
 
     await new Promise((r) => setTimeout(r, 100));
 
-    userEvent.click(renderResult.getByTestId('pagination-button-next'));
+    await userEvent.click(renderResult.getByTestId('pagination-button-next'));
 
     await new Promise((r) => setTimeout(r, 100));
 
@@ -81,7 +81,7 @@ describe('TTYSearchBar component', () => {
     renderResult = mockedContext.render(<TTYSearchBar {...props} searchQuery="-h" />);
 
     await new Promise((r) => setTimeout(r, 100));
-    userEvent.click(renderResult.getByTestId('clearSearchButton'));
+    await userEvent.click(renderResult.getByTestId('clearSearchButton'));
     await new Promise((r) => setTimeout(r, 100));
 
     renderResult.rerender(<TTYSearchBar {...props} />);

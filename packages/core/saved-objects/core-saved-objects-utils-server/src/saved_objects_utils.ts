@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v1 as uuidv1, v5 as uuidv5 } from 'uuid';
+import { isFunction } from 'lodash';
+import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import type {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectMigration, SavedObjectMigrationFn } from '@kbn/core-saved-objects-server';
 
 export const DEFAULT_NAMESPACE_STRING = 'default';
 export const ALL_NAMESPACES_STRING = '*';
@@ -68,7 +71,7 @@ export class SavedObjectsUtils {
    * Generates a random ID for a saved objects.
    */
   public static generateId() {
-    return uuidv1();
+    return uuidv4();
   }
 
   /**
@@ -94,5 +97,16 @@ export class SavedObjectsUtils {
       return id; // Objects that exist in the Default space do not get new IDs when they are converted.
     }
     return uuidv5(`${namespace}:${type}:${id}`, uuidv5.DNS); // The uuidv5 namespace constant (uuidv5.DNS) is arbitrary.
+  }
+
+  /**
+   * Gets the transform function from a migration object.
+   * @param migration Migration object or a migration function.
+   * @returns A migration function.
+   */
+  public static getMigrationFunction<InputAttributes, MigratedAttributes>(
+    migration: SavedObjectMigration<InputAttributes, MigratedAttributes>
+  ): SavedObjectMigrationFn<InputAttributes, MigratedAttributes> {
+    return isFunction(migration) ? migration : migration.transform;
   }
 }

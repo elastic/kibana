@@ -9,19 +9,21 @@ import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core
 export { CasesClient } from './client';
 import type { ConfigType } from './config';
 import { ConfigSchema } from './config';
-import { CasePlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: ConfigSchema,
   exposeToBrowser: {
     markdownPlugins: true,
     files: { maxSize: true, allowedMimeTypes: true },
+    stack: { enabled: true },
   },
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),
   ],
 };
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new CasePlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { CasePlugin } = await import('./plugin');
+  return new CasePlugin(initializerContext);
+};
 
-export type { CasesSetup, CasesStart } from './types';
+export type { CasesServerSetup, CasesServerStart } from './types';

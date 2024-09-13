@@ -16,9 +16,9 @@ import {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { InfraPluginSetup } from '@kbn/infra-plugin/server';
+import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
@@ -29,7 +29,11 @@ import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
 import { createReindexWorker } from './routes/reindex_indices';
 import { registerRoutes } from './routes/register_routes';
-import { reindexOperationSavedObjectType, mlSavedObjectType } from './saved_object_types';
+import {
+  reindexOperationSavedObjectType,
+  mlSavedObjectType,
+  hiddenTypes,
+} from './saved_object_types';
 import { handleEsError } from './shared_imports';
 import { RouteDependencies } from './types';
 import type { UpgradeAssistantConfig } from './config';
@@ -39,7 +43,7 @@ interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
-  infra: InfraPluginSetup;
+  logsShared: LogsSharedPluginSetup;
   security?: SecurityPluginSetup;
 }
 
@@ -79,7 +83,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   setup(
     { http, getStartServices, savedObjects }: CoreSetup,
-    { usageCollection, features, licensing, infra, security }: PluginsSetup
+    { usageCollection, features, licensing, logsShared, security }: PluginsSetup
   ) {
     this.licensing = licensing;
 
@@ -101,7 +105,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
     // We need to initialize the deprecation logs plugin so that we can
     // navigate from this app to the observability app using a source_id.
-    infra?.logViews.defineInternalLogView(DEPRECATION_LOGS_SOURCE_ID, {
+    logsShared?.logViews.defineInternalLogView(DEPRECATION_LOGS_SOURCE_ID, {
       name: 'deprecationLogs',
       description: 'deprecation logs',
       logIndices: {
@@ -143,7 +147,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     registerRoutes(dependencies, this.getWorker.bind(this));
 
     if (usageCollection) {
-      getStartServices().then(([{ elasticsearch }]) => {
+      void getStartServices().then(([{ elasticsearch }]) => {
         registerUpgradeAssistantUsageCollector({
           elasticsearch,
           usageCollection,
@@ -169,7 +173,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       elasticsearchService: elasticsearch,
       logger: this.logger,
       savedObjects: new SavedObjectsClient(
-        this.savedObjectsServiceStart.createInternalRepository()
+        this.savedObjectsServiceStart.createInternalRepository(hiddenTypes)
       ),
       security: this.securityPluginStart,
     });

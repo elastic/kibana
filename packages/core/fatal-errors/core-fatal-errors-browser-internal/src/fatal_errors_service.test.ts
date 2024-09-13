@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Observable } from 'rxjs';
@@ -13,6 +14,7 @@ expect.addSnapshotSerializer({
   print: () => `Rx.Observable`,
 });
 
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { mockRender } from './fatal_errors_service.test.mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
@@ -22,6 +24,7 @@ import { FatalErrorsService } from './fatal_errors_service';
 function setupService() {
   const rootDomElement = document.createElement('div');
 
+  const analytics = analyticsServiceMock.createAnalyticsServiceStart();
   const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
   const theme = themeServiceMock.createSetupContract();
 
@@ -39,7 +42,7 @@ function setupService() {
     rootDomElement,
     injectedMetadata,
     stopCoreSystem,
-    fatalErrors: fatalErrorsService.setup({ injectedMetadata, i18n, theme }),
+    fatalErrors: fatalErrorsService.setup({ analytics, injectedMetadata, i18n, theme }),
   };
 }
 

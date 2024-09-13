@@ -26,10 +26,10 @@ import type {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
+import { CopyStatusIndicator } from './copy_status_indicator';
 import type { SpacesDataEntry } from '../../types';
 import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
-import { CopyStatusIndicator } from './copy_status_indicator';
 
 interface Props {
   summarizedCopyResult: SummarizedCopyToSpaceResult;

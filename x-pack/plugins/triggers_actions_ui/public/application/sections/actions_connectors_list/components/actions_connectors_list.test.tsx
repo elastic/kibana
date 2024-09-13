@@ -6,36 +6,43 @@
  */
 
 import * as React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { ThemeProvider } from 'styled-components';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-
 import ActionsConnectorsList from './actions_connectors_list';
 import { coreMock } from '@kbn/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../../../../types';
+import { times } from 'lodash';
+import { useHistory, useParams } from 'react-router-dom';
 
 jest.mock('../../../../common/lib/kibana');
-import { ActionConnector, GenericValidationResult } from '../../../../types';
-import { times } from 'lodash';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
 }));
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn().mockReturnValue({}),
+  useLocation: jest.fn().mockReturnValue({ search: '' }),
+  useHistory: jest.fn().mockReturnValue({ push: jest.fn(), createHref: jest.fn() }),
+}));
+
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mocks = coreMock.createSetup();
-const { loadAllActions, loadActionTypes } = jest.requireMock('../../../lib/action_connector_api');
+const { loadActionTypes } = jest.requireMock('../../../lib/action_connector_api');
 
 describe('actions_connectors_list', () => {
   describe('component empty', () => {
-    let wrapper: ReactWrapper<any>;
-
-    async function setup() {
-      loadAllActions.mockResolvedValueOnce([]);
+    const setup = async () => {
       loadActionTypes.mockResolvedValueOnce([
         {
           id: 'test',
@@ -67,95 +74,115 @@ describe('actions_connectors_list', () => {
           show: true,
         },
       };
-      wrapper = mountWithIntl(<ActionsConnectorsList />);
-
-      // Wait for active space to resolve before requesting the component to update
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-    }
+    };
 
     it('renders empty prompt', async () => {
       await setup();
-      expect(
-        wrapper.find('[data-test-subj="createFirstConnectorEmptyPrompt"]').find('EuiEmptyPrompt')
-      ).toHaveLength(1);
-      expect(
-        wrapper.find('[data-test-subj="createFirstActionButton"]').find('EuiButton')
-      ).toHaveLength(1);
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={() => {}}
+            isLoadingActions={false}
+            actions={[]}
+            setActions={() => {}}
+          />
+        </IntlProvider>
+      );
+
+      expect(await screen.findByTestId('createFirstConnectorEmptyPrompt')).toBeInTheDocument();
+      expect(await screen.findByTestId('createFirstActionButton')).toBeInTheDocument();
     });
 
     test('if click create button should render CreateConnectorFlyout', async () => {
       await setup();
-      wrapper.find('[data-test-subj="createFirstActionButton"]').last().simulate('click');
-      expect(wrapper.find('[data-test-subj="create-connector-flyout"]').exists()).toBeTruthy();
+      const setAddFlyoutVisibility = jest.fn();
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={setAddFlyoutVisibility}
+            loadActions={async () => {}}
+            editItem={() => {}}
+            isLoadingActions={false}
+            actions={[]}
+            setActions={() => {}}
+          />
+        </IntlProvider>
+      );
+      const createFirstActionButton = await screen.findByTestId('createFirstActionButton');
+      await userEvent.click(createFirstActionButton);
+      await waitFor(() => {
+        expect(setAddFlyoutVisibility).toBeCalled();
+      });
     });
   });
 
   describe('component with items', () => {
     let wrapper: ReactWrapper<any>;
+    const mockedActions = [
+      {
+        id: '1',
+        actionTypeId: 'test',
+        isPreconfigured: false,
+        isDeprecated: false,
+        referencedByCount: 1,
+        config: {},
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        description: 'My test 2',
+        referencedByCount: 1,
+        isPreconfigured: false,
+        isDeprecated: false,
+        config: {},
+      },
+      {
+        id: '3',
+        actionTypeId: 'test2',
+        isMissingSecrets: true,
+        referencedByCount: 1,
+        isPreconfigured: true,
+        isDeprecated: false,
+        config: {},
+      },
+      {
+        id: '4',
+        actionTypeId: 'nonexistent',
+        referencedByCount: 1,
+        isPreconfigured: false,
+        isDeprecated: false,
+        config: {},
+      },
+      {
+        id: '5',
+        actionTypeId: 'test3',
+        referencedByCount: 1,
+        isPreconfigured: false,
+        isDeprecated: false,
+        config: {},
+      },
+      {
+        id: '6',
+        actionTypeId: 'test4',
+        referencedByCount: 1,
+        isPreconfigured: false,
+        isDeprecated: false,
+        config: {},
+      },
+    ] as ActionConnector[];
+    let mockedEditItem: jest.Mock;
 
-    async function setup(actionConnectors?: ActionConnector[]) {
-      loadAllActions.mockResolvedValueOnce(
-        actionConnectors ?? [
-          {
-            id: '1',
-            actionTypeId: 'test',
-            description: 'My test',
-            isPreconfigured: false,
-            isDeprecated: false,
-            referencedByCount: 1,
-            config: {},
-          },
-          {
-            id: '2',
-            actionTypeId: 'test2',
-            description: 'My test 2',
-            referencedByCount: 1,
-            isPreconfigured: false,
-            isDeprecated: false,
-            config: {},
-          },
-          {
-            id: '3',
-            actionTypeId: 'test2',
-            description: 'My preconfigured test 2',
-            isMissingSecrets: true,
-            referencedByCount: 1,
-            isPreconfigured: true,
-            isDeprecated: false,
-            config: {},
-          },
-          {
-            id: '4',
-            actionTypeId: 'nonexistent',
-            description: 'My invalid connector type',
-            referencedByCount: 1,
-            isPreconfigured: false,
-            isDeprecated: false,
-            config: {},
-          },
-          {
-            id: '5',
-            actionTypeId: 'test3',
-            description: 'action with all feature ids',
-            referencedByCount: 1,
-            isPreconfigured: false,
-            isDeprecated: false,
-            config: {},
-          },
-          {
-            id: '6',
-            actionTypeId: 'test4',
-            description: 'only cases',
-            referencedByCount: 1,
-            isPreconfigured: false,
-            isDeprecated: false,
-            config: {},
-          },
-        ]
-      );
+    afterEach(() => {
+      mockedEditItem.mockReset();
+    });
+
+    afterAll(() => {
+      jest.clearAllMocks();
+    });
+
+    async function setup(actionConnectors = mockedActions) {
       loadActionTypes.mockResolvedValueOnce([
         {
           id: 'test',
@@ -217,15 +244,25 @@ describe('actions_connectors_list', () => {
           show: true,
         },
       };
-      wrapper = mountWithIntl(<ActionsConnectorsList />);
+
+      mockedEditItem = jest.fn();
+
+      wrapper = mountWithIntl(
+        <ActionsConnectorsList
+          setAddFlyoutVisibility={() => {}}
+          loadActions={async () => {}}
+          editItem={mockedEditItem}
+          isLoadingActions={false}
+          actions={actionConnectors}
+          setActions={() => {}}
+        />
+      );
 
       // Wait for active space to resolve before requesting the component to update
       await act(async () => {
         await nextTick();
         wrapper.update();
       });
-
-      expect(loadAllActions).toHaveBeenCalled();
     }
 
     it('renders table of connectors', async () => {
@@ -315,9 +352,9 @@ describe('actions_connectors_list', () => {
           actionTypeId: 'test',
           name: `My test ${index}`,
           secrets: {},
-          description: `My test ${index}`,
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
           config: {},
         }))
@@ -332,20 +369,14 @@ describe('actions_connectors_list', () => {
       wrapper.find('[data-test-subj="pagination-button-1"]').last().simulate('click');
       expect(wrapper.find('[data-test-subj="actionsTable"]').first().prop('pagination'))
         .toMatchInlineSnapshot(`
-      Object {
-        "initialPageIndex": 0,
-        "pageIndex": 1,
-      }
-    `);
+        Object {
+          "initialPageIndex": 0,
+          "pageIndex": 1,
+        }
+      `);
     });
 
-    test('if select item for edit should render EditConnectorFlyout', async () => {
-      await setup();
-      await wrapper.find('[data-test-subj="edit1"]').first().find('button').simulate('click');
-      expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBeTruthy();
-    });
-
-    test('if delete item that is used in a rule should show a warning in the popup', async () => {
+    it('if delete item that is used in a rule should show a warning in the popup', async () => {
       await setup();
       await wrapper.find('.euiButtonIcon').last().simulate('click');
       expect(wrapper.find('[data-test-subj="deleteConnectorsConfirmation"]').exists()).toBeTruthy();
@@ -356,13 +387,170 @@ describe('actions_connectors_list', () => {
           .includes('This connector is used in a rule')
       );
     });
+
+    it('call editItem when connectorId presented in url', async () => {
+      const selectedConnector = mockedActions[3];
+      const mockedCreateHref = jest.fn(({ pathname }) => pathname);
+      const replaceStateSpy = jest.spyOn(window.history, 'replaceState');
+      (useParams as jest.Mock).mockReturnValue({ connectorId: selectedConnector.id });
+      (useHistory as jest.Mock).mockReturnValue({ createHref: mockedCreateHref });
+
+      await setup();
+
+      expect(mockedEditItem).toBeCalledWith(selectedConnector, EditConnectorTabs.Configuration);
+      expect(mockedCreateHref).toHaveBeenCalledWith({ pathname: '/connectors' });
+      expect(replaceStateSpy).toHaveBeenCalledWith(null, '', '/connectors');
+      replaceStateSpy.mockRestore();
+    });
   });
 
+  describe('check EditConnectorFlyout will open on edit connector', () => {
+    let wrapper: ReactWrapper<any>;
+    const mockedActions = [
+      {
+        id: '1',
+        actionTypeId: 'test',
+        isPreconfigured: false,
+        isDeprecated: false,
+        referencedByCount: 1,
+        config: {},
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        description: 'My test 2',
+        referencedByCount: 1,
+        isPreconfigured: false,
+        isDeprecated: false,
+        config: {},
+      },
+      {
+        id: '3',
+        actionTypeId: 'test2',
+        isMissingSecrets: true,
+        referencedByCount: 1,
+        isPreconfigured: true,
+        isDeprecated: false,
+        config: {},
+      },
+      {
+        id: '4',
+        actionTypeId: 'nonexistent',
+        referencedByCount: 1,
+        isPreconfigured: false,
+        isDeprecated: false,
+        config: {},
+      },
+      {
+        id: '5',
+        actionTypeId: 'test3',
+        referencedByCount: 1,
+        isPreconfigured: false,
+        isDeprecated: false,
+        config: {},
+      },
+      {
+        id: '6',
+        actionTypeId: 'test4',
+        referencedByCount: 1,
+        isPreconfigured: false,
+        isDeprecated: false,
+        config: {},
+      },
+    ] as ActionConnector[];
+
+    async function setup() {
+      loadActionTypes.mockResolvedValueOnce([
+        {
+          id: 'test',
+          name: 'Test',
+          enabled: true,
+          supportedFeatureIds: ['alerting'],
+        },
+        {
+          id: 'test2',
+          name: 'Test2',
+          enabled: true,
+          supportedFeatureIds: ['alerting', 'cases'],
+        },
+        {
+          id: 'test3',
+          name: 'Test3',
+          enabled: true,
+          supportedFeatureIds: ['alerting', 'cases', 'siem', 'uptime'],
+        },
+        {
+          id: 'test4',
+          name: 'Test4',
+          enabled: true,
+          supportedFeatureIds: ['cases'],
+        },
+      ]);
+
+      const [
+        {
+          application: { capabilities },
+        },
+      ] = await mocks.getStartServices();
+
+      const mockedActionParamsFields = React.lazy(async () => ({
+        default() {
+          return <></>;
+        },
+      }));
+
+      actionTypeRegistry.get.mockReturnValue({
+        id: 'test',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+        actionParamsFields: mockedActionParamsFields,
+      });
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useKibanaMock().services.application.capabilities = {
+        ...capabilities,
+        actions: {
+          delete: true,
+          save: true,
+          show: true,
+        },
+      };
+    }
+
+    it('if select item for edit should render EditConnectorFlyout', async () => {
+      await setup();
+      const editItem = jest.fn();
+
+      wrapper = mountWithIntl(
+        <ActionsConnectorsList
+          setAddFlyoutVisibility={() => {}}
+          loadActions={async () => {}}
+          editItem={editItem}
+          isLoadingActions={false}
+          actions={mockedActions}
+          setActions={() => {}}
+        />
+      );
+
+      // Wait for active space to resolve before requesting the component to update
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      wrapper.find('[data-test-subj="edit1"]').first().find('button').simulate('click');
+      expect(editItem).toBeCalled();
+    });
+  });
   describe('component empty with show only capability', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
-      loadAllActions.mockResolvedValueOnce([]);
       loadActionTypes.mockResolvedValueOnce([
         {
           id: 'test',
@@ -392,7 +580,17 @@ describe('actions_connectors_list', () => {
           delete: false,
         },
       };
-      wrapper = mountWithIntl(<ActionsConnectorsList />);
+
+      wrapper = mountWithIntl(
+        <ActionsConnectorsList
+          setAddFlyoutVisibility={() => {}}
+          loadActions={async () => {}}
+          editItem={() => {}}
+          isLoadingActions={false}
+          actions={[]}
+          setActions={() => {}}
+        />
+      );
 
       // Wait for active space to resolve before requesting the component to update
       await act(async () => {
@@ -406,7 +604,7 @@ describe('actions_connectors_list', () => {
       expect(wrapper.find('[defaultMessage="No permissions to create connectors"]')).toHaveLength(
         1
       );
-      expect(wrapper.find('[data-test-subj="createActionButton"]')).toHaveLength(0);
+      expect(wrapper.find('[data-test-subj="createConnectorButton"]')).toHaveLength(0);
     });
   });
 
@@ -414,22 +612,6 @@ describe('actions_connectors_list', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
-      loadAllActions.mockResolvedValueOnce([
-        {
-          id: '1',
-          actionTypeId: 'test',
-          description: 'My test',
-          referencedByCount: 1,
-          config: {},
-        },
-        {
-          id: '2',
-          actionTypeId: 'test2',
-          description: 'My test 2',
-          referencedByCount: 1,
-          config: {},
-        },
-      ]);
       loadActionTypes.mockResolvedValueOnce([
         {
           id: 'test',
@@ -459,7 +641,35 @@ describe('actions_connectors_list', () => {
       };
       // eslint-disable-next-line react-hooks/rules-of-hooks
       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-      wrapper = mountWithIntl(<ActionsConnectorsList />);
+      wrapper = mountWithIntl(
+        <ActionsConnectorsList
+          setAddFlyoutVisibility={() => {}}
+          loadActions={async () => {}}
+          editItem={() => {}}
+          isLoadingActions={false}
+          actions={
+            [
+              {
+                id: '1',
+                actionTypeId: 'test',
+                isPreconfigured: false,
+                isDeprecated: false,
+                referencedByCount: 1,
+                config: {},
+              },
+              {
+                id: '2',
+                actionTypeId: 'test2',
+                referencedByCount: 1,
+                isPreconfigured: false,
+                isDeprecated: false,
+                config: {},
+              },
+            ] as ActionConnector[]
+          }
+          setActions={() => {}}
+        />
+      );
 
       // Wait for active space to resolve before requesting the component to update
       await act(async () => {
@@ -484,22 +694,6 @@ describe('actions_connectors_list', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
-      loadAllActions.mockResolvedValueOnce([
-        {
-          id: '1',
-          actionTypeId: 'test',
-          description: 'My test',
-          referencedByCount: 1,
-          config: {},
-        },
-        {
-          id: '2',
-          actionTypeId: 'test2',
-          description: 'My test 2',
-          referencedByCount: 1,
-          config: {},
-        },
-      ]);
       loadActionTypes.mockResolvedValueOnce([
         {
           id: 'test',
@@ -536,15 +730,37 @@ describe('actions_connectors_list', () => {
       };
       // eslint-disable-next-line react-hooks/rules-of-hooks
       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-      wrapper = mountWithIntl(<ActionsConnectorsList />);
+      wrapper = mountWithIntl(
+        <ActionsConnectorsList
+          setAddFlyoutVisibility={() => {}}
+          loadActions={async () => {}}
+          editItem={() => {}}
+          isLoadingActions={false}
+          actions={
+            [
+              {
+                id: '1',
+                actionTypeId: 'test',
+                referencedByCount: 1,
+                config: {},
+              },
+              {
+                id: '2',
+                actionTypeId: 'test2',
+                referencedByCount: 1,
+                config: {},
+              },
+            ] as ActionConnector[]
+          }
+          setActions={() => {}}
+        />
+      );
 
       // Wait for active space to resolve before requesting the component to update
       await act(async () => {
         await nextTick();
         wrapper.update();
       });
-
-      expect(loadAllActions).toHaveBeenCalled();
     }
 
     it('renders table of connectors', async () => {
@@ -564,24 +780,6 @@ describe('actions_connectors_list', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
-      loadAllActions.mockResolvedValueOnce([
-        {
-          id: '1',
-          actionTypeId: '.servicenow',
-          description: 'My test',
-          referencedByCount: 1,
-          config: { usesTableApi: true },
-          isDeprecated: true,
-        },
-        {
-          id: '2',
-          actionTypeId: '.servicenow-sir',
-          description: 'My test 2',
-          referencedByCount: 1,
-          config: { usesTableApi: true },
-          isDeprecated: true,
-        },
-      ]);
       loadActionTypes.mockResolvedValueOnce([
         {
           id: 'test',
@@ -620,7 +818,31 @@ describe('actions_connectors_list', () => {
       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
       wrapper = mountWithIntl(
         <ThemeProvider theme={() => ({ eui: { euiSizeS: '15px' }, darkMode: true })}>
-          <ActionsConnectorsList />
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={() => {}}
+            isLoadingActions={false}
+            actions={
+              [
+                {
+                  id: '1',
+                  actionTypeId: '.servicenow',
+                  referencedByCount: 1,
+                  config: { usesTableApi: true },
+                  isDeprecated: true,
+                },
+                {
+                  id: '2',
+                  actionTypeId: '.servicenow-sir',
+                  referencedByCount: 1,
+                  config: { usesTableApi: true },
+                  isDeprecated: true,
+                },
+              ] as Array<ActionConnector<{ usesTableApi: boolean }>>
+            }
+            setActions={() => {}}
+          />
         </ThemeProvider>
       );
 
@@ -629,8 +851,6 @@ describe('actions_connectors_list', () => {
         await nextTick();
         wrapper.update();
       });
-
-      expect(loadAllActions).toHaveBeenCalled();
     }
 
     it('shows the warning icon', async () => {

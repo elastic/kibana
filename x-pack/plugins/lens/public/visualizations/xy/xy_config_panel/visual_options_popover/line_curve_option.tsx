@@ -7,46 +7,49 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import type { XYCurveType } from '@kbn/expression-xy-plugin/common';
+import { XYCurveTypes } from '@kbn/expression-xy-plugin/public';
+import { lineCurveDefinitions } from './line_curve_definitions';
 
 export interface LineCurveOptionProps {
-  /**
-   * Currently selected value
-   */
   value?: XYCurveType;
-  /**
-   * Callback on display option change
-   */
-  onChange: (id: XYCurveType) => void;
-  isCurveTypeEnabled?: boolean;
+  onChange: (type: XYCurveType) => void;
+  enabled?: boolean;
 }
 
 export const LineCurveOption: React.FC<LineCurveOptionProps> = ({
   onChange,
-  value,
-  isCurveTypeEnabled = true,
+  value = XYCurveTypes.LINEAR,
+  enabled = true,
 }) => {
-  return isCurveTypeEnabled ? (
+  return enabled ? (
     <EuiFormRow
-      display="columnCompressedSwitch"
-      label={i18n.translate('xpack.lens.xyChart.curveStyleLabel', {
-        defaultMessage: 'Curve lines',
+      display="columnCompressed"
+      label={i18n.translate('xpack.lens.xyChart.lineInterpolationLabel', {
+        defaultMessage: 'Line interpolation',
       })}
+      fullWidth
     >
-      <EuiSwitch
-        showLabel={false}
-        label="Curved"
-        checked={value === 'CURVE_MONOTONE_X'}
-        compressed={true}
-        onChange={(e) => {
-          if (e.target.checked) {
-            onChange('CURVE_MONOTONE_X');
-          } else {
-            onChange('LINEAR');
-          }
-        }}
-        data-test-subj="lnsCurveStyleToggle"
+      <EuiSuperSelect
+        data-test-subj="lnsCurveStyleSelect"
+        compressed
+        options={lineCurveDefinitions.map(({ type, title, description }) => ({
+          value: type,
+          dropdownDisplay: (
+            <>
+              <strong>{title}</strong>
+              <EuiText size="xs" color="subdued">
+                <p>{description}</p>
+              </EuiText>
+            </>
+          ),
+          inputDisplay: title,
+        }))}
+        valueOfSelected={value}
+        onChange={onChange}
+        itemLayoutAlign="top"
+        hasDividers
       />
     </EuiFormRow>
   ) : null;

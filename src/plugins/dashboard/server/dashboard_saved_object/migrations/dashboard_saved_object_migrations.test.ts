@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
 import { createExtract, createInject } from '../../../common';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
@@ -47,7 +49,7 @@ const contextMock = savedObjectsServiceMock.createMigrationContext();
 
 describe('dashboard', () => {
   describe('7.0.0', () => {
-    const migration = migrations['7.0.0'];
+    const migration = SavedObjectsUtils.getMigrationFunction(migrations['7.0.0']);
 
     test('skips error on empty object', () => {
       expect(migration({} as SavedObjectUnsanitizedDoc, contextMock)).toMatchInlineSnapshot(`
@@ -472,7 +474,7 @@ describe('dashboard', () => {
   });
 
   describe('7.10.0 - hidden panel titles', () => {
-    const migration = migrations['7.17.3'];
+    const migration = SavedObjectsUtils.getMigrationFunction(migrations['7.17.3']);
     const doc: DashboardDoc730ToLatest = {
       attributes: {
         description: '',
@@ -579,7 +581,7 @@ describe('dashboard', () => {
   });
 
   describe('7.11.0 - embeddable persistable state extraction', () => {
-    const migration = migrations['7.11.0'];
+    const migration = SavedObjectsUtils.getMigrationFunction(migrations['7.11.0']);
     const doc: DashboardDoc730ToLatest = {
       attributes: {
         description: '',
@@ -703,7 +705,10 @@ describe('dashboard', () => {
         embeddable: newEmbeddableSetupMock,
       });
       expect(migrationsList['7.13.0']).toBeDefined();
-      const migratedDoc = migrationsList['7.13.0'](originalDoc, contextMock);
+      const migratedDoc = SavedObjectsUtils.getMigrationFunction(migrationsList['7.13.0'])(
+        originalDoc,
+        contextMock
+      );
       expect(migratedDoc.attributes.panelsJSON).toMatchInlineSnapshot(
         `"[{\\"version\\":\\"7.9.3\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"0\\"},\\"panelIndex\\":\\"0\\",\\"embeddableConfig\\":{}},{\\"version\\":\\"7.13.0\\",\\"gridData\\":{\\"x\\":24,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"embeddableConfig\\":{\\"attributes\\":{\\"byValueThing\\":\\"ThisIsByValue\\"},\\"superCoolKey\\":\\"ONLY 4 BY VALUE EMBEDDABLES THANK YOU VERY MUCH\\"}}]"`
       );

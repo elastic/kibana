@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import PropTypes from 'prop-types';
@@ -18,7 +19,7 @@ import { createTickFormatter } from '../../lib/tick_formatter';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { checkIfSeriesHaveSameFormatters } from '../../lib/check_if_series_have_same_formatters';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
-import { MarkdownSimple } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import { replaceVars } from '../../lib/replace_vars';
 import { getInterval } from '../../lib/get_interval';
@@ -125,7 +126,7 @@ class TimeseriesVisualization extends Component {
       this.notificationReason = this.showToastNotification.reason;
       this.notification = toastNotifications.addDanger({
         title: this.showToastNotification.title,
-        text: <MarkdownSimple>{this.showToastNotification.reason}</MarkdownSimple>,
+        text: <Markdown readOnly>{this.showToastNotification.reason}</Markdown>,
       });
     }
 

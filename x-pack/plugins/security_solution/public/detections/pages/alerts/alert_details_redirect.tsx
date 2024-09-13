@@ -11,9 +11,13 @@ import { Redirect, useLocation, useParams } from 'react-router-dom';
 
 import moment from 'moment';
 import { encode } from '@kbn/rison';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { ALERTS_PATH, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { inputsSelectors } from '../../../common/store';
+import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
+import { resolveFlyoutParams } from './utils';
 
 export const AlertDetailsRedirect = () => {
   const { alertId } = useParams<{ alertId: string }>();
@@ -32,9 +36,9 @@ export const AlertDetailsRedirect = () => {
 
   // Default to the existing global timerange if we don't get this query param for whatever reason
   const fromTime = timestamp ?? globalTimerange.from;
-  // Add 1 millisecond to the alert timestamp as the alert table is non-inclusive of the end time
-  // So we have to extend slightly beyond the range of the timestamp of the given alert
-  const toTime = moment(timestamp ?? globalTimerange.to).add('1', 'millisecond');
+  // Add 5 minutes to the alert timestamp as the alert table is non-inclusive of the end time
+  // This also provides padding time if the user clears the `_id` filter after redirect to see other alerts
+  const toTime = moment(timestamp ?? globalTimerange.to).add('5', 'minutes');
 
   const timerange = encode({
     global: {
@@ -51,17 +55,27 @@ export const AlertDetailsRedirect = () => {
     },
   });
 
-  const flyoutString = encode({
-    panelView: 'eventDetail',
-    params: {
-      eventId: alertId,
-      indexName: index,
-    },
-  });
-
   const kqlAppQuery = encode({ language: 'kuery', query: `_id: ${alertId}` });
 
-  const url = `${ALERTS_PATH}?${URL_PARAM_KEY.appQuery}=${kqlAppQuery}&${URL_PARAM_KEY.timerange}=${timerange}&${URL_PARAM_KEY.eventFlyout}=${flyoutString}`;
+  const statusPageFilter: FilterControlConfig = {
+    fieldName: ALERT_WORKFLOW_STATUS,
+    title: 'Status',
+    selectedOptions: [],
+    existsSelected: false,
+  };
+
+  const pageFiltersQuery = encode(formatPageFilterSearchParam([statusPageFilter]));
+
+  const currentFlyoutParams = searchParams.get(URL_PARAM_KEY.flyout);
+
+  const urlParams = new URLSearchParams({
+    [URL_PARAM_KEY.appQuery]: kqlAppQuery,
+    [URL_PARAM_KEY.timerange]: timerange,
+    [URL_PARAM_KEY.pageFilter]: pageFiltersQuery,
+    [URL_PARAM_KEY.flyout]: resolveFlyoutParams({ index, alertId }, currentFlyoutParams),
+  });
+
+  const url = `${ALERTS_PATH}?${urlParams.toString()}`;
 
   return <Redirect to={url} />;
 };

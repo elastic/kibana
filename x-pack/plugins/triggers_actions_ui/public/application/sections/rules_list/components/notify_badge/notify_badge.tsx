@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 import moment from 'moment';
 import {
   EuiButton,
@@ -15,6 +15,8 @@ import {
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTextAlign,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -27,37 +29,78 @@ import {
   SNOOZE_FAILED_MESSAGE,
   SNOOZE_SUCCESS_MESSAGE,
   UNSNOOZE_SUCCESS_MESSAGE,
+  UNITS_TRANSLATION,
 } from './translations';
 import { RulesListNotifyBadgeProps } from './types';
 
-export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = (props) => {
-  const {
-    isLoading = false,
-    rule,
-    isOpen,
-    onClick,
-    onClose,
-    onLoading,
-    onRuleChanged,
-    snoozeRule,
-    unsnoozeRule,
-    showOnHover = false,
-    showTooltipInline = false,
-  } = props;
+function getTimeRemaining(endtime: Date): string {
+  const duration = moment.duration(moment(endtime).diff(moment()));
+  const timeValues = {
+    years: UNITS_TRANSLATION.getYearsTranslation(duration.years()),
+    months: UNITS_TRANSLATION.getMonthsTranslation(duration.months()),
+    weeks: UNITS_TRANSLATION.getWeeksTranslation(duration.weeks()),
+    days: UNITS_TRANSLATION.getDaysTranslation(duration.days()),
+    hours: UNITS_TRANSLATION.getHoursTranslation(duration.hours()),
+    minutes: UNITS_TRANSLATION.getMinutesTranslation(duration.minutes()),
+    seconds: UNITS_TRANSLATION.getSecondsTranslation(duration.seconds()),
+  };
+  const timeComponents = Object.entries(timeValues)
+    .filter(([unit, value]) => value !== '' && value !== `0 ${unit}`)
+    .map(([unit, value]) => `${value}`)
+    .join(', ');
+  const lastComponentIndex = timeComponents.lastIndexOf(', ');
+  const formattedTime =
+    lastComponentIndex === -1
+      ? timeComponents
+      : timeComponents.slice(0, lastComponentIndex) +
+        ' and' +
+        timeComponents.slice(lastComponentIndex + 1);
+  return formattedTime;
+}
 
-  const { isSnoozedUntil, muteAll, isEditable } = rule;
-
+export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = ({
+  snoozeSettings,
+  loading = false,
+  disabled = false,
+  onRuleChanged,
+  snoozeRule,
+  unsnoozeRule,
+  showOnHover = false,
+  showTooltipInline = false,
+}) => {
+  const [requestInFlight, setRequestInFlightLoading] = useState(false);
+  const isLoading = loading || requestInFlight;
+  const isDisabled = Boolean(disabled) || !snoozeSettings;
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const openPopover = useCallback(() => setIsPopoverOpen(true), [setIsPopoverOpen]);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
+  const isSnoozedUntil = snoozeSettings?.isSnoozedUntil;
+  const muteAll = snoozeSettings?.muteAll ?? false;
   const isSnoozedIndefinitely = muteAll;
+  const isSnoozed = useMemo(
+    () => (snoozeSettings ? isRuleSnoozed(snoozeSettings) : false),
+    [snoozeSettings]
+  );
+  const nextScheduledSnooze = useMemo(
+    () => (snoozeSettings ? getNextRuleSnoozeSchedule(snoozeSettings) : null),
+    [snoozeSettings]
+  );
+
+  const snoozeTimeLeft = useMemo(
+    () => (isSnoozedUntil ? getTimeRemaining(isSnoozedUntil) : undefined),
+    [isSnoozedUntil]
+  );
+
+  const focusTrapButtonRef = useRef<HTMLButtonElement>(null);
+
+  const snoozeButtonAriaLabel = useMemo(
+    () => (snoozeSettings?.name ? OPEN_SNOOZE_PANEL_ARIA_LABEL(snoozeSettings.name) : undefined),
+    [snoozeSettings]
+  );
 
   const {
     notifications: { toasts },
   } = useKibana().services;
-
-  const isSnoozed = useMemo(() => {
-    return isRuleSnoozed(rule);
-  }, [rule]);
-
-  const nextScheduledSnooze = useMemo(() => getNextRuleSnoozeSchedule(rule), [rule]);
 
   const isScheduled = useMemo(() => {
     return !isSnoozed && Boolean(nextScheduledSnooze);
@@ -90,15 +133,39 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         }
       );
     }
-    if (isSnoozed) {
-      return i18n.translate(
-        'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.snoozedTooltip',
-        {
-          defaultMessage: 'Notifications snoozing for {snoozeTime}',
-          values: {
-            snoozeTime: moment(isSnoozedUntil).fromNow(true),
-          },
-        }
+    if (isSnoozed && snoozeTimeLeft) {
+      return (
+        <EuiToolTip
+          title={i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.timeRemaining',
+            {
+              defaultMessage: 'Time remaining',
+            }
+          )}
+          content={
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <span>{snoozeTimeLeft}</span>
+              </EuiFlexItem>
+              <EuiSpacer />
+              <EuiFlexItem grow={false}>
+                <span>{isSnoozedUntil?.toString()}</span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          <EuiTextAlign>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.snoozedTooltip',
+              {
+                defaultMessage: 'Notifications snoozing for {snoozeTime}',
+                values: {
+                  snoozeTime: moment(isSnoozedUntil).fromNow(true),
+                },
+              }
+            )}
+          </EuiTextAlign>
+        </EuiToolTip>
       );
     }
     if (showTooltipInline) {
@@ -114,9 +181,10 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     isSnoozedIndefinitely,
     isScheduled,
     isSnoozed,
-    isSnoozedUntil,
-    nextScheduledSnooze,
     showTooltipInline,
+    nextScheduledSnooze,
+    snoozeTimeLeft,
+    isSnoozedUntil,
   ]);
 
   const snoozedButton = useMemo(() => {
@@ -124,37 +192,38 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       <EuiButton
         size="s"
         isLoading={isLoading}
-        disabled={isLoading || !isEditable}
+        disabled={isLoading || isDisabled}
         data-test-subj="rulesListNotifyBadge-snoozed"
-        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
+        aria-label={snoozeButtonAriaLabel}
         minWidth={85}
         iconType="bellSlash"
         color="accent"
-        onClick={onClick}
+        onClick={openPopover}
+        buttonRef={focusTrapButtonRef}
       >
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
       </EuiButton>
     );
-  }, [formattedSnoozeText, isLoading, isEditable, onClick]);
+  }, [isLoading, isDisabled, snoozeButtonAriaLabel, openPopover, formattedSnoozeText]);
 
   const scheduledSnoozeButton = useMemo(() => {
-    // TODO: Implement scheduled snooze button
     return (
       <EuiButton
         size="s"
         isLoading={isLoading}
-        disabled={isLoading || !isEditable}
+        disabled={isLoading || isDisabled}
         data-test-subj="rulesListNotifyBadge-scheduled"
         minWidth={85}
         iconType="calendar"
         color="text"
-        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
-        onClick={onClick}
+        aria-label={snoozeButtonAriaLabel}
+        onClick={openPopover}
+        buttonRef={focusTrapButtonRef}
       >
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
       </EuiButton>
     );
-  }, [formattedSnoozeText, isLoading, isEditable, onClick]);
+  }, [isLoading, isDisabled, snoozeButtonAriaLabel, openPopover, formattedSnoozeText]);
 
   const unsnoozedButton = useMemo(() => {
     // This show on hover is needed because we need style sheets to achieve the
@@ -165,32 +234,34 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       <EuiButtonIcon
         size="s"
         isLoading={isLoading}
-        disabled={isLoading || !isEditable}
+        disabled={isLoading || isDisabled}
         display={isLoading ? 'base' : 'empty'}
         data-test-subj="rulesListNotifyBadge-unsnoozed"
-        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
-        className={isOpen || isLoading ? '' : showOnHoverClass}
+        aria-label={snoozeButtonAriaLabel}
+        className={isPopoverOpen || isLoading ? '' : showOnHoverClass}
         iconType="bell"
-        onClick={onClick}
+        onClick={openPopover}
+        buttonRef={focusTrapButtonRef}
       />
     );
-  }, [isOpen, isLoading, isEditable, showOnHover, onClick]);
+  }, [showOnHover, isLoading, isDisabled, snoozeButtonAriaLabel, isPopoverOpen, openPopover]);
 
   const indefiniteSnoozeButton = useMemo(() => {
     return (
       <EuiButtonIcon
         size="s"
         isLoading={isLoading}
-        disabled={isLoading || !isEditable}
+        disabled={isLoading || isDisabled}
         display="base"
         data-test-subj="rulesListNotifyBadge-snoozedIndefinitely"
-        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
+        aria-label={snoozeButtonAriaLabel}
         iconType="bellSlash"
         color="accent"
-        onClick={onClick}
+        onClick={openPopover}
+        buttonRef={focusTrapButtonRef}
       />
     );
-  }, [isLoading, isEditable, onClick]);
+  }, [isLoading, isDisabled, snoozeButtonAriaLabel, openPopover]);
 
   const button = useMemo(() => {
     if (isScheduled) {
@@ -214,57 +285,72 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   ]);
 
   const buttonWithToolTip = useMemo(() => {
-    if (isOpen || showTooltipInline) {
-      return button;
-    }
-    return <EuiToolTip content={snoozeTooltipText}>{button}</EuiToolTip>;
-  }, [isOpen, button, snoozeTooltipText, showTooltipInline]);
-
-  const onClosePopover = useCallback(() => {
-    onClose();
-    // Set a timeout on closing the scheduler to avoid flicker
-    // setTimeout(onCloseScheduler, 1000);
-  }, [onClose]);
+    const tooltipContent =
+      typeof disabled === 'string'
+        ? disabled
+        : isPopoverOpen || showTooltipInline
+        ? undefined
+        : snoozeTimeLeft;
+    return (
+      <EuiToolTip
+        title={
+          tooltipContent
+            ? i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.timeRemaining',
+                {
+                  defaultMessage: 'Time remaining',
+                }
+              )
+            : undefined
+        }
+        content={tooltipContent}
+      >
+        {button}
+      </EuiToolTip>
+    );
+  }, [disabled, isPopoverOpen, button, showTooltipInline, snoozeTimeLeft]);
 
   const onApplySnooze = useCallback(
     async (schedule: SnoozeSchedule) => {
       try {
-        onLoading(true);
-        onClosePopover();
+        setRequestInFlightLoading(true);
+        closePopover();
         await snoozeRule(schedule);
-        onRuleChanged();
+        await onRuleChanged();
         toasts.addSuccess(SNOOZE_SUCCESS_MESSAGE);
       } catch (e) {
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
       } finally {
-        onLoading(false);
+        setRequestInFlightLoading(false);
+        requestAnimationFrame(() => focusTrapButtonRef.current?.focus());
       }
     },
-    [onLoading, snoozeRule, onRuleChanged, toasts, onClosePopover]
+    [closePopover, snoozeRule, onRuleChanged, toasts]
   );
 
   const onApplyUnsnooze = useCallback(
     async (scheduleIds?: string[]) => {
       try {
-        onLoading(true);
-        onClosePopover();
+        setRequestInFlightLoading(true);
+        closePopover();
         await unsnoozeRule(scheduleIds);
-        onRuleChanged();
+        await onRuleChanged();
         toasts.addSuccess(UNSNOOZE_SUCCESS_MESSAGE);
       } catch (e) {
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
       } finally {
-        onLoading(false);
+        setRequestInFlightLoading(false);
+        requestAnimationFrame(() => focusTrapButtonRef.current?.focus());
       }
     },
-    [onLoading, unsnoozeRule, onRuleChanged, toasts, onClosePopover]
+    [closePopover, unsnoozeRule, onRuleChanged, toasts]
   );
 
   const popover = (
     <EuiPopover
       data-test-subj="rulesListNotifyBadge"
-      isOpen={isOpen}
-      closePopover={onClosePopover}
+      isOpen={isPopoverOpen && !isDisabled}
+      closePopover={closePopover}
       button={buttonWithToolTip}
       anchorPosition="rightCenter"
       panelStyle={{ maxHeight: '100vh', overflowY: 'auto' }}
@@ -274,8 +360,8 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         unsnoozeRule={onApplyUnsnooze}
         interval={futureTimeToInterval(isSnoozedUntil)}
         showCancel={isSnoozed}
-        scheduledSnoozes={rule.snoozeSchedule ?? []}
-        activeSnoozes={rule.activeSnoozes ?? []}
+        scheduledSnoozes={snoozeSettings?.snoozeSchedule ?? []}
+        activeSnoozes={snoozeSettings?.activeSnoozes ?? []}
         inPopover
       />
     </EuiPopover>

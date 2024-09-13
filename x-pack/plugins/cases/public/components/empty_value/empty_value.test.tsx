@@ -7,14 +7,14 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
+import { ThemeProvider } from '@emotion/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import {
   defaultToEmptyTag,
   getEmptyString,
   getEmptyStringTag,
-  getEmptyTagValue,
+  getEmptyCellValue,
   getEmptyValue,
   getOrEmptyTag,
 } from '.';
@@ -43,10 +43,10 @@ describe('EmptyValue', () => {
     });
   });
 
-  describe('#getEmptyTagValue', () => {
+  describe('#getEmptyCellValue', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
-        <p>{getEmptyTagValue()}</p>
+        <p>{getEmptyCellValue()}</p>
       </ThemeProvider>
     );
     test('should return an empty tag value', () => expect(wrapper.text()).toBe('—'));

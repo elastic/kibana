@@ -12,7 +12,9 @@
       "actions",
       "alerting",
       "encryptedSavedObjects",
-      "ruleRegistry"
+      "ruleRegistry",
+      "eventLog",
+      "notifications",
     ],
     "optionalPlugins": [
       "security",

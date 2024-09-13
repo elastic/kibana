@@ -6,16 +6,31 @@
  */
 
 import type { PolicyConfig } from '../types';
-import { ProtectionModes } from '../types';
+import { AntivirusRegistrationModes, ProtectionModes } from '../types';
+
+import { isBillablePolicy } from './policy_config_helpers';
 
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
  */
-export const policyFactory = (license = ''): PolicyConfig => {
-  return {
+export const policyFactory = (
+  license = '',
+  cloud = false,
+  licenseUid = '',
+  clusterUuid = '',
+  clusterName = '',
+  serverless = false
+): PolicyConfig => {
+  const policy: PolicyConfig = {
     meta: {
       license,
+      license_uuid: licenseUid,
+      cluster_uuid: clusterUuid,
+      cluster_name: clusterName,
+      cloud,
+      serverless,
     },
+    global_manifest_version: 'latest',
     windows: {
       events: {
         credential_access: true,
@@ -30,6 +45,7 @@ export const policyFactory = (license = ''): PolicyConfig => {
       malware: {
         mode: ProtectionModes.prevent,
         blocklist: true,
+        on_write_scan: true,
       },
       ransomware: {
         mode: ProtectionModes.prevent,
@@ -41,6 +57,7 @@ export const policyFactory = (license = ''): PolicyConfig => {
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
+        reputation_service: cloud, // Defaults to true if on cloud
         supported: true,
       },
       popup: {
@@ -65,7 +82,8 @@ export const policyFactory = (license = ''): PolicyConfig => {
         file: 'info',
       },
       antivirus_registration: {
-        enabled: false,
+        mode: AntivirusRegistrationModes.sync,
+        enabled: true, // Defaults to true since Malware protection is set to prevent and mode is set to sync
       },
       attack_surface_reduction: {
         credential_hardening: {
@@ -82,9 +100,11 @@ export const policyFactory = (license = ''): PolicyConfig => {
       malware: {
         mode: ProtectionModes.prevent,
         blocklist: true,
+        on_write_scan: true,
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
+        reputation_service: cloud, // Defaults to true if on cloud
         supported: true,
       },
       memory_protection: {
@@ -123,9 +143,11 @@ export const policyFactory = (license = ''): PolicyConfig => {
       malware: {
         mode: ProtectionModes.prevent,
         blocklist: true,
+        on_write_scan: true,
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
+        reputation_service: cloud, // Defaults to true if on cloud
         supported: true,
       },
       memory_protection: {
@@ -154,6 +176,22 @@ export const policyFactory = (license = ''): PolicyConfig => {
       },
     },
   };
+  policy.meta.billable = isBillablePolicy(policy);
+
+  return policy;
+};
+
+/**
+ * Strips paid features from an existing or new `PolicyConfig` for license below enterprise
+ */
+
+export const policyFactoryWithoutPaidEnterpriseFeatures = (
+  policy: PolicyConfig = policyFactory()
+): PolicyConfig => {
+  return {
+    ...policy,
+    global_manifest_version: 'latest',
+  };
 };
 
 /**
@@ -172,6 +210,7 @@ export const policyFactoryWithoutPaidFeatures = (
 
   return {
     ...policy,
+    global_manifest_version: 'latest',
     windows: {
       ...policy.windows,
       advanced:
@@ -199,6 +238,7 @@ export const policyFactoryWithoutPaidFeatures = (
       },
       behavior_protection: {
         mode: ProtectionModes.off,
+        reputation_service: false,
         supported: false,
       },
       attack_surface_reduction: {
@@ -230,6 +270,7 @@ export const policyFactoryWithoutPaidFeatures = (
       ...policy.mac,
       behavior_protection: {
         mode: ProtectionModes.off,
+        reputation_service: false,
         supported: false,
       },
       memory_protection: {
@@ -256,6 +297,7 @@ export const policyFactoryWithoutPaidFeatures = (
       ...policy.linux,
       behavior_protection: {
         mode: ProtectionModes.off,
+        reputation_service: false,
         supported: false,
       },
       memory_protection: {

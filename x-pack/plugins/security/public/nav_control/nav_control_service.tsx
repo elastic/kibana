@@ -6,24 +6,27 @@
  */
 
 import { sortBy } from 'lodash';
-import type { FunctionComponent } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 
-import type { CoreStart, CoreTheme } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import type { BuildFlavor } from '@kbn/config/src/types';
+import type { CoreStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type {
+  AuthenticationServiceSetup,
+  SecurityNavControlServiceStart,
+  UserMenuLink,
+} from '@kbn/security-plugin-types-public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticationServiceSetup } from '../authentication';
+import { SecurityNavControl } from './nav_control_component';
+import type { SecurityLicense } from '../../common';
 import type { SecurityApiClients } from '../components';
 import { AuthenticationProvider, SecurityApiClientsProvider } from '../components';
-import type { UserMenuLink } from './nav_control_component';
-import { SecurityNavControl } from './nav_control_component';
 
 interface SetupDeps {
   securityLicense: SecurityLicense;
@@ -34,18 +37,6 @@ interface SetupDeps {
 interface StartDeps {
   core: CoreStart;
   authc: AuthenticationServiceSetup;
-}
-
-export interface SecurityNavControlServiceStart {
-  /**
-   * Returns an Observable of the array of user menu links (the links that show up under the user's Avatar in the UI) registered by other plugins
-   */
-  getUserMenuLinks$: () => Observable<UserMenuLink[]>;
-
-  /**
-   * Registers the provided user menu links to be displayed in the user menu (the links that show up under the user's Avatar in the UI).
-   */
-  addUserMenuLinks: (newUserMenuLink: UserMenuLink[]) => void;
 }
 
 export class SecurityNavControlService {
@@ -59,6 +50,8 @@ export class SecurityNavControlService {
 
   private readonly stop$ = new ReplaySubject<void>(1);
   private userMenuLinks$ = new BehaviorSubject<UserMenuLink[]>([]);
+
+  constructor(private readonly buildFlavor: BuildFlavor) {}
 
   public setup({ securityLicense, logoutUrl, securityApiClients }: SetupDeps) {
     this.securityLicense = securityLicense;
@@ -117,21 +110,16 @@ export class SecurityNavControlService {
   }
 
   private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
-    const { theme$ } = core.theme;
     core.chrome.navControls.registerRight({
-      order: 2000,
+      order: 4000,
       mount: (element: HTMLElement) => {
         ReactDOM.render(
-          <Providers
-            services={core}
-            authc={authc}
-            theme$={theme$}
-            securityApiClients={this.securityApiClients}
-          >
+          <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
             <SecurityNavControl
               editProfileUrl={core.http.basePath.prepend('/security/account')}
               logoutUrl={this.logoutUrl}
               userMenuLinks$={this.userMenuLinks$}
+              buildFlavour={this.buildFlavor}
             />
           </Providers>,
           element
@@ -153,25 +141,21 @@ export interface ProvidersProps {
   authc: AuthenticationServiceSetup;
   services: CoreStart;
   securityApiClients: SecurityApiClients;
-  theme$: Observable<CoreTheme>;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
+export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   authc,
   services,
-  theme$,
   securityApiClients,
   children,
 }) => (
-  <KibanaContextProvider services={services}>
-    <AuthenticationProvider authc={authc}>
-      <SecurityApiClientsProvider {...securityApiClients}>
-        <I18nProvider>
-          <KibanaThemeProvider theme$={theme$}>
-            <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>
-          </KibanaThemeProvider>
-        </I18nProvider>
-      </SecurityApiClientsProvider>
-    </AuthenticationProvider>
-  </KibanaContextProvider>
+  <KibanaRenderContextProvider {...services}>
+    <KibanaContextProvider services={services}>
+      <AuthenticationProvider authc={authc}>
+        <SecurityApiClientsProvider {...securityApiClients}>
+          <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>
+        </SecurityApiClientsProvider>
+      </AuthenticationProvider>
+    </KibanaContextProvider>
+  </KibanaRenderContextProvider>
 );

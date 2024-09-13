@@ -139,11 +139,7 @@ export const IndexParamsFields = ({
       <EuiFormRow
         fullWidth
         error={errors.indexOverride as string[]}
-        isInvalid={
-          errors.indexOverride !== undefined &&
-          (errors.indexOverride as string[]) &&
-          errors.indexOverride.length > 0
-        }
+        isInvalid={errors.indexOverride !== undefined && Number(errors.indexOverride.length) > 0}
         label={i18n.translate('xpack.stackConnectors.components.index.preconfiguredIndex', {
           defaultMessage: 'Elasticsearch index',
         })}
@@ -196,10 +192,10 @@ export const IndexParamsFields = ({
     <JsonEditorWithMessageVariables
       messageVariables={messageVariables}
       paramsProperty={'documents'}
-      data-test-subj="documentToIndex"
+      dataTestSubj="documentToIndex"
       inputTargetValue={documentToIndex}
       label={documentsFieldLabel}
-      aria-label={i18n.translate('xpack.stackConnectors.components.index.jsonDocAriaLabel', {
+      ariaLabel={i18n.translate('xpack.stackConnectors.components.index.jsonDocAriaLabel', {
         defaultMessage: 'Code editor',
       })}
       errors={errors.documents as string[]}

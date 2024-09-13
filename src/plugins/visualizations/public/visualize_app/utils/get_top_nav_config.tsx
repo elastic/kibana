@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -28,7 +29,7 @@ import {
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { saveVisualization } from '../../utils/saved_visualize_utils';
-import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput, getFullPath } from '../..';
+import { VISUALIZE_EMBEDDABLE_TYPE, getFullPath } from '../..';
 
 import {
   VisualizeServices,
@@ -36,7 +37,7 @@ import {
   VisualizeEditorVisInstance,
 } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
-import { getEditBreadcrumbs } from './breadcrumbs';
+import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
 import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
@@ -106,19 +107,17 @@ export const getTopNavConfig = (
     data,
     application,
     chrome,
-    overlays,
     history,
     share,
     setActiveUrl,
     toastNotifications,
     visualizeCapabilities,
     dashboardCapabilities,
-    i18n: { Context: I18nContext },
     savedObjectsTagging,
     presentationUtil,
     getKibanaVersion,
-    savedObjects,
-    theme,
+    serverless,
+    ...startServices
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -145,9 +144,8 @@ export const getTopNavConfig = (
 
     try {
       const id = await saveVisualization(savedVis, saveOptions, {
-        savedObjectsClient: savedObjects.client,
-        overlays,
         savedObjectsTagging,
+        ...startServices,
       });
 
       if (id) {
@@ -155,7 +153,7 @@ export const getTopNavConfig = (
           title: i18n.translate(
             'visualizations.topNavMenu.saveVisualization.successNotificationText',
             {
-              defaultMessage: `Saved '{visTitle}'`,
+              defaultMessage: `Saved ''{visTitle}''`,
               values: {
                 visTitle: savedVis.title,
               },
@@ -205,7 +203,11 @@ export const getTopNavConfig = (
             stateTransfer.clearEditorState(VisualizeConstants.APP_ID);
           }
           chrome.docTitle.change(savedVis.lastSavedTitle);
-          chrome.setBreadcrumbs(getEditBreadcrumbs({}, savedVis.lastSavedTitle));
+          if (serverless?.setBreadcrumbs) {
+            serverless.setBreadcrumbs(getEditServerlessBreadcrumbs({}, savedVis.lastSavedTitle));
+          } else {
+            chrome.setBreadcrumbs(getEditBreadcrumbs({}, savedVis.lastSavedTitle));
+          }
 
           if (id !== visualizationIdFromUrl) {
             history.replace({
@@ -224,7 +226,7 @@ export const getTopNavConfig = (
         title: i18n.translate(
           'visualizations.topNavMenu.saveVisualization.failureNotificationText',
           {
-            defaultMessage: `Error on saving '{visTitle}'`,
+            defaultMessage: `Error on saving ''{visTitle}''`,
             values: {
               visTitle: savedVis.title,
             },
@@ -244,8 +246,8 @@ export const getTopNavConfig = (
 
     const state = {
       input: {
-        savedVis: vis.serialize(),
-      } as VisualizeInput,
+        serializedVis: vis.serialize(),
+      },
       embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
       searchSessionId: data.search.session.getSessionId(),
@@ -256,7 +258,7 @@ export const getTopNavConfig = (
 
   const navigateToOriginatingApp = () => {
     if (originatingApp) {
-      application.navigateToApp(originatingApp);
+      application.navigateToApp(originatingApp, { path: originatingPath });
     }
   };
 
@@ -307,6 +309,8 @@ export const getTopNavConfig = (
                 vis,
                 data.query.timefilter.timefilter
               );
+              const searchFilters = data.query.filterManager.getAppFilters();
+              const searchQuery = data.query.queryString.getQuery();
               const updatedWithMeta = {
                 ...navigateToLensConfig,
                 embeddableId,
@@ -315,7 +319,10 @@ export const getTopNavConfig = (
                 title: visInstance?.panelTitle || vis.title,
                 visTypeTitle: vis.type.title,
                 description: visInstance?.panelDescription || vis.description,
+                panelTimeRange: visInstance?.panelTimeRange,
                 isEmbeddable: Boolean(originatingApp),
+                ...(searchFilters && { searchFilters }),
+                ...(searchQuery && { searchQuery }),
               };
               if (navigateToLensConfig) {
                 hideLensBadge();
@@ -388,6 +395,11 @@ export const getTopNavConfig = (
             shareableUrl: unhashUrl(window.location.href),
             objectId: savedVis?.id,
             objectType: 'visualization',
+            objectTypeMeta: {
+              title: i18n.translate('visualizations.share.shareModal.title', {
+                defaultMessage: 'Share this visualization',
+              }),
+            },
             sharingData: {
               title:
                 savedVis?.title ||
@@ -403,6 +415,7 @@ export const getTopNavConfig = (
             },
             isDirty: hasUnappliedChanges || hasUnsavedChanges,
             showPublicUrlSwitch,
+            toasts: toastNotifications,
           });
         }
       },
@@ -502,12 +515,12 @@ export const getTopNavConfig = (
 
                   const state = {
                     input: {
-                      savedVis: {
+                      serializedVis: {
                         ...vis.serialize(),
                         title: newTitle,
                         description: newDescription,
                       },
-                    } as VisualizeInput,
+                    },
                     embeddableId,
                     type: VISUALIZE_EMBEDDABLE_TYPE,
                     searchSessionId: data.search.session.getSessionId(),
@@ -546,6 +559,7 @@ export const getTopNavConfig = (
                     onTagsSelected={(newSelection) => {
                       selectedTags = newSelection;
                     }}
+                    markOptional
                   />
                 );
               }
@@ -597,6 +611,14 @@ export const getTopNavConfig = (
                       }
                     )}
                     onClose={() => {}}
+                    mustCopyOnSaveMessage={
+                      savedVis.managed
+                        ? i18n.translate('visualizations.topNavMenu.mustCopyOnSave', {
+                            defaultMessage:
+                              'Elastic manages this visualization. Save any changes to a new visualization.',
+                          })
+                        : undefined
+                    }
                   />
                 );
               }

@@ -63,8 +63,19 @@ export const PLATFORM_OPTIONS = [
   },
 ];
 
-export function usePlatform() {
-  const [platform, setPlatform] = useState<PLATFORM_TYPE>('linux');
+export const PLATFORM_OPTIONS_CLOUD_SHELL = [
+  ...PLATFORM_OPTIONS,
+  {
+    id: 'googleCloudShell',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.googleCloudShell', {
+      defaultMessage: 'Google Cloud Shell Script',
+    }),
+    'data-test-subj': 'platformTypeGoogleCloudShellScript',
+  },
+];
+
+export function usePlatform(initialPlatform: PLATFORM_TYPE = 'linux') {
+  const [platform, setPlatform] = useState<PLATFORM_TYPE>(initialPlatform);
 
   return {
     platform,

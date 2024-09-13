@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -16,13 +17,14 @@ import { useNavigationProps } from '../../../hooks/use_navigation_props';
 interface TableRowDetailsProps {
   children: JSX.Element;
   colLength: number;
-  rowIndex: string;
-  rowId: string;
+  rowIndex: string | undefined;
+  rowId: string | undefined;
   columns: string[];
   isTimeBased: boolean;
   dataView: DataView;
   filters?: Filter[];
   savedSearchId?: string;
+  isEsqlMode?: boolean;
 }
 
 export const TableRowDetails = ({
@@ -35,6 +37,7 @@ export const TableRowDetails = ({
   columns,
   filters,
   savedSearchId,
+  isEsqlMode,
 }: TableRowDetailsProps) => {
   const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } = useNavigationProps(
     {
@@ -56,57 +59,67 @@ export const TableRowDetails = ({
               <EuiIcon type="folderOpen" size="m" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs" data-test-subj="docTableRowDetailsTitle">
+              <EuiTitle size="xxs" data-test-subj="docViewerRowDetailsTitle">
                 <h4>
-                  <FormattedMessage
-                    id="discover.docTable.tableRow.detailHeading"
-                    defaultMessage="Expanded document"
-                  />
+                  {isEsqlMode && (
+                    <FormattedMessage
+                      id="discover.grid.tableRow.esqlDetailHeading"
+                      defaultMessage="Expanded result"
+                    />
+                  )}
+                  {!isEsqlMode && (
+                    <FormattedMessage
+                      id="discover.docTable.tableRow.detailHeading"
+                      defaultMessage="Expanded document"
+                    />
+                  )}
                 </h4>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {isTimeBased && (
-                /* eslint-disable-next-line @elastic/eui/href-or-on-click */
+        {!isEsqlMode && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                {isTimeBased && (
+                  /* eslint-disable-next-line @elastic/eui/href-or-on-click */
+                  <EuiButtonEmpty
+                    size="s"
+                    iconSize="s"
+                    iconType="document"
+                    flush="left"
+                    data-test-subj="docTableRowAction"
+                    href={contextViewHref}
+                    onClick={onOpenContextView}
+                  >
+                    <FormattedMessage
+                      id="discover.docTable.tableRow.viewSurroundingDocumentsLinkText"
+                      defaultMessage="View surrounding documents"
+                    />
+                  </EuiButtonEmpty>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiButtonEmpty
                   size="s"
                   iconSize="s"
                   iconType="document"
                   flush="left"
                   data-test-subj="docTableRowAction"
-                  href={contextViewHref}
-                  onClick={onOpenContextView}
+                  href={singleDocHref}
+                  onClick={onOpenSingleDoc}
                 >
                   <FormattedMessage
-                    id="discover.docTable.tableRow.viewSurroundingDocumentsLinkText"
-                    defaultMessage="View surrounding documents"
+                    id="discover.docTable.tableRow.viewSingleDocumentLinkText"
+                    defaultMessage="View single document"
                   />
                 </EuiButtonEmpty>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-              <EuiButtonEmpty
-                size="s"
-                iconSize="s"
-                iconType="document"
-                flush="left"
-                data-test-subj="docTableRowAction"
-                href={singleDocHref}
-                onClick={onOpenSingleDoc}
-              >
-                <FormattedMessage
-                  id="discover.docTable.tableRow.viewSingleDocumentLinkText"
-                  defaultMessage="View single document"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <div data-test-subj="docViewer">{children}</div>
     </td>

@@ -52,10 +52,10 @@ export interface CrawlCustomSettingsFlyoutLogicActions {
 }
 
 const filterSeedUrlsByDomainUrls = (seedUrls: string[], domainUrls: string[]): string[] => {
-  const domainUrlMap = domainUrls.reduce(
-    (acc, domainUrl) => ({ ...acc, [domainUrl]: true }),
-    {} as { [key: string]: boolean }
-  );
+  const domainUrlMap = domainUrls.reduce((acc, domainUrl) => {
+    acc[domainUrl] = true;
+    return acc;
+  }, {} as { [key: string]: boolean });
 
   return seedUrls.filter((seedUrl) => {
     const { domain } = extractDomainAndEntryPointFromUrl(seedUrl);
@@ -86,6 +86,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       [],
       {
         showFlyout: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectCustomEntryPointUrls: (_, { entryPointUrls }) => entryPointUrls,
       },
     ],
@@ -93,12 +94,14 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       [],
       {
         showFlyout: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectCustomSitemapUrls: (_, { sitemapUrls }) => sitemapUrls,
       },
     ],
     domainConfigs: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onRecieveDomainConfigData: (_, { domainConfigs }) => domainConfigs,
       },
     ],
@@ -106,6 +109,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       true,
       {
         showFlyout: () => true,
+        // @ts-expect-error upgrade typescript v5.1.6
         toggleIncludeSitemapsInRobotsTxt: (includeSitemapsInRobotsTxt) =>
           !includeSitemapsInRobotsTxt,
       },
@@ -136,6 +140,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       2,
       {
         showFlyout: () => 2,
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectMaxCrawlDepth: (_, { maxCrawlDepth }) => maxCrawlDepth,
       },
     ],
@@ -143,6 +148,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       [],
       {
         showFlyout: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectDomainUrls: (_, { domainUrls }) => domainUrls,
       },
     ],
@@ -150,7 +156,9 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       [],
       {
         showFlyout: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectEntryPointUrls: (_, { entryPointUrls }) => entryPointUrls,
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectDomainUrls: (entryPointUrls, { domainUrls }) =>
           filterSeedUrlsByDomainUrls(entryPointUrls, domainUrls),
       },
@@ -159,7 +167,9 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       [],
       {
         showFlyout: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectSitemapUrls: (_, { sitemapUrls }) => sitemapUrls,
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectDomainUrls: (selectedSitemapUrls, { domainUrls }) =>
           filterSeedUrlsByDomainUrls(selectedSitemapUrls, domainUrls),
       },
@@ -173,10 +183,10 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
     domainConfigMap: [
       (selectors) => [selectors.domainConfigs],
       (domainConfigs: DomainConfig[]) =>
-        domainConfigs.reduce(
-          (acc, domainConfig) => ({ ...acc, [domainConfig.name]: domainConfig }),
-          {} as { [key: string]: DomainConfig }
-        ),
+        domainConfigs.reduce((acc, domainConfig) => {
+          acc[domainConfig.name] = domainConfig;
+          return acc;
+        }, {} as { [key: string]: DomainConfig }),
     ],
     entryPointUrls: [
       (selectors) => [selectors.domainConfigMap, selectors.selectedDomainUrls],

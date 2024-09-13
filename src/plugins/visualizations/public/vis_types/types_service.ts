@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 import { BaseVisType } from './base_vis_type';
 import { VisTypeDefinition } from './types';
 import { VisGroups } from './vis_groups_enum';
+import { VisParams } from '../../common';
 
 /**
  * Vis Types Service
@@ -18,13 +20,10 @@ import { VisGroups } from './vis_groups_enum';
  */
 export class TypesService {
   private types: Record<string, BaseVisType<any>> = {};
-  private unregisteredHiddenTypes: string[] = [];
 
-  private registerVisualization<TVisParam>(visDefinition: BaseVisType<TVisParam>) {
-    if (this.unregisteredHiddenTypes.includes(visDefinition.name)) {
-      visDefinition.hidden = true;
-    }
-
+  private registerVisualization<TVisParam extends VisParams>(
+    visDefinition: BaseVisType<TVisParam>
+  ) {
     if (this.types[visDefinition.name]) {
       throw new Error('type already exists!');
     }
@@ -37,7 +36,9 @@ export class TypesService {
        * registers a visualization type
        * @param config - visualization type definition
        */
-      createBaseVisualization: <TVisParams>(config: VisTypeDefinition<TVisParams>): void => {
+      createBaseVisualization: <TVisParams extends VisParams>(
+        config: VisTypeDefinition<TVisParams>
+      ): void => {
         const vis = new BaseVisType(config);
         this.registerVisualization(vis);
       },
@@ -47,19 +48,6 @@ export class TypesService {
        * @param {VisTypeAlias} config - visualization alias definition
        */
       registerAlias: visTypeAliasRegistry.add,
-      /**
-       * allows to hide specific visualization types from create visualization dialog
-       * @param {string[]} typeNames - list of type ids to hide
-       */
-      hideTypes: (typeNames: string[]): void => {
-        typeNames.forEach((name: string) => {
-          if (this.types[name]) {
-            this.types[name].hidden = true;
-          } else {
-            this.unregisteredHiddenTypes.push(name);
-          }
-        });
-      },
     };
   }
 
@@ -69,7 +57,9 @@ export class TypesService {
        * returns specific visualization or undefined if not found
        * @param {string} visualization - id of visualization to return
        */
-      get: <TVisParams>(visualization: string): BaseVisType<TVisParams> | undefined => {
+      get: <TVisParams extends VisParams>(
+        visualization: string
+      ): BaseVisType<TVisParams> | undefined => {
         return this.types[visualization];
       },
       /**

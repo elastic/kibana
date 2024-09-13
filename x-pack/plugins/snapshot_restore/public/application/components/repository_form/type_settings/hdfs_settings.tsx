@@ -18,8 +18,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { CodeEditor } from '@kbn/code-editor';
 import { HDFSRepository, Repository, SourceRepository } from '../../../../../common/types';
-import { EuiCodeEditor } from '../../../../shared_imports';
 import { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 
@@ -181,7 +181,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.loadDefaults)}
           error={settingErrors.loadDefaults}
@@ -225,7 +224,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.compress)}
           error={settingErrors.compress}
@@ -347,25 +345,20 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             />
           }
         >
-          <EuiCodeEditor
-            mode="json"
-            theme="textmate"
-            width="100%"
+          <CodeEditor
+            languageId="json"
             value={additionalConf}
-            setOptions={{
-              showLineNumbers: false,
+            data-test-subj="codeEditor"
+            height={250}
+            options={{
+              lineNumbers: 'off',
               tabSize: 2,
-              maxLines: Infinity,
+              automaticLayout: true,
             }}
-            editorProps={{
-              $blockScrolling: Infinity,
-            }}
-            showGutter={false}
-            minLines={6}
             aria-label={i18n.translate(
               'xpack.snapshotRestore.repositoryForm.typeHDFS.configurationAriaLabel',
               {
-                defaultMessage: `Additional configuration for HDFS repository '{name}'`,
+                defaultMessage: `Additional configuration for HDFS repository ''{name}''`,
                 values: { name },
               }
             )}
@@ -391,7 +384,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
                 setIsConfInvalid(true);
               }
             }}
-            data-test-subj="codeEditor"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -433,7 +425,6 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}

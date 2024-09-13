@@ -1,0 +1,85 @@
+title: SLO definition response
+type: object
+required:
+  - id
+  - name
+  - description
+  - indicator
+  - timeWindow
+  - budgetingMethod
+  - objective
+  - settings
+  - revision
+  - enabled
+  - groupBy
+  - tags
+  - createdAt
+  - updatedAt
+  - version
+properties:
+  id:
+    description: The identifier of the SLO.
+    type: string
+    example: 8853df00-ae2e-11ed-90af-09bb6422b258
+  name:
+    description: The name of the SLO.
+    type: string
+    example: My Service SLO
+  description:
+    description: The description of the SLO.
+    type: string
+    example: My SLO description
+  indicator:
+    discriminator:
+      propertyName: type
+      mapping:
+        sli.apm.transactionErrorRate: './indicator_properties_apm_availability.yaml'
+        sli.kql.custom: './indicator_properties_custom_kql.yaml'
+        sli.apm.transactionDuration: './indicator_properties_apm_latency.yaml'
+        sli.metric.custom: './indicator_properties_custom_metric.yaml'
+        sli.histogram.custom: './indicator_properties_histogram.yaml'
+        sli.metric.timeslice: './indicator_properties_timeslice_metric.yaml'
+    oneOf:
+      - $ref: "indicator_properties_custom_kql.yaml"
+      - $ref: "indicator_properties_apm_availability.yaml"
+      - $ref: "indicator_properties_apm_latency.yaml"
+      - $ref: "indicator_properties_custom_metric.yaml"
+      - $ref: "indicator_properties_histogram.yaml"
+      - $ref: "indicator_properties_timeslice_metric.yaml"
+  timeWindow:
+    $ref: "time_window.yaml"
+  budgetingMethod:
+    $ref: "budgeting_method.yaml"
+  objective:
+    $ref: "objective.yaml"
+  settings:
+    $ref: "settings.yaml"
+  revision:
+    description: The SLO revision
+    type: number
+    example: 2
+  enabled:
+    description: Indicate if the SLO is enabled
+    type: boolean
+    example: true
+  groupBy:
+    description: optional group by field to use to generate an SLO per distinct value
+    type: string
+    example: "some.field"
+  tags:
+    description: List of tags
+    type: array
+    items:
+      type: string
+  createdAt:
+    description: The creation date
+    type: string
+    example: "2023-01-12T10:03:19.000Z"
+  updatedAt:
+    description: The last update date
+    type: string
+    example: "2023-01-12T10:03:19.000Z"
+  version:
+    description: The internal SLO version
+    type: number
+    example: 2

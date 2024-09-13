@@ -8,31 +8,32 @@
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { UserActionFindRequestTypes } from '../../../../common/types/api';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
-import type {
-  CaseUserActionAttributesWithoutConnectorId,
-  UserActionFindRequest,
-  ActionTypeValues,
-  FindTypeField,
-  CaseUserActionInjectedAttributes,
-} from '../../../../common/api';
-import { Actions, ActionTypes, CommentType } from '../../../../common/api';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
 
-import type { ServiceContext } from '../types';
+import type { FindOptions, ServiceContext } from '../types';
 import { transformFindResponseToExternalModel, transformToExternalModel } from '../transform';
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../../../client/utils';
-
-interface FindOptions extends UserActionFindRequest {
-  caseId: string;
-  filter?: KueryNode;
-}
+import type {
+  UserActionPersistedAttributes,
+  UserActionSavedObjectTransformed,
+  UserActionTransformedAttributes,
+} from '../../../common/types/user_actions';
+import { bulkDecodeSOAttributes } from '../../utils';
+import { UserActionTransformedAttributesRt } from '../../../common/types/user_actions';
+import type { UserActionType } from '../../../../common/types/domain';
+import {
+  UserActionActions,
+  UserActionTypes,
+  AttachmentType,
+} from '../../../../common/types/domain';
 
 export class UserActionFinder {
   constructor(private readonly context: ServiceContext) {}
@@ -44,29 +45,40 @@ export class UserActionFinder {
     page,
     perPage,
     filter,
-  }: FindOptions): Promise<SavedObjectsFindResponse<CaseUserActionInjectedAttributes>> {
+  }: FindOptions): Promise<SavedObjectsFindResponse<UserActionTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to find user actions for case id: ${caseId}`);
 
       const finalFilter = combineFilters([filter, UserActionFinder.buildFilter(types)]);
 
       const userActions =
-        await this.context.unsecuredSavedObjectsClient.find<CaseUserActionAttributesWithoutConnectorId>(
-          {
-            type: CASE_USER_ACTION_SAVED_OBJECT,
-            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-            page: page ?? DEFAULT_PAGE,
-            perPage: perPage ?? DEFAULT_PER_PAGE,
-            sortField: 'created_at',
-            sortOrder: sortOrder ?? 'asc',
-            filter: finalFilter,
-          }
-        );
+        await this.context.unsecuredSavedObjectsClient.find<UserActionPersistedAttributes>({
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+          page: page ?? DEFAULT_PAGE,
+          perPage: perPage ?? DEFAULT_PER_PAGE,
+          sortField: 'created_at',
+          sortOrder: sortOrder ?? 'asc',
+          filter: finalFilter,
+        });
 
-      return transformFindResponseToExternalModel(
+      const res = transformFindResponseToExternalModel(
         userActions,
         this.context.persistableStateAttachmentTypeRegistry
       );
+
+      const decodeRes = bulkDecodeSOAttributes(
+        res.saved_objects,
+        UserActionTransformedAttributesRt
+      );
+
+      return {
+        ...res,
+        saved_objects: res.saved_objects.map((so) => ({
+          ...so,
+          attributes: decodeRes.get(so.id) as UserActionTransformedAttributes,
+        })),
+      };
     } catch (error) {
       this.context.log.error(`Error finding user actions for case id: ${caseId}: ${error}`);
       throw error;
@@ -78,7 +90,7 @@ export class UserActionFinder {
     return combineFilters(filters, NodeBuilderOperators.or);
   }
 
-  private static buildFilterType(type: FindTypeField): KueryNode | undefined {
+  private static buildFilterType(type: UserActionFindRequestTypes): KueryNode | undefined {
     switch (type) {
       case 'action':
         return UserActionFinder.buildActionFilter();
@@ -95,7 +107,7 @@ export class UserActionFinder {
 
   private static buildActionFilter(): KueryNode | undefined {
     const filterForUserActionsExcludingComment = fromKueryExpression(
-      `not ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${CommentType.user}`
+      `not ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${AttachmentType.user}`
     );
 
     return filterForUserActionsExcludingComment;
@@ -105,13 +117,13 @@ export class UserActionFinder {
     return combineFilters(
       [
         buildFilter({
-          filters: [ActionTypes.comment],
+          filters: [UserActionTypes.comment],
           field: 'type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
         }),
         buildFilter({
-          filters: [CommentType.user],
+          filters: [AttachmentType.user],
           field: 'payload.comment.type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -125,13 +137,13 @@ export class UserActionFinder {
     return combineFilters(
       [
         buildFilter({
-          filters: [ActionTypes.comment],
+          filters: [UserActionTypes.comment],
           field: 'type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
         }),
         buildFilter({
-          filters: [CommentType.alert],
+          filters: [AttachmentType.alert],
           field: 'payload.comment.type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -145,13 +157,13 @@ export class UserActionFinder {
     return combineFilters(
       [
         buildFilter({
-          filters: [ActionTypes.comment],
+          filters: [UserActionTypes.comment],
           field: 'type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
         }),
         buildFilter({
-          filters: [CommentType.persistableState, CommentType.externalReference],
+          filters: [AttachmentType.persistableState, AttachmentType.externalReference],
           field: 'payload.comment.type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -161,7 +173,7 @@ export class UserActionFinder {
     );
   }
 
-  private static buildGenericTypeFilter(type: ActionTypeValues): KueryNode | undefined {
+  private static buildGenericTypeFilter(type: UserActionType): KueryNode | undefined {
     return buildFilter({
       filters: [type],
       field: 'type',
@@ -176,19 +188,19 @@ export class UserActionFinder {
   }: {
     caseId: string;
     filter?: KueryNode;
-  }): Promise<Array<SavedObject<CaseUserActionInjectedAttributes>>> {
+  }): Promise<UserActionSavedObjectTransformed[]> {
     try {
       this.context.log.debug('Attempting to find status changes');
 
       const updateActionFilter = buildFilter({
-        filters: Actions.update,
+        filters: UserActionActions.update,
         field: 'action',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,
       });
 
       const statusChangeFilter = buildFilter({
-        filters: ActionTypes.status,
+        filters: UserActionTypes.status,
         field: 'type',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -197,7 +209,7 @@ export class UserActionFinder {
       const combinedFilters = combineFilters([updateActionFilter, statusChangeFilter, filter]);
 
       const finder =
-        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<CaseUserActionAttributesWithoutConnectorId>(
+        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<UserActionPersistedAttributes>(
           {
             type: CASE_USER_ACTION_SAVED_OBJECT,
             hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
@@ -208,12 +220,23 @@ export class UserActionFinder {
           }
         );
 
-      let userActions: Array<SavedObject<CaseUserActionInjectedAttributes>> = [];
+      let userActions: UserActionSavedObjectTransformed[] = [];
+
       for await (const findResults of finder.find()) {
         userActions = userActions.concat(
-          findResults.saved_objects.map((so) =>
-            transformToExternalModel(so, this.context.persistableStateAttachmentTypeRegistry)
-          )
+          findResults.saved_objects.map((so) => {
+            const res = transformToExternalModel(
+              so,
+              this.context.persistableStateAttachmentTypeRegistry
+            );
+
+            const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
+
+            return {
+              ...res,
+              attributes: decodeRes,
+            };
+          })
         );
       }
 

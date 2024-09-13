@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { waitFor, screen } from '@testing-library/react';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../common/mock';
 import {
   noCasesPermissions,
@@ -18,6 +18,7 @@ import {
 import { AlertPropertyActions } from './alert_property_actions';
 
 describe('AlertPropertyActions', () => {
+  let user: UserEvent;
   let appMock: AppMockRenderer;
 
   const props = {
@@ -26,94 +27,90 @@ describe('AlertPropertyActions', () => {
     onDelete: jest.fn(),
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     jest.clearAllMocks();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+    });
+    appMock = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    await appMock.clearQueryCache();
   });
 
   it('renders the correct number of actions', async () => {
-    const result = appMock.render(<AlertPropertyActions {...props} />);
+    appMock.render(<AlertPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
+    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await user.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(result.getByTestId('property-actions-user-action-group').children.length).toBe(1);
-    expect(result.queryByTestId('property-actions-user-action-minusInCircle')).toBeInTheDocument();
-  });
+    expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(
+      1
+    );
 
-  it('renders the modal info correctly for one alert', async () => {
-    const result = appMock.render(<AlertPropertyActions {...props} />);
-
-    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
-
-    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
-
-    expect(result.queryByTestId('property-actions-user-action-minusInCircle')).toBeInTheDocument();
-
-    userEvent.click(result.getByTestId('property-actions-user-action-minusInCircle'));
-
-    await waitFor(() => {
-      expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
-    });
-
-    expect(result.getByTestId('confirmModalTitleText')).toHaveTextContent('Remove alert');
-    expect(result.getByText('Remove')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('property-actions-user-action-minusInCircle')
+    ).toBeInTheDocument();
   });
 
   it('renders the modal info correctly for multiple alert', async () => {
-    const result = appMock.render(<AlertPropertyActions {...props} totalAlerts={2} />);
+    appMock.render(<AlertPropertyActions {...props} totalAlerts={2} />);
 
-    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
+    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await user.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(result.queryByTestId('property-actions-user-action-minusInCircle')).toBeInTheDocument();
+    await user.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
 
-    userEvent.click(result.getByTestId('property-actions-user-action-minusInCircle'));
+    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
-    });
-
-    expect(result.getByTestId('confirmModalTitleText')).toHaveTextContent('Remove alerts');
-    expect(result.getByText('Remove')).toBeInTheDocument();
+    expect(await screen.findByTestId('confirmModalTitleText')).toHaveTextContent('Remove alerts');
+    expect(await screen.findByText('Remove')).toBeInTheDocument();
   });
 
   it('remove alerts correctly', async () => {
-    const result = appMock.render(<AlertPropertyActions {...props} />);
+    appMock.render(<AlertPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
+    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await user.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(result.queryByTestId('property-actions-user-action-minusInCircle')).toBeInTheDocument();
+    await user.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
 
-    userEvent.click(result.getByTestId('property-actions-user-action-minusInCircle'));
+    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+
+    await user.click(await screen.findByText('Remove'));
 
     await waitFor(() => {
-      expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+      expect(props.onDelete).toHaveBeenCalled();
     });
-
-    userEvent.click(result.getByText('Remove'));
-    expect(props.onDelete).toHaveBeenCalled();
   });
 
   it('does not show the property actions without delete permissions', async () => {
     appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
-    const result = appMock.render(<AlertPropertyActions {...props} />);
+    appMock.render(<AlertPropertyActions {...props} />);
 
-    expect(result.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
   });
 
   it('does show the property actions with only delete permissions', async () => {
     appMock = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
-    const result = appMock.render(<AlertPropertyActions {...props} />);
+    appMock.render(<AlertPropertyActions {...props} />);
 
-    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
+    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
   });
 });

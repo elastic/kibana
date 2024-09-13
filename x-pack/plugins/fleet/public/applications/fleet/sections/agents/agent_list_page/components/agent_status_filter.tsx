@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import type { EuiSelectableOption } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import {
   EuiFilterButton,
-  EuiFilterSelectItem,
   EuiNotificationBadge,
   EuiPopover,
+  EuiSelectable,
   EuiText,
   EuiTourStep,
+  EuiLink,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { useInactiveAgentsCalloutHasBeenDismissed, useLastSeenInactiveAgentsCount } from '../hooks';
+import { useDismissableTour } from '../../../../../../hooks/use_dismissable_tour';
+
+import { useLastSeenInactiveAgentsCount } from '../hooks';
 
 const statusFilters = [
   {
@@ -63,17 +69,12 @@ const LeftpaddedNotificationBadge = styled(EuiNotificationBadge)`
   margin-left: 10px;
 `;
 
-const TourStepNoHeaderFooter = styled(EuiTourStep)`
-  .euiTourFooter {
-    display: none;
-  }
-  .euiTourHeader {
-    display: none;
-  }
-`;
-
-const InactiveAgentsTourStep: React.FC<{ isOpen: boolean }> = ({ children, isOpen }) => (
-  <TourStepNoHeaderFooter
+const InactiveAgentsTourStep: React.FC<{
+  children: React.ReactNode;
+  isOpen: boolean;
+  setInactiveAgentsCalloutHasBeenDismissed: (val: boolean) => void;
+}> = ({ children, isOpen, setInactiveAgentsCalloutHasBeenDismissed }) => (
+  <EuiTourStep
     content={
       <EuiText size="s">
         <FormattedMessage
@@ -90,9 +91,21 @@ const InactiveAgentsTourStep: React.FC<{ isOpen: boolean }> = ({ children, isOpe
     onFinish={() => {}}
     anchorPosition="upCenter"
     maxWidth={280}
+    footerAction={
+      <EuiLink
+        onClick={() => {
+          setInactiveAgentsCalloutHasBeenDismissed(true);
+        }}
+      >
+        <FormattedMessage
+          id="xpack.fleet.addAgentHelpPopover.footActionButton"
+          defaultMessage="Got it"
+        />
+      </EuiLink>
+    }
   >
     {children as React.ReactElement}
-  </TourStepNoHeaderFooter>
+  </EuiTourStep>
 );
 
 export const AgentStatusFilter: React.FC<{
@@ -102,6 +115,7 @@ export const AgentStatusFilter: React.FC<{
   totalInactiveAgents: number;
   isOpenByDefault?: boolean;
 }> = (props) => {
+  const { euiTheme } = useEuiTheme();
   const {
     selectedStatus,
     onSelectedStatusChange,
@@ -111,8 +125,8 @@ export const AgentStatusFilter: React.FC<{
   } = props;
   const [lastSeenInactiveAgentsCount, setLastSeenInactiveAgentsCount] =
     useLastSeenInactiveAgentsCount();
-  const [inactiveAgentsCalloutHasBeenDismissed, setInactiveAgentsCalloutHasBeenDismissed] =
-    useInactiveAgentsCalloutHasBeenDismissed();
+  const { isHidden: inactiveAgentsCalloutHasBeenDismissed, dismiss: dismissInactiveAgentsCallout } =
+    useDismissableTour('INACTIVE_AGENTS');
 
   const newlyInactiveAgentsCount = useMemo(() => {
     const newVal = totalInactiveAgents - lastSeenInactiveAgentsCount;
@@ -148,17 +162,58 @@ export const AgentStatusFilter: React.FC<{
 
   const updateIsStatusFilterOpen = (isOpen: boolean) => {
     if (isOpen && newlyInactiveAgentsCount > 0 && !inactiveAgentsCalloutHasBeenDismissed) {
-      setInactiveAgentsCalloutHasBeenDismissed(true);
+      dismissInactiveAgentsCallout();
     }
 
     setIsStatusFilterOpen(isOpen);
   };
+
+  const getOptions = useCallback((): EuiSelectableOption[] => {
+    return statusFilters.map(({ label, status }) => {
+      return {
+        label,
+        checked: selectedStatus.includes(status) ? 'on' : undefined,
+        key: status,
+        append:
+          status === 'inactive' && newlyInactiveAgentsCount > 0 ? (
+            <LeftpaddedNotificationBadge>{newlyInactiveAgentsCount}</LeftpaddedNotificationBadge>
+          ) : undefined,
+      };
+    });
+  }, [selectedStatus, newlyInactiveAgentsCount]);
+
+  const [options, setOptions] = useState<EuiSelectableOption[]>(getOptions());
+
+  useEffect(() => {
+    setOptions(getOptions());
+  }, [getOptions]);
+
+  const onOptionsChange = useCallback(
+    (newOptions: EuiSelectableOption[]) => {
+      setOptions(newOptions);
+      newOptions.forEach((option, index) => {
+        if (option.checked !== options[index].checked) {
+          const status = option.key!;
+          if (option.checked !== 'on') {
+            onSelectedStatusChange([...selectedStatus.filter((s) => s !== status)]);
+          } else {
+            onSelectedStatusChange([...selectedStatus, status]);
+          }
+          return;
+        }
+      });
+    },
+    [onSelectedStatusChange, options, selectedStatus]
+  );
+
   return (
     <InactiveAgentsTourStep
       isOpen={newlyInactiveAgentsCount > 0 && !inactiveAgentsCalloutHasBeenDismissed}
+      setInactiveAgentsCalloutHasBeenDismissed={dismissInactiveAgentsCallout}
     >
       <EuiPopover
         ownFocus
+        zIndex={Number(euiTheme.levels.header) - 1}
         button={
           <EuiFilterButton
             iconType="arrowDown"
@@ -177,30 +232,19 @@ export const AgentStatusFilter: React.FC<{
         closePopover={() => updateIsStatusFilterOpen(false)}
         panelPaddingSize="none"
       >
-        <div className="euiFilterSelect__items">
-          {statusFilters.map(({ label, status }, idx) => (
-            <EuiFilterSelectItem
-              key={idx}
-              checked={selectedStatus.includes(status) ? 'on' : undefined}
-              onClick={() => {
-                if (selectedStatus.includes(status)) {
-                  onSelectedStatusChange([...selectedStatus.filter((s) => s !== status)]);
-                } else {
-                  onSelectedStatusChange([...selectedStatus, status]);
-                }
-              }}
-            >
-              <span>
-                {label}
-                {status === 'inactive' && newlyInactiveAgentsCount > 0 && (
-                  <LeftpaddedNotificationBadge>
-                    {newlyInactiveAgentsCount}
-                  </LeftpaddedNotificationBadge>
-                )}
-              </span>
-            </EuiFilterSelectItem>
-          ))}
-        </div>
+        <EuiSelectable
+          options={options}
+          onChange={onOptionsChange}
+          data-test-subj="agentList.agentStatusFilterOptions"
+          listProps={{
+            paddingSize: 's',
+            style: {
+              minWidth: 140,
+            },
+          }}
+        >
+          {(list) => list}
+        </EuiSelectable>
       </EuiPopover>
     </InactiveAgentsTourStep>
   );

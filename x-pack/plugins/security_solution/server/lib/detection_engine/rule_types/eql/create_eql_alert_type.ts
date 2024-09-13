@@ -5,34 +5,29 @@
  * 2.0.
  */
 
-import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import type { EqlRuleParams } from '../../rule_schema';
-import { eqlRuleParams } from '../../rule_schema';
+import { EqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from './eql';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateRuleOptions, SecurityAlertType, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
+import type { BuildReasonMessage } from '../utils/reason_formatters';
+import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
+import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
-  const { version } = createOptions;
+  const { experimentalFeatures, version, licensing } = createOptions;
   return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
     validate: {
       params: {
         validate: (object: unknown) => {
-          const [validated, errors] = validateNonExact(object, eqlRuleParams);
-          if (errors != null) {
-            throw new Error(errors);
-          }
-          if (validated == null) {
-            throw new Error('Validation of rule params failed');
-          }
-          return validated;
+          return EqlRuleParams.parse(object);
         },
         /**
          * validate rule params when rule is bulk edited (update and created in future as well)
@@ -47,6 +42,9 @@ export const createEqlAlertType = (
         },
       },
     },
+    schemas: {
+      params: { type: 'zod', schema: EqlRuleParams },
+    },
     actionGroups: [
       {
         id: 'default',
@@ -59,6 +57,7 @@ export const createEqlAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
+    category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
@@ -75,10 +74,37 @@ export const createEqlAlertType = (
           secondaryTimestamp,
           exceptionFilter,
           unprocessedExceptions,
+          mergeStrategy,
+          alertTimestampOverride,
+          publicBaseUrl,
+          alertWithSuppression,
         },
         services,
         state,
+        spaceId,
       } = execOptions;
+
+      const wrapSuppressedHits = (
+        events: SignalSourceHit[],
+        buildReasonMessage: BuildReasonMessage
+      ) =>
+        wrapSuppressedAlerts({
+          events,
+          spaceId,
+          completeRule,
+          mergeStrategy,
+          indicesToQuery: inputIndex,
+          buildReasonMessage,
+          alertTimestampOverride,
+          ruleExecutionLogger,
+          publicBaseUrl,
+          primaryTimestamp,
+          secondaryTimestamp,
+        });
+      const isNonSeqAlertSuppressionActive = await getIsAlertSuppressionActive({
+        alertSuppression: completeRule.ruleParams.alertSuppression,
+        licensing,
+      });
       const result = await eqlExecutor({
         completeRule,
         tuple,
@@ -94,6 +120,11 @@ export const createEqlAlertType = (
         secondaryTimestamp,
         exceptionFilter,
         unprocessedExceptions,
+        wrapSuppressedHits,
+        alertTimestampOverride,
+        alertWithSuppression,
+        isAlertSuppressionActive: isNonSeqAlertSuppressionActive,
+        experimentalFeatures,
       });
       return { ...result, state };
     },

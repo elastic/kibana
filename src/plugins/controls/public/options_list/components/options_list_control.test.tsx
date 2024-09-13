@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
-
+import { render } from '@testing-library/react';
+import { OptionsListEmbeddableContext } from '../embeddable/options_list_embeddable';
 import { OptionsListComponentState, OptionsListReduxState } from '../types';
-import { ControlOutput, OptionsListEmbeddableInput } from '../..';
-import { mockOptionsListReduxEmbeddableTools } from '../../../common/mocks';
+import { mockOptionsListEmbeddable } from '../../../common/mocks';
 import { OptionsListControl } from './options_list_control';
 import { BehaviorSubject } from 'rxjs';
+import { OptionsListEmbeddableInput } from '..';
+import { ControlOutput } from '../../types';
 
 describe('Options list control', () => {
   const defaultProps = {
@@ -30,16 +31,16 @@ describe('Options list control', () => {
   }
 
   async function mountComponent(options?: Partial<MountOptions>) {
-    const mockReduxEmbeddableTools = await mockOptionsListReduxEmbeddableTools({
+    const optionsListEmbeddable = await mockOptionsListEmbeddable({
       componentState: options?.componentState ?? {},
       explicitInput: options?.explicitInput ?? {},
       output: options?.output ?? {},
     } as Partial<OptionsListReduxState>);
 
-    return mountWithIntl(
-      <mockReduxEmbeddableTools.Wrapper>
+    return render(
+      <OptionsListEmbeddableContext.Provider value={optionsListEmbeddable}>
         <OptionsListControl {...defaultProps} />
-      </mockReduxEmbeddableTools.Wrapper>
+      </OptionsListEmbeddableContext.Provider>
     );
   }
 
@@ -47,15 +48,15 @@ describe('Options list control', () => {
     const control = await mountComponent({
       explicitInput: { id: 'testExists', exclude: false, existsSelected: true },
     });
-    const existsOption = findTestSubject(control, 'optionsList-control-testExists');
-    expect(existsOption.text()).toBe('Exists');
+    const existsOption = control.getByTestId('optionsList-control-testExists');
+    expect(existsOption).toHaveTextContent('Exists');
   });
 
   test('if exclude = true and existsSelected = true, then the option should read "Does not exist"', async () => {
     const control = await mountComponent({
       explicitInput: { id: 'testDoesNotExist', exclude: true, existsSelected: true },
     });
-    const existsOption = findTestSubject(control, 'optionsList-control-testDoesNotExist');
-    expect(existsOption.text()).toBe('DOES NOT Exist');
+    const existsOption = control.getByTestId('optionsList-control-testDoesNotExist');
+    expect(existsOption).toHaveTextContent('DOES NOT Exist');
   });
 });

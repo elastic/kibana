@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -32,16 +33,12 @@ export interface CompositeEditorProps {
 }
 
 export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
-  const { links, existingConcreteFields, subfields$ } = useFieldEditorContext();
+  const { links, subfields$ } = useFieldEditorContext();
   const subfields = useObservable(subfields$) || {};
 
   return (
     <div data-test-subj="compositeEditor">
-      <ScriptField
-        existingConcreteFields={existingConcreteFields}
-        links={links}
-        placeholder={"emit('field_name', 'hello world');"}
-      />
+      <ScriptField links={links} placeholder={"emit('field_name', 'hello world');"} />
       <EuiSpacer size="xl" />
       <>
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
@@ -71,7 +68,7 @@ export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
         </EuiFlexGroup>
         {Object.entries(subfields).map(([key, itemValue], idx) => {
           return (
-            <div>
+            <div key={key}>
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem>
                   <EuiFieldText value={key} disabled={true} />

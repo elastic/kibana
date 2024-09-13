@@ -21,6 +21,8 @@ import {
   securitySolutionOnlyReadAlerts,
   securitySolutionOnlyReadNoIndexAlerts,
   securitySolutionOnlyReadDelete,
+  noCasesConnectors as noCasesConnectorRole,
+  onlyActions as onlyActionsRole,
 } from './roles';
 import { User } from './types';
 
@@ -121,9 +123,15 @@ export const noKibanaPrivileges: User = {
 };
 
 export const noCasesPrivilegesSpace1: User = {
-  username: 'no_kibana_privileges_space1',
-  password: 'no_kibana_privileges_space1',
+  username: 'no_cases_privileges_space1',
+  password: 'no_cases_privileges_space1',
   roles: [noCasesPrivilegesSpace1Role.name],
+};
+
+export const noCasesConnectors: User = {
+  username: 'no_cases_connectors',
+  password: 'no_cases_connectors',
+  roles: [noCasesConnectorRole.name],
 };
 
 /**
@@ -134,6 +142,12 @@ export const secOnlySpacesAll: User = {
   username: 'sec_only_all_spaces',
   password: 'sec_only_all_spaces',
   roles: [securitySolutionOnlyAllSpacesRole.name],
+};
+
+export const onlyActions: User = {
+  username: 'only_actions',
+  password: 'only_actions',
+  roles: [onlyActionsRole.name],
 };
 
 export const users = [
@@ -154,4 +168,6 @@ export const users = [
   noKibanaPrivileges,
   noCasesPrivilegesSpace1,
   testDisabled,
+  noCasesConnectors,
+  onlyActions,
 ];

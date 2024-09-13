@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import path from 'path';
@@ -20,16 +21,7 @@ import { log as defaultLog } from '../utils/log';
 import { cache } from '../utils/cache';
 import { buildSnapshot, archiveForPlatform } from '../utils/build_snapshot';
 import { BASE_PATH } from '../paths';
-
-interface InstallSourceOptions {
-  sourcePath: string;
-  license?: string;
-  password?: string;
-  basePath?: string;
-  installPath?: string;
-  log?: ToolingLog;
-  esArgs?: string[];
-}
+import { InstallSourceOptions } from './types';
 
 /**
  * Installs ES from source
@@ -42,6 +34,7 @@ export async function installSource({
   installPath = path.resolve(basePath, 'source'),
   log = defaultLog,
   esArgs,
+  resources,
 }: InstallSourceOptions) {
   log.info('source path: %s', chalk.bold(sourcePath));
   log.info('install path: %s', chalk.bold(installPath));
@@ -68,6 +61,7 @@ export async function installSource({
     installPath,
     log,
     esArgs,
+    resources,
   });
 }
 

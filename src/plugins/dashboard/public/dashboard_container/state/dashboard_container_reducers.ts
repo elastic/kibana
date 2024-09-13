@@ -1,34 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { PayloadAction } from '@reduxjs/toolkit';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+
 import {
-  DashboardPublicState,
   DashboardReduxState,
+  DashboardPublicState,
   DashboardStateFromSaveModal,
   DashboardStateFromSettingsFlyout,
 } from '../types';
-import { DashboardContainerByValueInput } from '../../../common';
+import { DashboardContainerInput } from '../../../common';
 
 export const dashboardContainerReducers = {
   // ------------------------------------------------------------------------------
   // Content Reducers
   // ------------------------------------------------------------------------------
-  setControlGroupState: (
-    state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['controlGroupInput']>
-  ) => {
-    state.explicitInput.controlGroupInput = action.payload;
-  },
-
   setPanels: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['panels']>
+    action: PayloadAction<DashboardContainerInput['panels']>
   ) => {
     state.explicitInput.panels = action.payload;
   },
@@ -55,6 +51,10 @@ export const dashboardContainerReducers = {
     }
   },
 
+  setLastSavedId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.lastSavedId = action.payload;
+  },
+
   setStateFromSettingsFlyout: (
     state: DashboardReduxState,
     action: PayloadAction<DashboardStateFromSettingsFlyout>
@@ -75,37 +75,39 @@ export const dashboardContainerReducers = {
 
   setDescription: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['description']>
+    action: PayloadAction<DashboardContainerInput['description']>
   ) => {
     state.explicitInput.description = action.payload;
   },
 
   setViewMode: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['viewMode']>
+    action: PayloadAction<DashboardContainerInput['viewMode']>
   ) => {
+    // Managed Dashboards cannot be put into edit mode.
+    if (state.componentState.managed) {
+      state.explicitInput.viewMode = ViewMode.VIEW;
+      return;
+    }
     state.explicitInput.viewMode = action.payload;
   },
 
-  setTags: (
-    state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['tags']>
-  ) => {
+  setTags: (state: DashboardReduxState, action: PayloadAction<DashboardContainerInput['tags']>) => {
     state.explicitInput.tags = action.payload;
   },
 
   setTitle: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['title']>
+    action: PayloadAction<DashboardContainerInput['title']>
   ) => {
     state.explicitInput.title = action.payload;
   },
 
-  setSearchSessionId: (
+  setManaged: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['searchSessionId']>
+    action: PayloadAction<DashboardPublicState['managed']>
   ) => {
-    state.explicitInput.searchSessionId = action.payload;
+    state.componentState.managed = action.payload;
   },
 
   // ------------------------------------------------------------------------------
@@ -123,10 +125,25 @@ export const dashboardContainerReducers = {
     action: PayloadAction<DashboardPublicState['lastSavedInput']>
   ) => {
     state.componentState.lastSavedInput = action.payload;
+
+    // if we set the last saved input, it means we have saved this Dashboard - therefore clientside migrations have
+    // been serialized into the SO.
+    state.componentState.hasRunClientsideMigrations = false;
   },
 
+  /**
+   * Resets the dashboard to the last saved input, excluding:
+   * 1) The time range, unless `timeRestore` is `true` - if we include the time range on reset even when
+   *    `timeRestore` is `false`, this causes unecessary data fetches for the control group.
+   * 2) The view mode, since resetting should never impact this - sometimes the Dashboard saved objects
+   *    have this saved in and we don't want resetting to cause unexpected view mode changes.
+   */
   resetToLastSavedInput: (state: DashboardReduxState) => {
-    state.explicitInput = state.componentState.lastSavedInput;
+    state.explicitInput = {
+      ...state.componentState.lastSavedInput,
+      ...(!state.explicitInput.timeRestore && { timeRange: state.explicitInput.timeRange }),
+      viewMode: state.explicitInput.viewMode,
+    };
   },
 
   // ------------------------------------------------------------------------------
@@ -134,7 +151,7 @@ export const dashboardContainerReducers = {
   // ------------------------------------------------------------------------------
   setFiltersAndQuery: (
     state: DashboardReduxState,
-    action: PayloadAction<Pick<DashboardContainerByValueInput, 'filters' | 'query'>>
+    action: PayloadAction<Pick<DashboardContainerInput, 'filters' | 'query'>>
   ) => {
     state.explicitInput.filters = action.payload.filters;
     state.explicitInput.query = action.payload.query;
@@ -146,14 +163,14 @@ export const dashboardContainerReducers = {
 
   setFilters: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['filters']>
+    action: PayloadAction<DashboardContainerInput['filters']>
   ) => {
     state.explicitInput.filters = action.payload;
   },
 
   setQuery: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['query']>
+    action: PayloadAction<DashboardContainerInput['query']>
   ) => {
     state.explicitInput.query = action.payload;
   },
@@ -167,28 +184,28 @@ export const dashboardContainerReducers = {
 
   setTimeRestore: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['timeRestore']>
+    action: PayloadAction<DashboardContainerInput['timeRestore']>
   ) => {
     state.explicitInput.timeRestore = action.payload;
   },
 
   setTimeRange: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['timeRange']>
+    action: PayloadAction<DashboardContainerInput['timeRange']>
   ) => {
     state.explicitInput.timeRange = action.payload;
   },
 
   setRefreshInterval: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['refreshInterval']>
+    action: PayloadAction<DashboardContainerInput['refreshInterval']>
   ) => {
     state.explicitInput.refreshInterval = action.payload;
   },
 
   setTimeslice: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['timeslice']>
+    action: PayloadAction<DashboardContainerInput['timeslice']>
   ) => {
     state.explicitInput.timeslice = action.payload;
   },
@@ -207,5 +224,23 @@ export const dashboardContainerReducers = {
 
   setHasOverlays: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
     state.componentState.hasOverlays = action.payload;
+  },
+
+  setScrollToPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.scrollToPanelId = action.payload;
+  },
+
+  setHighlightPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.highlightPanelId = action.payload;
+  },
+  setFocusedPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.focusedPanelId = action.payload;
+  },
+
+  setAnimatePanelTransforms: (
+    state: DashboardReduxState,
+    action: PayloadAction<boolean | undefined>
+  ) => {
+    state.componentState.animatePanelTransforms = action.payload;
   },
 };

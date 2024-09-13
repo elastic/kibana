@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { useState, useEffect, useRef } from 'react';
-import type { HttpSetup, ToastsApi } from '@kbn/core/public';
-import type { ActionConnector } from '../../../../common/api';
+import { useQuery } from '@tanstack/react-query';
+import type { HttpSetup } from '@kbn/core/public';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { useCasesToast } from '../../../common/use_cases_toast';
+import type { ServerError } from '../../../types';
+import type { ActionConnector } from '../../../../common/types/domain';
+import { connectorsQueriesKeys } from '../constants';
 import { getIncidentTypes } from './api';
 import * as i18n from './translations';
 
@@ -15,80 +19,36 @@ type IncidentTypes = Array<{ id: number; name: string }>;
 
 interface Props {
   http: HttpSetup;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
   connector?: ActionConnector;
 }
 
-export interface UseGetIncidentTypes {
-  incidentTypes: IncidentTypes;
-  isLoading: boolean;
-}
-
-export const useGetIncidentTypes = ({
-  http,
-  toastNotifications,
-  connector,
-}: Props): UseGetIncidentTypes => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [incidentTypes, setIncidentTypes] = useState<IncidentTypes>([]);
-  const didCancel = useRef(false);
-  const abortCtrl = useRef(new AbortController());
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!connector) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        abortCtrl.current = new AbortController();
-        setIsLoading(true);
-
-        const res = await getIncidentTypes({
-          http,
-          signal: abortCtrl.current.signal,
-          connectorId: connector.id,
-        });
-
-        if (!didCancel.current) {
-          setIsLoading(false);
-          setIncidentTypes(res.data ?? []);
-          if (res.status && res.status === 'error') {
-            toastNotifications.addDanger({
-              title: i18n.INCIDENT_TYPES_API_ERROR,
-              text: `${res.serviceMessage ?? res.message}`,
-            });
-          }
+export const useGetIncidentTypes = ({ http, connector }: Props) => {
+  const { showErrorToast } = useCasesToast();
+  return useQuery<ActionTypeExecutorResult<IncidentTypes>, ServerError>(
+    connectorsQueriesKeys.resilientGetIncidentTypes(connector?.id ?? ''),
+    ({ signal }) => {
+      return getIncidentTypes({
+        http,
+        signal,
+        connectorId: connector?.id ?? '',
+      });
+    },
+    {
+      enabled: Boolean(connector),
+      staleTime: 60 * 1000, // one minute
+      onSuccess: (res) => {
+        if (res.status && res.status === 'error') {
+          showErrorToast(new Error(i18n.INCIDENT_TYPES_API_ERROR), {
+            title: i18n.INCIDENT_TYPES_API_ERROR,
+            toastMessage: `${res.serviceMessage ?? res.message}`,
+          });
         }
-      } catch (error) {
-        if (!didCancel.current) {
-          setIsLoading(false);
-          if (error.name !== 'AbortError') {
-            toastNotifications.addDanger({
-              title: i18n.INCIDENT_TYPES_API_ERROR,
-              text: error.message,
-            });
-          }
-        }
-      }
-    };
-
-    didCancel.current = false;
-    abortCtrl.current.abort();
-    fetchData();
-
-    return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
-    };
-  }, [http, connector, toastNotifications]);
-
-  return {
-    incidentTypes,
-    isLoading,
-  };
+      },
+      onError: (error: ServerError) => {
+        showErrorToast(error, { title: i18n.INCIDENT_TYPES_API_ERROR });
+      },
+    }
+  );
 };
+
+export type UseGetIncidentTypes = ReturnType<typeof useGetIncidentTypes>;

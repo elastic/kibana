@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 function detectCURLinLine(line: string) {
@@ -38,13 +39,13 @@ export function parseCURL(text: string) {
   const EscapedQuotes = /^((?:[^\\"']|\\.)+)/;
 
   const LooksLikeCurl = /^\s*curl\s+/;
-  const CurlVerb = /-X ?(GET|HEAD|POST|PUT|DELETE)/;
+  const CurlVerb = /-X ?(GET|HEAD|POST|PUT|DELETE|PATCH)/;
 
   const HasProtocol = /[\s"']https?:\/\//;
   const CurlRequestWithProto = /[\s"']https?:\/\/[^\/ ]+\/+([^\s"']+)/;
   const CurlRequestWithoutProto = /[\s"'][^\/ ]+\/+([^\s"']+)/;
   const CurlData = /^.+\s(--data|-d)\s*/;
-  const SenseLine = /^\s*(GET|HEAD|POST|PUT|DELETE)\s+\/?(.+)/;
+  const SenseLine = /^\s*(GET|HEAD|POST|PUT|DELETE|PATCH)\s+\/?(.+)/;
 
   if (lines.length > 0 && ExecutionComment.test(lines[0])) {
     lines.shift();

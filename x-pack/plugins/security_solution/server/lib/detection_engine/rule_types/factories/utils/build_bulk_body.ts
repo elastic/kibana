@@ -7,6 +7,7 @@
 
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import { requiredOptional } from '@kbn/zod-helpers';
 
 import type { BaseHit, SearchTypes } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
@@ -20,7 +21,7 @@ import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import { buildRuleNameFromMapping } from '../../utils/mappings/build_rule_name_from_mapping';
 import { buildSeverityFromMapping } from '../../utils/mappings/build_severity_from_mapping';
 import { buildRiskScoreFromMapping } from '../../utils/mappings/build_risk_score_from_mapping';
-import type { BaseFieldsLatest } from '../../../../../../common/detection_engine/schemas/alerts';
+import type { BaseFieldsLatest } from '../../../../../../common/api/detection_engine/model/alerts';
 import { stripNonEcsFields } from './strip_non_ecs_fields';
 
 const isSourceDoc = (
@@ -55,7 +56,9 @@ export const buildBulkBody = (
   buildReasonMessage: BuildReasonMessage,
   indicesToQuery: string[],
   alertTimestampOverride: Date | undefined,
-  ruleExecutionLogger: IRuleExecutionLogForExecutors
+  ruleExecutionLogger: IRuleExecutionLogForExecutors,
+  alertUuid: string,
+  publicBaseUrl?: string
 ): BaseFieldsLatest => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
 
@@ -90,7 +93,7 @@ export const buildBulkBody = (
         riskScoreOverride: buildRiskScoreFromMapping({
           eventSource: mergedDoc._source ?? {},
           riskScore: completeRule.ruleParams.riskScore,
-          riskScoreMapping: completeRule.ruleParams.riskScoreMapping,
+          riskScoreMapping: requiredOptional(completeRule.ruleParams.riskScoreMapping),
         }).riskScore,
       }
     : undefined;
@@ -101,6 +104,7 @@ export const buildBulkBody = (
     mergedDoc,
   });
 
+  const thresholdResult = mergedDoc._source?.threshold_result;
   if (isSourceDoc(mergedDoc)) {
     return {
       ...validatedSource,
@@ -111,12 +115,18 @@ export const buildBulkBody = (
         spaceId,
         reason,
         indicesToQuery,
+        alertUuid,
+        publicBaseUrl,
         alertTimestampOverride,
         overrides
       ),
       ...additionalAlertFields({
         ...mergedDoc,
-        _source: { ...mergedDoc._source, ...validatedEventFields },
+        _source: {
+          ...validatedSource,
+          ...validatedEventFields,
+          threshold_result: thresholdResult,
+        },
       }),
     };
   }

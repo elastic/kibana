@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -136,7 +137,7 @@ export interface SavedObjectsServiceSetup {
   /**
    * Returns the default index used for saved objects.
    */
-  getKibanaIndex: () => string;
+  getDefaultIndex: () => string;
 }
 
 /**
@@ -209,4 +210,27 @@ export interface SavedObjectsServiceStart {
    * {@link SavedObjectsType | saved object types}
    */
   getTypeRegistry: () => ISavedObjectTypeRegistry;
+  /**
+   * Returns the (alias to the) index that the specified saved object type is stored in.
+   *
+   * @param type The SO type to retrieve the index/alias for.
+   */
+  getIndexForType: (type: string) => string;
+  /**
+   * Returns the (alias to the) index that the specified saved object type is stored in.
+   *
+   * @remark if multiple types are living in the same index, duplicates will be removed.
+   * @param types The SO types to retrieve the index/alias for.
+   */
+  getIndicesForTypes: (types: string[]) => string[];
+  /**
+   * Returns the default index used for saved objects.
+   */
+  getDefaultIndex: () => string;
+  /**
+   * Returns all (aliases to) kibana system indices used for saved object storage.
+   *
+   * @remarks Only the indices effectively present in the current running environment will be returned.
+   */
+  getAllIndices: () => string[];
 }

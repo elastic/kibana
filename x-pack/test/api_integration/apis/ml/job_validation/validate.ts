@@ -13,7 +13,7 @@ import {
 } from '@kbn/ml-plugin/common/constants/messages.test.mock';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should recognize a valid job configuration`, async () => {
       const requestBody = {
-        duration: { start: 1560297859000, end: 1562975136000 },
+        duration: { start: 1686528259000, end: 1689205536000 },
         job: {
           job_id: 'test',
           description: '',
@@ -71,9 +71,9 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post('/api/ml/validate/job')
+        .post('/internal/ml/validate/job')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(requestBody);
       ml.api.assertResponseStatusCode(200, status, body);
 
@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should recognize a basic invalid job configuration and skip advanced checks', async () => {
       const requestBody = {
-        duration: { start: 1560297859000, end: 1562975136000 },
+        duration: { start: 1686528259000, end: 1689205536000 },
         job: {
           job_id: '-(*&^',
           description: '',
@@ -115,9 +115,9 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post('/api/ml/validate/job')
+        .post('/internal/ml/validate/job')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(requestBody);
       ml.api.assertResponseStatusCode(200, status, body);
 
@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should recognize non-basic issues in job configuration', async () => {
       const requestBody = {
-        duration: { start: 1560297859000, end: 1562975136000 },
+        duration: { start: 1686528259000, end: 1689205536000 },
         job: {
           job_id: 'test',
           description: '',
@@ -165,9 +165,9 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post('/api/ml/validate/job')
+        .post('/internal/ml/validate/job')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(requestBody);
       ml.api.assertResponseStatusCode(200, status, body);
 
@@ -175,7 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
       // and may vary between test environments, e.g. cloud vs non-cloud,
       // so it should not be part of the validation
       body.forEach((element: any) => {
-        if (element.hasOwnProperty('maxModelMemoryLimit')) {
+        if (Object.hasOwn(element, 'maxModelMemoryLimit')) {
           delete element.maxModelMemoryLimit;
         }
       });
@@ -204,7 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not validate configuration in case request payload is invalid', async () => {
       const requestBody = {
-        duration: { start: 1560297859000, end: 1562975136000 },
+        duration: { start: 1686528259000, end: 1689205536000 },
         job: {
           job_id: 'test',
           description: '',
@@ -232,9 +232,9 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post('/api/ml/validate/job')
+        .post('/internal/ml/validate/job')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(requestBody);
       ml.api.assertResponseStatusCode(400, status, body);
 
@@ -278,9 +278,9 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post('/api/ml/validate/job')
+        .post('/internal/ml/validate/job')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(requestBody);
       ml.api.assertResponseStatusCode(403, status, body);
 

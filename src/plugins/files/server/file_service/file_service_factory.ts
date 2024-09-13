@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -20,7 +21,13 @@ import { fileObjectType, fileShareObjectType, hiddenTypes } from '../saved_objec
 import { BlobStorageService } from '../blob_storage_service';
 import { FileClientImpl } from '../file_client/file_client';
 import { InternalFileShareService } from '../file_share_service';
-import { CreateFileArgs, FindFileArgs, GetByIdArgs, UpdateFileArgs } from './file_action_types';
+import {
+  CreateFileArgs,
+  FindFileArgs,
+  GetByIdArgs,
+  BulkGetByIdArgs,
+  UpdateFileArgs,
+} from './file_action_types';
 import { InternalFileService } from './internal_file_service';
 import { FileServiceStart } from './file_service';
 import { FileKindsRegistry } from '../../common/file_kinds_registry';
@@ -86,6 +93,26 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
       this.logger
     );
 
+    function bulkGetById<M>(
+      args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound?: true }
+    ): Promise<Array<File<M>>>;
+    function bulkGetById<M>(
+      args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound?: true; format: 'map' }
+    ): Promise<{ [id: string]: File<M> }>;
+    function bulkGetById<M>(
+      args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound: false }
+    ): Promise<Array<File<M> | null>>;
+    function bulkGetById<M>(
+      args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound: false; format: 'map' }
+    ): Promise<{ [id: string]: File<M> | null }>;
+    function bulkGetById<M>(
+      args: BulkGetByIdArgs
+    ): Promise<Array<File<M> | null> | { [id: string]: File<M> | null }> {
+      return internalFileService.bulkGetById<M>(
+        args as Parameters<InternalFileService['bulkGetById']>[0]
+      );
+    }
+
     return {
       async create<M>(args: CreateFileArgs<M>) {
         return internalFileService.createFile(args) as Promise<File<M>>;
@@ -94,11 +121,15 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
         await internalFileService.updateFile(args);
       },
       async delete(args) {
-        return internalFileService.deleteFile(args);
+        return await internalFileService.deleteFile(args);
+      },
+      async bulkDelete(args) {
+        return await internalFileService.bulkDeleteFiles(args);
       },
       async getById<M>(args: GetByIdArgs) {
         return internalFileService.getById(args) as Promise<File<M>>;
       },
+      bulkGetById,
       async find<M>(args: FindFileArgs) {
         return internalFileService.findFilesJSON(args) as Promise<{
           files: Array<FileJSON<M>>;

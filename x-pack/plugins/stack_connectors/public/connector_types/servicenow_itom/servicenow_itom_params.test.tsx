@@ -41,6 +41,7 @@ const connector: ActionConnector = {
   actionTypeId: '.test',
   name: 'Test',
   isPreconfigured: false,
+  isSystemAction: false as const,
   isDeprecated: false,
 };
 
@@ -93,6 +94,7 @@ describe('ServiceNowITOMParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="message_keyInput"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="severitySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="additional_infoJsonEditor"]').exists()).toBeTruthy();
   });
 
   test('If severity has errors, form row is invalid', () => {
@@ -116,8 +118,24 @@ describe('ServiceNowITOMParamsFields renders', () => {
     mount(<ServiceNowITOMParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual({
       message_key: '{{rule.id}}:{{alert.id}}',
-      additional_info:
-        '{"alert":{"id":"{{alert.id}}","actionGroup":"{{alert.actionGroup}}","actionSubgroup":"{{alert.actionSubgroup}}","actionGroupName":"{{alert.actionGroupName}}"},"rule":{"id":"{{rule.id}}","name":"{{rule.name}}","type":"{{rule.type}}"},"date":"{{date}}"}',
+      additional_info: JSON.stringify(
+        {
+          alert: {
+            id: '{{alert.id}}',
+            actionGroup: '{{alert.actionGroup}}',
+            actionSubgroup: '{{alert.actionSubgroup}}',
+            actionGroupName: '{{alert.actionGroupName}}',
+          },
+          rule: {
+            id: '{{rule.id}}',
+            name: '{{rule.name}}',
+            type: '{{rule.type}}',
+          },
+          date: '{{date}}',
+        },
+        null,
+        4
+      ),
     });
   });
 
@@ -139,8 +157,24 @@ describe('ServiceNowITOMParamsFields renders', () => {
     expect(editAction.mock.calls.length).toEqual(1);
     expect(editAction.mock.calls[0][1]).toEqual({
       message_key: '{{rule.id}}:{{alert.id}}',
-      additional_info:
-        '{"alert":{"id":"{{alert.id}}","actionGroup":"{{alert.actionGroup}}","actionSubgroup":"{{alert.actionSubgroup}}","actionGroupName":"{{alert.actionGroupName}}"},"rule":{"id":"{{rule.id}}","name":"{{rule.name}}","type":"{{rule.type}}"},"date":"{{date}}"}',
+      additional_info: JSON.stringify(
+        {
+          alert: {
+            id: '{{alert.id}}',
+            actionGroup: '{{alert.actionGroup}}',
+            actionSubgroup: '{{alert.actionSubgroup}}',
+            actionGroupName: '{{alert.actionGroupName}}',
+          },
+          rule: {
+            id: '{{rule.id}}',
+            name: '{{rule.name}}',
+            type: '{{rule.type}}',
+          },
+          date: '{{date}}',
+        },
+        null,
+        4
+      ),
     });
   });
 
@@ -176,5 +210,15 @@ describe('ServiceNowITOMParamsFields renders', () => {
         expect(editAction.mock.calls[0][1][field.key]).toEqual(changeEvent.target.value);
       })
     );
+
+    test('additional_info update triggers editAction correctly', () => {
+      const newValue = '{"foo": "bar"}' as unknown as React.ChangeEvent<HTMLSelectElement>;
+      const wrapper = mount(<ServiceNowITOMParamsFields {...defaultProps} />);
+      const theField = wrapper.find('[data-test-subj="additional_infoJsonEditor"]').first();
+
+      theField.prop('onChange')!(newValue);
+
+      expect(editAction.mock.calls[0][1].additional_info).toEqual(newValue);
+    });
   });
 });

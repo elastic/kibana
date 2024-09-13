@@ -7,14 +7,13 @@
 
 import React from 'react';
 import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
-import { OverlayStart, OverlayRef, ThemeServiceStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import type { OverlayRef } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Tag, TagAttributes } from '../../../common/types';
 import { ITagInternalClient } from '../../services';
+import { StartServices } from '../../types';
 
-interface GetModalOpenerOptions {
-  overlays: OverlayStart;
-  theme: ThemeServiceStart;
+interface GetModalOpenerOptions extends StartServices {
   tagClient: ITagInternalClient;
 }
 
@@ -40,7 +39,12 @@ const LazyEditTagModal = React.lazy(() =>
 );
 
 export const getCreateModalOpener =
-  ({ overlays, theme, tagClient }: GetModalOpenerOptions): CreateModalOpener =>
+  ({
+    overlays,
+    tagClient,
+    notifications,
+    ...startServices
+  }: GetModalOpenerOptions): CreateModalOpener =>
   async ({ onCreate, defaultValues }: OpenCreateModalOptions) => {
     const modal = overlays.openModal(
       toMountPoint(
@@ -55,9 +59,10 @@ export const getCreateModalOpener =
               onCreate(tag);
             }}
             tagClient={tagClient}
+            notifications={notifications}
           />
         </React.Suspense>,
-        { theme$: theme.theme$ }
+        startServices
       )
     );
     return modal;
@@ -69,7 +74,7 @@ interface OpenEditModalOptions {
 }
 
 export const getEditModalOpener =
-  ({ overlays, theme, tagClient }: GetModalOpenerOptions) =>
+  ({ overlays, tagClient, notifications, ...startServices }: GetModalOpenerOptions) =>
   async ({ tagId, onUpdate }: OpenEditModalOptions) => {
     const tag = await tagClient.get(tagId);
 
@@ -86,9 +91,10 @@ export const getEditModalOpener =
               onUpdate(saved);
             }}
             tagClient={tagClient}
+            notifications={notifications}
           />
         </React.Suspense>,
-        { theme$: theme.theme$ }
+        startServices
       )
     );
 

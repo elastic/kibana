@@ -15,6 +15,7 @@ import {
   useSwitchInput,
   useStartServices,
   sendPutDownloadSource,
+  useAuthz,
 } from '../../../../hooks';
 import type { DownloadSource, PostDownloadSourceRequest } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
@@ -22,23 +23,29 @@ import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import { confirmUpdate } from './confirm_update';
 
 export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource?: DownloadSource) {
+  const authz = useAuthz();
   const [isLoading, setIsloading] = useState(false);
   const { notifications } = useStartServices();
   const { confirm } = useConfirmModal();
 
-  const nameInput = useInput(downloadSource?.name ?? '', validateName);
+  const isEditDisabled = !authz.fleet.allSettings;
+
+  const nameInput = useInput(downloadSource?.name ?? '', validateName, isEditDisabled);
 
   const defaultDownloadSourceInput = useSwitchInput(
     downloadSource?.is_default ?? false,
-    downloadSource?.is_default
+    downloadSource?.is_default || isEditDisabled
   );
 
-  const hostInput = useInput(downloadSource?.host ?? '', validateHost);
+  const hostInput = useInput(downloadSource?.host ?? '', validateHost, isEditDisabled);
+
+  const proxyIdInput = useInput(downloadSource?.proxy_id ?? '', () => undefined, isEditDisabled);
 
   const inputs = {
     nameInput,
     hostInput,
     defaultDownloadSourceInput,
+    proxyIdInput,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -61,6 +68,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
         name: nameInput.value.trim(),
         host: hostInput.value.trim(),
         is_default: defaultDownloadSourceInput.value,
+        proxy_id: proxyIdInput.value || null,
       };
 
       if (downloadSource) {
@@ -100,6 +108,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     nameInput.value,
     notifications.toasts,
     onSuccess,
+    proxyIdInput.value,
     validate,
   ]);
 
@@ -107,7 +116,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     inputs,
     submit,
     isLoading,
-    isDisabled: isLoading || (downloadSource && !hasChanged),
+    isDisabled: isLoading || (downloadSource && !hasChanged) || isEditDisabled,
   };
 }
 

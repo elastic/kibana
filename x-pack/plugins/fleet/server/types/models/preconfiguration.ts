@@ -11,9 +11,18 @@ import semverValid from 'semver/functions/valid';
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
 import type { PreconfiguredOutput } from '../../../common/types';
 
-import { AgentPolicyBaseSchema } from './agent_policy';
-import { NamespaceSchema } from './package_policy';
-import { NewOutputSchema } from './output';
+import {
+  ElasticSearchSchema,
+  KafkaSchema,
+  LogstashSchema,
+  RemoteElasticSearchSchema,
+} from './output';
+
+import { AgentPolicyBaseSchema, AgentPolicyNamespaceSchema } from './agent_policy';
+import {
+  PackagePolicyNamespaceSchema,
+  SimplifiedPackagePolicyPreconfiguredSchema,
+} from './package_policy';
 
 const varsSchema = schema.maybe(
   schema.arrayOf(
@@ -38,6 +47,8 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
         }
       },
     }),
+    prerelease: schema.maybe(schema.boolean()),
+    skipDataStreamRollover: schema.maybe(schema.boolean()),
   }),
   {
     defaultValue: [],
@@ -73,16 +84,21 @@ function validatePreconfiguredOutputs(outputs: PreconfiguredOutput[]) {
   }
 }
 
+const PreconfiguredOutputBaseSchema = {
+  id: schema.string(),
+  config: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  config_yaml: schema.never(),
+  allow_edit: schema.maybe(schema.arrayOf(schema.string())),
+};
+
 export const PreconfiguredOutputsSchema = schema.arrayOf(
-  NewOutputSchema.extends({
-    id: schema.string(),
-    config: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    config_yaml: schema.never(),
-  }),
-  {
-    defaultValue: [],
-    validate: validatePreconfiguredOutputs,
-  }
+  schema.oneOf([
+    schema.object({ ...ElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema),
+    schema.object({ ...LogstashSchema }).extends(PreconfiguredOutputBaseSchema),
+    schema.object({ ...KafkaSchema }).extends(PreconfiguredOutputBaseSchema),
+    schema.object({ ...RemoteElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema),
+  ]),
+  { defaultValue: [], validate: validatePreconfiguredOutputs }
 );
 
 export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
@@ -90,6 +106,7 @@ export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
     id: schema.string(),
     name: schema.string(),
     is_default: schema.boolean({ defaultValue: false }),
+    is_internal: schema.maybe(schema.boolean()),
     host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
     proxy_id: schema.nullable(schema.string()),
   }),
@@ -117,55 +134,82 @@ export const PreconfiguredFleetProxiesSchema = schema.arrayOf(
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
   schema.object({
     ...AgentPolicyBaseSchema,
-    namespace: schema.maybe(NamespaceSchema),
+    space_id: schema.maybe(schema.string()),
+    namespace: schema.maybe(AgentPolicyNamespaceSchema),
     id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
     is_default: schema.maybe(schema.boolean()),
     is_default_fleet_server: schema.maybe(schema.boolean()),
     has_fleet_server: schema.maybe(schema.boolean()),
     data_output_id: schema.maybe(schema.string()),
     monitoring_output_id: schema.maybe(schema.string()),
-    package_policies: schema.arrayOf(
-      schema.object({
-        id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-        name: schema.string(),
-        package: schema.object({
-          name: schema.string({
-            validate: (value) => {
-              if (value === 'synthetics') {
-                return i18n.translate('xpack.fleet.config.disableSynthetics', {
-                  defaultMessage:
-                    'Synthetics package is not supported via kibana.yml config. Please use synthetics app to create monitors in private locations. https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html',
-                });
-              }
-            },
+    package_policies: schema.maybe(
+      schema.arrayOf(
+        schema.oneOf([
+          schema.object({
+            id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
+            name: schema.string(),
+            package: schema.object({
+              name: schema.string({
+                validate: (value) => {
+                  if (value === 'synthetics') {
+                    return i18n.translate('xpack.fleet.config.disableSynthetics', {
+                      defaultMessage:
+                        'Synthetics package is not supported via kibana.yml config. Please use Synthetics App to create monitors in private locations. https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html',
+                    });
+                  }
+                },
+              }),
+            }),
+            description: schema.maybe(schema.string()),
+            namespace: schema.maybe(PackagePolicyNamespaceSchema),
+            output_id: schema.nullable(schema.maybe(schema.string())),
+            inputs: schema.maybe(
+              schema.arrayOf(
+                schema.object({
+                  type: schema.string(),
+                  enabled: schema.maybe(schema.boolean()),
+                  keep_enabled: schema.maybe(schema.boolean()),
+                  vars: varsSchema,
+                  streams: schema.maybe(
+                    schema.arrayOf(
+                      schema.object({
+                        data_stream: schema.object({
+                          type: schema.maybe(schema.string()),
+                          dataset: schema.string(),
+                        }),
+                        enabled: schema.maybe(schema.boolean()),
+                        keep_enabled: schema.maybe(schema.boolean()),
+                        vars: varsSchema,
+                      })
+                    )
+                  ),
+                })
+              )
+            ),
           }),
-        }),
-        description: schema.maybe(schema.string()),
-        namespace: schema.maybe(NamespaceSchema),
-        inputs: schema.maybe(
-          schema.arrayOf(
-            schema.object({
-              type: schema.string(),
-              enabled: schema.maybe(schema.boolean()),
-              keep_enabled: schema.maybe(schema.boolean()),
-              vars: varsSchema,
-              streams: schema.maybe(
-                schema.arrayOf(
-                  schema.object({
-                    data_stream: schema.object({
-                      type: schema.maybe(schema.string()),
-                      dataset: schema.string(),
-                    }),
-                    enabled: schema.maybe(schema.boolean()),
-                    keep_enabled: schema.maybe(schema.boolean()),
-                    vars: varsSchema,
-                  })
-                )
-              ),
-            })
-          )
-        ),
-      })
+          SimplifiedPackagePolicyPreconfiguredSchema,
+        ])
+      )
+    ),
+  }),
+  {
+    defaultValue: [],
+  }
+);
+
+export const PreconfiguredSpaceSettingsSchema = schema.arrayOf(
+  schema.object({
+    space_id: schema.string(),
+    allowed_namespace_prefixes: schema.nullable(
+      schema.arrayOf(
+        schema.string({
+          validate: (v) => {
+            if (v.includes('-')) {
+              return 'Must not contain -';
+            }
+          },
+        })
+      )
     ),
   }),
   {

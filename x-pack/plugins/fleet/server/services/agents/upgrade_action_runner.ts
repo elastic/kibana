@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 
-import { isAgentUpgradeable } from '../../../common/services';
+import {
+  getRecentUpgradeInfoForAgent,
+  getNotUpgradeableMessage,
+  isAgentUpgradeableToVersion,
+} from '../../../common/services';
 
 import type { Agent } from '../../types';
 
@@ -26,10 +30,17 @@ import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_action_types';
 import { getCancelledActions } from './action_status';
+import { getLatestAvailableAgentVersion } from './versions';
 
 export class UpgradeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
-    return await upgradeBatch(this.soClient, this.esClient, agents, {}, this.actionParams! as any);
+    return await upgradeBatch(
+      this.esClient,
+      agents,
+      {},
+      this.actionParams! as any,
+      this.actionParams?.spaceId
+    );
   }
 
   protected getTaskType() {
@@ -47,7 +58,6 @@ const isActionIdCancelled = async (esClient: ElasticsearchClient, actionId: stri
 };
 
 export async function upgradeBatch(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   givenAgents: Agent[],
   outgoingErrors: Record<Agent['id'], Error>,
@@ -56,11 +66,14 @@ export async function upgradeBatch(
     version: string;
     sourceUri?: string | undefined;
     force?: boolean;
+    skipRateLimitCheck?: boolean;
     upgradeDurationSeconds?: number;
     startTime?: string;
     total?: number;
-  }
+  },
+  spaceId?: string
 ): Promise<{ actionId: string }> {
+  const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
@@ -72,14 +85,29 @@ export async function upgradeBatch(
       ? givenAgents.filter((agent: Agent) => !isHostedAgent(hostedPolicies, agent))
       : givenAgents;
 
-  const kibanaVersion = appContextService.getKibanaVersion();
+  const latestAgentVersion = await getLatestAvailableAgentVersion();
   const upgradeableResults = await Promise.allSettled(
     agentsToCheckUpgradeable.map(async (agent) => {
-      // Filter out agents currently unenrolling, unenrolled, or not upgradeable b/c of version check
+      // Filter out agents that are:
+      //  - currently unenrolling
+      //  - unenrolled
+      //  - recently upgraded
+      //  - currently upgrading
+      //  - upgradeable b/c of version check
       const isNotAllowed =
-        !options.force && !isAgentUpgradeable(agent, kibanaVersion, options.version);
+        (!options.skipRateLimitCheck &&
+          getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) ||
+        (!options.force &&
+          !options.skipRateLimitCheck &&
+          !isAgentUpgradeableToVersion(agent, options.version));
       if (isNotAllowed) {
-        throw new FleetError(`Agent ${agent.id} is not upgradeable`);
+        throw new FleetError(
+          `Agent ${agent.id} is not upgradeable: ${getNotUpgradeableMessage(
+            agent,
+            latestAgentVersion,
+            options.version
+          )}`
+        );
       }
 
       if (!options.force && isHostedAgent(hostedPolicies, agent)) {
@@ -146,6 +174,7 @@ export async function upgradeBatch(
 
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
+  const namespaces = spaceId ? [spaceId] : [];
 
   await createAgentAction(esClient, {
     id: actionId,
@@ -156,6 +185,7 @@ export async function upgradeBatch(
     total,
     agents: agentsToUpdate.map((agent) => agent.id),
     ...rollingUpgradeOptions,
+    namespaces,
   });
 
   await createErrorActionResults(
@@ -171,6 +201,7 @@ export async function upgradeBatch(
 }
 
 export const MINIMUM_EXECUTION_DURATION_SECONDS = 60 * 60 * 2; // 2h
+export const EXPIRATION_DURATION_SECONDS = 60 * 60 * 24 * 30; // 1 month
 
 export const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
   const now = new Date().toISOString();
@@ -197,13 +228,12 @@ export const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeco
     };
   }
   // Schedule without rolling upgrade (Immediately after start_time)
+  // Expiration time is set to a very long value (1 month) to allow upgrading agents staying offline for long time
   if (startTime && !upgradeDurationSeconds) {
     return {
       start_time: startTime ?? now,
       minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
-      expiration: moment(startTime)
-        .add(MINIMUM_EXECUTION_DURATION_SECONDS, 'seconds')
-        .toISOString(),
+      expiration: moment(startTime).add(EXPIRATION_DURATION_SECONDS, 'seconds').toISOString(),
     };
   } else {
     // Regular bulk upgrade (non scheduled, non rolling)

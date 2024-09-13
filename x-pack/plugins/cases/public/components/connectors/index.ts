@@ -12,13 +12,15 @@ import { getCaseConnector as getSwimlaneCaseConnector } from './swimlane';
 import { getCaseConnector as getResilientCaseConnector } from './resilient';
 import { getCaseConnector as getCasesWebhookCaseConnector } from './cases_webhook';
 import { getServiceNowITSMCaseConnector, getServiceNowSIRCaseConnector } from './servicenow';
+import { getCaseConnector as getTheHiveCaseConnector } from './thehive';
 import type {
   JiraFieldsType,
   ServiceNowITSMFieldsType,
   ServiceNowSIRFieldsType,
   ResilientFieldsType,
   SwimlaneFieldsType,
-} from '../../../common/api';
+  TheHiveFieldsType,
+} from '../../../common/types/domain';
 
 export * from './types';
 
@@ -43,6 +45,7 @@ class CaseConnectors {
     this.caseConnectorsRegistry.register<ServiceNowSIRFieldsType>(getServiceNowSIRCaseConnector());
     this.caseConnectorsRegistry.register<SwimlaneFieldsType>(getSwimlaneCaseConnector());
     this.caseConnectorsRegistry.register<null>(getCasesWebhookCaseConnector());
+    this.caseConnectorsRegistry.register<TheHiveFieldsType>(getTheHiveCaseConnector());
   }
 
   registry(): CaseConnectorsRegistry {

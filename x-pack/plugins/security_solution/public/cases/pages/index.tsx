@@ -8,6 +8,10 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
+import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,
@@ -17,62 +21,57 @@ import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
 
-import { useGetUserCasesPermissions, useKibana, useNavigation } from '../../common/lib/kibana';
+import { useKibana, useNavigation } from '../../common/lib/kibana';
 import { APP_ID, CASES_PATH, SecurityPageName } from '../../../common/constants';
-import { timelineActions } from '../../timelines/store/timeline';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { CaseDetailsRefreshContext } from '../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
+import { timelineActions } from '../../timelines/store';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { getEndpointDetailsPath } from '../../management/common/routing';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useInsertTimeline } from '../components/use_insert_timeline';
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
-import { DetailsPanel } from '../../timelines/components/side_panel';
 import { useFetchAlertData } from './use_fetch_alert_data';
-
-const TimelineDetailsPanel = () => {
-  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
-  return (
-    <DetailsPanel
-      browserFields={browserFields}
-      entityType="events"
-      isFlyoutView
-      runtimeMappings={runtimeMappings}
-      scopeId={TimelineId.casePage}
-    />
-  );
-};
+import { useUpsellingMessage } from '../../common/hooks/use_upselling';
+import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 
 const CaseContainerComponent: React.FC = () => {
-  const { cases } = useKibana().services;
+  const { cases, telemetry } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch();
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
     SecurityPageName.rules
   );
+  const { openFlyout } = useExpandableFlyoutApi();
 
   const getDetectionsRuleDetailsHref = useCallback(
-    (ruleId) => detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
+    (ruleId: string | null | undefined) =>
+      detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
     [detectionsFormatUrl, detectionsUrlSearch]
   );
 
+  const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
+
   const showAlertDetails = useCallback(
     (alertId: string, index: string) => {
-      dispatch(
-        timelineActions.toggleDetailPanel({
-          panelView: 'eventDetail',
-          id: TimelineId.casePage,
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
           params: {
-            eventId: alertId,
+            id: alertId,
             indexName: index,
+            scopeId: TimelineId.casePage,
           },
-        })
-      );
+        },
+      });
+      telemetry.reportDetailsFlyoutOpened({
+        location: TimelineId.casePage,
+        panel: 'right',
+      });
     },
-    [dispatch]
+    [openFlyout, telemetry]
   );
+
+  const { onLoad: onAlertsTableLoaded } = useFetchNotes();
 
   const endpointDetailsHref = (endpointId: string) =>
     getAppUrl({
@@ -81,19 +80,6 @@ const CaseContainerComponent: React.FC = () => {
         selected_endpoint: endpointId,
       }),
     });
-  // TO-DO: onComponentInitialized not needed after removing the expandedEvent state from timeline
-  const onComponentInitialized = useCallback(() => {
-    dispatch(
-      timelineActions.createTimeline({
-        id: TimelineId.casePage,
-        columns: [],
-        dataViewId: null,
-        indexNames: [],
-        expandedDetail: {},
-        show: false,
-      })
-    );
-  }, [dispatch]);
 
   const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
   const { activeStep, endTourStep, isTourShown } = useTourContext();
@@ -107,6 +93,19 @@ const CaseContainerComponent: React.FC = () => {
     if (isTourActive) endTourStep(SecurityStepId.alertsCases);
   }, [endTourStep, isTourActive]);
 
+  useEffect(() => {
+    dispatch(
+      timelineActions.createTimeline({
+        id: TimelineId.casePage,
+        columns: [],
+        dataViewId: null,
+        indexNames: [],
+        show: false,
+      })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <SecuritySolutionPageWrapper noPadding>
       <CaseDetailsRefreshContext.Provider value={refreshRef}>
@@ -114,11 +113,16 @@ const CaseContainerComponent: React.FC = () => {
           basePath: CASES_PATH,
           owner: [APP_ID],
           features: {
-            metrics: ['alerts.count', 'alerts.users', 'alerts.hosts', 'connectors', 'lifespan'],
+            metrics: [
+              CaseMetricsFeature.ALERTS_COUNT,
+              CaseMetricsFeature.ALERTS_USERS,
+              CaseMetricsFeature.ALERTS_HOSTS,
+              CaseMetricsFeature.CONNECTORS,
+              CaseMetricsFeature.LIFESPAN,
+            ],
             alerts: { isExperimental: false },
           },
           refreshRef,
-          onComponentInitialized,
           actionsNavigation: {
             href: endpointDetailsHref,
             onClick: (endpointId: string, e) => {
@@ -150,16 +154,14 @@ const CaseContainerComponent: React.FC = () => {
             editor_plugins: {
               parsingPlugin: timelineMarkdownPlugin.parser,
               processingPluginRenderer: timelineMarkdownPlugin.renderer,
-              uiPlugin: timelineMarkdownPlugin.plugin,
+              uiPlugin: timelineMarkdownPlugin.plugin({ interactionsUpsellingMessage }),
             },
             hooks: {
               useInsertTimeline,
             },
-            ui: {
-              renderTimelineDetailsPanel: TimelineDetailsPanel,
-            },
           },
           useFetchAlertData,
+          onAlertsTableLoaded,
           permissions: userCasesPermissions,
         })}
       </CaseDetailsRefreshContext.Provider>

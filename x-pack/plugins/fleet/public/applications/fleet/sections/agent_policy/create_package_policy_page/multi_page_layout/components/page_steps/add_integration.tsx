@@ -30,7 +30,7 @@ import { NotObscuredByBottomBar } from '..';
 import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
 import { prepareInputPackagePolicyDataset } from '../../../services/prepare_input_pkg_policy_dataset';
 
-const ExpandableAdvancedSettings: React.FC = ({ children }) => {
+const ExpandableAdvancedSettings: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
   return (
@@ -92,8 +92,9 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
     name: '',
     description: '',
-    namespace: 'default',
+    namespace: '',
     policy_id: '',
+    policy_ids: [''],
     enabled: true,
     inputs: [],
   });
@@ -238,7 +239,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
             showOnlyIntegration={integrationInfo?.name}
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}
-            validationResults={validationResults!}
+            validationResults={validationResults}
             submitAttempted={formState === 'INVALID'}
             noTopRule={true}
           />
@@ -248,7 +249,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
                 packageInfo={packageInfo}
                 packagePolicy={packagePolicy}
                 updatePackagePolicy={updatePackagePolicy}
-                validationResults={validationResults!}
+                validationResults={validationResults}
                 submitAttempted={formState === 'INVALID'}
                 noAdvancedToggle={true}
               />

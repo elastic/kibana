@@ -8,7 +8,7 @@
 import moment from 'moment';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import dateMath from '@kbn/datemath';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -22,7 +22,7 @@ import type { GetTimeFieldRangeResponse } from './types';
  */
 export type SetFullTimeRangeApiPath =
   | '/internal/file_upload/time_field_range'
-  | '/api/ml/fields_service/time_field_range';
+  | '/internal/ml/fields_service/time_field_range';
 
 /**
  * Determines the full available time range of the given Data View and updates
@@ -81,14 +81,15 @@ export async function setFullTimeRange(
       });
     }
   } catch (error) {
-    toasts.addDanger(
-      i18n.translate(
+    toasts.addError(error, {
+      title: i18n.translate(
         'xpack.ml.datePicker.fullTimeRangeSelector.errorSettingTimeRangeNotification',
         {
-          defaultMessage: 'An error occurred setting the time range.',
+          defaultMessage:
+            'An error occurred setting the time range. Please set the desired start and end times.',
         }
-      )
-    );
+      ),
+    });
   }
 }
 

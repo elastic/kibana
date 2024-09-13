@@ -14,18 +14,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-usage-data-server-mocks",
-        "id": "def-common.coreUsageDataServiceMock",
+        "id": "def-server.coreUsageDataServiceMock",
         "type": "Object",
         "tags": [],
         "label": "coreUsageDataServiceMock",
@@ -36,7 +28,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server-mocks",
-            "id": "def-common.coreUsageDataServiceMock.create",
+            "id": "def-server.coreUsageDataServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -53,9 +45,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-usage-data-server-internal",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUsageDataServerInternalPluginApi",
-                "section": "def-common.CoreUsageDataService",
+                "section": "def-server.CoreUsageDataService",
                 "text": "CoreUsageDataService"
               },
               ">>"
@@ -68,7 +60,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server-mocks",
-            "id": "def-common.coreUsageDataServiceMock.createSetupContract",
+            "id": "def-server.coreUsageDataServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -87,7 +79,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-usage-data-server-mocks",
-                "id": "def-common.coreUsageDataServiceMock.createSetupContract.$1",
+                "id": "def-server.coreUsageDataServiceMock.createSetupContract.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "usageStatsClient",
@@ -96,44 +88,44 @@
                   "{ getUsageStats: jest.MockInstance<Promise<",
                   {
                     "pluginId": "@kbn/core-usage-data-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreUsageDataServerPluginApi",
-                    "section": "def-common.CoreUsageStats",
+                    "section": "def-server.CoreUsageStats",
                     "text": "CoreUsageStats"
                   },
-                  ">, []>; incrementSavedObjectsBulkCreate: jest.MockInstance<Promise<void>, [options: ",
+                  ">, [], unknown>; incrementSavedObjectsBulkCreate: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
-                  "]>; incrementSavedObjectsBulkGet: jest.MockInstance<Promise<void>, [options: ",
+                  "], unknown>; incrementSavedObjectsBulkGet: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
-                  "]>; incrementSavedObjectsBulkResolve: jest.MockInstance<Promise<void>, [options: ",
+                  "], unknown>; incrementSavedObjectsBulkResolve: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
-                  "]>; incrementSavedObjectsBulkUpdate: jest.MockInstance<Promise<void>, [options: ",
+                  "], unknown>; incrementSavedObjectsBulkUpdate: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
-                  "]>; incrementSavedObjectsBulkDelete: jest.MockInstance<Promise<void>, [options: ",
+                  "], unknown>; incrementSavedObjectsBulkDelete: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
-                  "]>; incrementSavedObjectsCreate: jest.MockInstance<Promise<void>, [options: ",
+                  "], unknown>; incrementSavedObjectsCreate: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
-                  "]>; incrementSavedObjectsDelete: jest.MockInstance<Promise<void>, [options: ",
+                  "], unknown>; incrementSavedObjectsDelete: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
-                  "]>; incrementSavedObjectsFind: jest.MockInstance<Promise<void>, [options: ",
+                  "], unknown>; incrementSavedObjectsFind: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
-                  "]>; incrementSavedObjectsGet: jest.MockInstance<Promise<void>, [options: ",
+                  "], unknown>; incrementSavedObjectsGet: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
-                  "]>; incrementSavedObjectsResolve: jest.MockInstance<Promise<void>, [options: ",
+                  "], unknown>; incrementSavedObjectsResolve: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
-                  "]>; incrementSavedObjectsUpdate: jest.MockInstance<Promise<void>, [options: ",
+                  "], unknown>; incrementSavedObjectsUpdate: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
-                  "]>; incrementSavedObjectsImport: jest.MockInstance<Promise<void>, [options: ",
+                  "], unknown>; incrementSavedObjectsImport: jest.MockInstance<Promise<void>, [options: ",
                   "IncrementSavedObjectsImportOptions",
-                  "]>; incrementSavedObjectsResolveImportErrors: jest.MockInstance<Promise<void>, [options: ",
+                  "], unknown>; incrementSavedObjectsResolveImportErrors: jest.MockInstance<Promise<void>, [options: ",
                   "IncrementSavedObjectsResolveImportErrorsOptions",
-                  "]>; incrementSavedObjectsExport: jest.MockInstance<Promise<void>, [options: ",
+                  "], unknown>; incrementSavedObjectsExport: jest.MockInstance<Promise<void>, [options: ",
                   "IncrementSavedObjectsExportOptions",
-                  "]>; incrementLegacyDashboardsImport: jest.MockInstance<Promise<void>, [options: ",
+                  "], unknown>; incrementLegacyDashboardsImport: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
-                  "]>; incrementLegacyDashboardsExport: jest.MockInstance<Promise<void>, [options: ",
+                  "], unknown>; incrementLegacyDashboardsExport: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
-                  "]>; } & ",
+                  "], unknown>; } & ",
                   "ICoreUsageStatsClient"
                 ],
                 "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_data_service.mock.ts",
@@ -144,7 +136,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server-mocks",
-            "id": "def-common.coreUsageDataServiceMock.createStartContract",
+            "id": "def-server.coreUsageDataServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -153,9 +145,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-usage-data-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-common.CoreUsageDataStart",
+                "section": "def-server.CoreUsageDataStart",
                 "text": "CoreUsageDataStart"
               },
               ">"
@@ -171,7 +163,7 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server-mocks",
-        "id": "def-common.coreUsageStatsClientMock",
+        "id": "def-server.coreUsageStatsClientMock",
         "type": "Object",
         "tags": [],
         "label": "coreUsageStatsClientMock",
@@ -182,7 +174,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server-mocks",
-            "id": "def-common.coreUsageStatsClientMock.create",
+            "id": "def-server.coreUsageStatsClientMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -202,5 +194,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

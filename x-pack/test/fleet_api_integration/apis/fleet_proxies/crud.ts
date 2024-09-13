@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import pRetry from 'p-retry';
+
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -16,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   async function getLatestFleetPolicies(policyId: string): Promise<any> {
     const policyDocRes = await es.search({
@@ -31,20 +33,20 @@ export default function (providerContext: FtrProviderContext) {
     return policyDocRes.hits.hits[0]?._source;
   }
 
-  describe('fleet_proxies_crud', async function () {
-    skipIfNoDockerRegistry(providerContext);
-    before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
-    setupFleetAndAgents(providerContext);
-
+  describe('fleet_proxies_crud', function () {
     const existingId = 'test-default-123';
     const fleetServerHostId = 'test-fleetserver-123';
     const policyId = 'test-policy-123';
     const outputId = 'test-output-123';
+    let downloadSourceId: string;
 
-    before(async function () {
+    skipIfNoDockerRegistry(providerContext);
+
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await fleetAndAgents.setup();
+
       await kibanaServer.savedObjects.clean({
         types: ['fleet-proxy'],
       });
@@ -79,6 +81,19 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
+      const { body: downloadSourceResponse } = await supertest
+        .post(`/api/fleet/agent_download_sources`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'My download source',
+          host: 'http://test.fr:443',
+          proxy_id: existingId,
+          is_default: false,
+        })
+        .expect(200);
+
+      downloadSourceId = downloadSourceResponse.item.id;
+
       await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -88,6 +103,7 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           fleet_server_host_id: fleetServerHostId,
           data_output_id: outputId,
+          download_source_id: downloadSourceId,
         })
         .expect(200);
     });
@@ -131,6 +147,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('PUT /proxies/{itemId}', () => {
       it('should allow to update an existing fleet proxy', async function () {
+        const fleetPolicyBefore = await getLatestFleetPolicies(policyId);
         await supertest
           .put(`/api/fleet/proxies/${existingId}`)
           .set('kbn-xsrf', 'xxxx')
@@ -146,10 +163,23 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(fleetServerHost.name).to.eql('Test 123 updated');
 
-        const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
-        expect(fleetPolicyAfter?.data?.fleet?.proxy_url).to.be('https://testupdated.fr:3232');
-        expect(fleetPolicyAfter?.data?.outputs?.[outputId].proxy_url).to.be(
-          'https://testupdated.fr:3232'
+        await pRetry(
+          async () => {
+            const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
+            if (fleetPolicyAfter.revision_idx === fleetPolicyBefore.revision_idx) {
+              throw new Error('fleet server policy not deployed');
+            }
+            expect(fleetPolicyAfter?.data?.fleet?.proxy_url).to.be('https://testupdated.fr:3232');
+            expect(fleetPolicyAfter?.data?.outputs?.[outputId].proxy_url).to.be(
+              'https://testupdated.fr:3232'
+            );
+            expect(fleetPolicyAfter?.data?.agent.download.proxy_url).to.be(
+              'https://testupdated.fr:3232'
+            );
+          },
+          {
+            maxRetryTime: 30 * 1000, // 30s for the task to run
+          }
         );
       });
 
@@ -166,14 +196,26 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('DELETE /proxies/{itemId}', () => {
       it('should allow to delete an existing fleet proxy', async function () {
+        const fleetPolicyBefore = await getLatestFleetPolicies(policyId);
         await supertest
           .delete(`/api/fleet/proxies/${existingId}`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
-        expect(fleetPolicyAfter?.data?.fleet?.proxy_url).to.be(undefined);
-        expect(fleetPolicyAfter?.data?.outputs?.[outputId].proxy_url).to.be(undefined);
+        await pRetry(
+          async () => {
+            const fleetPolicyAfter = await getLatestFleetPolicies(policyId);
+            if (fleetPolicyAfter.revision_idx === fleetPolicyBefore.revision_idx) {
+              throw new Error('fleet server policy not deployed');
+            }
+            expect(fleetPolicyAfter?.data?.fleet?.proxy_url).to.be(undefined);
+            expect(fleetPolicyAfter?.data?.outputs?.[outputId].proxy_url).to.be(undefined);
+            expect(fleetPolicyAfter?.data?.agent.download.proxy_url).to.be(undefined);
+          },
+          {
+            maxRetryTime: 30 * 1000, // 30s for the task to run
+          }
+        );
       });
     });
   });

@@ -16,10 +16,10 @@
       "licensing"
     ],
     "optionalPlugins": [
-      "advancedSettings",
       "home",
       "management",
-      "usageCollection"
+      "usageCollection",
+      "cloud",
     ],
     "requiredBundles": [
       "esUiShared",
@@ -27,6 +27,7 @@
     ],
     "extraPublicDirs": [
       "common"
-    ]
+    ],
+    "runtimePluginDependencies": ["security"]
   }
 }

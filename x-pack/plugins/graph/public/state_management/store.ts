@@ -7,8 +7,9 @@
 
 import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
 import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
-import { ChromeStart, OverlayStart, SavedObjectsClientContract } from '@kbn/core/public';
+import { ChromeStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core/public';
+import { ContentClient } from '@kbn/content-management-plugin/public';
 import {
   fieldsReducer,
   FieldsState,
@@ -38,15 +39,15 @@ export interface GraphState {
   workspace: WorkspaceState;
 }
 
-export interface GraphStoreDependencies {
+export interface GraphStoreDependencies
+  extends Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'> {
   addBasePath: (url: string) => string;
   indexPatternProvider: IndexPatternProvider;
   createWorkspace: (index: string, advancedSettings: AdvancedSettings) => Workspace;
   getWorkspace: () => Workspace | undefined;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
-  overlays: OverlayStart;
-  savedObjectsClient: SavedObjectsClientContract;
+  contentClient: ContentClient;
   savePolicy: GraphSavePolicy;
   changeUrl: (newUrl: string) => void;
   notifyReact: () => void;

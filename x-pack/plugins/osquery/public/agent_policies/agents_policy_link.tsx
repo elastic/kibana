@@ -7,18 +7,17 @@
 
 import { EuiLink } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
 
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { useAgentPolicy } from './use_agent_policy';
 
-const StyledEuiLink = styled(EuiLink)`
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-`;
+const euiLinkCss = {
+  whiteSpace: 'nowrap' as const,
+  textOverflow: 'ellipsis',
+  overflow: 'hidden',
+};
 
 interface AgentsPolicyLinkProps {
   policyId: string;
@@ -39,7 +38,7 @@ const AgentsPolicyLinkComponent: React.FC<AgentsPolicyLinkProps> = ({ policyId }
   );
 
   const handleClick = useCallback(
-    (event) => {
+    (event: any) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
 
@@ -52,9 +51,10 @@ const AgentsPolicyLinkComponent: React.FC<AgentsPolicyLinkProps> = ({ policyId }
   );
 
   return (
-    <StyledEuiLink href={href} onClick={handleClick}>
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink href={href} onClick={handleClick} css={euiLinkCss}>
       {data?.name ?? policyId}
-    </StyledEuiLink>
+    </EuiLink>
   );
 };
 

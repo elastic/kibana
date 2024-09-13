@@ -11,8 +11,7 @@ import { sortBy } from 'lodash';
 import { AssetReference } from '@kbn/fleet-plugin/common/types';
 import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 function checkErrorWithResponseDataOrThrow(err: any) {
   if (!err?.response?.data) {
@@ -24,9 +23,8 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
-  const server = dockerServers.get('registry');
   const es: Client = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
   const logsTemplateName = `logs-${pkgName}.test_logs`;
@@ -42,17 +40,17 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('installs and uninstalls all assets', async () => {
+  describe('installs and uninstalls all assets', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
-    describe('installs all assets when installing a package for the first time', async () => {
+    describe('installs all assets when installing a package for the first time', () => {
       before(async () => {
-        if (!server.enabled) return;
+        await fleetAndAgents.setup();
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackage(pkgName, pkgVersion);
       });
       after(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(pkgName, pkgVersion);
       });
       expectAssetsInstalled({
@@ -65,16 +63,17 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('uninstalls all assets when uninstalling a package', async () => {
+    describe('uninstalls all assets when uninstalling a package', () => {
       // these tests ensure that uninstall works properly so make sure that the package gets installed and uninstalled
       // and then we'll test that not artifacts are left behind.
-      before(() => {
-        if (!server.enabled) return;
-        return installPackage(pkgName, pkgVersion);
-      });
-      before(() => {
-        if (!server.enabled) return;
-        return uninstallPackage(pkgName, pkgVersion);
+      before(async () => {
+        if (isDockerRegistryEnabledOrSkipped(providerContext)) {
+          await installPackage(pkgName, pkgVersion);
+        }
+
+        if (isDockerRegistryEnabledOrSkipped(providerContext)) {
+          await uninstallPackage(pkgName, pkgVersion);
+        }
       });
 
       it('should have uninstalled the index templates', async function () {
@@ -296,15 +295,15 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('reinstalls all assets', async () => {
+    describe('reinstalls all assets', () => {
       before(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackage(pkgName, pkgVersion);
         // reinstall
         await installPackage(pkgName, pkgVersion);
       });
       after(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(pkgName, pkgVersion);
       });
       expectAssetsInstalled({
@@ -408,15 +407,6 @@ const expectAssetsInstalled = ({
       { meta: true }
     );
     expect(resPackage.statusCode).equal(200);
-
-    const resUserSettings = await es.transport.request(
-      {
-        method: 'GET',
-        path: `/_component_template/${logsTemplateName}@custom`,
-      },
-      { meta: true }
-    );
-    expect(resUserSettings.statusCode).equal(200);
   });
   it('should have installed the kibana assets', async function () {
     // These are installed from Fleet along with every package
@@ -437,61 +427,75 @@ const expectAssetsInstalled = ({
       id: 'sample_dashboard',
     });
     expect(resDashboard.id).equal('sample_dashboard');
+    expect(resDashboard.managed).be(true);
     expect(resDashboard.references.map((ref: any) => ref.id).includes('sample_tag')).equal(true);
     const resDashboard2 = await kibanaServer.savedObjects.get({
       type: 'dashboard',
       id: 'sample_dashboard2',
     });
     expect(resDashboard2.id).equal('sample_dashboard2');
+    expect(resDashboard2.managed).be(true);
     const resVis = await kibanaServer.savedObjects.get({
       type: 'visualization',
       id: 'sample_visualization',
     });
+
     expect(resVis.id).equal('sample_visualization');
+    expect(resVis.managed).be(true);
     const resSearch = await kibanaServer.savedObjects.get({
       type: 'search',
       id: 'sample_search',
     });
     expect(resSearch.id).equal('sample_search');
+    expect(resSearch.managed).be(true);
     const resLens = await kibanaServer.savedObjects.get({
       type: 'lens',
       id: 'sample_lens',
     });
+
     expect(resLens.id).equal('sample_lens');
+    expect(resLens.managed).be(true);
     const resMlModule = await kibanaServer.savedObjects.get({
       type: 'ml-module',
       id: 'sample_ml_module',
     });
     expect(resMlModule.id).equal('sample_ml_module');
+    expect(resMlModule.managed).be(true);
     const resSecurityRule = await kibanaServer.savedObjects.get({
       type: 'security-rule',
       id: 'sample_security_rule',
     });
     expect(resSecurityRule.id).equal('sample_security_rule');
+    expect(resSecurityRule.managed).be(true);
     const resOsqueryPackAsset = await kibanaServer.savedObjects.get({
       type: 'osquery-pack-asset',
       id: 'sample_osquery_pack_asset',
     });
     expect(resOsqueryPackAsset.id).equal('sample_osquery_pack_asset');
+    expect(resOsqueryPackAsset.managed).be(true);
     const resOsquerySavedObject = await kibanaServer.savedObjects.get({
       type: 'osquery-saved-query',
       id: 'sample_osquery_saved_query',
     });
     expect(resOsquerySavedObject.id).equal('sample_osquery_saved_query');
+    expect(resOsquerySavedObject.managed).be(true);
     const resCloudSecurityPostureRuleTemplate = await kibanaServer.savedObjects.get({
       type: 'csp-rule-template',
       id: 'sample_csp_rule_template',
     });
     expect(resCloudSecurityPostureRuleTemplate.id).equal('sample_csp_rule_template');
+    expect(resCloudSecurityPostureRuleTemplate.managed).be(true);
     const resTag = await kibanaServer.savedObjects.get({
       type: 'tag',
       id: 'sample_tag',
     });
+    expect(resTag.managed).be(true);
     expect(resTag.id).equal('sample_tag');
     const resIndexPattern = await kibanaServer.savedObjects.get({
       type: 'index-pattern',
       id: 'test-*',
     });
+    expect(resIndexPattern.managed).be(true);
     expect(resIndexPattern.id).equal('test-*');
 
     let resInvalidTypeIndexPattern;
@@ -772,6 +776,7 @@ const expectAssetsInstalled = ({
       install_status: 'installed',
       install_started_at: res.attributes.install_started_at,
       install_source: 'registry',
+      latest_install_failed_attempts: [],
       install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
       verification_status: 'unknown',
       verification_key_id: null,

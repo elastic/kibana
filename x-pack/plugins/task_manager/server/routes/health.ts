@@ -14,8 +14,8 @@ import {
 } from '@kbn/core/server';
 import { IClusterClient, DocLinksServiceSetup } from '@kbn/core/server';
 import { Observable, Subject } from 'rxjs';
-import { tap, map } from 'rxjs/operators';
-import { throttleTime } from 'rxjs/operators';
+import { tap, map, filter } from 'rxjs';
+import { throttleTime } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { Logger, ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 import {
@@ -30,6 +30,7 @@ import { calculateHealthStatus } from '../lib/calculate_health_status';
 
 export type MonitoredHealth = RawMonitoringStats & {
   id: string;
+  reason?: string;
   status: HealthStatus;
   timestamp: string;
 };
@@ -87,10 +88,15 @@ export function healthRoute(params: HealthRouteParams): {
 
   function getHealthStatus(monitoredStats: MonitoringStats) {
     const summarizedStats = summarizeMonitoringStats(logger, monitoredStats, config);
-    const status = calculateHealthStatus(summarizedStats, config, shouldRunTasks, logger);
+    const { status, reason } = calculateHealthStatus(
+      summarizedStats,
+      config,
+      shouldRunTasks,
+      logger
+    );
     const now = Date.now();
     const timestamp = new Date(now).toISOString();
-    return { id: taskManagerId, timestamp, status, ...summarizedStats };
+    return { id: taskManagerId, timestamp, status, reason, ...summarizedStats };
   }
 
   const serviceStatus$: Subject<TaskManagerServiceStatus> = new Subject<TaskManagerServiceStatus>();
@@ -106,9 +112,10 @@ export function healthRoute(params: HealthRouteParams): {
       tap((stats) => {
         lastMonitoredStats = stats;
       }),
-      // Only calculate the summerized stats (calculates all runnign averages and evaluates state)
+      // Only calculate the summarized stats (calculates all running averages and evaluates state)
       // when needed by throttling down to the requiredHotStatsFreshness
-      map((stats) => withServiceStatus(getHealthStatus(stats)))
+      map((stats) => withServiceStatus(getHealthStatus(stats))),
+      filter(([monitoredHealth]) => monitoredHealth.status !== HealthStatus.Uninitialized)
     )
     .subscribe(([monitoredHealth, serviceStatus]) => {
       serviceStatus$.next(serviceStatus);
@@ -122,6 +129,10 @@ export function healthRoute(params: HealthRouteParams): {
       // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
       // options: { tags: ['access:taskManager'] },
       validate: false,
+      options: {
+        access: 'public',
+        summary: `Get task manager health`,
+      },
     },
     async function (
       context: RequestHandlerContext,
@@ -174,15 +185,19 @@ export function healthRoute(params: HealthRouteParams): {
 export function withServiceStatus(
   monitoredHealth: MonitoredHealth
 ): [MonitoredHealth, TaskManagerServiceStatus] {
+  const { reason, status } = monitoredHealth;
+
   const level =
-    monitoredHealth.status === HealthStatus.OK
-      ? ServiceStatusLevels.available
-      : ServiceStatusLevels.degraded;
+    status === HealthStatus.OK ? ServiceStatusLevels.available : ServiceStatusLevels.degraded;
+
+  const defaultMessage = LEVEL_SUMMARY[level.toString()];
+  const summary = reason ? `${defaultMessage} - Reason: ${reason}` : defaultMessage;
+
   return [
     monitoredHealth,
     {
       level,
-      summary: LEVEL_SUMMARY[level.toString()],
+      summary,
     },
   ];
 }

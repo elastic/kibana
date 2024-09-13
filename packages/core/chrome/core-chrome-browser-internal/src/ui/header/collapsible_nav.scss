@@ -1,7 +1,27 @@
+$screenHeightBreakpoint: $euiSize * 15;
+
+.kbnCollapsibleNav {
+  @media (max-height: $screenHeightBreakpoint) {
+    overflow-y: auto;
+  }
+}
+
 .kbnCollapsibleNav__recentsListGroup {
-  @include euiYScroll;
   max-height: $euiSize * 10;
   margin-right: -$euiSizeS;
+  @include euiYScroll;
+}
+
+.kbnCollapsibleNav__solutions {
+  @include euiYScroll;
+
+  /**
+   * Allows the solutions nav group to be viewed on
+   * very small screen sizes and when the browser Zoom is high
+   */
+  @media (max-height: $screenHeightBreakpoint) {
+    flex: 1 0 auto;
+  }
 }
 
 /**

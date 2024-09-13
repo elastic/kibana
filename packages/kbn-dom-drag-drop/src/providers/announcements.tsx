@@ -1,20 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
 import { DropType } from '../types';
 import { HumanData } from '.';
 
-type AnnouncementFunction = (
-  draggedElement: HumanData,
-  dropElement: HumanData,
-  announceModifierKeys?: boolean
-) => string;
+type AnnouncementFunction = (draggedElement: HumanData, dropElement: HumanData) => string;
 
 interface CustomAnnouncementsType {
   dropped: Partial<{ [dropType in DropType]: AnnouncementFunction }>;
@@ -32,10 +29,9 @@ const replaceAnnouncement = {
       canDuplicate,
       canCombine,
       layerNumber: dropLayerNumber,
-    }: HumanData,
-    announceModifierKeys?: boolean
+    }: HumanData
   ) => {
-    if (announceModifierKeys && (canSwap || canDuplicate)) {
+    if (canSwap || canDuplicate) {
       return i18n.translate('domDragDrop.announce.selectedTarget.replaceMain', {
         defaultMessage: `You're dragging {label} from {groupLabel} at position {position} in layer {layerNumber} over {dropLabel} from {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}. Press space or enter to replace {dropLabel} with {label}.{duplicateCopy}{swapCopy}{combineCopy}`,
         values: {
@@ -168,10 +164,9 @@ const combineAnnouncement = {
       canDuplicate,
       canCombine,
       layerNumber: dropLayerNumber,
-    }: HumanData,
-    announceModifierKeys?: boolean
+    }: HumanData
   ) => {
-    if (announceModifierKeys && (canSwap || canDuplicate || canCombine)) {
+    if (canSwap || canDuplicate || canCombine) {
       return i18n.translate('domDragDrop.announce.selectedTarget.combineMain', {
         defaultMessage: `You're dragging {label} from {groupLabel} at position {position} in layer {layerNumber} over {dropLabel} from {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}. Press space or enter to combine {dropLabel} with {label}.{duplicateCopy}{swapCopy}{combineCopy}`,
         values: {
@@ -247,10 +242,9 @@ export const announcements: CustomAnnouncementsType = {
         canDuplicate,
         canCombine,
         layerNumber: dropLayerNumber,
-      }: HumanData,
-      announceModifierKeys?: boolean
+      }: HumanData
     ) => {
-      if (announceModifierKeys && (canSwap || canDuplicate || canCombine)) {
+      if (canSwap || canDuplicate || canCombine) {
         return i18n.translate('domDragDrop.announce.selectedTarget.replaceIncompatibleMain', {
           defaultMessage: `You're dragging {label} from {groupLabel} at position {position} in layer {layerNumber} over {dropLabel} from {dropGroupLabel} group at position {dropPosition} in layer {dropLayerNumber}. Press space or enter to convert {label} to {nextLabel} and replace {dropLabel}.{duplicateCopy}{swapCopy}{combineCopy}`,
           values: {
@@ -290,10 +284,9 @@ export const announcements: CustomAnnouncementsType = {
         canSwap,
         canDuplicate,
         layerNumber: dropLayerNumber,
-      }: HumanData,
-      announceModifierKeys?: boolean
+      }: HumanData
     ) => {
-      if (announceModifierKeys && (canSwap || canDuplicate)) {
+      if (canSwap || canDuplicate) {
         return i18n.translate('domDragDrop.announce.selectedTarget.moveIncompatibleMain', {
           defaultMessage: `You're dragging {label} from {groupLabel} at position {position} in layer {layerNumber} over position {dropPosition} in {dropGroupLabel} group in layer {dropLayerNumber}. Press space or enter to convert {label} to {nextLabel} and move.{duplicateCopy}`,
           values: {
@@ -329,10 +322,9 @@ export const announcements: CustomAnnouncementsType = {
         canSwap,
         canDuplicate,
         layerNumber: dropLayerNumber,
-      }: HumanData,
-      announceModifierKeys?: boolean
+      }: HumanData
     ) => {
-      if (announceModifierKeys && (canSwap || canDuplicate)) {
+      if (canSwap || canDuplicate) {
         return i18n.translate('domDragDrop.announce.selectedTarget.moveCompatibleMain', {
           defaultMessage: `You're dragging {label} from {groupLabel} at position {position} over position {dropPosition} in {dropGroupLabel} group in layer {dropLayerNumber}. Press space or enter to move.{duplicateCopy}`,
           values: {
@@ -790,19 +782,9 @@ export const announce = {
   dropped: (draggedElement: HumanData, dropElement: HumanData, type?: DropType) =>
     (type && announcements.dropped?.[type]?.(draggedElement, dropElement)) ||
     defaultAnnouncements.dropped(draggedElement, dropElement),
-  selectedTarget: (
-    draggedElement: HumanData,
-    dropElement: HumanData,
-    type?: DropType,
-    announceModifierKeys?: boolean
-  ) => {
+  selectedTarget: (draggedElement: HumanData, dropElement: HumanData, type?: DropType) => {
     return (
-      (type &&
-        announcements.selectedTarget?.[type]?.(
-          draggedElement,
-          dropElement,
-          announceModifierKeys
-        )) ||
+      (type && announcements.selectedTarget?.[type]?.(draggedElement, dropElement)) ||
       defaultAnnouncements.selectedTarget(draggedElement, dropElement)
     );
   },

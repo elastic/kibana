@@ -1,22 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getTagCloudVisTypeDefinition } from './tag_cloud_type';
-import { ConfigSchema } from '../config';
+import type { TagcloudPublicConfig } from '../server/config';
+import { setDataViewsStart } from './services';
 
 /** @internal */
 export interface TagCloudPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
+}
+
+export interface TagCloudPluginStartDependencies {
+  dataViews: DataViewsPublicPluginStart;
 }
 
 /** @internal */
@@ -25,10 +31,12 @@ export interface TagCloudVisDependencies {
 }
 
 /** @internal */
-export class TagCloudPlugin implements Plugin<void, void> {
-  initializerContext: PluginInitializerContext<ConfigSchema>;
+export class TagCloudPlugin
+  implements Plugin<void, void, TagCloudPluginSetupDependencies, TagCloudPluginStartDependencies>
+{
+  initializerContext: PluginInitializerContext<TagcloudPublicConfig>;
 
-  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor(initializerContext: PluginInitializerContext<TagcloudPublicConfig>) {
     this.initializerContext = initializerContext;
   }
 
@@ -37,8 +45,15 @@ export class TagCloudPlugin implements Plugin<void, void> {
       palettes: charts.palettes,
     };
 
-    visualizations.createBaseVisualization(getTagCloudVisTypeDefinition(visualizationDependencies));
+    const { readOnly } = this.initializerContext.config.get<TagcloudPublicConfig>();
+    visualizations.createBaseVisualization({
+      ...getTagCloudVisTypeDefinition(visualizationDependencies),
+      disableCreate: Boolean(readOnly),
+      disableEdit: Boolean(readOnly),
+    });
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart, { dataViews }: TagCloudPluginStartDependencies) {
+    setDataViewsStart(dataViews);
+  }
 }

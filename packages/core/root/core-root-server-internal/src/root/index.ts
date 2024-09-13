@@ -1,20 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ConnectableObservable, Subscription } from 'rxjs';
-import {
-  first,
-  publishReplay,
-  switchMap,
-  concatMap,
-  tap,
-  distinctUntilChanged,
-} from 'rxjs/operators';
+import { first, publishReplay, switchMap, concatMap, tap, distinctUntilChanged } from 'rxjs';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { Env, RawConfigurationProvider } from '@kbn/config';
 import { LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
@@ -34,6 +28,7 @@ export class Root {
   private readonly server: Server;
   private loggingConfigSubscription?: Subscription;
   private apmConfigSubscription?: Subscription;
+  private shuttingDown: boolean = false;
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
@@ -81,7 +76,12 @@ export class Root {
   }
 
   public async shutdown(reason?: any) {
-    this.log.debug('shutting root down');
+    if (this.shuttingDown) {
+      return;
+    }
+    this.shuttingDown = true;
+
+    this.log.info('Kibana is shutting down');
 
     if (reason) {
       if (reason.code === 'EADDRINUSE' && Number.isInteger(reason.port)) {
@@ -91,7 +91,7 @@ export class Root {
       }
 
       if (reason.code !== MIGRATION_EXCEPTION_CODE) {
-        this.log.fatal(reason);
+        this.log.fatal(formatShutdownReason(reason));
       }
     }
 
@@ -159,3 +159,11 @@ export class Root {
     this.loggingConfigSubscription.add(connectSubscription);
   }
 }
+
+const formatShutdownReason = (reason: any): string => {
+  let message = `Reason: ${reason.message ?? reason}`;
+  if (reason.stack) {
+    message = `${message}\n${reason.stack}`;
+  }
+  return message;
+};

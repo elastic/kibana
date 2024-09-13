@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-
+import type { FC } from 'react';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { parse } from 'query-string';
-
+import { useMlKibana } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../locator';
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-
+import type { MlRoute, PageProps } from '../../router';
+import { createPath, PageLoader } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
 import { resolver } from '../../../jobs/new_job/job_from_lens';
 
 export const fromLensRouteFactory = (): MlRoute => ({
@@ -22,24 +22,48 @@ export const fromLensRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { lensId, vis, from, to, query, filters, layerIndex }: Record<string, any> = parse(
+const PageWrapper: FC<PageProps> = ({ location }) => {
+  const { vis, from, to, query, filters, layerIndex }: Record<string, any> = parse(
     location.search,
     {
       sort: false,
     }
   );
+  const {
+    services: {
+      data: {
+        dataViews,
+        query: {
+          timefilter: { timefilter: timeFilter },
+        },
+      },
+      dashboard: dashboardService,
+      uiSettings: kibanaConfig,
+      mlServices: { mlApi },
+      lens,
+    },
+  } = useMlKibana();
 
-  const { context } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    {
-      redirect: () => resolver(lensId, vis, from, to, query, filters, layerIndex),
-    }
-  );
+  const { context } = useRouteResolver('full', ['canCreateJob'], {
+    redirect: () =>
+      resolver(
+        {
+          dataViews,
+          lens,
+          mlApi,
+          timeFilter,
+          kibanaConfig,
+          dashboardService,
+        },
+        vis,
+        from,
+        to,
+        query,
+        filters,
+        layerIndex
+      ),
+  });
+
   return (
     <PageLoader context={context}>
       {<Redirect to={createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB)} />}

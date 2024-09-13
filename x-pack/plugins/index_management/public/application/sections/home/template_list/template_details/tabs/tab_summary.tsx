@@ -20,14 +20,20 @@ import {
   EuiCodeBlock,
   EuiSpacer,
 } from '@elastic/eui';
+import { reactRouterNavigate } from '../../../../../../shared_imports';
+import { useAppContext } from '../../../../../app_context';
+import { serializeAsESLifecycle } from '../../../../../../../common/lib/data_stream_serialization';
+import { getLifecycleValue } from '../../../../../lib/data_streams';
 import { TemplateDeserialized } from '../../../../../../../common';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../../constants';
 import { useIlmLocator } from '../../../../../services/use_ilm_locator';
+import { allowAutoCreateRadioIds } from '../../../../../../../common/constants';
 
 interface Props {
   templateDetails: TemplateDeserialized;
 }
 
+const INFINITE_AS_ICON = true;
 const i18nTexts = {
   yes: i18n.translate('xpack.idxMgmt.templateDetails.summaryTab.yesDescriptionText', {
     defaultMessage: 'Yes',
@@ -50,10 +56,12 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
     ilmPolicy,
     _meta,
     _kbnMeta: { isLegacy, hasDatastream },
+    allowAutoCreate,
   } = templateDetails;
 
   const numIndexPatterns = indexPatterns.length;
 
+  const { history } = useAppContext();
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, ilmPolicy?.name);
 
   return (
@@ -130,9 +138,11 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                     <ul>
                       {composedOf.map((component) => (
                         <li key={component}>
-                          <EuiTitle size="xs">
+                          <EuiLink
+                            {...reactRouterNavigate(history, `/component_templates/${component}`)}
+                          >
                             <span>{component}</span>
-                          </EuiTitle>
+                          </EuiLink>
                         </li>
                       ))}
                     </ul>
@@ -192,6 +202,42 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
             <EuiDescriptionListDescription>
               {version || version === 0 ? version : i18nTexts.none}
             </EuiDescriptionListDescription>
+
+            {/* Data retention */}
+            {hasDatastream && templateDetails?.lifecycle && (
+              <>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateDetails.summaryTab.lifecycleDescriptionListTitle"
+                    defaultMessage="Data retention"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {getLifecycleValue(
+                    serializeAsESLifecycle(templateDetails.lifecycle),
+                    INFINITE_AS_ICON
+                  )}
+                </EuiDescriptionListDescription>
+              </>
+            )}
+
+            {/* Allow auto create */}
+            {isLegacy !== true &&
+              allowAutoCreate !== allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION && (
+                <>
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      id="xpack.idxMgmt.templateDetails.summaryTab.allowAutoCreateDescriptionListTitle"
+                      defaultMessage="Allow auto create"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    {allowAutoCreate === allowAutoCreateRadioIds.TRUE_RADIO_OPTION
+                      ? i18nTexts.yes
+                      : i18nTexts.no}
+                  </EuiDescriptionListDescription>
+                </>
+              )}
           </EuiDescriptionList>
         </EuiFlexItem>
       </EuiFlexGroup>

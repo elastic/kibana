@@ -1,15 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 } from 'uuid';
 import { omit } from 'lodash';
 import { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 
-import { DashboardPanelMap, DashboardPanelState, SavedDashboardPanel } from '..';
+import type { Reference } from '@kbn/content-management-utils';
+import { DashboardPanelMap, DashboardPanelState } from '..';
+import { SavedDashboardPanel } from '../content_management';
+import {
+  getReferencesForPanelId,
+  prefixReferencesFromPanel,
+} from '../dashboard_container/persistable_state/dashboard_container_references';
 
 export function convertSavedDashboardPanelToPanelState<
   TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
@@ -24,16 +32,29 @@ export function convertSavedDashboardPanelToPanelState<
       ...(savedDashboardPanel.title !== undefined && { title: savedDashboardPanel.title }),
       ...savedDashboardPanel.embeddableConfig,
     } as TEmbeddableInput,
+
+    /**
+     * Version information used to be stored in the panel until 8.11 when it was moved
+     * to live inside the explicit Embeddable Input. If version information is given here, we'd like to keep it.
+     * It will be removed on Dashboard save
+     */
+    version: savedDashboardPanel.version,
   };
 }
 
 export function convertPanelStateToSavedDashboardPanel(
   panelState: DashboardPanelState,
-  version: string
+  removeLegacyVersion?: boolean
 ): SavedDashboardPanel {
   const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
   return {
-    version,
+    /**
+     * Version information used to be stored in the panel until 8.11 when it was moved to live inside the
+     * explicit Embeddable Input. If removeLegacyVersion is not passed, we'd like to keep this information for
+     * the time being.
+     */
+    ...(!removeLegacyVersion ? { version: panelState.version } : {}),
+
     type: panelState.type,
     gridData: panelState.gridData,
     panelIndex: panelState.explicitInput.id,
@@ -52,8 +73,32 @@ export const convertSavedPanelsToPanelMap = (panels?: SavedDashboardPanel[]): Da
   return panelsMap;
 };
 
-export const convertPanelMapToSavedPanels = (panels: DashboardPanelMap, version: string) => {
+export const convertPanelMapToSavedPanels = (
+  panels: DashboardPanelMap,
+  removeLegacyVersion?: boolean
+) => {
   return Object.values(panels).map((panel) =>
-    convertPanelStateToSavedDashboardPanel(panel, version)
+    convertPanelStateToSavedDashboardPanel(panel, removeLegacyVersion)
   );
+};
+
+/**
+ * When saving a dashboard as a copy, we should generate new IDs for all panels so that they are
+ * properly refreshed when navigating between Dashboards
+ */
+export const generateNewPanelIds = (panels: DashboardPanelMap, references?: Reference[]) => {
+  const newPanelsMap: DashboardPanelMap = {};
+  const newReferences: Reference[] = [];
+  for (const [oldId, panel] of Object.entries(panels)) {
+    const newId = v4();
+    newPanelsMap[newId] = {
+      ...panel,
+      gridData: { ...panel.gridData, i: newId },
+      explicitInput: { ...panel.explicitInput, id: newId },
+    };
+    newReferences.push(
+      ...prefixReferencesFromPanel(newId, getReferencesForPanelId(oldId, references ?? []))
+    );
+  }
+  return { panels: newPanelsMap, references: newReferences };
 };

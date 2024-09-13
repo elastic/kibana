@@ -19,6 +19,10 @@
     "@kbn/shared-ux-page-analytics-no-data-types",
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-page-analytics-no-data-mocks",
+    "@kbn/shared-ux-page-kibana-no-data-types",
+    "@kbn/i18n-react",
+    "@kbn/core-http-browser",
+    "@kbn/core-http-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

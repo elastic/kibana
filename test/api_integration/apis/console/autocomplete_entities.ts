@@ -1,132 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
+  const console = getService('console');
   const supertest = getService('supertest');
-  const client = getService('es');
 
-  const createIndex = async (indexName: string) => {
-    await client.indices.create({
-      index: indexName,
-      body: {
-        mappings: {
-          properties: {
-            foo: {
-              type: 'text',
-            },
-          },
-        },
-      },
-    });
-  };
-
-  const createAlias = async (indexName: string, aliasName: string) => {
-    await client.indices.putAlias({
-      index: indexName,
-      name: aliasName,
-    });
-  };
-
-  const createLegacyTemplate = async (templateName: string) => {
-    await client.indices.putTemplate({
-      name: templateName,
-      body: {
-        index_patterns: ['*'],
-      },
-    });
-  };
-
-  const createComponentTemplate = async (templateName: string) => {
-    await client.cluster.putComponentTemplate({
-      name: templateName,
-      body: {
-        template: {
-          mappings: {
-            properties: {
-              '@timestamp': {
-                type: 'date',
-                format: 'date_optional_time||epoch_millis',
-              },
-              message: {
-                type: 'wildcard',
-              },
-            },
-          },
-        },
-      },
-    });
-  };
-
-  const createIndexTemplate = async (
-    templateName: string,
-    indexPatterns: string[],
-    composedOf: string[]
-  ) => {
-    await client.indices.putIndexTemplate({
-      name: templateName,
-      body: {
-        index_patterns: indexPatterns,
-        data_stream: {},
-        composed_of: composedOf,
-        priority: 500,
-      },
-    });
-  };
-
-  const createDataStream = async (dataStream: string) => {
-    await client.indices.createDataStream({
-      name: dataStream,
-    });
-  };
-
-  const deleteIndex = async (indexName: string) => {
-    await client.indices.delete({
-      index: indexName,
-    });
-  };
-
-  const deleteAlias = async (indexName: string, aliasName: string) => {
-    await client.indices.deleteAlias({
-      index: indexName,
-      name: aliasName,
-    });
-  };
-
-  const deleteIndexTemplate = async (templateName: string) => {
-    await client.indices.deleteIndexTemplate({
-      name: templateName,
-    });
-  };
-
-  const deleteComponentTemplate = async (templateName: string) => {
-    await client.cluster.deleteComponentTemplate({
-      name: templateName,
-    });
-  };
-
-  const deleteLegacyTemplate = async (templateName: string) => {
-    await client.indices.deleteTemplate({
-      name: templateName,
-    });
-  };
-
-  const deleteDataStream = async (dataStream: string) => {
-    await client.indices.deleteDataStream({
-      name: dataStream,
-    });
-  };
-
-  const sendRequest = async (query: object) => {
-    return await supertest.get('/api/console/autocomplete_entities').query(query);
-  };
+  const sendRequest = (query: object) =>
+    supertest
+      .get('/api/console/autocomplete_entities')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(query);
 
   describe('/api/console/autocomplete_entities', function () {
     const indexName = 'test-index-1';
@@ -138,22 +31,26 @@ export default ({ getService }: FtrProviderContext) => {
 
     before(async () => {
       // Setup indices, aliases, templates, and data streams
-      await createIndex(indexName);
-      await createAlias(indexName, aliasName);
-      await createComponentTemplate(componentTemplateName);
-      await createIndexTemplate(indexTemplateName, [dataStreamName], [componentTemplateName]);
-      await createDataStream(dataStreamName);
-      await createLegacyTemplate(legacyTemplateName);
+      await console.createIndex(indexName);
+      await console.createAlias(indexName, aliasName);
+      await console.createComponentTemplate(componentTemplateName);
+      await console.createIndexTemplate(
+        indexTemplateName,
+        [dataStreamName],
+        [componentTemplateName]
+      );
+      await console.createDataStream(dataStreamName);
+      await console.createLegacyTemplate(legacyTemplateName);
     });
 
     after(async () => {
       // Cleanup indices, aliases, templates, and data streams
-      await deleteAlias(indexName, aliasName);
-      await deleteIndex(indexName);
-      await deleteDataStream(dataStreamName);
-      await deleteIndexTemplate(indexTemplateName);
-      await deleteComponentTemplate(componentTemplateName);
-      await deleteLegacyTemplate(legacyTemplateName);
+      await console.deleteAlias(indexName, aliasName);
+      await console.deleteIndex(indexName);
+      await console.deleteDataStream(dataStreamName);
+      await console.deleteIndexTemplate(indexTemplateName);
+      await console.deleteComponentTemplate(componentTemplateName);
+      await console.deleteLegacyTemplate(legacyTemplateName);
     });
 
     it('should not succeed if no settings are provided in query params', async () => {

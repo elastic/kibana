@@ -1,0 +1,47 @@
+{
+  "id": "@kbn/plugin-check",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/plugin-check",
+        "id": "def-server.runPluginCheckCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runPluginCheckCli",
+        "description": [
+          "\nA CLI for checking the consistency of a plugin's declared and implicit dependencies."
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-plugin-check/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -2,17 +2,10 @@
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": [
-    "**/*.ts"
-  ],
+  "include": ["**/*.ts"],
   "kbn_references": [
-    "@kbn/logging",
-    "@kbn/analytics-client",
     "@kbn/ebt-tools",
     "@kbn/core-base-browser-internal",
     "@kbn/core-injected-metadata-browser-internal",
@@ -20,7 +13,5 @@
     "@kbn/core-base-browser-mocks",
     "@kbn/core-injected-metadata-browser-mocks"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -39,7 +39,7 @@ type UpdateExceptionListItemSchemaWithNonNullProps = NonNullableTypeProperties<
 > &
   Pick<UpdateExceptionListItemSchema, 'meta' | 'expire_time'>;
 
-const exceptionItemToCreateExceptionItem = (
+export const exceptionItemToCreateExceptionItem = (
   exceptionItem: ExceptionListItemSchema
 ): CreateExceptionListItemSchemaWithNonNullProps => {
   const {

@@ -6,6 +6,7 @@
  */
 
 import { merge } from 'lodash';
+import { SPACE_IDS } from '@kbn/rule-data-utils';
 import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
 import otherMapping from './other_mappings.json';
@@ -27,7 +28,7 @@ import signalExtraFields from './signal_extra_fields.json';
   incremented by 10 in order to add "room" for the aforementioned patch
   release
 */
-export const SIGNALS_TEMPLATE_VERSION = 67;
+export const SIGNALS_TEMPLATE_VERSION = 77;
 /**
   @constant
   @type {number}
@@ -41,7 +42,7 @@ export const SIGNALS_TEMPLATE_VERSION = 67;
   UI will call create_index_route and and go through the index update process. Increment this number if
   making changes to the field aliases we use to make signals forwards-compatible.
 */
-export const SIGNALS_FIELD_ALIASES_VERSION = 3;
+export const SIGNALS_FIELD_ALIASES_VERSION = 4;
 
 /**
   @constant
@@ -52,7 +53,7 @@ export const SIGNALS_FIELD_ALIASES_VERSION = 3;
 */
 export const ALIAS_VERSION_FIELD = 'aliases_version';
 
-export const getSignalsTemplate = (index: string, aadIndexAliasName: string) => {
+export const getSignalsTemplate = (index: string, aadIndexAliasName: string, spaceId: string) => {
   const fieldAliases = createSignalsFieldAliases();
   const template = {
     index_patterns: [`${index}-*`],
@@ -81,7 +82,13 @@ export const getSignalsTemplate = (index: string, aadIndexAliasName: string) => 
           ecsMapping.mappings.properties,
           otherMapping.mappings.properties,
           fieldAliases,
-          signalsMapping.mappings.properties
+          signalsMapping.mappings.properties,
+          {
+            [SPACE_IDS]: {
+              type: 'constant_keyword',
+              value: spaceId,
+            },
+          }
         ),
         _meta: {
           version: SIGNALS_TEMPLATE_VERSION,
@@ -132,7 +139,7 @@ const properties = {
   },
 };
 
-export const backwardsCompatibilityMappings = [
+export const backwardsCompatibilityMappings = (spaceId: string) => [
   {
     minVersion: 0,
     // Version 45 shipped with 7.14. 7.15+ have both the host.os.name.caseless field and the field aliases
@@ -149,10 +156,23 @@ export const backwardsCompatibilityMappings = [
       },
     },
   },
+  {
+    minVersion: 0,
+    maxVersion: 67,
+    mapping: {
+      dynamic: false,
+      properties: {
+        [SPACE_IDS]: {
+          type: 'constant_keyword',
+          value: spaceId,
+        },
+      },
+    },
+  },
 ];
 
-export const createBackwardsCompatibilityMapping = (version: number) => {
-  const mappings = backwardsCompatibilityMappings
+export const createBackwardsCompatibilityMapping = (version: number, spaceId: string) => {
+  const mappings = backwardsCompatibilityMappings(spaceId)
     .filter((mapping) => version <= mapping.maxVersion && version >= mapping.minVersion)
     .map((mapping) => mapping.mapping);
 

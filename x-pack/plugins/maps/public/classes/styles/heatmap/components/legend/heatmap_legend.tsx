@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import React, { Component, ReactNode } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { ColorGradient } from './color_gradient';
 import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_row';
 import { HEATMAP_COLOR_RAMP_LABEL } from '../heatmap_constants';
-import { IField } from '../../../../fields/field';
+import type { IField } from '../../../../fields/field';
+import type { IESAggField } from '../../../../fields/agg';
+import { MaskLegend } from '../../../vector/components/legend/mask_legend';
 
 interface Props {
   colorRampName: string;
@@ -47,7 +49,7 @@ export class HeatmapLegend extends Component<Props, State> {
   }
 
   render() {
-    return (
+    const metricLegend = (
       <RangedStyleLegendRow
         header={<ColorGradient colorPaletteId={this.props.colorRampName} />}
         minLabel={i18n.translate('xpack.maps.heatmapLegend.coldLabel', {
@@ -60,6 +62,29 @@ export class HeatmapLegend extends Component<Props, State> {
         fieldLabel={this.state.label}
         invert={false}
       />
+    );
+
+    let maskLegend: ReactNode | undefined;
+    if ('getMask' in (this.props.field as IESAggField)) {
+      const mask = (this.props.field as IESAggField).getMask();
+      if (mask) {
+        maskLegend = (
+          <MaskLegend
+            esAggField={this.props.field as IESAggField}
+            operator={mask.operator}
+            value={mask.value}
+          />
+        );
+      }
+    }
+
+    return maskLegend ? (
+      <>
+        {maskLegend}
+        {metricLegend}
+      </>
+    ) : (
+      metricLegend
     );
   }
 }

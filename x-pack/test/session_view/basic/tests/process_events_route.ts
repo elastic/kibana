@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { PROCESS_EVENTS_ROUTE } from '@kbn/session-view-plugin/common/constants';
+import {
+  PROCESS_EVENTS_ROUTE,
+  CURRENT_API_VERSION,
+} from '@kbn/session-view-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { User } from '../../../rule_registry/common/lib/authentication/types';
 
@@ -26,6 +29,8 @@ import {
   noKibanaPrivileges,
 } from '../../../rule_registry/common/lib/authentication/users';
 
+const MOCK_INDEX = 'logs-endpoint.events.process*';
+const MOCK_SESSION_START_TIME = '2022-05-08T13:44:00.13Z';
 const MOCK_SESSION_ENTITY_ID =
   'MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==';
 
@@ -42,6 +47,13 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
+  function getTestRoute() {
+    return supertest
+      .get(PROCESS_EVENTS_ROUTE)
+      .set('kbn-xsrf', 'foo')
+      .set('Elastic-Api-Version', CURRENT_API_VERSION);
+  }
+
   describe(`Session view - ${PROCESS_EVENTS_ROUTE} - with a basic license`, () => {
     describe(`using typical process event data`, () => {
       before(async () => {
@@ -56,9 +68,24 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/session_view/io_events');
       });
 
+      it(`${PROCESS_EVENTS_ROUTE} fails when an invalid api version is specified`, async () => {
+        const response = await supertest
+          .get(PROCESS_EVENTS_ROUTE)
+          .set('kbn-xsrf', 'foo')
+          .set('Elastic-Api-Version', '999999')
+          .query({
+            index: MOCK_INDEX,
+            sessionEntityId: MOCK_SESSION_ENTITY_ID,
+            sessionStartTime: MOCK_SESSION_START_TIME,
+          });
+        expect(response.status).to.be(400);
+      });
+
       it(`${PROCESS_EVENTS_ROUTE} returns a page of process events`, async () => {
-        const response = await supertest.get(PROCESS_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
+        const response = await getTestRoute().query({
+          index: MOCK_INDEX,
           sessionEntityId: MOCK_SESSION_ENTITY_ID,
+          sessionStartTime: MOCK_SESSION_START_TIME,
           pageSize: MOCK_PAGE_SIZE, // overriding to test pagination, as we only have 419 records of mock data
         });
         expect(response.status).to.be(200);
@@ -67,8 +94,10 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
       });
 
       it(`${PROCESS_EVENTS_ROUTE} returns a page of process events (w alerts) (paging forward)`, async () => {
-        const response = await supertest.get(PROCESS_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
+        const response = await getTestRoute().query({
+          index: MOCK_INDEX,
           sessionEntityId: MOCK_SESSION_ENTITY_ID,
+          sessionStartTime: MOCK_SESSION_START_TIME,
           pageSize: MOCK_PAGE_SIZE, // overriding to test pagination, as we only have 419 records of mock data
           cursor: '2022-05-10T20:39:23.6817084Z', // paginating from the timestamp of the first alert.
         });
@@ -82,8 +111,10 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
       });
 
       it(`${PROCESS_EVENTS_ROUTE} returns a page of process events (w alerts) (paging backwards)`, async () => {
-        const response = await supertest.get(PROCESS_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
+        const response = await getTestRoute().query({
+          index: MOCK_INDEX,
           sessionEntityId: MOCK_SESSION_ENTITY_ID,
+          sessionStartTime: MOCK_SESSION_START_TIME,
           pageSize: MOCK_PAGE_SIZE, // overriding to test pagination, as we only have 419 records of mock data
           cursor: '2022-05-10T20:39:23.6817084Z',
           forward: false,
@@ -112,8 +143,11 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
               .get(`${PROCESS_EVENTS_ROUTE}`)
               .auth(username, password)
               .set('kbn-xsrf', 'true')
+              .set('Elastic-Api-Version', CURRENT_API_VERSION)
               .query({
+                index: MOCK_INDEX,
                 sessionEntityId: MOCK_SESSION_ENTITY_ID,
+                sessionStartTime: MOCK_SESSION_START_TIME,
                 pageSize: MOCK_PAGE_SIZE, // overriding to test pagination, as we only have 419 records of mock data
                 cursor: '2022-05-10T20:39:23.6817084Z', // paginating from the timestamp of the first alert.
               });
@@ -133,8 +167,11 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
               .get(`${PROCESS_EVENTS_ROUTE}`)
               .auth(username, password)
               .set('kbn-xsrf', 'true')
+              .set('Elastic-Api-Version', CURRENT_API_VERSION)
               .query({
+                index: MOCK_INDEX,
                 sessionEntityId: MOCK_SESSION_ENTITY_ID,
+                sessionStartTime: MOCK_SESSION_START_TIME,
                 cursor: '2022-05-10T20:39:23.6817084Z', // paginating from the timestamp of the first alert.
               });
             expect(response.status).to.be(200);
@@ -184,13 +221,73 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
       });
 
       it(`${PROCESS_EVENTS_ROUTE} returns a page of process events`, async () => {
-        const response = await supertest.get(PROCESS_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
+        const response = await getTestRoute().query({
+          index: MOCK_INDEX,
           sessionEntityId: MOCK_SESSION_ENTITY_ID,
+          sessionStartTime: MOCK_SESSION_START_TIME,
           pageSize: MOCK_PAGE_SIZE, // overriding to test pagination, as we only have 419 records of mock data
         });
         expect(response.status).to.be(200);
         expect(response.body.total).to.be.greaterThan(0);
         expect(response.body.events.length).to.be.greaterThan(0);
+      });
+    });
+
+    describe(`Session view - ${PROCESS_EVENTS_ROUTE} - with Auditbeat Events`, () => {
+      const MOCK_INDEX_AUDITBEAT = '.ds-auditbeat-8.14.0-2024.03.26-000001';
+
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/session_view/process_events_auditbeat'
+        );
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/session_view/process_events_auditbeat_alerts'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/session_view/process_events_auditbeat'
+        );
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/session_view/process_events_auditbeat_alerts'
+        );
+      });
+
+      it(`${PROCESS_EVENTS_ROUTE} returns a page of Auditbeat process events`, async () => {
+        const MOCK_SESSION_ENTITY_ID_AUDITBEAT =
+          'NDAyNjUzMTgzNl9fOTIxYjkxYzktZjJlMS00MjZhLThmZWYtYjgwYTNlMWY3MDQxX18yMjA2X18xNzEyMTA2MjIx';
+        const MOCK_SESSION_START_TIME_AUDITBEAT = '2024-04-03T01:03:41.970Z';
+
+        const response = await getTestRoute().query({
+          index: MOCK_INDEX_AUDITBEAT,
+          sessionEntityId: MOCK_SESSION_ENTITY_ID_AUDITBEAT,
+          sessionStartTime: MOCK_SESSION_START_TIME_AUDITBEAT,
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.total).to.be.greaterThan(0);
+        expect(response.body.events.length).to.be.greaterThan(0);
+      });
+
+      it(`${PROCESS_EVENTS_ROUTE} returns a page of Auditbeat process events (w alerts)`, async () => {
+        const MOCK_SESSION_ENTITY_ID_AUDITBEAT_ALERT =
+          'NDAyNjUzMTgzNl9fOTIxYjkxYzktZjJlMS00MjZhLThmZWYtYjgwYTNlMWY3MDQxX18xNTA5X18xNzEyMTAxNzk4';
+        const MOCK_SESSION_START_TIME_AUDITBEAT_ALERT = '2024-04-02T23:49:58.700Z';
+
+        const response = await getTestRoute().query({
+          index: MOCK_INDEX_AUDITBEAT,
+          sessionEntityId: MOCK_SESSION_ENTITY_ID_AUDITBEAT_ALERT,
+          sessionStartTime: MOCK_SESSION_START_TIME_AUDITBEAT_ALERT,
+          pageSize: MOCK_PAGE_SIZE, // overriding to test pagination, as we only have 419 records of mock data
+        });
+        expect(response.status).to.be(200);
+
+        const alerts = response.body.events.filter(
+          (event: any) => event._source.event.kind === 'signal'
+        );
+
+        expect(alerts.length).to.above(0);
       });
     });
   });

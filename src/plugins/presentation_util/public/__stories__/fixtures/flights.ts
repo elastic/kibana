@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { map, uniq } from 'lodash';
@@ -15,7 +16,7 @@ import {
 } from '@kbn/field-formats-plugin/common';
 import { flights } from './flights_data';
 
-export type Flight = typeof flights[number];
+export type Flight = (typeof flights)[number];
 export type FlightField = keyof Flight;
 
 export const flightFieldNames: FlightField[] = [
@@ -61,14 +62,19 @@ const numberFields = [
 const getConfig = (() => {}) as FieldFormatsGetConfigFn;
 
 export const flightFieldByName: { [key: string]: DataViewField } = {};
-flightFieldNames.forEach(
-  (flightFieldName) =>
-    (flightFieldByName[flightFieldName] = {
-      name: flightFieldName,
-      type: numberFields.includes(flightFieldName) ? 'number' : 'string',
-      aggregatable: true,
-    } as unknown as DataViewField)
-);
+flightFieldNames.forEach((flightFieldName) => {
+  const fieldBase = {
+    name: flightFieldName,
+    type: numberFields.includes(flightFieldName) ? 'number' : 'string',
+    aggregatable: true,
+  };
+  flightFieldByName[flightFieldName] = {
+    ...fieldBase,
+    toSpec: () => {
+      return fieldBase;
+    },
+  } as unknown as DataViewField;
+});
 flightFieldByName.Cancelled = { name: 'Cancelled', type: 'boolean' } as DataViewField;
 flightFieldByName.timestamp = { name: 'timestamp', type: 'date' } as DataViewField;
 

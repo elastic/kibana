@@ -130,7 +130,7 @@ export interface IVectorStyle extends IStyle {
     fillLayerId,
     lineLayerId,
   }: {
-    alpha: number;
+    alpha: unknown;
     mbMap: MbMap;
     fillLayerId: string;
     lineLayerId: string;
@@ -140,7 +140,7 @@ export interface IVectorStyle extends IStyle {
     mbMap,
     pointLayerId,
   }: {
-    alpha: number;
+    alpha: unknown;
     mbMap: MbMap;
     pointLayerId: string;
   }) => void;
@@ -149,7 +149,7 @@ export interface IVectorStyle extends IStyle {
     mbMap,
     textLayerId,
   }: {
-    alpha: number;
+    alpha: unknown;
     mbMap: MbMap;
     textLayerId: string;
   }) => void;
@@ -158,7 +158,7 @@ export interface IVectorStyle extends IStyle {
     symbolLayerId,
     alpha,
   }: {
-    alpha: number;
+    alpha: unknown;
     mbMap: MbMap;
     symbolLayerId: string;
   }) => void;
@@ -730,6 +730,7 @@ export class VectorStyle implements IVectorStyle {
 
     return (
       <VectorStyleLegend
+        masks={this._layer.getMasks()}
         styles={this._getLegendDetailStyleProperties()}
         isPointsOnly={this.getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
@@ -800,7 +801,7 @@ export class VectorStyle implements IVectorStyle {
     fillLayerId,
     lineLayerId,
   }: {
-    alpha: number;
+    alpha: unknown;
     mbMap: MbMap;
     fillLayerId: string;
     lineLayerId: string;
@@ -815,7 +816,7 @@ export class VectorStyle implements IVectorStyle {
     mbMap,
     pointLayerId,
   }: {
-    alpha: number;
+    alpha: unknown;
     mbMap: MbMap;
     pointLayerId: string;
   }) {
@@ -832,7 +833,7 @@ export class VectorStyle implements IVectorStyle {
     mbMap,
     textLayerId,
   }: {
-    alpha: number;
+    alpha: unknown;
     mbMap: MbMap;
     textLayerId: string;
   }) {
@@ -850,7 +851,7 @@ export class VectorStyle implements IVectorStyle {
     symbolLayerId,
     alpha,
   }: {
-    alpha: number;
+    alpha: unknown;
     mbMap: MbMap;
     symbolLayerId: string;
   }) {

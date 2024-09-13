@@ -17,18 +17,16 @@ import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 
-import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { Subscription } from 'rxjs';
 import { upgradeIntegration } from './utils/upgrade_integration';
-import type { PackSavedObjectAttributes } from './common/types';
+import type { PackSavedObject } from './common/types';
 import { updateGlobalPacksCreateCallback } from './lib/update_global_packs';
 import { packSavedObjectType } from '../common/types';
-import type { CreateLiveQueryRequestBodySchema } from '../common/schemas/routes/live_query';
 import { createConfig } from './create_config';
 import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
 import { initSavedObjects } from './saved_objects';
-import { initUsageCollectors } from './usage';
 import type { OsqueryAppContext } from './lib/osquery_app_context_services';
 import { OsqueryAppContextService } from './lib/osquery_app_context_services';
 import type { ConfigType } from '../common/config';
@@ -39,10 +37,10 @@ import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { initializeTransformsIndices } from './create_indices/create_transforms_indices';
 import { initializeTransforms } from './create_transforms/create_transforms';
 import { createDataViews } from './create_data_views';
-import { createActionHandler } from './handlers/action';
 
 import { registerFeatures } from './utils/register_features';
 import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
+import { createActionService } from './handlers/action/create_action_service';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -50,6 +48,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private readonly osqueryAppContextService = new OsqueryAppContextService();
   private readonly telemetryReceiver: TelemetryReceiver;
   private readonly telemetryEventsSender: TelemetryEventsSender;
+  private licenseSubscription: Subscription | null = null;
+  private createActionService: ReturnType<typeof createActionService> | null = null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.context = initializerContext;
@@ -73,34 +73,34 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       config: (): ConfigType => config,
       security: plugins.security,
       telemetryEventsSender: this.telemetryEventsSender,
+      licensing: plugins.licensing,
     };
 
     initSavedObjects(core.savedObjects);
-    initUsageCollectors({
-      core,
-      osqueryContext,
-      usageCollection: plugins.usageCollection,
-    });
 
-    core.getStartServices().then(([{ elasticsearch }, depsStart]) => {
-      const osquerySearchStrategy = osquerySearchStrategyProvider(
-        depsStart.data,
-        elasticsearch.client
-      );
+    this.createActionService = createActionService(osqueryContext);
 
-      plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
-      defineRoutes(router, osqueryContext);
-    });
+    core
+      .getStartServices()
+      .then(([{ elasticsearch }, depsStart]) => {
+        const osquerySearchStrategy = osquerySearchStrategyProvider(
+          depsStart.data,
+          elasticsearch.client
+        );
+
+        plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
+        defineRoutes(router, osqueryContext);
+      })
+      .catch(() => {
+        // it shouldn't reject, but just in case
+      });
 
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
     plugins.cases.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
 
     return {
-      osqueryCreateAction: (
-        params: CreateLiveQueryRequestBodySchema,
-        alertData?: ParsedTechnicalFields
-      ) => createActionHandler(osqueryContext, params, { alertData }),
+      createActionService: this.createActionService,
     };
   }
 
@@ -122,56 +122,71 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     this.telemetryEventsSender.start(plugins.taskManager, this.telemetryReceiver);
 
-    plugins.fleet?.fleetSetupCompleted().then(async () => {
-      const packageInfo = await plugins.fleet?.packageService.asInternalUser.getInstallation(
-        OSQUERY_INTEGRATION_NAME
-      );
-      const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    plugins.fleet
+      ?.fleetSetupCompleted()
+      .then(async () => {
+        const packageInfo = await plugins.fleet?.packageService.asInternalUser.getInstallation(
+          OSQUERY_INTEGRATION_NAME
+        );
+        const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
 
-      const esClient = core.elasticsearch.client.asInternalUser;
-      const dataViewsService = await plugins.dataViews.dataViewsServiceFactory(
-        client,
-        esClient,
-        undefined,
-        true
-      );
-
-      // If package is installed we want to make sure all needed assets are installed
-      if (packageInfo) {
-        await this.initialize(core, dataViewsService);
-      }
-
-      // Upgrade integration into 1.6.0 and rollover if found 'generic' dataset - we do not want to wait for it
-      upgradeIntegration({ packageInfo, client, esClient, logger: this.logger });
-
-      if (registerIngestCallback) {
-        registerIngestCallback(
-          'packagePolicyCreate',
-          async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
-            if (newPackagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
-              await this.initialize(core, dataViewsService);
-
-              const allPacks = await client.find<PackSavedObjectAttributes>({
-                type: packSavedObjectType,
-              });
-
-              if (allPacks.saved_objects) {
-                return updateGlobalPacksCreateCallback(
-                  newPackagePolicy,
-                  client,
-                  allPacks,
-                  this.osqueryAppContextService
-                );
-              }
-            }
-
-            return newPackagePolicy;
-          }
+        const esClient = core.elasticsearch.client.asInternalUser;
+        const dataViewsService = await plugins.dataViews.dataViewsServiceFactory(
+          client,
+          esClient,
+          undefined,
+          true
         );
 
-        registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(client));
-      }
-    });
+        // If package is installed we want to make sure all needed assets are installed
+        if (packageInfo) {
+          await this.initialize(core, dataViewsService);
+        }
+
+        // Upgrade integration into 1.6.0 and rollover if found 'generic' dataset - we do not want to wait for it
+        upgradeIntegration({ packageInfo, client, esClient, logger: this.logger }).catch(() => {
+          // we do not want to wait for it
+        });
+
+        if (registerIngestCallback) {
+          registerIngestCallback(
+            'packagePolicyCreate',
+            async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
+              if (newPackagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
+                await this.initialize(core, dataViewsService);
+
+                const allPacks = await client
+                  .find<PackSavedObject>({
+                    type: packSavedObjectType,
+                  })
+                  .then((data) => ({
+                    ...data,
+                    saved_objects: data.saved_objects.map((pack) => ({
+                      ...pack.attributes,
+                      saved_object_id: pack.id,
+                    })),
+                  }));
+
+                if (allPacks.saved_objects) {
+                  return updateGlobalPacksCreateCallback(
+                    newPackagePolicy,
+                    client,
+                    allPacks.saved_objects,
+                    this.osqueryAppContextService
+                  );
+                }
+              }
+
+              return newPackagePolicy;
+            }
+          );
+
+          registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(client));
+        }
+      })
+      .catch(() => {
+        // it shouldn't reject, but just in case
+      });
 
     return {};
   }
@@ -180,6 +195,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.logger.debug('osquery: Stopped');
     this.telemetryEventsSender.stop();
     this.osqueryAppContextService.stop();
+    this.licenseSubscription?.unsubscribe();
+    this.createActionService?.stop();
   }
 
   async initialize(core: CoreStart, dataViewsService: DataViewsService): Promise<void> {

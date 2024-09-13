@@ -1,27 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, withRouter, RouteComponentProps, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { withRouter, RouteComponentProps, Redirect } from 'react-router-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { Router, Route } from '@kbn/shared-ux-router';
 
 import {
   EuiPage,
+  EuiPageSidebar,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPageSideBar_Deprecated as EuiPageSideBar,
   EuiTitle,
   EuiSideNav,
 } from '@elastic/eui';
@@ -37,16 +36,14 @@ const Home = () => (
         </EuiTitle>
       </EuiPageHeaderSection>
     </EuiPageHeader>
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
-          <EuiTitle>
-            <h2>DL home page section title</h2>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>Wow this is the content!</EuiPageContentBody>
-    </EuiPageContent>
+    <EuiPageSection>
+      <EuiPageHeader>
+        <EuiTitle>
+          <h2>DL home page section title</h2>
+        </EuiTitle>
+      </EuiPageHeader>
+      <EuiPageSection>Wow this is the content!</EuiPageSection>
+    </EuiPageSection>
   </EuiPageBody>
 );
 
@@ -55,20 +52,18 @@ const PageA = () => (
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">
-          <h1>DL Page A</h1>
+          <h1>DL page A</h1>
         </EuiTitle>
       </EuiPageHeaderSection>
     </EuiPageHeader>
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
-          <EuiTitle>
-            <h2>DL Page A section title</h2>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>DL Page A&apos;s content goes here</EuiPageContentBody>
-    </EuiPageContent>
+    <EuiPageSection>
+      <EuiPageHeader>
+        <EuiTitle>
+          <h2>DL Page A section title</h2>
+        </EuiTitle>
+      </EuiPageHeader>
+      <EuiPageSection>DL Page A&apos;s content goes here</EuiPageSection>
+    </EuiPageSection>
   </EuiPageBody>
 );
 
@@ -77,20 +72,18 @@ const PageB = () => (
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">
-          <h1>DL Page B</h1>
+          <h1>DL page B</h1>
         </EuiTitle>
       </EuiPageHeaderSection>
     </EuiPageHeader>
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
-          <EuiTitle>
-            <h2>DL Page B section title</h2>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>DL Page B&apos;s content goes here</EuiPageContentBody>
-    </EuiPageContent>
+    <EuiPageSection>
+      <EuiPageHeader>
+        <EuiTitle>
+          <h2>DL Page B section title</h2>
+        </EuiTitle>
+      </EuiPageHeader>
+      <EuiPageSection>DL Page B&apos;s content goes here</EuiPageSection>
+    </EuiPageSection>
   </EuiPageBody>
 );
 
@@ -141,9 +134,9 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
 const DlApp = ({ history, coreStart }: { history: History; coreStart: CoreStart }) => (
   <Router history={history}>
     <EuiPage>
-      <EuiPageSideBar>
+      <EuiPageSidebar>
         <Nav navigateToApp={coreStart.application.navigateToApp} />
-      </EuiPageSideBar>
+      </EuiPageSidebar>
       <Route path="/" exact render={() => <Redirect to="/home" />} />
       <Route path="/home" exact component={Home} />
       <Route path="/page-a" component={PageA} />
@@ -153,7 +146,12 @@ const DlApp = ({ history, coreStart }: { history: History; coreStart: CoreStart 
 );
 
 export const renderApp = (coreStart: CoreStart, { history, element }: AppMountParameters) => {
-  ReactDOM.render(<DlApp history={history} coreStart={coreStart} />, element);
+  ReactDOM.render(
+    <KibanaRenderContextProvider {...coreStart}>
+      <DlApp history={history} coreStart={coreStart} />
+    </KibanaRenderContextProvider>,
+    element
+  );
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

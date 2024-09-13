@@ -14,7 +14,6 @@
 
 import React from 'react';
 
-import '../../common/mock/match_media';
 import type { CaseViewProps } from './types';
 import { connectorsMock } from '../../containers/mock';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
@@ -30,7 +29,7 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import CaseView from '.';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { useGetTags } from '../../containers/use_get_tags';
 import { casesQueriesKeys } from '../../containers/constants';
 import {
@@ -96,7 +95,7 @@ describe('CaseView', () => {
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
     usePostPushToServiceMock.mockReturnValue({
       isLoading: false,
-      pushCaseToExternalService: jest.fn(),
+      mutateAsync: jest.fn(),
     });
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
@@ -174,7 +173,7 @@ describe('CaseView', () => {
   it('should refresh data on refresh', async () => {
     const queryClientSpy = jest.spyOn(appMockRenderer.queryClient, 'invalidateQueries');
     const result = appMockRenderer.render(<CaseView {...caseViewProps} />);
-    userEvent.click(result.getByTestId('case-refresh'));
+    await userEvent.click(result.getByTestId('case-refresh'));
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
   });

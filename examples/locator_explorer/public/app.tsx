@@ -1,23 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { EuiPage } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
-import { EuiPageBody } from '@elastic/eui';
-import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
-import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
-import { EuiFieldText } from '@elastic/eui';
-import { EuiPageHeader } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiButton,
+  EuiPageBody,
+  EuiPageTemplate,
+  EuiPageSection,
+  EuiSpacer,
+  EuiText,
+  EuiFieldText,
+  EuiPageHeader,
+  EuiLink,
+} from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import {
@@ -112,9 +115,11 @@ const ActionsExplorer = ({ share }: Props) => {
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageHeader>Locator explorer</EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody>
+        <EuiPageSection>
+          <EuiPageHeader pageTitle="Locator Explorer" />
+        </EuiPageSection>
+        <EuiPageTemplate.Section>
+          <EuiPageSection>
             <EuiText>
               <p>Create new links using the most recent version of a locator.</p>
             </EuiText>
@@ -178,8 +183,8 @@ const ActionsExplorer = ({ share }: Props) => {
                 </React.Fragment>
               ))
             )}
-          </EuiPageContentBody>
-        </EuiPageContent>
+          </EuiPageSection>
+        </EuiPageTemplate.Section>
       </EuiPageBody>
     </EuiPage>
   );

@@ -11,9 +11,9 @@ import { getESAssetMetadata } from '../services/epm/elasticsearch/meta';
 
 const meta = getESAssetMetadata();
 
-export const FLEET_INSTALL_FORMAT_VERSION = '1.0.0';
+export const FLEET_INSTALL_FORMAT_VERSION = '1.2.0';
 
-export const FLEET_AGENT_POLICIES_SCHEMA_VERSION = '1.1.0';
+export const FLEET_AGENT_POLICIES_SCHEMA_VERSION = '1.1.1';
 
 export const FLEET_FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
@@ -61,6 +61,7 @@ export const FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_CONTENT = {
             ingested: {
               type: 'date',
               format: 'strict_date_time_no_millis||strict_date_optional_time||epoch_millis',
+              ignore_malformed: false,
             },
             agent_id_status: {
               ignore_above: 1024,
@@ -81,7 +82,21 @@ export const FLEET_COMPONENT_TEMPLATES = [
   },
 ];
 
-export const FLEET_FINAL_PIPELINE_VERSION = 3;
+export const STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS = `logs@settings`;
+export const STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS = `logs@mappings`;
+export const STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS = `metrics@settings`;
+export const STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS = `metrics@tsdb-settings`;
+export const STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS = 'ecs@mappings';
+
+export const STACK_COMPONENT_TEMPLATES = [
+  STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+  STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
+  STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS,
+  STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS,
+  STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+];
+
+export const FLEET_FINAL_PIPELINE_VERSION = 4;
 
 // If the content is updated you probably need to update the FLEET_FINAL_PIPELINE_VERSION too to allow upgrade of the pipeline
 export const FLEET_FINAL_PIPELINE_CONTENT = `---
@@ -92,20 +107,27 @@ _meta:
 description: >
   Final pipeline for processing all incoming Fleet Agent documents.
 processors:
-  - date:
+  - script:
       description: Add time when event was ingested (and remove sub-seconds to improve storage efficiency)
       tag: truncate-subseconds-event-ingested
-      field: _ingest.timestamp
-      target_field: event.ingested
-      formats:
-        - ISO8601
-      output_format: date_time_no_millis
       ignore_failure: true
+      source: |-
+        if (ctx?.event == null) {
+          ctx.event = [:];
+        }
+
+        ctx.event.ingested = metadata().now.withNano(0).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
   - remove:
       description: Remove any pre-existing untrusted values.
       field:
         - event.agent_id_status
         - _security
+      ignore_missing: true
+  - remove:
+      description: Remove event.original unless the preserve_original_event tag is set
+      field: event.original
+      if: "ctx?.tags == null || !(ctx.tags.contains('preserve_original_event'))"
+      ignore_failure: true
       ignore_missing: true
   - set_security_user:
       field: _security

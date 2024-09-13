@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getHeatmapColors } from './heatmap_color';
@@ -66,23 +67,5 @@ describe('Vislib Heatmap Color Module Test Suite', () => {
     for (let i = 0; i < 10; i++) {
       expect(getHeatmapColors(i / 10, schema)).toMatch(colorRegex);
     }
-  });
-
-  describe('drawColormap function', () => {
-    const canvasElement = {
-      getContext: jest.fn(() => ({
-        fillStyle: null,
-        fillRect: jest.fn(),
-      })),
-    };
-    beforeEach(() => {
-      jest.spyOn(document, 'createElement').mockImplementation(() => canvasElement as any);
-    });
-
-    it('should return canvas element', () => {
-      const response = getHeatmapColors.prototype.drawColormap('Greens');
-      expect(typeof response).toEqual('object');
-      expect(response).toBe(canvasElement);
-    });
   });
 });

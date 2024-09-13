@@ -5,27 +5,17 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { DeprecationsDetails, GetDeprecationsContext } from '@kbn/core/server';
-import { API_MIGRATE_ILM_POLICY_URL, ILM_POLICY_NAME } from '../../common/constants';
-import { ReportingCore } from '../core';
-import { deprecations } from '../lib/deprecations';
+import { i18n } from '@kbn/i18n';
+import { ILM_POLICY_NAME, INTERNAL_ROUTES } from '@kbn/reporting-common';
+import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
+import { IlmPolicyManager } from '../lib/store';
 
-interface ExtraDependencies {
-  reportingCore: ReportingCore;
-}
-
-export const getDeprecationsInfo = async (
-  { esClient }: GetDeprecationsContext,
-  { reportingCore }: ExtraDependencies
-): Promise<DeprecationsDetails[]> => {
-  const store = await reportingCore.getStore();
-  const indexPattern = store.getReportingIndexPattern();
-
-  const migrationStatus = await deprecations.checkIlmMigrationStatus({
-    reportingCore,
-    elasticsearchClient: esClient.asInternalUser,
-  });
+export const getDeprecationsInfo = async ({
+  esClient,
+}: GetDeprecationsContext): Promise<DeprecationsDetails[]> => {
+  const ilmPolicyManager = IlmPolicyManager.create({ client: esClient.asInternalUser });
+  const migrationStatus = await ilmPolicyManager.checkIlmMigrationStatus();
 
   if (migrationStatus !== 'ok') {
     return [
@@ -35,10 +25,10 @@ export const getDeprecationsInfo = async (
         }),
         level: 'warning',
         message: i18n.translate('xpack.reporting.deprecations.migrateIndexIlmPolicyActionMessage', {
-          defaultMessage: `New reporting indices will be managed by the "{reportingIlmPolicy}" provisioned ILM policy. You must edit this policy to manage the report lifecycle. This change targets all indices prefixed with "{indexPattern}".`,
+          defaultMessage: `New reporting indices will be managed by the "{reportingIlmPolicy}" provisioned ILM policy. You must edit this policy to manage the report lifecycle. This change targets the hidden system index pattern "{indexPattern}".`,
           values: {
             reportingIlmPolicy: ILM_POLICY_NAME,
-            indexPattern,
+            indexPattern: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
           },
         }),
         correctiveActions: {
@@ -54,7 +44,7 @@ export const getDeprecationsInfo = async (
           ],
           api: {
             method: 'PUT',
-            path: API_MIGRATE_ILM_POLICY_URL,
+            path: INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY,
           },
         },
       },

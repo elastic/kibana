@@ -6,16 +6,21 @@
  */
 
 import React, { FC } from 'react';
-import { EuiImage, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiImage, EuiText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface PopoverPlaceholderProps {
-  darkMode: boolean;
   basePath: string;
+  customPlaceholderMessage?: React.ReactNode;
 }
 
-export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({ basePath, darkMode }) => {
+export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({
+  basePath,
+  customPlaceholderMessage,
+}) => {
+  const { colorMode } = useEuiTheme();
+
   return (
     <EuiFlexGroup
       style={{ minHeight: 300 }}
@@ -32,25 +37,29 @@ export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({ basePath, dark
           })}
           size="fullWidth"
           url={`${basePath}illustration_product_no_search_results_${
-            darkMode ? 'dark' : 'light'
+            colorMode === 'DARK' ? 'dark' : 'light'
           }.svg`}
         />
 
-        <EuiText size="m">
-          <p>
-            <FormattedMessage
-              id="xpack.globalSearchBar.searchBar.noResultsHeading"
-              defaultMessage="No results found"
-            />
-          </p>
-        </EuiText>
+        {customPlaceholderMessage ?? (
+          <>
+            <EuiText size="m">
+              <p>
+                <FormattedMessage
+                  id="xpack.globalSearchBar.searchBar.noResultsHeading"
+                  defaultMessage="No results found"
+                />
+              </p>
+            </EuiText>
 
-        <p>
-          <FormattedMessage
-            id="xpack.globalSearchBar.searchBar.noResults"
-            defaultMessage="Try searching for applications, dashboards, visualizations, and more."
-          />
-        </p>
+            <p>
+              <FormattedMessage
+                id="xpack.globalSearchBar.searchBar.noResults"
+                defaultMessage="Try searching for applications, dashboards, visualizations, and more."
+              />
+            </p>
+          </>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

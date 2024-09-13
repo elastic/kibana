@@ -1,19 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import './management_app.scss';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { BehaviorSubject } from 'rxjs';
+
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
-import { reactRouterNavigate, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import useObservable from 'react-use/lib/useObservable';
+import { AppContextProvider } from './management_context';
 import {
   ManagementSection,
   MANAGEMENT_BREADCRUMB,
@@ -21,25 +29,29 @@ import {
 } from '../../utils';
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
-import { SectionsServiceStart } from '../../types';
+import { SectionsServiceStart, NavigationCardsSubject } from '../../types';
 
 interface ManagementAppProps {
   appBasePath: string;
   history: AppMountParameters['history'];
-  theme$: AppMountParameters['theme$'];
   dependencies: ManagementAppDependencies;
 }
 
 export interface ManagementAppDependencies {
   sections: SectionsServiceStart;
   kibanaVersion: string;
+  coreStart: CoreStart;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
+  isSidebarEnabled$: BehaviorSubject<boolean>;
+  cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject>;
 }
 
-export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppProps) => {
-  const { setBreadcrumbs } = dependencies;
+export const ManagementApp = ({ dependencies, history, appBasePath }: ManagementAppProps) => {
+  const { coreStart, setBreadcrumbs, isSidebarEnabled$, cardsNavigationConfig$ } = dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
+  const isSidebarEnabled = useObservable(isSidebarEnabled$);
+  const cardsNavigationConfig = useObservable(cardsNavigationConfig$);
 
   const onAppMounted = useCallback((id: string) => {
     setSelectedId(id);
@@ -75,39 +87,51 @@ export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppPr
     return null;
   }
 
-  const solution: KibanaPageTemplateProps['solutionNav'] = {
-    name: i18n.translate('management.nav.label', {
-      defaultMessage: 'Management',
-    }),
-    icon: 'managementApp',
-    'data-test-subj': 'mgtSideBarNav',
-    items: managementSidebarNav({
-      selectedId,
-      sections,
-      history,
-    }),
+  const solution: KibanaPageTemplateProps['solutionNav'] | undefined = isSidebarEnabled
+    ? {
+        name: i18n.translate('management.nav.label', {
+          defaultMessage: 'Management',
+        }),
+        icon: 'managementApp',
+        'data-test-subj': 'mgtSideBarNav',
+        items: managementSidebarNav({
+          selectedId,
+          sections,
+          history,
+        }),
+      }
+    : undefined;
+
+  const contextDependencies = {
+    appBasePath,
+    sections,
+    cardsNavigationConfig,
+    kibanaVersion: dependencies.kibanaVersion,
   };
 
   return (
-    <I18nProvider>
-      <KibanaThemeProvider theme$={theme$}>
-        <KibanaPageTemplate
-          restrictWidth={false}
-          solutionNav={solution}
-          // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
-          // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
-          mainProps={{ paddingSize: 'l' }}
-        >
-          <ManagementRouter
-            history={history}
-            theme$={theme$}
-            setBreadcrumbs={setBreadcrumbsScoped}
-            onAppMounted={onAppMounted}
-            sections={sections}
-            dependencies={dependencies}
-          />
-        </KibanaPageTemplate>
-      </KibanaThemeProvider>
-    </I18nProvider>
+    <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
+      <RedirectAppLinks coreStart={dependencies.coreStart}>
+        <AppContextProvider value={contextDependencies}>
+          <KibanaPageTemplate
+            restrictWidth={false}
+            solutionNav={solution}
+            // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
+            // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
+            mainProps={{ paddingSize: 'l' }}
+            panelled
+          >
+            <ManagementRouter
+              history={history}
+              theme={coreStart.theme}
+              setBreadcrumbs={setBreadcrumbsScoped}
+              onAppMounted={onAppMounted}
+              sections={sections}
+              analytics={coreStart.analytics}
+            />
+          </KibanaPageTemplate>
+        </AppContextProvider>
+      </RedirectAppLinks>
+    </KibanaRenderContextProvider>
   );
 };

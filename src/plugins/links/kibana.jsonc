@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/links-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "description": "A dashboard panel for creating links to dashboards or external links.",
+  "plugin": {
+    "id": "links",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "contentManagement",
+      "dashboard",
+      "embeddable",
+      "kibanaReact",
+      "kibanaUtils",
+      "presentationUtil",
+      "uiActions",
+      "uiActionsEnhanced",
+      "visualizations"
+    ],
+    "optionalPlugins": ["triggersActionsUi", "usageCollection"],
+    "requiredBundles": ["savedObjects"]
+  }
+}

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -15,18 +16,14 @@ import type {
 
 export type Method = Exclude<RouteMethod, 'options'>;
 
-/** @experimental */
+/** @internal */
 export interface VersionedRouterRoute {
-  /** @experimental */
   method: string;
-  /** @experimental */
   path: string;
-  /** @experimental */
-  options: VersionedRouteConfig<RouteMethod>;
-  /** @experimental */
+  options: Omit<VersionedRouteConfig<RouteMethod>, 'path'>;
   handlers: Array<{
     fn: RequestHandler;
-    options: AddVersionOpts<unknown, unknown, unknown, unknown>;
+    options: AddVersionOpts<unknown, unknown, unknown>;
   }>;
 }
 
@@ -42,4 +39,6 @@ export type HandlerResolutionStrategy =
   /** Use the oldest available version by default */
   | 'oldest'
   /** Use the newest available version by default */
-  | 'newest';
+  | 'newest'
+  /** Dev-only: remove resolution and fail if no version is provided */
+  | 'none';

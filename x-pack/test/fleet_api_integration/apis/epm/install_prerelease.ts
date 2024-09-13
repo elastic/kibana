@@ -6,29 +6,29 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const testPackage = 'prerelease';
   const testPackageVersion = '0.1.0-dev.0+abc';
-  const server = dockerServers.get('registry');
 
   const deletePackage = async (pkg: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/150343
-  describe('installs package that has a prerelease version', async () => {
+  describe('installs package that has a prerelease version', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     after(async () => {
-      if (server.enabled) {
+      if (isDockerRegistryEnabledOrSkipped(providerContext)) {
         // remove the package just in case it being installed will affect other tests
         await deletePackage(testPackage, testPackageVersion);
       }
@@ -70,13 +70,21 @@ export default function (providerContext: FtrProviderContext) {
       expect(response.body.items.find((item: any) => item.id.includes(gaVersion)));
     });
 
-    it('should install the beta package when no version is provided and prerelease is true', async function () {
+    it('should install the beta package when prerelease is true', async function () {
       const response = await supertest
-        .post(`/api/fleet/epm/packages/${testPackage}?prerelease=true`)
+        .post(`/api/fleet/epm/packages/${testPackage}/${testPackageVersion}?prerelease=true`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true }) // using force to ignore package verification error
         .expect(200);
+      expect(response.body.items.find((item: any) => item.id.includes(betaVersion)));
+    });
 
+    it('should install the beta package when no version is provided and prerelease is true', async function () {
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/${testPackage}/${testPackageVersion}?prerelease=true`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true }) // using force to ignore package verification error
+        .expect(200);
       expect(response.body.items.find((item: any) => item.id.includes(betaVersion)));
     });
 

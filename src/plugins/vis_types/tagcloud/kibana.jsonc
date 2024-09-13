@@ -11,11 +11,13 @@
       "data",
       "expressions",
       "visualizations",
-      "charts"
+      "charts",
+      "dataViews"
     ],
     "requiredBundles": [
       "kibanaReact",
-      "visDefaultEditor"
+      "visDefaultEditor",
+      "kibanaUtils"
     ]
   }
 }

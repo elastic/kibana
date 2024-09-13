@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
+
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 
 import {
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
@@ -12,15 +15,16 @@ import {
   DEFAULT_DOWNLOAD_SOURCE_ID,
 } from '../constants';
 
-import type { DownloadSource, DownloadSourceAttributes, DownloadSourceBase } from '../types';
+import type { DownloadSource, DownloadSourceSOAttributes, DownloadSourceBase } from '../types';
 import { DownloadSourceError, FleetError } from '../errors';
 import { SO_SEARCH_LIMIT } from '../../common';
 
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
+import { getFleetProxy } from './fleet_proxies';
 
-function savedObjectToDownloadSource(so: SavedObject<DownloadSourceAttributes>) {
+function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>) {
   const { source_id: sourceId, ...attributes } = so.attributes;
 
   return {
@@ -31,20 +35,20 @@ function savedObjectToDownloadSource(so: SavedObject<DownloadSourceAttributes>) 
 
 class DownloadSourceService {
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<DownloadSource> {
-    const soResponse = await soClient.get<DownloadSourceAttributes>(
+    const soResponse = await soClient.get<DownloadSourceSOAttributes>(
       DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       id
     );
 
     if (soResponse.error) {
-      throw new Error(soResponse.error.message);
+      throw new FleetError(soResponse.error.message);
     }
 
     return savedObjectToDownloadSource(soResponse);
   }
 
   public async list(soClient: SavedObjectsClientContract) {
-    const downloadSources = await soClient.find<DownloadSourceAttributes>({
+    const downloadSources = await soClient.find<DownloadSourceSOAttributes>({
       type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
@@ -65,12 +69,19 @@ class DownloadSourceService {
     downloadSource: DownloadSourceBase,
     options?: { id?: string; overwrite?: boolean }
   ): Promise<DownloadSource> {
-    const data: DownloadSourceAttributes = downloadSource;
+    const logger = appContextService.getLogger();
+    logger.debug(`Creating new download source`);
+
+    const data: DownloadSourceSOAttributes = downloadSource;
 
     await this.requireUniqueName(soClient, {
       name: downloadSource.name,
       id: options?.id,
     });
+
+    if (data.proxy_id) {
+      await this.throwIfProxyNotFound(soClient, data.proxy_id);
+    }
 
     // default should be only one
     if (data.is_default) {
@@ -84,7 +95,7 @@ class DownloadSourceService {
       data.source_id = options?.id;
     }
 
-    const newSo = await soClient.create<DownloadSourceAttributes>(
+    const newSo = await soClient.create<DownloadSourceSOAttributes>(
       DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       data,
       {
@@ -92,20 +103,26 @@ class DownloadSourceService {
         overwrite: options?.overwrite ?? false,
       }
     );
+    logger.debug(`Creating new download source ${options?.id}`);
     return savedObjectToDownloadSource(newSo);
   }
 
-  // default should be only one
   public async update(
     soClient: SavedObjectsClientContract,
     id: string,
     newData: Partial<DownloadSource>
   ) {
-    const updateData: Partial<DownloadSourceAttributes> = newData;
+    const logger = appContextService.getLogger();
+    logger.debug(`Updating download source ${id} with ${newData}`);
+    const updateData: Partial<DownloadSourceSOAttributes> = newData;
 
-    if (newData.name) {
+    if (updateData.proxy_id) {
+      await this.throwIfProxyNotFound(soClient, updateData.proxy_id);
+    }
+
+    if (updateData.name) {
       await this.requireUniqueName(soClient, {
-        name: newData.name,
+        name: updateData.name,
         id,
       });
     }
@@ -117,34 +134,32 @@ class DownloadSourceService {
         await this.update(soClient, defaultDownloadSourceId, { is_default: false });
       }
     }
-    const soResponse = await soClient.update<DownloadSourceAttributes>(
+    const soResponse = await soClient.update<DownloadSourceSOAttributes>(
       DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       id,
       updateData
     );
     if (soResponse.error) {
-      throw new Error(soResponse.error.message);
+      throw new FleetError(soResponse.error.message);
+    } else {
+      logger.debug(`Updated download source ${id}`);
     }
   }
 
-  public async delete(
-    soClient: SavedObjectsClientContract,
-    id: string,
-    { fromPreconfiguration = false }: { fromPreconfiguration?: boolean } = {
-      fromPreconfiguration: false,
-    }
-  ) {
+  public async delete(soClient: SavedObjectsClientContract, id: string) {
+    const logger = appContextService.getLogger();
+    logger.debug(`Deleting download source ${id}`);
+
     const targetDS = await this.get(soClient, id);
 
     if (targetDS.is_default) {
       throw new DownloadSourceError(`Default Download source ${id} cannot be deleted.`);
     }
     await agentPolicyService.removeDefaultSourceFromAll(
-      soClient,
       appContextService.getInternalUserESClient(),
       id
     );
-
+    logger.debug(`Deleted download source ${id}`);
     return soClient.delete(DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE, id);
   }
 
@@ -183,7 +198,7 @@ class DownloadSourceService {
     soClient: SavedObjectsClientContract,
     downloadSource: { name: string; id?: string }
   ) {
-    const results = await soClient.find<DownloadSourceAttributes>({
+    const results = await soClient.find<DownloadSourceSOAttributes>({
       type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       searchFields: ['name'],
       search: escapeSearchQueryPhrase(downloadSource.name),
@@ -204,8 +219,33 @@ class DownloadSourceService {
     }
   }
 
+  public async listAllForProxyId(soClient: SavedObjectsClientContract, proxyId: string) {
+    const downloadSources = await soClient.find<DownloadSourceSOAttributes>({
+      type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+      searchFields: ['proxy_id'],
+      search: proxyId,
+      perPage: SO_SEARCH_LIMIT,
+    });
+
+    return {
+      items: downloadSources.saved_objects.map<DownloadSource>(savedObjectToDownloadSource),
+      total: downloadSources.total,
+    };
+  }
+
+  private async throwIfProxyNotFound(soClient: SavedObjectsClientContract, id: string) {
+    try {
+      await getFleetProxy(soClient, id);
+    } catch (err) {
+      if (err instanceof SavedObjectNotFound) {
+        throw new DownloadSourceError(`Proxy ${id} not found`);
+      }
+      throw new DownloadSourceError(`Error checking proxy_id: ${err.message}`);
+    }
+  }
+
   private async _getDefaultDownloadSourceSO(soClient: SavedObjectsClientContract) {
-    return await soClient.find<DownloadSourceAttributes>({
+    return await soClient.find<DownloadSourceSOAttributes>({
       type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',

@@ -12,6 +12,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  FILE_ATTACHMENT_TYPE,
 } from '../../../common/constants';
 import type {
   CaseAggregationResult,
@@ -26,10 +27,11 @@ import type {
   FileAttachmentAggregationResults,
   FileAttachmentAggsResult,
   AttachmentFrameworkAggsResult,
+  CustomFieldsTelemetry,
 } from '../types';
 import { buildFilter } from '../../client/utils';
 import type { Owner } from '../../../common/constants/types';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
+import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {
@@ -199,6 +201,28 @@ export const getSolutionValues = ({
   };
 };
 
+export const getCustomFieldsTelemetry = (
+  customFields?: ConfigurationPersistedAttributes['customFields']
+): CustomFieldsTelemetry => {
+  const customFiledTypes: Record<string, number> = {};
+
+  const totalsByType = customFields?.reduce((a, c) => {
+    if (c?.type) {
+      Object.assign(customFiledTypes, { [c.type]: (customFiledTypes[c.type] ?? 0) + 1 });
+    }
+
+    return customFiledTypes;
+  }, {});
+
+  const allRequiredCustomFields = customFields?.filter((field) => field?.required).length;
+
+  return {
+    totalsByType: totalsByType ?? {},
+    totals: customFields?.length ?? 0,
+    required: allRequiredCustomFields ?? 0,
+  };
+};
+
 export const findValueInBuckets = (buckets: Buckets['buckets'], value: string | number): number =>
   buckets.find(({ key }) => key === value)?.doc_count ?? 0;
 
@@ -208,14 +232,11 @@ export const getAggregationsBuckets = ({
 }: {
   keys: string[];
   aggs?: Record<string, unknown>;
-}): Record<string, Buckets['buckets']> =>
-  keys.reduce(
-    (acc, key) => ({
-      ...acc,
-      [key]: getBucketFromAggregation({ aggs, key }),
-    }),
-    {}
-  );
+}) =>
+  keys.reduce<Record<string, Buckets['buckets']>>((acc, key) => {
+    acc[key] = getBucketFromAggregation({ aggs, key });
+    return acc;
+  }, {});
 
 export const getAttachmentsFrameworkStats = ({
   attachmentAggregations,
@@ -230,7 +251,7 @@ export const getAttachmentsFrameworkStats = ({
     return emptyAttachmentFramework();
   }
 
-  const averageFileSize = filesAggregations?.averageSize?.value;
+  const averageFileSize = getAverageFileSize(filesAggregations);
   const topMimeTypes = filesAggregations?.topMimeTypes;
 
   return {
@@ -251,6 +272,14 @@ export const getAttachmentsFrameworkStats = ({
       }),
     },
   };
+};
+
+const getAverageFileSize = (filesAggregations?: FileAttachmentAggsResult) => {
+  if (filesAggregations?.averageSize?.value == null) {
+    return 0;
+  }
+
+  return Math.round(filesAggregations.averageSize.value);
 };
 
 const getAttachmentRegistryStats = (

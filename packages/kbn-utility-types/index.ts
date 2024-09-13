@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export type { $Values, Assign, Class, Optional, Required } from 'utility-types';
@@ -151,3 +152,23 @@ export type ArrayElement<A> = A extends ReadonlyArray<infer T> ? T : never;
 export type WithRequiredProperty<Type, Key extends keyof Type> = Omit<Type, Key> & {
   [Property in Key]-?: Type[Property];
 };
+
+// Recursive partial object type. inspired by EUI RecursivePartial
+export type RecursivePartial<T> = {
+  [P in keyof T]?: T[P] extends NonAny[]
+    ? T[P]
+    : T[P] extends readonly NonAny[]
+    ? T[P]
+    : T[P] extends Array<infer U>
+    ? Array<RecursivePartial<U>>
+    : T[P] extends ReadonlyArray<infer U>
+    ? ReadonlyArray<RecursivePartial<U>>
+    : T[P] extends Set<infer V>
+    ? Set<RecursivePartial<V>>
+    : T[P] extends Map<infer K, infer V>
+    ? Map<K, RecursivePartial<V>>
+    : T[P] extends NonAny
+    ? T[P]
+    : RecursivePartial<T[P]>;
+};
+type NonAny = number | boolean | string | symbol | null;

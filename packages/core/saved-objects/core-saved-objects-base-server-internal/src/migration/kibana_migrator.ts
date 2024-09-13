@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Observable } from 'rxjs';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '../mappings';
+import type { IDocumentMigrator } from './document_migrator';
 
 /** @internal */
 export interface IKibanaMigrator {
@@ -49,7 +51,27 @@ export interface IKibanaMigrator {
    * @param doc - The saved object to migrate
    * @returns `doc` with all registered migrations applied.
    */
-  migrateDocument(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc;
+  migrateDocument(
+    doc: SavedObjectUnsanitizedDoc,
+    options?: MigrateDocumentOptions
+  ): SavedObjectUnsanitizedDoc;
+
+  /**
+   * Returns the document migrator bound to this kibana migrator.
+   */
+  getDocumentMigrator(): IDocumentMigrator;
+}
+
+/**
+ * Options for {@link IKibanaMigrator.migrateDocument}
+ * @internal
+ */
+export interface MigrateDocumentOptions {
+  /**
+   * Defines whether it is allowed to convert documents from an higher version or not.
+   * Defaults to `false`.
+   */
+  allowDowngrade?: boolean;
 }
 
 /** @internal */
@@ -69,7 +91,11 @@ export type MigrationStatus =
 /** @internal */
 export type MigrationResult =
   | { status: 'skipped' }
-  | { status: 'patched' }
+  | {
+      status: 'patched';
+      destIndex: string;
+      elapsedMs: number;
+    }
   | {
       status: 'migrated';
       destIndex: string;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { LoadRuleAggregationsProps } from './aggregate_helpers';
+export type { LoadRuleAggregationsProps, LoadRuleTagsProps } from './aggregate_helpers';
 export type { LoadRulesProps } from './rules_helpers';
 export type {
   LoadExecutionLogAggregationsProps,

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
-import { useMlApiContext } from '../../contexts/kibana';
+import { useMlApi } from '../../contexts/kibana';
 import { JobSpacesSyncFlyout } from '../job_spaces_sync';
-import { checkPermission } from '../../capabilities/check_capabilities';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
 interface Props {
   mlSavedObjectType?: MlSavedObjectType;
@@ -26,12 +27,22 @@ export const SavedObjectsWarning: FC<Props> = ({
 }) => {
   const {
     savedObjects: { syncCheck },
-  } = useMlApiContext();
+  } = useMlApi();
 
   const mounted = useRef(false);
   const [showWarning, setShowWarning] = useState(false);
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
-  const canCreateJob = useMemo(() => checkPermission('canCreateJob'), []);
+
+  const [canCreateJob, canCreateDataFrameAnalytics, canCreateTrainedModels] = usePermissionCheck([
+    'canCreateJob',
+    'canCreateDataFrameAnalytics',
+    'canCreateTrainedModels',
+  ]);
+
+  const canSync = useMemo(
+    () => canCreateJob || canCreateDataFrameAnalytics || canCreateTrainedModels,
+    [canCreateDataFrameAnalytics, canCreateJob, canCreateTrainedModels]
+  );
 
   const checkStatus = useCallback(async () => {
     try {
@@ -101,7 +112,7 @@ export const SavedObjectsWarning: FC<Props> = ({
             id="xpack.ml.jobsList.missingSavedObjectWarning.description"
             defaultMessage="Some jobs or trained models are missing or have incomplete saved objects. "
           />
-          {canCreateJob ? (
+          {canSync ? (
             <FormattedMessage
               id="xpack.ml.jobsList.missingSavedObjectWarning.link"
               defaultMessage=" {link}"

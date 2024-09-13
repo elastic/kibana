@@ -9,11 +9,11 @@ import { partition, mapValues, pickBy } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { DateRange } from '../../../../common/types';
 import type {
   DatasourceFixAction,
-  FrameDatasourceAPI,
+  FramePublicAPI,
   IndexPattern,
   IndexPatternField,
   OperationMetadata,
@@ -636,7 +636,7 @@ export function replaceColumn({
         previousColumn.customLabel &&
         hypotheticalLayer.columns[columnId] &&
         previousColumn.label !==
-          previousDefinition.getDefaultLabel(previousColumn, indexPattern, tempLayer.columns)
+          previousDefinition.getDefaultLabel(previousColumn, tempLayer.columns, indexPattern)
       ) {
         hypotheticalLayer.columns[columnId].customLabel = true;
         hypotheticalLayer.columns[columnId].label = previousColumn.label;
@@ -836,12 +836,16 @@ export function replaceColumn({
       { ...layer, columns: { ...layer.columns, [columnId]: newColumn } },
       columnId
     );
-    return adjustColumnReferencesForChangedColumn(
-      {
-        ...newLayer,
-        columnOrder: getColumnOrder(newLayer),
-      },
-      columnId
+
+    return updateDefaultLabels(
+      adjustColumnReferencesForChangedColumn(
+        {
+          ...newLayer,
+          columnOrder: getColumnOrder(newLayer),
+        },
+        columnId
+      ),
+      indexPattern
     );
   } else if (operationDefinition.input === 'managedReference') {
     // Just changing a param in a formula column should trigger
@@ -1576,7 +1580,8 @@ export function getErrorMessages(
           columnId,
           indexPattern,
           { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
-          operationDefinitionMap
+          operationDefinitionMap,
+          core.uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
         );
       }
     })
@@ -1589,7 +1594,7 @@ export function getErrorMessages(
         fixAction: errorMessage.fixAction
           ? {
               ...errorMessage.fixAction,
-              newState: async (frame: FrameDatasourceAPI) => ({
+              newState: async (frame: FramePublicAPI) => ({
                 ...state,
                 layers: {
                   ...state.layers,
@@ -1718,8 +1723,8 @@ export function updateDefaultLabels(
         ...col,
         label: operationDefinitionMap[col.operationType].getDefaultLabel(
           col,
-          indexPattern,
-          copiedColumns
+          copiedColumns,
+          indexPattern
         ),
       };
     }

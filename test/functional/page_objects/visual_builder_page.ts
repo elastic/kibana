@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { DebugState } from '@elastic/charts';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 type Duration =
   | 'Milliseconds'
@@ -34,20 +35,23 @@ export class VisualBuilderPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visChart = this.ctx.getPageObject('visChart');
+  private readonly visualize = this.ctx.getPageObject('visualize');
 
   public async resetPage(
     fromTime = 'Sep 19, 2015 @ 06:31:44.000',
     toTime = 'Sep 22, 2015 @ 18:31:44.000'
   ) {
-    await this.common.navigateToUrl('visualize', 'create?type=metrics', {
-      useActualUrl: true,
-    });
-    this.log.debug('Wait for initializing TSVB editor');
+    await this.visualize.navigateToNewVisualization();
+    await this.visualize.clickVisualBuilder();
     await this.checkVisualBuilderIsPresent();
-    this.log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
+    await this.setTime(fromTime, toTime);
+  }
+
+  public async setTime(
+    fromTime = 'Sep 19, 2015 @ 06:31:44.000',
+    toTime = 'Sep 22, 2015 @ 18:31:44.000'
+  ) {
     await this.timePicker.setAbsoluteRange(fromTime, toTime);
-    // 2 sec sleep until https://github.com/elastic/kibana/issues/46353 is fixed
-    await this.common.sleep(2000);
   }
 
   public async checkTabIsLoaded(testSubj: string, name: string) {
@@ -61,6 +65,12 @@ export class VisualBuilderPageObject extends FtrService {
     if (!isPresent) {
       throw new Error(`TSVB ${name} tab is not loaded`);
     }
+  }
+
+  private async toggleYesNoSwitch(testSubj: string, value: boolean) {
+    const option = await this.testSubjects.find(`${testSubj}-${value ? 'yes' : 'no'}`);
+    await (await option.findByCssSelector('label')).click();
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async checkTabIsSelected(chartType: string) {
@@ -251,8 +261,10 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async clickSeriesOption(nth = 0) {
-    const el = await this.testSubjects.findAll('seriesOptions');
-    await el[nth].click();
+    const button = await this.find.byXPath(
+      `(//button[@data-test-subj='seriesOptions'])[${nth + 1}]`
+    );
+    await button.click();
   }
 
   public async clearOffsetSeries() {
@@ -316,8 +328,7 @@ export class VisualBuilderPageObject extends FtrService {
       });
     }
     if (decimalPlaces) {
-      const decimalPlacesInput = await this.testSubjects.find('dataFormatPickerDurationDecimal');
-      await decimalPlacesInput.type(decimalPlaces);
+      await this.testSubjects.setValue('dataFormatPickerDurationDecimal', decimalPlaces);
     }
   }
 
@@ -343,7 +354,7 @@ export class VisualBuilderPageObject extends FtrService {
   public async getRhythmChartLegendValue(nth = 0) {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const metricValue = (
-      await this.find.allByCssSelector(`.echLegendItem .echLegendItem__extra`, 20000)
+      await this.find.allByCssSelector(`.echLegendItem .echLegendItem__legendValue`, 20000)
     )[nth];
     await metricValue.moveMouseTo();
     return await metricValue.getVisibleText();
@@ -363,7 +374,7 @@ export class VisualBuilderPageObject extends FtrService {
     return await gaugeCount.getVisibleText();
   }
 
-  public async getGaugeColor(isInner = false): Promise<string> {
+  public async getGaugeColor(isInner = false): Promise<string | null> {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const gaugeColoredCircle = await this.testSubjects.find(`gaugeCircle${isInner ? 'Inner' : ''}`);
     return await gaugeColoredCircle.getAttribute('stroke');
@@ -385,7 +396,7 @@ export class VisualBuilderPageObject extends FtrService {
     return await gaugeCount.getVisibleText();
   }
 
-  public async getTopNBarStyle(nth: number = 0): Promise<string> {
+  public async getTopNBarStyle(nth: number = 0): Promise<string | null> {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const topNBars = await this.testSubjects.findAll('topNInnerBar');
     return await topNBars[nth].getAttribute('style');
@@ -428,22 +439,30 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async selectAggType(value: string, nth = 0) {
-    const elements = await this.testSubjects.findAll('aggSelector');
-    await this.comboBox.setElement(elements[nth], value);
+    const element = await this.find.byXPath(`(//div[@data-test-subj='aggSelector'])[${nth + 1}]`);
+    await this.comboBox.setElement(element, value);
     return await this.header.waitUntilLoadingHasFinished();
   }
 
   public async fillInExpression(expression: string, nth = 0) {
-    const expressions = await this.testSubjects.findAll('mathExpression');
-    await expressions[nth].type(expression);
+    const element = await this.find.byXPath(
+      `(//textarea[@data-test-subj='mathExpression'])[${nth + 1}]`
+    );
+    await element.type(expression);
     return await this.header.waitUntilLoadingHasFinished();
   }
 
   public async fillInVariable(name = 'test', metric = 'Count', nth = 0) {
-    const elements = await this.testSubjects.findAll('varRow');
-    const varNameInput = await elements[nth].findByCssSelector('.tvbAggs__varName');
+    const varNameInput = await this.find.byXPath(
+      `(//div[@data-test-subj="varRow"])[${nth + 1}]//input[@data-test-subj='tvbAggsVarNameInput']`
+    );
     await varNameInput.type(name);
-    const metricSelectWrapper = await elements[nth].findByCssSelector('.tvbAggs__varMetricWrapper');
+    const metricSelectWrapper = await this.find.byXPath(
+      `(//div[@data-test-subj="varRow"])[${
+        nth + 1
+      }]//div[@data-test-subj='tvbAggsVarMetricWrapper']`
+    );
+
     await this.comboBox.setElement(metricSelectWrapper, metric);
     return await this.header.waitUntilLoadingHasFinished();
   }
@@ -501,19 +520,16 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setAnnotationFilter(query: string) {
-    const annotationQueryBar = await this.testSubjects.find('annotationQueryBar');
-    await annotationQueryBar.type(query);
+    await this.testSubjects.setValue('annotationQueryBar', query);
     await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setAnnotationFields(fields: string) {
-    const annotationFieldsInput = await this.testSubjects.find('annotationFieldsInput');
-    await annotationFieldsInput.type(fields);
+    await this.testSubjects.setValue('annotationFieldsInput', fields);
   }
 
   public async setAnnotationRowTemplate(template: string) {
-    const annotationRowTemplateInput = await this.testSubjects.find('annotationRowTemplateInput');
-    await annotationRowTemplateInput.type(template);
+    await this.testSubjects.setValue('annotationRowTemplateInput', template);
   }
 
   public async toggleIndexPatternSelectionModePopover(shouldOpen: boolean) {
@@ -562,7 +578,7 @@ export class VisualBuilderPageObject extends FtrService {
 
     if (useKibanaIndices === false) {
       const el = await this.testSubjects.find(metricsIndexPatternInput);
-      el.focus();
+      await el.focus();
       await el.clearValue();
       if (value) {
         await el.type(value, { charByChar: true });
@@ -585,17 +601,11 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setDropLastBucket(value: boolean) {
-    const option = await this.testSubjects.find(`metricsDropLastBucket-${value ? 'yes' : 'no'}`);
-    (await option.findByCssSelector('label')).click();
-    await this.header.waitUntilLoadingHasFinished();
+    await this.toggleYesNoSwitch('metricsDropLastBucket', value);
   }
 
   public async setOverrideIndexPattern(value: boolean) {
-    const option = await this.testSubjects.find(
-      `seriesOverrideIndexPattern-${value ? 'yes' : 'no'}`
-    );
-    (await option.findByCssSelector('label')).click();
-    await this.header.waitUntilLoadingHasFinished();
+    await this.toggleYesNoSwitch('seriesOverrideIndexPattern', value);
   }
 
   public async waitForIndexPatternTimeFieldOptionsLoaded() {
@@ -641,7 +651,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setStaticValue(value: number, nth: number = 0): Promise<void> {
-    const input = (await this.testSubjects.findAll('staticValue'))[nth];
+    const input = await this.find.byXPath(`(//input[@data-test-subj='staticValue'])[${nth + 1}]`);
     await input.type(value.toString());
   }
 
@@ -654,9 +664,11 @@ export class VisualBuilderPageObject extends FtrService {
    * @memberof VisualBuilderPage
    */
   public async setFieldForAggregation(field: string, aggNth: number = 0): Promise<void> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const fieldEl = await this.getFieldForAggregation(aggNth);
 
     await this.comboBox.setElement(fieldEl, field);
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setFieldForAggregateBy(field: string): Promise<void> {
@@ -688,16 +700,17 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getFieldForAggregation(aggNth: number = 0): Promise<WebElementWrapper> {
-    const labels = await this.testSubjects.findAll('aggRow');
-    const label = labels[aggNth];
-
-    return (await label.findAllByTestSubject('comboBoxInput'))[1];
+    // Aggregation has 2 comboBox elements: Aggregation Type and Field
+    // Locator picks the aggregation by index (aggNth) and its Field comboBox child by index (2)
+    return await this.find.byXPath(
+      `((//div[@data-test-subj='aggRow'])[${aggNth + 1}]//div[@data-test-subj='comboBoxInput'])[2]`
+    );
   }
 
   public async clickColorPicker(nth: number = 0): Promise<void> {
-    const picker = (await this.find.allByCssSelector('[data-test-subj="tvbColorPicker"] button'))[
-      nth
-    ];
+    const picker = await this.find.byXPath(
+      `(//button[@data-test-subj='euiColorPickerAnchor'])[${nth + 1}]`
+    );
     await picker.clickMouseButton();
   }
 
@@ -744,19 +757,19 @@ export class VisualBuilderPageObject extends FtrService {
     });
   }
 
-  public async getBackgroundStyle(): Promise<string> {
+  public async getBackgroundStyle(): Promise<string | null> {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const visualization = await this.find.byClassName('tvbVis');
     return await visualization.getAttribute('style');
   }
 
-  public async getMetricValueStyle(): Promise<string> {
+  public async getMetricValueStyle(): Promise<string | null> {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const metricValue = await this.testSubjects.find('tsvbMetricValue');
     return await metricValue.getAttribute('style');
   }
 
-  public async getGaugeValueStyle(): Promise<string> {
+  public async getGaugeValueStyle(): Promise<string | null> {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const metricValue = await this.testSubjects.find('gaugeValue');
     return await metricValue.getAttribute('style');
@@ -812,7 +825,7 @@ export class VisualBuilderPageObject extends FtrService {
       .toArray()
       .map((li) => {
         const label = $(li).find('.echLegendItem__label').text();
-        const value = $(li).find('.echLegendItem__extra').text();
+        const value = $(li).find('.echLegendItem__legendValue').text();
 
         return `${label}: ${value}`;
       });
@@ -834,22 +847,35 @@ export class VisualBuilderPageObject extends FtrService {
   ) {
     await this.setMetricsGroupBy('terms');
     await this.common.sleep(1000);
-    const byField = await this.testSubjects.find('groupByField');
     await this.retry.try(async () => {
+      const byField = await this.testSubjects.find('groupByField');
       await this.comboBox.setElement(byField, field);
+      const isSelected = await this.comboBox.isOptionSelected(byField, field);
+      if (!isSelected) {
+        throw new Error(`setMetricsGroupByTerms: failed to set '${field}' field`);
+      }
     });
-
     await this.setMetricsGroupByFiltering(filtering.include, filtering.exclude);
   }
 
   public async setAnotherGroupByTermsField(field: string) {
-    const fieldSelectAddButtons = await this.testSubjects.findAll('fieldSelectItemAddBtn');
-    await fieldSelectAddButtons[fieldSelectAddButtons.length - 1].click();
+    // Using xpath locator to find the last element
+    const fieldSelectAddButtonLast = await this.find.byXPath(
+      `(//*[@data-test-subj='fieldSelectItemAddBtn'])[last()]`
+    );
+    // In case of StaleElementReferenceError 'browser' service will try to find element again
+    await fieldSelectAddButtonLast.click();
     await this.common.sleep(2000);
-    const byFields = await this.testSubjects.findAll('fieldSelectItem');
-    const selectedByField = byFields[byFields.length - 1];
+
     await this.retry.try(async () => {
+      const selectedByField = await this.find.byXPath(
+        `(//*[@data-test-subj='fieldSelectItem'])[last()]`
+      );
       await this.comboBox.setElement(selectedByField, field);
+      const isSelected = await this.comboBox.isOptionSelected(selectedByField, field);
+      if (!isSelected) {
+        throw new Error(`setAnotherGroupByTermsField: failed to set '${field}' field`);
+      }
     });
   }
 
@@ -878,35 +904,45 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setGroupByFilterQuery(query: string, nth: number = 0) {
-    const filterQueryInput = await this.testSubjects.findAll('filterItemsQueryBar');
-    await filterQueryInput[nth].type(query);
+    const filterQueryInput = await this.find.byXPath(
+      `(//textarea[@data-test-subj='filterItemsQueryBar'])[${nth + 1}]`
+    );
+    await filterQueryInput.type(query);
   }
 
   public async setGroupByFilterLabel(label: string, nth: number = 0) {
-    const filterLabelInput = await this.testSubjects.findAll('filterItemsLabel');
-    await filterLabelInput[nth].type(label);
+    const filterLabelInput = await this.find.byXPath(
+      `(//input[@data-test-subj='filterItemsLabel'])[${nth + 1}]`
+    );
+    await filterLabelInput.type(label);
   }
 
   public async setChartType(type: 'Bar' | 'Line', nth: number = 0) {
-    const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesChartTypeComboBox');
-    return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], type);
+    const seriesChartTypeComboBox = await this.find.byXPath(
+      `(//div[@data-test-subj='seriesChartTypeComboBox'])[${nth + 1}]`
+    );
+    return await this.comboBox.setElement(seriesChartTypeComboBox, type);
   }
 
   public async setStackedType(stackedType: string, nth: number = 0) {
-    const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesStackedComboBox');
-    return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], stackedType);
+    const seriesStackedComboBox = await this.find.byXPath(
+      `(//div[@data-test-subj='seriesStackedComboBox'])[${nth + 1}]`
+    );
+    return await this.comboBox.setElement(seriesStackedComboBox, stackedType);
   }
 
   public async setSeriesFilter(query: string) {
-    const seriesFilterQueryInput = await this.testSubjects.find('seriesConfigQueryBar');
-    await seriesFilterQueryInput.type(query);
+    await this.testSubjects.setValue('seriesConfigQueryBar', query);
     await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setPanelFilter(query: string) {
-    const panelFilterQueryInput = await this.testSubjects.find('panelFilterQueryBar');
-    await panelFilterQueryInput.type(query);
+    await this.testSubjects.setValue('panelFilterQueryBar', query);
     await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async setIgnoreFilters(value: boolean) {
+    await this.toggleYesNoSwitch('ignore_global_filter', value);
   }
 
   public async setMetricsDataTimerangeMode(value: string) {
@@ -931,8 +967,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setFilterRatioOption(optionType: 'Numerator' | 'Denominator', query: string) {
-    const optionInput = await this.testSubjects.find(`filterRatio${optionType}Input`);
-    await optionInput.type(query);
+    await this.testSubjects.setValue(`filterRatio${optionType}Input`, query);
   }
 
   public async clickSeriesLegendItem(name: string) {

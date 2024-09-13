@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { omit } from 'lodash';
@@ -11,9 +12,10 @@ import { omit } from 'lodash';
 import {
   type MockedPluginInitializer,
   mockPluginInitializerProvider,
+  runtimeResolverMock,
 } from './plugins_service.test.mocks';
 
-import { type PluginName, PluginType } from '@kbn/core-base-common';
+import { type PluginName, type DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
@@ -40,6 +42,8 @@ import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-browser-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -60,24 +64,24 @@ let mockStartContext: DeeplyMocked<CoreStart>;
 function createManifest(
   id: string,
   { required = [], optional = [] }: { required?: string[]; optional?: string[]; ui?: boolean } = {}
-) {
+): DiscoveredPlugin {
   return {
     id,
-    version: 'some-version',
     type: PluginType.standard,
     configPath: ['path'],
     requiredPlugins: required,
     optionalPlugins: optional,
     requiredBundles: [],
-    owner: {
-      name: 'Core',
-      githubTeam: 'kibana-core',
-    },
+    runtimePluginDependencies: [],
   };
 }
 
 describe('PluginsService', () => {
   beforeEach(() => {
+    runtimeResolverMock.setDependencyMap.mockReset();
+    runtimeResolverMock.resolveSetupRequests.mockReset();
+    runtimeResolverMock.resolveStartRequests.mockReset();
+
     plugins = [
       { id: 'pluginA', plugin: createManifest('pluginA') },
       { id: 'pluginB', plugin: createManifest('pluginB', { required: ['pluginA'] }) },
@@ -97,11 +101,20 @@ describe('PluginsService', () => {
       notifications: notificationServiceMock.createSetupContract(),
       uiSettings: uiSettingsServiceMock.createSetupContract(),
       theme: themeServiceMock.createSetupContract(),
+      security: securityServiceMock.createInternalSetup(),
+      userProfile: userProfileServiceMock.createInternalSetup(),
     };
     mockSetupContext = {
       ...omit(mockSetupDeps, 'injectedMetadata'),
       application: expect.any(Object),
+      plugins: expect.any(Object),
       getStartServices: expect.any(Function),
+      security: expect.any(Object),
+      userProfile: expect.any(Object),
+      http: {
+        ...mockSetupDeps.http,
+        staticAssets: expect.any(Object),
+      },
     };
     // @ts-expect-error this file was not being type checked properly in the past, error is legit
     mockStartDeps = {
@@ -120,11 +133,20 @@ describe('PluginsService', () => {
       fatalErrors: fatalErrorsServiceMock.createStartContract(),
       deprecations: deprecationsServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
+      security: securityServiceMock.createInternalStart(),
+      userProfile: userProfileServiceMock.createInternalStart(),
     };
     mockStartContext = {
       ...omit(mockStartDeps, 'injectedMetadata'),
       application: expect.any(Object),
+      plugins: expect.any(Object),
       chrome: omit(mockStartDeps.chrome, 'getComponent'),
+      security: expect.any(Object),
+      userProfile: expect.any(Object),
+      http: {
+        ...mockStartDeps.http,
+        staticAssets: expect.any(Object),
+      },
     };
 
     // Reset these for each test.
@@ -248,6 +270,28 @@ describe('PluginsService', () => {
       expect(pluginDDeps).not.toHaveProperty('missing');
     });
 
+    it('setups the runtimeResolver', async () => {
+      const pluginsService = new PluginsService(mockCoreContext, plugins);
+      await pluginsService.setup(mockSetupDeps);
+
+      expect(runtimeResolverMock.setDependencyMap).toHaveBeenCalledTimes(1);
+      expect(runtimeResolverMock.setDependencyMap).toHaveBeenCalledWith(expect.any(Map));
+
+      expect(runtimeResolverMock.resolveSetupRequests).toHaveBeenCalledTimes(1);
+      expect(runtimeResolverMock.resolveSetupRequests).toHaveBeenCalledWith(expect.any(Map));
+      expect(
+        Object.fromEntries([...runtimeResolverMock.resolveSetupRequests.mock.calls[0][0].entries()])
+      ).toEqual({
+        pluginA: {
+          setupValue: 1,
+        },
+        pluginB: {
+          pluginAPlusB: 2,
+        },
+        pluginC: undefined,
+      });
+    });
+
     it('returns plugin setup contracts', async () => {
       const pluginsService = new PluginsService(mockCoreContext, plugins);
       const { contracts } = await pluginsService.setup(mockSetupDeps);
@@ -297,6 +341,26 @@ describe('PluginsService', () => {
       expect(pluginDInstance.start).toHaveBeenCalledWith(mockStartContext, {});
       const pluginDDeps = pluginDInstance.start.mock.calls[0][1];
       expect(pluginDDeps).not.toHaveProperty('missing');
+    });
+
+    it('setups the runtimeResolver', async () => {
+      const pluginsService = new PluginsService(mockCoreContext, plugins);
+      await pluginsService.setup(mockSetupDeps);
+      await pluginsService.start(mockStartDeps);
+
+      expect(runtimeResolverMock.resolveStartRequests).toHaveBeenCalledTimes(1);
+      expect(runtimeResolverMock.resolveStartRequests).toHaveBeenCalledWith(expect.any(Map));
+      expect(
+        Object.fromEntries([...runtimeResolverMock.resolveStartRequests.mock.calls[0][0].entries()])
+      ).toEqual({
+        pluginA: {
+          startValue: 2,
+        },
+        pluginB: {
+          pluginAPlusB: 3,
+        },
+        pluginC: undefined,
+      });
     });
 
     it('returns plugin start contracts', async () => {

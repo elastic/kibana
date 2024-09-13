@@ -14,9 +14,6 @@ export const flatten = (source: any, path: any[] = []): { [key: string]: any } =
 
   return Object.keys(source).reduce((result, key) => {
     const flattened: any = flatten(source[key], [...path, key]);
-    return {
-      ...result,
-      ...flattened,
-    };
+    return Object.assign(result, flattened);
   }, {});
 };

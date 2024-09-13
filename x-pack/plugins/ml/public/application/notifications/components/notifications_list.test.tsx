@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, waitFor } from '@testing-library/react';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
@@ -17,6 +17,7 @@ jest.mock('../../services/toast_notification_service');
 jest.mock('../../contexts/ml/ml_notifications_context');
 jest.mock('../../contexts/kibana/use_field_formatter');
 jest.mock('../../components/saved_objects_warning');
+jest.mock('../../capabilities/check_capabilities');
 
 const getMockedTimefilter = () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -56,7 +57,7 @@ const getMockedDatePickeDependencies = () => {
   } as unknown as DatePickerDependencies;
 };
 
-const Wrapper: FC = ({ children }) => (
+const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <I18nProvider>
     <DatePickerContextProvider {...getMockedDatePickeDependencies()}>
       {children}
@@ -81,10 +82,10 @@ describe('NotificationsList', () => {
 
     await waitFor(() => {
       expect(
-        useMlKibana().services.mlServices.mlApiServices.notifications.findMessages
+        useMlKibana().services.mlServices.mlApi.notifications.findMessages
       ).toHaveBeenCalledTimes(1);
       expect(
-        useMlKibana().services.mlServices.mlApiServices.notifications.findMessages
+        useMlKibana().services.mlServices.mlApi.notifications.findMessages
       ).toHaveBeenCalledWith({
         earliest: '',
         latest: '',

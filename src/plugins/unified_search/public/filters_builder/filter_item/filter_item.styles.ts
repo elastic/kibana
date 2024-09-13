@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiThemeComputed } from '@elastic/eui';
@@ -22,6 +23,10 @@ export const cursorOrCss = css`
 
 export const fieldAndParamCss = (euiTheme: EuiThemeComputed) => css`
   min-width: calc(${euiTheme.size.xl} * 5);
+  flex-grow: 1;
+  .euiFormRow {
+    max-width: 800px;
+  }
 `;
 
 export const operationCss = (euiTheme: EuiThemeComputed) => css`
@@ -36,10 +41,8 @@ export const getGrabIconCss = (euiTheme: EuiThemeComputed) => css`
   margin: 0 ${euiTheme.size.xxs};
 `;
 
-export const actionButtonCss = css`
-  &.euiButtonEmpty .euiButtonEmpty__content {
-    padding: 0 4px;
-  }
+export const actionButtonCss = (euiTheme: EuiThemeComputed) => css`
+  padding-inline: ${euiTheme.size.xs};
 `;
 
 export const disabledDraggableCss = css`

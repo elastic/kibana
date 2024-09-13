@@ -37,6 +37,7 @@ exports[`renders ListControl 1`] = `
       isClearable={true}
       isLoading={false}
       onChange={[Function]}
+      optionMatcher={[Function]}
       options={
         Array [
           Object {

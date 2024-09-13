@@ -56,11 +56,11 @@ export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
       return rsp;
     },
 
-    async deleteAllRules() {
+    async deleteAllRules(additionalRequestHeaders?: object) {
       log.debug(`Deleting all rules...`);
       const { body } = await kbnSupertest
         .get(`/api/alerting/rules/_find`)
-        .set('kbn-xsrf', 'foo')
+        .set({ ...additionalRequestHeaders, 'kbn-xsrf': 'foo' })
         .expect(200);
 
       for (const rule of body.data) {

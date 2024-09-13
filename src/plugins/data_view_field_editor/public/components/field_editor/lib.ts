@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -28,9 +29,13 @@ export interface Change {
 export type ChangeSet = Record<string, Change>;
 
 const createNameNotAllowedValidator =
-  (namesNotAllowed: Context['namesNotAllowed']): ValidationFunc<{}, string, string> =>
-  ({ value }) => {
-    if (namesNotAllowed.fields.includes(value)) {
+  (dataView: Context['dataView'], fieldName?: string): ValidationFunc<{}, string, string> =>
+  async ({ value }) => {
+    const runtimeComposites = Object.entries(dataView.getAllRuntimeFields())
+      .filter(([, _runtimeField]) => _runtimeField.type === 'composite')
+      .map(([_runtimeFieldName]) => _runtimeFieldName);
+
+    if (value !== fieldName && (await dataView.getFieldByName(value, true))) {
       return {
         message: i18n.translate(
           'indexPatternFieldEditor.editor.runtimeFieldsEditor.existRuntimeFieldNamesValidationErrorMessage',
@@ -39,7 +44,7 @@ const createNameNotAllowedValidator =
           }
         ),
       };
-    } else if (namesNotAllowed.runtimeComposites.includes(value)) {
+    } else if (value !== fieldName && runtimeComposites.includes(value)) {
       return {
         message: i18n.translate(
           'indexPatternFieldEditor.editor.runtimeFieldsEditor.existCompositeNamesValidationErrorMessage',
@@ -55,20 +60,13 @@ const createNameNotAllowedValidator =
  * Dynamically retrieve the config for the "name" field, adding
  * a validator to avoid duplicated runtime fields to be created.
  *
- * @param namesNotAllowed Array of names not allowed for the field "name"
  * @param field Initial value of the form
  */
 export const getNameFieldConfig = (
-  namesNotAllowed?: Context['namesNotAllowed'],
+  dataView: Context['dataView'],
   field?: Props['field']
 ): FieldConfig<string, Field> => {
   const nameFieldConfig = schema.name as FieldConfig<string, Field>;
-
-  if (!namesNotAllowed) {
-    return nameFieldConfig;
-  }
-
-  const filterOutCurrentFieldName = (name: string) => name !== field?.name;
 
   // Add validation to not allow duplicates
   return {
@@ -76,10 +74,7 @@ export const getNameFieldConfig = (
     validations: [
       ...(nameFieldConfig.validations ?? []),
       {
-        validator: createNameNotAllowedValidator({
-          fields: namesNotAllowed.fields.filter(filterOutCurrentFieldName),
-          runtimeComposites: namesNotAllowed.runtimeComposites.filter(filterOutCurrentFieldName),
-        }),
+        validator: createNameNotAllowedValidator(dataView, field?.name),
       },
     ],
   };
@@ -88,13 +83,16 @@ export const getNameFieldConfig = (
 export const valueToComboBoxOption = (value: string) =>
   RUNTIME_FIELD_OPTIONS_PRIMITIVE.find(({ value: optionValue }) => optionValue === value);
 
-export const getFieldPreviewChanges = (subject: BehaviorSubject<FieldPreview[] | undefined>) =>
+export const getFieldPreviewChanges = (
+  subject: BehaviorSubject<FieldPreview[] | undefined>,
+  parentName: string
+) =>
   subject.pipe(
     filter((preview) => preview !== undefined),
     map((items) =>
       // reduce the fields to make diffing easier
       items!.map((item) => {
-        const key = item.key.slice(item.key.search('\\.') + 1);
+        const key = item.key.substring(`${parentName}.`.length);
         return { name: key, type: item.type! };
       })
     ),

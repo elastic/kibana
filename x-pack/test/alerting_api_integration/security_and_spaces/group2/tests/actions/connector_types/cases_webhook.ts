@@ -13,13 +13,17 @@ import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function casesWebhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
+  const retry = getService('retry');
   const config = {
     createCommentJson: '{"body":{{{case.comment}}}}',
     createCommentMethod: 'post',
@@ -108,6 +112,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
         expect(createdAction).to.eql({
           id: createdAction.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           name: 'A casesWebhook action',
           connector_type_id: '.cases-webhook',
@@ -122,6 +127,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
         expect(fetchedAction).to.eql({
           id: fetchedAction.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           name: 'A casesWebhook action',
           connector_type_id: '.cases-webhook',
@@ -199,7 +205,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type connector: both user and password must be specified',
+                'error validating action type connector: must specify a secrets configuration',
             });
           });
       });
@@ -240,7 +246,13 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               params: {},
             })
             .then((resp: any) => {
-              expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
+              expect(Object.keys(resp.body)).to.eql([
+                'status',
+                'message',
+                'retry',
+                'errorSource',
+                'connector_id',
+              ]);
               expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
             });
@@ -260,6 +272,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subAction]: expected value to equal [pushToService]',
+                errorSource: TaskErrorSource.FRAMEWORK,
               });
             });
         });
@@ -278,6 +291,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
+                errorSource: TaskErrorSource.FRAMEWORK,
               });
             });
         });
@@ -304,6 +318,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
+                errorSource: TaskErrorSource.FRAMEWORK,
               });
             });
         });
@@ -332,6 +347,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
+                errorSource: TaskErrorSource.FRAMEWORK,
               });
             });
         });
@@ -359,6 +375,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
+                errorSource: TaskErrorSource.FRAMEWORK,
               });
             });
         });
@@ -383,6 +400,23 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           expect(proxyHaveBeenCalled).to.equal(true);
           const { pushedDate, ...dataWithoutTime } = body.data;
           body.data = dataWithoutTime;
+
+          const events: IValidatedEvent[] = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: 'default',
+              type: 'action',
+              id: simulatedActionId,
+              provider: 'actions',
+              actions: new Map([
+                ['execute-start', { equal: 1 }],
+                ['execute', { equal: 1 }],
+              ]),
+            });
+          });
+
+          const executeEvent = events[1];
+          expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(125);
 
           expect(body).to.eql({
             status: 'ok',
@@ -457,6 +491,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.FRAMEWORK,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create case. Error: JSON Error: Create case JSON body must be valid JSON.  ',
               });
@@ -487,6 +522,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.FRAMEWORK,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to update case with id 12345. Error: JSON Error: Update case JSON body must be valid JSON.  ',
               });
@@ -554,6 +590,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.FRAMEWORK,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create comment at case with id 123. Error: JSON Error: Create comment JSON body must be valid JSON.  ',
               });
@@ -621,6 +658,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.FRAMEWORK,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create case. Error: Invalid Create case URL: Error: Invalid protocol.  ',
               });
@@ -651,6 +689,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.FRAMEWORK,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to update case with id 12345. Error: Invalid Update case URL: Error: Invalid URL.  ',
               });
@@ -718,6 +757,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.FRAMEWORK,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create comment at case with id 123. Error: Invalid Create comment URL: Error: Invalid URL.  ',
               });

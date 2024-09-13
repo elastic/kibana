@@ -1,53 +1,89 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { readFileSync } from 'fs';
 import { safeLoad } from 'js-yaml';
-
 import { set } from '@kbn/safer-lodash-set';
 import { isPlainObject } from 'lodash';
-import { ensureDeepObject } from '@kbn/std';
+import { ensureValidObjectPath } from '@kbn/std';
+import { splitKey, getUnsplittableKey, replaceEnvVarRefs } from './utils';
 
 const readYaml = (path: string) => safeLoad(readFileSync(path, 'utf8'));
 
-function replaceEnvVarRefs(val: string) {
-  return val.replace(/\$\{(\w+)\}/g, (match, envVarName) => {
-    const envVarValue = process.env[envVarName];
-    if (envVarValue !== undefined) {
-      return envVarValue;
-    }
+interface YamlEntry {
+  path: string[];
+  value: any;
+}
 
-    throw new Error(`Unknown environment variable referenced in config : ${envVarName}`);
+const listEntries = (root: Record<string, any>): YamlEntry[] => {
+  const entries: YamlEntry[] = [];
+
+  const recursiveListEntries = (currentLevel: any, currentPath: string[]) => {
+    if (isPlainObject(currentLevel) && Object.keys(currentLevel).length > 0) {
+      for (const [subKey, subVal] of Object.entries(currentLevel)) {
+        const subKeySplits = splitKey(subKey);
+        recursiveListEntries(subVal, [...currentPath, ...subKeySplits]);
+      }
+    } else if (currentPath.length) {
+      entries.push({
+        path: currentPath,
+        value: processEntryValue(currentLevel),
+      });
+    }
+  };
+
+  recursiveListEntries(root, []);
+  return entries;
+};
+
+const mergeEntries = (entries: YamlEntry[]): Record<string, any> => {
+  const root = {};
+
+  entries.forEach((entry) => {
+    set(root, entry.path, entry.value);
   });
-}
 
-function merge(target: Record<string, any>, value: any, key?: string) {
-  if ((isPlainObject(value) || Array.isArray(value)) && Object.keys(value).length > 0) {
+  return root;
+};
+
+function processEntryValue(value: any) {
+  if (isPlainObject(value) || Array.isArray(value)) {
     for (const [subKey, subVal] of Object.entries(value)) {
-      merge(target, subVal, key ? `${key}.${subKey}` : subKey);
+      const unsplitKey = getUnsplittableKey(subKey);
+      if (unsplitKey) {
+        delete value[subKey];
+        set(value, [unsplitKey], processEntryValue(subVal));
+      } else {
+        const subKeySplits = splitKey(subKey);
+        if (subKeySplits.length > 1) delete value[subKey];
+        set(value, subKeySplits, processEntryValue(subVal));
+      }
     }
-  } else if (key !== undefined) {
-    set(target, key, typeof value === 'string' ? replaceEnvVarRefs(value) : value);
+  } else if (typeof value === 'string') {
+    return replaceEnvVarRefs(value);
   }
-
-  return target;
+  return value;
 }
 
-/** @internal */
 export const getConfigFromFiles = (configFiles: readonly string[]) => {
-  let mergedYaml = {};
+  const yamlEntries: YamlEntry[] = [];
 
   for (const configFile of configFiles) {
     const yaml = readYaml(configFile);
     if (yaml !== null) {
-      mergedYaml = merge(mergedYaml, yaml);
+      yamlEntries.push(...listEntries(yaml));
     }
   }
 
-  return ensureDeepObject(mergedYaml);
+  for (const entry of yamlEntries) {
+    ensureValidObjectPath(entry.path);
+  }
+
+  return mergeEntries(yamlEntries);
 };

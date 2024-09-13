@@ -14,18 +14,26 @@ import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
 
+import { deleteConnectorSecret, updateConnectorIndexName } from '@kbn/search-connectors';
+import {
+  fetchConnectorByIndexName,
+  fetchConnectors,
+} from '@kbn/search-connectors/lib/fetch_connectors';
+
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { AlwaysShowPattern } from '../../../common/types/indices';
 
-import type { AttachMlInferencePipelineResponse } from '../../../common/types/pipelines';
+import type {
+  AttachMlInferencePipelineResponse,
+  MlInferenceError,
+  MlInferenceHistoryResponse,
+} from '../../../common/types/pipelines';
 
-import { deleteConnectorById } from '../../lib/connectors/delete_connector';
-
-import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors/fetch_connectors';
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createIndex } from '../../lib/indices/create_index';
+import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices, fetchSearchIndices } from '../../lib/indices/fetch_indices';
@@ -37,9 +45,14 @@ import { preparePipelineAndIndexForMlInference } from '../../lib/indices/pipelin
 import { deleteMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
 import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
+import { fetchMlModels } from '../../lib/ml/fetch_ml_models';
+import { getMlModelDeploymentStatus } from '../../lib/ml/get_ml_model_deployment_status';
+import { startMlModelDeployment } from '../../lib/ml/start_ml_model_deployment';
+import { startMlModelDownload } from '../../lib/ml/start_ml_model_download';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
+import { getIndexPipelineParameters } from '../../lib/pipelines/get_index_pipeline';
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
 import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
 import { revertCustomPipeline } from '../../lib/pipelines/revert_custom_pipeline';
@@ -48,6 +61,7 @@ import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
   isIndexNotFoundException,
+  isNotFoundException,
   isPipelineIsInUseException,
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
@@ -107,7 +121,7 @@ export function registerIndexRoutes({
         from,
         size
       );
-      const connectors = await fetchConnectors(client, indexNames);
+      const connectors = await fetchConnectors(client.asCurrentUser, indexNames);
       const crawlers = await fetchCrawlers(client, indexNames);
       const enrichedIndices = indices.map((index) => ({
         ...index,
@@ -180,7 +194,7 @@ export function registerIndexRoutes({
 
       try {
         const crawler = await fetchCrawlerByIndexName(client, indexName);
-        const connector = await fetchConnectorByIndexName(client, indexName);
+        const connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
 
         if (crawler) {
           const crawlerRes = await enterpriseSearchRequestHandler.createRequest({
@@ -193,10 +207,18 @@ export function registerIndexRoutes({
         }
 
         if (connector) {
-          await deleteConnectorById(client, connector.id);
+          // detach the deleted index without removing the connector
+          await updateConnectorIndexName(client.asCurrentUser, connector.id, null);
+          if (connector.api_key_id) {
+            await client.asCurrentUser.security.invalidateApiKey({ ids: [connector.api_key_id] });
+          }
+          if (connector.api_key_secret_id) {
+            await deleteConnectorSecret(client.asCurrentUser, connector.api_key_secret_id);
+          }
         }
 
         await deleteIndexPipelines(client, indexName);
+        await deleteAccessControlIndex(client, indexName);
 
         await client.asCurrentUser.indices.delete({ index: indexName });
 
@@ -261,6 +283,9 @@ export function registerIndexRoutes({
     {
       path: '/internal/enterprise_search/indices/{indexName}/api_key',
       validate: {
+        body: schema.object({
+          is_native: schema.boolean(),
+        }),
         params: schema.object({
           indexName: schema.string(),
         }),
@@ -268,9 +293,11 @@ export function registerIndexRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.indexName);
+      const { is_native: isNative } = request.body;
+
       const { client } = (await context.core).elasticsearch;
 
-      const apiKey = await generateApiKey(client, indexName);
+      const apiKey = await generateApiKey(client, indexName, isNative);
 
       return response.ok({
         body: apiKey,
@@ -335,7 +362,7 @@ export function registerIndexRoutes({
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
       const [defaultPipeline, customPipelines] = await Promise.all([
-        getPipeline(DEFAULT_PIPELINE_NAME, client),
+        getPipeline(DEFAULT_PIPELINE_NAME, client).catch(() => ({})),
         getCustomPipelines(indexName, client),
       ]);
       return response.ok({
@@ -343,6 +370,26 @@ export function registerIndexRoutes({
           ...defaultPipeline,
           ...customPipelines,
         },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/pipeline_parameters',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+      const body = await getIndexPipelineParameters(indexName, client);
+      return response.ok({
+        body,
         headers: { 'content-type': 'application/json' },
       });
     })
@@ -364,7 +411,7 @@ export function registerIndexRoutes({
         savedObjects: { client: savedObjectsClient },
       } = await context.core;
       const trainedModelsProvider = ml
-        ? await ml.trainedModelsProvider(request, savedObjectsClient)
+        ? ml.trainedModelsProvider(request, savedObjectsClient)
         : undefined;
 
       const mlInferencePipelineProcessorConfigs = await fetchMlInferencePipelineProcessors(
@@ -388,22 +435,12 @@ export function registerIndexRoutes({
           indexName: schema.string(),
         }),
         body: schema.object({
-          destination_field: schema.maybe(schema.nullable(schema.string())),
           field_mappings: schema.maybe(
             schema.arrayOf(
               schema.object({ sourceField: schema.string(), targetField: schema.string() })
             )
           ),
-          inference_config: schema.maybe(
-            schema.object({
-              zero_shot_classification: schema.maybe(
-                schema.object({
-                  labels: schema.arrayOf(schema.string()),
-                })
-              ),
-            })
-          ),
-          model_id: schema.maybe(schema.string()),
+          model_id: schema.string(),
           pipeline_definition: schema.maybe(
             schema.object({
               description: schema.maybe(schema.string()),
@@ -412,7 +449,6 @@ export function registerIndexRoutes({
             })
           ),
           pipeline_name: schema.string(),
-          source_field: schema.maybe(schema.string()),
         }),
       },
     },
@@ -424,40 +460,8 @@ export function registerIndexRoutes({
         model_id: modelId,
         pipeline_name: pipelineName,
         pipeline_definition: pipelineDefinition,
-        source_field: sourceField,
-        destination_field: destinationField,
-        inference_config: inferenceConfig,
         field_mappings: fieldMappings,
       } = request.body;
-
-      // additional validations
-      if ((pipelineDefinition || fieldMappings) && (sourceField || destinationField || modelId)) {
-        return createError({
-          errorCode: ErrorCode.PARAMETER_CONFLICT,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterConflictError',
-            {
-              defaultMessage:
-                'pipeline_definition and field_mappings should only be provided if source_field and destination_field and model_id are not provided',
-            }
-          ),
-          response,
-          statusCode: 400,
-        });
-      } else if (!((pipelineDefinition && fieldMappings) || (sourceField && modelId))) {
-        return createError({
-          errorCode: ErrorCode.PARAMETER_CONFLICT,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterMissingError',
-            {
-              defaultMessage:
-                'either pipeline_definition AND fieldMappings or source_field AND model_id must be provided',
-            }
-          ),
-          response,
-          statusCode: 400,
-        });
-      }
 
       try {
         // Create the sub-pipeline for inference
@@ -466,10 +470,7 @@ export function registerIndexRoutes({
           pipelineName,
           pipelineDefinition,
           modelId,
-          sourceField,
-          destinationField,
           fieldMappings,
-          inferenceConfig,
           client.asCurrentUser
         );
         return response.ok({
@@ -594,7 +595,10 @@ export function registerIndexRoutes({
         });
       }
 
-      const connector = await fetchConnectorByIndexName(client, request.body.index_name);
+      const connector = await fetchConnectorByIndexName(
+        client.asCurrentUser,
+        request.body.index_name
+      );
 
       if (connector) {
         return createError({
@@ -775,8 +779,14 @@ export function registerIndexRoutes({
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
 
-      const errors = await getMlInferenceErrors(indexName, client.asCurrentUser);
-
+      let errors: MlInferenceError[] = [];
+      try {
+        errors = await getMlInferenceErrors(indexName, client.asCurrentUser);
+      } catch (error) {
+        if (!isIndexNotFoundException(error)) {
+          throw error;
+        }
+      }
       return response.ok({
         body: {
           errors,
@@ -886,7 +896,7 @@ export function registerIndexRoutes({
               'xpack.enterpriseSearch.server.routes.indices.mlInference.pipelineProcessors.pipelineIsInUseError',
               {
                 defaultMessage:
-                  "Inference pipeline is used in managed pipeline '{pipelineName}' of a different index",
+                  "Inference pipeline is used in managed pipeline ''{pipelineName}'' of a different index",
                 values: {
                   pipelineName: error.pipelineName,
                 },
@@ -915,9 +925,14 @@ export function registerIndexRoutes({
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
-
-      const history = await fetchMlInferencePipelineHistory(client.asCurrentUser, indexName);
-
+      let history: MlInferenceHistoryResponse = { history: [] };
+      try {
+        history = await fetchMlInferencePipelineHistory(client.asCurrentUser, indexName);
+      } catch (error) {
+        if (!isIndexNotFoundException(error)) {
+          throw error;
+        }
+      }
       return response.ok({
         body: history,
         headers: { 'content-type': 'application/json' },
@@ -945,6 +960,47 @@ export function registerIndexRoutes({
         body: pipelines,
         headers: { 'content-type': 'application/json' },
       });
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/pipelines/{pipelineName}',
+      validate: {
+        params: schema.object({
+          pipelineName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const pipelineName = decodeURIComponent(request.params.pipelineName);
+      const { client } = (await context.core).elasticsearch;
+      try {
+        const pipeline = await getPipeline(pipelineName, client);
+        return response.ok({
+          body: pipeline,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isNotFoundException(error)) {
+          // return specific message if pipeline doesn't exist
+          return createError({
+            errorCode: ErrorCode.PIPELINE_NOT_FOUND,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.indices.pipelines.pipelineNotFoundError',
+              {
+                defaultMessage: 'The pipeline {pipelineName} does not exist',
+                values: {
+                  pipelineName,
+                },
+              }
+            ),
+            response,
+            statusCode: 404,
+          });
+        }
+        throw error;
+      }
     })
   );
 
@@ -977,6 +1033,151 @@ export function registerIndexRoutes({
       } catch (error) {
         if (isResourceNotFoundException(error)) {
           // return specific message if pipeline doesn't exist
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: error.meta?.body?.error?.reason,
+            response,
+            statusCode: 404,
+          });
+        }
+        // otherwise, let the default handler wrap it
+        throw error;
+      }
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/ml/models/{modelName}',
+      validate: {
+        params: schema.object({
+          modelName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const modelName = decodeURIComponent(request.params.modelName);
+      const {
+        savedObjects: { client: savedObjectsClient },
+      } = await context.core;
+      const trainedModelsProvider = ml
+        ? await ml.trainedModelsProvider(request, savedObjectsClient)
+        : undefined;
+
+      try {
+        const deployResult = await startMlModelDownload(modelName, trainedModelsProvider);
+
+        return response.ok({
+          body: deployResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          // return specific message if model doesn't exist
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: error.meta?.body?.error?.reason,
+            response,
+            statusCode: 404,
+          });
+        }
+        // otherwise, let the default handler wrap it
+        throw error;
+      }
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/ml/models/{modelName}/deploy',
+      validate: {
+        params: schema.object({
+          modelName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const modelName = decodeURIComponent(request.params.modelName);
+      const {
+        savedObjects: { client: savedObjectsClient },
+      } = await context.core;
+      const trainedModelsProvider = ml
+        ? await ml.trainedModelsProvider(request, savedObjectsClient)
+        : undefined;
+
+      try {
+        const deployResult = await startMlModelDeployment(modelName, trainedModelsProvider);
+
+        return response.ok({
+          body: deployResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          // return specific message if model doesn't exist
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: error.meta?.body?.error?.reason,
+            response,
+            statusCode: 404,
+          });
+        }
+        // otherwise, let the default handler wrap it
+        throw error;
+      }
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/ml/models',
+      validate: {},
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const {
+        savedObjects: { client: savedObjectsClient },
+      } = await context.core;
+      const trainedModelsProvider = ml
+        ? await ml.trainedModelsProvider(request, savedObjectsClient)
+        : undefined;
+
+      const modelsResult = await fetchMlModels(trainedModelsProvider, log);
+
+      return response.ok({
+        body: modelsResult,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/ml/models/{modelName}',
+      validate: {
+        params: schema.object({
+          modelName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const modelName = decodeURIComponent(request.params.modelName);
+      const {
+        savedObjects: { client: savedObjectsClient },
+      } = await context.core;
+      const trainedModelsProvider = ml
+        ? await ml.trainedModelsProvider(request, savedObjectsClient)
+        : undefined;
+
+      try {
+        const getStatusResult = await getMlModelDeploymentStatus(modelName, trainedModelsProvider);
+
+        return response.ok({
+          body: getStatusResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          // return specific message if model doesn't exist
           return createError({
             errorCode: ErrorCode.RESOURCE_NOT_FOUND,
             message: error.meta?.body?.error?.reason,

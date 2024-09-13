@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -73,8 +74,8 @@ const kqlQuery = {
   language: 'kuery',
 };
 
-const sqlQuery = {
-  sql: 'SELECT * from test',
+const esqlQuery = {
+  esql: 'from test',
 };
 
 function wrapSearchBarInContext(testProps: any) {
@@ -89,15 +90,19 @@ function wrapSearchBarInContext(testProps: any) {
 
   const services = {
     uiSettings: startMock.uiSettings,
+    settings: startMock.settings,
     savedObjects: startMock.savedObjects,
     notifications: startMock.notifications,
     http: startMock.http,
+    theme: startMock.theme,
+    docLinks: startMock.docLinks,
     storage: createMockStorage(),
     data: {
       query: {
         savedQueries: {
           findSavedQueries: () =>
             Promise.resolve({
+              total: 1,
               queries: [
                 {
                   id: 'testwewe',
@@ -113,6 +118,7 @@ function wrapSearchBarInContext(testProps: any) {
                 },
               ],
             }),
+          getSavedQueryCount: jest.fn(),
         },
       },
       dataViewEditor: dataViewEditorMock,
@@ -139,6 +145,7 @@ describe('SearchBar', () => {
   const QUERY_BAR = '.kbnQueryBar';
   const QUERY_INPUT = '[data-test-subj="unifiedQueryInput"]';
   const QUERY_MENU_BUTTON = '[data-test-subj="showQueryBarMenu"]';
+  const QUERY_SUBMIT_BUTTON = 'button[data-test-subj="querySubmitButton"]';
   const EDITOR = '[data-test-subj="unifiedTextLangEditor"]';
 
   beforeEach(() => {
@@ -254,13 +261,13 @@ describe('SearchBar', () => {
     expect(component.find(QUERY_INPUT).length).toBeTruthy();
   });
 
-  it('Should NOT render the input query input, for sql query', () => {
+  it('Should NOT render the input query input, for es|ql query', () => {
     const component = mount(
       wrapSearchBarInContext({
         indexPatterns: [mockIndexPattern],
         screenTitle: 'test screen',
         onQuerySubmit: noop,
-        query: sqlQuery,
+        query: esqlQuery,
       })
     );
     expect(component.find(QUERY_INPUT).length).toBeFalsy();
@@ -303,5 +310,61 @@ describe('SearchBar', () => {
     Array.from(component.getDOMNode().querySelectorAll('button')).forEach((button) => {
       expect(button).toBeDisabled();
     });
+  });
+
+  it('Should call onQuerySubmit with isUpdate prop as false when dateRange is provided', () => {
+    const mockedOnQuerySubmit = jest.fn();
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        screenTitle: 'test screen',
+        onQuerySubmit: mockedOnQuerySubmit,
+        query: kqlQuery,
+        showQueryMenu: false,
+        dateRangeTo: 'now',
+        dateRangeFrom: 'now-15m',
+      })
+    );
+
+    const submitButton = component.find(QUERY_SUBMIT_BUTTON);
+    submitButton.simulate('click');
+
+    expect(mockedOnQuerySubmit).toBeCalledTimes(1);
+    expect(mockedOnQuerySubmit).toHaveBeenNthCalledWith(
+      1,
+      {
+        dateRange: { from: 'now-15m', to: 'now' },
+        query: { language: 'kuery', query: 'response:200' },
+      },
+      false
+    );
+  });
+
+  it('Should call onQuerySubmit with isUpdate prop as true when dateRange is not provided', () => {
+    const mockedOnQuerySubmit = jest.fn();
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        screenTitle: 'test screen',
+        onQuerySubmit: mockedOnQuerySubmit,
+        query: kqlQuery,
+        showQueryMenu: false,
+      })
+    );
+
+    const submitButton = component.find(QUERY_SUBMIT_BUTTON);
+    submitButton.simulate('click');
+
+    expect(mockedOnQuerySubmit).toBeCalledTimes(1);
+    expect(mockedOnQuerySubmit).toHaveBeenNthCalledWith(
+      1,
+      {
+        dateRange: { from: 'now-15m', to: 'now' },
+        query: { language: 'kuery', query: 'response:200' },
+      },
+      // isUpdate is true because the default value in state ({ from: 'now-15m', to: 'now' })
+      // is not equal with props for dateRange which is undefined
+      true
+    );
   });
 });

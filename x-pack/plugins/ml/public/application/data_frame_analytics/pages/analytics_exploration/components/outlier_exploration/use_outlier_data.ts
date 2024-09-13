@@ -7,53 +7,59 @@
 
 import { useEffect, useMemo } from 'react';
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-
-import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
-
 import {
-  useColorRange,
-  COLOR_RANGE,
-  COLOR_RANGE_SCALE,
-} from '../../../../../components/color_range_legend';
+  sortExplorationResultsFields,
+  ML__ID_COPY,
+  ML__INCREMENTAL_ID,
+  DEFAULT_RESULTS_FIELD,
+  FEATURE_INFLUENCE,
+  type DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
 import {
   getFieldType,
   getDataGridSchemasFromFieldTypes,
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
-  UseIndexDataReturnType,
-} from '../../../../../components/data_grid';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
-import { getToastNotifications } from '../../../../../util/dependency_cache';
+  type UseIndexDataReturnType,
+} from '@kbn/ml-data-grid';
 
-import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import { FEATURE_INFLUENCE } from '../../../../common/constants';
-import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 import {
-  sortExplorationResultsFields,
-  ML__ID_COPY,
-  ML__INCREMENTAL_ID,
-} from '../../../../common/fields';
+  useColorRange,
+  COLOR_RANGE,
+  COLOR_RANGE_SCALE,
+} from '../../../../../components/color_range_legend';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
+
+import { getIndexData, getIndexFields } from '../../../../common';
 
 import { getFeatureCount, getOutlierScoreFieldName } from './common';
 import { useExplorationDataGrid } from '../exploration_results_table/use_exploration_data_grid';
 
 export const useOutlierData = (
-  indexPattern: DataView | undefined,
+  dataView: DataView | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
-  searchQuery: SavedSearchQuery
+  searchQuery: estypes.QueryDslQueryContainer
 ): UseIndexDataReturnType => {
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useMlKibana();
+  const mlApi = useMlApi();
   const needsDestIndexFields =
-    indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
+    dataView !== undefined && dataView.title === jobConfig?.source.index[0];
 
   const columns = useMemo(() => {
     const newColumns: EuiDataGridColumn[] = [];
 
-    if (jobConfig !== undefined && indexPattern !== undefined) {
+    if (jobConfig !== undefined && dataView !== undefined) {
       const resultsField = jobConfig.dest.results_field;
-      const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
+      const { fieldTypes } = getIndexFields(mlApi, jobConfig, needsDestIndexFields);
       newColumns.push(
         ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField!).sort((a: any, b: any) =>
           sortExplorationResultsFields(a.id, b.id, jobConfig)
@@ -63,7 +69,7 @@ export const useOutlierData = (
 
     return newColumns;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobConfig, indexPattern]);
+  }, [jobConfig, dataView]);
 
   const dataGrid = useExplorationDataGrid(
     columns,
@@ -86,7 +92,7 @@ export const useOutlierData = (
   // passed on to `getIndexData`.
   useEffect(() => {
     const options = { didCancel: false };
-    getIndexData(jobConfig, dataGrid, searchQuery, options);
+    getIndexData(mlApi, jobConfig, dataGrid, searchQuery, options);
     return () => {
       options.didCancel = true;
     };
@@ -95,11 +101,10 @@ export const useOutlierData = (
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
-    () =>
-      indexPattern !== undefined
-        ? new DataLoader(indexPattern, getToastNotifications())
-        : undefined,
-    [indexPattern]
+    () => (dataView !== undefined ? new DataLoader(dataView, mlApi) : undefined),
+    // skip ml API services from deps check
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dataView]
   );
 
   const fetchColumnChartsData = async function () {
@@ -117,7 +122,7 @@ export const useOutlierData = (
         dataGrid.setColumnCharts(columnChartsData);
       }
     } catch (e) {
-      showDataGridColumnChartErrorMessageToast(e, getToastNotifications());
+      showDataGridColumnChartErrorMessageToast(e, toasts);
     }
   };
 
@@ -146,13 +151,13 @@ export const useOutlierData = (
   );
 
   const renderCellValue = useRenderCellValue(
-    indexPattern,
+    dataView,
     dataGrid.pagination,
     dataGrid.tableItems,
     jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD,
     (columnId, cellValue, fullItem, setCellProps) => {
       const resultsField = jobConfig?.dest.results_field ?? '';
-      let backgroundColor;
+      let backgroundColor: string | undefined;
 
       const featureNames = fullItem[`${resultsField}.${FEATURE_INFLUENCE}`];
 
@@ -166,11 +171,16 @@ export const useOutlierData = (
         }
       }
 
-      if (backgroundColor !== undefined) {
-        setCellProps({
-          style: { backgroundColor: String(backgroundColor) },
-        });
-      }
+      // From EUI docs: Treated as React component allowing hooks, context, and other React concepts to be used.
+      // This is the recommended use of setCellProps: https://github.com/elastic/eui/blob/main/src/components/datagrid/data_grid_types.ts#L521-L525
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useEffect(() => {
+        if (backgroundColor) {
+          setCellProps({
+            style: { backgroundColor: String(backgroundColor) },
+          });
+        }
+      }, [backgroundColor, setCellProps]);
     }
   );
 

@@ -6,20 +6,21 @@
  */
 
 import React from 'react';
-import type { EuiContextMenuPanelProps } from '@elastic/eui';
-import { EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useAddToCaseActions } from './use_add_to_case_actions';
 import { TestProviders } from '../../../../common/mock';
-import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,
   sampleCase,
 } from '../../../../common/components/guided_onboarding_tour/tour_config';
 import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
+import type { AlertTableContextMenuItem } from '../types';
+import { allCasesPermissions } from '../../../../cases_test_utils';
 
 jest.mock('../../../../common/components/guided_onboarding_tour');
 jest.mock('../../../../common/lib/kibana');
@@ -53,7 +54,8 @@ const addToNewCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
 const addToExistingCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
 const useKibanaMock = useKibana as jest.Mock;
 
-const renderContextMenu = (items: EuiContextMenuPanelProps['items']) => {
+const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
+  const panels = [{ id: 0, items }];
   render(
     <EuiPopover
       isOpen={true}
@@ -62,7 +64,7 @@ const renderContextMenu = (items: EuiContextMenuPanelProps['items']) => {
       closePopover={() => {}}
       button={<></>}
     >
-      <EuiContextMenuPanel size="s" items={items} />
+      <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };
@@ -75,15 +77,6 @@ describe('useAddToCaseActions', () => {
       isTourShown: () => false,
     });
 
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      all: true,
-      create: true,
-      read: true,
-      update: true,
-      delete: true,
-      push: true,
-    });
-
     useKibanaMock.mockReturnValue({
       services: {
         cases: {
@@ -93,6 +86,7 @@ describe('useAddToCaseActions', () => {
           },
           helpers: {
             getRuleIdFromEvent: () => null,
+            canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
           },
         },
       },
@@ -105,10 +99,10 @@ describe('useAddToCaseActions', () => {
       wrapper: TestProviders,
     });
     expect(result.current.addToCaseActionItems.length).toEqual(2);
-    expect(result.current.addToCaseActionItems[0].props['data-test-subj']).toEqual(
+    expect(result.current.addToCaseActionItems[0]['data-test-subj']).toEqual(
       'add-to-existing-case-action'
     );
-    expect(result.current.addToCaseActionItems[1].props['data-test-subj']).toEqual(
+    expect(result.current.addToCaseActionItems[1]['data-test-subj']).toEqual(
       'add-to-new-case-action'
     );
   });
@@ -174,7 +168,7 @@ describe('useAddToCaseActions', () => {
     expect(addToNewCase.mock.calls[0][0]).not.toHaveProperty('initialValue');
   });
 
-  it('should refetch when adding an alert to a new case', () => {
+  it('should refetch when adding an alert to a new case', async () => {
     const { result } = renderHook(() => useAddToCaseActions(defaultProps), {
       wrapper: TestProviders,
     });
@@ -184,7 +178,7 @@ describe('useAddToCaseActions', () => {
     renderContextMenu(result.current.addToCaseActionItems);
 
     expect(screen.getByTestId('add-to-new-case-action')).toBeInTheDocument();
-    userEvent.click(screen.getByTestId('add-to-new-case-action'));
+    await userEvent.click(screen.getByTestId('add-to-new-case-action'));
 
     expect(refetch).toHaveBeenCalled();
   });
@@ -201,7 +195,7 @@ describe('useAddToCaseActions', () => {
     expect(refetch).toHaveBeenCalled();
   });
 
-  it('should refetch when adding an alert to an existing case', () => {
+  it('should refetch when adding an alert to an existing case', async () => {
     const { result } = renderHook(() => useAddToCaseActions(defaultProps), {
       wrapper: TestProviders,
     });
@@ -211,7 +205,7 @@ describe('useAddToCaseActions', () => {
     renderContextMenu(result.current.addToCaseActionItems);
 
     expect(screen.getByTestId('add-to-existing-case-action')).toBeInTheDocument();
-    userEvent.click(screen.getByTestId('add-to-existing-case-action'));
+    await userEvent.click(screen.getByTestId('add-to-existing-case-action'));
 
     expect(refetch).toHaveBeenCalled();
   });

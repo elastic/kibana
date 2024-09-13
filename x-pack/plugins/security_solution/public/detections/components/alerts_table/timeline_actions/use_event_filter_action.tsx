@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
+import { useMemo } from 'react';
 import { ACTION_ADD_EVENT_FILTER } from '../translations';
+import type { AlertTableContextMenuItem } from '../types';
 
 export const useEventFilterAction = ({
   onAddEventFilterClick,
@@ -19,16 +19,15 @@ export const useEventFilterAction = ({
   tooltipMessage?: string;
 }) => {
   const eventFilterActionItems = useMemo(
-    () => [
-      <EuiContextMenuItem
-        key="add-event-filter-menu-item"
-        data-test-subj="add-event-filter-menu-item"
-        onClick={onAddEventFilterClick}
-        disabled={disabled}
-        toolTipContent={tooltipMessage}
-      >
-        {ACTION_ADD_EVENT_FILTER}
-      </EuiContextMenuItem>,
+    (): AlertTableContextMenuItem[] => [
+      {
+        key: 'add-event-filter-menu-item',
+        'data-test-subj': 'add-event-filter-menu-item',
+        onClick: onAddEventFilterClick,
+        disabled,
+        toolTipContent: tooltipMessage,
+        name: ACTION_ADD_EVENT_FILTER,
+      },
     ],
     [onAddEventFilterClick, disabled, tooltipMessage]
   );

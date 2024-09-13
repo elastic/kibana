@@ -14,8 +14,7 @@ import * as i18n from '../../../../../detections/pages/detection_engine/rules/tr
 
 const SearchBarWrapper = styled(EuiFlexItem)`
   min-width: 200px;
-  & .euiPopover,
-  & .euiPopover__anchor {
+  & .euiPopover {
     // This is needed to "cancel" styles passed down from EuiTourStep that
     // interfere with EuiFieldSearch and don't allow it to take the full width
     display: block;
@@ -25,9 +24,14 @@ const SearchBarWrapper = styled(EuiFlexItem)`
 interface RuleSearchFieldProps {
   initialValue?: string;
   onSearch: (value: string) => void;
+  placeholder?: string;
 }
 
-export function RuleSearchField({ initialValue, onSearch }: RuleSearchFieldProps): JSX.Element {
+export function RuleSearchField({
+  initialValue,
+  onSearch,
+  placeholder,
+}: RuleSearchFieldProps): JSX.Element {
   const [searchText, setSearchText] = useState(initialValue);
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value),
@@ -45,7 +49,7 @@ export function RuleSearchField({ initialValue, onSearch }: RuleSearchFieldProps
         aria-label={i18n.SEARCH_RULES}
         fullWidth
         incremental={false}
-        placeholder={i18n.SEARCH_PLACEHOLDER}
+        placeholder={placeholder ?? i18n.SEARCH_PLACEHOLDER}
         value={searchText}
         onChange={handleChange}
         onSearch={onSearch}

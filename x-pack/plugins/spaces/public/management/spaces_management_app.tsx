@@ -7,31 +7,38 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Switch, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
-import { Route } from '@kbn/shared-ux-router';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type {
+  PrivilegesAPIClientPublicContract,
+  RolesAPIClient,
+} from '@kbn/security-plugin-types-public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 
 import type { Space } from '../../common';
+import type { EventTracker } from '../analytics';
+import type { ConfigType } from '../config';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginsStart>;
   spacesManager: SpacesManager;
+  config: ConfigType;
+  getRolesAPIClient: () => Promise<RolesAPIClient>;
+  eventTracker: EventTracker;
+  getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
 }
 
 export const spacesManagementApp = Object.freeze({
   id: 'spaces',
-  create({ getStartServices, spacesManager }: CreateParams) {
+  create({ getStartServices, spacesManager, config, eventTracker }: CreateParams) {
     const title = i18n.translate('xpack.spaces.displayName', {
       defaultMessage: 'Spaces',
     });
@@ -41,7 +48,7 @@ export const spacesManagementApp = Object.freeze({
       order: 2,
       title,
 
-      async mount({ element, theme$, setBreadcrumbs, history }) {
+      async mount({ element, setBreadcrumbs, history }) {
         const [[coreStart, { features }], { SpacesGridPage }, { ManageSpacePage }] =
           await Promise.all([getStartServices(), import('./spaces_grid'), import('./edit_space')]);
 
@@ -49,7 +56,7 @@ export const spacesManagementApp = Object.freeze({
           text: title,
           href: `/`,
         };
-        const { notifications, i18n: i18nStart, application, chrome } = coreStart;
+        const { notifications, application, chrome, http } = coreStart;
 
         chrome.docTitle.change(title);
 
@@ -61,8 +68,11 @@ export const spacesManagementApp = Object.freeze({
               getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
+              serverBasePath={http.basePath.serverBasePath}
               history={history}
               getUrlForApp={application.getUrlForApp}
+              maxSpaces={config.maxSpaces}
+              allowSolutionVisibility={config.allowSolutionVisibility}
             />
           );
         };
@@ -84,6 +94,9 @@ export const spacesManagementApp = Object.freeze({
               notifications={notifications}
               spacesManager={spacesManager}
               history={history}
+              allowFeatureVisibility={config.allowFeatureVisibility}
+              allowSolutionVisibility={config.allowSolutionVisibility}
+              eventTracker={eventTracker}
             />
           );
         };
@@ -109,32 +122,33 @@ export const spacesManagementApp = Object.freeze({
               spaceId={spaceId}
               onLoadSpace={onLoadSpace}
               history={history}
+              allowFeatureVisibility={config.allowFeatureVisibility}
+              allowSolutionVisibility={config.allowSolutionVisibility}
+              eventTracker={eventTracker}
             />
           );
         };
 
         render(
-          <KibanaContextProvider services={coreStart}>
-            <i18nStart.Context>
-              <KibanaThemeProvider theme$={theme$}>
-                <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
-                  <Router history={history}>
-                    <Switch>
-                      <Route path={['', '/']} exact>
-                        <SpacesGridPageWithBreadcrumbs />
-                      </Route>
-                      <Route path="/create">
-                        <CreateSpacePageWithBreadcrumbs />
-                      </Route>
-                      <Route path="/edit/:spaceId">
-                        <EditSpacePageWithBreadcrumbs />
-                      </Route>
-                    </Switch>
-                  </Router>
-                </RedirectAppLinks>
-              </KibanaThemeProvider>
-            </i18nStart.Context>
-          </KibanaContextProvider>,
+          <KibanaRenderContextProvider {...coreStart}>
+            <KibanaContextProvider services={coreStart}>
+              <RedirectAppLinks coreStart={coreStart}>
+                <Router history={history}>
+                  <Routes>
+                    <Route path={['', '/']} exact>
+                      <SpacesGridPageWithBreadcrumbs />
+                    </Route>
+                    <Route path="/create">
+                      <CreateSpacePageWithBreadcrumbs />
+                    </Route>
+                    <Route path="/edit/:spaceId">
+                      <EditSpacePageWithBreadcrumbs />
+                    </Route>
+                  </Routes>
+                </Router>
+              </RedirectAppLinks>
+            </KibanaContextProvider>
+          </KibanaRenderContextProvider>,
           element
         );
 

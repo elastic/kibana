@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs';
@@ -14,7 +15,6 @@ import { pipeline, Transform } from 'stream';
 import { setTimeout } from 'timers/promises';
 
 import fetch, { Headers } from 'node-fetch';
-import AbortController from 'abort-controller';
 import chalk from 'chalk';
 import { ToolingLog } from '@kbn/tooling-log';
 
@@ -28,7 +28,7 @@ const PERMANENT_SNAPSHOTS_BASE_URL =
   'https://storage.googleapis.com/kibana-ci-es-snapshots-permanent';
 
 type ChecksumType = 'sha512';
-export type ArtifactLicense = 'oss' | 'basic' | 'trial';
+export type ArtifactLicense = 'basic' | 'trial';
 
 interface ArtifactManifest {
   id: string;
@@ -123,7 +123,7 @@ async function getArtifactSpecForSnapshot(
   log: ToolingLog
 ): Promise<ArtifactSpec> {
   const desiredVersion = urlVersion.replace('-SNAPSHOT', '');
-  const desiredLicense = license === 'oss' ? 'oss' : 'default';
+  const desiredLicense = 'default';
 
   const customManifestUrl = process.env.ES_SNAPSHOT_MANIFEST;
   const primaryManifestUrl = `${DAILY_SNAPSHOTS_BASE_URL}/${desiredVersion}/manifest-latest${

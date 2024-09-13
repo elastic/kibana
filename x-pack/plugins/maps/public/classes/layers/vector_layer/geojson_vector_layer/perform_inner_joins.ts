@@ -6,10 +6,12 @@
  */
 
 import { FeatureCollection } from 'geojson';
+import { asyncForEach } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../../../../common/constants';
 import { DataRequestContext } from '../../../../actions';
 import { JoinState } from '../types';
+import { isTermJoinSource, type ITermJoinSource } from '../../../sources/join_sources';
 
 interface SourceResult {
   refreshed: boolean;
@@ -20,7 +22,7 @@ export async function performInnerJoins(
   sourceResult: SourceResult,
   joinStates: JoinState[],
   updateSourceData: DataRequestContext['updateSourceData'],
-  onJoinError: DataRequestContext['onJoinError']
+  setJoinError: DataRequestContext['setJoinError']
 ) {
   // should update the store if
   // -- source result was refreshed
@@ -57,8 +59,8 @@ export async function performInnerJoins(
       if (joinKey !== null) {
         joinStatus.keys.push(joinKey);
       }
-      const canJoinOnCurrent = joinState.propertiesMap
-        ? innerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap)
+      const canJoinOnCurrent = joinState.joinMetrics
+        ? innerJoin.joinPropertiesToFeature(feature, joinState.joinMetrics)
         : false;
       if (canJoinOnCurrent && !joinStatus.joinedWithAtLeastOneFeature) {
         joinStatus.joinedWithAtLeastOneFeature = true;
@@ -77,52 +79,56 @@ export async function performInnerJoins(
     updateSourceData({ ...sourceResult.featureCollection });
   }
 
-  const joinStatusesWithoutAnyMatches = joinStatuses.filter((joinStatus) => {
-    const hasTerms =
-      joinStatus.joinState.propertiesMap && joinStatus.joinState.propertiesMap.size > 0;
-    return !joinStatus.joinedWithAtLeastOneFeature && hasTerms;
+  //
+  // term joins are easy to misconfigure.
+  // Users often are unaware of left values and right values and whether they allign for joining
+  // Provide messaging that helps users debug joins with no matches
+  //
+  await asyncForEach(joinStatuses, async (joinStatus) => {
+    setJoinError(joinStatus.joinState.joinIndex, await getJoinError(joinStatus));
   });
+}
 
-  if (joinStatusesWithoutAnyMatches.length) {
-    function prettyPrintArray(array: unknown[]) {
-      return array.length <= 5
-        ? array.join(',')
-        : array.slice(0, 5).join(',') +
-            i18n.translate('xpack.maps.vectorLayer.joinError.firstTenMsg', {
-              defaultMessage: ` (5 of {total})`,
-              values: { total: array.length },
-            });
-    }
+function prettyPrintArray(array: unknown[]) {
+  return array.length <= 5
+    ? array.join(',')
+    : array.slice(0, 5).join(',') +
+        i18n.translate('xpack.maps.vectorLayer.joinError.firstTenMsg', {
+          defaultMessage: ` (5 of {total})`,
+          values: { total: array.length },
+        });
+}
 
-    const joinStatus = joinStatusesWithoutAnyMatches[0];
-    const leftFieldName = await joinStatus.joinState.join.getLeftField().getLabel();
-    const rightFieldName = await joinStatus.joinState.join
-      .getRightJoinSource()
-      .getTermField()
-      .getLabel();
-    const reason =
-      joinStatus.keys.length === 0
-        ? i18n.translate('xpack.maps.vectorLayer.joinError.noLeftFieldValuesMsg', {
-            defaultMessage: `Left field: '{leftFieldName}', does not provide any values.`,
-            values: { leftFieldName },
-          })
-        : i18n.translate('xpack.maps.vectorLayer.joinError.noMatchesMsg', {
-            defaultMessage: `Left field does not match right field. Left field: '{leftFieldName}' has values { leftFieldValues }. Right field: '{rightFieldName}' has values: { rightFieldValues }.`,
-            values: {
-              leftFieldName,
-              leftFieldValues: prettyPrintArray(joinStatus.keys),
-              rightFieldName,
-              rightFieldValues: prettyPrintArray(
-                Array.from(joinStatus.joinState.propertiesMap!.keys())
-              ),
-            },
-          });
-
-    onJoinError(
-      i18n.translate('xpack.maps.vectorLayer.joinErrorMsg', {
-        defaultMessage: `Unable to perform term join. {reason}`,
-        values: { reason },
-      })
-    );
+async function getJoinError(joinStatus: {
+  joinedWithAtLeastOneFeature: boolean;
+  keys: string[];
+  joinState: JoinState;
+}): Promise<string | undefined> {
+  if (!isTermJoinSource(joinStatus.joinState.join.getRightJoinSource())) {
+    return;
   }
+
+  const hasTerms = joinStatus.joinState.joinMetrics && joinStatus.joinState.joinMetrics.size > 0;
+
+  if (!hasTerms || joinStatus.joinedWithAtLeastOneFeature) {
+    return;
+  }
+
+  const leftFieldName = await joinStatus.joinState.join.getLeftField().getLabel();
+  const termJoinSource = joinStatus.joinState.join.getRightJoinSource() as ITermJoinSource;
+  const rightFieldName = await termJoinSource.getTermField().getLabel();
+  return joinStatus.keys.length === 0
+    ? i18n.translate('xpack.maps.vectorLayer.joinError.noLeftFieldValuesMsg', {
+        defaultMessage: `Left field: ''{leftFieldName}'', did not provide any values.`,
+        values: { leftFieldName },
+      })
+    : i18n.translate('xpack.maps.vectorLayer.joinError.noMatchesMsg', {
+        defaultMessage: `Left field values do not match right field values. Left field: ''{leftFieldName}'' has values: {leftFieldValues}. Right field: ''{rightFieldName}'' has values: {rightFieldValues}.`,
+        values: {
+          leftFieldName,
+          leftFieldValues: prettyPrintArray(joinStatus.keys),
+          rightFieldName,
+          rightFieldValues: prettyPrintArray(Array.from(joinStatus.joinState.joinMetrics!.keys())),
+        },
+      });
 }

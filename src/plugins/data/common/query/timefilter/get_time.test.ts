@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { RangeFilter } from '@kbn/es-query';
@@ -183,6 +184,14 @@ describe('get_time', () => {
     });
 
     test('should convert relative to absolute', () => {
+      const clock = sinon.useFakeTimers(moment.utc([2000, 1, 0, 0, 0, 0, 0]).valueOf());
+      const from = '2000-01-01T00:00:00.000Z';
+      const to = moment.utc(clock.now).toISOString();
+      expect(getAbsoluteTimeRange({ from, to: 'now' })).toEqual({ from, to });
+      clock.restore();
+    });
+
+    test('should handle moments', () => {
       const clock = sinon.useFakeTimers(moment.utc([2000, 1, 0, 0, 0, 0, 0]).valueOf());
       const from = '2000-01-01T00:00:00.000Z';
       const to = moment.utc(clock.now).toISOString();

@@ -15,6 +15,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
@@ -24,6 +25,7 @@ import type {
   FilterOptions,
   PaginationOptions,
   Rule,
+  RulesSnoozeSettingsMap,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
@@ -36,6 +38,22 @@ import {
 } from './rules_table_defaults';
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
+
+interface RulesSnoozeSettings {
+  /**
+   * A map object using rule SO's id (not ruleId) as keys and snooze settings as values
+   */
+  data: RulesSnoozeSettingsMap;
+  /**
+   * Sets to true during the first data loading
+   */
+  isLoading: boolean;
+  /**
+   * Sets to true during data loading
+   */
+  isFetching: boolean;
+  isError: boolean;
+}
 
 export interface RulesTableState {
   /**
@@ -106,6 +124,10 @@ export interface RulesTableState {
    * Whether the state has its default value
    */
   isDefault: boolean;
+  /**
+   * Rules snooze settings for the current rules
+   */
+  rulesSnoozeSettings: RulesSnoozeSettings;
 }
 
 export type LoadingRuleAction =
@@ -116,6 +138,7 @@ export type LoadingRuleAction =
   | 'export'
   | 'load'
   | 'edit'
+  | 'run'
   | null;
 
 export interface LoadingRules {
@@ -184,7 +207,10 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     showElasticRules:
       savedFilter?.source === RuleSource.Prebuilt ?? DEFAULT_FILTER_OPTIONS.showElasticRules,
     enabled: savedFilter?.enabled,
+    ruleExecutionStatus:
+      savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
   });
+
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
     field: savedSorting?.field ?? DEFAULT_SORTING_OPTIONS.field,
     order: savedSorting?.order ?? DEFAULT_SORTING_OPTIONS.order,
@@ -226,6 +252,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
       tags: DEFAULT_FILTER_OPTIONS.tags,
       enabled: undefined,
+      ruleExecutionStatus: DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
     });
     setSortingOptions({
       field: DEFAULT_SORTING_OPTIONS.field,
@@ -269,14 +296,36 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       pagination,
     },
     {
+      // We don't need refreshes on windows focus and reconnects if auto-refresh if off
+      refetchOnWindowFocus: isRefreshOn && !isActionInProgress,
+      refetchOnReconnect: isRefreshOn && !isActionInProgress,
       refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
       keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
     }
   );
 
+  // Fetch rules snooze settings
+  const {
+    data: rulesSnoozeSettingsMap,
+    isLoading: isSnoozeSettingsLoading,
+    isFetching: isSnoozeSettingsFetching,
+    isError: isSnoozeSettingsFetchError,
+    refetch: refetchSnoozeSettings,
+  } = useFetchRulesSnoozeSettingsQuery(
+    rules.map((x) => x.id),
+    { enabled: rules.length > 0 }
+  );
+
+  const refetchRulesAndSnoozeSettings = useCallback(async () => {
+    const response = await refetch();
+    await refetchSnoozeSettings();
+
+    return response;
+  }, [refetch, refetchSnoozeSettings]);
+
   const actions = useMemo(
     () => ({
-      reFetchRules: refetch,
+      reFetchRules: refetchRulesAndSnoozeSettings,
       setFilterOptions: handleFilterOptionsChange,
       setIsAllSelected,
       setIsRefreshOn,
@@ -290,7 +339,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       clearFilters,
     }),
     [
-      refetch,
+      refetchRulesAndSnoozeSettings,
       handleFilterOptionsChange,
       setIsAllSelected,
       setIsRefreshOn,
@@ -305,10 +354,16 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     ]
   );
 
-  const providerValue = useMemo(
-    () => ({
+  const providerValue = useMemo(() => {
+    return {
       state: {
         rules,
+        rulesSnoozeSettings: {
+          data: rulesSnoozeSettingsMap ?? {},
+          isLoading: isSnoozeSettingsLoading,
+          isFetching: isSnoozeSettingsFetching,
+          isError: isSnoozeSettingsFetchError,
+        },
         pagination: {
           page,
           perPage,
@@ -335,29 +390,32 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         }),
       },
       actions,
-    }),
-    [
-      rules,
-      page,
-      perPage,
-      total,
-      filterOptions,
-      isPreflightInProgress,
-      isActionInProgress,
-      isAllSelected,
-      isFetched,
-      isFetching,
-      isLoading,
-      isRefetching,
-      isRefreshOn,
-      dataUpdatedAt,
-      loadingRules.ids,
-      loadingRules.action,
-      selectedRuleIds,
-      sortingOptions,
-      actions,
-    ]
-  );
+    };
+  }, [
+    rules,
+    rulesSnoozeSettingsMap,
+    isSnoozeSettingsLoading,
+    isSnoozeSettingsFetching,
+    isSnoozeSettingsFetchError,
+    page,
+    perPage,
+    total,
+    filterOptions,
+    isPreflightInProgress,
+    isActionInProgress,
+    isAllSelected,
+    isFetched,
+    isFetching,
+    isLoading,
+    isRefetching,
+    isRefreshOn,
+    dataUpdatedAt,
+    loadingRules.ids,
+    loadingRules.action,
+    selectedRuleIds,
+    sortingOptions,
+    actions,
+  ]);
 
   return <RulesTableContext.Provider value={providerValue}>{children}</RulesTableContext.Provider>;
 };

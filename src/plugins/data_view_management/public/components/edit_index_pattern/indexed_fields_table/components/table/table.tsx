@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { PureComponent } from 'react';
-import { OverlayModalStart, ThemeServiceStart } from '@kbn/core/public';
-
+import { OverlayModalStart } from '@kbn/core/public';
+import { FieldDescription } from '@kbn/field-utils';
 import {
   EuiIcon,
   EuiInMemoryTable,
@@ -24,13 +25,15 @@ import {
   EuiText,
   EuiBasicTable,
   EuiCode,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { DataView } from '@kbn/data-views-plugin/public';
+import { StartServices } from '../../../../../types';
 import { IndexedFieldItem } from '../../types';
 
 export const showDelete = (field: IndexedFieldItem) =>
@@ -204,7 +207,7 @@ interface IndexedFieldProps {
   editField: (field: IndexedFieldItem) => void;
   deleteField: (fieldName: string[]) => void;
   openModal: OverlayModalStart['open'];
-  theme: ThemeServiceStart;
+  startServices: StartServices;
 }
 
 const getItems = (conflictDescriptions: IndexedFieldItem['conflictDescriptions']) => {
@@ -263,6 +266,12 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
             {field.customLabel}
           </EuiBadge>
         </EuiToolTip>
+      </div>
+    ) : null}
+    {field.customDescription ? (
+      <div>
+        <EuiSpacer size="xs" />
+        <FieldDescription field={field} color="subdued" />
       </div>
     ) : null}
   </span>
@@ -336,7 +345,7 @@ const getConflictBtn = (
   fieldName: string,
   conflictDescriptions: IndexedFieldItem['conflictDescriptions'],
   openModal: IndexedFieldProps['openModal'],
-  theme: ThemeServiceStart
+  startServices: StartServices
 ) => {
   const onClick = () => {
     const overlayRef = openModal(
@@ -348,13 +357,14 @@ const getConflictBtn = (
           fieldName,
           conflictDescriptions,
         }),
-        { theme$: theme.theme$ }
+        startServices
       )
     );
   };
 
   return (
     <span>
+      {' '}
       <EuiBadge
         color="warning"
         iconType="warning"
@@ -385,7 +395,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
               field.name,
               field.conflictDescriptions,
               this.props.openModal,
-              this.props.theme
+              this.props.startServices
             )
           : ''}
       </span>
@@ -406,7 +416,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
         name: nameHeader,
         dataType: 'string',
         sortable: true,
-        render: (value: string, field: IndexedFieldItem) => {
+        render: (_value: string, field: IndexedFieldItem) => {
           return renderFieldName(field, indexPattern.timeFieldName);
         },
         width: '38%',

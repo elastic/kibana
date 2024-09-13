@@ -6,8 +6,8 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { useRouteMatch, Switch, useLocation } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { useRouteMatch, useLocation } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -97,7 +97,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
               ) : (
                 <FormattedMessage
                   id="xpack.fleet.agentDetails.agentDetailsTitle"
-                  defaultMessage="Agent '{id}'"
+                  defaultMessage="Agent ''{id}''"
                   values={{
                     id: agentId,
                   }}
@@ -117,7 +117,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s" direction="row">
-            {!isAgentPolicyLoading && !agentPolicyData?.item?.is_managed && (
+            {!isAgentPolicyLoading && (
               <EuiFlexItem grow={false}>
                 <AgentDetailsActionMenu
                   agent={agentData.item}
@@ -231,7 +231,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
         : '-',
   });
   return (
-    <Switch>
+    <Routes>
       <Route
         path={FLEET_ROUTING_PATHS.agent_details_logs}
         render={() => {
@@ -250,6 +250,6 @@ const AgentDetailsPageContent: React.FunctionComponent<{
           return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
-    </Switch>
+    </Routes>
   );
 };

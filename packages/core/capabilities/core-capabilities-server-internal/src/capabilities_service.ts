@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -18,7 +19,9 @@ import type {
   CapabilitiesSwitcher,
   CapabilitiesStart,
   CapabilitiesSetup,
+  CapabilitiesSwitcherOptions,
 } from '@kbn/core-capabilities-server';
+import type { SwitcherWithOptions } from './types';
 import { mergeCapabilities } from './merge_capabilities';
 import { getCapabilitiesResolver, CapabilitiesResolver } from './resolve_capabilities';
 import { registerRoutes } from './routes';
@@ -41,8 +44,9 @@ const defaultCapabilities: Capabilities = {
 export class CapabilitiesService {
   private readonly logger: Logger;
   private readonly capabilitiesProviders: CapabilitiesProvider[] = [];
-  private readonly capabilitiesSwitchers: CapabilitiesSwitcher[] = [];
+  private readonly capabilitiesSwitchers: SwitcherWithOptions[] = [];
   private readonly resolveCapabilities: CapabilitiesResolver;
+  private started = false;
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('capabilities-service');
@@ -73,18 +77,38 @@ export class CapabilitiesService {
 
     return {
       registerProvider: (provider: CapabilitiesProvider) => {
+        if (this.started) {
+          throw new Error('registerProvider cannot be called after #start');
+        }
         this.capabilitiesProviders.push(provider);
       },
-      registerSwitcher: (switcher: CapabilitiesSwitcher) => {
-        this.capabilitiesSwitchers.push(switcher);
+      registerSwitcher: (switcher: CapabilitiesSwitcher, options: CapabilitiesSwitcherOptions) => {
+        if (this.started) {
+          throw new Error('registerSwitcher cannot be called after #start');
+        }
+        this.capabilitiesSwitchers.push({
+          switcher,
+          capabilityPath: Array.isArray(options.capabilityPath)
+            ? options.capabilityPath
+            : [options.capabilityPath],
+        });
       },
     };
   }
 
   public start(): CapabilitiesStart {
+    this.started = true;
+
     return {
       resolveCapabilities: (request, options) =>
-        this.resolveCapabilities(request, [], options?.useDefaultCapabilities ?? false),
+        this.resolveCapabilities({
+          request,
+          capabilityPath: Array.isArray(options.capabilityPath)
+            ? options.capabilityPath
+            : [options.capabilityPath],
+          useDefaultCapabilities: options.useDefaultCapabilities ?? false,
+          applications: [],
+        }),
     };
   }
 }

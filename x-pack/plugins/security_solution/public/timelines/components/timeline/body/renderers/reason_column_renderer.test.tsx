@@ -7,18 +7,17 @@
 
 import React from 'react';
 
-import { mockTimelineData } from '../../../../../common/mock';
+import { mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { defaultColumnHeaderType } from '../column_headers/default_headers';
 import { REASON_FIELD_NAME } from './constants';
 import { reasonColumnRenderer } from './reason_column_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
 
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
+import { RowRendererIdEnum } from '../../../../../../common/api/timeline';
 
 import { render } from '@testing-library/react';
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { cloneDeep } from 'lodash';
-import { RowRendererId } from '@kbn/timelines-plugin/common/types';
 import { TableId } from '@kbn/securitysolution-data-table';
 jest.mock('./plain_column_renderer');
 
@@ -42,7 +41,7 @@ const field: ColumnHeaderOptions = {
 
 const rowRenderers: RowRenderer[] = [
   {
-    id: RowRendererId.alerts,
+    id: RowRendererIdEnum.alerts,
     isInstance: (ecs) => ecs === validEcs,
     renderRow: () => <span data-test-subj="test-row-render" />,
   },
@@ -58,7 +57,7 @@ const defaultProps = {
 
 describe('reasonColumnRenderer', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('isIntance', () => {

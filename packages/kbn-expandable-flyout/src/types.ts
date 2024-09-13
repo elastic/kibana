@@ -1,14 +1,69 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 
-export interface FlyoutPanel {
+export interface ExpandableFlyoutApi {
+  /**
+   * Open the flyout with left, right and/or preview panels
+   */
+  openFlyout: (panels: {
+    left?: FlyoutPanelProps;
+    right?: FlyoutPanelProps;
+    preview?: FlyoutPanelProps;
+  }) => void;
+  /**
+   * Replaces the current right panel with a new one
+   */
+  openRightPanel: (panel: FlyoutPanelProps) => void;
+  /**
+   * Replaces the current left panel with a new one
+   */
+  openLeftPanel: (panel: FlyoutPanelProps) => void;
+  /**
+   * Add a new preview panel to the list of current preview panels
+   */
+  openPreviewPanel: (panel: FlyoutPanelProps) => void;
+  /**
+   * Closes right panel
+   */
+  closeRightPanel: () => void;
+  /**
+   * Closes left panel
+   */
+  closeLeftPanel: () => void;
+  /**
+   * Closes all preview panels
+   */
+  closePreviewPanel: () => void;
+  /**
+   * Go back to previous preview panel
+   */
+  previousPreviewPanel: () => void;
+  /**
+   * Close all panels and closes flyout
+   */
+  closeFlyout: () => void;
+}
+
+export interface PanelPath {
+  /**
+   * Top level tab that to be displayed
+   */
+  tab: string;
+  /**
+   * Optional secondary level to be displayed under top level tab
+   */
+  subTab?: string;
+}
+
+export interface FlyoutPanelProps {
   /**
    * Unique key to identify the panel
    */
@@ -18,9 +73,9 @@ export interface FlyoutPanel {
    */
   params?: Record<string, unknown>;
   /**
-   * Tracks the path for what to show in a panel. We may have multiple tabs or details..., so easiest to just use a stack
+   * Tracks the path for what to show in a panel, such as activated tab and subtab
    */
-  path?: string[];
+  path?: PanelPath;
   /**
    * Tracks visual state such as whether the panel is collapsed
    */
@@ -35,5 +90,5 @@ export interface Panel {
   /**
    * Component to be rendered
    */
-  component: (props: FlyoutPanel) => React.ReactElement;
+  component: (props: FlyoutPanelProps) => React.ReactElement;
 }

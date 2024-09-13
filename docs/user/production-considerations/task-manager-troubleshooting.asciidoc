@@ -98,7 +98,6 @@ The API returns the following:
       "timestamp": "2021-02-16T11:29:05.055Z",
       "value": {
         "request_capacity": 1000,
-        "max_poll_inactivity_cycles": 10,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_running_average_window": 50,
         "monitored_task_execution_thresholds": {
@@ -297,7 +296,6 @@ Evaluating the health stats, you can see the following output under `stats.confi
 --------------------------------------------------
 {
   "request_capacity": 1000,
-  "max_poll_inactivity_cycles": 10,
   "monitored_aggregated_stats_refresh_rate": 60000,
   "monitored_stats_running_average_window": 50,
   "monitored_task_execution_thresholds": {
@@ -322,7 +320,6 @@ Now suppose the output under `stats.configuration.value` is the following:
 --------------------------------------------------
 {
   "request_capacity": 1000,
-  "max_poll_inactivity_cycles": 10,
   "monitored_aggregated_stats_refresh_rate": 60000,
   "monitored_stats_running_average_window": 50,
   "monitored_task_execution_thresholds": {
@@ -1000,11 +997,12 @@ Task Manager has run out of Available Workers:
 [source, txt]
 --------------------------------------------------
 server log [12:41:33.672] [info][plugins][taskManager][taskManager] [Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.
+server log [12:41:33.672] [warn][plugins][taskManager][taskManager] taskManager plugin is now degraded: Task Manager is unhealthy - Reason: setting HealthStatus.Error because of expired hot timestamps
 --------------------------------------------------
 
 This log message tells us that Task Manager is not managing to keep up with the sheer amount of work it has been tasked with completing. This might mean that rules are not running at the frequency that was expected (instead of running every 5 minutes, it runs every 7-8 minutes, just as an example).
 
-By default Task Manager is limited to 10 tasks and this can be bumped up by setting a higher number in the kibana.yml file using the `xpack.task_manager.max_workers` configuration. It is important to keep in mind that a higher number of tasks running at any given time means more load on both Kibana and Elasticsearch, so only change this setting if increasing load in your environment makes sense.
+By default Task Manager is limited to 10 tasks and this can be bumped up by setting a higher number in the `kibana.yml` file using the `xpack.task_manager.capacity` configuration. It is important to keep in mind that a higher number of tasks running at any given time means more load on both Kibana and Elasticsearch; only change this setting if increasing load in your environment makes sense.
 
 Another approach to addressing this might be to tell workers to run at a higher rate, rather than adding more of them, which would be configured using xpack.task_manager.poll_interval. This value dictates how often Task Manager checks to see if there’s more work to be done and uses milliseconds (by default it is 3000, which means an interval of 3 seconds).
 

@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { BATCH_SIZE } from './constants';
 
 export interface UpdateByQueryResponse {
   taskId: string;
@@ -21,7 +22,7 @@ export interface UpdateByQueryResponse {
 
 /**
  * Pickup updated mappings by performing an update by query operation on all
- * documents in the index. Returns a task ID which can be
+ * documents matching the passed in query. Returns a task ID which can be
  * tracked for progress.
  *
  * @remarks When mappings are updated to add a field which previously wasn't
@@ -35,7 +36,9 @@ export interface UpdateByQueryResponse {
 export const pickupUpdatedMappings =
   (
     client: ElasticsearchClient,
-    index: string
+    index: string,
+    batchSize: number,
+    query?: QueryDslQueryContainer
   ): TaskEither.TaskEither<RetryableEsClientError, UpdateByQueryResponse> =>
   () => {
     return client
@@ -46,12 +49,14 @@ export const pickupUpdatedMappings =
         allow_no_indices: false,
         index,
         // How many documents to update per batch
-        scroll_size: BATCH_SIZE,
+        scroll_size: batchSize,
         // force a refresh so that we can query the updated index immediately
         // after the operation completes
         refresh: true,
         // Create a task and return task id instead of blocking until complete
         wait_for_completion: false,
+        // Only update the documents that match the provided query
+        query,
       })
       .then(({ task: taskId }) => {
         return Either.right({ taskId: String(taskId!) });

@@ -10,7 +10,6 @@
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/visualizations-plugin",
-    "@kbn/discover-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/field-formats-plugin",
@@ -27,6 +26,9 @@
     "@kbn/monaco",
     "@kbn/es-ui-shared-plugin",
     "@kbn/utility-types",
+    "@kbn/saved-search-plugin",
+    "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

@@ -11,8 +11,8 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import { routeDefinitionParamsMock } from '../../index.mock';
 import { defineGetAllRolesRoutes } from './get_all';
+import { routeDefinitionParamsMock } from '../../index.mock';
 
 const application = 'kibana-.kibana';
 const reservedPrivilegesApplicationWildcard = 'kibana-*';
@@ -118,6 +118,7 @@ describe('GET all roles', () => {
     getRolesTest(`transforms elasticsearch privileges`, {
       apiResponse: () => ({
         first_role: {
+          description: 'roleDescription',
           cluster: ['manage_watcher'],
           indices: [
             {
@@ -140,6 +141,7 @@ describe('GET all roles', () => {
         result: [
           {
             name: 'first_role',
+            description: 'roleDescription',
             metadata: {
               _reserved: true,
             },
@@ -170,6 +172,7 @@ describe('GET all roles', () => {
         {
           apiResponse: () => ({
             first_role: {
+              description: 'roleDescription',
               cluster: [],
               indices: [],
               applications: [
@@ -193,6 +196,7 @@ describe('GET all roles', () => {
             result: [
               {
                 name: 'first_role',
+                description: 'roleDescription',
                 metadata: {
                   _reserved: true,
                 },

@@ -12,18 +12,22 @@ import { formatDate, EuiPanel, EuiSpacer, EuiInMemoryTable } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 
 import { TIME_FORMAT } from '../../../../../../common/constants';
-import type { TransformHealthIssue } from '../../../../../../common/types/transform_stats';
+import type {
+  TransformHealthIssue,
+  TransformStats,
+} from '../../../../../../common/types/transform_stats';
 
-import { TransformListRow } from '../../../../common';
+import { mapEsHealthStatus2TransformHealthStatus } from '../../../../../../common/constants';
 
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 
 interface ExpandedRowHealthPaneProps {
-  health: TransformListRow['stats']['health'];
+  health: TransformStats['health'];
 }
 
 export const ExpandedRowHealthPane: FC<ExpandedRowHealthPaneProps> = ({ health }) => {
-  const { status, issues } = health;
+  const healthStatus = mapEsHealthStatus2TransformHealthStatus(health?.status);
+  const issues = health?.issues;
 
   const sorting = {
     sort: {
@@ -79,7 +83,7 @@ export const ExpandedRowHealthPane: FC<ExpandedRowHealthPaneProps> = ({ health }
       data-test-subj="transformHealthTabContent"
     >
       <EuiSpacer size="s" />
-      <TransformHealthColoredDot healthStatus={status} compact={false} />
+      <TransformHealthColoredDot healthStatus={healthStatus} compact={false} />
       {Array.isArray(issues) && issues.length > 0 && (
         <>
           <EuiSpacer size="s" />

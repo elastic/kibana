@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CtiQueries } from '../../../../../../common/search_strategy/security_solution/cti';
+import type { CtiQueries } from '../../../../../../common/search_strategy';
 import type { SecuritySolutionFactory } from '../../types';
 import { buildEventEnrichmentQuery } from './query';
 import { parseEventEnrichmentResponse } from './response';

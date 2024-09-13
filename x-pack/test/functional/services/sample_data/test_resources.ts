@@ -13,21 +13,30 @@ export function SampleDataTestResourcesServiceProvider({ getService }: FtrProvid
   const kibanaServer = getService('kibanaServer');
 
   return {
-    async installKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
-      await supertest.post(`/api/sample_data/${sampleDataId}`).set('kbn-xsrf', 'true').expect(200);
+    async installKibanaSampleData(
+      sampleDataId: 'ecommerce' | 'flights' | 'logs',
+      additionalRequestHeaders?: object
+    ) {
+      await supertest
+        .post(`/api/sample_data/${sampleDataId}`)
+        .set({ ...additionalRequestHeaders, 'kbn-xsrf': 'true' })
+        .expect(200);
     },
 
-    async removeKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
+    async removeKibanaSampleData(
+      sampleDataId: 'ecommerce' | 'flights' | 'logs',
+      additionalRequestHeaders?: object
+    ) {
       await supertest
         .delete(`/api/sample_data/${sampleDataId}`)
-        .set('kbn-xsrf', 'true')
+        .set({ ...additionalRequestHeaders, 'kbn-xsrf': 'true' })
         .expect(204);
     },
 
-    async installAllKibanaSampleData() {
-      await this.installKibanaSampleData('ecommerce');
-      await this.installKibanaSampleData('flights');
-      await this.installKibanaSampleData('logs');
+    async installAllKibanaSampleData(additionalRequestHeaders?: object) {
+      await this.installKibanaSampleData('ecommerce', additionalRequestHeaders);
+      await this.installKibanaSampleData('flights', additionalRequestHeaders);
+      await this.installKibanaSampleData('logs', additionalRequestHeaders);
 
       // Sample data is shifted to be relative to current time
       // This means that a static timerange will return different documents
@@ -46,10 +55,10 @@ export function SampleDataTestResourcesServiceProvider({ getService }: FtrProvid
       });
     },
 
-    async removeAllKibanaSampleData() {
-      await this.removeKibanaSampleData('ecommerce');
-      await this.removeKibanaSampleData('flights');
-      await this.removeKibanaSampleData('logs');
+    async removeAllKibanaSampleData(additionalRequestHeaders?: object) {
+      await this.removeKibanaSampleData('ecommerce', additionalRequestHeaders);
+      await this.removeKibanaSampleData('flights', additionalRequestHeaders);
+      await this.removeKibanaSampleData('logs', additionalRequestHeaders);
     },
   };
 }

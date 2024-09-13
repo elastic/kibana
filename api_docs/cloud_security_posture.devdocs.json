@@ -49,70 +49,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cloudSecurityPosture",
-        "id": "def-public.getSecuritySolutionNavTab",
-        "type": "Function",
-        "tags": [],
-        "label": "getSecuritySolutionNavTab",
-        "description": [
-          "\nGets the cloud security posture link properties of a CSP page for navigation in the old security solution navigation."
-        ],
-        "signature": [
-          "<TId extends string = ",
-          {
-            "pluginId": "cloudSecurityPosture",
-            "scope": "public",
-            "docId": "kibCloudSecurityPosturePluginApi",
-            "section": "def-public.CloudSecurityPosturePageId",
-            "text": "CloudSecurityPosturePageId"
-          },
-          ">(cloudSecurityPosturePage: ",
-          "CspPage",
-          ", basePath: string) => CloudSecurityPostureNavTab<TId>"
-        ],
-        "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "cloudSecurityPosture",
-            "id": "def-public.getSecuritySolutionNavTab.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "cloudSecurityPosturePage",
-            "description": [
-              "the name of the cloud posture page."
-            ],
-            "signature": [
-              "CspPage"
-            ],
-            "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "cloudSecurityPosture",
-            "id": "def-public.getSecuritySolutionNavTab.$2",
-            "type": "string",
-            "tags": [],
-            "label": "basePath",
-            "description": [
-              "the base path for links."
-            ],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -181,23 +117,6 @@
     "misc": [
       {
         "parentPluginId": "cloudSecurityPosture",
-        "id": "def-public.CLOUD_SECURITY_POSTURE_BASE_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "CLOUD_SECURITY_POSTURE_BASE_PATH",
-        "description": [
-          "The base path for all cloud security posture pages."
-        ],
-        "signature": [
-          "\"/cloud_security_posture\""
-        ],
-        "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cloudSecurityPosture",
         "id": "def-public.CloudSecurityPosturePageId",
         "type": "Type",
         "tags": [],
@@ -206,7 +125,7 @@
           "\nAll the IDs for the cloud security posture pages.\nThis needs to match the cloud security posture page entries in `SecurityPageName` in `x-pack/plugins/security_solution/common/constants.ts`."
         ],
         "signature": [
-          "\"cloud_security_posture-dashboard\" | \"cloud_security_posture-findings\" | \"cloud_security_posture-benchmarks\" | \"cloud_security_posture-benchmarks-rules\""
+          "\"cloud_security_posture-dashboard\" | \"cloud_security_posture-cspm-dashboard\" | \"cloud_security_posture-kspm-dashboard\" | \"cloud_security_posture-vulnerability_dashboard\" | \"cloud_security_posture-findings\" | \"cloud_security_posture-benchmarks\" | \"cloud_security_posture-benchmarks-rules\""
         ],
         "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/types.ts",
         "deprecated": false,

@@ -11,6 +11,10 @@ discover-app {
 .dscPage {
   @include euiBreakpoint('m', 'l', 'xl') {
     @include kibanaFullBodyHeight();
+
+    &.dscPage--topNavInline {
+      @include kibanaFullBodyHeight($euiSize * 3);
+    }
   }
 
   flex-direction: column;
@@ -29,26 +33,33 @@ discover-app {
 
 .dscPageBody__contents {
   overflow: hidden;
+  height: 100%;
 }
 
 .dscPageContent__wrapper {
-  padding: $euiSizeS $euiSizeS $euiSizeS 0;
   overflow: hidden; // Ensures horizontal scroll of table
-
-  @include euiBreakpoint('xs', 's') {
-    padding: 0 $euiSizeS $euiSizeS;
-  }
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .dscPageContent {
   position: relative;
   overflow: hidden;
-  border: $euiBorderThin;
   height: 100%;
 }
 
 .dscPageContent--centered {
+  width: auto;
   height: auto;
+  align-self: center;
+  margin-top: auto;
+  margin-bottom: auto;
+  flex-grow: 0;
+}
+
+.dscPageContent__panelsToggleWhenNoResults {
+  padding: $euiSizeS;
 }
 
 .dscTable {

@@ -6,22 +6,21 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 
-import numeral from '@elastic/numeral';
-import { FindFileStructureErrorResponse } from '@kbn/file-upload-plugin/common';
-import { FILE_SIZE_DISPLAY_FORMAT } from '../../../../../common/constants';
+import type { FindFileStructureErrorResponse } from '@kbn/file-upload-plugin/common';
+import type { FileSizeChecker } from './file_size_check';
 
 interface FileTooLargeProps {
-  fileSize: number;
-  maxFileSize: number;
+  fileSizeChecker: FileSizeChecker;
 }
 
-export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSize, maxFileSize }) => {
-  const fileSizeFormatted = numeral(fileSize).format(FILE_SIZE_DISPLAY_FORMAT);
-  const maxFileSizeFormatted = numeral(maxFileSize).format(FILE_SIZE_DISPLAY_FORMAT);
+export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSizeChecker }) => {
+  const fileSizeFormatted = fileSizeChecker.fileSizeFormatted();
+  const maxFileSizeFormatted = fileSizeChecker.maxFileSizeFormatted();
 
   // Format the byte values, using the second format if the difference between
   // the file size and the max is so small that the formatted values are identical
@@ -42,7 +41,7 @@ export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSize, maxFileSize }) =
       </p>
     );
   } else {
-    const diffFormatted = numeral(fileSize - maxFileSize).format(FILE_SIZE_DISPLAY_FORMAT);
+    const diffFormatted = fileSizeChecker.fileSizeDiffFormatted();
     errorText = (
       <p>
         <FormattedMessage

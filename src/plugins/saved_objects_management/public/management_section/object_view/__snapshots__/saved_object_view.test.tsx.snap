@@ -4,6 +4,42 @@ exports[`SavedObjectEdition should render normally 1`] = `
 <Provider
   services={
     Object {
+      "settings": Object {
+        "client": Object {
+          "get": [MockFunction],
+          "get$": [MockFunction],
+          "getAll": [MockFunction],
+          "getUpdate$": [MockFunction],
+          "getUpdateErrors$": [MockFunction],
+          "isCustom": [MockFunction],
+          "isDeclared": [MockFunction],
+          "isDefault": [MockFunction],
+          "isOverridden": [MockFunction],
+          "remove": [MockFunction],
+          "set": [MockFunction],
+          "validateValue": [MockFunction],
+        },
+        "globalClient": Object {
+          "get": [MockFunction],
+          "get$": [MockFunction],
+          "getAll": [MockFunction],
+          "getUpdate$": [MockFunction],
+          "getUpdateErrors$": [MockFunction],
+          "isCustom": [MockFunction],
+          "isDeclared": [MockFunction],
+          "isDefault": [MockFunction],
+          "isOverridden": [MockFunction],
+          "remove": [MockFunction],
+          "set": [MockFunction],
+          "validateValue": [MockFunction],
+        },
+      },
+      "theme": Object {
+        "getTheme": [MockFunction],
+        "theme$": Observable {
+          "_subscribe": [Function],
+        },
+      },
       "uiSettings": Object {
         "get": [MockFunction],
         "get$": [MockFunction],
@@ -16,6 +52,7 @@ exports[`SavedObjectEdition should render normally 1`] = `
         "isOverridden": [MockFunction],
         "remove": [MockFunction],
         "set": [MockFunction],
+        "validateValue": [MockFunction],
       },
     }
   }

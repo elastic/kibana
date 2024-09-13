@@ -1,22 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscription } from 'rxjs';
-import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs/operators';
+import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs';
 import { createBrowserHistory, History } from 'history';
 
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
+import type { InternalHttpSetup, InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type {
   App,
   AppDeepLink,
@@ -28,24 +30,33 @@ import type {
   NavigateToUrlOptions,
 } from '@kbn/core-application-browser';
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
-import { AppStatus, AppNavLinkStatus } from '@kbn/core-application-browser';
+import { AppStatus } from '@kbn/core-application-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { getUserConfirmationHandler } from './navigation_confirm';
-import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
+import {
+  appendAppPath,
+  parseAppUrl,
+  relativeToAbsolute,
+  getAppInfo,
+  getLocationObservable,
+} from './utils';
+import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 
 export interface SetupDeps {
-  http: HttpSetup;
+  http: InternalHttpSetup;
+  analytics: AnalyticsServiceSetup;
   history?: History<any>;
   /** Used to redirect to external urls */
   redirectTo?: (path: string) => void;
 }
 
 export interface StartDeps {
-  http: HttpStart;
+  http: InternalHttpStart;
+  analytics: AnalyticsServiceStart;
   theme: ThemeServiceStart;
   overlays: OverlayStart;
   customBranding: CustomBrandingStart;
@@ -103,6 +114,7 @@ export class ApplicationService {
   private stop$ = new Subject<void>();
   private registrationClosed = false;
   private history?: History<any>;
+  private location$?: Observable<string>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
   private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
@@ -111,6 +123,7 @@ export class ApplicationService {
 
   public setup({
     http: { basePath },
+    analytics,
     redirectTo = (path: string) => {
       window.location.assign(path);
     },
@@ -125,6 +138,12 @@ export class ApplicationService {
           overlayPromise: firstValueFrom(this.overlayStart$.pipe(take(1))),
         }),
       });
+
+    this.location$ = getLocationObservable(window.location, this.history);
+    registerAnalyticsContextProvider({
+      analytics,
+      location$: this.location$,
+    });
 
     this.navigate = (url, state, replace) => {
       // basePath not needed here because `history` is configured with basename
@@ -164,7 +183,9 @@ export class ApplicationService {
 
     const validateApp = (app: App<unknown>) => {
       if (this.registrationClosed) {
-        throw new Error(`Applications cannot be registered after "setup"`);
+        throw new Error(
+          `Applications cannot be registered after "setup" (attempted to register "${app.id}")`
+        );
       } else if (!applicationIdRegexp.test(app.id)) {
         throw new Error(
           `Invalid application id: it can only be composed of alphanum chars, '-' and '_'`
@@ -188,7 +209,6 @@ export class ApplicationService {
         this.apps.set(app.id, {
           ...appProps,
           status: app.status ?? AppStatus.accessible,
-          navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
           deepLinks: populateDeepLinkDefaults(appProps.deepLinks),
         });
         if (updater$) {
@@ -208,6 +228,7 @@ export class ApplicationService {
   }
 
   public async start({
+    analytics,
     http,
     overlays,
     theme,
@@ -295,6 +316,7 @@ export class ApplicationService {
         shareReplay(1)
       ),
       capabilities,
+      currentLocation$: this.location$!.pipe(takeUntil(this.stop$)),
       currentAppId$: this.currentAppId$.pipe(
         filter((appId) => appId !== undefined),
         distinctUntilChanged(),
@@ -346,6 +368,7 @@ export class ApplicationService {
         }
         return (
           <AppRouter
+            analytics={analytics}
             history={this.history}
             theme$={theme.theme$}
             mounters={availableMounters}
@@ -447,10 +470,6 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
           changes.status ?? AppStatus.accessible,
           fields.status ?? AppStatus.accessible
         ),
-        navLinkStatus: Math.max(
-          changes.navLinkStatus ?? AppNavLinkStatus.default,
-          fields.navLinkStatus ?? AppNavLinkStatus.default
-        ),
         ...(fields.deepLinks ? { deepLinks: populateDeepLinkDefaults(fields.deepLinks) } : {}),
       };
     }
@@ -468,7 +487,7 @@ const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
   }
   return deepLinks.map((deepLink) => ({
     ...deepLink,
-    navLinkStatus: deepLink.navLinkStatus ?? AppNavLinkStatus.default,
+    visibleIn: deepLink.visibleIn ?? ['globalSearch'], // by default, deepLinks are only visible in global search.
     deepLinks: populateDeepLinkDefaults(deepLink.deepLinks),
   }));
 };

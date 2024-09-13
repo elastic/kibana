@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import cytoscape from 'cytoscape';
-import {
-  ANALYSIS_CONFIG_TYPE,
-  JOB_MAP_NODE_TYPES,
-} from '../../../../../../common/constants/data_frame_analytics';
-import { EuiThemeType } from '../../../../components/color_range_legend';
+import type cytoscape from 'cytoscape';
+import { ANALYSIS_CONFIG_TYPE, JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
+import type { EuiThemeType } from '../../../../components/color_range_legend';
 import classificationJobIcon from './icons/ml_classification_job.svg';
 import outlierDetectionJobIcon from './icons/ml_outlier_detection_job.svg';
 import regressionJobIcon from './icons/ml_regression_job.svg';
@@ -22,13 +19,16 @@ const MAP_SHAPES = {
   RECTANGLE: 'rectangle',
   DIAMOND: 'diamond',
   TRIANGLE: 'triangle',
+  ROUND_RECTANGLE: 'round-rectangle',
 } as const;
-type MapShapes = typeof MAP_SHAPES[keyof typeof MAP_SHAPES];
+type MapShapes = (typeof MAP_SHAPES)[keyof typeof MAP_SHAPES];
 
 function shapeForNode(el: cytoscape.NodeSingular, theme: EuiThemeType): MapShapes {
   const type = el.data('type');
   switch (type) {
     case JOB_MAP_NODE_TYPES.ANALYTICS:
+      return MAP_SHAPES.ELLIPSE;
+    case JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING:
       return MAP_SHAPES.ELLIPSE;
     case JOB_MAP_NODE_TYPES.TRANSFORM:
       return MAP_SHAPES.RECTANGLE;
@@ -36,6 +36,9 @@ function shapeForNode(el: cytoscape.NodeSingular, theme: EuiThemeType): MapShape
       return MAP_SHAPES.DIAMOND;
     case JOB_MAP_NODE_TYPES.TRAINED_MODEL:
       return MAP_SHAPES.TRIANGLE;
+    case JOB_MAP_NODE_TYPES.INGEST_PIPELINE:
+      return MAP_SHAPES.ROUND_RECTANGLE;
+
     default:
       return MAP_SHAPES.ELLIPSE;
   }
@@ -64,6 +67,8 @@ function borderColorForNode(el: cytoscape.NodeSingular, theme: EuiThemeType) {
   const type = el.data('type');
 
   switch (type) {
+    case JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING:
+      return theme.euiColorFullShade;
     case JOB_MAP_NODE_TYPES.ANALYTICS:
       return theme.euiColorSuccess;
     case JOB_MAP_NODE_TYPES.TRANSFORM:
@@ -72,6 +77,9 @@ function borderColorForNode(el: cytoscape.NodeSingular, theme: EuiThemeType) {
       return theme.euiColorVis2;
     case JOB_MAP_NODE_TYPES.TRAINED_MODEL:
       return theme.euiColorVis3;
+    case JOB_MAP_NODE_TYPES.INGEST_PIPELINE:
+      return theme.euiColorVis7;
+
     default:
       return theme.euiColorMediumShade;
   }

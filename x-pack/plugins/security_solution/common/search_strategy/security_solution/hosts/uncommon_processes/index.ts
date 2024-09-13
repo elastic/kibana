@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 
 import type { HostEcs, ProcessEcs, UserEcs } from '@kbn/securitysolution-ecs';
 import type {
-  RequestOptionsPaginated,
-  SortField,
   CursorType,
   Inspect,
   Maybe,
@@ -21,11 +19,6 @@ import type {
   Hits,
   CommonFields,
 } from '../../..';
-
-export interface HostsUncommonProcessesRequestOptions extends RequestOptionsPaginated {
-  sort: SortField;
-  defaultIndex: string[];
-}
 
 export interface HostsUncommonProcessesStrategyResponse extends IEsSearchResponse {
   edges: HostsUncommonProcessesEdges[];

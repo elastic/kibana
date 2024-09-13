@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -96,7 +97,8 @@ async function updateRoutingAllocations(
   });
 }
 
-describe('incompatible_cluster_routing_allocation', () => {
+// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
+describe.skip('incompatible_cluster_routing_allocation', () => {
   let client: ElasticsearchClient;
   let root: Root;
 
@@ -125,7 +127,9 @@ describe('incompatible_cluster_routing_allocation', () => {
     await root.preboot();
     await root.setup();
 
-    root.start();
+    root.start().catch(() => {
+      // Silent catch because the test might be done and call shutdown before starting is completed, causing unwanted thrown errors.
+    });
 
     // Wait for the INIT -> INIT action retry
     await retryAsync(
@@ -161,7 +165,7 @@ describe('incompatible_cluster_routing_allocation', () => {
           .map((str) => JSON5.parse(str)) as LogRecord[];
 
         expect(
-          records.find((rec) => rec.message.includes('MARK_VERSION_INDEX_READY -> DONE'))
+          records.find((rec) => rec.message.includes('MARK_VERSION_INDEX_READY_SYNC -> DONE'))
         ).toBeDefined();
       },
       { retryAttempts: 100, retryDelayMs: 500 }

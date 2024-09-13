@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SpecDefinitionsService } from '../../../services';
@@ -222,6 +223,37 @@ export const search = (specService: SpecDefinitionsService) => {
       timeout: '1s',
       version: { __one_of: [true, false] },
       track_total_hits: { __one_of: [true, false] },
+      knn: {
+        __template: {
+          field: '',
+          k: 10,
+          num_candidates: 100,
+        },
+        __one_of: [
+          {
+            field: '{field}',
+            filter: { __scope_link: 'GLOBAL.filter' },
+            k: 10,
+            num_candidates: 100,
+            query_vector: [],
+            query_vector_builder: {},
+            similarity: { __one_of: ['l2_norm', 'cosine', 'dot_product'] },
+            boost: 1.0,
+          },
+          [
+            {
+              field: '{field}',
+              filter: { __scope_link: 'GLOBAL.filter' },
+              k: 10,
+              num_candidates: 100,
+              query_vector: [],
+              query_vector_builder: {},
+              similarity: { __one_of: ['l2_norm', 'cosine', 'dot_product'] },
+              boost: 1.0,
+            },
+          ],
+        ],
+      },
     },
   });
 

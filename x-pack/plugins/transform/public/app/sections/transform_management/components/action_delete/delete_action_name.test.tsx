@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
-import { DeleteActionName, DeleteActionNameProps } from './delete_action_name';
+import type { DeleteActionNameProps } from './delete_action_name';
+import { DeleteActionName } from './delete_action_name';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
@@ -16,12 +17,14 @@ jest.mock('../../../../app_dependencies');
 describe('Transform: Transform List Actions <DeleteAction />', () => {
   test('Minimal initialization', () => {
     const props: DeleteActionNameProps = {
+      items: [],
       canDeleteTransform: true,
       disabled: false,
       isBulkAction: false,
+      forceDisable: false,
     };
 
-    const wrapper = shallow(<DeleteActionName {...props} />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(<DeleteActionName {...props} />);
+    expect(container.textContent).toBe('Delete');
   });
 });

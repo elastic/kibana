@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { ActionGroup, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ActionGroup, ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { RuleExecutionSummaryAndChart } from './rule_execution_summary_and_chart';
 import { useKibana } from '../../../../common/lib/kibana';
 import { mockRule, mockRuleType, mockRuleSummary } from './test_helpers';
@@ -24,13 +24,13 @@ const onChangeDurationMock = jest.fn();
 const ruleMock = mockRule();
 
 const authorizedConsumers = {
-  [ALERTS_FEATURE_ID]: { read: true, all: true },
+  [ALERTING_FEATURE_ID]: { read: true, all: true },
 };
 
 const recoveryActionGroup: ActionGroup<'recovered'> = { id: 'recovered', name: 'Recovered' };
 
 const ruleType: RuleType = mockRuleType({
-  producer: ALERTS_FEATURE_ID,
+  producer: ALERTING_FEATURE_ID,
   authorizedConsumers,
   recoveryActionGroup,
 });
@@ -85,13 +85,12 @@ describe('rule_execution_summary_and_chart', () => {
     const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
     expect(avgExecutionDurationPanel.exists()).toBeTruthy();
     expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
-    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
+    expect(wrapper.find('EuiPanel[data-test-subj="avgExecutionDurationPanel"]').text()).toEqual(
       'Average duration00:00:00.100'
     );
     expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
 
     expect(wrapper.find('[data-test-subj="executionDurationChartPanel"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="avgExecutionDurationPanel"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="ruleEventLogListAvgDuration"]').first().text()).toEqual(
       '00:00:00.100'
     );
@@ -115,15 +114,17 @@ describe('rule_execution_summary_and_chart', () => {
     // Does not fetch for the rule summary by itself
     expect(loadRuleSummaryMock).toHaveBeenCalledTimes(1);
 
-    (
-      wrapper
-        .find('[data-test-subj="executionDurationChartPanelSelect"]')
-        .first()
-        .prop('onChange') as any
-    )({
-      target: {
-        value: 30,
-      },
+    await act(async () => {
+      (
+        wrapper
+          .find('[data-test-subj="executionDurationChartPanelSelect"]')
+          .first()
+          .prop('onChange') as any
+      )({
+        target: {
+          value: 30,
+        },
+      });
     });
 
     await act(async () => {
@@ -137,13 +138,12 @@ describe('rule_execution_summary_and_chart', () => {
     const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
     expect(avgExecutionDurationPanel.exists()).toBeTruthy();
     expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
-    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
+    expect(wrapper.find('EuiPanel[data-test-subj="avgExecutionDurationPanel"]').text()).toEqual(
       'Average duration00:00:00.100'
     );
     expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
 
     expect(wrapper.find('[data-test-subj="executionDurationChartPanel"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="avgExecutionDurationPanel"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="ruleEventLogListAvgDuration"]').first().text()).toEqual(
       '00:00:00.100'
     );

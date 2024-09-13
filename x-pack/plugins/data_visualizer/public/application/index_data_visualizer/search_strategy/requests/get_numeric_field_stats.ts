@@ -7,20 +7,22 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { find, get } from 'lodash';
-import { catchError, map } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
-import { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { catchError, map } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
+import type { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
-  IKibanaSearchRequest,
   IKibanaSearchResponse,
+  IKibanaSearchRequest,
   ISearchOptions,
-} from '@kbn/data-plugin/common';
+} from '@kbn/search-types';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { processTopValues } from './utils';
 import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
-import { MAX_PERCENT, PERCENTILE_SPACING, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
+import { MAX_PERCENT, PERCENTILE_SPACING } from './constants';
 import type {
   Aggs,
   Bucket,
@@ -32,7 +34,6 @@ import type {
   FieldStatsError,
 } from '../../../../../common/types/field_stats';
 import { processDistributionData } from '../../utils/process_distribution_data';
-import { extractErrorProperties } from '../../utils/error_utils';
 import {
   isIKibanaSearchResponse,
   isNormalSamplingOption,
@@ -154,7 +155,6 @@ export const fetchNumericFieldsStats = (
   fields: Field[],
   options: ISearchOptions
 ): Observable<NumericFieldStats[] | FieldStatsError> => {
-  const { samplerShardSize } = params;
   const request: estypes.SearchRequest = getNumericFieldsStatsRequest(params, fields);
 
   return dataSearch
@@ -183,9 +183,6 @@ export const fetchNumericFieldsStats = (
           );
 
           const topAggsPath = [...aggsPath, `${safeFieldName}_top`];
-          if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-            topAggsPath.push('top');
-          }
 
           const fieldAgg = get(aggregations, [...topAggsPath], {}) as { buckets: Bucket[] };
           const { topValuesSampleSize, topValues } = processTopValues(fieldAgg);

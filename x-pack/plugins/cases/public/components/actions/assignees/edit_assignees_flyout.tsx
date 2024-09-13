@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,18 +21,18 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type { Case } from '../../../../common';
+import type { CasesUI } from '../../../../common';
 import { EditAssigneesSelectable } from './edit_assignees_selectable';
 import * as i18n from './translations';
 import type { ItemsSelectionState } from '../types';
 
 interface Props {
-  selectedCases: Case[];
+  selectedCases: CasesUI;
   onClose: () => void;
   onSaveAssignees: (args: ItemsSelectionState) => void;
 }
 
-const FlyoutBody = styled(EuiFlyoutBody)`
+const FlyoutBodyCss = css`
   ${euiFullHeight()}
 
   .euiFlyoutBody__overflowContent {
@@ -75,12 +75,12 @@ const EditAssigneesFlyoutComponent: React.FC<Props> = ({
           <p>{headerSubtitle}</p>
         </EuiText>
       </EuiFlyoutHeader>
-      <FlyoutBody>
+      <EuiFlyoutBody css={FlyoutBodyCss}>
         <EditAssigneesSelectable
           selectedCases={selectedCases}
           onChangeAssignees={setAssigneesSelection}
         />
-      </FlyoutBody>
+      </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>

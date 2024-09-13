@@ -1,0 +1,31 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../../typings/**/*"
+  ],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/security-solution-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/security-solution-features",
+    "@kbn/cases-plugin",
+    "@kbn/security-solution-navigation",
+    "@kbn/licensing-plugin",
+    "@kbn/security-solution-upselling",
+    "@kbn/i18n",
+    "@kbn/navigation-plugin",
+    "@kbn/management-cards-navigation",
+    "@kbn/management-plugin",
+    "@kbn/core-chrome-browser",
+  ]
+}

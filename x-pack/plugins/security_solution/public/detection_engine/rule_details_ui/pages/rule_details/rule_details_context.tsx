@@ -8,14 +8,18 @@
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../common/constants';
+import {
+  RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY,
+  RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY,
+} from '../../../../../common/constants';
 import type {
   RuleExecutionResult,
   RuleExecutionStatus,
-} from '../../../../../common/detection_engine/rule_monitoring';
+  RuleRunType,
+} from '../../../../../common/api/detection_engine/rule_monitoring';
 import { invariant } from '../../../../../common/utils/invariant';
 import { useKibana } from '../../../../common/lib/kibana';
-import { RuleDetailTabs } from '.';
+import { RuleDetailTabs } from './use_rule_details_tabs';
 
 export interface ExecutionLogTableState {
   /**
@@ -56,6 +60,11 @@ export interface ExecutionLogTableState {
    */
   showMetricColumns: boolean;
   /**
+   * Whether or not to show source event time range
+   */
+
+  showSourceEventTimeRange: boolean;
+  /**
    * Currently selected page and number of rows per page
    */
   pagination: {
@@ -66,6 +75,7 @@ export interface ExecutionLogTableState {
     sortField: keyof RuleExecutionResult;
     sortDirection: SortOrder;
   };
+  runTypeFilters: RuleRunType[];
 }
 
 // @ts-expect-error unused constant
@@ -79,7 +89,9 @@ const DEFAULT_STATE: ExecutionLogTableState = {
   },
   queryText: '',
   statusFilters: [],
+  runTypeFilters: [],
   showMetricColumns: false,
+  showSourceEventTimeRange: false,
   pagination: {
     pageIndex: 1,
     pageSize: 5,
@@ -103,6 +115,8 @@ export interface ExecutionLogTableActions {
   setPageSize: React.Dispatch<React.SetStateAction<number>>;
   setSortField: React.Dispatch<React.SetStateAction<keyof RuleExecutionResult>>;
   setSortDirection: React.Dispatch<React.SetStateAction<SortOrder>>;
+  setShowSourceEventTimeRange: React.Dispatch<React.SetStateAction<boolean>>;
+  setRunTypeFilters: React.Dispatch<React.SetStateAction<RuleRunType[]>>;
 }
 
 export interface RuleDetailsContextType {
@@ -133,8 +147,12 @@ export const RuleDetailsContextProvider = ({ children }: RuleDetailsContextProvi
   // Searchbar/Filter/Settings state
   const [queryText, setQueryText] = useState('');
   const [statusFilters, setStatusFilters] = useState<RuleExecutionStatus[]>([]);
+  const [runTypeFilters, setRunTypeFilters] = useState<RuleRunType[]>([]);
   const [showMetricColumns, setShowMetricColumns] = useState<boolean>(
     storage.get(RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY) ?? false
+  );
+  const [showSourceEventTimeRange, setShowSourceEventTimeRange] = useState<boolean>(
+    storage.get(RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY) ?? false
   );
   // Pagination state
   const [pageIndex, setPageIndex] = useState(1);
@@ -156,7 +174,9 @@ export const RuleDetailsContextProvider = ({ children }: RuleDetailsContextProvi
           },
           queryText,
           statusFilters,
+          runTypeFilters,
           showMetricColumns,
+          showSourceEventTimeRange,
           pagination: {
             pageIndex,
             pageSize,
@@ -179,6 +199,8 @@ export const RuleDetailsContextProvider = ({ children }: RuleDetailsContextProvi
           setSortField,
           setStart,
           setStatusFilters,
+          setRunTypeFilters,
+          setShowSourceEventTimeRange,
         },
       },
     }),
@@ -195,6 +217,8 @@ export const RuleDetailsContextProvider = ({ children }: RuleDetailsContextProvi
       sortField,
       start,
       statusFilters,
+      runTypeFilters,
+      showSourceEventTimeRange,
     ]
   );
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Vis } from '@kbn/visualizations-plugin/public';
@@ -161,5 +162,52 @@ describe('convertToLens', () => {
     expect(result).toBeDefined();
     expect(result?.type).toBe('lnsXY');
     expect(mockIsValidMetrics).toBeCalledTimes(0);
+  });
+
+  test('should set the ignoreGlobalFilters if set on the panel', async () => {
+    const result = await convertToLens({
+      params: createPanel({
+        series: [
+          createSeries({
+            metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+          }),
+        ],
+        ignore_global_filter: 1,
+      }),
+    } as Vis<Panel>);
+    expect(result?.layers.every((l) => l.ignoreGlobalFilters)).toBe(true);
+  });
+
+  test('should set the ignoreGlobalFilters if set on the series', async () => {
+    const result = await convertToLens({
+      params: createPanel({
+        series: [
+          createSeries({
+            metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+            ignore_global_filter: 1,
+          }),
+        ],
+      }),
+    } as Vis<Panel>);
+    expect(result?.layers[0].ignoreGlobalFilters).toBe(true);
+  });
+
+  test('should ignore the ignoreGlobalFilters if set on hidden series', async () => {
+    const result = await convertToLens({
+      params: createPanel({
+        series: [
+          createSeries({
+            metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+            hidden: true,
+            ignore_global_filter: 1,
+          }),
+          createSeries({
+            metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+            hidden: false,
+          }),
+        ],
+      }),
+    } as Vis<Panel>);
+    expect(result?.layers[0].ignoreGlobalFilters).toBe(false);
   });
 });

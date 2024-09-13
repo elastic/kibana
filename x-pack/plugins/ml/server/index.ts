@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-import { MlServerPlugin } from './plugin';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { type ConfigSchema } from '../common/constants/app';
+import { configSchema } from './config_schema';
 export type { MlPluginSetup, MlPluginStart } from './plugin';
 export type {
-  AnomalyRecordDoc as MlAnomalyRecordDoc,
-  AnomaliesTableRecord as MlAnomaliesTableRecord,
-  AnomalyResultType as MlAnomalyResultType,
   DatafeedStats as MlDatafeedStats,
   Job as MlJob,
   MlSummaryJob,
@@ -30,4 +28,17 @@ export {
   MLPrivilegesUninitialized,
 } from './shared';
 
-export const plugin = (ctx: PluginInitializerContext) => new MlServerPlugin(ctx);
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  schema: configSchema,
+  exposeToBrowser: {
+    ad: true,
+    dfa: true,
+    nlp: true,
+    experimental: true,
+  },
+};
+
+export const plugin = async (ctx: PluginInitializerContext<ConfigSchema>) => {
+  const { MlServerPlugin } = await import('./plugin');
+  return new MlServerPlugin(ctx);
+};

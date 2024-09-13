@@ -15,26 +15,31 @@ export const APP_ICON_SOLUTION = 'logoKibana';
 export const APP_NAME = i18n.translate('xpack.maps.visTypeAlias.title', {
   defaultMessage: 'Maps',
 });
+export const MAP_EMBEDDABLE_NAME = i18n.translate('xpack.maps.embeddableDisplayName', {
+  defaultMessage: 'map',
+});
+
 export const INITIAL_LAYERS_KEY = 'initialLayers';
 
 export const MAPS_APP_PATH = `app/${APP_ID}`;
 export const MAP_PATH = 'map';
-export const GIS_API_PATH = `api/${APP_ID}`;
-export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
-export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
-export const INDEX_SOURCE_API_PATH = `${GIS_API_PATH}/docSource`;
-export const API_ROOT_PATH = `/${GIS_API_PATH}`;
-export const INDEX_FEATURE_PATH = `/${GIS_API_PATH}/feature`;
-export const GET_MATCHING_INDEXES_PATH = `/${GIS_API_PATH}/getMatchingIndexes`;
-export const CHECK_IS_DRAWING_INDEX = `/${GIS_API_PATH}/checkIsDrawingIndex`;
+const GIS_INTERNAL_PATH = `internal/${APP_ID}`;
+export const INDEX_SETTINGS_API_PATH = `/${GIS_INTERNAL_PATH}/indexSettings`;
+export const FONTS_API_PATH = `/${GIS_INTERNAL_PATH}/fonts`;
+export const INDEX_SOURCE_API_PATH = `/${GIS_INTERNAL_PATH}/docSource`;
+export const INDEX_FEATURE_PATH = `/${GIS_INTERNAL_PATH}/feature`;
+export const GET_MATCHING_INDEXES_PATH = `/${GIS_INTERNAL_PATH}/getMatchingIndexes`;
+export const CHECK_IS_DRAWING_INDEX = `/${GIS_INTERNAL_PATH}/checkIsDrawingIndex`;
+export const MVT_GETTILE_API_PATH = `/${GIS_INTERNAL_PATH}/mvt/getTile`;
+export const MVT_GETGRIDTILE_API_PATH = `/${GIS_INTERNAL_PATH}/mvt/getGridTile`;
 
-export const MVT_GETTILE_API_PATH = 'mvt/getTile';
-export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 export const OPEN_LAYER_WIZARD = 'openLayerWizard';
 
 // Identifies centroid feature.
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
 export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
+
+export const GEOJSON_FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
 
 export function getNewMapPath() {
   return `/${MAPS_APP_PATH}/${MAP_PATH}`;
@@ -63,13 +68,17 @@ export enum SOURCE_TYPES {
   ES_GEO_LINE = 'ES_GEO_LINE',
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
-  ES_TERM_SOURCE = 'ES_TERM_SOURCE',
   ES_ML_ANOMALIES = 'ML_ANOMALIES',
+  ESQL = 'ESQL',
   EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. EMS-prefix in the name is a little unfortunate :(
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
   GEOJSON_FILE = 'GEOJSON_FILE',
   MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
+
+  // join sources
+  ES_DISTANCE_SOURCE = 'ES_DISTANCE_SOURCE',
+  ES_TERM_SOURCE = 'ES_TERM_SOURCE',
   TABLE_SOURCE = 'TABLE_SOURCE',
 }
 
@@ -106,12 +115,6 @@ export enum ES_GEO_FIELD_TYPE {
 
 // Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IndexPatternField.type is compared to value
 export const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
-
-export enum ES_SPATIAL_RELATIONS {
-  INTERSECTS = 'INTERSECTS',
-  DISJOINT = 'DISJOINT',
-  WITHIN = 'WITHIN',
-}
 
 export enum GEO_JSON_TYPE {
   POINT = 'Point',
@@ -181,10 +184,6 @@ export const GEOCENTROID_AGG_NAME = 'gridCentroid';
 
 export const TOP_TERM_PERCENTAGE_SUFFIX = '__percentage';
 export const DEFAULT_PERCENTILE = 50;
-
-export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabel', {
-  defaultMessage: 'count',
-});
 
 export const COUNT_PROP_NAME = 'doc_count';
 
@@ -329,12 +328,22 @@ export enum WIZARD_ID {
   POINT_2_POINT = 'point2Point',
   ES_DOCUMENT = 'esDocument',
   ES_TOP_HITS = 'esTopHits',
+  ESQL = 'ESQL',
   KIBANA_BASEMAP = 'kibanaBasemap',
   MVT_VECTOR = 'mvtVector',
   WMS_LAYER = 'wmsLayer',
   TMS_LAYER = 'tmsLayer',
+  SPATIAL_JOIN = 'spatialJoin',
+}
+
+export enum MASK_OPERATOR {
+  ABOVE = 'ABOVE',
+  BELOW = 'BELOW',
 }
 
 // Maplibre does not provide any feedback when rendering is complete.
 // Workaround is hard-coded timeout period.
 export const RENDER_TIMEOUT = 1000;
+
+export const MIDDLE_TRUNCATION_PROPS = { truncation: 'middle' as const };
+export const SINGLE_SELECTION_AS_TEXT_PROPS = { asPlainText: true };

@@ -18,22 +18,24 @@ import { RouteInitializerDeps } from '..';
 
 export function initializeZipShareableWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
-  router.post(
-    {
+  router.versioned
+    .post({
       path: API_ROUTE_SHAREABLE_ZIP,
-      validate: { body: RenderedWorkpadSchema },
-    },
-    async (_context, request, response) => {
-      const workpad = request.body;
-      const archive = archiver('zip');
-      archive.append(JSON.stringify(workpad), { name: 'workpad.json' });
-      archive.file(`${SHAREABLE_RUNTIME_SRC}/template.html`, { name: 'index.html' });
-      archive.file(SHAREABLE_RUNTIME_FILE, { name: `${SHAREABLE_RUNTIME_NAME}.js` });
+      access: 'internal',
+    })
+    .addVersion(
+      { version: '1', validate: { request: { body: RenderedWorkpadSchema } } },
+      async (_context, request, response) => {
+        const workpad = request.body;
+        const archive = archiver('zip');
+        archive.append(JSON.stringify(workpad), { name: 'workpad.json' });
+        archive.file(`${SHAREABLE_RUNTIME_SRC}/template.html`, { name: 'index.html' });
+        archive.file(SHAREABLE_RUNTIME_FILE, { name: `${SHAREABLE_RUNTIME_NAME}.js` });
 
-      const result = { headers: { 'content-type': 'application/zip' }, body: archive };
-      archive.finalize();
+        const result = { headers: { 'content-type': 'application/zip' }, body: archive };
+        await archive.finalize();
 
-      return response.ok(result);
-    }
-  );
+        return response.ok(result);
+      }
+    );
 }

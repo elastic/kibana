@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import type { CheckPrivilegesDynamically } from '@kbn/security-plugin/server/authorization/check_privileges_dynamically';
-import type { IRouter, RequestHandler, RouteConfig } from '@kbn/core/server';
+import type {
+  CheckPrivilegesDynamically,
+  CheckPrivilegesResponse,
+  CheckPrivilegesPayload,
+} from '@kbn/security-plugin/server';
+import type { AuthenticatedUser, RequestHandler } from '@kbn/core/server';
+import type { VersionedRouter } from '@kbn/core-http-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 import { coreMock } from '@kbn/core/server/mocks';
 
-import type { CheckPrivilegesPayload } from '@kbn/security-plugin/server';
-
-import type { CheckPrivilegesResponse } from '@kbn/security-plugin/server/authorization/types';
+import { API_VERSIONS } from '../../../common/constants';
 
 import type { FleetRequestHandlerContext } from '../..';
 import { createAppContextStartContractMock } from '../../mocks';
@@ -64,8 +65,16 @@ describe('FleetAuthzRouter', () => {
     routeConfig?: any;
   }) => {
     const fakeRouter = {
-      get: jest.fn(),
-    } as unknown as jest.Mocked<IRouter<FleetRequestHandlerContext>>;
+      versioned: {
+        get: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest
+              .fn()
+              .mockImplementation((options: any, handler: RequestHandler) => Promise.resolve()),
+          };
+        }),
+      },
+    } as unknown as jest.Mocked<VersionedRouter<FleetRequestHandlerContext>>;
     const fakeHandler: RequestHandler = jest.fn((ctx, req, res) => res.ok());
 
     const mockContext = createAppContextStartContractMock();
@@ -74,7 +83,7 @@ describe('FleetAuthzRouter', () => {
     // @ts-expect-error type doesn't properly respect deeply mocked keys
     mockContext.securityStart.authz.actions.ui.get.mockImplementation((priv) => `ui:${priv}`);
 
-    mockContext.securityStart.authc.getCurrentUser.mockReturnValue({
+    mockContext.securityCoreStart.authc.getCurrentUser.mockReturnValue({
       username: 'foo',
       roles,
     } as unknown as AuthenticatedUser);
@@ -92,10 +101,15 @@ describe('FleetAuthzRouter', () => {
 
     appContextService.start(mockContext);
 
-    const fleetAuthzRouter = makeRouterWithFleetAuthz(fakeRouter, mockLogger);
-    fleetAuthzRouter.get({ ...routeConfig } as RouteConfig<any, any, any, any>, fakeHandler);
-    const wrappedHandler = fakeRouter.get.mock.calls[0][1];
-    const wrappedRouteConfig = fakeRouter.get.mock.calls[0][0];
+    const fleetAuthzRouter = makeRouterWithFleetAuthz(fakeRouter as any, mockLogger);
+    fleetAuthzRouter.versioned
+      .get({ ...routeConfig })
+      .addVersion({ version: API_VERSIONS.public.v1, validate: false }, fakeHandler);
+    // @ts-ignore
+    const wrappedRouteConfig = fakeRouter.versioned.get.mock.calls[0][0];
+    const wrappedHandler =
+      // @ts-ignore
+      fakeRouter.versioned.get.mock.results[0].value.addVersion.mock.calls[0][1];
     const resFactory = { forbidden: jest.fn(() => 'forbidden'), ok: jest.fn(() => 'ok') };
 
     const fakeReq = {
@@ -200,5 +214,91 @@ describe('FleetAuthzRouter', () => {
         })
       ).toEqual('forbidden');
     });
+  });
+
+  describe('default access', () => {
+    let fakeRouter: jest.Mocked<VersionedRouter<FleetRequestHandlerContext>>;
+
+    beforeEach(() => {
+      fakeRouter = {
+        versioned: {
+          get: jest.fn().mockImplementation(() => {
+            return {
+              addVersion: jest
+                .fn()
+                .mockImplementation((options: any, handler: RequestHandler) => Promise.resolve()),
+            };
+          }),
+          post: jest.fn().mockImplementation(() => {
+            return {
+              addVersion: jest
+                .fn()
+                .mockImplementation((options: any, handler: RequestHandler) => Promise.resolve()),
+            };
+          }),
+          delete: jest.fn().mockImplementation(() => {
+            return {
+              addVersion: jest
+                .fn()
+                .mockImplementation((options: any, handler: RequestHandler) => Promise.resolve()),
+            };
+          }),
+          put: jest.fn().mockImplementation(() => {
+            return {
+              addVersion: jest
+                .fn()
+                .mockImplementation((options: any, handler: RequestHandler) => Promise.resolve()),
+            };
+          }),
+          patch: jest.fn().mockImplementation(() => {
+            return {
+              addVersion: jest
+                .fn()
+                .mockImplementation((options: any, handler: RequestHandler) => Promise.resolve()),
+            };
+          }),
+        },
+      } as unknown as jest.Mocked<VersionedRouter<FleetRequestHandlerContext>>;
+    });
+
+    const METHODS: Array<'get' | 'post' | 'delete' | 'put' | 'patch'> = [
+      'get',
+      'post',
+      'delete',
+      'put',
+      'patch',
+    ];
+
+    for (const method of METHODS) {
+      describe(`${method}`, () => {
+        it('should set default access to public', () => {
+          const fleetAuthzRouter = makeRouterWithFleetAuthz(fakeRouter as any, mockLogger);
+
+          fleetAuthzRouter.versioned[method]({
+            path: '/test',
+          });
+          // @ts-ignore
+          expect(fakeRouter.versioned[method]).toBeCalledWith(
+            expect.objectContaining({
+              access: 'public',
+            })
+          );
+        });
+
+        it('should allow to define internal routes when called with access: internal', () => {
+          const fleetAuthzRouter = makeRouterWithFleetAuthz(fakeRouter as any, mockLogger);
+          fleetAuthzRouter.versioned[method]({
+            path: '/test',
+            access: 'internal',
+          });
+          // @ts-ignore
+          expect(fakeRouter.versioned[method]).toBeCalledWith(
+            expect.objectContaining({
+              access: 'internal',
+            })
+          );
+        });
+      });
+    }
   });
 });

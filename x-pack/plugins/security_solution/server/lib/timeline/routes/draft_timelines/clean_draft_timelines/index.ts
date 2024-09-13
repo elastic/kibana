@@ -13,7 +13,6 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { TIMELINE_DRAFT_URL } from '../../../../../../common/constants';
 import { buildFrameworkRequest } from '../../../utils/common';
-import type { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import {
   getDraftTimeline,
@@ -22,89 +21,89 @@ import {
   persistTimeline,
 } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
-import { cleanDraftTimelineSchema } from '../../../schemas/draft_timelines';
-import { TimelineType } from '../../../../../../common/types/timeline';
+import { cleanDraftTimelineSchema, TimelineTypeEnum } from '../../../../../../common/api/timeline';
 
-export const cleanDraftTimelinesRoute = (
-  router: SecuritySolutionPluginRouter,
-  _: ConfigType,
-  security: SetupPlugins['security']
-) => {
-  router.post(
-    {
+export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+  router.versioned
+    .post({
       path: TIMELINE_DRAFT_URL,
-      validate: {
-        body: buildRouteValidationWithExcess(cleanDraftTimelineSchema),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const frameworkRequest = await buildFrameworkRequest(context, security, request);
-      const siemResponse = buildSiemResponse(response);
+      access: 'public',
+    })
+    .addVersion(
+      {
+        validate: {
+          request: { body: buildRouteValidationWithExcess(cleanDraftTimelineSchema) },
+        },
+        version: '2023-10-31',
+      },
+      async (context, request, response) => {
+        const frameworkRequest = await buildFrameworkRequest(context, request);
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const {
-          timeline: [draftTimeline],
-        } = await getDraftTimeline(frameworkRequest, request.body.timelineType);
+        try {
+          const {
+            timeline: [draftTimeline],
+          } = await getDraftTimeline(frameworkRequest, request.body.timelineType);
 
-        if (draftTimeline?.savedObjectId) {
-          await resetTimeline(
-            frameworkRequest,
-            [draftTimeline.savedObjectId],
-            request.body.timelineType
-          );
-          const cleanedDraftTimeline = await getTimeline(
-            frameworkRequest,
-            draftTimeline.savedObjectId
-          );
+          if (draftTimeline?.savedObjectId) {
+            await resetTimeline(
+              frameworkRequest,
+              draftTimeline.savedObjectId,
+              request.body.timelineType
+            );
+            const cleanedDraftTimeline = await getTimeline(
+              frameworkRequest,
+              draftTimeline.savedObjectId
+            );
 
-          return response.ok({
-            body: {
-              data: {
-                persistTimeline: {
-                  timeline: cleanedDraftTimeline,
+            return response.ok({
+              body: {
+                data: {
+                  persistTimeline: {
+                    timeline: cleanedDraftTimeline,
+                  },
                 },
               },
-            },
+            });
+          }
+          const templateTimelineData =
+            request.body.timelineType === TimelineTypeEnum.template
+              ? {
+                  timelineType: request.body.timelineType,
+                  templateTimelineId: uuidv4(),
+                  templateTimelineVersion: 1,
+                }
+              : {};
+
+          const newTimelineResponse = await persistTimeline(frameworkRequest, null, null, {
+            ...draftTimelineDefaults,
+            ...templateTimelineData,
           });
-        }
-        const templateTimelineData =
-          request.body.timelineType === TimelineType.template
-            ? {
-                timelineType: request.body.timelineType,
-                templateTimelineId: uuidv4(),
-                templateTimelineVersion: 1,
-              }
-            : {};
 
-        const newTimelineResponse = await persistTimeline(frameworkRequest, null, null, {
-          ...draftTimelineDefaults,
-          ...templateTimelineData,
-        });
-
-        if (newTimelineResponse.code === 200) {
-          return response.ok({
-            body: {
-              data: {
-                persistTimeline: {
-                  timeline: newTimelineResponse.timeline,
+          if (newTimelineResponse.code === 200) {
+            return response.ok({
+              body: {
+                data: {
+                  persistTimeline: {
+                    timeline: newTimelineResponse.timeline,
+                  },
                 },
               },
-            },
+            });
+          }
+
+          return response.ok({});
+        } catch (err) {
+          const error = transformError(err);
+
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
           });
         }
-
-        return response.ok({});
-      } catch (err) {
-        const error = transformError(err);
-
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

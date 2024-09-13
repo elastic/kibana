@@ -98,7 +98,7 @@ export async function syncGeojsonSourceData({
     };
   } catch (error) {
     if (!(error instanceof DataRequestAbortError)) {
-      onLoadError(dataRequestId, requestToken, error.message);
+      onLoadError(dataRequestId, requestToken, error);
     }
     throw error;
   }

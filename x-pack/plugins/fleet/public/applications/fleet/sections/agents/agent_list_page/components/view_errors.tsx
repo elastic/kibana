@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { stringify } from 'querystring';
-
 import styled from 'styled-components';
 import React from 'react';
-import { encode } from '@kbn/rison';
 import type { EuiBasicTableProps } from '@elastic/eui';
-import { EuiButton, EuiAccordion, EuiToolTip, EuiText, EuiBasicTable } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiAccordion, EuiToolTip, EuiText, EuiBasicTable } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
 import type { ActionErrorResult } from '../../../../../../../common/types';
 
 import { buildQuery } from '../../agent_details_page/components/agent_logs/build_query';
+import {
+  ViewLogsButton,
+  getFormattedRange,
+} from '../../agent_details_page/components/agent_logs/view_logs_button';
 
 import type { ActionStatus } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
@@ -33,26 +34,21 @@ const TruncatedEuiText = styled(EuiText)`
 export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ action }) => {
   const coreStart = useStartServices();
 
-  const logStreamQuery = (agentId: string) =>
-    buildQuery({
+  const getLogsButton = (agentId: string, timestamp: string) => {
+    const start = moment(timestamp).subtract(5, 'm').toISOString();
+    const end = moment(timestamp).add(5, 'm').toISOString();
+    const startTime = getFormattedRange(start);
+    const endTime = getFormattedRange(end);
+
+    const logStreamQuery = buildQuery({
       agentId,
       datasets: ['elastic_agent'],
       logLevels: ['error'],
       userQuery: '',
     });
-
-  const getErrorLogsUrl = (agentId: string, timestamp: string) => {
-    const queryParams = stringify({
-      logPosition: encode({
-        position: { time: Date.parse(timestamp) },
-        streamLive: false,
-      }),
-      logFilter: encode({
-        expression: logStreamQuery(agentId),
-        kind: 'kuery',
-      }),
-    });
-    return coreStart.http.basePath.prepend(`/app/logs/stream?${queryParams}`);
+    return (
+      <ViewLogsButton logStreamQuery={logStreamQuery} startTime={startTime} endTime={endTime} />
+    );
   };
 
   const columns: EuiBasicTableProps<ActionErrorResult>['columns'] = [
@@ -89,16 +85,7 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
         const errorItem = (action.latestErrors ?? []).find((item) => item.agentId === agentId);
         return (
           <RedirectAppLinks coreStart={coreStart}>
-            <EuiButton
-              href={getErrorLogsUrl(agentId, errorItem!.timestamp)}
-              color="danger"
-              data-test-subj="viewLogsBtn"
-            >
-              <FormattedMessage
-                id="xpack.fleet.agentActivityFlyout.reviewErrorLogs"
-                defaultMessage="Review error logs"
-              />
-            </EuiButton>
+            {getLogsButton(agentId, errorItem!.timestamp)}
           </RedirectAppLinks>
         );
       },

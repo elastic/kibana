@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -17,10 +18,13 @@ import {
   RequestHandlerContext,
   RequestHandler,
   KibanaResponseFactory,
+  AnalyticsServiceStart,
+  HttpProtocol,
 } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+
 import { map$ } from '@kbn/std';
-import { RouteConfigOptions } from '@kbn/core-http-server';
+import { schema } from '@kbn/config-schema';
+import { BFETCH_ROUTE_VERSION_LATEST } from '../common/constants';
 import {
   StreamingResponseHandler,
   BatchRequestData,
@@ -35,8 +39,9 @@ import { getUiSettings } from './ui_settings';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BfetchServerSetupDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface BfetchServerStartDependencies {}
+export interface BfetchServerStartDependencies {
+  analytics?: AnalyticsServiceStart;
+}
 
 export interface BatchProcessingRouteParams<BatchItemData, BatchItemResult> {
   onBatchItem: (data: BatchItemData) => Promise<BatchItemResult>;
@@ -55,19 +60,26 @@ export interface BfetchServerSetup {
       context: RequestHandlerContext
     ) => StreamingResponseHandler<Payload, Response>,
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE',
-    pluginRouter?: ReturnType<CoreSetup['http']['createRouter']>,
-    options?: RouteConfigOptions<'get' | 'post' | 'put' | 'delete'>
+    pluginRouter?: ReturnType<CoreSetup['http']['createRouter']>
   ) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BfetchServerStart {}
 
-const streamingHeaders = {
-  'Content-Type': 'application/x-ndjson',
-  Connection: 'keep-alive',
-  'Transfer-Encoding': 'chunked',
-  'X-Accel-Buffering': 'no',
+const getStreamingHeaders = (protocol: HttpProtocol): Record<string, string> => {
+  if (protocol === 'http2') {
+    return {
+      'Content-Type': 'application/x-ndjson',
+      'X-Accel-Buffering': 'no',
+    };
+  }
+  return {
+    'Content-Type': 'application/x-ndjson',
+    Connection: 'keep-alive',
+    'Transfer-Encoding': 'chunked',
+    'X-Accel-Buffering': 'no',
+  };
 };
 
 interface Query {
@@ -82,6 +94,8 @@ export class BfetchServerPlugin
       BfetchServerStartDependencies
     >
 {
+  private _analyticsService: AnalyticsServiceStart | undefined;
+
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: BfetchServerSetupDependencies): BfetchServerSetup {
@@ -104,6 +118,7 @@ export class BfetchServerPlugin
   }
 
   public start(core: CoreStart, plugins: BfetchServerStartDependencies): BfetchServerStart {
+    this._analyticsService = core.analytics;
     return {};
   }
 
@@ -111,7 +126,6 @@ export class BfetchServerPlugin
 
   private addStreamingResponseRoute =
     ({
-      getStartServices,
       router,
       logger,
     }: {
@@ -119,17 +133,18 @@ export class BfetchServerPlugin
       router: ReturnType<CoreSetup['http']['createRouter']>;
       logger: Logger;
     }): BfetchServerSetup['addStreamingResponseRoute'] =>
-    (path, handler, method = 'POST', pluginRouter, options) => {
+    (path, handler, method = 'POST', pluginRouter) => {
       const httpRouter = pluginRouter || router;
-
       const routeDefinition = {
-        path: `/${removeLeadingSlash(path)}`,
+        version: BFETCH_ROUTE_VERSION_LATEST,
         validate: {
-          body: schema.any(),
-          query: schema.object({ compress: schema.boolean({ defaultValue: false }) }),
+          request: {
+            body: schema.any(),
+            query: schema.object({ compress: schema.boolean({ defaultValue: false }) }),
+          },
         },
-        options,
       };
+
       const routeHandler: RequestHandler<unknown, Query> = async (
         context: RequestHandlerContext,
         request: KibanaRequest<unknown, Query, any>,
@@ -139,23 +154,36 @@ export class BfetchServerPlugin
         const data = request.body;
         const compress = request.query.compress;
         return response.ok({
-          headers: streamingHeaders,
-          body: createStream(handlerInstance.getResponseStream(data), logger, compress),
+          headers: getStreamingHeaders(request.protocol),
+          body: createStream(
+            handlerInstance.getResponseStream(data),
+            logger,
+            compress,
+            this._analyticsService
+          ),
         });
       };
 
       switch (method) {
         case 'GET':
-          httpRouter.get(routeDefinition, routeHandler);
+          httpRouter.versioned
+            .get({ access: 'internal', path: `/${removeLeadingSlash(path)}` })
+            .addVersion(routeDefinition, routeHandler);
           break;
         case 'POST':
-          httpRouter.post(routeDefinition, routeHandler);
+          httpRouter.versioned
+            .post({ access: 'internal', path: `/${removeLeadingSlash(path)}` })
+            .addVersion(routeDefinition, routeHandler);
           break;
         case 'PUT':
-          httpRouter.put(routeDefinition, routeHandler);
+          httpRouter.versioned
+            .put({ access: 'internal', path: `/${removeLeadingSlash(path)}` })
+            .addVersion(routeDefinition, routeHandler);
           break;
         case 'DELETE':
-          httpRouter.delete(routeDefinition, routeHandler);
+          httpRouter.versioned
+            .delete({ access: 'internal', path: `/${removeLeadingSlash(path)}` })
+            .addVersion(routeDefinition, routeHandler);
           break;
         default:
           throw new Error(`Handler for method ${method} is not defined`);

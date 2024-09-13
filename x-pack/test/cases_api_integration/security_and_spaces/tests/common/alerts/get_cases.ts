@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { CaseResponse } from '@kbn/cases-plugin/common/api';
+import { Case } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -71,14 +71,14 @@ export default ({ getService }: FtrProviderContext): void => {
       // if there are more than 100 responses, the implementation sets the aggregation size to the
       // specific value
       const numCases = 102;
-      const createCasePromises: Array<Promise<CaseResponse>> = [];
+      const createCasePromises: Array<Promise<Case>> = [];
       for (let i = 0; i < numCases; i++) {
         createCasePromises.push(createCase(supertest, getPostCaseRequest()));
       }
 
       const cases = await Promise.all(createCasePromises);
 
-      const commentPromises: Array<Promise<CaseResponse>> = [];
+      const commentPromises: Array<Promise<Case>> = [];
       for (const caseInfo of cases) {
         commentPromises.push(
           createComment({ supertest, caseId: caseInfo.id, params: postCommentAlertReq })

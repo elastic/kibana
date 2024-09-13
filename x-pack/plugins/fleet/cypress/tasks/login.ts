@@ -12,6 +12,7 @@ import * as yaml from 'js-yaml';
 
 import type { ROLES } from './privileges';
 import { hostDetailsUrl, LOGOUT_URL } from './navigation';
+import { request } from './common';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -135,7 +136,7 @@ export const deleteRoleAndUser = (role: ROLES) => {
 };
 
 export const loginWithUser = (user: User) => {
-  cy.request({
+  request({
     body: {
       providerType: 'basic',
       providerName: 'basic',
@@ -145,7 +146,6 @@ export const loginWithUser = (user: User) => {
         password: user.password,
       },
     },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
     method: 'POST',
     url: constructUrlWithUser(user, LOGIN_API_ENDPOINT),
   });
@@ -162,7 +162,7 @@ export const loginWithRole = async (role: ROLES) => {
     port: Cypress.env('configport'),
   } as UrlObject);
   cy.log(`origin: ${theUrl}`);
-  cy.request({
+  request({
     body: {
       providerType: 'basic',
       providerName: 'basic',
@@ -200,8 +200,9 @@ export const login = (role?: ROLES) => {
  * Returns `true` if the credentials used to login to Kibana are provided
  * via environment variables
  */
-const credentialsProvidedByEnvironment = (): boolean =>
-  Cypress.env(ELASTICSEARCH_USERNAME) != null && Cypress.env(ELASTICSEARCH_PASSWORD) != null;
+const credentialsProvidedByEnvironment = (): boolean => {
+  return Cypress.env(ELASTICSEARCH_USERNAME) != null && Cypress.env(ELASTICSEARCH_PASSWORD) != null;
+};
 
 /**
  * Authenticates with Kibana by reading credentials from the
@@ -215,7 +216,7 @@ const loginViaEnvironmentCredentials = () => {
   );
 
   // programmatically authenticate without interacting with the Kibana login page
-  cy.request({
+  request({
     body: {
       providerType: 'basic',
       providerName: 'basic',
@@ -246,7 +247,7 @@ const loginViaConfig = () => {
     const config = yaml.safeLoad(kibanaDevYml);
 
     // programmatically authenticate without interacting with the Kibana login page
-    cy.request({
+    request({
       body: {
         providerType: 'basic',
         providerName: 'basic',

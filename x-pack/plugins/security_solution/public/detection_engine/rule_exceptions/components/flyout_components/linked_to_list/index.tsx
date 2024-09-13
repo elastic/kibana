@@ -6,11 +6,11 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiTitle, EuiSpacer, EuiPanel, EuiInMemoryTable, EuiLoadingContent } from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiPanel, EuiInMemoryTable, EuiSkeletonText } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
 import * as i18n from './translations';
-import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/detection_engine/rule_exceptions';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/api/detection_engine/rule_exceptions';
 import { getSharedListsTableColumns } from '../utils';
 
 interface ExceptionsLinkedToListComponentProps {
@@ -31,7 +31,7 @@ const ExceptionsLinkedToListsComponent: React.FC<ExceptionsLinkedToListComponent
   listAndReferences,
 }): JSX.Element => {
   const [message, setMessage] = useState<JSX.Element | string | undefined>(
-    <EuiLoadingContent lines={4} data-test-subj="exceptionItemListsTableLoading" />
+    <EuiSkeletonText lines={4} data-test-subj="exceptionItemListsTableLoading" />
   );
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -61,7 +61,6 @@ const ExceptionsLinkedToListsComponent: React.FC<ExceptionsLinkedToListComponent
         items={listAndReferences}
         error={error}
         columns={getSharedListsTableColumns()}
-        isSelectable={false}
         sorting
         data-test-subj="exceptionItemSharedList"
       />

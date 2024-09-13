@@ -6,7 +6,12 @@
  */
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -17,6 +22,9 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -25,6 +33,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -35,10 +44,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
@@ -46,6 +57,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
+  backfillClient: backfillClientMock.create(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 setGlobalDate();
@@ -55,7 +72,7 @@ describe('runSoon()', () => {
 
   const existingRule = {
     id: '1',
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       name: 'name',
       consumer: 'myApp',
@@ -115,7 +132,7 @@ describe('runSoon()', () => {
         operation: 'runSoon',
         ruleTypeId: 'myType',
       });
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
     });
 
     test('throws when user is not authorised to run this type of rule ad hoc', async () => {
@@ -145,7 +162,7 @@ describe('runSoon()', () => {
             action: 'rule_run_soon',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
         })
       );
     });
@@ -163,7 +180,7 @@ describe('runSoon()', () => {
           kibana: {
             saved_object: {
               id: '1',
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
             },
           },
           error: {

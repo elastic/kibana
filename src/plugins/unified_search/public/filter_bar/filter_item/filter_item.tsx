@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './filter_item.scss';
@@ -33,8 +34,8 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
+import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
 import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { FilterEditor } from '../filter_editor/filter_editor';
@@ -44,6 +45,7 @@ import {
   withCloseFilterEditorConfirmModal,
   WithCloseFilterEditorConfirmModalProps,
 } from '../filter_editor';
+import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps {
   id: string;
@@ -54,10 +56,14 @@ export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps 
   onRemove: () => void;
   intl: InjectedIntl;
   uiSettings: IUiSettingsClient;
+  docLinks: DocLinksStart;
   hiddenPanelOptions?: FilterPanelOption[];
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
   readOnly?: boolean;
+  suggestionsAbstraction?: SuggestionsAbstraction;
+  filtersCount?: number;
+  dataViews?: DataViewsContract;
 }
 
 type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
@@ -77,14 +83,14 @@ export type FilterLabelStatus =
   | typeof FILTER_ITEM_WARNING
   | typeof FILTER_ITEM_ERROR;
 
-export const FILTER_EDITOR_WIDTH = 960;
+export const FILTER_EDITOR_WIDTH = 1200;
 
 function FilterItemComponent(props: FilterItemProps) {
   const { onCloseFilterPopover, onLocalFilterCreate, onLocalFilterUpdate } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const [renderedComponent, setRenderedComponent] = useState('menu');
-  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false } = props;
+  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false, docLinks } = props;
 
   const closePopover = useCallback(() => {
     onCloseFilterPopover([() => setIsPopoverOpen(false)]);
@@ -363,8 +369,7 @@ function FilterItemComponent(props: FilterItemProps) {
 
   const popoverProps: FilterPopoverProps = {
     id: `popoverFor_filter${id}`,
-    className: `globalFilterItem__popover`,
-    anchorClassName: `globalFilterItem__popoverAnchor`,
+    display: 'block',
     isOpen: isPopoverOpen,
     closePopover,
     button: <FilterView {...filterViewProps} />,
@@ -393,6 +398,10 @@ function FilterItemComponent(props: FilterItemProps) {
                 onCancel={() => setIsPopoverOpen(false)}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
                 filtersForSuggestions={props.filtersForSuggestions}
+                suggestionsAbstraction={props.suggestionsAbstraction}
+                docLinks={docLinks}
+                filtersCount={props.filtersCount}
+                dataViews={props.dataViews}
               />
             </div>,
           ]}

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+
 import {
   createCaseSavedObjectResponse,
   createESJiraConnector,
@@ -17,13 +19,13 @@ import {
   transformUpdateResponseToExternalModel,
 } from './transform';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
-import { ESCaseSeverity, ESCaseStatus } from './types';
+import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
+import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
 
 describe('case transforms', () => {
   describe('transformUpdateResponseToExternalModel', () => {
@@ -200,10 +202,10 @@ describe('case transforms', () => {
     });
 
     it.each([
-      [ESCaseSeverity.LOW, CaseSeverity.LOW],
-      [ESCaseSeverity.MEDIUM, CaseSeverity.MEDIUM],
-      [ESCaseSeverity.HIGH, CaseSeverity.HIGH],
-      [ESCaseSeverity.CRITICAL, CaseSeverity.CRITICAL],
+      [CasePersistedSeverity.LOW, CaseSeverity.LOW],
+      [CasePersistedSeverity.MEDIUM, CaseSeverity.MEDIUM],
+      [CasePersistedSeverity.HIGH, CaseSeverity.HIGH],
+      [CasePersistedSeverity.CRITICAL, CaseSeverity.CRITICAL],
     ])(
       'properly converts "%s" severity to corresponding external value "%s"',
       (internalSeverityValue, expectedSeverityValue) => {
@@ -222,9 +224,9 @@ describe('case transforms', () => {
     );
 
     it.each([
-      [ESCaseStatus.OPEN, CaseStatuses.open],
-      [ESCaseStatus.IN_PROGRESS, CaseStatuses['in-progress']],
-      [ESCaseStatus.CLOSED, CaseStatuses.closed],
+      [CasePersistedStatus.OPEN, CaseStatuses.open],
+      [CasePersistedStatus.IN_PROGRESS, CaseStatuses['in-progress']],
+      [CasePersistedStatus.CLOSED, CaseStatuses.closed],
     ])(
       'properly converts "%s" status to corresponding ES Value "%s"',
       (internalStatusValue, expectedStatusValue) => {
@@ -387,10 +389,10 @@ describe('case transforms', () => {
     });
 
     it.each([
-      [CaseSeverity.LOW, ESCaseSeverity.LOW],
-      [CaseSeverity.MEDIUM, ESCaseSeverity.MEDIUM],
-      [CaseSeverity.HIGH, ESCaseSeverity.HIGH],
-      [CaseSeverity.CRITICAL, ESCaseSeverity.CRITICAL],
+      [CaseSeverity.LOW, CasePersistedSeverity.LOW],
+      [CaseSeverity.MEDIUM, CasePersistedSeverity.MEDIUM],
+      [CaseSeverity.HIGH, CasePersistedSeverity.HIGH],
+      [CaseSeverity.CRITICAL, CasePersistedSeverity.CRITICAL],
     ])(
       'properly converts "%s" severity to corresponding ES Value "%s"',
       (externalSeverityValue, expectedSeverityValue) => {
@@ -410,9 +412,9 @@ describe('case transforms', () => {
     });
 
     it.each([
-      [CaseStatuses.open, ESCaseStatus.OPEN],
-      [CaseStatuses['in-progress'], ESCaseStatus.IN_PROGRESS],
-      [CaseStatuses.closed, ESCaseStatus.CLOSED],
+      [CaseStatuses.open, CasePersistedStatus.OPEN],
+      [CaseStatuses['in-progress'], CasePersistedStatus.IN_PROGRESS],
+      [CaseStatuses.closed, CasePersistedStatus.CLOSED],
     ])(
       'properly converts "%s" status to corresponding ES Value "%s"',
       (externalStatusValue, expectedStatusValue) => {
@@ -501,10 +503,10 @@ describe('case transforms', () => {
     });
 
     it.each([
-      [ESCaseSeverity.LOW, CaseSeverity.LOW],
-      [ESCaseSeverity.MEDIUM, CaseSeverity.MEDIUM],
-      [ESCaseSeverity.HIGH, CaseSeverity.HIGH],
-      [ESCaseSeverity.CRITICAL, CaseSeverity.CRITICAL],
+      [CasePersistedSeverity.LOW, CaseSeverity.LOW],
+      [CasePersistedSeverity.MEDIUM, CaseSeverity.MEDIUM],
+      [CasePersistedSeverity.HIGH, CaseSeverity.HIGH],
+      [CasePersistedSeverity.CRITICAL, CaseSeverity.CRITICAL],
     ])(
       'properly converts "%s" severity to corresponding external value "%s"',
       (internalSeverityValue, expectedSeverityValue) => {
@@ -529,9 +531,9 @@ describe('case transforms', () => {
     });
 
     it.each([
-      [ESCaseStatus.OPEN, CaseStatuses.open],
-      [ESCaseStatus.IN_PROGRESS, CaseStatuses['in-progress']],
-      [ESCaseStatus.CLOSED, CaseStatuses.closed],
+      [CasePersistedStatus.OPEN, CaseStatuses.open],
+      [CasePersistedStatus.IN_PROGRESS, CaseStatuses['in-progress']],
+      [CasePersistedStatus.CLOSED, CaseStatuses.closed],
     ])(
       'properly converts "%s" status to corresponding external value "%s"',
       (internalStatusValue, expectedStatusValue) => {
@@ -553,6 +555,32 @@ describe('case transforms', () => {
       expect(transformAttributesToESModel({ status: undefined }).attributes).not.toHaveProperty(
         'status'
       );
+    });
+
+    it('returns the default value for category when it is undefined', () => {
+      const CaseSOResponseWithoutCategory = omit(createCaseSavedObjectResponse(), 'category');
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithoutCategory).attributes.category
+      ).toBe(null);
+    });
+
+    it('returns the correct value for category when it is null', () => {
+      const CaseSOResponseWithoutCategory = createCaseSavedObjectResponse();
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithoutCategory).attributes.category
+      ).toBe(null);
+    });
+
+    it('returns the correct value for category when it is defined', () => {
+      const CaseSOResponseWithoutCategory = createCaseSavedObjectResponse({
+        overrides: { category: 'foobar' },
+      });
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithoutCategory).attributes.category
+      ).toBe('foobar');
     });
   });
 });

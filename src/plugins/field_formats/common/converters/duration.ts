@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -11,201 +12,30 @@ import moment, { unitOfTime, Duration } from 'moment';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import {
+  DEFAULT_DURATION_INPUT_FORMAT,
+  DEFAULT_DURATION_OUTPUT_FORMAT,
+  DURATION_INPUT_FORMATS,
+  DURATION_OUTPUT_FORMATS,
+} from '../constants/duration_formats';
 
 const ratioToSeconds: Record<string, number> = {
   picoseconds: 0.000000000001,
   nanoseconds: 0.000000001,
   microseconds: 0.000001,
 };
+
 const HUMAN_FRIENDLY = 'humanize';
 const HUMAN_FRIENDLY_PRECISE = 'humanizePrecise';
 const DEFAULT_OUTPUT_PRECISION = 2;
-const DEFAULT_INPUT_FORMAT = {
-  text: i18n.translate('fieldFormats.duration.inputFormats.seconds', {
-    defaultMessage: 'Seconds',
-  }),
-  kind: 'seconds',
-};
-const inputFormats = [
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.picoseconds', {
-      defaultMessage: 'Picoseconds',
-    }),
-    kind: 'picoseconds',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.nanoseconds', {
-      defaultMessage: 'Nanoseconds',
-    }),
-    kind: 'nanoseconds',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.microseconds', {
-      defaultMessage: 'Microseconds',
-    }),
-    kind: 'microseconds',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.milliseconds', {
-      defaultMessage: 'Milliseconds',
-    }),
-    kind: 'milliseconds',
-  },
-  { ...DEFAULT_INPUT_FORMAT },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.minutes', {
-      defaultMessage: 'Minutes',
-    }),
-    kind: 'minutes',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.hours', {
-      defaultMessage: 'Hours',
-    }),
-    kind: 'hours',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.days', {
-      defaultMessage: 'Days',
-    }),
-    kind: 'days',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.weeks', {
-      defaultMessage: 'Weeks',
-    }),
-    kind: 'weeks',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.months', {
-      defaultMessage: 'Months',
-    }),
-    kind: 'months',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.inputFormats.years', {
-      defaultMessage: 'Years',
-    }),
-    kind: 'years',
-  },
-];
-const DEFAULT_OUTPUT_FORMAT = {
-  text: i18n.translate('fieldFormats.duration.outputFormats.humanize.approximate', {
-    defaultMessage: 'Human-readable (approximate)',
-  }),
-  method: 'humanize',
-};
-const outputFormats = [
-  { ...DEFAULT_OUTPUT_FORMAT },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.humanize.precise', {
-      defaultMessage: 'Human-readable (precise)',
-    }),
-    method: 'humanizePrecise',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asMilliseconds', {
-      defaultMessage: 'Milliseconds',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asMilliseconds.short', {
-      defaultMessage: 'ms',
-    }),
-    method: 'asMilliseconds',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asSeconds', {
-      defaultMessage: 'Seconds',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asSeconds.short', {
-      defaultMessage: 's',
-    }),
-    method: 'asSeconds',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asMinutes', {
-      defaultMessage: 'Minutes',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asMinutes.short', {
-      defaultMessage: 'min',
-    }),
-    method: 'asMinutes',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asHours', {
-      defaultMessage: 'Hours',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asHours.short', {
-      defaultMessage: 'h',
-    }),
-    method: 'asHours',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asDays', {
-      defaultMessage: 'Days',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asDays.short', {
-      defaultMessage: 'd',
-    }),
-    method: 'asDays',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asWeeks', {
-      defaultMessage: 'Weeks',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asWeeks.short', {
-      defaultMessage: 'w',
-    }),
-    method: 'asWeeks',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asMonths', {
-      defaultMessage: 'Months',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asMonths.short', {
-      defaultMessage: 'mon',
-    }),
-    method: 'asMonths',
-  },
-  {
-    text: i18n.translate('fieldFormats.duration.outputFormats.asYears', {
-      defaultMessage: 'Years',
-    }),
-    shortText: i18n.translate('fieldFormats.duration.outputFormats.asYears.short', {
-      defaultMessage: 'y',
-    }),
-    method: 'asYears',
-  },
-];
 
-function parseInputAsDuration(val: number, inputFormat: string) {
+function parseInputAsDuration(val: number, inputFormat: string, humanPrecise: boolean) {
   const ratio = ratioToSeconds[inputFormat] || 1;
   const kind = (
     inputFormat in ratioToSeconds ? 'seconds' : inputFormat
   ) as unitOfTime.DurationConstructor;
-  return moment.duration(val * ratio, kind);
-}
-
-function formatInputHumanPrecise(
-  val: number,
-  inputFormat: string,
-  outputPrecision: number,
-  useShortSuffix: boolean,
-  includeSpace: string
-) {
-  const ratio = ratioToSeconds[inputFormat] || 1;
-  const kind = (
-    inputFormat in ratioToSeconds ? 'seconds' : inputFormat
-  ) as unitOfTime.DurationConstructor;
-  const valueInDuration = moment.duration(val * ratio, kind);
-
-  return formatDuration(
-    val,
-    valueInDuration,
-    inputFormat,
-    outputPrecision,
-    useShortSuffix,
-    includeSpace
-  );
+  const value = humanPrecise && val < 0 ? Math.abs(val * ratio) : val * ratio;
+  return moment.duration(value, kind);
 }
 
 export class DurationFormat extends FieldFormat {
@@ -214,8 +44,8 @@ export class DurationFormat extends FieldFormat {
     defaultMessage: 'Duration',
   });
   static fieldType = KBN_FIELD_TYPES.NUMBER;
-  static inputFormats = inputFormats;
-  static outputFormats = outputFormats;
+  static inputFormats = DURATION_INPUT_FORMATS;
+  static outputFormats = DURATION_OUTPUT_FORMATS;
   allowsNumericalAggregations = true;
 
   isHuman() {
@@ -228,8 +58,8 @@ export class DurationFormat extends FieldFormat {
 
   getParamDefaults() {
     return {
-      inputFormat: DEFAULT_INPUT_FORMAT.kind,
-      outputFormat: DEFAULT_OUTPUT_FORMAT.method,
+      inputFormat: DEFAULT_DURATION_INPUT_FORMAT.kind,
+      outputFormat: DEFAULT_DURATION_OUTPUT_FORMAT.method,
       outputPrecision: DEFAULT_OUTPUT_PRECISION,
       includeSpaceWithSuffix: true,
     };
@@ -248,6 +78,12 @@ export class DurationFormat extends FieldFormat {
     const human = this.isHuman();
     const humanPrecise = this.isHumanPrecise();
 
+    if (human && val === 0) {
+      return i18n.translate('fieldFormats.duration.zeroSecondsLabel', {
+        defaultMessage: '0 seconds',
+      }); // Handle the case of 0 value for "Human Friendly"
+    }
+
     const prefix =
       val < 0 && human
         ? i18n.translate('fieldFormats.duration.negativeLabel', {
@@ -255,13 +91,13 @@ export class DurationFormat extends FieldFormat {
           }) + ' '
         : '';
 
-    const duration = parseInputAsDuration(val, inputFormat) as Record<keyof Duration, Function>;
+    const duration = parseInputAsDuration(val, inputFormat, humanPrecise);
     const formatted = humanPrecise
-      ? formatInputHumanPrecise(val, inputFormat, outputPrecision, useShortSuffix, includeSpace)
-      : duration[outputFormat]();
+      ? formatDurationHumanPrecise(duration, outputPrecision, useShortSuffix, includeSpace, val < 0)
+      : (duration[outputFormat] as Function)();
 
-    const precise = human || humanPrecise ? formatted : formatted.toFixed(outputPrecision);
-    const type = outputFormats.find(({ method }) => method === outputFormat);
+    const precise = human || humanPrecise ? formatted : Number(formatted).toFixed(outputPrecision);
+    const type = DURATION_OUTPUT_FORMATS.find(({ method }) => method === outputFormat);
 
     const unitText = useShortSuffix ? type?.shortText : type?.text.toLowerCase();
 
@@ -271,53 +107,41 @@ export class DurationFormat extends FieldFormat {
   };
 }
 
-function formatDuration(
-  val: number,
+// Array of units is to find the first unit duration value that is not 0
+const units = [
+  { seconds: 31536000, method: 'asYears' },
+  // Note: 30 days is used as a month in the duration format
+  { seconds: 2592000, method: 'asMonths' },
+  { seconds: 604800, method: 'asWeeks' },
+  { seconds: 86400, method: 'asDays' },
+  { seconds: 3600, method: 'asHours' },
+  { seconds: 60, method: 'asMinutes' },
+  { seconds: 1, method: 'asSeconds' },
+  { seconds: 0.001, method: 'asMilliseconds' },
+];
+
+function formatDurationHumanPrecise(
   duration: moment.Duration,
-  inputFormat: string,
   outputPrecision: number,
   useShortSuffix: boolean,
-  includeSpace: string
+  includeSpace: string,
+  negativeValue: boolean
 ) {
   // return nothing when the duration is falsy or not correctly parsed (P0D)
   if (!duration || !duration.isValid()) return;
-  const units = [
-    { unit: duration.years(), nextUnitRate: 12, method: 'asYears' },
-    { unit: duration.months(), nextUnitRate: 4, method: 'asMonths' },
-    { unit: duration.weeks(), nextUnitRate: 7, method: 'asWeeks' },
-    { unit: duration.days(), nextUnitRate: 24, method: 'asDays' },
-    { unit: duration.hours(), nextUnitRate: 60, method: 'asHours' },
-    { unit: duration.minutes(), nextUnitRate: 60, method: 'asMinutes' },
-    { unit: duration.seconds(), nextUnitRate: 1000, method: 'asSeconds' },
-    { unit: duration.milliseconds(), nextUnitRate: 1000, method: 'asMilliseconds' },
-  ];
+  const valueInSeconds = duration.as('seconds');
 
   const getUnitText = (method: string) => {
-    const type = outputFormats.find(({ method: methodT }) => method === methodT);
+    const type = DURATION_OUTPUT_FORMATS.find(({ method: methodT }) => method === methodT);
     return useShortSuffix ? type?.shortText : type?.text.toLowerCase();
   };
 
-  for (let i = 0; i < units.length; i++) {
-    const unitValue = units[i].unit;
-    if (unitValue >= 1) {
-      const unitText = getUnitText(units[i].method);
-
-      const value = Math.floor(unitValue);
-      if (units?.[i + 1]) {
-        const decimalPointValue = Math.floor(units[i + 1].unit);
-        return (
-          (value + decimalPointValue / units[i].nextUnitRate).toFixed(outputPrecision) +
-          includeSpace +
-          unitText
-        );
-      } else {
-        return unitValue.toFixed(outputPrecision) + includeSpace + unitText;
-      }
+  for (const unit of units) {
+    const unitValue = valueInSeconds / unit.seconds;
+    if (unitValue >= 1 || unit === units[units.length - 1]) {
+      // return a value if it's the first iteration where the value > 1, or the last iteration
+      const prefix = negativeValue ? '-' : '';
+      return prefix + unitValue.toFixed(outputPrecision) + includeSpace + getUnitText(unit.method);
     }
   }
-
-  const unitValue = units[units.length - 1].unit;
-  const unitText = getUnitText(units[units.length - 1].method);
-
-  return unitValue.toFixed(outputPrecision) + includeSpace + unitText;
 }

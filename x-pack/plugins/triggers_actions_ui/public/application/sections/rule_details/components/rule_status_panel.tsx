@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import datemath from '@kbn/datemath';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -21,12 +20,15 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { SnoozeSchedule } from '../../../../types';
 import { RuleStatusDropdown } from '../..';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { RulesListNotifyBadge } from '../../rules_list/components/notify_badge';
+import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
+import { RefreshToken } from './types';
 
 export interface RuleStatusPanelProps {
   rule: any;
@@ -34,19 +36,16 @@ export interface RuleStatusPanelProps {
   requestRefresh: () => void;
   healthColor: string;
   statusMessage?: string | null;
+  refreshToken?: RefreshToken;
 }
 
-type ComponentOpts = Pick<
+export type RuleStatusPanelWithApiProps = Pick<
   RuleApis,
-  | 'bulkDisableRules'
-  | 'bulkEnableRules'
-  | 'snoozeRule'
-  | 'unsnoozeRule'
-  | 'loadExecutionLogAggregations'
+  'bulkDisableRules' | 'bulkEnableRules' | 'snoozeRule' | 'unsnoozeRule'
 > &
   RuleStatusPanelProps;
 
-export const RuleStatusPanel: React.FC<ComponentOpts> = ({
+export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
   rule,
   bulkEnableRules,
   bulkDisableRules,
@@ -56,20 +55,17 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
   isEditable,
   healthColor,
   statusMessage,
-  loadExecutionLogAggregations,
+  refreshToken,
 }) => {
-  const [isSnoozeLoading, setIsSnoozeLoading] = useState(false);
-  const [isSnoozeOpen, setIsSnoozeOpen] = useState(false);
   const [lastNumberOfExecutions, setLastNumberOfExecutions] = useState<number | null>(null);
+  const isInitialized = useRef(false);
 
-  const openSnooze = useCallback(() => setIsSnoozeOpen(true), [setIsSnoozeOpen]);
-  const closeSnooze = useCallback(() => setIsSnoozeOpen(false), [setIsSnoozeOpen]);
   const onSnoozeRule = useCallback(
-    (snoozeSchedule) => snoozeRule(rule, snoozeSchedule),
+    (snoozeSchedule: SnoozeSchedule) => snoozeRule(rule, snoozeSchedule),
     [rule, snoozeRule]
   );
   const onUnsnoozeRule = useCallback(
-    (scheduleIds) => unsnoozeRule(rule, scheduleIds),
+    (scheduleIds?: string[]) => unsnoozeRule(rule, scheduleIds),
     [rule, unsnoozeRule]
   );
 
@@ -87,24 +83,40 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
     return statusMessage;
   }, [rule, statusMessage]);
 
-  const getLastNumberOfExecutions = useCallback(async () => {
-    try {
-      const result = await loadExecutionLogAggregations({
-        id: rule.id,
-        dateStart: datemath.parse('now-24h')!.format(),
-        dateEnd: datemath.parse('now')!.format(),
-        page: 0,
-        perPage: 10,
-      });
-      setLastNumberOfExecutions(result.total);
-    } catch (e) {
-      // Do nothing if executions fail to fetch
-    }
-  }, [loadExecutionLogAggregations, setLastNumberOfExecutions, rule]);
+  const { data, loadEventLogs } = useLoadRuleEventLogs({
+    id: rule.id,
+    dateStart: 'now-24h',
+    dateEnd: 'now',
+    page: 0,
+    perPage: 10,
+  });
 
   useEffect(() => {
-    getLastNumberOfExecutions();
-  }, [getLastNumberOfExecutions]);
+    if (!data) {
+      return;
+    }
+    setLastNumberOfExecutions(data.total);
+  }, [data]);
+
+  const requestRefreshInternal = useCallback(() => {
+    loadEventLogs();
+    requestRefresh();
+  }, [requestRefresh, loadEventLogs]);
+
+  const onDisableRule = useCallback(
+    (untrack: boolean) => {
+      return bulkDisableRules({ ids: [rule.id], untrack });
+    },
+    [bulkDisableRules, rule.id]
+  );
+
+  useEffect(() => {
+    if (isInitialized.current) {
+      loadEventLogs();
+    }
+    isInitialized.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshToken]);
 
   return (
     <EuiPanel data-test-subj="ruleStatusPanel" hasBorder paddingSize="none">
@@ -122,16 +134,12 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <RuleStatusDropdown
-              disableRule={async () => {
-                await bulkDisableRules({ ids: [rule.id] });
-              }}
-              enableRule={async () => {
-                await bulkEnableRules({ ids: [rule.id] });
-              }}
+              disableRule={onDisableRule}
+              enableRule={() => bulkEnableRules({ ids: [rule.id] })}
               snoozeRule={async () => {}}
               unsnoozeRule={async () => {}}
               rule={rule}
-              onRuleChanged={requestRefresh}
+              onRuleChanged={requestRefreshInternal}
               direction="row"
               isEditable={isEditable}
               hideSnoozeOption
@@ -187,13 +195,10 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
       <EuiHorizontalRule margin="none" />
       <EuiPanel hasShadow={false}>
         <RulesListNotifyBadge
-          rule={{ ...rule, isEditable }}
-          isOpen={isSnoozeOpen}
-          isLoading={isSnoozeLoading}
-          onLoading={setIsSnoozeLoading}
-          onClick={openSnooze}
-          onClose={closeSnooze}
-          onRuleChanged={requestRefresh}
+          snoozeSettings={rule}
+          loading={!rule}
+          disabled={!isEditable}
+          onRuleChanged={requestRefreshInternal}
           snoozeRule={onSnoozeRule}
           unsnoozeRule={onUnsnoozeRule}
           showTooltipInline

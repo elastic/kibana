@@ -6,20 +6,20 @@
  */
 
 import { lazy } from 'react';
-import type { CoreStart } from '@kbn/core/public';
 import type {
   PackageGenericErrorsListComponent,
   PackageGenericErrorsListProps,
 } from '@kbn/fleet-plugin/public';
-import type { StartPlugins } from '../../../../../types';
+import type { FleetUiExtensionGetterOptions } from '../../../../../common/types';
 
-export const getLazyEndpointGenericErrorsListExtension = (
-  coreStart: CoreStart,
-  depsStart: Pick<StartPlugins, 'data' | 'fleet'>
-) => {
+export const getLazyEndpointGenericErrorsListExtension = ({
+  coreStart,
+  depsStart,
+  services,
+}: FleetUiExtensionGetterOptions) => {
   return lazy<PackageGenericErrorsListComponent>(async () => {
     const [{ withSecurityContext }, { EndpointGenericErrorsList }] = await Promise.all([
-      import('./components/with_security_context/with_security_context'),
+      import('../../../../../common/components/with_security_context/with_security_context'),
       import('./endpoint_generic_errors_list'),
     ]);
 
@@ -27,6 +27,7 @@ export const getLazyEndpointGenericErrorsListExtension = (
       default: withSecurityContext<PackageGenericErrorsListProps>({
         coreStart,
         depsStart,
+        services,
         WrappedComponent: EndpointGenericErrorsList,
       }),
     };

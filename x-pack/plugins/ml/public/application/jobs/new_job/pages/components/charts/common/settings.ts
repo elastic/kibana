@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
-import {
-  JobCreatorType,
-  isMultiMetricJobCreator,
-  isPopulationJobCreator,
-} from '../../../../common/job_creator';
-import { getTimeBucketsFromCache, TimeBuckets } from '../../../../../../util/time_buckets';
-import { useUiSettings } from '../../../../../../contexts/kibana/use_ui_settings_context';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { TimeBuckets } from '@kbn/ml-time-buckets';
+import { useCurrentThemeVars } from '../../../../../../contexts/kibana';
+import type { JobCreatorType } from '../../../../common/job_creator';
+import { isMultiMetricJobCreator, isPopulationJobCreator } from '../../../../common/job_creator';
+import { getTimeBucketsFromCache } from '../../../../../../util/get_time_buckets_from_cache';
 
 export function useChartColors() {
-  const IS_DARK_THEME = useUiSettings().get('theme:darkMode');
-  const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
+  const { euiTheme } = useCurrentThemeVars();
   return {
-    LINE_COLOR: themeName.euiColorPrimary,
-    MODEL_COLOR: themeName.euiColorPrimary,
-    EVENT_RATE_COLOR: themeName.euiColorPrimary,
-    EVENT_RATE_COLOR_WITH_ANOMALIES: themeName.euiColorLightShade,
+    LINE_COLOR: euiTheme.euiColorPrimary,
+    MODEL_COLOR: euiTheme.euiColorPrimary,
+    EVENT_RATE_COLOR: euiTheme.euiColorPrimary,
+    EVENT_RATE_COLOR_WITH_ANOMALIES: euiTheme.euiColorLightShade,
   };
 }
 
@@ -61,7 +58,11 @@ export const seriesStyle = {
   },
 };
 
-export function getChartSettings(jobCreator: JobCreatorType, chartInterval: TimeBuckets) {
+export function getChartSettings(
+  uiSettings: IUiSettingsClient,
+  jobCreator: JobCreatorType,
+  chartInterval: TimeBuckets
+) {
   const cs = {
     ...defaultChartSettings,
     intervalMs: chartInterval.getInterval().asMilliseconds(),
@@ -72,7 +73,7 @@ export function getChartSettings(jobCreator: JobCreatorType, chartInterval: Time
     // the calculation from TimeBuckets, but without the
     // bar target and max bars which have been set for the
     // general chartInterval
-    const interval = getTimeBucketsFromCache();
+    const interval = getTimeBucketsFromCache(uiSettings);
     interval.setInterval('auto');
     interval.setBounds(chartInterval.getBounds());
     cs.intervalMs = interval.getInterval().asMilliseconds();

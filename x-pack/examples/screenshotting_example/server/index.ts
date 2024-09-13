@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ScreenshottingExamplePlugin } from './plugin';
-
-export function plugin() {
+export async function plugin() {
+  const { ScreenshottingExamplePlugin } = await import('./plugin');
   return new ScreenshottingExamplePlugin();
 }

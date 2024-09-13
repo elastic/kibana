@@ -8,7 +8,10 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../../common/constants';
+import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality';
+import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { UserDetailsLink } from '../../../../common/components/links';
 import {
@@ -16,7 +19,12 @@ import {
   getOrEmptyTagFromValue,
 } from '../../../../common/components/empty_value';
 
-import type { Columns, Criteria, ItemsPerRow } from '../../../components/paginated_table';
+import type {
+  Columns,
+  Criteria,
+  ItemsPerRow,
+  SiemTables,
+} from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
 
 import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
@@ -27,12 +35,12 @@ import { usersActions, usersModel, usersSelectors } from '../../store';
 import type { User } from '../../../../../common/search_strategy/security_solution/users/all';
 import type { SortUsersField } from '../../../../../common/search_strategy/security_solution/users/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScore } from '../../../components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { VIEW_USERS_BY_SEVERITY } from '../user_risk_score_table/translations';
+import { VIEW_USERS_BY_SEVERITY } from '../../../../entity_analytics/components/user_risk_score_table/translations';
 import { SecurityPageName } from '../../../../app/types';
 import { UsersTableType } from '../../store/model';
-import { useNavigateTo } from '../../../../common/lib/kibana';
+import { useNavigateTo, useUiSetting$ } from '../../../../common/lib/kibana';
 
 const tableType = usersModel.UsersTableType.allUsers;
 
@@ -53,7 +61,8 @@ export type UsersTableColumns = [
   Columns<User['name']>,
   Columns<User['lastSeen']>,
   Columns<User['domain']>,
-  Columns<RiskSeverity>?
+  Columns<RiskSeverity>?,
+  Columns<CriticalityLevelWithUnassigned>?
 ];
 
 const rowItems: ItemsPerRow[] = [
@@ -69,7 +78,8 @@ const rowItems: ItemsPerRow[] = [
 
 const getUsersColumns = (
   showRiskColumn: boolean,
-  dispatchSeverityUpdate: (s: RiskSeverity) => void
+  dispatchSeverityUpdate: (s: RiskSeverity) => void,
+  isAssetCriticalityEnabled: boolean
 ): UsersTableColumns => {
   const columns: UsersTableColumns = [
     {
@@ -85,8 +95,6 @@ const getUsersColumns = (
               values: [name],
               idPrefix: `users-table-${name}-name`,
               render: (item) => <UserDetailsLink userName={item} />,
-              aggregatable: true,
-              fieldType: 'keyword',
             })
           : getOrEmptyTagFromValue(name),
     },
@@ -110,8 +118,6 @@ const getUsersColumns = (
               fieldName: 'user.domain',
               values: [domain],
               idPrefix: `users-table-${domain}-domain`,
-              aggregatable: true,
-              fieldType: 'keyword',
             })
           : getOrEmptyTagFromValue(domain),
     },
@@ -120,20 +126,14 @@ const getUsersColumns = (
   if (showRiskColumn) {
     columns.push({
       field: 'risk',
-      name: (
-        <EuiToolTip content={i18n.USER_RISK_TOOLTIP}>
-          <>
-            {i18n.USER_RISK} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-          </>
-        </EuiToolTip>
-      ),
+      name: i18n.USER_RISK,
       truncateText: false,
       mobileOptions: { show: true },
       sortable: false,
       render: (riskScore: RiskSeverity) => {
         if (riskScore != null) {
           return (
-            <RiskScore
+            <RiskScoreLevel
               toolTipContent={
                 <EuiLink onClick={() => dispatchSeverityUpdate(riskScore)}>
                   <EuiText size="xs">{VIEW_USERS_BY_SEVERITY(riskScore.toLowerCase())}</EuiText>
@@ -144,6 +144,25 @@ const getUsersColumns = (
           );
         }
         return getEmptyTagValue();
+      },
+    });
+  }
+
+  if (isAssetCriticalityEnabled) {
+    columns.push({
+      field: 'criticality',
+      name: i18n.ASSET_CRITICALITY,
+      truncateText: false,
+      mobileOptions: { show: true },
+      sortable: false,
+      render: (assetCriticality: CriticalityLevelWithUnassigned) => {
+        if (!assetCriticality) return getEmptyTagValue();
+        return (
+          <AssetCriticalityBadge
+            criticalityLevel={assetCriticality}
+            css={{ verticalAlign: 'middle' }}
+          />
+        );
       },
     });
   }
@@ -169,7 +188,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const { navigateTo } = useNavigateTo();
 
-  const updateLimitPagination = useCallback(
+  const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
     (newLimit) => {
       dispatch(
         usersActions.updateTableLimit({
@@ -182,7 +201,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
     [type, dispatch]
   );
 
-  const updateActivePage = useCallback(
+  const updateActivePage = useCallback<SiemTables['updateActivePage']>(
     (newPage) => {
       dispatch(
         usersActions.updateTableActivePage({
@@ -227,9 +246,11 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
     [dispatch, navigateTo]
   );
 
+  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
   const columns = useMemo(
-    () => getUsersColumns(isPlatinumOrTrialLicense, dispatchSeverityUpdate),
-    [isPlatinumOrTrialLicense, dispatchSeverityUpdate]
+    () =>
+      getUsersColumns(isPlatinumOrTrialLicense, dispatchSeverityUpdate, isAssetCriticalityEnabled),
+    [isPlatinumOrTrialLicense, dispatchSeverityUpdate, isAssetCriticalityEnabled]
   );
 
   return (

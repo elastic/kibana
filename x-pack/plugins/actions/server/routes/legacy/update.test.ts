@@ -10,7 +10,7 @@ import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess, ActionTypeDisabledError } from '../../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { actionsClientMock } from '../../actions_client.mock';
+import { actionsClientMock } from '../../actions_client/actions_client.mock';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
@@ -47,6 +47,7 @@ describe('updateActionRoute', () => {
       config: { foo: true },
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -105,6 +106,7 @@ describe('updateActionRoute', () => {
       config: { foo: true },
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -149,6 +151,7 @@ describe('updateActionRoute', () => {
       config: { foo: true },
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -169,7 +172,7 @@ describe('updateActionRoute', () => {
       ['ok']
     );
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });

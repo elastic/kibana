@@ -1,13 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
+
+interface FilterForTableCell {
+  column: number;
+  row: number;
+  filter: 'in' | 'out';
+}
 
 export class InspectorService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -138,7 +145,7 @@ export class InspectorService extends FtrService {
       return await inspectorPanel.findByTagName('thead');
     });
     const $ = await dataTableHeader.parseDomContent();
-    return $('th span.euiTableCellContent__text')
+    return $('th .euiTableCellContent span')
       .toArray()
       .map((cell) => $(cell).text().trim());
   }
@@ -155,36 +162,23 @@ export class InspectorService extends FtrService {
   }
 
   /**
-   * Filters table for value by clicking specified cell
+   * Filter / filter out table for value by clicking specified cell
    * @param column column index
    * @param row row index
+   * @param filter 'in' to filter and 'out' to filter out
    */
-  public async filterForTableCell(column: string | number, row: string | number): Promise<void> {
+  public async filterForTableCell(options: FilterForTableCell): Promise<void> {
+    const filterLocator = {
+      in: 'filterForInspectorCellValue',
+      out: 'filterOutInspectorCellValue',
+    };
     await this.retry.try(async () => {
       const table = await this.testSubjects.find('inspectorTable');
       const cell = await table.findByCssSelector(
-        `tbody tr:nth-child(${row}) td:nth-child(${column})`
+        `tbody tr:nth-child(${options.row}) td:nth-child(${options.column})`
       );
       await cell.moveMouseTo();
-      const filterBtn = await this.testSubjects.findDescendant('filterForInspectorCellValue', cell);
-      await filterBtn.click();
-    });
-    await this.renderable.waitForRender();
-  }
-
-  /**
-   * Filters out table by clicking specified cell
-   * @param column column index
-   * @param row row index
-   */
-  public async filterOutTableCell(column: string | number, row: string | number): Promise<void> {
-    await this.retry.try(async () => {
-      const table = await this.testSubjects.find('inspectorTable');
-      const cell = await table.findByCssSelector(
-        `tbody tr:nth-child(${row}) td:nth-child(${column})`
-      );
-      await cell.moveMouseTo();
-      const filterBtn = await this.testSubjects.findDescendant('filterOutInspectorCellValue', cell);
+      const filterBtn = await this.testSubjects.findDescendant(filterLocator[options.filter], cell);
       await filterBtn.click();
     });
     await this.renderable.waitForRender();
@@ -238,6 +232,19 @@ export class InspectorService extends FtrService {
     });
   }
 
+  public async getTableDataWithId(tableTestSubj: string): Promise<string[][]> {
+    const chooserDataTestId = 'inspectorTableChooser';
+    if (!(await this.testSubjects.exists(chooserDataTestId))) {
+      return [];
+    }
+
+    return await this.retry.try(async () => {
+      await this.testSubjects.click(chooserDataTestId);
+      await this.testSubjects.click(tableTestSubj);
+      return this.getTableData();
+    });
+  }
+
   /**
    * Returns the selected option value from combobox
    */
@@ -252,6 +259,16 @@ export class InspectorService extends FtrService {
     }
 
     return selectedOption[0];
+  }
+
+  /**
+   * Opens request by name. Use when inspector has multiple requests and you want to view a specific request
+   */
+  public async openRequestByName(requestName: string): Promise<void> {
+    await this.openInspectorRequestsView();
+    this.log.debug(`Open Inspector request ${requestName}`);
+    await this.testSubjects.click('inspectorRequestChooser');
+    await this.testSubjects.click(`inspectorRequestChooser${requestName.replace(/\s+/, '_')}`);
   }
 
   /**
@@ -276,6 +293,21 @@ export class InspectorService extends FtrService {
     return this.testSubjects.find('inspectorRequestDetailResponse');
   }
 
+  public async getRequest(
+    codeEditorIndex: number = 0
+  ): Promise<{ command: string; body: Record<string, any> }> {
+    await (await this.getOpenRequestDetailRequestButton()).click();
+
+    await this.monacoEditor.waitCodeEditorReady('inspectorRequestCodeViewerContainer');
+    const requestString = await this.monacoEditor.getCodeEditorValue(codeEditorIndex);
+    this.log.debug('Request string from inspector:', requestString);
+    const openBraceIndex = requestString.indexOf('{');
+    return {
+      command: openBraceIndex >= 0 ? requestString.substring(0, openBraceIndex).trim() : '',
+      body: openBraceIndex >= 0 ? JSON.parse(requestString.substring(openBraceIndex)) : {},
+    };
+  }
+
   public async getResponse(): Promise<Record<string, any>> {
     await (await this.getOpenRequestDetailResponseButton()).click();
 
@@ -296,5 +328,10 @@ export class InspectorService extends FtrService {
     const comboBoxOptions = await this.comboBox.getOptionsList('inspectorRequestChooser');
 
     return value === comboBoxOptions;
+  }
+
+  public async getRequestTotalTime() {
+    const [ms] = (await this.testSubjects.getVisibleText('inspectorRequestTotalTime')).split('ms');
+    return parseFloat(ms);
   }
 }

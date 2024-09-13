@@ -1,0 +1,108 @@
+{
+  "id": "@kbn/content-management-table-list-view",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-management-table-list-view",
+        "id": "def-public.TableListView",
+        "type": "Function",
+        "tags": [],
+        "label": "TableListView",
+        "description": [],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "@kbn/content-management-table-list-view-common",
+            "scope": "common",
+            "docId": "kibKbnContentManagementTableListViewCommonPluginApi",
+            "section": "def-common.UserContentCommonSchema",
+            "text": "UserContentCommonSchema"
+          },
+          ">({ title, description, entityName, entityNamePlural, initialFilter, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, findItems, createItem, editItem, deleteItems, getDetailViewLink, getOnClickTitle, rowItemActions, id: listingId, contentEditor, children, titleColumnName, additionalRightSideActions, withoutPageTemplateWrapper, createdByEnabled, recentlyAccessed, }: ",
+          {
+            "pluginId": "@kbn/content-management-table-list-view",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTableListViewPluginApi",
+            "section": "def-public.TableListViewProps",
+            "text": "TableListViewProps"
+          },
+          "<T>) => JSX.Element"
+        ],
+        "path": "packages/content-management/table_list_view/src/table_list_view.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view",
+            "id": "def-public.TableListView.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  title,\n  description,\n  entityName,\n  entityNamePlural,\n  initialFilter,\n  headingId,\n  initialPageSize,\n  listingLimit,\n  urlStateEnabled = true,\n  customTableColumn,\n  emptyPrompt,\n  findItems,\n  createItem,\n  editItem,\n  deleteItems,\n  getDetailViewLink,\n  getOnClickTitle,\n  rowItemActions,\n  id: listingId,\n  contentEditor,\n  children,\n  titleColumnName,\n  additionalRightSideActions,\n  withoutPageTemplateWrapper,\n  createdByEnabled,\n  recentlyAccessed,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-table-list-view",
+                "scope": "public",
+                "docId": "kibKbnContentManagementTableListViewPluginApi",
+                "section": "def-public.TableListViewProps",
+                "text": "TableListViewProps"
+              },
+              "<T>"
+            ],
+            "path": "packages/content-management/table_list_view/src/table_list_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/content-management-table-list-view",
+        "id": "def-public.TableListViewProps",
+        "type": "Type",
+        "tags": [],
+        "label": "TableListViewProps",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "@kbn/content-management-table-list-view-table",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTableListViewTablePluginApi",
+            "section": "def-public.TableListViewTableProps",
+            "text": "TableListViewTableProps"
+          },
+          "<T>, \"id\" | \"entityName\" | \"entityNamePlural\" | \"initialFilter\" | \"headingId\" | \"initialPageSize\" | \"listingLimit\" | \"urlStateEnabled\" | \"customTableColumn\" | \"emptyPrompt\" | \"findItems\" | \"createItem\" | \"editItem\" | \"deleteItems\" | \"getDetailViewLink\" | \"getOnClickTitle\" | \"rowItemActions\" | \"contentEditor\" | \"titleColumnName\" | \"withoutPageTemplateWrapper\" | \"createdByEnabled\" | \"recentlyAccessed\"> & { title: string; description?: string | undefined; additionalRightSideActions?: React.ReactNode[] | undefined; children?: React.ReactNode; }"
+        ],
+        "path": "packages/content-management/table_list_view/src/table_list_view.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

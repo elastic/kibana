@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const proxySetup = require('proxy');
+import * as proxy from 'proxy';
 
 import { readFileSync as fsReadFileSync } from 'fs';
 import { resolve as pathResolve, join as pathJoin } from 'path';
@@ -24,6 +23,11 @@ import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal
 import { ActionsConfig } from '../config';
 import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from '../actions_config';
 import { resolveCustomHosts } from '../lib/custom_host_settings';
+import {
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+} from '../../common';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -40,9 +44,6 @@ const CA = fsReadFileSync(CA_FILE, 'utf8');
 const Auth = 'elastic:changeme';
 const AuthB64 = Buffer.from(Auth).toString('base64');
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const AxiosDefaultsAadapter = require('axios/lib/adapters/http');
-
 const ServerResponse = 'A unique response returned by the server!';
 
 describe('axios connections', () => {
@@ -54,7 +55,7 @@ describe('axios connections', () => {
     // needed to prevent the dreaded Error: Cross origin http://localhost forbidden
     // see: https://github.com/axios/axios/issues/1754#issuecomment-572778305
     savedAxiosDefaultsAdapter = axios.defaults.adapter;
-    axios.defaults.adapter = AxiosDefaultsAadapter;
+    axios.defaults.adapter = 'http';
   });
 
   afterEach(() => {
@@ -271,9 +272,9 @@ describe('axios connections', () => {
 });
 
 async function basicProxyTest(opts: RunTestOptions) {
-  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+  await runWithSetup(opts, async (target, proxyInstance, axiosDefaults) => {
     const acu = getACUfromConfig({
-      proxyUrl: proxy.url,
+      proxyUrl: proxyInstance.url,
       ssl: { verificationMode: 'none' },
       customHostSettings: [{ url: target.url, ssl: { certificateAuthoritiesData: CA } }],
     });
@@ -285,9 +286,9 @@ async function basicProxyTest(opts: RunTestOptions) {
 }
 
 async function wrongTargetPasswordProxyTest(opts: RunTestOptions) {
-  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+  await runWithSetup(opts, async (target, proxyInstance, axiosDefaults) => {
     const acu = getACUfromConfig({
-      proxyUrl: proxy.url,
+      proxyUrl: proxyInstance.url,
       ssl: { verificationMode: 'none' },
       customHostSettings: [{ url: target.url, ssl: { certificateAuthoritiesData: CA } }],
     });
@@ -299,9 +300,9 @@ async function wrongTargetPasswordProxyTest(opts: RunTestOptions) {
 }
 
 async function missingTargetPasswordProxyTest(opts: RunTestOptions) {
-  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+  await runWithSetup(opts, async (target, proxyInstance, axiosDefaults) => {
     const acu = getACUfromConfig({
-      proxyUrl: proxy.url,
+      proxyUrl: proxyInstance.url,
       ssl: { verificationMode: 'none' },
       customHostSettings: [{ url: target.url, ssl: { certificateAuthoritiesData: CA } }],
     });
@@ -313,8 +314,8 @@ async function missingTargetPasswordProxyTest(opts: RunTestOptions) {
 }
 
 async function wrongProxyPasswordProxyTest(opts: RunTestOptions) {
-  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
-    const wrongUrl = manglePassword(proxy.url);
+  await runWithSetup(opts, async (target, proxyInstance, axiosDefaults) => {
+    const wrongUrl = manglePassword(proxyInstance.url);
     const acu = getACUfromConfig({
       proxyUrl: wrongUrl,
       ssl: { verificationMode: 'none' },
@@ -330,8 +331,8 @@ async function wrongProxyPasswordProxyTest(opts: RunTestOptions) {
 }
 
 async function missingProxyPasswordProxyTest(opts: RunTestOptions) {
-  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
-    const anonUrl = removePassword(proxy.url);
+  await runWithSetup(opts, async (target, proxyInstance, axiosDefaults) => {
+    const anonUrl = removePassword(proxyInstance.url);
     const acu = getACUfromConfig({
       proxyUrl: anonUrl,
       ssl: { verificationMode: 'none' },
@@ -347,9 +348,9 @@ async function missingProxyPasswordProxyTest(opts: RunTestOptions) {
 }
 
 async function missingCaProxyTest(opts: RunTestOptions) {
-  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+  await runWithSetup(opts, async (target, proxyInstance, axiosDefaults) => {
     const acu = getACUfromConfig({
-      proxyUrl: proxy.url,
+      proxyUrl: proxyInstance.url,
     });
 
     try {
@@ -362,9 +363,9 @@ async function missingCaProxyTest(opts: RunTestOptions) {
 }
 
 async function rejectUnauthorizedTargetProxyTest(opts: RunTestOptions) {
-  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+  await runWithSetup(opts, async (target, proxyInstance, axiosDefaults) => {
     const acu = getACUfromConfig({
-      proxyUrl: proxy.url,
+      proxyUrl: proxyInstance.url,
       rejectUnauthorized: false,
       customHostSettings: [{ url: target.url, ssl: { verificationMode: 'none' } }],
     });
@@ -376,9 +377,9 @@ async function rejectUnauthorizedTargetProxyTest(opts: RunTestOptions) {
 }
 
 async function customCAProxyTest(opts: RunTestOptions) {
-  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+  await runWithSetup(opts, async (target, proxyInstance, axiosDefaults) => {
     const acu = getACUfromConfig({
-      proxyUrl: proxy.url,
+      proxyUrl: proxyInstance.url,
       customHostSettings: [{ url: target.url, ssl: { certificateAuthoritiesData: CA } }],
     });
 
@@ -389,9 +390,9 @@ async function customCAProxyTest(opts: RunTestOptions) {
 }
 
 async function verModeNoneTargetProxyTest(opts: RunTestOptions) {
-  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+  await runWithSetup(opts, async (target, proxyInstance, axiosDefaults) => {
     const acu = getACUfromConfig({
-      proxyUrl: proxy.url,
+      proxyUrl: proxyInstance.url,
       customHostSettings: [{ url: target.url, ssl: { verificationMode: 'none' } }],
     });
 
@@ -422,7 +423,7 @@ async function runWithSetup(opts: RunTestOptions, fn: Test) {
     requireAuth: opts.targetAuth,
   });
 
-  const proxy = await createProxy({
+  const proxyInstance = await createProxy({
     useHttps: opts.proxyHttps,
     requireAuth: opts.proxyAuth,
   });
@@ -433,18 +434,18 @@ async function runWithSetup(opts: RunTestOptions, fn: Test) {
     validateStatus,
     url: target.url,
     configurationUtilities: getACUfromConfig({
-      proxyUrl: proxy.url,
+      proxyUrl: proxyInstance.url,
     }),
   };
 
   try {
-    await fn(target, proxy, axiosDefaults);
+    await fn(target, proxyInstance, axiosDefaults);
   } catch (err) {
     expect(err).toBeUndefined();
   }
 
   target.server.close();
-  proxy.server.close();
+  proxyInstance.server.close();
 }
 
 function testLabel(type: string, tls: boolean, auth: boolean) {
@@ -553,7 +554,7 @@ async function createProxy(options: CreateProxyOptions): Promise<CreateProxyResu
   }
   proxyServer.unref();
 
-  proxySetup(proxyServer);
+  proxy.createProxy(proxyServer);
   if (requireAuth) {
     (proxyServer as unknown as IAuthenticate).authenticate = (req, callback) => {
       const auth = req.headers['proxy-authorization'];
@@ -593,6 +594,9 @@ const BaseActionsConfig: ActionsConfig = {
   responseTimeout: momentDuration(1000 * 30),
   customHostSettings: undefined,
   enableFooterInEmail: true,
+  microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+  microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {

@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should convert to Lens', async () => {
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
 
       const metricData = await lens.getMetricVisualizationData();
@@ -51,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
         const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
@@ -98,12 +98,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
 
       await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
         const closePalettePanels = await testSubjects.findAll(
-          'lns-indexPattern-PalettePanelContainerBack'
+          'lns-indexPattern-SettingWithSiblingFlyoutBack'
         );
         if (closePalettePanels.length) {
           await lens.closePalettePanel();
@@ -115,7 +115,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await dimensions[0].click();
 
-        await lens.openPalettePanel('lnsMetric');
+        await lens.openPalettePanel();
         const colorStops = await lens.getPaletteColorStops();
 
         expect(colorStops).to.eql([
@@ -125,6 +125,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           { stop: '', color: undefined },
         ]);
       });
+    });
+
+    it('should bring the ignore global filters configured at series level over', async () => {
+      await visualBuilder.clickSeriesOption();
+      await visualBuilder.setIgnoreFilters(true);
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisualization();
+      await lens.waitForVisualization('mtrVis');
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
+    });
+
+    it('should bring the ignore global filters configured at panel level over', async () => {
+      await visualBuilder.clickPanelOptions('gauge');
+      await visualBuilder.setIgnoreFilters(true);
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisualization();
+      await lens.waitForVisualization('mtrVis');
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
   });
 }

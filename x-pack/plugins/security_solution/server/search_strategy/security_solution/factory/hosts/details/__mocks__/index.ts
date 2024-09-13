@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import type { HostsFields } from '../../../../../../../common/api/search_strategy/hosts/model/sort';
 import type {
   HostDetailsRequestOptions,
   SortField,
-  HostsFields,
 } from '../../../../../../../common/search_strategy';
 import { Direction, HostsQueries } from '../../../../../../../common/search_strategy';
 

@@ -12,5 +12,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./general'));
     loadTestFile(require.resolve('./opsgenie'));
     loadTestFile(require.resolve('./tines'));
+    loadTestFile(require.resolve('./slack'));
   });
 };

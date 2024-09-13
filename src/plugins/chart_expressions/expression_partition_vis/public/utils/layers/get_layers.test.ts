@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ArrayEntry, ArrayNode } from '@elastic/charts';
@@ -110,5 +111,58 @@ describe('getLayers', () => {
         ],
       ]
     `);
+  });
+
+  it('should handle empty slices with default label', () => {
+    const visData = createMockVisData();
+    const visDataWithNullValues = {
+      ...visData,
+      rows: [
+        {
+          'col-0-2': 'Null Airways',
+          'col-1-1': null,
+          'col-2-3': null,
+          'col-3-1': null,
+        },
+      ],
+    };
+
+    const columns: BucketColumns[] = [
+      {
+        id: 'col-0-0',
+        name: 'Normal column',
+        meta: { type: 'murmur3' },
+      },
+      {
+        id: 'col-0-0',
+        name: 'multi-metric column',
+        meta: {
+          type: 'number',
+          sourceParams: {
+            consolidatedMetricsColumn: true,
+          },
+        },
+      },
+    ];
+    const visParams = createMockPieParams();
+    const layers = getLayers(
+      ChartTypes.PIE,
+      columns,
+      visParams,
+      visDataWithNullValues,
+      {},
+      [],
+      getPaletteRegistry(),
+      {},
+      fieldFormatsMock,
+      false,
+      false
+    );
+
+    for (const layer of layers) {
+      expect(layer.groupByRollup(visDataWithNullValues.rows[0], 0)).toEqual('(empty)');
+      expect(layer.showAccessor?.(visDataWithNullValues.rows[0]['col-0-2'])).toEqual(true);
+      expect(layer.nodeLabel?.(visDataWithNullValues.rows[0]['col-0-2'])).toEqual('Null Airways');
+    }
   });
 });

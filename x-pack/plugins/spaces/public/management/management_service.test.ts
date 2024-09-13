@@ -10,11 +10,22 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { ManagementSection } from '@kbn/management-plugin/public';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 
+import { ManagementService } from './management_service';
+import { getRolesAPIClientMock } from './roles_api_client.mock';
+import { EventTracker } from '../analytics';
+import type { ConfigType } from '../config';
 import type { PluginsStart } from '../plugin';
 import { spacesManagerMock } from '../spaces_manager/mocks';
-import { ManagementService } from './management_service';
+
+const eventTracker = new EventTracker({ reportEvent: jest.fn() });
 
 describe('ManagementService', () => {
+  const config: ConfigType = {
+    maxSpaces: 1000,
+    allowFeatureVisibility: true,
+    allowSolutionVisibility: true,
+  };
+
   describe('#setup', () => {
     it('registers the spaces management page under the kibana section', () => {
       const mockKibanaSection = {
@@ -22,15 +33,18 @@ describe('ManagementService', () => {
       } as unknown as ManagementSection;
       const managementMockSetup = managementPluginMock.createSetupContract();
       managementMockSetup.sections.section.kibana = mockKibanaSection;
-      const deps = {
+
+      const service = new ManagementService();
+      service.setup({
         management: managementMockSetup,
         getStartServices: coreMock.createSetup()
           .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
-      };
-
-      const service = new ManagementService();
-      service.setup(deps);
+        config,
+        getRolesAPIClient: getRolesAPIClientMock,
+        getPrivilegesAPIClient: jest.fn(),
+        eventTracker,
+      });
 
       expect(mockKibanaSection.registerApp).toHaveBeenCalledTimes(1);
       expect(mockKibanaSection.registerApp).toHaveBeenCalledWith({
@@ -42,15 +56,17 @@ describe('ManagementService', () => {
     });
 
     it('will not crash if the kibana section is missing', () => {
-      const deps = {
+      const service = new ManagementService();
+      service.setup({
         management: managementPluginMock.createSetupContract(),
         getStartServices: coreMock.createSetup()
           .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
-      };
-
-      const service = new ManagementService();
-      service.setup(deps);
+        config,
+        getRolesAPIClient: getRolesAPIClientMock,
+        getPrivilegesAPIClient: jest.fn(),
+        eventTracker,
+      });
     });
   });
 
@@ -63,15 +79,17 @@ describe('ManagementService', () => {
       const managementMockSetup = managementPluginMock.createSetupContract();
       managementMockSetup.sections.section.kibana = mockKibanaSection;
 
-      const deps = {
+      const service = new ManagementService();
+      service.setup({
         management: managementMockSetup,
         getStartServices: coreMock.createSetup()
           .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
-      };
-
-      const service = new ManagementService();
-      service.setup(deps);
+        config,
+        getRolesAPIClient: jest.fn(),
+        getPrivilegesAPIClient: jest.fn(),
+        eventTracker,
+      });
 
       service.stop();
 

@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { KbnClientRequester, pathWithSpace } from './kbn_client_requester';
 
-export type UiSettingValues = Record<string, string | number | boolean>;
+export type UiSettingValues = Record<string, string | number | boolean | string[]>;
 interface UiSettingsApiResponse {
   settings: {
     [key: string]: {
@@ -47,7 +48,7 @@ export class KbnClientUiSettings {
    */
   async unset(setting: string, { space }: { space?: string } = {}) {
     const { data } = await this.requester.request<any>({
-      path: pathWithSpace(space)`/api/kibana/settings/${setting}`,
+      path: pathWithSpace(space)`/internal/kibana/settings/${setting}`,
       method: 'DELETE',
     });
     return data;
@@ -69,14 +70,14 @@ export class KbnClientUiSettings {
     };
 
     for (const [name, { isOverridden }] of Object.entries(await this.getAll())) {
-      if (!isOverridden && !changes.hasOwnProperty(name)) {
+      if (!isOverridden && !Object.hasOwn(changes, name)) {
         changes[name] = null;
       }
     }
 
     await this.requester.request({
       method: 'POST',
-      path: pathWithSpace(space)`/api/kibana/settings`,
+      path: pathWithSpace(space)`/internal/kibana/settings`,
       body: { changes },
       retries,
     });
@@ -89,7 +90,7 @@ export class KbnClientUiSettings {
     this.log.debug('applying update to kibana config: %j', updates);
 
     await this.requester.request({
-      path: pathWithSpace(space)`/api/kibana/settings`,
+      path: pathWithSpace(space)`/internal/kibana/settings`,
       method: 'POST',
       body: {
         changes: updates,
@@ -100,7 +101,7 @@ export class KbnClientUiSettings {
 
   private async getAll({ space }: { space?: string } = {}) {
     const { data } = await this.requester.request<UiSettingsApiResponse>({
-      path: pathWithSpace(space)`/api/kibana/settings`,
+      path: pathWithSpace(space)`/internal/kibana/settings`,
       method: 'GET',
     });
 

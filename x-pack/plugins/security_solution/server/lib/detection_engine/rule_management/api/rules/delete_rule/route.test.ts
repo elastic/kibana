@@ -13,21 +13,10 @@ import {
   getFindResultWithSingleHit,
   getDeleteRequestById,
   getEmptySavedObjectsResponse,
-  getRuleMock,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { deleteRuleRoute } from './route';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
-
-jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');
-  return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
 
 describe('Delete rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -38,9 +27,8 @@ describe('Delete rule route', () => {
     ({ clients, context } = requestContextMock.createTools());
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.detectionRulesClient.deleteRule.mockResolvedValue();
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
-
-    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     deleteRuleRoute(server.router);
   });
@@ -67,7 +55,7 @@ describe('Delete rule route', () => {
 
     test('returns 404 when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      (legacyMigrate as jest.Mock).mockResolvedValue(null);
+
       const response = await server.inject(
         getDeleteRequest(),
         requestContextMock.convertContext(context)
@@ -81,7 +69,7 @@ describe('Delete rule route', () => {
     });
 
     test('catches error if deletion throws error', async () => {
-      clients.rulesClient.delete.mockImplementation(async () => {
+      clients.detectionRulesClient.deleteRule.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(

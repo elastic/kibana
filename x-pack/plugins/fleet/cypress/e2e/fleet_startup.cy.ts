@@ -17,31 +17,18 @@ import {
   LANDING_PAGE_ADD_FLEET_SERVER_BUTTON,
 } from '../screens/fleet';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
+import { request } from '../tasks/common';
 import { verifyPolicy, verifyAgentPackage, navigateToTab } from '../tasks/fleet';
-import { deleteFleetServer } from '../tasks/fleet_server';
+import { setFleetServerHost } from '../tasks/fleet_server';
+import { login } from '../tasks/login';
 import { FLEET, navigateTo } from '../tasks/navigation';
 
 describe('Fleet startup', () => {
-  // skipping Fleet Server enroll, to enable, comment out runner.ts line 23
-  describe.skip('Fleet Server', () => {
-    it('should display Add agent button and Healthy agent once Fleet Agent page loaded', () => {
-      navigateTo(FLEET);
-      cy.get('.euiBadge').contains('Healthy');
-
-      verifyPolicy('Fleet Server policy', ['Fleet Server']);
-    });
-
-    after(() => {
-      unenrollAgent();
-      cleanupAgentPolicies();
-    });
-  });
-
   describe('Create policies', () => {
     before(() => {
       unenrollAgent();
       cleanupAgentPolicies();
-      deleteFleetServer();
+      setFleetServerHost();
     });
 
     after(() => {
@@ -49,11 +36,12 @@ describe('Fleet startup', () => {
     });
 
     beforeEach(() => {
+      login();
       navigateTo(FLEET);
     });
 
     it('should have no agent policy by default', () => {
-      cy.request('/api/fleet/agent_policies?full=true').then((response: any) => {
+      request({ url: '/api/fleet/agent_policies?full=true' }).then((response: any) => {
         expect(response.body.items.length).to.equal(0);
       });
     });

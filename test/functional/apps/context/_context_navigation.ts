@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -24,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'context', 'discover', 'timePicker']);
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
-  const find = getService('find');
+  const testSubjects = getService('testSubjects');
 
   const checkMainViewFilters = async () => {
     for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
@@ -82,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await rowActions[1].click();
           await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-          await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+          await testSubjects.click(`~breadcrumb & ~first`);
           await PageObjects.discover.waitForDocTableLoadingComplete();
 
           await checkMainViewFilters();
@@ -101,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.context.waitUntilContextLoadingHasFinished();
           await browser.refresh();
           await PageObjects.context.waitUntilContextLoadingHasFinished();
-          await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+          await testSubjects.click(`~breadcrumb & ~first`);
           await PageObjects.discover.waitForDocTableLoadingComplete();
 
           await checkMainViewFilters();
@@ -122,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.removeFilter('agent');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await testSubjects.click(`~breadcrumb & ~first`);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await filterBar.getFilterCount()).to.eql(2);
@@ -135,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [filterName, filterValue] = TEST_FILTER_COLUMN_NAMES[1];
       expect(await filterBar.hasFilter(filterName, filterValue, false)).to.eql(true);
 
-      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await testSubjects.click(`~breadcrumb & ~first`);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await filterBar.getFilterCount()).to.eql(2);

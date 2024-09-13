@@ -6,10 +6,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { APP_ID } from '../../../../../common';
 import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
 import {
   AlertsCasesTourSteps,
@@ -17,9 +17,10 @@ import {
   SecurityStepId,
 } from '../../../../common/components/guided_onboarding_tour/tour_config';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
-import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
+import type { AlertTableContextMenuItem } from '../types';
 
 export interface UseAddToCaseActions {
   onMenuItemClick: () => void;
@@ -29,7 +30,7 @@ export interface UseAddToCaseActions {
   onSuccess?: () => Promise<void>;
   isActiveTimelines: boolean;
   isInDetections: boolean;
-  refetch: (() => void) | undefined;
+  refetch?: (() => void) | undefined;
 }
 
 export const useAddToCaseActions = ({
@@ -43,7 +44,7 @@ export const useAddToCaseActions = ({
   refetch,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = casesUi.helpers.canUseCases([APP_ID]);
 
   const isAlert = useMemo(() => {
     return ecsData?.event?.kind?.includes('signal');
@@ -55,7 +56,7 @@ export const useAddToCaseActions = ({
           {
             alertId: ecsData?._id ?? '',
             index: ecsData?._index ?? '',
-            type: CommentType.alert,
+            type: AttachmentType.alert,
             rule: casesUi.helpers.getRuleIdFromEvent({ ecs: ecsData, data: nonEcsData ?? [] }),
           },
         ]
@@ -64,7 +65,7 @@ export const useAddToCaseActions = ({
 
   const { activeStep, incrementStep, setStep, isTourShown } = useTourContext();
 
-  const onCaseSuccess = () => {
+  const onCaseSuccess = useCallback(() => {
     if (onSuccess) {
       onSuccess();
     }
@@ -72,7 +73,7 @@ export const useAddToCaseActions = ({
     if (refetch) {
       refetch();
     }
-  };
+  }, [onSuccess, refetch]);
 
   const afterCaseCreated = useCallback(async () => {
     if (isTourShown(SecurityStepId.alertsCases)) {
@@ -91,17 +92,25 @@ export const useAddToCaseActions = ({
     [activeStep, isTourShown]
   );
 
-  const createCaseFlyout = casesUi.hooks.useCasesAddToNewCaseFlyout({
-    onClose: onMenuItemClick,
-    onSuccess: onCaseSuccess,
-    afterCaseCreated,
-    ...prefillCasesValue,
-  });
+  const createCaseArgs = useMemo(() => {
+    return {
+      onClose: onMenuItemClick,
+      onSuccess: onCaseSuccess,
+      afterCaseCreated,
+      ...prefillCasesValue,
+    };
+  }, [onMenuItemClick, onCaseSuccess, afterCaseCreated, prefillCasesValue]);
 
-  const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal({
-    onClose: onMenuItemClick,
-    onSuccess: onCaseSuccess,
-  });
+  const createCaseFlyout = casesUi.hooks.useCasesAddToNewCaseFlyout(createCaseArgs);
+
+  const selectCaseArgs = useMemo(() => {
+    return {
+      onClose: onMenuItemClick,
+      onSuccess: onCaseSuccess,
+    };
+  }, [onMenuItemClick, onCaseSuccess]);
+
+  const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal(selectCaseArgs);
 
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
@@ -130,7 +139,7 @@ export const useAddToCaseActions = ({
     selectCaseModal.open({ getAttachments: () => caseAttachments });
   }, [caseAttachments, onMenuItemClick, selectCaseModal]);
 
-  const addToCaseActionItems = useMemo(() => {
+  const addToCaseActionItems: AlertTableContextMenuItem[] = useMemo(() => {
     if (
       (isActiveTimelines || isInDetections) &&
       userCasesPermissions.create &&
@@ -139,25 +148,23 @@ export const useAddToCaseActions = ({
     ) {
       return [
         // add to existing case menu item
-        <EuiContextMenuItem
-          aria-label={ariaLabel}
-          data-test-subj="add-to-existing-case-action"
-          key="add-to-existing-case-action"
-          onClick={handleAddToExistingCaseClick}
-          size="s"
-        >
-          {ADD_TO_EXISTING_CASE}
-        </EuiContextMenuItem>,
+        {
+          'aria-label': ariaLabel,
+          'data-test-subj': 'add-to-existing-case-action',
+          key: 'add-to-existing-case-action',
+          onClick: handleAddToExistingCaseClick,
+          size: 's',
+          name: ADD_TO_EXISTING_CASE,
+        },
         // add to new case menu item
-        <EuiContextMenuItem
-          aria-label={ariaLabel}
-          data-test-subj="add-to-new-case-action"
-          key="add-to-new-case-action"
-          onClick={handleAddToNewCaseClick}
-          size="s"
-        >
-          {ADD_TO_NEW_CASE}
-        </EuiContextMenuItem>,
+        {
+          'aria-label': ariaLabel,
+          'data-test-subj': 'add-to-new-case-action',
+          key: 'add-to-new-case-action',
+          onClick: handleAddToNewCaseClick,
+          size: 's',
+          name: ADD_TO_NEW_CASE,
+        },
       ];
     }
     return [];
@@ -175,5 +182,6 @@ export const useAddToCaseActions = ({
   return {
     addToCaseActionItems,
     handleAddToNewCaseClick,
+    handleAddToExistingCaseClick,
   };
 };

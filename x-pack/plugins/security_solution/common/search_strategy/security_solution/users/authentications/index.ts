@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 
 import type { UserEcs, SourceEcs, HostEcs } from '@kbn/securitysolution-ecs';
 import type {
@@ -17,18 +17,13 @@ import type {
   Hit,
   TotalHit,
 } from '../../../common';
-import type { CommonFields, RequestOptionsPaginated } from '../..';
+import type { CommonFields } from '../..';
 
 export interface UserAuthenticationsStrategyResponse extends IEsSearchResponse {
   edges: AuthenticationsEdges[];
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
-}
-
-export interface UserAuthenticationsRequestOptions extends RequestOptionsPaginated {
-  defaultIndex: string[];
-  stackByField: AuthStackByField;
 }
 
 export enum AuthStackByField {

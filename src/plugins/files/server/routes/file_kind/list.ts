@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
@@ -25,6 +26,7 @@ const rt = {
   body: schema.object({
     status: schema.maybe(stringOrArrayOfStrings),
     extension: schema.maybe(stringOrArrayOfStrings),
+    mimeType: schema.maybe(stringOrArrayOfStrings),
     name: schema.maybe(nameStringOrArrayOfNameStrings),
     meta: commonSchemas.fileMeta,
   }),
@@ -42,7 +44,7 @@ export type Endpoint<M = unknown> = CreateRouteDefinition<
 
 export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req, res) => {
   const {
-    body: { name, status, extension, meta },
+    body: { name, status, extension, mimeType, meta },
     query: { page, perPage },
   } = req;
   const { fileService } = await files;
@@ -51,6 +53,7 @@ export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req,
     name: toArrayOrUndefined(name),
     status: toArrayOrUndefined(status),
     extension: toArrayOrUndefined(extension),
+    mimeType: toArrayOrUndefined(mimeType),
     page,
     perPage,
     meta: meta as Record<string, string>,

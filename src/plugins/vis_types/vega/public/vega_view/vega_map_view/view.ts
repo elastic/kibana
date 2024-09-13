@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -15,7 +16,7 @@ import { maplibregl } from '@kbn/mapbox-gl';
 
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';
-import { getUISettings } from '../../services';
+import { getThemeService } from '../../services';
 
 import { defaultMapConfig, defaultMabBoxStyle, vegaLayerId } from './constants';
 import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
@@ -98,7 +99,7 @@ export class VegaMapView extends VegaBaseView {
     const { mapStyle, emsTileServiceId } = this._parser.mapConfig;
     //
     if (mapStyle) {
-      const isDarkMode: boolean = getUISettings().get('theme:darkMode');
+      const isDarkMode: boolean = getThemeService().getTheme().darkMode;
       return emsTileServiceId
         ? emsTileServiceId
         : await this._serviceSettings.getDefaultTmsLayer(isDarkMode);
@@ -136,14 +137,14 @@ export class VegaMapView extends VegaBaseView {
     }
 
     // In some cases, Vega may be initialized twice, e.g. after awaiting...
-    if (!this._$container) return;
+    if (!this._container) return;
 
     // For the correct geration of the PDF/PNG report, we must wait until the map is fully rendered.
     return new Promise((resolve) => {
       const mapBoxInstance = new maplibregl.Map({
         style,
         customAttribution,
-        container: this._$container.get(0),
+        container: this._container,
         ...this.getMapParams({ ...zoomSettings }),
       });
 
@@ -206,7 +207,7 @@ export class VegaMapView extends VegaBaseView {
       map: mapBoxInstance,
       context: {
         vegaView,
-        vegaControls: this._$controls?.get(0),
+        vegaControls: this._controls,
         updateVegaView,
       },
     });

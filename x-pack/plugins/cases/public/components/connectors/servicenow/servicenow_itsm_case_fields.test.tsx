@@ -6,32 +6,33 @@
  */
 
 import React from 'react';
-import { waitFor, act, render, screen, within } from '@testing-library/react';
-import { EuiSelect } from '@elastic/eui';
-import { mount } from 'enzyme';
-import userEvent from '@testing-library/user-event';
+import { waitFor, screen, within } from '@testing-library/react';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
-import { useKibana } from '../../../common/lib/kibana';
-import { connector, choices as mockChoices } from '../mock';
-import type { Choice } from './types';
+import { connector, choices } from '../mock';
+import { useGetChoices } from './use_get_choices';
 import Fields from './servicenow_itsm_case_fields';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-
-let onChoicesSuccess = (c: Choice[]) => {};
+import { MockFormWrapperComponent } from '../test_utils';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('./use_get_choices', () => ({
-  useGetChoices: (args: { onSuccess: () => void }) => {
-    onChoicesSuccess = args.onSuccess;
-    return { isLoading: false, choices: mockChoices };
-  },
-}));
+jest.mock('./use_get_choices');
+const useGetChoicesMock = useGetChoices as jest.Mock;
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-let mockedContext: AppMockRenderer;
+let appMockRenderer: AppMockRenderer;
 
 describe('ServiceNowITSM Fields', () => {
+  let user: UserEvent;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   const fields = {
     severity: '1',
     urgency: '2',
@@ -39,216 +40,166 @@ describe('ServiceNowITSM Fields', () => {
     category: 'software',
     subcategory: 'os',
   };
-  const onChange = jest.fn();
 
   beforeEach(() => {
-    mockedContext = createAppMockRenderer();
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
-      actionTypeTitle: '.servicenow',
-      iconClass: 'logoSecurity',
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+    });
+    appMockRenderer = createAppMockRenderer();
+    useGetChoicesMock.mockReturnValue({
+      isLoading: false,
+      isFetching: false,
+      data: { data: choices },
     });
     jest.clearAllMocks();
   });
 
-  it('all params fields are rendered - isEdit: true', () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    act(() => {
-      onChoicesSuccess(mockChoices);
-    });
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="severitySelect"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="urgencySelect"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="impactSelect"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="categorySelect"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeTruthy();
-  });
-
-  it('all params fields are rendered - isEdit: false', () => {
-    const wrapper = mount(
-      <Fields isEdit={false} fields={fields} onChange={onChange} connector={connector} />
+  it('all params fields are rendered', async () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
-    act(() => {
-      onChoicesSuccess(mockChoices);
-    });
 
-    const nodes = wrapper.find('[data-test-subj="card-list-item"]').hostNodes();
-
-    expect(nodes.at(0).text()).toEqual('Urgency: 2 - High');
-    expect(nodes.at(1).text()).toEqual('Severity: 1 - Critical');
-    expect(nodes.at(2).text()).toEqual('Impact: 3 - Moderate');
+    expect(await screen.findByTestId('severitySelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('urgencySelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('impactSelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('categorySelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('subcategorySelect')).toBeInTheDocument();
   });
 
   it('transforms the categories to options correctly', async () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    act(() => {
-      onChoicesSuccess(mockChoices);
-    });
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
 
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="categorySelect"]').first().prop('options')).toEqual([
-      { value: 'Priviledge Escalation', text: 'Priviledge Escalation' },
-      {
-        value: 'Criminal activity/investigation',
-        text: 'Criminal activity/investigation',
-      },
-      { value: 'Denial of Service', text: 'Denial of Service' },
-      {
-        value: 'software',
-        text: 'Software',
-      },
-      {
-        text: 'Failed Login',
-        value: 'failed_login',
-      },
-    ]);
+    expect(await screen.findByRole('option', { name: 'Privilege Escalation' }));
+    expect(await screen.findByRole('option', { name: 'Criminal activity/investigation' }));
+    expect(await screen.findByRole('option', { name: 'Denial of Service' }));
+    expect(await screen.findByRole('option', { name: 'Software' }));
+    expect(await screen.findByRole('option', { name: 'Failed Login' }));
   });
 
   it('transforms the subcategories to options correctly', async () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    act(() => {
-      onChoicesSuccess(mockChoices);
-    });
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
 
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="subcategorySelect"]').first().prop('options')).toEqual([
-      {
-        text: 'Operation System',
-        value: 'os',
-      },
-    ]);
+    expect(await screen.findByRole('option', { name: 'Operation System' }));
   });
 
   it('transforms the options correctly', async () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    act(() => {
-      onChoicesSuccess(mockChoices);
-    });
-
-    wrapper.update();
-    const testers = ['severity', 'urgency', 'impact'];
-    testers.forEach((subj) =>
-      expect(wrapper.find(`[data-test-subj="${subj}Select"]`).first().prop('options')).toEqual([
-        { value: '1', text: '1 - Critical' },
-        { value: '2', text: '2 - High' },
-        { value: '3', text: '3 - Moderate' },
-        { value: '4', text: '4 - Low' },
-      ])
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
+
+    expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
+
+    const testers = ['severity', 'urgency', 'impact'];
+    testers.forEach((subj) => {
+      const select = within(screen.getByTestId(`${subj}Select`));
+
+      expect(select.getByRole('option', { name: '1 - Critical' }));
+      expect(select.getByRole('option', { name: '2 - High' }));
+      expect(select.getByRole('option', { name: '3 - Moderate' }));
+      expect(select.getByRole('option', { name: '4 - Low' }));
+    });
   });
 
   it('shows the deprecated callout if the connector is deprecated', async () => {
     const tableApiConnector = { ...connector, isDeprecated: true };
-    render(<Fields fields={fields} onChange={onChange} connector={tableApiConnector} />);
-    expect(screen.getByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
+
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={tableApiConnector} />
+      </MockFormWrapperComponent>
+    );
+
+    expect(await screen.findByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
   });
 
   it('does not show the deprecated callout when the connector is not deprecated', async () => {
-    render(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
     expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
   });
 
   it('does not show the deprecated callout when the connector is preconfigured and not deprecated', async () => {
-    render(
-      <Fields
-        fields={fields}
-        onChange={onChange}
-        connector={{ ...connector, isPreconfigured: true }}
-      />
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={{ ...connector, isPreconfigured: true }} />
+      </MockFormWrapperComponent>
     );
+
     expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
   });
 
   it('shows the deprecated callout when the connector is preconfigured and deprecated', async () => {
-    render(
-      <Fields
-        fields={fields}
-        onChange={onChange}
-        connector={{ ...connector, isPreconfigured: true, isDeprecated: true }}
-      />
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={{ ...connector, isPreconfigured: true, isDeprecated: true }} />
+      </MockFormWrapperComponent>
     );
-    expect(screen.queryByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
+
+    expect(await screen.findByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
   });
 
-  it('should hide subcategory if selecting a category without subcategories', async () => {
+  it('shows the subcategory if the selected category does not have subcategories', async () => {
     // Failed Login doesn't have defined subcategories
     const customFields = {
       ...fields,
       category: 'Failed Login',
       subcategory: '',
     };
-    const wrapper = mount(
-      <Fields fields={customFields} onChange={onChange} connector={connector} />
+
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={customFields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeFalsy();
+    expect(await screen.findByTestId('subcategorySelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('subcategorySelect')).not.toHaveValue();
   });
 
-  describe('onChange calls', () => {
-    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    act(() => {
-      onChoicesSuccess(mockChoices);
-    });
-    wrapper.update();
-
-    expect(onChange).toHaveBeenCalledWith(fields);
-
-    const testers = ['severity', 'urgency', 'impact', 'subcategory'];
+  describe('changing selectables', () => {
+    const testers = ['severity', 'urgency', 'impact'];
     testers.forEach((subj) =>
       it(`${subj.toUpperCase()}`, async () => {
-        await waitFor(() => {
-          const select = wrapper.find(EuiSelect).filter(`[data-test-subj="${subj}Select"]`)!;
-          select.prop('onChange')!({
-            target: {
-              value: '9',
-            },
-          } as React.ChangeEvent<HTMLSelectElement>);
-        });
-        wrapper.update();
-        expect(onChange).toHaveBeenCalledWith({
-          ...fields,
-          [subj]: '9',
-        });
+        appMockRenderer.render(
+          <MockFormWrapperComponent fields={fields}>
+            <Fields connector={connector} />
+          </MockFormWrapperComponent>
+        );
+
+        const select = await screen.findByTestId(`${subj}Select`);
+        await user.selectOptions(select, '4 - Low');
+
+        expect(select).toHaveValue('4');
       })
     );
-
-    it('should set subcategory to null when changing category', async () => {
-      await waitFor(() => {
-        const select = wrapper.find(EuiSelect).filter(`[data-test-subj="categorySelect"]`)!;
-        select.prop('onChange')!({
-          target: {
-            value: 'network',
-          },
-        } as React.ChangeEvent<HTMLSelectElement>);
-      });
-      wrapper.update();
-      expect(onChange).toHaveBeenCalledWith({
-        ...fields,
-        subcategory: null,
-        category: 'network',
-      });
-    });
   });
 
   it('should submit a service now itsm connector', async () => {
-    const { rerender } = mockedContext.render(
-      <Fields fields={fields} onChange={onChange} connector={connector} />
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
 
-    act(() => {
-      onChoicesSuccess(mockChoices);
-    });
-
-    const severitySelect = screen.getByTestId('severitySelect');
-    const urgencySelect = screen.getByTestId('urgencySelect');
-    const impactSelect = screen.getByTestId('impactSelect');
-
-    await waitFor(() => {
-      expect(within(severitySelect).getByRole('option', { name: '2 - High' }));
-      expect(within(urgencySelect).getByRole('option', { name: '2 - High' }));
-      expect(within(impactSelect).getByRole('option', { name: '2 - High' }));
-
-      expect(screen.getByRole('option', { name: 'Software' }));
-    });
+    const severitySelect = await screen.findByTestId('severitySelect');
+    const urgencySelect = await screen.findByTestId('urgencySelect');
+    const impactSelect = await screen.findByTestId('impactSelect');
 
     const selectables: Array<[HTMLElement, 'severity' | 'urgency' | 'impact']> = [
       [severitySelect, 'severity'],
@@ -256,52 +207,51 @@ describe('ServiceNowITSM Fields', () => {
       [impactSelect, 'impact'],
     ];
 
-    let newFields = { ...fields };
+    for (const [element] of selectables) {
+      await user.selectOptions(element, ['2']);
+    }
+    const categorySelect = await screen.findByTestId('categorySelect');
 
-    selectables.forEach(([element, key]) => {
-      userEvent.selectOptions(element, ['2']);
+    expect(await within(categorySelect).findByRole('option', { name: 'Software' }));
 
-      rerender(
-        <Fields fields={{ ...newFields, [key]: '2' }} onChange={onChange} connector={connector} />
-      );
+    await user.selectOptions(categorySelect, ['software']);
 
-      newFields = { ...newFields, [key]: '2' };
-    });
+    const subcategorySelect = await screen.findByTestId('subcategorySelect');
 
-    const categorySelect = screen.getByTestId('categorySelect');
+    expect(await within(subcategorySelect).findByRole('option', { name: 'Operation System' }));
 
-    await waitFor(() => {
-      expect(within(categorySelect).getByRole('option', { name: 'Software' }));
-    });
+    await user.selectOptions(subcategorySelect, ['os']);
 
-    userEvent.selectOptions(categorySelect, ['software']);
+    expect(severitySelect).toHaveValue('2');
+    expect(urgencySelect).toHaveValue('2');
+    expect(impactSelect).toHaveValue('2');
+    expect(categorySelect).toHaveValue('software');
+    expect(subcategorySelect).toHaveValue('os');
+  });
 
-    rerender(
-      <Fields
-        fields={{ ...newFields, category: 'software' }}
-        onChange={onChange}
-        connector={connector}
-      />
+  it('resets subcategory when changing category', async () => {
+    appMockRenderer.render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
     );
 
-    const subcategorySelect = screen.getByTestId('subcategorySelect');
+    const categorySelect = await screen.findByTestId('categorySelect');
+
+    expect(await within(categorySelect).findByRole('option', { name: 'Software' }));
+
+    await user.selectOptions(categorySelect, ['software']);
+
+    const subcategorySelect = await screen.findByTestId('subcategorySelect');
+
+    expect(await within(subcategorySelect).findByRole('option', { name: 'Operation System' }));
+
+    expect(subcategorySelect).toHaveValue('os');
+
+    await user.selectOptions(categorySelect, ['Privilege Escalation']);
 
     await waitFor(() => {
-      expect(within(subcategorySelect).getByRole('option', { name: 'Operation System' }));
-    });
-
-    userEvent.selectOptions(subcategorySelect, ['os']);
-
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalled();
-    });
-
-    expect(onChange).toBeCalledWith({
-      impact: '2',
-      severity: '2',
-      urgency: '2',
-      category: 'software',
-      subcategory: 'os',
+      expect(subcategorySelect).not.toHaveValue();
     });
   });
 });

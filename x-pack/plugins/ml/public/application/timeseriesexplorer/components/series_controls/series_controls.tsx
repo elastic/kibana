@@ -5,22 +5,27 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectProps } from '@elastic/eui';
+import type { EuiSelectProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { useStorage } from '@kbn/ml-local-storage';
+import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { EntityControl } from '../entity_control';
-import { mlJobService } from '../../../services/job_service';
-import { Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs';
+import { useMlJobService } from '../../../services/job_service';
+import type {
+  CombinedJob,
+  Detector,
+  JobId,
+} from '../../../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../../../contexts/kibana';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer_constants';
-import {
-  ComboBoxOption,
-  EMPTY_FIELD_VALUE_LABEL,
-  EntityControlProps,
-} from '../entity_control/entity_control';
+import type { ComboBoxOption, EntityControlProps } from '../entity_control/entity_control';
+import { EMPTY_FIELD_VALUE_LABEL } from '../entity_control/entity_control';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import {
   ML_ENTITY_FIELDS_CONFIG,
@@ -29,10 +34,10 @@ import {
   type MlStorageKey,
   type TMlStorageMapped,
 } from '../../../../../common/types/storage';
-import { EntityFieldType } from '../../../../../common/types/anomalies';
-import { FieldDefinition } from '../../../services/results_service/result_service_rx';
+import type { FieldDefinition } from '../../../services/results_service/result_service_rx';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';
 import { PlotByFunctionControls } from '../plot_function_controls';
+import type { MlEntity } from '../../../../embeddables';
 
 function getEntityControlOptions(fieldValues: FieldDefinition['values']): ComboBoxOption[] {
   if (!Array.isArray(fieldValues)) {
@@ -52,7 +57,7 @@ export type UiPartitionFieldConfig = Exclude<PartitionFieldConfig, undefined>;
  * Provides default fields configuration.
  */
 const getDefaultFieldConfig = (
-  fieldTypes: EntityFieldType[],
+  fieldTypes: MlEntityFieldType[],
   isAnomalousOnly: boolean,
   applyTimeRange: boolean
 ): UiPartitionFieldsConfig => {
@@ -67,37 +72,46 @@ const getDefaultFieldConfig = (
 };
 
 interface SeriesControlsProps {
-  selectedDetectorIndex: number;
-  selectedJobId: JobId;
-  bounds: any;
   appStateHandler: Function;
-  selectedEntities: Record<string, any>;
-  functionDescription: string;
+  bounds: any;
+  direction?: 'column' | 'row';
+  functionDescription?: string;
+  job?: CombinedJob | MlJob;
+  selectedDetectorIndex: number;
+  selectedEntities?: MlEntity;
+  selectedJobId: JobId;
   setFunctionDescription: (func: string) => void;
 }
 
 /**
  * Component for handling the detector and entities controls.
  */
-export const SeriesControls: FC<SeriesControlsProps> = ({
-  bounds,
-  selectedDetectorIndex,
-  selectedJobId,
+export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
   appStateHandler,
+  bounds,
   children,
-  selectedEntities,
+  direction = 'row',
   functionDescription,
+  job,
+  selectedDetectorIndex,
+  selectedEntities,
+  selectedJobId,
   setFunctionDescription,
 }) => {
   const {
     services: {
       mlServices: {
-        mlApiServices: { results: mlResultsService },
+        mlApi: { results: mlResultsService },
       },
     },
   } = useMlKibana();
+  const mlJobService = useMlJobService();
 
-  const selectedJob = useMemo(() => mlJobService.getJob(selectedJobId), [selectedJobId]);
+  const selectedJob: CombinedJob | MlJob = useMemo(
+    () => job ?? mlJobService.getJob(selectedJobId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedJobId]
+  );
 
   const isModelPlotEnabled = !!selectedJob.model_plot_config?.enabled;
 
@@ -108,11 +122,16 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     index: number;
     detector_description: Detector['detector_description'];
   }> = useMemo(() => {
-    return getViewableDetectors(selectedJob);
+    return getViewableDetectors(selectedJob as CombinedJob);
   }, [selectedJob]);
 
   const entityControls = useMemo(() => {
-    return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJobId);
+    return getControlsForDetector(
+      selectedDetectorIndex,
+      selectedEntities,
+      selectedJob as CombinedJob
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDetectorIndex, selectedEntities, selectedJobId]);
 
   const [storageFieldsConfig, setStorageFieldsConfig] = useStorage<
@@ -221,7 +240,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     appStateHandler(APP_STATE_ACTION.SET_ENTITIES, resultEntities);
   };
 
-  const detectorIndexChangeHandler: EuiSelectProps['onChange'] = useCallback(
+  const detectorIndexChangeHandler = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (e) => {
       const id = e.target.value;
       if (id !== undefined) {
@@ -249,8 +268,8 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
         // In case anomalous selector has been changed
         // we need to change it for all the other fields
         for (const c in updatedResultConfig) {
-          if (updatedResultConfig.hasOwnProperty(c)) {
-            updatedResultConfig[c as EntityFieldType]!.anomalousOnly =
+          if (Object.hasOwn(updatedResultConfig, c)) {
+            updatedResultConfig[c as MlEntityFieldType]!.anomalousOnly =
               updatedFieldConfig.anomalousOnly;
           }
         }
@@ -260,8 +279,8 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
         // In case time range selector has been changed
         // we need to change it for all the other fields
         for (const c in updatedResultConfig) {
-          if (updatedResultConfig.hasOwnProperty(c)) {
-            updatedResultConfig[c as EntityFieldType]!.applyTimeRange =
+          if (Object.hasOwn(updatedResultConfig, c)) {
+            updatedResultConfig[c as MlEntityFieldType]!.applyTimeRange =
               updatedFieldConfig.applyTimeRange;
           }
         }
@@ -280,7 +299,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
 
   return (
     <div data-test-subj="mlSingleMetricViewerSeriesControls">
-      <EuiFlexGroup>
+      <EuiFlexGroup direction={direction}>
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={
@@ -318,6 +337,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
           );
         })}
         <PlotByFunctionControls
+          job={job}
           selectedJobId={selectedJobId}
           selectedDetectorIndex={selectedDetectorIndex}
           selectedEntities={selectedEntities}

@@ -18,20 +18,35 @@ value:
       "severity": "low",
       "closed_at": null,
       "closed_by": null,
-      "created_at": "2022-05-13T09:16:17.416Z",
+      "created_at": "2023-10-13T09:16:17.416Z",
       "created_by": {
         "email": null,
         "full_name": null,
-        "username": "elastic"
+        "username": "elastic",
+        "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
       },
       "status": "open",
-      "updated_at": "2022-05-13T09:48:33.043Z",
+      "updated_at": "2023-10-13T09:48:33.043Z",
       "updated_by": {
         "email": null,
         "full_name": null,
-        "username": "elastic"
+        "username": "elastic",
+        "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
       },
       "assignees": [],
+      "category": null,
+      "customFields": [
+      {
+        "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
+        "type": "text",
+        "value": "My new field value"
+      },
+      {
+        "key": "fcc6840d-eb14-42df-8aaf-232201a705ec",
+        "type": "toggle",
+        "value": false
+      }
+    ],
       "connector": {
         "id": "131d4448-abe0-4789-939d-8ef60680b498",
         "name": "My connector",
@@ -50,7 +65,7 @@ value:
           "username": "elastic"
         },
         "external_url": "https://hms.atlassian.net/browse/IS-4",
-        "pushed_at": "2022-05-13T09:20:40.672Z",
+        "pushed_at": "2023-10-13T09:20:40.672Z",
         "connector_id": "05da469f-1fde-4058-99a3-91e4807e2de8",
         "external_id": "10003",
         "connector_name": "Jira"

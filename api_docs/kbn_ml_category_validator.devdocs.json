@@ -1,0 +1,705 @@
+{
+  "id": "@kbn/ml-category-validator",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.categorizationExamplesProvider",
+        "type": "Function",
+        "tags": [
+          "export"
+        ],
+        "label": "categorizationExamplesProvider",
+        "description": [
+          "\nProvides methods for checking whether categories can be\nproduced from a field.\n"
+        ],
+        "signature": [
+          "(client: ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-server.IScopedClusterClient",
+            "text": "IScopedClusterClient"
+          },
+          ") => { validateCategoryExamples: (indexPatternTitle: string, query: ",
+          "QueryDslQueryContainer",
+          ", size: number, categorizationFieldName: string, timeField: string | undefined, start: number, end: number, analyzer: ",
+          {
+            "pluginId": "@kbn/ml-category-validator",
+            "scope": "common",
+            "docId": "kibKbnMlCategoryValidatorPluginApi",
+            "section": "def-common.CategorizationAnalyzer",
+            "text": "CategorizationAnalyzer"
+          },
+          ", runtimeMappings: ",
+          "MappingRuntimeFields",
+          " | undefined, indicesOptions: ",
+          "IndicesOptions",
+          " | undefined, includeExamples?: boolean) => Promise<{ overallValidStatus: ",
+          {
+            "pluginId": "@kbn/ml-category-validator",
+            "scope": "common",
+            "docId": "kibKbnMlCategoryValidatorPluginApi",
+            "section": "def-common.CATEGORY_EXAMPLES_VALIDATION_STATUS",
+            "text": "CATEGORY_EXAMPLES_VALIDATION_STATUS"
+          },
+          "; validationChecks: ",
+          {
+            "pluginId": "@kbn/ml-category-validator",
+            "scope": "common",
+            "docId": "kibKbnMlCategoryValidatorPluginApi",
+            "section": "def-common.FieldExampleCheck",
+            "text": "FieldExampleCheck"
+          },
+          "[]; sampleSize: number; examples?: undefined; } | { overallValidStatus: ",
+          {
+            "pluginId": "@kbn/ml-category-validator",
+            "scope": "common",
+            "docId": "kibKbnMlCategoryValidatorPluginApi",
+            "section": "def-common.CATEGORY_EXAMPLES_VALIDATION_STATUS",
+            "text": "CATEGORY_EXAMPLES_VALIDATION_STATUS"
+          },
+          "; validationChecks: ",
+          {
+            "pluginId": "@kbn/ml-category-validator",
+            "scope": "common",
+            "docId": "kibKbnMlCategoryValidatorPluginApi",
+            "section": "def-common.FieldExampleCheck",
+            "text": "FieldExampleCheck"
+          },
+          "[]; sampleSize: number; examples: { text: string; tokens: ",
+          {
+            "pluginId": "@kbn/ml-category-validator",
+            "scope": "common",
+            "docId": "kibKbnMlCategoryValidatorPluginApi",
+            "section": "def-common.Token",
+            "text": "Token"
+          },
+          "[]; }[]; }>; }"
+        ],
+        "path": "x-pack/packages/ml/category_validator/src/examples.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.categorizationExamplesProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "- IScopedClusterClient"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.IScopedClusterClient",
+                "text": "IScopedClusterClient"
+              }
+            ],
+            "path": "x-pack/packages/ml/category_validator/src/examples.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.CategoryFieldExample",
+        "type": "Interface",
+        "tags": [],
+        "label": "CategoryFieldExample",
+        "description": [
+          "\nField example for a category."
+        ],
+        "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.CategoryFieldExample.text",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [
+              "\nThe text of the field example."
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.CategoryFieldExample.tokens",
+            "type": "Array",
+            "tags": [],
+            "label": "tokens",
+            "description": [
+              "\nThe tokens extracted from the field example."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-category-validator",
+                "scope": "common",
+                "docId": "kibKbnMlCategoryValidatorPluginApi",
+                "section": "def-common.Token",
+                "text": "Token"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.FieldExampleCheck",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldExampleCheck",
+        "description": [
+          "\nResult of a field example check."
+        ],
+        "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.FieldExampleCheck.id",
+            "type": "Enum",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nThe ID of the validation result."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-category-validator",
+                "scope": "common",
+                "docId": "kibKbnMlCategoryValidatorPluginApi",
+                "section": "def-common.VALIDATION_RESULT",
+                "text": "VALIDATION_RESULT"
+              }
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.FieldExampleCheck.valid",
+            "type": "Enum",
+            "tags": [],
+            "label": "valid",
+            "description": [
+              "\nThe validation status of the field example."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-category-validator",
+                "scope": "common",
+                "docId": "kibKbnMlCategoryValidatorPluginApi",
+                "section": "def-common.CATEGORY_EXAMPLES_VALIDATION_STATUS",
+                "text": "CATEGORY_EXAMPLES_VALIDATION_STATUS"
+              }
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.FieldExampleCheck.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [
+              "\nThe message associated with the validation result."
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.FieldValidationResults",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldValidationResults",
+        "description": [
+          "\nValidation results for a specific field."
+        ],
+        "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.FieldValidationResults.examples",
+            "type": "Array",
+            "tags": [
+              "type"
+            ],
+            "label": "examples",
+            "description": [
+              "\nAn array of example objects representing category field examples."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-category-validator",
+                "scope": "common",
+                "docId": "kibKbnMlCategoryValidatorPluginApi",
+                "section": "def-common.CategoryFieldExample",
+                "text": "CategoryFieldExample"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.FieldValidationResults.sampleSize",
+            "type": "number",
+            "tags": [
+              "type"
+            ],
+            "label": "sampleSize",
+            "description": [
+              "\nThe total number of examples used for validation."
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.FieldValidationResults.overallValidStatus",
+            "type": "Enum",
+            "tags": [
+              "type"
+            ],
+            "label": "overallValidStatus",
+            "description": [
+              "\nThe overall validation status of the category examples."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-category-validator",
+                "scope": "common",
+                "docId": "kibKbnMlCategoryValidatorPluginApi",
+                "section": "def-common.CATEGORY_EXAMPLES_VALIDATION_STATUS",
+                "text": "CATEGORY_EXAMPLES_VALIDATION_STATUS"
+              }
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.FieldValidationResults.validationChecks",
+            "type": "Array",
+            "tags": [
+              "type"
+            ],
+            "label": "validationChecks",
+            "description": [
+              "\nAn array of validation checks performed on each example."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-category-validator",
+                "scope": "common",
+                "docId": "kibKbnMlCategoryValidatorPluginApi",
+                "section": "def-common.FieldExampleCheck",
+                "text": "FieldExampleCheck"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.Token",
+        "type": "Interface",
+        "tags": [],
+        "label": "Token",
+        "description": [
+          "\nToken"
+        ],
+        "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.Token.token",
+            "type": "string",
+            "tags": [],
+            "label": "token",
+            "description": [
+              "\nThe token string."
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.Token.start_offset",
+            "type": "number",
+            "tags": [],
+            "label": "start_offset",
+            "description": [
+              "\nThe starting offset of the token."
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.Token.end_offset",
+            "type": "number",
+            "tags": [],
+            "label": "end_offset",
+            "description": [
+              "\nThe ending offset of the token."
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.Token.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nThe type of the token."
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.Token.position",
+            "type": "number",
+            "tags": [],
+            "label": "position",
+            "description": [
+              "\nThe position of the token."
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.CATEGORY_EXAMPLES_VALIDATION_STATUS",
+        "type": "Enum",
+        "tags": [],
+        "label": "CATEGORY_EXAMPLES_VALIDATION_STATUS",
+        "description": [
+          "\nEnum representing the validation status of category examples."
+        ],
+        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.VALIDATION_RESULT",
+        "type": "Enum",
+        "tags": [],
+        "label": "VALIDATION_RESULT",
+        "description": [
+          "\nEnum representing the validation results for field examples."
+        ],
+        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.CategorizationAnalyzer",
+        "type": "Type",
+        "tags": [],
+        "label": "CategorizationAnalyzer",
+        "description": [
+          "\nCategorization analyzer with additional properties."
+        ],
+        "signature": [
+          "MlCategorizationAnalyzerDefinition",
+          " & { analyzer?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.CATEGORY_EXAMPLES_ERROR_LIMIT",
+        "type": "number",
+        "tags": [],
+        "label": "CATEGORY_EXAMPLES_ERROR_LIMIT",
+        "description": [
+          "\nThe error limit for category examples. If the category examples validation falls below this limit, an error is triggered."
+        ],
+        "signature": [
+          "0.02"
+        ],
+        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.CATEGORY_EXAMPLES_SAMPLE_SIZE",
+        "type": "number",
+        "tags": [],
+        "label": "CATEGORY_EXAMPLES_SAMPLE_SIZE",
+        "description": [
+          "\nThe number of category examples to use for analysis."
+        ],
+        "signature": [
+          "1000"
+        ],
+        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.CATEGORY_EXAMPLES_WARNING_LIMIT",
+        "type": "number",
+        "tags": [],
+        "label": "CATEGORY_EXAMPLES_WARNING_LIMIT",
+        "description": [
+          "\nThe warning limit for category examples. If the category examples validation falls below this limit, a warning is triggered."
+        ],
+        "signature": [
+          "0.75"
+        ],
+        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.MEDIAN_LINE_LENGTH_LIMIT",
+        "type": "number",
+        "tags": [],
+        "label": "MEDIAN_LINE_LENGTH_LIMIT",
+        "description": [
+          "\nThe limit for the median line length of category examples."
+        ],
+        "signature": [
+          "400"
+        ],
+        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.NULL_COUNT_PERCENT_LIMIT",
+        "type": "number",
+        "tags": [],
+        "label": "NULL_COUNT_PERCENT_LIMIT",
+        "description": [
+          "\nThe limit for the percentage of null values in category examples."
+        ],
+        "signature": [
+          "0.75"
+        ],
+        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.VALID_TOKEN_COUNT",
+        "type": "number",
+        "tags": [],
+        "label": "VALID_TOKEN_COUNT",
+        "description": [
+          "\nThe valid token count for category examples."
+        ],
+        "signature": [
+          "3"
+        ],
+        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.VALIDATION_CHECK_DESCRIPTION",
+        "type": "Object",
+        "tags": [],
+        "label": "VALIDATION_CHECK_DESCRIPTION",
+        "description": [
+          "\nDescription for each validation result."
+        ],
+        "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.VALIDATION_CHECK_DESCRIPTION.VALIDATION_RESULT.NO_EXAMPLES",
+            "type": "string",
+            "tags": [],
+            "label": "[VALIDATION_RESULT.NO_EXAMPLES]",
+            "description": [
+              "/**\n   * Examples were successfully loaded.\n   */"
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.VALIDATION_CHECK_DESCRIPTION.VALIDATION_RESULT.FAILED_TO_TOKENIZE",
+            "type": "string",
+            "tags": [],
+            "label": "[VALIDATION_RESULT.FAILED_TO_TOKENIZE]",
+            "description": [
+              "/**\n   * The loaded examples were tokenized successfully.\n   */"
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.VALIDATION_CHECK_DESCRIPTION.VALIDATION_RESULT.TOKEN_COUNT",
+            "type": "string",
+            "tags": [],
+            "label": "[VALIDATION_RESULT.TOKEN_COUNT]",
+            "description": [
+              "/**\n   * More than {tokenCount} tokens per example were found in over {percentage}% of the loaded examples.\n   */"
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.VALIDATION_CHECK_DESCRIPTION.VALIDATION_RESULT.MEDIAN_LINE_LENGTH",
+            "type": "string",
+            "tags": [],
+            "label": "[VALIDATION_RESULT.MEDIAN_LINE_LENGTH]",
+            "description": [
+              "/**\n   * The median line length of the loaded examples was less than {medianCharCount} characters.\n   */"
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.VALIDATION_CHECK_DESCRIPTION.VALIDATION_RESULT.NULL_VALUES",
+            "type": "string",
+            "tags": [],
+            "label": "[VALIDATION_RESULT.NULL_VALUES]",
+            "description": [
+              "/**\n   * Less than {percentage}% of the loaded examples were null.\n   */"
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.VALIDATION_CHECK_DESCRIPTION.VALIDATION_RESULT.TOO_MANY_TOKENS",
+            "type": "string",
+            "tags": [],
+            "label": "[VALIDATION_RESULT.TOO_MANY_TOKENS]",
+            "description": [
+              "/**\n   * Less than 10000 tokens were found in total in the loaded examples.\n   */"
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.VALIDATION_CHECK_DESCRIPTION.VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES",
+            "type": "string",
+            "tags": [],
+            "label": "[VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES]",
+            "description": [
+              "/**\n   * The user has sufficient privileges to perform the checks.\n   */"
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/constants/categorization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
@@ -13,6 +14,9 @@ import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { switchMap } from 'rxjs';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
+import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import type {
   VisualizeServices,
   VisualizeAppState,
@@ -58,11 +62,15 @@ const TopNav = ({
   embeddableId,
   onAppLeave,
   eventEmitter,
-}: VisualizeTopNavProps) => {
+}: VisualizeTopNavProps & { intl: InjectedIntl }) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
   const { setHeaderActionMenu, visualizeCapabilities } = services;
-  const { embeddableHandler, vis } = visInstance;
+  const {
+    embeddableHandler,
+    vis,
+    savedVis: { managed },
+  } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const [navigateToLens, setNavigateToLens] = useState(false);
   const [displayEditInLensItem, setDisplayEditInLensItem] = useState(false);
@@ -234,19 +242,23 @@ const TopNav = ({
 
   /** Synchronizing dataView with state **/
   useEffect(() => {
-    const stateContainerSubscription = stateContainer.state$.subscribe(async ({ dataView }) => {
-      if (
-        dataView &&
-        visInstance.vis.data.indexPattern &&
-        dataView !== visInstance.vis.data.indexPattern.id
-      ) {
-        const dataViewFromState = await services.dataViews.get(dataView);
+    const stateContainerSubscription = stateContainer.state$
+      .pipe(
+        switchMap(async ({ dataView }) => {
+          if (
+            dataView &&
+            visInstance.vis.data.indexPattern &&
+            dataView !== visInstance.vis.data.indexPattern.id
+          ) {
+            const dataViewFromState = await services.dataViews.get(dataView);
 
-        if (dataViewFromState) {
-          setIndexPatterns([dataViewFromState]);
-        }
-      }
-    });
+            if (dataViewFromState) {
+              setIndexPatterns([dataViewFromState]);
+            }
+          }
+        })
+      )
+      .subscribe();
     return () => {
       stateContainerSubscription.unsubscribe();
     };
@@ -255,13 +267,16 @@ const TopNav = ({
   useEffect(() => {
     const autoRefreshFetchSub = services.data.query.timefilter.timefilter
       .getAutoRefreshFetch$()
-      .subscribe(async (done) => {
-        try {
-          await doReload();
-        } finally {
-          done();
-        }
-      });
+      .pipe(
+        switchMap(async (done) => {
+          try {
+            await doReload();
+          } finally {
+            done();
+          }
+        })
+      )
+      .subscribe();
     return () => {
       autoRefreshFetchSub.unsubscribe();
     };
@@ -307,7 +322,21 @@ const TopNav = ({
       showDatePicker={showDatePicker()}
       showFilterBar={showFilterBar}
       showQueryInput={showQueryInput}
-      showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
+      badges={
+        managed
+          ? [
+              getManagedContentBadge(
+                i18n.translate('visualizations.managedBadgeTooltip', {
+                  defaultMessage:
+                    'This visualization is managed by Elastic. Changes made here must be saved to a new visualization.',
+                })
+              ),
+            ]
+          : undefined
+      }
+      saveQueryMenuVisibility={
+        services.visualizeCapabilities.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
+      }
       dataViewPickerComponentProps={
         shouldShowDataViewPicker && vis.data.indexPattern
           ? {
@@ -346,11 +375,11 @@ const TopNav = ({
       setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={indexPatterns}
       showSearchBar
-      showSaveQuery={false}
+      saveQueryMenuVisibility="hidden"
       showDatePicker={false}
       showQueryInput={false}
     />
   ) : null;
 };
 
-export const VisualizeTopNav = memo(TopNav);
+export const VisualizeTopNav = injectI18n(memo(TopNav));

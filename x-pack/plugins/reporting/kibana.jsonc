@@ -7,34 +7,21 @@
     "id": "reporting",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "reporting"
-    ],
+    "configPath": ["xpack", "reporting"],
     "requiredPlugins": [
       "data",
       "discover",
       "fieldFormats",
-      "esUiShared",
       "home",
       "management",
       "licensing",
       "uiActions",
       "taskManager",
-      "embeddable",
-      "screenshotting",
       "screenshotMode",
       "share",
       "features"
     ],
-    "optionalPlugins": [
-      "security",
-      "spaces",
-      "usageCollection"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "discover"
-    ]
+    "optionalPlugins": ["security", "spaces", "usageCollection", "screenshotting"],
+    "requiredBundles": ["embeddable", "esUiShared", "kibanaReact"]
   }
 }

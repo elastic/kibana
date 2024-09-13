@@ -6,10 +6,7 @@
  */
 
 export { canRedirectRequest } from './can_redirect_request';
-export type {
-  AuthenticationServiceStart,
-  InternalAuthenticationServiceStart,
-} from './authentication_service';
+export type { InternalAuthenticationServiceStart } from './authentication_service';
 export { AuthenticationService } from './authentication_service';
 export { AuthenticationResult } from './authentication_result';
 export { DeauthenticationResult } from './deauthentication_result';
@@ -27,11 +24,3 @@ export {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
 } from './http_authentication';
-export type {
-  CreateAPIKeyResult,
-  InvalidateAPIKeyResult,
-  CreateAPIKeyParams,
-  InvalidateAPIKeysParams,
-  ValidateAPIKeyParams,
-  GrantAPIKeyResult,
-} from './api_keys';

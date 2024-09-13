@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// SO definition for this type is declared in server/types/interfaces
 export interface EnrollmentAPIKey {
   id: string;
   api_key_id: string;
@@ -14,8 +15,6 @@ export interface EnrollmentAPIKey {
   policy_id?: string;
   created_at: string;
 }
-
-export type EnrollmentAPIKeySOAttributes = Omit<EnrollmentAPIKey, 'id'>;
 
 // Generated
 
@@ -43,4 +42,5 @@ export interface FleetServerEnrollmentAPIKey {
   expire_at?: string;
   created_at?: string;
   updated_at?: string;
+  namespaces?: string[];
 }

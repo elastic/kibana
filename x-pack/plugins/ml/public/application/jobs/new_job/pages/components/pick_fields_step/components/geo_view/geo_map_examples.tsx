@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { LayerDescriptor } from '@kbn/maps-plugin/common';
+import type { LayerDescriptor } from '@kbn/maps-plugin/common';
+import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
+import type { Aggregation, Field, SplitField } from '@kbn/ml-anomaly-utils';
 import { SplitCards, useAnimateSplit } from '../split_cards';
-import { MlEmbeddedMapComponent } from '../../../../../../../components/ml_embedded_map';
-import { Aggregation, Field, SplitField } from '../../../../../../../../../common/types/fields';
+import { useMlKibana } from '../../../../../../../contexts/kibana';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 import { DetectorTitle } from '../detector_title';
 
@@ -30,6 +32,10 @@ export const GeoMapExamples: FC<Props> = ({
   geoAgg,
   layerList,
 }) => {
+  const {
+    services: { maps: mapsPlugin },
+  } = useMlKibana();
+
   const animateSplit = useAnimateSplit();
 
   return (
@@ -45,9 +51,18 @@ export const GeoMapExamples: FC<Props> = ({
           <>
             {geoAgg && geoField ? <DetectorTitle index={0} agg={geoAgg} field={geoField} /> : null}
             <EuiSpacer size="s" />
-            <span data-test-subj="mlGeoJobWizardMap" style={{ width: '100%', height: 400 }}>
-              <MlEmbeddedMapComponent layerList={layerList} />
-            </span>
+            {mapsPlugin && (
+              <span data-test-subj="mlGeoJobWizardMap" style={{ width: '100%', height: 400 }}>
+                <mapsPlugin.Map
+                  layerList={layerList}
+                  hideFilterActions={true}
+                  mapSettings={{
+                    initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS,
+                    autoFitToDataBounds: true,
+                  }}
+                />
+              </span>
+            )}
           </>
         </EuiFlexItem>
       </EuiFlexGrid>

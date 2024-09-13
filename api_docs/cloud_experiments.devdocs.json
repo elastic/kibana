@@ -98,42 +98,82 @@
         "parentPluginId": "cloudExperiments",
         "id": "def-common.CloudExperimentsPluginStart",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "CloudExperimentsPluginStart",
         "description": [
           "\nThe contract of the start lifecycle method\n"
         ],
         "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/types.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/types.ts"
+          },
+          {
+            "plugin": "cloudChat",
+            "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/plugin.ts"
+          },
+          {
+            "plugin": "cloudChat",
+            "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/plugin.ts"
+          },
+          {
+            "plugin": "observabilityOnboarding",
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/plugin.ts"
+          },
+          {
+            "plugin": "observabilityOnboarding",
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/plugin.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "cloudExperiments",
             "id": "def-common.CloudExperimentsPluginStart.getVariation",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "getVariation",
             "description": [
               "\nFetch the configuration assigned to variation `configKey`. If nothing is found, fallback to `defaultValue`."
             ],
             "signature": [
-              "<Data>(featureFlagName: \"security-solutions.add-integrations-url\", defaultValue: Data) => Promise<Data>"
+              "<Data>(featureFlagName: \"security-solutions.add-integrations-url\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\" | \"observability_onboarding.experimental_onboarding_flow_enabled\", defaultValue: Data) => Promise<Data>"
             ],
             "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "cloudChat",
+                "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/plugin.ts"
+              },
+              {
+                "plugin": "cloudChat",
+                "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/plugin.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "cloudExperiments",
                 "id": "def-common.CloudExperimentsPluginStart.getVariation.$1",
-                "type": "string",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "featureFlagName",
                 "description": [
                   "The name of the key to find the config variation. {@link CloudExperimentsFeatureFlagNames }."
                 ],
                 "signature": [
-                  "\"security-solutions.add-integrations-url\""
+                  "\"security-solutions.add-integrations-url\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\" | \"observability_onboarding.experimental_onboarding_flow_enabled\""
                 ],
                 "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
                 "deprecated": false,
@@ -164,7 +204,9 @@
             "parentPluginId": "cloudExperiments",
             "id": "def-common.CloudExperimentsPluginStart.reportMetric",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "reportMetric",
             "description": [
               "\nReport metrics back to the A/B testing service to measure the conversion rate for each variation in the experiment."
@@ -181,8 +223,9 @@
               "<Data>) => void"
             ],
             "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [],
             "children": [
               {
                 "parentPluginId": "cloudExperiments",
@@ -227,7 +270,7 @@
           "\nThe names of the feature flags declared in Kibana.\nValid keys are defined in {@link FEATURE_FLAG_NAMES}. When using a new feature flag, add the name to the list.\n"
         ],
         "signature": [
-          "\"security-solutions.add-integrations-url\""
+          "\"security-solutions.add-integrations-url\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\" | \"observability_onboarding.experimental_onboarding_flow_enabled\""
         ],
         "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
         "deprecated": false,

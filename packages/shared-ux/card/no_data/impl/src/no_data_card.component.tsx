@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -56,6 +57,7 @@ export const NoDataCard = ({
   description: descriptionProp,
   canAccessFleet,
   button,
+  href,
   ...props
 }: Props) => {
   const styles = NoDataCardStyles();
@@ -72,7 +74,11 @@ export const NoDataCard = ({
     }
 
     // Default footer action is a button with the provided or default string
-    return <EuiButton fill>{button || titleProp || defaultTitle}</EuiButton>;
+    return (
+      <EuiButton fill href={href} data-test-subj="noDataDefaultFooterAction">
+        {button || titleProp || defaultTitle}
+      </EuiButton>
+    );
   };
 
   const title = () => {
@@ -103,6 +109,7 @@ export const NoDataCard = ({
       description={description()}
       footer={footer()}
       isDisabled={!canAccessFleet}
+      href={href}
       image={<Image />}
       {...props}
     />

@@ -74,7 +74,7 @@ const createActions = (testBed: TestBed) => {
     clickActionMenu(pipelineName);
 
     act(() => {
-      component.find('.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
+      component.find('button.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
     });
 
     component.update();
@@ -110,4 +110,5 @@ export type PipelineListTestSubjects =
   | 'emptyList.title'
   | 'sectionLoading'
   | 'pipelineLoadError'
+  | 'jsonCodeBlock'
   | 'reloadButton';

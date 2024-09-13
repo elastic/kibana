@@ -5,22 +5,27 @@
  * 2.0.
  */
 
-import type {
-  RuleCreateProps,
-  RuleResponse,
-} from '../../../../common/detection_engine/rule_schema';
+import type { Case } from '@kbn/cases-plugin/common';
+import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { request } from './common';
 
 export const generateRandomStringName = (length: number) =>
   Array.from({ length }, () => Math.random().toString(36).substring(2));
 
 export const cleanupRule = (id: string) => {
-  request({ method: 'DELETE', url: `/api/detection_engine/rules?id=${id}` });
+  request({
+    method: 'DELETE',
+    url: `/api/detection_engine/rules?id=${id}`,
+    headers: {
+      'elastic-api-version': '2023-10-31',
+    },
+  });
 };
 
-export const loadRule = () =>
+export const loadRule = (body = {}, includeResponseActions = true) =>
   request<RuleResponse>({
     method: 'POST',
+    url: `/api/detection_engine/rules`,
     body: {
       type: 'query',
       index: [
@@ -56,9 +61,61 @@ export const loadRule = () =>
       actions: [],
       enabled: true,
       throttle: 'no_actions',
-      response_actions: [
-        { params: { command: 'isolate', comment: 'Isolate host' }, action_type_id: '.endpoint' },
-      ],
-    } as RuleCreateProps,
-    url: `/api/detection_engine/rules`,
+      ...body,
+      ...(includeResponseActions
+        ? {
+            response_actions: [
+              {
+                params: { command: 'isolate', comment: 'Isolate host' },
+                action_type_id: '.endpoint',
+              },
+              {
+                params: {
+                  command: 'suspend-process',
+                  comment: 'Suspend host',
+                  config: {
+                    field: 'entity_id',
+                    overwrite: false,
+                  },
+                },
+                action_type_id: '.endpoint',
+              },
+              {
+                params: {
+                  command: 'kill-process',
+                  comment: 'Kill host',
+                  config: {
+                    field: '',
+                    overwrite: true,
+                  },
+                },
+                action_type_id: '.endpoint',
+              },
+            ],
+          }
+        : {}),
+    },
+    headers: {
+      'elastic-api-version': '2023-10-31',
+    },
   }).then((response) => response.body);
+
+export const loadCase = (owner: string) =>
+  request<Case>({
+    method: 'POST',
+    url: '/api/cases',
+    body: {
+      title: `Test ${owner} case ${generateRandomStringName(1)[0]}`,
+      tags: [],
+      severity: 'low',
+      description: 'Test security case',
+      assignees: [],
+      connector: { id: 'none', name: 'none', type: '.none', fields: null },
+      settings: { syncAlerts: true },
+      owner,
+    },
+  }).then((response) => response.body);
+
+export const cleanupCase = (id: string) => {
+  request({ method: 'DELETE', url: '/api/cases', qs: { ids: JSON.stringify([id]) } });
+};

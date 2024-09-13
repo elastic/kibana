@@ -1,15 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // ESLint disabled dot-notation we can access the private key telemetryService['http']
 /* eslint-disable dot-notation */
 
 import { mockTelemetryService } from '../mocks';
+import {
+  FetchSnapshotTelemetry,
+  INTERNAL_VERSION,
+  LastReportedRoute,
+  OptInRoute,
+  UserHasSeenNoticeRoute,
+} from '../../common/routes';
 
 describe('TelemetryService', () => {
   describe('fetchTelemetry', () => {
@@ -17,7 +25,8 @@ describe('TelemetryService', () => {
       const telemetryService = mockTelemetryService();
 
       await telemetryService.fetchTelemetry();
-      expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/clusters/_stats', {
+      expect(telemetryService['http'].post).toBeCalledWith(FetchSnapshotTelemetry, {
+        ...INTERNAL_VERSION,
         body: JSON.stringify({ unencrypted: false, refreshCache: false }),
       });
     });
@@ -64,7 +73,8 @@ describe('TelemetryService', () => {
       const optedIn = true;
       await telemetryService.setOptIn(optedIn);
 
-      expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/optIn', {
+      expect(telemetryService['http'].post).toBeCalledWith(OptInRoute, {
+        ...INTERNAL_VERSION,
         body: JSON.stringify({ enabled: optedIn }),
       });
     });
@@ -77,7 +87,8 @@ describe('TelemetryService', () => {
       const optedIn = false;
       await telemetryService.setOptIn(optedIn);
 
-      expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/optIn', {
+      expect(telemetryService['http'].post).toBeCalledWith(OptInRoute, {
+        ...INTERNAL_VERSION,
         body: JSON.stringify({ enabled: optedIn }),
       });
     });
@@ -110,7 +121,7 @@ describe('TelemetryService', () => {
         config: { allowChangingOptInStatus: true },
       });
       telemetryService['http'].post = jest.fn().mockImplementation((url: string) => {
-        if (url === '/api/telemetry/v2/optIn') {
+        if (url === OptInRoute) {
           throw Error('failed to update opt in.');
         }
       });
@@ -146,7 +157,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
-        `"https://telemetry-staging.elastic.co/xpack/v2/send"`
+        `"https://telemetry-staging.elastic.co/v3/send/kibana-snapshot"`
       );
     });
 
@@ -156,7 +167,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
-        `"https://telemetry.elastic.co/xpack/v2/send"`
+        `"https://telemetry.elastic.co/v3/send/kibana-snapshot"`
       );
     });
   });
@@ -168,7 +179,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
-        `"https://telemetry-staging.elastic.co/opt_in_status/v2/send"`
+        `"https://telemetry-staging.elastic.co/v3/send/kibana-opt-in-reports"`
       );
     });
 
@@ -178,7 +189,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
-        `"https://telemetry.elastic.co/opt_in_status/v2/send"`
+        `"https://telemetry.elastic.co/v3/send/kibana-opt-in-reports"`
       );
     });
   });
@@ -203,7 +214,7 @@ describe('TelemetryService', () => {
       });
 
       telemetryService['http'].put = jest.fn().mockImplementation((url: string) => {
-        if (url === '/api/telemetry/v2/userHasSeenNotice') {
+        if (url === UserHasSeenNoticeRoute) {
           throw Error('failed to update opt in.');
         }
       });
@@ -232,6 +243,19 @@ describe('TelemetryService', () => {
       expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
     });
 
+    it('should return true when optIn: null even when previously seen', () => {
+      const telemetryService = mockTelemetryService({
+        config: {
+          userCanChangeSettings: true,
+          telemetryNotifyUserAboutOptInDefault: false,
+          optIn: null,
+        },
+      });
+      expect(telemetryService.config.userCanChangeSettings).toBe(true);
+      expect(telemetryService.userCanChangeSettings).toBe(true);
+      expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(true);
+    });
+
     it('returns whether the user can update the telemetry config (has SavedObjects access)', () => {
       const telemetryService = mockTelemetryService({
         config: { userCanChangeSettings: undefined },
@@ -253,8 +277,8 @@ describe('TelemetryService', () => {
   });
 
   describe('reportOptInStatus', () => {
-    let originalFetch: typeof window['fetch'];
-    let mockFetch: jest.Mock<typeof window['fetch']>;
+    let originalFetch: (typeof window)['fetch'];
+    let mockFetch: jest.Mock<(typeof window)['fetch']>;
 
     beforeAll(() => {
       originalFetch = window.fetch;
@@ -330,6 +354,19 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.canSendTelemetry()).toBe(true);
+    });
+  });
+
+  describe('updateLastReported', () => {
+    let telemetryService: ReturnType<typeof mockTelemetryService>;
+
+    beforeEach(() => {
+      telemetryService = mockTelemetryService();
+    });
+
+    it('calls expected URL with expected headers', async () => {
+      await telemetryService.updateLastReported();
+      expect(telemetryService['http'].put).toBeCalledWith(LastReportedRoute, INTERNAL_VERSION);
     });
   });
 });

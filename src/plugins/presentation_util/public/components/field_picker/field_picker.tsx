@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
@@ -39,8 +41,12 @@ export const FieldPicker = ({
   filterPredicate,
   selectedFieldName,
   selectableProps,
+  ...other
 }: FieldPickerProps) => {
+  const initialSelection = useRef(selectedFieldName);
+
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
+  const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [fieldSelectableOptions, setFieldSelectableOptions] = useState<EuiSelectableOption[]>([]);
 
   const availableFields = useMemo(
@@ -50,7 +56,7 @@ export const FieldPicker = ({
           .filter((f) => typesFilter.length === 0 || typesFilter.includes(f.type as string))
           .filter((f) => (filterPredicate ? filterPredicate(f) : true)),
         ['name']
-      ),
+      ).sort((f) => (f.name === initialSelection.current ? -1 : 1)),
     [dataView, filterPredicate, typesFilter]
   );
 
@@ -59,10 +65,10 @@ export const FieldPicker = ({
     const options: EuiSelectableOption[] = (availableFields ?? []).map((field) => {
       return {
         key: field.name,
+        name: field.name,
         label: field.displayName ?? field.name,
-        className: classNames('presFieldPicker__fieldButton', {
-          presFieldPickerFieldButtonActive: field.name === selectedFieldName,
-        }),
+        className: 'presFieldPicker__fieldButton',
+        checked: field.name === selectedFieldName ? 'on' : undefined,
         'data-test-subj': `field-picker-select-${field.name}`,
         prepend: (
           <FieldIcon
@@ -89,9 +95,14 @@ export const FieldPicker = ({
     [dataView, filterPredicate]
   );
 
+  const setFocusToSearch = useCallback(() => {
+    searchRef?.focus();
+  }, [searchRef]);
+
   const fieldTypeFilter = (
     <EuiFormRow fullWidth={true}>
       <FieldTypeFilter
+        setFocusToSearch={setFocusToSearch}
         onFieldTypesChange={(types) => setTypesFilter(types)}
         fieldTypesValue={typesFilter}
         availableFieldTypes={uniqueTypes}
@@ -102,6 +113,7 @@ export const FieldPicker = ({
 
   return (
     <EuiSelectable
+      {...other}
       {...selectableProps}
       className={classNames('fieldPickerSelectable', {
         fieldPickerSelectableLoading: selectableProps?.isLoading,
@@ -120,17 +132,20 @@ export const FieldPicker = ({
         const field = dataView.getFieldByName(changedOption.key);
         if (field) onSelectField?.(field);
       }}
+      optionMatcher={comboBoxFieldOptionMatcher}
       searchProps={{
         'data-test-subj': 'field-search-input',
         placeholder: i18n.translate('presentationUtil.fieldSearch.searchPlaceHolder', {
           defaultMessage: 'Search field names',
         }),
         disabled: Boolean(selectableProps?.isLoading),
+        inputRef: setSearchRef,
       }}
       listProps={{
         isVirtualized: true,
         showIcons: false,
         bordered: true,
+        truncationProps: { truncation: 'middle' },
       }}
       height="full"
     >

@@ -16,7 +16,7 @@ import {
   MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES,
 } from '../../test/mocks';
 import { ControlGeneralView } from '.';
-import { getInputFromPolicy } from '../../common/utils';
+import { getInputFromPolicy } from '../../../common/utils/helpers';
 import { INPUT_CONTROL } from '../../../common/constants';
 
 describe('<ControlGeneralView />', () => {
@@ -44,10 +44,10 @@ describe('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = yaml.safeLoad(configuration);
 
       expect(json.file.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
-      expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-response').length);
+      expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-file-response').length);
       expect(json.file.selectors.length).toBe(3);
       expect(json.file.responses.length).toBe(2);
     } catch (err) {
@@ -58,8 +58,8 @@ describe('<ControlGeneralView />', () => {
   it('allows a user to add a new selector', async () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
-    userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
-    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddFileSelector')));
+    await userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
+    await userEvent.click(getByTestId('cloud-defend-btnAddFileSelector'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
 
@@ -69,7 +69,7 @@ describe('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = yaml.safeLoad(configuration);
 
       expect(json.file.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
     } catch (err) {
@@ -80,8 +80,8 @@ describe('<ControlGeneralView />', () => {
   it('allows a user to add a file response', async () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
-    userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
-    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddFileResponse')));
+    await userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
+    await userEvent.click(getByTestId('cloud-defend-btnAddFileResponse'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
 
@@ -91,34 +91,36 @@ describe('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = yaml.safeLoad(configuration);
 
-      expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-response').length);
+      expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-file-response').length);
     } catch (err) {
       throw err;
     }
   });
 
-  it('should prevent user from adding a process response if no there are no process selectors', async () => {
-    const testPolicy = `
-      file:
-        selectors:
-          - name: test
-            operation: ['createFile']
-        responses:
-          - match: [test]
-            actions: [alert, block]
-    `;
+  it('allows a user to add a process response', async () => {
+    const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
-    const { getByTestId } = render(
-      <WrappedComponent policy={getCloudDefendNewPolicyMock(testPolicy)} />
-    );
+    await userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
+    await userEvent.click(getByTestId('cloud-defend-btnAddProcessResponse'));
 
-    userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
-    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddProcessResponse')));
+    const policy = onChange.mock.calls[0][0].updatedPolicy;
 
-    expect(onChange.mock.calls.length).toBe(0);
-    expect(getByTestId('cloud-defend-btnAddProcessResponse')).toBeDisabled();
+    rerender(<WrappedComponent policy={policy} />);
+
+    const input = getInputFromPolicy(policy, INPUT_CONTROL);
+    const configuration = input?.vars?.configuration?.value;
+
+    try {
+      const json = yaml.safeLoad(configuration);
+
+      expect(json.process.responses.length).toBe(
+        getAllByTestId('cloud-defend-process-response').length
+      );
+    } catch (err) {
+      throw err;
+    }
   });
 
   it('updates selector name used in response.match, if its name is changed', async () => {
@@ -128,7 +130,7 @@ describe('<ControlGeneralView />', () => {
       () => getAllByTestId('cloud-defend-selectorcondition-name')[1] as HTMLInputElement
     );
 
-    userEvent.type(input, '2');
+    await userEvent.type(input, '2');
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
     rerender(<WrappedComponent policy={policy} />);
@@ -143,13 +145,33 @@ describe('<ControlGeneralView />', () => {
       () => getAllByTestId('cloud-defend-selectorcondition-name')[2] as HTMLInputElement
     );
 
-    userEvent.type(input, '3');
+    await userEvent.type(input, '3');
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
 
     rerender(<WrappedComponent policy={policy} />);
 
     expect(getByTitle('Remove excludeCustomNginxBuild3 from selection in this group')).toBeTruthy();
+  });
+
+  it('removes a selector from a match/exclude list of a response if it is deleted', async () => {
+    const { getByTestId, getAllByTestId } = render(<WrappedComponent />);
+    const btnSelectorPopover = getAllByTestId('cloud-defend-btnselectorpopover')[0];
+    btnSelectorPopover.click();
+
+    await waitFor(() => getByTestId('cloud-defend-btndeleteselector').click());
+
+    const policy = onChange.mock.calls[0][0].updatedPolicy;
+    const input = getInputFromPolicy(policy, INPUT_CONTROL);
+    const configuration = input?.vars?.configuration?.value;
+
+    try {
+      const json = yaml.safeLoad(configuration);
+
+      expect(json.file.responses[0].match).toHaveLength(1);
+    } catch (err) {
+      throw err;
+    }
   });
 
   it('doesnt blow up if invalid yaml passed in', async () => {
@@ -168,7 +190,27 @@ describe('<ControlGeneralView />', () => {
       />
     );
 
-    userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
+    await userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
     expect(getByTestId('cloud-defend-btnAddFileSelector')).toBeDisabled();
+  });
+
+  it('allows the user to duplicate the selector', async () => {
+    const { getByTestId, getAllByTestId } = render(<WrappedComponent />);
+    const btnSelectorPopover = getAllByTestId('cloud-defend-btnselectorpopover')[0];
+    btnSelectorPopover.click();
+
+    await waitFor(() => getByTestId('cloud-defend-btnduplicateselector').click());
+    const policy = onChange.mock.calls[0][0].updatedPolicy;
+    const input = getInputFromPolicy(policy, INPUT_CONTROL);
+    const configuration = input?.vars?.configuration?.value;
+
+    try {
+      const json = yaml.safeLoad(configuration);
+
+      expect(json.file.selectors).toHaveLength(4);
+      expect(json.file.selectors[3].name).toEqual(json.file.selectors[0].name + '1');
+    } catch (err) {
+      throw err;
+    }
   });
 });

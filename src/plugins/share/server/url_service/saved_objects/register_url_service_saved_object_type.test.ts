@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
@@ -12,6 +13,7 @@ import type {
   SavedObjectsType,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { ServerShortUrlClientFactory } from '..';
 import { UrlService, LocatorDefinition } from '../../../common/url_service';
 import { LegacyShortUrlLocatorDefinition } from '../../../common/url_service/locators/legacy_short_url_locator';
@@ -101,9 +103,9 @@ describe('migrations', () => {
 
     service.locators.create(new FooLocatorDefinition());
 
-    const migrationFunction = (type.migrations as () => SavedObjectMigrationMap)()['8.0.0'];
-
-    expect(typeof migrationFunction).toBe('function');
+    const migrationFunction = SavedObjectsUtils.getMigrationFunction(
+      (type.migrations as () => SavedObjectMigrationMap)()['8.0.0']
+    );
 
     const doc1: SavedObjectUnsanitizedDoc<ShortUrlSavedObjectAttributes> = {
       id: 'foo',

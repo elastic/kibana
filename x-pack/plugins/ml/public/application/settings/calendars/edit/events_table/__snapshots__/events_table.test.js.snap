@@ -56,8 +56,8 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
         ],
       }
     }
-    responsive={true}
     rowProps={[Function]}
+    searchFormat="eql"
     sorting={
       Object {
         "sort": Object {
@@ -127,7 +127,6 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         ],
       }
     }
-    responsive={true}
     rowProps={[Function]}
     search={
       Object {
@@ -137,36 +136,33 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         "filters": Array [],
         "toolsRight": Array [
           <EuiButton
-            color="primary"
             data-test-subj="mlCalendarNewEventButton"
             iconType="plusInCircle"
             isDisabled={false}
             onClick={[MockFunction]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="New event"
               id="xpack.ml.calendarsEdit.eventsTable.newEventButtonLabel"
-              values={Object {}}
             />
           </EuiButton>,
           <EuiButton
-            color="primary"
             data-test-subj="mlCalendarImportEventsButton"
             iconType="importAction"
             isDisabled={false}
             onClick={[MockFunction]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Import events"
               id="xpack.ml.calendarsEdit.eventsTable.importEventsButtonLabel"
-              values={Object {}}
             />
           </EuiButton>,
         ],
       }
     }
+    searchFormat="eql"
     sorting={
       Object {
         "sort": Object {

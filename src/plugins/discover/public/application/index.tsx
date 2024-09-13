@@ -1,19 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
-import { discoverRouter } from './discover_router';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { Observable } from 'rxjs';
+import type { ExperimentalFeatures } from '../../server/config';
+import { DiscoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
+import type { DiscoverCustomizationContext } from '../customizations';
 
-export const renderApp = (element: HTMLElement, services: DiscoverServices, isDev: boolean) => {
-  const { history: getHistory, capabilities, chrome, data, core } = services;
+export interface RenderAppProps {
+  element: HTMLElement;
+  services: DiscoverServices;
+  customizationContext$: Observable<DiscoverCustomizationContext>;
+  experimentalFeatures: ExperimentalFeatures;
+}
 
-  const history = getHistory();
+export const renderApp = ({
+  element,
+  services,
+  customizationContext$,
+  experimentalFeatures,
+}: RenderAppProps) => {
+  const { history, capabilities, chrome, data, core } = services;
+
   if (!capabilities.discover.save) {
     chrome.setBadge({
       text: i18n.translate('discover.badge.readOnly.text', {
@@ -26,7 +43,13 @@ export const renderApp = (element: HTMLElement, services: DiscoverServices, isDe
     });
   }
   const unmount = toMountPoint(
-    wrapWithTheme(discoverRouter(services, history, isDev), core.theme.theme$)
+    <DiscoverRouter
+      services={services}
+      customizationContext$={customizationContext$}
+      experimentalFeatures={experimentalFeatures}
+      history={history}
+    />,
+    core
   )(element);
 
   return () => {

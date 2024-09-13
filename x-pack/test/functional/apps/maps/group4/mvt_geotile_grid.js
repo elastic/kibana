@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 const MB_VECTOR_SOURCE_ID = 'g1xkv';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const security = getService('security');
 
@@ -28,8 +28,8 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should render with mvt-source (style meta from ES)', async () => {
-      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from ES)');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('MVT geotile grid (style meta from ES)');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const tileUrl = new URL(
         mapboxStyle.sources[MB_VECTOR_SOURCE_ID].tiles[0],
@@ -37,7 +37,9 @@ export default function ({ getPageObjects, getService }) {
       );
       const searchParams = Object.fromEntries(tileUrl.searchParams);
 
-      expect(tileUrl.pathname).to.equal('/api/maps/mvt/getGridTile/%7Bz%7D/%7Bx%7D/%7By%7D.pbf');
+      expect(tileUrl.pathname).to.equal(
+        '/internal/maps/mvt/getGridTile/%7Bz%7D/%7Bx%7D/%7By%7D.pbf'
+      );
 
       // token is an unique id that changes between runs
       expect(typeof searchParams.token).to.equal('string');
@@ -51,7 +53,7 @@ export default function ({ getPageObjects, getService }) {
         index: 'logstash-*',
         gridPrecision: '8',
         renderAs: 'grid',
-        requestBody: `(_source%3A(excludes%3A!())%2Caggs%3A(max_of_bytes%3A(max%3A(field%3Abytes)))%2Cfields%3A!((field%3A'%40timestamp'%2Cformat%3Adate_time)%2C(field%3A'relatedContent.article%3Amodified_time'%2Cformat%3Adate_time)%2C(field%3A'relatedContent.article%3Apublished_time'%2Cformat%3Adate_time)%2C(field%3Autc_time%2Cformat%3Adate_time))%2Cquery%3A(bool%3A(filter%3A!((range%3A('%40timestamp'%3A(format%3Astrict_date_optional_time%2Cgte%3A'2015-09-20T00%3A00%3A00.000Z'%2Clte%3A'2015-09-20T01%3A00%3A00.000Z'))))%2Cmust%3A!()%2Cmust_not%3A!()%2Cshould%3A!()))%2Cruntime_mappings%3A()%2Cscript_fields%3A(hour_of_day%3A(script%3A(lang%3Apainless%2Csource%3A'doc%5B!'%40timestamp!'%5D.value.getHour()')))%2Csize%3A0%2Cstored_fields%3A!('*'))`,
+        requestBody: `(aggs:(max_of_bytes:(max:(field:bytes))),query:(bool:(filter:!((range:('@timestamp':(format:strict_date_optional_time,gte:'2015-09-20T00:00:00.000Z',lte:'2015-09-20T01:00:00.000Z'))),(exists:(field:geo.coordinates))),must:!(),must_not:!(),should:!())),runtime_mappings:())`,
       });
 
       //Should correctly load meta for style-rule (sigma is set to 1, opacity to 1)
@@ -97,8 +99,8 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should render with mvt-source (style meta from local - count)', async () => {
-      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from local - count)');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('MVT geotile grid (style meta from local - count)');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const fillLayer = mapboxStyle.layers.find(
         (layer) => layer.id === MB_VECTOR_SOURCE_ID + '_fill'
@@ -142,8 +144,8 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should render with mvt-source (style meta from local - metric)', async () => {
-      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from local - metric)');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('MVT geotile grid (style meta from local - metric)');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const fillLayer = mapboxStyle.layers.find(
         (layer) => layer.id === MB_VECTOR_SOURCE_ID + '_fill'
@@ -187,8 +189,8 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should render heatmap layer', async () => {
-      await PageObjects.maps.loadSavedMap('geo grid heatmap example');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('geo grid heatmap example');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const heatmapLayer = mapboxStyle.layers.find((layer) => layer.id === '3xlvm_heatmap');
 

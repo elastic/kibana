@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -81,9 +82,9 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.hideEndzones.help', {
       defaultMessage: 'Hide endzone markers for partial data',
     }),
-  getValuesInLegendHelp: () =>
-    i18n.translate('expressionXY.xyVis.valuesInLegend.help', {
-      defaultMessage: 'Show values in legend',
+  getLegendStatsArgHelp: () =>
+    i18n.translate('expressionXY.xyVis.legendStats.help', {
+      defaultMessage: 'Define the stats to show in the legend',
     }),
   getAriaLabelHelp: () =>
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
@@ -120,6 +121,10 @@ export const strings = {
   getMinTimeBarIntervalHelp: () =>
     i18n.translate('expressionXY.xyVis.xAxisInterval.help', {
       defaultMessage: 'Specifies the min interval for time bar chart',
+    }),
+  getMinBarHeightHelp: () =>
+    i18n.translate('expressionXY.xyVis.minBarHeight.help', {
+      defaultMessage: 'Specifies the min bar height in pixels for bar chart',
     }),
   getSplitColumnAccessorHelp: () =>
     i18n.translate('expressionXY.xyVis.splitColumnAccessor.help', {
@@ -208,6 +213,10 @@ export const strings = {
   getPaletteHelp: () =>
     i18n.translate('expressionXY.dataLayer.palette.help', {
       defaultMessage: 'Palette',
+    }),
+  getColorMappingHelp: () =>
+    i18n.translate('expressionXY.layer.colorMapping.help', {
+      defaultMessage: 'JSON key-value pairs of the color mapping model',
     }),
   getTableHelp: () =>
     i18n.translate('expressionXY.layers.table.help', {

@@ -2,6 +2,7 @@
   "name": "@kbn/securitysolution-hook-utils",
   "version": "1.0.0",
   "description": "Security Solution utilities for React hooks",
-  "license": "SSPL-1.0 OR Elastic License 2.0",
-  "private": true
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "private": true,
+  "sideEffects": false
 }

@@ -11,22 +11,23 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiPageHeader,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiSpacer,
 } from '@elastic/eui';
 
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import { extractQueryParams, SectionLoading } from '../../../shared_imports';
-import { getRouterLinkProps, listBreadcrumb } from '../../services';
+import { listBreadcrumb } from '../../services';
 import { documentationLinks } from '../../services/documentation_links';
 
 import { JobTable } from './job_table';
 import { DetailPanel } from './detail_panel';
+import { DeprecationCallout } from '../components';
+import { DeprecatedPrompt } from './deprecated_prompt';
 
 const REFRESH_RATE_MS = 30000;
 
@@ -87,8 +88,9 @@ export class JobListUi extends Component {
       defaultMessage: 'Permission error',
     });
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection alignment="center" grow={true}>
         <EuiEmptyPrompt
+          color="danger"
           data-test-subj="jobListNoPermission"
           iconType="warning"
           title={<h1>{title}</h1>}
@@ -101,7 +103,7 @@ export class JobListUi extends Component {
             </p>
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
@@ -115,8 +117,9 @@ export class JobListUi extends Component {
     });
 
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection alignment="center" grow={true}>
         <EuiEmptyPrompt
+          color="danger"
           data-test-subj="jobListError"
           iconType="warning"
           title={<h1>{title}</h1>}
@@ -126,63 +129,20 @@ export class JobListUi extends Component {
             </p>
           }
         />
-      </EuiPageContent>
-    );
-  }
-
-  renderEmpty() {
-    return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <EuiEmptyPrompt
-          data-test-subj="jobListEmptyPrompt"
-          iconType="indexRollupApp"
-          title={
-            <h1>
-              <FormattedMessage
-                id="xpack.rollupJobs.jobList.emptyPromptTitle"
-                defaultMessage="Create your first rollup job"
-              />
-            </h1>
-          }
-          body={
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.rollupJobs.jobList.emptyPromptDescription"
-                  defaultMessage="Rollup jobs summarize and store historical data in a smaller index
-                  for future analysis."
-                />
-              </p>
-            </Fragment>
-          }
-          actions={
-            <EuiButton
-              data-test-subj="createRollupJobButton"
-              {...getRouterLinkProps('/create')}
-              fill
-              iconType="plusInCircle"
-            >
-              <FormattedMessage
-                id="xpack.rollupJobs.jobList.emptyPrompt.createButtonLabel"
-                defaultMessage="Create rollup job"
-              />
-            </EuiButton>
-          }
-        />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
   renderLoading() {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" grow={true}>
         <SectionLoading>
           <FormattedMessage
             id="xpack.rollupJobs.jobList.loadingTitle"
             defaultMessage="Loading rollup jobs…"
           />
         </SectionLoading>
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
@@ -213,6 +173,10 @@ export class JobListUi extends Component {
 
         <EuiSpacer size="l" />
 
+        <DeprecationCallout linksTestSubjPrefix="listView" />
+
+        <EuiSpacer size="l" />
+
         <JobTable />
 
         <DetailPanel />
@@ -232,7 +196,7 @@ export class JobListUi extends Component {
         content = this.renderError(jobLoadError);
       }
     } else if (!isLoading && !hasJobs) {
-      content = this.renderEmpty();
+      content = <DeprecatedPrompt />;
     } else if (isLoading) {
       content = this.renderLoading();
     } else {

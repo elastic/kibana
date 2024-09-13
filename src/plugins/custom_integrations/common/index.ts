@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 export const PLUGIN_ID = 'customIntegrations';
 export const PLUGIN_NAME = 'customIntegrations';
 
@@ -15,6 +17,7 @@ export const PLUGIN_NAME = 'customIntegrations';
 export const INTEGRATION_CATEGORY_DISPLAY: {
   [key: string]: { title: string; parent_id?: string };
 } = {
+  advanced_analytics_ueba: { title: 'Advanced Analytics (UEBA', parent_id: 'security' },
   analytics_engine: { title: 'Analytics Engine', parent_id: 'observability' },
   application_observability: { title: 'Application', parent_id: 'observability' },
   app_search: { title: 'Application Search', parent_id: 'enterprise_search' },
@@ -28,9 +31,7 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   config_management: { title: 'Config management', parent_id: undefined },
   connector: { title: 'Connector', parent_id: 'enterprise_search' },
   connector_client: { title: 'Connector Client', parent_id: 'enterprise_search' },
-  connector_package: { title: 'Connector Package', parent_id: 'enterprise_search' },
   containers: { title: 'Containers', parent_id: undefined },
-  content_source: { title: 'Content Source', parent_id: 'enterprise_search' },
   crawler: { title: 'Crawler', parent_id: 'enterprise_search' },
   credential_management: { title: 'Credential Management', parent_id: 'security' },
   crm: { title: 'CRM', parent_id: undefined },
@@ -40,10 +41,11 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   datastore: { title: 'Database', parent_id: undefined },
   dns_security: { title: 'DNS', parent_id: 'security' },
   edr_xdr: { title: 'EDR/XDR', parent_id: 'security' },
+  cloudsecurity_cdr: { title: 'Cloud Security/CDR', parent_id: 'security' },
   elasticsearch_sdk: { title: 'Elasticsearch SDK', parent_id: undefined },
   elastic_stack: { title: 'Elastic Stack', parent_id: undefined },
   email_security: { title: 'Email', parent_id: 'security' },
-  enterprise_search: { title: 'Enterprise Search', parent_id: undefined },
+  enterprise_search: { title: 'Search', parent_id: undefined },
   firewall_security: { title: 'Firewall', parent_id: 'security' },
   google_cloud: { title: 'Google Cloud', parent_id: undefined },
   iam: { title: 'Identity and Access Management', parent_id: 'security' },
@@ -79,8 +81,10 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   web: { title: 'Web Server', parent_id: 'observability' },
   web_application_firewall: { title: 'Web Application Firewall', parent_id: 'security' },
   websphere: { title: 'WebSphere Application Server', parent_id: 'observability' },
-  workplace_search: { title: 'Workplace Search', parent_id: 'enterprise_search' },
-
+  workplace_search_content_source: {
+    title: 'Workplace Search Content Source',
+    parent_id: 'enterprise_search',
+  },
   // Kibana added
   apm: { title: 'APM', parent_id: undefined },
 };
@@ -118,7 +122,7 @@ export interface IntegrationCategoryCount {
 // TODO: consider i18n
 export const SHIPPER_DISPLAY = {
   beats: 'Beats',
-  enterprise_search: 'Enterprise Search',
+  enterprise_search: 'Search',
   language_clients: 'Language clients',
   other: 'Other',
   sample_data: 'Sample data',

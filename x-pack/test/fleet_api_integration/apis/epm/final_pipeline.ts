@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from '../agents/services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 const TEST_INDEX = 'logs-log.log-test';
@@ -24,6 +23,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   function indexUsingApiKey(body: any, apiKey: string): Promise<{ body: Record<string, unknown> }> {
     const supertestWithoutAuth = getService('esSupertestWithoutAuth');
@@ -38,37 +38,29 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
-    setupFleetAndAgents(providerContext);
-
-    // Use the custom log package to test the fleet final pipeline
-    before(async () => {
+      await fleetAndAgents.setup();
+      // Use the custom log package to test the fleet final pipeline
       await supertest
         .post(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
+
     after(async () => {
       await supertest
         .delete(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
-    });
-
-    after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
-
-    after(async () => {
       const res = await es.search({
         index: TEST_INDEX,
       });
 
       for (const hit of res.hits.hits) {
         await es.delete({
-          id: hit._id,
+          id: hit._id!,
           index: hit._index,
         });
       }
@@ -92,7 +84,7 @@ export default function (providerContext: FtrProviderContext) {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx');
       const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
       expect(pipelineRes).to.have.property(FINAL_PIPELINE_ID);
-      expect(pipelineRes[FINAL_PIPELINE_ID].version).to.be(3);
+      expect(pipelineRes[FINAL_PIPELINE_ID].version).to.be(4);
     });
 
     it('should correctly setup the final pipeline and apply to fleet managed index template', async () => {
@@ -100,6 +92,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(pipelineRes).to.have.property(FINAL_PIPELINE_ID);
       const res = await es.indices.getIndexTemplate({ name: 'logs-log.log' });
       expect(res.index_templates.length).to.be(FINAL_PIPELINE_VERSION);
+      expect(res.index_templates[0]?.index_template?.composed_of).to.contain('ecs@mappings');
       expect(res.index_templates[0]?.index_template?.composed_of).to.contain('.fleet_globals-1');
       expect(res.index_templates[0]?.index_template?.composed_of).to.contain(
         '.fleet_agent_id_verification-1'
@@ -147,6 +140,58 @@ export default function (providerContext: FtrProviderContext) {
 
       expect(event.agent_id_status).to.be('auth_metadata_missing');
       expect(event).to.have.property('ingested');
+    });
+
+    it('removes event.original if preserve_original_event is not set', async () => {
+      const res = await es.index({
+        index: 'logs-log.log-test',
+        body: {
+          message: 'message-test-1',
+          event: {
+            original: JSON.stringify({ foo: 'bar' }),
+          },
+          '@timestamp': '2023-01-01T09:00:00',
+          tags: [],
+          agent: {
+            id: 'agent1',
+          },
+        },
+      });
+
+      const doc: any = await es.get({
+        id: res._id,
+        index: res._index,
+      });
+
+      const event = doc._source.event;
+
+      expect(event.original).to.be(undefined);
+    });
+
+    it('preserves event.original if preserve_original_event is set', async () => {
+      const res = await es.index({
+        index: 'logs-log.log-test',
+        body: {
+          message: 'message-test-1',
+          event: {
+            original: JSON.stringify({ foo: 'bar' }),
+          },
+          '@timestamp': '2023-01-01T09:00:00',
+          tags: ['preserve_original_event'],
+          agent: {
+            id: 'agent1',
+          },
+        },
+      });
+
+      const doc: any = await es.get({
+        id: res._id,
+        index: res._index,
+      });
+
+      const event = doc._source.event;
+
+      expect(event.original).to.eql(JSON.stringify({ foo: 'bar' }));
     });
 
     const scenarios = [

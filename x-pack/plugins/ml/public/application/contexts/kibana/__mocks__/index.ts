@@ -7,4 +7,5 @@
 
 export { useMlKibana } from './kibana_context';
 export { useTimefilter } from './use_timefilter';
-export { useMlApiContext } from './use_ml_api_context';
+export { useMlApi } from './use_ml_api_context';
+export { useMlLicenseInfo } from './use_ml_license';

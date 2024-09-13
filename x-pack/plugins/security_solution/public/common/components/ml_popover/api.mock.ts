@@ -100,6 +100,16 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
   },
 ];
 
+export const getJobsSummaryResponseMock = (additionalJobs: MlSummaryJob[]): MlSummaryJob[] => [
+  ...mockJobsSummaryResponse,
+  ...additionalJobs,
+];
+
+export const buildMockJobsSummary = (overrides: Partial<MlSummaryJob>): MlSummaryJob => ({
+  ...mockJobsSummaryResponse[0],
+  ...overrides,
+});
+
 export const mockGetModuleResponse: Module[] = [
   {
     id: 'security_linux_v3',
@@ -417,5 +427,29 @@ export const mockSecurityJobs: SecurityJob[] = [
     customSettings: {
       security_app_display_name: 'Unusually Windows Processes',
     },
+  },
+  {
+    datafeedId: 'datafeed-siem-api-rare_process_linux_ecs',
+    datafeedIndices: ['auditbeat-*'],
+    datafeedState: 'failed',
+    description: 'SIEM Auditbeat: Detect unusually rare processes on Linux (beta)',
+    earliestTimestampMs: 1561651364098,
+    groups: ['siem'],
+    hasDatafeed: true,
+    id: 'siem-api-rare_process_linux_ecs',
+    isSingleMetricViewerJob: true,
+    jobState: 'closed',
+    latestTimestampMs: 1562870521264,
+    memory_status: 'hard_limit',
+    nodeName: 'siem-es',
+    processed_record_count: 3425264,
+    awaitingNodeAssignment: false,
+    jobTags: {},
+    bucketSpanSeconds: 900,
+    moduleId: 'security_linux_v3',
+    defaultIndexPattern: 'auditbeat-*',
+    isCompatible: true,
+    isInstalled: true,
+    isElasticJob: true,
   },
 ];

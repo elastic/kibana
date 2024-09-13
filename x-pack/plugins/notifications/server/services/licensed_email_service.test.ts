@@ -10,12 +10,13 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { LicensedEmailService } from './licensed_email_service';
 import type { ILicense } from '@kbn/licensing-plugin/server';
-import type { EmailService, PlainTextEmail } from './types';
+import type { EmailService, HTMLEmail, PlainTextEmail } from './types';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const emailServiceMock: EmailService = {
   sendPlainTextEmail: jest.fn(),
+  sendHTMLEmail: jest.fn(),
 };
 
 const validLicense = licensingMock.createLicenseMock();
@@ -30,6 +31,13 @@ const someEmail: PlainTextEmail = {
   to: ['user1@email.com'],
   subject: 'Some subject',
   message: 'Some message',
+};
+
+const someHTMLEmail: HTMLEmail = {
+  to: ['user1@email.com'],
+  subject: 'Some subject',
+  message: 'Some message',
+  messageHTML: '<html><body><span>Some message</span></body></html>',
 };
 
 describe('LicensedEmailService', () => {
@@ -58,7 +66,7 @@ describe('LicensedEmailService', () => {
       const license$ = new Subject<ILicense>();
       const email = new LicensedEmailService(emailServiceMock, license$, 'platinum', logger);
 
-      email.sendPlainTextEmail(someEmail);
+      void email.sendPlainTextEmail(someEmail);
       expect(emailServiceMock.sendPlainTextEmail).not.toHaveBeenCalled();
       license$.next(validLicense);
 
@@ -100,6 +108,76 @@ describe('LicensedEmailService', () => {
       const silentSend = async () => {
         try {
           await email.sendPlainTextEmail(someEmail);
+          emailsOk++;
+        } catch (err) {
+          emailsKo++;
+        }
+      };
+
+      await silentSend();
+      await silentSend();
+      await silentSend();
+      await silentSend();
+      license$.next(validLicense);
+      await silentSend();
+      await silentSend();
+      await silentSend();
+      await silentSend();
+
+      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledTimes(2);
+      expect(emailsKo).toEqual(4);
+      expect(emailsOk).toEqual(4);
+    });
+  });
+
+  describe('sendHTMLEmail()', () => {
+    it('does not call the underlying email service until the license is determined and valid', async () => {
+      const license$ = new Subject<ILicense>();
+      const email = new LicensedEmailService(emailServiceMock, license$, 'platinum', logger);
+
+      void email.sendHTMLEmail(someHTMLEmail);
+      expect(emailServiceMock.sendHTMLEmail).not.toHaveBeenCalled();
+      license$.next(validLicense);
+
+      await delay(1);
+
+      expect(emailServiceMock.sendHTMLEmail).toHaveBeenCalledTimes(1);
+      expect(emailServiceMock.sendHTMLEmail).toHaveBeenCalledWith(someHTMLEmail);
+    });
+
+    it('does not call the underlying email service if the license is invalid', async () => {
+      const license$ = new Subject<ILicense>();
+      const email = new LicensedEmailService(emailServiceMock, license$, 'platinum', logger);
+      license$.next(invalidLicense);
+
+      try {
+        await email.sendHTMLEmail(someHTMLEmail);
+      } catch (err) {
+        expect(err.message).toEqual(
+          'The current license does not allow sending email notifications'
+        );
+        return;
+      }
+
+      expect('it should have thrown').toEqual('but it did not');
+    });
+
+    it('does not log a warning for every email attempt, but rather for every license change', async () => {
+      const license$ = new Subject<ILicense>();
+      const email = new LicensedEmailService(emailServiceMock, license$, 'platinum', logger);
+      license$.next(invalidLicense);
+      license$.next(validLicense);
+      license$.next(invalidLicense);
+
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledTimes(2);
+
+      let emailsOk = 0;
+      let emailsKo = 0;
+      const silentSend = async () => {
+        try {
+          await email.sendHTMLEmail(someHTMLEmail);
           emailsOk++;
         } catch (err) {
           emailsKo++;

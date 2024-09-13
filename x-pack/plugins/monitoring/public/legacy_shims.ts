@@ -22,6 +22,7 @@ import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { ActionTypeModel, RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import {
   MonitoringStartPluginDependencies,
   LegacyMonitoringStartPluginDependencies,
@@ -73,6 +74,7 @@ export interface IShims {
   usageCollection: UsageCollectionSetup;
   kibanaServices: CoreStart & { usageCollection: UsageCollectionSetup };
   appMountParameters: AppMountParameters;
+  infra?: InfraClientStartExports;
 }
 
 export class Legacy {
@@ -85,6 +87,7 @@ export class Legacy {
     triggersActionsUi,
     usageCollection,
     appMountParameters,
+    infra,
   }: LegacyMonitoringStartPluginDependencies) {
     this._shims = {
       toastNotifications: core.notifications.toasts,
@@ -143,6 +146,7 @@ export class Legacy {
         usageCollection,
       },
       appMountParameters,
+      infra,
     };
   }
 

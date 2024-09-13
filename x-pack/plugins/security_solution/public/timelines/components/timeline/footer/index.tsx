@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiPopoverProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -20,7 +19,6 @@ import {
   EuiPagination,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -29,40 +27,10 @@ import type { OnChangePage } from '../events';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME } from '../helpers';
 
 import * as i18n from './translations';
-import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
-
-export const isCompactFooter = (width: number): boolean => width < 600;
-
-interface FixedWidthLastUpdatedContainerProps {
-  updatedAt: number;
-}
-
-const FixedWidthLastUpdatedContainer = React.memo<FixedWidthLastUpdatedContainerProps>(
-  ({ updatedAt }) => {
-    const { timelines } = useKibana().services;
-    const width = useEventDetailsWidthContext();
-    const compact = useMemo(() => isCompactFooter(width), [width]);
-
-    return updatedAt > 0 ? (
-      <FixedWidthLastUpdated data-test-subj="fixed-width-last-updated" compact={compact}>
-        {timelines.getLastUpdated({ updatedAt, compact })}
-      </FixedWidthLastUpdated>
-    ) : null;
-  }
-);
-
-FixedWidthLastUpdatedContainer.displayName = 'FixedWidthLastUpdatedContainer';
-
-const FixedWidthLastUpdated = styled.div<{ compact?: boolean }>`
-  width: ${({ compact }) => (!compact ? 200 : 25)}px;
-  overflow: hidden;
-  text-align: end;
-`;
-
-FixedWidthLastUpdated.displayName = 'FixedWidthLastUpdated';
+import { LastUpdatedContainer } from './last_updated';
 
 interface HeightProp {
   height: number;
@@ -90,19 +58,6 @@ const LoadingPanelContainer = styled.div`
 `;
 
 LoadingPanelContainer.displayName = 'LoadingPanelContainer';
-
-const PopoverRowItems = styled(EuiPopover as unknown as FC)<
-  EuiPopoverProps & {
-    className?: string;
-    id?: string;
-  }
->`
-  .euiButtonEmpty__content {
-    padding: 0px 0px;
-  }
-`;
-
-PopoverRowItems.displayName = 'PopoverRowItems';
 
 export const ServerSideEventCount = styled.div`
   margin: 0 5px 0 5px;
@@ -139,7 +94,7 @@ export const EventsCountComponent = ({
   );
   return (
     <h5>
-      <PopoverRowItems
+      <EuiPopover
         className="footer-popover"
         id="customizablePagination"
         data-test-subj="timelineSizeRowPopover"
@@ -149,6 +104,7 @@ export const EventsCountComponent = ({
               {itemsCount}
               <EuiButtonEmpty
                 className={EVENTS_COUNT_BUTTON_CLASS_NAME}
+                flush="both"
                 size="s"
                 color="text"
                 iconType="arrowDown"
@@ -165,7 +121,7 @@ export const EventsCountComponent = ({
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
-      </PopoverRowItems>
+      </EuiPopover>
       <EuiToolTip
         content={
           <>
@@ -294,7 +250,7 @@ export const FooterComponent = ({
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
   const onChangeItemsPerPage = useCallback(
-    (itemsChangedPerPage) =>
+    (itemsChangedPerPage: number) =>
       dispatch(timelineActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage })),
     [dispatch, id]
   );
@@ -379,10 +335,10 @@ export const FooterComponent = ({
         </EuiFlexItem>
 
         <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
-          <FixedWidthLastUpdatedContainer updatedAt={updatedAt} />
+          <LastUpdatedContainer updatedAt={updatedAt} />
         </EuiFlexItem>
 
-        <EuiFlexItem data-test-subj="paging-control-container" grow={false}>
+        <EuiFlexItem grow={false}>
           {isLive ? (
             <EuiText size="s" data-test-subj="is-live-on-message">
               <b>
@@ -404,7 +360,6 @@ export const FooterComponent = ({
             </EuiText>
           ) : (
             <PagingControl
-              data-test-subj="paging-control"
               totalCount={totalCount}
               totalPages={totalPages}
               activePage={activePage}

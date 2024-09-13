@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
-import { PivotGroupByConfig, PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
+import type { PivotGroupByConfig } from '../../../../common';
+import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
 
 import { GroupByListForm } from './list_form';
 
@@ -27,8 +28,8 @@ describe('Transform: <GroupByListForm />', () => {
       onChange() {},
     };
 
-    const wrapper = shallow(<GroupByListForm {...props} />);
+    const { container } = render(<GroupByListForm {...props} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toContain('the-group-by-agg-name');
   });
 });

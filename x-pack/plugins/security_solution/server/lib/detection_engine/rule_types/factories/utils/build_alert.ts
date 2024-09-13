@@ -34,15 +34,21 @@ import {
   ALERT_SEVERITY,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_URL,
+  ALERT_UUID,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   EVENT_KIND,
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
+import { requiredOptional } from '@kbn/zod-helpers';
 
 import { createHash } from 'crypto';
 
+import { getAlertDetailsUrl } from '../../../../../../common/utils/alert_detail_path';
 import type { BaseSignalHit, SimpleHit } from '../../types';
 import type { ThresholdResult } from '../../threshold/types';
 import {
@@ -51,7 +57,7 @@ import {
   isWrappedDetectionAlert,
   isWrappedSignalHit,
 } from '../../utils/utils';
-import { SERVER_APP_ID } from '../../../../../../common/constants';
+import { DEFAULT_ALERTS_INDEX, SERVER_APP_ID } from '../../../../../../common/constants';
 import type { SearchTypes } from '../../../../telemetry/types';
 import {
   ALERT_ANCESTORS,
@@ -74,6 +80,14 @@ import {
   ALERT_RULE_THREAT,
   ALERT_RULE_EXCEPTIONS_LIST,
   ALERT_RULE_IMMUTABLE,
+  LEGACY_ALERT_HOST_CRITICALITY,
+  LEGACY_ALERT_USER_CRITICALITY,
+  ALERT_HOST_CRITICALITY,
+  ALERT_USER_CRITICALITY,
+  ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM,
+  ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM,
 } from '../../../../../../common/field_maps/field_names';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import { commonParamsCamelToSnake, typeSpecificCamelToSnake } from '../../../rule_management';
@@ -81,7 +95,7 @@ import { transformAlertToRuleAction } from '../../../../../../common/detection_e
 import type {
   AncestorLatest,
   BaseFieldsLatest,
-} from '../../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../../common/api/detection_engine/model/alerts';
 
 export const generateAlertId = (alert: BaseFieldsLatest) => {
   return createHash('sha256')
@@ -137,6 +151,8 @@ export const buildAlert = (
   spaceId: string | null | undefined,
   reason: string,
   indicesToQuery: string[],
+  alertUuid: string,
+  publicBaseUrl: string | undefined,
   alertTimestampOverride: Date | undefined,
   overrides?: {
     nameOverride: string;
@@ -180,8 +196,18 @@ export const buildAlert = (
     primaryTimestamp: TIMESTAMP,
   });
 
+  const timestamp = alertTimestampOverride?.toISOString() ?? new Date().toISOString();
+
+  const alertUrl = getAlertDetailsUrl({
+    alertId: alertUuid,
+    index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+    timestamp,
+    basePath: publicBaseUrl,
+    spaceId,
+  });
+
   return {
-    [TIMESTAMP]: alertTimestampOverride?.toISOString() ?? new Date().toISOString(),
+    [TIMESTAMP]: timestamp,
     [SPACE_IDS]: spaceId != null ? [spaceId] : [],
     [EVENT_KIND]: 'signal',
     [ALERT_ORIGINAL_TIME]: originalTime?.toISOString(),
@@ -213,7 +239,7 @@ export const buildAlert = (
     [ALERT_RULE_NAMESPACE_FIELD]: params.namespace,
     [ALERT_RULE_NOTE]: params.note,
     [ALERT_RULE_REFERENCES]: params.references,
-    [ALERT_RULE_RISK_SCORE_MAPPING]: params.riskScoreMapping,
+    [ALERT_RULE_RISK_SCORE_MAPPING]: requiredOptional(params.riskScoreMapping),
     [ALERT_RULE_RULE_ID]: params.ruleId,
     [ALERT_RULE_RULE_NAME_OVERRIDE]: params.ruleNameOverride,
     [ALERT_RULE_SEVERITY_MAPPING]: params.severityMapping,
@@ -229,11 +255,24 @@ export const buildAlert = (
     [ALERT_RULE_UPDATED_BY]: updatedBy ?? '',
     [ALERT_RULE_UUID]: completeRule.alertId,
     [ALERT_RULE_VERSION]: params.version,
+    [ALERT_URL]: alertUrl,
+    [ALERT_UUID]: alertUuid,
+    [ALERT_WORKFLOW_TAGS]: [],
+    [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
     ...flattenWithPrefix(ALERT_RULE_META, params.meta),
     // These fields don't exist in the mappings, but leaving here for now to limit changes to the alert building logic
     'kibana.alert.rule.risk_score': params.riskScore,
     'kibana.alert.rule.severity': params.severity,
     'kibana.alert.rule.building_block_type': params.buildingBlockType,
+    // asset criticality fields will be enriched before ingestion
+    [LEGACY_ALERT_HOST_CRITICALITY]: undefined,
+    [LEGACY_ALERT_USER_CRITICALITY]: undefined,
+    [ALERT_HOST_CRITICALITY]: undefined,
+    [ALERT_USER_CRITICALITY]: undefined,
+    [ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL]: undefined,
+    [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
+    [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: undefined,
+    [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
   };
 };
 

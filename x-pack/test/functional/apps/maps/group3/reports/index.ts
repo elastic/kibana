@@ -11,60 +11,74 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 const REPORTS_FOLDER = __dirname;
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
+  const { reporting, dashboard } = getPageObjects(['reporting', 'dashboard']);
+  const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   const config = getService('config');
   const log = getService('log');
-  const reporting = getService('reporting');
+  const reportingService = getService('reporting');
   const png = getService('png');
 
+  // NOTE: Occasionally, you may need to run the test and copy the "session" image file and replace the
+  // "baseline" image file to reflect current renderings. The source and destination file paths can be found in
+  // the debug logs.
   describe('dashboard reporting: creates a map report', () => {
     // helper function to check the difference between the new image and the baseline
     const measurePngDifference = async (fileName: string) => {
-      const url = await PageObjects.reporting.getReportURL(60000);
-      const reportData = await PageObjects.reporting.getRawPdfReportData(url);
+      const url = await reporting.getReportURL(60000);
+      const reportData = await reporting.getRawReportData(url ?? '');
 
-      const sessionReportPath = await PageObjects.reporting.writeSessionReport(
+      const sessionReportPath = await reporting.writeSessionReport(
         fileName,
         'png',
         reportData,
         REPORTS_FOLDER
       );
-      log.debug(`session report path: ${sessionReportPath}`);
-
       expect(sessionReportPath).not.to.be(null);
+
+      const baselineReportPath = reporting.getBaselineReportPath(fileName, 'png', REPORTS_FOLDER);
+      log.debug(`session report path: ${sessionReportPath}`);
+      log.debug(`baseline report path: ${baselineReportPath}`);
+
       return await png.checkIfPngsMatch(
         sessionReportPath,
-        PageObjects.reporting.getBaselineReportPath(fileName, 'png', REPORTS_FOLDER),
+        baselineReportPath,
         config.get('screenshots.directory')
       );
     };
 
+    before(async () => {
+      await browser.setWindowSize(1600, 1000);
+    });
+
     after(async () => {
-      await reporting.deleteAllReports();
+      await reportingService.deleteAllReports();
     });
 
     it('PNG file matches the baseline image, using sample geo data', async function () {
-      await reporting.initEcommerce();
+      await reportingService.initEcommerce();
 
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard('Ecommerce Map');
-      await PageObjects.reporting.openPngReportingPanel();
-      await PageObjects.reporting.clickGenerateReportButton();
+      await dashboard.navigateToApp();
+      await dashboard.loadSavedDashboard('Ecommerce Map');
+      await reporting.openExportTab();
+      await testSubjects.click('pngV2-radioOption');
+      await reporting.clickGenerateReportButton();
 
       const percentDiff = await measurePngDifference('geo_map_report');
-      expect(percentDiff).to.be.lessThan(0.09);
+      expect(percentDiff).to.be.lessThan(0.03);
 
-      await reporting.teardownEcommerce();
+      await reportingService.teardownEcommerce();
     });
 
     it('PNG file matches the baseline image, using embeddable example', async function () {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
-      await PageObjects.reporting.openPngReportingPanel();
-      await PageObjects.reporting.clickGenerateReportButton();
+      await dashboard.navigateToApp();
+      await dashboard.loadSavedDashboard('map embeddable example');
+      await reporting.openExportTab();
+      await testSubjects.click('pngV2-radioOption');
+      await reporting.clickGenerateReportButton();
 
       const percentDiff = await measurePngDifference('example_map_report');
-      expect(percentDiff).to.be.lessThan(0.09);
+      expect(percentDiff).to.be.lessThan(0.03);
     });
   });
 }

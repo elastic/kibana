@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
@@ -14,7 +15,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import { HttpService } from '@kbn/core-http-server-internal';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 
 let server: HttpService;
 
@@ -29,7 +30,7 @@ const setupDeps = {
 
 beforeEach(async () => {
   logger = loggingSystemMock.create();
-  server = createHttpServer({ logger });
+  server = createHttpService({ logger });
   await server.preboot({ context: contextServiceMock.createPrebootContract() });
 });
 
@@ -1474,7 +1475,7 @@ describe('OnPreResponse', () => {
 });
 
 describe('runs with default preResponse handlers', () => {
-  it('does not allow overwriting of the "kbn-name" and "Content-Security-Policy" headers', async () => {
+  it('does not allow overwriting of the "kbn-name", "Content-Security-Policy" and  "Content-Security-Policy-Report-Only" headers', async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
@@ -1484,6 +1485,7 @@ describe('runs with default preResponse handlers', () => {
           foo: 'bar',
           'kbn-name': 'hijacked!',
           'Content-Security-Policy': 'hijacked!',
+          'Content-Security-Policy-Report-Only': 'hijacked!',
         },
       })
     );
@@ -1494,7 +1496,10 @@ describe('runs with default preResponse handlers', () => {
     expect(response.header.foo).toBe('bar');
     expect(response.header['kbn-name']).toBe('kibana');
     expect(response.header['content-security-policy']).toBe(
-      `script-src 'self' 'unsafe-eval'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+      `script-src 'report-sample' 'self' 'unsafe-eval'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`
+    );
+    expect(response.header['content-security-policy-report-only']).toBe(
+      `form-action 'report-sample' 'self'`
     );
   });
 });

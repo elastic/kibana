@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
 import { ISearchStrategy } from '@kbn/data-plugin/server';
+import { of } from 'rxjs';
 import { FibonacciRequest, FibonacciResponse } from '../common/types';
 
 export const fibonacciStrategyProvider = (): ISearchStrategy<
@@ -40,10 +42,7 @@ export const fibonacciStrategyProvider = (): ISearchStrategy<
       const took = Date.now() - started;
       const values = sequence.slice(0, loaded);
 
-      // Usually we'd do something like "of()" but for some reason it breaks in tests with the error
-      // "You provided an invalid object where a stream was expected." which is why we have to cast
-      // down below as well
-      return [{ id, loaded, total, isRunning, isPartial, rawResponse: { took, values } }];
+      return of({ id, loaded, total, isRunning, isPartial, rawResponse: { took, values } });
     },
     cancel: async (id: string) => {
       responseMap.delete(id);

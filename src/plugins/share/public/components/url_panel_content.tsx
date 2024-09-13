@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Component, ReactElement } from 'react';
+import React, { Component } from 'react';
 import {
   EuiButton,
   EuiCopy,
@@ -28,6 +29,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { Capabilities } from '@kbn/core/public';
 
+import type { LocatorPublic } from '../../common';
 import { UrlParamExtension } from '../types';
 import {
   AnonymousAccessServiceContract,
@@ -42,6 +44,10 @@ export interface UrlPanelContentProps {
   objectType: string;
   shareableUrl?: string;
   shareableUrlForSavedObject?: string;
+  shareableUrlLocatorParams?: {
+    locator: LocatorPublic<any>;
+    params: any;
+  };
   urlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
@@ -351,16 +357,23 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     });
 
     try {
-      const snapshotUrl = this.getSnapshotUrl();
-      const shortUrl = await this.props.urlService.shortUrls
-        .get(null)
-        .createFromLongUrl(snapshotUrl);
+      const { shareableUrlLocatorParams } = this.props;
+      if (shareableUrlLocatorParams) {
+        const shortUrls = this.props.urlService.shortUrls.get(null);
+        const shortUrl = await shortUrls.createWithLocator(shareableUrlLocatorParams);
+        this.shortUrlCache = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
+      } else {
+        const snapshotUrl = this.getSnapshotUrl();
+        const shortUrl = await this.props.urlService.shortUrls
+          .get(null)
+          .createFromLongUrl(snapshotUrl);
+        this.shortUrlCache = shortUrl.url;
+      }
 
       if (!this.mounted) {
         return;
       }
 
-      this.shortUrlCache = shortUrl.url;
       this.setState(
         {
           isCreatingShortUrl: false,
@@ -569,7 +582,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     );
   };
 
-  private renderUrlParamExtensions = (): ReactElement | void => {
+  private renderUrlParamExtensions = (): React.ReactNode => {
     if (!this.props.urlParamExtensions) {
       return;
     }

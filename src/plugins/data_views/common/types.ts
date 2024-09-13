@@ -1,17 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type {
-  SavedObject,
-  SavedObjectsCreateOptions,
-  SavedObjectsUpdateOptions,
-} from '@kbn/core/public';
+import type { SavedObject } from '@kbn/core/server';
 import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -25,7 +23,7 @@ export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 /**
  * Runtime field types
  */
-export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+export type RuntimeType = (typeof RUNTIME_FIELD_TYPES)[number];
 
 /**
  * Runtime field primitive types - excluding composite
@@ -83,6 +81,10 @@ export interface FieldConfiguration {
    */
   customLabel?: string;
   /**
+   * Custom description
+   */
+  customDescription?: string;
+  /**
    * Popularity - used for discover
    */
   popularity?: number;
@@ -119,7 +121,7 @@ export interface DataViewAttributes {
   /**
    * Fields as a serialized array of field specs
    */
-  fields: string;
+  fields?: string;
   /**
    * Data view title
    */
@@ -160,6 +162,10 @@ export interface DataViewAttributes {
    * Name of the data view. Human readable name used to differentiate data view.
    */
   name?: string;
+  /**
+   * Allow hidden and system indices when loading field list
+   */
+  allowHidden?: boolean;
 }
 
 /**
@@ -182,6 +188,10 @@ export type FieldAttrSet = {
    * Custom field label
    */
   customLabel?: string;
+  /**
+   * Custom field description
+   */
+  customDescription?: string;
   /**
    * Popularity count - used for discover
    */
@@ -237,10 +247,6 @@ export interface UiSettingsCommon {
  */
 export interface SavedObjectsClientCommonFindArgs {
   /**
-   * Saved object type
-   */
-  type: string | string[];
-  /**
    * Saved object fields
    */
   fields?: string[];
@@ -259,21 +265,23 @@ export interface SavedObjectsClientCommonFindArgs {
 }
 
 /**
- * Common interface for the saved objects client
+ * Common interface for the saved objects client on server and content management in browser
  * @public
  */
-export interface SavedObjectsClientCommon {
+export interface PersistenceAPI {
   /**
    * Search for saved objects
    * @param options - options for search
    */
-  find: <T = unknown>(options: SavedObjectsClientCommonFindArgs) => Promise<Array<SavedObject<T>>>;
+  find: (
+    options: SavedObjectsClientCommonFindArgs
+  ) => Promise<Array<SavedObject<DataViewAttributes>>>;
   /**
    * Get a single saved object by id
    * @param type - type of saved object
    * @param id - id of saved object
    */
-  get: <T = unknown>(type: string, id: string) => Promise<SavedObject<T>>;
+  get: (id: string) => Promise<SavedObject<DataViewAttributes>>;
   /**
    * Update a saved object by id
    * @param type - type of saved object
@@ -282,49 +290,56 @@ export interface SavedObjectsClientCommon {
    * @param options - client options
    */
   update: (
-    type: string,
     id: string,
     attributes: DataViewAttributes,
-    options: SavedObjectsUpdateOptions
+    options: { version?: string }
   ) => Promise<SavedObject>;
   /**
    * Create a saved object
-   * @param type - type of saved object
    * @param attributes - attributes to set
    * @param options - client options
    */
   create: (
-    type: string,
     attributes: DataViewAttributes,
-    options: SavedObjectsCreateOptions
+    // SavedObjectsCreateOptions
+    options: { id?: string; initialNamespaces?: string[]; overwrite?: boolean }
   ) => Promise<SavedObject>;
   /**
    * Delete a saved object by id
    * @param type - type of saved object
    * @param id - id of saved object
    */
-  delete: (type: string, id: string) => Promise<{}>;
+  delete: (id: string) => Promise<void>;
 }
 
 export interface GetFieldsOptions {
   pattern: string;
   type?: string;
-  lookBack?: boolean;
   metaFields?: string[];
   rollupIndex?: string;
   allowNoIndex?: boolean;
   indexFilter?: QueryDslQueryContainer;
   includeUnmapped?: boolean;
   fields?: string[];
+  allowHidden?: boolean;
+  forceRefresh?: boolean;
+  fieldTypes?: string[];
+  includeEmptyFields?: boolean;
 }
 
 /**
  * FieldsForWildcard response
  */
 export interface FieldsForWildcardResponse {
-  fields: FieldSpec[];
+  fields: FieldsForWildcardSpec[];
   indices: string[];
+  etag?: string;
 }
+
+/**
+ * Existing Indices response
+ */
+export type ExistingIndicesResponse = string[];
 
 export interface IDataViewsApiClient {
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldsForWildcardResponse>;
@@ -373,6 +388,12 @@ export enum DataViewType {
 
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
 
+// omit items saved DataView
+type FieldsForWildcardSpec = Omit<
+  FieldSpec,
+  'format' | 'customLabel' | 'runtimeField' | 'count' | 'customDescription'
+>;
+
 /**
  * Serialized version of DataViewField
  * @public
@@ -403,6 +424,10 @@ export type FieldSpec = DataViewFieldBase & {
    */
   aggregatable: boolean;
   /**
+   * True if field is empty
+   */
+  isNull?: boolean;
+  /**
    * True if can be read from doc values
    */
   readFromDocValues?: boolean;
@@ -414,6 +439,10 @@ export type FieldSpec = DataViewFieldBase & {
    * Custom label for field, used for display in kibana
    */
   customLabel?: string;
+  /**
+   * Custom description for field, used for display in kibana
+   */
+  customDescription?: string;
   /**
    * Runtime field definition
    */
@@ -437,7 +466,7 @@ export type FieldSpec = DataViewFieldBase & {
   /**
    * set if field is a TSDB metric field
    */
-  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesMetric?: estypes.MappingTimeSeriesMetricType;
 
   // not persisted
 
@@ -453,6 +482,8 @@ export type FieldSpec = DataViewFieldBase & {
    * Name of parent field for composite runtime field subfields.
    */
   parentName?: string;
+
+  defaultFormatter?: string;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;
@@ -519,15 +550,26 @@ export type DataViewSpec = {
    * Name of the data view. Human readable name used to differentiate data view.
    */
   name?: string;
+  /**
+   * Allow hidden and system indices when loading field list
+   */
+  allowHidden?: boolean;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SourceFilter = {
   value: string;
+  clientId?: string | number;
 };
 
 export interface HasDataService {
   hasESData: () => Promise<boolean>;
   hasUserDataView: () => Promise<boolean>;
   hasDataView: () => Promise<boolean>;
+}
+
+export interface ClientConfigType {
+  scriptedFieldsEnabled?: boolean;
+  dataTiersExcludedForFields?: string;
+  fieldListCachingEnabled?: boolean;
 }

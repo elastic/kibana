@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useCallback } from 'react';
@@ -47,6 +48,7 @@ export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType' |
   type: TypeSelection;
   __meta__: {
     isCustomLabelVisible: boolean;
+    isCustomDescriptionVisible: boolean;
     isValueVisible: boolean;
     isFormatVisible: boolean;
     isPopularityVisible: boolean;
@@ -86,6 +88,7 @@ const formDeserializer = (field: Field): FieldFormInternal => {
     format,
     __meta__: {
       isCustomLabelVisible: field.customLabel !== undefined,
+      isCustomDescriptionVisible: field.customDescription !== undefined,
       isValueVisible: field.script !== undefined,
       isFormatVisible: field.format !== undefined,
       isPopularityVisible: field.popularity !== undefined,
@@ -105,7 +108,7 @@ const formSerializer = (field: FieldFormInternal): Field => {
 };
 
 const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
-  const { namesNotAllowed, fieldTypeToProcess, fieldName$, subfields$ } = useFieldEditorContext();
+  const { fieldTypeToProcess, fieldName$, subfields$, dataView } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
     fieldPreview$,
@@ -119,13 +122,14 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
 
   const { submit, isValid: isFormValid, isSubmitted, getFields, isSubmitting } = form;
 
-  const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
+  const nameFieldConfig = getNameFieldConfig(dataView, field);
 
   const [formData] = useFormData<FieldFormInternal>({ form });
   const isFormModified = useFormIsModified({
     form,
     discard: [
       '__meta__.isCustomLabelVisible',
+      '__meta__.isCustomDescriptionVisible',
       '__meta__.isValueVisible',
       '__meta__.isFormatVisible',
       '__meta__.isPopularityVisible',
@@ -168,7 +172,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   useEffect(() => {
     const existingCompositeField = !!Object.keys(subfields$.getValue() || {}).length;
 
-    const changes$ = getFieldPreviewChanges(fieldPreview$);
+    const changes$ = getFieldPreviewChanges(fieldPreview$, updatedName);
 
     const subChanges = changes$.subscribe((previewFields) => {
       const fields = subfields$.getValue();
@@ -199,7 +203,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     return () => {
       subChanges.unsubscribe();
     };
-  }, [form, fieldPreview$, subfields$]);
+  }, [form, fieldPreview$, subfields$, updatedName]);
 
   useEffect(() => {
     if (onChange) {
@@ -288,7 +292,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
           <EuiCallOut
             iconType="iInCircle"
             title={i18n.translate('indexPatternFieldEditor.editor.form.subFieldParentInfo', {
-              defaultMessage: "Field value is defined by '{parentName}'",
+              defaultMessage: "Field value is defined by ''{parentName}''",
               values: { parentName: field?.parentName },
             })}
           />

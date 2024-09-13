@@ -2,7 +2,7 @@
   "id": "metricbeat_system_ecs",
   "title": "Metricbeat System",
   "description": "Detect anomalies in Metricbeat System data (ECS)",
-  "type": "Metricbeat data.",
+  "type": "Infrastructure",
   "logoFile": "logo.json",
   "defaultIndexPattern": "metricbeat-*",
   "query": {
@@ -48,5 +48,6 @@
       "file": "datafeed_high_mean_cpu_iowait_ecs.json",
       "job_id": "high_mean_cpu_iowait_ecs"
     }
-  ]
+  ],
+  "tags": ["observability"]
 }

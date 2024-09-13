@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import { groupBy, orderBy } from 'lodash';
 import {
   IconPosition,
@@ -17,6 +18,7 @@ import {
   FillStyle,
   ExtendedReferenceLineDecorationConfig,
   ReferenceLineDecorationConfig,
+  CommonXYReferenceLineLayerConfig,
 } from '../../../common/types';
 import { FillStyles } from '../../../common/constants';
 import {
@@ -27,6 +29,7 @@ import {
   getAxisPosition,
   getOriginalAxisPosition,
   AxesMap,
+  isReferenceLine,
 } from '../../helpers';
 import type { ReferenceLineAnnotationConfig } from './reference_line_annotations';
 
@@ -240,4 +243,30 @@ export function getAxisGroupForReferenceLine(
       (decorationConfig.axisId && axis.groupId.includes(decorationConfig.axisId)) ||
       getAxisPosition(decorationConfig.position ?? Position.Left, shouldRotate) === axis.position
   );
+}
+
+export type FormattersMap = Record<string, FieldFormat>;
+
+export function getReferenceLinesFormattersMap(
+  referenceLinesLayers: CommonXYReferenceLineLayerConfig[],
+  formatFactory: FormatFactory
+): FormattersMap {
+  const formattersMap: Record<string, FieldFormat> = {};
+  for (const layer of referenceLinesLayers) {
+    if (isReferenceLine(layer)) {
+      for (const { valueMeta, forAccessor } of layer.decorations) {
+        if (valueMeta?.params?.params?.formatOverride) {
+          formattersMap[forAccessor] = formatFactory(valueMeta.params);
+        }
+      }
+    } else {
+      for (const { forAccessor } of layer.decorations || []) {
+        const columnFormat = layer.table.columns.find(({ id }) => id === forAccessor)?.meta.params;
+        if (columnFormat?.params?.formatOverride) {
+          formattersMap[forAccessor] = formatFactory(columnFormat);
+        }
+      }
+    }
+  }
+  return formattersMap;
 }

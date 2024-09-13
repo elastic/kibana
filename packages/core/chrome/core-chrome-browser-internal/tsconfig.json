@@ -5,7 +5,10 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-storybook-types",
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [
@@ -13,7 +16,6 @@
     "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/crypto-browser",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/core-injected-metadata-browser-internal",
@@ -36,6 +38,23 @@
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-custom-branding-browser",
     "@kbn/core-custom-branding-common",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-analytics-browser",
+    "@kbn/default-nav-analytics",
+    "@kbn/default-nav-ml",
+    "@kbn/default-nav-management",
+    "@kbn/default-nav-devtools",
+    "@kbn/shared-ux-router",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/core-http-browser-internal",
+    "@kbn/core-base-browser-internal",
+    "@kbn/core-base-browser-mocks",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/react-kibana-context-render",
+    "@kbn/recently-accessed",
   ],
   "exclude": [
     "target/**/*",

@@ -12,7 +12,6 @@ import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { alertRenderer } from './alert_renderer';
-import '../../../../../common/mock/match_media';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
@@ -20,7 +19,7 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 
 import { defaultRowRenderers } from '.';
 import { getRowRenderer } from './get_row_renderer';
-import { TimelineId } from '../../../../../../common/types';
+import { TimelineId } from '../../../../../../common/types/timeline';
 
 // EuiIcons coming from .testenv render the icon's aria-label as a span
 // extractEuiIcon removes the aria-label before checking for equality
@@ -54,7 +53,7 @@ describe('get_column_renderer', () => {
     return wrapper;
   };
   beforeEach(() => {
-    nonSuricata = cloneDeep(mockTimelineData[0].ecs);
+    nonSuricata = cloneDeep(mockTimelineData[1].ecs);
     suricata = cloneDeep(mockTimelineData[2].ecs);
     zeek = cloneDeep(mockTimelineData[13].ecs);
     system = cloneDeep(mockTimelineData[28].ecs);

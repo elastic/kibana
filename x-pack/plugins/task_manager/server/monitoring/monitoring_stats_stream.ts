@@ -6,12 +6,10 @@
  */
 
 import { merge, of, Observable } from 'rxjs';
-import { map, scan } from 'rxjs/operators';
+import { map, scan } from 'rxjs';
 import { set } from '@kbn/safer-lodash-set';
 import { Logger } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
-import { TaskStore } from '../task_store';
-import { TaskPollingLifecycle } from '../polling_lifecycle';
 import {
   createWorkloadAggregator,
   summarizeWorkloadStat,
@@ -37,13 +35,9 @@ import {
 
 import { ConfigStat, createConfigurationAggregator } from './configuration_statistics';
 import { TaskManagerConfig } from '../config';
-import { AggregatedStatProvider } from './runtime_statistics_aggregator';
-import { ManagedConfiguration } from '../lib/create_managed_configuration';
-import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 import { CapacityEstimationStat, withCapacityEstimate } from './capacity_estimation';
-import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
-
-export type { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
+import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
+import { CreateMonitoringStatsOpts } from '.';
 
 export interface MonitoringStats {
   last_update: string;
@@ -57,6 +51,7 @@ export interface MonitoringStats {
 }
 
 export enum HealthStatus {
+  Uninitialized = 'uninitialized',
   OK = 'OK',
   Warning = 'warn',
   Error = 'error',
@@ -68,6 +63,7 @@ export interface MonitoredStat<T> {
 }
 export type RawMonitoredStat<T extends JsonObject> = MonitoredStat<T> & {
   status: HealthStatus;
+  reason?: string;
 };
 
 export interface RawMonitoringStats {
@@ -81,35 +77,37 @@ export interface RawMonitoringStats {
   };
 }
 
-export function createAggregators(
-  taskStore: TaskStore,
-  elasticsearchAndSOAvailability$: Observable<boolean>,
-  config: TaskManagerConfig,
-  managedConfig: ManagedConfiguration,
-  logger: Logger,
-  adHocTaskCounter: AdHocTaskCounter,
-  taskPollingLifecycle?: TaskPollingLifecycle,
-  ephemeralTaskLifecycle?: EphemeralTaskLifecycle
-): AggregatedStatProvider {
+export function createAggregators({
+  taskStore,
+  elasticsearchAndSOAvailability$,
+  config,
+  managedConfig,
+  logger,
+  taskDefinitions,
+  adHocTaskCounter,
+  taskPollingLifecycle,
+  ephemeralTaskLifecycle,
+}: CreateMonitoringStatsOpts): AggregatedStatProvider {
   const aggregators: AggregatedStatProvider[] = [
     createConfigurationAggregator(config, managedConfig),
 
-    createWorkloadAggregator(
+    createWorkloadAggregator({
       taskStore,
       elasticsearchAndSOAvailability$,
-      config.monitored_aggregated_stats_refresh_rate,
-      config.poll_interval,
-      logger
-    ),
+      refreshInterval: config.monitored_aggregated_stats_refresh_rate,
+      pollInterval: config.poll_interval,
+      logger,
+      taskDefinitions,
+    }),
   ];
   if (taskPollingLifecycle) {
     aggregators.push(
       createTaskRunAggregator(taskPollingLifecycle, config.monitored_stats_running_average_window),
       createBackgroundTaskUtilizationAggregator(
         taskPollingLifecycle,
-        config.monitored_stats_running_average_window,
         adHocTaskCounter,
-        config.poll_interval
+        config.poll_interval,
+        config.worker_utilization_running_average_window
       )
     );
   }
@@ -118,7 +116,7 @@ export function createAggregators(
       createEphemeralTaskAggregator(
         ephemeralTaskLifecycle,
         config.monitored_stats_running_average_window,
-        config.max_workers
+        managedConfig.startingCapacity
       )
     );
   }
@@ -126,8 +124,7 @@ export function createAggregators(
 }
 
 export function createMonitoringStatsStream(
-  provider$: AggregatedStatProvider,
-  config: TaskManagerConfig
+  provider$: AggregatedStatProvider
 ): Observable<MonitoringStats> {
   const initialStats = {
     last_update: new Date().toISOString(),

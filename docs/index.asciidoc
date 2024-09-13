@@ -1,25 +1,11 @@
 [[kibana-guide]]
 = Kibana Guide
 
-:include-xpack:  true
-:lang:           en
-:kib-repo-dir:   {kibana-root}/docs
-
 include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
-
-:docker-repo:     docker.elastic.co/kibana/kibana
-:docker-image:    {docker-repo}:{version}
-:es-docker-repo:  docker.elastic.co/elasticsearch/elasticsearch
-:es-docker-image: {es-docker-repo}:{version}
-:security-ref:    https://www.elastic.co/community/security/
-:Data-source:     Data view
-:data-source:     data view
-:data-sources:    data views
-:a-data-source:   a data view
 
 include::{docs-root}/shared/attributes.asciidoc[]
 
-:blob: {kib-repo}blob/{branch}/
+include::landing-page.asciidoc[]
 
 include::user/index.asciidoc[]
 
@@ -28,8 +14,6 @@ include::accessibility.asciidoc[]
 include::CHANGELOG.asciidoc[]
 
 include::developer/index.asciidoc[]
-
-include::apis.asciidoc[]
 
 include::redirects.asciidoc[]
 

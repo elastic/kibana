@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponse } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { PACKS_ID } from './constants';
 import type { PackSavedObject } from './types';
 
-export type UsePacksResponse = Omit<SavedObjectsFindResponse, 'savedObjects'> & {
+export interface UsePacksResponse {
+  total: number;
   data: PackSavedObject[];
-};
+}
 
 export const usePacks = ({
   isLive = false,
@@ -29,6 +30,7 @@ export const usePacks = ({
     [PACKS_ID, { pageIndex, pageSize, sortField, sortOrder }],
     () =>
       http.get('/api/osquery/packs', {
+        version: API_VERSIONS.public.v1,
         query: { pageIndex, pageSize, sortField, sortOrder },
       }),
     {

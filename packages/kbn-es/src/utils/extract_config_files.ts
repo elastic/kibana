@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import path from 'path';
@@ -29,6 +30,7 @@ export function extractConfigFiles(
     if (isFile(value)) {
       const filename = path.basename(value);
       const destPath = path.resolve(dest, 'config', filename);
+
       copyFileSync(value, destPath);
 
       options?.log.info('moved %s in config to %s', value, destPath);
@@ -42,11 +44,11 @@ export function extractConfigFiles(
   return localConfig;
 }
 
-function isFile(dest = '') {
-  return path.isAbsolute(dest) && path.extname(dest).length > 0 && fs.existsSync(dest);
+export function isFile(dest = '') {
+  return fs.existsSync(dest) && fs.statSync(dest).isFile();
 }
 
-function copyFileSync(src: string, dest: string) {
+export function copyFileSync(src: string, dest: string) {
   const destPath = path.dirname(dest);
 
   if (!fs.existsSync(destPath)) {

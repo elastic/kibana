@@ -1,15 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { i18n } from '@kbn/i18n';
-import type { FilterManager } from '@kbn/data-plugin/public';
-import { createFilter, isEmptyFilterValue } from './create_filter';
+import type { FilterManager, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { addFilter, isEmptyFilterValue } from './add_filter';
+
 import { FILTER_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
+import {
+  isTypeSupportedByDefaultActions,
+  isValueSupportedByDefaultActions,
+  valueToArray,
+  filterOutNullableValues,
+} from '../utils';
+import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '../translations';
+import type { DefaultActionsSupportedValue } from '../types';
 
 const ICON = 'minusInCircle';
 const FILTER_OUT = i18n.translate('cellActions.actions.filterOut', {
@@ -17,18 +29,45 @@ const FILTER_OUT = i18n.translate('cellActions.actions.filterOut', {
 });
 
 export const createFilterOutActionFactory = createCellActionFactory(
-  ({ filterManager }: { filterManager: FilterManager }) => ({
+  ({
+    filterManager,
+    notifications: { toasts },
+  }: {
+    filterManager: FilterManager;
+    notifications: NotificationsStart;
+  }) => ({
     type: FILTER_CELL_ACTION_TYPE,
     getIconType: () => ICON,
     getDisplayName: () => FILTER_OUT,
     getDisplayNameTooltip: () => FILTER_OUT,
-    isCompatible: async ({ field }) => !!field.name,
-    execute: async ({ field }) => {
-      addFilterOut({
-        filterManager,
-        fieldName: field.name,
-        value: field.value,
-      });
+    isCompatible: async ({ data }) => {
+      const field = data[0]?.field;
+      return (
+        data.length === 1 && // TODO Add support for multiple values
+        !!field.name &&
+        isTypeSupportedByDefaultActions(field.type as KBN_FIELD_TYPES)
+      );
+    },
+
+    execute: async ({ data, metadata }) => {
+      const field = data[0]?.field;
+      const rawValue = data[0]?.value;
+      const dataViewId = typeof metadata?.dataViewId === 'string' ? metadata.dataViewId : undefined;
+
+      const value = filterOutNullableValues(valueToArray(rawValue));
+
+      if (isValueSupportedByDefaultActions(value)) {
+        addFilterOut({
+          filterManager,
+          fieldName: field.name,
+          value,
+          dataViewId,
+        });
+      } else {
+        toasts.addWarning({
+          title: ACTION_INCOMPATIBLE_VALUE_WARNING,
+        });
+      }
     },
   })
 );
@@ -37,17 +76,20 @@ export const addFilterOut = ({
   filterManager,
   fieldName,
   value,
+  dataViewId,
 }: {
   filterManager: FilterManager | undefined;
   fieldName: string;
-  value: string[] | string | null | undefined;
+  value: DefaultActionsSupportedValue;
+  dataViewId?: string;
 }) => {
   if (filterManager != null) {
-    const filter = createFilter({
+    addFilter({
+      filterManager,
       key: fieldName,
       value,
       negate: !isEmptyFilterValue(value),
+      dataViewId,
     });
-    filterManager.addFilters(filter);
   }
 };

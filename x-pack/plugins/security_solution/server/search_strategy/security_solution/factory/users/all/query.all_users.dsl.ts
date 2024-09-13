@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/search-types';
+import type { UsersRequestOptions } from '../../../../../../common/api/search_strategy';
 import type { Direction } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
-import type { UsersRequestOptions } from '../../../../../../common/search_strategy/security_solution/users/all';
-import type { SortUsersField } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { UsersFields } from '../../../../../../common/search_strategy/security_solution/users/common';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
 export const buildUsersQuery = ({
   defaultIndex,
   filterQuery,
-  pagination: { querySize },
+  pagination,
   sort,
   timerange: { from, to },
 }: UsersRequestOptions): ISearchRequestParams => {
+  // TODO: replace magic number with defaults
+  const { querySize } = pagination || { activePage: 0, querySize: 10 };
+
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -80,13 +82,14 @@ export const buildUsersQuery = ({
 
 type QueryOrder = { lastSeen: Direction } | { domain: Direction } | { _key: Direction };
 
-const getQueryOrder = (sort: SortUsersField): QueryOrder => {
-  switch (sort.field) {
-    case UsersFields.lastSeen:
-      return { lastSeen: sort.direction };
-    case UsersFields.name:
-      return { _key: sort.direction };
-    default:
-      return assertUnreachable(sort.field);
+const getQueryOrder = (sort: UsersRequestOptions['sort']): QueryOrder => {
+  if (!sort) return assertUnreachable(sort);
+
+  if (sort.field === UsersFields.lastSeen) {
+    return { lastSeen: sort.direction };
+  } else if (sort.field === UsersFields.name) {
+    return { _key: sort.direction };
+  } else {
+    throw new Error(`Invalid sort field provided for Users query: "${sort.field}"`);
   }
 };

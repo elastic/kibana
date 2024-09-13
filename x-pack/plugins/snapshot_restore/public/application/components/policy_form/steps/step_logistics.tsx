@@ -273,6 +273,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         }}
         fullWidth
         data-test-subj="repositorySelect"
+        disabled={policy?.isManagedPolicy && isEditing}
       />
     );
   };
@@ -336,12 +337,13 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           placeholder={i18n.translate(
             'xpack.snapshotRestore.policyForm.stepLogistics.policySnapshotNamePlaceholder',
             {
-              defaultMessage: '<daily-snap-\\{now/d\\}>',
+              defaultMessage: `'<daily-snap-{now/d}>'`,
               description:
                 'Example date math snapshot name. Keeping the same syntax is important: <SOME-TRANSLATION-{now/d}>',
             }
           )}
           data-test-subj="snapshotNameInput"
+          disabled={policy?.isManagedPolicy && isEditing}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>

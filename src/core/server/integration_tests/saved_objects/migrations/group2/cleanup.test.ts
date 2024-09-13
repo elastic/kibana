@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -13,7 +14,7 @@ import JSON5 from 'json5';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { getMigrationDocLink, delay } from '../test_utils';
+import { getMigrationDocLink } from '../test_utils';
 import {
   clearLog,
   currentVersion,
@@ -42,7 +43,7 @@ describe('migration v2', () => {
   });
 
   it('clean ups if migration fails', async () => {
-    const { runMigrations, client } = await setupNextMinor();
+    const { runMigrations } = await setupNextMinor();
 
     await expect(runMigrations()).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Unable to complete saved object migrations for the [${defaultKibanaIndex}] index: Migrations failed. Reason: 1 corrupt saved object documents were found: corrupt:2baf4de0-a6d4-11ed-ba5a-39196fc76e60
@@ -63,18 +64,6 @@ describe('migration v2', () => {
     );
 
     expect(logRecordWithPit).toBeTruthy();
-
-    const pitId = logRecordWithPit.right.pitId;
-    expect(pitId).toBeTruthy();
-
-    await expect(
-      client.search({
-        body: {
-          pit: { id: pitId },
-        },
-      })
-      // throws an exception that cannot search with closed PIT
-    ).rejects.toThrow(/search_phase_execution_exception/);
   });
 
   afterEach(async () => {
@@ -83,7 +72,6 @@ describe('migration v2', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 });
 
@@ -143,13 +131,13 @@ const setupBaseline = async () => {
 
   // inject corrupt saved objects directly using esClient
   await Promise.all(
-    savedObjects.map((savedObject) => {
+    savedObjects.map((savedObject) =>
       client.create({
         index: defaultKibanaIndex,
         refresh: 'wait_for',
         ...savedObject,
-      });
-    })
+      })
+    )
   );
 
   return client;

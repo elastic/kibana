@@ -1,15 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { compact, flattenDeep, isString } from 'lodash';
+import { Observable, ReplaySubject, distinctUntilChanged } from 'rxjs';
 import type { ChromeDocTitle } from '@kbn/core-chrome-browser';
 
-interface StartDeps {
+export interface InternalChromeDocTitleSetup {
+  title$: Observable<string>;
+}
+
+interface SetupDeps {
   document: { title: string };
 }
 
@@ -18,12 +24,24 @@ const titleSeparator = ' - ';
 
 /** @internal */
 export class DocTitleService {
-  private document = { title: '' };
-  private baseTitle = '';
+  private document?: { title: string };
+  private baseTitle?: string;
+  private titleSubject = new ReplaySubject<string>(1);
 
-  public start({ document }: StartDeps): ChromeDocTitle {
+  public setup({ document }: SetupDeps): InternalChromeDocTitleSetup {
     this.document = document;
     this.baseTitle = document.title;
+    this.titleSubject.next(this.baseTitle);
+
+    return {
+      title$: this.titleSubject.asObservable().pipe(distinctUntilChanged()),
+    };
+  }
+
+  public start(): ChromeDocTitle {
+    if (this.document === undefined || this.baseTitle === undefined) {
+      throw new Error('DocTitleService#setup must be called before DocTitleService#start');
+    }
 
     return {
       change: (title: string | string[]) => {
@@ -36,7 +54,9 @@ export class DocTitleService {
   }
 
   private applyTitle(title: string | string[]) {
-    this.document.title = this.render(title);
+    const rendered = this.render(title);
+    this.document!.title = rendered;
+    this.titleSubject.next(rendered);
   }
 
   private render(title: string | string[]) {

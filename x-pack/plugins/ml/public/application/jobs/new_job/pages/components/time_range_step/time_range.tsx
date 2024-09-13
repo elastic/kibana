@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -13,14 +14,17 @@ import moment from 'moment';
 import { FullTimeRangeSelector, FROZEN_TIER_PREFERENCE } from '@kbn/ml-date-picker';
 import { useTimefilter, type GetTimeFieldRangeResponse } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
+import { ML_INTERNAL_BASE_PATH } from '../../../../../../../common/constants/app';
 import { WizardNav } from '../wizard_nav';
-import { StepProps, WIZARD_STEPS } from '../step_types';
+import type { StepProps } from '../step_types';
+import { WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { useMlContext } from '../../../../../contexts/ml';
+import { useDataSource } from '../../../../../contexts/ml';
 import { EventRateChart } from '../charts/event_rate_chart';
-import { LineChartPoint } from '../../../common/chart_loader';
+import type { LineChartPoint } from '../../../common/chart_loader';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
-import { TimeRangePicker, TimeRange } from '../../../common/components';
+import type { TimeRange } from '../../../common/components';
+import { TimeRangePicker } from '../../../common/components';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   ML_FROZEN_TIER_PREFERENCE,
@@ -31,7 +35,7 @@ import {
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const timefilter = useTimefilter();
   const { services } = useMlKibana();
-  const mlContext = useMlContext();
+  const dataSourceContext = useDataSource();
 
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, chartLoader, chartInterval } =
     useContext(JobCreatorContext);
@@ -112,7 +116,8 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       const { toasts } = services.notifications;
       toasts.addDanger(
         i18n.translate('xpack.ml.newJob.wizard.timeRangeStep.fullTimeRangeError', {
-          defaultMessage: 'An error occurred obtaining the time range for the index',
+          defaultMessage:
+            'An error occurred obtaining the time range for the index. Please set the desired start and end times.',
         })
       );
     }
@@ -130,12 +135,12 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
               <FullTimeRangeSelector
                 frozenDataPreference={frozenDataPreference}
                 setFrozenDataPreference={setFrozenDataPreference}
-                dataView={mlContext.currentDataView}
-                query={mlContext.combinedQuery}
+                dataView={dataSourceContext.selectedDataView}
+                query={dataSourceContext.combinedQuery}
                 disabled={false}
                 callback={fullTimeRangeCallback}
                 timefilter={timefilter}
-                apiPath="/api/ml/fields_service/time_field_range"
+                apiPath={`${ML_INTERNAL_BASE_PATH}/fields_service/time_field_range`}
               />
             </EuiFlexItem>
             <EuiFlexItem />

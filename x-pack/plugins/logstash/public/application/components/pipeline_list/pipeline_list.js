@@ -12,7 +12,7 @@ import {
   EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
@@ -254,7 +254,6 @@ class PipelineListUi extends React.Component {
               {
                 numSuccesses,
                 numPipelinesSelected,
-                numPipelinesSelected,
               }
             ),
             text,
@@ -288,10 +287,10 @@ class PipelineListUi extends React.Component {
   onSelectionChange = (selection) => this.setState({ selection });
 
   render() {
-    const { clonePipeline, createPipeline, isReadOnly, openPipeline } = this.props;
+    const { clonePipeline, createPipeline, isReadOnly, openPipeline, isServerless } = this.props;
     const { isSelectable, message, pipelines, selection, showConfirmDeleteModal } = this.state;
     return (
-      <EuiPageContentBody data-test-subj="pipelineList">
+      <EuiPageSection data-test-subj="pipelineList">
         <EuiPageHeader
           pageTitle={
             <FormattedMessage id="xpack.logstash.pipelineList.head" defaultMessage="Pipelines" />
@@ -326,10 +325,10 @@ class PipelineListUi extends React.Component {
           showConfirmDeleteModal={showConfirmDeleteModal}
         />
         <InfoAlerts
-          showAddRoleAlert={this.state.showAddRoleAlert}
-          showEnableMonitoringAlert={this.state.showEnableMonitoringAlert}
+          showAddRoleAlert={!isServerless && this.state.showAddRoleAlert}
+          showEnableMonitoringAlert={!isServerless && this.state.showEnableMonitoringAlert}
         />
-      </EuiPageContentBody>
+      </EuiPageSection>
     );
   }
 }

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, memo } from 'react';
+import React, { useCallback, memo, useEffect } from 'react';
 import type { SavedObjectsFindOptionsReference, ScopedHistory } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { TableListView } from '@kbn/content-management-table-list';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
+import { TableListView } from '@kbn/content-management-table-list-view';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
-import type { MapItem } from '../../../common/content_management';
-import { APP_ID, getEditPath, MAP_PATH } from '../../../common/constants';
+import type { MapAttributes, MapItem } from '../../../common/content_management';
+import { APP_ID, APP_NAME, getEditPath, MAP_PATH } from '../../../common/constants';
 import {
   getMapsCapabilities,
   getCoreChrome,
@@ -21,9 +21,9 @@ import {
   getNavigateToApp,
   getUiSettings,
   getUsageCollection,
+  getServerless,
 } from '../../kibana_services';
-import { getAppTitle } from '../../../common/i18n_getters';
-import { mapsClient } from '../../content_management';
+import { getMapClient } from '../../content_management';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -55,7 +55,7 @@ const toTableListViewSavedObject = (mapItem: MapItem): MapUserContent => {
 };
 
 async function deleteMaps(items: Array<{ id: string }>) {
-  await Promise.all(items.map(({ id }) => mapsClient.delete(id)));
+  await Promise.all(items.map(({ id }) => getMapClient().delete(id)));
 }
 
 interface Props {
@@ -73,8 +73,18 @@ function MapsListViewComp({ history }: Props) {
   const listingLimit = getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = getUiSettings().get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
-  getCoreChrome().docTitle.change(getAppTitle());
-  getCoreChrome().setBreadcrumbs([{ text: getAppTitle() }]);
+  // TLDR; render should be side effect free
+  //
+  // setBreadcrumbs fires observables which cause state changes in ScreenReaderRouteAnnouncements.
+  // wrap chrome updates in useEffect to avoid potentially causing state changes in other component during render phase.
+  useEffect(() => {
+    getCoreChrome().docTitle.change(APP_NAME);
+    if (getServerless()) {
+      getServerless()!.setBreadcrumbs({ text: APP_NAME });
+    } else {
+      getCoreChrome().setBreadcrumbs([{ text: APP_NAME }]);
+    }
+  }, []);
 
   const findMaps = useCallback(
     async (
@@ -87,7 +97,7 @@ function MapsListViewComp({ history }: Props) {
         referencesToExclude?: SavedObjectsFindOptionsReference[];
       } = {}
     ) => {
-      return mapsClient
+      return getMapClient<MapAttributes>()
         .search({
           text: searchTerm ? `${searchTerm}*` : undefined,
           limit: getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING),
@@ -128,8 +138,10 @@ function MapsListViewComp({ history }: Props) {
       entityNamePlural={i18n.translate('xpack.maps.mapListing.entityNamePlural', {
         defaultMessage: 'maps',
       })}
-      tableListTitle={getAppTitle()}
-      onClickTitle={({ id }) => history.push(getEditPath(id))}
+      title={APP_NAME}
+      getOnClickTitle={({ id }) =>
+        () =>
+          history.push(getEditPath(id))}
     />
   );
 }

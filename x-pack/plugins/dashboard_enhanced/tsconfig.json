@@ -1,15 +1,10 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
-    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/share-plugin",
@@ -22,9 +17,11 @@
     "@kbn/es-query",
     "@kbn/unified-search-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/image-embeddable-plugin"
+    "@kbn/image-embeddable-plugin",
+    "@kbn/presentation-util-plugin",
+    "@kbn/presentation-containers",
+    "@kbn/presentation-publishing",
+    "@kbn/react-kibana-mount"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

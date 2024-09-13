@@ -55,16 +55,17 @@ export const forceHTMLElementOffsetWidth = (width: number = 100): (() => void) =
  */
 export const clickOnEffectedPolicy = async (
   renderResult: ReturnType<AppContextTestRender['render']>,
+  effectedPoliciesPrefix: string,
   atIndex: number = 0
 ): Promise<Element> => {
   const policiesHolderElement = await renderResult.findByTestId(
-    'effectedPolicies-select-policiesSelectable'
+    `${effectedPoliciesPrefix}-effectedPolicies-policiesSelectable`
   );
   const policyElements = policiesHolderElement.querySelectorAll('li.euiSelectableListItem');
   const item = policyElements.item(atIndex);
 
   if (item) {
-    userEvent.click(item);
+    await userEvent.click(item);
   }
 
   return item;
@@ -77,10 +78,11 @@ export const clickOnEffectedPolicy = async (
  */
 export const isEffectedPolicySelected = async (
   renderResult: ReturnType<AppContextTestRender['render']>,
+  effectedPoliciesPrefix: string,
   atIndex: number = 0
 ): Promise<boolean> => {
   const policiesHolderElement = await renderResult.findByTestId(
-    'effectedPolicies-select-policiesSelectable'
+    `${effectedPoliciesPrefix}-effectedPolicies-policiesSelectable`
   );
   const policyElements = policiesHolderElement.querySelectorAll<HTMLLIElement>(
     'li.euiSelectableListItem'
@@ -91,5 +93,5 @@ export const isEffectedPolicySelected = async (
     throw new Error(`No policy found in EffectedPolicySelect at index position ${atIndex}`);
   }
 
-  return item.dataset.testSelected === 'true';
+  return item.getAttribute('aria-checked') === 'true';
 };

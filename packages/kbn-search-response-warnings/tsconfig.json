@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts"],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/inspector-plugin",
+    "@kbn/core",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-i18n-browser",
+  ],
+  "exclude": ["target/**/*"]
+}

@@ -8,7 +8,6 @@
 import * as Rx from 'rxjs';
 
 import type { ObjectType } from '@kbn/config-schema';
-import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { RouteValidatorConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import {
@@ -17,7 +16,10 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
+import { initCopyToSpacesApi } from './copy_to_space';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -33,7 +35,6 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { initCopyToSpacesApi } from './copy_to_space';
 
 describe('copy to space', () => {
   const spacesSavedObjects = createSpaces();
@@ -57,7 +58,7 @@ describe('copy to space', () => {
       createResolveSavedObjectsImportErrorsMock()
     );
 
-    const clientService = new SpacesClientService(jest.fn());
+    const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -72,7 +73,7 @@ describe('copy to space', () => {
       usageStatsServiceMock.createSetupContract(usageStatsClient)
     );
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
@@ -80,11 +81,12 @@ describe('copy to space', () => {
     });
 
     initCopyToSpacesApi({
-      externalRouter: router,
+      router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
+      isServerless: false,
     });
 
     const [[ctsRouteDefinition, ctsRouteHandler], [resolveRouteDefinition, resolveRouteHandler]] =

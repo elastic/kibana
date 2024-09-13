@@ -9,12 +9,12 @@ const createAlertingEventLoggerMock = () => {
   return jest.fn().mockImplementation(() => {
     return {
       initialize: jest.fn(),
-      start: jest.fn(),
       getEvent: jest.fn(),
       getStartAndDuration: jest.fn(),
-      setRuleName: jest.fn(),
+      addOrUpdateRuleData: jest.fn(),
       setExecutionSucceeded: jest.fn(),
       setExecutionFailed: jest.fn(),
+      setMaintenanceWindowIds: jest.fn(),
       logTimeout: jest.fn(),
       logAlert: jest.fn(),
       logAction: jest.fn(),

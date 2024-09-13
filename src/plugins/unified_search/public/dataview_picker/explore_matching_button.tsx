@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 interface ExploreMatchingButtonProps {
   noDataViewMatches: boolean;
   indexMatches: number;
   dataViewSearchString: string;
-  onCreateDefaultAdHocDataView?: (pattern: string) => void;
+  onCreateDefaultAdHocDataView?: (dataViewSpec: DataViewSpec) => void;
   setPopoverIsOpen: (isOpen: boolean) => void;
 }
 
@@ -34,7 +36,6 @@ export const ExploreMatchingButton = ({
         alignItems="center"
         gutterSize="none"
         justifyContent="spaceBetween"
-        data-test-subj="select-text-based-language-panel"
         css={css`
           margin: ${euiTheme.size.s};
           margin-bottom: 0;
@@ -47,7 +48,7 @@ export const ExploreMatchingButton = ({
             data-test-subj="explore-matching-indices-button"
             onClick={() => {
               setPopoverIsOpen(false);
-              onCreateDefaultAdHocDataView(dataViewSearchString);
+              onCreateDefaultAdHocDataView({ title: dataViewSearchString });
             }}
           >
             {i18n.translate('unifiedSearch.query.queryBar.indexPattern.createForMatchingIndices', {

@@ -1,0 +1,200 @@
+{
+  "id": "@kbn/default-nav-analytics",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/default-nav-analytics",
+        "id": "def-common.AnalyticsNodeDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "AnalyticsNodeDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.NodeDefinition",
+            "text": "NodeDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/deeplinks-analytics",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksAnalyticsPluginApi",
+            "section": "def-common.AppId",
+            "text": "AppId"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-analytics",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavAnalyticsPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-analytics",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavAnalyticsPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          "> & { children: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.NodeDefinition",
+            "text": "NodeDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/deeplinks-analytics",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksAnalyticsPluginApi",
+            "section": "def-common.AppId",
+            "text": "AppId"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-analytics",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavAnalyticsPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/default-nav-analytics",
+            "scope": "common",
+            "docId": "kibKbnDefaultNavAnalyticsPluginApi",
+            "section": "def-common.NavigationID",
+            "text": "NavigationID"
+          },
+          ">[]; }"
+        ],
+        "path": "packages/default-nav/analytics/default_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/default-nav-analytics",
+        "id": "def-common.NavigationID",
+        "type": "Type",
+        "tags": [],
+        "label": "NavigationID",
+        "description": [],
+        "signature": [
+          "\"root\" | \"rootNav:analytics\""
+        ],
+        "path": "packages/default-nav/analytics/default_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/default-nav-analytics",
+        "id": "def-common.defaultNavigation",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultNavigation",
+        "description": [],
+        "path": "packages/default-nav/analytics/default_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/default-nav-analytics",
+            "id": "def-common.defaultNavigation.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"rootNav:analytics\""
+            ],
+            "path": "packages/default-nav/analytics/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-analytics",
+            "id": "def-common.defaultNavigation.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "packages/default-nav/analytics/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-analytics",
+            "id": "def-common.defaultNavigation.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "path": "packages/default-nav/analytics/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-analytics",
+            "id": "def-common.defaultNavigation.renderAs",
+            "type": "string",
+            "tags": [],
+            "label": "renderAs",
+            "description": [],
+            "signature": [
+              "\"accordion\""
+            ],
+            "path": "packages/default-nav/analytics/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/default-nav-analytics",
+            "id": "def-common.defaultNavigation.children",
+            "type": "Array",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "({ link: \"discover\"; } | { link: \"dashboards\"; } | { link: \"visualize\"; })[]"
+            ],
+            "path": "packages/default-nav/analytics/default_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

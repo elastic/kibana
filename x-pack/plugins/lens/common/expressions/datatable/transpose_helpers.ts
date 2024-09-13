@@ -8,14 +8,18 @@
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { DatatableArgs } from './datatable';
-import type { ColumnConfig, ColumnConfigArg } from './datatable_column';
+import type { DatatableColumnConfig, DatatableColumnArgs } from './datatable_column';
 
 const TRANSPOSE_SEPARATOR = '---';
 
 const TRANSPOSE_VISUAL_SEPARATOR = '›';
 
-function getTransposeId(value: string, columnId: string) {
+export function getTransposeId(value: string, columnId: string) {
   return `${value}${TRANSPOSE_SEPARATOR}${columnId}`;
+}
+
+export function isTransposeId(id: string): boolean {
+  return id.split(TRANSPOSE_SEPARATOR).length > 1;
 }
 
 export function getOriginalId(id: string) {
@@ -87,11 +91,11 @@ export function transposeTable(
 
 function transposeRows(
   firstTable: Datatable,
-  bucketsColumnArgs: ColumnConfigArg[],
+  bucketsColumnArgs: DatatableColumnArgs[],
   formatters: Record<string, FieldFormat>,
   transposedColumnFormatter: FieldFormat,
   transposedColumnId: string,
-  metricsColumnArgs: ColumnConfigArg[]
+  metricsColumnArgs: DatatableColumnArgs[]
 ) {
   const rowsByBucketColumns: Record<string, DatatableRow[]> = groupRowsByBucketColumns(
     firstTable,
@@ -113,12 +117,12 @@ function transposeRows(
  */
 function updateColumnArgs(
   args: DatatableArgs,
-  bucketsColumnArgs: ColumnConfig['columns'],
-  transposedColumnGroups: Array<ColumnConfig['columns']>
+  bucketsColumnArgs: DatatableColumnConfig['columns'],
+  transposedColumnGroups: Array<DatatableColumnConfig['columns']>
 ) {
   args.columns = [...bucketsColumnArgs];
   // add first column from each group, then add second column for each group, ...
-  transposedColumnGroups[0].forEach((_, index) => {
+  transposedColumnGroups[0]?.forEach((_, index) => {
     transposedColumnGroups.forEach((transposedColumnGroup) => {
       args.columns.push(transposedColumnGroup[index]);
     });
@@ -151,8 +155,8 @@ function getUniqueValues(table: Datatable, formatter: FieldFormat, columnId: str
  */
 function transposeColumns(
   args: DatatableArgs,
-  bucketsColumnArgs: ColumnConfig['columns'],
-  metricColumns: ColumnConfig['columns'],
+  bucketsColumnArgs: DatatableColumnConfig['columns'],
+  metricColumns: DatatableColumnConfig['columns'],
   firstTable: Datatable,
   uniqueValues: string[],
   uniqueRawValues: unknown[],
@@ -196,10 +200,10 @@ function transposeColumns(
  */
 function mergeRowGroups(
   rowsByBucketColumns: Record<string, DatatableRow[]>,
-  bucketColumns: ColumnConfigArg[],
+  bucketColumns: DatatableColumnArgs[],
   formatter: FieldFormat,
   transposedColumnId: string,
-  metricColumns: ColumnConfigArg[]
+  metricColumns: DatatableColumnArgs[]
 ) {
   return Object.values(rowsByBucketColumns).map((rows) => {
     const mergedRow: DatatableRow = {};
@@ -222,7 +226,7 @@ function mergeRowGroups(
  */
 function groupRowsByBucketColumns(
   firstTable: Datatable,
-  bucketColumns: ColumnConfigArg[],
+  bucketColumns: DatatableColumnArgs[],
   formatters: Record<string, FieldFormat>
 ) {
   const rowsByBucketColumns: Record<string, DatatableRow[]> = {};

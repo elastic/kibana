@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Url from 'url';
 
-import Axios, { AxiosRequestConfig, AxiosInstance } from 'axios';
+import Axios, { AxiosRequestConfig, AxiosInstance, AxiosHeaders, AxiosHeaderValue } from 'axios';
 import { isAxiosResponseError, isAxiosRequestError } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 
@@ -130,7 +131,7 @@ export class GithubApi {
   ): Promise<{
     status: number;
     statusText: string;
-    headers: Record<string, string | string[] | undefined>;
+    headers: Record<string, AxiosHeaderValue | undefined>;
     data: T;
   }> {
     const executeRequest = !this.dryRun || options.safeForDryRun;
@@ -145,7 +146,7 @@ export class GithubApi {
         return {
           status: 200,
           statusText: 'OK',
-          headers: {},
+          headers: new AxiosHeaders(),
           data: dryRunResponse,
         };
       }
@@ -158,7 +159,7 @@ export class GithubApi {
         const githubApiFailed = isAxiosResponseError(error) && error.response.status >= 500;
         const errorResponseLog =
           isAxiosResponseError(error) &&
-          `[${error.config.method} ${error.config.url}] ${error.response.status} ${error.response.statusText} Error`;
+          `[${error.config?.method} ${error.config?.url}] ${error.response.status} ${error.response.statusText} Error`;
 
         if ((unableToReachGithub || githubApiFailed) && attempt < maxAttempts) {
           const waitMs = 1000 * attempt;

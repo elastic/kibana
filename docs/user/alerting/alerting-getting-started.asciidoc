@@ -13,7 +13,7 @@ To make sure you can access alerting and actions, see the <<alerting-prerequisit
 ==============================================
 
 Alerting works by running checks on a schedule to detect conditions defined by a rule. When a condition is met, the rule tracks it as an _alert_ and responds by triggering one or more _actions_.
-Actions typically involve interaction with {kib} services or third party integrations. _Connectors_ enable actions to talk to these services and integrations. 
+Actions typically involve interaction with {kib} services or third party integrations. _Connectors_ enable actions to talk to these services and integrations.
 This section describes all of these elements and how they operate together.
 
 [float]
@@ -21,7 +21,7 @@ This section describes all of these elements and how they operate together.
 
 A rule specifies a background task that runs on the {kib} server to check for specific conditions. {kib} provides two types of rules: stack rules that are built into {kib} and the rules that are registered by {kib} apps. For more information, refer to <<rule-types>>.
 
-A rule consists of three main parts: 
+A rule consists of three main parts:
 
 * _Conditions_: what needs to be detected?
 * _Schedule_: when/how often should detection checks run?
@@ -41,7 +41,7 @@ The following sections describe each part of the rule in more detail.
 [[alerting-concepts-conditions]]
 === Conditions
 
-Under the hood, {kib} rules detect conditions by running a JavaScript function on the {kib} server, which gives it the flexibility to support a wide range of conditions, anything from the results of a simple {es} query to heavy computations involving data from multiple sources or external systems. 
+Under the hood, {kib} rules detect conditions by running a JavaScript function on the {kib} server, which gives it the flexibility to support a wide range of conditions, anything from the results of a simple {es} query to heavy computations involving data from multiple sources or external systems.
 
 These conditions are packaged and exposed as _rule types_. A rule type hides the underlying details of the condition, and exposes a set of parameters
 to control the details of the conditions to detect.
@@ -75,9 +75,12 @@ When defining actions in a rule, you specify:
 
 Rather than repeatedly entering connection information and credentials for each action, {kib} simplifies action setup using <<action-types,connectors>>. For example if four rules send email notifications via the same SMTP service, they can all reference the same SMTP connector.
 
-The _action frequency_ defines when the action runs (for example, only when the alert status changes or at specific time intervals). Each rule type also has a set of the _action groups_ that affects when the action runs (for example, when the threshold is met or when the alert is recovered). If you want to reduce the number of notifications you receive without affecting their timeliness, some rule types support alert summaries. You can set the action frequency such that you receive notifications that summarize the new, ongoing, and recovered alerts at your preferred time intervals.
+The _action frequency_ defines when the action runs (for example, only when the alert status changes or at specific time intervals). Each rule type also has a set of the _action groups_ that affects when the action runs (for example, when the threshold is met or when the alert is recovered). If you want to reduce the number of notifications you receive without affecting their timeliness, set the action frequency to a summary of alerts. You will receive notifications that summarize the new, ongoing, and recovered alerts at your preferred time intervals.
 
-Each action definition is therefore a template: all the parameters needed to invoke a service are supplied except for specific values that are only known at the time the rule condition is detected. 
+Some types of rules enable you to further refine the conditions under which actions run.
+For example, you can specify that actions run only when an alert occurs within a specific time frame or when it matches a KQL query.
+
+Each action definition is therefore a template: all the parameters needed to invoke a service are supplied except for specific values that are only known at the time the rule condition is detected.
 
 In the server monitoring example, the `email` connector type is used, and `server` is mapped to the body of the email, using the template string `CPU on {{server}} is high`.
 
@@ -100,7 +103,7 @@ A rule consists of conditions, actions, and a schedule. When conditions are met,
 
 image::images/rule-concepts-summary.svg[Rules, connectors, alerts and actions work together to convert detection into action]
 
-. Any time a rule's conditions are met, an alert is created. This example checks for servers with average CPU > 0.9. Three servers meet the condition, so three alerts are created. 
+. Any time a rule's conditions are met, an alert is created. This example checks for servers with average CPU > 0.9. Three servers meet the condition, so three alerts are created.
 . Alerts create actions according to the action frequency, as long as they are not muted or throttled. When actions are created, its properties are filled with actual values. In this example, three actions are created when the threshold is met, and the template string {{server}} is replaced with the appropriate server name for each alert.
 . {kib} runs the actions, sending notifications by using a third party integration like an email service.
 . If the third party integration has connection parameters or credentials, {kib} fetches these from the appropriate connector.
@@ -116,14 +119,14 @@ independent alerting systems.
 This section will clarify some of the important differences in the function and
 intent of the two systems.
 
-Functionally, the {alert-features} differ in that: 
+Functionally, the {alert-features} differ in that:
 
 * Scheduled checks are run on {kib} instead of {es}
 * {kib} <<alerting-concepts-conditions,rules hide the details of detecting conditions>> through rule types, whereas watches provide low-level control over inputs, conditions, and transformations.
 * {kib} rules track and persist the state of each detected condition through alerts. This makes it possible to mute and throttle individual alerts, and detect changes in state such as resolution.
 * Actions are linked to alerts. Actions are fired for each occurrence of a detected condition, rather than for the entire rule.
 
-At a higher level, the {alert-features} allow rich integrations across use cases like <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, and <<uptime-app,*Uptime*>>.
+At a higher level, the {alert-features} allow rich integrations across use cases like <<apm-app,*APM*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, and <<uptime-app,*Uptime*>>.
 Prepackaged rule types simplify setup and hide the details of complex, domain-specific detections, while providing a consistent interface across {kib}.
 
 --

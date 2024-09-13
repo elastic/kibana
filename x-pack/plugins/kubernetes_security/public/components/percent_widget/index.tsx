@@ -11,7 +11,7 @@ import { useStyles } from './styles';
 import type { IndexPattern, GlobalFilter } from '../../types';
 import { useSetFilter } from '../../hooks';
 import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
-import { AggregateResult } from '../../../common/types/aggregate';
+import { AggregateResult } from '../../../common/types';
 import { useFetchPercentWidgetData } from './hooks';
 
 export const LOADING_TEST_ID = 'kubernetesSecurity:percentWidgetLoading';
@@ -33,6 +33,7 @@ export interface PercentWidgetDeps {
   groupedBy: string;
   countBy?: string;
   onReduce: (result: AggregateResult) => Record<string, number>;
+  dataViewId?: string;
 }
 
 interface FilterButtons {
@@ -49,6 +50,7 @@ export const PercentWidget = ({
   groupedBy,
   countBy,
   onReduce,
+  dataViewId,
 }: PercentWidgetDeps) => {
   const [hoveredFilter, setHoveredFilter] = useState<number | null>(null);
   const styles = useStyles();
@@ -92,6 +94,7 @@ export const PercentWidget = ({
             ownFocus: false,
             showTooltip: true,
             value: [groupedByValue],
+            dataViewId,
           })
         );
         result.filterOutButtons.push(
@@ -104,13 +107,14 @@ export const PercentWidget = ({
             ownFocus: false,
             showTooltip: true,
             value: [groupedByValue],
+            dataViewId,
           })
         );
       }
     });
 
     return result;
-  }, [dataValueMap, filterManager, getFilterForValueButton, getFilterOutValueButton]);
+  }, [dataValueMap, dataViewId, filterManager, getFilterForValueButton, getFilterOutValueButton]);
 
   return (
     <div css={styles.container}>

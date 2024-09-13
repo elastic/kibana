@@ -10,8 +10,8 @@ jest.mock('./overwritten_session_page');
 import type { AppMount } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
-import { securityMock } from '../../mocks';
 import { overwrittenSessionApp } from './overwritten_session_app';
+import { securityMock } from '../../mocks';
 
 describe('overwrittenSessionApp', () => {
   it('properly registers application', () => {
@@ -63,8 +63,8 @@ describe('overwrittenSessionApp', () => {
     ).renderOverwrittenSessionPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(
-      coreStartMock.i18n,
-      { element: appMountParams.element, theme$: appMountParams.theme$ },
+      coreStartMock,
+      { element: appMountParams.element },
       { authc: authcMock, basePath: coreStartMock.http.basePath }
     );
   });

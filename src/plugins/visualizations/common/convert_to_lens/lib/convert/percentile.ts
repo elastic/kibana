@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '../../..';
 import { isFieldValid, PercentileParams } from '../..';
-import { getFieldNameFromField, getLabelForPercentile } from '../utils';
+import { getAggIdAndValue, getFieldNameFromField, getLabelForPercentile } from '../utils';
 import { createColumn, getFormat } from './column';
 import { PercentileColumn, CommonColumnConverterArgs } from './types';
 import { SUPPORTED_METRICS } from './supported_metrics';
@@ -40,7 +41,7 @@ const getPercent = (
 
   const { percents } = aggParams;
 
-  const [, percentStr] = aggId.split('.');
+  const [, percentStr] = getAggIdAndValue(aggId);
 
   const percent = Number(percentStr);
   if (!percents || !percents.length || percentStr === '' || isNaN(percent)) {

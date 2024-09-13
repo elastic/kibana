@@ -8,20 +8,20 @@
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { DVErrorObject } from '../../../../../index_data_visualizer/utils/error_utils';
+import type { MLErrorObject } from '@kbn/ml-error-utils';
 
 export const ErrorMessageContent = ({
   fieldName,
   error,
 }: {
   fieldName: string;
-  error: DVErrorObject;
+  error: MLErrorObject;
 }) => {
   return (
     <EuiCallOut heading="p" color="danger" size="s">
       <FormattedMessage
         id="xpack.dataVisualizer.index.fieldStatisticsErrorMessage"
-        defaultMessage="Error getting statistics for field '{fieldName}' because {reason}"
+        defaultMessage="Error getting statistics for field ''{fieldName}'' because {reason}"
         values={{ fieldName, reason: error.message }}
       />
     </EuiCallOut>

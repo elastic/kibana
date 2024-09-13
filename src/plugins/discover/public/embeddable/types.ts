@@ -1,44 +1,108 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
-  Embeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-} from '@kbn/embeddable-plugin/public';
-import type { Filter, TimeRange, Query } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
+  EmbeddableApiContext,
+  HasEditCapabilities,
+  HasInPlaceLibraryTransforms,
+  PublishesBlockingError,
+  PublishesDataLoading,
+  PublishesDataViews,
+  PublishesSavedObjectId,
+  PublishesUnifiedSearch,
+  PublishesWritablePanelTitle,
+  PublishingSubject,
+  SerializedTimeRange,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
+import {
+  SavedSearch,
+  SavedSearchAttributes,
+  SerializableSavedSearch,
+} from '@kbn/saved-search-plugin/common/types';
+import { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import { BehaviorSubject } from 'rxjs';
+import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 
-export interface SearchInput extends EmbeddableInput {
-  timeRange: TimeRange;
-  timeslice?: [number, number];
-  query?: Query;
-  filters?: Filter[];
-  hidePanelTitles?: boolean;
-  columns?: string[];
-  sort?: SortOrder[];
-  rowHeight?: number;
-  rowsPerPage?: number;
+export type SearchEmbeddableState = Pick<
+  SerializableSavedSearch,
+  | 'rowHeight'
+  | 'rowsPerPage'
+  | 'headerRowHeight'
+  | 'columns'
+  | 'sort'
+  | 'sampleSize'
+  | 'viewMode'
+  | 'grid'
+  | 'density'
+> & {
+  rows: DataTableRecord[];
+  columnsMeta: DataTableColumnsMeta | undefined;
+  totalHitCount: number | undefined;
+};
+
+export type SearchEmbeddableStateManager = {
+  [key in keyof Required<SearchEmbeddableState>]: BehaviorSubject<SearchEmbeddableState[key]>;
+};
+
+export type SearchEmbeddableSerializedAttributes = Omit<
+  SearchEmbeddableState,
+  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource'
+> &
+  Pick<SerializableSavedSearch, 'serializedSearchSource'>;
+
+export type SearchEmbeddableSerializedState = SerializedTitles &
+  SerializedTimeRange &
+  Partial<Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>> & {
+    // by value
+    attributes?: SavedSearchAttributes & { references: SavedSearch['references'] };
+    // by reference
+    savedObjectId?: string;
+  };
+
+export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes &
+  SerializedTitles &
+  SerializedTimeRange & {
+    savedObjectTitle?: string;
+    savedObjectId?: string;
+    savedObjectDescription?: string;
+  };
+
+export type SearchEmbeddableApi = DefaultEmbeddableApi<
+  SearchEmbeddableSerializedState,
+  SearchEmbeddableRuntimeState
+> &
+  PublishesDataViews &
+  PublishesSavedObjectId &
+  PublishesDataLoading &
+  PublishesBlockingError &
+  PublishesWritablePanelTitle &
+  PublishesSavedSearch &
+  PublishesDataViews &
+  PublishesUnifiedSearch &
+  HasInPlaceLibraryTransforms &
+  HasTimeRange &
+  Partial<HasEditCapabilities & PublishesSavedObjectId>;
+
+export interface PublishesSavedSearch {
+  savedSearch$: PublishingSubject<SavedSearch>;
 }
 
-export interface SearchOutput extends EmbeddableOutput {
-  editUrl: string;
-  indexPatterns?: DataView[];
-  editable: boolean;
-}
+export const apiPublishesSavedSearch = (
+  api: EmbeddableApiContext['embeddable']
+): api is PublishesSavedSearch => {
+  const embeddable = api as PublishesSavedSearch;
+  return Boolean(embeddable.savedSearch$);
+};
 
-export interface ISearchEmbeddable extends IEmbeddable<SearchInput, SearchOutput> {
-  getSavedSearch(): SavedSearch;
-}
-
-export interface SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
-  type: string;
+export interface HasTimeRange {
+  hasTimeRange(): boolean;
 }

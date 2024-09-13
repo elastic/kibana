@@ -13,7 +13,7 @@ import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { RoleMapping } from '../../../../../common/model';
+import type { RoleMapping } from '../../../../../common';
 import type { RoleMappingsAPIClient } from '../../role_mappings_api_client';
 
 interface Props {
@@ -110,7 +110,7 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({
         : i18n.translate(
             'xpack.security.management.roleMappings.deleteRoleMapping.successSingleNotificationTitle',
             {
-              defaultMessage: "Deleted role mapping '{name}'",
+              defaultMessage: "Deleted role mapping ''{name}''",
               values: { name: successfulDeletes[0].name },
             }
           );
@@ -139,7 +139,7 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({
         : i18n.translate(
             'xpack.security.management.roleMappings.deleteRoleMapping.errorSingleNotificationTitle',
             {
-              defaultMessage: "Error deleting role mapping '{name}'",
+              defaultMessage: "Error deleting role mapping ''{name}''",
               values: { name: erroredDeletes[0].name },
             }
           );
@@ -161,7 +161,7 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({
             ? i18n.translate(
                 'xpack.security.management.roleMappings.deleteRoleMapping.confirmModal.deleteSingleTitle',
                 {
-                  defaultMessage: "Delete role mapping '{name}'?",
+                  defaultMessage: "Delete role mapping ''{name}''?",
                   values: { name: roleMappings[0].name },
                 }
               )

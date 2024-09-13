@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { access, link, unlink, chmod } from 'fs';
@@ -29,37 +30,51 @@ export async function runDockerGenerator(
   build: Build,
   flags: {
     architecture?: string;
-    baseImage: 'none' | 'ubi9' | 'ubi8' | 'ubuntu';
+    baseImage: 'none' | 'wolfi' | 'ubi' | 'ubuntu';
     context: boolean;
     image: boolean;
     ironbank?: boolean;
     cloud?: boolean;
+    serverless?: boolean;
     dockerBuildDate?: string;
+    fips?: boolean;
   }
 ) {
   let baseImageName = '';
   if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
-  if (flags.baseImage === 'ubi8') baseImageName = 'docker.elastic.co/ubi8/ubi-minimal:latest';
-  if (flags.baseImage === 'ubi9') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
+  if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
+  /**
+   * Renovate config contains a regex manager to automatically updates this Chainguard reference
+   *
+   * If this logic moves to another file or under another name, then the Renovate regex manager
+   * for automatic Chainguard updates will break.
+   */
+  if (flags.baseImage === 'wolfi')
+    baseImageName =
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:aad4cd4e5f6d849691748c6933761889db1a20a57231613b98bbff61fa7723ab';
 
   let imageFlavor = '';
-  if (flags.baseImage === 'ubi8') imageFlavor += `-ubi8`;
-  if (flags.baseImage === 'ubi9') imageFlavor += `-ubi9`;
+  if (flags.baseImage === 'ubi') imageFlavor += `-ubi`;
+  if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
+  if (flags.serverless) imageFlavor += '-serverless';
+  if (flags.fips) imageFlavor += '-fips';
 
   // General docker var config
   const license = 'Elastic License';
   const configuredNamespace = config.getDockerNamespace();
   const imageNamespace = configuredNamespace
     ? configuredNamespace
-    : flags.cloud
+    : flags.cloud || flags.serverless
     ? 'kibana-ci'
     : 'kibana';
   const imageTag = `docker.elastic.co/${imageNamespace}/kibana`;
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
-  const artifactPrefix = `kibana-${version}-linux`;
+  let artifactVariant = '';
+  if (flags.serverless) artifactVariant = '-serverless';
+  const artifactPrefix = `kibana${artifactVariant}-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';
   const metricbeatTarball = `metricbeat-${version}-linux-${beatsArchitecture}.tar.gz`;
@@ -104,12 +119,14 @@ export async function runDockerGenerator(
     dockerBuildDate,
     baseImage: flags.baseImage,
     cloud: flags.cloud,
+    serverless: flags.serverless,
     metricbeatTarball,
     filebeatTarball,
     ironbank: flags.ironbank,
     architecture: flags.architecture,
     revision: config.getBuildSha(),
     publicArtifactSubdomain,
+    fips: flags.fips,
   };
 
   type HostArchitectureToDocker = Record<string, string>;
@@ -131,6 +148,14 @@ export async function runDockerGenerator(
     await write(resolve(dockerBuildDir, dockerTemplate.name), dockerTemplate.generator(scope));
   }
 
+  // Copy serverless-only configuration files
+  if (flags.serverless) {
+    await mkdirp(resolve(dockerBuildDir, 'config'));
+    await copyAll(config.resolveFromRepo('config'), resolve(dockerBuildDir, 'config'), {
+      select: ['serverless*.yml'],
+    });
+  }
+
   // Copy all the needed resources into kibana-docker folder
   // in order to build the docker image accordingly the dockerfile defined
   // under templates/kibana_yml.template/js
@@ -138,6 +163,14 @@ export async function runDockerGenerator(
     config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/base'),
     dockerBuildDir
   );
+
+  // Copy fips related resources
+  if (flags.fips) {
+    await copyAll(
+      config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/fips'),
+      dockerBuildDir
+    );
+  }
 
   // Build docker image into the target folder
   // In order to do this we just call the file we

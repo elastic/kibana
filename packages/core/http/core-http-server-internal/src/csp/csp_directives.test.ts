@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CspDirectives } from './csp_directives';
@@ -78,7 +79,7 @@ describe('CspDirectives', () => {
       const config = cspConfig.schema.validate({});
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'"`
+        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'"`
       );
     });
 
@@ -91,7 +92,7 @@ describe('CspDirectives', () => {
       const directives = CspDirectives.fromConfig(config);
 
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'self' baz; worker-src blob: 'self' foo; style-src 'unsafe-inline' 'self' bar dolly"`
+        `"script-src 'report-sample' 'self' baz; worker-src 'report-sample' 'self' blob: foo; style-src 'report-sample' 'self' 'unsafe-inline' bar dolly"`
       );
     });
 
@@ -108,7 +109,7 @@ describe('CspDirectives', () => {
       });
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; connect-src 'self' connect-src; default-src 'self' default-src; font-src 'self' font-src; frame-src 'self' frame-src; img-src 'self' img-src; frame-ancestors 'self' frame-ancestors; report-uri report-uri; report-to report-to"`
+        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; connect-src 'self' connect-src; default-src 'self' default-src; font-src 'self' font-src; frame-src 'self' frame-src; img-src 'self' img-src; frame-ancestors 'self' frame-ancestors; report-uri report-uri; report-to report-to"`
       );
     });
 
@@ -118,7 +119,30 @@ describe('CspDirectives', () => {
       });
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'self' 'unsafe-hashes'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'"`
+        `"script-src 'report-sample' 'self' 'unsafe-hashes'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'"`
+      );
+    });
+
+    it('merges additional CSP configs as expected', () => {
+      const config = cspConfig.schema.validate({
+        connect_src: ['*.foo.bar'], // should de-dupe these
+      });
+      const additionalConfig1 = {
+        connect_src: ['*.foo.bar'],
+        img_src: ['*.foo.bar'],
+      };
+      const additionalConfig2 = {
+        connect_src: [`cdn.host.test`],
+        font_src: [`cdn.host.test`],
+        frame_src: [`cdn.host.test`],
+        img_src: [`cdn.host.test`],
+        worker_src: [`cdn.host.test`],
+        script_src: [`cdn.host.test`],
+        style_src: [`cdn.host.test`],
+      };
+      const directives = CspDirectives.fromConfig(config, additionalConfig1, additionalConfig2);
+      expect(directives.getCspHeader()).toEqual(
+        `script-src 'report-sample' 'self' cdn.host.test; worker-src 'report-sample' 'self' blob: cdn.host.test; style-src 'report-sample' 'self' 'unsafe-inline' cdn.host.test; connect-src 'self' *.foo.bar cdn.host.test; font-src 'self' cdn.host.test; frame-src 'self' cdn.host.test; img-src 'self' *.foo.bar cdn.host.test`
       );
     });
   });

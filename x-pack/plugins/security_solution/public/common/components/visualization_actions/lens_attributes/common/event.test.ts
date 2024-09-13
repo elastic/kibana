@@ -17,7 +17,7 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('0039eb0c-9a1a-4687-ae54-0f4e239bec75'),
 }));
 
-jest.mock('../../../../containers/sourcerer', () => ({
+jest.mock('../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',
@@ -477,6 +477,23 @@ describe('getEventsHistogramLensAttributes', () => {
             'host.id': '123',
           },
         },
+      })
+    );
+  });
+
+  it('should render values in legend', () => {
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getEventsHistogramLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state?.visualization).toEqual(
+      expect.objectContaining({
+        legend: expect.objectContaining({ legendStats: ['currentAndLastValue'] }),
       })
     );
   });

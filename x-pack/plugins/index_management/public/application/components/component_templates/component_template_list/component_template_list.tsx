@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ScopedHistory } from '@kbn/core/public';
 import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import {
   APP_WRAPPER_CLASS,
   PageLoading,
@@ -35,6 +36,7 @@ import { useRedirectPath } from '../../../hooks/redirect_path';
 interface Props {
   componentTemplateName?: string;
   history: RouteComponentProps['history'];
+  filter?: string;
 }
 
 const { useGlobalFlyout } = GlobalFlyout;
@@ -42,11 +44,16 @@ const { useGlobalFlyout } = GlobalFlyout;
 export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   componentTemplateName,
   history,
+  filter,
 }) => {
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
   const { api, trackMetric, documentation } = useComponentTemplatesContext();
   const redirectTo = useRedirectPath(history);
+
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.componentTemplates);
+  }, []);
 
   const { data, isLoading, error, resendRequest } = api.useLoadComponentTemplates();
 
@@ -144,7 +151,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
 
   if (isLoading) {
     return (
-      <PageLoading data-test-subj="sectionLoading">
+      <PageLoading>
         <FormattedMessage
           id="xpack.idxMgmt.home.componentTemplates.list.loadingMessage"
           defaultMessage="Loading component templates…"
@@ -178,6 +185,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
 
         <ComponentTable
           componentTemplates={data}
+          defaultFilter={filter ?? ''}
           onReloadClick={resendRequest}
           onDeleteClick={setComponentTemplatesToDelete}
           onEditClick={goToEditComponentTemplate}

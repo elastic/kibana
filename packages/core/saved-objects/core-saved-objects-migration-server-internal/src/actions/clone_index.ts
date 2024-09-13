@@ -1,21 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import type { IndexNotFound, AcknowledgeResponse } from '.';
+import type { IndexNotFound, AcknowledgeResponse, OperationNotSupported } from '.';
 import { type IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
 import {
   DEFAULT_TIMEOUT,
@@ -31,11 +35,13 @@ export type CloneIndexResponse = AcknowledgeResponse;
 /** @internal */
 export interface CloneIndexParams {
   client: ElasticsearchClient;
+  esCapabilities: ElasticsearchCapabilities;
   source: string;
   target: string;
   /** only used for testing */
   timeout?: string;
 }
+
 /**
  * Makes a clone of the source index into the target.
  *
@@ -48,17 +54,32 @@ export interface CloneIndexParams {
  */
 export const cloneIndex = ({
   client,
+  esCapabilities,
   source,
   target,
   timeout = DEFAULT_TIMEOUT,
 }: CloneIndexParams): TaskEither.TaskEither<
-  RetryableEsClientError | IndexNotFound | IndexNotGreenTimeout | ClusterShardLimitExceeded,
+  | RetryableEsClientError
+  | IndexNotFound
+  | IndexNotGreenTimeout
+  | ClusterShardLimitExceeded
+  | OperationNotSupported,
   CloneIndexResponse
 > => {
   const cloneTask: TaskEither.TaskEither<
-    RetryableEsClientError | IndexNotFound | ClusterShardLimitExceeded,
+    RetryableEsClientError | IndexNotFound | ClusterShardLimitExceeded | OperationNotSupported,
     AcknowledgeResponse
   > = () => {
+    // clone is not supported on serverless
+    if (esCapabilities.serverless) {
+      return Promise.resolve(
+        Either.left({
+          type: 'operation_not_supported' as const,
+          operationName: 'clone',
+        })
+      );
+    }
+
     return client.indices
       .clone({
         index: source,
@@ -69,6 +90,10 @@ export const cloneIndex = ({
             // The source we're cloning from will have a write block set, so
             // we need to remove it to allow writes to our newly cloned index
             'blocks.write': false,
+            // Increase the fields limit beyond the default of 1000
+            mapping: {
+              total_fields: { limit: 1500 },
+            },
             // The rest of the index settings should have already been applied
             // to the source index and will be copied to the clone target. But
             // we repeat it here for explicitness.
@@ -80,10 +105,6 @@ export const cloneIndex = ({
             refresh_interval: '1s',
             // Bump priority so that recovery happens before newer indices
             priority: 10,
-            // Increase the fields limit beyond the default of 1000
-            mapping: {
-              total_fields: { limit: 1500 },
-            },
           },
         },
         timeout,

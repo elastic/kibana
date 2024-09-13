@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { set } from '@kbn/safer-lodash-set';
@@ -53,30 +54,44 @@ Command.prototype.collectUnknownOptions = function () {
   this.allowUnknownOption();
   this.getUnknownOptions = function () {
     const opts = {};
+
+    /**
+     * Commander.js already presents the unknown args split by "=",
+     * and shorthand switches already split, like -asd => -a, -s, -d
+     */
     const unknowns = this.unknownArgv();
 
+    const singleFlagArgs = unknowns.filter((flag) => {
+      return flag.match(/^-[a-zA-Z0-9]$/);
+    });
+
+    if (singleFlagArgs.length) {
+      this.error(
+        `${title} shouldn't have unknown shorthand flag arguments (${singleFlagArgs}). Possibly an argumentation error?`
+      );
+    }
+
     while (unknowns.length) {
-      const opt = unknowns.shift().split('=');
-      if (opt[0].slice(0, 2) !== '--') {
-        this.error(`${title} "${opt[0]}" must start with "--"`);
+      const optName = unknowns.shift();
+
+      if (optName.slice(0, 2) !== '--') {
+        this.error(`${title} "${optName}" must start with "--"`);
       }
 
-      if (opt.length === 1) {
-        if (!unknowns.length || unknowns[0][0] === '-') {
-          this.error(`${title} "${opt[0]}" must have a value`);
-        }
-
-        opt.push(unknowns.shift());
+      if (unknowns.length === 0) {
+        this.error(`${title} "${optName}" must have a value`);
       }
 
-      let val = opt[1];
+      const optValue = unknowns.shift();
+
+      let val = optValue;
       try {
-        val = JSON.parse(opt[1]);
-      } catch (e) {
-        val = opt[1];
+        val = JSON.parse(optValue);
+      } catch {
+        val = optValue;
       }
 
-      set(opts, opt[0].slice(2), val);
+      set(opts, optName.slice(2), val);
     }
 
     return opts;
@@ -96,7 +111,7 @@ Command.prototype.action = _.wrap(Command.prototype.action, function (action, fn
     const ret = fn.apply(this, args);
     if (ret && typeof ret.then === 'function') {
       ret.then(null, function (e) {
-        console.log('FATAL CLI ERROR', e.stack);
+        console.log('FATAL CLI ERROR', e.stack);
         process.exit(1);
       });
     }

@@ -9,10 +9,10 @@ import _ from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { DataFilters, VectorSourceRequestMeta } from '../../../common/descriptor_types';
 import { IVectorSource } from '../sources/vector_source';
-import { ITermJoinSource } from '../sources/term_join_source';
+import { IJoinSource } from '../sources/join_sources';
 
 export function buildVectorRequestMeta(
-  source: IVectorSource | ITermJoinSource,
+  source: IVectorSource | IJoinSource,
   fieldNames: string[],
   dataFilters: DataFilters,
   sourceQuery: Query | null | undefined,
@@ -26,7 +26,7 @@ export function buildVectorRequestMeta(
     applyGlobalQuery: source.getApplyGlobalQuery(),
     applyGlobalTime: source.getApplyGlobalTime(),
     sourceMeta: source.getSyncMeta(dataFilters),
-    applyForceRefresh: source.isESSource() ? source.getApplyForceRefresh() : false,
+    applyForceRefresh: source.getApplyForceRefresh(),
     isForceRefresh,
     isFeatureEditorOpenForLayer,
   };

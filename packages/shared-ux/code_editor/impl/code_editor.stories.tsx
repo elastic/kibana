@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { action } from '@storybook/addon-actions';
-
-import { CodeEditorStorybookMock, CodeEditorStorybookParams } from '@kbn/code-editor-mocks';
 import { monaco as monacoEditor } from '@kbn/monaco';
+
+import { CodeEditorStorybookMock, CodeEditorStorybookParams } from './mocks/storybook';
 
 import mdx from './README.mdx';
 
@@ -32,7 +33,13 @@ const argTypes = mock.getArgumentTypes();
 
 export const Basic = (params: CodeEditorStorybookParams) => {
   return (
-    <CodeEditor {...params} languageId="plainText" onChange={action('on change')} value="Hello!" />
+    <CodeEditor
+      {...params}
+      languageId="plainText"
+      onChange={action('on change')}
+      value="Hello!"
+      height={200}
+    />
   );
 };
 
@@ -199,3 +206,39 @@ export const HoverProvider = () => {
     </div>
   );
 };
+
+export const AutomaticResize = (params: CodeEditorStorybookParams) => {
+  return (
+    <div style={{ height: `calc(100vh - 30px)` }}>
+      <CodeEditor
+        {...params}
+        languageId="plainText"
+        onChange={action('on change')}
+        value="Hello!"
+        height={'100%'}
+        options={{ automaticLayout: true }}
+      />
+    </div>
+  );
+};
+
+AutomaticResize.argTypes = argTypes;
+
+export const FitToContent = (params: CodeEditorStorybookParams) => {
+  const [value, setValue] = useState('hello');
+  return (
+    <CodeEditor
+      {...params}
+      languageId="plainText"
+      onChange={(newValue) => {
+        setValue(newValue);
+        action('on change');
+      }}
+      value={value}
+      fitToContent={{ minLines: 3, maxLines: 5 }}
+      options={{ automaticLayout: true }}
+    />
+  );
+};
+
+FitToContent.argTypes = argTypes;

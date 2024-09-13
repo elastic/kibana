@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { retryCallCluster } from '@kbn/core-elasticsearch-server-internal';
-import { decorateEsError } from './decorate_es_error';
+import { decorateEsError } from './utils';
 
 const methods = [
   'bulk',
@@ -26,7 +27,7 @@ const methods = [
   'updateByQuery',
 ] as const;
 
-type MethodName = typeof methods[number];
+type MethodName = (typeof methods)[number];
 
 export type RepositoryEsClient = Pick<ElasticsearchClient, MethodName | 'transport'>;
 
@@ -35,9 +36,7 @@ export function createRepositoryEsClient(client: ElasticsearchClient): Repositor
     Object.defineProperty(acc, key, {
       value: async (params?: unknown, options?: TransportRequestOptions) => {
         try {
-          return await retryCallCluster(() =>
-            (client[key] as Function)(params, { maxRetries: 0, ...options })
-          );
+          return await retryCallCluster(() => (client[key] as Function)(params, options ?? {}));
         } catch (e) {
           // retry failures are caught here, as are 404's that aren't ignored (e.g update calls)
           throw decorateEsError(e);

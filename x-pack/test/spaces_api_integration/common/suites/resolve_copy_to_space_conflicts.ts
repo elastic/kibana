@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { SavedObject } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
+import { SuperTest } from 'supertest';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -69,7 +70,9 @@ const getDestinationSpace = (originSpaceId?: string) => {
 export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
   const testDataLoader = getTestDataLoader(context);
   const supertestWithAuth = context.getService('supertest');
-  const supertestWithoutAuth = context.getService('supertestWithoutAuth');
+  const supertestWithoutAuth = context.getService(
+    'supertestWithoutAuth'
+  ) as unknown as SuperTest<any>;
 
   const getVisualizationAtSpace = async (spaceId: string): Promise<SavedObject<any>> => {
     return supertestWithAuth
@@ -108,6 +111,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
               },
               destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
               overwrite: true,
+              managed: false,
             },
             {
               id: `cts_vis_3_${sourceSpaceId}`,
@@ -118,6 +122,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
               },
               destinationId: `cts_vis_3_${destination}`, // this conflicted with another visualization in the destination space because of a shared originId
               overwrite: true,
+              managed: false,
             },
           ],
         },
@@ -147,6 +152,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
               },
               destinationId: `cts_dashboard_${destinationSpaceId}`, // this conflicted with another dashboard in the destination space because of a shared originId
               overwrite: true,
+              managed: false,
             },
           ],
         },
@@ -380,7 +386,14 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
         })();
         const meta = { title, icon: 'beaker' };
         expect(successResults).to.eql([
-          { type, id, meta, overwrite: true, ...(destinationId && { destinationId }) },
+          {
+            type,
+            id,
+            meta,
+            overwrite: true,
+            ...(destinationId && { destinationId }),
+            managed: false,
+          },
         ]);
       };
 
@@ -394,7 +407,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
             if (outcome === 'authorized') {
               expectSavedObjectSuccessResponse(response, exactMatchId);
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);
@@ -416,7 +429,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
             if (outcome === 'authorized') {
               expectSavedObjectSuccessResponse(response, inexactMatchIdA, 'conflict_1a_space_2');
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);
@@ -437,7 +450,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
             if (outcome === 'authorized') {
               expectSavedObjectSuccessResponse(response, inexactMatchIdB, 'conflict_1b_space_2');
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);
@@ -458,7 +471,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
             if (outcome === 'authorized') {
               expectSavedObjectSuccessResponse(response, inexactMatchIdC, 'conflict_1c_space_2');
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);
@@ -479,7 +492,7 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
             if (outcome === 'authorized') {
               expectSavedObjectSuccessResponse(response, ambiguousConflictId, 'conflict_2_space_2');
             } else if (outcome === 'noAccess') {
-              expectRouteForbiddenResponse(response);
+              await expectRouteForbiddenResponse(response);
             } else {
               // unauthorized read/write
               expectSavedObjectForbiddenResponse(response);

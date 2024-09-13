@@ -1,13 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObjectsType, SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
-import { getModelVersionMapForTypes, getLatestModelVersion } from './version_map';
+import {
+  getModelVersionMapForTypes,
+  getLatestModelVersion,
+  getLatestMigrationVersion,
+  getCurrentVirtualVersion,
+  getVirtualVersionMap,
+  getLatestMappingsVersionNumber,
+  getLatestMappingsModelVersion,
+  getLatestMappingsVirtualVersionMap,
+} from './version_map';
 
 describe('ModelVersion map utilities', () => {
   const buildType = (parts: Partial<SavedObjectsType> = {}): SavedObjectsType => ({
@@ -19,10 +29,28 @@ describe('ModelVersion map utilities', () => {
   });
 
   const dummyModelVersion = (): SavedObjectsModelVersion => ({
-    modelChange: {
-      type: 'expansion',
-    },
+    changes: [],
   });
+
+  const dummyModelVersionWithMappingsChanges = (): SavedObjectsModelVersion => ({
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {},
+      },
+    ],
+  });
+
+  const dummyModelVersionWithDataRemoval = (): SavedObjectsModelVersion => ({
+    changes: [
+      {
+        type: 'data_removal',
+        removedAttributePaths: ['some.attribute'],
+      },
+    ],
+  });
+
+  const dummyMigration = jest.fn();
 
   describe('getLatestModelVersion', () => {
     it('returns 0 when no model versions are registered', () => {
@@ -113,6 +141,285 @@ describe('ModelVersion map utilities', () => {
         foo: 2,
         bar: 0,
         dolly: 3,
+      });
+    });
+  });
+
+  describe('getLatestMigrationVersion', () => {
+    it('returns 0.0.0 when no migrations are registered', () => {
+      expect(getLatestMigrationVersion(buildType({ migrations: {} }))).toEqual('0.0.0');
+      expect(getLatestMigrationVersion(buildType({ migrations: undefined }))).toEqual('0.0.0');
+    });
+
+    it('throws if an invalid version is provided', () => {
+      expect(() =>
+        getLatestMigrationVersion(
+          buildType({
+            migrations: {
+              foo: dummyMigration,
+              '8.6.0': dummyMigration,
+            },
+          })
+        )
+      ).toThrowError();
+    });
+
+    it('returns the latest registered version', () => {
+      expect(
+        getLatestMigrationVersion(
+          buildType({
+            migrations: {
+              '7.17.2': dummyMigration,
+              '8.6.0': dummyMigration,
+            },
+          })
+        )
+      ).toEqual('8.6.0');
+    });
+
+    it('accepts provider functions', () => {
+      expect(
+        getLatestMigrationVersion(
+          buildType({
+            migrations: () => ({
+              '7.17.2': dummyMigration,
+              '8.4.0': dummyMigration,
+            }),
+          })
+        )
+      ).toEqual('8.4.0');
+    });
+
+    it('supports unordered maps', () => {
+      expect(
+        getLatestMigrationVersion(
+          buildType({
+            migrations: {
+              '7.17.2': dummyMigration,
+              '8.7.0': dummyMigration,
+              '8.2.0': dummyMigration,
+            },
+          })
+        )
+      ).toEqual('8.7.0');
+    });
+  });
+
+  describe('getCurrentVirtualVersion', () => {
+    it('returns the latest registered migration if switchToModelVersionAt is unset', () => {
+      expect(
+        getCurrentVirtualVersion(
+          buildType({
+            migrations: {
+              '7.17.2': dummyMigration,
+              '8.6.0': dummyMigration,
+            },
+            modelVersions: {
+              1: dummyModelVersion(),
+            },
+          })
+        )
+      ).toEqual('8.6.0');
+    });
+
+    it('returns the virtual version of the latest model version if switchToModelVersionAt is set', () => {
+      expect(
+        getCurrentVirtualVersion(
+          buildType({
+            switchToModelVersionAt: '8.7.0',
+            migrations: {
+              '7.17.2': dummyMigration,
+              '8.6.0': dummyMigration,
+            },
+            modelVersions: {
+              1: dummyModelVersion(),
+            },
+          })
+        )
+      ).toEqual('10.1.0');
+    });
+  });
+
+  describe('getVirtualVersionMap', () => {
+    it('returns the virtual version for each of the provided types', () => {
+      expect(
+        getVirtualVersionMap([
+          buildType({
+            name: 'foo',
+            switchToModelVersionAt: '8.7.0',
+            migrations: {
+              '7.17.2': dummyMigration,
+              '8.6.0': dummyMigration,
+            },
+            modelVersions: {
+              1: dummyModelVersion(),
+            },
+          }),
+          buildType({
+            name: 'bar',
+            migrations: {
+              '7.17.2': dummyMigration,
+              '8.6.0': dummyMigration,
+            },
+            modelVersions: {
+              1: dummyModelVersion(),
+            },
+          }),
+          buildType({
+            name: 'dolly',
+            switchToModelVersionAt: '8.7.0',
+            migrations: {
+              '7.17.2': dummyMigration,
+              '8.6.0': dummyMigration,
+            },
+          }),
+        ])
+      ).toEqual({
+        foo: '10.1.0',
+        bar: '8.6.0',
+        dolly: '10.0.0',
+      });
+    });
+  });
+
+  describe('getLatestMappingsVersionNumber', () => {
+    it('returns 0 when no model versions are registered', () => {
+      expect(getLatestMappingsVersionNumber(buildType({ modelVersions: {} }))).toEqual(0);
+      expect(getLatestMappingsVersionNumber(buildType({ modelVersions: undefined }))).toEqual(0);
+    });
+
+    it('throws if an invalid version is provided', () => {
+      expect(() =>
+        getLatestMappingsVersionNumber(
+          buildType({
+            modelVersions: {
+              foo: dummyModelVersionWithMappingsChanges(),
+            },
+          })
+        )
+      ).toThrow();
+    });
+
+    it('returns the latest version that brings mappings changes', () => {
+      expect(
+        getLatestMappingsVersionNumber(
+          buildType({
+            modelVersions: {
+              '1': dummyModelVersion(),
+              '2': dummyModelVersionWithMappingsChanges(),
+              '3': dummyModelVersionWithDataRemoval(),
+            },
+          })
+        )
+      ).toEqual(2);
+    });
+
+    it('accepts provider functions', () => {
+      expect(
+        getLatestMappingsVersionNumber(
+          buildType({
+            modelVersions: () => ({
+              '1': dummyModelVersion(),
+              '2': dummyModelVersionWithMappingsChanges(),
+              '3': dummyModelVersionWithDataRemoval(),
+            }),
+          })
+        )
+      ).toEqual(2);
+    });
+
+    it('supports unordered maps', () => {
+      expect(
+        getLatestMappingsVersionNumber(
+          buildType({
+            modelVersions: {
+              '3': dummyModelVersionWithDataRemoval(),
+              '1': dummyModelVersion(),
+              '2': dummyModelVersionWithMappingsChanges(),
+            },
+          })
+        )
+      ).toEqual(2);
+    });
+  });
+
+  describe('getLatestMappingsModelVersion', () => {
+    it('returns the latest registered migration if switchToModelVersionAt is unset', () => {
+      expect(
+        getLatestMappingsModelVersion(
+          buildType({
+            migrations: {
+              '7.17.2': dummyMigration,
+              '8.6.0': dummyMigration,
+            },
+            modelVersions: {
+              1: dummyModelVersionWithMappingsChanges(),
+              2: dummyModelVersion(),
+            },
+          })
+        )
+      ).toEqual('8.6.0');
+    });
+
+    it('returns the virtual version of the latest model version if switchToModelVersionAt is set', () => {
+      expect(
+        getLatestMappingsModelVersion(
+          buildType({
+            switchToModelVersionAt: '8.7.0',
+            migrations: {
+              '7.17.2': dummyMigration,
+              '8.6.0': dummyMigration,
+            },
+            modelVersions: {
+              1: dummyModelVersionWithMappingsChanges(),
+              2: dummyModelVersion(),
+            },
+          })
+        )
+      ).toEqual('10.1.0');
+    });
+  });
+
+  describe('getLatestMappingsVirtualVersionMap', () => {
+    it('returns the virtual version for each of the provided types', () => {
+      expect(
+        getLatestMappingsVirtualVersionMap([
+          buildType({
+            name: 'foo',
+            switchToModelVersionAt: '8.7.0',
+            migrations: {
+              '7.17.2': dummyMigration,
+              '8.6.0': dummyMigration,
+            },
+            modelVersions: {
+              1: dummyModelVersionWithMappingsChanges(),
+              2: dummyModelVersion(),
+            },
+          }),
+          buildType({
+            name: 'bar',
+            migrations: {
+              '7.17.2': dummyMigration,
+              '8.6.0': dummyMigration,
+            },
+            modelVersions: {
+              1: dummyModelVersionWithMappingsChanges(),
+              2: dummyModelVersion(),
+            },
+          }),
+          buildType({
+            name: 'dolly',
+            switchToModelVersionAt: '8.7.0',
+            migrations: {
+              '7.17.2': dummyMigration,
+              '8.6.0': dummyMigration,
+            },
+          }),
+        ])
+      ).toEqual({
+        foo: '10.1.0',
+        bar: '8.6.0',
+        dolly: '10.0.0',
       });
     });
   });

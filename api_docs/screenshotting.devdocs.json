@@ -174,7 +174,7 @@
               "\nCollected performance metrics during the screenshotting session along with the PDF generation ones."
             ],
             "signature": [
-              "PdfScreenshotMetrics"
+              "{ cpu?: number | undefined; cpuInPercentage?: number | undefined; memory?: number | undefined; memoryInMegabytes?: number | undefined; }"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
             "deprecated": false,
@@ -488,7 +488,88 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "screenshotting",
+        "id": "def-common.PerformanceMetrics",
+        "type": "Interface",
+        "tags": [],
+        "label": "PerformanceMetrics",
+        "description": [
+          "\nCollected performance metrics during a screenshotting session."
+        ],
+        "path": "x-pack/plugins/screenshotting/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "screenshotting",
+            "id": "def-common.PerformanceMetrics.cpu",
+            "type": "number",
+            "tags": [],
+            "label": "cpu",
+            "description": [
+              "\nThe percentage of CPU time spent by the browser divided by number or cores."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/screenshotting/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "screenshotting",
+            "id": "def-common.PerformanceMetrics.cpuInPercentage",
+            "type": "number",
+            "tags": [],
+            "label": "cpuInPercentage",
+            "description": [
+              "\nThe percentage of CPU in percent untis."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/screenshotting/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "screenshotting",
+            "id": "def-common.PerformanceMetrics.memory",
+            "type": "number",
+            "tags": [],
+            "label": "memory",
+            "description": [
+              "\nThe total amount of memory used by the browser."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/screenshotting/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "screenshotting",
+            "id": "def-common.PerformanceMetrics.memoryInMegabytes",
+            "type": "number",
+            "tags": [],
+            "label": "memoryInMegabytes",
+            "description": [
+              "\nThe total amount of memory used by the browser in megabytes."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/screenshotting/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -538,7 +619,7 @@
           "\nSupported layout types."
         ],
         "signature": [
-          "\"canvas\" | \"preserve_layout\" | \"print\""
+          "\"canvas\" | \"print\" | \"preserve_layout\""
         ],
         "path": "x-pack/plugins/screenshotting/common/layout.ts",
         "deprecated": false,

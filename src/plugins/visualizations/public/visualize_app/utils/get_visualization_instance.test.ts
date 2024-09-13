@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { VisualizeInput, VisSavedObject, Vis, VisParams } from '../..';
 import {
   getVisualizationInstance,
@@ -15,6 +15,7 @@ import {
 import { createVisualizeServicesMock } from './mocks';
 import { BehaviorSubject } from 'rxjs';
 import type { VisualizeServices } from '../types';
+import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 
 const commonSerializedVisMock = {
   type: 'area',
@@ -38,15 +39,6 @@ jest.mock('../../vis_async', () => ({
 }));
 const { createVisAsync } = jest.requireMock('../../vis_async');
 
-jest.mock('@kbn/saved-search-plugin/public', () => ({
-  getSavedSearch: jest.fn().mockResolvedValue({
-    id: 'savedSearch',
-    title: 'savedSearchTitle',
-    searchSource: {},
-  }),
-  throwErrorOnSavedSearchUrlConflict: jest.fn(),
-}));
-
 let savedVisMock: VisSavedObject;
 
 describe('getVisualizationInstance', () => {
@@ -69,6 +61,14 @@ describe('getVisualizationInstance', () => {
     mockServices.createVisEmbeddableFromObject = jest.fn().mockImplementation(() => ({
       getOutput$: jest.fn(() => subj.asObservable()),
     }));
+    mockServices.savedSearch = {
+      ...savedSearchPluginMock.createStartContract(),
+      get: jest.fn().mockImplementation(() => ({
+        id: 'savedSearch',
+        searchSource: {},
+        title: 'savedSearchTitle',
+      })),
+    };
   });
 
   test('should create new instances of savedVis, vis and embeddableHandler', async () => {
@@ -120,7 +120,6 @@ describe('getVisualizationInstance', () => {
     visMock.data.savedSearchId = 'saved_search_id';
     const { savedSearch } = await getVisualizationInstance(mockServices, 'saved_vis_id');
 
-    expect(getSavedSearch).toHaveBeenCalled();
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "id": "savedSearch",
@@ -170,6 +169,10 @@ describe('getVisualizationInstanceInput', () => {
       id: 'test-id',
       description: 'description',
       title: 'title',
+      timeRange: {
+        from: 'now-7d/d',
+        to: 'now',
+      },
       savedVis: {
         title: '',
         description: '',
@@ -196,8 +199,15 @@ describe('getVisualizationInstanceInput', () => {
         },
       },
     } as unknown as VisualizeInput;
-    const { savedVis, savedSearch, vis, embeddableHandler, panelDescription, panelTitle } =
-      await getVisualizationInstanceFromInput(mockServices, input);
+    const {
+      savedVis,
+      savedSearch,
+      vis,
+      embeddableHandler,
+      panelDescription,
+      panelTitle,
+      panelTimeRange,
+    } = await getVisualizationInstanceFromInput(mockServices, input);
 
     expect(getSavedVisualization).toHaveBeenCalled();
     expect(createVisAsync).toHaveBeenCalledWith(serializedVisMock.type, input.savedVis);
@@ -216,5 +226,9 @@ describe('getVisualizationInstanceInput', () => {
     expect(savedSearch).toBeUndefined();
     expect(panelDescription).toBe('description');
     expect(panelTitle).toBe('title');
+    expect(panelTimeRange).toStrictEqual({
+      from: 'now-7d/d',
+      to: 'now',
+    });
   });
 });

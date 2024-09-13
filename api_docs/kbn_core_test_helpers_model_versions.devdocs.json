@@ -1,0 +1,593 @@
+{
+  "id": "@kbn/core-test-helpers-model-versions",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-test-helpers-model-versions",
+        "id": "def-common.createModelVersionTestBed",
+        "type": "Function",
+        "tags": [],
+        "label": "createModelVersionTestBed",
+        "description": [
+          "\nCreate a {@link ModelVersionTestBed} that can be used for model version integration testing.\n"
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/core-test-helpers-model-versions",
+            "scope": "common",
+            "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
+            "section": "def-common.ModelVersionTestBed",
+            "text": "ModelVersionTestBed"
+          }
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/test_bed.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-model-versions",
+        "id": "def-common.createModelVersionTestMigrator",
+        "type": "Function",
+        "tags": [],
+        "label": "createModelVersionTestMigrator",
+        "description": [
+          "\nCreate a {@link ModelVersionTestMigrator | test migrator} that can be used\nto test model version changes between versions.\n"
+        ],
+        "signature": [
+          "({ type, }: { type: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsType",
+            "text": "SavedObjectsType"
+          },
+          "<any>; }) => ",
+          {
+            "pluginId": "@kbn/core-test-helpers-model-versions",
+            "scope": "common",
+            "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
+            "section": "def-common.ModelVersionTestMigrator",
+            "text": "ModelVersionTestMigrator"
+          }
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.createModelVersionTestMigrator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  type,\n}",
+            "description": [],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-model-versions",
+                "id": "def-common.createModelVersionTestMigrator.$1.type",
+                "type": "Object",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsType",
+                    "text": "SavedObjectsType"
+                  },
+                  "<any>"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-test-helpers-model-versions",
+        "id": "def-common.ModelVersionTestBed",
+        "type": "Interface",
+        "tags": [],
+        "label": "ModelVersionTestBed",
+        "description": [
+          "\nA testbed that can be used for model version integration tests.\n"
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.ModelVersionTestBed.startES",
+            "type": "Function",
+            "tags": [],
+            "label": "startES",
+            "description": [
+              "\nStarts the ES cluster.\nThis should usually be called only once before the suite runs, within a `beforeAll` block."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.ModelVersionTestBed.stopES",
+            "type": "Function",
+            "tags": [],
+            "label": "stopES",
+            "description": [
+              "\nStops the ES cluster.\nThis should usually be called only after the suite runs, within a `afterAll` block."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.ModelVersionTestBed.prepareTestKit",
+            "type": "Function",
+            "tags": [
+              "see",
+              "see"
+            ],
+            "label": "prepareTestKit",
+            "description": [
+              "\nPrepare and return the testkit instance.\n"
+            ],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "@kbn/core-test-helpers-model-versions",
+                "scope": "common",
+                "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
+                "section": "def-common.ModelVersionTestkitOptions",
+                "text": "ModelVersionTestkitOptions"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-test-helpers-model-versions",
+                "scope": "common",
+                "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
+                "section": "def-common.ModelVersionTestKit",
+                "text": "ModelVersionTestKit"
+              },
+              ">"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-model-versions",
+                "id": "def-common.ModelVersionTestBed.prepareTestKit.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-test-helpers-model-versions",
+                    "scope": "common",
+                    "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
+                    "section": "def-common.ModelVersionTestkitOptions",
+                    "text": "ModelVersionTestkitOptions"
+                  }
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-model-versions",
+        "id": "def-common.ModelVersionTestKit",
+        "type": "Interface",
+        "tags": [],
+        "label": "ModelVersionTestKit",
+        "description": [
+          "\nTestkit composed of various services that can be used to run the\nmodel version integration tests.\n\nMostly composed of the two `repositoryBefore` and `repositoryAfter` repositories\nthat can be used to interact with different versions of the SO types.\n"
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.ModelVersionTestKit.esClient",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [
+              "\nAn ES client connecting to the Elasticsearch cluster used by the testkit."
+            ],
+            "signature": [
+              "default"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.ModelVersionTestKit.repositoryBefore",
+            "type": "Object",
+            "tags": [],
+            "label": "repositoryBefore",
+            "description": [
+              "\nThe SO repository using the SO type definitions at the `before` versions."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.ISavedObjectsRepository",
+                "text": "ISavedObjectsRepository"
+              }
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.ModelVersionTestKit.repositoryAfter",
+            "type": "Object",
+            "tags": [],
+            "label": "repositoryAfter",
+            "description": [
+              "\nThe SO repository using the SO type definitions at the `after` versions."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.ISavedObjectsRepository",
+                "text": "ISavedObjectsRepository"
+              }
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.ModelVersionTestKit.tearDown",
+            "type": "Function",
+            "tags": [],
+            "label": "tearDown",
+            "description": [
+              "\nCleanup function that will delete the test index.\nShould be called before calling `testbed.prepareTestKit` again."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-model-versions",
+        "id": "def-common.ModelVersionTestkitOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ModelVersionTestkitOptions",
+        "description": [
+          "\nOptions used to create a {@link ModelVersionTestKit} via {@link ModelVersionTestBed#prepareTestKit}\n"
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.ModelVersionTestkitOptions.savedObjectDefinitions",
+            "type": "Array",
+            "tags": [],
+            "label": "savedObjectDefinitions",
+            "description": [
+              "\nThe {@link SavedObjectTestkitDefinition | definitions} for the SO type(s) to test"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-test-helpers-model-versions",
+                "scope": "common",
+                "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
+                "section": "def-common.SavedObjectTestkitDefinition",
+                "text": "SavedObjectTestkitDefinition"
+              },
+              "[]"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.ModelVersionTestkitOptions.logFilePath",
+            "type": "string",
+            "tags": [],
+            "label": "logFilePath",
+            "description": [
+              "\nThe path of the file to write logs to.\nNecessary because the testkit doesn't know the test's location\n"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.ModelVersionTestkitOptions.objectsToCreateBetween",
+            "type": "Array",
+            "tags": [],
+            "label": "objectsToCreateBetween",
+            "description": [
+              "\n(optional) if specified, the provided list of objects will be created (using `SOR.bulkCreate`)\nbetween the first (before) the second (after) migrator runs. Objects are therefor expected to be of\nthe `versionBefore` version."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsBulkCreateObject",
+                "text": "SavedObjectsBulkCreateObject"
+              },
+              "<unknown>[] | undefined"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.ModelVersionTestkitOptions.settingOverrides",
+            "type": "Object",
+            "tags": [],
+            "label": "settingOverrides",
+            "description": [
+              "\n(optional) raw record of settings to be used to override the default Kibana configuration.\nif provided, will be merged by the default test configuration.\n"
+            ],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.ModelVersionTestkitOptions.kibanaVersion",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersion",
+            "description": [
+              "\n(optional) allows to override the kibanaVersion that will be passed down to the migrator instances\nDefaults to the version coming from the package.json."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.ModelVersionTestkitOptions.kibanaBranch",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaBranch",
+            "description": [
+              "\n(optional) allows to override the kibanaBranch that will be passed down to the migrator instances\nDefaults to the version coming from the package.json."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.ModelVersionTestkitOptions.kibanaIndex",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaIndex",
+            "description": [
+              "\n(optional) the index (pattern) to use for all types.\nDefaults to `.kibana_migrator_tests`"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-model-versions",
+        "id": "def-common.ModelVersionTestMigrator",
+        "type": "Interface",
+        "tags": [],
+        "label": "ModelVersionTestMigrator",
+        "description": [
+          "\nTest utility allowing to test model version changes between versions."
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.ModelVersionTestMigrator.migrate",
+            "type": "Function",
+            "tags": [
+              "see"
+            ],
+            "label": "migrate",
+            "description": [
+              "\nMigrate the document from the provided source to destination model version.\n"
+            ],
+            "signature": [
+              "<In = unknown, Out = unknown>(options: ModelVersionTestMigrateOptions<In>) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<Out>"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-model-versions",
+                "id": "def-common.ModelVersionTestMigrator.migrate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ModelVersionTestMigrateOptions<In>"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-model-versions",
+        "id": "def-common.SavedObjectTestkitDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectTestkitDefinition",
+        "description": [
+          "\nRepresents the info necessary to prepare a given type for the sandbox.\nContains both the actual SO type definition, and the versions\nthat should be used at 'before' and 'after' model versions.\n"
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.SavedObjectTestkitDefinition.definition",
+            "type": "Object",
+            "tags": [],
+            "label": "definition",
+            "description": [
+              "\nThe SO type definition"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<any>"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.SavedObjectTestkitDefinition.modelVersionBefore",
+            "type": "number",
+            "tags": [],
+            "label": "modelVersionBefore",
+            "description": [
+              "\nThe model version to be used for the 'before' repository."
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-model-versions",
+            "id": "def-common.SavedObjectTestkitDefinition.modelVersionAfter",
+            "type": "number",
+            "tags": [],
+            "label": "modelVersionAfter",
+            "description": [
+              "\nThe model version to be used for the 'after' repository."
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

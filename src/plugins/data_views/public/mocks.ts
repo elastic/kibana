@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DataViewsPlugin, DataViewsContract } from '.';
@@ -11,7 +12,9 @@ import { DataViewsPlugin, DataViewsContract } from '.';
 export type Setup = jest.Mocked<ReturnType<DataViewsPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<DataViewsPlugin['start']>>;
 
-const createSetupContract = (): Setup => ({});
+const createSetupContract = (): Setup => ({
+  enableRollups: jest.fn(),
+});
 
 const createStartContract = (): Start => {
   return {
@@ -38,6 +41,8 @@ const createStartContract = (): Start => {
     getIdsWithTitle: jest.fn(),
     getFieldsForIndexPattern: jest.fn(),
     create: jest.fn().mockReturnValue(Promise.resolve({})),
+    toDataView: jest.fn().mockReturnValue(Promise.resolve({})),
+    toDataViewLazy: jest.fn().mockReturnValue(Promise.resolve({})),
   } as unknown as jest.Mocked<DataViewsContract>;
 };
 

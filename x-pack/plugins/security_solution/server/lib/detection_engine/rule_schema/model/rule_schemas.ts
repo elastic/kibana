@@ -4,70 +4,69 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import * as t from 'io-ts';
-
-import {
-  concurrentSearchesOrUndefined,
-  itemsPerSearchOrUndefined,
-  machine_learning_job_id_normalized,
-  RiskScore,
-  RiskScoreMapping,
-  RuleActionArrayCamel,
-  RuleActionThrottle,
-  RuleIntervalFrom,
-  RuleIntervalTo,
-  Severity,
-  SeverityMapping,
-  threat_index,
-  threat_mapping,
-  threat_query,
-  threatIndicatorPathOrUndefined,
-} from '@kbn/securitysolution-io-ts-alerting-types';
-import {
-  SIGNALS_ID,
+import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import type {
   EQL_RULE_TYPE_ID,
+  ESQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  SIGNALS_ID,
+  THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-
-import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import * as z from '@kbn/zod';
+import type { CreateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/create';
+import type { UpdateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/update';
+import { RuleResponseAction } from '../../../../../common/api/detection_engine';
 import {
   AlertsIndex,
   AlertsIndexNamespace,
   AlertSuppressionCamel,
+  AnomalyThreshold,
   BuildingBlockType,
+  ConcurrentSearches,
   DataViewId,
   EventCategoryOverride,
-  ExceptionListArray,
   HistoryWindowStart,
   IndexPatternArray,
+  InvestigationFields,
   InvestigationGuide,
-  IsRuleEnabled,
+  IsExternalRuleCustomized,
   IsRuleImmutable,
+  ItemsPerSearch,
+  KqlQueryLanguage,
   MaxSignals,
   NewTermsFields,
   RelatedIntegrationArray,
   RequiredFieldArray,
+  RiskScore,
+  RiskScoreMapping,
   RuleAuthorArray,
   RuleDescription,
+  RuleExceptionList,
   RuleFalsePositiveArray,
   RuleFilterArray,
+  RuleIntervalFrom,
+  RuleIntervalTo,
   RuleLicense,
   RuleMetadata,
-  RuleName,
   RuleNameOverride,
   RuleQuery,
   RuleReferenceArray,
   RuleSignatureId,
-  RuleTagArray,
   RuleVersion,
+  SavedQueryId,
   SetupGuide,
+  Severity,
+  SeverityMapping,
   ThreatArray,
+  ThreatIndex,
+  ThreatIndicatorPath,
+  ThreatMapping,
+  ThreatQuery,
+  ThresholdAlertSuppression,
   ThresholdNormalized,
   TiebreakerField,
   TimelineTemplateId,
@@ -75,183 +74,240 @@ import {
   TimestampField,
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
-} from '../../../../../common/detection_engine/rule_schema';
-import {
-  savedIdOrUndefined,
-  saved_id,
-  anomaly_threshold,
-} from '../../../../../common/detection_engine/schemas/common';
-import { SERVER_APP_ID } from '../../../../../common/constants';
-import { ResponseActionRuleParamsOrUndefined } from '../../../../../common/detection_engine/rule_response_actions/schemas';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { SERVER_APP_ID } from '../../../../../common/constants';
 
-const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
+// 8.10.x is mapped as an array of strings
+export type LegacyInvestigationFields = z.infer<typeof LegacyInvestigationFields>;
+export const LegacyInvestigationFields = z.array(z.string());
 
-export const baseRuleParams = t.exact(
-  t.type({
-    author: RuleAuthorArray,
-    buildingBlockType: t.union([BuildingBlockType, t.undefined]),
-    description: RuleDescription,
-    namespace: t.union([AlertsIndexNamespace, t.undefined]),
-    note: t.union([InvestigationGuide, t.undefined]),
-    falsePositives: RuleFalsePositiveArray,
-    from: RuleIntervalFrom,
-    ruleId: RuleSignatureId,
-    immutable: IsRuleImmutable,
-    license: t.union([RuleLicense, t.undefined]),
-    outputIndex: AlertsIndex,
-    timelineId: t.union([TimelineTemplateId, t.undefined]),
-    timelineTitle: t.union([TimelineTemplateTitle, t.undefined]),
-    meta: t.union([RuleMetadata, t.undefined]),
-    // maxSignals not used in ML rules but probably should be used
-    maxSignals: MaxSignals,
-    riskScore: RiskScore,
-    riskScoreMapping: RiskScoreMapping,
-    ruleNameOverride: t.union([RuleNameOverride, t.undefined]),
-    severity: Severity,
-    severityMapping: SeverityMapping,
-    timestampOverride: t.union([TimestampOverride, t.undefined]),
-    timestampOverrideFallbackDisabled: t.union([TimestampOverrideFallbackDisabled, t.undefined]),
-    threat: ThreatArray,
-    to: RuleIntervalTo,
-    references: RuleReferenceArray,
-    version: RuleVersion,
-    exceptionsList: ExceptionListArray,
-    relatedIntegrations: t.union([RelatedIntegrationArray, t.undefined]),
-    requiredFields: t.union([RequiredFieldArray, t.undefined]),
-    setup: t.union([SetupGuide, t.undefined]),
-  })
-);
-export type BaseRuleParams = t.TypeOf<typeof baseRuleParams>;
-
-const eqlSpecificRuleParams = t.type({
-  type: t.literal('eql'),
-  language: t.literal('eql'),
-  index: t.union([IndexPatternArray, t.undefined]),
-  dataViewId: t.union([DataViewId, t.undefined]),
-  query: RuleQuery,
-  filters: t.union([RuleFilterArray, t.undefined]),
-  eventCategoryOverride: t.union([EventCategoryOverride, t.undefined]),
-  timestampField: t.union([TimestampField, t.undefined]),
-  tiebreakerField: t.union([TiebreakerField, t.undefined]),
-});
-export const eqlRuleParams = t.intersection([baseRuleParams, eqlSpecificRuleParams]);
-export type EqlSpecificRuleParams = t.TypeOf<typeof eqlSpecificRuleParams>;
-export type EqlRuleParams = t.TypeOf<typeof eqlRuleParams>;
-
-const threatSpecificRuleParams = t.type({
-  type: t.literal('threat_match'),
-  language: nonEqlLanguages,
-  index: t.union([IndexPatternArray, t.undefined]),
-  query: RuleQuery,
-  filters: t.union([RuleFilterArray, t.undefined]),
-  savedId: savedIdOrUndefined,
-  threatFilters: t.union([RuleFilterArray, t.undefined]),
-  threatQuery: threat_query,
-  threatMapping: threat_mapping,
-  threatLanguage: t.union([nonEqlLanguages, t.undefined]),
-  threatIndex: threat_index,
-  threatIndicatorPath: threatIndicatorPathOrUndefined,
-  concurrentSearches: concurrentSearchesOrUndefined,
-  itemsPerSearch: itemsPerSearchOrUndefined,
-  dataViewId: t.union([DataViewId, t.undefined]),
-});
-export const threatRuleParams = t.intersection([baseRuleParams, threatSpecificRuleParams]);
-export type ThreatSpecificRuleParams = t.TypeOf<typeof threatSpecificRuleParams>;
-export type ThreatRuleParams = t.TypeOf<typeof threatRuleParams>;
-
-const querySpecificRuleParams = t.exact(
-  t.type({
-    type: t.literal('query'),
-    language: nonEqlLanguages,
-    index: t.union([IndexPatternArray, t.undefined]),
-    query: RuleQuery,
-    filters: t.union([RuleFilterArray, t.undefined]),
-    savedId: savedIdOrUndefined,
-    dataViewId: t.union([DataViewId, t.undefined]),
-    responseActions: ResponseActionRuleParamsOrUndefined,
-    alertSuppression: t.union([AlertSuppressionCamel, t.undefined]),
-  })
-);
-export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
-export type QuerySpecificRuleParams = t.TypeOf<typeof querySpecificRuleParams>;
-export type QueryRuleParams = t.TypeOf<typeof queryRuleParams>;
-
-const savedQuerySpecificRuleParams = t.type({
-  type: t.literal('saved_query'),
-  // Having language, query, and filters possibly defined adds more code confusion and probably user confusion
-  // if the saved object gets deleted for some reason
-  language: nonEqlLanguages,
-  index: t.union([IndexPatternArray, t.undefined]),
-  dataViewId: t.union([DataViewId, t.undefined]),
-  query: t.union([RuleQuery, t.undefined]),
-  filters: t.union([RuleFilterArray, t.undefined]),
-  savedId: saved_id,
-  responseActions: ResponseActionRuleParamsOrUndefined,
-  alertSuppression: t.union([AlertSuppressionCamel, t.undefined]),
-});
-export const savedQueryRuleParams = t.intersection([baseRuleParams, savedQuerySpecificRuleParams]);
-export type SavedQuerySpecificRuleParams = t.TypeOf<typeof savedQuerySpecificRuleParams>;
-export type SavedQueryRuleParams = t.TypeOf<typeof savedQueryRuleParams>;
-
-export const unifiedQueryRuleParams = t.intersection([
-  baseRuleParams,
-  t.union([querySpecificRuleParams, savedQuerySpecificRuleParams]),
+/*
+ * In ESS 8.10.x "investigation_fields" are mapped as string[].
+ * For 8.11+ logic is added on read in our endpoints to migrate
+ * the data over to it's intended type of { field_names: string[] }.
+ * The SO rule type will continue to support both types until we deprecate,
+ * but APIs will only support intended object format.
+ * See PR 169061
+ */
+export type InvestigationFieldsCombined = z.infer<typeof InvestigationFieldsCombined>;
+export const InvestigationFieldsCombined = z.union([
+  InvestigationFields,
+  LegacyInvestigationFields,
 ]);
-export type UnifiedQueryRuleParams = t.TypeOf<typeof unifiedQueryRuleParams>;
 
-const thresholdSpecificRuleParams = t.type({
-  type: t.literal('threshold'),
-  language: nonEqlLanguages,
-  index: t.union([IndexPatternArray, t.undefined]),
+/**
+ * This is the same type as RuleSource, but with the keys in camelCase. Intended
+ * for internal use only (not for API responses).
+ */
+export type RuleSourceCamelCased = z.infer<typeof RuleSourceCamelCased>;
+export const RuleSourceCamelCased = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('external'),
+    isCustomized: IsExternalRuleCustomized,
+  }),
+  z.object({
+    type: z.literal('internal'),
+  }),
+]);
+
+// Conversion to an interface has to be disabled for the entire file; otherwise,
+// the resulting union would not be assignable to Alerting's RuleParams due to a
+// TypeScript bug: https://github.com/microsoft/TypeScript/issues/15300
+
+export type BaseRuleParams = z.infer<typeof BaseRuleParams>;
+export const BaseRuleParams = z.object({
+  author: RuleAuthorArray,
+  buildingBlockType: BuildingBlockType.optional(),
+  description: RuleDescription,
+  namespace: AlertsIndexNamespace.optional(),
+  note: InvestigationGuide.optional(),
+  falsePositives: RuleFalsePositiveArray,
+  from: RuleIntervalFrom,
+  ruleId: RuleSignatureId,
+  investigationFields: InvestigationFieldsCombined.optional(),
+  immutable: IsRuleImmutable,
+  ruleSource: RuleSourceCamelCased.optional(),
+  license: RuleLicense.optional(),
+  outputIndex: AlertsIndex,
+  timelineId: TimelineTemplateId.optional(),
+  timelineTitle: TimelineTemplateTitle.optional(),
+  meta: RuleMetadata.optional(),
+  maxSignals: MaxSignals,
+  riskScore: RiskScore,
+  riskScoreMapping: RiskScoreMapping,
+  ruleNameOverride: RuleNameOverride.optional(),
+  severity: Severity,
+  severityMapping: SeverityMapping,
+  timestampOverride: TimestampOverride.optional(),
+  timestampOverrideFallbackDisabled: TimestampOverrideFallbackDisabled.optional(),
+  threat: ThreatArray,
+  to: RuleIntervalTo,
+  references: RuleReferenceArray,
+  version: RuleVersion,
+  exceptionsList: RuleExceptionList.array(),
+  relatedIntegrations: RelatedIntegrationArray.optional(),
+  requiredFields: RequiredFieldArray.optional(),
+  setup: SetupGuide.optional(),
+});
+
+export type EqlSpecificRuleParams = z.infer<typeof EqlSpecificRuleParams>;
+export const EqlSpecificRuleParams = z.object({
+  type: z.literal('eql'),
+  language: z.literal('eql'),
+  index: IndexPatternArray.optional(),
+  dataViewId: DataViewId.optional(),
   query: RuleQuery,
-  filters: t.union([RuleFilterArray, t.undefined]),
-  savedId: savedIdOrUndefined,
+  filters: RuleFilterArray.optional(),
+  eventCategoryOverride: EventCategoryOverride.optional(),
+  timestampField: TimestampField.optional(),
+  tiebreakerField: TiebreakerField.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
+});
+
+export type EqlRuleParams = BaseRuleParams & EqlSpecificRuleParams;
+export const EqlRuleParams = z.intersection(BaseRuleParams, EqlSpecificRuleParams);
+
+export type EsqlSpecificRuleParams = z.infer<typeof EsqlSpecificRuleParams>;
+export const EsqlSpecificRuleParams = z.object({
+  type: z.literal('esql'),
+  language: z.literal('esql'),
+  query: RuleQuery,
+  alertSuppression: AlertSuppressionCamel.optional(),
+});
+
+export type EsqlRuleParams = BaseRuleParams & EsqlSpecificRuleParams;
+export const EsqlRuleParams = z.intersection(BaseRuleParams, EsqlSpecificRuleParams);
+
+export type ThreatSpecificRuleParams = z.infer<typeof ThreatSpecificRuleParams>;
+export const ThreatSpecificRuleParams = z.object({
+  type: z.literal('threat_match'),
+  language: KqlQueryLanguage,
+  index: IndexPatternArray.optional(),
+  query: RuleQuery,
+  filters: RuleFilterArray.optional(),
+  savedId: SavedQueryId.optional(),
+  threatFilters: RuleFilterArray.optional(),
+  threatQuery: ThreatQuery,
+  threatMapping: ThreatMapping,
+  threatLanguage: KqlQueryLanguage.optional(),
+  threatIndex: ThreatIndex,
+  threatIndicatorPath: ThreatIndicatorPath.optional(),
+  concurrentSearches: ConcurrentSearches.optional(),
+  itemsPerSearch: ItemsPerSearch.optional(),
+  dataViewId: DataViewId.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
+});
+
+export type ThreatRuleParams = BaseRuleParams & ThreatSpecificRuleParams;
+export const ThreatRuleParams = z.intersection(BaseRuleParams, ThreatSpecificRuleParams);
+
+export type QuerySpecificRuleParams = z.infer<typeof QuerySpecificRuleParams>;
+export const QuerySpecificRuleParams = z.object({
+  type: z.literal('query'),
+  language: KqlQueryLanguage,
+  index: IndexPatternArray.optional(),
+  query: RuleQuery,
+  filters: RuleFilterArray.optional(),
+  savedId: SavedQueryId.optional(),
+  dataViewId: DataViewId.optional(),
+  responseActions: z.array(RuleResponseAction).optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
+});
+
+export type QueryRuleParams = BaseRuleParams & QuerySpecificRuleParams;
+export const QueryRuleParams = z.intersection(BaseRuleParams, QuerySpecificRuleParams);
+
+export type SavedQuerySpecificRuleParams = z.infer<typeof SavedQuerySpecificRuleParams>;
+export const SavedQuerySpecificRuleParams = z.object({
+  type: z.literal('saved_query'),
+  language: KqlQueryLanguage,
+  index: IndexPatternArray.optional(),
+  dataViewId: DataViewId.optional(),
+  query: RuleQuery.optional(),
+  filters: RuleFilterArray.optional(),
+  savedId: SavedQueryId,
+  responseActions: z.array(RuleResponseAction).optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
+});
+
+export type SavedQueryRuleParams = BaseRuleParams & SavedQuerySpecificRuleParams;
+export const SavedQueryRuleParams = z.intersection(BaseRuleParams, SavedQuerySpecificRuleParams);
+
+export type UnifiedQueryRuleParams = z.infer<typeof UnifiedQueryRuleParams>;
+export const UnifiedQueryRuleParams = z.intersection(
+  BaseRuleParams,
+  z.union([QuerySpecificRuleParams, SavedQuerySpecificRuleParams])
+);
+
+export type ThresholdSpecificRuleParams = z.infer<typeof ThresholdSpecificRuleParams>;
+export const ThresholdSpecificRuleParams = z.object({
+  type: z.literal('threshold'),
+  language: KqlQueryLanguage,
+  index: IndexPatternArray.optional(),
+  query: RuleQuery,
+  filters: RuleFilterArray.optional(),
+  savedId: SavedQueryId.optional(),
   threshold: ThresholdNormalized,
-  dataViewId: t.union([DataViewId, t.undefined]),
+  dataViewId: DataViewId.optional(),
+  alertSuppression: ThresholdAlertSuppression.optional(),
 });
-export const thresholdRuleParams = t.intersection([baseRuleParams, thresholdSpecificRuleParams]);
-export type ThresholdSpecificRuleParams = t.TypeOf<typeof thresholdSpecificRuleParams>;
-export type ThresholdRuleParams = t.TypeOf<typeof thresholdRuleParams>;
 
-const machineLearningSpecificRuleParams = t.type({
-  type: t.literal('machine_learning'),
-  anomalyThreshold: anomaly_threshold,
-  machineLearningJobId: machine_learning_job_id_normalized,
+export type ThresholdRuleParams = BaseRuleParams & ThresholdSpecificRuleParams;
+export const ThresholdRuleParams = z.intersection(BaseRuleParams, ThresholdSpecificRuleParams);
+
+export type MachineLearningSpecificRuleParams = z.infer<typeof MachineLearningSpecificRuleParams>;
+export const MachineLearningSpecificRuleParams = z.object({
+  type: z.literal('machine_learning'),
+  anomalyThreshold: AnomalyThreshold,
+  machineLearningJobId: z.array(z.string()),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
-export const machineLearningRuleParams = t.intersection([
-  baseRuleParams,
-  machineLearningSpecificRuleParams,
-]);
-export type MachineLearningSpecificRuleParams = t.TypeOf<typeof machineLearningSpecificRuleParams>;
-export type MachineLearningRuleParams = t.TypeOf<typeof machineLearningRuleParams>;
 
-const newTermsSpecificRuleParams = t.type({
-  type: t.literal('new_terms'),
+export type MachineLearningRuleParams = BaseRuleParams & MachineLearningSpecificRuleParams;
+export const MachineLearningRuleParams = z.intersection(
+  BaseRuleParams,
+  MachineLearningSpecificRuleParams
+);
+
+export type NewTermsSpecificRuleParams = z.infer<typeof NewTermsSpecificRuleParams>;
+export const NewTermsSpecificRuleParams = z.object({
+  type: z.literal('new_terms'),
   query: RuleQuery,
   newTermsFields: NewTermsFields,
   historyWindowStart: HistoryWindowStart,
-  index: t.union([IndexPatternArray, t.undefined]),
-  filters: t.union([RuleFilterArray, t.undefined]),
-  language: nonEqlLanguages,
-  dataViewId: t.union([DataViewId, t.undefined]),
+  index: IndexPatternArray.optional(),
+  filters: RuleFilterArray.optional(),
+  language: KqlQueryLanguage,
+  dataViewId: DataViewId.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
-export const newTermsRuleParams = t.intersection([baseRuleParams, newTermsSpecificRuleParams]);
-export type NewTermsSpecificRuleParams = t.TypeOf<typeof newTermsSpecificRuleParams>;
-export type NewTermsRuleParams = t.TypeOf<typeof newTermsRuleParams>;
 
-export const typeSpecificRuleParams = t.union([
-  eqlSpecificRuleParams,
-  threatSpecificRuleParams,
-  querySpecificRuleParams,
-  savedQuerySpecificRuleParams,
-  thresholdSpecificRuleParams,
-  machineLearningSpecificRuleParams,
-  newTermsSpecificRuleParams,
+export type NewTermsRuleParams = BaseRuleParams & NewTermsSpecificRuleParams;
+export const NewTermsRuleParams = z.intersection(BaseRuleParams, NewTermsSpecificRuleParams);
+
+export type TypeSpecificRuleParams = z.infer<typeof TypeSpecificRuleParams>;
+export const TypeSpecificRuleParams = z.union([
+  EqlSpecificRuleParams,
+  EsqlSpecificRuleParams,
+  ThreatSpecificRuleParams,
+  QuerySpecificRuleParams,
+  SavedQuerySpecificRuleParams,
+  ThresholdSpecificRuleParams,
+  MachineLearningSpecificRuleParams,
+  NewTermsSpecificRuleParams,
 ]);
-export type TypeSpecificRuleParams = t.TypeOf<typeof typeSpecificRuleParams>;
 
-export const ruleParams = t.intersection([baseRuleParams, typeSpecificRuleParams]);
-export type RuleParams = t.TypeOf<typeof ruleParams>;
+export type RuleParams = z.infer<typeof RuleParams>;
+export const RuleParams = z.union([
+  EqlRuleParams,
+  EsqlRuleParams,
+  ThreatRuleParams,
+  QueryRuleParams,
+  SavedQueryRuleParams,
+  ThresholdRuleParams,
+  MachineLearningRuleParams,
+  NewTermsRuleParams,
+]);
 
 export interface CompleteRule<T extends RuleParams> {
   alertId: string;
@@ -259,61 +315,19 @@ export interface CompleteRule<T extends RuleParams> {
   ruleConfig: SanitizedRuleConfig;
 }
 
-export const notifyWhen = t.union([
-  t.literal('onActionGroupChange'),
-  t.literal('onActiveAlert'),
-  t.literal('onThrottleInterval'),
-  t.null,
-]);
+export type AllRuleTypes =
+  | typeof SIGNALS_ID
+  | typeof EQL_RULE_TYPE_ID
+  | typeof ESQL_RULE_TYPE_ID
+  | typeof INDICATOR_RULE_TYPE_ID
+  | typeof ML_RULE_TYPE_ID
+  | typeof QUERY_RULE_TYPE_ID
+  | typeof SAVED_QUERY_RULE_TYPE_ID
+  | typeof THRESHOLD_RULE_TYPE_ID
+  | typeof NEW_TERMS_RULE_TYPE_ID;
 
-export const allRuleTypes = t.union([
-  t.literal(SIGNALS_ID),
-  t.literal(EQL_RULE_TYPE_ID),
-  t.literal(INDICATOR_RULE_TYPE_ID),
-  t.literal(ML_RULE_TYPE_ID),
-  t.literal(QUERY_RULE_TYPE_ID),
-  t.literal(SAVED_QUERY_RULE_TYPE_ID),
-  t.literal(THRESHOLD_RULE_TYPE_ID),
-  t.literal(NEW_TERMS_RULE_TYPE_ID),
-]);
+export type InternalRuleCreate = CreateRuleData<RuleParams> & {
+  consumer: typeof SERVER_APP_ID;
+};
 
-const internalRuleCreateRequired = t.type({
-  name: RuleName,
-  tags: RuleTagArray,
-  alertTypeId: allRuleTypes,
-  consumer: t.literal(SERVER_APP_ID),
-  schedule: t.type({
-    interval: t.string,
-  }),
-  enabled: IsRuleEnabled,
-  actions: RuleActionArrayCamel,
-  params: ruleParams,
-});
-const internalRuleCreateOptional = t.partial({
-  throttle: t.union([RuleActionThrottle, t.null]),
-  notifyWhen,
-});
-export const internalRuleCreate = t.intersection([
-  internalRuleCreateOptional,
-  internalRuleCreateRequired,
-]);
-export type InternalRuleCreate = t.TypeOf<typeof internalRuleCreate>;
-
-const internalRuleUpdateRequired = t.type({
-  name: RuleName,
-  tags: RuleTagArray,
-  schedule: t.type({
-    interval: t.string,
-  }),
-  actions: RuleActionArrayCamel,
-  params: ruleParams,
-});
-const internalRuleUpdateOptional = t.partial({
-  throttle: t.union([RuleActionThrottle, t.null]),
-  notifyWhen,
-});
-export const internalRuleUpdate = t.intersection([
-  internalRuleUpdateOptional,
-  internalRuleUpdateRequired,
-]);
-export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;
+export type InternalRuleUpdate = UpdateRuleData<RuleParams>;

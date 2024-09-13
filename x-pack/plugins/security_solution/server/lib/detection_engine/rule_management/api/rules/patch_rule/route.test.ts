@@ -6,10 +6,7 @@
  */
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { getPatchRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_management/mocks';
-
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { mlServicesMock } from '../../../../../machine_learning/mocks';
+import { getPatchRulesSchemaMock } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import {
@@ -22,38 +19,29 @@ import {
 } from '../../../../routes/__mocks__/request_responses';
 
 import { getMlRuleParams, getQueryRuleParams } from '../../../../rule_schema/mocks';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
+
+import {
+  getRulesSchemaMock,
+  getRulesMlSchemaMock,
+} from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 
 import { patchRuleRoute } from './route';
-
-jest.mock('../../../../../machine_learning/authz');
-
-jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');
-  return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
+import { HttpAuthzError } from '../../../../../machine_learning/validation';
 
 describe('Patch rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
+    clients.detectionRulesClient.patchRule.mockResolvedValue(getRulesSchemaMock());
 
-    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
-
-    patchRuleRoute(server.router, ml);
+    patchRuleRoute(server.router);
   });
 
   describe('status codes', () => {
@@ -62,12 +50,12 @@ describe('Patch rule route', () => {
         getPatchRequest(),
         requestContextMock.convertContext(context)
       );
+
       expect(response.status).toEqual(200);
     });
 
     test('returns 404 when updating a single rule that does not exist', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      (legacyMigrate as jest.Mock).mockResolvedValue(null);
       const response = await server.inject(
         getPatchRequest(),
         requestContextMock.convertContext(context)
@@ -80,7 +68,6 @@ describe('Patch rule route', () => {
     });
 
     test('returns error if requesting a non-rule', async () => {
-      (legacyMigrate as jest.Mock).mockResolvedValue(null);
       clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
       const response = await server.inject(
         getPatchRequest(),
@@ -94,7 +81,7 @@ describe('Patch rule route', () => {
     });
 
     test('catches error if update throws error', async () => {
-      clients.rulesClient.update.mockImplementation(async () => {
+      clients.detectionRulesClient.patchRule.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(
@@ -114,37 +101,36 @@ describe('Patch rule route', () => {
         ...getFindResultWithSingleHit(),
         data: [getRuleMock(getMlRuleParams())],
       });
-      (legacyMigrate as jest.Mock).mockResolvedValueOnce(getRuleMock(getMlRuleParams()));
+
+      const anomalyThreshold = 4;
+      const machineLearningJobId = 'some_job_id';
+      clients.detectionRulesClient.patchRule.mockResolvedValueOnce({
+        ...getRulesMlSchemaMock(),
+        anomaly_threshold: anomalyThreshold,
+        machine_learning_job_id: [machineLearningJobId],
+      });
+
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
           type: 'machine_learning',
           rule_id: 'my-rule-id',
-          anomaly_threshold: 4,
-          machine_learning_job_id: 'some_job_id',
+          anomaly_threshold: anomalyThreshold,
+          machine_learning_job_id: machineLearningJobId,
         },
       });
-      await server.inject(request, requestContextMock.convertContext(context));
-
-      expect(clients.rulesClient.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            params: expect.objectContaining({
-              anomalyThreshold: 4,
-              machineLearningJobId: ['some_job_id'],
-            }),
-          }),
-        })
-      );
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(200);
+      expect(response.body.machine_learning_job_id).toEqual([machineLearningJobId]);
+      expect(response.body.anomaly_threshold).toEqual(anomalyThreshold);
     });
 
     it('rejects patching a rule to ML if mlAuthz fails', async () => {
-      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
-        validateRuleType: jest
-          .fn()
-          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      clients.detectionRulesClient.patchRule.mockImplementationOnce(async () => {
+        throw new HttpAuthzError('mocked validation message');
       });
+
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
@@ -160,11 +146,10 @@ describe('Patch rule route', () => {
     });
 
     it('rejects patching an ML rule if mlAuthz fails', async () => {
-      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
-        validateRuleType: jest
-          .fn()
-          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      clients.detectionRulesClient.patchRule.mockImplementationOnce(async () => {
+        throw new HttpAuthzError('mocked validation message');
       });
+
       const { type, ...payloadWithoutType } = typicalMlRulePayload();
       const request = requestMock.create({
         method: 'patch',
@@ -215,7 +200,7 @@ describe('Patch rule route', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown_type" supplied to "type",Invalid value "kuery" supplied to "language"'
+        'type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "query", type: Invalid literal value, expected "saved_query", type: Invalid literal value, expected "threshold", and 5 more'
       );
     });
 
@@ -241,7 +226,7 @@ describe('Patch rule route', () => {
         },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
+      expect(result.badRequest).toHaveBeenCalledWith('from: Failed to parse date-math expression');
     });
   });
 });

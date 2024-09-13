@@ -1,5 +1,0 @@
-title: Connector request properties for a xMatters connector
-description: Defines properties for connectors when type is `.xmatters`.
-type: object
-additionalProperties: true
-# TO-DO: Add the properties for this connector.

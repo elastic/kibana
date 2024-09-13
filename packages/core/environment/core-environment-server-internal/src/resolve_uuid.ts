@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -65,13 +66,16 @@ export async function resolveInstanceUuid({
 
 async function readUuidFromFile(filepath: string, logger: Logger): Promise<string | undefined> {
   const content = await readFileContent(filepath);
+  if (content === undefined) {
+    return undefined;
+  }
 
   if (content === UUID_7_6_0_BUG) {
     logger.debug(`UUID from 7.6.0 bug detected, ignoring file UUID`);
     return undefined;
   }
 
-  if (content && !content.match(uuidRegexp)) {
+  if (!content.match(uuidRegexp)) {
     throw new Error(`${filepath} contains an invalid UUID`);
   }
 

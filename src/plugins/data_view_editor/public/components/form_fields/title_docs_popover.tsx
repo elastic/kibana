@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
@@ -39,6 +40,7 @@ export const TitleDocsPopover: React.FC = () => {
       isOpen={isOpen}
       display="inlineBlock"
       panelPaddingSize="none"
+      anchorPosition="upRight"
       closePopover={() => setIsOpen(false)}
     >
       <EuiPopoverTitle paddingSize="s">
@@ -49,7 +51,7 @@ export const TitleDocsPopover: React.FC = () => {
       <EuiPanel
         className="eui-yScroll"
         css={css`
-          max-height: 40vh;
+          max-height: 50vh;
           max-width: 500px;
         `}
         color="transparent"
@@ -94,6 +96,23 @@ export const TitleDocsPopover: React.FC = () => {
               </p>
               <p>
                 <EuiCode>filebeat-*,-filebeat-c</EuiCode>
+              </p>
+            </li>
+            <li>
+              <p>
+                <FormattedMessage
+                  id="indexPatternEditor.titleDocsPopover.useCrossClusterSearchDescription"
+                  defaultMessage="For cross-cluster search, precede with the cluster name followed by a colon (:)."
+                />
+              </p>
+              <p>
+                <EuiCode>cluster1:filebeat-*</EuiCode>
+              </p>
+              <p>
+                <EuiCode>cluster1:filebeat-*,cluster2:filebeat-*</EuiCode>
+              </p>
+              <p>
+                <EuiCode>cluster*:filebeat-*,filebeat-*</EuiCode>
               </p>
             </li>
             <li>

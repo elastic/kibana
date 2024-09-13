@@ -2,63 +2,53 @@
 
 exports[`renders DashboardSaveModal 1`] = `
 <SavedObjectSaveModal
+  description="dash description"
   initialCopyOnSave={true}
   objectType="dashboard"
   onClose={[Function]}
   onSave={[Function]}
   options={
     <React.Fragment>
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        label={
-          <FormattedMessage
-            defaultMessage="Description"
-            id="dashboard.topNav.saveModal.descriptionFormRowLabel"
-            values={Object {}}
-          />
-        }
-        labelType="label"
-      >
-        <EuiTextArea
-          data-test-subj="dashboardDescription"
-          onChange={[Function]}
-          value="dash description"
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        helpText={
-          <FormattedMessage
-            defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
-            id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
-            values={Object {}}
-          />
-        }
-        labelType="label"
-      >
-        <EuiSwitch
-          checked={true}
-          data-test-subj="storeTimeWithDashboard"
-          label={
-            <FormattedMessage
-              defaultMessage="Store time with dashboard"
-              id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
-              values={Object {}}
+      <EuiFormRow>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiSwitch
+              checked={true}
+              data-test-subj="storeTimeWithDashboard"
+              label={
+                <Memo(MemoizedFormattedMessage)
+                  defaultMessage="Store time with dashboard"
+                  id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
+                />
+              }
+              onChange={[Function]}
             />
-          }
-          onChange={[Function]}
-        />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiIconTip
+              content={
+                <Memo(MemoizedFormattedMessage)
+                  defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
+                  id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
+                />
+              }
+              position="top"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFormRow>
     </React.Fragment>
   }
   showCopyOnSave={true}
-  showDescription={false}
+  showDescription={true}
   title="dash title"
 />
 `;

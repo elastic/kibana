@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { CaseResponse } from '../../../../common/api';
 import { createCasesClientMock } from '../../mocks';
 import type { CasesClientArgs } from '../../types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createAttachmentServiceMock } from '../../../services/mocks';
 
 import { AlertsCount } from './count';
+import type { Case } from '../../../../common/types/domain';
 
 const clientMock = createCasesClientMock();
 const attachmentService = createAttachmentServiceMock();
@@ -32,7 +32,7 @@ const constructorOptions = { caseId: 'test-id', casesClient: clientMock, clientA
 describe('AlertsCount', () => {
   beforeAll(() => {
     getAuthorizationFilter.mockResolvedValue({});
-    clientMock.cases.get.mockResolvedValue({ id: 'test-id' } as unknown as CaseResponse);
+    clientMock.cases.get.mockResolvedValue({ id: 'test-id' } as unknown as Case);
   });
 
   beforeEach(() => {

@@ -27,7 +27,7 @@ export const esSearchHitToArtifact = <
 }: T): Artifact => {
   return {
     ...attributesNotNeedingRename,
-    id,
+    id: id!,
     compressionAlgorithm,
     decodedSha256,
     decodedSize,
@@ -81,4 +81,8 @@ export const uniqueIdFromArtifact = <
   packageName,
 }: T): string => {
   return `${packageName}:${identifier}-${decodedSha256}`;
+};
+
+export const uniqueIdFromId = (id: string, packageName: string): string => {
+  return `${packageName}:${id}`;
 };

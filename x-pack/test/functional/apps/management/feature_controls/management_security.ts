@@ -16,7 +16,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const managementMenu = getService('managementMenu');
   const testSubjects = getService('testSubjects');
 
-  describe('security', () => {
+  describe('security', function () {
+    this.tags('skipFIPS');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
@@ -26,7 +27,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('no management privileges', () => {
+    describe('no management privileges', function () {
+      this.tags('skipFIPS');
       before(async () => {
         await security.testUser.setRoles(['global_dashboard_read']);
       });
@@ -36,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should not show the Stack Management nav link', async () => {
         const links = await appsMenu.readLinks();
-        expect(links.map((link) => link.text)).to.eql(['Dashboard']);
+        expect(links.map((link) => link.text)).to.eql(['Dashboards']);
       });
 
       it('should render the "application not found" view when navigating to management directly', async () => {
@@ -64,13 +66,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(sections).to.have.length(2);
         expect(sections[0]).to.eql({
           sectionId: 'insightsAndAlerting',
-          sectionLinks: ['triggersActions', 'cases', 'triggersActionsConnectors', 'jobsListLink'],
+          sectionLinks: [
+            'triggersActionsAlerts',
+            'triggersActions',
+            'cases',
+            'triggersActionsConnectors',
+            'jobsListLink',
+            'maintenanceWindows',
+          ],
         });
         expect(sections[1]).to.eql({
           sectionId: 'kibana',
           sectionLinks: [
             'dataViews',
             'filesManagement',
+            'aiAssistantManagementSelection',
             'objects',
             'tags',
             'search_sessions',

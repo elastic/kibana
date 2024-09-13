@@ -6,8 +6,11 @@
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+const METRIC_THRESHOLD_RULE_TYPE_SELECTOR = 'metrics.alert.threshold-SelectOption';
+
 export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   const getManageRulesPageHref = async () => {
     const manageRulesPageButton = await testSubjects.find('manageRulesPageButton');
@@ -23,10 +26,31 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
 
   const clickDisableFromDropDownMenu = async () => testSubjects.click('statusDropdownDisabledItem');
 
+  const clickLogsTab = async () => testSubjects.click('ruleLogsTab');
+
+  const clickOnRuleInEventLogs = async () => {
+    await find.clickByButtonText('metric-threshold');
+  };
+
+  const clickOnInfrastructureCategory = async () => {
+    const categories = await testSubjects.find('ruleTypeModal');
+    const category = await categories.findByCssSelector(`.euiFacetButton[title="Infrastructure"]`);
+    await category.click();
+  };
+
+  const clickOnMetricThresholdRule = async () => {
+    await testSubjects.existOrFail(METRIC_THRESHOLD_RULE_TYPE_SELECTOR);
+    await testSubjects.click(METRIC_THRESHOLD_RULE_TYPE_SELECTOR);
+  };
+
   return {
     getManageRulesPageHref,
     clickCreateRuleButton,
     clickRuleStatusDropDownMenu,
     clickDisableFromDropDownMenu,
+    clickLogsTab,
+    clickOnRuleInEventLogs,
+    clickOnInfrastructureCategory,
+    clickOnMetricThresholdRule,
   };
 }

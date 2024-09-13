@@ -8,7 +8,7 @@ Array [
     Success! Wait a moment please.
   </h2>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText emotion-euiText-m"
@@ -47,7 +47,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText emotion-euiText-m"
@@ -80,7 +80,7 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-m-fill-disabled"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
         data-test-subj="enableCollectionInterval"
         disabled=""
         type="button"
@@ -121,7 +121,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText emotion-euiText-m"
@@ -154,7 +154,7 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
         data-test-subj="enableCollectionInterval"
         type="button"
       >

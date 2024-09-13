@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { of, Observable } from 'rxjs';
 import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import { calculateStatus$ } from './status';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 
 describe('calculateStatus$', () => {
   const expectUnavailableDueToEs = (status$: Observable<ServiceStatus>) =>
@@ -81,7 +82,13 @@ describe('calculateStatus$', () => {
     it('is available after migrations have ran', async () => {
       await expect(
         calculateStatus$(
-          of({ status: 'completed', result: [{ status: 'skipped' }, { status: 'patched' }] }),
+          of({
+            status: 'completed',
+            result: [
+              { status: 'skipped' },
+              { status: 'patched', destIndex: '.kibana', elapsedMs: 28 },
+            ],
+          }),
           esStatus$
         )
           .pipe(take(2))

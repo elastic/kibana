@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,31 +14,46 @@ import styled from 'styled-components';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { RangeFilterParams } from '@kbn/es-query';
 import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
-import type { XYState } from '@kbn/lens-plugin/public';
+import type {
+  EmbeddableComponentProps,
+  TypedLensByValueInput,
+  XYState,
+} from '@kbn/lens-plugin/public';
+import type { LensBaseEmbeddableInput } from '@kbn/lens-plugin/public/embeddable';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
 import type { LensEmbeddableComponentProps } from './types';
-import { useActions } from './use_actions';
-import { inputsSelectors } from '../../store';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { DEFAULT_ACTIONS, useActions } from './use_actions';
+
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
-import { getRequestsAndResponses } from './utils';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationActions } from './actions';
+import { useEmbeddableInspect } from './use_embeddable_inspect';
+import { useVisualizationResponse } from './use_visualization_response';
+import { useInspect } from '../inspect/use_inspect';
+
+const HOVER_ACTIONS_PADDING = 24;
+const DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL'];
 
 const LensComponentWrapper = styled.div<{
-  height?: string;
-  width?: string;
+  $height?: number;
+  width?: string | number;
   $addHoverActionsPadding?: boolean;
 }>`
-  height: ${({ height }) => height ?? 'auto'};
+  height: ${({ $height }) => ($height ? `${$height}px` : 'auto')};
   width: ${({ width }) => width ?? 'auto'};
-  > div {
-    background-color: transparent;
-    ${({ $addHoverActionsPadding }) => ($addHoverActionsPadding ? `padding: 20px 0 0 0;` : ``)}
+
+  ${({ $addHoverActionsPadding }) =>
+    $addHoverActionsPadding ? `.embPanel__header { top: ${HOVER_ACTIONS_PADDING * -1}px; }` : ''}
+
+  .embPanel__header {
+    z-index: 2;
+    position: absolute;
+    right: 0;
   }
+
   .expExpressionRenderer__expression {
     padding: 2px 0 0 0 !important;
   }
@@ -47,18 +62,9 @@ const LensComponentWrapper = styled.div<{
   }
 `;
 
-const initVisualizationData: {
-  requests: string[] | undefined;
-  responses: string[] | undefined;
-  isLoading: boolean;
-} = {
-  requests: undefined,
-  responses: undefined,
-  isLoading: true,
-};
-
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   applyGlobalQueriesAndFilters = true,
+  applyPageAndTabsFilters = true,
   extraActions,
   extraOptions,
   getLensAttributes,
@@ -69,10 +75,13 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   lensAttributes,
   onLoad,
   scopeId = SourcererScopeName.default,
+  enableLegendActions = true,
   stackByField,
   timerange,
   width: wrapperWidth,
-  withActions = true,
+  withActions = DEFAULT_ACTIONS,
+  disableOnClickFilter = false,
+  casesAttachmentMetadata,
 }) => {
   const style = useMemo(
     () => ({
@@ -89,12 +98,10 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     },
   } = useKibana().services;
   const dispatch = useDispatch();
-  const [isShowingModal, setIsShowingModal] = useState(false);
-  const [visualizationData, setVisualizationData] = useState(initVisualizationData);
-  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
-  const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
+  const { searchSessionId } = useVisualizationResponse({ visualizationId: id });
   const attributes = useLensAttributes({
     applyGlobalQueriesAndFilters,
+    applyPageAndTabsFilters,
     extraOptions,
     getLensAttributes,
     lensAttributes,
@@ -108,14 +115,39 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     attributes?.visualizationType !== 'lnsLegacyMetric' &&
     attributes?.visualizationType !== 'lnsPie';
   const LensComponent = lens.EmbeddableComponent;
+
+  const overrides: TypedLensByValueInput['overrides'] = useMemo(
+    () =>
+      enableLegendActions
+        ? undefined
+        : { settings: { legendAction: 'ignore', onBrushEnd: 'ignore' } },
+    [enableLegendActions]
+  );
+  const { setInspectData } = useEmbeddableInspect(onLoad);
+  const { responses, loading } = useVisualizationResponse({ visualizationId: id });
+
+  const {
+    additionalRequests,
+    additionalResponses,
+    handleClick: handleInspectClick,
+    handleCloseModal,
+    isButtonDisabled: isInspectButtonDisabled,
+    isShowingModal,
+    request,
+    response,
+  } = useInspect({
+    inputId: inputsModelId,
+    isDisabled: loading,
+    multiple: responses != null && responses.length > 1,
+    queryId: id,
+  });
+
   const inspectActionProps = useMemo(
     () => ({
-      onInspectActionClicked: () => {
-        setIsShowingModal(true);
-      },
-      isDisabled: visualizationData.isLoading,
+      handleInspectClick,
+      isInspectButtonDisabled,
     }),
-    [visualizationData.isLoading]
+    [handleInspectClick, isInspectButtonDisabled]
   );
 
   const actions = useActions({
@@ -124,14 +156,11 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     inspectActionProps,
     timeRange: timerange,
     withActions,
+    lensMetadata: casesAttachmentMetadata,
   });
 
-  const handleCloseModal = useCallback(() => {
-    setIsShowingModal(false);
-  }, []);
-
   const updateDateRange = useCallback(
-    ({ range }) => {
+    ({ range }: { range: Array<number | string> }) => {
       const [min, max] = range;
       dispatch(
         setAbsoluteRangeDatePicker({
@@ -144,57 +173,32 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [dispatch, inputsModelId]
   );
 
-  const requests = useMemo(() => {
-    const [request, ...additionalRequests] = visualizationData.requests ?? [];
-    return { request, additionalRequests };
-  }, [visualizationData.requests]);
-
-  const responses = useMemo(() => {
-    const [response, ...additionalResponses] = visualizationData.responses ?? [];
-    return { response, additionalResponses };
-  }, [visualizationData.responses]);
-
-  const onLoadCallback = useCallback(
-    (isLoading, adapters) => {
-      if (!adapters) {
+  const onFilterCallback = useCallback<Required<LensBaseEmbeddableInput>['onFilter']>(
+    (event) => {
+      if (disableOnClickFilter) {
+        event.preventDefault();
         return;
       }
-      const data = getRequestsAndResponses(adapters?.requests?.getRequests());
-      setVisualizationData({
-        requests: data.requests,
-        responses: data.responses,
-        isLoading,
-      });
-
-      if (onLoad != null) {
-        onLoad({
-          requests: data.requests,
-          responses: data.responses,
-          isLoading,
+      const callback: EmbeddableComponentProps['onFilter'] = async (e) => {
+        if (!isClickTriggerEvent(e) || preferredSeriesType !== 'area') {
+          e.preventDefault();
+          return;
+        }
+        // Update timerange when clicking on a dot in an area chart
+        const [{ query }] = await createFiltersFromValueClickAction({
+          data: e.data,
+          negate: e.negate,
         });
-      }
+        const rangeFilter: RangeFilterParams = query?.range['@timestamp'];
+        if (rangeFilter?.gte && rangeFilter?.lt) {
+          updateDateRange({
+            range: [rangeFilter.gte, rangeFilter.lt],
+          });
+        }
+      };
+      return callback;
     },
-    [onLoad]
-  );
-
-  const onFilterCallback = useCallback(
-    async (e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => {
-      if (!Array.isArray(e.data) || preferredSeriesType !== 'area') {
-        return;
-      }
-      // Update timerange when clicking on a dot in an area chart
-      const [{ query }] = await createFiltersFromValueClickAction({
-        data: e.data,
-        negate: e.negate,
-      });
-      const rangeFilter: RangeFilterParams = query?.range['@timestamp'];
-      if (rangeFilter?.gte && rangeFilter?.lt) {
-        updateDateRange({
-          range: [rangeFilter.gte, rangeFilter.lt],
-        });
-      }
-    },
-    [createFiltersFromValueClickAction, updateDateRange, preferredSeriesType]
+    [createFiltersFromValueClickAction, updateDateRange, preferredSeriesType, disableOnClickFilter]
   );
 
   const adHocDataViews = useMemo(
@@ -214,10 +218,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     return null;
   }
 
-  if (
-    !attributes ||
-    (visualizationData?.responses != null && visualizationData?.responses?.length === 0)
-  ) {
+  if (!attributes || (responses != null && responses.length === 0)) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
@@ -243,7 +244,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             stackByField={stackByField}
             timerange={timerange}
             title={inspectTitle}
-            withDefaultActions={false}
+            withActions={withActions}
+            casesAttachmentMetadata={casesAttachmentMetadata}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -254,41 +256,51 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     <>
       {attributes && searchSessionId && (
         <LensComponentWrapper
-          height={wrapperHeight}
+          $height={wrapperHeight}
           width={wrapperWidth}
           $addHoverActionsPadding={addHoverActionsPadding}
         >
           <LensComponent
-            id={id}
-            style={style}
-            timeRange={timerange}
             attributes={attributes}
-            onLoad={onLoadCallback}
+            disabledActions={DISABLED_ACTIONS}
+            extraActions={actions}
+            id={id}
             onBrushEnd={updateDateRange}
             onFilter={onFilterCallback}
-            viewMode={ViewMode.VIEW}
-            withDefaultActions={false}
-            extraActions={actions}
+            onLoad={setInspectData}
+            overrides={overrides}
             searchSessionId={searchSessionId}
             showInspector={false}
+            style={style}
+            syncCursor={false}
+            syncTooltips={false}
+            timeRange={timerange}
+            viewMode={ViewMode.VIEW}
+            withDefaultActions={false}
           />
         </LensComponentWrapper>
       )}
-      {isShowingModal && requests.request != null && responses.response != null && (
+      {isShowingModal && request != null && response != null && (
         <ModalInspectQuery
           adHocDataViews={adHocDataViews}
-          additionalRequests={requests.additionalRequests}
-          additionalResponses={responses.additionalResponses}
+          additionalRequests={additionalRequests}
+          additionalResponses={additionalResponses}
           closeModal={handleCloseModal}
           data-test-subj="inspect-modal"
           inputId={inputsModelId}
-          request={requests.request}
-          response={responses.response}
+          request={request}
+          response={response}
           title={inspectTitle}
         />
       )}
     </>
   );
+};
+
+const isClickTriggerEvent = (
+  e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']
+): e is ClickTriggerEvent['data'] => {
+  return Array.isArray(e.data) && 'column' in e.data[0];
 };
 
 export const LensEmbeddable = React.memo(LensEmbeddableComponent);

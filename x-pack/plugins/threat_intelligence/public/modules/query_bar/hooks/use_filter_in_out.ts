@@ -7,13 +7,11 @@
 
 import { useCallback } from 'react';
 import { Filter } from '@kbn/es-query';
-import {
-  fieldAndValueValid,
-  getIndicatorFieldAndValue,
-  useIndicatorsFiltersContext,
-} from '../../indicators';
+import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
+import { useIndicatorsFiltersContext } from '../../indicators/hooks/use_filters_context';
 import { Indicator } from '../../../../common/types/indicator';
-import { FilterIn, FilterOut, updateFiltersArray } from '../utils';
+import { FilterIn, FilterOut, updateFiltersArray } from '../utils/filter';
+import { useSourcererDataView } from '../../indicators/hooks/use_sourcerer_data_view';
 
 export interface UseFilterInParam {
   /**
@@ -47,6 +45,7 @@ export const useFilterInOut = ({
   filterType,
 }: UseFilterInParam): UseFilterInValue => {
   const { filterManager } = useIndicatorsFiltersContext();
+  const { sourcererDataView } = useSourcererDataView();
 
   const { key, value } =
     typeof indicator === 'string'
@@ -55,9 +54,15 @@ export const useFilterInOut = ({
 
   const filterFn = useCallback((): void => {
     const existingFilters = filterManager.getFilters();
-    const newFilters: Filter[] = updateFiltersArray(existingFilters, key, value, filterType);
+    const newFilters: Filter[] = updateFiltersArray(
+      existingFilters,
+      key,
+      value,
+      filterType,
+      sourcererDataView?.id
+    );
     filterManager.setFilters(newFilters);
-  }, [filterManager, filterType, key, value]);
+  }, [filterManager, filterType, key, sourcererDataView?.id, value]);
 
   if (!fieldAndValueValid(key, value)) {
     return {} as unknown as UseFilterInValue;

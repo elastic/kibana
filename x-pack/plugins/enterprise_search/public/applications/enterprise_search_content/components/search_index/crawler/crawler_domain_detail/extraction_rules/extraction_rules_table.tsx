@@ -66,7 +66,6 @@ export const ExtractionRulesTable: React.FC = () => {
               if (rule) {
                 openEditRuleFlyout({
                   fieldRule: rule,
-                  fieldRuleIndex: rule.index,
                   isNewRule: false,
                 });
               }
@@ -244,7 +243,6 @@ export const ExtractionRulesTable: React.FC = () => {
       )}
       <EuiBasicTable
         columns={columns}
-        isExpandable
         itemId="id"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         items={extractionRules}

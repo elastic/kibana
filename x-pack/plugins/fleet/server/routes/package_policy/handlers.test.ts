@@ -12,18 +12,39 @@ import type { RouteConfig } from '@kbn/core/server';
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
-import { appContextService, packagePolicyService } from '../../services';
+import {
+  agentPolicyService,
+  appContextService,
+  licenseService,
+  packagePolicyService,
+} from '../../services';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import type { PackagePolicyClient, FleetRequestHandlerContext } from '../..';
 import type { UpdatePackagePolicyRequestSchema } from '../../types/rest_spec';
-import type { FleetRequestHandler } from '../../types';
+import type { AgentPolicy, FleetRequestHandler } from '../../types';
 import type { PackagePolicy } from '../../types';
 
 import { getPackagePoliciesHandler } from './handlers';
-
 import { registerRoutes } from '.';
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
+const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+
+function mockAgentPolicy(data: Partial<AgentPolicy>) {
+  mockedAgentPolicyService.get.mockResolvedValue({
+    id: 'agent-policy',
+    status: 'active',
+    package_policies: [],
+    is_managed: false,
+    namespace: 'default',
+    revision: 1,
+    name: 'Policy',
+    updated_at: '2020-01-01',
+    updated_by: 'qwerty',
+    is_protected: false,
+    ...data,
+  });
+}
 
 jest.mock(
   '../../services/package_policy',
@@ -73,6 +94,7 @@ jest.mock(
                 updated_at: '2022-12-19T20:43:45.879Z',
                 updated_by: 'elastic',
                 policy_id: `agent-policy-id-a`,
+                policy_ids: [`agent-policy-id-a`],
                 enabled: true,
                 inputs: [],
                 namespace: 'default',
@@ -104,10 +126,20 @@ jest.mock(
   }
 );
 
+jest.mock('../../services/agent_policy', () => {
+  return {
+    agentPolicyService: {
+      get: jest.fn(),
+      update: jest.fn(),
+    },
+  };
+});
+
 jest.mock('../../services/epm/packages', () => {
   return {
     ensureInstalledPackage: jest.fn(() => Promise.resolve()),
     getPackageInfo: jest.fn(() => Promise.resolve()),
+    getInstallation: jest.fn(),
   };
 });
 
@@ -135,7 +167,7 @@ describe('When calling package policy', () => {
     appContextService.stop();
   });
 
-  describe('update api handler', () => {
+  describe('Update api handler', () => {
     const getUpdateKibanaRequest = (
       newData?: typeof UpdatePackagePolicyRequestSchema.body
     ): KibanaRequest<
@@ -187,12 +219,17 @@ describe('When calling package policy', () => {
     };
 
     beforeEach(() => {
-      [routeConfig, routeHandler] = routerMock.put.mock.calls.find(([{ path }]) =>
+      // @ts-ignore
+      const putMock = routerMock.versioned.put.mock;
+      // @ts-ignore
+      routeConfig = putMock.calls.find(([{ path }]) =>
         path.startsWith(PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN)
       )!;
+      routeHandler = putMock.results[0].value.addVersion.mock.calls[0][1];
     });
 
     beforeEach(() => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockClear();
       packagePolicyServiceMock.update.mockImplementation((soClient, esClient, policyId, newData) =>
         Promise.resolve(newData as PackagePolicy)
       );
@@ -204,6 +241,7 @@ describe('When calling package policy', () => {
         updated_at: '',
         updated_by: '',
         ...existingPolicy,
+        policy_ids: [existingPolicy.policy_id],
         inputs: [
           {
             ...existingPolicy.inputs[0],
@@ -217,6 +255,7 @@ describe('When calling package policy', () => {
           },
         ],
       });
+      (agentPolicyService.get as jest.Mock).mockResolvedValue({ inputs: [] });
     });
 
     it('should use existing package policy props if not provided by request', async () => {
@@ -232,6 +271,7 @@ describe('When calling package policy', () => {
         name: 'endpoint-2',
         description: '',
         policy_id: '3',
+        policy_ids: ['3'],
         enabled: false,
         inputs: [
           {
@@ -273,6 +313,159 @@ describe('When calling package policy', () => {
       await routeHandler(context, request, response);
       expect(response.ok).toHaveBeenCalledWith({
         body: { item: { ...existingPolicy, namespace: 'namespace' } },
+      });
+    });
+
+    it('should throw if policy_ids changed on agentless integration', async () => {
+      (agentPolicyService.get as jest.Mock).mockResolvedValue({
+        supports_agentless: true,
+        inputs: [],
+      });
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
+      const request = getUpdateKibanaRequest({ policy_ids: ['1', '2'] } as any);
+      await routeHandler(context, request, response);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          message: 'Cannot change agent policies of an agentless integration',
+        },
+      });
+    });
+
+    it('should rename the agentless agent policy to sync with the package policy name if agentless is enabled', async () => {
+      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
+
+      mockAgentPolicy({
+        supports_agentless: true,
+      });
+
+      const request = getUpdateKibanaRequest({ name: 'new-name' } as any);
+      await routeHandler(context, request, response);
+
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'agent-policy',
+        { name: 'Agentless policy for new-name' },
+        { force: true }
+      );
+    });
+    it('should not rename the agentless agent policy if agentless is not enabled in cloud environment', async () => {
+      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: false },
+      } as any);
+
+      mockAgentPolicy({
+        supports_agentless: true,
+      });
+
+      const request = getUpdateKibanaRequest({ name: 'new-name' } as any);
+      await routeHandler(context, request, response);
+
+      expect(mockedAgentPolicyService.update).not.toHaveBeenCalled();
+    });
+    it('should not rename the agentless agent policy if cloud is not enabled', async () => {
+      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: false } as any);
+
+      mockAgentPolicy({
+        supports_agentless: true,
+      });
+
+      const request = getUpdateKibanaRequest({ name: 'new-name' } as any);
+      await routeHandler(context, request, response);
+
+      expect(mockedAgentPolicyService.update).not.toHaveBeenCalled();
+    });
+    it('should not rename the agentless agent policy if the package policy name has not changed', async () => {
+      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
+
+      mockAgentPolicy({
+        supports_agentless: true,
+        name: 'Agentless policy for new-name',
+      });
+
+      const request = getUpdateKibanaRequest({ name: 'new-name' } as any);
+      await routeHandler(context, request, response);
+
+      expect(mockedAgentPolicyService.update).not.toHaveBeenCalled();
+    });
+    it('should not rename the agentless agent policy if the agent policy does not support agentless', async () => {
+      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
+
+      mockAgentPolicy({
+        supports_agentless: false,
+      });
+
+      const request = getUpdateKibanaRequest({ name: 'new-name' } as any);
+      await routeHandler(context, request, response);
+
+      expect(mockedAgentPolicyService.update).not.toHaveBeenCalled();
+    });
+
+    it('should disable an input if is enabled and has all its stream disabled', async () => {
+      const inputs = [
+        {
+          type: 'input-logs',
+          enabled: true,
+          streams: [
+            {
+              enabled: false,
+              data_stream: {
+                type: 'logs',
+                dataset: 'test.some_logs',
+              },
+            },
+          ],
+        },
+      ];
+      const request = getUpdateKibanaRequest({
+        inputs,
+      } as any);
+      await routeHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          item: {
+            description: 'desc',
+            enabled: true,
+            inputs: [
+              {
+                type: 'input-logs',
+                enabled: false,
+                streams: [
+                  {
+                    enabled: false,
+                    data_stream: {
+                      type: 'logs',
+                      dataset: 'test.some_logs',
+                    },
+                  },
+                ],
+              },
+            ],
+            name: 'endpoint-1',
+            namespace: 'default',
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Endpoint',
+              version: '0.5.0',
+            },
+            vars: expect.any(Object),
+            policy_id: '2',
+          },
+        },
       });
     });
   });
@@ -340,6 +533,7 @@ describe('When calling package policy', () => {
                 version: '1.0.0',
               },
               policy_id: 'agent-policy-id-a',
+              policy_ids: ['agent-policy-id-a'],
               revision: 1,
               updated_at: '2022-12-19T20:43:45.879Z',
               updated_by: 'elastic',

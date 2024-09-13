@@ -13,7 +13,7 @@ import {
 } from '../kibana_react.mock';
 
 export const KibanaServices = {
-  get: jest.fn(),
+  get: jest.fn(() => ({})),
   getKibanaVersion: jest.fn(() => '8.0.0'),
   getConfig: jest.fn(() => null),
 };
@@ -25,7 +25,6 @@ export const useKibana = jest.fn().mockReturnValue({
 export const useHttp = jest.fn().mockReturnValue(createStartServicesMock().http);
 export const useTimeZone = jest.fn();
 export const useDateFormat = jest.fn();
-export const useBasePath = jest.fn(() => '/test/base/path');
 export const useToasts = jest
   .fn()
   .mockReturnValue(notificationServiceMock.createStartContract().toasts);

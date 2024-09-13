@@ -8,30 +8,35 @@
 import moment from 'moment-timezone';
 import { useEffect, useMemo, useState } from 'react';
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
 
 import { difference } from 'lodash';
+
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-
-import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
-import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';
-
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 import {
-  RenderCellValue,
-  UseIndexDataReturnType,
-  ES_CLIENT_TOTAL_HITS_RELATION,
-} from '../../shared_imports';
+  getDataGridSchemaFromESFieldType,
+  multiColumnSortFactory,
+  getNestedOrEscapedVal,
+  useDataGrid,
+  type RenderCellValue,
+  type UseIndexDataReturnType,
+  INDEX_STATUS,
+} from '@kbn/ml-data-grid';
+
+import type { PreviewMappingsProperties } from '../../../server/routes/api_schemas/transforms';
+
 import { getErrorMessage } from '../../../common/utils/errors';
 
-import { useAppDependencies } from '../app_dependencies';
 import { getPreviewTransformRequestBody, type TransformConfigQuery } from '../common';
 
-import { SearchItems } from './use_search_items';
-import { useApi } from './use_api';
-import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
+import type { SearchItems } from './use_search_items';
+import { useGetTransformsPreview } from './use_get_transforms_preview';
+import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import {
   isLatestPartialRequest,
   isPivotPartialRequest,
@@ -105,17 +110,6 @@ export const useTransformConfigData = (
 ): UseIndexDataReturnType => {
   const [previewMappingsProperties, setPreviewMappingsProperties] =
     useState<PreviewMappingsProperties>({});
-  const api = useApi();
-  const {
-    ml: {
-      getDataGridSchemaFromESFieldType,
-      formatHumanReadableDateTimeSeconds,
-      multiColumnSortFactory,
-      getNestedOrEscapedVal,
-      useDataGrid,
-      INDEX_STATUS,
-    },
-  } = useAppDependencies();
 
   // Filters mapping properties of type `object`, which get returned for nested field parents.
   const columnKeys = Object.keys(previewMappingsProperties).filter(
@@ -151,32 +145,32 @@ export const useTransformConfigData = (
     tableItems,
   } = dataGrid;
 
-  const getPreviewData = async () => {
-    if (!validationStatus.isValid) {
-      setTableItems([]);
-      setRowCountInfo({
-        rowCount: 0,
-        rowCountRelation: ES_CLIENT_TOTAL_HITS_RELATION.EQ,
-      });
-      setNoDataMessage(validationStatus.errorMessage!);
-      return;
-    }
+  const previewRequest = useMemo(
+    () =>
+      getPreviewTransformRequestBody(
+        dataView,
+        query,
+        requestPayload,
+        combinedRuntimeMappings,
+        timeRangeMs
+      ),
+    [dataView, query, requestPayload, combinedRuntimeMappings, timeRangeMs]
+  );
 
-    setErrorMessage('');
-    setNoDataMessage('');
-    setStatus(INDEX_STATUS.LOADING);
+  const {
+    error: previewError,
+    data: previewData,
+    isError,
+    isLoading,
+  } = useGetTransformsPreview(previewRequest, validationStatus.isValid);
 
-    const previewRequest = getPreviewTransformRequestBody(
-      dataView,
-      query,
-      requestPayload,
-      combinedRuntimeMappings,
-      timeRangeMs
-    );
-    const resp = await api.getTransformsPreview(previewRequest);
-
-    if (!isPostTransformsPreviewResponseSchema(resp)) {
-      setErrorMessage(getErrorMessage(resp));
+  useEffect(() => {
+    if (isLoading) {
+      setErrorMessage('');
+      setNoDataMessage('');
+      setStatus(INDEX_STATUS.LOADING);
+    } else if (isError) {
+      setErrorMessage(getErrorMessage(previewError));
       setTableItems([]);
       setRowCountInfo({
         rowCount: 0,
@@ -184,51 +178,67 @@ export const useTransformConfigData = (
       });
       setPreviewMappingsProperties({});
       setStatus(INDEX_STATUS.ERROR);
-      return;
+    } else if (!isLoading && !isError && previewData !== undefined) {
+      // To improve UI performance with a latest configuration for indices with a large number
+      // of fields, we reduce the number of available columns to those populated with values.
+
+      // 1. Flatten the returned object structure object documents to match mapping properties
+      const docs = previewData.preview.map(getFlattenedObject);
+
+      // 2. Get all field names for each returned doc and flatten it
+      //    to a list of unique field names used across all docs.
+      const populatedFields = [...new Set(docs.map(Object.keys).flat(1))];
+
+      // 3. Filter mapping properties by populated fields
+      let populatedProperties: PreviewMappingsProperties = Object.entries(
+        previewData.generated_dest_index.mappings.properties
+      )
+        .filter(([key]) => populatedFields.includes(key))
+        .reduce(
+          (p, [key, value]) => ({
+            ...p,
+            [key]: value,
+          }),
+          {}
+        );
+
+      populatedProperties = getCombinedProperties(populatedProperties, docs);
+
+      setTableItems(docs);
+      setRowCountInfo({
+        rowCount: docs.length,
+        rowCountRelation: ES_CLIENT_TOTAL_HITS_RELATION.EQ,
+      });
+      setPreviewMappingsProperties(populatedProperties);
+      setStatus(INDEX_STATUS.LOADED);
+
+      if (docs.length === 0) {
+        setNoDataMessage(
+          i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody', {
+            defaultMessage:
+              'The preview request did not return any data. Please ensure the optional query returns data and that values exist for the field used by group-by and aggregation fields.',
+          })
+        );
+      } else {
+        setNoDataMessage('');
+      }
     }
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isError, isLoading, previewData]);
 
-    // To improve UI performance with a latest configuration for indices with a large number
-    // of fields, we reduce the number of available columns to those populated with values.
-
-    // 1. Flatten the returned object structure object documents to match mapping properties
-    const docs = resp.preview.map(getFlattenedObject);
-
-    // 2. Get all field names for each returned doc and flatten it
-    //    to a list of unique field names used across all docs.
-    const populatedFields = [...new Set(docs.map(Object.keys).flat(1))];
-
-    // 3. Filter mapping properties by populated fields
-    let populatedProperties: PreviewMappingsProperties = Object.entries(
-      resp.generated_dest_index.mappings.properties
-    )
-      .filter(([key]) => populatedFields.includes(key))
-      .reduce(
-        (p, [key, value]) => ({
-          ...p,
-          [key]: value,
-        }),
-        {}
-      );
-
-    populatedProperties = getCombinedProperties(populatedProperties, docs);
-
-    setTableItems(docs);
-    setRowCountInfo({
-      rowCount: docs.length,
-      rowCountRelation: ES_CLIENT_TOTAL_HITS_RELATION.EQ,
-    });
-    setPreviewMappingsProperties(populatedProperties);
-    setStatus(INDEX_STATUS.LOADED);
-
-    if (docs.length === 0) {
-      setNoDataMessage(
-        i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody', {
-          defaultMessage:
-            'The preview request did not return any data. Please ensure the optional query returns data and that values exist for the field used by group-by and aggregation fields.',
-        })
-      );
+  useEffect(() => {
+    if (!validationStatus.isValid) {
+      setTableItems([]);
+      setRowCountInfo({
+        rowCount: 0,
+        rowCountRelation: ES_CLIENT_TOTAL_HITS_RELATION.EQ,
+      });
+      setNoDataMessage(validationStatus.errorMessage!);
     }
-  };
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [validationStatus.isValid]);
 
   useEffect(() => {
     resetPagination();
@@ -236,21 +246,18 @@ export const useTransformConfigData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(query)]);
 
-  useEffect(() => {
-    getPreviewData();
-    // custom comparison
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [
-    dataView.getIndexPattern(),
-    JSON.stringify([requestPayload, query, combinedRuntimeMappings, timeRangeMs]),
-  ]);
-
   if (sortingColumns.length > 0) {
-    const sortingColumnsWithTypes = sortingColumns.map((c) => ({
-      ...c,
+    const sortingColumnsWithTypes = sortingColumns.map((c) => {
       // Since items might contain undefined/null values, we want to accurate find the data type
-      type: typeof tableItems.find((item) => getNestedOrEscapedVal(item, c.id) !== undefined),
-    }));
+      const populatedItem = tableItems.find(
+        (item) => getNestedOrEscapedVal(item, c.id) !== undefined
+      );
+
+      return {
+        ...c,
+        type: typeof getNestedOrEscapedVal(populatedItem, c.id),
+      };
+    });
     tableItems.sort(multiColumnSortFactory(sortingColumnsWithTypes));
   }
 
@@ -263,7 +270,7 @@ export const useTransformConfigData = (
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
       const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
 
-      const cellValue = pageData.hasOwnProperty(adjustedRowIndex)
+      const cellValue = Object.hasOwn(pageData, adjustedRowIndex)
         ? pageData[adjustedRowIndex][columnId] ?? null
         : null;
 
@@ -289,13 +296,7 @@ export const useTransformConfigData = (
 
       return cellValue;
     };
-  }, [
-    pageData,
-    pagination.pageIndex,
-    pagination.pageSize,
-    previewMappingsProperties,
-    formatHumanReadableDateTimeSeconds,
-  ]);
+  }, [pageData, pagination.pageIndex, pagination.pageSize, previewMappingsProperties]);
 
   return {
     ...dataGrid,

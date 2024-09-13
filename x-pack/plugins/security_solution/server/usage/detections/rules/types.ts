@@ -5,6 +5,20 @@
  * 2.0.
  */
 
+export interface AlertSuppressionUsage {
+  enabled: number;
+  disabled: number;
+  suppressed_fields_count: {
+    one: number;
+    two: number;
+    three: number;
+  };
+  suppressed_per_time_period: number;
+  suppressed_per_rule_execution: number;
+  suppresses_missing_fields: number;
+  does_not_suppress_missing_fields: number;
+}
+
 export interface FeatureTypeUsage {
   enabled: number;
   disabled: number;
@@ -14,6 +28,8 @@ export interface FeatureTypeUsage {
   legacy_notifications_disabled: number;
   notifications_enabled: number;
   notifications_disabled: number;
+  legacy_investigation_fields: number;
+  alert_suppression: AlertSuppressionUsage;
 }
 
 export interface RulesTypeUsage {
@@ -25,6 +41,7 @@ export interface RulesTypeUsage {
   new_terms: FeatureTypeUsage;
   elastic_total: FeatureTypeUsage;
   custom_total: FeatureTypeUsage;
+  esql: FeatureTypeUsage;
 }
 
 export interface RuleAdoption {
@@ -46,6 +63,11 @@ export interface RuleMetric {
   cases_count_total: number;
   has_legacy_notification: boolean;
   has_notification: boolean;
+  has_legacy_investigation_field: boolean;
+  has_alert_suppression_per_rule_execution: boolean;
+  has_alert_suppression_per_time_period: boolean;
+  has_alert_suppression_missing_fields_strategy_do_not_suppress: boolean;
+  alert_suppression_fields_count: number;
 }
 
 /**

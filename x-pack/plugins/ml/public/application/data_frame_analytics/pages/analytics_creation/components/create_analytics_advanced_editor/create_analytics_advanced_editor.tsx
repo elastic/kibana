@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useRef } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useMemo, useRef } from 'react';
 import { debounce } from 'lodash';
 import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import { useNotifications } from '../../../../../contexts/kibana';
-import { ml } from '../../../../../services/ml_api_service';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
-import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { useMlApi, useNotifications } from '../../../../../contexts/kibana';
+import type { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { CreateStep } from '../create_step';
 import { ANALYTICS_STEPS } from '../../page';
 
+const EditorComponent = dynamic(async () => ({
+  default: (await import('./editor_component')).EditorComponent,
+}));
+
 export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (props) => {
+  const mlApi = useMlApi();
   const { actions, state } = props;
   const { setAdvancedEditorRawString, setFormState } = actions;
 
@@ -38,7 +43,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
     () =>
       debounce(async () => {
         try {
-          const results = await ml.dataFrameAnalytics.jobsExist([jobId], true);
+          const results = await mlApi.dataFrameAnalytics.jobsExist([jobId], true);
           setFormState({ jobIdExists: results[jobId].exists });
         } catch (e) {
           toasts.addDanger(
@@ -139,38 +144,13 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
         )}
         style={{ maxWidth: '100%' }}
       >
-        <CodeEditor
-          languageId={'json'}
-          height={500}
-          languageConfiguration={{
-            autoClosingPairs: [
-              {
-                open: '{',
-                close: '}',
-              },
-            ],
-          }}
-          value={advancedEditorRawString}
-          onChange={onChange}
-          options={{
-            ariaLabel: i18n.translate(
-              'xpack.ml.dataframe.analytics.create.advancedEditor.codeEditorAriaLabel',
-              {
-                defaultMessage: 'Advanced analytics job editor',
-              }
-            ),
-            automaticLayout: true,
-            readOnly: isJobCreated,
-            fontSize: 12,
-            scrollBeyondLastLine: false,
-            quickSuggestions: true,
-            minimap: {
-              enabled: false,
-            },
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-          }}
-        />
+        <div data-test-subj={'mlAnalyticsCreateJobWizardAdvancedEditorCodeEditor'}>
+          <EditorComponent
+            value={advancedEditorRawString}
+            onChange={onChange}
+            readOnly={isJobCreated}
+          />
+        </div>
       </EuiFormRow>
       <EuiSpacer />
       {advancedEditorMessages.map((advancedEditorMessage, i) => (
@@ -193,7 +173,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
         </Fragment>
       ))}
       <EuiSpacer />
-      <CreateStep {...props} step={ANALYTICS_STEPS.CREATE} />
+      <CreateStep {...props} step={ANALYTICS_STEPS.CREATE} showCreateDataView={true} />
     </EuiForm>
   );
 };

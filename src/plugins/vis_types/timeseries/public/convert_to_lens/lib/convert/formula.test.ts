@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createSeries } from '../__mocks__';
@@ -296,6 +297,34 @@ describe('convertMathToFormulaColumn', () => {
     } else {
       expect(convertMathToFormulaColumn(...input)).toEqual(expect.objectContaining(expected));
     }
+  });
+
+  it.each`
+    expression                               | expected
+    ${'params._interval'}                    | ${'time_range()'}
+    ${'params._interval + params._interval'} | ${'time_range() + time_range()'}
+    ${'params._all'}                         | ${null}
+    ${'params._all + params.interval'}       | ${null}
+    ${'params._timestamp'}                   | ${null}
+    ${'params._timestamp + params.interval'} | ${null}
+    ${'params._index'}                       | ${null}
+    ${'params._index + params.interval'}     | ${null}
+  `(`handle special params cases: $expression`, ({ expression, expected }) => {
+    expect(
+      convertMathToFormulaColumn({
+        series,
+        metrics: [{ ...mathMetric, script: expression }],
+        dataView,
+      })
+    ).toEqual(
+      expected
+        ? expect.objectContaining({
+            meta: { metricId: 'some-id-1' },
+            operationType: 'formula',
+            params: { formula: expected },
+          })
+        : expected
+    );
   });
 });
 

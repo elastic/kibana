@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, ReactNode } from 'react';
 import { action } from '@storybook/addon-actions';
-import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import { LIGHT_THEME } from '@elastic/charts';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { identity } from 'lodash';
-import { CoreStart, IUiSettingsClient, PluginInitializerContext } from '@kbn/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_TABLE_LEGACY,
@@ -21,17 +21,15 @@ import {
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_MULTIFIELDS,
-} from '../../../common';
-import { SIDEBAR_CLOSED_KEY } from '../../application/main/components/layout/discover_layout';
+} from '@kbn/discover-utils';
 import { LocalStorageMock } from '../local_storage_mock';
 import { DiscoverServices } from '../../build_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Plugin as NavigationPublicPlugin } from '@kbn/navigation-plugin/public';
-import { SearchBar, UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { SavedQuery } from '@kbn/data-plugin/public';
-import { BehaviorSubject, Observable } from 'rxjs';
 
-const NavigationPlugin = new NavigationPublicPlugin({} as PluginInitializerContext);
+interface DiscoverServicesProviderProps {
+  children: ReactNode;
+}
 
 export const uiSettingsMock = {
   get: (key: string) => {
@@ -64,15 +62,18 @@ const filterManager = {
   getFetches$: () => new Observable(),
 };
 
+const theme = {
+  theme$: of({ darkMode: false }),
+};
+
 export const services = {
   core: {
     http: { basePath: { prepend: () => void 0 } },
-    notifications: { toasts: {} },
+    notifications: { toasts: {}, showErrorDialog: action('showErrorDialog') },
     docLinks: { links: { discover: {} } },
+    theme,
   },
-  storage: new LocalStorageMock({
-    [SIDEBAR_CLOSED_KEY]: false,
-  }) as unknown as Storage,
+  storage: new LocalStorageMock({}) as unknown as Storage,
   data: {
     query: {
       timefilter: {
@@ -141,24 +142,7 @@ export const services = {
       editIndexPattern: () => void 0,
     },
   },
-  navigation: NavigationPlugin.start({} as CoreStart, {
-    unifiedSearch: {
-      ui: { SearchBar, AggregateQuerySearchBar: SearchBar },
-    } as unknown as UnifiedSearchPublicPluginStart,
-  }),
-  theme: {
-    useChartsTheme: () => ({
-      ...EUI_CHARTS_THEME_LIGHT.theme,
-      chartPaddings: {
-        top: 0,
-        left: 0,
-        bottom: 0,
-        right: 0,
-      },
-      heatmap: { xAxisLabel: { rotation: {} } },
-    }),
-    useChartsBaseTheme: () => LIGHT_THEME,
-  },
+  theme,
   capabilities: {
     visualize: {
       show: true,
@@ -200,4 +184,10 @@ export const withDiscoverServices = (Component: FunctionComponent) => {
       <Component {...props} />
     </KibanaContextProvider>
   );
+};
+
+export const DiscoverServicesProvider: FunctionComponent<DiscoverServicesProviderProps> = ({
+  children,
+}) => {
+  return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
 };

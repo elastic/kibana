@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
 import { AggGroupNames } from '@kbn/data-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { TagCloudVisParams } from './types';
 import { getTagCloudOptions } from './components/get_tag_cloud_options';
 import { toExpressionAst } from './to_ast';
 import { TagCloudVisDependencies } from './plugin';
@@ -80,5 +83,18 @@ export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependenci
       ],
     },
     requiresSearch: true,
+    navigateToLens: async (vis?: Vis<TagCloudVisParams>, timefilter?: TimefilterContract) => {
+      const { convertToLens } = await import('./convert_to_lens');
+      return vis ? convertToLens(vis, timefilter) : null;
+    },
+    getExpressionVariables: async (
+      vis?: Vis<TagCloudVisParams>,
+      timeFilter?: TimefilterContract
+    ) => {
+      const { convertToLens } = await import('./convert_to_lens');
+      return {
+        canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
+      };
+    },
   };
 };

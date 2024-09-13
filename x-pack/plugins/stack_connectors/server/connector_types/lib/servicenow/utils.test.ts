@@ -15,11 +15,13 @@ import {
   getPushedDate,
   throwIfSubActionIsNotSupported,
   getAxiosInstance,
+  throwIfAdditionalFieldsNotSupported,
 } from './utils';
 import type { ResponseError } from './types';
 import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 
 jest.mock('@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token', () => ({
   getOAuthJwtAccessToken: jest.fn(),
@@ -27,6 +29,8 @@ jest.mock('@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token', () => ({
 
 jest.mock('axios', () => ({
   create: jest.fn(),
+  AxiosHeaders: jest.requireActual('axios').AxiosHeaders,
+  AxiosError: jest.requireActual('axios').AxiosError,
 }));
 const createAxiosInstanceMock = axios.create as jest.Mock;
 const axiosInstanceMock = {
@@ -58,6 +62,46 @@ describe('utils', () => {
       const incident = { short_description: 'title', description: 'desc' };
       const newIncident = prepareIncident(true, incident);
       expect(newIncident).toEqual(incident);
+    });
+
+    test('does not prefix additional fields with u_', async () => {
+      const incident = {
+        short_description: 'title',
+        description: 'desc',
+        additional_fields: { foo: 'test' },
+      };
+
+      const newIncident = prepareIncident(false, incident);
+      expect(newIncident).toEqual({
+        u_short_description: 'title',
+        u_description: 'desc',
+        foo: 'test',
+      });
+    });
+
+    test('strips out additional fields if it is a deprecated connector', async () => {
+      const incident = {
+        short_description: 'title',
+        description: 'desc',
+        additional_fields: { foo: 'test' },
+      };
+
+      const newIncident = prepareIncident(true, incident);
+      expect(newIncident).toEqual({ short_description: 'title', description: 'desc' });
+    });
+
+    test('does not overrides base fields', async () => {
+      const incident = {
+        short_description: 'title',
+        description: 'desc',
+        additional_fields: { u_short_description: 'foo' },
+      };
+
+      const newIncident = prepareIncident(false, incident);
+      expect(newIncident).toEqual({
+        u_short_description: 'title',
+        u_description: 'desc',
+      });
     });
   });
 
@@ -187,7 +231,7 @@ describe('utils', () => {
 
       expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
       expect(createAxiosInstanceMock).toHaveBeenCalledWith({
-        auth: { password: 'password', username: 'username' },
+        headers: getBasicAuthHeader({ username: 'username', password: 'password' }),
       });
     });
 
@@ -226,7 +270,7 @@ describe('utils', () => {
       const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as jest.Mock).mock
         .calls[0][0];
       expect(await mockRequestCallback({ headers: {} })).toEqual({
-        headers: { Authorization: 'Bearer tokentokentoken' },
+        headers: new axios.AxiosHeaders({ Authorization: 'Bearer tokentokentoken' }),
       });
 
       expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalledWith({
@@ -412,6 +456,30 @@ describe('utils', () => {
       await expect(() => mockResponseCallback(errorResponse)).rejects.toEqual(errorResponse);
 
       expect(connectorTokenClient.deleteConnectorTokens).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('throwIfAdditionalFieldsNotSupported', () => {
+    it('throws if the connector is deprecated and it sets additional_fields', async () => {
+      expect.assertions(1);
+
+      expect(() => throwIfAdditionalFieldsNotSupported(true, { additional_fields: {} })).toThrow(
+        'ServiceNow additional fields are not supported for deprecated connectors.'
+      );
+    });
+
+    it('does not throw if the connector is deprecated and it does not set additional_fields', async () => {
+      expect(() => throwIfAdditionalFieldsNotSupported(true, {})).not.toThrow();
+    });
+
+    it('does not throw if the connector is not and it set additional_fields', async () => {
+      expect(() =>
+        throwIfAdditionalFieldsNotSupported(false, { additional_fields: {} })
+      ).not.toThrow();
+    });
+
+    it('does not throw if the connector is not and it does not set additional_fields', async () => {
+      expect(() => throwIfAdditionalFieldsNotSupported(false, {})).not.toThrow();
     });
   });
 });

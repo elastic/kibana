@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { ReactChild, useState, useLayoutEffect } from 'react';
@@ -12,13 +13,8 @@ import type { History } from 'history';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import {
-  EuiEmptyPrompt,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
-import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
+import { EuiPageTemplate } from '@elastic/eui';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { AppMountParameters } from '@kbn/core-application-browser';
 import { UrlOverflowUi } from './url_overflow_ui';
@@ -36,18 +32,14 @@ const ErrorPage: React.FC<Props> = ({ title, children }) => {
     });
 
   return (
-    <EuiPage style={{ minHeight: '100%' }} data-test-subj="appRenderErrorPageContent">
-      <EuiPageBody>
-        <EuiPageContent verticalPosition="center" horizontalPosition="center">
-          <EuiEmptyPrompt
-            iconType="warning"
-            iconColor="danger"
-            title={<h2>{title}</h2>}
-            body={children}
-          />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <EuiPageTemplate data-test-subj="appRenderErrorPageContent">
+      <EuiPageTemplate.EmptyPrompt
+        iconType="warning"
+        iconColor="danger"
+        title={<h2>{title}</h2>}
+        body={children}
+      />
+    </EuiPageTemplate>
   );
 };
 
@@ -86,9 +78,9 @@ interface Deps {
 export const renderApp = ({ element, history, theme$ }: AppMountParameters, { basePath }: Deps) => {
   ReactDOM.render(
     <I18nProvider>
-      <CoreThemeProvider theme$={theme$}>
+      <KibanaThemeProvider theme={{ theme$ }}>
         <ErrorApp history={history} basePath={basePath} />
-      </CoreThemeProvider>
+      </KibanaThemeProvider>
     </I18nProvider>,
     element
   );

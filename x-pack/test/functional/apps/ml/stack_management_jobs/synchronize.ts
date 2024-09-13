@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.api.deleteDataFrameAnalyticsJobES(dfaJobId);
       }
       await ml.testResources.cleanMLSavedObjects();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
     it('should have nothing to sync initially', async () => {

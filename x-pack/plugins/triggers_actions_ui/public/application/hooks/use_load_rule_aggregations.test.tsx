@@ -11,7 +11,7 @@ import { RuleStatus } from '../../types';
 import { useKibana } from '../../common/lib/kibana';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../lib/rule_api/aggregate_kuery_filter', () => ({
@@ -32,7 +32,7 @@ const queryClient = new QueryClient({
     },
   },
 });
-const wrapper = ({ children }: { children: Node }) => (
+const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
@@ -68,6 +68,7 @@ describe('useLoadRuleAggregations', () => {
         ruleExecutionStatuses: [],
         ruleLastRunOutcomes: [],
         ruleStatuses: [],
+        ruleParams: {},
         tags: [],
       },
       enabled: true,
@@ -105,6 +106,7 @@ describe('useLoadRuleAggregations', () => {
         types: ['type1', 'type2'],
         actionTypes: ['action1', 'action2'],
         ruleExecutionStatuses: ['status1', 'status2'],
+        ruleParams: {},
         ruleStatuses: ['enabled', 'snoozed'] as RuleStatus[],
         tags: ['tag1', 'tag2'],
         ruleLastRunOutcomes: ['outcome1', 'outcome2'],
@@ -145,6 +147,7 @@ describe('useLoadRuleAggregations', () => {
         types: [],
         actionTypes: [],
         ruleExecutionStatuses: [],
+        ruleParams: {},
         ruleLastRunOutcomes: [],
         ruleStatuses: [],
         tags: [],

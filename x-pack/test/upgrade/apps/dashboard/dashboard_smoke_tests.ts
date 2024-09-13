@@ -14,7 +14,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
-  const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
+  const kibanaServer = getService('kibanaServer');
+  const { common, header, home, dashboard } = getPageObjects([
+    'common',
+    'header',
+    'home',
+    'dashboard',
+  ]);
   const browser = getService('browser');
 
   describe('upgrade dashboard smoke tests', function describeIndexTests() {
@@ -32,26 +38,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     spaces.forEach(({ space, basePath }) => {
       describe('space: ' + space, () => {
         beforeEach(async () => {
-          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+          await common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
           });
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await header.waitUntilLoadingHasFinished();
           await browser.refresh();
         });
         dashboardTests.forEach(({ name, numPanels }) => {
           it('should launch sample ' + name + ' data set dashboard', async () => {
-            await PageObjects.home.launchSampleDashboard(name);
-            await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
-            await PageObjects.header.waitUntilLoadingHasFinished();
+            await kibanaServer.uiSettings.update({
+              'timepicker:timeDefaults': `{ "from": "now-5y", "to": "now"}`,
+            });
+            await home.launchSampleDashboard(name);
+            await header.waitUntilLoadingHasFinished();
             await renderable.waitForRender();
-            const panelCount = await PageObjects.dashboard.getPanelCount();
+            const panelCount = await dashboard.getPanelCount();
             expect(panelCount).to.be.above(numPanels);
           });
         });
         it('should render visualizations', async () => {
-          await PageObjects.home.launchSampleDashboard('flights');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
+          await kibanaServer.uiSettings.update({
+            'timepicker:timeDefaults': `{ "from": "now-5y", "to": "now"}`,
+          });
+          await home.launchSampleDashboard('flights');
+          await header.waitUntilLoadingHasFinished();
           await renderable.waitForRender();
           log.debug('Checking saved searches rendered');
           await dashboardExpect.savedSearchRowCount(49);

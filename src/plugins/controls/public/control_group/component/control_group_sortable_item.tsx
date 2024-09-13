@@ -1,21 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexItem, EuiFormLabel, EuiIcon, EuiFlexGroup } from '@elastic/eui';
-import React, { forwardRef, HTMLAttributes } from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import classNames from 'classnames';
+import { CSS } from '@dnd-kit/utilities';
+import { useSortable } from '@dnd-kit/sortable';
+import React, { forwardRef, HTMLAttributes } from 'react';
+import { EuiFlexItem, EuiFormLabel, EuiIcon, EuiFlexGroup } from '@elastic/eui';
 
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { ControlFrame, ControlFrameProps } from './control_frame_component';
-import { ControlGroupReduxState } from '../types';
 import { ControlGroupStrings } from '../control_group_strings';
+import { ControlFrame, ControlFrameProps } from './control_frame_component';
+import { controlGroupSelector } from '../embeddable/control_group_container';
 
 interface DragInfo {
   isOver?: boolean;
@@ -70,14 +70,14 @@ const SortableControlInner = forwardRef<
     dragHandleRef
   ) => {
     const { isOver, isDragging, draggingIndex, index } = dragInfo;
-    const { useEmbeddableSelector } = useReduxEmbeddableContext<ControlGroupReduxState>();
-    const panels = useEmbeddableSelector((state) => state.explicitInput.panels);
+    const panels = controlGroupSelector((state) => state.explicitInput.panels);
+    const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
 
     const grow = panels[embeddableId].grow;
     const width = panels[embeddableId].width;
     const title = panels[embeddableId].explicitInput.title;
 
-    const dragHandle = (
+    const dragHandle = isEditable ? (
       <button
         ref={dragHandleRef}
         {...dragHandleProps}
@@ -86,7 +86,9 @@ const SortableControlInner = forwardRef<
       >
         <EuiIcon type="grabHorizontal" />
       </button>
-    );
+    ) : controlStyle === 'oneLine' ? (
+      <EuiIcon type="empty" size="s" />
+    ) : undefined;
 
     return (
       <EuiFlexItem
@@ -95,6 +97,7 @@ const SortableControlInner = forwardRef<
         data-test-subj={`control-frame`}
         data-render-complete="true"
         className={classNames('controlFrameWrapper', {
+          'controlFrameWrapper--grow': grow,
           'controlFrameWrapper-isDragging': isDragging,
           'controlFrameWrapper-isEditable': isEditable,
           'controlFrameWrapper--small': width === 'small',
@@ -109,7 +112,7 @@ const SortableControlInner = forwardRef<
           enableActions={draggingIndex === -1}
           embeddableId={embeddableId}
           embeddableType={embeddableType}
-          customPrepend={isEditable ? dragHandle : undefined}
+          customPrepend={dragHandle}
         />
       </EuiFlexItem>
     );
@@ -122,9 +125,8 @@ const SortableControlInner = forwardRef<
  * can be quite cumbersome.
  */
 export const ControlClone = ({ draggingId }: { draggingId: string }) => {
-  const { useEmbeddableSelector: select } = useReduxEmbeddableContext<ControlGroupReduxState>();
-  const panels = select((state) => state.explicitInput.panels);
-  const controlStyle = select((state) => state.explicitInput.controlStyle);
+  const panels = controlGroupSelector((state) => state.explicitInput.panels);
+  const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
 
   const width = panels[draggingId].width;
   const title = panels[draggingId].explicitInput.title;

@@ -1040,9 +1040,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -1110,9 +1110,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-public.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
@@ -1136,9 +1136,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<",
@@ -1166,9 +1166,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<",
@@ -1209,9 +1209,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ", { uiActions, licensing }: ",
@@ -1239,9 +1239,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-public.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -2222,6 +2222,43 @@
             "signature": [
               "React.PropsWithChildren<",
               "UrlDrilldownCollectConfigProps",
+              ">"
+            ],
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActionsEnhanced",
+        "id": "def-public.UrlDrilldownOptionsComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "UrlDrilldownOptionsComponent",
+        "description": [],
+        "signature": [
+          "(props: React.PropsWithChildren<",
+          "UrlDrilldownOptionsProps",
+          ">) => JSX.Element"
+        ],
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActionsEnhanced",
+            "id": "def-public.UrlDrilldownOptionsComponent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "UrlDrilldownOptionsProps",
               ">"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
@@ -3274,7 +3311,7 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
+              "{ readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -3290,7 +3327,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly getActionFactory: (actionFactoryId: string) => ",
+              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly getActionFactory: (actionFactoryId: string) => ",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "public",
@@ -3328,7 +3365,15 @@
             "label": "isCompatible",
             "description": [],
             "signature": [
-              "<C = unknown>(context: C) => Promise<boolean>"
+              "(context: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.EmbeddableApiContext",
+                "text": "EmbeddableApiContext"
+              },
+              ") => Promise<boolean>"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
@@ -3337,12 +3382,18 @@
               {
                 "parentPluginId": "uiActionsEnhanced",
                 "id": "def-public.DynamicActionManagerParams.isCompatible.$1",
-                "type": "Uncategorized",
+                "type": "Object",
                 "tags": [],
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "C"
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "public",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-public.EmbeddableApiContext",
+                    "text": "EmbeddableApiContext"
+                  }
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
@@ -3565,7 +3616,31 @@
         "label": "UrlDrilldownConfig",
         "description": [],
         "signature": [
-          "{ url: { format?: \"handlebars_v1\" | undefined; template: string; }; openInNewTab: boolean; encodeUrl?: boolean | undefined; }"
+          "{ url: { format?: \"handlebars_v1\" | undefined; template: string; }; } & ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "public",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-public.UrlDrilldownOptions",
+            "text": "UrlDrilldownOptions"
+          }
+        ],
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActionsEnhanced",
+        "id": "def-public.UrlDrilldownOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "UrlDrilldownOptions",
+        "description": [
+          "\nUser-configurable options for URL drilldowns"
+        ],
+        "signature": [
+          "{ openInNewTab: boolean; encodeUrl: boolean; }"
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
         "deprecated": false,
@@ -3573,7 +3648,50 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "uiActionsEnhanced",
+        "id": "def-public.DEFAULT_URL_DRILLDOWN_OPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_URL_DRILLDOWN_OPTIONS",
+        "description": [],
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActionsEnhanced",
+            "id": "def-public.DEFAULT_URL_DRILLDOWN_OPTIONS.encodeUrl",
+            "type": "boolean",
+            "tags": [],
+            "label": "encodeUrl",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActionsEnhanced",
+            "id": "def-public.DEFAULT_URL_DRILLDOWN_OPTIONS.openInNewTab",
+            "type": "boolean",
+            "tags": [],
+            "label": "openInNewTab",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "uiActionsEnhanced",
       "id": "def-public.SetupContract",
@@ -3594,8 +3712,8 @@
           "pluginId": "uiActions",
           "scope": "public",
           "docId": "kibUiActionsPluginApi",
-          "section": "def-public.UiActionsSetup",
-          "text": "UiActionsSetup"
+          "section": "def-public.UiActionsPublicSetup",
+          "text": "UiActionsPublicSetup"
         },
         ",Pick<",
         "UiActionsServiceEnhancements",
@@ -3628,8 +3746,8 @@
           "pluginId": "uiActions",
           "scope": "public",
           "docId": "kibUiActionsPluginApi",
-          "section": "def-public.UiActionsStart",
-          "text": "UiActionsStart"
+          "section": "def-public.UiActionsPublicStart",
+          "text": "UiActionsPublicStart"
         },
         ",Pick<",
         "UiActionsServiceEnhancements",
@@ -3711,9 +3829,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-server.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -3721,10 +3839,12 @@
             "pluginId": "uiActionsEnhanced",
             "scope": "server",
             "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-server.SetupContract",
-            "text": "SetupContract"
+            "section": "def-server.UiActionsEnhancedServerSetup",
+            "text": "UiActionsEnhancedServerSetup"
           },
-          ", void, SetupDependencies, object>"
+          ", void, UiActionsEnhancedServerSetupDependencies, ",
+          "UiActionsEnhancedServerStartDependencies",
+          ">"
         ],
         "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
         "deprecated": false,
@@ -3784,15 +3904,15 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "(core: ",
+              "(_core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>, { embeddable }: SetupDependencies) => { registerActionFactory: (definition: ",
+              "<object, unknown>, { embeddable }: UiActionsEnhancedServerSetupDependencies) => { registerActionFactory: (definition: ",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "server",
@@ -3819,14 +3939,14 @@
                 "id": "def-server.AdvancedUiActionsServerPlugin.setup.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "core",
+                "label": "_core",
                 "description": [],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -3844,7 +3964,7 @@
                 "label": "{ embeddable }",
                 "description": [],
                 "signature": [
-                  "SetupDependencies"
+                  "UiActionsEnhancedServerSetupDependencies"
                 ],
                 "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
                 "deprecated": false,
@@ -4142,10 +4262,10 @@
     "objects": [],
     "setup": {
       "parentPluginId": "uiActionsEnhanced",
-      "id": "def-server.SetupContract",
+      "id": "def-server.UiActionsEnhancedServerSetup",
       "type": "Interface",
       "tags": [],
-      "label": "SetupContract",
+      "label": "UiActionsEnhancedServerSetup",
       "description": [],
       "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
       "deprecated": false,
@@ -4153,7 +4273,7 @@
       "children": [
         {
           "parentPluginId": "uiActionsEnhanced",
-          "id": "def-server.SetupContract.registerActionFactory",
+          "id": "def-server.UiActionsEnhancedServerSetup.registerActionFactory",
           "type": "Function",
           "tags": [],
           "label": "registerActionFactory",
@@ -4183,7 +4303,7 @@
           "children": [
             {
               "parentPluginId": "uiActionsEnhanced",
-              "id": "def-server.SetupContract.registerActionFactory.$1",
+              "id": "def-server.UiActionsEnhancedServerSetup.registerActionFactory.$1",
               "type": "Object",
               "tags": [],
               "label": "definition",
@@ -4220,10 +4340,10 @@
     },
     "start": {
       "parentPluginId": "uiActionsEnhanced",
-      "id": "def-server.StartContract",
+      "id": "def-server.UiActionsEnhancedServerStart",
       "type": "Type",
       "tags": [],
-      "label": "StartContract",
+      "label": "UiActionsEnhancedServerStart",
       "description": [],
       "signature": [
         "void"

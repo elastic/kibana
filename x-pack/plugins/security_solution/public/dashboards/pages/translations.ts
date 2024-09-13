@@ -10,6 +10,9 @@ export const DASHBOARDS_PAGE_TITLE = i18n.translate('xpack.securitySolution.dash
   defaultMessage: 'Dashboards',
 });
 
-export const DASHBOARD_PAGE_TITLE = i18n.translate('xpack.securitySolution.dashboard.pageTitle', {
-  defaultMessage: 'Dashboard',
-});
+export const CREATE_DASHBOARD_TITLE = i18n.translate(
+  'xpack.securitySolution.dashboards.dashboard.createDashboardTitle',
+  {
+    defaultMessage: `Editing New Dashboard`,
+  }
+);

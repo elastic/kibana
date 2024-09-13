@@ -8,11 +8,14 @@
 import { RawRule } from '../../types';
 import { RulesClientContext } from '../types';
 
+/**
+ * @deprecated Use updateMetaAttributes instead
+ */
 export function updateMeta<T extends Partial<RawRule>>(
   context: RulesClientContext,
   alertAttributes: T
 ): T {
-  if (alertAttributes.hasOwnProperty('apiKey') || alertAttributes.hasOwnProperty('apiKeyOwner')) {
+  if (Object.hasOwn(alertAttributes, 'apiKey') || Object.hasOwn(alertAttributes, 'apiKeyOwner')) {
     alertAttributes.meta = alertAttributes.meta ?? {};
     alertAttributes.meta.versionApiKeyLastmodified = context.kibanaVersion;
   }

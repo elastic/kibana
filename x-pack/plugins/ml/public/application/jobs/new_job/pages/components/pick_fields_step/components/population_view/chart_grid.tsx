@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { Fragment, FC } from 'react';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { AggFieldPair, SplitField } from '../../../../../../../../../common/types/fields';
-import { ChartSettings } from '../../../charts/common/settings';
-import { LineChartData } from '../../../../../common/chart_loader';
-import { ModelItem, Anomaly } from '../../../../../common/results_loader';
+import type { AggFieldPair, SplitField } from '@kbn/ml-anomaly-utils';
+import type { ChartSettings } from '../../../charts/common/settings';
+import type { LineChartData } from '../../../../../common/chart_loader';
+import type { ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 import { SplitCards, useAnimateSplit } from '../split_cards';
 import { DetectorTitle } from '../detector_title';

@@ -78,7 +78,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
         });
     });
 
-    it(`shouldn't delete action from preconfigured list`, async () => {
+    it(`shouldn't delete a preconfigured action`, async () => {
       await supertest
         .delete(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/my-slack1`)
         .set('kbn-xsrf', 'foo')
@@ -86,6 +86,21 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
           statusCode: 400,
           error: 'Bad Request',
           message: `Preconfigured action my-slack1 is not allowed to delete.`,
+        });
+    });
+
+    it(`shouldn't delete a system action`, async () => {
+      await supertest
+        .delete(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/actions/connector/system-connector-test.system-action`
+        )
+        .set('kbn-xsrf', 'foo')
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'System action system-connector-test.system-action is not allowed to delete.',
         });
     });
 
@@ -150,7 +165,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
           });
       });
 
-      it(`shouldn't delete action from preconfigured list`, async () => {
+      it(`shouldn't delete a preconfigured action`, async () => {
         await supertest
           .delete(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/my-slack1`)
           .set('kbn-xsrf', 'foo')
@@ -158,6 +173,21 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message: `Preconfigured action my-slack1 is not allowed to delete.`,
+          });
+      });
+
+      it(`shouldn't delete a system action`, async () => {
+        await supertest
+          .delete(
+            `${getUrlPrefix(
+              Spaces.space1.id
+            )}/api/actions/action/system-connector-test.system-action`
+          )
+          .set('kbn-xsrf', 'foo')
+          .expect(400, {
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'System action system-connector-test.system-action is not allowed to delete.',
           });
       });
     });

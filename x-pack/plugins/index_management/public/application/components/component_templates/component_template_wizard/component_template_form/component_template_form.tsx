@@ -19,6 +19,10 @@ import {
   StepMappingsContainer,
   StepAliasesContainer,
 } from '../../shared_imports';
+import {
+  serializeAsESLifecycle,
+  deserializeESLifecycle,
+} from '../../../../../../common/lib/data_stream_serialization';
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import { StepLogisticsContainer, StepReviewContainer } from './steps';
 
@@ -34,6 +38,7 @@ export type WizardSection = keyof WizardContent | 'review';
 interface Props {
   onSave: (componentTemplate: ComponentTemplateDeserialized) => void;
   clearSaveError: () => void;
+  setComponentName?: (name: string) => void;
   isSaving: boolean;
   saveError: any;
   defaultValue?: ComponentTemplateDeserialized;
@@ -41,6 +46,7 @@ interface Props {
   defaultActiveWizardSection?: WizardSection;
   onStepChange?: (stepId: string) => void;
   dataStreams?: string[];
+  canRollover?: boolean;
 }
 
 const wizardSections: { [id: string]: { id: WizardSection; label: string } } = {
@@ -86,7 +92,9 @@ export const ComponentTemplateForm = ({
       isManaged: false,
     },
   },
+  setComponentName,
   dataStreams,
+  canRollover,
   isEditing,
   isSaving,
   saveError,
@@ -96,14 +104,17 @@ export const ComponentTemplateForm = ({
   onStepChange,
 }: Props) => {
   const {
-    template: { settings, mappings, aliases },
+    template: { settings, mappings, aliases, lifecycle },
     ...logistics
   } = defaultValue;
 
   const { documentation } = useComponentTemplatesContext();
 
   const wizardDefaultValue: WizardContent = {
-    logistics,
+    logistics: {
+      ...logistics,
+      ...(lifecycle ? { lifecycle: deserializeESLifecycle(lifecycle) } : {}),
+    },
     settings,
     mappings,
     aliases,
@@ -162,6 +173,10 @@ export const ComponentTemplateForm = ({
       delete outputTemplate.template.aliases;
     }
 
+    if (outputTemplate.lifecycle) {
+      delete outputTemplate.lifecycle;
+    }
+
     return outputTemplate;
   };
 
@@ -177,9 +192,14 @@ export const ComponentTemplateForm = ({
             settings: wizardData.settings,
             mappings: wizardData.mappings,
             aliases: wizardData.aliases,
+            lifecycle: wizardData.logistics.lifecycle
+              ? serializeAsESLifecycle(wizardData.logistics.lifecycle)
+              : undefined,
           },
         };
-        return cleanupComponentTemplateObject(outputComponentTemplate);
+        return cleanupComponentTemplateObject(
+          outputComponentTemplate as ComponentTemplateDeserialized
+        );
       },
     []
   );
@@ -221,6 +241,16 @@ export const ComponentTemplateForm = ({
       texts={i18nTexts}
       defaultActiveStep={defaultActiveStepIndex}
       onStepChange={onStepChange}
+      onChange={(attrs) => {
+        // Let the parent component know the name of the component template in the
+        // form has changed, so that it can re-compute the canRollover prop.
+        // This is needed for determinating if the user should see a rollover
+        // attached datastreams modal or not.
+        const data = attrs.getData();
+        if (setComponentName) {
+          setComponentName(data.logistics.name);
+        }
+      }}
     >
       <FormWizardStep
         id={wizardSections.logistics.id}
@@ -246,6 +276,7 @@ export const ComponentTemplateForm = ({
         <StepReviewContainer
           getComponentTemplateData={buildComponentTemplateObject(defaultValue)}
           dataStreams={dataStreams}
+          canRollover={canRollover}
         />
       </FormWizardStep>
     </FormWizard>

@@ -1,23 +1,57 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Option from 'fp-ts/Option';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { Logger } from '@kbn/logging';
-import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import type {
+import {
+  getLatestMappingsVirtualVersionMap,
   IndexMapping,
+  IndexTypesMap,
   SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
+import {
+  getOutdatedDocumentsQuery,
+  type OutdatedDocumentsQueryParams,
+} from './get_outdated_documents_query';
 import type { InitState } from './state';
 import { excludeUnusedTypesQuery } from './core';
+import { getTempIndexName } from './model/helpers';
+
+export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
+  kibanaVersion: string;
+  waitForMigrationCompletion: boolean;
+  mustRelocateDocuments: boolean;
+  indexTypes: string[];
+  indexTypesMap: IndexTypesMap;
+  hashToVersionMap: Record<string, string>;
+  targetIndexMappings: IndexMapping;
+  preMigrationScript?: string;
+  indexPrefix: string;
+  migrationsConfig: SavedObjectsMigrationConfigType;
+  typeRegistry: ISavedObjectTypeRegistry;
+  docLinks: DocLinksServiceStart;
+  logger: Logger;
+  esCapabilities: ElasticsearchCapabilities;
+}
+
+const TEMP_INDEX_MAPPINGS: IndexMapping = {
+  dynamic: false,
+  properties: {
+    type: { type: 'keyword' },
+    typeMigrationVersion: {
+      type: 'version',
+    },
+  },
+};
 
 /**
  * Construct the initial state for the model
@@ -25,69 +59,25 @@ import { excludeUnusedTypesQuery } from './core';
 export const createInitialState = ({
   kibanaVersion,
   waitForMigrationCompletion,
-  targetMappings,
+  mustRelocateDocuments,
+  indexTypes,
+  indexTypesMap,
+  hashToVersionMap,
+  targetIndexMappings,
   preMigrationScript,
+  coreMigrationVersionPerType,
   migrationVersionPerType,
   indexPrefix,
   migrationsConfig,
   typeRegistry,
   docLinks,
   logger,
-}: {
-  kibanaVersion: string;
-  waitForMigrationCompletion: boolean;
-  targetMappings: IndexMapping;
-  preMigrationScript?: string;
-  migrationVersionPerType: SavedObjectsMigrationVersion;
-  indexPrefix: string;
-  migrationsConfig: SavedObjectsMigrationConfigType;
-  typeRegistry: ISavedObjectTypeRegistry;
-  docLinks: DocLinksServiceStart;
-  logger: Logger;
-}): InitState => {
-  const outdatedDocumentsQuery: QueryDslQueryContainer = {
-    bool: {
-      should: Object.entries(migrationVersionPerType).map(([type, latestVersion]) => ({
-        bool: {
-          must: [
-            { term: { type } },
-            {
-              bool: {
-                should: [
-                  {
-                    bool: {
-                      must: { exists: { field: 'migrationVersion' } },
-                      must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
-                    },
-                  },
-                  {
-                    bool: {
-                      must_not: [
-                        { exists: { field: 'migrationVersion' } },
-                        { term: { typeMigrationVersion: latestVersion } },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      })),
-    },
-  };
-
-  const reindexTargetMappings: IndexMapping = {
-    dynamic: false,
-    properties: {
-      type: { type: 'keyword' },
-      migrationVersion: {
-        // @ts-expect-error we don't allow plugins to set `dynamic`
-        dynamic: 'true',
-        type: 'object',
-      },
-    },
-  };
+  esCapabilities,
+}: CreateInitialStateParams): InitState => {
+  const outdatedDocumentsQuery = getOutdatedDocumentsQuery({
+    coreMigrationVersionPerType,
+    migrationVersionPerType,
+  });
 
   const knownTypes = typeRegistry.getAllTypes().map((type) => type.name);
   const excludeFilterHooks = Object.fromEntries(
@@ -120,28 +110,37 @@ export const createInitialState = ({
   return {
     controlState: 'INIT',
     waitForMigrationCompletion,
+    mustRelocateDocuments,
+    indexTypes,
+    indexTypesMap,
+    hashToVersionMap,
     indexPrefix,
     legacyIndex: indexPrefix,
     currentAlias: indexPrefix,
     versionAlias: `${indexPrefix}_${kibanaVersion}`,
     versionIndex: `${indexPrefix}_${kibanaVersion}_001`,
-    tempIndex: `${indexPrefix}_${kibanaVersion}_reindex_temp`,
+    tempIndex: getTempIndexName(indexPrefix, kibanaVersion),
+    tempIndexAlias: getTempIndexName(indexPrefix, kibanaVersion) + '_alias',
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
-    targetIndexMappings: targetMappings,
-    tempIndexMappings: reindexTargetMappings,
+    targetIndexMappings,
+    tempIndexMappings: TEMP_INDEX_MAPPINGS,
     outdatedDocumentsQuery,
     retryCount: 0,
     retryDelay: 0,
     retryAttempts: migrationsConfig.retryAttempts,
     batchSize: migrationsConfig.batchSize,
+    maxBatchSize: migrationsConfig.batchSize,
     maxBatchSizeBytes: migrationsConfig.maxBatchSizeBytes.getValueInBytes(),
+    maxReadBatchSizeBytes: migrationsConfig.maxReadBatchSizeBytes.getValueInBytes(),
     discardUnknownObjects: migrationsConfig.discardUnknownObjects === kibanaVersion,
     discardCorruptObjects: migrationsConfig.discardCorruptObjects === kibanaVersion,
     logs: [],
     excludeOnUpgradeQuery: excludeUnusedTypesQuery,
     knownTypes,
+    latestMappingsVersions: getLatestMappingsVirtualVersionMap(typeRegistry.getAllTypes()),
     excludeFromUpgradeFilterHooks: excludeFilterHooks,
     migrationDocLinks,
+    esCapabilities,
   };
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Observable, Subscription } from 'rxjs';
+import { exhaustMap, type Observable, Subject, type Subscription, takeUntil, timer } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import moment from 'moment';
 import type {
@@ -67,7 +67,7 @@ export class BulkUploader implements IBulkUploader {
   private kibanaStatusSubscription?: Subscription;
   private readonly opsMetrics$: Observable<OpsMetrics>;
   private kibanaStatus: ServiceStatusLevel | null;
-  private _timer: NodeJS.Timer | null;
+  private readonly stop$ = new Subject<void>();
   private readonly _interval: number;
   private readonly config: MonitoringConfig;
 
@@ -86,7 +86,6 @@ export class BulkUploader implements IBulkUploader {
     this.opsMetrics$ = opsMetrics$;
     this.config = config;
 
-    this._timer = null;
     this._interval = interval;
     this._log = log;
 
@@ -108,15 +107,12 @@ export class BulkUploader implements IBulkUploader {
       this.kibanaStatus = nextStatus.level;
     });
 
-    if (this._timer) {
-      clearInterval(this._timer);
-    } else {
-      this._fetchAndUpload(esClient); // initial fetch
-    }
-
-    this._timer = setInterval(() => {
-      this._fetchAndUpload(esClient);
-    }, this._interval);
+    timer(0, this._interval)
+      .pipe(
+        takeUntil(this.stop$),
+        exhaustMap(() => this._fetchAndUpload(esClient))
+      )
+      .subscribe();
   }
 
   /*
@@ -125,8 +121,7 @@ export class BulkUploader implements IBulkUploader {
    * @param {String} logPrefix help give context to the reason for stopping
    */
   public stop(logPrefix?: string) {
-    if (this._timer) clearInterval(this._timer);
-    this._timer = null;
+    this.stop$.next();
 
     this.kibanaStatusSubscription?.unsubscribe();
 
@@ -137,6 +132,7 @@ export class BulkUploader implements IBulkUploader {
   public handleNotEnabled() {
     this.stop('Monitoring status upload endpoint is not enabled in Elasticsearch');
   }
+
   public handleConnectionLost() {
     this.stop('Connection issue detected');
   }
@@ -258,14 +254,14 @@ export class BulkUploader implements IBulkUploader {
     // convert the raw data into a flat array, with each payload prefixed
     // with an 'index' instruction, for bulk upload
     return rawData.reduce((accum, { type, result }) => {
-      return [
-        ...accum,
+      accum.push(
         { index: { _type: type } },
         {
           kibana: this.getKibanaStats(type),
           ...result,
-        },
-      ];
+        }
+      );
+      return accum;
     }, [] as object[]);
   }
 }

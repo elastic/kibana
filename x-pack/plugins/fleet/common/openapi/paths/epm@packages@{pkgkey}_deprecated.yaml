@@ -84,6 +84,18 @@ post:
       name: pkgkey
       in: path
       required: true
+    - in: query
+      name: ignoreMappingUpdateErrors
+      schema:
+        type: boolean
+        default: false
+      description: avoid erroring out on unexpected mapping update errors
+    - in: query
+      name: skipDataStreamRollover
+      schema:
+        type: boolean
+        default: false
+      description: Skip data stream rollover during index template mapping or settings update
   requestBody:
     content:
       application/json:

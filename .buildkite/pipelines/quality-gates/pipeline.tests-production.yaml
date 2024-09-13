@@ -1,0 +1,38 @@
+# These pipeline steps constitute the quality gate for your service within the production environment.
+# Incorporate any necessary additional logic to validate the service's integrity.
+# A failure in this pipeline build will prevent further progression to the subsequent stage.
+
+steps:
+  - label: ":kibana: SLO check"
+    trigger: "serverless-quality-gates" # https://buildkite.com/elastic/serverless-quality-gates
+    build:
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)"
+      env:
+        TARGET_ENV: production
+        CHECK_SLO: true
+        CHECK_SLO_TAG: kibana
+        CHECK_SLO_WAITING_PERIOD: 15m
+        CHECK_SLO_BURN_RATE_THRESHOLD: 0.1
+        DEPLOYMENT_SLICES: ${DEPLOYMENT_SLICES:-""}
+    soft_fail: true
+
+  - label: ":rocket: control-plane e2e tests"
+    if: build.env("ENVIRONMENT") == "production-canary"
+    trigger: "ess-k8s-production-e2e-tests" # https://buildkite.com/elastic/ess-k8s-production-e2e-tests
+    build:
+      env:
+        REGION_ID: aws-us-east-1
+        NAME_PREFIX: ci_test_kibana-promotion_
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)"
+
+  - label: ":cookie: 24h bake time before continuing promotion"
+    if: build.env("ENVIRONMENT") == "production-canary"
+    command: "sleep 86400"
+    soft_fail:
+      # A manual cancel of that step produces return code 255.
+      # We're treating this case as a soft fail to allow manual bake time skipping.
+      # To stop the promotion entirely, instead click the "Cancel" button at the top of the page
+      - exit_status: 255
+    agents:
+      # How long can this agent live for in minutes - 25 hours
+      instanceMaxAge: 1500

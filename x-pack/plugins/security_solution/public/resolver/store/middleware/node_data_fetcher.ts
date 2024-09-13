@@ -7,10 +7,14 @@
 
 import type { Dispatch, MiddlewareAPI } from 'redux';
 import type { SafeResolverEvent } from '../../../../common/endpoint/types';
-
-import type { ResolverState, DataAccessLayer } from '../../types';
+import type { DataAccessLayer } from '../../types';
+import type { State } from '../../../common/store/types';
 import * as selectors from '../selectors';
-import type { ResolverAction } from '../actions';
+import {
+  appRequestingNodeData,
+  serverFailedToReturnNodeData,
+  serverReturnedNodeData,
+} from '../data/action';
 
 /**
  * Max number of nodes to request from the server
@@ -25,11 +29,10 @@ const nodeDataLimit = 5000;
  */
 export function NodeDataFetcher(
   dataAccessLayer: DataAccessLayer,
-  api: MiddlewareAPI<Dispatch<ResolverAction>, ResolverState>
-): () => void {
-  return async () => {
+  api: MiddlewareAPI<Dispatch, State>
+): (id: string) => void {
+  return async (id: string) => {
     const state = api.getState();
-
     /**
      * Using the greatest positive number here so that we will request the node data for the nodes in view
      * before the animation finishes. This will be a better user experience since we'll start the request while
@@ -37,8 +40,10 @@ export function NodeDataFetcher(
      *
      * This gets the visible nodes that we haven't already requested or received data for
      */
-    const newIDsToRequest: Set<string> = selectors.newIDsToRequest(state)(Number.POSITIVE_INFINITY);
-    const indices = selectors.eventIndices(state);
+    const newIDsToRequest: Set<string> = selectors.newIDsToRequest(state.analyzer[id])(
+      Number.POSITIVE_INFINITY
+    );
+    const indices = selectors.eventIndices(state.analyzer[id]);
 
     if (newIDsToRequest.size <= 0) {
       return;
@@ -51,34 +56,26 @@ export function NodeDataFetcher(
      * When we dispatch this, this middleware will run again but the visible nodes will be the same, the nodeData
      * state will have the new visible nodes in it, and newIDsToRequest will be an empty set.
      */
-    api.dispatch({
-      type: 'appRequestingNodeData',
-      payload: {
-        requestedIDs: newIDsToRequest,
-      },
-    });
+    api.dispatch(appRequestingNodeData({ id, requestedIDs: newIDsToRequest }));
 
     let results: SafeResolverEvent[] | undefined;
     try {
-      const detectedBounds = selectors.detectedBounds(state);
+      const detectedBounds = selectors.detectedBounds(state.analyzer[id]);
+      const agentId = selectors.agentId(state.analyzer[id]);
       const timeRangeFilters =
-        detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state);
+        detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state.analyzer[id]);
       results = await dataAccessLayer.nodeData({
         ids: Array.from(newIDsToRequest),
         timeRange: timeRangeFilters,
         indexPatterns: indices,
         limit: nodeDataLimit,
+        agentId,
       });
     } catch (error) {
       /**
        * Dispatch an action indicating all the nodes that we failed to retrieve data for
        */
-      api.dispatch({
-        type: 'serverFailedToReturnNodeData',
-        payload: {
-          requestedIDs: newIDsToRequest,
-        },
-      });
+      api.dispatch(serverFailedToReturnNodeData({ id, requestedIDs: newIDsToRequest }));
     }
 
     if (results) {
@@ -87,9 +84,9 @@ export function NodeDataFetcher(
        * not have received events for each node so the original IDs will help with identifying nodes that we have
        * no data for.
        */
-      api.dispatch({
-        type: 'serverReturnedNodeData',
-        payload: {
+      api.dispatch(
+        serverReturnedNodeData({
+          id,
           nodeData: results,
           requestedIDs: newIDsToRequest,
           /**
@@ -114,8 +111,8 @@ export function NodeDataFetcher(
            *  if that node is still in view we'll request its node data.
            */
           numberOfRequestedEvents: nodeDataLimit,
-        },
-      });
+        })
+      );
     }
   };
 }

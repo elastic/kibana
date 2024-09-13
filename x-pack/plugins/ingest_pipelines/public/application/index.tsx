@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import React, { ReactNode } from 'react';
+import { CoreStart, HttpSetup } from '@kbn/core/public';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
 
 import { ApplicationStart } from '@kbn/core/public';
-import { NotificationsSetup, IUiSettingsClient, CoreTheme } from '@kbn/core/public';
+import { NotificationsSetup, IUiSettingsClient, OverlayStart, HttpStart } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '../shared_imports';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+
+import { KibanaContextProvider, KibanaRenderContextProvider } from '../shared_imports';
 import { ILicense } from '../types';
 
 import { API_BASE_PATH } from '../../common/constants';
@@ -40,36 +42,38 @@ export interface AppServices {
   notifications: NotificationsSetup;
   history: ManagementAppMountParams['history'];
   uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
   share: SharePluginStart;
   fileUpload: FileUploadPluginStart;
   application: ApplicationStart;
   license: ILicense | null;
+  consolePlugin?: ConsolePluginStart;
+  overlays: OverlayStart;
+  http: HttpStart;
 }
 
-export interface CoreServices {
+type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+
+export interface CoreServices extends StartServices {
   http: HttpSetup;
 }
 
 export const renderApp = (
   element: HTMLElement,
-  I18nContext: ({ children }: { children: ReactNode }) => JSX.Element,
   services: AppServices,
-  coreServices: CoreServices,
-  { theme$ }: { theme$: Observable<CoreTheme> }
+  coreServices: CoreServices
 ) => {
   render(
-    <AuthorizationProvider
-      privilegesEndpoint={`${API_BASE_PATH}/privileges`}
-      httpClient={coreServices.http}
-    >
-      <I18nContext>
-        <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider services={services}>
-            <App />
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nContext>
-    </AuthorizationProvider>,
+    <KibanaRenderContextProvider {...coreServices}>
+      <AuthorizationProvider
+        privilegesEndpoint={`${API_BASE_PATH}/privileges`}
+        httpClient={coreServices.http}
+      >
+        <KibanaContextProvider services={services}>
+          <App />
+        </KibanaContextProvider>
+      </AuthorizationProvider>
+    </KibanaRenderContextProvider>,
     element
   );
 

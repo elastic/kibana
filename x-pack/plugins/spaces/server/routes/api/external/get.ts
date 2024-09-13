@@ -13,11 +13,14 @@ import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetSpaceApi(deps: ExternalRouteDeps) {
-  const { externalRouter, getSpacesService } = deps;
+  const { router, getSpacesService } = deps;
 
-  externalRouter.get(
+  router.get(
     {
       path: '/api/spaces/space/{id}',
+      options: {
+        description: `Get a space`,
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -30,7 +33,9 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
 
       try {
         const space = await spacesClient.get(spaceId);
-        return response.ok({ body: space });
+        return response.ok({
+          body: space,
+        });
       } catch (error) {
         if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
           return response.notFound();

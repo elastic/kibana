@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
 import {
@@ -46,7 +47,10 @@ const Context = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const SampleDataTabProvider: FC<SampleDataTabServices> = ({ children, ...services }) => {
+export const SampleDataTabProvider: FC<PropsWithChildren<SampleDataTabServices>> = ({
+  children,
+  ...services
+}) => {
   const { fetchSampleDataSets, notifyError, logClick } = services;
 
   return (
@@ -86,10 +90,9 @@ export type SampleDataTabKibanaDependencies = KibanaDependencies & SampleDataCar
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const SampleDataTabKibanaProvider: FC<SampleDataTabKibanaDependencies> = ({
-  children,
-  ...dependencies
-}) => {
+export const SampleDataTabKibanaProvider: FC<
+  PropsWithChildren<SampleDataTabKibanaDependencies>
+> = ({ children, ...dependencies }) => {
   const { coreStart, trackUiMetric } = dependencies;
   const { http, notifications } = coreStart;
 

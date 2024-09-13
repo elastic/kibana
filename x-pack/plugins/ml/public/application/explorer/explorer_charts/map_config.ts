@@ -6,8 +6,8 @@
  */
 
 import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '@kbn/maps-plugin/common';
-import { SEVERITY_COLOR_RAMP } from '../../../../common';
-import { AnomaliesTableData } from '../explorer_utils';
+import { ML_SEVERITY_COLOR_RAMP } from '@kbn/ml-anomaly-utils';
+import type { AnomaliesTableData } from '../explorer_utils';
 
 const FEATURE = 'Feature';
 const POINT = 'Point';
@@ -22,17 +22,14 @@ function getAnomalyFeatures(
     const geoResults = anomaly.geo_results || (anomaly?.causes && anomaly?.causes[0]?.geo_results);
     const coordinateStr = geoResults && geoResults[type];
     if (coordinateStr !== undefined) {
-      // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
-      const coordinates = coordinateStr
-        .split(',')
-        .map((point: string) => Number(point))
-        .reverse();
+      const coordinates = coordinateStr.split(',').map((point: string) => Number(point));
 
       anomalyFeatures.push({
         type: FEATURE,
         geometry: {
           type: POINT,
-          coordinates,
+          // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
+          coordinates: coordinates.toReversed(),
         },
         properties: {
           record_score: Math.floor(anomaly.record_score),
@@ -115,7 +112,7 @@ export const getMLAnomaliesActualLayer = (anomalies: any) => {
         fillColor: {
           type: STYLE_TYPE.DYNAMIC,
           options: {
-            customColorRamp: SEVERITY_COLOR_RAMP,
+            customColorRamp: ML_SEVERITY_COLOR_RAMP,
             field: {
               name: 'record_score',
               origin: FIELD_ORIGIN.SOURCE,

@@ -1,0 +1,631 @@
+{
+  "id": "@kbn/elastic-agent-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.isAndroidAgentName",
+        "type": "Function",
+        "tags": [],
+        "label": "isAndroidAgentName",
+        "description": [],
+        "signature": [
+          "(agentName: string | undefined) => boolean"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.isAndroidAgentName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.isAWSLambdaAgentName",
+        "type": "Function",
+        "tags": [],
+        "label": "isAWSLambdaAgentName",
+        "description": [],
+        "signature": [
+          "(serverlessType: string | undefined) => boolean"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.isAWSLambdaAgentName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "serverlessType",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.isAzureFunctionsAgentName",
+        "type": "Function",
+        "tags": [],
+        "label": "isAzureFunctionsAgentName",
+        "description": [],
+        "signature": [
+          "(serverlessType: string | undefined) => boolean"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.isAzureFunctionsAgentName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "serverlessType",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.isIosAgentName",
+        "type": "Function",
+        "tags": [],
+        "label": "isIosAgentName",
+        "description": [],
+        "signature": [
+          "(agentName: string | undefined) => boolean"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.isIosAgentName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.isJavaAgentName",
+        "type": "Function",
+        "tags": [],
+        "label": "isJavaAgentName",
+        "description": [],
+        "signature": [
+          "(agentName: string | undefined) => boolean"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.isJavaAgentName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.isJRubyAgentName",
+        "type": "Function",
+        "tags": [],
+        "label": "isJRubyAgentName",
+        "description": [],
+        "signature": [
+          "(agentName: string | undefined, runtimeName: string | undefined) => boolean"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.isJRubyAgentName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.isJRubyAgentName.$2",
+            "type": "string",
+            "tags": [],
+            "label": "runtimeName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.isMobileAgentName",
+        "type": "Function",
+        "tags": [],
+        "label": "isMobileAgentName",
+        "description": [],
+        "signature": [
+          "(agentName: string | undefined) => boolean"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.isMobileAgentName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.isOpenTelemetryAgentName",
+        "type": "Function",
+        "tags": [],
+        "label": "isOpenTelemetryAgentName",
+        "description": [],
+        "signature": [
+          "(agentName: string) => boolean"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.isOpenTelemetryAgentName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.isRumAgentName",
+        "type": "Function",
+        "tags": [],
+        "label": "isRumAgentName",
+        "description": [],
+        "signature": [
+          "(agentName: string | undefined) => boolean"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.isRumAgentName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.isRumOrMobileAgentName",
+        "type": "Function",
+        "tags": [],
+        "label": "isRumOrMobileAgentName",
+        "description": [],
+        "signature": [
+          "(agentName: string | undefined) => boolean"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.isRumOrMobileAgentName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.isServerlessAgentName",
+        "type": "Function",
+        "tags": [],
+        "label": "isServerlessAgentName",
+        "description": [],
+        "signature": [
+          "(serverlessType: string | undefined) => boolean"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.isServerlessAgentName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "serverlessType",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.AGENT_NAMES",
+        "type": "Array",
+        "tags": [],
+        "label": "AGENT_NAMES",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/elastic-agent-utils",
+            "scope": "common",
+            "docId": "kibKbnElasticAgentUtilsPluginApi",
+            "section": "def-common.AgentName",
+            "text": "AgentName"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.AgentName",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentName",
+        "description": [],
+        "signature": [
+          "\"java\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"ruby\" | \"rum-js\" | \"android/java\" | \"otlp\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/java\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"opentelemetry/swift\" | \"opentelemetry/android\" | \"opentelemetry/webjs\""
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.ELASTIC_AGENT_NAMES",
+        "type": "Array",
+        "tags": [],
+        "label": "ELASTIC_AGENT_NAMES",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/elastic-agent-utils",
+            "scope": "common",
+            "docId": "kibKbnElasticAgentUtilsPluginApi",
+            "section": "def-common.ElasticAgentName",
+            "text": "ElasticAgentName"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.ElasticAgentName",
+        "type": "Type",
+        "tags": [],
+        "label": "ElasticAgentName",
+        "description": [
+          "\nWe cannot mark these arrays as const and derive their type\nbecause we need to be able to assign them as mutable entities for ES queries."
+        ],
+        "signature": [
+          "\"java\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"ruby\" | \"rum-js\" | \"android/java\""
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.JAVA_AGENT_NAMES",
+        "type": "Array",
+        "tags": [],
+        "label": "JAVA_AGENT_NAMES",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/elastic-agent-utils",
+            "scope": "common",
+            "docId": "kibKbnElasticAgentUtilsPluginApi",
+            "section": "def-common.JavaAgentName",
+            "text": "JavaAgentName"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.JavaAgentName",
+        "type": "Type",
+        "tags": [],
+        "label": "JavaAgentName",
+        "description": [],
+        "signature": [
+          "\"java\" | \"opentelemetry/java\""
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.OPEN_TELEMETRY_AGENT_NAMES",
+        "type": "Array",
+        "tags": [],
+        "label": "OPEN_TELEMETRY_AGENT_NAMES",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/elastic-agent-utils",
+            "scope": "common",
+            "docId": "kibKbnElasticAgentUtilsPluginApi",
+            "section": "def-common.OpenTelemetryAgentName",
+            "text": "OpenTelemetryAgentName"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.OpenTelemetryAgentName",
+        "type": "Type",
+        "tags": [],
+        "label": "OpenTelemetryAgentName",
+        "description": [],
+        "signature": [
+          "\"otlp\" | \"opentelemetry/cpp\" | \"opentelemetry/dotnet\" | \"opentelemetry/erlang\" | \"opentelemetry/go\" | \"opentelemetry/java\" | \"opentelemetry/nodejs\" | \"opentelemetry/php\" | \"opentelemetry/python\" | \"opentelemetry/ruby\" | \"opentelemetry/rust\" | \"opentelemetry/swift\" | \"opentelemetry/android\" | \"opentelemetry/webjs\""
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.RUM_AGENT_NAMES",
+        "type": "Array",
+        "tags": [],
+        "label": "RUM_AGENT_NAMES",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/elastic-agent-utils",
+            "scope": "common",
+            "docId": "kibKbnElasticAgentUtilsPluginApi",
+            "section": "def-common.RumAgentName",
+            "text": "RumAgentName"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.RumAgentName",
+        "type": "Type",
+        "tags": [],
+        "label": "RumAgentName",
+        "description": [],
+        "signature": [
+          "\"js-base\" | \"rum-js\" | \"opentelemetry/webjs\""
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.SERVERLESS_TYPE",
+        "type": "Array",
+        "tags": [],
+        "label": "SERVERLESS_TYPE",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/elastic-agent-utils",
+            "scope": "common",
+            "docId": "kibKbnElasticAgentUtilsPluginApi",
+            "section": "def-common.ServerlessType",
+            "text": "ServerlessType"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.ServerlessType",
+        "type": "Type",
+        "tags": [],
+        "label": "ServerlessType",
+        "description": [],
+        "signature": [
+          "\"aws.lambda\" | \"azure.functions\""
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

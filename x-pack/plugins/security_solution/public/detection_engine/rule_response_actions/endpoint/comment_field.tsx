@@ -5,9 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface ActionTypeFieldProps {
   basePath: string;
@@ -19,6 +20,12 @@ const CONFIG = {
   label: i18n.translate('xpack.securitySolution.responseActions.endpoint.commentLabel', {
     defaultMessage: 'Comment (optional)',
   }),
+  helpText: (
+    <FormattedMessage
+      id="xpack.securitySolution.responseActions.endpoint.commentDescription"
+      defaultMessage="Leave a note that explains or describes the action. Your comment is included in the response actions history."
+    />
+  ),
 };
 
 const CommentFieldComponent = ({

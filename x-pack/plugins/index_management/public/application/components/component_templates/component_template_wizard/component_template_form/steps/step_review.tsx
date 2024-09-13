@@ -27,8 +27,9 @@ import {
   serializers,
   serializeComponentTemplate,
 } from '../../../shared_imports';
-import { MANAGED_BY_FLEET } from '../../../constants';
+import { getLifecycleValue } from '../../../../../lib/data_streams';
 
+const INFINITE_AS_ICON = true;
 const { stripEmptyFields } = serializers;
 
 const getDescriptionText = (data: any) => {
@@ -50,10 +51,11 @@ const getDescriptionText = (data: any) => {
 interface Props {
   componentTemplate: ComponentTemplateDeserialized;
   dataStreams?: string[];
+  canRollover?: boolean;
 }
 
 export const StepReview: React.FunctionComponent<Props> = React.memo(
-  ({ dataStreams, componentTemplate }) => {
+  ({ dataStreams, canRollover, componentTemplate }) => {
     const { name } = componentTemplate;
 
     const serializedComponentTemplate = serializeComponentTemplate(
@@ -68,8 +70,8 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
       version: serializedVersion,
     } = serializedComponentTemplate;
 
-    const isFleetDatastreamsVisible =
-      Boolean(dataStreams?.length) && componentTemplate._meta?.managed_by === MANAGED_BY_FLEET;
+    const areDatastreamsVisible =
+      Boolean(dataStreams?.length) && (componentTemplate.name.endsWith('@custom') || canRollover);
 
     const SummaryTab = () => (
       <div data-test-subj="summaryTab">
@@ -123,10 +125,21 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               <EuiDescriptionListDescription>
                 {getDescriptionText(serializedTemplate?.aliases)}
               </EuiDescriptionListDescription>
+
+              {/* Data retention */}
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.dataRetentionLabel"
+                  defaultMessage="Data retention"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {getLifecycleValue(serializedTemplate?.lifecycle, INFINITE_AS_ICON)}
+              </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiFlexItem>
-          {isFleetDatastreamsVisible && dataStreams && (
-            <EuiFlexItem>
+          {areDatastreamsVisible && dataStreams && (
+            <EuiFlexItem data-test-subj="affectedMappingsList">
               {/* Datastream mappings */}
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepReview.summaryTab.datastreamsLabel"
@@ -194,7 +207,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
             {request}
           </EuiCodeBlock>
 
-          {isFleetDatastreamsVisible && (
+          {areDatastreamsVisible && (
             <>
               <EuiSpacer size="m" />
               <EuiText>
@@ -217,7 +230,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
           <h2 data-test-subj="title">
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateForm.stepReview.stepTitle"
-              defaultMessage="Review details for '{templateName}'"
+              defaultMessage="Review details for ''{templateName}''"
               values={{ templateName: name }}
             />
           </h2>

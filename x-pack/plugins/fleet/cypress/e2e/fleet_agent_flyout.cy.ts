@@ -6,15 +6,18 @@
  */
 
 import { ADD_AGENT_BUTTON, AGENT_FLYOUT } from '../screens/fleet';
-import { cleanupAgentPolicies, deleteFleetServerDocs, deleteAgentDocs } from '../tasks/cleanup';
+import { cleanupAgentPolicies, deleteAgentDocs } from '../tasks/cleanup';
 import { createAgentDoc } from '../tasks/agents';
 import { setFleetServerHost } from '../tasks/fleet_server';
 import { FLEET, navigateTo } from '../tasks/navigation';
+import { request } from '../tasks/common';
+
+import { API_VERSIONS } from '../../common/constants';
+import { login } from '../tasks/login';
 
 const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
 
 function cleanUp() {
-  deleteFleetServerDocs(true);
   deleteAgentDocs(true);
   cleanupAgentPolicies();
 }
@@ -25,10 +28,10 @@ describe('Fleet add agent flyout', () => {
       cleanUp();
       let policyId: string;
       // Create a Fleet server policy
-      cy.request({
+      request({
         method: 'POST',
         url: '/api/fleet/agent_policies',
-        headers: { 'kbn-xsrf': 'xx' },
+        headers: { 'kbn-xsrf': 'xx', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
         body: {
           id: FLEET_SERVER_POLICY_ID,
           name: 'Fleet Server policy',
@@ -49,16 +52,10 @@ describe('Fleet add agent flyout', () => {
           index: '.fleet-agents',
           docs: [createAgentDoc('agent1', policyId, 'online', kibanaVersion)],
         });
-        cy.task('insertDocs', {
-          index: '.fleet-servers',
-          docs: [
-            {
-              '@timestamp': new Date().toISOString(),
-            },
-          ],
-        });
         setFleetServerHost();
       });
+
+      login();
     });
 
     afterEach(() => {

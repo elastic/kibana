@@ -16,7 +16,9 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
+import { initDeleteSpacesApi } from './delete';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -27,7 +29,6 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { initDeleteSpacesApi } from './delete';
 
 describe('Spaces Public API', () => {
   const spacesSavedObjects = createSpaces();
@@ -42,7 +43,7 @@ describe('Spaces Public API', () => {
 
     const coreStart = coreMock.createStart();
 
-    const clientService = new SpacesClientService(jest.fn());
+    const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -54,7 +55,7 @@ describe('Spaces Public API', () => {
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
@@ -62,11 +63,12 @@ describe('Spaces Public API', () => {
     });
 
     initDeleteSpacesApi({
-      externalRouter: router,
+      router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
+      isServerless: false,
     });
 
     const [routeDefinition, routeHandler] = router.delete.mock.calls[0];

@@ -7,6 +7,8 @@
 
 import type { FleetAuthzRouter } from '../../services/security';
 
+import { API_VERSIONS } from '../../../common/constants';
+
 import { DOWNLOAD_SOURCE_API_ROUTES } from '../../constants';
 import {
   getDownloadSourcesRequestSchema,
@@ -25,56 +27,78 @@ import {
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: DOWNLOAD_SOURCE_API_ROUTES.LIST_PATTERN,
-      validate: getDownloadSourcesRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readSettings: true },
       },
-    },
-    getDownloadSourcesHandler
-  );
-  router.get(
-    {
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: getDownloadSourcesRequestSchema },
+      },
+      getDownloadSourcesHandler
+    );
+
+  router.versioned
+    .get({
       path: DOWNLOAD_SOURCE_API_ROUTES.INFO_PATTERN,
-      validate: GetOneDownloadSourcesRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readSettings: true },
       },
-    },
-    getOneDownloadSourcesHandler
-  );
-  router.put(
-    {
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetOneDownloadSourcesRequestSchema },
+      },
+      getOneDownloadSourcesHandler
+    );
+
+  router.versioned
+    .put({
       path: DOWNLOAD_SOURCE_API_ROUTES.UPDATE_PATTERN,
-      validate: PutDownloadSourcesRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
-    },
-    putDownloadSourcesHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: PutDownloadSourcesRequestSchema },
+      },
+      putDownloadSourcesHandler
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
       path: DOWNLOAD_SOURCE_API_ROUTES.CREATE_PATTERN,
-      validate: PostDownloadSourcesRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
-    },
-    postDownloadSourcesHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: PostDownloadSourcesRequestSchema },
+      },
+      postDownloadSourcesHandler
+    );
 
-  router.delete(
-    {
+  router.versioned
+    .delete({
       path: DOWNLOAD_SOURCE_API_ROUTES.DELETE_PATTERN,
-      validate: DeleteDownloadSourcesRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
-    },
-    deleteDownloadSourcesHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: DeleteDownloadSourcesRequestSchema },
+      },
+      deleteDownloadSourcesHandler
+    );
 };

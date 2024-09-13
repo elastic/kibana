@@ -20,16 +20,12 @@ import { isEmpty, debounce } from 'lodash/fp';
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-import type {
-  TimelineTypeLiteralWithNull,
-  TimelineTypeLiteral,
-} from '../../../../../common/types/timeline';
-import { SortFieldTimeline } from '../../../../../common/types/timeline';
+import { type TimelineType, SortFieldTimelineEnum } from '../../../../../common/api/timeline';
 
 import { useGetAllTimeline } from '../../../containers/all';
 import { isUntitled } from '../../open_timeline/helpers';
 import * as i18nTimeline from '../../open_timeline/translations';
-import type { OpenTimelineResult } from '../../open_timeline/types';
+import type { FavoriteTimelineResult, OpenTimelineResult } from '../../open_timeline/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import * as i18n from '../translations';
 import { Direction } from '../../../../../common/search_strategy';
@@ -54,13 +50,21 @@ const TIMELINE_ITEM_HEIGHT = 50;
  * @param {EuiSelectableOption[]} options
  * @returns {EuiSelectableOption[]} modified options
  */
-const replaceTitleInOptions = (options: EuiSelectableOption[]): EuiSelectableOption[] =>
-  options.map(({ title, ...props }) => ({ ...props, title: undefined, timelineTitle: title }));
+const replaceTitleInOptions = (
+  options: EuiSelectableOption[]
+): Array<
+  EuiSelectableOption<{ timelineTitle: string; description?: string; graphEveId?: string }>
+> =>
+  options.map(({ title, ...props }) => ({
+    ...props,
+    title: undefined,
+    timelineTitle: title ?? '',
+  }));
 
 export interface GetSelectableOptions {
   timelines: OpenTimelineResult[];
   onlyFavorites: boolean;
-  timelineType?: TimelineTypeLiteralWithNull;
+  timelineType?: TimelineType | null;
   searchTimelineValue: string;
 }
 
@@ -78,7 +82,7 @@ export interface SelectableTimelineProps {
     timelineId: string | null,
     graphEventId?: string
   ) => void;
-  timelineType: TimelineTypeLiteral;
+  timelineType: TimelineType;
   placeholder?: string;
 }
 
@@ -101,7 +105,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const debouncedSetSearchTimelineValue = useMemo(() => debounce(500, setSearchTimelineValue), []);
 
   const onSearchTimeline = useCallback(
-    (val) => {
+    (val: string) => {
       debouncedSetSearchTimelineValue(val);
     },
     [debouncedSetSearchTimelineValue]
@@ -134,7 +138,16 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     [heightTrigger, pageSize]
   );
 
-  const renderTimelineOption = useCallback((option, searchValue) => {
+  const renderTimelineOption = useCallback<
+    NonNullable<
+      EuiSelectableProps<{
+        timelineTitle: string;
+        description?: string;
+        graphEventId?: string;
+        favorite?: FavoriteTimelineResult[];
+      }>['renderOption']
+    >
+  >((option, searchValue) => {
     const title: string = isUntitled({ ...option, title: option.timelineTitle })
       ? i18nTimeline.UNTITLED_TIMELINE
       : option.timelineTitle;
@@ -180,17 +193,25 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     );
   }, []);
 
-  const handleTimelineChange = useCallback(
+  const handleTimelineChange = useCallback<
+    NonNullable<
+      EuiSelectableProps<{
+        timelineTitle: string;
+        description?: string;
+        graphEventId?: string;
+      }>['onChange']
+    >
+  >(
     (options) => {
-      const selectedTimeline = options.filter(
-        (option: { checked: string }) => option.checked === 'on'
-      );
+      const selectedTimeline = options.filter((option) => option.checked === 'on');
       if (selectedTimeline != null && selectedTimeline.length > 0) {
         onTimelineChange(
           isEmpty(selectedTimeline[0].timelineTitle)
             ? i18nTimeline.UNTITLED_TIMELINE
             : selectedTimeline[0].timelineTitle,
-          selectedTimeline[0].id === '-1' ? null : selectedTimeline[0].id,
+          selectedTimeline[0].id === '-1'
+            ? null
+            : (selectedTimeline[0].id as unknown as string | null),
           selectedTimeline[0].graphEventId ?? ''
         );
       }
@@ -199,7 +220,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     [onClosePopover, onTimelineChange]
   );
 
-  const EuiSelectableContent = useCallback(
+  const EuiSelectableContent = useCallback<NonNullable<EuiSelectableProps['children']>>(
     (list, search) => (
       <>
         {search}
@@ -254,7 +275,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       },
       search: searchTimelineValue,
       sort: {
-        sortField: SortFieldTimeline.updated,
+        sortField: SortFieldTimelineEnum.updated,
         sortOrder: Direction.desc,
       },
       onlyUserFavorite: onlyFavorites,
@@ -264,7 +285,12 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   }, [fetchAllTimeline, onlyFavorites, pageSize, searchTimelineValue, timelineType]);
 
   return (
-    <EuiSelectable
+    <EuiSelectable<{
+      timelineTitle: string;
+      description?: string;
+      graphEventId?: string;
+      favorite?: FavoriteTimelineResult[];
+    }>
       data-test-subj="selectable-input"
       height={POPOVER_HEIGHT}
       isLoading={loading && timelines == null}

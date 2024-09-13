@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -34,6 +35,7 @@ interface Arguments {
   timeFields?: string[];
   probability?: number;
   samplerSeed?: number;
+  ignoreGlobalFilters?: boolean;
 }
 
 export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -56,6 +58,7 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
   name,
   type: 'datatable',
   inputTypes: ['kibana_context', 'null'],
+  allowCache: true,
   help: i18n.translate('data.functions.esaggs.help', {
     defaultMessage: 'Run AggConfig aggregation',
   }),
@@ -109,6 +112,12 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
       help: i18n.translate('data.search.functions.esaggs.samplerSeed.help', {
         defaultMessage:
           'The seed to generate the random sampling of documents. Uses random sampler.',
+      }),
+    },
+    ignoreGlobalFilters: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.functions.esaggs.ignoreGlobalFilters.help', {
+        defaultMessage: 'Whether to ignore or use global query and filters',
       }),
     },
   },

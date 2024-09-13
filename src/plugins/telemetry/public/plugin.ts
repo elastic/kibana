@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ApmBase } from '@elastic/apm-rum';
 import type {
   Plugin,
   CoreStart,
@@ -16,12 +18,18 @@ import type {
   DocLinksStart,
   HttpSetup,
 } from '@kbn/core/public';
-import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import type {
+  ScreenshotModePluginSetup,
+  ScreenshotModePluginStart,
+} from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
+import { ElasticV3BrowserShipper } from '@elastic/ebt/shippers/elastic_v3/browser';
+import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
+import { BehaviorSubject, map, switchMap, tap } from 'rxjs';
+import { buildShipperHeaders, createBuildShipperUrl } from '../common/ebt_v3_endpoint';
 
-import { of } from 'rxjs';
-import { FetchTelemetryConfigRoute } from '../common/routes';
+import type { TelemetryConfigLabels } from '../server/config';
+import { FetchTelemetryConfigRoute, INTERNAL_VERSION } from '../common/routes';
 import type { v2 } from '../common/types';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
@@ -81,6 +89,16 @@ interface TelemetryPluginSetupDependencies {
   home?: HomePublicPluginSetup;
 }
 
+interface TelemetryPluginStartDependencies {
+  screenshotMode: ScreenshotModePluginStart;
+}
+
+declare global {
+  interface Window {
+    elasticApm?: ApmBase;
+  }
+}
+
 /**
  * Public-exposed configuration
  */
@@ -103,6 +121,8 @@ export interface TelemetryPluginConfig {
   hidePrivacyStatement?: boolean;
   /** Extra labels to add to the telemetry context */
   labels: Record<string, unknown>;
+  /** Whether to use Serverless-specific channels when reporting Snapshot Telemetry */
+  appendServerlessChannelsSuffix: boolean;
 }
 
 function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
@@ -111,9 +131,18 @@ function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
   };
 }
 
-export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
+export class TelemetryPlugin
+  implements
+    Plugin<
+      TelemetryPluginSetup,
+      TelemetryPluginStart,
+      TelemetryPluginSetupDependencies,
+      TelemetryPluginStartDependencies
+    >
+{
   private readonly currentKibanaVersion: string;
   private readonly config: TelemetryPluginConfig;
+  private readonly telemetryLabels$: BehaviorSubject<TelemetryConfigLabels>;
   private telemetrySender?: TelemetrySender;
   private telemetryNotifications?: TelemetryNotifications;
   private telemetryService?: TelemetryService;
@@ -122,6 +151,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   constructor(initializerContext: PluginInitializerContext<TelemetryPluginConfig>) {
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
     this.config = initializerContext.config.get();
+    this.telemetryLabels$ = new BehaviorSubject<TelemetryConfigLabels>(this.config.labels);
   }
 
   public setup(
@@ -132,7 +162,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const currentKibanaVersion = this.currentKibanaVersion;
     this.telemetryService = new TelemetryService({
       config,
-      isScreenshotMode: screenshotMode.isScreenshotMode(),
+      isScreenshotMode: this.shouldSkipTelemetry(screenshotMode),
       http,
       notifications,
       currentKibanaVersion,
@@ -146,7 +176,14 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     analytics.registerContextProvider({
       name: 'telemetry labels',
-      context$: of({ labels: this.config.labels }),
+      context$: this.telemetryLabels$.pipe(
+        tap((labels) => {
+          // Hack to update the APM agent's labels.
+          // In the future we might want to expose APM as a core service to make reporting metrics much easier.
+          window.elasticApm?.addLabels(labels);
+        }),
+        map((labels) => ({ labels }))
+      ),
       schema: {
         labels: {
           type: 'pass_through',
@@ -157,21 +194,27 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       },
     });
 
+    const sendTo = this.getSendToEnv(config.sendUsageTo);
     analytics.registerShipper(ElasticV3BrowserShipper, {
       channelName: 'kibana-browser',
       version: currentKibanaVersion,
-      sendTo: config.sendUsageTo === 'prod' ? 'production' : 'staging',
+      buildShipperHeaders,
+      buildShipperUrl: createBuildShipperUrl(sendTo),
     });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
       await this.refreshConfig(http);
-      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
+      analytics.optIn({
+        global: {
+          enabled: this.telemetryService!.isOptedIn && !this.shouldSkipTelemetry(screenshotMode),
+        },
+      });
     });
 
     if (home && !this.config.hidePrivacyStatement) {
       home.welcomeScreen.registerOnRendered(() => {
         if (this.telemetryService?.userCanChangeSettings) {
-          this.telemetryNotifications?.setOptedInNoticeSeen();
+          this.telemetryNotifications?.setOptInStatusNoticeSeen();
         }
       });
 
@@ -189,14 +232,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public start({
-    analytics,
-    http,
-    overlays,
-    theme,
-    application,
-    docLinks,
-  }: CoreStart): TelemetryPluginStart {
+  public start(
+    { analytics, http, overlays, application, docLinks, ...startServices }: CoreStart,
+    { screenshotMode }: TelemetryPluginStartDependencies
+  ): TelemetryPluginStart {
     if (!this.telemetryService) {
       throw Error('Telemetry plugin failed to initialize properly.');
     }
@@ -208,36 +247,50 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const telemetryNotifications = new TelemetryNotifications({
       http,
       overlays,
-      theme,
       telemetryService: this.telemetryService,
       telemetryConstants,
+      analytics,
+      ...startServices,
     });
     this.telemetryNotifications = telemetryNotifications;
 
-    application.currentAppId$.subscribe(async () => {
-      const isUnauthenticated = this.getIsUnauthenticated(http);
-      if (isUnauthenticated) {
-        return;
-      }
+    application.currentAppId$
+      .pipe(
+        switchMap(async () => {
+          // Disable telemetry and terminate early if Kibana is running in a special "skip" mode
+          if (this.shouldSkipTelemetry(screenshotMode)) {
+            analytics.optIn({ global: { enabled: false } });
+            return;
+          }
 
-      // Refresh and get telemetry config
-      const updatedConfig = await this.refreshConfig(http);
+          // Refresh and get telemetry config
+          const updatedConfig = await this.refreshConfig(http);
 
-      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
+          analytics.optIn({
+            global: {
+              enabled: this.telemetryService!.isOptedIn,
+            },
+          });
 
-      const telemetryBanner = updatedConfig?.banner;
+          const isUnauthenticated = this.getIsUnauthenticated(http);
+          if (isUnauthenticated) {
+            return;
+          }
 
-      this.maybeStartTelemetryPoller();
-      if (telemetryBanner) {
-        this.maybeShowOptedInNotificationBanner();
-        this.maybeShowOptInBanner();
-      }
-    });
+          const telemetryBanner = updatedConfig?.banner;
+
+          this.maybeStartTelemetryPoller();
+          if (telemetryBanner) {
+            this.maybeShowOptedInNotificationBanner();
+          }
+        })
+      )
+      .subscribe();
 
     return {
       telemetryService: this.getTelemetryServicePublicApis(),
       telemetryNotifications: {
-        setOptedInNoticeSeen: () => telemetryNotifications.setOptedInNoticeSeen(),
+        setOptedInNoticeSeen: () => telemetryNotifications.setOptInStatusNoticeSeen(),
       },
       telemetryConstants,
     };
@@ -245,6 +298,20 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
   public stop() {
     this.telemetrySender?.stop();
+  }
+
+  private getSendToEnv(sendUsageTo: string): 'production' | 'staging' {
+    return sendUsageTo === 'prod' ? 'production' : 'staging';
+  }
+
+  /**
+   * Kibana should skip telemetry collection if reporting is taking a screenshot
+   * or Synthetics monitoring is navigating Kibana.
+   * @param screenshotMode {@link ScreenshotModePluginSetup}
+   * @private
+   */
+  private shouldSkipTelemetry(screenshotMode: ScreenshotModePluginSetup): boolean {
+    return screenshotMode.isScreenshotMode() || isSyntheticsMonitor();
   }
 
   private getTelemetryServicePublicApis(): TelemetryServicePublicApis {
@@ -269,6 +336,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     if (this.telemetryService) {
       this.telemetryService.config = updatedConfig;
     }
+
+    this.telemetryLabels$.next(updatedConfig.labels);
+
     return updatedConfig;
   }
 
@@ -300,19 +370,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     if (!this.telemetryNotifications) {
       return;
     }
-    const shouldShowBanner = this.telemetryNotifications.shouldShowOptedInNoticeBanner();
+    const shouldShowBanner = this.telemetryNotifications.shouldShowOptInStatusNoticeBanner();
     if (shouldShowBanner) {
-      this.telemetryNotifications.renderOptedInNoticeBanner();
-    }
-  }
-
-  private maybeShowOptInBanner() {
-    if (!this.telemetryNotifications) {
-      return;
-    }
-    const shouldShowBanner = this.telemetryNotifications.shouldShowOptInBanner();
-    if (shouldShowBanner) {
-      this.telemetryNotifications.renderOptInBanner();
+      this.telemetryNotifications.renderOptInStatusNoticeBanner();
     }
   }
 
@@ -322,8 +382,16 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
    * @private
    */
   private async fetchUpdatedConfig(http: HttpStart | HttpSetup): Promise<TelemetryPluginConfig> {
-    const { allowChangingOptInStatus, optIn, sendUsageFrom, telemetryNotifyUserAboutOptInDefault } =
-      await http.get<v2.FetchTelemetryConfigResponse>(FetchTelemetryConfigRoute);
+    const {
+      allowChangingOptInStatus,
+      optIn,
+      sendUsageFrom,
+      telemetryNotifyUserAboutOptInDefault,
+      labels,
+    } = await http.get<v2.FetchTelemetryConfigResponse>(
+      FetchTelemetryConfigRoute,
+      INTERNAL_VERSION
+    );
 
     return {
       ...this.config,
@@ -331,6 +399,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       optIn,
       sendUsageFrom,
       telemetryNotifyUserAboutOptInDefault,
+      labels,
       userCanChangeSettings: this.canUserChangeSettings,
     };
   }

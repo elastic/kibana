@@ -6,8 +6,20 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { UpdateTrainedModelDeploymentRequest } from '../../lib/ml_client/types';
+import type {
+  GetModelDownloadConfigOptions,
+  ModelDefinitionResponse,
+} from '@kbn/ml-trained-models-utils';
+import type {
+  MlInferTrainedModelRequest,
+  MlStopTrainedModelDeploymentRequest,
+  UpdateTrainedModelDeploymentRequest,
+  UpdateTrainedModelDeploymentResponse,
+} from '../../lib/ml_client/types';
+import { modelsProvider } from '../../models/model_management';
+import type { GetCuratedModelConfigParams } from '../../models/model_management/models_provider';
 import type { GetGuards } from '../shared_services';
 
 export interface TrainedModelsProvider {
@@ -21,10 +33,34 @@ export interface TrainedModelsProvider {
     getTrainedModelsStats(
       params: estypes.MlGetTrainedModelsStatsRequest
     ): Promise<estypes.MlGetTrainedModelsStatsResponse>;
+    startTrainedModelDeployment(
+      params: estypes.MlStartTrainedModelDeploymentRequest
+    ): Promise<estypes.MlStartTrainedModelDeploymentResponse>;
+    stopTrainedModelDeployment(
+      params: MlStopTrainedModelDeploymentRequest
+    ): Promise<estypes.MlStopTrainedModelDeploymentResponse>;
+    inferTrainedModel(
+      params: MlInferTrainedModelRequest
+    ): Promise<estypes.MlInferTrainedModelResponse>;
+    deleteTrainedModel(
+      params: estypes.MlDeleteTrainedModelRequest
+    ): Promise<estypes.MlDeleteTrainedModelResponse>;
+    updateTrainedModelDeployment(
+      params: UpdateTrainedModelDeploymentRequest
+    ): Promise<UpdateTrainedModelDeploymentResponse>;
+    putTrainedModel(
+      params: estypes.MlPutTrainedModelRequest
+    ): Promise<estypes.MlPutTrainedModelResponse>;
+    getELSER(params?: GetModelDownloadConfigOptions): Promise<ModelDefinitionResponse>;
+    getCuratedModelConfig(...params: GetCuratedModelConfigParams): Promise<ModelDefinitionResponse>;
+    installElasticModel(modelId: string): Promise<estypes.MlTrainedModelConfig>;
   };
 }
 
-export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsProvider {
+export function getTrainedModelsProvider(
+  getGuards: GetGuards,
+  cloud: CloudSetup
+): TrainedModelsProvider {
   return {
     trainedModelsProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
       const guards = getGuards(request, savedObjectsClient);
@@ -53,7 +89,7 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
               return mlClient.startTrainedModelDeployment(params);
             });
         },
-        async stopTrainedModelDeployment(params: estypes.MlStopTrainedModelDeploymentRequest) {
+        async stopTrainedModelDeployment(params: MlStopTrainedModelDeploymentRequest) {
           return await guards
             .isFullLicense()
             .hasMlCapabilities(['canStartStopTrainedModels'])
@@ -61,7 +97,7 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
               return mlClient.stopTrainedModelDeployment(params);
             });
         },
-        async inferTrainedModel(params: estypes.MlInferTrainedModelRequest) {
+        async inferTrainedModel(params: MlInferTrainedModelRequest) {
           return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetTrainedModels'])
@@ -80,9 +116,44 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
         async updateTrainedModelDeployment(params: UpdateTrainedModelDeploymentRequest) {
           return await guards
             .isFullLicense()
-            .hasMlCapabilities(['canStartStopTrainedModels'])
+            .hasMlCapabilities(['canCreateTrainedModels'])
             .ok(async ({ mlClient }) => {
               return mlClient.updateTrainedModelDeployment(params);
+            });
+        },
+        async putTrainedModel(params: estypes.MlPutTrainedModelRequest) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canCreateTrainedModels'])
+            .ok(async ({ mlClient }) => {
+              return mlClient.putTrainedModel(params);
+            });
+        },
+        async getELSER(params?: GetModelDownloadConfigOptions) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canGetTrainedModels'])
+            .ok(async ({ scopedClient, mlClient }) => {
+              return modelsProvider(scopedClient, mlClient, cloud).getELSER(params);
+            });
+        },
+        async getCuratedModelConfig(...params: GetCuratedModelConfigParams) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canGetTrainedModels'])
+            .ok(async ({ scopedClient, mlClient }) => {
+              return modelsProvider(scopedClient, mlClient, cloud).getCuratedModelConfig(...params);
+            });
+        },
+        async installElasticModel(modelId: string) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canGetTrainedModels'])
+            .ok(async ({ scopedClient, mlClient, mlSavedObjectService }) => {
+              return modelsProvider(scopedClient, mlClient, cloud).installElasticModel(
+                modelId,
+                mlSavedObjectService
+              );
             });
         },
       };

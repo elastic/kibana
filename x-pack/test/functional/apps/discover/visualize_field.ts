@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { DebugState } from '@elastic/charts';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -16,25 +17,35 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects([
+  const dataViews = getService('dataViews');
+  const { common, discover, timePicker, lens, header, unifiedFieldList } = getPageObjects([
     'common',
-    'error',
     'discover',
     'timePicker',
-    'unifiedSearch',
     'lens',
-    'security',
-    'spaceSelector',
     'header',
+    'unifiedFieldList',
   ]);
+  const elasticChart = getService('elasticChart');
   const monacoEditor = getService('monacoEditor');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   const defaultSettings = {
-    'discover:enableSql': true,
+    enableESQL: true,
   };
 
   async function setDiscoverTimeRange() {
-    await PageObjects.timePicker.setDefaultAbsoluteRange();
+    await timePicker.setDefaultAbsoluteRange();
+  }
+
+  function assertMatchesExpectedData(state: DebugState) {
+    expect(state.legend?.items.map(({ name }) => name).sort()).to.eql([
+      'css',
+      'gif',
+      'jpg',
+      'php',
+      'png',
+    ]);
   }
 
   describe('discover field visualize button', () => {
@@ -46,7 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
       await setDiscoverTimeRange();
     });
 
@@ -58,14 +69,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('shows "visualize" field button', async () => {
-      await PageObjects.discover.clickFieldListItem('bytes');
-      await PageObjects.discover.expectFieldListItemVisualize('bytes');
+      await unifiedFieldList.clickFieldListItem('bytes');
+      await unifiedFieldList.expectFieldListItemVisualize('bytes');
     });
 
     it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
-      await PageObjects.discover.findFieldByName('bytes');
-      await PageObjects.discover.clickFieldListItemVisualize('bytes');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await unifiedFieldList.findFieldByName('bytes');
+      await unifiedFieldList.clickFieldListItemVisualize('bytes');
+      await header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(2);
@@ -79,9 +90,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         operation: 'is between',
         value: { from: '3500', to: '4000' },
       });
-      await PageObjects.discover.findFieldByName('geo.src');
-      await PageObjects.discover.clickFieldListItemVisualize('geo.src');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await unifiedFieldList.findFieldByName('geo.src');
+      await unifiedFieldList.clickFieldListItemVisualize('geo.src');
+      await header.waitUntilLoadingHasFinished();
 
       expect(await filterBar.hasFilter('bytes', '3,500 to 4,000')).to.be(true);
     });
@@ -89,21 +100,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should preserve query in lens', async () => {
       await queryBar.setQuery('machine.os : ios');
       await queryBar.submitQuery();
-      await PageObjects.discover.findFieldByName('geo.dest');
-      await PageObjects.discover.clickFieldListItemVisualize('geo.dest');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await unifiedFieldList.findFieldByName('geo.dest');
+      await unifiedFieldList.clickFieldListItemVisualize('geo.dest');
+      await header.waitUntilLoadingHasFinished();
 
       expect(await queryBar.getQueryString()).to.equal('machine.os : ios');
     });
 
     it('should visualize correctly using breakdown field', async () => {
-      await PageObjects.discover.chooseBreakdownField('extension.raw');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await discover.chooseBreakdownField('extension.raw');
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.click('unifiedHistogramEditVisualization');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         const breakdownLabel = await testSubjects.find(
-          'lnsDragDrop_draggable-Top 3 values of extension.raw'
+          'lnsDragDrop_domDraggable_Top 3 values of extension.raw'
         );
 
         const lnsWorkspace = await testSubjects.find('lnsWorkspace');
@@ -113,75 +124,193 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         expect(await breakdownLabel.getVisibleText()).to.eql('Top 3 values of extension.raw');
-        expect(values).to.eql(['Other', 'png', 'css', 'jpg']);
+        expect(values).to.eql(['jpg', 'css', 'png', 'Other']);
       });
     });
 
     it('should visualize correctly using adhoc data view', async () => {
-      await PageObjects.discover.createAdHocDataView('logst', true);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dataViews.createFromSearchBar({
+        name: 'logst',
+        adHoc: true,
+        hasTimeField: true,
+      });
 
       await testSubjects.click('unifiedHistogramEditVisualization');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
-      await retry.try(async () => {
-        const selectedPattern = await PageObjects.lens.getDataPanelIndexPattern();
-        expect(selectedPattern).to.eql('logst*');
-      });
+      await dataViews.waitForSwitcherToBe('logst*');
     });
 
-    it('should visualize correctly text based language queries in Discover', async () => {
-      await PageObjects.discover.selectTextBaseLang('SQL');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+    it('should visualize correctly ES|QL queries in Discover', async () => {
+      await discover.selectTextBaseLang();
+      await header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
-        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+        'from logstash-* | stats averageB = avg(bytes) by extension'
       );
       await testSubjects.click('querySubmitButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
-      expect(await testSubjects.exists('heatmapChart')).to.be(true);
+      expect(await testSubjects.exists('xyVisChart')).to.be(true);
 
-      await PageObjects.discover.chooseLensChart('Donut');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await discover.chooseLensSuggestion('pie');
+      await header.waitUntilLoadingHasFinished();
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
     });
 
-    it('should visualize correctly text based language queries in Lens', async () => {
-      await PageObjects.discover.selectTextBaseLang('SQL');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+    it('should allow changing dimensions', async () => {
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await discover.selectTextBaseLang();
+      await header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
-        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+        'from logstash-* | stats averageB = avg(bytes) by extension'
       );
       await testSubjects.click('querySubmitButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('unifiedTextLangEditor-expand');
-      await testSubjects.click('unifiedHistogramEditVisualization');
+      await header.waitUntilLoadingHasFinished();
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+      expect(await testSubjects.exists('xyVisChart')).to.be(true);
+      expect(await lens.canRemoveDimension('lnsXY_xDimensionPanel')).to.equal(true);
+      await lens.removeDimension('lnsXY_xDimensionPanel');
+      await header.waitUntilLoadingHasFinished();
+      await lens.configureTextBasedLanguagesDimension({
+        dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+        field: 'extension',
+      });
+      await header.waitUntilLoadingHasFinished();
+      const data = await lens.getCurrentChartDebugStateForVizType('xyVisChart');
+      assertMatchesExpectedData(data!);
+    });
 
-      await retry.waitFor('lens visualization', async () => {
+    it('should visualize correctly ES|QL queries in Lens', async () => {
+      await discover.selectTextBaseLang();
+      await header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | stats averageB = avg(bytes) by extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+
+      await header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('lens flyout', async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
-        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'average';
+        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'averageB';
       });
     });
 
-    it('should visualize correctly text based language queries based on index patterns', async () => {
-      await PageObjects.discover.selectTextBaseLang('SQL');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+    it('should visualize correctly ES|QL queries based on index patterns', async () => {
+      await discover.selectTextBaseLang();
+      await header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
-        'SELECT extension, AVG("bytes") as average FROM "logstash*" GROUP BY extension'
+        'from logstash* | stats averageB = avg(bytes) by extension'
       );
       await testSubjects.click('querySubmitButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('unifiedTextLangEditor-expand');
-      await testSubjects.click('unifiedHistogramEditVisualization');
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
-      await retry.waitFor('lens visualization', async () => {
+      await retry.waitFor('lens flyout', async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
-        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'average';
+        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'averageB';
       });
+    });
+
+    it('should save and edit chart in the dashboard on the fly', async () => {
+      await discover.selectTextBaseLang();
+      await header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | stats averageB = avg(bytes) by extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.click('unifiedHistogramSaveVisualization');
+      await header.waitUntilLoadingHasFinished();
+
+      await lens.saveModal('TextBasedChart', false, false, false, 'new');
+      await testSubjects.existOrFail('embeddablePanelHeading-TextBasedChart');
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await header.waitUntilLoadingHasFinished();
+      await dashboardPanelActions.clickInlineEdit();
+      await header.waitUntilLoadingHasFinished();
+      expect(await lens.canRemoveDimension('lnsXY_xDimensionPanel')).to.equal(true);
+      await lens.removeDimension('lnsXY_xDimensionPanel');
+      await header.waitUntilLoadingHasFinished();
+      await lens.configureTextBasedLanguagesDimension({
+        dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+        field: 'extension',
+      });
+      await header.waitUntilLoadingHasFinished();
+      const data = await lens.getCurrentChartDebugStateForVizType('xyVisChart');
+      assertMatchesExpectedData(data!);
+    });
+
+    it('should allow editing the query in the dashboard', async () => {
+      await discover.selectTextBaseLang();
+      await header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue('from logstash-* | limit 10');
+      await testSubjects.click('querySubmitButton');
+      await header.waitUntilLoadingHasFinished();
+      // save the visualization
+      await testSubjects.click('unifiedHistogramSaveVisualization');
+      await header.waitUntilLoadingHasFinished();
+      await lens.saveModal('TextBasedChart1', false, false, false, 'new');
+      await testSubjects.existOrFail('embeddablePanelHeading-TextBasedChart1');
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await header.waitUntilLoadingHasFinished();
+      // open the inline editing flyout
+      await dashboardPanelActions.clickInlineEdit();
+      await header.waitUntilLoadingHasFinished();
+
+      // change the query
+      await monacoEditor.setCodeEditorValue('from logstash-* | stats maxB = max(bytes)');
+      await testSubjects.click('TextBasedLangEditor-run-query-button');
+      await header.waitUntilLoadingHasFinished();
+
+      expect((await lens.getMetricVisualizationData()).length).to.be.equal(1);
+
+      // change the query to display a datatabler
+      await monacoEditor.setCodeEditorValue('from logstash-* | limit 10');
+      await testSubjects.click('TextBasedLangEditor-run-query-button');
+      await lens.waitForVisualization();
+      expect(await testSubjects.exists('lnsDataTable')).to.be(true);
+
+      await lens.removeDimension('lnsDatatable_metrics');
+      await lens.removeDimension('lnsDatatable_metrics');
+      await lens.removeDimension('lnsDatatable_metrics');
+      await lens.removeDimension('lnsDatatable_metrics');
+
+      await lens.configureTextBasedLanguagesDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        field: 'bytes',
+        keepOpen: true,
+      });
+      await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+      // click pie from suggestions
+      await testSubjects.click('lensSuggestionsPanelToggleButton');
+      await testSubjects.click('lnsSuggestion-pie');
+      expect(await testSubjects.exists('partitionVisChart')).to.be(true);
+    });
+
+    it('should default title when saving chart in Discover (even when modal is closed and reopened)', async () => {
+      await discover.selectTextBaseLang();
+      await header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | stats averageB = avg(bytes) by extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.click('unifiedHistogramSaveVisualization');
+      await header.waitUntilLoadingHasFinished();
+      let title = await testSubjects.getAttribute('savedObjectTitle', 'value');
+      expect(title).to.equal('Bar vertical stacked');
+      await testSubjects.click('saveCancelButton');
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.click('unifiedHistogramSaveVisualization');
+      await header.waitUntilLoadingHasFinished();
+      title = await testSubjects.getAttribute('savedObjectTitle', 'value');
+      expect(title).to.equal('Bar vertical stacked');
     });
   });
 }

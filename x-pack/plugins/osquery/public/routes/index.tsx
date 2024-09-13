@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { useBreadcrumbs } from '../common/hooks/use_breadcrumbs';
 import { LiveQueries } from './live_queries';
@@ -18,7 +18,7 @@ const OsqueryAppRoutesComponent = () => {
   useBreadcrumbs('base');
 
   return (
-    <Switch>
+    <Routes>
       <Route path={`/packs`}>
         <Packs />
       </Route>
@@ -29,7 +29,7 @@ const OsqueryAppRoutesComponent = () => {
         <LiveQueries />
       </Route>
       <Redirect to="/live_queries" />
-    </Switch>
+    </Routes>
   );
 };
 

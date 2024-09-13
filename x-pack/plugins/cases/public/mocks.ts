@@ -6,9 +6,9 @@
  */
 
 import { mockCasesContext } from './mocks/mock_cases_context';
-import type { CasesUiStart } from './types';
+import type { CasesPublicStart } from './types';
 
-const apiMock: jest.Mocked<CasesUiStart['api']> = {
+const apiMock: jest.Mocked<CasesPublicStart['api']> = {
   getRelatedCases: jest.fn(),
   cases: {
     find: jest.fn(),
@@ -18,27 +18,28 @@ const apiMock: jest.Mocked<CasesUiStart['api']> = {
   },
 };
 
-const uiMock: jest.Mocked<CasesUiStart['ui']> = {
+const uiMock: jest.Mocked<CasesPublicStart['ui']> = {
   getCases: jest.fn(),
   getCasesContext: jest.fn().mockImplementation(() => mockCasesContext),
   getAllCasesSelectorModal: jest.fn(),
-  getCreateCaseFlyout: jest.fn(),
   getRecentCases: jest.fn(),
 };
 
 export const openAddToExistingCaseModalMock = jest.fn();
 export const openAddToNewCaseFlyoutMock = jest.fn();
+export const isAddToCaseOpenMock = jest.fn();
 
-const hooksMock: jest.Mocked<CasesUiStart['hooks']> = {
+const hooksMock: jest.Mocked<CasesPublicStart['hooks']> = {
   useCasesAddToNewCaseFlyout: jest.fn().mockImplementation(() => ({
     open: openAddToNewCaseFlyoutMock,
   })),
   useCasesAddToExistingCaseModal: jest.fn().mockImplementation(() => ({
     open: openAddToExistingCaseModalMock,
   })),
+  useIsAddToCaseOpen: isAddToCaseOpenMock,
 };
 
-const helpersMock: jest.Mocked<CasesUiStart['helpers']> = {
+const helpersMock: jest.Mocked<CasesPublicStart['helpers']> = {
   canUseCases: jest.fn(),
   getUICapabilities: jest.fn().mockReturnValue({
     all: false,
@@ -47,16 +48,18 @@ const helpersMock: jest.Mocked<CasesUiStart['helpers']> = {
     update: false,
     delete: false,
     push: false,
+    connectors: false,
+    settings: false,
   }),
   getRuleIdFromEvent: jest.fn(),
   groupAlertsByRule: jest.fn(),
 };
 
 export interface CaseUiClientMock {
-  api: jest.Mocked<CasesUiStart['api']>;
-  ui: jest.Mocked<CasesUiStart['ui']>;
-  hooks: jest.Mocked<CasesUiStart['hooks']>;
-  helpers: jest.Mocked<CasesUiStart['helpers']>;
+  api: jest.Mocked<CasesPublicStart['api']>;
+  ui: jest.Mocked<CasesPublicStart['ui']>;
+  hooks: jest.Mocked<CasesPublicStart['hooks']>;
+  helpers: jest.Mocked<CasesPublicStart['helpers']>;
 }
 
 export const mockCasesContract = (): CaseUiClientMock => ({

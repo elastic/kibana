@@ -9,6 +9,10 @@ properties:
     type: string
   host:
     type: string
+  proxy_id:
+    description: The ID of the proxy to use for this download source. See the proxies API for more information.
+    type: string
+    nullable: true
 required:
   - is_default
   - name

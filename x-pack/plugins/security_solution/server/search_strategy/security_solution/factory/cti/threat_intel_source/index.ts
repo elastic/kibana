@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { SecuritySolutionFactory } from '../../types';
 import type {
   CtiDataSourceStrategyResponse,
   CtiQueries,
-  CtiDataSourceRequestOptions,
 } from '../../../../../../common/search_strategy/security_solution/cti';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildTiDataSourceQuery } from './query.threat_intel_source.dsl';
 
 export const dataSource: SecuritySolutionFactory<CtiQueries.dataSource> = {
-  buildDsl: (options: CtiDataSourceRequestOptions) => buildTiDataSourceQuery(options),
+  buildDsl: (options) => buildTiDataSourceQuery(options),
   parse: async (
-    options: CtiDataSourceRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<CtiDataSourceStrategyResponse> => {
     const inspect = {

@@ -138,8 +138,6 @@ export const CurationsTable: React.FC = () => {
       <EuiBasicTable
         columns={columns}
         items={curations}
-        responsive
-        hasActions
         loading={dataLoading}
         pagination={{
           ...convertMetaToPagination(meta),

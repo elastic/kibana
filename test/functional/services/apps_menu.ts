@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrService } from '../ftr_provider_context';
@@ -59,6 +60,7 @@ export class AppsMenuService extends FtrService {
     if (!(await this.testSubjects.exists('collapsibleNav'))) {
       await this.testSubjects.click('toggleNavButton');
     }
+    await this.testSubjects.exists('collapsibleNav');
   }
 
   /**
@@ -115,23 +117,55 @@ export class AppsMenuService extends FtrService {
       category,
     }: { closeCollapsibleNav?: boolean; category?: string } = {}
   ) {
-    try {
-      this.log.debug(`click "${name}" app link`);
-      await this.openCollapsibleNav();
-      let nav;
-      if (typeof category === 'string') {
-        nav = await this.testSubjects.find(`collapsibleNavGroup-${category}`);
-      } else {
-        nav = await this.testSubjects.find('collapsibleNav');
-      }
-      const link = await nav.findByPartialLinkText(name);
-      await link.click();
+    await this.waitUntilLoadingHasFinished();
 
-      if (closeCollapsibleNav) {
-        await this.closeCollapsibleNav();
+    await this.ctx.getService('retry').try(async () => {
+      this.log.debug(`click "${name}" app link`);
+
+      try {
+        await this.openCollapsibleNav();
+        let nav;
+        if (typeof category === 'string') {
+          // we can search within a specific section of the side nav
+          nav = await this.testSubjects.find(`collapsibleNavGroup-${category}`);
+          const link = await nav.findByPartialLinkText(name);
+          await link.click();
+        } else {
+          // we need to search our app link in the whole side nav
+          // first, we get all the links, along with their inner text
+          const allLinks = await this.testSubjects.findAll('collapsibleNavAppLink');
+          const allLinksTexts = await Promise.all(
+            allLinks.map((link) => link.getVisibleText().then((text) => ({ link, text })))
+          );
+
+          // then, filter out those that don't have a matching text
+          const matchingLinks = allLinksTexts.filter(({ text }) => text.includes(name));
+          if (matchingLinks.length === 0) {
+            this.log.debug(
+              `Found ${allLinks.length} links on the side nav: ${allLinksTexts.map(
+                ({ text }) => text
+              )}`
+            );
+            throw new Error(
+              `Could not find the '${name}' application on the side nav (${allLinks.length} links found)`
+            );
+          } else if (matchingLinks.length > 1) {
+            throw new Error(
+              `Multiple apps exist in the side nav with the specified name: '${name}'. Consider using the "category" parameter to disambiguate`
+            );
+          }
+
+          this.log.debug(`Found "${name}" app link on the side nav!`);
+          // if we click on a stale element (e.g. re-rendered) it'll throw an Error and we will retry
+          await matchingLinks.pop()!.link.click();
+        }
+
+        if (closeCollapsibleNav) {
+          await this.closeCollapsibleNav();
+        }
+      } finally {
+        // Intentionally empty
       }
-    } finally {
-      // Intentionally empty
-    }
+    });
   }
 }

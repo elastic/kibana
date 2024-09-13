@@ -195,7 +195,7 @@ Valid values are `Strict`, `Lax`, `None`.
 This is *not set* by default, which modern browsers will treat as `Lax`. If you use Kibana embedded in an iframe in modern browsers, you might need to set it to `None`. Setting this value to `None` requires cookies to be sent over a secure connection by setting <<xpack-security-secureCookies, `xpack.security.secureCookies`>>: `true`.
 
 [[xpack-session-idleTimeout]] xpack.security.session.idleTimeout {ess-icon}::
-Ensures that user sessions will expire after a period of inactivity. This and <<xpack-session-lifespan,`xpack.security.session.lifespan`>> are both highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is set to `0`, then sessions will never expire due to inactivity. By default, this value is 8 hours.
+Ensures that user sessions will expire after a period of inactivity. This and <<xpack-session-lifespan,`xpack.security.session.lifespan`>> are both highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is set to `0`, then sessions will never expire due to inactivity. By default, this value is 3 days.
 +
 NOTE: Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 
@@ -210,7 +210,7 @@ Sets the interval at which {kib} tries to remove expired and invalid sessions fr
 +
 TIP: Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 
-xpack.security.session.сoncurrentSessions.maxSessions::
+xpack.security.session.concurrentSessions.maxSessions {ess-icon}::
 Set the maximum number of sessions each user is allowed to have active at any given time.
 By default, no limit is applied.
 If set, the value of this option should be an integer between `1` and `1000`.
@@ -367,9 +367,13 @@ xpack.security.audit.ignore_filters:
 - actions: [http_request] <1>
 - categories: [database]
   types: [creation, change, deletion] <2>
+- spaces: [default] <3>
+- users: [elastic, kibana_system] <4>
 ----------------------------------------
 <1> Filters out HTTP request events
 <2> Filters out any data write events
+<3> Filters out events from the `default` space
+<4> Filters out events from the `elastic` and `kibana_system` users
 
 xpack.security.audit.ignore_filters[].actions[] {ess-icon}::
 List of values matched against the `event.action` field of an audit event. Refer to <<xpack-security-audit-logging>> for a list of available events.
@@ -377,8 +381,14 @@ List of values matched against the `event.action` field of an audit event. Refer
 xpack.security.audit.ignore_filters[].categories[] {ess-icon}::
 List of values matched against the `event.category` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-category.html[ECS categorization field] for allowed values.
 
+xpack.security.audit.ignore_filters[].outcomes[] {ess-icon}::
+List of values matched against the `event.outcome` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.
+
+xpack.security.audit.ignore_filters[].spaces[] {ess-icon}::
+List of values matched against the `kibana.space_id` field of an audit event. This represents the space id in which the event took place.
+
 xpack.security.audit.ignore_filters[].types[] {ess-icon}::
 List of values matched against the `event.type` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-type.html[ECS type field] for allowed values.
 
-xpack.security.audit.ignore_filters[].outcomes[] {ess-icon}::
-List of values matched against the `event.outcome` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.
+xpack.security.audit.ignore_filters[].users[] {ess-icon}::
+List of values matched against the `user.name` field of an audit event. This represents the `username` associated with the audit event.

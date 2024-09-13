@@ -14,24 +14,29 @@ import type {
   HttpServiceSetup,
   Logger,
   KibanaRequest,
+  SecurityServiceStart,
 } from '@kbn/core/server';
+
+import { CoreKibanaRequest } from '@kbn/core/server';
 
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-
 import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
-
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
-
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 import type { FleetConfigType } from '../../common/types';
-import type { ExperimentalFeatures } from '../../common/experimental_features';
+import {
+  allowedExperimentalValues,
+  type ExperimentalFeatures,
+} from '../../common/experimental_features';
 import type {
   ExternalCallback,
   ExternalCallbacksStorage,
@@ -40,19 +45,25 @@ import type {
   PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
+  PostAgentPolicyCreateCallback,
+  PostAgentPolicyUpdateCallback,
 } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
+import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '../constants';
 import type { MessageSigningServiceInterface } from '..';
 
-import type { BulkActionsResolver } from './agents';
+import type { BulkActionsResolver } from './agents/bulk_actions_resolver';
+import { type UninstallTokenServiceInterface } from './security/uninstall_token_service';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
+  private encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart | undefined;
   private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
-  private experimentalFeatures?: ExperimentalFeatures;
+  private experimentalFeatures: ExperimentalFeatures = allowedExperimentalValues;
+  private securityCoreStart: SecurityServiceStart | undefined;
   private securitySetup: SecurityPluginSetup | undefined;
   private securityStart: SecurityPluginStart | undefined;
   private config$?: Observable<FleetConfigType>;
@@ -61,6 +72,7 @@ class AppContextService {
   private isProductionMode: FleetAppContext['isProductionMode'] = false;
   private kibanaVersion: FleetAppContext['kibanaVersion'] = kibanaPackageJson.version;
   private kibanaBranch: FleetAppContext['kibanaBranch'] = kibanaPackageJson.branch;
+  private kibanaInstanceId: FleetAppContext['kibanaInstanceId'] = '';
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
@@ -69,12 +81,16 @@ class AppContextService {
   private savedObjectsTagging: SavedObjectTaggingStart | undefined;
   private bulkActionsResolver: BulkActionsResolver | undefined;
   private messageSigningService: MessageSigningServiceInterface | undefined;
+  private uninstallTokenService: UninstallTokenServiceInterface | undefined;
+  private taskManagerStart: TaskManagerStartContract | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
     this.esClient = appContext.elasticsearch.client.asInternalUser;
+    this.encryptedSavedObjectsStart = appContext.encryptedSavedObjectsStart;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
+    this.securityCoreStart = appContext.securityCoreStart;
     this.securitySetup = appContext.securitySetup;
     this.securityStart = appContext.securityStart;
     this.savedObjects = appContext.savedObjects;
@@ -84,11 +100,14 @@ class AppContextService {
     this.logger = appContext.logger;
     this.kibanaVersion = appContext.kibanaVersion;
     this.kibanaBranch = appContext.kibanaBranch;
+    this.kibanaInstanceId = appContext.kibanaInstanceId;
     this.httpSetup = appContext.httpSetup;
     this.telemetryEventsSender = appContext.telemetryEventsSender;
     this.savedObjectsTagging = appContext.savedObjectsTagging;
     this.bulkActionsResolver = appContext.bulkActionsResolver;
     this.messageSigningService = appContext.messageSigningService;
+    this.uninstallTokenService = appContext.uninstallTokenService;
+    this.taskManagerStart = appContext.taskManagerStart;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -114,6 +133,10 @@ class AppContextService {
       throw new Error('Encrypted saved object start service not set.');
     }
     return this.encryptedSavedObjects;
+  }
+
+  public getSecurityCore() {
+    return this.securityCoreStart!;
   }
 
   public getSecurity() {
@@ -148,9 +171,6 @@ class AppContextService {
   }
 
   public getExperimentalFeatures() {
-    if (!this.experimentalFeatures) {
-      throw new Error('experimentalFeatures not set.');
-    }
     return this.experimentalFeatures;
   }
 
@@ -167,11 +187,59 @@ class AppContextService {
     }
     return this.savedObjectsTagging;
   }
+  public getInternalUserSOClientForSpaceId(spaceId?: string) {
+    const request = CoreKibanaRequest.from({
+      headers: {},
+      path: '/',
+      route: { settings: {} },
+      url: { href: '', hash: '' } as URL,
+      raw: { req: { url: '/' } } as any,
+    });
+    if (this.httpSetup && spaceId && spaceId !== DEFAULT_SPACE_ID) {
+      this.httpSetup?.basePath.set(request, `/s/${spaceId}`);
+    }
 
-  public getInternalUserSOClient(request: KibanaRequest) {
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
+      includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
       excludedExtensions: [SECURITY_EXTENSION_ID],
+    });
+  }
+
+  public getInternalUserSOClient(request?: KibanaRequest) {
+    if (!request) {
+      request = {
+        headers: {},
+        getBasePath: () => '',
+        path: '/',
+        route: { settings: {} },
+        url: { href: {} },
+        raw: { req: { url: '/' } },
+        isFakeRequest: true,
+      } as unknown as KibanaRequest;
+    }
+
+    // soClient as kibana internal users, be careful on how you use it, security is not enabled
+    return appContextService.getSavedObjects().getScopedClient(request, {
+      includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+    });
+  }
+
+  public getInternalUserSOClientWithoutSpaceExtension() {
+    const fakeRequest = {
+      headers: {},
+      getBasePath: () => '',
+      path: '/',
+      route: { settings: {} },
+      url: { href: {} },
+      raw: { req: { url: '/' } },
+      isFakeRequest: true,
+    } as unknown as KibanaRequest;
+
+    // soClient as kibana internal users, be careful on how you use it, security is not enabled
+    return appContextService.getSavedObjects().getScopedClient(fakeRequest, {
+      excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
     });
   }
 
@@ -198,12 +266,24 @@ class AppContextService {
     return this.encryptedSavedObjectsSetup;
   }
 
+  public getEncryptedSavedObjectsStart() {
+    return this.encryptedSavedObjectsStart;
+  }
+
   public getKibanaVersion() {
     return this.kibanaVersion;
   }
 
   public getKibanaBranch() {
     return this.kibanaBranch;
+  }
+
+  public getKibanaInstanceId() {
+    return this.kibanaInstanceId;
+  }
+
+  public getTaskManagerStart() {
+    return this.taskManagerStart;
   }
 
   public addExternalCallback(type: ExternalCallback[0], callback: ExternalCallback[1]) {
@@ -217,7 +297,11 @@ class AppContextService {
     type: T
   ):
     | Set<
-        T extends 'packagePolicyCreate'
+        T extends 'agentPolicyCreate'
+          ? PostAgentPolicyCreateCallback
+          : T extends 'agentPolicyUpdate'
+          ? PostAgentPolicyUpdateCallback
+          : T extends 'packagePolicyCreate'
           ? PostPackagePolicyCreateCallback
           : T extends 'packagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
@@ -230,7 +314,11 @@ class AppContextService {
     | undefined {
     if (this.externalCallbacks) {
       return this.externalCallbacks.get(type) as Set<
-        T extends 'packagePolicyCreate'
+        T extends 'agentPolicyCreate'
+          ? PostAgentPolicyCreateCallback
+          : T extends 'agentPolicyUpdate'
+          ? PostAgentPolicyUpdateCallback
+          : T extends 'packagePolicyCreate'
           ? PostPackagePolicyCreateCallback
           : T extends 'packagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
@@ -253,6 +341,10 @@ class AppContextService {
 
   public getMessageSigningService() {
     return this.messageSigningService;
+  }
+
+  public getUninstallTokenService() {
+    return this.uninstallTokenService;
   }
 }
 

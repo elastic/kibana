@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { ContentClient } from '@kbn/content-management-plugin/public';
 import { GraphWorkspaceSavedObject } from '../types';
 import { saveSavedWorkspace } from './saved_workspace_utils';
 
@@ -28,12 +29,10 @@ describe('saved_workspace_utils', () => {
         savedWorkspace,
         {},
         {
-          savedObjectsClient: {
-            ...core.savedObjects.client,
-            find: jest.fn().mockResolvedValue({ savedObjects: [] }),
-            create: jest.fn().mockResolvedValue({ id: '456' }),
-          },
-          overlays: core.overlays,
+          ...core,
+          contentClient: {
+            create: jest.fn().mockReturnValue(Promise.resolve({ item: { id: '456' } })),
+          } as unknown as ContentClient,
         }
       );
       expect(savedWorkspace.id).toBe(undefined);

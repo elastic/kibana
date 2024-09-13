@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { Fragment, FC } from 'react';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
-import { Anomaly } from '../../../../common/results_loader';
-import { getSeverityColor } from '../../../../../../../../common/util/anomaly_utils';
-import { ANOMALY_THRESHOLD } from '../../../../../../../../common/constants/anomalies';
+import { getSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import type { Anomaly } from '../../../../common/results_loader';
 
 interface Props {
   anomalyData?: Anomaly[];
@@ -61,35 +61,35 @@ export const Anomalies: FC<Props> = ({ anomalyData }) => {
         id="low"
         domainType={AnnotationDomainType.XDomain}
         dataValues={severities.low}
-        style={getAnomalyStyle(ANOMALY_THRESHOLD.LOW)}
+        style={getAnomalyStyle(ML_ANOMALY_THRESHOLD.LOW)}
         hideTooltips={true}
       />
       <LineAnnotation
         id="warning"
         domainType={AnnotationDomainType.XDomain}
         dataValues={severities.warning}
-        style={getAnomalyStyle(ANOMALY_THRESHOLD.WARNING)}
+        style={getAnomalyStyle(ML_ANOMALY_THRESHOLD.WARNING)}
         hideTooltips={true}
       />
       <LineAnnotation
         id="minor"
         domainType={AnnotationDomainType.XDomain}
         dataValues={severities.minor}
-        style={getAnomalyStyle(ANOMALY_THRESHOLD.MINOR)}
+        style={getAnomalyStyle(ML_ANOMALY_THRESHOLD.MINOR)}
         hideTooltips={true}
       />
       <LineAnnotation
         id="major"
         domainType={AnnotationDomainType.XDomain}
         dataValues={severities.major}
-        style={getAnomalyStyle(ANOMALY_THRESHOLD.MAJOR)}
+        style={getAnomalyStyle(ML_ANOMALY_THRESHOLD.MAJOR)}
         hideTooltips={true}
       />
       <LineAnnotation
         id="critical"
         domainType={AnnotationDomainType.XDomain}
         dataValues={severities.critical}
-        style={getAnomalyStyle(ANOMALY_THRESHOLD.CRITICAL)}
+        style={getAnomalyStyle(ML_ANOMALY_THRESHOLD.CRITICAL)}
         hideTooltips={true}
       />
     </Fragment>

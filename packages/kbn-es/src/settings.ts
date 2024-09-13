@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -11,6 +12,7 @@
  */
 const SECURE_SETTINGS_LIST = [
   /^xpack\.security\.authc\.realms\.oidc\.[a-zA-Z0-9_]+\.rp\.client_secret$/,
+  /^xpack\.security\.authc\.realms\.jwt\.[a-zA-Z0-9_]+\.client_authentication\.shared_secret$/,
 ];
 
 function isSecureSetting(settingName: string) {

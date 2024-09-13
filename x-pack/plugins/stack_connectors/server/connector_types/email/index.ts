@@ -8,6 +8,7 @@
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import type {
@@ -26,6 +27,8 @@ import {
   renderMustacheObject,
   renderMustacheString,
 } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './send_email';
 import { portSchema } from '../lib/schemas';
@@ -154,6 +157,7 @@ const ParamsSchemaProps = {
   bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
   subject: schema.string(),
   message: schema.string(),
+  messageHTML: schema.nullable(schema.string()),
   // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
   // provide a more contextual URL in the footer (ex: URL to the alert details page)
   kibanaFooterLink: schema.object({
@@ -166,7 +170,7 @@ const ParamsSchemaProps = {
   }),
 };
 
-const ParamsSchema = schema.object(ParamsSchemaProps);
+export const ParamsSchema = schema.object(ParamsSchemaProps);
 
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;
@@ -248,14 +252,15 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
 }
 
 function renderParameterTemplates(
+  logger: Logger,
   params: ActionParamsType,
   variables: Record<string, unknown>
 ): ActionParamsType {
   return {
     // most of the params need no escaping
-    ...renderMustacheObject(params, variables),
+    ...renderMustacheObject(logger, params, variables),
     // message however, needs to escaped as markdown
-    message: renderMustacheString(params.message, variables, 'markdown'),
+    message: renderMustacheString(logger, params.message, variables, 'markdown'),
   };
 }
 
@@ -269,8 +274,16 @@ async function executor(
   },
   execOptions: EmailConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, config, secrets, params, configurationUtilities, services, logger } =
-    execOptions;
+  const {
+    actionId,
+    config,
+    secrets,
+    params,
+    configurationUtilities,
+    services,
+    logger,
+    connectorUsageCollector,
+  } = execOptions;
   const connectorTokenClient = services.connectorTokenClient;
 
   const emails = params.to.concat(params.cc).concat(params.bcc);
@@ -282,6 +295,16 @@ async function executor(
   invalidEmailsMessage = configurationUtilities.validateEmailAddresses([config.from]);
   if (invalidEmailsMessage) {
     return { status: 'error', actionId, message: `[from]: ${invalidEmailsMessage}` };
+  }
+
+  if (params.messageHTML != null) {
+    if (execOptions.source?.type !== ActionExecutionSourceType.NOTIFICATION) {
+      return {
+        status: 'error',
+        actionId,
+        message: `HTML email can only be sent via notifications`,
+      };
+    }
   }
 
   const transport: Transport = {};
@@ -320,6 +343,8 @@ async function executor(
   }
 
   let actualMessage = params.message;
+  const actualHTMLMessage = params.messageHTML;
+
   if (configurationUtilities.enableFooterInEmail()) {
     const footerMessage = getFooterMessage({
       publicBaseUrl,
@@ -340,6 +365,7 @@ async function executor(
     content: {
       subject: params.subject,
       message: actualMessage,
+      messageHTML: actualHTMLMessage,
     },
     hasAuth: config.hasAuth,
     configurationUtilities,
@@ -348,17 +374,33 @@ async function executor(
   let result;
 
   try {
-    result = await sendEmail(logger, sendEmailOptions, connectorTokenClient);
+    result = await sendEmail(
+      logger,
+      sendEmailOptions,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
   } catch (err) {
     const message = i18n.translate('xpack.stackConnectors.email.errorSendingErrorMessage', {
       defaultMessage: 'error sending email',
     });
-    return {
+    const errorResult: ConnectorTypeExecutorResult<unknown> = {
       status: 'error',
       actionId,
       message,
       serviceMessage: err.message,
     };
+
+    // Mark 4xx and 5xx errors as user errors
+    const statusCode = err?.response?.status;
+    if (statusCode >= 400 && statusCode < 600) {
+      return {
+        ...errorResult,
+        errorSource: TaskErrorSource.USER,
+      };
+    }
+
+    return errorResult;
   }
 
   return { status: 'ok', data: result, actionId };

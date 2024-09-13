@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import Chance from 'chance';
-import type { CloudDefendPolicy } from '../../../common/types';
+import type { CloudDefendPolicy } from '../../../common';
 
 type CreateCloudDefendIntegrationFixtureInput = {
   chance?: Chance.Chance;
@@ -21,7 +21,7 @@ export const createCloudDefendIntegrationFixture = ({
     enabled: true,
     id: chance.guid(),
     name: chance.string(),
-    policy_id: chance.guid(),
+    policy_ids: [chance.guid()],
     namespace: chance.string(),
     updated_at: chance.date().toISOString(),
     updated_by: chance.word(),

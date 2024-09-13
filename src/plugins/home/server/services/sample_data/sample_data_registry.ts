@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
@@ -15,6 +16,7 @@ import {
   SampleDatasetSchema,
   SampleDatasetDashboardPanel,
   AppLinkData,
+  SampleDatasetProviderContext,
 } from './lib/sample_dataset_registry_types';
 import { sampleDataSchema } from './lib/sample_dataset_schema';
 
@@ -31,13 +33,18 @@ import { registerSampleDatasetWithIntegration } from './lib/register_with_integr
 
 export class SampleDataRegistry {
   constructor(private readonly initContext: PluginInitializerContext) {}
+
   private readonly sampleDatasets: SampleDatasetSchema[] = [];
   private readonly appLinksMap = new Map<string, AppLinkData[]>();
+  private sampleDataProviderContext?: SampleDatasetProviderContext;
 
   private registerSampleDataSet(specProvider: SampleDatasetProvider) {
+    if (!this.sampleDataProviderContext) {
+      throw new Error('#registerSampleDataSet called before #setup');
+    }
     let value: SampleDatasetSchema;
     try {
-      value = sampleDataSchema.validate(specProvider());
+      value = sampleDataSchema.validate(specProvider(this.sampleDataProviderContext));
     } catch (error) {
       throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
     }
@@ -68,8 +75,9 @@ export class SampleDataRegistry {
     isDevMode?: boolean
   ) {
     if (usageCollections) {
-      const kibanaIndex = core.savedObjects.getKibanaIndex();
-      makeSampleDataUsageCollector(usageCollections, kibanaIndex);
+      const getIndexForType = (type: string) =>
+        core.getStartServices().then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
+      makeSampleDataUsageCollector(usageCollections, getIndexForType);
     }
     const usageTracker = usage(
       core.getStartServices().then(([coreStart]) => coreStart.savedObjects),
@@ -80,6 +88,10 @@ export class SampleDataRegistry {
     createListRoute(router, this.sampleDatasets, this.appLinksMap, logger);
     createInstallRoute(router, this.sampleDatasets, logger, usageTracker, core.analytics);
     createUninstallRoute(router, this.sampleDatasets, logger, usageTracker, core.analytics);
+
+    this.sampleDataProviderContext = {
+      staticAssets: core.http.staticAssets,
+    };
 
     this.registerSampleDataSet(flightsSpecProvider);
     this.registerSampleDataSet(logsSpecProvider);
@@ -176,6 +188,7 @@ export class SampleDataRegistry {
     return {};
   }
 }
+
 /** @public */
 export type SampleDataRegistrySetup = ReturnType<SampleDataRegistry['setup']>;
 

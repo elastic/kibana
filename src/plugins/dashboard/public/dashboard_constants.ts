@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ViewMode } from '@kbn/embeddable-plugin/common';
-import type { DashboardContainerByValueInput } from '../common';
+import type { DashboardContainerInput } from '../common';
 
 // ------------------------------------------------------------------
 // URL Constants
@@ -53,7 +54,6 @@ export const DASHBOARD_UI_METRIC_ID = 'dashboard';
 export const DASHBOARD_APP_ID = 'dashboards';
 export const LEGACY_DASHBOARD_APP_ID = 'dashboard';
 export const SEARCH_SESSION_ID = 'searchSessionId';
-export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 
 // ------------------------------------------------------------------
 // Grid
@@ -66,11 +66,26 @@ export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 
 export const CHANGE_CHECK_DEBOUNCE = 100;
 
+export enum PanelPlacementStrategy {
+  /** Place on the very top of the Dashboard, add the height of this panel to all other panels. */
+  placeAtTop = 'placeAtTop',
+  /** Look for the smallest y and x value where the default panel will fit. */
+  findTopLeftMostOpenSpace = 'findTopLeftMostOpenSpace',
+}
+
+// ------------------------------------------------------------------
+// Content Management
+// ------------------------------------------------------------------
+export { CONTENT_ID as DASHBOARD_CONTENT_ID } from '../common/content_management/constants';
+
+export const DASHBOARD_CACHE_SIZE = 20; // only store a max of 20 dashboards
+export const DASHBOARD_CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
+
 // ------------------------------------------------------------------
 // Default State
 // ------------------------------------------------------------------
-export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerByValueInput, 'id'> = {
-  viewMode: ViewMode.EDIT, // new dashboards start in  edit mode.
+export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerInput, 'id'> = {
+  viewMode: ViewMode.VIEW,
   timeRestore: false,
   query: { query: '', language: 'kuery' },
   description: '',
@@ -78,6 +93,9 @@ export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerByValueInput, 'id'>
   panels: {},
   title: '',
   tags: [],
+  executionContext: {
+    type: 'dashboard',
+  },
 
   // options
   useMargins: true,

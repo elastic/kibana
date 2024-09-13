@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       requestBody: {
         aggTypes: ['avg'],
-        duration: { start: 1560297859000, end: 1562975136000 },
+        duration: { start: 1686528259000, end: 1689205536000 },
         fields: ['taxless_total_price'],
         index: 'ft_ecommerce',
         query: { bool: { must: [{ match_all: {} }] } },
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       requestBody: {
         aggTypes: ['avg', 'sum'],
-        duration: { start: 1560297859000, end: 1562975136000 },
+        duration: { start: 1686528259000, end: 1689205536000 },
         fields: ['products.base_price', 'products.base_unit_price'],
         index: 'ft_ecommerce',
         query: { bool: { must: [{ match_all: {} }] } },
@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       requestBody: {
         aggTypes: ['avg'],
-        duration: { start: 1560297859000, end: 1562975136000 },
+        duration: { start: 1686528259000, end: 1689205536000 },
         fields: ['taxless_total_price'],
         index: 'ft_ecommerce',
         query: { bool: { must: [{ match_all: {} }] } },
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       requestBody: {
         aggTypes: ['avg'],
-        duration: { start: 1560297859000, end: 1562975136000 },
+        duration: { start: 1686528259000, end: 1689205536000 },
         fields: ['taxless_total_price'],
         filters: [],
         index: 'ft_ecommerce',
@@ -96,9 +96,9 @@ export default ({ getService }: FtrProviderContext) => {
       for (const testData of testDataList) {
         it(`estimates the bucket span ${testData.testTitleSuffix}`, async () => {
           const { body, status } = await supertest
-            .post('/api/ml/validate/estimate_bucket_span')
+            .post('/internal/ml/validate/estimate_bucket_span')
             .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
-            .set(COMMON_REQUEST_HEADERS)
+            .set(getCommonRequestHeader('1'))
             .send(testData.requestBody);
           ml.api.assertResponseStatusCode(testData.expected.responseCode, status, body);
 
@@ -126,9 +126,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       it(`estimates the bucket span`, async () => {
         const { body, status } = await supertest
-          .post('/api/ml/validate/estimate_bucket_span')
+          .post('/internal/ml/validate/estimate_bucket_span')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(testData.requestBody);
         ml.api.assertResponseStatusCode(testData.expected.responseCode, status, body);
 
@@ -155,9 +155,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       it(`estimates the bucket span`, async () => {
         const { body, status } = await supertest
-          .post('/api/ml/validate/estimate_bucket_span')
+          .post('/internal/ml/validate/estimate_bucket_span')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(testData.requestBody);
         ml.api.assertResponseStatusCode(testData.expected.responseCode, status, body);
 

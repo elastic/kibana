@@ -10,9 +10,8 @@ import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import { timeline as timelineLib, pinnedEvent as pinnedEventLib } from '../../../saved_object';
 import type { FrameworkRequest } from '../../../../framework';
-import type { ResponseTimeline, SavedTimeline } from '../../../../../../common/types/timeline';
+import type { ResponseTimeline, SavedTimeline, Note } from '../../../../../../common/api/timeline';
 import { persistNotes } from '../../../saved_object/notes/persist_notes';
-import type { NoteResult } from '../../../../../../common/types/timeline/note';
 
 interface CreateTimelineProps {
   frameworkRequest: FrameworkRequest;
@@ -21,7 +20,7 @@ interface CreateTimelineProps {
   timelineVersion?: string | null;
   overrideNotesOwner?: boolean;
   pinnedEventIds?: string[] | null;
-  notes?: NoteResult[];
+  notes?: Note[];
   existingNoteIds?: string[];
   isImmutable?: boolean;
 }

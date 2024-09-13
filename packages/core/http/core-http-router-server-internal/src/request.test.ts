@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 jest.mock('uuid', () => ({
@@ -15,6 +16,10 @@ import { hapiMocks } from '@kbn/hapi-mocks';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from './request';
 import { schema } from '@kbn/config-schema';
+import {
+  ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 
 describe('CoreKibanaRequest', () => {
   describe('using real requests', () => {
@@ -119,7 +124,7 @@ describe('CoreKibanaRequest', () => {
       });
     });
 
-    describe('isSytemApi property', () => {
+    describe('isSystemRequest property', () => {
       it('is false when no kbn-system-request header is set', () => {
         const request = hapiMocks.createRequest({
           headers: { custom: 'one' },
@@ -142,6 +147,112 @@ describe('CoreKibanaRequest', () => {
         });
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.isSystemRequest).toBe(false);
+      });
+    });
+
+    describe('isInternalApiRequest property', () => {
+      it('is true when header is set', () => {
+        const request = hapiMocks.createRequest({
+          headers: { [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'true' },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+        expect(kibanaRequest.isInternalApiRequest).toBe(true);
+      });
+      it('is true when query param is set', () => {
+        const request = hapiMocks.createRequest({
+          query: { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: 'true' },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+        expect(kibanaRequest.isInternalApiRequest).toBe(true);
+      });
+      it('is true when both header and query param is set', () => {
+        const request = hapiMocks.createRequest({
+          headers: { [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'true' },
+          query: { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: 'true' },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+        expect(kibanaRequest.isInternalApiRequest).toBe(true);
+      });
+      it('is false when neither header nor query param is set', () => {
+        const request = hapiMocks.createRequest();
+        const kibanaRequest = CoreKibanaRequest.from(request);
+        expect(kibanaRequest.isInternalApiRequest).toBe(false);
+      });
+    });
+
+    describe('sanitize input', () => {
+      it('does not pass the reserved query parameter to consumers', () => {
+        const request = hapiMocks.createRequest({
+          query: { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: 'true', myCoolValue: 'cool!' },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request, {
+          query: schema.object({ myCoolValue: schema.string() }),
+        });
+        expect(kibanaRequest.query).toEqual({ myCoolValue: 'cool!' });
+      });
+      it('pass nothing if only the reserved query param is present', () => {
+        const request = hapiMocks.createRequest({
+          query: { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: 'true' },
+        });
+        expect(() =>
+          CoreKibanaRequest.from(request, {
+            query: schema.object({}, { unknowns: 'forbid' }), // we require an empty object
+          })
+        ).not.toThrow();
+      });
+    });
+
+    describe('route.httpVersion property', () => {
+      it('returns the version from the raw request', () => {
+        const request = hapiMocks.createRequest({
+          raw: {
+            req: {
+              httpVersion: '7.4',
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.httpVersion).toEqual('7.4');
+      });
+    });
+
+    describe('route.protocol property', () => {
+      it('return the correct value for http/1.0 requests', () => {
+        const request = hapiMocks.createRequest({
+          raw: {
+            req: {
+              httpVersion: '1.0',
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.protocol).toEqual('http1');
+      });
+      it('return the correct value for http/1.1 requests', () => {
+        const request = hapiMocks.createRequest({
+          raw: {
+            req: {
+              httpVersion: '1.1',
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.protocol).toEqual('http1');
+      });
+      it('return the correct value for http/2 requests', () => {
+        const request = hapiMocks.createRequest({
+          raw: {
+            req: {
+              httpVersion: '2.0',
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.protocol).toEqual('http2');
       });
     });
 
@@ -311,6 +422,17 @@ describe('CoreKibanaRequest', () => {
         };
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.isFakeRequest).toBe(true);
+      });
+    });
+
+    describe('httpVersion', () => {
+      it('should be 1.0', () => {
+        const request: FakeRawRequest = {
+          headers: {},
+          path: '/',
+        };
+        const kibanaRequest = CoreKibanaRequest.from(request);
+        expect(kibanaRequest.httpVersion).toEqual('1.0');
       });
     });
 

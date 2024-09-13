@@ -8,7 +8,8 @@
 import React, { useCallback, useRef } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
-import { DragDropIdentifier, RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { type DragDropAction, DragDropIdentifier, RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import {
   DatasourceMap,
@@ -68,6 +69,10 @@ export function EditorFrame(props: EditorFrameProps) {
     selectFramePublicAPI(state, datasourceMap)
   );
 
+  framePublicAPI.absDateRange = getAbsoluteDateRange(
+    props.plugins.data.query.timefilter.timefilter
+  );
+
   // Using a ref to prevent rerenders in the child components while keeping the latest state
   const getSuggestionForField = useRef<(field: DragDropIdentifier) => Suggestion | undefined>();
   getSuggestionForField.current = (field: DragDropIdentifier) => {
@@ -81,7 +86,8 @@ export function EditorFrame(props: EditorFrameProps) {
       visualizationMap,
       datasourceMap[activeDatasourceId],
       field,
-      framePublicAPI.dataViews
+      framePublicAPI.dataViews,
+      true
     );
   };
 
@@ -91,7 +97,7 @@ export function EditorFrame(props: EditorFrameProps) {
   );
 
   const dropOntoWorkspace = useCallback(
-    (field) => {
+    (field: DragDropIdentifier) => {
       const suggestion = getSuggestionForField.current!(field);
       if (suggestion) {
         trackUiCounterEvents('drop_onto_workspace');
@@ -107,13 +113,24 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const bannerMessages = props.getUserMessages('banner', { severity: 'warning' });
 
+  const telemetryMiddleware = useCallback((action: DragDropAction) => {
+    if (action.type === 'dropToTarget') {
+      trackUiCounterEvents('drop_total');
+    }
+  }, []);
+
   return (
-    <RootDragDropProvider dataTestSubj="lnsDragDrop" onTrackUICounterEvent={trackUiCounterEvents}>
+    <RootDragDropProvider
+      initialState={{ dataTestSubjPrefix: 'lnsDragDrop' }}
+      customMiddleware={telemetryMiddleware}
+    >
       <FrameLayout
         bannerMessages={
           bannerMessages.length ? (
             <ErrorBoundary onError={onError}>
-              <BannerWrapper nodes={bannerMessages.map(({ longMessage }) => longMessage)} />
+              <BannerWrapper
+                nodes={bannerMessages.map(({ longMessage }) => longMessage as React.ReactNode)}
+              />
             </ErrorBoundary>
           ) : undefined
         }
@@ -141,6 +158,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 visualizationMap={visualizationMap}
                 framePublicAPI={framePublicAPI}
                 uiActions={props.plugins.uiActions}
+                dataViews={props.plugins.dataViews}
                 indexPatternService={props.indexPatternService}
                 getUserMessages={props.getUserMessages}
               />
@@ -176,6 +194,9 @@ export function EditorFrame(props: EditorFrameProps) {
                 visualizationMap={visualizationMap}
                 frame={framePublicAPI}
                 getUserMessages={props.getUserMessages}
+                nowProvider={props.plugins.data.nowProvider}
+                core={props.core}
+                showOnlyIcons
               />
             </ErrorBoundary>
           )

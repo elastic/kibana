@@ -9,9 +9,14 @@ import type { Dispatch, MiddlewareAPI } from 'redux';
 import { isEqual } from 'lodash';
 import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 
-import type { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
+import type { DataAccessLayer, PanelViewAndParameters } from '../../types';
+import type { State } from '../../../common/store/types';
 import * as selectors from '../selectors';
-import type { ResolverAction } from '../actions';
+import {
+  appRequestedCurrentRelatedEventData,
+  serverFailedToReturnCurrentRelatedEventData,
+  serverReturnedCurrentRelatedEventData,
+} from '../data/action';
 
 /**
  *
@@ -19,23 +24,25 @@ import type { ResolverAction } from '../actions';
  * If the current view is the `eventDetail` view it will request the event details from the server.
  * @export
  * @param {DataAccessLayer} dataAccessLayer
- * @param {MiddlewareAPI<Dispatch<ResolverAction>, ResolverState>} api
+ * @param {MiddlewareAPI<Dispatch<Action>, State>} api
  * @returns {() => void}
  */
 export function CurrentRelatedEventFetcher(
   dataAccessLayer: DataAccessLayer,
-  api: MiddlewareAPI<Dispatch<ResolverAction>, ResolverState>
-): () => void {
-  let last: PanelViewAndParameters | undefined;
-
-  return async () => {
+  api: MiddlewareAPI<Dispatch, State>
+): (id: string) => void {
+  const last: { [id: string]: PanelViewAndParameters | undefined } = {};
+  return async (id: string) => {
     const state = api.getState();
 
-    const newParams = selectors.panelViewAndParameters(state);
-    const indices = selectors.eventIndices(state);
+    if (!last[id]) {
+      last[id] = undefined;
+    }
+    const newParams = selectors.panelViewAndParameters(state.analyzer[id]);
+    const indices = selectors.eventIndices(state.analyzer[id]);
 
-    const oldParams = last;
-    last = newParams;
+    const oldParams = last[id];
+    last[id] = newParams;
 
     // If the panel view params have changed and the current panel view is the `eventDetail`, then fetch the event details for that eventID.
     if (!isEqual(newParams, oldParams) && newParams.panelView === 'eventDetail') {
@@ -45,12 +52,11 @@ export function CurrentRelatedEventFetcher(
       const currentEventTimestamp = newParams.panelParameters.eventTimestamp;
       const winlogRecordID = newParams.panelParameters.winlogRecordID;
 
-      api.dispatch({
-        type: 'appRequestedCurrentRelatedEventData',
-      });
-      const detectedBounds = selectors.detectedBounds(state);
+      api.dispatch(appRequestedCurrentRelatedEventData({ id }));
+      const detectedBounds = selectors.detectedBounds(state.analyzer[id]);
+      const agentId = selectors.agentId(state.analyzer[id]);
       const timeRangeFilters =
-        detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state);
+        detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state.analyzer[id]);
       let result: SafeResolverEvent | null = null;
       try {
         result = await dataAccessLayer.event({
@@ -61,22 +67,16 @@ export function CurrentRelatedEventFetcher(
           winlogRecordID,
           indexPatterns: indices,
           timeRange: timeRangeFilters,
+          agentId,
         });
       } catch (error) {
-        api.dispatch({
-          type: 'serverFailedToReturnCurrentRelatedEventData',
-        });
+        api.dispatch(serverFailedToReturnCurrentRelatedEventData({ id }));
       }
 
       if (result) {
-        api.dispatch({
-          type: 'serverReturnedCurrentRelatedEventData',
-          payload: result,
-        });
+        api.dispatch(serverReturnedCurrentRelatedEventData({ id, relatedEvent: result }));
       } else {
-        api.dispatch({
-          type: 'serverFailedToReturnCurrentRelatedEventData',
-        });
+        api.dispatch(serverFailedToReturnCurrentRelatedEventData({ id }));
       }
     }
   };

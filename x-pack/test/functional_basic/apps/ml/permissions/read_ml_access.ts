@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('for user with read ML access', function () {
+    this.tags('skipFIPS');
     for (const testUser of testUsers) {
       describe(`(${testUser.user})`, function () {
         const ecIndexPattern = 'ft_module_sample_ecommerce';
@@ -36,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
           await esArchiver.loadIfNeeded(
             'x-pack/test/functional/es_archives/ml/module_sample_ecommerce'
           );
-          await ml.testResources.createIndexPatternIfNeeded(ecIndexPattern, 'order_date');
+          await ml.testResources.createDataViewIfNeeded(ecIndexPattern, 'order_date');
 
           await ml.securityUI.loginAs(testUser.user);
         });
@@ -105,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should display elements on Index Data Visualizer page correctly', async () => {
           await ml.testExecution.logTestStep('should load an index into the data visualizer page');
-          await ml.dataVisualizer.navigateToIndexPatternSelection();
+          await ml.dataVisualizer.navigateToDataViewSelection();
           await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(ecIndexPattern);
 
           await ml.testExecution.logTestStep('should display the time range step');

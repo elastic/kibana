@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -32,6 +33,8 @@ export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
     | '_source'
     | 'point'
     | 'shape'
+    | 'sparse_vector'
+    | 'semantic_text'
     | 'string'
     | string
     | 'nested'
@@ -52,7 +55,7 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   conflict: { iconType: 'warning', color: 'euiColorVis9', shape: 'square' },
   date: { iconType: 'tokenDate' },
   date_range: { iconType: 'tokenDate' },
-  dense_vector: { iconType: 'tokenDenseVector' },
+  dense_vector: { iconType: 'tokenVectorDense' },
   geo_point: { iconType: 'tokenGeo' },
   geo_shape: { iconType: 'tokenGeo' },
   ip: { iconType: 'tokenIP' },
@@ -69,6 +72,8 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   _source: { iconType: 'editorCodeBlock', color: 'gray' },
   point: { iconType: 'tokenShape' }, // there is no separate icon for `point` yet
   shape: { iconType: 'tokenShape' },
+  sparse_vector: { iconType: 'tokenVectorSparse' },
+  semantic_text: { iconType: 'tokenSemanticText' },
   string: { iconType: 'tokenString' },
   text: { iconType: 'tokenString' },
   keyword: { iconType: 'tokenKeyword' },

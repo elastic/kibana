@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TOAST_CLOSE_BTN, CONFIRM_MODAL } from '../screens/navigation';
+import { CONFIRM_MODAL } from '../screens/navigation';
 import {
   SETTINGS_SAVE_BTN,
   SETTINGS_OUTPUTS,
@@ -14,9 +14,12 @@ import {
   FLEET_SERVER_SETUP,
   GENERATE_FLEET_SERVER_POLICY_BUTTON,
 } from '../screens/fleet';
+import { login } from '../tasks/login';
 
 describe('Edit settings', () => {
   beforeEach(() => {
+    login();
+
     cy.intercept('/api/fleet/fleet_server_hosts', {
       items: [
         {
@@ -24,6 +27,13 @@ describe('Edit settings', () => {
           name: 'Host',
           host_urls: ['https://localhost:8220'],
           is_default: true,
+        },
+        {
+          id: 'fleet-internal-host',
+          name: 'Internal Host',
+          host_urls: ['https://internal:8220'],
+          is_default: false,
+          is_internal: true,
         },
       ],
       page: 1,
@@ -43,7 +53,6 @@ describe('Edit settings', () => {
     });
 
     cy.visit('/app/fleet/settings');
-    cy.getBySel(TOAST_CLOSE_BTN).click();
   });
 
   it('should allow to update Fleet server hosts', () => {
@@ -157,5 +166,9 @@ describe('Edit settings', () => {
     cy.wait('@postLogstashOutput').then((interception) => {
       expect(interception.request.body.name).to.equal('output-logstash-1');
     });
+  });
+
+  it('should not display internal fleet server hosts', () => {
+    cy.getBySel(SETTINGS_FLEET_SERVER_HOSTS.TABLE).should('not.contain', 'Internal Host');
   });
 });

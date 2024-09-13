@@ -3,8 +3,13 @@ $mediumControl: $euiSize * 25;
 $largeControl: $euiSize * 50;
 $controlMinWidth: $euiSize * 14;
 
-.controlGroup {
-  min-height: $euiSize * 4;
+.controlsWrapper {
+  display: flex;
+  align-items: center;
+
+  .controlGroup--endButtonGroup {
+    align-self: end;
+  }
 }
 
 .controlsWrapper--twoLine {
@@ -41,7 +46,7 @@ $controlMinWidth: $euiSize * 14;
 
   .controlFrame__draggable {
     cursor: grabbing;
-    height: $euiButtonHeight;
+    height: $euiButtonHeightSmall;
     align-items: center;
     border-radius: $euiBorderRadius;
     font-weight: $euiFontWeightSemiBold;
@@ -74,23 +79,13 @@ $controlMinWidth: $euiSize * 14;
   }
 }
 
-.controlFrame__labelToolTip {
-  max-width: 40%;
-}
-
 .controlFrameWrapper {
   flex-basis: auto;
   position: relative;
 
-  &.controlFrameWrapper-isEditable {
-    .controlFrame__formControlLayoutLabel {
-      padding-left: 0;
-    }
-  }
-
   &:not(.controlFrameWrapper-isEditable) {
-    .controlFrameFormControlLayout--twoLine .euiFormControlLayout__childrenWrapper {
-      border-radius: $euiBorderRadius 0 0 $euiBorderRadius;
+    .controlFrame--twoLine {
+      border-radius: $euiFormControlBorderRadius !important;
     }
   }
 
@@ -99,9 +94,9 @@ $controlMinWidth: $euiSize * 14;
     min-width: $controlMinWidth;
     transition: background-color .1s, color .1s;
 
-    &Label {
+    .controlFrame__formControlLayoutLabel {
       @include euiTextTruncate;
-      border-radius: $euiBorderRadius;
+      padding: 0;
     }
 
     &:not(.controlFrame__formControlLayout-clone) {
@@ -110,13 +105,21 @@ $controlMinWidth: $euiSize * 14;
       }
     }
 
+    // Make sure controls with popover, tooltip, and tour wrappers inherit height correctly
+    [data-euiportal='true'],
+    .euiPopover,
+    .euiToolTipAnchor {
+      height: 100%;
+    }
+
+    .euiFormControlLayout__prepend {
+      padding-left: 0;
+      gap: 0;
+    }
+
     .controlFrame__control {
       height: 100%;
       transition: opacity .1s;
-
-      &.controlFrame--twoLine {
-        width: 100%;
-      }
     }
 
     .controlFrame--controlLoading {
@@ -182,12 +185,7 @@ $controlMinWidth: $euiSize * 14;
   }
 
   &-isDragging {
-    .euiFormRow__labelWrapper {
-      opacity: 0;
-    }
-    .controlFrame__formControlLayout {
-      opacity: 0; // hide dragged control, while control is dragged its replaced with ControlClone component
-    }
+    opacity: 0; // hide dragged control, while control is dragged its replaced with ControlClone component
   }
 }
 
@@ -205,11 +203,13 @@ $controlMinWidth: $euiSize * 14;
   &--twoLine {
     top: (-$euiSizeXS) !important;
   }
+}
 
-  &--fatalError {
-    padding: $euiSizeXS;
-    border-radius: $euiBorderRadius;
-    background-color: $euiColorEmptyShade;
-    box-shadow: 0 0 0 1px $euiColorLightShade;
+.controlGroup--invalidSelectionsTour {
+  .controlGroup--suppressTourCheckbox {
+    height: 22px;
+    &Label {
+      font-weight: $euiFontWeightMedium;
+    }
   }
 }

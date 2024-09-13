@@ -7,7 +7,7 @@
 
 import type { Transaction } from '@elastic/apm-rum';
 import { useCallback } from 'react';
-import { CommentType } from '../../../common';
+import { AttachmentType } from '../../../common/types/domain';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useStartTransaction } from './use_start_transaction';
 
@@ -17,8 +17,8 @@ const BULK_ADD_ATTACHMENT_TO_NEW_CASE = 'bulkAddAttachmentsToNewCase' as const;
 const ADD_ATTACHMENT_TO_EXISTING_CASE = 'addAttachmentToExistingCase' as const;
 const BULK_ADD_ATTACHMENT_TO_EXISTING_CASE = 'bulkAddAttachmentsToExistingCase' as const;
 
-export type StartCreateCaseWithAttachmentsTransaction = (param: {
-  appId: string;
+export type StartCreateCaseWithAttachmentsTransaction = (param?: {
+  appId?: string;
   attachments?: CaseAttachmentsWithoutOwner;
 }) => Transaction | undefined;
 
@@ -28,11 +28,17 @@ export const useCreateCaseWithAttachmentsTransaction = () => {
 
   const startCreateCaseWithAttachmentsTransaction =
     useCallback<StartCreateCaseWithAttachmentsTransaction>(
-      ({ appId, attachments }) => {
+      ({ appId, attachments } = {}) => {
+        if (!appId) {
+          return;
+        }
+
         if (!attachments) {
           return startTransaction(`Cases [${appId}] ${CREATE_CASE}`);
         }
+
         const alertCount = getAlertCount(attachments);
+
         if (alertCount <= 1) {
           return startTransaction(`Cases [${appId}] ${ADD_ATTACHMENT_TO_NEW_CASE}`);
         }
@@ -48,7 +54,7 @@ export const useCreateCaseWithAttachmentsTransaction = () => {
 };
 
 export type StartAddAttachmentToExistingCaseTransaction = (param: {
-  appId: string;
+  appId?: string;
   attachments: CaseAttachmentsWithoutOwner;
 }) => Transaction | undefined;
 
@@ -59,13 +65,20 @@ export const useAddAttachmentToExistingCaseTransaction = () => {
   const startAddAttachmentToExistingCaseTransaction =
     useCallback<StartAddAttachmentToExistingCaseTransaction>(
       ({ appId, attachments }) => {
+        if (!appId) {
+          return;
+        }
+
         const alertCount = getAlertCount(attachments);
+
         if (alertCount <= 1) {
           return startTransaction(`Cases [${appId}] ${ADD_ATTACHMENT_TO_EXISTING_CASE}`);
         }
+
         const transaction = startTransaction(
           `Cases [${appId}] ${BULK_ADD_ATTACHMENT_TO_EXISTING_CASE}`
         );
+
         transaction?.addLabels({ alert_count: alertCount });
         return transaction;
       },
@@ -77,7 +90,7 @@ export const useAddAttachmentToExistingCaseTransaction = () => {
 
 const getAlertCount = (attachments: CaseAttachmentsWithoutOwner) => {
   return attachments.reduce((total, attachment) => {
-    if (attachment.type !== CommentType.alert) {
+    if (attachment.type !== AttachmentType.alert) {
       return total;
     }
     if (!Array.isArray(attachment.alertId)) {

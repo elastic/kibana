@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
@@ -17,7 +18,7 @@ import {
 } from '../../file_share_service/errors';
 import type { FilesRouter } from '../types';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
-import { getDownloadHeadersForFile } from '../common';
+import { getDownloadHeadersForFile, getDownloadedFileName } from '../common';
 import { fileNameWithExt } from '../common_schemas';
 import { CreateHandler } from '../types';
 
@@ -44,8 +45,9 @@ const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
   try {
     const file = await fileService.asInternalUser().getByToken(token);
     const body: Readable = await file.downloadContent();
-    return res.ok({
+    return res.file({
       body,
+      filename: fileName ?? getDownloadedFileName(file),
       headers: getDownloadHeadersForFile({ file, fileName }),
     });
   } catch (e) {
@@ -73,6 +75,7 @@ export function register(router: FilesRouter) {
       validate: { ...rt },
       options: {
         authRequired: false,
+        access: 'public',
       },
     },
     handler

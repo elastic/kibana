@@ -27,6 +27,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
+import { NameInput } from '@kbn/visualization-ui-components';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
 import { deleteColumn, GenericIndexPatternColumn } from '../form_based';
@@ -47,9 +48,9 @@ import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid, getSamplingValue, isSamplingValueEnabled } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import type { FormBasedLayer } from '../types';
-import { FormatSelector } from './format_selector';
+import { FormatSelector, FormatSelectorProps } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
-import { TimeScaling } from './time_scaling';
+import { TimeScaling, TimeScalingProps } from './time_scaling';
 import { Filtering } from './filtering';
 import { ReducedTimeRange } from './reduced_time_range';
 import { AdvancedOptions } from './advanced_options';
@@ -65,10 +66,11 @@ import {
   DimensionEditorButtonGroups,
   CalloutWarning,
   DimensionEditorGroupsOptions,
+  isLayerChangingDueToDecimalsPercentile,
+  isLayerChangingDueToOtherBucketChange,
 } from './dimensions_editor_helpers';
 import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
-import { NameInput } from '../../../shared_components';
 import { ParamEditorProps } from '../operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';
 import { isColumn } from '../operations/definitions/helpers';
@@ -105,7 +107,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     isFullscreen,
     supportStaticValue,
     enableFormatSelector = true,
-    formatSelectorOptions,
     layerType,
     paramEditorCustomProps,
   } = props;
@@ -113,7 +114,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     data: props.data,
     fieldFormats: props.fieldFormats,
     uiSettings: props.uiSettings,
-    savedObjectsClient: props.savedObjectsClient,
     http: props.http,
     storage: props.storage,
     unifiedSearch: props.unifiedSearch,
@@ -126,10 +126,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const [temporaryState, setTemporaryState] = useState<TemporaryState>('none');
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+
   // If a layer has sampling disabled, assume the toast has already fired in the past
   const [hasRandomSamplingToastFired, setSamplingToastAsFired] = useState(
     !isSamplingValueEnabled(state.layers[layerId])
   );
+
+  const [hasRankingToastFired, setRankingToastAsFired] = useState(false);
+
+  const [hasOtherBucketToastFired, setHasOtherBucketToastFired] = useState(false);
 
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
@@ -139,8 +144,28 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const { euiTheme } = useEuiTheme();
 
   const updateLayer = useCallback(
-    (newLayer) => setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
+    (newLayer: Partial<FormBasedLayer>) =>
+      setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
     [layerId, setState]
+  );
+
+  const fireOrResetOtherBucketToast = useCallback(
+    (newLayer: FormBasedLayer) => {
+      if (isLayerChangingDueToOtherBucketChange(state.layers[layerId], newLayer)) {
+        props.notifications.toasts.add({
+          title: i18n.translate('xpack.lens.uiInfo.otherBucketChangeTitle', {
+            defaultMessage: '“Group remaining values as Other” disabled',
+          }),
+          text: i18n.translate('xpack.lens.uiInfo.otherBucketDisabled', {
+            defaultMessage:
+              'Values >= 1000 may slow performance. Re-enable the setting in “Advanced” options.',
+          }),
+        });
+      }
+      // resets the flag
+      setHasOtherBucketToastFired(!hasOtherBucketToastFired);
+    },
+    [layerId, props.notifications.toasts, state.layers, hasOtherBucketToastFired]
   );
 
   const fireOrResetRandomSamplingToast = useCallback(
@@ -163,6 +188,33 @@ export function DimensionEditor(props: DimensionEditorProps) {
       setSamplingToastAsFired(!hasRandomSamplingToastFired);
     },
     [hasRandomSamplingToastFired, layerId, props.notifications.toasts, state.layers]
+  );
+
+  const fireOrResetRankingToast = useCallback(
+    (newLayer: FormBasedLayer) => {
+      if (isLayerChangingDueToDecimalsPercentile(state.layers[layerId], newLayer)) {
+        props.notifications.toasts.add({
+          title: i18n.translate('xpack.lens.uiInfo.rankingResetTitle', {
+            defaultMessage: 'Ranking changed to alphabetical',
+          }),
+          text: i18n.translate('xpack.lens.uiInfo.rankingResetToAlphabetical', {
+            defaultMessage: 'To rank by percentile, use whole numbers only.',
+          }),
+        });
+      }
+      // reset the flag if the user switches to another supported operation
+      setRankingToastAsFired(!hasRankingToastFired);
+    },
+    [hasRankingToastFired, layerId, props.notifications.toasts, state.layers]
+  );
+
+  const fireOrResetToastChecks = useCallback(
+    (newLayer: FormBasedLayer) => {
+      fireOrResetRandomSamplingToast(newLayer);
+      fireOrResetRankingToast(newLayer);
+      fireOrResetOtherBucketToast(newLayer);
+    },
+    [fireOrResetRandomSamplingToast, fireOrResetRankingToast, fireOrResetOtherBucketToast]
   );
 
   const setStateWrapper = useCallback(
@@ -205,7 +257,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           }
           const newLayer = adjustColumnReferencesForChangedColumn(outputLayer, columnId);
           // Fire an info toast (eventually) on layer update
-          fireOrResetRandomSamplingToast(newLayer);
+          fireOrResetToastChecks(newLayer);
 
           return mergeLayer({
             state: prevState,
@@ -219,12 +271,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
         }
       );
     },
-    [columnId, fireOrResetRandomSamplingToast, layerId, setState, state.layers]
+    [columnId, fireOrResetToastChecks, layerId, setState, state.layers]
   );
-
-  const setIsCloseable = (isCloseable: boolean) => {
-    setState((prevState) => ({ ...prevState, isDimensionClosePrevented: !isCloseable }));
-  };
 
   const incompleteInfo = (state.layers[layerId].incompleteColumns ?? {})[columnId];
   const {
@@ -278,7 +326,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   // changes from the static value operation (which has to be a function)
   // Note: it forced a rerender at this point to avoid UI glitches in async updates (another hack upstream)
   // TODO: revisit this once we get rid of updateDatasourceAsync upstream
-  const moveDefinetelyToStaticValueAndUpdate = (
+  const moveDefinitelyToStaticValueAndUpdate = (
     setter:
       | FormBasedLayer
       | ((prevLayer: FormBasedLayer) => FormBasedLayer)
@@ -431,8 +479,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
       } else if (!compatibleWithCurrentField) {
         label = (
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs }}>
-              {label}
+            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs, minWidth: 0 }}>
+              <span
+                css={css`
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                `}
+              >
+                {label}
+              </span>
             </EuiFlexItem>
             {shouldDisplayDots && (
               <EuiFlexItem grow={false}>
@@ -444,7 +500,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   position="left"
                   size="s"
                   type="dot"
-                  color="warning"
+                  color={euiTheme.colors.warning}
                 />
               </EuiFlexItem>
             )}
@@ -504,6 +560,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                           helpPopoverContainer.current = null;
                         }
                       }}
+                      startServices={props.core}
                     >
                       <HelpComponent />
                     </WrappingHelpPopover>
@@ -657,7 +714,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     operationDefinitionMap,
     toggleFullscreen,
     isFullscreen,
-    setIsCloseable,
     paramEditorCustomProps,
     ReferenceEditor,
     dataSectionExtra: props.dataSectionExtra,
@@ -745,7 +801,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     compressed={true}
                     rowHeader="firstName"
                     columns={columnsSidebar}
-                    responsive={false}
+                    responsiveBreakpoint={false}
                   />
                 </EuiPanel>
               </EuiPopover>
@@ -784,6 +840,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 incompleteColumn={
                   layer.incompleteColumns ? layer.incompleteColumns[referenceId] : undefined
                 }
+                onResetIncomplete={() => {
+                  updateLayer({
+                    ...layer,
+                    // clean up the incomplete column data for the referenced id
+                    incompleteColumns: { ...layer.incompleteColumns, [referenceId]: undefined },
+                  });
+                }}
                 onDeleteColumn={() => {
                   updateLayer(
                     deleteColumn({
@@ -802,7 +865,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     field,
                     visualizationGroups: dimensionGroups,
                   });
-                  fireOrResetRandomSamplingToast(newLayer);
+                  fireOrResetToastChecks(newLayer);
                   updateLayer(newLayer);
                 }}
                 onChooseField={(choice: FieldChoiceWithOperationType) => {
@@ -837,7 +900,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   } else {
                     newLayer = setter;
                   }
-                  fireOrResetRandomSamplingToast(newLayer);
+                  fireOrResetToastChecks(newLayer);
                   return updateLayer(adjustColumnReferencesForChangedColumn(newLayer, referenceId));
                 }}
                 validation={validation}
@@ -851,7 +914,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 })}
                 isFullscreen={isFullscreen}
                 toggleFullscreen={toggleFullscreen}
-                setIsCloseable={setIsCloseable}
                 paramEditorCustomProps={paramEditorCustomProps}
                 {...services}
               />
@@ -913,7 +975,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         layer={state.layers[layerId]}
         activeData={props.activeData}
         paramEditorUpdater={
-          temporaryStaticValue ? moveDefinetelyToStaticValueAndUpdate : setStateWrapper
+          temporaryStaticValue ? moveDefinitelyToStaticValueAndUpdate : setStateWrapper
         }
         columnId={columnId}
         currentColumn={state.layers[layerId].columns[columnId]}
@@ -924,7 +986,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
         isFullscreen={isFullscreen}
         indexPattern={currentIndexPattern}
         toggleFullscreen={toggleFullscreen}
-        setIsCloseable={setIsCloseable}
         ReferenceEditor={ReferenceEditor}
         {...services}
       />
@@ -933,7 +994,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const ButtonGroupContent = showQuickFunctions ? quickFunctions : customParamEditor;
 
-  const onFormatChange = useCallback(
+  const onFormatChange = useCallback<FormatSelectorProps['onChange']>(
     (newFormat) => {
       updateLayer(
         updateColumnParam({
@@ -1027,8 +1088,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
         selectedColumn &&
           operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
             selectedColumn,
-            props.indexPatterns[state.layers[layerId].indexPatternId],
-            state.layers[layerId].columns
+            state.layers[layerId].columns,
+            props.indexPatterns[state.layers[layerId].indexPatternId]
           )
       ),
     [layerId, selectedColumn, props.indexPatterns, state.layers]
@@ -1038,7 +1099,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
    * Advanced options can cause side effects on other columns (i.e. formulas)
    * so before updating the layer the full insertOrReplaceColumn needs to be performed
    */
-  const updateAdvancedOption = useCallback(
+  const updateAdvancedOption = useCallback<TimeScalingProps['updateLayer']>(
     (newLayer) => {
       if (selectedColumn) {
         setStateWrapper(
@@ -1203,8 +1264,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         customLabel:
                           operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
                             selectedColumn,
-                            props.indexPatterns[state.layers[layerId].indexPatternId],
-                            state.layers[layerId].columns
+                            state.layers[layerId].columns,
+                            props.indexPatterns[state.layers[layerId].indexPatternId]
                           ) !== value,
                       },
                     },
@@ -1220,7 +1281,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               <FormatSelector
                 selectedColumn={selectedColumn}
                 onChange={onFormatChange}
-                options={formatSelectorOptions}
+                docLinks={props.core.docLinks}
               />
             ) : null}
           </>

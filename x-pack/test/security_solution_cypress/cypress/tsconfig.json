@@ -1,0 +1,48 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "include": ["**/*", "fixtures/**/*.json"],
+  "exclude": ["target/**/*"],
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["cypress", "cypress-file-upload", "cypress-real-events", "cypress-recurse", "node"]
+  },
+  "kbn_references": [
+    "@kbn/securitysolution-io-ts-alerting-types",
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/cypress-config",
+    // this cypress project uses code from the parent ts project
+    // in a way that can't be auto-matically deteceted at this time
+    // so we have to force the inclusion of this reference
+    {
+      "path": "../../../plugins/security_solution/tsconfig.json",
+      "force": true
+    },
+    "@kbn/rison",
+    "@kbn/datemath",
+    "@kbn/guided-onboarding-plugin",
+    "@kbn/alerting-plugin",
+    "@kbn/cases-plugin",
+    "@kbn/data-plugin",
+    "@kbn/core-http-common",
+    "@kbn/data-views-plugin",
+    "@kbn/es-archiver",
+    "@kbn/test",
+    "@kbn/tooling-log",
+    "@kbn/fleet-plugin",
+    "@kbn/cases-components",
+    "@kbn/security-solution-plugin",
+    "@kbn/dev-utils",
+    "@kbn/config-schema",
+    "@kbn/securitysolution-list-constants",
+    "@kbn/security-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/es-query",
+    "@kbn/ml-plugin",
+    "@kbn/license-management-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/alerts-ui-shared",
+    "@kbn/securitysolution-endpoint-exceptions-common",
+    "@kbn/repo-info",
+    "@kbn/elastic-assistant-common",
+  ]
+}

@@ -4,30 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import { useAsync } from 'react-use';
 import { InputsModelId } from '../../store/inputs/constants';
-import { useKibana } from '../../lib/kibana/kibana_react';
 import { ModalInspectQuery } from '../inspect/modal';
 
 import { useInspect } from '../inspect/use_inspect';
 import { useLensAttributes } from './use_lens_attributes';
-import { useAddToExistingCase } from './use_add_to_existing_case';
-import { useAddToNewCase } from './use_add_to_new_case';
+
 import type { VisualizationActionsProps } from './types';
-import {
-  ADD_TO_EXISTING_CASE,
-  ADD_TO_NEW_CASE,
-  INSPECT,
-  MORE_ACTIONS,
-  OPEN_IN_LENS,
-} from './translations';
+import { MORE_ACTIONS } from './translations';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from './utils';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { DEFAULT_ACTIONS, useActions, VISUALIZATION_CONTEXT_MENU_TRIGGER } from './use_actions';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 const Wrapper = styled.div`
   &.viz-actions {
@@ -58,11 +52,9 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   title: inspectTitle,
   scopeId = SourcererScopeName.default,
   stackByField,
-  withDefaultActions = true,
+  withActions = DEFAULT_ACTIONS,
+  casesAttachmentMetadata,
 }) => {
-  const { lens } = useKibana().services;
-
-  const { canUseEditor, navigateToPrefilledEditor } = lens;
   const [isPopoverOpen, setPopover] = useState(false);
   const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
 
@@ -85,36 +77,6 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   });
 
   const dataTestSubj = `stat-${queryId}`;
-
-  const { disabled: isAddToExistingCaseDisabled, onAddToExistingCaseClicked } =
-    useAddToExistingCase({
-      onAddToCaseClicked: closePopover,
-      lensAttributes: attributes,
-      timeRange: timerange,
-    });
-
-  const { onAddToNewCaseClicked, disabled: isAddToNewCaseDisabled } = useAddToNewCase({
-    onClick: closePopover,
-    timeRange: timerange,
-    lensAttributes: attributes,
-  });
-
-  const onOpenInLens = useCallback(() => {
-    closePopover();
-    if (!timerange || !attributes) {
-      return;
-    }
-    navigateToPrefilledEditor(
-      {
-        id: '',
-        timeRange: timerange,
-        attributes,
-      },
-      {
-        openInNewTab: true,
-      }
-    );
-  }, [attributes, navigateToPrefilledEditor, timerange]);
 
   const onOpenInspectModal = useCallback(() => {
     closePopover();
@@ -146,81 +108,34 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     queryId,
   });
 
-  const disabledOpenInLens = useMemo(
-    () => !canUseEditor() || attributes == null,
-    [attributes, canUseEditor]
+  const inspectActionProps = useMemo(
+    () => ({
+      handleInspectClick: handleInspectButtonClick,
+      isInspectButtonDisabled: disableInspectButton,
+    }),
+    [disableInspectButton, handleInspectButtonClick]
   );
 
-  const items = useMemo(() => {
-    const context = {} as ActionExecutionContext<object>;
-    const extraActionsItems =
-      extraActions?.map((item: Action) => {
-        return (
-          <EuiContextMenuItem
-            icon={item?.getIconType(context)}
-            key={item.id}
-            onClick={() => item.execute(context)}
-            data-test-subj={`viz-actions-${item.id}`}
-          >
-            {item.getDisplayName(context)}
-          </EuiContextMenuItem>
-        );
-      }) ?? [];
-    return [
-      ...(extraActionsItems ? extraActionsItems : []),
-      ...(withDefaultActions
-        ? [
-            <EuiContextMenuItem
-              icon="inspect"
-              key="visualizationActionsInspect"
-              onClick={handleInspectButtonClick}
-              disabled={disableInspectButton}
-              data-test-subj="viz-actions-inspect"
-            >
-              {INSPECT}
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              disabled={isAddToNewCaseDisabled}
-              icon="plusInCircle"
-              key="visualizationActionsAddToNewCase"
-              onClick={onAddToNewCaseClicked}
-              data-test-subj="viz-actions-add-to-new-case"
-            >
-              {ADD_TO_NEW_CASE}
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              disabled={isAddToExistingCaseDisabled}
-              data-test-subj="viz-actions-add-to-existing-case"
-              icon="plusInCircle"
-              key="visualizationActionsAddToExistingCase"
-              onClick={onAddToExistingCaseClicked}
-            >
-              {ADD_TO_EXISTING_CASE}
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              icon="visArea"
-              key="visualizationActionsOpenInLens"
-              data-test-subj="viz-actions-open-in-lens"
-              disabled={disabledOpenInLens}
-              onClick={onOpenInLens}
-            >
-              {OPEN_IN_LENS}
-            </EuiContextMenuItem>,
-          ]
-        : []),
-    ];
-  }, [
-    disableInspectButton,
-    disabledOpenInLens,
+  const contextMenuActions = useActions({
+    attributes,
     extraActions,
-    handleInspectButtonClick,
-    isAddToExistingCaseDisabled,
-    isAddToNewCaseDisabled,
-    onAddToExistingCaseClicked,
-    onAddToNewCaseClicked,
-    onOpenInLens,
-    withDefaultActions,
-  ]);
+    inspectActionProps,
+    timeRange: timerange,
+    withActions,
+    lensMetadata: casesAttachmentMetadata,
+  });
+
+  const panels = useAsync(
+    () =>
+      buildContextMenuForActions({
+        actions: contextMenuActions.map((action) => ({
+          action,
+          context: {},
+          trigger: VISUALIZATION_CONTEXT_MENU_TRIGGER,
+        })),
+      }),
+    [contextMenuActions]
+  );
 
   const button = useMemo(
     () => (
@@ -237,7 +152,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
 
   return (
     <Wrapper className={className}>
-      {items.length > 0 && (
+      {panels.value && panels.value.length > 0 && (
         <EuiPopover
           button={button}
           isOpen={isPopoverOpen}
@@ -247,7 +162,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
           panelClassName="withHoverActions__popover"
           data-test-subj="viz-actions-popover"
         >
-          <EuiContextMenuPanel data-test-subj="viz-actions-panel" size="s" items={items} />
+          <EuiContextMenu data-test-subj="viz-actions-panel" size="s" panels={panels.value} />
         </EuiPopover>
       )}
       {isInspectModalOpen && request !== null && response !== null && (

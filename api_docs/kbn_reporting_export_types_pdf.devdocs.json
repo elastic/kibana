@@ -1,0 +1,844 @@
+{
+  "id": "@kbn/reporting-export-types-pdf",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/reporting-export-types-pdf",
+        "id": "def-server.PdfExportType",
+        "type": "Class",
+        "tags": [],
+        "label": "PdfExportType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-export-types-pdf",
+            "scope": "server",
+            "docId": "kibKbnReportingExportTypesPdfPluginApi",
+            "section": "def-server.PdfExportType",
+            "text": "PdfExportType"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/reporting-server",
+            "scope": "server",
+            "docId": "kibKbnReportingServerPluginApi",
+            "section": "def-server.ExportType",
+            "text": "ExportType"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/reporting-export-types-pdf-common",
+            "scope": "common",
+            "docId": "kibKbnReportingExportTypesPdfCommonPluginApi",
+            "section": "def-common.JobParamsPDFV2",
+            "text": "JobParamsPDFV2"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/reporting-export-types-pdf-common",
+            "scope": "common",
+            "docId": "kibKbnReportingExportTypesPdfCommonPluginApi",
+            "section": "def-common.TaskPayloadPDFV2",
+            "text": "TaskPayloadPDFV2"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/reporting-server",
+            "scope": "server",
+            "docId": "kibKbnReportingServerPluginApi",
+            "section": "def-server.BaseExportTypeSetupDeps",
+            "text": "BaseExportTypeSetupDeps"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/reporting-server",
+            "scope": "server",
+            "docId": "kibKbnReportingServerPluginApi",
+            "section": "def-server.BaseExportTypeStartDeps",
+            "text": "BaseExportTypeStartDeps"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfExportType.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfExportType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfExportType.jobType",
+            "type": "string",
+            "tags": [],
+            "label": "jobType",
+            "description": [],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfExportType.jobContentEncoding",
+            "type": "string",
+            "tags": [],
+            "label": "jobContentEncoding",
+            "description": [],
+            "signature": [
+              "\"base64\""
+            ],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfExportType.jobContentExtension",
+            "type": "string",
+            "tags": [],
+            "label": "jobContentExtension",
+            "description": [],
+            "signature": [
+              "\"pdf\""
+            ],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfExportType.validLicenses",
+            "type": "Array",
+            "tags": [],
+            "label": "validLicenses",
+            "description": [],
+            "signature": [
+              "(\"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\")[]"
+            ],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfExportType.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfExportType.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "[core: ",
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-server.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<object, unknown>, config: Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ByteSizeValue",
+                    "text": "ByteSizeValue"
+                  },
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, logger: ",
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  },
+                  ", context: ",
+                  {
+                    "pluginId": "@kbn/core-plugins-server",
+                    "scope": "server",
+                    "docId": "kibKbnCorePluginsServerPluginApi",
+                    "section": "def-server.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ByteSizeValue",
+                    "text": "ByteSizeValue"
+                  },
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfExportType.createJob",
+            "type": "Function",
+            "tags": [],
+            "label": "createJob",
+            "description": [],
+            "signature": [
+              "({ locatorParams, ...jobParams }: ",
+              {
+                "pluginId": "@kbn/reporting-export-types-pdf-common",
+                "scope": "common",
+                "docId": "kibKbnReportingExportTypesPdfCommonPluginApi",
+                "section": "def-common.JobParamsPDFV2",
+                "text": "JobParamsPDFV2"
+              },
+              ") => Promise<{ locatorParams: ",
+              "LocatorParams",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">[]; isDeprecated: boolean; browserTimezone: string; forceNow: string; layout: { id?: ",
+              {
+                "pluginId": "screenshotting",
+                "scope": "common",
+                "docId": "kibScreenshottingPluginApi",
+                "section": "def-common.LayoutType",
+                "text": "LayoutType"
+              },
+              " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "LayoutSelectorDictionary",
+              "> | undefined; zoom?: number | undefined; }; objectType: string; title: string; version: string; pagingStrategy?: ",
+              "CsvPagingStrategy",
+              " | undefined; }>"
+            ],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfExportType.createJob.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "{ locatorParams, ...jobParams }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/reporting-export-types-pdf-common",
+                    "scope": "common",
+                    "docId": "kibKbnReportingExportTypesPdfCommonPluginApi",
+                    "section": "def-common.JobParamsPDFV2",
+                    "text": "JobParamsPDFV2"
+                  }
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "jobParams"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfExportType.runTask",
+            "type": "Function",
+            "tags": [],
+            "label": "runTask",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "(jobId: string, payload: ",
+              {
+                "pluginId": "@kbn/reporting-export-types-pdf-common",
+                "scope": "common",
+                "docId": "kibKbnReportingExportTypesPdfCommonPluginApi",
+                "section": "def-common.TaskPayloadPDFV2",
+                "text": "TaskPayloadPDFV2"
+              },
+              ", taskInstanceFields: ",
+              "TaskInstanceFields",
+              ", cancellationToken: ",
+              {
+                "pluginId": "@kbn/reporting-common",
+                "scope": "common",
+                "docId": "kibKbnReportingCommonPluginApi",
+                "section": "def-common.CancellationToken",
+                "text": "CancellationToken"
+              },
+              ", stream: ",
+              "Writable",
+              ") => Promise<",
+              "TaskRunResult",
+              ">"
+            ],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfExportType.runTask.$1",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfExportType.runTask.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "payload",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/reporting-export-types-pdf-common",
+                    "scope": "common",
+                    "docId": "kibKbnReportingExportTypesPdfCommonPluginApi",
+                    "section": "def-common.TaskPayloadPDFV2",
+                    "text": "TaskPayloadPDFV2"
+                  }
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfExportType.runTask.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "taskInstanceFields",
+                "description": [],
+                "signature": [
+                  "TaskInstanceFields"
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfExportType.runTask.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "cancellationToken",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/reporting-common",
+                    "scope": "common",
+                    "docId": "kibKbnReportingCommonPluginApi",
+                    "section": "def-common.CancellationToken",
+                    "text": "CancellationToken"
+                  }
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfExportType.runTask.$5",
+                "type": "Object",
+                "tags": [],
+                "label": "stream",
+                "description": [],
+                "signature": [
+                  "Writable"
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-export-types-pdf",
+        "id": "def-server.PdfV1ExportType",
+        "type": "Class",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "PdfV1ExportType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-export-types-pdf",
+            "scope": "server",
+            "docId": "kibKbnReportingExportTypesPdfPluginApi",
+            "section": "def-server.PdfV1ExportType",
+            "text": "PdfV1ExportType"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/reporting-server",
+            "scope": "server",
+            "docId": "kibKbnReportingServerPluginApi",
+            "section": "def-server.ExportType",
+            "text": "ExportType"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/reporting-export-types-pdf-common",
+            "scope": "common",
+            "docId": "kibKbnReportingExportTypesPdfCommonPluginApi",
+            "section": "def-common.JobParamsPDFDeprecated",
+            "text": "JobParamsPDFDeprecated"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/reporting-export-types-pdf-common",
+            "scope": "common",
+            "docId": "kibKbnReportingExportTypesPdfCommonPluginApi",
+            "section": "def-common.TaskPayloadPDF",
+            "text": "TaskPayloadPDF"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/reporting-server",
+            "scope": "server",
+            "docId": "kibKbnReportingServerPluginApi",
+            "section": "def-server.BaseExportTypeSetupDeps",
+            "text": "BaseExportTypeSetupDeps"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/reporting-server",
+            "scope": "server",
+            "docId": "kibKbnReportingServerPluginApi",
+            "section": "def-server.BaseExportTypeStartDeps",
+            "text": "BaseExportTypeStartDeps"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/server/core.ts"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/server/core.ts"
+          }
+        ],
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfV1ExportType.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfV1ExportType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfV1ExportType.jobType",
+            "type": "string",
+            "tags": [],
+            "label": "jobType",
+            "description": [],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfV1ExportType.jobContentEncoding",
+            "type": "string",
+            "tags": [],
+            "label": "jobContentEncoding",
+            "description": [],
+            "signature": [
+              "\"base64\" | undefined"
+            ],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfV1ExportType.jobContentExtension",
+            "type": "string",
+            "tags": [],
+            "label": "jobContentExtension",
+            "description": [],
+            "signature": [
+              "\"pdf\""
+            ],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfV1ExportType.validLicenses",
+            "type": "Array",
+            "tags": [],
+            "label": "validLicenses",
+            "description": [],
+            "signature": [
+              "(\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\")[]"
+            ],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfV1ExportType.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfV1ExportType.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "[core: ",
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-server.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<object, unknown>, config: Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ByteSizeValue",
+                    "text": "ByteSizeValue"
+                  },
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, logger: ",
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  },
+                  ", context: ",
+                  {
+                    "pluginId": "@kbn/core-plugins-server",
+                    "scope": "server",
+                    "docId": "kibKbnCorePluginsServerPluginApi",
+                    "section": "def-server.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ByteSizeValue",
+                    "text": "ByteSizeValue"
+                  },
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfV1ExportType.createJob",
+            "type": "Function",
+            "tags": [],
+            "label": "createJob",
+            "description": [],
+            "signature": [
+              "({ relativeUrls, ...jobParams }: ",
+              {
+                "pluginId": "@kbn/reporting-export-types-pdf-common",
+                "scope": "common",
+                "docId": "kibKbnReportingExportTypesPdfCommonPluginApi",
+                "section": "def-common.JobParamsPDFDeprecated",
+                "text": "JobParamsPDFDeprecated"
+              },
+              ") => Promise<{ isDeprecated: boolean; forceNow: string; objects: { relativeUrl: string; }[]; layout: { id?: ",
+              {
+                "pluginId": "screenshotting",
+                "scope": "common",
+                "docId": "kibScreenshottingPluginApi",
+                "section": "def-common.LayoutType",
+                "text": "LayoutType"
+              },
+              " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "LayoutSelectorDictionary",
+              "> | undefined; zoom?: number | undefined; }; browserTimezone: string; objectType: string; title: string; version: string; pagingStrategy?: ",
+              "CsvPagingStrategy",
+              " | undefined; }>"
+            ],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfV1ExportType.createJob.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "{ relativeUrls, ...jobParams }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/reporting-export-types-pdf-common",
+                    "scope": "common",
+                    "docId": "kibKbnReportingExportTypesPdfCommonPluginApi",
+                    "section": "def-common.JobParamsPDFDeprecated",
+                    "text": "JobParamsPDFDeprecated"
+                  }
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-pdf",
+            "id": "def-server.PdfV1ExportType.runTask",
+            "type": "Function",
+            "tags": [],
+            "label": "runTask",
+            "description": [],
+            "signature": [
+              "(jobId: string, job: ",
+              {
+                "pluginId": "@kbn/reporting-export-types-pdf-common",
+                "scope": "common",
+                "docId": "kibKbnReportingExportTypesPdfCommonPluginApi",
+                "section": "def-common.TaskPayloadPDF",
+                "text": "TaskPayloadPDF"
+              },
+              ", taskInstanceFields: ",
+              "TaskInstanceFields",
+              ", cancellationToken: ",
+              {
+                "pluginId": "@kbn/reporting-common",
+                "scope": "common",
+                "docId": "kibKbnReportingCommonPluginApi",
+                "section": "def-common.CancellationToken",
+                "text": "CancellationToken"
+              },
+              ", stream: ",
+              "Writable",
+              ") => Promise<",
+              "TaskRunResult",
+              ">"
+            ],
+            "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfV1ExportType.runTask.$1",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfV1ExportType.runTask.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "job",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/reporting-export-types-pdf-common",
+                    "scope": "common",
+                    "docId": "kibKbnReportingExportTypesPdfCommonPluginApi",
+                    "section": "def-common.TaskPayloadPDF",
+                    "text": "TaskPayloadPDF"
+                  }
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfV1ExportType.runTask.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "taskInstanceFields",
+                "description": [],
+                "signature": [
+                  "TaskInstanceFields"
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfV1ExportType.runTask.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "cancellationToken",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/reporting-common",
+                    "scope": "common",
+                    "docId": "kibKbnReportingCommonPluginApi",
+                    "section": "def-common.CancellationToken",
+                    "text": "CancellationToken"
+                  }
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfV1ExportType.runTask.$5",
+                "type": "Object",
+                "tags": [],
+                "label": "stream",
+                "description": [],
+                "signature": [
+                  "Writable"
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

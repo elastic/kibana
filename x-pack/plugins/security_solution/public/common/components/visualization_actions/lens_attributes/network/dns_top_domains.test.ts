@@ -14,7 +14,7 @@ import { useLensAttributes } from '../../use_lens_attributes';
 
 import { getDnsTopDomainsLensAttributes } from './dns_top_domains';
 
-jest.mock('../../../../containers/sourcerer', () => ({
+jest.mock('../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',
@@ -156,5 +156,13 @@ describe('getDnsTopDomainsLensAttributes', () => {
         "query": "host.name: *",
       }
     `);
+  });
+
+  it('should render values in legend', () => {
+    expect(result?.current?.state?.visualization).toEqual(
+      expect.objectContaining({
+        legend: expect.objectContaining({ legendStats: ['currentAndLastValue'] }),
+      })
+    );
   });
 });

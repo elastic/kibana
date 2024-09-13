@@ -32,6 +32,8 @@
     "@kbn/core-http-server",
     "@kbn/core-http-server-mocks",
     "@kbn/core-saved-objects-migration-server-internal",
+    "@kbn/utility-types",
+    "@kbn/core-security-common",
   ],
   "exclude": [
     "target/**/*",

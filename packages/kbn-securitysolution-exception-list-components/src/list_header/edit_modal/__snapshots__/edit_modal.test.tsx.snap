@@ -14,13 +14,15 @@ Object {
         data-eui="EuiFocusTrap"
       >
         <div
+          aria-modal="true"
           class="euiModal emotion-euiModal-defaultMaxWidth"
           data-test-subj="EditModal"
+          role="dialog"
           tabindex="0"
         >
           <button
             aria-label="Closes this modal window"
-            class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
+            class="euiButtonIcon euiModal__closeIcon emotion-euiButtonIcon-xs-empty-text-euiModal__closeIcon"
             type="button"
           >
             <span
@@ -52,7 +54,7 @@ Object {
                 id="modalForm_generated-id"
               >
                 <div
-                  class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+                  class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
                   id="generated-id-row"
                 >
                   <div
@@ -60,7 +62,7 @@ Object {
                   >
                     <label
                       aria-invalid="false"
-                      class="euiFormLabel euiFormRow__label"
+                      class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
                       for="generated-id"
                       id="generated-id-label"
                     >
@@ -71,14 +73,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout euiFormControlLayout--fullWidth"
+                      class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
                     >
                       <div
-                        class="euiFormControlLayout__childrenWrapper"
+                        class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          aria-invalid="false"
-                          class="euiFieldText euiFieldText--fullWidth"
+                          class="euiFieldText emotion-euiFieldText-fullWidth"
                           data-test-subj="editModalNameTextField"
                           id="generated-id"
                           name="name"
@@ -90,14 +91,14 @@ Object {
                   </div>
                 </div>
                 <div
-                  class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+                  class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
                   id="generated-id-row"
                 >
                   <div
                     class="euiFormRow__labelWrapper"
                   >
                     <label
-                      class="euiFormLabel euiFormRow__label"
+                      class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
                       for="generated-id"
                       id="generated-id-label"
                     >
@@ -107,15 +108,23 @@ Object {
                   <div
                     class="euiFormRow__fieldWrapper"
                   >
-                    <textarea
-                      class="euiTextArea euiTextArea--resizeVertical euiTextArea--fullWidth"
-                      data-test-subj="editModalDescriptionTextField"
-                      id="generated-id"
-                      name="description"
-                      rows="6"
+                    <div
+                      class="euiFormControlLayout euiFormControlLayout--euiTextArea emotion-euiFormControlLayout-fullWidth-euiTextArea"
                     >
-                      list description
-                    </textarea>
+                      <div
+                        class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+                      >
+                        <textarea
+                          class="euiTextArea emotion-euiTextArea-vertical-fullWidth"
+                          data-test-subj="editModalDescriptionTextField"
+                          id="generated-id"
+                          name="description"
+                          rows="6"
+                        >
+                          list description
+                        </textarea>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </form>
@@ -125,22 +134,22 @@ Object {
             class="euiModalFooter emotion-euiModalFooter"
           >
             <button
-              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
               data-test-subj="editModalCancelBtn"
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   Cancel
                 </span>
               </span>
             </button>
             <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
               data-test-subj="editModalSaveBtn"
               form="modalForm_generated-id"
               type="submit"

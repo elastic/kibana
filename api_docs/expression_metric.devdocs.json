@@ -16,9 +16,9 @@
           "<",
           {
             "pluginId": "@kbn/core-theme-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.CoreTheme",
+            "section": "def-public.CoreTheme",
             "text": "CoreTheme"
           },
           ">) => () => ",
@@ -55,9 +55,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
+                "section": "def-public.CoreTheme",
                 "text": "CoreTheme"
               },
               ">"
@@ -82,9 +82,9 @@
           "(core: ",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreSetup",
+            "section": "def-public.CoreSetup",
             "text": "CoreSetup"
           },
           "<object, unknown>) => () => ",
@@ -119,9 +119,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>"
@@ -192,7 +192,7 @@
         "label": "metricFunction",
         "description": [],
         "signature": [
-          "() => { name: \"metric\"; aliases: never[]; type: \"render\"; inputTypes: (\"string\" | \"number\" | \"null\")[]; help: any; args: { label: { types: \"string\"[]; aliases: string[]; help: any; default: string; }; labelFont: { types: \"style\"[]; help: any; default: string; }; metricFont: { types: \"style\"[]; help: any; default: string; }; metricFormat: { types: \"string\"[]; aliases: string[]; help: any; }; }; fn: (input: ",
+          "() => { name: \"metric\"; aliases: never[]; type: \"render\"; inputTypes: (\"string\" | \"number\" | \"null\")[]; help: string; args: { label: { types: \"string\"[]; aliases: string[]; help: string; default: string; }; labelFont: { types: \"style\"[]; help: string; default: string; }; metricFont: { types: \"style\"[]; help: string; default: string; }; metricFormat: { types: \"string\"[]; aliases: string[]; help: string; }; }; fn: (input: ",
           {
             "pluginId": "expressionMetric",
             "scope": "common",
@@ -528,14 +528,6 @@
             "docId": "kibInspectorPluginApi",
             "section": "def-common.Adapters",
             "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
           },
           ">>"
         ],

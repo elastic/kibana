@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import { calendarSchema, calendarIdSchema, calendarIdsSchema } from './schemas/calendars_schema';
-import { CalendarManager, Calendar, FormCalendar } from '../models/calendar';
+import type { Calendar, FormCalendar } from '../models/calendar';
+import { CalendarManager } from '../models/calendar';
 import type { MlClient } from '../lib/ml_client';
 
 function getAllCalendars(mlClient: MlClient) {
@@ -42,174 +44,173 @@ function getCalendarsByIds(mlClient: MlClient, calendarIds: string[]) {
 }
 
 export function calendars({ router, routeGuard }: RouteInitialization) {
-  /**
-   * @apiGroup Calendars
-   *
-   * @api {get} /api/ml/calendars Gets calendars
-   * @apiName GetCalendars
-   * @apiDescription Gets calendars - size limit has been explicitly set to 1000
-   */
-  router.get(
-    {
-      path: '/api/ml/calendars',
-      validate: false,
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/calendars`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canGetCalendars'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
-      try {
-        const resp = await getAllCalendars(mlClient);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
+      summary: 'Gets calendars',
+      description: 'Gets calendars - size limit has been explicitly set to 10000',
     })
-  );
-
-  /**
-   * @apiGroup Calendars
-   *
-   * @api {get} /api/ml/calendars/:calendarIds Gets a calendar
-   * @apiName GetCalendarById
-   * @apiDescription Gets calendar by id
-   *
-   * @apiSchema (params) calendarIdsSchema
-   */
-  router.get(
-    {
-      path: '/api/ml/calendars/{calendarIds}',
-      validate: {
-        params: calendarIdsSchema,
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
       },
-      options: {
-        tags: ['access:ml:canGetCalendars'],
-      },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      let returnValue;
-      try {
-        const calendarIds = request.params.calendarIds.split(',');
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
+        try {
+          const resp = await getAllCalendars(mlClient);
 
-        if (calendarIds.length === 1) {
-          returnValue = await getCalendar(mlClient, calendarIds[0]);
-        } else {
-          returnValue = await getCalendarsByIds(mlClient, calendarIds);
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
         }
+      })
+    );
 
-        return response.ok({
-          body: returnValue,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
-    })
-  );
-
-  /**
-   * @apiGroup Calendars
-   *
-   * @api {put} /api/ml/calendars Creates a calendar
-   * @apiName PutCalendars
-   * @apiDescription Creates a calendar
-   *
-   * @apiSchema (body) calendarSchema
-   */
-  router.put(
-    {
-      path: '/api/ml/calendars',
-      validate: {
-        body: calendarSchema,
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/calendars/{calendarIds}`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetCalendars'],
       },
+      summary: 'Gets a calendar',
+      description: 'Gets a calendar by id',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: calendarIdsSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        let returnValue;
+        try {
+          const calendarIds = request.params.calendarIds.split(',');
+
+          if (calendarIds.length === 1) {
+            returnValue = await getCalendar(mlClient, calendarIds[0]);
+          } else {
+            returnValue = await getCalendarsByIds(mlClient, calendarIds);
+          }
+
+          return response.ok({
+            body: returnValue,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .put({
+      path: `${ML_INTERNAL_BASE_PATH}/calendars`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canCreateCalendar'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const body = request.body;
-        // @ts-expect-error event interface incorrect
-        const resp = await newCalendar(mlClient, body);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
+      summary: 'Creates a calendar',
+      description: 'Creates a calendar',
     })
-  );
-
-  /**
-   * @apiGroup Calendars
-   *
-   * @api {put} /api/ml/calendars/:calendarId Updates a calendar
-   * @apiName UpdateCalendarById
-   * @apiDescription Updates a calendar
-   *
-   * @apiSchema (params) calendarIdSchema
-   * @apiSchema (body) calendarSchema
-   */
-  router.put(
-    {
-      path: '/api/ml/calendars/{calendarId}',
-      validate: {
-        params: calendarIdSchema,
-        body: calendarSchema,
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: calendarSchema,
+          },
+        },
       },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const body = request.body;
+          // @ts-expect-error event interface incorrect
+          const resp = await newCalendar(mlClient, body);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .put({
+      path: `${ML_INTERNAL_BASE_PATH}/calendars/{calendarId}`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canCreateCalendar'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const { calendarId } = request.params;
-        const body = request.body;
-        // @ts-expect-error event interface incorrect
-        const resp = await updateCalendar(mlClient, calendarId, body);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
+      summary: 'Updates a calendar',
+      description: 'Updates a calendar',
     })
-  );
-
-  /**
-   * @apiGroup Calendars
-   *
-   * @api {delete} /api/ml/calendars/:calendarId Deletes a calendar
-   * @apiName DeleteCalendarById
-   * @apiDescription Deletes a calendar
-   *
-   * @apiSchema (params) calendarIdSchema
-   */
-  router.delete(
-    {
-      path: '/api/ml/calendars/{calendarId}',
-      validate: {
-        params: calendarIdSchema,
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: calendarIdSchema,
+            body: calendarSchema,
+          },
+        },
       },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const { calendarId } = request.params;
+          const body = request.body;
+          // @ts-expect-error event interface incorrect
+          const resp = await updateCalendar(mlClient, calendarId, body);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .delete({
+      path: `${ML_INTERNAL_BASE_PATH}/calendars/{calendarId}`,
+      access: 'internal',
       options: {
         tags: ['access:ml:canDeleteCalendar'],
       },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        const { calendarId } = request.params;
-        const resp = await deleteCalendar(mlClient, calendarId);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
+      summary: 'Deletes a calendar',
+      description: 'Deletes a calendar',
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: calendarIdSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+        try {
+          const { calendarId } = request.params;
+          const resp = await deleteCalendar(mlClient, calendarId);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
 }

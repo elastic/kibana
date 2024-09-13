@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import React, { memo, FC, createContext, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, createContext, useMemo } from 'react';
 
 import { EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { type DropDownOptionWithField } from '../step_define/common/get_pivot_dropdown_options';
-import { DropDownOption } from '../../../../common';
+import type { DropDownOption } from '../../../../common';
 import { useAppDependencies } from '../../../../app_dependencies';
 import { AggListForm } from '../aggregation_list';
 import { DropDown } from '../aggregation_dropdown';
 import { GroupByListForm } from '../group_by_list';
-import { StepDefineFormHook } from '../step_define';
+import type { StepDefineFormHook } from '../step_define';
 
 export const PivotConfigurationContext = createContext<
   StepDefineFormHook['pivotConfig'] | undefined
@@ -28,7 +29,8 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
     const {
       ml: { useFieldStatsTrigger, FieldStatsInfoButton },
     } = useAppDependencies();
-    const { handleFieldStatsButtonClick, closeFlyout, renderOption } = useFieldStatsTrigger();
+    const { handleFieldStatsButtonClick, closeFlyout, renderOption, populatedFields } =
+      useFieldStatsTrigger();
 
     const {
       addAggregation,
@@ -52,6 +54,7 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
             // for more robust rendering
             label: (
               <FieldStatsInfoButton
+                isEmpty={populatedFields && !populatedFields.has(field.id)}
                 field={field}
                 label={label}
                 onButtonClick={handleFieldStatsButtonClick}
@@ -61,7 +64,7 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
           };
           return aggOption;
         }),
-      [aggOptions, FieldStatsInfoButton, handleFieldStatsButtonClick]
+      [aggOptions, FieldStatsInfoButton, handleFieldStatsButtonClick, populatedFields]
     );
     return (
       <PivotConfigurationContext.Provider value={{ actions, state }}>

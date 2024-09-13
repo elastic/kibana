@@ -8,21 +8,25 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+
 import { CustomAssetsAccordion } from './components/custom_assets_accordion';
 import type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
 import { useStartServices } from './hooks';
 import type { PackageAssetsComponent } from './types';
 
 export const CustomLogsAssetsExtension: PackageAssetsComponent = () => {
-  const { http } = useStartServices();
-  const logStreamUrl = http.basePath.prepend('/app/logs/stream');
+  const {
+    share: { url },
+  } = useStartServices();
+  const { logsLocator } = getLogsLocatorsFromUrlService(url);
 
   const views: CustomAssetsAccordionProps['views'] = [
     {
       name: i18n.translate('xpack.fleet.assets.customLogs.name', { defaultMessage: 'Logs' }),
-      url: logStreamUrl,
+      url: logsLocator.getRedirectUrl({}),
       description: i18n.translate('xpack.fleet.assets.customLogs.description', {
-        defaultMessage: 'View Custom logs data in Logs app',
+        defaultMessage: 'View Custom logs data in Logs Explorer',
       }),
     },
   ];

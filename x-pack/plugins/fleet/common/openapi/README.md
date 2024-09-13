@@ -1,12 +1,12 @@
-# OpenAPI (Experimental)
-
-> **_NOTE:_** This spec is experimental and may be incomplete or change later.
+# OpenAPI
 
 The current self-contained spec file, available [as JSON](https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/fleet/common/openapi/bundled.json) or [as YAML](https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/fleet/common/openapi/bundled.yaml), can be used for online tools like those found at https://openapi.tools/.
 
 For example, [click here to view the specification in the Swagger UI](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/fleet/common/openapi/bundled.json).
 
 A guide about the openApi specification can be found at [https://swagger.io/docs/specification/about/](https://swagger.io/docs/specification/about/).
+
+Fleet API docs: https://www.elastic.co/guide/en/fleet/master/fleet-apis.html
 
 ## The `openapi` folder
 
@@ -22,18 +22,18 @@ A guide about the openApi specification can be found at [https://swagger.io/docs
 It is possible to validate the docs before bundling them with the following command:
 
 ```shell
-$ npx @redocly/cli lint entrypoint.yaml
+npx @redocly/cli lint entrypoint.yaml
 ```
 
 Then generate the `bundled` files with the following:
 
 ```shell
-$ npx @redocly/openapi-cli bundle --ext yaml --output bundled.yaml entrypoint.yaml
-$ npx @redocly/openapi-cli bundle --ext json --output bundled.json entrypoint.yaml
+npx @redocly/openapi-cli bundle --ext yaml --output bundled.yaml entrypoint.yaml
+npx @redocly/openapi-cli bundle --ext json --output bundled.json entrypoint.yaml
 ```
 
 Validate the resulting bundle via
 
 ```shell
-$ npx @redocly/cli lint bundled.json
+npx @redocly/cli lint bundled.json
 ```

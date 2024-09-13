@@ -136,6 +136,7 @@ function renderToolsRight(
   return [
     <NewFilterButton key="new_filter_list" canCreateFilter={canCreateFilter} />,
     <DeleteFilterListModal
+      key="delete_filter_list"
       canDeleteFilter={canDeleteFilter}
       selectedFilterLists={selectedFilterLists}
       refreshFilterLists={refreshFilterLists}
@@ -212,7 +213,6 @@ export function FilterListsTable({
             pagination={true}
             sorting={sorting}
             selection={tableSelection}
-            isSelectable={true}
             data-test-subj="mlFilterListsTable"
             rowProps={(item) => ({
               'data-test-subj': `mlFilterListRow row-${item.filter_id}`,

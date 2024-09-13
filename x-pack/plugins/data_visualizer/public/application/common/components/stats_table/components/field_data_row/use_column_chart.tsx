@@ -11,20 +11,19 @@ import React from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
 
-import { euiPaletteColorBlind, EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-
 import {
   isNumericChartData,
   isOrdinalChartData,
-  ChartData,
-  ChartDataItem,
-  NumericDataItem,
-  OrdinalDataItem,
-} from './field_histograms';
+  type ChartData,
+  type ChartDataItem,
+  type NumericDataItem,
+  type OrdinalDataItem,
+} from '@kbn/ml-data-grid';
 
 const NON_AGGREGATABLE = 'non-aggregatable';
 

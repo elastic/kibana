@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import { Subscription } from 'rxjs';
 
 import { PLUGIN } from '../common/constants';
 import { init as initBreadcrumbs } from './application/services/breadcrumb';
@@ -27,6 +28,9 @@ export class RemoteClustersUIPlugin
 {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
+  private canUseApiKeyTrustModel: boolean = false;
+  private licensingSubscription?: Subscription;
+
   setup(
     { notifications: { toasts }, http, getStartServices }: CoreSetup,
     { management, usageCollection, cloud, share }: Dependencies
@@ -44,11 +48,10 @@ export class RemoteClustersUIPlugin
           defaultMessage: 'Remote Clusters',
         }),
         order: 7,
-        mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
+        mount: async ({ element, setBreadcrumbs, history }) => {
           const [core] = await getStartServices();
           const {
             chrome: { docTitle },
-            i18n: { Context: i18nContext },
             docLinks,
             fatalErrors,
             executionContext,
@@ -69,10 +72,14 @@ export class RemoteClustersUIPlugin
           const { renderApp } = await import('./application');
           const unmountAppCallback = await renderApp(
             element,
-            i18nContext,
-            { isCloudEnabled, cloudBaseUrl, executionContext },
+            {
+              isCloudEnabled,
+              cloudBaseUrl,
+              executionContext,
+              canUseAPIKeyTrustModel: this.canUseApiKeyTrustModel,
+            },
             history,
-            theme$
+            core
           );
 
           return () => {
@@ -94,7 +101,7 @@ export class RemoteClustersUIPlugin
     };
   }
 
-  start({ application }: CoreStart) {
+  start({ application }: CoreStart, { licensing }: Dependencies) {
     const {
       ui: { enabled: isRemoteClustersUiEnabled },
     } = this.initializerContext.config.get<ClientConfigType>();
@@ -102,7 +109,13 @@ export class RemoteClustersUIPlugin
     if (isRemoteClustersUiEnabled) {
       initRedirect(application.navigateToApp);
     }
+
+    this.licensingSubscription = licensing.license$.subscribe((next) => {
+      this.canUseApiKeyTrustModel = next.hasAtLeast('enterprise');
+    });
   }
 
-  stop() {}
+  stop() {
+    this.licensingSubscription?.unsubscribe();
+  }
 }

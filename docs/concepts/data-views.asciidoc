@@ -40,7 +40,8 @@ image::images/discover-data-view.png[How to set the {data-source} in Discover, w
 . Give your {data-source} a name.
 
 . Start typing in the *Index pattern* field, and {kib} looks for the names of
-indices, data streams, and aliases that match your input.
+indices, data streams, and aliases that match your input. You can
+view all available sources or only the sources that the data view targets.
 +
 [role="screenshot"]
 image:management/index-patterns/images/create-data-view.png["Create data view"]
@@ -92,6 +93,8 @@ NOTE: Temporary {data-sources} are not available in *Stack Management.*
 [[rollup-data-view]]
 ==== Use {data-sources} with rolled up data
 
+deprecated::[8.11.0,'Rollups are deprecated and will be removed in a future version. Use {ref}/downsampling.html[downsampling] instead.']
+
 A {data-source} can match one rollup index.  For a combination rollup
 {data-source} with both raw and rolled up data, use the standard notation:
 
@@ -142,14 +145,19 @@ all clusters having a name starting with `cluster_`:
 `cluster_*:logstash-*,cluster_*:-logstash-old*`
 ```
 
-To exclude a cluster having a name starting with `cluster_`:
+Excluding a cluster avoids sending any network calls to that cluster.
+To exclude a cluster with the name `cluster_one`:
 
 ```ts
-`cluster_*:logstash-*,cluster_one:-*`
+`cluster_*:logstash-*,-cluster_one:*`
 ```
 
 Once you configure a {data-source} to use the {ccs} syntax, all searches and
 aggregations using that {data-source} in {kib} take advantage of {ccs}.
+
+For more information, refer to
+{ref}/modules-cross-cluster-search.html#exclude-problematic-clusters[Excluding
+clusters or indicies from cross-cluster search].
 
 [float]
 [[delete-data-view]]
@@ -164,3 +172,14 @@ WARNING: Deleting a {data-source} breaks all visualizations, saved searches, and
 
 . Find the {data-source} that you want to delete, and then
 click image:management/index-patterns/images/delete.png[Delete icon] in the *Actions* column.
+
+[float]
+[[data-view-field-cache]]
+=== {data-source} field cache
+
+The browser caches {data-source} field lists for increased performance. This is particularly impactful 
+for {data-sources} with a high field count that span a large number of indices and clusters. The field 
+list is updated every couple of minutes in typical {kib} usage. Alternatively, use the refresh button on the {data-source} 
+management detail page to get an updated field list. A force reload of {kib} has the same effect. 
+
+The field list may be impacted by changes in indices and user permissions.

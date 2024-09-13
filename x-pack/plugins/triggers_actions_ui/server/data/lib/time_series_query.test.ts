@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Logger } from '@kbn/core/server';
 import { TimeSeriesQuery, timeSeriesQuery, getResultFromEs } from './time_series_query';
@@ -49,7 +50,7 @@ describe('timeSeriesQuery', () => {
   });
 
   it('fails as expected when the query params are invalid', async () => {
-    expect(
+    await expect(
       timeSeriesQuery({ ...params, query: { ...params.query, dateStart: 'x' } })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid date format for dateStart: \\"x\\""`);
   });
@@ -713,6 +714,28 @@ describe('timeSeriesQuery', () => {
       { ignore: [404], meta: true }
     );
   });
+
+  it('uses the passed in date parms when useCalculatedDateRange = false param is passed', async () => {
+    await timeSeriesQuery({
+      ...params,
+      useCalculatedDateRange: false,
+      query: {
+        ...params.query,
+        dateStart: '2023-10-12T00:00:00Z',
+        dateEnd: '2023-10-12T00:00:00Z',
+      },
+    });
+    // @ts-ignore
+    expect(esClient.search.mock.calls[0]![0].body.query.bool.filter[0]).toEqual({
+      range: {
+        'time-field': {
+          format: 'strict_date_time',
+          gte: '2023-10-12T00:00:00Z',
+          lt: '2023-10-12T00:00:00Z',
+        },
+      },
+    });
+  });
 });
 
 describe('getResultFromEs', () => {
@@ -805,7 +828,7 @@ describe('getResultFromEs', () => {
           took: 0,
           timed_out: false,
           _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
-          _clusters: { total: 1, successful: 1, skipped: 0 },
+          _clusters: { total: 1, successful: 1, skipped: 0 } as estypes.ClusterStatistics,
           hits: { total: { value: 0, relation: 'eq' }, hits: [] },
         },
       })
@@ -823,7 +846,7 @@ describe('getResultFromEs', () => {
           took: 0,
           timed_out: false,
           _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
-          _clusters: { total: 1, successful: 1, skipped: 0 },
+          _clusters: { total: 1, successful: 1, skipped: 0 } as estypes.ClusterStatistics,
           hits: { total: { value: 0, relation: 'eq' }, hits: [] },
         },
       })
@@ -1261,7 +1284,7 @@ describe('getResultFromEs', () => {
           took: 0,
           timed_out: false,
           _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
-          _clusters: { total: 1, successful: 1, skipped: 0 },
+          _clusters: { total: 1, successful: 1, skipped: 0 } as estypes.ClusterStatistics,
           hits: { total: { value: 0, relation: 'eq' }, hits: [] },
         },
       })
@@ -1279,7 +1302,7 @@ describe('getResultFromEs', () => {
           took: 0,
           timed_out: false,
           _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
-          _clusters: { total: 1, successful: 1, skipped: 0 },
+          _clusters: { total: 1, successful: 1, skipped: 0 } as estypes.ClusterStatistics,
           hits: { total: { value: 0, relation: 'eq' }, hits: [] },
         },
       })

@@ -5,27 +5,22 @@
  * 2.0.
  */
 
-import {
-  IngestRemoveProcessor,
-  IngestSetProcessor,
-  MlTrainedModelConfig,
-  MlTrainedModelStats,
-} from '@elastic/elasticsearch/lib/api/types';
-import { SUPPORTED_PYTORCH_TASKS, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
+import { MlTrainedModelConfig, MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
+import { BUILT_IN_MODEL_TAG, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 
+import { MlModel, MlModelDeploymentState } from '../types/ml';
 import { MlInferencePipeline, TrainedModelState } from '../types/pipelines';
 
 import {
   generateMlInferencePipelineBody,
   getMlModelTypesForModelConfig,
-  getRemoveProcessorForInferenceType,
-  getSetProcessorForInferenceType,
   parseMlInferenceParametersFromPipeline,
+  parseModelState,
   parseModelStateFromStats,
   parseModelStateReasonFromStats,
 } from '.';
 
-const mockModel: MlTrainedModelConfig = {
+const mockTrainedModel: MlTrainedModelConfig = {
   inference_config: {
     ner: {},
   },
@@ -38,8 +33,27 @@ const mockModel: MlTrainedModelConfig = {
   version: '1',
 };
 
+const mockModel: MlModel = {
+  modelId: 'model_1',
+  type: 'ner',
+  title: 'Model 1',
+  description: 'Model 1 description',
+  licenseType: 'elastic',
+  modelDetailsPageUrl: 'https://my-model.ai',
+  deploymentState: MlModelDeploymentState.NotDeployed,
+  startTime: 0,
+  targetAllocationCount: 0,
+  nodeAllocationCount: 0,
+  threadsPerAllocation: 0,
+  isPlaceholder: false,
+  hasStats: false,
+  types: ['pytorch', 'ner'],
+  inputFieldNames: ['title'],
+  version: '1',
+};
+
 describe('getMlModelTypesForModelConfig lib function', () => {
-  const builtInMockModel: MlTrainedModelConfig = {
+  const builtInMockTrainedModel: MlTrainedModelConfig = {
     inference_config: {
       text_classification: {},
     },
@@ -53,84 +67,14 @@ describe('getMlModelTypesForModelConfig lib function', () => {
 
   it('should return the model type and inference config type', () => {
     const expected = ['pytorch', 'ner'];
-    const response = getMlModelTypesForModelConfig(mockModel);
+    const response = getMlModelTypesForModelConfig(mockTrainedModel);
     expect(response.sort()).toEqual(expected.sort());
   });
 
   it('should include the built in type', () => {
     const expected = ['lang_ident', 'text_classification', BUILT_IN_MODEL_TAG];
-    const response = getMlModelTypesForModelConfig(builtInMockModel);
+    const response = getMlModelTypesForModelConfig(builtInMockTrainedModel);
     expect(response.sort()).toEqual(expected.sort());
-  });
-});
-
-describe('getRemoveProcessorForInferenceType lib function', () => {
-  const destinationField = 'dest';
-
-  it('should return expected value for TEXT_CLASSIFICATION', () => {
-    const inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;
-
-    const expected: IngestRemoveProcessor = {
-      field: destinationField,
-      ignore_missing: true,
-    };
-
-    expect(getRemoveProcessorForInferenceType(destinationField, inferenceType)).toEqual(expected);
-  });
-
-  it('should return expected value for TEXT_EMBEDDING', () => {
-    const inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING;
-
-    const expected: IngestRemoveProcessor = {
-      field: destinationField,
-      ignore_missing: true,
-    };
-
-    expect(getRemoveProcessorForInferenceType(destinationField, inferenceType)).toEqual(expected);
-  });
-
-  it('should return undefined for unknown inferenceType', () => {
-    const inferenceType = 'wrongInferenceType';
-
-    expect(getRemoveProcessorForInferenceType(destinationField, inferenceType)).toBeUndefined();
-  });
-});
-
-describe('getSetProcessorForInferenceType lib function', () => {
-  const targetField = 'dest';
-  it('should return expected value for TEXT_CLASSIFICATION', () => {
-    const inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;
-
-    const expected: IngestSetProcessor = {
-      copy_from: 'ml.inference.dest.predicted_value',
-      description:
-        "Copy the predicted_value to 'dest' if the prediction_probability is greater than 0.5",
-      field: targetField,
-      if: "ctx?.ml?.inference != null && ctx.ml.inference['dest'] != null && ctx.ml.inference['dest'].prediction_probability > 0.5",
-      value: undefined,
-    };
-
-    expect(getSetProcessorForInferenceType(targetField, inferenceType)).toEqual(expected);
-  });
-
-  it('should return expected value for TEXT_EMBEDDING', () => {
-    const inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING;
-
-    const expected: IngestSetProcessor = {
-      copy_from: 'ml.inference.dest.predicted_value',
-      description: "Copy the predicted_value to 'dest'",
-      field: targetField,
-      if: "ctx?.ml?.inference != null && ctx.ml.inference['dest'] != null",
-      value: undefined,
-    };
-
-    expect(getSetProcessorForInferenceType(targetField, inferenceType)).toEqual(expected);
-  });
-
-  it('should return undefined for unknown inferenceType', () => {
-    const inferenceType = 'wrongInferenceType';
-
-    expect(getSetProcessorForInferenceType(targetField, inferenceType)).toBeUndefined();
   });
 });
 
@@ -140,24 +84,25 @@ describe('generateMlInferencePipelineBody lib function', () => {
     processors: [
       {
         remove: {
-          field: 'ml.inference.my-target-field',
+          field: 'my-target-field',
           ignore_missing: true,
         },
       },
       {
         inference: {
           field_map: {
-            'my-source-field': 'MODEL_INPUT_FIELD',
+            'my-source-field': 'title',
           },
-          model_id: 'test_id',
+          model_id: 'model_1',
           on_failure: [
             {
               append: {
                 field: '_source._ingest.inference_errors',
+                allow_duplicates: false,
                 value: [
                   {
                     message:
-                      "Processor 'inference' in pipeline 'my-pipeline' failed with message '{{ _ingest.on_failure_message }}'",
+                      "Processor 'inference' in pipeline 'my-pipeline' failed for field 'my-source-field' with message '{{ _ingest.on_failure_message }}'",
                     pipeline: 'my-pipeline',
                     timestamp: '{{{ _ingest.timestamp }}}',
                   },
@@ -165,7 +110,7 @@ describe('generateMlInferencePipelineBody lib function', () => {
               },
             },
           ],
-          target_field: 'ml.inference.my-target-field',
+          target_field: 'my-target-field',
         },
       },
       {
@@ -196,121 +141,15 @@ describe('generateMlInferencePipelineBody lib function', () => {
     expect(actual).toEqual(expected);
   });
 
-  it('should return something expected with specific processors', () => {
-    const mockTextClassificationModel: MlTrainedModelConfig = {
-      ...mockModel,
-      ...{ inference_config: { text_classification: {} } },
-    };
-    const actual: MlInferencePipeline = generateMlInferencePipelineBody({
-      description: 'my-description',
-      model: mockTextClassificationModel,
-      pipelineName: 'my-pipeline',
-      fieldMappings: [{ sourceField: 'my-source-field', targetField: 'my-target-field' }],
-    });
-
-    expect(actual).toEqual(
-      expect.objectContaining({
-        description: expect.any(String),
-        processors: expect.arrayContaining([
-          expect.objectContaining({
-            remove: {
-              field: 'my-target-field',
-              ignore_missing: true,
-            },
-          }),
-          expect.objectContaining({
-            set: {
-              copy_from: 'ml.inference.my-target-field.predicted_value',
-              description:
-                "Copy the predicted_value to 'my-target-field' if the prediction_probability is greater than 0.5",
-              field: 'my-target-field',
-              if: "ctx?.ml?.inference != null && ctx.ml.inference['my-target-field'] != null && ctx.ml.inference['my-target-field'].prediction_probability > 0.5",
-            },
-          }),
-        ]),
-      })
-    );
-  });
-
-  it('should return something that safely removes redundant prefixes', () => {
-    const mockTextClassificationModel: MlTrainedModelConfig = {
-      ...mockModel,
-      ...{ inference_config: { text_classification: {} } },
-    };
-    const actual: MlInferencePipeline = generateMlInferencePipelineBody({
-      description: 'my-description',
-      model: mockTextClassificationModel,
-      pipelineName: 'my-pipeline',
-      fieldMappings: [
-        { sourceField: 'my-source-field_1', targetField: 'ml.inference.my-source-field_expanded' },
-        { sourceField: 'my-source-field_2', targetField: 'my-source-ml.inference-field_expanded' },
-        {
-          sourceField: 'my-source-field_3',
-          targetField: 'ml.inference.my-source-2-ml.inference-field_expanded',
-        },
-      ],
-    });
-
-    expect(actual).toEqual(
-      expect.objectContaining({
-        description: expect.any(String),
-        processors: expect.arrayContaining([
-          expect.objectContaining({
-            remove: {
-              field: 'ml.inference.my-source-field_expanded',
-              ignore_missing: true,
-            },
-          }),
-          expect.objectContaining({
-            remove: {
-              field: 'ml.inference.my-source-ml.inference-field_expanded',
-              ignore_missing: true,
-            },
-          }),
-          expect.objectContaining({
-            remove: {
-              field: 'ml.inference.my-source-2-ml.inference-field_expanded',
-              ignore_missing: true,
-            },
-          }),
-          expect.objectContaining({
-            inference: expect.objectContaining({
-              field_map: {
-                'my-source-field_1': 'MODEL_INPUT_FIELD',
-              },
-              target_field: 'ml.inference.my-source-field_expanded',
-            }),
-          }),
-          expect.objectContaining({
-            inference: expect.objectContaining({
-              field_map: {
-                'my-source-field_2': 'MODEL_INPUT_FIELD',
-              },
-              target_field: 'ml.inference.my-source-ml.inference-field_expanded',
-            }),
-          }),
-          expect.objectContaining({
-            inference: expect.objectContaining({
-              field_map: {
-                'my-source-field_3': 'MODEL_INPUT_FIELD',
-              },
-              target_field: 'ml.inference.my-source-2-ml.inference-field_expanded',
-            }),
-          }),
-        ]),
-      })
-    );
-  });
-
   it('should return something expected with multiple fields', () => {
     const actual: MlInferencePipeline = generateMlInferencePipelineBody({
       description: 'my-description',
       model: mockModel,
       pipelineName: 'my-pipeline',
       fieldMappings: [
-        { sourceField: 'my-source-field1', targetField: 'my-destination-field1' },
-        { sourceField: 'my-source-field2', targetField: 'my-destination-field2' },
-        { sourceField: 'my-source-field3', targetField: 'my-destination-field3' },
+        { sourceField: 'my-source-field1', targetField: 'my-target-field1' },
+        { sourceField: 'my-source-field2', targetField: 'my-target-field2' },
+        { sourceField: 'my-source-field3', targetField: 'my-target-field3' },
       ],
     });
 
@@ -319,37 +158,37 @@ describe('generateMlInferencePipelineBody lib function', () => {
         processors: expect.arrayContaining([
           {
             remove: expect.objectContaining({
-              field: 'ml.inference.my-destination-field1',
+              field: 'my-target-field1',
             }),
           },
           {
             remove: expect.objectContaining({
-              field: 'ml.inference.my-destination-field2',
+              field: 'my-target-field2',
             }),
           },
           {
             remove: expect.objectContaining({
-              field: 'ml.inference.my-destination-field3',
+              field: 'my-target-field3',
             }),
           },
           {
             inference: expect.objectContaining({
               field_map: {
-                'my-source-field1': 'MODEL_INPUT_FIELD',
+                'my-source-field1': 'title',
               },
             }),
           },
           {
             inference: expect.objectContaining({
               field_map: {
-                'my-source-field2': 'MODEL_INPUT_FIELD',
+                'my-source-field2': 'title',
               },
             }),
           },
           {
             inference: expect.objectContaining({
               field_map: {
-                'my-source-field3': 'MODEL_INPUT_FIELD',
+                'my-source-field3': 'title',
               },
             }),
           },
@@ -376,16 +215,61 @@ describe('parseMlInferenceParametersFromPipeline', () => {
         ],
       })
     ).toEqual({
-      destination_field: 'test',
       model_id: 'test-model',
       pipeline_name: 'unit-test',
-      source_field: 'body',
+      pipeline_definition: {},
+      field_mappings: [
+        {
+          sourceField: 'body',
+          targetField: 'ml.inference.test',
+        },
+      ],
     });
   });
-  it('return null if pipeline missing inference processor', () => {
+  it('returns pipeline parameters from ingest pipeline with multiple inference processors', () => {
+    expect(
+      parseMlInferenceParametersFromPipeline('unit-test', {
+        processors: [
+          {
+            inference: {
+              field_map: {
+                body: 'text_field',
+              },
+              model_id: 'test-model',
+              target_field: 'ml.inference.body',
+            },
+          },
+          {
+            inference: {
+              field_map: {
+                title: 'text_field',
+              },
+              model_id: 'test-model',
+              target_field: 'ml.inference.title',
+            },
+          },
+        ],
+      })
+    ).toEqual({
+      model_id: 'test-model',
+      pipeline_name: 'unit-test',
+      pipeline_definition: {},
+      field_mappings: [
+        {
+          sourceField: 'body',
+          targetField: 'ml.inference.body',
+        },
+        {
+          sourceField: 'title',
+          targetField: 'ml.inference.title',
+        },
+      ],
+    });
+  });
+  it('return null if pipeline is missing inference processor', () => {
     expect(parseMlInferenceParametersFromPipeline('unit-test', { processors: [] })).toBeNull();
   });
-  it('return null if pipeline missing field_map', () => {
+  it('return null if pipeline is missing field_map', () => {
     expect(
       parseMlInferenceParametersFromPipeline('unit-test', {
         processors: [
@@ -402,8 +286,12 @@ describe('parseMlInferenceParametersFromPipeline', () => {
 });
 
 describe('parseModelStateFromStats', () => {
-  it('returns not deployed for undefined stats', () => {
-    expect(parseModelStateFromStats()).toEqual(TrainedModelState.NotDeployed);
+  it('returns Started for the lang_ident model', () => {
+    expect(
+      parseModelStateFromStats({
+        model_type: TRAINED_MODEL_TYPE.LANG_IDENT,
+      })
+    ).toEqual(TrainedModelState.Started);
   });
   it('returns Started', () => {
     expect(
@@ -449,6 +337,28 @@ describe('parseModelStateFromStats', () => {
         },
       } as unknown as MlTrainedModelStats)
     ).toEqual(TrainedModelState.NotDeployed);
+  });
+});
+
+describe('parseModelState', () => {
+  it('returns Started', () => {
+    expect(parseModelState('started')).toEqual(TrainedModelState.Started);
+    expect(parseModelState('fully_allocated')).toEqual(TrainedModelState.Started);
+  });
+  it('returns Starting', () => {
+    expect(parseModelState('starting')).toEqual(TrainedModelState.Starting);
+    expect(parseModelState('downloading')).toEqual(TrainedModelState.Starting);
+    expect(parseModelState('downloaded')).toEqual(TrainedModelState.Starting);
+  });
+  it('returns Stopping', () => {
+    expect(parseModelState('stopping')).toEqual(TrainedModelState.Stopping);
+  });
+  it('returns Failed', () => {
+    expect(parseModelState('failed')).toEqual(TrainedModelState.Failed);
+  });
+  it('returns NotDeployed for an unknown state', () => {
+    expect(parseModelState(undefined)).toEqual(TrainedModelState.NotDeployed);
+    expect(parseModelState('other_state')).toEqual(TrainedModelState.NotDeployed);
   });
 });
 

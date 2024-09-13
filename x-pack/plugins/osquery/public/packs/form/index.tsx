@@ -7,6 +7,7 @@
 
 import { filter, isEmpty, map, omit, reduce } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,7 +23,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
-import styled from 'styled-components';
 import { PackShardsField } from './shards/pack_shards_field';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
@@ -41,12 +41,11 @@ import { overflowCss } from '../utils';
 
 type PackFormData = Omit<PackItem, 'id' | 'queries'> & { queries: PackQueryFormData[] };
 
-const StyledEuiAccordion = styled(EuiAccordion)`
-  ${({ isDisabled }: { isDisabled?: boolean }) => isDisabled && 'display: none;'}
-  .euiAccordion__button {
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
-`;
+const euiAccordionCss = ({ euiTheme }: UseEuiTheme) => ({
+  '.euiAccordion__button': {
+    color: euiTheme.colors.primary,
+  },
+});
 
 interface PackFormProps {
   defaultValue?: PackItem;
@@ -61,7 +60,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 }) => {
   const [shardsToggleState, setShardsToggleState] =
     useState<EuiAccordionProps['forceState']>('closed');
-  const handleToggle = useCallback((isOpen) => {
+  const handleToggle = useCallback((isOpen: any) => {
     const newState = isOpen ? 'open' : 'closed';
     setShardsToggleState(newState);
   }, []);
@@ -169,15 +168,15 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       };
 
       try {
-        if (editMode && defaultValue?.id) {
-          await updateAsync({ id: defaultValue?.id, ...serializer(values) });
+        if (editMode && defaultValue?.saved_object_id) {
+          await updateAsync({ id: defaultValue?.saved_object_id, ...serializer(values) });
         } else {
           await createAsync(serializer(values));
         }
         // eslint-disable-next-line no-empty
       } catch (e) {}
     },
-    [createAsync, defaultValue?.id, editMode, getShards, shards, updateAsync]
+    [createAsync, defaultValue?.saved_object_id, editMode, getShards, shards, updateAsync]
   );
 
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
@@ -271,7 +270,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
             <EuiFlexGroup>
               <EuiFlexItem css={overflowCss}>
-                <StyledEuiAccordion
+                <EuiAccordion
+                  css={euiAccordionCss}
                   id="shardsToggle"
                   forceState={shardsToggleState}
                   onToggle={handleToggle}
@@ -279,7 +279,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                 >
                   <EuiSpacer size="xs" />
                   <PackShardsField options={availableOptions} />
-                </StyledEuiAccordion>
+                </EuiAccordion>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
@@ -300,7 +300,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty color="ghost" {...cancelButtonProps}>
+                <EuiButtonEmpty color="text" {...cancelButtonProps}>
                   <FormattedMessage
                     id="xpack.osquery.pack.form.cancelButtonLabel"
                     defaultMessage="Cancel"
@@ -315,6 +315,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                   size="m"
                   iconType="save"
                   onClick={handleSaveClick}
+                  data-test-subj={`${editMode ? 'update' : 'save'}-pack-button`}
                 >
                   {editMode ? (
                     <FormattedMessage

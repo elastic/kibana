@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreSetup } from '@kbn/core/public';
@@ -24,6 +25,7 @@ interface ValueSuggestionsGetFnArgs {
   boolFilter?: any[];
   signal?: AbortSignal;
   method?: ValueSuggestionsMethod;
+  querySuggestionKey?: 'rules' | 'cases' | 'alerts';
 }
 
 const getAutocompleteTimefilter = ({ timefilter }: TimefilterSetup, indexPattern: DataView) => {
@@ -61,20 +63,26 @@ export const setupValueSuggestionProvider = (
       signal?: AbortSignal,
       method: ValueSuggestionsMethod = core.uiSettings.get<ValueSuggestionsMethod>(
         UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD
-      )
+      ),
+      querySuggestionKey?: string
     ) => {
       usageCollector?.trackRequest();
+      let path = `/internal/kibana/suggestions/values/${index}`;
+      if (querySuggestionKey) {
+        path = `/internal/${querySuggestionKey}/suggestions/values`;
+      }
       return core.http
-        .fetch<T>(`/api/kibana/suggestions/values/${index}`, {
+        .fetch<T>(path, {
           method: 'POST',
           body: JSON.stringify({
             query,
             field: field.name,
-            fieldMeta: field?.toSpec?.(),
+            fieldMeta: field.toSpec?.() ?? field,
             filters,
-            method,
+            ...(querySuggestionKey === undefined ? { method } : {}),
           }),
           signal,
+          version: '1',
         })
         .then((r) => {
           usageCollector?.trackResult();
@@ -92,6 +100,7 @@ export const setupValueSuggestionProvider = (
     boolFilter,
     signal,
     method,
+    querySuggestionKey,
   }: ValueSuggestionsGetFnArgs): Promise<any[]> => {
     const shouldSuggestValues = core!.uiSettings.get<boolean>(
       UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES
@@ -121,7 +130,15 @@ export const setupValueSuggestionProvider = (
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
     try {
       usageCollector?.trackCall();
-      return await requestSuggestions(title, field, query, filters, signal, method);
+      return await requestSuggestions(
+        title,
+        field,
+        query,
+        filters,
+        signal,
+        method,
+        querySuggestionKey
+      );
     } catch (e) {
       if (!signal?.aborted) {
         usageCollector?.trackError();

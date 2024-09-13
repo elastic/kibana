@@ -16,7 +16,8 @@ import {
   getLensVisualizations,
   parseCommentString,
 } from '../../../common/utils/markdown_plugins/utils';
-import { CommentType } from '../../../common/api';
+import type { PersistableStateAttachmentAttributes } from '../../../common/types/domain';
+import { AttachmentType } from '../../../common/types/domain';
 
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
@@ -27,12 +28,20 @@ import type {
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import type { PersistableStateAttachmentTypeSetup } from '../../attachment_framework/types';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { omit, partition } from 'lodash';
+import gte from 'semver/functions/gte';
+import type {
+  SavedObject,
+  SavedObjectMigrationFn,
+  SavedObjectMigrationMap,
+  SavedObjectMigrationParams,
+} from '@kbn/core-saved-objects-server';
+import { mockCaseComments } from '../../mocks';
 
 describe('comments migrations', () => {
   const contextMock = savedObjectsServiceMock.createMigrationContext();
@@ -109,7 +118,7 @@ describe('comments migrations', () => {
     jest.clearAllMocks();
   });
 
-  describe('lens embeddable migrations for by value panels', () => {
+  describe('lens migrations', () => {
     describe('7.14.0 remove time zone from Lens visualization date histogram', () => {
       const expectedLensVisualizationMigrated = {
         title: 'MyRenamedOps',
@@ -245,7 +254,10 @@ describe('comments migrations', () => {
         });
 
         expect(migrations['7.14.0']).toBeDefined();
-        const result = migrations['7.14.0'](caseComment, contextMock);
+        const result = SavedObjectsUtils.getMigrationFunction(migrations['7.14.0'])(
+          caseComment,
+          contextMock
+        );
 
         const parsedComment = parseCommentString(result.attributes.comment);
         const lensVisualizations = getLensVisualizations(
@@ -267,6 +279,133 @@ describe('comments migrations', () => {
         expect((columns[1] as { params: {} }).params).toEqual({ interval: 'auto' });
         expect(columns[2].operationType).toEqual('my_unexpected_operation');
         expect((columns[2] as { params: {} }).params).toEqual({ timeZone: 'do not delete' });
+      });
+    });
+
+    it('should marked lens migrations as deferred correctly', () => {
+      const lensEmbeddableFactory = makeLensEmbeddableFactory(
+        () => ({}),
+        () => ({}),
+        {}
+      );
+
+      const lensMigrations = lensEmbeddableFactory().migrations;
+      const lensMigrationObject =
+        typeof lensMigrations === 'function' ? lensMigrations() : lensMigrations || {};
+      const lensMigrationObjectWithFakeMigration = {
+        ...lensMigrationObject,
+        '8.9.0': jest.fn(),
+        '8.10.0': jest.fn(),
+      };
+
+      const lensVersions = Object.keys(lensMigrationObjectWithFakeMigration);
+      const [lensVersionToBeDeferred, lensVersionToNotBeDeferred] = partition(
+        lensVersions,
+        (version) => gte(version, '8.9.0')
+      );
+
+      const migrations = createCommentsMigrations({
+        persistableStateAttachmentTypeRegistry: new PersistableStateAttachmentTypeRegistry(),
+        lensEmbeddableFactory: () => ({
+          id: 'test',
+          migrations: lensMigrationObjectWithFakeMigration,
+        }),
+      });
+
+      for (const version of lensVersionToBeDeferred) {
+        const migration = migrations[version] as SavedObjectMigrationParams;
+        expect(migration.deferred).toBe(true);
+        expect(migration.transform).toEqual(expect.any(Function));
+      }
+
+      for (const version of lensVersionToNotBeDeferred) {
+        const migration = migrations[version] as SavedObjectMigrationParams;
+        expect(migration.deferred).toBe(false);
+        expect(migration.transform).toEqual(expect.any(Function));
+      }
+
+      const migrationsWithoutLens = omit<SavedObjectMigrationMap>(migrations, lensVersions);
+
+      for (const version of Object.keys(migrationsWithoutLens)) {
+        const migration = migrationsWithoutLens[version] as SavedObjectMigrationFn;
+
+        expect(migration).toEqual(expect.any(Function));
+      }
+    });
+
+    describe('persistable state lens migrations', () => {
+      it('migrates correctly persistable state lens attachments', () => {
+        const persistableAttachment =
+          mockCaseComments[6] as SavedObject<PersistableStateAttachmentAttributes>;
+        const persistableAttachmentState =
+          persistableAttachment.attributes.persistableStateAttachmentState;
+
+        const migratedPersistableAttachmentState = {
+          ...persistableAttachmentState,
+          // @ts-expect-error: lens attributes can be spread
+          attributes: { ...persistableAttachmentState.attributes, foo: 'bar' },
+        };
+
+        const migrateFunction = jest.fn().mockReturnValue(migratedPersistableAttachmentState);
+
+        const migrations = createCommentsMigrations({
+          persistableStateAttachmentTypeRegistry: new PersistableStateAttachmentTypeRegistry(),
+          lensEmbeddableFactory: () => ({
+            id: 'test',
+            migrations: { '8.9.0': migrateFunction },
+          }),
+        });
+
+        const result = SavedObjectsUtils.getMigrationFunction(migrations['8.9.0'])(
+          persistableAttachment,
+          contextMock
+        );
+
+        expect(result).toEqual({
+          ...persistableAttachment,
+          attributes: {
+            ...persistableAttachment.attributes,
+            persistableStateAttachmentState: migratedPersistableAttachmentState,
+          },
+        });
+      });
+
+      it('logs and do not throw in case of a migration error', () => {
+        const persistableAttachment =
+          mockCaseComments[6] as SavedObject<PersistableStateAttachmentAttributes>;
+
+        const migrateFunction = jest.fn().mockImplementation(() => {
+          throw new Error('an error');
+        });
+
+        const migrations = createCommentsMigrations({
+          persistableStateAttachmentTypeRegistry: new PersistableStateAttachmentTypeRegistry(),
+          lensEmbeddableFactory: () => ({
+            id: 'test',
+            migrations: { '8.9.0': migrateFunction },
+          }),
+        });
+
+        const result = SavedObjectsUtils.getMigrationFunction(migrations['8.9.0'])(
+          persistableAttachment,
+          contextMock
+        );
+
+        expect(result).toEqual(persistableAttachment);
+
+        const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
+        expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "Failed to migrate comment persistable lens attachment with doc id: mock-comment-7 version: 8.0.0 error: an error",
+            Object {
+              "migrations": Object {
+                "comment": Object {
+                  "id": "mock-comment-7",
+                },
+              },
+            },
+          ]
+        `);
       });
     });
   });
@@ -291,21 +430,37 @@ describe('comments migrations', () => {
       id: '1cefd0d0-e86d-11eb-bae5-3d065cd16a32',
       attributes: {
         comment,
+        owner: 'cases',
+        type: AttachmentType.user,
+        created_at: '2021-07-19T08:41:29.951Z',
+        created_by: {
+          email: null,
+          full_name: null,
+          username: 'elastic',
+        },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: '2021-07-19T08:41:47.549Z',
+        updated_by: {
+          full_name: null,
+          email: null,
+          username: 'elastic',
+        },
       },
       references: [],
     };
 
     it('logs an error when it fails to parse invalid json', () => {
-      const commentMigrationFunction = migrateByValueLensVisualizations(migrationFunction);
+      const commentMigrationFunction = migrateByValueLensVisualizations(migrationFunction, '0.0.0');
 
-      const result = commentMigrationFunction(caseComment, contextMock);
+      const result = commentMigrationFunction.transform(caseComment, contextMock);
       // the comment should remain unchanged when there is an error
       expect(result.attributes.comment).toEqual(comment);
 
       const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
       expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "Failed to migrate comment with doc id: 1cefd0d0-e86d-11eb-bae5-3d065cd16a32 version: 8.0.0 error: an error",
+          "Failed to migrate lens comment with doc id: 1cefd0d0-e86d-11eb-bae5-3d065cd16a32 version: 8.0.0 error: an error",
           Object {
             "migrations": Object {
               "comment": Object {
@@ -320,7 +475,7 @@ describe('comments migrations', () => {
     describe('mergeSavedObjectMigrationMaps', () => {
       it('logs an error when the passed migration functions fails', () => {
         const migrationObj1 = {
-          '1.0.0': migrateByValueLensVisualizations(migrationFunction),
+          '1.0.0': migrateByValueLensVisualizations(migrationFunction, '1.0.0'),
         } as unknown as MigrateFunctionsObject;
 
         const migrationObj2 = {
@@ -330,12 +485,12 @@ describe('comments migrations', () => {
         };
 
         const mergedFunctions = mergeSavedObjectMigrationMaps(migrationObj1, migrationObj2);
-        mergedFunctions['1.0.0'](caseComment, contextMock);
+        SavedObjectsUtils.getMigrationFunction(mergedFunctions['1.0.0'])(caseComment, contextMock);
 
         const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
         expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
-            "Failed to migrate comment with doc id: 1cefd0d0-e86d-11eb-bae5-3d065cd16a32 version: 8.0.0 error: an error",
+            "Failed to migrate lens comment with doc id: 1cefd0d0-e86d-11eb-bae5-3d065cd16a32 version: 8.0.0 error: an error",
             Object {
               "migrations": Object {
                 "comment": Object {
@@ -349,7 +504,7 @@ describe('comments migrations', () => {
 
       it('it does not log an error when the migration function does not use the context', () => {
         const migrationObj1 = {
-          '1.0.0': migrateByValueLensVisualizations(migrationFunction),
+          '1.0.0': migrateByValueLensVisualizations(migrationFunction, '1.0.0'),
         } as unknown as MigrateFunctionsObject;
 
         const migrationObj2 = {
@@ -360,7 +515,9 @@ describe('comments migrations', () => {
 
         const mergedFunctions = mergeSavedObjectMigrationMaps(migrationObj1, migrationObj2);
 
-        expect(() => mergedFunctions['2.0.0'](caseComment, contextMock)).toThrow();
+        expect(() =>
+          SavedObjectsUtils.getMigrationFunction(mergedFunctions['2.0.0'])(caseComment, contextMock)
+        ).toThrow();
 
         const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
         expect(log.error).not.toHaveBeenCalled();
@@ -425,7 +582,7 @@ describe('comments migrations', () => {
         id: '123',
         type: 'abc',
         attributes: {
-          type: CommentType.alert,
+          type: AttachmentType.alert,
           rule: {
             id: '123',
             name: 'hello',
@@ -465,7 +622,7 @@ describe('comments migrations', () => {
         id: '123',
         type: 'abc',
         attributes: {
-          type: CommentType.alert,
+          type: AttachmentType.alert,
           rule: {
             id: '123',
             name: 'hello',
@@ -535,181 +692,6 @@ describe('comments migrations', () => {
             name: 'action-name',
           },
         ],
-      });
-    });
-  });
-
-  describe('Attachment framework', () => {
-    const attachmentSimple: PersistableStateAttachmentTypeSetup = {
-      id: 'test-simple',
-      migrations: {
-        '8.4.0': (state) => {
-          return { ...state, persistableStateAttachmentState: { bar: 'bar' } };
-        },
-      },
-    };
-
-    const attachmentChangeAll: PersistableStateAttachmentTypeSetup = {
-      id: 'test-change-all',
-      migrations: {
-        '8.4.0': (state) => {
-          return {
-            excess: '456',
-            type: CommentType.alert,
-            persistableStateAttachmentTypeId: 'changed',
-            owner: 'test',
-            persistableStateAttachmentState: { bar: 'bar' },
-          };
-        },
-      },
-    };
-
-    const attachmentOld: PersistableStateAttachmentTypeSetup = {
-      id: 'test-old',
-      migrations: {
-        '7.14.0': (state) => ({ ...state, persistableStateAttachmentState: { old: 'old' } }),
-      },
-    };
-
-    const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-    persistableStateAttachmentTypeRegistry.register(attachmentSimple);
-    persistableStateAttachmentTypeRegistry.register(attachmentChangeAll);
-    persistableStateAttachmentTypeRegistry.register(attachmentOld);
-
-    const migrations = createCommentsMigrations({
-      persistableStateAttachmentTypeRegistry,
-      lensEmbeddableFactory: makeLensEmbeddableFactory(
-        () => ({}),
-        () => ({}),
-        {}
-      ),
-    });
-
-    it('migrates a persistable state attachment correctly', () => {
-      const migrationFn = migrations['8.4.0'];
-      const res = migrationFn(
-        {
-          id: '123',
-          type: 'abc',
-          attributes: {
-            type: CommentType.persistableState,
-            persistableStateAttachmentTypeId: 'test-simple',
-            persistableStateAttachmentState: { foo: 'foo' },
-            owner: SECURITY_SOLUTION_OWNER,
-          },
-        },
-        contextMock
-      );
-
-      expect(res).toEqual({
-        attributes: {
-          owner: 'securitySolution',
-          persistableStateAttachmentState: {
-            bar: 'bar',
-          },
-          persistableStateAttachmentTypeId: 'test-simple',
-          type: 'persistableState',
-        },
-        id: '123',
-        type: 'abc',
-        references: [],
-      });
-    });
-
-    it('should not change any other attribute expect persistableStateAttachmentState or put excess attributes', () => {
-      const migrationFn = migrations['8.4.0'];
-      const res = migrationFn(
-        {
-          id: '123',
-          type: 'abc',
-          attributes: {
-            type: CommentType.persistableState,
-            persistableStateAttachmentTypeId: 'test-change-all',
-            persistableStateAttachmentState: { foo: 'foo' },
-            owner: SECURITY_SOLUTION_OWNER,
-          },
-        },
-        contextMock
-      );
-
-      expect(res).toEqual({
-        attributes: {
-          owner: 'securitySolution',
-          persistableStateAttachmentState: {
-            bar: 'bar',
-          },
-          persistableStateAttachmentTypeId: 'test-change-all',
-          type: 'persistableState',
-        },
-        id: '123',
-        type: 'abc',
-        references: [],
-      });
-    });
-
-    it('combines cases comment migration with persistable attachment migrations correctly', () => {
-      /**
-       * The 7.14.0 migration adds the owner field to all comments.
-       * By executing the 7.14.0 migrations on a persistable state attachment
-       * without an owner we test that the cases migrations are
-       * combined along with the persistable state attachment
-       * migrations
-       */
-      const migrationFn = migrations['7.14.0'];
-      const res = migrationFn(
-        {
-          id: '123',
-          type: 'abc',
-          attributes: {
-            // owner is missing on purpose
-            type: CommentType.persistableState,
-            persistableStateAttachmentTypeId: 'test-old',
-            persistableStateAttachmentState: { foo: 'foo' },
-          },
-        },
-        contextMock
-      );
-
-      expect(res).toEqual({
-        attributes: {
-          // owner was added by the case migrations
-          owner: 'securitySolution',
-          // state changed by the persistable attachment migration
-          persistableStateAttachmentState: {
-            old: 'old',
-          },
-          persistableStateAttachmentTypeId: 'test-old',
-          type: 'persistableState',
-        },
-        id: '123',
-        type: 'abc',
-        references: [],
-      });
-    });
-
-    it('does not run persistable state migration on other attachments', () => {
-      const migrationFn = migrations['8.4.0'];
-      const res = migrationFn(
-        {
-          id: '123',
-          type: 'abc',
-          attributes: {
-            type: CommentType.user,
-            comment: 'test',
-            owner: SECURITY_SOLUTION_OWNER,
-          },
-        },
-        contextMock
-      );
-
-      expect(res).toEqual({
-        attributes: {
-          owner: 'securitySolution',
-          comment: 'test',
-          type: 'user',
-        },
-        id: '123',
-        type: 'abc',
       });
     });
   });

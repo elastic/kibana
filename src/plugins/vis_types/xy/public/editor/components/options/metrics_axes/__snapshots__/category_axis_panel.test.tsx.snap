@@ -8,10 +8,9 @@ exports[`CategoryAxisPanel component should init with the default set of props 1
     size="xs"
   >
     <h3>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="X-axis"
         id="visTypeXy.controls.pointSeries.categoryAxis.xAxisTitle"
-        values={Object {}}
       />
     </h3>
   </EuiTitle>

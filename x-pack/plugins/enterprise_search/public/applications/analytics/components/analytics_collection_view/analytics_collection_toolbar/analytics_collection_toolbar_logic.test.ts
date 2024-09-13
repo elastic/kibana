@@ -44,7 +44,6 @@ describe('AnalyticsCollectionToolbarLogic', () => {
   });
   const defaultProps: AnalyticsCollectionToolbarLogicValues = {
     _searchSessionId: null,
-    dataViewId: null,
     refreshInterval: { pause: true, value: 10000 },
     searchSessionId: undefined,
     timeRange: { from: 'now-7d', to: 'now' },
@@ -62,11 +61,6 @@ describe('AnalyticsCollectionToolbarLogic', () => {
       );
     });
 
-    it('sets dataViewId', () => {
-      AnalyticsCollectionToolbarLogic.actions.setDataViewId('sample_data_view_id');
-      expect(AnalyticsCollectionToolbarLogic.values.dataViewId).toEqual('sample_data_view_id');
-    });
-
     it('sets refreshInterval', () => {
       const refreshInterval: RefreshInterval = { pause: false, value: 5000 };
       AnalyticsCollectionToolbarLogic.actions.setRefreshInterval(refreshInterval);
@@ -81,20 +75,12 @@ describe('AnalyticsCollectionToolbarLogic', () => {
   });
 
   describe('listeners', () => {
-    it('should set dataViewId when findDataViewId called', async () => {
-      await AnalyticsCollectionToolbarLogic.actions.findDataViewId({
-        events_datastream: 'some-collection',
-        name: 'some-collection-name',
-      });
-      expect(AnalyticsCollectionToolbarLogic.values.dataViewId).toBe('some-data-view-id');
-    });
-
     it('should set searchSessionId when onTimeRefresh called', () => {
       jest.spyOn(AnalyticsCollectionToolbarLogic.actions, 'setSearchSessionId');
 
       AnalyticsCollectionToolbarLogic.actions.onTimeRefresh();
 
-      expect(KibanaLogic.values.data.search.session.start).toHaveBeenCalled();
+      expect(KibanaLogic.values.data?.search.session.start).toHaveBeenCalled();
       expect(AnalyticsCollectionToolbarLogic.actions.setSearchSessionId).toHaveBeenCalledWith(
         'some-search-session-id'
       );

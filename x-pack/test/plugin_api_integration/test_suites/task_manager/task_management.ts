@@ -9,13 +9,11 @@ import moment from 'moment';
 import { random } from 'lodash';
 import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import TaskManagerMapping from '@kbn/task-manager-plugin/server/saved_objects/mappings.json';
+import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
 import { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const {
-  task: { properties: taskManagerIndexMapping },
-} = TaskManagerMapping;
+const { properties: taskManagerIndexMapping } = TaskManagerMapping;
 
 export interface RawDoc {
   _id: string;
@@ -54,10 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
-      return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
-    });
-
-    beforeEach(async () => {
+      await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
       const exists = await es.indices.exists({ index: testHistoryIndex });
       if (exists) {
         await es.deleteByQuery({
@@ -294,6 +289,20 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         const history = await historyDocs();
         expect(history.length).to.eql(1);
+        expect((await currentTasks()).docs).to.eql([]);
+      });
+    });
+
+    it('should remove recurring task if task requests deletion', async () => {
+      await scheduleTask({
+        taskType: 'sampleRecurringTaskThatDeletesItself',
+        schedule: { interval: '1s' },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const history = await historyDocs();
+        expect(history.length).to.eql(5);
         expect((await currentTasks()).docs).to.eql([]);
       });
     });
@@ -793,6 +802,43 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should fail to schedule recurring task with timeout override', async () => {
+      const task = await scheduleTask({
+        taskType: 'sampleRecurringTaskTimingOut',
+        schedule: { interval: '1s' },
+        timeoutOverride: '30s',
+        params: {},
+      });
+
+      expect(task.timeoutOverride).to.be(undefined);
+    });
+
+    it('should allow timeout override for ad hoc tasks', async () => {
+      const task = await scheduleTask({
+        taskType: 'sampleAdHocTaskTimingOut',
+        timeoutOverride: '30s',
+        params: {},
+      });
+
+      expect(task.timeoutOverride).to.be('30s');
+
+      // this task type is set to time out after 1s but the task runner
+      // will wait 15 seconds and then index a document if it hasn't timed out
+      // this test overrides the timeout to 30s and checks if the expected
+      // document was indexed. presence of indexed document means the task
+      // timeout override was respected
+      await retry.try(async () => {
+        const [scheduledTask] = (await currentTasks()).docs;
+        expect(scheduledTask?.id).to.eql(task.id);
+      });
+
+      await retry.try(async () => {
+        const docs: RawDoc[] = await historyDocs(task.id);
+        expect(docs.length).to.eql(1);
+        expect(docs[0]._source.taskType).to.eql('sampleAdHocTaskTimingOut');
+      });
+    });
+
     it('should bulk update schedules for multiple tasks', async () => {
       const initialTime = Date.now();
       const tasks = await Promise.all([
@@ -857,7 +903,7 @@ export default function ({ getService }: FtrProviderContext) {
         params: {},
       });
 
-      runTaskSoon({ id: longRunningTask.id });
+      await runTaskSoon({ id: longRunningTask.id });
 
       let scheduledRunAt: string;
       // ensure task is running and store scheduled runAt

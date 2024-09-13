@@ -9,15 +9,11 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea
 
 import moment from 'moment';
 
+import { ConnectorSyncJob, SyncJobType, SyncStatus, TriggerMethod } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError, Status } from '../../../../../../common/types/api';
 
-import {
-  ConnectorSyncJob,
-  SyncStatus,
-  TriggerMethod,
-} from '../../../../../../common/types/connectors';
 import { FetchSyncJobsApiLogic } from '../../../api/connector/fetch_sync_jobs_api_logic';
 
 import { IndexViewLogic } from '../index_view_logic';
@@ -27,17 +23,21 @@ import { SyncJobView, SyncJobsViewLogic } from './sync_jobs_view_logic';
 // We can't test fetchTimeOutId because this will get set whenever the logic is created
 // And the timeoutId is non-deterministic. We use expect.object.containing throughout this test file
 const DEFAULT_VALUES = {
+  cancelSyncJobLoading: false,
+  cancelSyncJobStatus: Status.IDLE,
   connectorId: null,
+  selectedSyncJobCategory: 'content',
+  syncJobToCancel: null,
   syncJobs: [],
   syncJobsData: undefined,
   syncJobsLoading: true,
   syncJobsPagination: {
-    from: 0,
-    has_more_hits_than_total: false,
-    size: 10,
-    total: 0,
+    pageIndex: 0,
+    pageSize: 10,
+    totalItemCount: 0,
   },
   syncJobsStatus: Status.IDLE,
+  syncTriggeredLocally: false,
 };
 
 describe('SyncJobsViewLogic', () => {
@@ -76,10 +76,12 @@ describe('SyncJobsViewLogic', () => {
         id: 'id',
         indexed_document_count: 50,
         indexed_document_volume: 40,
+        job_type: SyncJobType.FULL,
         last_seen: '2022-09-05T15:59:39.816+00:00',
         metadata: {},
         started_at: '2022-09-05T14:59:39.816+00:00',
         status: SyncStatus.COMPLETED,
+        total_document_count: null,
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: 'hostname_fake',
       };
@@ -118,10 +120,9 @@ describe('SyncJobsViewLogic', () => {
           },
           syncJobsLoading: false,
           syncJobsPagination: {
-            from: 40,
-            has_more_hits_than_total: false,
-            size: 20,
-            total: 50,
+            pageIndex: 2,
+            pageSize: 20,
+            totalItemCount: 50,
           },
           syncJobsStatus: Status.SUCCESS,
         });
@@ -154,7 +155,7 @@ describe('SyncJobsViewLogic', () => {
               completed_at: null,
               deleted_document_count: 0,
               duration: expect.anything(),
-              lastSync: syncJob.created_at,
+              lastSync: null,
               status: SyncStatus.IN_PROGRESS,
             },
           ],
@@ -178,10 +179,9 @@ describe('SyncJobsViewLogic', () => {
           },
           syncJobsLoading: false,
           syncJobsPagination: {
-            from: 40,
-            has_more_hits_than_total: false,
-            size: 20,
-            total: 50,
+            pageIndex: 2,
+            pageSize: 20,
+            totalItemCount: 50,
           },
           syncJobsStatus: Status.SUCCESS,
         });

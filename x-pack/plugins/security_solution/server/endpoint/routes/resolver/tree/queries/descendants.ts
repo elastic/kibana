@@ -20,8 +20,22 @@ import { BaseResolverQuery } from './base';
 export class DescendantsQuery extends BaseResolverQuery {
   declare readonly resolverFields: JsonValue[];
 
-  constructor({ schema, indexPatterns, timeRange, isInternalRequest }: ResolverQueryParams) {
-    super({ schema, indexPatterns, timeRange, isInternalRequest });
+  constructor({
+    schema,
+    indexPatterns,
+    timeRange,
+    isInternalRequest,
+    shouldExcludeColdAndFrozenTiers,
+    agentId,
+  }: ResolverQueryParams) {
+    super({
+      schema,
+      indexPatterns,
+      timeRange,
+      isInternalRequest,
+      shouldExcludeColdAndFrozenTiers,
+      agentId,
+    });
   }
 
   private query(nodes: NodeID[], size: number): JsonObject {
@@ -37,9 +51,13 @@ export class DescendantsQuery extends BaseResolverQuery {
         bool: {
           filter: [
             ...this.getRangeFilter(),
+            ...this.getColdAndFrozenTierFilter(),
             {
               terms: { [this.schema.parent]: nodes },
             },
+            ...(this.schema.agentId && this.agentId
+              ? [{ term: { 'agent.id': this.agentId } }]
+              : []),
             {
               exists: {
                 field: this.schema.id,
@@ -58,10 +76,10 @@ export class DescendantsQuery extends BaseResolverQuery {
               },
             },
             {
-              term: { 'event.category': 'process' },
+              terms: { 'event.category': ['process'] },
             },
             {
-              term: { 'event.kind': 'event' },
+              terms: { 'event.kind': ['event', 'alert'] },
             },
           ],
         },
@@ -121,6 +139,9 @@ export class DescendantsQuery extends BaseResolverQuery {
                 [ancestryField]: nodes,
               },
             },
+            ...(this.schema.agentId && this.agentId
+              ? [{ term: { 'agent.id': this.agentId } }]
+              : []),
             {
               exists: {
                 field: this.schema.id,

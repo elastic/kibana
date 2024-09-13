@@ -1,19 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { nodeTypes } from '.';
 
-import { buildNode, buildNodeWithArgumentNodes, toElasticsearchQuery } from './function';
-import { toElasticsearchQuery as isFunctionToElasticsearchQuery } from '../functions/is';
+import {
+  buildNode,
+  buildNodeWithArgumentNodes,
+  toElasticsearchQuery,
+  toKqlExpression,
+} from './function';
+import {
+  KqlIsFunctionNode,
+  toElasticsearchQuery as isFunctionToElasticsearchQuery,
+} from '../functions/is';
 import { DataViewBase } from '../../es_query';
 import { fields } from '../../filters/stubs/fields.mocks';
-
-jest.mock('../grammar');
 
 describe('kuery node types', () => {
   describe('function', () => {
@@ -53,11 +60,19 @@ describe('kuery node types', () => {
 
     describe('toElasticsearchQuery', () => {
       test("should return the given function type's ES query representation", () => {
-        const node = buildNode('is', 'extension', 'jpg');
+        const node = buildNode('is', 'extension', 'jpg') as KqlIsFunctionNode;
         const expected = isFunctionToElasticsearchQuery(node, indexPattern);
         const result = toElasticsearchQuery(node, indexPattern);
 
         expect(expected).toEqual(result);
+      });
+    });
+
+    describe('toKqlExpression', () => {
+      test("should return the given function type's KQL representation", () => {
+        const node = buildNode('is', 'extension', 'jpg') as KqlIsFunctionNode;
+        const result = toKqlExpression(node);
+        expect(result).toEqual('extension: jpg');
       });
     });
   });

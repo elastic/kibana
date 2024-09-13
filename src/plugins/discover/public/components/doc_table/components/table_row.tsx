@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
@@ -12,16 +13,19 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { formatFieldValue } from '../../../utils/format_value';
-import { DocViewRenderProps } from '../../../services/doc_views/doc_views_types';
+import type {
+  DataTableRecord,
+  EsHitRecord,
+  ShouldShowFieldInTableHandler,
+} from '@kbn/discover-utils/types';
+import { formatFieldValue } from '@kbn/discover-utils';
+import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '@kbn/discover-utils';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
-import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
-import { DataTableRecord, EsHitRecord } from '../../../types';
 import { TableRowDetails } from './table_row_details';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
-import { type ShouldShowFieldInTableHandler } from '../../../utils/get_should_show_field_handler';
 
 export type DocTableRow = EsHitRecord & {
   isAnchor?: boolean;
@@ -29,30 +33,32 @@ export type DocTableRow = EsHitRecord & {
 
 export interface TableRowProps {
   columns: string[];
-  filter: DocViewFilterFn;
+  filter?: DocViewFilterFn;
   filters?: Filter[];
+  isEsqlMode?: boolean;
   savedSearchId?: string;
   row: DataTableRecord;
+  rows: DataTableRecord[];
   dataView: DataView;
   useNewFieldsApi: boolean;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   onAddColumn?: (column: string) => void;
   onRemoveColumn?: (column: string) => void;
-  DocViewer: React.ComponentType<DocViewRenderProps>;
 }
 
 export const TableRow = ({
   filters,
+  isEsqlMode,
   columns,
   filter,
   savedSearchId,
   row,
+  rows,
   dataView,
   useNewFieldsApi,
   shouldShowFieldHandler,
   onAddColumn,
   onRemoveColumn,
-  DocViewer,
 }: TableRowProps) => {
   const { uiSettings, fieldFormats } = useDiscoverServices();
   const [maxEntries, hideTimeColumn] = useMemo(
@@ -100,7 +106,7 @@ export const TableRow = ({
   const inlineFilter = useCallback(
     (column: string, type: '+' | '-') => {
       const field = dataView.fields.getByName(column);
-      filter(field!, row.flattened[column], type);
+      filter?.(field!, row.flattened[column], type);
     },
     [filter, dataView.fields, row.flattened]
   );
@@ -153,7 +159,8 @@ export const TableRow = ({
       />
     );
   } else {
-    columns.forEach(function (column: string) {
+    columns.forEach(function (column: string, index) {
+      const cellKey = `${column}-${index}`;
       if (useNewFieldsApi && !mapping(column) && row.raw.fields && !row.raw.fields[column]) {
         const innerColumns = Object.fromEntries(
           Object.entries(row.raw.fields).filter(([key]) => {
@@ -163,7 +170,7 @@ export const TableRow = ({
 
         rowCells.push(
           <TableCell
-            key={column}
+            key={cellKey}
             timefield={false}
             sourcefield={true}
             formatted={formatTopLevelObject(row, innerColumns, dataView, maxEntries)}
@@ -178,11 +185,13 @@ export const TableRow = ({
         // We should improve this and show a helpful tooltip why the filter buttons are not
         // there/disabled when there are ignored values.
         const isFilterable = Boolean(
-          mapping(column)?.filterable && filter && !row.raw._ignored?.includes(column)
+          mapping(column)?.filterable &&
+            typeof filter === 'function' &&
+            !row.raw._ignored?.includes(column)
         );
         rowCells.push(
           <TableCell
-            key={column}
+            key={cellKey}
             timefield={false}
             sourcefield={column === '_source'}
             formatted={displayField(column)}
@@ -211,14 +220,16 @@ export const TableRow = ({
             columns={columns}
             filters={filters}
             savedSearchId={savedSearchId}
+            isEsqlMode={isEsqlMode}
           >
-            <DocViewer
+            <UnifiedDocViewer
               columns={columns}
               filter={filter}
               hit={row}
               dataView={dataView}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
+              textBasedHits={isEsqlMode ? rows : undefined}
             />
           </TableRowDetails>
         )}

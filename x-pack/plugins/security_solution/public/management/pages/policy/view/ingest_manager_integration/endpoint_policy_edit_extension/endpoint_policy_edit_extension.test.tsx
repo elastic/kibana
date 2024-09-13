@@ -14,6 +14,8 @@ import type { AppContextTestRender } from '../../../../../../common/mock/endpoin
 import { EndpointPolicyEditExtension } from './endpoint_policy_edit_extension';
 import { createFleetContextRendererMock } from '../mocks';
 import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
+import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
 
 jest.mock('../../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
@@ -29,12 +31,16 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
 
   beforeEach(() => {
     const mockedTestContext = createFleetContextRendererMock();
+    const policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy({
+      id: 'someid',
+    });
+    const newPolicy = getPolicyDataForUpdate(policy);
 
     render = () =>
       mockedTestContext.render(
         <EndpointPolicyEditExtension
-          policy={{ id: 'someid' } as PackagePolicy}
-          newPolicy={{ id: 'someid' } as NewPackagePolicy}
+          policy={policy as PackagePolicy}
+          newPolicy={newPolicy as NewPackagePolicy}
           onChange={jest.fn()}
         />
       );

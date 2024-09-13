@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type Subject, ReplaySubject } from 'rxjs';
-import type {
+import { type Subject, ReplaySubject, Observable, map, distinctUntilChanged } from 'rxjs';
+import {
   PluginInitializerContext,
   Plugin,
   CoreSetup,
@@ -14,6 +14,8 @@ import type {
   KibanaRequest,
   CoreStart,
   IContextProvider,
+  CoreStatus,
+  ServiceStatusLevels,
 } from '@kbn/core/server';
 
 import type {
@@ -91,6 +93,8 @@ export class RuleRegistryPlugin
   ): RuleRegistryPluginSetupContract {
     const { logger, kibanaVersion } = this;
 
+    const elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
+
     const startDependencies = core.getStartServices().then(([coreStart, pluginStart]) => {
       return {
         core: coreStart,
@@ -99,6 +103,8 @@ export class RuleRegistryPlugin
     });
 
     this.security = plugins.security;
+
+    const dataStreamAdapter = plugins.alerting.getDataStreamAdapter();
 
     this.ruleDataService = new RuleDataService({
       logger,
@@ -112,25 +118,29 @@ export class RuleRegistryPlugin
       },
       frameworkAlerts: plugins.alerting.frameworkAlerts,
       pluginStop$: this.pluginStop$,
+      dataStreamAdapter,
+      elasticsearchAndSOAvailability$,
     });
 
     this.ruleDataService.initializeService();
 
-    core.getStartServices().then(([_, depsStart]) => {
-      const ruleRegistrySearchStrategy = ruleRegistrySearchStrategyProvider(
-        depsStart.data,
-        this.ruleDataService!,
-        depsStart.alerting,
-        logger,
-        plugins.security,
-        depsStart.spaces
-      );
+    core
+      .getStartServices()
+      .then(([_, depsStart]) => {
+        const ruleRegistrySearchStrategy = ruleRegistrySearchStrategyProvider(
+          depsStart.data,
+          depsStart.alerting,
+          logger,
+          plugins.security,
+          depsStart.spaces
+        );
 
-      plugins.data.search.registerSearchStrategy(
-        RULE_SEARCH_STRATEGY_NAME,
-        ruleRegistrySearchStrategy
-      );
-    });
+        plugins.data.search.registerSearchStrategy(
+          RULE_SEARCH_STRATEGY_NAME,
+          ruleRegistrySearchStrategy
+        );
+      })
+      .catch(() => {});
 
     // ALERTS ROUTES
     const router = core.http.createRouter<RacRequestHandlerContext>();
@@ -163,6 +173,9 @@ export class RuleRegistryPlugin
       },
       securityPluginSetup: security,
       ruleDataService,
+      getRuleType: plugins.alerting.getType,
+      getRuleList: plugins.alerting.listTypes,
+      getAlertIndicesAlias: plugins.alerting.getAlertIndicesAlias,
     });
 
     const getRacClientWithRequest = (request: KibanaRequest) => {
@@ -191,4 +204,15 @@ export class RuleRegistryPlugin
     this.pluginStop$.next();
     this.pluginStop$.complete();
   }
+}
+
+function getElasticsearchAndSOAvailability(core$: Observable<CoreStatus>): Observable<boolean> {
+  return core$.pipe(
+    map(
+      ({ elasticsearch, savedObjects }) =>
+        elasticsearch.level === ServiceStatusLevels.available &&
+        savedObjects.level === ServiceStatusLevels.available
+    ),
+    distinctUntilChanged()
+  );
 }

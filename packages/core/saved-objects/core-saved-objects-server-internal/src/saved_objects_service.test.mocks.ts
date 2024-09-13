@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { mockKibanaMigrator } from '@kbn/core-saved-objects-migration-server-mocks';
@@ -50,3 +51,12 @@ export const registerRoutesMock = jest.fn();
 jest.doMock('./routes', () => ({
   registerRoutes: registerRoutesMock,
 }));
+
+export const applyTypeDefaultsMock = jest.fn();
+jest.doMock('./apply_type_defaults', () => {
+  const actual = jest.requireActual('./apply_type_defaults');
+  return {
+    ...actual,
+    applyTypeDefaults: applyTypeDefaultsMock,
+  };
+});

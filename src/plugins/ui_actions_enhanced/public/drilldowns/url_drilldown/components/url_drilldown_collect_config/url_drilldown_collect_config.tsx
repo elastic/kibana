@@ -1,21 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useRef } from 'react';
-import {
-  EuiFormRow,
-  EuiLink,
-  EuiSwitch,
-  EuiAccordion,
-  EuiSpacer,
-  EuiPanel,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiFormRow, EuiLink, EuiAccordion, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { UrlTemplateEditor, UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { UrlDrilldownConfig } from '../../types';
@@ -23,12 +16,11 @@ import './index.scss';
 import {
   txtUrlTemplateSyntaxHelpLinkText,
   txtUrlTemplateLabel,
-  txtUrlTemplateOpenInNewTab,
   txtUrlTemplateAdditionalOptions,
-  txtUrlTemplateEncodeUrl,
-  txtUrlTemplateEncodeDescription,
 } from './i18n';
 import { VariablePopover } from '../variable_popover';
+import { UrlDrilldownOptionsComponent } from './lazy';
+import { DEFAULT_URL_DRILLDOWN_OPTIONS } from '../../constants';
 
 export interface UrlDrilldownCollectConfigProps {
   config: UrlDrilldownConfig;
@@ -97,6 +89,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
         labelAppend={variablesDropdown}
       >
         <UrlTemplateEditor
+          fitToContent={{ minLines: 5, maxLines: 15 }}
           variables={variables}
           value={urlTemplate}
           placeholder={exampleUrl}
@@ -114,31 +107,12 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
       >
         <EuiSpacer size={'s'} />
         <EuiPanel color="subdued" borderRadius="none" hasShadow={false} style={{ border: 'none' }}>
-          <EuiFormRow hasChildLabel={false}>
-            <EuiSwitch
-              id="openInNewTab"
-              name="openInNewTab"
-              label={txtUrlTemplateOpenInNewTab}
-              checked={config.openInNewTab}
-              onChange={() => onConfig({ ...config, openInNewTab: !config.openInNewTab })}
-              data-test-subj="urlDrilldownOpenInNewTab"
-            />
-          </EuiFormRow>
-          <EuiFormRow hasChildLabel={false} fullWidth>
-            <EuiSwitch
-              id="encodeUrl"
-              name="encodeUrl"
-              label={
-                <>
-                  {txtUrlTemplateEncodeUrl}
-                  <EuiSpacer size={'s'} />
-                  <EuiTextColor color="subdued">{txtUrlTemplateEncodeDescription}</EuiTextColor>
-                </>
-              }
-              checked={config.encodeUrl ?? true}
-              onChange={() => onConfig({ ...config, encodeUrl: !(config.encodeUrl ?? true) })}
-            />
-          </EuiFormRow>
+          <UrlDrilldownOptionsComponent
+            options={{ ...DEFAULT_URL_DRILLDOWN_OPTIONS, ...config }}
+            onOptionChange={(change) => {
+              onConfig({ ...config, ...change });
+            }}
+          />
         </EuiPanel>
       </EuiAccordion>
     </>

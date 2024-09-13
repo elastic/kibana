@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -23,7 +24,7 @@ export const FLAG_OPTIONS: FlagOptions = {
   help: `
     --config             Define a FTR config that should be executed. Can be specified multiple times
     --journey            Define a Journey that should be executed. Can be specified multiple times
-    --esFrom             Build Elasticsearch from source or run from snapshot. Default: $TEST_ES_FROM or "snapshot"
+    --esFrom             Build Elasticsearch from source or run snapshot or serverless. Default: $TEST_ES_FROM or "snapshot"
     --kibana-install-dir Run Kibana from existing install directory instead of from source
     --logToFile          Write the log output from Kibana/ES to files instead of to stdout
   `,
@@ -40,7 +41,7 @@ export function parseFlags(flags: FlagsReader) {
 
   return {
     config: configs[0],
-    esFrom: flags.enum('esFrom', ['source', 'snapshot']),
+    esFrom: flags.enum('esFrom', ['source', 'snapshot', 'serverless']),
     esVersion: EsVersion.getDefault(),
     installDir: flags.string('kibana-install-dir'),
     logsDir: flags.boolean('logToFile')

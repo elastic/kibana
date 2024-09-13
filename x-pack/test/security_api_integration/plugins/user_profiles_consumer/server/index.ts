@@ -6,10 +6,7 @@
  */
 
 import type { PluginInitializer, Plugin, CoreSetup } from '@kbn/core/server';
-import {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
-} from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { initRoutes } from './init_routes';
@@ -26,11 +23,8 @@ export interface PluginStartDependencies {
   spaces: SpacesPluginStart;
 }
 
-export const plugin: PluginInitializer<void, void> = (): Plugin<
-  void,
-  void,
-  PluginSetupDependencies,
-  PluginStartDependencies
+export const plugin: PluginInitializer<void, void> = async (): Promise<
+  Plugin<void, void, PluginSetupDependencies, PluginStartDependencies>
 > => ({
   setup: (core: CoreSetup<PluginStartDependencies>) => initRoutes(core),
   start: () => {},

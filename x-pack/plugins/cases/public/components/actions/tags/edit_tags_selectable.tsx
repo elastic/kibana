@@ -20,13 +20,13 @@ import {
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash';
-import type { Case } from '../../../../common';
+import type { CasesUI } from '../../../../common';
 import * as i18n from './translations';
 import { useItemsState } from '../use_items_state';
 import type { ItemSelectableOption, ItemsSelectionState } from '../types';
 
 interface Props {
-  selectedCases: Case[];
+  selectedCases: CasesUI;
   tags: string[];
   isLoading: boolean;
   onChangeTags: (args: ItemsSelectionState) => void;
@@ -70,22 +70,25 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
   const [searchValue, setSearchValue] = useState<string>('');
   const { euiTheme } = useEuiTheme();
 
-  const renderOption = useCallback((option: ItemSelectableOption, search: string) => {
-    const dataTestSubj = option.newItem
-      ? 'cases-actions-tags-edit-selectable-add-new-tag-icon'
-      : `cases-actions-tags-edit-selectable-tag-${option.label}-icon-${option.itemIcon}`;
+  const renderOption = useCallback(
+    (option: ItemSelectableOption, search: string) => {
+      const dataTestSubj = option.newItem
+        ? 'cases-actions-tags-edit-selectable-add-new-tag-icon'
+        : `cases-actions-tags-edit-selectable-tag-${option.label}-icon-${option.itemIcon}`;
 
-    return (
-      <>
-        <EuiIcon
-          type={option.itemIcon}
-          data-test-subj={dataTestSubj}
-          className="euiSelectableListItem__icon euiSelectableListItem__prepend"
-        />
-        <EuiHighlight search={search}>{option.label}</EuiHighlight>
-      </>
-    );
-  }, []);
+      return (
+        <>
+          <EuiIcon
+            type={option.itemIcon}
+            data-test-subj={dataTestSubj}
+            css={{ flexShrink: 0, marginRight: euiTheme.size.m }}
+          />
+          <EuiHighlight search={search}>{option.label}</EuiHighlight>
+        </>
+      );
+    },
+    [euiTheme]
+  );
 
   /**
    * While the user searches we need to add the ability
@@ -117,10 +120,6 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
     [options, searchValue, state.items]
   );
 
-  const onSearchChange = useCallback((value) => {
-    setSearchValue(value);
-  }, []);
-
   return (
     <EuiSelectable
       options={optionsWithAddNewTagOption}
@@ -129,7 +128,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
         placeholder: i18n.SEARCH_PLACEHOLDER,
         isLoading,
         isClearable: !isLoading,
-        onChange: onSearchChange,
+        onChange: setSearchValue,
         value: searchValue,
         'data-test-subj': 'cases-actions-tags-edit-selectable-search-input',
       }}

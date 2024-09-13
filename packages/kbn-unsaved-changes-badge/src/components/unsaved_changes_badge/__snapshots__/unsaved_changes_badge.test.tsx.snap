@@ -1,0 +1,92 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<UnsavedChangesBadge /> should show all menu items 1`] = `
+<div>
+  <div
+    class="euiPopover emotion-euiPopover-inline-block"
+    id="unsavedChangesPopover_generated-id"
+  >
+    <button
+      aria-label="View available actions"
+      class="euiBadge emotion-euiBadge-clickable"
+      data-test-subj="unsavedChangesBadge"
+      style="--euiBadgeBackgroundColor: #F6E58D; --euiBadgeTextColor: #000;"
+      title="test"
+    >
+      <span
+        class="euiBadge__content emotion-euiBadge__content"
+      >
+        <span
+          class="euiBadge__text emotion-euiBadge__text-clickable"
+        >
+          test
+        </span>
+        <span
+          class="euiBadge__icon emotion-euiBadge__icon-right"
+          color="inherit"
+          data-euiicon-type="arrowDown"
+        />
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`<UnsavedChangesBadge /> should show all menu items 2`] = `
+<div
+  class="euiContextMenuPanel emotion-euiContextMenuPanel"
+  data-test-subj="unsavedChangesBadgeMenuPanel"
+  tabindex="-1"
+>
+  <div>
+    <button
+      class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+      data-test-subj="saveUnsavedChangesButton"
+      type="button"
+    >
+      <span
+        class="euiContextMenu__icon emotion-euiContextMenu__icon"
+        color="inherit"
+        data-euiicon-type="save"
+      />
+      <span
+        class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+      >
+        Save
+      </span>
+    </button>
+    <button
+      class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+      data-test-subj="saveUnsavedChangesAsButton"
+      type="button"
+    >
+      <span
+        class="euiContextMenu__icon emotion-euiContextMenu__icon"
+        color="inherit"
+        data-euiicon-type="save"
+      />
+      <span
+        class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+      >
+        Save as
+      </span>
+    </button>
+    <button
+      class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+      data-test-subj="revertUnsavedChangesButton"
+      type="button"
+    >
+      <span
+        class="euiContextMenu__icon emotion-euiContextMenu__icon"
+        color="inherit"
+        data-euiicon-type="editorUndo"
+      />
+      <span
+        class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+      >
+        Revert changes
+      </span>
+    </button>
+  </div>
+</div>
+`;

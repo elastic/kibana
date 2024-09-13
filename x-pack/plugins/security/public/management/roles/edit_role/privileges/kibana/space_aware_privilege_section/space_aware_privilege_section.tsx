@@ -20,16 +20,16 @@ import React, { Component, Fragment } from 'react';
 import type { Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Role } from '@kbn/security-plugin-types-common';
+import type { KibanaPrivileges } from '@kbn/security-role-management-model';
+import { PrivilegeFormCalculator } from '@kbn/security-ui-components';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 
-import type { Role } from '../../../../../../../common/model';
-import { isRoleReserved } from '../../../../../../../common/model';
-import type { KibanaPrivileges } from '../../../../model';
-import type { RoleValidator } from '../../../validate_role';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { PrivilegeSummary } from '../privilege_summary';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeSpaceTable } from './privilege_space_table';
+import { isRoleReserved, isRoleWithWildcardBasePrivilege } from '../../../../../../../common';
+import type { RoleValidator } from '../../../validate_role';
+import { PrivilegeSummary } from '../privilege_summary';
 
 interface Props {
   kibanaPrivileges: KibanaPrivileges;
@@ -188,7 +188,10 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
     const hasAvailableSpaces = this.getAvailableSpaces().length > 0;
 
     // This shouldn't happen organically...
-    if (!hasAvailableSpaces && !hasPrivilegesAssigned) {
+    if (
+      (!hasAvailableSpaces && !hasPrivilegesAssigned) ||
+      isRoleWithWildcardBasePrivilege(this.props.role)
+    ) {
       return null;
     }
 
@@ -219,6 +222,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
         kibanaPrivileges={this.props.kibanaPrivileges}
         canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
         spacesApiUi={this.props.spacesApiUi}
+        data-test-subj={'privilegeSummaryButton'}
       />
     );
 

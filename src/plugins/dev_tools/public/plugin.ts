@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { Plugin, CoreSetup, AppMountParameters, AppDeepLink } from '@kbn/core/public';
+import { Plugin, CoreSetup, AppMountParameters, AppDeepLink, AppStatus } from '@kbn/core/public';
 import { AppUpdater } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
 
-import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
+import { deepLinkIds as devtoolsDeeplinkIds } from '@kbn/deeplinks-devtools';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 import { DocTitleService, BreadcrumbService } from './services';
 
@@ -44,6 +46,8 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     return sortBy([...this.devTools.values()], 'order');
   }
 
+  constructor() {}
+
   public setup(coreSetup: CoreSetup, { urlForwarding }: { urlForwarding: UrlForwardingSetup }) {
     const { application: applicationSetup, getStartServices } = coreSetup;
 
@@ -57,11 +61,13 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
       order: 9010,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
-        const { element, history, theme$ } = params;
+        const { element, history } = params;
         element.classList.add('devAppWrapper');
 
         const [core] = await getStartServices();
         const { application, chrome, executionContext } = core;
+        const { analytics, i18n: i18nStart, theme } = core;
+        const startServices = { analytics, i18n: i18nStart, theme };
 
         this.docTitleService.setup(chrome.docTitle.change);
         this.breadcrumbService.setup(chrome.setBreadcrumbs);
@@ -78,9 +84,9 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
           application,
           chrome,
           history,
-          theme$,
           this.getSortedDevTools(),
-          appServices
+          appServices,
+          startServices
         );
       },
     });
@@ -104,7 +110,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
 
   public start() {
     if (this.getSortedDevTools().length === 0) {
-      this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
+      this.appStateUpdater.next(() => ({ status: AppStatus.inaccessible }));
     } else {
       this.appStateUpdater.next(() => {
         const deepLinks: AppDeepLink[] = [...this.devTools.values()]
@@ -112,12 +118,21 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
             // Some tools do not use a string title, so we filter those out
             (tool) => !tool.enableRouting && !tool.isDisabled() && typeof tool.title === 'string'
           )
-          .map((tool) => ({
-            id: tool.id,
-            title: tool.title as string,
-            path: `#/${tool.id}`,
-          }));
-        return { deepLinks };
+          .map((tool) => {
+            const deepLink: AppDeepLink = {
+              id: tool.id,
+              title: tool.title as string,
+              path: `#/${tool.id}`,
+            };
+            if (!devtoolsDeeplinkIds.some((id) => id === deepLink.id)) {
+              throw new Error('Deeplink must be registered in package.');
+            }
+            return deepLink;
+          });
+
+        return {
+          deepLinks,
+        };
       });
     }
   }

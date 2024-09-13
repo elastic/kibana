@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -38,6 +39,7 @@ interface AutocompleteFieldMatchAnyProps {
   autocompleteService: AutocompleteStart;
   onChange: (arg: string[]) => void;
   onError?: (arg: boolean) => void;
+  'aria-label'?: string;
 }
 
 export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatchAnyProps> = ({
@@ -53,6 +55,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
   onChange,
   onError,
   autocompleteService,
+  'aria-label': ariaLabel,
 }): JSX.Element => {
   const [searchQuery, setSearchQuery] = useState('');
   const [touched, setIsTouched] = useState(false);
@@ -184,28 +187,31 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
           onSearchChange={handleSearchChange}
           onCreateOption={handleCreateOption}
           isInvalid={selectedField != null && error != null}
+          isCaseSensitive
           onBlur={setIsTouchedValue}
           data-test-subj="valuesAutocompleteMatchAny"
+          aria-label={ariaLabel}
           fullWidth
           async
         />
       </EuiFormRow>
     );
   }, [
-    comboOptions,
-    error,
-    handleCreateOption,
-    handleSearchChange,
-    handleValuesChange,
-    inputPlaceholder,
-    isClearable,
-    isDisabled,
-    isLoadingState,
     rowLabel,
-    selectedComboOptions,
+    error,
     selectedField,
     showSpacesWarning,
+    inputPlaceholder,
+    isLoadingState,
+    isClearable,
+    isDisabled,
+    comboOptions,
+    selectedComboOptions,
+    handleValuesChange,
+    handleSearchChange,
+    handleCreateOption,
     setIsTouchedValue,
+    ariaLabel,
   ]);
 
   if (!isSuggestingValues && selectedField != null) {
@@ -231,6 +237,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
               isInvalid={selectedField != null && error != null}
               onFocus={setIsTouchedValue}
               data-test-subj="valuesAutocompleteMatchAnyNumber"
+              aria-label={ariaLabel}
               fullWidth
             />
           </EuiFormRow>

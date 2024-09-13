@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`revert changes routine reverts changes 2`] = `
+Object {
+  "layers": Array [
+    Object {
+      "__lastSaved": Object {
+        "annotations": Array [
+          Object {
+            "id": "some-different-annotation-id",
+            "key": Object {
+              "timestamp": "timestamp2",
+              "type": "point_in_time",
+            },
+            "type": "manual",
+          },
+        ],
+        "description": "",
+        "ignoreGlobalFilters": true,
+        "indexPatternId": "other index pattern",
+        "layerId": "some-id",
+        "layerType": "annotations",
+        "tags": Array [],
+        "title": "My library group",
+      },
+      "annotationGroupId": "shouldnt show up",
+      "annotations": Array [
+        Object {
+          "id": "some-different-annotation-id",
+          "key": Object {
+            "timestamp": "timestamp2",
+            "type": "point_in_time",
+          },
+          "type": "manual",
+        },
+      ],
+      "ignoreGlobalFilters": true,
+      "indexPatternId": "other index pattern",
+      "layerId": "some-id",
+      "layerType": "annotations",
+    },
+  ],
+}
+`;

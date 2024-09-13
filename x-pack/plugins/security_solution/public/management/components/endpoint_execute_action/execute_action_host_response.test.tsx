@@ -10,6 +10,7 @@ import type {
   ResponseActionExecuteOutputContent,
   ResponseActionsExecuteParameters,
   ActionDetails,
+  DeepMutable,
 } from '../../../../common/endpoint/types';
 import React from 'react';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -23,8 +24,8 @@ import { EXECUTE_OUTPUT_FILE_TRUNCATED_MESSAGE } from './execute_action_host_res
 describe('When using the `ExecuteActionHostResponse` component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
-  let renderProps: ExecuteActionHostResponseProps;
-  let action: ActionDetails;
+  let renderProps: DeepMutable<ExecuteActionHostResponseProps>;
+  let action: DeepMutable<ExecuteActionHostResponseProps>['action'];
 
   beforeEach(() => {
     const appTestContext = createAppRootMockRenderer();
@@ -32,7 +33,10 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
     action = new EndpointActionGenerator('seed').generateActionDetails<
       ResponseActionExecuteOutputContent,
       ResponseActionsExecuteParameters
-    >({ command: 'execute', agents: ['agent-a'] });
+    >({
+      command: 'execute',
+      agents: ['agent-a'],
+    });
 
     renderProps = {
       action,
@@ -58,8 +62,8 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
 
   it('should show execute context accordion as `closed`', async () => {
     render();
-    expect(renderResult.getByTestId('test-executeResponseOutput-context').className).toEqual(
-      'euiAccordion'
+    expect(renderResult.getByTestId('test-executeResponseOutput-context').className).not.toContain(
+      'euiAccordion-isOpen'
     );
   });
 
@@ -92,11 +96,11 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
   });
 
   it('should show `-` in output accordion when no output content', async () => {
-    (renderProps.action as ActionDetails).outputs = {
+    renderProps.action.outputs = {
       'agent-a': {
         type: 'json',
         content: {
-          ...(renderProps.action as ActionDetails).outputs?.[action.agents[0]].content,
+          ...renderProps.action.outputs![action.agents[0]].content,
           stdout: '',
         },
       },
@@ -109,11 +113,11 @@ describe('When using the `ExecuteActionHostResponse` component', () => {
   });
 
   it('should NOT show the error accordion when no error content', async () => {
-    (renderProps.action as ActionDetails).outputs = {
+    renderProps.action.outputs = {
       'agent-a': {
         type: 'json',
         content: {
-          ...(renderProps.action as ActionDetails).outputs?.[action.agents[0]].content,
+          ...renderProps.action.outputs![action.agents[0]].content,
           stderr: '',
         },
       },

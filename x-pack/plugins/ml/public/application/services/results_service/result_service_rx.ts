@@ -8,27 +8,30 @@
 // Queries Elasticsearch to obtain metric aggregation results.
 // index can be a String, or String[], of index names to search.
 // entityFields parameter must be an array, with each object in the array having 'fieldName'
-//  and 'fieldValue' properties.
+// and 'fieldValue' properties.
 // Extra query object can be supplied, or pass null if no additional query
 // to that built from the supplied entity fields.
 // Returned response contains a results property containing the requested aggregation.
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import type { Observable } from 'rxjs';
+import { map } from 'rxjs';
 import { each, get } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { Dictionary } from '../../../../common/types/common';
+import type { ErrorType } from '@kbn/ml-error-utils';
+import {
+  aggregationTypeTransform,
+  type InfluencersFilterQuery,
+  type MlEntityField,
+  type MlRecordForInfluencer,
+  ES_AGGREGATION,
+} from '@kbn/ml-anomaly-utils';
+import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
-import { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
-import { MlApiServices } from '../ml_api_service';
-import { CriteriaField } from '.';
+import type { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { findAggField } from '../../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
-import { aggregationTypeTransform, EntityField } from '../../../../common/util/anomaly_utils';
-import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
-import { InfluencersFilterQuery } from '../../../../common/types/es_client';
-import { RecordForInfluencer } from './results_service';
-import { isRuntimeMappings } from '../../../../common';
-import { ErrorType } from '../../../../common/util/errors';
+import type { MlApi } from '../ml_api_service';
+import type { CriteriaField } from '.';
 
 export interface ResultResponse {
   success: boolean;
@@ -68,7 +71,7 @@ export interface ScheduledEventsByBucket extends ResultResponse {
   events: Record<string, any>;
 }
 
-export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
+export function resultsServiceRxProvider(mlApi: MlApi) {
   return {
     getMetricData(
       index: string,
@@ -213,7 +216,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
           }
         }
       }
-      return mlApiServices.esSearch$({ index, body }).pipe(
+      return mlApi.esSearch$({ index, body }).pipe(
         map((resp: any) => {
           const obj: MetricData = { success: true, results: {} };
           const dataByTime = resp?.aggregations?.byTime?.buckets ?? [];
@@ -313,7 +316,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         },
       ];
 
-      return mlApiServices.results
+      return mlApi.results
         .anomalySearch$(
           {
             body: {
@@ -466,7 +469,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         });
       }
 
-      return mlApiServices.results
+      return mlApi.results
         .anomalySearch$(
           {
             body: {
@@ -552,7 +555,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         });
       }
 
-      return mlApiServices.results
+      return mlApi.results
         .anomalySearch$(
           {
             body: {
@@ -631,7 +634,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       earliestMs: number,
       latestMs: number
     ) {
-      return mlApiServices.results.fetchPartitionFieldsValues(
+      return mlApi.results.fetchPartitionFieldsValues(
         jobId,
         searchTerm,
         criteriaFields,
@@ -648,14 +651,14 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
     // Pass an empty array or ['*'] to search over all job IDs.
     getRecordsForInfluencer$(
       jobIds: string[],
-      influencers: EntityField[],
+      influencers: MlEntityField[],
       threshold: number,
       earliestMs: number,
       latestMs: number,
       maxResults: number,
       influencersFilterQuery: InfluencersFilterQuery
-    ): Observable<{ records: RecordForInfluencer[]; success: boolean }> {
-      const obj = { success: true, records: [] as RecordForInfluencer[] };
+    ): Observable<{ records: MlRecordForInfluencer[]; success: boolean }> {
+      const obj = { success: true, records: [] as MlRecordForInfluencer[] };
 
       // Build the criteria to use in the bool filter part of the request.
       // Add criteria for the time range, record score, plus any specified job IDs.
@@ -731,7 +734,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         });
       }
 
-      return mlApiServices.results
+      return mlApi.results
         .anomalySearch$(
           {
             body: {

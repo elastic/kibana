@@ -6,27 +6,21 @@ Array [
     class="euiText emotion-euiText-s"
   >
     <p>
-      <span>
-        Familiarize yourself with 
-        <button
-          class="euiLink emotion-euiLink-primary"
-          type="button"
-        >
-          <span>
-            scripted fields
-          </span>
-        </button>
-         and 
-        <button
-          class="euiLink emotion-euiLink-primary"
-          type="button"
-        >
-          <span>
-            scripts in aggregations
-          </span>
-        </button>
-         before using this feature. Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow and, if done incorrectly, can cause Kibana to become unusable.
-      </span>
+      Familiarize yourself with 
+      <button
+        class="euiLink emotion-euiLink-primary"
+        type="button"
+      >
+        scripted fields
+      </button>
+       and 
+      <button
+        class="euiLink emotion-euiLink-primary"
+        type="button"
+      >
+        scripts in aggregations
+      </button>
+       before using this feature. Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow and, if done incorrectly, can cause Kibana to become unusable.
     </p>
   </div>,
   <div
@@ -44,29 +38,26 @@ Array [
         color="inherit"
         data-euiicon-type="warning"
       />
-      <span>
-        Scripted fields are deprecated
-      </span>
+      Scripted fields are deprecated
     </p>
     <div
-      class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+    />
+    <div
+      class="euiText emotion-euiText-s-euiTextColor-default"
     >
       <div
         class="euiText emotion-euiText-s"
       >
         <p>
-          <span>
-            For greater flexibility and Painless script support, use 
-            <button
-              class="euiLink emotion-euiLink-primary"
-              type="button"
-            >
-              <span>
-                runtime fields
-              </span>
-            </button>
-            .
-          </span>
+          For greater flexibility and Painless script support, use 
+          <button
+            class="euiLink emotion-euiLink-primary"
+            type="button"
+          >
+            runtime fields
+          </button>
+          .
         </p>
       </div>
     </div>

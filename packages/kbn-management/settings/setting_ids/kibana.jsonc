@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/management-settings-ids",
+  "owner": "@elastic/appex-sharedux @elastic/kibana-management"
+}

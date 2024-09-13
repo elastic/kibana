@@ -1,13 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FieldEditor should render create new scripted field correctly 1`] = `
-<div>
+<I18nProvider>
   <eui-text>
     <h3>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Create scripted field"
         id="indexPatternManagement.createHeader"
-        values={Object {}}
       />
     </h3>
   </eui-text>
@@ -31,6 +30,8 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
           },
           "getFormatterForField": [Function],
           "getFormatterForFieldNoDefault": [Function],
+          "setFieldCustomLabel": [Function],
+          "upsertScriptedField": [Function],
         }
       }
       isVisible={false}
@@ -53,10 +54,9 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     </eui-form-row>
     <eui-form-row
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Set a custom label to use when this field is displayed in Discover, Maps, and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
           id="indexPatternManagement.labelHelpText"
-          values={Object {}}
         />
       }
       label="Custom label"
@@ -121,17 +121,15 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     </eui-form-row>
     <eui-form-row
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Formatting controls how values are displayed. Changing this setting might also affect the field value and highlighting in Discover."
           id="indexPatternManagement.formatLabel"
-          values={Object {}}
         />
       }
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Format"
           id="indexPatternManagement.formatHeader"
-          values={Object {}}
         />
       }
     >
@@ -162,10 +160,9 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     </eui-form-row>
     <eui-form-row
       error={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Script is required"
           id="indexPatternManagement.scriptRequiredErrorMessage"
-          values={Object {}}
         />
       }
       fullWidth={true}
@@ -184,7 +181,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     </eui-form-row>
     <eui-form-row>
       <eui-text>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Access fields with {code}."
           id="indexPatternManagement.script.accessWithLabel"
           values={
@@ -201,10 +198,9 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
         data-test-subj="scriptedFieldsHelpLink"
         onClick={[Function]}
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Get help with the syntax and preview the results of your script."
           id="indexPatternManagement.script.getHelpLabel"
-          values={Object {}}
         />
       </eui-link>
     </eui-form-row>
@@ -220,10 +216,9 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
             isLoading={false}
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Create field"
               id="indexPatternManagement.actions.createButton"
-              values={Object {}}
             />
           </eui-button>
         </eui-flex-item>
@@ -234,10 +229,9 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Cancel"
               id="indexPatternManagement.actions.cancelButton"
-              values={Object {}}
             />
           </eui-button-empty>
         </eui-flex-item>
@@ -247,14 +241,14 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
   <eui-spacer
     size="l"
   />
-</div>
+</I18nProvider>
 `;
 
 exports[`FieldEditor should render edit scripted field correctly 1`] = `
-<div>
+<I18nProvider>
   <eui-text>
     <h3>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Edit {fieldName}"
         id="indexPatternManagement.editHeader"
         values={
@@ -285,6 +279,8 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
           },
           "getFormatterForField": [Function],
           "getFormatterForFieldNoDefault": [Function],
+          "setFieldCustomLabel": [Function],
+          "upsertScriptedField": [Function],
         }
       }
       isVisible={false}
@@ -295,10 +291,9 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     />
     <eui-form-row
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Set a custom label to use when this field is displayed in Discover, Maps, and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
           id="indexPatternManagement.labelHelpText"
-          values={Object {}}
         />
       }
       label="Custom label"
@@ -364,17 +359,15 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     </eui-form-row>
     <eui-form-row
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Formatting controls how values are displayed. Changing this setting might also affect the field value and highlighting in Discover."
           id="indexPatternManagement.formatLabel"
-          values={Object {}}
         />
       }
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Format"
           id="indexPatternManagement.formatHeader"
-          values={Object {}}
         />
       }
     >
@@ -421,7 +414,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     </eui-form-row>
     <eui-form-row>
       <eui-text>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Access fields with {code}."
           id="indexPatternManagement.script.accessWithLabel"
           values={
@@ -438,10 +431,9 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
         data-test-subj="scriptedFieldsHelpLink"
         onClick={[Function]}
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Get help with the syntax and preview the results of your script."
           id="indexPatternManagement.script.getHelpLabel"
-          values={Object {}}
         />
       </eui-link>
     </eui-form-row>
@@ -457,10 +449,9 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
             isLoading={false}
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Save field"
               id="indexPatternManagement.actions.saveButton"
-              values={Object {}}
             />
           </eui-button>
         </eui-flex-item>
@@ -471,10 +462,9 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Cancel"
               id="indexPatternManagement.actions.cancelButton"
-              values={Object {}}
             />
           </eui-button-empty>
         </eui-flex-item>
@@ -489,10 +479,9 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
                 color="danger"
                 onClick={[Function]}
               >
-                <FormattedMessage
+                <MemoizedFormattedMessage
                   defaultMessage="Delete"
                   id="indexPatternManagement.actions.deleteButton"
-                  values={Object {}}
                 />
               </eui-button-empty>
             </eui-flex-item>
@@ -504,17 +493,16 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
   <eui-spacer
     size="l"
   />
-</div>
+</I18nProvider>
 `;
 
 exports[`FieldEditor should show conflict field warning 1`] = `
-<div>
+<I18nProvider>
   <eui-text>
     <h3>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Create scripted field"
         id="indexPatternManagement.createHeader"
-        values={Object {}}
       />
     </h3>
   </eui-text>
@@ -538,6 +526,8 @@ exports[`FieldEditor should show conflict field warning 1`] = `
           },
           "getFormatterForField": [Function],
           "getFormatterForFieldNoDefault": [Function],
+          "setFieldCustomLabel": [Function],
+          "upsertScriptedField": [Function],
         }
       }
       isVisible={false}
@@ -555,7 +545,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
             type="warning"
           />
            
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with the same name means you won't be able to query both fields at the same time."
             id="indexPatternManagement.mappingConflictLabel.mappingConflictDetail"
             values={
@@ -564,10 +554,9 @@ exports[`FieldEditor should show conflict field warning 1`] = `
                   foobar
                 </eui-code>,
                 "mappingConflict": <strong>
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Mapping Conflict:"
                     id="indexPatternManagement.mappingConflictLabel.mappingConflictLabel"
-                    values={Object {}}
                   />
                 </strong>,
               }
@@ -588,10 +577,9 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     </eui-form-row>
     <eui-form-row
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Set a custom label to use when this field is displayed in Discover, Maps, and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
           id="indexPatternManagement.labelHelpText"
-          values={Object {}}
         />
       }
       label="Custom label"
@@ -657,17 +645,15 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     </eui-form-row>
     <eui-form-row
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Formatting controls how values are displayed. Changing this setting might also affect the field value and highlighting in Discover."
           id="indexPatternManagement.formatLabel"
-          values={Object {}}
         />
       }
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Format"
           id="indexPatternManagement.formatHeader"
-          values={Object {}}
         />
       }
     >
@@ -698,10 +684,9 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     </eui-form-row>
     <eui-form-row
       error={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Script is required"
           id="indexPatternManagement.scriptRequiredErrorMessage"
-          values={Object {}}
         />
       }
       fullWidth={true}
@@ -720,7 +705,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     </eui-form-row>
     <eui-form-row>
       <eui-text>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Access fields with {code}."
           id="indexPatternManagement.script.accessWithLabel"
           values={
@@ -737,10 +722,9 @@ exports[`FieldEditor should show conflict field warning 1`] = `
         data-test-subj="scriptedFieldsHelpLink"
         onClick={[Function]}
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Get help with the syntax and preview the results of your script."
           id="indexPatternManagement.script.getHelpLabel"
-          values={Object {}}
         />
       </eui-link>
     </eui-form-row>
@@ -756,10 +740,9 @@ exports[`FieldEditor should show conflict field warning 1`] = `
             isLoading={false}
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Create field"
               id="indexPatternManagement.actions.createButton"
-              values={Object {}}
             />
           </eui-button>
         </eui-flex-item>
@@ -770,10 +753,9 @@ exports[`FieldEditor should show conflict field warning 1`] = `
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Cancel"
               id="indexPatternManagement.actions.cancelButton"
-              values={Object {}}
             />
           </eui-button-empty>
         </eui-flex-item>
@@ -783,14 +765,14 @@ exports[`FieldEditor should show conflict field warning 1`] = `
   <eui-spacer
     size="l"
   />
-</div>
+</I18nProvider>
 `;
 
 exports[`FieldEditor should show deprecated lang warning 1`] = `
-<div>
+<I18nProvider>
   <eui-text>
     <h3>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Edit {fieldName}"
         id="indexPatternManagement.editHeader"
         values={
@@ -821,6 +803,8 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           },
           "getFormatterForField": [Function],
           "getFormatterForFieldNoDefault": [Function],
+          "setFieldCustomLabel": [Function],
+          "upsertScriptedField": [Function],
         }
       }
       isVisible={false}
@@ -831,10 +815,9 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     />
     <eui-form-row
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Set a custom label to use when this field is displayed in Discover, Maps, and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
           id="indexPatternManagement.labelHelpText"
-          values={Object {}}
         />
       }
       label="Custom label"
@@ -856,14 +839,13 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           />
            
           <strong>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Deprecation Warning:"
               id="indexPatternManagement.warningHeader"
-              values={Object {}}
             />
           </strong>
            
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="{language} is deprecated and support will be removed in the next major version of Kibana and Elasticsearch. We recommend using {painlessLink} for new scripted fields."
             id="indexPatternManagement.warningLabel.warningDetail"
             values={
@@ -874,10 +856,9 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                 "painlessLink": <eui-link
                   target="_blank"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Painless"
                     id="indexPatternManagement.warningLabel.painlessLinkLabel"
-                    values={Object {}}
                   />
                 </eui-link>,
               }
@@ -993,17 +974,15 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     </eui-form-row>
     <eui-form-row
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Formatting controls how values are displayed. Changing this setting might also affect the field value and highlighting in Discover."
           id="indexPatternManagement.formatLabel"
-          values={Object {}}
         />
       }
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Format"
           id="indexPatternManagement.formatHeader"
-          values={Object {}}
         />
       }
     >
@@ -1050,7 +1029,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     </eui-form-row>
     <eui-form-row>
       <eui-text>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Access fields with {code}."
           id="indexPatternManagement.script.accessWithLabel"
           values={
@@ -1067,10 +1046,9 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
         data-test-subj="scriptedFieldsHelpLink"
         onClick={[Function]}
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Get help with the syntax and preview the results of your script."
           id="indexPatternManagement.script.getHelpLabel"
-          values={Object {}}
         />
       </eui-link>
     </eui-form-row>
@@ -1086,10 +1064,9 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
             isLoading={false}
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Save field"
               id="indexPatternManagement.actions.saveButton"
-              values={Object {}}
             />
           </eui-button>
         </eui-flex-item>
@@ -1100,10 +1077,9 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Cancel"
               id="indexPatternManagement.actions.cancelButton"
-              values={Object {}}
             />
           </eui-button-empty>
         </eui-flex-item>
@@ -1118,10 +1094,9 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                 color="danger"
                 onClick={[Function]}
               >
-                <FormattedMessage
+                <MemoizedFormattedMessage
                   defaultMessage="Delete"
                   id="indexPatternManagement.actions.deleteButton"
-                  values={Object {}}
                 />
               </eui-button-empty>
             </eui-flex-item>
@@ -1133,17 +1108,16 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
   <eui-spacer
     size="l"
   />
-</div>
+</I18nProvider>
 `;
 
 exports[`FieldEditor should show multiple type field warning with a table containing indices 1`] = `
-<div>
+<I18nProvider>
   <eui-text>
     <h3>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Create scripted field"
         id="indexPatternManagement.createHeader"
-        values={Object {}}
       />
     </h3>
   </eui-text>
@@ -1167,6 +1141,8 @@ exports[`FieldEditor should show multiple type field warning with a table contai
           },
           "getFormatterForField": [Function],
           "getFormatterForFieldNoDefault": [Function],
+          "setFieldCustomLabel": [Function],
+          "upsertScriptedField": [Function],
         }
       }
       isVisible={false}
@@ -1184,7 +1160,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
             type="warning"
           />
            
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with the same name means you won't be able to query both fields at the same time."
             id="indexPatternManagement.mappingConflictLabel.mappingConflictDetail"
             values={
@@ -1193,10 +1169,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
                   foobar
                 </eui-code>,
                 "mappingConflict": <strong>
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Mapping Conflict:"
                     id="indexPatternManagement.mappingConflictLabel.mappingConflictLabel"
-                    values={Object {}}
                   />
                 </strong>,
               }
@@ -1217,10 +1192,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
     </eui-form-row>
     <eui-form-row
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Set a custom label to use when this field is displayed in Discover, Maps, and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
           id="indexPatternManagement.labelHelpText"
-          values={Object {}}
         />
       }
       label="Custom label"
@@ -1293,17 +1267,15 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         iconType="warning"
         size="s"
         title={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Field type conflict"
             id="indexPatternManagement.fieldTypeConflict"
-            values={Object {}}
           />
         }
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:"
           id="indexPatternManagement.multiTypeLabelDesc"
-          values={Object {}}
         />
       </eui-call-out>
       <eui-spacer
@@ -1342,17 +1314,15 @@ exports[`FieldEditor should show multiple type field warning with a table contai
     </div>
     <eui-form-row
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Formatting controls how values are displayed. Changing this setting might also affect the field value and highlighting in Discover."
           id="indexPatternManagement.formatLabel"
-          values={Object {}}
         />
       }
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Format"
           id="indexPatternManagement.formatHeader"
-          values={Object {}}
         />
       }
     >
@@ -1383,10 +1353,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
     </eui-form-row>
     <eui-form-row
       error={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Script is required"
           id="indexPatternManagement.scriptRequiredErrorMessage"
-          values={Object {}}
         />
       }
       fullWidth={true}
@@ -1405,7 +1374,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
     </eui-form-row>
     <eui-form-row>
       <eui-text>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Access fields with {code}."
           id="indexPatternManagement.script.accessWithLabel"
           values={
@@ -1422,10 +1391,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         data-test-subj="scriptedFieldsHelpLink"
         onClick={[Function]}
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Get help with the syntax and preview the results of your script."
           id="indexPatternManagement.script.getHelpLabel"
-          values={Object {}}
         />
       </eui-link>
     </eui-form-row>
@@ -1441,10 +1409,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
             isLoading={false}
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Create field"
               id="indexPatternManagement.actions.createButton"
-              values={Object {}}
             />
           </eui-button>
         </eui-flex-item>
@@ -1455,10 +1422,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Cancel"
               id="indexPatternManagement.actions.cancelButton"
-              values={Object {}}
             />
           </eui-button-empty>
         </eui-flex-item>
@@ -1468,5 +1434,5 @@ exports[`FieldEditor should show multiple type field warning with a table contai
   <eui-spacer
     size="l"
   />
-</div>
+</I18nProvider>
 `;

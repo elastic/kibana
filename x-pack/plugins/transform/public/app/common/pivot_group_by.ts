@@ -7,11 +7,11 @@
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { AggName } from '../../../common/types/aggregations';
-import { Dictionary } from '../../../common/types/common';
-import { EsFieldName } from '../../../common/types/fields';
-import { GenericAgg } from '../../../common/types/pivot_group_by';
-import { PivotAggsConfigWithUiSupport } from './pivot_aggs';
+import type { AggName } from '../../../common/types/aggregations';
+import type { Dictionary } from '../../../common/types/common';
+import type { EsFieldName } from '../../../common/types/fields';
+import type { GenericAgg } from '../../../common/types/pivot_group_by';
+import type { PivotAggsConfigWithUiSupport } from './pivot_aggs';
 
 export enum PIVOT_SUPPORTED_GROUP_BY_AGGS {
   DATE_HISTOGRAM = 'date_histogram',
@@ -59,6 +59,7 @@ interface GroupByDateHistogram extends GroupByConfigBase {
   field: EsFieldName;
   calendar_interval: string;
   missing_bucket?: boolean;
+  time_zone?: string;
 }
 
 interface GroupByHistogram extends GroupByConfigBase {

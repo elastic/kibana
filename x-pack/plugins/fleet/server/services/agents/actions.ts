@@ -9,10 +9,13 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import apm from 'elastic-apm-node';
 
+import { partition } from 'lodash';
+
 import { appContextService } from '../app_context';
 import type {
   Agent,
   AgentAction,
+  AgentActionType,
   NewAgentAction,
   FleetServerAgentAction,
 } from '../../../common/types/models';
@@ -25,25 +28,34 @@ import { AgentActionNotFoundError } from '../../errors';
 
 import { auditLoggingService } from '../audit_logging';
 
+import { getAgentIdsForAgentPolicies } from '../agent_policies/agent_policies_to_agent_ids';
+
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
+
 import { bulkUpdateAgents } from './crud';
 
 const ONE_MONTH_IN_MS = 2592000000;
 
 export const NO_EXPIRATION = 'NONE';
 
+const SIGNED_ACTIONS: Set<Partial<AgentActionType>> = new Set(['UNENROLL', 'UPGRADE']);
+
 export async function createAgentAction(
   esClient: ElasticsearchClient,
   newAgentAction: NewAgentAction
 ): Promise<AgentAction> {
   const actionId = newAgentAction.id ?? uuidv4();
-  const timestamp = new Date().toISOString();
+  const now = Date.now();
+  const timestamp = new Date(now).toISOString();
   const body: FleetServerAgentAction = {
     '@timestamp': timestamp,
     expiration:
       newAgentAction.expiration === NO_EXPIRATION
         ? undefined
-        : newAgentAction.expiration ?? new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
+        : newAgentAction.expiration ?? new Date(now + ONE_MONTH_IN_MS).toISOString(),
     agents: newAgentAction.agents,
+    namespaces: newAgentAction.namespaces,
     action_id: actionId,
     data: newAgentAction.data,
     type: newAgentAction.type,
@@ -53,6 +65,15 @@ export async function createAgentAction(
     total: newAgentAction.total,
     traceparent: apm.currentTraceparent,
   };
+
+  const messageSigningService = appContextService.getMessageSigningService();
+  if (SIGNED_ACTIONS.has(newAgentAction.type) && messageSigningService) {
+    const signedBody = await messageSigningService.sign(body);
+    body.signed = {
+      data: signedBody.data.toString('base64'),
+      signature: signedBody.signature,
+    };
+  }
 
   await esClient.create({
     index: AGENT_ACTIONS_INDEX,
@@ -88,30 +109,41 @@ export async function bulkCreateAgentActions(
     return [];
   }
 
+  const messageSigningService = appContextService.getMessageSigningService();
   await esClient.bulk({
     index: AGENT_ACTIONS_INDEX,
-    body: actions.flatMap((action) => {
-      const body: FleetServerAgentAction = {
-        '@timestamp': new Date().toISOString(),
-        expiration: action.expiration ?? new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
-        start_time: action.start_time,
-        rollout_duration_seconds: action.rollout_duration_seconds,
-        agents: action.agents,
-        action_id: action.id,
-        data: action.data,
-        type: action.type,
-        traceparent: apm.currentTraceparent,
-      };
+    body: await Promise.all(
+      actions.flatMap(async (action) => {
+        const body: FleetServerAgentAction = {
+          '@timestamp': new Date().toISOString(),
+          expiration: action.expiration ?? new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
+          start_time: action.start_time,
+          rollout_duration_seconds: action.rollout_duration_seconds,
+          agents: action.agents,
+          action_id: action.id,
+          data: action.data,
+          type: action.type,
+          traceparent: apm.currentTraceparent,
+        };
 
-      return [
-        {
-          create: {
-            _id: action.id,
+        if (SIGNED_ACTIONS.has(action.type) && messageSigningService) {
+          const signedBody = await messageSigningService.sign(body);
+          body.signed = {
+            data: signedBody.data.toString('base64'),
+            signature: signedBody.signature,
+          };
+        }
+
+        return [
+          {
+            create: {
+              _id: action.id,
+            },
           },
-        },
-        body,
-      ];
-    }),
+          body,
+        ];
+      })
+    ),
   });
 
   for (const action of actions) {
@@ -154,6 +186,7 @@ export async function bulkCreateAgentActionResults(
   results: Array<{
     actionId: string;
     agentId: string;
+    namespaces?: string[];
     error?: string;
   }>
 ): Promise<void> {
@@ -166,6 +199,7 @@ export async function bulkCreateAgentActionResults(
       '@timestamp': new Date().toISOString(),
       action_id: result.actionId,
       agent_id: result.agentId,
+      namespaces: result.namespaces,
       error: result.error,
     };
 
@@ -274,21 +308,28 @@ export async function getUnenrollAgentActions(
   return result;
 }
 
-export async function cancelAgentAction(esClient: ElasticsearchClient, actionId: string) {
+export async function cancelAgentAction(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  actionId: string
+) {
+  const currentSpaceId = getCurrentNamespace(soClient);
+
   const getUpgradeActions = async () => {
+    const query = {
+      bool: {
+        filter: [
+          {
+            term: {
+              action_id: actionId,
+            },
+          },
+        ],
+      },
+    };
     const res = await esClient.search<FleetServerAgentAction>({
       index: AGENT_ACTIONS_INDEX,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                action_id: actionId,
-              },
-            },
-          ],
-        },
-      },
+      query: await addNamespaceFilteringToQuery(query, currentSpaceId),
       size: SO_SEARCH_LIMIT,
     });
 
@@ -320,6 +361,7 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
     await createAgentAction(esClient, {
       id: cancelActionId,
       type: 'CANCEL',
+      namespaces: [currentSpaceId],
       agents: action.agents!,
       data: {
         target_id: action.action_id,
@@ -395,6 +437,10 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
 }
 
 async function getAgentActionsByIds(esClient: ElasticsearchClient, actionIds: string[]) {
+  if (actionIds.length === 0) {
+    return [];
+  }
+
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     query: {
@@ -412,7 +458,8 @@ async function getAgentActionsByIds(esClient: ElasticsearchClient, actionIds: st
   });
 
   if (res.hits.hits.length === 0) {
-    throw new AgentActionNotFoundError('Action not found');
+    appContextService.getLogger().debug(`No agent action found for ids ${actionIds}`);
+    return [];
   }
 
   const result: FleetServerAgentAction[] = [];
@@ -435,8 +482,31 @@ export const getAgentsByActionsIds = async (
   esClient: ElasticsearchClient,
   actionsIds: string[]
 ) => {
-  const actions = await getAgentActionsByIds(esClient, actionsIds);
-  return actions.flatMap((a) => a?.agents).filter((agent) => !!agent) as string[];
+  // There are two types of actions:
+  // 1. Agent actions stored in .fleet-actions, with type AgentActionType except 'POLICY_CHANGE'
+  // 2. Agent policy actions, generated from .fleet-policies, with actionId `${hit.policy_id}:${hit.revision_idx}`
+
+  const [agentPolicyActionIds, agentActionIds] = partition(
+    actionsIds,
+    (actionsId) => actionsId.split(':').length > 1
+  );
+
+  const agentIds: string[] = [];
+
+  const agentActions = await getAgentActionsByIds(esClient, agentActionIds);
+  if (agentActions.length > 0) {
+    agentIds.push(
+      ...(agentActions.flatMap((a) => a?.agents).filter((agent) => !!agent) as string[])
+    );
+  }
+
+  const policyIds = agentPolicyActionIds.map((actionId) => actionId.split(':')[0]);
+  const assignedAgentIds = await getAgentIdsForAgentPolicies(esClient, policyIds);
+  if (assignedAgentIds.length > 0) {
+    agentIds.push(...assignedAgentIds);
+  }
+
+  return agentIds;
 };
 
 export interface ActionsService {
@@ -446,7 +516,11 @@ export interface ActionsService {
     agentId: string
   ) => Promise<Agent>;
 
-  cancelAgentAction: (esClient: ElasticsearchClient, actionId: string) => Promise<AgentAction>;
+  cancelAgentAction: (
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    actionId: string
+  ) => Promise<AgentAction>;
 
   createAgentAction: (
     esClient: ElasticsearchClient,

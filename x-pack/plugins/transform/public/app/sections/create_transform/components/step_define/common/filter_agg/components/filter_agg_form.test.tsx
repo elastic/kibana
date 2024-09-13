@@ -11,18 +11,18 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { FilterAggForm } from './filter_agg_form';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { RuntimeField } from '@kbn/data-views-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterTermForm } from './filter_term_form';
 
 describe('FilterAggForm', () => {
-  const runtimeMappings = {
+  const runtimeMappings: RuntimeMappings = {
     rt_bytes_bigger: {
       type: 'double',
       script: {
         source: "emit(doc['bytes'].value * 2.0)",
       },
-    } as RuntimeField,
+    },
   };
 
   const dataView = {

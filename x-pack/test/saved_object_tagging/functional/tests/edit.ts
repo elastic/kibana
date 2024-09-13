@@ -16,7 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const tagManagementPage = PageObjects.tagManagement;
 
   describe('edit tag', () => {
-    let tagModal: typeof tagManagementPage['tagModal'];
+    let tagModal: (typeof tagManagementPage)['tagModal'];
 
     before(async () => {
       tagModal = tagManagementPage.tagModal;
@@ -55,7 +55,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           description: 'This was edited',
           color: '#FFCC00',
         },
-        { submit: true }
+        {
+          submit: true,
+          clearWithKeyboard: true,
+        }
       );
       await tagModal.waitUntilClosed();
       await tagManagementPage.waitUntilTableIsLoaded();
@@ -78,7 +81,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         {
           name: 'a',
         },
-        { submit: true }
+        {
+          submit: true,
+          clearWithKeyboard: true,
+        }
       );
 
       expect(await tagModal.isOpened()).to.be(true);
@@ -97,7 +103,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           description: 'edited description',
           color: '#FF00CC',
         },
-        { submit: true }
+        {
+          submit: true,
+          clearWithKeyboard: true,
+        }
       );
 
       expect(await tagModal.isOpened()).to.be(true);
@@ -107,7 +116,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         {
           name: 'edited name',
         },
-        { submit: true }
+        {
+          submit: true,
+          clearWithKeyboard: true,
+        }
       );
 
       await tagModal.waitUntilClosed();
@@ -129,7 +141,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           description: 'I will not add this tag',
           color: '#FF00CC',
         },
-        { submit: false }
+        {
+          submit: false,
+          clearWithKeyboard: true,
+        }
       );
       await tagModal.clickCancel();
       await tagModal.waitUntilClosed();
@@ -152,13 +167,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should disable save button if no property is changed', async () => {
         await tagModal.openEdit('tag-3');
 
-        await tagModal.fillForm(tag3Unmodified, { submit: false });
+        await tagModal.fillForm(tag3Unmodified, { submit: false, clearWithKeyboard: true });
         expect(await tagModal.isConfirmDisabled()).to.be(true);
       });
       it('should enable save button if name is changed', async () => {
         await tagModal.openEdit('tag-3');
 
-        await tagModal.fillForm({ ...tag3Unmodified, name: 'changed name' }, { submit: false });
+        await tagModal.fillForm(
+          { ...tag3Unmodified, name: 'changed name' },
+          { submit: false, clearWithKeyboard: true }
+        );
         expect(await tagModal.isConfirmDisabled()).to.be(false);
       });
       it('should enable save button if description is changed', async () => {
@@ -166,14 +184,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await tagModal.fillForm(
           { ...tag3Unmodified, description: 'changed description' },
-          { submit: false }
+          { submit: false, clearWithKeyboard: true }
         );
         expect(await tagModal.isConfirmDisabled()).to.be(false);
       });
       it('should enable save button if color is changed', async () => {
         await tagModal.openEdit('tag-3');
 
-        await tagModal.fillForm({ ...tag3Unmodified, color: '#FF0000' }, { submit: false });
+        await tagModal.fillForm(
+          { ...tag3Unmodified, color: '#FF0000' },
+          { submit: false, clearWithKeyboard: true }
+        );
         expect(await tagModal.isConfirmDisabled()).to.be(false);
       });
     });

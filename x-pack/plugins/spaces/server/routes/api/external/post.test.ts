@@ -16,7 +16,9 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
+import { initPostSpacesApi } from './post';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -27,7 +29,6 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { initPostSpacesApi } from './post';
 
 describe('Spaces Public API', () => {
   const spacesSavedObjects = createSpaces();
@@ -42,7 +43,7 @@ describe('Spaces Public API', () => {
 
     const log = loggingSystemMock.create().get('spaces');
 
-    const clientService = new SpacesClientService(jest.fn());
+    const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -52,9 +53,13 @@ describe('Spaces Public API', () => {
       basePath: httpService.basePath,
     });
 
+    const featuresPluginMockStart = featuresPluginMock.createStart();
+
+    featuresPluginMockStart.getKibanaFeatures.mockReturnValue([]);
+
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMockStart);
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
@@ -62,11 +67,12 @@ describe('Spaces Public API', () => {
     });
 
     initPostSpacesApi({
-      externalRouter: router,
+      router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
+      isServerless: false,
     });
 
     const [routeDefinition, routeHandler] = router.post.mock.calls[0];
@@ -130,6 +136,7 @@ describe('Spaces Public API', () => {
       id: 'a-space',
       name: 'my updated space',
       description: 'with a description',
+      disabledFeatures: [],
     };
 
     const { routeHandler } = await setup();
@@ -152,6 +159,7 @@ describe('Spaces Public API', () => {
       id: 'my-space-id',
       name: 'my new space',
       description: 'with a description',
+      disabledFeatures: [],
     };
 
     const { routeValidation, routeHandler, savedObjectsRepositoryMock } = await setup();

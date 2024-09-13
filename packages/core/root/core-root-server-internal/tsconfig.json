@@ -69,6 +69,13 @@
     "@kbn/core-custom-branding-server-mocks",
     "@kbn/repo-packages",
     "@kbn/core-node-server",
+    "@kbn/core-user-settings-server-internal",
+    "@kbn/core-user-settings-server-mocks",
+    "@kbn/core-security-server-mocks",
+    "@kbn/core-security-server-internal",
+    "@kbn/core-usage-data-server-mocks",
+    "@kbn/core-user-profile-server-mocks",
+    "@kbn/core-user-profile-server-internal",
   ],
   "exclude": [
     "target/**/*",

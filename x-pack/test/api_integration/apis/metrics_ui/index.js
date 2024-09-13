@@ -22,6 +22,9 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./metrics_process_list'));
     loadTestFile(require.resolve('./metrics_process_list_chart'));
     loadTestFile(require.resolve('./infra_log_analysis_validation_log_entry_datasets'));
+    loadTestFile(require.resolve('./infra'));
     loadTestFile(require.resolve('./inventory_threshold_alert'));
+    loadTestFile(require.resolve('./services'));
+    loadTestFile(require.resolve('./infra_custom_dashboards'));
   });
 }

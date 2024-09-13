@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { KibanaFeature } from '@kbn/features-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -103,11 +104,15 @@ export default function ({ getService }: FtrProviderContext) {
             'filesManagement',
             'filesSharedImage',
             'advancedSettings',
+            'aiAssistantManagementSelection',
             'indexPatterns',
             'graph',
+            'guidedOnboardingFeature',
             'monitoring',
+            'observabilityAIAssistant',
             'observabilityCases',
             'savedObjectsManagement',
+            'savedQueryManagement',
             'savedObjectsTagging',
             'ml',
             'apm',
@@ -121,12 +126,72 @@ export default function ({ getService }: FtrProviderContext) {
             'osquery',
             'rulesSettings',
             'uptime',
+            'searchInferenceEndpoints',
             'siem',
             'slo',
+            'securitySolutionAssistant',
+            'securitySolutionAttackDiscovery',
             'securitySolutionCases',
             'fleet',
             'fleetv2',
           ].sort()
+        );
+      });
+
+      it('should return a full feature set with correct scope', async () => {
+        const { body } = await supertest.get('/api/features').expect(200);
+        expect(body).to.be.an(Array);
+
+        const scopeAgnosticFeatures = [
+          'discover',
+          'visualize',
+          'dashboard',
+          'dev_tools',
+          'actions',
+          'enterpriseSearch',
+          'filesManagement',
+          'filesSharedImage',
+          'advancedSettings',
+          'aiAssistantManagementSelection',
+          'indexPatterns',
+          'graph',
+          'guidedOnboardingFeature',
+          'monitoring',
+          'observabilityAIAssistant',
+          'observabilityCases',
+          'savedObjectsManagement',
+          'savedQueryManagement',
+          'savedObjectsTagging',
+          'ml',
+          'apm',
+          'stackAlerts',
+          'canvas',
+          'generalCases',
+          'infrastructure',
+          'logs',
+          'maintenanceWindow',
+          'maps',
+          'osquery',
+          'rulesSettings',
+          'uptime',
+          'searchInferenceEndpoints',
+          'siem',
+          'slo',
+          'securitySolutionAssistant',
+          'securitySolutionAttackDiscovery',
+          'securitySolutionCases',
+          'fleet',
+          'fleetv2',
+        ];
+
+        const features = body.filter(
+          (f: KibanaFeature) =>
+            f.scope?.includes(KibanaFeatureScope.Spaces) &&
+            f.scope?.includes(KibanaFeatureScope.Security)
+        );
+
+        expect(features.every((f: KibanaFeature) => scopeAgnosticFeatures.includes(f.id))).to.be(
+          true
         );
       });
     });

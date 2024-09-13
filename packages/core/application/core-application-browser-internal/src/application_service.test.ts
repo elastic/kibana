@@ -1,37 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
   MockCapabilitiesService,
   MockHistory,
   parseAppUrlMock,
+  getLocationObservableMock,
+  registerAnalyticsContextProviderMock,
 } from './application_service.test.mocks';
 
 import { createElement } from 'react';
 import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
-import { bufferCount, takeUntil } from 'rxjs/operators';
+import { bufferCount, takeUntil } from 'rxjs';
 import { mount, shallow } from 'enzyme';
+import { createBrowserHistory } from 'history';
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { MockLifecycle } from './test_helpers/test_types';
 import { ApplicationService } from './application_service';
 import {
   App,
   AppDeepLink,
-  AppNavLinkStatus,
   AppStatus,
   AppUpdater,
   PublicAppInfo,
 } from '@kbn/core-application-browser';
 import { act } from 'react-dom/test-utils';
+import { DEFAULT_APP_VISIBILITY } from './utils';
 
 const createApp = (props: Partial<App>): App => {
   return {
@@ -48,9 +53,12 @@ let service: ApplicationService;
 
 describe('#setup()', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
+    const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
     setupDeps = {
       http,
+      analytics,
       redirectTo: jest.fn(),
     };
     startDeps = {
@@ -58,6 +66,7 @@ describe('#setup()', () => {
       overlays: overlayServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
       customBranding: customBrandingServiceMock.createStartContract(),
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     };
     service = new ApplicationService();
   });
@@ -90,7 +99,9 @@ describe('#setup()', () => {
       await service.start(startDeps);
       expect(() =>
         register(Symbol(), createApp({ id: 'app1' }))
-      ).toThrowErrorMatchingInlineSnapshot(`"Applications cannot be registered after \\"setup\\""`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Applications cannot be registered after \\"setup\\" (attempted to register \\"app1\\")"`
+      );
     });
 
     it('allows to register an AppUpdater for the application', async () => {
@@ -101,7 +112,17 @@ describe('#setup()', () => {
       setup.register(pluginId, createApp({ id: 'app1', updater$ }));
       setup.register(
         pluginId,
-        createApp({ id: 'app2', deepLinks: [{ id: 'subapp1', title: 'Subapp', path: '/subapp' }] })
+        createApp({
+          id: 'app2',
+          deepLinks: [
+            {
+              id: 'subapp1',
+              title: 'Subapp',
+              path: '/subapp',
+              visibleIn: undefined, // not specified
+            },
+          ],
+        })
       );
       const { applications$ } = await service.start(startDeps);
 
@@ -110,18 +131,18 @@ describe('#setup()', () => {
       expect(applications.get('app1')).toEqual(
         expect.objectContaining({
           id: 'app1',
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleIn: DEFAULT_APP_VISIBILITY,
           status: AppStatus.accessible,
         })
       );
       expect(applications.get('app2')).toEqual(
         expect.objectContaining({
           id: 'app2',
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleIn: DEFAULT_APP_VISIBILITY,
           status: AppStatus.accessible,
           deepLinks: [
             expect.objectContaining({
-              navLinkStatus: AppNavLinkStatus.hidden,
+              visibleIn: ['globalSearch'], // if not specified, deep links are visible in globalSearch
             }),
           ],
         })
@@ -139,20 +160,23 @@ describe('#setup()', () => {
       expect(applications.get('app1')).toEqual(
         expect.objectContaining({
           id: 'app1',
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
           status: AppStatus.inaccessible,
           defaultPath: 'foo/bar',
           tooltip: 'App inaccessible due to reason',
-          deepLinks: [
-            expect.objectContaining({ id: 'subapp2', title: 'Subapp 2', path: '/subapp2' }),
-          ],
+          deepLinks: [], // deep links are removed when the app is inaccessible
         })
       );
       expect(applications.get('app2')).toEqual(
         expect.objectContaining({
           id: 'app2',
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleIn: DEFAULT_APP_VISIBILITY,
           status: AppStatus.accessible,
+          deepLinks: [
+            expect.objectContaining({
+              visibleIn: ['globalSearch'],
+            }),
+          ],
         })
       );
     });
@@ -204,7 +228,7 @@ describe('#setup()', () => {
           if (app.id === 'app1') {
             return {
               status: AppStatus.inaccessible,
-              navLinkStatus: AppNavLinkStatus.disabled,
+              visibleIn: [],
               tooltip: 'App inaccessible due to reason',
             };
           }
@@ -220,7 +244,7 @@ describe('#setup()', () => {
       expect(applications.get('app1')).toEqual(
         expect.objectContaining({
           id: 'app1',
-          navLinkStatus: AppNavLinkStatus.disabled,
+          visibleIn: [],
           status: AppStatus.inaccessible,
           tooltip: 'App inaccessible due to reason',
         })
@@ -228,7 +252,7 @@ describe('#setup()', () => {
       expect(applications.get('app2')).toEqual(
         expect.objectContaining({
           id: 'app2',
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleIn: DEFAULT_APP_VISIBILITY,
           status: AppStatus.accessible,
           tooltip: 'App accessible',
         })
@@ -240,7 +264,7 @@ describe('#setup()', () => {
       const pluginId = Symbol('plugin');
       const appStatusUpdater$ = new BehaviorSubject<AppUpdater>((app) => ({
         status: AppStatus.inaccessible,
-        navLinkStatus: AppNavLinkStatus.disabled,
+        visibleIn: [],
       }));
       setup.register(pluginId, createApp({ id: 'app1', updater$: appStatusUpdater$ }));
       setup.register(pluginId, createApp({ id: 'app2' }));
@@ -255,7 +279,7 @@ describe('#setup()', () => {
           }
           return {
             status: AppStatus.inaccessible,
-            navLinkStatus: AppNavLinkStatus.hidden,
+            visibleIn: [],
           };
         })
       );
@@ -267,7 +291,7 @@ describe('#setup()', () => {
       expect(applications.get('app1')).toEqual(
         expect.objectContaining({
           id: 'app1',
-          navLinkStatus: AppNavLinkStatus.disabled,
+          visibleIn: [],
           status: AppStatus.inaccessible,
           tooltip: 'App inaccessible due to reason',
         })
@@ -276,7 +300,7 @@ describe('#setup()', () => {
         expect.objectContaining({
           id: 'app2',
           status: AppStatus.inaccessible,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         })
       );
     });
@@ -290,7 +314,7 @@ describe('#setup()', () => {
         new BehaviorSubject<AppUpdater>((app) => {
           return {
             status: AppStatus.inaccessible,
-            navLinkStatus: AppNavLinkStatus.disabled,
+            visibleIn: ['globalSearch'], // passing "globalSearch" but as the app is inaccessible it will be removed
           };
         })
       );
@@ -298,7 +322,7 @@ describe('#setup()', () => {
         new BehaviorSubject<AppUpdater>((app) => {
           return {
             status: AppStatus.accessible,
-            navLinkStatus: AppNavLinkStatus.default,
+            visibleIn: DEFAULT_APP_VISIBILITY,
           };
         })
       );
@@ -310,7 +334,7 @@ describe('#setup()', () => {
       expect(applications.get('app1')).toEqual(
         expect.objectContaining({
           id: 'app1',
-          navLinkStatus: AppNavLinkStatus.disabled,
+          visibleIn: [],
           status: AppStatus.inaccessible,
         })
       );
@@ -325,7 +349,7 @@ describe('#setup()', () => {
       const statusUpdater = new BehaviorSubject<AppUpdater>((app) => {
         return {
           status: AppStatus.inaccessible,
-          navLinkStatus: AppNavLinkStatus.disabled,
+          visibleIn: [],
         };
       });
       setup.registerAppUpdater(statusUpdater);
@@ -340,14 +364,14 @@ describe('#setup()', () => {
         expect.objectContaining({
           id: 'app1',
           status: AppStatus.inaccessible,
-          navLinkStatus: AppNavLinkStatus.disabled,
+          visibleIn: [],
         })
       );
 
       statusUpdater.next((app) => {
         return {
           status: AppStatus.accessible,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         };
       });
 
@@ -355,7 +379,7 @@ describe('#setup()', () => {
         expect.objectContaining({
           id: 'app1',
           status: AppStatus.accessible,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         })
       );
     });
@@ -400,15 +424,13 @@ describe('#setup()', () => {
         {
           id: 'foo',
           title: 'Foo',
-          searchable: true,
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleIn: ['globalSearch'],
           path: '/foo',
         },
         {
           id: 'bar',
           title: 'Bar',
-          searchable: false,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
           path: '/bar',
         },
       ];
@@ -426,18 +448,16 @@ describe('#setup()', () => {
           deepLinks: [],
           id: 'foo',
           keywords: [],
-          navLinkStatus: 1,
+          visibleIn: ['globalSearch'],
           path: '/foo',
-          searchable: true,
           title: 'Foo',
         },
         {
           deepLinks: [],
           id: 'bar',
           keywords: [],
-          navLinkStatus: 3,
+          visibleIn: [],
           path: '/bar',
-          searchable: false,
           title: 'Bar',
         },
       ]);
@@ -447,8 +467,7 @@ describe('#setup()', () => {
           {
             id: 'bar',
             title: 'Bar',
-            searchable: false,
-            navLinkStatus: AppNavLinkStatus.hidden,
+            visibleIn: [],
             path: '/bar',
           },
         ],
@@ -461,12 +480,34 @@ describe('#setup()', () => {
           deepLinks: [],
           id: 'bar',
           keywords: [],
-          navLinkStatus: 3,
+          visibleIn: [],
           path: '/bar',
-          searchable: false,
           title: 'Bar',
         },
       ]);
+    });
+  });
+
+  describe('analytics context provider', () => {
+    it('calls getLocationObservable with the correct parameters', () => {
+      const history = createBrowserHistory();
+      service.setup({ ...setupDeps, history });
+
+      expect(getLocationObservableMock).toHaveBeenCalledTimes(1);
+      expect(getLocationObservableMock).toHaveBeenCalledWith(window.location, history);
+    });
+
+    it('calls registerAnalyticsContextProvider with the correct parameters', () => {
+      const location$ = new Subject<string>();
+      getLocationObservableMock.mockReturnValue(location$);
+
+      service.setup(setupDeps);
+
+      expect(registerAnalyticsContextProviderMock).toHaveBeenCalledTimes(1);
+      expect(registerAnalyticsContextProviderMock).toHaveBeenCalledWith({
+        analytics: setupDeps.analytics,
+        location$,
+      });
     });
   });
 });
@@ -474,8 +515,10 @@ describe('#setup()', () => {
 describe('#start()', () => {
   beforeEach(() => {
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
+    const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
     setupDeps = {
       http,
+      analytics,
       redirectTo: jest.fn(),
     };
     startDeps = {
@@ -483,6 +526,7 @@ describe('#start()', () => {
       overlays: overlayServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
       customBranding: customBrandingServiceMock.createStartContract(),
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     };
     service = new ApplicationService();
   });
@@ -514,7 +558,7 @@ describe('#start()', () => {
       expect.objectContaining({
         appRoute: '/app/app1',
         id: 'app1',
-        navLinkStatus: AppNavLinkStatus.visible,
+        visibleIn: DEFAULT_APP_VISIBILITY,
         status: AppStatus.accessible,
       })
     );
@@ -522,7 +566,7 @@ describe('#start()', () => {
       expect.objectContaining({
         appRoute: '/app/app2',
         id: 'app2',
-        navLinkStatus: AppNavLinkStatus.visible,
+        visibleIn: DEFAULT_APP_VISIBILITY,
         status: AppStatus.accessible,
       })
     );
@@ -1113,7 +1157,7 @@ describe('#start()', () => {
         removeListenerSpy = jest.spyOn(window, 'removeEventListener');
       });
       afterEach(() => {
-        jest.restoreAllMocks();
+        jest.clearAllMocks();
       });
 
       it('calls `navigateToApp` with `skipAppLeave` option', async () => {
@@ -1185,20 +1229,23 @@ describe('#stop()', () => {
 
     MockHistory.push.mockReset();
     const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+    const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
     setupDeps = {
       http,
+      analytics,
     };
     startDeps = {
       http,
       overlays: overlayServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
       customBranding: customBrandingServiceMock.createStartContract(),
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     };
     service = new ApplicationService();
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('removes the beforeunload listener', async () => {

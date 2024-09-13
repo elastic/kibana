@@ -7,7 +7,7 @@
 
 // https://github.com/DefinitelyTyped/DefinitelyTyped/pull/40309
 
-import type { MovementMode, DraggableId } from 'react-beautiful-dnd';
+import type { MovementMode, DraggableId } from '@hello-pangea/dnd';
 
 export interface BeforeCapture {
   draggableId: DraggableId;

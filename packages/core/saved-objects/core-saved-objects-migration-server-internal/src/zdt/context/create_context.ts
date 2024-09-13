@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getModelVersionMapForTypes } from '@kbn/core-saved-objects-base-server-internal';
+import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 import { REMOVED_TYPES } from '../../core';
 import type { MigrateIndexOptions } from '../migrate_index';
 import type { MigratorContext } from './types';
@@ -26,6 +27,8 @@ export const createContext = ({
   indexPrefix,
   typeRegistry,
   serializer,
+  nodeRoles,
+  esCapabilities,
 }: CreateContextOps): MigratorContext => {
   return {
     migrationConfig,
@@ -33,13 +36,16 @@ export const createContext = ({
     kibanaVersion,
     indexPrefix,
     types,
-    typeModelVersions: getModelVersionMapForTypes(types.map((type) => typeRegistry.getType(type)!)),
+    typeVirtualVersions: getVirtualVersionMap(types.map((type) => typeRegistry.getType(type)!)),
     elasticsearchClient,
     typeRegistry,
     serializer,
     maxRetryAttempts: migrationConfig.retryAttempts,
     migrationDocLinks: docLinks.links.kibanaUpgradeSavedObjects,
     deletedTypes: REMOVED_TYPES,
+    batchSize: migrationConfig.batchSize,
     discardCorruptObjects: Boolean(migrationConfig.discardCorruptObjects),
+    nodeRoles,
+    esCapabilities,
   };
 };

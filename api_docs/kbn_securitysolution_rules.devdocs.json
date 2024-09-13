@@ -75,7 +75,7 @@
         "label": "isRuleType",
         "description": [],
         "signature": [
-          "(ruleType: unknown) => ruleType is \"eql\" | \"query\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\" | \"new_terms\""
+          "(ruleType: unknown) => ruleType is \"eql\" | \"esql\" | \"query\" | \"threshold\" | \"threat_match\" | \"saved_query\" | \"machine_learning\" | \"new_terms\""
         ],
         "path": "packages/kbn-securitysolution-rules/src/utils.ts",
         "deprecated": false,
@@ -153,6 +153,21 @@
         "description": [],
         "signature": [
           "\"siem.eqlRule\""
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-common.ESQL_RULE_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_RULE_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"siem.esqlRule\""
         ],
         "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
@@ -244,7 +259,7 @@
         "label": "RuleType",
         "description": [],
         "signature": [
-          "\"eql\" | \"query\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\" | \"new_terms\""
+          "\"eql\" | \"esql\" | \"query\" | \"threshold\" | \"threat_match\" | \"saved_query\" | \"machine_learning\" | \"new_terms\""
         ],
         "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
         "deprecated": false,
@@ -259,7 +274,7 @@
         "label": "RuleTypeId",
         "description": [],
         "signature": [
-          "\"siem.eqlRule\" | \"siem.indicatorRule\" | \"siem.mlRule\" | \"siem.queryRule\" | \"siem.savedQueryRule\" | \"siem.thresholdRule\" | \"siem.newTermsRule\""
+          "\"siem.eqlRule\" | \"siem.esqlRule\" | \"siem.indicatorRule\" | \"siem.mlRule\" | \"siem.queryRule\" | \"siem.savedQueryRule\" | \"siem.thresholdRule\" | \"siem.newTermsRule\""
         ],
         "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
         "deprecated": false,
@@ -337,6 +352,20 @@
             "description": [],
             "signature": [
               "\"siem.eqlRule\""
+            ],
+            "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-rules",
+            "id": "def-common.ruleTypeMappings.esql",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "\"siem.esqlRule\""
             ],
             "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
             "deprecated": false,

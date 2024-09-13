@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { ToastsApi } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
@@ -49,18 +49,38 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
   const [rule, setRule] = useState<ResolvedRule | null>(null);
   const [ruleType, setRuleType] = useState<RuleType | null>(null);
   const [actionTypes, setActionTypes] = useState<ActionType[] | null>(null);
-  const [refreshToken, requestRefresh] = React.useState<number>();
+  const [refreshToken, setRefreshToken] = useState<{
+    resolve: () => void;
+    reject: () => void;
+  }>();
+  const requestRefresh = useCallback(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        setRefreshToken({
+          resolve,
+          reject,
+        });
+      }),
+    [setRefreshToken]
+  );
+
   useEffect(() => {
-    getRuleData(
-      ruleId,
-      loadRuleTypes,
-      resolveRule,
-      loadActionTypes,
-      setRule,
-      setRuleType,
-      setActionTypes,
-      toasts
-    );
+    const loadData = async () => {
+      await getRuleData(
+        ruleId,
+        loadRuleTypes,
+        resolveRule,
+        loadActionTypes,
+        setRule,
+        setRuleType,
+        setActionTypes,
+        toasts
+      );
+
+      refreshToken?.resolve();
+    };
+
+    loadData();
   }, [ruleId, http, loadActionTypes, loadRuleTypes, resolveRule, toasts, refreshToken]);
 
   useEffect(() => {
@@ -110,20 +130,22 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
     return null;
   };
 
-  return rule && ruleType && actionTypes ? (
-    <>
-      {getLegacyUrlConflictCallout()}
-      <RuleDetails
-        rule={rule}
-        ruleType={ruleType}
-        actionTypes={actionTypes}
-        requestRefresh={async () => requestRefresh(Date.now())}
-        refreshToken={refreshToken}
-      />
-    </>
-  ) : (
-    <CenterJustifiedSpinner />
-  );
+  if (rule && ruleType && actionTypes) {
+    return (
+      <>
+        {getLegacyUrlConflictCallout()}
+        <RuleDetails
+          rule={rule}
+          ruleType={ruleType}
+          actionTypes={actionTypes}
+          requestRefresh={requestRefresh}
+          refreshToken={refreshToken}
+        />
+      </>
+    );
+  }
+
+  return <CenterJustifiedSpinner />;
 };
 
 export async function getRuleData(

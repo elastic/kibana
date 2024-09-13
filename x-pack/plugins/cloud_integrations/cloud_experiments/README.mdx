@@ -9,6 +9,9 @@ tags: ['kibana', 'dev', 'contributor', 'api docs', 'cloud', 'a/b testing', 'expe
 
 # Kibana Cloud Experiments Service
 
+> [!WARNING]  
+> These APIs are deprecated and should not be used as we're working on a replacement Core Feature Flags Service that will arrive _soon_.
+
 The Cloud Experiments Service provides the necessary APIs to implement A/B testing scenarios, fetching the variations in configuration and reporting back metrics to track conversion rates of the experiments.
 
 The `cloudExperiments` plugin is disabled by default and only enabled on Elastic Cloud deployments.
@@ -168,7 +171,7 @@ xpack.cloud_integrations.experiments.flag_overrides:
 
 ### How is my user identified?
 
-The user is automatically identified during the `setup` phase. It currently uses a hash of the deployment ID, meaning all users accessing the same deployment will get the same values for the `getVariation` requests unless the A/B provider is explicitly configured to randomize it.
+The user is automatically identified during the `setup` phase. It currently uses the ESS deployment ID, meaning all users accessing the same deployment will get the same values for the `getVariation` requests unless the A/B provider is explicitly configured to randomize it.
 
 If you are curious of the data provided to the `identify` call, you can see that in the [`cloud` plugin](../../cloud).
 

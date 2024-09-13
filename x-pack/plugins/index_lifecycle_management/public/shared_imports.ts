@@ -28,6 +28,7 @@ export {
   getFieldValidityAndErrorMessage,
   useFormContext,
   UseMultiFields,
+  useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
@@ -44,12 +45,11 @@ export {
 
 export { attemptToURIDecode } from '@kbn/es-ui-shared-plugin/public';
 
-export {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-  useExecutionContext,
-} from '@kbn/kibana-react-plugin/public';
+export { KibanaContextProvider, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+
+export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+
+export { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 export { APP_WRAPPER_CLASS } from '@kbn/core/public';
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -23,12 +24,14 @@ export const FLAG_OPTIONS: FlagOptions = {
     'config',
     'journey',
     'esFrom',
+    'esServerlessImage',
     'kibana-install-dir',
     'grep',
     'include-tag',
     'exclude-tag',
     'include',
     'exclude',
+    'writeLogsToPath',
   ],
   alias: {
     updateAll: 'u',
@@ -36,7 +39,8 @@ export const FLAG_OPTIONS: FlagOptions = {
   help: `
     --config             Define a FTR config that should be executed. Can be specified multiple times
     --journey            Define a Journey that should be executed. Can be specified multiple times
-    --esFrom             Build Elasticsearch from source or run from snapshot. Default: $TEST_ES_FROM or "snapshot"
+    --esFrom             Build Elasticsearch from source or run snapshot or serverless. Default: $TEST_ES_FROM or "snapshot"
+    --esServerlessImage  When 'esFrom' is "serverless", this argument will be interpreted either as a tag within the ES Serverless repo, OR a full docker image path.
     --include-tag        Tags that suites must include to be run, can be included multiple times
     --exclude-tag        Tags that suites must NOT include to be run, can be included multiple times
     --include            Files that must included to be run, can be included multiple times
@@ -45,10 +49,18 @@ export const FLAG_OPTIONS: FlagOptions = {
     --kibana-install-dir Run Kibana from existing install directory instead of from source
     --bail               Stop the test run at the first failure
     --logToFile          Write the log output from Kibana/ES to files instead of to stdout
+    --writeLogsToPath    Write the log output from Kibana/ES to files in specified path
     --dry-run            Report tests without executing them
     --updateBaselines    Replace baseline screenshots with whatever is generated from the test
     --updateSnapshots    Replace inline and file snapshots with whatever is generated from the test
     --updateAll, -u      Replace both baseline screenshots and snapshots
+  `,
+  examples: `
+Run the latest verified, kibana-compatible ES Serverless image:
+  node scripts/functional_tests --config ./config.ts --esFrom serverless --esServerlessImage docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
+
+Run with a specific ES Serverless tag from the docker.elastic.co/elasticsearch-ci/elasticsearch-serverless repo:
+  node scripts/functional_tests --config ./config.ts --esFrom serverless --esServerlessImage git-fec36430fba2
   `,
 };
 
@@ -64,6 +76,12 @@ export function parseFlags(flags: FlagsReader) {
 
   const esVersionString = flags.string('es-version');
 
+  const logsDir = flags.path('writeLogsToPath')
+    ? Path.resolve(REPO_ROOT, flags.path('writeLogsToPath')!)
+    : flags.boolean('logToFile')
+    ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
+    : undefined;
+
   return {
     configs,
     esVersion: esVersionString ? new EsVersion(esVersionString) : EsVersion.getDefault(),
@@ -71,19 +89,18 @@ export function parseFlags(flags: FlagsReader) {
     dryRun: flags.boolean('dry-run'),
     updateBaselines: flags.boolean('updateBaselines') || flags.boolean('updateAll'),
     updateSnapshots: flags.boolean('updateSnapshots') || flags.boolean('updateAll'),
-    logsDir: flags.boolean('logToFile')
-      ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
-      : undefined,
-    esFrom: flags.enum('esFrom', ['snapshot', 'source']) ?? 'snapshot',
+    logsDir,
+    esFrom: flags.enum('esFrom', ['snapshot', 'source', 'serverless']),
+    esServerlessImage: flags.string('esServerlessImage'),
     installDir: flags.path('kibana-install-dir'),
     grep: flags.string('grep'),
     suiteTags: {
-      include: flags.arrayOfStrings('include-tag'),
-      exclude: flags.arrayOfStrings('exclude-tag'),
+      include: flags.arrayOfStrings('include-tag') ?? [],
+      exclude: flags.arrayOfStrings('exclude-tag') ?? [],
     },
     suiteFilters: {
-      include: flags.arrayOfPaths('include'),
-      exclude: flags.arrayOfPaths('exclude'),
+      include: flags.arrayOfPaths('include') ?? [],
+      exclude: flags.arrayOfPaths('exclude') ?? [],
     },
   };
 }

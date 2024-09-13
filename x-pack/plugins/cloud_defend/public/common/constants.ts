@@ -13,3 +13,5 @@ export const MAX_CONDITION_VALUE_LENGTH_BYTES = 511; // max length for all condi
 
 // TODO: temporary until I change condition value length checks in the yaml editor view to be byte based.
 export const MAX_CONDITION_VALUE_LENGTH = 64;
+
+export const FIM_OPERATIONS = ['createFile', 'modifyFile', 'deleteFile'];

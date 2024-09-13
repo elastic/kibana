@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function canvasFiltersTest({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['canvas', 'common']);
+  const { canvas } = getPageObjects(['canvas']);
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/filter';
@@ -24,9 +24,8 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
     before(async () => {
       await kibanaServer.importExport.load(archive);
       // load test workpad
-      await PageObjects.common.navigateToApp('canvas', {
-        hash: '/workpad/workpad-b5618217-56d2-47fa-b756-1be2306cda68/page/1',
-      });
+      await canvas.goToListingPage();
+      await canvas.loadFirstWorkpad('Filter Debug Workpad');
     });
 
     after(async () => {
@@ -42,7 +41,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
       });
 
       // Double check that the filter has the correct time range and default filter value
-      const startingMatchFilters = await PageObjects.canvas.getMatchFiltersFromDebug();
+      const startingMatchFilters = await canvas.getFiltersFromDebug('term');
       const projectQuery = startingMatchFilters[0].query.term.project;
       expect(projectQuery !== null && typeof projectQuery === 'object').to.equal(true);
       expect(projectQuery?.value).to.equal('apm');
@@ -51,7 +50,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
       await testSubjects.selectValue('canvasDropdownFilter__select', 'beats');
 
       await retry.try(async () => {
-        const matchFilters = await PageObjects.canvas.getMatchFiltersFromDebug();
+        const matchFilters = await canvas.getFiltersFromDebug('term');
         const newProjectQuery = matchFilters[0].query.term.project;
         expect(newProjectQuery !== null && typeof newProjectQuery === 'object').to.equal(true);
         expect(newProjectQuery?.value).to.equal('beats');
@@ -67,7 +66,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
         expect(elements).to.have.length(3);
       });
 
-      const startingTimeFilters = await PageObjects.canvas.getTimeFiltersFromDebug();
+      const startingTimeFilters = await canvas.getFiltersFromDebug('range');
       const timestampQuery = startingTimeFilters[0].query.range['@timestamp'];
       expect(timestampQuery !== null && typeof timestampQuery === 'object').to.equal(true);
       expect(new Date(timestampQuery.gte).toDateString()).to.equal('Sun Oct 18 2020');
@@ -77,7 +76,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
       await find.clickByCssSelector('.react-datepicker [aria-label="day-19"]', 20000);
 
       await retry.try(async () => {
-        const timeFilters = await PageObjects.canvas.getTimeFiltersFromDebug();
+        const timeFilters = await canvas.getFiltersFromDebug('range');
         const newTimestampQuery = timeFilters[0].query.range['@timestamp'];
         expect(newTimestampQuery !== null && typeof newTimestampQuery === 'object').to.equal(true);
         expect(new Date(newTimestampQuery.gte).toDateString()).to.equal('Mon Oct 19 2020');
@@ -88,7 +87,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
       await find.clickByCssSelector('.react-datepicker [aria-label="day-23"]', 20000);
 
       await retry.try(async () => {
-        const timeFilters = await PageObjects.canvas.getTimeFiltersFromDebug();
+        const timeFilters = await canvas.getFiltersFromDebug('range');
         const newTimestampQuery = timeFilters[0].query.range['@timestamp'];
         expect(newTimestampQuery !== null && typeof newTimestampQuery === 'object').to.equal(true);
         expect(new Date(newTimestampQuery.gte).toDateString()).to.equal('Mon Oct 19 2020');

@@ -11,39 +11,18 @@ import fs from 'fs';
 import { Client, errors } from '@elastic/elasticsearch';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
-import type { Role } from '@kbn/security-plugin/common';
+import { isServerlessKibanaFlavor } from '../../common/endpoint/utils/kibana_status';
+import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
+import { EndpointSecurityTestRolesLoader } from './common/role_and_user_loader';
 import { METADATA_DATASTREAM } from '../../common/endpoint/constants';
 import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { fetchStackVersion } from './common/stack_services';
 import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
-import { getWithResponseActionsRole } from './common/roles_users/with_response_actions_role';
-import { getNoResponseActionsRole } from './common/roles_users/without_response_actions_role';
-import { getT1Analyst } from './common/roles_users/t1_analyst';
-import { getT2Analyst } from './common/roles_users/t2_analyst';
-import { getEndpointOperationsAnalyst } from './common/roles_users/endpoint_operations_analyst';
-import { getEndpointSecurityPolicyManager } from './common/roles_users/endpoint_security_policy_manager';
-import { getHunter } from './common/roles_users/hunter';
-import { getPlatformEngineer } from './common/roles_users/platform_engineer';
-import { getSocManager } from './common/roles_users/soc_manager';
-import { getThreatIntelligenceAnalyst } from './common/roles_users/threat_intelligence_analyst';
-
-const rolesMapping: { [id: string]: Omit<Role, 'name'> } = {
-  t1Analyst: getT1Analyst(),
-  t2Analyst: getT2Analyst(),
-  hunter: getHunter(),
-  threatIntelligenceAnalyst: getThreatIntelligenceAnalyst(),
-  socManager: getSocManager(),
-  platformEngineer: getPlatformEngineer(),
-  endpointOperationsAnalyst: getEndpointOperationsAnalyst(),
-  endpointSecurityPolicyManager: getEndpointSecurityPolicyManager(),
-  withResponseActionsRole: getWithResponseActionsRole(),
-  noResponseActionsRole: getNoResponseActionsRole(),
-};
 
 main();
 
@@ -64,31 +43,6 @@ async function deleteIndices(indices: string[], client: Client) {
     } catch (err) {
       handleErr(err);
     }
-  }
-}
-
-async function addRole(kbnClient: KbnClient, role: Role): Promise<string | undefined> {
-  if (!role) {
-    console.log('No role data given');
-    return;
-  }
-
-  const { name, ...permissions } = role;
-  const path = `/api/security/role/${name}?createOnly=true`;
-
-  // add role if doesn't exist already
-  try {
-    console.log(`Adding ${name} role`);
-    await kbnClient.request({
-      method: 'PUT',
-      path,
-      body: permissions,
-    });
-
-    return name;
-  } catch (error) {
-    console.log(error);
-    handleErr(error);
   }
 }
 
@@ -161,6 +115,8 @@ function updateURL({
 }
 
 async function main() {
+  const startTime = new Date().getTime();
+
   const argv = yargs.help().options({
     seed: {
       alias: 's',
@@ -318,17 +274,13 @@ async function main() {
       default: false,
     },
   }).argv;
-  let ca: Buffer;
 
+  let ca: Buffer;
   let clientOptions: ClientOptions;
   let url: string;
   let node: string;
-  const toolingLogOptions = {
-    log: new ToolingLog({
-      level: 'info',
-      writeTo: process.stdout,
-    }),
-  };
+  const logger = createToolingLogger();
+  const toolingLogOptions = { log: logger };
 
   let kbnClientOptions: KbnClientOptions = {
     ...toolingLogOptions,
@@ -350,38 +302,62 @@ async function main() {
     clientOptions = { node: argv.node };
   }
   let client = new Client(clientOptions);
+  let kbnClient = new KbnClient({ ...kbnClientOptions });
   let user: UserInfo | undefined;
+  const isServerless = await isServerlessKibanaFlavor(kbnClient);
+
+  logger.info(`Build flavor: ${isServerless ? 'serverless' : 'non-serverless'}`);
+
+  if (argv.fleet && !argv.withNewUser && !isServerless) {
+    // warn and exit when using fleet flag
+    logger.error(
+      'Please use the --withNewUser=username:password flag to add a custom user with required roles when --fleet is enabled!'
+    );
+    // eslint-disable-next-line no-process-exit
+    process.exit(0);
+  }
+
   // if fleet flag is used
   if (argv.fleet) {
-    // add endpoint user if --withNewUser flag has values as username:password
-    const newUserCreds =
-      argv.withNewUser.indexOf(':') !== -1 ? argv.withNewUser.split(':') : undefined;
-    user = await addUser(
-      client,
-      newUserCreds
-        ? {
-            username: newUserCreds[0],
-            password: newUserCreds[1],
-          }
-        : undefined
-    );
+    if (!isServerless) {
+      // add endpoint user if --withNewUser flag has values as username:password
+      const newUserCreds =
+        argv.withNewUser.indexOf(':') !== -1 ? argv.withNewUser.split(':') : undefined;
+      user = await addUser(
+        client,
+        newUserCreds
+          ? {
+              username: newUserCreds[0],
+              password: newUserCreds[1],
+            }
+          : undefined
+      );
 
-    // update client and kibana options before instantiating
-    if (user) {
-      // use endpoint user for Es and Kibana URLs
+      // update client and kibana options before instantiating
+      if (user) {
+        // use endpoint user for Es and Kibana URLs
 
-      url = updateURL({ url: argv.kibana, user });
-      node = updateURL({ url: argv.node, user });
+        url = updateURL({ url: argv.kibana, user });
+        node = updateURL({ url: argv.node, user });
 
-      kbnClientOptions = {
-        ...kbnClientOptions,
-        url,
-      };
-      client = new Client({ ...clientOptions, node });
+        kbnClientOptions = {
+          ...kbnClientOptions,
+          url,
+        };
+
+        client = new Client({ ...clientOptions, node });
+        kbnClient = new KbnClient({ ...kbnClientOptions });
+
+        logger.verbose(`ES/KBN clients updated to login using: ${JSON.stringify(user)}`);
+      }
+    } else {
+      logger.warning(
+        'Option `--withNewUser` not supported in serverless.\n' +
+          'Ensure that `--kibana` and `--node` options are defined with username/password of ' +
+          '`system_indices_superuser:changeme`'
+      );
     }
   }
-  // instantiate kibana client
-  const kbnClient = new KbnClient({ ...kbnClientOptions });
 
   if (argv.delete) {
     await deleteIndices(
@@ -391,39 +367,16 @@ async function main() {
   }
 
   if (argv.rbacUser) {
-    // Add roles and users with response actions kibana privileges
-    for (const role of Object.keys(rolesMapping)) {
-      const addedRole = await addRole(kbnClient, {
-        name: role,
-        ...rolesMapping[role],
-      });
-      if (addedRole) {
-        console.log(`Successfully added ${role} role`);
-        await addUser(client, { username: role, password: 'changeme', roles: [role] });
-      } else {
-        console.log(`Failed to add role, ${role}`);
-      }
+    if (isServerless) {
+      // FIXME:PT create users in serverless when that capability is available
+
+      throw new Error(`Can not use '--rbacUser' option against serverless deployment`);
     }
+
+    await loadRbacTestUsers(kbnClient, logger);
   }
 
-  let seed = argv.seed;
-
-  if (!seed) {
-    seed = Math.random().toString();
-    console.log(`No seed supplied, using random seed: ${seed}`);
-  }
-
-  const startTime = new Date().getTime();
-
-  if (argv.fleet && !argv.withNewUser) {
-    // warn and exit when using fleet flag
-    console.log(
-      'Please use the --withNewUser=username:password flag to add a custom user with required roles when --fleet is enabled!'
-    );
-    // eslint-disable-next-line no-process-exit
-    process.exit(0);
-  }
-
+  const seed = argv.seed || Math.random().toString();
   let DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator;
 
   // If `--randomVersions` is NOT set, then use custom generator that ensures all data generated
@@ -446,6 +399,7 @@ async function main() {
     };
   }
 
+  logger.info('Indexing host and alerts...');
   await indexHostsAndAlerts(
     client,
     kbnClient,
@@ -475,11 +429,21 @@ async function main() {
   );
 
   // delete endpoint_user after
-  if (user) {
+  if (user && !isServerless) {
     const deleted = await deleteUser(client, user.username);
     if (deleted.found) {
-      console.log(`User ${user.username} deleted successfully!`);
+      logger.info(`User ${user.username} deleted successfully!`);
     }
   }
-  console.log(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);
+
+  logger.info(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);
 }
+
+const loadRbacTestUsers = async (kbnClient: KbnClient, logger: ToolingLog): Promise<void> => {
+  const loadedRoles = await new EndpointSecurityTestRolesLoader(kbnClient, logger).loadAll();
+
+  logger.info(`Roles and associated users loaded. Login accounts:
+  ${Object.values(loadedRoles)
+    .map(({ username, password }) => `${username} / ${password}`)
+    .join('\n  ')}`);
+};

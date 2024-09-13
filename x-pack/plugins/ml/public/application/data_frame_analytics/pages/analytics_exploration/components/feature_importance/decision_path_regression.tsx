@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import d3 from 'd3';
@@ -13,7 +14,7 @@ import type {
   FeatureImportance,
   FeatureImportanceBaseline,
   TopClasses,
-} from '../../../../../../../common/types/feature_importance';
+} from '@kbn/ml-data-frame-analytics-utils';
 import { useDecisionPathData, isDecisionPathData } from './use_classification_path_data';
 import { DecisionPathChart } from './decision_path_chart';
 import { MissingDecisionPathCallout } from './missing_decision_path_callout';

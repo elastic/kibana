@@ -176,6 +176,7 @@ export default function ({ getService, getPageObjects }) {
       describe('when create alerts options is selected in the alerts modal', () => {
         before(async () => {
           await overview.acceptAlertsModal();
+          await overview.confirmWatcherMigrationDone();
         });
 
         it('should show a toast when alerts are created successfully', async () => {

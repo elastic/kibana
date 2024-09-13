@@ -8,7 +8,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import '../../mock/match_media';
 import {
   RowItemOverflowComponent,
   OverflowFieldComponent,
@@ -21,6 +20,8 @@ import { render } from '@testing-library/react';
 
 jest.mock('../../lib/kibana');
 
+jest.mock('../../hooks/use_get_field_spec');
+
 describe('Table Helpers', () => {
   const items = ['item1', 'item2', 'item3'];
   const mount = useMountAppended();
@@ -31,7 +32,6 @@ describe('Table Helpers', () => {
         values: undefined,
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
-        aggregatable: false,
       });
 
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
@@ -44,7 +44,6 @@ describe('Table Helpers', () => {
         values: [''],
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
-        aggregatable: false,
       });
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
 
@@ -56,7 +55,6 @@ describe('Table Helpers', () => {
         values: null,
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
-        aggregatable: false,
         displayCount: 0,
       });
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
@@ -69,7 +67,6 @@ describe('Table Helpers', () => {
         values: ['item1'],
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
-        aggregatable: false,
         render: renderer,
       });
       const { container } = render(<TestProviders>{rowItem}</TestProviders>);
@@ -82,7 +79,6 @@ describe('Table Helpers', () => {
         values: [],
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
-        aggregatable: false,
       });
       const { container } = render(<TestProviders>{rowItems}</TestProviders>);
       expect(container.textContent).toBe(getEmptyValue());
@@ -93,11 +89,12 @@ describe('Table Helpers', () => {
         values: items,
         fieldName: 'attrName',
         idPrefix: 'idPrefix',
-        aggregatable: false,
         displayCount: 2,
       });
-      const { queryAllByTestId, queryByTestId } = render(<TestProviders>{rowItems}</TestProviders>);
-
+      const { queryAllByTestId, queryByTestId, debug } = render(
+        <TestProviders>{rowItems}</TestProviders>
+      );
+      debug();
       expect(queryAllByTestId('cellActions-renderContent-attrName').length).toBe(2);
       expect(queryByTestId('overflow-button')).toBeInTheDocument();
     });
@@ -110,9 +107,8 @@ describe('Table Helpers', () => {
           values={items}
           fieldName="attrName"
           idPrefix="idPrefix"
-          maxOverflowItems={1}
           overflowIndexStart={1}
-          fieldType="keyword"
+          maxOverflowItems={1}
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -126,7 +122,6 @@ describe('Table Helpers', () => {
           idPrefix="idPrefix"
           maxOverflowItems={5}
           overflowIndexStart={1}
-          fieldType="keyword"
         />
       );
       expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(0);
@@ -141,7 +136,6 @@ describe('Table Helpers', () => {
             idPrefix="idPrefix"
             maxOverflowItems={5}
             overflowIndexStart={1}
-            fieldType="keyword"
           />
         </TestProviders>
       );
@@ -161,10 +155,29 @@ describe('Table Helpers', () => {
           idPrefix="idPrefix"
           maxOverflowItems={1}
           overflowIndexStart={1}
-          fieldType="keyword"
         />
       );
       expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(1);
+    });
+
+    test('it shows correct number of overflow items when maxOverflowItems are exceeded', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <RowItemOverflowComponent
+            values={items}
+            fieldName="attrName"
+            idPrefix="idPrefix"
+            maxOverflowItems={1}
+            overflowIndexStart={1}
+          />
+        </TestProviders>
+      );
+      wrapper.find('[data-test-subj="overflow-button"]').first().find('button').simulate('click');
+
+      expect(
+        wrapper.find('[data-test-subj="overflow-items"]').last().prop<JSX.Element[]>('children')
+          ?.length
+      ).toBe(1);
     });
   });
 

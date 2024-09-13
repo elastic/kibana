@@ -7,13 +7,13 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import { ActionDetailsRequestSchema } from '../../../../common/api/endpoint';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
-import { ActionDetailsRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { getActionDetailsById } from '../../services';
 import { errorHandler } from '../error_handler';
@@ -28,18 +28,25 @@ export const registerActionDetailsRoutes = (
   endpointContext: EndpointAppContext
 ) => {
   // Details for a given action id
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: ACTION_DETAILS_ROUTE,
-      validate: ActionDetailsRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canReadSecuritySolution'] },
-      endpointContext.logFactory.get('hostIsolationDetails'),
-      getActionDetailsRequestHandler(endpointContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: ActionDetailsRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canReadSecuritySolution'] },
+        endpointContext.logFactory.get('hostIsolationDetails'),
+        getActionDetailsRequestHandler(endpointContext)
+      )
+    );
 };
 
 export const getActionDetailsRequestHandler = (

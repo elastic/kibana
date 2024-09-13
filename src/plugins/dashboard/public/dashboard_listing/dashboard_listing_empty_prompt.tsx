@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -22,13 +23,14 @@ import {
   getNewDashboardTitle,
   dashboardUnsavedListingStrings,
 } from './_dashboard_listing_strings';
-import { DashboardListingProps } from './dashboard_listing';
 import { pluginServices } from '../services/plugin_services';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_session_storage/dashboard_session_storage_service';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
+import { DashboardListingProps } from './types';
 
 export interface DashboardListingEmptyPromptProps {
   createItem: () => void;
+  disableCreateDashboardButton?: boolean;
   unsavedDashboardIds: string[];
   goToDashboard: DashboardListingProps['goToDashboard'];
   setUnsavedDashboardIds: React.Dispatch<React.SetStateAction<string[]>>;
@@ -41,10 +43,11 @@ export const DashboardListingEmptyPrompt = ({
   unsavedDashboardIds,
   goToDashboard,
   createItem,
+  disableCreateDashboardButton,
 }: DashboardListingEmptyPromptProps) => {
   const {
     application,
-    dashboardSessionStorage,
+    dashboardBackup,
     dashboardCapabilities: { showWriteControls },
   } = pluginServices.getServices();
 
@@ -56,7 +59,13 @@ export const DashboardListingEmptyPrompt = ({
   const getEmptyAction = useCallback(() => {
     if (!isEditingFirstDashboard) {
       return (
-        <EuiButton onClick={createItem} fill iconType="plusInCircle" data-test-subj="newItemButton">
+        <EuiButton
+          onClick={createItem}
+          fill
+          iconType="plusInCircle"
+          data-test-subj="newItemButton"
+          disabled={disableCreateDashboardButton}
+        >
           {noItemsStrings.getCreateNewDashboardText()}
         </EuiButton>
       );
@@ -69,8 +78,8 @@ export const DashboardListingEmptyPrompt = ({
             color="danger"
             onClick={() =>
               confirmDiscardUnsavedChanges(() => {
-                dashboardSessionStorage.clearState(DASHBOARD_PANELS_UNSAVED_ID);
-                setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
+                dashboardBackup.clearState(DASHBOARD_PANELS_UNSAVED_ID);
+                setUnsavedDashboardIds(dashboardBackup.getDashboardIdsWithUnsavedChanges());
               })
             }
             data-test-subj="discardDashboardPromptButton"
@@ -94,11 +103,12 @@ export const DashboardListingEmptyPrompt = ({
       </EuiFlexGroup>
     );
   }, [
-    dashboardSessionStorage,
     isEditingFirstDashboard,
-    setUnsavedDashboardIds,
-    goToDashboard,
     createItem,
+    disableCreateDashboardButton,
+    dashboardBackup,
+    goToDashboard,
+    setUnsavedDashboardIds,
   ]);
 
   if (!showWriteControls) {

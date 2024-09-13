@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -12,6 +13,7 @@ import type {
   RuntimeField,
   SerializedFieldFormat,
   RuntimePrimitiveTypes,
+  DataViewField,
 } from '../../shared_imports';
 import type { RuntimeFieldPainlessError } from '../../types';
 import type { PreviewController } from './preview_controller';
@@ -25,7 +27,7 @@ export interface EsDocument {
     [key: string]: unknown;
   };
   fields: {
-    [key: string]: unknown;
+    [key: string]: unknown[];
   };
   [key: string]: unknown;
 }
@@ -55,6 +57,22 @@ export interface PreviewState {
     isValid: boolean;
     message: string | null;
   };
+  /** Response from the Painless _execute API */
+  previewResponse: {
+    fields: FieldPreview[];
+    error: PreviewError | null;
+  };
+  isFetchingDocument: boolean;
+  fetchDocError: FetchDocError | null;
+  customDocIdToLoad: string | null;
+  /** Flag to indicate if we are calling the _execute API */
+  isLoadingPreview: boolean;
+  initialPreviewComplete: boolean;
+  isPreviewAvailable: boolean;
+  isPanelVisible: boolean;
+  isSaving: boolean;
+  concreteFields: Array<{ name: string; type: string }>;
+  fieldMap: Record<string, DataViewField>;
 }
 
 export interface FetchDocError {
@@ -108,31 +126,17 @@ export type ChangeSet = Record<string, Change>;
 
 export interface Context {
   controller: PreviewController;
-  fields: FieldPreview[];
   fieldPreview$: BehaviorSubject<FieldPreview[] | undefined>;
-  error: PreviewError | null;
   fieldTypeInfo?: FieldTypeInfo[];
-  initialPreviewComplete: boolean;
   params: {
     value: Params;
     update: (updated: Partial<Params>) => void;
   };
-  isPreviewAvailable: boolean;
-  isLoadingPreview: boolean;
-  documents: {
-    loadSingle: (id: string) => void;
-    loadFromCluster: () => Promise<void>;
-    fetchDocError: FetchDocError | null;
+  validation: {
+    setScriptEditorValidation: React.Dispatch<
+      React.SetStateAction<{ isValid: boolean; isValidating: boolean; message: string | null }>
+    >;
   };
-  panel: {
-    isVisible: boolean;
-    setIsVisible: (isVisible: boolean) => void;
-  };
-  navigation: {
-    isFirstDoc: boolean;
-    isLastDoc: boolean;
-  };
-  reset: () => void;
 }
 
 export type PainlessExecuteContext =

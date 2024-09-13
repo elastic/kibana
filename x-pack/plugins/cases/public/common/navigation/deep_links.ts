@@ -15,7 +15,7 @@ export const CasesDeepLinkId = {
   casesConfigure: 'cases_configure',
 } as const;
 
-export type ICasesDeepLinkId = typeof CasesDeepLinkId[keyof typeof CasesDeepLinkId];
+export type ICasesDeepLinkId = (typeof CasesDeepLinkId)[keyof typeof CasesDeepLinkId];
 
 export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
   basePath = DEFAULT_BASE_PATH,
@@ -33,15 +33,15 @@ export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
   deepLinks: [
     {
       title: i18n.translate('xpack.cases.navigation.create', {
-        defaultMessage: 'Create New Case',
+        defaultMessage: 'Create',
       }),
       ...(extend[CasesDeepLinkId.casesCreate] ?? {}),
       id: CasesDeepLinkId.casesCreate,
       path: getCreateCasePath(basePath),
     },
     {
-      title: i18n.translate('xpack.cases.navigation.configure', {
-        defaultMessage: 'Configure Cases',
+      title: i18n.translate('xpack.cases.navigation.settings', {
+        defaultMessage: 'Settings',
       }),
       ...(extend[CasesDeepLinkId.casesConfigure] ?? {}),
       id: CasesDeepLinkId.casesConfigure,

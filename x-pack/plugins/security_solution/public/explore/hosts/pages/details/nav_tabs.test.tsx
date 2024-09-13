@@ -14,37 +14,8 @@ describe('navTabsHostDetails', () => {
   test('it should skip anomalies tab if without mlUserPermission', () => {
     const tabs = navTabsHostDetails({
       hasMlUserPermissions: false,
-      isRiskyHostsEnabled: false,
       hostName: mockHostName,
     });
-    expect(tabs).toHaveProperty(HostsTableType.authentications);
-    expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
-    expect(tabs).not.toHaveProperty(HostsTableType.anomalies);
-    expect(tabs).toHaveProperty(HostsTableType.events);
-    expect(tabs).not.toHaveProperty(HostsTableType.risk);
-  });
-
-  test('it should display anomalies tab if with mlUserPermission', () => {
-    const tabs = navTabsHostDetails({
-      hasMlUserPermissions: true,
-      isRiskyHostsEnabled: false,
-      hostName: mockHostName,
-    });
-
-    expect(tabs).toHaveProperty(HostsTableType.authentications);
-    expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
-    expect(tabs).toHaveProperty(HostsTableType.anomalies);
-    expect(tabs).toHaveProperty(HostsTableType.events);
-    expect(tabs).not.toHaveProperty(HostsTableType.risk);
-  });
-
-  test('it should display risky hosts tab if when risky hosts is enabled', () => {
-    const tabs = navTabsHostDetails({
-      hasMlUserPermissions: false,
-      isRiskyHostsEnabled: true,
-      hostName: mockHostName,
-    });
-
     expect(tabs).toHaveProperty(HostsTableType.authentications);
     expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
     expect(tabs).not.toHaveProperty(HostsTableType.anomalies);
@@ -52,10 +23,22 @@ describe('navTabsHostDetails', () => {
     expect(tabs).toHaveProperty(HostsTableType.risk);
   });
 
+  test('it should display anomalies tab if with mlUserPermission', () => {
+    const tabs = navTabsHostDetails({
+      hasMlUserPermissions: true,
+      hostName: mockHostName,
+    });
+
+    expect(tabs).toHaveProperty(HostsTableType.authentications);
+    expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
+    expect(tabs).toHaveProperty(HostsTableType.anomalies);
+    expect(tabs).toHaveProperty(HostsTableType.events);
+    expect(tabs).toHaveProperty(HostsTableType.risk);
+  });
+
   test('it should display sessions tab when users are on Enterprise and above license', () => {
     const tabs = navTabsHostDetails({
       hasMlUserPermissions: false,
-      isRiskyHostsEnabled: true,
       hostName: mockHostName,
       isEnterprise: true,
     });
@@ -70,7 +53,6 @@ describe('navTabsHostDetails', () => {
   test('it should not display sessions tab when users are not on Enterprise and above license', () => {
     const tabs = navTabsHostDetails({
       hasMlUserPermissions: false,
-      isRiskyHostsEnabled: true,
       hostName: mockHostName,
       isEnterprise: false,
     });
@@ -80,19 +62,5 @@ describe('navTabsHostDetails', () => {
     );
 
     expect(sessionsTab).not.toBeTruthy();
-  });
-
-  test('it should display Beta badge for risk tab', () => {
-    const tabs = navTabsHostDetails({
-      hasMlUserPermissions: false,
-      isRiskyHostsEnabled: true,
-      hostName: mockHostName,
-    });
-
-    const riskTab = Object.values<TabNavigationItemProps>(tabs).find(
-      (item) => item.id === HostsTableType.risk
-    );
-
-    expect(riskTab?.isBeta).toEqual(true);
   });
 });

@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import { BulkActionType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 
 import type { DryRunResult, BulkActionForConfirmation } from './types';
 
@@ -56,6 +56,16 @@ const BulkEditRuleErrorItem = ({
           />
         </li>
       );
+    case BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.esqlRulesIndexEditDescription"
+            defaultMessage="{rulesCount, plural, =1 {# custom ES|QL rule} other {# custom ES|QL rules}} (these rules don't have index patterns)"
+            values={{ rulesCount }}
+          />
+        </li>
+      );
     default:
       return (
         <li key={message}>
@@ -98,6 +108,45 @@ const BulkExportRuleErrorItem = ({
   }
 };
 
+const BulkManualRuleRunErrorItem = ({
+  errorCode,
+  message,
+  rulesCount,
+}: BulkActionRuleErrorItemProps) => {
+  switch (errorCode) {
+    case BulkActionsDryRunErrCode.MANUAL_RULE_RUN_FEATURE:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRunFeatureDisabledDescription"
+            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} (Manual rule run feature is disabled)"
+            values={{ rulesCount }}
+          />
+        </li>
+      );
+    case BulkActionsDryRunErrCode.MANUAL_RULE_RUN_DISABLED_RULE:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.scheduleDisabledRuleDescription"
+            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} (Cannot schedule manual rule run for disabled rules)"
+            values={{ rulesCount }}
+          />
+        </li>
+      );
+    default:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.defaultScheduleRuleRunFailureDescription"
+            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} can't be scheduled ({message})"
+            values={{ rulesCount, message }}
+          />
+        </li>
+      );
+  }
+};
+
 interface BulkActionRuleErrorsListProps {
   ruleErrors: DryRunResult['ruleErrors'];
   bulkAction: BulkActionForConfirmation;
@@ -122,7 +171,7 @@ const BulkActionRuleErrorsListComponent = ({
         {ruleErrors.map(({ message, errorCode, ruleIds }) => {
           const rulesCount = ruleIds.length;
           switch (bulkAction) {
-            case BulkActionType.edit:
+            case BulkActionTypeEnum.edit:
               return (
                 <BulkEditRuleErrorItem
                   message={message}
@@ -131,9 +180,18 @@ const BulkActionRuleErrorsListComponent = ({
                 />
               );
 
-            case BulkActionType.export:
+            case BulkActionTypeEnum.export:
               return (
                 <BulkExportRuleErrorItem
+                  message={message}
+                  errorCode={errorCode}
+                  rulesCount={rulesCount}
+                />
+              );
+
+            case BulkActionTypeEnum.run:
+              return (
+                <BulkManualRuleRunErrorItem
                   message={message}
                   errorCode={errorCode}
                   rulesCount={rulesCount}

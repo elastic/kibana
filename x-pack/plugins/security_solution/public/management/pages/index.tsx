@@ -6,10 +6,12 @@
  */
 
 import React, { memo } from 'react';
-import { Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ManagementEmptyStateWrapper } from '../components/management_empty_state_wrapper';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
@@ -89,11 +91,27 @@ export const ManagementContainer = memo(() => {
 
   // Lets wait until we can verify permissions
   if (loading) {
-    return <EuiLoadingSpinner />;
+    return (
+      <ManagementEmptyStateWrapper>
+        <EuiEmptyPrompt
+          icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+          title={
+            <h2>
+              {i18n.translate(
+                'xpack.securitySolution.endpoint.managementContainer.loadingEndpointManagement',
+                {
+                  defaultMessage: 'Loading Endpoint Management',
+                }
+              )}
+            </h2>
+          }
+        />
+      </ManagementEmptyStateWrapper>
+    );
   }
 
   return (
-    <Switch>
+    <Routes>
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_ENDPOINTS_PATH}
         component={EndpointTelemetry}
@@ -136,7 +154,7 @@ export const ManagementContainer = memo(() => {
         </Route>
       )}
       <Route path="*" component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 });
 

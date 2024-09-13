@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
@@ -17,7 +18,7 @@ import {
 } from './internal_transforms';
 import { validateTypeMigrations } from './validate_migrations';
 import { transformComparator, convertMigrationFunction } from './utils';
-import { getModelVersionTransforms } from './model_version';
+import { getModelVersionTransforms, getModelVersionSchemas } from './model_version';
 
 /**
  * Converts migrations from a format that is convenient for callers to a format that
@@ -36,7 +37,6 @@ export function buildActiveMigrations({
   convertVersion?: string;
   log: Logger;
 }): ActiveMigrations {
-  const coreTransforms = getCoreTransforms();
   const referenceTransforms = getReferenceTransforms(typeRegistry);
 
   return typeRegistry.getAllTypes().reduce((migrations, type) => {
@@ -46,31 +46,25 @@ export function buildActiveMigrations({
       type,
       log,
       kibanaVersion,
-      coreTransforms,
       referenceTransforms,
     });
 
-    if (!typeTransforms.transforms.length) {
-      return migrations;
+    if (typeTransforms.transforms.length || Object.keys(typeTransforms.versionSchemas).length) {
+      migrations[type.name] = typeTransforms;
     }
 
-    return {
-      ...migrations,
-      [type.name]: typeTransforms,
-    };
+    return migrations;
   }, {} as ActiveMigrations);
 }
 
 const buildTypeTransforms = ({
   type,
   log,
-  coreTransforms,
   referenceTransforms,
 }: {
   type: SavedObjectsType;
   kibanaVersion: string;
   log: Logger;
-  coreTransforms: Transform[];
   referenceTransforms: Transform[];
 }): TypeTransforms => {
   const migrationsMap =
@@ -79,11 +73,13 @@ const buildTypeTransforms = ({
   const migrationTransforms = Object.entries(migrationsMap ?? {}).map<Transform>(
     ([version, transform]) => ({
       version,
+      deferred: !_.isFunction(transform) && !!transform.deferred,
       transform: convertMigrationFunction(version, type, transform, log),
       transformType: TransformType.Migrate,
     })
   );
 
+  const coreTransforms = getCoreTransforms({ log, type });
   const modelVersionTransforms = getModelVersionTransforms({ log, typeDefinition: type });
 
   const conversionTransforms = getConversionTransforms(type);
@@ -95,11 +91,26 @@ const buildTypeTransforms = ({
     ...modelVersionTransforms,
   ].sort(transformComparator);
 
+  const modelVersionSchemas = getModelVersionSchemas({ typeDefinition: type });
+
   return {
+    immediateVersion: _.chain(transforms)
+      .groupBy('transformType')
+      .mapValues((items) =>
+        _.chain(items)
+          .filter(({ deferred }) => !deferred)
+          .last()
+          .get('version')
+          .value()
+      )
+      .value() as Record<TransformType, string>,
     latestVersion: _.chain(transforms)
       .groupBy('transformType')
       .mapValues((items) => _.last(items)?.version)
       .value() as Record<TransformType, string>,
     transforms,
+    versionSchemas: {
+      ...modelVersionSchemas,
+    },
   };
 };

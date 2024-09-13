@@ -5,27 +5,16 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/order
-import { createAppContextStartContractMock } from '../../../../mocks';
-
-jest.mock('../../packages/get', () => {
-  return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };
-});
-
-jest.mock('./common', () => {
-  return {
-    getAsset: jest.fn(),
-  };
-});
-
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
+import { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
+
 import { getInstallation, getInstallationObject } from '../../packages';
-import type { Installation, RegistryPackage } from '../../../../types';
+import type { Installation } from '../../../../types';
 import { ElasticsearchAssetType } from '../../../../types';
 import { appContextService } from '../../../app_context';
 
@@ -33,8 +22,14 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../constants';
 
 import { getESAssetMetadata } from '../meta';
 
+import { createAppContextStartContractMock } from '../../../../mocks';
+import type { PackageInstallContext } from '../../../../../common/types';
+
 import { installTransforms } from './install';
-import { getAsset } from './common';
+
+jest.mock('../../packages/get', () => {
+  return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };
+});
 
 const meta = getESAssetMetadata({ packageName: 'endpoint' });
 
@@ -42,6 +37,10 @@ describe('test transform install', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 
+  const authorizationHeader = new HTTPAuthorizationHeader(
+    'Basic',
+    'bW9uaXRvcmluZ191c2VyOm1scWFfYWRtaW4='
+  );
   const getYamlTestData = (
     autoStart: boolean | undefined = undefined,
     transformVersion: string = '0.1.0'
@@ -102,7 +101,34 @@ _meta:
   type: date
 - name: updated_at
   type: alias
-  path: event.ingested`,
+  path: event.ingested
+- external: ecs
+  name: ecs.version
+- external: ecs
+  name: message`,
+      BEATS_FIELDS: `- name: input.type
+  type: keyword
+  description: Type of Filebeat input.
+- name: log.flags
+  type: keyword
+  description: Flags for the log file.
+- name: log.offset
+  type: long
+  description: Offset of the entry in the log file.
+- name: log.file.path
+  type: keyword
+  description: Path to the log file.`,
+      AGENT_FIELDS: `- name: instance.name
+  level: extended
+  type: keyword
+  ignore_above: 1024
+  description: Instance name of the host machine.
+- name: machine.type
+  level: extended
+  type: keyword
+  ignore_above: 1024
+  description: Machine type of the host machine.
+  example: t2.medium`,
     };
   };
   const getExpectedData = (transformVersion: string) => {
@@ -113,7 +139,8 @@ _meta:
         body: {
           description: 'Merges latest endpoint and Agent metadata documents.',
           dest: {
-            index: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+            index: '.metrics-endpoint.metadata_united_default',
+            aliases: [],
           },
           frequency: '1s',
           pivot: {
@@ -145,7 +172,7 @@ _meta:
               field: 'updated_at',
             },
           },
-          _meta: { fleet_transform_version: transformVersion, ...meta },
+          _meta: { fleet_transform_version: transformVersion, ...meta, run_as_kibana_system: true },
         },
       },
     };
@@ -203,11 +230,6 @@ _meta:
         },
       ],
     } as unknown as Installation;
-    (getAsset as jest.MockedFunction<typeof getAsset>)
-      .mockReturnValueOnce(Buffer.from(sourceData.FIELDS, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.MANIFEST, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
-
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
@@ -235,21 +257,47 @@ _meta:
       ],
     });
 
-    await installTransforms(
-      {
-        name: 'endpoint',
-        version: '0.16.0-dev.0',
-      } as unknown as RegistryPackage,
-      [
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-      ],
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: {
+          name: 'endpoint',
+          version: '0.16.0-dev.0',
+        },
+        paths: [
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/beats.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/agent.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+        ],
+        assetsMap: new Map([
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/beats.yml',
+            sourceData.BEATS_FIELDS,
+          ],
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/agent.yml',
+            sourceData.AGENT_FIELDS,
+          ],
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+            sourceData.FIELDS,
+          ],
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+            sourceData.MANIFEST,
+          ],
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+            sourceData.TRANSFORM,
+          ],
+        ]),
+      } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     // Stop and delete previously installed transforms
     expect(esClient.transform.stopTransform.mock.calls).toEqual([
@@ -266,6 +314,7 @@ _meta:
         {
           transform_id: 'logs-endpoint.metadata_current-default-0.1.0',
           force: true,
+          delete_dest_index: false,
         },
         { ignore: [404] },
       ],
@@ -288,11 +337,25 @@ _meta:
                   number_of_shards: 1,
                   number_of_routing_shards: 30,
                   hidden: true,
-                  mapping: { total_fields: { limit: '10000' } },
+                  mapping: { total_fields: { limit: 1000 } },
                 },
               },
               mappings: {
-                properties: { '@timestamp': { type: 'date' } },
+                properties: {
+                  input: { properties: { type: { type: 'keyword', ignore_above: 1024 } } },
+                  log: {
+                    properties: {
+                      flags: { type: 'keyword', ignore_above: 1024 },
+                      offset: { type: 'long' },
+                      file: { properties: { path: { type: 'keyword', ignore_above: 1024 } } },
+                    },
+                  },
+                  instance: { properties: { name: { type: 'keyword', ignore_above: 1024 } } },
+                  machine: { properties: { type: { type: 'keyword', ignore_above: 1024 } } },
+                  '@timestamp': { ignore_malformed: false, type: 'date' },
+                  ecs: { properties: { version: { type: 'keyword', ignore_above: 1024 } } },
+                  message: { type: 'keyword', ignore_above: 1024 },
+                },
                 dynamic_templates: [
                   {
                     strings_as_keyword: {
@@ -312,17 +375,6 @@ _meta:
         },
         { ignore: [404] },
       ],
-      [
-        {
-          name: 'logs-endpoint.metadata_current-template@custom',
-          body: {
-            template: { settings: {} },
-            _meta: { managed_by: 'fleet', managed: true, package: { name: 'endpoint' } },
-          },
-          create: true,
-        },
-        { ignore: [404] },
-      ],
     ]);
 
     // Index template composed of the two component templates created
@@ -336,9 +388,10 @@ _meta:
               'logs-endpoint.metadata_current-template@package',
               'logs-endpoint.metadata_current-template@custom',
             ],
-            index_patterns: ['.metrics-endpoint.metadata_united_default-0.16.0-dev.0'],
+            index_patterns: ['.metrics-endpoint.metadata_united_default'],
             priority: 250,
             template: { mappings: undefined, settings: undefined },
+            ignore_missing_component_templates: ['logs-endpoint.metadata_current-template@custom'],
           },
           name: 'logs-endpoint.metadata_current-template',
         },
@@ -346,21 +399,12 @@ _meta:
       ],
     ]);
 
-    // Destination index is created before transform is created
-    expect(esClient.indices.create.mock.calls).toEqual([
-      [
-        {
-          aliases: {
-            '.metrics-endpoint.metadata_united_default.all': {},
-            '.metrics-endpoint.metadata_united_default.latest': {},
-          },
-          index: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
-        },
-        { ignore: [400] },
-      ],
-    ]);
+    // Destination index is not created before transform is created
+    expect(esClient.indices.create.mock.calls).toEqual([]);
 
-    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
+      [expectedData.TRANSFORM, { ignore: [409] }],
+    ]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
       [
         {
@@ -382,7 +426,7 @@ _meta:
               type: ElasticsearchAssetType.ingestPipeline,
             },
             {
-              id: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+              id: '.metrics-endpoint.metadata_united_default',
               type: ElasticsearchAssetType.index,
             },
             {
@@ -401,6 +445,48 @@ _meta:
               version: '0.2.0',
             },
             {
+              id: 'logs-endpoint.metadata_current-default-0.2.0',
+              type: ElasticsearchAssetType.transform,
+              version: '0.2.0',
+            },
+          ],
+        },
+        {
+          refresh: false,
+        },
+      ],
+      // After transforms are installed, es asset reference needs to be updated if they are deferred or not
+      [
+        'epm-packages',
+        'endpoint',
+        {
+          installed_es: [
+            {
+              id: 'metrics-endpoint.policy-0.16.0-dev.0',
+              type: ElasticsearchAssetType.ingestPipeline,
+            },
+            {
+              id: '.metrics-endpoint.metadata_united_default',
+              type: ElasticsearchAssetType.index,
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template',
+              type: ElasticsearchAssetType.indexTemplate,
+              version: '0.2.0',
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template@custom',
+              type: ElasticsearchAssetType.componentTemplate,
+              version: '0.2.0',
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template@package',
+              type: ElasticsearchAssetType.componentTemplate,
+              version: '0.2.0',
+            },
+            {
+              // After transforms are installed, es asset reference needs to be updated if they are deferred or not
+              deferred: false,
               id: 'logs-endpoint.metadata_current-default-0.2.0',
               type: ElasticsearchAssetType.transform,
               version: '0.2.0',
@@ -447,10 +533,6 @@ _meta:
         },
       ],
     } as unknown as Installation;
-    (getAsset as jest.MockedFunction<typeof getAsset>)
-      .mockReturnValueOnce(Buffer.from(sourceData.FIELDS, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.MANIFEST, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
 
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
@@ -479,21 +561,37 @@ _meta:
       ],
     });
 
-    await installTransforms(
-      {
-        name: 'endpoint',
-        version: '0.16.0-dev.0',
-      } as unknown as RegistryPackage,
-      [
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-      ],
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: {
+          name: 'endpoint',
+          version: '0.16.0-dev.0',
+        },
+        paths: [
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+        ],
+        assetsMap: new Map([
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+            Buffer.from(sourceData.FIELDS),
+          ],
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+            Buffer.from(sourceData.MANIFEST),
+          ],
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+            Buffer.from(sourceData.TRANSFORM),
+          ],
+        ]),
+      } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     // Stop and delete previously installed transforms
     expect(esClient.transform.stopTransform.mock.calls).toEqual([
@@ -510,17 +608,7 @@ _meta:
         {
           transform_id: 'endpoint.metadata_current-default-0.1.0',
           force: true,
-        },
-        { ignore: [404] },
-      ],
-    ]);
-
-    // Destination index from previous version using legacy schema should be deleted
-    expect(esClient.transport.request.mock.calls).toEqual([
-      [
-        {
-          method: 'DELETE',
-          path: '/mock-old-destination-index',
+          delete_dest_index: true,
         },
         { ignore: [404] },
       ],
@@ -540,11 +628,18 @@ _meta:
                   number_of_shards: 1,
                   number_of_routing_shards: 30,
                   hidden: true,
-                  mapping: { total_fields: { limit: '10000' } },
+                  mapping: { total_fields: { limit: 1000 } },
                 },
               },
               mappings: {
-                properties: { '@timestamp': { type: 'date' } },
+                properties: {
+                  '@timestamp': {
+                    ignore_malformed: false,
+                    type: 'date',
+                  },
+                  ecs: { properties: { version: { type: 'keyword', ignore_above: 1024 } } },
+                  message: { type: 'keyword', ignore_above: 1024 },
+                },
                 dynamic_templates: [
                   {
                     strings_as_keyword: {
@@ -564,17 +659,6 @@ _meta:
         },
         { ignore: [404] },
       ],
-      [
-        {
-          name: 'logs-endpoint.metadata_current-template@custom',
-          body: {
-            template: { settings: {} },
-            _meta: { managed_by: 'fleet', managed: true, package: { name: 'endpoint' } },
-          },
-          create: true,
-        },
-        { ignore: [404] },
-      ],
     ]);
 
     // Index template composed of the two component templates created
@@ -588,9 +672,10 @@ _meta:
               'logs-endpoint.metadata_current-template@package',
               'logs-endpoint.metadata_current-template@custom',
             ],
-            index_patterns: ['.metrics-endpoint.metadata_united_default-0.16.0-dev.0'],
+            index_patterns: ['.metrics-endpoint.metadata_united_default'],
             priority: 250,
             template: { mappings: undefined, settings: undefined },
+            ignore_missing_component_templates: ['logs-endpoint.metadata_current-template@custom'],
           },
           name: 'logs-endpoint.metadata_current-template',
         },
@@ -598,21 +683,12 @@ _meta:
       ],
     ]);
 
-    // Destination index is created before transform is created
-    expect(esClient.indices.create.mock.calls).toEqual([
-      [
-        {
-          aliases: {
-            '.metrics-endpoint.metadata_united_default.all': {},
-            '.metrics-endpoint.metadata_united_default.latest': {},
-          },
-          index: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
-        },
-        { ignore: [400] },
-      ],
-    ]);
+    // Destination index is not created before transform is created
+    expect(esClient.indices.create.mock.calls).toEqual([]);
 
-    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
+      [expectedData.TRANSFORM, { ignore: [409] }],
+    ]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
       [
         {
@@ -634,7 +710,7 @@ _meta:
               type: ElasticsearchAssetType.ingestPipeline,
             },
             {
-              id: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+              id: '.metrics-endpoint.metadata_united_default',
               type: ElasticsearchAssetType.index,
             },
             {
@@ -653,6 +729,47 @@ _meta:
               version: '0.2.0',
             },
             {
+              id: 'logs-endpoint.metadata_current-default-0.2.0',
+              type: ElasticsearchAssetType.transform,
+              version: '0.2.0',
+            },
+          ],
+        },
+        {
+          refresh: false,
+        },
+      ],
+      [
+        'epm-packages',
+        'endpoint',
+        {
+          installed_es: [
+            {
+              id: 'metrics-endpoint.policy-0.1.0-dev.0',
+              type: ElasticsearchAssetType.ingestPipeline,
+            },
+            {
+              id: '.metrics-endpoint.metadata_united_default',
+              type: ElasticsearchAssetType.index,
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template',
+              type: ElasticsearchAssetType.indexTemplate,
+              version: '0.2.0',
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template@custom',
+              type: ElasticsearchAssetType.componentTemplate,
+              version: '0.2.0',
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template@package',
+              type: ElasticsearchAssetType.componentTemplate,
+              version: '0.2.0',
+            },
+            {
+              // After transforms are installed, es asset reference needs to be updated if they are deferred or not
+              deferred: false,
               id: 'logs-endpoint.metadata_current-default-0.2.0',
               type: ElasticsearchAssetType.transform,
               version: '0.2.0',
@@ -700,10 +817,6 @@ _meta:
         },
       ],
     } as unknown as Installation;
-    (getAsset as jest.MockedFunction<typeof getAsset>)
-      .mockReturnValueOnce(Buffer.from(sourceData.FIELDS, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
-
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
@@ -731,20 +844,32 @@ _meta:
       ],
     });
 
-    await installTransforms(
-      {
-        name: 'endpoint',
-        version: '0.16.0-dev.0',
-      } as unknown as RegistryPackage,
-      [
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-      ],
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: {
+          name: 'endpoint',
+          version: '0.16.0-dev.0',
+        },
+        paths: [
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+        ],
+        assetsMap: new Map([
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+            Buffer.from(sourceData.FIELDS),
+          ],
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+            Buffer.from(sourceData.TRANSFORM),
+          ],
+        ]),
+      } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     // Stop and delete previously installed transforms
     expect(esClient.transform.stopTransform.mock.calls).toEqual([
@@ -761,6 +886,7 @@ _meta:
         {
           transform_id: 'logs-endpoint.metadata_current-default-0.1.0',
           force: true,
+          delete_dest_index: false,
         },
         { ignore: [404] },
       ],
@@ -776,23 +902,21 @@ _meta:
           name: 'logs-endpoint.metadata_current-template@package',
           body: {
             template: {
-              settings: { index: { mapping: { total_fields: { limit: '10000' } } } },
-              mappings: { properties: { '@timestamp': { type: 'date' } } },
+              settings: { index: { mapping: { total_fields: { limit: 1000 } } } },
+              mappings: {
+                properties: {
+                  '@timestamp': {
+                    ignore_malformed: false,
+                    type: 'date',
+                  },
+                  ecs: { properties: { version: { type: 'keyword', ignore_above: 1024 } } },
+                  message: { type: 'keyword', ignore_above: 1024 },
+                },
+              },
             },
             _meta: meta,
           },
           create: false,
-        },
-        { ignore: [404] },
-      ],
-      [
-        {
-          name: 'logs-endpoint.metadata_current-template@custom',
-          body: {
-            template: { settings: {} },
-            _meta: { managed_by: 'fleet', managed: true, package: { name: 'endpoint' } },
-          },
-          create: true,
         },
         { ignore: [404] },
       ],
@@ -809,9 +933,10 @@ _meta:
               'logs-endpoint.metadata_current-template@package',
               'logs-endpoint.metadata_current-template@custom',
             ],
-            index_patterns: ['.metrics-endpoint.metadata_united_default-0.16.0-dev.0'],
+            index_patterns: ['.metrics-endpoint.metadata_united_default'],
             priority: 250,
             template: { mappings: undefined, settings: undefined },
+            ignore_missing_component_templates: ['logs-endpoint.metadata_current-template@custom'],
           },
           name: 'logs-endpoint.metadata_current-template',
         },
@@ -819,21 +944,12 @@ _meta:
       ],
     ]);
 
-    // Destination index is created before transform is created
-    expect(esClient.indices.create.mock.calls).toEqual([
-      [
-        {
-          aliases: {
-            '.metrics-endpoint.metadata_united_default.all': {},
-            '.metrics-endpoint.metadata_united_default.latest': {},
-          },
-          index: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
-        },
-        { ignore: [400] },
-      ],
-    ]);
+    // Destination index is not created before transform is created
+    expect(esClient.indices.create.mock.calls).toEqual([]);
 
-    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
+      [expectedData.TRANSFORM, { ignore: [409] }],
+    ]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
       [
         {
@@ -855,7 +971,7 @@ _meta:
               type: ElasticsearchAssetType.ingestPipeline,
             },
             {
-              id: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+              id: '.metrics-endpoint.metadata_united_default',
               type: ElasticsearchAssetType.index,
             },
             {
@@ -874,6 +990,46 @@ _meta:
               version: '0.2.0',
             },
             {
+              id: 'logs-endpoint.metadata_current-default-0.2.0',
+              type: ElasticsearchAssetType.transform,
+              version: '0.2.0',
+            },
+          ],
+        },
+        {
+          refresh: false,
+        },
+      ],
+      [
+        'epm-packages',
+        'endpoint',
+        {
+          installed_es: [
+            {
+              id: 'metrics-endpoint.policy-0.16.0-dev.0',
+              type: ElasticsearchAssetType.ingestPipeline,
+            },
+            {
+              id: '.metrics-endpoint.metadata_united_default',
+              type: ElasticsearchAssetType.index,
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template',
+              type: ElasticsearchAssetType.indexTemplate,
+              version: '0.2.0',
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template@custom',
+              type: ElasticsearchAssetType.componentTemplate,
+              version: '0.2.0',
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template@package',
+              type: ElasticsearchAssetType.componentTemplate,
+              version: '0.2.0',
+            },
+            {
+              deferred: false,
               id: 'logs-endpoint.metadata_current-default-0.2.0',
               type: ElasticsearchAssetType.transform,
               version: '0.2.0',
@@ -903,9 +1059,6 @@ _meta:
         },
       ],
     } as unknown as Installation;
-    (getAsset as jest.MockedFunction<typeof getAsset>)
-      .mockReturnValueOnce(Buffer.from(sourceData.MANIFEST, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
 
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
@@ -919,22 +1072,37 @@ _meta:
       } as unknown as SavedObject<Installation>)
     );
 
-    await installTransforms(
-      {
-        name: 'endpoint',
-        version: '0.16.0-dev.0',
-      } as unknown as RegistryPackage,
-      [
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-      ],
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: {
+          name: 'endpoint',
+          version: '0.16.0-dev.0',
+        },
+        paths: [
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+        ],
+        assetsMap: new Map([
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+            sourceData.MANIFEST,
+          ],
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+            sourceData.TRANSFORM,
+          ],
+        ]),
+      } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+      authorizationHeader,
+    });
 
-    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
+      [expectedData.TRANSFORM, { ignore: [409] }],
+    ]);
     // Does not start transform because start is set to false in manifest.yml
     expect(esClient.transform.startTransform.mock.calls).toEqual([]);
   });
@@ -984,9 +1152,6 @@ _meta:
         },
       ],
     } as unknown as Installation;
-    (getAsset as jest.MockedFunction<typeof getAsset>)
-      .mockReturnValueOnce(Buffer.from(sourceData.MANIFEST, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
 
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
@@ -1011,66 +1176,52 @@ _meta:
       })
     );
 
-    await installTransforms(
-      {
-        name: 'endpoint',
-        version: '0.16.0-dev.0',
-      } as unknown as RegistryPackage,
-      [
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-      ],
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: {
+          name: 'endpoint',
+          version: '0.16.0-dev.0',
+        },
+        paths: [
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+        ],
+        assetsMap: new Map([
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+            sourceData.MANIFEST,
+          ],
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+            sourceData.TRANSFORM,
+          ],
+        ]),
+      } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
-    expect(esClient.indices.create.mock.calls).toEqual([
-      [
-        {
-          index: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
-          aliases: {
-            '.metrics-endpoint.metadata_united_default.all': {},
-            '.metrics-endpoint.metadata_united_default.latest': {},
-          },
-        },
-        { ignore: [400] },
-      ],
-    ]);
+    expect(esClient.indices.create.mock.calls).toEqual([]);
 
     // If downgrading to and older version, and destination index already exists
     // aliases should still be updated to point .latest to this index
-    expect(esClient.indices.updateAliases.mock.calls).toEqual([
-      [
-        {
-          body: {
-            actions: [
-              {
-                add: {
-                  index: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
-                  alias: '.metrics-endpoint.metadata_united_default.all',
-                },
-              },
-              {
-                add: {
-                  index: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
-                  alias: '.metrics-endpoint.metadata_united_default.latest',
-                },
-              },
-            ],
-          },
-        },
-      ],
-    ]);
+    expect(esClient.indices.updateAliases.mock.calls).toEqual([]);
 
     expect(esClient.transform.deleteTransform.mock.calls).toEqual([
       [
-        { force: true, transform_id: 'logs-endpoint.metadata_current-default-0.2.0' },
+        {
+          force: true,
+          transform_id: 'logs-endpoint.metadata_current-default-0.2.0',
+          delete_dest_index: false,
+        },
         { ignore: [404] },
       ],
     ]);
-    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
+      [expectedData.TRANSFORM, { ignore: [409] }],
+    ]);
   });
 
   test('retain old transforms and do nothing if fleet_transform_version is the same', async () => {
@@ -1107,11 +1258,6 @@ _meta:
       ],
     } as unknown as Installation;
 
-    (getAsset as jest.MockedFunction<typeof getAsset>)
-      .mockReturnValueOnce(Buffer.from(sourceData.FIELDS, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.MANIFEST, 'utf8'))
-      .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
-
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
@@ -1124,21 +1270,37 @@ _meta:
       } as unknown as SavedObject<Installation>)
     );
 
-    await installTransforms(
-      {
-        name: 'endpoint',
-        version: '0.16.0-dev.0',
-      } as unknown as RegistryPackage,
-      [
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-      ],
+    await installTransforms({
+      packageInstallContext: {
+        packageInfo: {
+          name: 'endpoint',
+          version: '0.16.0-dev.0',
+        },
+        paths: [
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+          'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+        ],
+        assetsMap: new Map([
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+            sourceData.FIELDS,
+          ],
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+            sourceData.MANIFEST,
+          ],
+          [
+            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+            sourceData.TRANSFORM,
+          ],
+        ]),
+      } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     // Transform from old version is neither stopped nor deleted
     expect(esClient.transform.stopTransform.mock.calls).toEqual([]);

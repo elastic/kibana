@@ -6,11 +6,7 @@
  */
 
 import { PluginInitializer } from '@kbn/core/server';
-import {
-  GlobalSearchPlugin,
-  GlobalSearchPluginSetupDeps,
-  GlobalSearchPluginStartDeps,
-} from './plugin';
+import { GlobalSearchPluginSetupDeps, GlobalSearchPluginStartDeps } from './plugin';
 import { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
 
 export const plugin: PluginInitializer<
@@ -18,7 +14,10 @@ export const plugin: PluginInitializer<
   GlobalSearchPluginStart,
   GlobalSearchPluginSetupDeps,
   GlobalSearchPluginStartDeps
-> = (context) => new GlobalSearchPlugin(context);
+> = async (context) => {
+  const { GlobalSearchPlugin } = await import('./plugin');
+  return new GlobalSearchPlugin(context);
+};
 
 export { config } from './config';
 

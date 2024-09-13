@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -67,24 +68,18 @@ beforeEach(() => {
 
   MOCKS = {
     valid: {
-      archives: [createArchive({ license: 'oss' }), createArchive({ license: 'default' })],
+      archives: [createArchive({ license: 'default' })],
     },
     invalidArch: {
-      archives: [
-        createArchive({ license: 'oss', architecture: 'invalid_arch' }),
-        createArchive({ license: 'default', architecture: 'invalid_arch' }),
-      ],
+      archives: [createArchive({ license: 'default', architecture: 'invalid_arch' })],
     },
     differentVersion: {
-      archives: [
-        createArchive({ license: 'oss', version: 'another-version' }),
-        createArchive({ license: 'default', version: 'another-version' }),
-      ],
+      archives: [createArchive({ license: 'default', version: 'another-version' })],
     },
     multipleArch: {
       archives: [
-        createArchive({ architecture: 'fake_arch', license: 'oss' }),
-        createArchive({ architecture: ARCHITECTURE, license: 'oss' }),
+        createArchive({ architecture: 'fake_arch', license: 'default' }),
+        createArchive({ architecture: ARCHITECTURE, license: 'default' }),
       ],
     },
   };
@@ -116,8 +111,6 @@ describe('Artifact', () => {
         mockFetch(MOCKS.valid);
       });
 
-      it('should return artifact metadata for a daily oss artifact', artifactTest('oss', 'oss'));
-
       it(
         'should return artifact metadata for a daily default artifact',
         artifactTest('default', 'default')
@@ -148,11 +141,6 @@ describe('Artifact', () => {
       });
 
       it(
-        'should return artifact metadata for a permanent oss artifact',
-        artifactTest('oss', 'oss', 2)
-      );
-
-      it(
         'should return artifact metadata for a permanent default artifact',
         artifactTest('default', 'default', 2)
       );
@@ -181,8 +169,8 @@ describe('Artifact', () => {
       });
 
       it('should return artifact metadata for the correct architecture', async () => {
-        const artifact = await Artifact.getSnapshot('oss', MOCK_VERSION, log);
-        expect(artifact.spec.filename).toEqual(MOCK_FILENAME + `-${ARCHITECTURE}.oss`);
+        const artifact = await Artifact.getSnapshot('default', MOCK_VERSION, log);
+        expect(artifact.spec.filename).toEqual(MOCK_FILENAME + `-${ARCHITECTURE}.default`);
       });
     });
 
@@ -195,7 +183,7 @@ describe('Artifact', () => {
       });
 
       it('should use the custom URL when looking for a snapshot', async () => {
-        await Artifact.getSnapshot('oss', MOCK_VERSION, log);
+        await Artifact.getSnapshot('default', MOCK_VERSION, log);
         expect(fetch.mock.calls[0][0]).toEqual(CUSTOM_URL);
       });
 
@@ -211,7 +199,7 @@ describe('Artifact', () => {
       });
 
       it('should use the daily unverified URL when looking for a snapshot', async () => {
-        await Artifact.getSnapshot('oss', MOCK_VERSION, log);
+        await Artifact.getSnapshot('default', MOCK_VERSION, log);
         expect(fetch.mock.calls[0][0]).toEqual(
           `${DAILY_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/manifest-latest.json`
         );

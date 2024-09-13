@@ -18,18 +18,16 @@ import {
   EuiConfirmModal,
   EuiSpacer,
 } from '@elastic/eui';
-import type { Observable } from 'rxjs';
-import type { CoreTheme } from '@kbn/core/public';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
+import type { FleetStartServices } from '../../../../../../../plugin';
 import type {
   PackageInfo,
   UpgradePackagePolicyDryRunResponse,
   PackagePolicy,
 } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../../constants';
 import {
   useInstallPackage,
   useGetPackageInstallStatus,
@@ -37,15 +35,16 @@ import {
   useAuthz,
   useLink,
   useUpgradePackagePoliciesMutation,
-  useGetAgentPoliciesQuery,
+  useBulkGetAgentPoliciesQuery,
 } from '../../../../../hooks';
 
 interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'version'> {
   dryRunData?: UpgradePackagePolicyDryRunResponse | null;
   packagePolicyIds?: string[];
+  agentPolicyIds: string[];
   isUpgradingPackagePolicies?: boolean;
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
-  theme$: Observable<CoreTheme>;
+  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
 }
 
 /*
@@ -73,10 +72,11 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   isUpgradingPackagePolicies = false,
   name,
   packagePolicyIds = [],
+  agentPolicyIds = [],
   setIsUpgradingPackagePolicies = () => {},
   title,
   version,
-  theme$,
+  startServices,
 }) => {
   const history = useHistory();
   const { getPath } = useLink();
@@ -92,16 +92,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState<boolean>(false);
   const [upgradePackagePolicies, setUpgradePackagePolicies] = useState<boolean>(true);
 
-  const { data: agentPolicyData } = useGetAgentPoliciesQuery({
-    perPage: SO_SEARCH_LIMIT,
-    page: 1,
-    // Fetch all agent policies that include one of the eligible package policies
-    kuery: packagePolicyIds.length
-      ? `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:${packagePolicyIds
-          .map((id) => `"${id}"`)
-          .join(' or ')}`
-      : '',
-  });
+  const { data: agentPolicyData } = useBulkGetAgentPoliciesQuery(agentPolicyIds, { full: true });
 
   const packagePolicyCount = useMemo(() => packagePolicyIds.length, [packagePolicyIds]);
 
@@ -151,8 +142,9 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   }, [history, getPath, name, version]);
 
   const handleClickUpdate = useCallback(async () => {
-    await installPackage({ name, version, title, fromUpdate: true });
-  }, [installPackage, name, title, version]);
+    await installPackage({ name, version, title, isUpgrade: true });
+    navigateToNewSettingsPage();
+  }, [installPackage, name, title, version, navigateToNewSettingsPage]);
 
   const upgradePackagePoliciesMutation = useUpgradePackagePoliciesMutation();
 
@@ -164,40 +156,68 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     setIsUpdateModalVisible(false);
     setIsUpgradingPackagePolicies(true);
 
-    await installPackage({ name, version, title });
+    const hasUpgraded = await installPackage({ name, version, title, isUpgrade: true });
+    //  If install package failed do not upgrade package policies
+    if (!hasUpgraded) {
+      setIsUpgradingPackagePolicies(false);
+      return;
+    }
 
-    upgradePackagePoliciesMutation.mutate(
-      {
-        // Only upgrade policies that don't have conflicts
-        packagePolicyIds: packagePolicyIds.filter(
-          (id) => !dryRunData?.find((dryRunRecord) => dryRunRecord.diff?.[0].id === id)?.hasErrors
-        ),
-      },
-      {
-        onSuccess: () => {
-          notifications.toasts.addSuccess({
-            title: toMountPoint(
-              <FormattedMessage
-                id="xpack.fleet.integrations.packageUpdateSuccessTitle"
-                defaultMessage="Updated {title} and upgraded policies"
-                values={{ title }}
-              />,
-              { theme$ }
-            ),
-            text: toMountPoint(
-              <FormattedMessage
-                id="xpack.fleet.integrations.packageUpdateSuccessDescription"
-                defaultMessage="Successfully updated {title} and upgraded policies"
-                values={{ title }}
-              />,
-              { theme$ }
-            ),
-          });
-
-          navigateToNewSettingsPage();
-        },
-      }
+    // Only upgrade policies that don't have conflicts
+    const packagePolicyIdsToUpdate = packagePolicyIds.filter(
+      (id) => !dryRunData?.find((dryRunRecord) => dryRunRecord.diff?.[0].id === id)?.hasErrors
     );
+
+    if (!packagePolicyIdsToUpdate.length) {
+      setIsUpgradingPackagePolicies(false);
+      navigateToNewSettingsPage();
+    }
+
+    try {
+      await upgradePackagePoliciesMutation.mutateAsync({
+        packagePolicyIds: packagePolicyIdsToUpdate,
+      });
+      notifications.toasts.addSuccess({
+        title: toMountPoint(
+          <FormattedMessage
+            id="xpack.fleet.integrations.packageUpdateSuccessTitle"
+            defaultMessage="Updated {title} and upgraded policies"
+            values={{ title }}
+          />,
+          startServices
+        ),
+        text: toMountPoint(
+          <FormattedMessage
+            id="xpack.fleet.integrations.packageUpdateSuccessDescription"
+            defaultMessage="Successfully updated {title} and upgraded policies"
+            values={{ title }}
+          />,
+          startServices
+        ),
+      });
+
+      navigateToNewSettingsPage();
+    } catch (error) {
+      notifications.toasts.addError(error, {
+        title: i18n.translate(
+          'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.title',
+          {
+            defaultMessage: 'Error updating policies',
+          }
+        ),
+        toastMessage: i18n.translate(
+          'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.message',
+          {
+            defaultMessage: 'Integrations policies, need to be manually updated. \n Error: {error}',
+            values: {
+              error: error.message,
+            },
+          }
+        ),
+      });
+      setIsUpgradingPackagePolicies(false);
+      navigateToNewSettingsPage();
+    }
   }, [
     isUpgradingPackagePolicies,
     setIsUpgradingPackagePolicies,
@@ -209,7 +229,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     packagePolicyIds,
     dryRunData,
     notifications.toasts,
-    theme$,
+    startServices,
     navigateToNewSettingsPage,
   ]);
 
@@ -315,7 +335,6 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
         {packagePolicyCount > 0 && (
           <EuiFlexItem grow={false}>
             <EuiCheckbox
-              compressed
               labelProps={{
                 style: {
                   display: 'flex',

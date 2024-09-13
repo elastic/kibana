@@ -22,10 +22,7 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
 import type { OsqueryAppContextService } from '../osquery_app_context_services';
-import type {
-  PackSavedObjectAttributes,
-  SavedQuerySavedObjectAttributes,
-} from '../../common/types';
+import type { PackSavedObject, SavedQuerySavedObject } from '../../common/types';
 import { getPrebuiltSavedQueryIds } from '../../routes/saved_query/utils';
 
 export class TelemetryReceiver {
@@ -43,7 +40,7 @@ export class TelemetryReceiver {
     this.logger = logger.get('telemetry_events');
   }
 
-  public async start(core: CoreStart, osqueryContextService?: OsqueryAppContextService) {
+  public start(core: CoreStart, osqueryContextService?: OsqueryAppContextService) {
     this.agentClient = osqueryContextService?.getAgentService()?.asInternalUser;
     this.agentPolicyService = osqueryContextService?.getAgentPolicyService();
     this.packageService = osqueryContextService?.getPackageService();
@@ -54,23 +51,39 @@ export class TelemetryReceiver {
   }
 
   public async fetchPacks() {
-    return this.soClient?.find<PackSavedObjectAttributes>({
-      type: packSavedObjectType,
-      page: 1,
-      perPage: this.max_records,
-      sortField: 'updated_at',
-      sortOrder: 'desc',
-    });
+    return this.soClient
+      ?.find<PackSavedObject>({
+        type: packSavedObjectType,
+        page: 1,
+        perPage: this.max_records,
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+      })
+      .then((data) => ({
+        ...data,
+        saved_objects: data.saved_objects.map((pack) => ({
+          ...pack.attributes,
+          saved_object_id: pack.id,
+        })),
+      }));
   }
 
   public async fetchSavedQueries() {
-    return this.soClient?.find<SavedQuerySavedObjectAttributes>({
-      type: savedQuerySavedObjectType,
-      page: 1,
-      perPage: this.max_records,
-      sortField: 'updated_at',
-      sortOrder: 'desc',
-    });
+    return this.soClient
+      ?.find<SavedQuerySavedObject>({
+        type: savedQuerySavedObjectType,
+        page: 1,
+        perPage: this.max_records,
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+      })
+      .then((data) => ({
+        ...data,
+        saved_objects: data.saved_objects.map((savedQuery) => ({
+          ...savedQuery.attributes,
+          saved_object_id: savedQuery.id,
+        })),
+      }));
   }
 
   public async fetchConfigs() {

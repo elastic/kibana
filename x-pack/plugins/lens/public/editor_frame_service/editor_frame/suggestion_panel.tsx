@@ -10,6 +10,7 @@ import './suggestion_panel.scss';
 import { camelCase, pick } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiIcon,
@@ -20,16 +21,21 @@ import {
   EuiButtonEmpty,
   EuiAccordion,
   EuiText,
+  EuiNotificationBadge,
 } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { ExecutionContextSearch } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ExecutionContextSearch } from '@kbn/es-query';
 import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { CoreStart } from '@kbn/core/public';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import {
   Datasource,
@@ -39,7 +45,6 @@ import {
   VisualizationMap,
   DatasourceLayers,
   UserMessagesGetter,
-  FrameDatasourceAPI,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
@@ -61,7 +66,7 @@ import {
   selectChangesApplied,
   applyChanges,
   selectStagedActiveData,
-  selectFrameDatasourceAPI,
+  selectFramePublicAPI,
 } from '../../state_management';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 
@@ -73,7 +78,7 @@ const configurationsValid = (
   currentDatasourceState: unknown,
   currentVisualization: Visualization,
   currentVisualizationState: unknown,
-  frame: FrameDatasourceAPI
+  frame: FramePublicAPI
 ): boolean => {
   try {
     return (
@@ -99,7 +104,13 @@ export interface SuggestionPanelProps {
   visualizationMap: VisualizationMap;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
-  getUserMessages: UserMessagesGetter;
+  getUserMessages?: UserMessagesGetter;
+  nowProvider: DataPublicPluginStart['nowProvider'];
+  core: CoreStart;
+  showOnlyIcons?: boolean;
+  wrapSuggestions?: boolean;
+  isAccordionOpen?: boolean;
+  toggleAccordionCb?: (flag: boolean) => void;
 }
 
 const PreviewRenderer = ({
@@ -107,11 +118,13 @@ const PreviewRenderer = ({
   ExpressionRendererComponent,
   expression,
   hasError,
+  onRender,
 }: {
   withLabel: boolean;
   expression: string | null | undefined;
   ExpressionRendererComponent: ReactExpressionRendererType;
   hasError: boolean;
+  onRender: () => void;
 }) => {
   const onErrorMessage = (
     <div className="lnsSuggestionPanel__suggestionIcon">
@@ -142,6 +155,7 @@ const PreviewRenderer = ({
           padding="s"
           renderMode="preview"
           expression={expression}
+          onRender$={onRender}
           debounce={2000}
           renderError={() => {
             return onErrorMessage;
@@ -158,6 +172,8 @@ const SuggestionPreview = ({
   selected,
   onSelect,
   showTitleAsLabel,
+  onRender,
+  wrapSuggestions,
 }: {
   onSelect: () => void;
   preview: {
@@ -169,22 +185,38 @@ const SuggestionPreview = ({
   ExpressionRenderer: ReactExpressionRendererType;
   selected: boolean;
   showTitleAsLabel?: boolean;
+  onRender: () => void;
+  wrapSuggestions?: boolean;
 }) => {
   return (
-    <EuiToolTip content={preview.title}>
+    <EuiToolTip
+      content={preview.title}
+      anchorProps={
+        wrapSuggestions
+          ? {
+              css: css`
+                display: flex;
+                flex-direction: column;
+                flex-basis: calc(50% - 9px);
+              `,
+            }
+          : undefined
+      }
+    >
       <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
         <EuiPanel
           hasBorder={true}
           hasShadow={false}
           className={classNames('lnsSuggestionPanel__button', {
             'lnsSuggestionPanel__button-isSelected': selected,
+            'lnsSuggestionPanel__button-fixedWidth': !wrapSuggestions,
           })}
           paddingSize="none"
           data-test-subj="lnsSuggestion"
           onClick={onSelect}
           aria-current={!!selected}
           aria-label={preview.title}
-          element="div"
+          element="button"
           role="listitem"
         >
           {preview.expression || preview.error ? (
@@ -193,6 +225,7 @@ const SuggestionPreview = ({
               expression={preview.expression && toExpression(preview.expression)}
               withLabel={Boolean(showTitleAsLabel)}
               hasError={Boolean(preview.error)}
+              onRender={onRender}
             />
           ) : (
             <span className="lnsSuggestionPanel__suggestionIcon">
@@ -219,6 +252,12 @@ export function SuggestionPanel({
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
   getUserMessages,
+  nowProvider,
+  core,
+  showOnlyIcons,
+  wrapSuggestions,
+  toggleAccordionCb,
+  isAccordionOpen,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -228,19 +267,24 @@ export function SuggestionPanel({
   const currentVisualization = useLensSelector(selectCurrentVisualization);
   const currentDatasourceStates = useLensSelector(selectCurrentDatasourceStates);
 
-  const frameDatasourceAPI = useLensSelector((state) =>
-    selectFrameDatasourceAPI(state, datasourceMap)
-  );
+  const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
   const changesApplied = useLensSelector(selectChangesApplied);
   // get user's selection from localStorage, this key defines if the suggestions panel will be hidden or not
+  const initialAccordionStatusValue = isAccordionOpen != null ? !Boolean(isAccordionOpen) : false;
   const [hideSuggestions, setHideSuggestions] = useLocalStorage(
     LOCAL_STORAGE_SUGGESTIONS_PANEL,
-    false
+    initialAccordionStatusValue
   );
+  useEffect(() => {
+    if (isAccordionOpen != null) {
+      setHideSuggestions(!Boolean(isAccordionOpen));
+    }
+  }, [isAccordionOpen, setHideSuggestions]);
 
   const toggleSuggestions = useCallback(() => {
     setHideSuggestions(!hideSuggestions);
-  }, [setHideSuggestions, hideSuggestions]);
+    toggleAccordionCb?.(!hideSuggestions);
+  }, [setHideSuggestions, hideSuggestions, toggleAccordionCb]);
 
   const missingIndexPatterns = getMissingIndexPattern(
     activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
@@ -276,7 +320,7 @@ export function SuggestionPanel({
                   suggestionDatasourceState,
                   visualizationMap[visualizationId],
                   suggestionVisualizationState,
-                  frameDatasourceAPI
+                  framePublicAPI
                 )
               );
             }
@@ -289,12 +333,15 @@ export function SuggestionPanel({
               visualizationMap[suggestion.visualizationId],
               datasourceMap,
               currentDatasourceStates,
-              frame
+              frame,
+              nowProvider
             ),
           }));
 
-    const hasErrors =
-      getUserMessages(['visualization', 'visualizationInEditor'], { severity: 'error' }).length > 0;
+    const hasErrors = getUserMessages
+      ? getUserMessages(['visualization', 'visualizationInEditor'], { severity: 'error' }).length >
+        0
+      : false;
 
     const newStateExpression =
       currentVisualization.state && currentVisualization.activeId && !hasErrors
@@ -303,7 +350,8 @@ export function SuggestionPanel({
             visualizationMap[currentVisualization.activeId],
             datasourceMap,
             currentDatasourceStates,
-            frame
+            frame,
+            nowProvider
           )
         : undefined;
 
@@ -354,20 +402,39 @@ export function SuggestionPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existsStagedPreview]);
 
+  const startTime = useRef<number>(0);
+  const initialRenderComplete = useRef<boolean>(false);
+  const suggestionsRendered = useRef<boolean[]>([]);
+  const totalSuggestions = suggestions.length + 1;
+
+  const onSuggestionRender = useCallback(
+    (suggestionIndex: number) => {
+      suggestionsRendered.current[suggestionIndex] = true;
+      if (initialRenderComplete.current === false && suggestionsRendered.current.every(Boolean)) {
+        initialRenderComplete.current = true;
+        reportPerformanceMetricEvent(core.analytics, {
+          eventName: 'lensSuggestionsRenderTime',
+          duration: performance.now() - startTime.current,
+        });
+      }
+    },
+    [core.analytics]
+  );
+
+  const rollbackToCurrentVisualization = useCallback(() => {
+    if (lastSelectedSuggestion !== -1) {
+      setLastSelectedSuggestion(-1);
+      dispatchLens(rollbackSuggestion());
+      dispatchLens(applyChanges());
+    }
+  }, [dispatchLens, lastSelectedSuggestion]);
+
   if (!activeDatasourceId) {
     return null;
   }
 
   if (suggestions.length === 0) {
     return null;
-  }
-
-  function rollbackToCurrentVisualization() {
-    if (lastSelectedSuggestion !== -1) {
-      setLastSelectedSuggestion(-1);
-      dispatchLens(rollbackSuggestion());
-      dispatchLens(applyChanges());
-    }
   }
 
   const renderApplyChangesPrompt = () => (
@@ -396,103 +463,138 @@ export function SuggestionPanel({
     </EuiPanel>
   );
 
-  const renderSuggestionsUI = () => (
-    <>
-      {currentVisualization.activeId && !hideSuggestions && (
-        <SuggestionPreview
-          preview={{
-            error: currentStateError,
-            expression: currentStateExpression,
-            icon:
-              visualizationMap[currentVisualization.activeId].getDescription(
-                currentVisualization.state
-              ).icon || 'empty',
-            title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
-              defaultMessage: 'Current visualization',
-            }),
-          }}
-          ExpressionRenderer={AutoRefreshExpressionRenderer}
-          onSelect={rollbackToCurrentVisualization}
-          selected={lastSelectedSuggestion === -1}
-          showTitleAsLabel
-        />
-      )}
-      {!hideSuggestions &&
-        suggestions.map((suggestion, index) => {
-          return (
-            <SuggestionPreview
-              preview={{
-                expression: suggestion.previewExpression,
-                icon: suggestion.previewIcon,
-                title: suggestion.title,
-              }}
-              ExpressionRenderer={AutoRefreshExpressionRenderer}
-              key={index}
-              onSelect={() => {
-                if (lastSelectedSuggestion === index) {
-                  rollbackToCurrentVisualization();
-                } else {
-                  setLastSelectedSuggestion(index);
-                  switchToSuggestion(dispatchLens, suggestion, { applyImmediately: true });
-                }
-              }}
-              selected={index === lastSelectedSuggestion}
-            />
-          );
-        })}
-    </>
-  );
-
-  return (
-    <div className="lnsSuggestionPanel">
-      <EuiAccordion
-        id="lensSuggestionsPanel"
-        buttonContent={
-          <EuiTitle size="xxs">
-            <h3>
-              <FormattedMessage
-                id="xpack.lens.editorFrame.suggestionPanelTitle"
-                defaultMessage="Suggestions"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        forceState={hideSuggestions ? 'closed' : 'open'}
-        onToggle={toggleSuggestions}
-        extraAction={
-          existsStagedPreview &&
-          !hideSuggestions && (
-            <EuiToolTip
-              content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
-                defaultMessage: 'Refresh the suggestions based on the selected visualization.',
-              })}
-            >
-              <EuiButtonEmpty
-                data-test-subj="lensSubmitSuggestion"
-                size="xs"
-                iconType="refresh"
-                onClick={() => {
-                  dispatchLens(submitSuggestion());
+  const renderSuggestionsUI = () => {
+    suggestionsRendered.current = new Array(totalSuggestions).fill(false);
+    startTime.current = performance.now();
+    return (
+      <>
+        {currentVisualization.activeId && !hideSuggestions && (
+          <SuggestionPreview
+            preview={{
+              error: currentStateError,
+              expression: !showOnlyIcons ? currentStateExpression : undefined,
+              icon:
+                visualizationMap[currentVisualization.activeId].getDescription(
+                  currentVisualization.state
+                ).icon || 'empty',
+              title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
+                defaultMessage: 'Current visualization',
+              }),
+            }}
+            ExpressionRenderer={AutoRefreshExpressionRenderer}
+            onSelect={rollbackToCurrentVisualization}
+            selected={lastSelectedSuggestion === -1}
+            showTitleAsLabel
+            onRender={() => onSuggestionRender(0)}
+            wrapSuggestions={wrapSuggestions}
+          />
+        )}
+        {!hideSuggestions &&
+          suggestions.map((suggestion, index) => {
+            return (
+              <SuggestionPreview
+                preview={{
+                  expression: !showOnlyIcons ? suggestion.previewExpression : undefined,
+                  icon: suggestion.previewIcon,
+                  title: suggestion.title,
                 }}
-              >
-                {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
-                  defaultMessage: 'Refresh',
-                })}
-              </EuiButtonEmpty>
-            </EuiToolTip>
-          )
-        }
+                ExpressionRenderer={AutoRefreshExpressionRenderer}
+                key={index}
+                onSelect={() => {
+                  if (lastSelectedSuggestion === index) {
+                    rollbackToCurrentVisualization();
+                  } else {
+                    setLastSelectedSuggestion(index);
+                    switchToSuggestion(dispatchLens, suggestion, { applyImmediately: true });
+                  }
+                }}
+                selected={index === lastSelectedSuggestion}
+                onRender={() => onSuggestionRender(index + 1)}
+                showTitleAsLabel={showOnlyIcons}
+                wrapSuggestions={wrapSuggestions}
+              />
+            );
+          })}
+      </>
+    );
+  };
+  const title = (
+    <EuiTitle
+      size="xxs"
+      css={css`
+    padding: 2px;
+  }
+`}
+    >
+      <h3>
+        <FormattedMessage
+          id="xpack.lens.editorFrame.suggestionPanelTitle"
+          defaultMessage="Suggestions"
+        />
+      </h3>
+    </EuiTitle>
+  );
+  return (
+    <EuiAccordion
+      id="lensSuggestionsPanel"
+      buttonProps={{
+        'data-test-subj': 'lensSuggestionsPanelToggleButton',
+        paddingSize: wrapSuggestions ? 'm' : 's',
+      }}
+      className="lnsSuggestionPanel"
+      css={css`
+        padding-bottom: ${wrapSuggestions ? 0 : euiThemeVars.euiSizeS};
+      `}
+      buttonContent={title}
+      forceState={hideSuggestions ? 'closed' : 'open'}
+      onToggle={toggleSuggestions}
+      extraAction={
+        <>
+          {!hideSuggestions && (
+            <>
+              {existsStagedPreview && (
+                <EuiToolTip
+                  content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
+                    defaultMessage: 'Refresh the suggestions based on the selected visualization.',
+                  })}
+                >
+                  <EuiButtonEmpty
+                    data-test-subj="lensSubmitSuggestion"
+                    size="xs"
+                    iconType="refresh"
+                    onClick={() => {
+                      dispatchLens(submitSuggestion());
+                    }}
+                  >
+                    {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
+                      defaultMessage: 'Refresh',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              )}
+            </>
+          )}
+          {wrapSuggestions && (
+            <EuiNotificationBadge size="m" color="subdued">
+              {suggestions.length + 1}
+            </EuiNotificationBadge>
+          )}
+        </>
+      }
+    >
+      <div
+        className="lnsSuggestionPanel__suggestions"
+        data-test-subj="lnsSuggestionsPanel"
+        role="list"
+        tabIndex={0}
+        css={css`
+          flex-wrap: ${wrapSuggestions ? 'wrap' : 'nowrap'};
+          gap: ${wrapSuggestions ? euiThemeVars.euiSize : 0};
+        `}
       >
-        <div
-          className="lnsSuggestionPanel__suggestions"
-          data-test-subj="lnsSuggestionsPanel"
-          role="list"
-          tabIndex={0}
-        >
-          {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}
-        </div>
-      </EuiAccordion>
-    </div>
+        {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}
+      </div>
+    </EuiAccordion>
   );
 }
 
@@ -508,7 +610,8 @@ function getPreviewExpression(
   visualization: Visualization,
   datasources: Record<string, Datasource>,
   datasourceStates: DatasourceStates,
-  frame: FramePublicAPI
+  frame: FramePublicAPI,
+  nowProvider: DataPublicPluginStart['nowProvider']
 ) {
   if (!visualization.toPreviewExpression) {
     return null;
@@ -546,7 +649,8 @@ function getPreviewExpression(
       datasources,
       datasourceStates,
       frame.dataViews.indexPatterns,
-      frame.dateRange
+      frame.dateRange,
+      nowProvider.get()
     );
 
     return visualization.toPreviewExpression(
@@ -565,7 +669,8 @@ function preparePreviewExpression(
   visualization: Visualization,
   datasourceMap: DatasourceMap,
   datasourceStates: DatasourceStates,
-  framePublicAPI: FramePublicAPI
+  framePublicAPI: FramePublicAPI,
+  nowProvider: DataPublicPluginStart['nowProvider']
 ) {
   const suggestionDatasourceId = visualizableState.datasourceId;
   const suggestionDatasourceState = visualizableState.datasourceState;
@@ -585,7 +690,8 @@ function preparePreviewExpression(
     visualization,
     datasourceMap,
     datasourceStatesWithSuggestions,
-    framePublicAPI
+    framePublicAPI,
+    nowProvider
   );
 
   if (!expression) {

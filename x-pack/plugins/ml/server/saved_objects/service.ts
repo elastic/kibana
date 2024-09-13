@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import RE2 from 're2';
 import { memoize } from 'lodash';
-import {
+import type {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
@@ -76,7 +75,7 @@ export function mlSavedObjectServiceFactory(
     currentSpaceOnly: boolean = true
   ) {
     await isMlReady();
-    const filterObject: JobObjectFilter = {};
+    const filterObject: JobObjectFilter = Object.create(null);
 
     if (jobType !== undefined) {
       filterObject.type = jobType;
@@ -226,7 +225,7 @@ export function mlSavedObjectServiceFactory(
 
   async function getAllJobObjectsForAllSpaces(jobType?: JobType, jobId?: string) {
     await isMlReady();
-    const filterObject: JobObjectFilter = {};
+    const filterObject: JobObjectFilter = Object.create(null);
 
     if (jobType !== undefined) {
       filterObject.type = jobType;
@@ -248,8 +247,7 @@ export function mlSavedObjectServiceFactory(
       filter,
     };
 
-    const jobs = await _savedObjectsClientFindMemo<JobObject>(options);
-    return jobs.saved_objects;
+    return (await internalSavedObjectsClient.find<JobObject>(options)).saved_objects;
   }
 
   async function addDatafeed(datafeedId: string, jobId: string) {
@@ -330,7 +328,7 @@ export function mlSavedObjectServiceFactory(
       if (id.match('\\*') === null) {
         return jobIds.includes(id);
       }
-      const regex = new RE2(id.replace('*', '.*'));
+      const regex = new RegExp(id.replace('*', '.*'));
       return jobIds.some((jId) => typeof jId === 'string' && regex.exec(jId));
     });
   }
@@ -361,7 +359,7 @@ export function mlSavedObjectServiceFactory(
       return {};
     }
 
-    const results: SavedObjectResult = {};
+    const results: SavedObjectResult = Object.create(null);
     const jobs = await _getJobObjects(jobType);
     const jobObjectIdMap = new Map<string, string>();
     const jobObjectsToUpdate: Array<{ type: string; id: string }> = [];
@@ -465,7 +463,7 @@ export function mlSavedObjectServiceFactory(
 
   async function _getTrainedModelObjects(modelId?: string, currentSpaceOnly: boolean = true) {
     await isMlReady();
-    const filterObject: TrainedModelObjectFilter = {};
+    const filterObject: TrainedModelObjectFilter = Object.create(null);
 
     if (modelId !== undefined) {
       filterObject.model_id = modelId;
@@ -642,7 +640,7 @@ export function mlSavedObjectServiceFactory(
       if (id.match('\\*') === null) {
         return modelIds.includes(id);
       }
-      const regex = new RE2(id.replace('*', '.*'));
+      const regex = new RegExp(id.replace('*', '.*'));
       return modelIds.some((jId) => typeof jId === 'string' && regex.exec(jId));
     });
   }
@@ -727,7 +725,7 @@ export function mlSavedObjectServiceFactory(
     if (modelIds.length === 0 || (spacesToAdd.length === 0 && spacesToRemove.length === 0)) {
       return {};
     }
-    const results: SavedObjectResult = {};
+    const results: SavedObjectResult = Object.create(null);
     const models = await _getTrainedModelObjects();
     const trainedModelObjectIdMap = new Map<string, string>();
     const objectsToUpdate: Array<{ type: string; id: string }> = [];

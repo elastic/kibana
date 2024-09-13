@@ -1,33 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
-import type { PluginsService, PluginsServiceSetup } from '@kbn/core-plugins-browser-internal';
+import type {
+  PluginsService,
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart,
+} from '@kbn/core-plugins-browser-internal';
+import type { BuildFlavor } from '@kbn/config/src/types';
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<PluginsServiceSetup> = {
+const createInternalSetupContractMock = () => {
+  const setupContract: jest.Mocked<InternalPluginsServiceSetup> = {
     contracts: new Map(),
   };
   // we have to suppress type errors until decide how to mock es6 class
-  return setupContract as PluginsServiceSetup;
+  return setupContract as InternalPluginsServiceSetup;
 };
 
-const createStartContractMock = () => {
-  const startContract: jest.Mocked<PluginsServiceSetup> = {
+const createInternalStartContractMock = () => {
+  const startContract: jest.Mocked<InternalPluginsServiceStart> = {
     contracts: new Map(),
   };
   // we have to suppress type errors until decide how to mock es6 class
-  return startContract as PluginsServiceSetup;
+  return startContract as InternalPluginsServiceSetup;
 };
 
-const createPluginInitializerContextMock = (config: unknown = {}) => {
+const createPluginInitializerContextMock = (
+  config: unknown = {},
+  { buildFlavor = 'serverless' }: { buildFlavor?: BuildFlavor } = {}
+) => {
   const mock: PluginInitializerContext = {
     opaqueId: Symbol(),
     env: {
@@ -41,7 +50,10 @@ const createPluginInitializerContextMock = (config: unknown = {}) => {
         branch: 'branch',
         buildNum: 100,
         buildSha: 'buildSha',
+        buildShaShort: 'buildShaShort',
         dist: false,
+        buildDate: new Date('2023-05-15T23:12:09.000Z'),
+        buildFlavor,
       },
     },
     logger: loggerMock.create(),
@@ -62,14 +74,14 @@ const createMock = () => {
     stop: jest.fn(),
   };
 
-  mocked.setup.mockResolvedValue(createSetupContractMock());
-  mocked.start.mockResolvedValue(createStartContractMock());
+  mocked.setup.mockResolvedValue(createInternalSetupContractMock());
+  mocked.start.mockResolvedValue(createInternalStartContractMock());
   return mocked;
 };
 
 export const pluginsServiceMock = {
   create: createMock,
-  createSetupContract: createSetupContractMock,
-  createStartContract: createStartContractMock,
+  createInternalSetupContract: createInternalSetupContractMock,
+  createInternalStartContract: createInternalStartContractMock,
   createPluginInitializerContext: createPluginInitializerContextMock,
 };

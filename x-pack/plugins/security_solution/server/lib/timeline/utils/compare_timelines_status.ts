@@ -6,11 +6,12 @@
  */
 
 import { isEmpty, isInteger } from 'lodash/fp';
-import type {
-  TimelineTypeLiteralWithNull,
-  TimelineTypeLiteral,
-} from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import {
+  type TimelineType,
+  TimelineTypeEnum,
+  type TimelineStatus,
+  TimelineStatusEnum,
+} from '../../../../common/api/timeline';
 import type { FrameworkRequest } from '../../framework';
 
 import type { TimelineStatusAction } from './common';
@@ -26,14 +27,14 @@ import {
 
 interface GivenTimelineInput {
   id: string | null | undefined;
-  type?: TimelineTypeLiteralWithNull;
+  type?: TimelineType | null;
   version: string | number | null | undefined;
 }
 
 interface TimelinesStatusProps {
   status: TimelineStatus | null | undefined;
   title: string | null | undefined;
-  timelineType: TimelineTypeLiteralWithNull | undefined;
+  timelineType: TimelineType | null | undefined;
   timelineInput: GivenTimelineInput;
   templateTimelineInput: GivenTimelineInput;
   frameworkRequest: FrameworkRequest;
@@ -42,33 +43,33 @@ interface TimelinesStatusProps {
 export class CompareTimelinesStatus {
   public readonly timelineObject: TimelineObject;
   public readonly templateTimelineObject: TimelineObject;
-  private readonly timelineType: TimelineTypeLiteral;
+  private readonly timelineType: TimelineType;
   private readonly title: string | null;
   private readonly status: TimelineStatus;
   constructor({
-    status = TimelineStatus.active,
+    status = TimelineStatusEnum.active,
     title,
-    timelineType = TimelineType.default,
+    timelineType = TimelineTypeEnum.default,
     timelineInput,
     templateTimelineInput,
     frameworkRequest,
   }: TimelinesStatusProps) {
     this.timelineObject = new TimelineObject({
       id: timelineInput.id,
-      type: timelineInput.type ?? TimelineType.default,
+      type: timelineInput.type ?? TimelineTypeEnum.default,
       version: timelineInput.version,
       frameworkRequest,
     });
 
     this.templateTimelineObject = new TimelineObject({
       id: templateTimelineInput.id,
-      type: templateTimelineInput.type ?? TimelineType.template,
+      type: templateTimelineInput.type ?? TimelineTypeEnum.template,
       version: templateTimelineInput.version,
       frameworkRequest,
     });
-    this.timelineType = timelineType ?? TimelineType.default;
+    this.timelineType = timelineType ?? TimelineTypeEnum.default;
     this.title = title ?? null;
-    this.status = status ?? TimelineStatus.active;
+    this.status = status ?? TimelineStatusEnum.active;
   }
 
   public get isCreatable() {
@@ -109,8 +110,8 @@ export class CompareTimelinesStatus {
     const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
 
     return obj.isExists
-      ? this.status === obj.getData?.status && this.status !== TimelineStatus.draft
-      : this.status !== TimelineStatus.draft;
+      ? this.status === obj.getData?.status && this.status !== TimelineStatusEnum.draft
+      : this.status !== TimelineStatusEnum.draft;
   }
 
   public get isUpdatable() {
@@ -124,7 +125,7 @@ export class CompareTimelinesStatus {
 
   private get isTimelineTypeValid() {
     const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
-    const existintTimelineType = obj.getData?.timelineType ?? TimelineType.default;
+    const existintTimelineType = obj.getData?.timelineType ?? TimelineTypeEnum.default;
     return obj.isExists ? this.timelineType === existintTimelineType : true;
   }
 
@@ -142,8 +143,8 @@ export class CompareTimelinesStatus {
 
   public get isTitleValid() {
     return (
-      (this.status !== TimelineStatus.draft && !isEmpty(this.title)) ||
-      this.status === TimelineStatus.draft
+      (this.status !== TimelineStatusEnum.draft && !isEmpty(this.title)) ||
+      this.status === TimelineStatusEnum.draft
     );
   }
 
@@ -196,7 +197,7 @@ export class CompareTimelinesStatus {
   }
 
   public get isHandlingTemplateTimeline() {
-    return this.timelineType === TimelineType.template;
+    return this.timelineType === TimelineTypeEnum.template;
   }
 
   private get isSavedObjectVersionConflict() {
@@ -217,7 +218,9 @@ export class CompareTimelinesStatus {
     if (
       templateTimelineVersion != null &&
       this.templateTimelineObject.isExists &&
-      existingTemplateTimelineVersion != null
+      existingTemplateTimelineVersion != null &&
+      typeof templateTimelineVersion === 'number' &&
+      typeof existingTemplateTimelineVersion === 'number'
     ) {
       return templateTimelineVersion <= existingTemplateTimelineVersion;
     } else if (this.templateTimelineObject.isExists && templateTimelineVersion == null) {
@@ -240,8 +243,8 @@ export class CompareTimelinesStatus {
       ? this.templateTimelineInput.data?.status
       : this.timelineInput.data?.status;
     return (
-      ((existingStatus == null || existingStatus === TimelineStatus.active) &&
-        (status == null || status === TimelineStatus.active)) ||
+      ((existingStatus == null || existingStatus === TimelineStatusEnum.active) &&
+        (status == null || status === TimelineStatusEnum.active)) ||
       (existingStatus != null && status === existingStatus)
     );
   }

@@ -7,13 +7,14 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiPanel, EuiText, EuiInMemoryTable, EuiLoadingContent } from '@elastic/eui';
-import type { Rule } from '../../../../rule_management/logic/types';
+import type { Search } from '@elastic/eui';
+import { EuiSkeletonText, EuiSpacer, EuiPanel, EuiText, EuiInMemoryTable } from '@elastic/eui';
 import { useAddToRulesTable } from './use_add_to_rules_table';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 
 interface ExceptionsAddToRulesComponentProps {
-  initiallySelectedRules?: Rule[];
-  onRuleSelectionChange: (rulesSelectedToAdd: Rule[]) => void;
+  initiallySelectedRules?: RuleResponse[];
+  onRuleSelectionChange: (rulesSelectedToAdd: RuleResponse[]) => void;
 }
 
 const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponentProps> = ({
@@ -38,9 +39,9 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
       <>
         <EuiText size="s">{addToSelectedRulesDescription}</EuiText>
         <EuiSpacer size="s" />
-        <EuiInMemoryTable<Rule>
+        <EuiInMemoryTable<RuleResponse>
           tableLayout="auto"
-          search={searchOptions}
+          search={searchOptions as Search}
           data-test-subj="addExceptionToRulesTable"
           tableCaption="Rules table"
           items={sortedRulesByLinkedRulesOnTop}
@@ -48,10 +49,7 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
           columns={rulesTableColumnsWithLinkSwitch}
           message={
             isLoading ? (
-              <EuiLoadingContent
-                lines={4}
-                data-test-subj="exceptionItemViewerEmptyPromptsLoading"
-              />
+              <EuiSkeletonText lines={4} data-test-subj="exceptionItemViewerEmptyPromptsLoading" />
             ) : undefined
           }
           pagination={pagination}

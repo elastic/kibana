@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiBadgeProps, EuiToolTip, useInnerText } from '@elastic/eui';
@@ -11,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { Filter, isFilterPinned } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { stringHash } from '@kbn/ml-string-hash';
 import type { FilterLabelStatus } from '../filter_item/filter_item';
 import { FilterBadge } from '../../filter_badge';
 
@@ -103,7 +105,7 @@ export const FilterView: FC<Props> = ({
       hideAlias={hideAlias}
       {...badgeProps}
       {...rest}
-      data-test-subj={`filter-badge-'${innerText}' ${rest['data-test-subj']}`}
+      data-test-subj={`filter-badge-${stringHash(innerText || '')} ${rest['data-test-subj']}`}
     />
   );
 

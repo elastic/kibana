@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LayerValue, SeriesIdentifier } from '@elastic/charts';
+import { LayerValue, SeriesIdentifier, TooltipValue } from '@elastic/charts';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ValueClickContext } from '@kbn/embeddable-plugin/public';
@@ -25,6 +26,45 @@ export const canFilter = async (
   const filters = await actions.createFiltersFromValueClickAction(event.data);
   return Boolean(filters.length);
 };
+
+export const getMultiFilterCells = (
+  tooltipSelectedValues: Array<TooltipValue<Record<'key', string | number>, SeriesIdentifier>>,
+  bucketColumns: Array<Partial<BucketColumns>>,
+  visData: Datatable
+) => {
+  const row = visData.rows.findIndex((r) =>
+    tooltipSelectedValues.every(({ valueAccessor, seriesIdentifier }) => {
+      if (typeof valueAccessor !== 'number' || valueAccessor < 1) return;
+      const index = valueAccessor - 1;
+      const bucketColumnId = bucketColumns[index].id;
+      if (!bucketColumnId) return;
+      return r[bucketColumnId] === seriesIdentifier.key;
+    })
+  );
+
+  return tooltipSelectedValues
+    .map(({ valueAccessor }) => {
+      if (typeof valueAccessor !== 'number' || valueAccessor < 1) return;
+      const index = valueAccessor - 1;
+      const bucketColumnId = bucketColumns[index].id;
+      if (!bucketColumnId) return;
+      const column = visData.columns.findIndex((c) => c.id === bucketColumnId);
+
+      if (column === -1) {
+        return;
+      }
+
+      return {
+        column,
+        row,
+      };
+    })
+    .filter(nonNullable);
+};
+
+function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
 
 export const getFilterClickData = (
   clickedLayers: LayerValue[],

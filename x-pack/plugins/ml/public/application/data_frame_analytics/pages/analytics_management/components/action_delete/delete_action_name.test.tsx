@@ -21,11 +21,8 @@ jest.mock('../../../../../capabilities/check_capabilities', () => ({
   createPermissionFailureMessage: jest.fn(),
 }));
 
-jest.mock('../../../../../util/dependency_cache', () => ({
-  getToastNotifications: () => ({ addSuccess: jest.fn(), addDanger: jest.fn() }),
-}));
-
 jest.mock('../../../../../contexts/kibana', () => ({
+  useMlApi: jest.fn(),
   useMlKibana: () => ({
     services: { ...mockCoreServices.createStart(), data: { data_view: { find: jest.fn() } } },
   }),
@@ -99,7 +96,7 @@ describe('DeleteAction', () => {
       fireEvent.click(deleteButton);
       expect(getByTestId('mlAnalyticsJobDeleteModal')).toBeInTheDocument();
       expect(queryByTestId('mlAnalyticsJobDeleteIndexSwitch')).toBeNull();
-      expect(queryByTestId('mlAnalyticsJobDeleteIndexPatternSwitch')).toBeNull();
+      expect(queryByTestId('mlAnalyticsJobDeleteDataViewSwitch')).toBeNull();
 
       mock.mockRestore();
     });

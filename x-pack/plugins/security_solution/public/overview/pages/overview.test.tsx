@@ -10,13 +10,12 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { merge } from 'lodash';
 
-import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
 import type { UseMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { Overview } from '.';
 import { useUserPrivileges } from '../../common/components/user_privileges';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { useFetchIndex } from '../../common/containers/source';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
 import { mockCtiLinksResponse, mockTiDataSources } from '../components/overview_cti_links/mock';
@@ -24,11 +23,11 @@ import { useCtiDashboardLinks } from '../containers/overview_cti_links';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
 import type { EndpointPrivileges } from '../../../common/endpoint/types';
-import { useRiskScore } from '../../explore/containers/risk_score';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { LandingPageComponent } from '../../common/components/landing_page';
+import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
 
 const mockNavigateToApp = jest.fn();
+jest.mock('../../common/components/empty_prompt');
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
 
@@ -49,7 +48,7 @@ jest.mock('../../common/lib/kibana', () => {
   };
 });
 jest.mock('../../common/containers/source');
-jest.mock('../../common/containers/sourcerer');
+jest.mock('../../sourcerer/containers');
 jest.mock('../../common/components/visualization_actions/lens_embeddable');
 jest.mock('../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
@@ -97,7 +96,7 @@ jest.mock('../containers/overview_cti_links/use_all_ti_data_sources');
 const useAllTiDataSourcesMock = useAllTiDataSources as jest.Mock;
 useAllTiDataSourcesMock.mockReturnValue(mockTiDataSources);
 
-jest.mock('../../explore/containers/risk_score');
+jest.mock('../../entity_analytics/api/hooks/use_risk_score');
 const useRiskScoreMock = useRiskScore as jest.Mock;
 useRiskScoreMock.mockReturnValue({ loading: false, data: [], isModuleEnabled: false });
 
@@ -308,7 +307,7 @@ describe('Overview', () => {
           </TestProviders>
         );
 
-        expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
+        expect(wrapper.find(`[data-test-subj="empty-prompt"]`).exists()).toBe(true);
       });
     });
   });

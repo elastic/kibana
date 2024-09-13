@@ -23,6 +23,7 @@ import {
 import { get } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { RouteMethod } from '@kbn/core/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
@@ -30,12 +31,12 @@ import {
   LOGGING_TAG,
   SAVED_OBJECT_TELEMETRY,
 } from '../common/constants';
-import { AlertsFactory } from './alerts';
+import { RulesFactory } from './rules';
 import { configSchema, createConfig, MonitoringConfig } from './config';
 import { instantiateClient } from './es_client/instantiate_client';
 import { initBulkUploader } from './kibana_monitoring';
 import { registerCollectors } from './kibana_monitoring/collectors';
-import { initInfraSource } from './lib/logs/init_infra_source';
+import { initLogView } from './lib/logs/init_log_view';
 import { LicenseService } from './license_service';
 import { requireUIRoutes } from './routes';
 import { EndpointTypes, Globals } from './static_globals';
@@ -104,7 +105,7 @@ export class MonitoringPlugin
       kibanaStats: {
         uuid: this.initializerContext.env.instanceUuid,
         name: serverInfo.name,
-        index: coreSetup.savedObjects.getKibanaIndex(),
+        index: coreSetup.savedObjects.getDefaultIndex(),
         host: serverInfo.hostname,
         locale: i18n.getLocale(),
         port: serverInfo.port.toString(),
@@ -123,9 +124,9 @@ export class MonitoringPlugin
       setupPlugins: this.setupPlugins!,
     });
 
-    const alerts = AlertsFactory.getAll();
-    for (const alert of alerts) {
-      plugins.alerting?.registerType(alert.getRuleType());
+    const rules = RulesFactory.getAll();
+    for (const rule of rules) {
+      plugins.alerting?.registerType(rule.getRuleType());
     }
 
     const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
@@ -202,7 +203,7 @@ export class MonitoringPlugin
         alerting: plugins.alerting,
         logger: this.log,
       });
-      initInfraSource(config, plugins.infra);
+      initLogView(config, plugins.logsShared);
     }
   }
 
@@ -257,7 +258,7 @@ export class MonitoringPlugin
 
   stop() {
     if (this.cluster && this.cluster.close) {
-      this.cluster.close();
+      this.cluster.close().catch(() => {});
     }
     if (this.licenseService && this.licenseService.stop) {
       this.licenseService.stop();
@@ -272,6 +273,7 @@ export class MonitoringPlugin
         defaultMessage: 'Stack Monitoring',
       }),
       category: DEFAULT_APP_CATEGORIES.management,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,

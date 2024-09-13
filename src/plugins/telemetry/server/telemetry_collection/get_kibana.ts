@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { omit } from 'lodash';
@@ -43,15 +44,12 @@ export function handleKibanaStats(
     ...kibanaStats.os,
   };
   const formattedOsStats = Object.entries(os).reduce((acc, [key, value]) => {
-    if (typeof value !== 'string') {
-      // There are new fields reported now from the "os" property like "load", "memory", etc. They are objects.
-      return acc;
+    // There are new fields reported now from the "os" property like "load", "memory", etc. They are objects.
+    if (typeof value === 'string') {
+      acc[`${key}s`] = [{ [key]: value, count: 1 }];
     }
-    return {
-      ...acc,
-      [`${key}s`]: [{ [key]: value, count: 1 }],
-    };
-  }, {});
+    return acc;
+  }, {} as Record<string, unknown[]>);
 
   const version = serverVersion.replace(/-snapshot/i, ''); // Shouldn't we better maintain the -snapshot so we can differentiate between actual final releases and snapshots?
 

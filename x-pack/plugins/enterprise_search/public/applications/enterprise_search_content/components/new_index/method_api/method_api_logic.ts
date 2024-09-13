@@ -24,9 +24,14 @@ type MethodApiActions = Pick<
   'apiSuccess' | 'makeRequest'
 >;
 
-export const MethodApiLogic = kea<MakeLogicType<{}, MethodApiActions>>({
+interface MethodApiValues {
+  status: (typeof CreateApiIndexApiLogic.values)['status'];
+}
+
+export const MethodApiLogic = kea<MakeLogicType<MethodApiValues, MethodApiActions>>({
   connect: {
     actions: [CreateApiIndexApiLogic, ['apiSuccess', 'makeRequest']],
+    values: [CreateApiIndexApiLogic, ['status']],
   },
   listeners: {
     apiSuccess: ({ indexName }) => {

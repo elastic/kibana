@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
@@ -11,13 +12,14 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiPanel,
   EuiText,
   EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -55,8 +57,8 @@ export function ActionsExpressionsExample({ expressions, actions }: Props) {
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
-      <EuiPageContent data-test-subj="expressionsActionsTest">
-        <EuiPageContentBody>
+      <EuiPageTemplate.Section data-test-subj="expressionsActionsTest">
+        <EuiPageSection>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiText>
@@ -66,6 +68,8 @@ export function ActionsExpressionsExample({ expressions, actions }: Props) {
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
+
+          <EuiSpacer />
 
           <EuiFlexGroup gutterSize="l">
             <EuiFlexItem>
@@ -86,8 +90,8 @@ export function ActionsExpressionsExample({ expressions, actions }: Props) {
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPageContentBody>
-      </EuiPageContent>
+        </EuiPageSection>
+      </EuiPageTemplate.Section>
     </EuiPageBody>
   );
 }

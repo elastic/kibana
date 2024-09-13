@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -16,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects([
+  const { visualize, timePicker, visEditor, visChart, common } = getPageObjects([
     'visualize',
     'timePicker',
     'visEditor',
@@ -28,44 +29,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const vizName1 = 'Visualization DataTable';
 
     before(async function () {
-      await PageObjects.visualize.initTests();
+      await visualize.initTests();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
+      await visualize.navigateToNewAggBasedVisualization();
       log.debug('clickDataTable');
-      await PageObjects.visualize.clickDataTable();
+      await visualize.clickDataTable();
       log.debug('clickNewSearch');
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await visualize.clickNewSearch();
       log.debug('Bucket = Split rows');
-      await PageObjects.visEditor.clickBucket('Split rows');
+      await visEditor.clickBucket('Split rows');
       log.debug('Aggregation = Histogram');
-      await PageObjects.visEditor.selectAggregation('Histogram');
+      await visEditor.selectAggregation('Histogram');
       log.debug('Field = bytes');
-      await PageObjects.visEditor.selectField('bytes');
+      await visEditor.selectField('bytes');
       log.debug('Interval = 2000');
-      await PageObjects.visEditor.setInterval('2000', { type: 'numeric' });
-      await PageObjects.visEditor.clickGo();
+      await visEditor.setInterval('2000', { type: 'numeric' });
+      await visEditor.clickGo();
+    });
+
+    after(async () => {
+      await common.unsetTime();
     });
 
     it('should allow applying changed params', async () => {
-      await PageObjects.visEditor.setInterval('1', { type: 'numeric', append: true });
-      const interval = await PageObjects.visEditor.getNumericInterval();
+      await visEditor.setInterval('1', { type: 'numeric', append: true });
+      const interval = await visEditor.getNumericInterval();
       expect(interval).to.be('20001');
-      const isApplyButtonEnabled = await PageObjects.visEditor.isApplyEnabled();
+      const isApplyButtonEnabled = await visEditor.isApplyEnabled();
       expect(isApplyButtonEnabled).to.be(true);
     });
 
     it('should allow reseting changed params', async () => {
-      await PageObjects.visEditor.clickReset();
-      const interval = await PageObjects.visEditor.getNumericInterval();
+      await visEditor.clickReset();
+      const interval = await visEditor.getNumericInterval();
       expect(interval).to.be('2000');
     });
 
     it('should be able to save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
+      await visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
-      await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.visChart.waitForVisualization();
+      await visualize.loadSavedVisualization(vizName1);
+      await visChart.waitForVisualization();
     });
 
     it('should have inspector enabled', async function () {
@@ -106,21 +111,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ['15.625KB', '161'],
         ['17.578KB', '137'],
       ];
-      await PageObjects.visEditor.clickOptionsTab();
-      await PageObjects.visEditor.checkSwitch('showPartialRows');
-      await PageObjects.visEditor.clickGo();
+      await visEditor.clickOptionsTab();
+      await visEditor.checkSwitch('showPartialRows');
+      await visEditor.clickGo();
 
       return retry.try(async function () {
         await inspector.open();
         await inspector.expectTableData(expectedChartData);
         await inspector.close();
-        await PageObjects.visEditor.uncheckSwitch('showPartialRows');
+        await visEditor.uncheckSwitch('showPartialRows');
       });
     });
 
     it('should show percentage columns', async () => {
       async function expectValidTableData() {
-        const data = await PageObjects.visChart.getTableVisContent();
+        const data = await visChart.getTableVisContent();
         expect(data).to.be.eql([
           ['≥ 0B and < 1,000B', '1,351', '64.703%'],
           ['≥ 1,000B and < 1.953KB', '737', '35.297%'],
@@ -128,42 +133,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
 
       // load a plain table
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
-      await PageObjects.visualize.clickDataTable();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.visEditor.clickBucket('Split rows');
-      await PageObjects.visEditor.selectAggregation('Range');
-      await PageObjects.visEditor.selectField('bytes');
-      await PageObjects.visEditor.clickGo();
-      await PageObjects.visEditor.clickOptionsTab();
-      await PageObjects.visEditor.setSelectByOptionText(
-        'datatableVisualizationPercentageCol',
-        'Count'
-      );
-      await PageObjects.visEditor.clickGo();
+      await visualize.navigateToNewAggBasedVisualization();
+      await visualize.clickDataTable();
+      await visualize.clickNewSearch();
+      await visEditor.clickBucket('Split rows');
+      await visEditor.selectAggregation('Range');
+      await visEditor.selectField('bytes');
+      await visEditor.clickGo();
+      await visEditor.clickOptionsTab();
+      await visEditor.setSelectByOptionText('datatableVisualizationPercentageCol', 'Count');
+      await visEditor.clickGo();
 
       await expectValidTableData();
 
       // check that it works after a save and reload
       const SAVE_NAME = 'viz w/ percents';
-      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(SAVE_NAME);
+      await visualize.saveVisualizationExpectSuccessAndBreadcrumb(SAVE_NAME);
 
-      await PageObjects.visualize.loadSavedVisualization(SAVE_NAME);
-      await PageObjects.visChart.waitForVisualization();
+      await visualize.loadSavedVisualization(SAVE_NAME);
+      await visChart.waitForVisualization();
 
       await expectValidTableData();
 
       // check that it works after selecting a column that's deleted
-      await PageObjects.visEditor.clickDataTab();
-      await PageObjects.visEditor.clickBucket('Metric', 'metrics');
-      await PageObjects.visEditor.selectAggregation('Average', 'metrics');
-      await PageObjects.visEditor.selectField('bytes', 'metrics');
-      await PageObjects.visEditor.removeDimension(1);
-      await PageObjects.visEditor.clickGo();
-      await PageObjects.visEditor.clickOptionsTab();
+      await visEditor.clickDataTab();
+      await visEditor.clickBucket('Metric', 'metrics');
+      await visEditor.selectAggregation('Average', 'metrics');
+      await visEditor.selectField('bytes', 'metrics');
+      await visEditor.removeDimension(1);
+      await visEditor.clickGo();
+      await visEditor.clickOptionsTab();
 
-      const data = await PageObjects.visChart.getTableVisContent();
+      const data = await visChart.getTableVisContent();
       expect(data).to.be.eql([
         ['≥ 0B and < 1,000B', '344.094B'],
         ['≥ 1,000B and < 1.953KB', '1.697KB'],
@@ -171,30 +172,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show correct data when using average pipeline aggregation', async () => {
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
-      await PageObjects.visualize.clickDataTable();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.visEditor.clickBucket('Metric', 'metrics');
-      await PageObjects.visEditor.selectAggregation('Average Bucket', 'metrics');
-      await PageObjects.visEditor.selectAggregation('Terms', 'metrics', true);
-      await PageObjects.visEditor.selectField('geo.src', 'metrics', true);
-      await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisContent();
+      await visualize.navigateToNewAggBasedVisualization();
+      await visualize.clickDataTable();
+      await visualize.clickNewSearch();
+      await visEditor.clickBucket('Metric', 'metrics');
+      await visEditor.selectAggregation('Average Bucket', 'metrics');
+      await visEditor.selectAggregation('Terms', 'metrics', true);
+      await visEditor.selectField('geo.src', 'metrics', true);
+      await visEditor.clickGo();
+      const data = await visChart.getTableVisContent();
       expect(data).to.be.eql([['14,004', '1,412.6']]);
     });
 
     it('should show correct data for a data table with date histogram', async () => {
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
-      await PageObjects.visualize.clickDataTable();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.visEditor.clickBucket('Split rows');
-      await PageObjects.visEditor.selectAggregation('Date Histogram');
-      await PageObjects.visEditor.selectField('@timestamp');
-      await PageObjects.visEditor.setInterval('Day');
-      await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisContent();
+      await visualize.navigateToNewAggBasedVisualization();
+      await visualize.clickDataTable();
+      await visualize.clickNewSearch();
+      await visEditor.clickBucket('Split rows');
+      await visEditor.selectAggregation('Date Histogram');
+      await visEditor.selectField('@timestamp');
+      await visEditor.setInterval('Day');
+      await visEditor.clickGo();
+      const data = await visChart.getTableVisContent();
       expect(data).to.be.eql([
         ['2015-09-20', '4,757'],
         ['2015-09-21', '4,614'],
@@ -203,22 +202,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show correct data when selecting a field by its custom name', async () => {
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
-      await PageObjects.visualize.clickDataTable();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.visEditor.clickBucket('Split rows');
-      await PageObjects.visEditor.selectAggregation('Date Histogram');
-      await PageObjects.visEditor.selectField('UTC time');
-      await PageObjects.visEditor.setInterval('Day');
-      await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisContent();
+      await visualize.navigateToNewAggBasedVisualization();
+      await visualize.clickDataTable();
+      await visualize.clickNewSearch();
+      await visEditor.clickBucket('Split rows');
+      await visEditor.selectAggregation('Date Histogram');
+      await visEditor.selectField('UTC time');
+      await visEditor.setInterval('Day');
+      await visEditor.clickGo();
+      const data = await visChart.getTableVisContent();
       expect(data).to.be.eql([
         ['2015-09-20', '4,757'],
         ['2015-09-21', '4,614'],
         ['2015-09-22', '4,633'],
       ]);
-      const header = await PageObjects.visChart.getTableVisHeader();
+      const header = await visChart.getTableVisHeader();
       expect(header).to.contain('UTC time');
     });
 
@@ -228,42 +226,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'is between',
         value: { from: '2015-09-19', to: '2015-09-21' },
       });
-      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      const data = await PageObjects.visChart.getTableVisContent();
+      await visChart.waitForVisualizationRenderingStabilized();
+      const data = await visChart.getTableVisContent();
       expect(data).to.be.eql([['2015-09-20', '4,757']]);
     });
 
     it('should correctly filter for pinned filters', async () => {
       await filterBar.toggleFilterPinned('@timestamp');
-      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      const data = await PageObjects.visChart.getTableVisContent();
+      await visChart.waitForVisualizationRenderingStabilized();
+      const data = await visChart.getTableVisContent();
       expect(data).to.be.eql([['2015-09-20', '4,757']]);
     });
 
     it('should show correct data for a data table with top hits', async () => {
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
-      await PageObjects.visualize.clickDataTable();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.visEditor.clickMetricEditor();
-      await PageObjects.visEditor.selectAggregation('Top Hit', 'metrics');
-      await PageObjects.visEditor.selectField('agent.raw', 'metrics');
-      await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisContent();
+      await visualize.navigateToNewAggBasedVisualization();
+      await visualize.clickDataTable();
+      await visualize.clickNewSearch();
+      await visEditor.clickMetricEditor();
+      await visEditor.selectAggregation('Top Hit', 'metrics');
+      await visEditor.selectField('agent.raw', 'metrics');
+      await visEditor.clickGo();
+      const data = await visChart.getTableVisContent();
       log.debug(data);
       expect(data.length).to.be.greaterThan(0);
     });
 
     it('should show correct data for a data table with range agg', async () => {
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
-      await PageObjects.visualize.clickDataTable();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.visEditor.clickBucket('Split rows');
-      await PageObjects.visEditor.selectAggregation('Range');
-      await PageObjects.visEditor.selectField('bytes');
-      await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisContent();
+      await visualize.navigateToNewAggBasedVisualization();
+      await visualize.clickDataTable();
+      await visualize.clickNewSearch();
+      await visEditor.clickBucket('Split rows');
+      await visEditor.selectAggregation('Range');
+      await visEditor.selectField('bytes');
+      await visEditor.clickGo();
+      const data = await visChart.getTableVisContent();
       expect(data).to.be.eql([
         ['≥ 0B and < 1,000B', '1,351'],
         ['≥ 1,000B and < 1.953KB', '737'],
@@ -272,23 +268,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('otherBucket', () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewAggBasedVisualization();
-        await PageObjects.visualize.clickDataTable();
-        await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.visEditor.clickBucket('Split rows');
-        await PageObjects.visEditor.selectAggregation('Terms');
-        await PageObjects.visEditor.selectField('extension.raw');
-        await PageObjects.visEditor.setSize(2);
-        await PageObjects.visEditor.clickGo();
+        await visualize.navigateToNewAggBasedVisualization();
+        await visualize.clickDataTable();
+        await visualize.clickNewSearch();
+        await visEditor.clickBucket('Split rows');
+        await visEditor.selectAggregation('Terms');
+        await visEditor.selectField('extension.raw');
+        await visEditor.setSize(2);
+        await visEditor.clickGo();
 
-        await PageObjects.visEditor.toggleOtherBucket();
-        await PageObjects.visEditor.toggleMissingBucket();
-        await PageObjects.visEditor.clickGo();
+        await visEditor.toggleOtherBucket();
+        await visEditor.toggleMissingBucket();
+        await visEditor.clickGo();
       });
 
       it('should show correct data', async () => {
-        const data = await PageObjects.visChart.getTableVisContent();
+        const data = await visChart.getTableVisContent();
         expect(data).to.be.eql([
           ['jpg', '9,109'],
           ['css', '2,159'],
@@ -297,9 +292,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should apply correct filter', async () => {
-        await PageObjects.visChart.filterOnTableCell(0, 2);
-        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-        const data = await PageObjects.visChart.getTableVisContent();
+        await visChart.filterOnTableCell(0, 2);
+        await visChart.waitForVisualizationRenderingStabilized();
+        const data = await visChart.getTableVisContent();
         expect(data).to.be.eql([
           ['png', '1,373'],
           ['gif', '918'],
@@ -310,24 +305,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('metricsOnAllLevels', () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewAggBasedVisualization();
-        await PageObjects.visualize.clickDataTable();
-        await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.visEditor.clickBucket('Split rows');
-        await PageObjects.visEditor.selectAggregation('Terms');
-        await PageObjects.visEditor.selectField('extension.raw');
-        await PageObjects.visEditor.setSize(2);
-        await PageObjects.visEditor.toggleOpenEditor(2, 'false');
-        await PageObjects.visEditor.clickBucket('Split rows');
-        await PageObjects.visEditor.selectAggregation('Terms');
-        await PageObjects.visEditor.selectField('geo.dest');
-        await PageObjects.visEditor.toggleOpenEditor(3, 'false');
-        await PageObjects.visEditor.clickGo();
+        await visualize.navigateToNewAggBasedVisualization();
+        await visualize.clickDataTable();
+        await visualize.clickNewSearch();
+        await visEditor.clickBucket('Split rows');
+        await visEditor.selectAggregation('Terms');
+        await visEditor.selectField('extension.raw');
+        await visEditor.setSize(2);
+        await visEditor.toggleOpenEditor(2, 'false');
+        await visEditor.clickBucket('Split rows');
+        await visEditor.selectAggregation('Terms');
+        await visEditor.selectField('geo.dest');
+        await visEditor.toggleOpenEditor(3, 'false');
+        await visEditor.clickGo();
       });
 
       it('should show correct data without showMetricsAtAllLevels', async () => {
-        const data = await PageObjects.visChart.getTableVisContent();
+        const data = await visChart.getTableVisContent();
         expect(data).to.be.eql([
           ['jpg', 'CN', '1,718'],
           ['jpg', 'IN', '1,511'],
@@ -343,10 +337,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show correct data without showMetricsAtAllLevels even if showPartialRows is selected', async () => {
-        await PageObjects.visEditor.clickOptionsTab();
+        await visEditor.clickOptionsTab();
         await testSubjects.setCheckbox('showPartialRows', 'check');
-        await PageObjects.visEditor.clickGo();
-        const data = await PageObjects.visChart.getTableVisContent();
+        await visEditor.clickGo();
+        const data = await visChart.getTableVisContent();
         expect(data).to.be.eql([
           ['jpg', 'CN', '1,718'],
           ['jpg', 'IN', '1,511'],
@@ -362,10 +356,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show metrics on each level', async () => {
-        await PageObjects.visEditor.clickOptionsTab();
+        await visEditor.clickOptionsTab();
         await testSubjects.setCheckbox('showMetricsAtAllLevels', 'check');
-        await PageObjects.visEditor.clickGo();
-        const data = await PageObjects.visChart.getTableVisContent();
+        await visEditor.clickGo();
+        const data = await visChart.getTableVisContent();
         expect(data).to.be.eql([
           ['jpg', '9,109', 'CN', '1,718'],
           ['jpg', '9,109', 'IN', '1,511'],
@@ -381,12 +375,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show metrics other than count on each level', async () => {
-        await PageObjects.visEditor.clickDataTab();
-        await PageObjects.visEditor.clickBucket('Metric', 'metrics');
-        await PageObjects.visEditor.selectAggregation('Average', 'metrics');
-        await PageObjects.visEditor.selectField('bytes', 'metrics');
-        await PageObjects.visEditor.clickGo();
-        const data = await PageObjects.visChart.getTableVisContent();
+        await visEditor.clickDataTab();
+        await visEditor.clickBucket('Metric', 'metrics');
+        await visEditor.selectAggregation('Average', 'metrics');
+        await visEditor.selectField('bytes', 'metrics');
+        await visEditor.clickGo();
+        const data = await visChart.getTableVisContent();
         expect(data).to.be.eql([
           ['jpg', '9,109', '5.469KB', 'CN', '1,718', '5.477KB'],
           ['jpg', '9,109', '5.469KB', 'IN', '1,511', '5.456KB'],
@@ -404,32 +398,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('split tables', () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewAggBasedVisualization();
-        await PageObjects.visualize.clickDataTable();
-        await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.visEditor.clickBucket('Split table');
+        await visualize.navigateToNewAggBasedVisualization();
+        await visualize.clickDataTable();
+        await visualize.clickNewSearch();
+        await visEditor.clickBucket('Split table');
         // split by column to make all tables rows visible
-        await PageObjects.visEditor.clickSplitDirection('Columns');
-        await PageObjects.visEditor.selectAggregation('Terms');
-        await PageObjects.visEditor.selectField('extension.raw');
-        await PageObjects.visEditor.setSize(2);
-        await PageObjects.visEditor.toggleOpenEditor(2, 'false');
-        await PageObjects.visEditor.clickBucket('Split rows');
-        await PageObjects.visEditor.selectAggregation('Terms');
-        await PageObjects.visEditor.selectField('geo.dest');
-        await PageObjects.visEditor.setSize(3, 3);
-        await PageObjects.visEditor.toggleOpenEditor(3, 'false');
-        await PageObjects.visEditor.clickBucket('Split rows');
-        await PageObjects.visEditor.selectAggregation('Terms');
-        await PageObjects.visEditor.selectField('geo.src');
-        await PageObjects.visEditor.setSize(3, 4);
-        await PageObjects.visEditor.toggleOpenEditor(4, 'false');
-        await PageObjects.visEditor.clickGo();
+        await visEditor.clickSplitDirection('Columns');
+        await visEditor.selectAggregation('Terms');
+        await visEditor.selectField('extension.raw');
+        await visEditor.setSize(2);
+        await visEditor.toggleOpenEditor(2, 'false');
+        await visEditor.clickBucket('Split rows');
+        await visEditor.selectAggregation('Terms');
+        await visEditor.selectField('geo.dest');
+        await visEditor.setSize(3, 3);
+        await visEditor.toggleOpenEditor(3, 'false');
+        await visEditor.clickBucket('Split rows');
+        await visEditor.selectAggregation('Terms');
+        await visEditor.selectField('geo.src');
+        await visEditor.setSize(3, 4);
+        await visEditor.toggleOpenEditor(4, 'false');
+        await visEditor.clickGo();
       });
 
       it('should have a splitted table', async () => {
-        const data = await PageObjects.visChart.getTableVisContent();
+        const data = await visChart.getTableVisContent();
         expect(data).to.be.eql([
           [
             ['CN', 'CN', '330'],
@@ -457,10 +450,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show metrics for split bucket when using showMetricsAtAllLevels', async () => {
-        await PageObjects.visEditor.clickOptionsTab();
+        await visEditor.clickOptionsTab();
         await testSubjects.setCheckbox('showMetricsAtAllLevels', 'check');
-        await PageObjects.visEditor.clickGo();
-        const data = await PageObjects.visChart.getTableVisContent();
+        await visEditor.clickGo();
+        const data = await visChart.getTableVisContent();
         expect(data).to.be.eql([
           [
             ['CN', '1,718', 'CN', '330'],

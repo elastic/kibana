@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { delay, filter, map, shareReplay } from 'rxjs/operators';
+import { delay, filter, map, shareReplay } from 'rxjs';
 import { defaults } from 'lodash';
 import { SerializableRecord, UnwrapObservable } from '@kbn/utility-types';
 import { Adapters } from '@kbn/inspector-plugin/public';
@@ -151,6 +152,7 @@ export class ExpressionLoader {
       executionContext: params.executionContext,
       partial: params.partial,
       throttle: params.throttle,
+      allowCache: params.allowCache,
     });
     this.subscription = this.execution
       .getData()
@@ -190,6 +192,7 @@ export class ExpressionLoader {
     this.params.debug = Boolean(params.debug);
     this.params.partial = Boolean(params.partial);
     this.params.throttle = Number(params.throttle ?? 1000);
+    this.params.allowCache = params.allowCache;
 
     this.params.inspectorAdapters = (params.inspectorAdapters ||
       this.execution?.inspect()) as Adapters;

@@ -13,7 +13,7 @@ import { capitalize } from 'lodash';
 import { Observable, Subscription } from 'rxjs';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
-import { PLUGIN } from '../constants/plugin';
+import { PLUGIN } from '../../common/constants/plugin';
 import { getRuleTypeFeatureUsageName } from './get_rule_type_feature_usage_name';
 import {
   RuleType,
@@ -21,6 +21,7 @@ import {
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
+  RuleAlertData,
 } from '../types';
 import { RuleTypeDisabledError } from './errors/rule_type_disabled';
 
@@ -147,6 +148,31 @@ export class LicenseState {
     }
   }
 
+  public ensureLicenseForMaintenanceWindow() {
+    if (!this.license || !this.license?.isAvailable) {
+      throw Boom.forbidden(
+        i18n.translate(
+          'xpack.alerting.serverSideErrors.maintenanceWindow.unavailableLicenseErrorMessage',
+          {
+            defaultMessage:
+              'Maintenance window is disabled because license information is not available at this time.',
+          }
+        )
+      );
+    }
+    if (!this.license.hasAtLeast('platinum')) {
+      throw Boom.forbidden(
+        i18n.translate(
+          'xpack.alerting.serverSideErrors.maintenanceWindow.invalidLicenseErrorMessage',
+          {
+            defaultMessage:
+              'Maintenance window is disabled because it requires a platinum license. Go to License Management to view upgrade options.',
+          }
+        )
+      );
+    }
+  }
+
   public ensureLicenseForRuleType<
     Params extends RuleTypeParams,
     ExtractedParams extends RuleTypeParams,
@@ -154,7 +180,8 @@ export class LicenseState {
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string
+    RecoveryActionGroupId extends string,
+    AlertData extends RuleAlertData
   >(
     ruleType: RuleType<
       Params,
@@ -163,7 +190,8 @@ export class LicenseState {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >
   ) {
     this.notifyUsage(ruleType.name, ruleType.minimumLicenseRequired);

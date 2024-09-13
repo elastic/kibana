@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -17,9 +18,10 @@ import {
 } from '@kbn/usage-collection-plugin/server/mocks';
 import { cloudDetailsMock, registerEbtCountersMock } from './plugin.test.mocks';
 import { plugin } from '.';
+import type { KibanaUsageCollectionPlugin } from './plugin';
 
 describe('kibana_usage_collection', () => {
-  const pluginInstance = plugin(coreMock.createPluginInitializerContext({}));
+  let pluginInstance: KibanaUsageCollectionPlugin;
 
   const usageCollectors: CollectorOptions[] = [];
 
@@ -31,6 +33,10 @@ describe('kibana_usage_collection', () => {
   usageCollection.makeStatsCollector.mockImplementation((opts) => {
     usageCollectors.push(opts);
     return createUsageCollectionSetupMock().makeStatsCollector(opts);
+  });
+
+  beforeAll(async () => {
+    pluginInstance = await plugin(coreMock.createPluginInitializerContext({}));
   });
 
   beforeEach(() => {

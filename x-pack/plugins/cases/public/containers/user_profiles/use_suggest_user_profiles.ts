@@ -52,16 +52,14 @@ export const useSuggestUserProfiles = ({
 
   return useQuery<UserProfile[], ServerError>(
     casesQueriesKeys.suggestUsers({ name: debouncedName, owners, size }),
-    () => {
-      const abortCtrlRef = new AbortController();
-      return suggestUserProfiles({
+    ({ signal }) =>
+      suggestUserProfiles({
         http,
         name: debouncedName,
         owners,
         size,
-        signal: abortCtrlRef.signal,
-      });
-    },
+        signal,
+      }),
     {
       retry: false,
       keepPreviousData: true,

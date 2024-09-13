@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ShareMenuRegistry } from './share_menu_registry';
@@ -14,16 +15,16 @@ describe('ShareActionsRegistry', () => {
     test('throws when registering duplicate id', () => {
       const setup = new ShareMenuRegistry().setup();
       setup.register({
-        id: 'myTest',
+        id: 'csvReports',
         getShareMenuItems: () => [],
       });
       expect(() =>
         setup.register({
-          id: 'myTest',
+          id: 'csvReports',
           getShareMenuItems: () => [],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Share menu provider with id [myTest] has already been registered. Use a unique id."`
+        `"Share menu provider with id [csvReports] has already been registered. Use a unique id."`
       );
     });
   });
@@ -39,11 +40,11 @@ describe('ShareActionsRegistry', () => {
         const provider1Callback = jest.fn(() => [shareAction1]);
         const provider2Callback = jest.fn(() => [shareAction2, shareAction3]);
         registerFunction({
-          id: 'myTest',
+          id: 'csvReports',
           getShareMenuItems: provider1Callback,
         });
         registerFunction({
-          id: 'myTest2',
+          id: 'screenCaptureReports',
           getShareMenuItems: provider2Callback,
         });
         const context = {} as ShareContext;

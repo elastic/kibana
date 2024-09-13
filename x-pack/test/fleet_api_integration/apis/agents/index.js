@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-export default function loadTests({ loadTestFile }) {
-  describe('Fleet Endpoints', () => {
+import { setupTestUsers } from '../test_users';
+
+export default function loadTests({ loadTestFile, getService }) {
+  describe('Agents', () => {
+    before(async () => {
+      await setupTestUsers(getService('security'));
+    });
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./list'));
     loadTestFile(require.resolve('./unenroll'));
@@ -21,5 +26,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./request_diagnostics'));
     loadTestFile(require.resolve('./uploads'));
     loadTestFile(require.resolve('./get_agents_by_actions'));
+    loadTestFile(require.resolve('./privileges'));
   });
 }

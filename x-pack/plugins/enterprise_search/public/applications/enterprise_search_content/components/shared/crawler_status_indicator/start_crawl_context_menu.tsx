@@ -25,7 +25,13 @@ export const StartCrawlContextMenu: React.FC = () => {
   return (
     <EuiPopover
       button={
-        <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover} fill>
+        <EuiButton
+          iconType="arrowDown"
+          iconSide="right"
+          onClick={togglePopover}
+          fill
+          data-test-subj="entSearchContent-crawler-startCrawlMenu-menuButton"
+        >
           {i18n.translate(
             'xpack.enterpriseSearch.crawler.crawlerStatusIndicator.retryCrawlButtonLabel',
             {
@@ -48,6 +54,7 @@ export const StartCrawlContextMenu: React.FC = () => {
               startCrawl();
             }}
             icon="play"
+            data-test-subj="entSearchContent-crawler-startCrawlMenu-crawlAllDomains"
           >
             {i18n.translate(
               'xpack.enterpriseSearch.crawler.startCrawlContextMenu.crawlAllDomainsMenuLabel',

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DataView } from '@kbn/data-views-plugin/public';
-import { buildDataViewMock } from './data_view';
+import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 const fields = [
   {
@@ -416,4 +417,28 @@ export const dataViewComplexMock = buildDataViewMock({
   name: 'data-view-with-various-field-types',
   fields,
   timeFieldName: 'data',
+});
+
+export const dataViewAdHoc = {
+  ...buildDataViewMock({
+    name: 'data-view-ad-hoc',
+    fields,
+    timeFieldName: 'time',
+  }),
+  isPersisted: () => false,
+} as DataView;
+
+export const dataViewWithDefaultColumnMock = buildDataViewMock({
+  name: 'data-view-with-user-default-column',
+  fields: [
+    ...fields,
+    {
+      name: 'default_column',
+      type: 'date',
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+    },
+  ] as DataView['fields'],
+  timeFieldName: '@timestamp',
 });

@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Observable } from 'rxjs';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
-import type { ChromeNavControls } from './nav_controls';
+import type { ChromeHelpMenuLink, ChromeNavControls } from './nav_controls';
 import type { ChromeHelpExtension } from './help_extension';
 import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
-import type { ChromeBadge, ChromeUserBanner } from './types';
-import { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
+import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
+import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -107,6 +108,11 @@ export interface ChromeStart {
   setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
 
   /**
+   * Override the default links shown in the help menu
+   */
+  setHelpMenuLinks(links: ChromeHelpMenuLink[]): void;
+
+  /**
    * Get the list of the registered global help extension menu links
    */
   getGlobalHelpExtensionMenuLinks$(): Observable<ChromeGlobalHelpExtensionMenuLink[]>;
@@ -135,6 +141,11 @@ export interface ChromeStart {
   setHelpSupportUrl(url: string): void;
 
   /**
+   * Get the support URL shown in the help menu
+   */
+  getHelpSupportUrl$(): Observable<string>;
+
+  /**
    * Get an observable of the current locked state of the nav drawer.
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
@@ -150,4 +161,25 @@ export interface ChromeStart {
    * Get an observable of the current header banner presence state.
    */
   hasHeaderBanner$(): Observable<boolean>;
+
+  /**
+   * Sets the style type of the chrome.
+   * @param style The style type to apply to the chrome.
+   */
+  setChromeStyle(style: ChromeStyle): void;
+
+  /**
+   * Get an observable of the current style type of the chrome.
+   */
+  getChromeStyle$(): Observable<ChromeStyle>;
+
+  /**
+   * Get an observable of the current collapsed state of the side nav.
+   */
+  getIsSideNavCollapsed$(): Observable<boolean>;
+
+  /**
+   * Get the id of the currently active project navigation or `null` otherwise.
+   */
+  getActiveSolutionNavId$(): Observable<string | null>;
 }

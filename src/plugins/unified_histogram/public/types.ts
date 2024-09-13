@@ -1,20 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Theme } from '@kbn/charts-plugin/public/plugin';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type {
+  LensEmbeddableOutput,
+  LensPublicStart,
+  TypedLensByValueInput,
+  Suggestion,
+} from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { Subject } from 'rxjs';
+import type { Observable, Subject } from 'rxjs';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -35,13 +40,13 @@ export enum UnifiedHistogramFetchStatus {
  */
 export interface UnifiedHistogramServices {
   data: DataPublicPluginStart;
-  theme: Theme;
   uiActions: UiActionsStart;
   uiSettings: IUiSettingsClient;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   storage: Storage;
   expressions: ExpressionsStart;
+  capabilities: Capabilities;
 }
 
 /**
@@ -66,6 +71,10 @@ export interface UnifiedHistogramChartLoadEvent {
    * Inspector adapters for the request
    */
   adapters: UnifiedHistogramAdapters;
+  /**
+   * Observable of the lens embeddable output
+   */
+  embeddableOutput$?: Observable<LensEmbeddableOutput>;
 }
 
 /**
@@ -108,10 +117,6 @@ export interface UnifiedHistogramChartContext {
    * Controls the time interval of the chart
    */
   timeInterval?: string;
-  /**
-   * The chart title -- sets the title property on the Lens chart input
-   */
-  title?: string;
 }
 
 /**
@@ -140,3 +145,39 @@ export type UnifiedHistogramInputMessage = UnifiedHistogramRefetchMessage;
  * Unified histogram input observable
  */
 export type UnifiedHistogramInput$ = Subject<UnifiedHistogramInputMessage>;
+
+export enum UnifiedHistogramExternalVisContextStatus {
+  unknown = 'unknown',
+  applied = 'applied',
+  automaticallyCreated = 'automaticallyCreated',
+  automaticallyOverridden = 'automaticallyOverridden',
+  manuallyCustomized = 'manuallyCustomized',
+}
+
+export enum UnifiedHistogramSuggestionType {
+  unsupported = 'unsupported',
+  lensSuggestion = 'lensSuggestion',
+  histogramForESQL = 'histogramForESQL',
+  histogramForDataView = 'histogramForDataView',
+}
+
+export interface UnifiedHistogramSuggestionContext {
+  suggestion: Suggestion | undefined;
+  type: UnifiedHistogramSuggestionType;
+}
+
+export interface LensRequestData {
+  dataViewId?: string;
+  timeField?: string;
+  timeInterval?: string;
+  breakdownField?: string;
+}
+
+/**
+ * Unified Histogram type for recreating a stored Lens vis
+ */
+export interface UnifiedHistogramVisContext {
+  attributes: TypedLensByValueInput['attributes'];
+  requestData: LensRequestData;
+  suggestionType: UnifiedHistogramSuggestionType;
+}

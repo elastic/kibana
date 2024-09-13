@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 interface Node {
@@ -76,16 +76,16 @@ export class GraphPageObject extends FtrService {
   }
 
   private async getCirclePosition(element: WebElementWrapper) {
-    const x = await element.getAttribute('cx');
-    const y = await element.getAttribute('cy');
+    const x = (await element.getAttribute('cx')) ?? '';
+    const y = (await element.getAttribute('cy')) ?? '';
     return this.getPositionAsString(x, y);
   }
 
   private async getLinePositions(element: WebElementWrapper) {
-    const x1 = await element.getAttribute('x1');
-    const y1 = await element.getAttribute('y1');
-    const x2 = await element.getAttribute('x2');
-    const y2 = await element.getAttribute('y2');
+    const x1 = (await element.getAttribute('x1')) ?? '';
+    const y1 = (await element.getAttribute('y1')) ?? '';
+    const x2 = (await element.getAttribute('x2')) ?? '';
+    const y2 = (await element.getAttribute('y2')) ?? '';
     return [this.getPositionAsString(x1, y1), this.getPositionAsString(x2, y2)];
   }
 
@@ -100,7 +100,7 @@ export class GraphPageObject extends FtrService {
       const selectionLabel = await labelElement.getVisibleText();
       this.log.debug('Looking at selection ' + selectionLabel);
       if (selectionLabel !== from && selectionLabel !== to) {
-        (await selection.findByClassName('gphNode__text')).click();
+        await (await selection.findByTestSubject(`graph-selected-${selectionLabel}`)).click();
         await this.common.sleep(200);
       }
     }
@@ -154,7 +154,7 @@ export class GraphPageObject extends FtrService {
       const tagName: string = await element.getTagName();
       if (tagName === 'line') {
         const [sourcePosition, targetPosition] = await this.getLinePositions(element);
-        const lineStyle = await element.getAttribute('style');
+        const lineStyle = (await element.getAttribute('style')) ?? '';
         // grep out the width of the connection from the style attribute
         const strokeWidth = Number(/stroke-width: ?(\d+(\.\d+)?)/.exec(lineStyle)![1]);
         edges.push({

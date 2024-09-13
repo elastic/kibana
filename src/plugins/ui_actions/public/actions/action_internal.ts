@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as React from 'react';
-import { Presentable, PresentableGrouping } from '@kbn/ui-actions-browser';
+import type { Presentable, PresentableGrouping } from '@kbn/ui-actions-browser/src/types';
 import { Action, ActionDefinition, ActionMenuItemProps } from './action';
 
 /**
@@ -24,6 +25,9 @@ export class ActionInternal<Context extends object = object>
   public readonly showNotification?: boolean;
   public readonly disabled?: boolean;
 
+  public readonly subscribeToCompatibilityChanges?: Action<Context>['subscribeToCompatibilityChanges'];
+  public readonly couldBecomeCompatible?: Action<Context>['couldBecomeCompatible'];
+
   constructor(public readonly definition: ActionDefinition<Context>) {
     this.id = this.definition.id;
     this.type = this.definition.type || '';
@@ -32,6 +36,13 @@ export class ActionInternal<Context extends object = object>
     this.grouping = this.definition.grouping;
     this.showNotification = this.definition.showNotification;
     this.disabled = this.definition.disabled;
+
+    if (this.definition.subscribeToCompatibilityChanges) {
+      this.subscribeToCompatibilityChanges = definition.subscribeToCompatibilityChanges;
+    }
+    if (this.definition.couldBecomeCompatible) {
+      this.couldBecomeCompatible = definition.couldBecomeCompatible;
+    }
   }
 
   public execute(context: Context) {

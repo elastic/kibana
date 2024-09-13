@@ -13,7 +13,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['timePicker']);
+  const { timePicker } = getPageObjects(['timePicker']);
   const config = getService('config');
   let remoteEsArchiver;
 
@@ -37,7 +37,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     };
     let indexPatternString: string;
     before(async () => {
-      await log.debug('Starting lens before method');
+      log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
       await kibanaServer.savedObjects.cleanStandardList();
       try {
@@ -54,7 +54,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
 
       await esNode.load(esArchive);
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
@@ -65,7 +65,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
 
     after(async () => {
       await esNode.unload(esArchive);
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
       await kibanaServer.savedObjects.cleanStandardList();
@@ -74,15 +74,10 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     if (config.get('esTestCluster.ccs')) {
       loadTestFile(require.resolve('./smokescreen'));
     } else {
-      loadTestFile(require.resolve('./smokescreen'));
-      loadTestFile(require.resolve('./ad_hoc_data_view'));
-      loadTestFile(require.resolve('./partition'));
-      loadTestFile(require.resolve('./persistent_context'));
-      loadTestFile(require.resolve('./table_dashboard'));
-      loadTestFile(require.resolve('./table'));
-      loadTestFile(require.resolve('./text_based_languages'));
-      loadTestFile(require.resolve('./fields_list'));
-      loadTestFile(require.resolve('./layer_actions'));
+      // total run time ~16 min
+      loadTestFile(require.resolve('./smokescreen')); // 12m 12s
+      loadTestFile(require.resolve('./ad_hoc_data_view')); // 3m 40s
+      loadTestFile(require.resolve('./multiple_data_views'));
     }
   });
 };

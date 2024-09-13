@@ -1,9 +1,5 @@
 // Charts themes available app-wide
 @import '@elastic/charts/dist/theme';
-@import '@elastic/eui/src/themes/charts/theme';
-
-// Grab some nav-specific EUI vars
-@import '@elastic/eui/src/components/collapsible_nav/variables';
 
 // We apply brute force focus states to anything not coming from Eui
 // which has focus states designed at the component level.
@@ -12,7 +8,11 @@
 // focus states in Kibana.
 :focus {
   &:not([class^='eui']):not(.kbn-resetFocusState) {
-    @include euiFocusRing;
+    // The focus policy causes double focus rings to appear on EuiSelectableList
+    // since the focusable element does not contain a class starting with "eui".
+    &:not(.euiSelectableList__list > ul) {
+      @include euiFocusRing;
+    }
   }
 }
 
@@ -29,17 +29,13 @@
   margin-left: 320px; // Hard-coded for now -- @cchaos
 }
 
+// Add support for serverless navbar
+.euiBody--hasFlyout .euiBottomBar--fixed {
+  margin-left: var(--euiCollapsibleNavOffset, 0);
+}
+
 // Temporary fix for EuiPageHeader with a bottom border but no tabs or padding
 // Will fix in EUI -- @cchaos
 .euiPageHeader--bottomBorder:not(.euiPageHeader--tabsAtBottom):not([class*='euiPageHeader--padding']) {
   padding-bottom: $euiSizeL;
-}
-
-// Kibana's body ignores the `margin-right !important` set by react-remove-scroll-bar
-// (used by EUI's focus trap component & prevents page width jumps on full-screen overlays)
-// due to the 100% width/min-width CSS set by Kibana in other places. To work around this, we
-// grab the `--removed-body-scroll-bar-size` var added by the library & manually set `padding`
-// TODO: Use `gapMode` instead once https://github.com/theKashey/react-focus-on/issues/65 is fixed
-.kbnBody {
-  padding-right: var(--removed-body-scroll-bar-size, 0);
 }

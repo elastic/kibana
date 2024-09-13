@@ -7,8 +7,9 @@
 
 import { DataProvider } from '@kbn/timelines-plugin/common';
 import { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
-import { generateDataProvider } from '../utils';
-import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators';
+import { useKibana } from '../../../hooks/use_kibana';
+import { generateDataProvider } from '../utils/data_provider';
+import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import { Indicator } from '../../../../common/types/indicator';
 
 export interface UseAddToTimelineParam {
@@ -38,6 +39,9 @@ export const useAddToTimeline = ({
   indicator,
   field,
 }: UseAddToTimelineParam): UseAddToTimelineValue => {
+  const { analytics, i18n, theme } = useKibana().services;
+  const startServices = { analytics, i18n, theme };
+
   const { key, value } =
     typeof indicator === 'string'
       ? { key: field, value: indicator }
@@ -53,6 +57,7 @@ export const useAddToTimeline = ({
     dataProvider,
     field: key,
     ownFocus: false,
+    startServices,
   };
 
   return {

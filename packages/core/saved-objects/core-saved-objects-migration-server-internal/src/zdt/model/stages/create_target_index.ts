@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { cloneDeep } from 'lodash';
@@ -12,12 +13,11 @@ import { delayRetryState } from '../../../model/retry_state';
 import { throwBadResponse } from '../../../model/helpers';
 import { CLUSTER_SHARD_LIMIT_EXCEEDED_REASON } from '../../../common/constants';
 import { isTypeof } from '../../actions';
-import { getAliasActions } from '../../utils';
 import type { ModelStage } from '../types';
 
 export const createTargetIndex: ModelStage<
   'CREATE_TARGET_INDEX',
-  'UPDATE_ALIASES' | 'INDEX_STATE_UPDATE_DONE' | 'FATAL'
+  'INDEX_STATE_UPDATE_DONE' | 'FATAL'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     const left = res.left;
@@ -36,22 +36,16 @@ export const createTargetIndex: ModelStage<
     }
   }
 
-  const aliasActions = getAliasActions({
-    currentIndex: state.currentIndex,
-    existingAliases: [],
-    indexPrefix: context.indexPrefix,
-    kibanaVersion: context.kibanaVersion,
-  });
-
   const currentIndexMeta = cloneDeep(state.indexMappings._meta!);
 
   return {
     ...state,
-    controlState: aliasActions.length ? 'UPDATE_ALIASES' : 'INDEX_STATE_UPDATE_DONE',
+    controlState: 'INDEX_STATE_UPDATE_DONE',
     previousMappings: state.indexMappings,
     currentIndexMeta,
     aliases: [],
-    aliasActions,
-    newIndexCreation: true,
+    aliasActions: [],
+    skipDocumentMigration: true,
+    previousAlgorithm: 'zdt',
   };
 };

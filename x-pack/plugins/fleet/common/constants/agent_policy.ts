@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const AGENT_POLICY_SAVED_OBJECT_TYPE = 'ingest-agent-policies';
+export const LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE = 'ingest-agent-policies';
+export const AGENT_POLICY_SAVED_OBJECT_TYPE = 'fleet-agent-policies';
+
 export const AGENT_POLICY_INDEX = '.fleet-policies';
 export const agentPolicyStatuses = {
   Active: 'active',
@@ -27,8 +29,16 @@ export const AGENT_POLICY_DEFAULT_MONITORING_DATASETS = [
   'elastic_agent.heartbeat',
   'elastic_agent.cloudbeat',
   'elastic_agent.cloud_defend',
+  'elastic_agent.pf_host_agent',
+  'elastic_agent.pf_elastic_collector',
+  'elastic_agent.pf_elastic_symbolizer',
 ];
 
 export const LICENSE_FOR_SCHEDULE_UPGRADE = 'platinum';
 
 export const DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT = 750;
+
+export const AGENTLESS_POLICY_ID = 'agentless'; // the policy id defined here: https://github.com/elastic/project-controller/blob/main/internal/project/security/security_kibana_config.go#L86
+
+export const AGENT_LOG_LEVELS = ['error', 'warning', 'info', 'debug'] as const;
+export const DEFAULT_LOG_LEVEL = 'info' as const;

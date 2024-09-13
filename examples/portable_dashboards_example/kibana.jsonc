@@ -16,11 +16,8 @@
       "dashboard",
       "embeddable",
       "navigation",
-      "savedObjects",
       "unifiedSearch",
-      "developerExamples",
-      "embeddableExamples"
-    ],
-    "requiredBundles": ["presentationUtil"]
+      "developerExamples"
+    ]
   }
 }

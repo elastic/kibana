@@ -13,12 +13,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { DeprecationCallout } from '../components';
 
 import {
   EuiCallOut,
   EuiLoadingLogo,
   EuiOverlayMask,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiPageHeader,
   EuiSpacer,
   EuiStepsHorizontal,
@@ -543,7 +544,7 @@ export class JobCreateUi extends Component {
     }
 
     return (
-      <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+      <EuiPageSection restrictWidth>
         <EuiPageHeader
           bottomBorder
           pageTitle={
@@ -553,6 +554,10 @@ export class JobCreateUi extends Component {
             />
           }
         />
+
+        <EuiSpacer size="l" />
+
+        <DeprecationCallout linksTestSubjPrefix="createForm" />
 
         <EuiSpacer size="l" />
 
@@ -569,7 +574,7 @@ export class JobCreateUi extends Component {
         {this.renderNavigation()}
 
         {savingFeedback}
-      </EuiPageContentBody>
+      </EuiPageSection>
     );
   }
 

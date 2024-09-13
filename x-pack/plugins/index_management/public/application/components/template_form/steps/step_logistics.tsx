@@ -13,6 +13,7 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
   EuiLink,
+  EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -26,9 +27,14 @@ import {
   Field,
   Forms,
   JsonEditorField,
+  NumericField,
+  RadioGroupField,
 } from '../../../../shared_imports';
+import { UnitField, timeUnits } from '../../shared';
+import { DataRetention } from '../../../../../common';
 import { documentationService } from '../../../services/documentation';
 import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
+import { allowAutoCreateRadios } from '../../../../../common/constants';
 
 // Create or Form components with partial props that are common to all instances
 const UseField = getUseField({ component: Field });
@@ -112,6 +118,35 @@ function getFieldsMeta(esDocsBase: string) {
       }),
       testSubject: 'versionField',
     },
+    dataRetention: {
+      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.dataRetentionTitle', {
+        defaultMessage: 'Data retention',
+      }),
+      description: i18n.translate(
+        'xpack.idxMgmt.templateForm.stepLogistics.dataRetentionDescription',
+        {
+          defaultMessage:
+            'Data will be kept at least this long before being automatically deleted.',
+        }
+      ),
+      unitTestSubject: 'unitDataRetentionField',
+    },
+    allowAutoCreate: {
+      title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.allowAutoCreateTitle', {
+        defaultMessage: 'Allow auto create',
+      }),
+      description: (
+        <FormattedMessage
+          id="xpack.idxMgmt.templateForm.stepLogistics.allowAutoCreateDescription"
+          defaultMessage="This setting overwrites the value of the {settingName} cluster setting. If set to {true} in a template, then indices can be automatically created using that template."
+          values={{
+            settingName: <EuiCode>action.auto_create_index</EuiCode>,
+            true: <EuiCode>true</EuiCode>,
+          }}
+        />
+      ),
+      testSubject: 'allowAutoCreateField',
+    },
   };
 }
 
@@ -164,9 +199,18 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       getFormData,
     } = form;
 
-    const [{ addMeta }] = useFormData<{ addMeta: boolean }>({
+    const [{ addMeta, doCreateDataStream, lifecycle }] = useFormData<{
+      addMeta: boolean;
+      lifecycle: DataRetention;
+      doCreateDataStream: boolean;
+    }>({
       form,
-      watch: 'addMeta',
+      watch: [
+        'addMeta',
+        'lifecycle.enabled',
+        'lifecycle.infiniteDataRetention',
+        'doCreateDataStream',
+      ],
     });
 
     /**
@@ -185,9 +229,16 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       });
     }, [onChange, isFormValid, validate, getFormData]);
 
-    const { name, indexPatterns, createDataStream, order, priority, version } = getFieldsMeta(
-      documentationService.getEsDocsBase()
-    );
+    const {
+      name,
+      indexPatterns,
+      createDataStream,
+      order,
+      priority,
+      version,
+      dataRetention,
+      allowAutoCreate,
+    } = getFieldsMeta(documentationService.getEsDocsBase());
 
     return (
       <>
@@ -195,7 +246,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle>
-              <h2>
+              <h2 data-test-subj="stepTitle">
                 <FormattedMessage
                   id="xpack.idxMgmt.templateForm.stepLogistics.stepTitle"
                   defaultMessage="Logistics"
@@ -260,6 +311,61 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             </FormRow>
           )}
 
+          {/*
+            Since data stream and data retention are settings that are only allowed for non legacy,
+            we only need to check if data stream is set to true to show the data retention.
+          */}
+          {doCreateDataStream && (
+            <FormRow
+              title={dataRetention.title}
+              description={
+                <>
+                  {dataRetention.description}
+                  <EuiSpacer size="m" />
+                  <UseField
+                    path="lifecycle.enabled"
+                    componentProps={{ 'data-test-subj': 'dataRetentionToggle' }}
+                  />
+                </>
+              }
+            >
+              {lifecycle?.enabled && (
+                <UseField
+                  path="lifecycle.value"
+                  component={NumericField}
+                  labelAppend={
+                    <UseField
+                      path="lifecycle.infiniteDataRetention"
+                      data-test-subj="infiniteDataRetentionToggle"
+                      componentProps={{
+                        euiFieldProps: {
+                          compressed: true,
+                        },
+                      }}
+                    />
+                  }
+                  componentProps={{
+                    euiFieldProps: {
+                      disabled: lifecycle?.infiniteDataRetention,
+                      'data-test-subj': 'valueDataRetentionField',
+                      min: 1,
+                      append: (
+                        <UnitField
+                          path="lifecycle.unit"
+                          options={timeUnits}
+                          disabled={lifecycle?.infiniteDataRetention}
+                          euiFieldProps={{
+                            'data-test-subj': 'unitDataRetentionField',
+                          }}
+                        />
+                      ),
+                    },
+                  }}
+                />
+              )}
+            </FormRow>
+          )}
+
           {/* Order */}
           {isLegacy && (
             <FormRow title={order.title} description={order.description}>
@@ -294,6 +400,23 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             />
           </FormRow>
 
+          {/* Allow auto create */}
+          {isLegacy === false && (
+            <FormRow title={allowAutoCreate.title} description={allowAutoCreate.description}>
+              <UseField
+                path="allowAutoCreate"
+                component={RadioGroupField}
+                componentProps={{
+                  'data-test-subj': allowAutoCreate.testSubject,
+                  euiFieldProps: {
+                    options: allowAutoCreateRadios,
+                    name: 'allowAutoCreate radio group',
+                  },
+                }}
+              />
+            </FormRow>
+          )}
+
           {/* _meta */}
           {isLegacy === false && (
             <FormRow
@@ -316,7 +439,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                   path="_meta"
                   component={JsonEditorField}
                   componentProps={{
-                    euiCodeEditorProps: {
+                    codeEditorProps: {
                       height: '280px',
                       'aria-label': i18n.translate(
                         'xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorAriaLabel',

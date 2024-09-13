@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { duration } from 'moment';
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 import { REPO_ROOT, fromRoot } from '@kbn/repo-info';
 import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -40,6 +41,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     requiredPlugins: ['some-required-dep'],
     requiredBundles: [],
     optionalPlugins: ['some-optional-dep'],
+    runtimePluginDependencies: [],
     server: true,
     ui: true,
     owner: {
@@ -237,7 +239,7 @@ describe('createPluginPrebootSetupContext', () => {
     });
 
     const corePreboot = coreInternalLifecycleMock.createInternalPreboot();
-    const prebootSetupContext = createPluginPrebootSetupContext(coreContext, corePreboot, plugin);
+    const prebootSetupContext = createPluginPrebootSetupContext({ deps: corePreboot, plugin });
 
     const holdSetupPromise = Promise.resolve(undefined);
     prebootSetupContext.preboot.holdSetupUntilResolved('some-reason', holdSetupPromise);

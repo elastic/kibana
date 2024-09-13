@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -21,16 +22,30 @@ import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/
 import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
 
 /** @public */
-export interface SharePluginSetup {
+export interface SharePublicSetup {
   url: ServerUrlService;
 }
 
 /** @public */
-export interface SharePluginStart {
+export interface SharePublicStart {
   url: ServerUrlService;
 }
 
-export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SharePublicSetupDependencies {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SharePublicStartDependencies {}
+
+export class SharePlugin
+  implements
+    Plugin<
+      SharePublicSetup,
+      SharePublicStart,
+      SharePublicSetupDependencies,
+      SharePublicStartDependencies
+    >
+{
   private url?: ServerUrlService;
   private version: string;
 

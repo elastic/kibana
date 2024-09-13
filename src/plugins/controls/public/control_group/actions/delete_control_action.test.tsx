@@ -1,32 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  lazyLoadReduxEmbeddablePackage,
-  ReduxEmbeddablePackage,
-} from '@kbn/presentation-util-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
+import { OPTIONS_LIST_CONTROL } from '../../../common';
 import { ControlOutput } from '../../types';
 import { ControlGroupInput } from '../types';
 import { pluginServices } from '../../services';
 import { DeleteControlAction } from './delete_control_action';
 import { OptionsListEmbeddableInput } from '../../options_list';
-import { controlGroupInputBuilder } from '../control_group_input_builder';
+import { controlGroupInputBuilder } from '../external_api/control_group_input_builder';
 import { ControlGroupContainer } from '../embeddable/control_group_container';
+import { OptionsListEmbeddableFactory } from '../../options_list/embeddable/options_list_embeddable_factory';
 import { OptionsListEmbeddable } from '../../options_list/embeddable/options_list_embeddable';
+import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
 
 let container: ControlGroupContainer;
 let embeddable: OptionsListEmbeddable;
-let reduxEmbeddablePackage: ReduxEmbeddablePackage;
 
 beforeAll(async () => {
-  reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
+  pluginServices.getServices().controls.getControlFactory = jest
+    .fn()
+    .mockImplementation((type: string) => {
+      if (type === OPTIONS_LIST_CONTROL) return new OptionsListEmbeddableFactory();
+    });
 
   const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroupInput;
   controlGroupInputBuilder.addOptionsListControl(controlGroupInput, {
@@ -36,10 +39,11 @@ beforeAll(async () => {
     width: 'medium',
     grow: false,
   });
-  container = new ControlGroupContainer(reduxEmbeddablePackage, controlGroupInput);
+  container = new ControlGroupContainer(mockedReduxEmbeddablePackage, controlGroupInput);
   await container.untilInitialized();
 
   embeddable = container.getChild(container.getChildIds()[0]);
+  expect(embeddable.type).toBe(OPTIONS_LIST_CONTROL);
 });
 
 test('Action is incompatible with Error Embeddables', async () => {
@@ -53,7 +57,7 @@ test('Action is incompatible with Error Embeddables', async () => {
 test('Execute throws an error when called with an embeddable not in a parent', async () => {
   const deleteControlAction = new DeleteControlAction();
   const optionsListEmbeddable = new OptionsListEmbeddable(
-    reduxEmbeddablePackage,
+    mockedReduxEmbeddablePackage,
     {} as OptionsListEmbeddableInput,
     {} as ControlOutput
   );

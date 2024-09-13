@@ -12,15 +12,19 @@ import {
   FleetAllIntegrNoneUser,
   deleteUsersAndRoles,
 } from '../tasks/privileges';
-import { loginWithUserAndWaitForPage, logout } from '../tasks/login';
+import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 
-import { MISSING_PRIVILEGES_TITLE, MISSING_PRIVILEGES_MESSAGE } from '../screens/fleet';
+import { MISSING_PRIVILEGES } from '../screens/fleet';
 const rolesToCreate = [FleetAllIntegrNoneRole];
 const usersToCreate = [FleetAllIntegrNoneUser];
 
 describe('When the user has All privilege for Fleet but None for integrations', () => {
   before(() => {
     createUsersAndRoles(usersToCreate, rolesToCreate);
+  });
+
+  beforeEach(() => {
+    login();
   });
 
   afterEach(() => {
@@ -31,12 +35,8 @@ describe('When the user has All privilege for Fleet but None for integrations', 
     deleteUsersAndRoles(usersToCreate, rolesToCreate);
   });
 
-  it('Fleet access is blocked with a callout', () => {
+  it('Fleet is accessible', () => {
     loginWithUserAndWaitForPage(FLEET, FleetAllIntegrNoneUser);
-    cy.getBySel(MISSING_PRIVILEGES_TITLE).should('have.text', 'Permission denied');
-    cy.getBySel(MISSING_PRIVILEGES_MESSAGE).should(
-      'contain',
-      'You are not authorized to access Fleet.'
-    );
+    cy.getBySel(MISSING_PRIVILEGES.TITLE).should('not.exist');
   });
 });

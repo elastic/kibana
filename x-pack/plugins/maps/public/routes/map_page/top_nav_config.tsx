@@ -21,14 +21,13 @@ import { ScopedHistory } from '@kbn/core/public';
 import {
   getNavigateToApp,
   getMapsCapabilities,
-  getIsAllowByValueEmbeddables,
   getInspector,
   getCoreOverlays,
   getSavedObjectsTagging,
   getPresentationUtilContext,
 } from '../../kibana_services';
+import { MAP_EMBEDDABLE_NAME } from '../../../common/constants';
 import { SavedMap } from './saved_map';
-import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
 import { checkForDuplicateTitle } from '../../content_management';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -151,16 +150,17 @@ export function getTopNavConfig({
         }
       },
       run: () => {
-        let selectedTags = savedMap.getTags();
-        function onTagsSelected(newTags: string[]) {
-          selectedTags = newTags;
+        let tags = savedMap.getTags();
+        function onTagsSelected(nextTags: string[]) {
+          tags = nextTags;
         }
 
         const savedObjectsTagging = getSavedObjectsTagging();
         const tagSelector = savedObjectsTagging ? (
           <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
-            initialSelection={selectedTags}
+            initialSelection={tags}
             onTagsSelected={onTagsSelected}
+            markOptional
           />
         ) : undefined;
 
@@ -179,7 +179,7 @@ export function getTopNavConfig({
                   copyOnSave: props.newCopyOnSave,
                   lastSavedTitle: savedMap.getSavedObjectId() ? savedMap.getTitle() : '',
                   isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
-                  getDisplayName: getMapEmbeddableDisplayName,
+                  getDisplayName: () => MAP_EMBEDDABLE_NAME,
                   onTitleDuplicate: props.onTitleDuplicate,
                 },
                 {
@@ -193,7 +193,7 @@ export function getTopNavConfig({
 
             await savedMap.save({
               ...props,
-              newTags: selectedTags,
+              tags,
               saveByReference: props.addToLibrary,
               history,
             });
@@ -214,7 +214,7 @@ export function getTopNavConfig({
 
         let saveModal;
 
-        if (savedMap.hasOriginatingApp() || !getIsAllowByValueEmbeddables()) {
+        if (savedMap.hasOriginatingApp()) {
           saveModal = (
             <SavedObjectSaveModalOrigin
               {...saveModalProps}
@@ -239,6 +239,13 @@ export function getTopNavConfig({
             <SavedObjectSaveModalDashboard
               {...saveModalProps}
               canSaveByReference={true} // we know here that we have save capabilities.
+              mustCopyOnSaveMessage={
+                savedMap.isManaged()
+                  ? i18n.translate('xpack.maps.topNav.mustCopyOnSaveMessage', {
+                      defaultMessage: 'Elastic manages this map. Save any changes to a new map.',
+                    })
+                  : undefined
+              }
               tagOptions={tagSelector}
             />
           );

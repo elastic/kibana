@@ -16,41 +16,48 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
+  formatNumber,
 } from '@elastic/eui';
-import { formatNumber } from '@elastic/eui/lib/services/format';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { context } from '@kbn/kibana-react-plugin/public';
+import { timeFormatter } from '@kbn/ml-date-utils';
 
 import { FORECAST_REQUEST_STATE } from '../../../../../../../common/constants/states';
 import { addItemToRecentlyAccessed } from '../../../../../util/recently_accessed';
-import { mlForecastService } from '../../../../../services/forecast_service';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { forecastServiceFactory } from '../../../../../services/forecast_service';
 import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
 } from '../../../../../../../common/util/job_utils';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../../common/constants/locator';
-import { timeFormatter } from '../../../../../../../common/util/date_utils';
 
 const MAX_FORECASTS = 500;
 
 /**
  * Table component for rendering the lists of forecasts run on an ML job.
  */
-export class ForecastsTableUI extends Component {
-  constructor(props) {
-    super(props);
+export class ForecastsTable extends Component {
+  constructor(props, constructorContext) {
+    super(props, constructorContext);
     this.state = {
       isLoading: props.job.data_counts.processed_record_count !== 0,
       forecasts: [],
     };
+    this.mlForecastService = forecastServiceFactory(constructorContext.services.mlServices.mlApi);
   }
+
+  /**
+   * Access ML services in react context.
+   */
+  static contextType = context;
 
   componentDidMount() {
     const dataCounts = this.props.job.data_counts;
     if (dataCounts.processed_record_count > 0) {
       // Get the list of all the forecasts with results at or later than the specified 'from' time.
-      mlForecastService
+      this.mlForecastService
         .getForecastsSummary(
           this.props.job,
           null,
@@ -82,10 +89,11 @@ export class ForecastsTableUI extends Component {
   async openSingleMetricView(forecast) {
     const {
       services: {
+        chrome: { recentlyAccessed },
         application: { navigateToUrl },
         share,
       },
-    } = this.props.kibana;
+    } = this.context;
 
     // Creates the link to the Single Metric Viewer.
     // Set the total time range from the start of the job data to the end of the forecast,
@@ -149,7 +157,8 @@ export class ForecastsTableUI extends Component {
     addItemToRecentlyAccessed(
       'timeseriesexplorer',
       this.props.job.job_id,
-      singleMetricViewerForecastLink
+      singleMetricViewerForecastLink,
+      recentlyAccessed
     );
     await navigateToUrl(singleMetricViewerForecastLink);
   }
@@ -315,8 +324,9 @@ export class ForecastsTableUI extends Component {
                 this.props.job.blocked !== undefined ||
                 forecast.forecast_status !== FORECAST_REQUEST_STATE.FINISHED
               }
-              iconType="visLine"
+              iconType="singleMetricViewer"
               aria-label={viewForecastAriaLabel}
+              data-test-subj="mlJobListForecastTabOpenSingleMetricViewButton"
             />
           );
         },
@@ -325,6 +335,7 @@ export class ForecastsTableUI extends Component {
 
     return (
       <EuiInMemoryTable
+        data-test-subj="mlJobListForecastTable"
         compressed={true}
         items={forecasts}
         columns={columns}
@@ -336,8 +347,6 @@ export class ForecastsTableUI extends Component {
     );
   }
 }
-ForecastsTableUI.propTypes = {
+ForecastsTable.propTypes = {
   job: PropTypes.object.isRequired,
 };
-
-export const ForecastsTable = withKibana(ForecastsTableUI);

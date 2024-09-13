@@ -16,27 +16,41 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import type {
   IndexPatternArray,
   RuleQuery,
-} from '../../../../../common/detection_engine/rule_schema';
-import type { SavedIdOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { SavedIdOrUndefined } from '../../../../../common/api/detection_engine';
 import type { PartialFilter } from '../../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
-import { getQueryFilter } from './get_query_filter';
+import { getQueryFilter as getQueryFilterNoLoadFields } from './get_query_filter';
+import { getQueryFilterLoadFields } from './get_query_filter_load_fields';
+import { getDataTierFilter } from './get_data_tier_filter';
 
-interface GetFilterArgs {
+/**
+ * EQL and threat_match rules support tier filtering too, but it is implemented inside rule executors
+ */
+const ruleTypesSupportingTierFilters = new Set<Type>([
+  'threshold',
+  'new_terms',
+  'query',
+  'saved_query',
+]);
+
+export interface GetFilterArgs {
   type: Type;
-  filters: unknown | undefined;
+  filters: unknown[] | undefined;
   language: LanguageOrUndefined;
   query: RuleQuery | undefined;
   savedId: SavedIdOrUndefined;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   index: IndexPatternArray | undefined;
   exceptionFilter: Filter | undefined;
+  fields?: DataViewFieldBase[];
+  loadFields?: boolean;
 }
 
 interface QueryAttributes {
@@ -57,15 +71,29 @@ export const getFilter = async ({
   type,
   query,
   exceptionFilter,
+  fields = [],
+  loadFields = false,
 }: GetFilterArgs): Promise<ESBoolQuery> => {
+  const dataViews = await services.getDataViews();
+  const getQueryFilter = loadFields
+    ? getQueryFilterLoadFields(dataViews)
+    : getQueryFilterNoLoadFields;
+
+  const dataTiersFilters = ruleTypesSupportingTierFilters.has(type)
+    ? await getDataTierFilter({ uiSettingsClient: services.uiSettingsClient })
+    : [];
+
+  const mergedFilters = [...(filters ? filters : []), ...dataTiersFilters];
+
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
       return getQueryFilter({
         query,
         language,
-        filters: filters || [],
+        filters: mergedFilters,
         index,
         exceptionFilter,
+        fields,
       });
     } else {
       throw new BadRequestError('query, filters, and index parameter should be defined');
@@ -82,9 +110,10 @@ export const getFilter = async ({
         return getQueryFilter({
           query: savedObject.attributes.query.query,
           language: savedObject.attributes.query.language,
-          filters: savedObject.attributes.filters,
+          filters: [...savedObject.attributes.filters, ...dataTiersFilters],
           index,
           exceptionFilter,
+          fields,
         });
       } catch (err) {
         // saved object does not exist, so try and fall back if the user pushed
@@ -93,9 +122,10 @@ export const getFilter = async ({
           return getQueryFilter({
             query,
             language,
-            filters: filters || [],
+            filters: mergedFilters,
             index,
             exceptionFilter,
+            fields,
           });
         } else {
           // user did not give any additional fall back mechanism for generating a rule
@@ -126,6 +156,9 @@ export const getFilter = async ({
     }
     case 'eql': {
       throw new BadRequestError('Unsupported Rule of type "eql" supplied to getFilter');
+    }
+    case 'esql': {
+      throw new BadRequestError('Unsupported Rule of type "esql" supplied to getFilter');
     }
     default: {
       return assertUnreachable(type);

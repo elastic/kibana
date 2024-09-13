@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+import type { userActionApiV1 } from '../../../../common/types/api';
 import { CASE_USER_ACTIONS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -23,14 +24,25 @@ export const getUserActionsRoute = createCasesRoute({
     }),
   },
   options: { deprecated: true },
+  routerOptions: {
+    access: 'public',
+    summary: 'Get case activity',
+    description: `Returns all user activity for a case.`,
+    // You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
+    tags: ['oas-tag:cases'],
+    deprecated: true,
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
 
+      const res: userActionApiV1.CaseUserActionsDeprecatedResponse =
+        await casesClient.userActions.getAll({ caseId });
+
       return response.ok({
-        body: await casesClient.userActions.getAll({ caseId }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

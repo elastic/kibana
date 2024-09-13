@@ -10,7 +10,7 @@ import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_ELASTICSEARCH_ECS,
   INDEX_PATTERN_KIBANA,
-  INDEX_PATTERN_LOGSTASH,
+  INDEX_PATTERN_LOGSTASH_MONITORING,
   INDEX_PATTERN_BEATS,
   DS_INDEX_PATTERN_LOGS,
   DS_INDEX_PATTERN_METRICS,
@@ -63,7 +63,7 @@ export function getLegacyIndexPattern({
       indexPattern = INDEX_PATTERN_KIBANA;
       break;
     case 'logstash':
-      indexPattern = INDEX_PATTERN_LOGSTASH;
+      indexPattern = INDEX_PATTERN_LOGSTASH_MONITORING;
       break;
     case 'apm':
     case 'beats':

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,15 +17,42 @@ import {
   EuiIcon,
   EuiLink,
   EuiBadge,
+  EuiPopover,
+  EuiFilterGroup,
+  EuiSelectable,
+  EuiFilterButton,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { ComponentTemplateListItem, reactRouterNavigate } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
+import { DeprecatedBadge } from '../components';
+
+const inUseFilterLabel = i18n.translate(
+  'xpack.idxMgmt.componentTemplatesList.table.inUseFilterLabel',
+  {
+    defaultMessage: 'In use',
+  }
+);
+const managedFilterLabel = i18n.translate(
+  'xpack.idxMgmt.componentTemplatesList.table.managedFilterLabel',
+  {
+    defaultMessage: 'Managed',
+  }
+);
+const deprecatedFilterLabel = i18n.translate(
+  'xpack.idxMgmt.componentTemplatesList.table.deprecatedFilterLabel',
+  {
+    defaultMessage: 'Deprecated',
+  }
+);
 
 export interface Props {
   componentTemplates: ComponentTemplateListItem[];
+  defaultFilter: string;
   onReloadClick: () => void;
   onDeleteClick: (componentTemplateName: string[]) => void;
   onEditClick: (componentTemplateName: string) => void;
@@ -33,8 +60,11 @@ export interface Props {
   history: ScopedHistory;
 }
 
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
+
 export const ComponentTable: FunctionComponent<Props> = ({
   componentTemplates,
+  defaultFilter,
   onReloadClick,
   onDeleteClick,
   onEditClick,
@@ -43,23 +73,92 @@ export const ComponentTable: FunctionComponent<Props> = ({
 }) => {
   const { trackMetric } = useComponentTemplatesContext();
 
+  // By default, we want to show all the component templates that are not deprecated.
+  const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>([
+    { key: 'inUse', label: inUseFilterLabel, 'data-test-subj': 'componentTemplates--inUseFilter' },
+    {
+      key: 'managed',
+      label: managedFilterLabel,
+      'data-test-subj': 'componentTemplates--managedFilter',
+    },
+    {
+      key: 'deprecated',
+      label: deprecatedFilterLabel,
+      'data-test-subj': 'componentTemplates--deprecatedFilter',
+      checked: 'off',
+    },
+  ]);
+
   const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
 
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<ComponentTemplateListItem>({
+    tableId: 'componentTemplates',
+    initialPageSize: 10,
+    initialSort: { field: 'name', direction: 'asc' },
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
+  });
+
+  const filteredComponentTemplates = useMemo(() => {
+    const inUseFilter = filterOptions.find(({ key }) => key === 'inUse')?.checked;
+    const managedFilter = filterOptions.find(({ key }) => key === 'managed')?.checked;
+    const deprecatedFilter = filterOptions.find(({ key }) => key === 'deprecated')?.checked;
+    return (componentTemplates || []).filter((component) => {
+      return !(
+        (deprecatedFilter === 'off' && component.isDeprecated) ||
+        (deprecatedFilter === 'on' && !component.isDeprecated) ||
+        (managedFilter === 'off' && component.isManaged) ||
+        (managedFilter === 'on' && !component.isManaged) ||
+        (inUseFilter === 'off' && component.usedBy.length >= 1) ||
+        (inUseFilter === 'on' && component.usedBy.length === 0)
+      );
+    });
+  }, [componentTemplates, filterOptions]);
+
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const onButtonClick = () => {
+    setIsPopoverOpen(!isPopoverOpen);
+  };
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+  };
+  const button = (
+    <EuiFilterButton
+      data-test-subj="componentTemplatesFiltersButton"
+      iconType="arrowDown"
+      badgeColor="success"
+      onClick={onButtonClick}
+      isSelected={isPopoverOpen}
+      numFilters={filterOptions.filter((item) => item.checked !== 'off').length}
+      hasActiveFilters={!!filterOptions.find((item) => item.checked === 'on')}
+      numActiveFilters={filterOptions.filter((item) => item.checked === 'on').length}
+    >
+      {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.filtersButtonLabel', {
+        defaultMessage: 'Filters',
+      })}
+    </EuiFilterButton>
+  );
+
   const tableProps: EuiInMemoryTableProps<ComponentTemplateListItem> = {
+    tableLayout: 'auto',
     itemId: 'name',
-    isSelectable: true,
     'data-test-subj': 'componentTemplatesTable',
-    sorting: { sort: { field: 'name', direction: 'asc' } },
+    sorting,
     selection: {
       onSelectionChange: setSelection,
       selectable: ({ usedBy }) => usedBy.length === 0,
-      selectableMessage: (selectable) =>
+      selectableMessage: (selectable, { name }) =>
         selectable
           ? i18n.translate('xpack.idxMgmt.componentTemplatesList.table.selectionLabel', {
-              defaultMessage: 'Select this component template',
+              defaultMessage: 'Select "{name}" component template',
+              values: {
+                name,
+              },
             })
           : i18n.translate('xpack.idxMgmt.componentTemplatesList.table.disabledSelectionLabel', {
-              defaultMessage: 'Component template is in use and cannot be deleted',
+              defaultMessage: 'Component template "{name}" is in use and cannot be deleted',
+              values: {
+                name,
+              },
             }),
     },
     rowProps: () => ({
@@ -106,47 +205,46 @@ export const ComponentTable: FunctionComponent<Props> = ({
       ],
       box: {
         incremental: true,
+        'data-test-subj': 'componentTemplatesSearch',
       },
       filters: [
         {
-          type: 'is',
-          field: 'isManaged',
-          name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isManagedFilterLabel', {
-            defaultMessage: 'Managed',
-          }),
-        },
-        {
-          type: 'field_value_toggle_group',
-          field: 'usedBy.length',
-          items: [
-            {
-              value: 1,
-              name: i18n.translate(
-                'xpack.idxMgmt.componentTemplatesList.table.inUseFilterOptionLabel',
-                {
-                  defaultMessage: 'In use',
-                }
-              ),
-              operator: 'gte',
-            },
-            {
-              value: 0,
-              name: i18n.translate(
-                'xpack.idxMgmt.componentTemplatesList.table.notInUseFilterOptionLabel',
-                {
-                  defaultMessage: 'Not in use',
-                }
-              ),
-              operator: 'eq',
-            },
-          ],
+          type: 'custom_component',
+          component: () => {
+            return (
+              <EuiFilterGroup>
+                <EuiPopover
+                  button={button}
+                  isOpen={isPopoverOpen}
+                  closePopover={closePopover}
+                  panelPaddingSize="none"
+                >
+                  <EuiSelectable
+                    allowExclusions
+                    aria-label={i18n.translate(
+                      'xpack.idxMgmt.componentTemplatesList.table.filtersAriaLabel',
+                      {
+                        defaultMessage: 'Filters',
+                      }
+                    )}
+                    options={filterOptions}
+                    onChange={setFilterOptions}
+                  >
+                    {(list) => <div style={{ width: 300 }}>{list}</div>}
+                  </EuiSelectable>
+                </EuiPopover>
+              </EuiFilterGroup>
+            );
+          },
         },
       ],
+      defaultQuery: defaultFilter,
     },
     pagination: {
-      initialPageSize: 10,
-      pageSizeOptions: [10, 20, 50],
+      initialPageSize: pageSize,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     },
+    onTableChange,
     columns: [
       {
         field: 'name',
@@ -154,9 +252,9 @@ export const ComponentTable: FunctionComponent<Props> = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
-        width: '20%',
+        width: '45%',
         render: (name: string, item: ComponentTemplateListItem) => (
-          <>
+          <span>
             <EuiLink
               {...reactRouterNavigate(
                 history,
@@ -165,13 +263,20 @@ export const ComponentTable: FunctionComponent<Props> = ({
                 },
                 () => trackMetric(METRIC_TYPE.CLICK, UIM_COMPONENT_TEMPLATE_DETAILS)
               )}
+              role="button"
               data-test-subj="templateDetailsLink"
             >
               {name}
             </EuiLink>
-            {item.isManaged && (
+            {item.isDeprecated && (
               <>
                 &nbsp;
+                <DeprecatedBadge />
+              </>
+            )}
+            {item.isManaged && (
+              <>
+                {' '}
                 <EuiBadge color="hollow" data-test-subj="isManagedBadge">
                   {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.managedBadgeLabel', {
                     defaultMessage: 'Managed',
@@ -179,7 +284,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
                 </EuiBadge>
               </>
             )}
-          </>
+          </span>
         ),
       },
       {
@@ -211,6 +316,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
           defaultMessage: 'Mappings',
         }),
         truncateText: true,
+        align: 'center',
         sortable: true,
         render: (hasMappings: boolean) => (hasMappings ? <EuiIcon type="check" /> : null),
       },
@@ -220,6 +326,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
           defaultMessage: 'Settings',
         }),
         truncateText: true,
+        align: 'center',
         sortable: true,
         render: (hasSettings: boolean) => (hasSettings ? <EuiIcon type="check" /> : null),
       },
@@ -229,6 +336,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
           defaultMessage: 'Aliases',
         }),
         truncateText: true,
+        align: 'center',
         sortable: true,
         render: (hasAliases: boolean) => (hasAliases ? <EuiIcon type="check" /> : null),
       },
@@ -290,7 +398,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
         ],
       },
     ],
-    items: componentTemplates ?? [],
+    items: filteredComponentTemplates,
   };
 
   return <EuiInMemoryTable {...tableProps} />;

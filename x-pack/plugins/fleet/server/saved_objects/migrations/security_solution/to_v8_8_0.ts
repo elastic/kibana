@@ -24,7 +24,7 @@ export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, P
     const policy = input.config.policy.value;
 
     // For the migration, we add an empty string, and the license watcher will correct it if needed.
-    policy.meta = { license: '' };
+    policy.meta = { license: '', cloud: false };
   }
 
   return updatedPackagePolicyDoc;

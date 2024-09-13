@@ -1,0 +1,32 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/some-dev-log",
+    "@kbn/dev-cli-errors",
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-plugins-server-internal",
+    "@kbn/core-saved-objects-migration-server-internal",
+    "@kbn/dev-cli-runner",
+    "@kbn/test",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/safer-lodash-set",
+    "@kbn/tooling-log",
+    "@kbn/core-saved-objects-server",
+    "@kbn/utils",
+    "@kbn/dev-utils",
+  ]
+}

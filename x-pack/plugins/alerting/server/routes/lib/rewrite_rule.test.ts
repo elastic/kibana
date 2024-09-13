@@ -35,15 +35,22 @@ const sampleRule: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] } =
   actions: [
     {
       group: 'default',
-      id: 'aaa',
-      actionTypeId: 'bbb',
+      id: '1001',
+      actionTypeId: '.test-system-action',
       params: {},
       frequency: {
         summary: false,
         notifyWhen: 'onThrottleInterval',
         throttle: '1m',
       },
-      alertsFilter: { timeframe: null, query: { kql: 'test:1', dsl: '{}' } },
+      alertsFilter: { query: { kql: 'test:1', filters: [] } },
+    },
+  ],
+  systemActions: [
+    {
+      id: 'ccc',
+      actionTypeId: 'ddd',
+      params: {},
     },
   ],
   scheduledTaskId: 'xyz456',
@@ -62,6 +69,9 @@ const sampleRule: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] } =
   },
   nextRun: DATE_2020,
   revision: 0,
+  alertDelay: {
+    active: 10,
+  },
 };
 
 describe('rewriteRule', () => {
@@ -78,13 +88,31 @@ describe('rewriteRule', () => {
   });
   it('should rewrite actions correctly', () => {
     const rewritten = rewriteRule(sampleRule);
-    for (const action of rewritten.actions) {
-      expect(Object.keys(action)).toEqual(
-        expect.arrayContaining(['group', 'id', 'connector_type_id', 'params', 'frequency'])
-      );
-      expect(Object.keys(action.frequency!)).toEqual(
-        expect.arrayContaining(['summary', 'notify_when', 'throttle'])
-      );
-    }
+    expect(rewritten.actions).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "alerts_filter": Object {
+            "query": Object {
+              "filters": Array [],
+              "kql": "test:1",
+            },
+          },
+          "connector_type_id": ".test-system-action",
+          "frequency": Object {
+            "notify_when": "onThrottleInterval",
+            "summary": false,
+            "throttle": "1m",
+          },
+          "group": "default",
+          "id": "1001",
+          "params": Object {},
+        },
+        Object {
+          "connector_type_id": "ddd",
+          "id": "ccc",
+          "params": Object {},
+        },
+      ]
+    `);
   });
 });

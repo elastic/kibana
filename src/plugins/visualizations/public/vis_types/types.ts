@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { IconType } from '@elastic/eui';
@@ -79,7 +80,7 @@ interface CustomEditorConfig {
  * A visualization type definition representing a spec of one specific type of "classical"
  * visualizations (i.e. not Lens visualizations).
  */
-export interface VisTypeDefinition<TVisParams> {
+export interface VisTypeDefinition<TVisParams extends VisParams> {
   /**
    * Visualization unique name
    */
@@ -199,7 +200,10 @@ export interface VisTypeDefinition<TVisParams> {
   readonly updateVisTypeOnParamsChange?: (params: VisParams) => string | undefined;
 
   readonly setup?: (vis: Vis<TVisParams>) => Promise<Vis<TVisParams>>;
-  hidden?: boolean;
+
+  disableCreate?: boolean;
+
+  disableEdit?: boolean;
 
   readonly options?: Partial<VisTypeOptions>;
 
@@ -214,4 +218,6 @@ export interface VisTypeDefinition<TVisParams> {
    * have incosistencies in legacy visLib visualizations
    */
   readonly visConfig: Record<string, any>;
+
+  readonly order?: number;
 }

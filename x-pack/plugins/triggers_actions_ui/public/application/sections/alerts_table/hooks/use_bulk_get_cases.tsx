@@ -7,16 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { useKibana } from '../../../../common';
 import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
 import { ServerError } from '../types';
-import { bulkGetCases, Case, CasesBulkGetResponse } from './api';
+import { bulkGetCases, Case, CasesBulkGetResponse } from './apis/bulk_get_cases';
 
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.cases.api.bulkGet', {
   defaultMessage: 'Error fetching cases data',
 });
-
-const caseFields = ['title', 'description', 'status', 'totalComment', 'created_at', 'created_by'];
 
 const transformCases = (data: CasesBulkGetResponse): Map<string, Case> => {
   const casesMap = new Map();
@@ -36,11 +35,9 @@ export const useBulkGetCases = (caseIds: string[], fetchCases: boolean) => {
 
   return useQuery(
     triggersActionsUiQueriesKeys.casesBulkGet(caseIds),
-    () => {
-      const abortCtrlRef = new AbortController();
-      return bulkGetCases(http, { ids: caseIds, fields: caseFields }, abortCtrlRef.signal);
-    },
+    ({ signal }) => bulkGetCases(http, { ids: caseIds }, signal),
     {
+      context: AlertsQueryContext,
       enabled: caseIds.length > 0 && fetchCases,
       select: transformCases,
       onError: (error: ServerError) => {

@@ -58,7 +58,7 @@ export function logAlerts<
     });
   }
 
-  if (activeAlertIds.length > 0) {
+  if (activeAlertIds.length > 0 && logger.isLevelEnabled('debug')) {
     logger.debug(
       `rule ${ruleLogPrefix} has ${activeAlertIds.length} active alerts: ${JSON.stringify(
         activeAlertIds.map((alertId) => ({
@@ -68,7 +68,7 @@ export function logAlerts<
       )}`
     );
   }
-  if (recoveredAlertIds.length > 0) {
+  if (recoveredAlertIds.length > 0 && logger.isLevelEnabled('debug')) {
     logger.debug(
       `rule ${ruleLogPrefix} has ${recoveredAlertIds.length} recovered alerts: ${JSON.stringify(
         recoveredAlertIds
@@ -95,6 +95,7 @@ export function logAlerts<
       const { group: actionGroup } = alert.getLastScheduledActions() ?? {};
       const uuid = alert.getUuid();
       const state = recoveredAlerts[id].getState();
+      const maintenanceWindowIds = alert.getMaintenanceWindowIds();
       const message = `${ruleLogPrefix} alert '${id}' has recovered`;
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
@@ -104,6 +105,7 @@ export function logAlerts<
         message,
         state,
         flapping: recoveredAlerts[id].getFlapping(),
+        ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
       });
     }
 
@@ -112,6 +114,7 @@ export function logAlerts<
       const { actionGroup } = alert.getScheduledActionOptions() ?? {};
       const state = alert.getState();
       const uuid = alert.getUuid();
+      const maintenanceWindowIds = alert.getMaintenanceWindowIds();
       const message = `${ruleLogPrefix} created new alert: '${id}'`;
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.newInstance,
@@ -121,6 +124,7 @@ export function logAlerts<
         message,
         state,
         flapping: activeAlerts[id].getFlapping(),
+        ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
       });
     }
 
@@ -129,6 +133,7 @@ export function logAlerts<
       const { actionGroup } = alert.getScheduledActionOptions() ?? {};
       const state = alert.getState();
       const uuid = alert.getUuid();
+      const maintenanceWindowIds = alert.getMaintenanceWindowIds();
       const message = `${ruleLogPrefix} active alert: '${id}' in actionGroup: '${actionGroup}'`;
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.activeInstance,
@@ -138,6 +143,7 @@ export function logAlerts<
         message,
         state,
         flapping: activeAlerts[id].getFlapping(),
+        ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
       });
     }
   }

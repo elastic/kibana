@@ -13,15 +13,24 @@ import {
   builtInAggregationTypes,
   builtInGroupByTypes,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import {
+  MAX_SELECTABLE_SOURCE_FIELDS,
+  MAX_SELECTABLE_GROUP_BY_TERMS,
+  ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
+  ES_QUERY_MAX_HITS_PER_EXECUTION,
+  MAX_HITS_FOR_GROUP_BY,
+} from '../../../common/constants';
 import { EsQueryRuleParams, SearchType } from './types';
-import { isSearchSourceRule } from './util';
+import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import {
   COMMON_EXPRESSION_ERRORS,
+  ONLY_ESQL_QUERY_EXPRESSION_ERRORS,
   ONLY_ES_QUERY_EXPRESSION_ERRORS,
   SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS,
 } from './constants';
 
-const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
+const validateCommonParams = (ruleParams: EsQueryRuleParams, isServerless?: boolean) => {
   const {
     size,
     threshold,
@@ -32,6 +41,7 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
     groupBy,
     termSize,
     termField,
+    sourceFields,
   } = ruleParams;
   const errors: typeof COMMON_EXPRESSION_ERRORS = defaultsDeep({}, COMMON_EXPRESSION_ERRORS);
 
@@ -68,13 +78,44 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
 
   if (
     groupBy &&
+    builtInGroupByTypes[groupBy] &&
+    builtInGroupByTypes[groupBy].sizeRequired &&
+    size &&
+    size > MAX_HITS_FOR_GROUP_BY
+  ) {
+    errors.size.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.sizeTooLargeForGroupByText', {
+        defaultMessage: 'Size cannot exceed {max} when using a group by field.',
+        values: { max: MAX_HITS_FOR_GROUP_BY },
+      })
+    );
+  }
+
+  if (
+    groupBy &&
     builtInGroupByTypes[groupBy].validNormalizedTypes &&
     builtInGroupByTypes[groupBy].validNormalizedTypes.length > 0 &&
-    !termField
+    (!termField || termField.length <= 0)
   ) {
     errors.termField.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTermFieldText', {
         defaultMessage: 'Term field is required.',
+      })
+    );
+  }
+
+  if (
+    groupBy &&
+    builtInGroupByTypes[groupBy].validNormalizedTypes &&
+    builtInGroupByTypes[groupBy].validNormalizedTypes.length > 0 &&
+    termField &&
+    Array.isArray(termField) &&
+    termField.length > MAX_SELECTABLE_GROUP_BY_TERMS
+  ) {
+    errors.termField.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.overNumberedTermFieldText', {
+        defaultMessage: `Cannot select more than {max} terms`,
+        values: { max: MAX_SELECTABLE_GROUP_BY_TERMS },
       })
     );
   }
@@ -121,11 +162,27 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
       })
     );
   }
-  if ((size && size < 0) || size > 10000) {
+  const maxSize = isServerless
+    ? ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS
+    : ES_QUERY_MAX_HITS_PER_EXECUTION;
+  if ((size && size < 0) || size > maxSize) {
     errors.size.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.invalidSizeRangeText', {
         defaultMessage: 'Size must be between 0 and {max, number}.',
-        values: { max: 10000 },
+        values: { max: maxSize },
+      })
+    );
+  }
+
+  if (
+    sourceFields &&
+    Array.isArray(sourceFields) &&
+    sourceFields.length > MAX_SELECTABLE_SOURCE_FIELDS
+  ) {
+    errors.sourceFields.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.sourceFields', {
+        defaultMessage: `Cannot select more than {max} fields`,
+        values: { max: MAX_SELECTABLE_SOURCE_FIELDS },
       })
     );
   }
@@ -221,10 +278,53 @@ const validateEsQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esQuery>
   return errors;
 };
 
-export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationResult => {
+const validateEsqlQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esqlQuery>) => {
+  const errors: typeof ONLY_ESQL_QUERY_EXPRESSION_ERRORS = defaultsDeep(
+    {},
+    ONLY_ESQL_QUERY_EXPRESSION_ERRORS
+  );
+  if (!ruleParams.esqlQuery) {
+    errors.esqlQuery.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredQueryText', {
+        defaultMessage: 'ES|QL query is required.',
+      })
+    );
+  }
+  if (!ruleParams.timeField) {
+    errors.timeField.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredTimeFieldText', {
+        defaultMessage: 'Time field is required.',
+      })
+    );
+  }
+  if (ruleParams.thresholdComparator !== COMPARATORS.GREATER_THAN) {
+    errors.thresholdComparator.push(
+      i18n.translate(
+        'xpack.stackAlerts.esqlQuery.ui.validation.error.requiredThresholdComparatorText',
+        {
+          defaultMessage: 'Threshold comparator is required to be greater than.',
+        }
+      )
+    );
+  }
+  if (ruleParams.threshold && ruleParams.threshold[0] !== 0) {
+    errors.threshold0.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredThreshold0Text', {
+        defaultMessage: 'Threshold is required to be 0.',
+      })
+    );
+  }
+
+  return errors;
+};
+
+export const validateExpression = (
+  ruleParams: EsQueryRuleParams,
+  isServerless?: boolean
+): ValidationResult => {
   const validationResult = { errors: {} };
 
-  const commonErrors = validateCommonParams(ruleParams);
+  const commonErrors = validateCommonParams(ruleParams, isServerless);
   validationResult.errors = commonErrors;
 
   /**
@@ -234,11 +334,18 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
    * It's important to report searchSource rule related errors only into errors.searchConfiguration prop.
    * For example errors.index is a mistake to report searchSource rule related errors. It will lead to issues.
    */
-  const isSearchSource = isSearchSourceRule(ruleParams);
-  if (isSearchSource) {
+  if (isSearchSourceRule(ruleParams)) {
     validationResult.errors = {
       ...validationResult.errors,
       ...validateSearchSourceParams(ruleParams),
+    };
+    return validationResult;
+  }
+
+  if (isEsqlQueryRule(ruleParams)) {
+    validationResult.errors = {
+      ...validationResult.errors,
+      ...validateEsqlQueryParams(ruleParams),
     };
     return validationResult;
   }
@@ -248,8 +355,11 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
   return validationResult;
 };
 
-export const hasExpressionValidationErrors = (ruleParams: EsQueryRuleParams) => {
-  const { errors: validationErrors } = validateExpression(ruleParams);
+export const hasExpressionValidationErrors = (
+  ruleParams: EsQueryRuleParams,
+  isServerless: boolean
+) => {
+  const { errors: validationErrors } = validateExpression(ruleParams, isServerless);
   return Object.keys(validationErrors).some(
     (key) => validationErrors[key] && validationErrors[key].length
   );

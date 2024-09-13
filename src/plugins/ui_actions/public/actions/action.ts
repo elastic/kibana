@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Presentable } from '@kbn/ui-actions-browser';
-import type { Trigger } from '../triggers';
+import type { Presentable } from '@kbn/ui-actions-browser/src/types';
+import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import { Subscription } from 'rxjs';
 
 /**
  * During action execution we can provide additional information,
@@ -37,6 +39,9 @@ export type ActionDefinitionContext<Context extends object = object> =
 export interface ActionMenuItemProps<Context extends object> {
   context: ActionExecutionContext<Context>;
 }
+
+export type FrequentCompatibilityChangeAction<Context extends object = object> = Action<Context> &
+  Required<Pick<Action<Context>, 'subscribeToCompatibilityChanges' | 'couldBecomeCompatible'>>;
 
 export interface Action<Context extends object = object>
   extends Partial<Presentable<ActionExecutionContext<Context>>> {
@@ -91,6 +96,22 @@ export interface Action<Context extends object = object>
    * false by default.
    */
   shouldAutoExecute?(context: ActionExecutionContext<Context>): Promise<boolean>;
+
+  /**
+   * Allows this action to call a method when its compatibility changes.
+   * @returns a subscription that can be used to unsubscribe from the changes.
+   */
+  subscribeToCompatibilityChanges?: (
+    context: Context,
+    onChange: (isCompatible: boolean, action: Action<Context>) => void
+  ) => Subscription | undefined;
+
+  /**
+   * Determines if action could become compatible given the context. If present,
+   * it should be much more lenient than `isCompatible` and return true if there
+   * is any chance that `isCompatible` could return true in the future.
+   */
+  couldBecomeCompatible?: (context: Context) => boolean;
 
   /**
    * action is disabled or not
@@ -156,6 +177,22 @@ export interface ActionDefinition<Context extends object = object>
    *
    */
   showNotification?: boolean;
+
+  /**
+   * Allows this action to call a method when its compatibility changes.
+   * @returns a subscription that can be used to unsubscribe from the changes.
+   */
+  subscribeToCompatibilityChanges?: (
+    context: Context,
+    onChange: (isCompatible: boolean, action: Action<Context>) => void
+  ) => Subscription | undefined;
+
+  /**
+   * Determines if action could become compatible given the context. If present,
+   * it should be much more lenient than `isCompatible` and return true if there
+   * is any chance that `isCompatible` could return true in the future.
+   */
+  couldBecomeCompatible?: (context: Context) => boolean;
 }
 
 export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;

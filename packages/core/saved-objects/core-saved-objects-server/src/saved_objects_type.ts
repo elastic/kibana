@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -20,6 +21,8 @@ import type {
 } from './model_version';
 
 /**
+ * Definition of a type of savedObject.
+ *
  * @public
  */
 export interface SavedObjectsType<Attributes = any> {
@@ -68,6 +71,7 @@ export interface SavedObjectsType<Attributes = any> {
   mappings: SavedObjectsTypeMappingDefinition;
   /**
    * An optional map of {@link SavedObjectMigrationFn | migrations} or a function returning a map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
+   * @deprecated Use {@link SavedObjectsType.modelVersions | modelVersions} instead.
    */
   migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
   /**
@@ -76,6 +80,7 @@ export interface SavedObjectsType<Attributes = any> {
    * When provided, calls to {@link SavedObjectsClient.create | create} will be validated against this schema.
    *
    * See {@link SavedObjectsValidationMap} for more details.
+   * @deprecated Use {@link SavedObjectsType.modelVersions | modelVersions} instead.
    */
   schemas?: SavedObjectsValidationMap | (() => SavedObjectsValidationMap);
   /**
@@ -142,9 +147,9 @@ export interface SavedObjectsType<Attributes = any> {
    * Model versioning is decoupled from Kibana versioning, and isolated between types.
    * Model versions are identified by a single numeric value, starting at `1` and without gaps.
    *
-   * Please refer to {@link SavedObjectsModelVersion} for details on the API's usages.
+   * Please refer to {@link SavedObjectsModelVersion} for more details on the model version API.
    *
-   * A **valid** versioning would be:
+   * @example A **valid** versioning would be:
    *
    * ```ts
    * {
@@ -158,7 +163,7 @@ export interface SavedObjectsType<Attributes = any> {
    * }
    * ```
    *
-   * A **invalid** versioning would be:
+   * @example An **invalid** versioning would be:
    *
    * ```ts
    * {
@@ -171,22 +176,20 @@ export interface SavedObjectsType<Attributes = any> {
    *   }
    * }
    * ```
-   *
-   * @alpha experimental and subject to change.
    */
   modelVersions?: SavedObjectsModelVersionMap | SavedObjectsModelVersionMapProvider;
 
   /**
-   * Allows to opt-in to the new model version API.
+   * Allows to opt-in to the model version API.
    *
    * Must be a valid semver version (with the patch version being necessarily 0)
    *
    * When specified, the type will switch from using the {@link SavedObjectsType.migrations | legacy migration API}
    * to use the {@link SavedObjectsType.modelVersions | modelVersion API} after the specified version.
    *
-   * When opted in, it will no longer be possible to use the legacy migration API after the specified version.
+   * Once opted in, it will no longer be possible to use the legacy migration API after the specified version.
    *
-   * A **valid** usage example would be:
+   * @example A **valid** usage example would be:
    *
    * ```ts
    * {
@@ -203,7 +206,7 @@ export interface SavedObjectsType<Attributes = any> {
    * }
    * ```
    *
-   * An **invalid** usage example would be:
+   * @example An **invalid** usage example would be:
    *
    * ```ts
    * {
@@ -224,8 +227,8 @@ export interface SavedObjectsType<Attributes = any> {
    * Please refer to the {@link SavedObjectsType.modelVersions | modelVersion API} for more documentation on
    * the new API.
    *
-   * @remarks All types will be forced to switch to use the new API in a later version. This switch is
-   *          allowing types owners to switch their types before the milestone.
+   * @remarks All types will be forced to switch to use the new API during `8.10.0`. This switch is
+   *          allowing types owners to switch their types before the milestone (and for testing purposes).
    */
   switchToModelVersionAt?: string;
 }

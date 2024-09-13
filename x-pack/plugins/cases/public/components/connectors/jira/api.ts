@@ -14,11 +14,11 @@ import type { IssueTypes, Fields, Issues, Issue } from './types';
 
 export interface GetIssueTypesProps {
   http: HttpSetup;
-  signal: AbortSignal;
   connectorId: string;
+  signal?: AbortSignal;
 }
 
-export async function getIssueTypes({ http, signal, connectorId }: GetIssueTypesProps) {
+export async function getIssueTypes({ http, connectorId, signal }: GetIssueTypesProps) {
   const res = await http.post<ConnectorExecutorResult<IssueTypes>>(
     getExecuteConnectorUrl(connectorId),
     {
@@ -34,16 +34,16 @@ export async function getIssueTypes({ http, signal, connectorId }: GetIssueTypes
 
 export interface GetFieldsByIssueTypeProps {
   http: HttpSetup;
-  signal: AbortSignal;
   connectorId: string;
   id: string;
+  signal?: AbortSignal;
 }
 
 export async function getFieldsByIssueType({
   http,
-  signal,
   connectorId,
   id,
+  signal,
 }: GetFieldsByIssueTypeProps): Promise<ActionTypeExecutorResult<Fields>> {
   const res = await http.post<ConnectorExecutorResult<Fields>>(
     getExecuteConnectorUrl(connectorId),
@@ -59,16 +59,16 @@ export async function getFieldsByIssueType({
 
 export interface GetIssuesTypeProps {
   http: HttpSetup;
-  signal: AbortSignal;
   connectorId: string;
   title: string;
+  signal?: AbortSignal;
 }
 
 export async function getIssues({
   http,
-  signal,
   connectorId,
   title,
+  signal,
 }: GetIssuesTypeProps): Promise<ActionTypeExecutorResult<Issues>> {
   const res = await http.post<ConnectorExecutorResult<Issues>>(
     getExecuteConnectorUrl(connectorId),
@@ -84,16 +84,16 @@ export async function getIssues({
 
 export interface GetIssueTypeProps {
   http: HttpSetup;
-  signal: AbortSignal;
   connectorId: string;
   id: string;
+  signal?: AbortSignal;
 }
 
 export async function getIssue({
   http,
-  signal,
   connectorId,
   id,
+  signal,
 }: GetIssueTypeProps): Promise<ActionTypeExecutorResult<Issue>> {
   const res = await http.post<ConnectorExecutorResult<Issue>>(getExecuteConnectorUrl(connectorId), {
     body: JSON.stringify({

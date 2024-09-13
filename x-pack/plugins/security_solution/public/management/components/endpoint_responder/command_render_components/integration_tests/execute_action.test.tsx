@@ -18,16 +18,23 @@ import { getEndpointConsoleCommands } from '../../lib/console_commands_definitio
 import React from 'react';
 import { enterConsoleCommand } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { EXECUTE_ROUTE } from '../../../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
-import { INSUFFICIENT_PRIVILEGES_FOR_COMMAND } from '../../../../../common/translations';
+import {
+  INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
+  UPGRADE_AGENT_FOR_RESPONDER,
+} from '../../../../../common/translations';
 import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
+import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/experimental_features_service');
 
 describe('When using execute action from response actions console', () => {
+  let user: UserEvent;
   let render: (
     capabilities?: EndpointCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -38,7 +45,17 @@ describe('When using execute action from response actions console', () => {
   >;
   let endpointPrivileges: EndpointPrivileges;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const mockedContext = createAppRootMockRenderer();
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
@@ -52,6 +69,7 @@ describe('When using execute action from response actions console', () => {
               consoleProps: {
                 'data-test-subj': 'test',
                 commands: getEndpointConsoleCommands({
+                  agentType: 'endpoint',
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities: [...capabilities],
                   endpointPrivileges,
@@ -62,7 +80,10 @@ describe('When using execute action from response actions console', () => {
         />
       );
 
-      consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(renderResult);
+      consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(
+        user,
+        renderResult
+      );
 
       await consoleManagerMockAccess.clickOnRegisterNewConsole();
       await consoleManagerMockAccess.openRunningConsole();
@@ -73,17 +94,17 @@ describe('When using execute action from response actions console', () => {
 
   it('should show an error if the `execute` capability is not present in the endpoint', async () => {
     await render([]);
-    enterConsoleCommand(renderResult, 'execute --command="ls -al"');
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -al"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-      'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
+      UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'execute')
     );
   });
 
   it('should show an error if `execute` is not authorized', async () => {
     endpointPrivileges.canWriteExecuteOperations = false;
     await render();
-    enterConsoleCommand(renderResult, 'execute --command="ls -al"');
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -al"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       INSUFFICIENT_PRIVILEGES_FOR_COMMAND
@@ -92,7 +113,7 @@ describe('When using execute action from response actions console', () => {
 
   it('should show an error if `execute` is entered without `--command` argument', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'execute');
+    await enterConsoleCommand(renderResult, user, 'execute');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Missing required arguments: --command'
@@ -101,7 +122,7 @@ describe('When using execute action from response actions console', () => {
 
   it('should show error if `--command` is empty string', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'execute --command=""');
+    await enterConsoleCommand(renderResult, user, 'execute --command=""');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument --command must have a value'
@@ -110,7 +131,7 @@ describe('When using execute action from response actions console', () => {
 
   it('should show error if `--timeout` is empty string', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'execute --command="ls -al" --timeout=""');
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -al" --timeout=""');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument --timeout must have a value'
@@ -119,7 +140,7 @@ describe('When using execute action from response actions console', () => {
 
   it('should show error if `--timeout` does not match required format', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'execute --command="ls -al" --timeout="23d"');
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -al" --timeout="23d"');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Invalid argument value: --timeout. Argument must be a string with a positive integer value followed by a unit of time (h for hours, m for minutes, s for seconds). Example: 37m.'
@@ -128,19 +149,24 @@ describe('When using execute action from response actions console', () => {
 
   it('should call the `execute` API with the expected payload', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'execute --command="ls -al"');
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -al"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.execute).toHaveBeenCalledWith({
         body: '{"endpoint_ids":["a.b.c"],"parameters":{"command":"ls -al"}}',
         path: EXECUTE_ROUTE,
+        version: '2023-10-31',
       });
     });
   });
 
   it('should only accept one `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'execute --command="ls -al" --comment "one" --comment "two"');
+    await enterConsoleCommand(
+      renderResult,
+      user,
+      'execute --command="ls -al" --comment "one" --comment "two"'
+    );
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'
@@ -162,7 +188,7 @@ describe('When using execute action from response actions console', () => {
     apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
 
     await render();
-    enterConsoleCommand(renderResult, 'execute --command="ls -l"');
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -l"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
@@ -177,6 +203,38 @@ describe('When using execute action from response actions console', () => {
     await waitFor(() => {
       expect(renderResult.getByTestId('executeSuccess').textContent).toEqual(
         'Command execution was successful.Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+      );
+    });
+  });
+
+  it.each(
+    Object.keys(endpointActionResponseCodes).filter((key) => key.startsWith('ra_execute_error'))
+  )('should display known error message for response failure: %s', async (errorCode) => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'execute',
+        errors: ['some error happen in endpoint'],
+        wasSuccessful: false,
+        outputs: {
+          'agent-a': {
+            content: {
+              code: errorCode,
+            },
+          },
+        },
+      }),
+    });
+
+    const { getByTestId } = await render();
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -l"');
+
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('execute-actionFailure')).toHaveTextContent(
+        endpointActionResponseCodes[errorCode]
       );
     });
   });

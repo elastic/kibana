@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   httpServiceMock,
   InternalHttpServicePrebootMock,
@@ -15,6 +17,8 @@ import {
 } from '@kbn/core-http-server-mocks';
 import type { CapabilitiesSetup } from '@kbn/core-capabilities-server';
 import { CapabilitiesService } from './capabilities_service';
+
+const fakeRequest = {} as KibanaRequest;
 
 describe('CapabilitiesService', () => {
   let http: InternalHttpServiceSetupMock;
@@ -71,7 +75,8 @@ describe('CapabilitiesService', () => {
         catalogue: { myPlugin: true },
       }));
       const start = service.start();
-      expect(await start.resolveCapabilities({} as any)).toMatchInlineSnapshot(`
+      expect(await start.resolveCapabilities(fakeRequest, { capabilityPath: '*' }))
+        .toMatchInlineSnapshot(`
         Object {
           "catalogue": Object {
             "myPlugin": true,
@@ -100,7 +105,8 @@ describe('CapabilitiesService', () => {
         },
       }));
       const start = service.start();
-      expect(await start.resolveCapabilities({} as any)).toMatchInlineSnapshot(`
+      expect(await start.resolveCapabilities(fakeRequest, { capabilityPath: '*' }))
+        .toMatchInlineSnapshot(`
         Object {
           "catalogue": Object {
             "A": true,
@@ -123,17 +129,21 @@ describe('CapabilitiesService', () => {
       setup.registerProvider(() => ({
         catalogue: { a: true, b: true, c: true },
       }));
-      setup.registerSwitcher((req, capabilities) => {
-        return {
-          ...capabilities,
-          catalogue: {
-            ...capabilities.catalogue,
-            b: false,
-          },
-        };
-      });
+      setup.registerSwitcher(
+        (req, capabilities) => {
+          return {
+            ...capabilities,
+            catalogue: {
+              ...capabilities.catalogue,
+              b: false,
+            },
+          };
+        },
+        { capabilityPath: '*' }
+      );
       const start = service.start();
-      expect(await start.resolveCapabilities({} as any)).toMatchInlineSnapshot(`
+      expect(await start.resolveCapabilities(fakeRequest, { capabilityPath: '*' }))
+        .toMatchInlineSnapshot(`
         Object {
           "catalogue": Object {
             "a": true,
@@ -162,29 +172,39 @@ describe('CapabilitiesService', () => {
           c: true,
         },
       }));
-      setup.registerSwitcher((req, capabilities) => {
-        return {
-          catalogue: {
-            b: false,
-          },
-        };
-      });
+      setup.registerSwitcher(
+        (req, capabilities) => {
+          return {
+            catalogue: {
+              b: false,
+            },
+          };
+        },
+        { capabilityPath: '*' }
+      );
 
-      setup.registerSwitcher((req, capabilities) => {
-        return {
-          navLinks: { c: false },
-        };
-      });
-      setup.registerSwitcher((req, capabilities) => {
-        return {
-          customSection: {
-            c: false,
-          },
-        };
-      });
+      setup.registerSwitcher(
+        (req, capabilities) => {
+          return {
+            navLinks: { c: false },
+          };
+        },
+        { capabilityPath: '*' }
+      );
+      setup.registerSwitcher(
+        (req, capabilities) => {
+          return {
+            customSection: {
+              c: false,
+            },
+          };
+        },
+        { capabilityPath: '*' }
+      );
 
       const start = service.start();
-      expect(await start.resolveCapabilities({} as any)).toMatchInlineSnapshot(`
+      expect(await start.resolveCapabilities(fakeRequest, { capabilityPath: '*' }))
+        .toMatchInlineSnapshot(`
         Object {
           "catalogue": Object {
             "a": true,
@@ -206,22 +226,14 @@ describe('CapabilitiesService', () => {
 
     it('allows to indicate that default capabilities should be returned', async () => {
       setup.registerProvider(() => ({ customSection: { isDefault: true } }));
-      setup.registerSwitcher((req, capabilities, useDefaultCapabilities) =>
-        useDefaultCapabilities ? capabilities : { customSection: { isDefault: false } }
+      setup.registerSwitcher(
+        (req, capabilities, useDefaultCapabilities) =>
+          useDefaultCapabilities ? capabilities : { customSection: { isDefault: false } },
+        { capabilityPath: '*' }
       );
 
       const start = service.start();
-      expect(await start.resolveCapabilities({} as any)).toMatchInlineSnapshot(`
-        Object {
-          "catalogue": Object {},
-          "customSection": Object {
-            "isDefault": false,
-          },
-          "management": Object {},
-          "navLinks": Object {},
-        }
-      `);
-      expect(await start.resolveCapabilities({} as any, { useDefaultCapabilities: false }))
+      expect(await start.resolveCapabilities(fakeRequest, { capabilityPath: '*' }))
         .toMatchInlineSnapshot(`
         Object {
           "catalogue": Object {},
@@ -232,8 +244,27 @@ describe('CapabilitiesService', () => {
           "navLinks": Object {},
         }
       `);
-      expect(await start.resolveCapabilities({} as any, { useDefaultCapabilities: true }))
-        .toMatchInlineSnapshot(`
+      expect(
+        await start.resolveCapabilities({} as any, {
+          useDefaultCapabilities: false,
+          capabilityPath: '*',
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "catalogue": Object {},
+          "customSection": Object {
+            "isDefault": false,
+          },
+          "management": Object {},
+          "navLinks": Object {},
+        }
+      `);
+      expect(
+        await start.resolveCapabilities({} as any, {
+          useDefaultCapabilities: true,
+          capabilityPath: '*',
+        })
+      ).toMatchInlineSnapshot(`
         Object {
           "catalogue": Object {},
           "customSection": Object {

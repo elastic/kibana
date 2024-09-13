@@ -49,6 +49,12 @@ export const REMOVED_FIELD = i18n.translate('xpack.cases.caseView.actionLabel.re
   defaultMessage: 'removed',
 });
 
+export const CHANGED_FIELD_TO_EMPTY = (field: string) =>
+  i18n.translate('xpack.cases.caseView.actionLabel.changeFieldToEmpty', {
+    values: { field },
+    defaultMessage: 'changed {field} to "None"',
+  });
+
 export const VIEW_INCIDENT = (incidentNumber: string) =>
   i18n.translate('xpack.cases.caseView.actionLabel.viewIncident', {
     defaultMessage: 'View {incidentNumber}',
@@ -74,6 +80,14 @@ export const ADDED_DESCRIPTION = i18n.translate('xpack.cases.caseView.actionLabe
 
 export const EDIT_DESCRIPTION = i18n.translate('xpack.cases.caseView.edit.description', {
   defaultMessage: 'Edit description',
+});
+
+export const COLLAPSE_DESCRIPTION = i18n.translate('xpack.cases.caseView.description.collapse', {
+  defaultMessage: 'Collapse description',
+});
+
+export const EXPAND_DESCRIPTION = i18n.translate('xpack.cases.caseView.description.expand', {
+  defaultMessage: 'Expand description',
 });
 
 export const QUOTE = i18n.translate('xpack.cases.caseView.edit.quote', {
@@ -114,6 +128,10 @@ export const CASE_REFRESH = i18n.translate('xpack.cases.caseView.caseRefresh', {
 
 export const ACTIVITY = i18n.translate('xpack.cases.caseView.activity', {
   defaultMessage: 'Activity',
+});
+
+export const CASE_SETTINGS = i18n.translate('xpack.cases.caseView.caseSettings', {
+  defaultMessage: 'Case settings',
 });
 
 export const EMAIL_SUBJECT = (caseTitle: string) =>
@@ -163,6 +181,10 @@ export const ACTIVITY_TAB = i18n.translate('xpack.cases.caseView.tabs.activity',
 
 export const ALERTS_TAB = i18n.translate('xpack.cases.caseView.tabs.alerts', {
   defaultMessage: 'Alerts',
+});
+
+export const FILES_TAB = i18n.translate('xpack.cases.caseView.tabs.files', {
+  defaultMessage: 'Files',
 });
 
 export const ALERTS_EMPTY_DESCRIPTION = i18n.translate(

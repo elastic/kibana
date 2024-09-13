@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, CoreStart, PluginInitializerContext, IStaticAssets } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
 import {
@@ -71,10 +72,13 @@ function registerBeatsTutorialsWithCustomIntegrations(
 export class TutorialsRegistry {
   private tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
+  private staticAssets!: IStaticAssets;
 
   constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, customIntegrations?: CustomIntegrationsPluginSetup) {
+    this.staticAssets = core.http.staticAssets;
+
     const router = core.http.createRouter();
     router.get(
       { path: '/api/kibana/home/tutorials', validate: false },
@@ -143,7 +147,10 @@ export class TutorialsRegistry {
   }
 
   private get baseTutorialContext(): TutorialContext {
-    return { kibanaBranch: this.initContext.env.packageInfo.branch };
+    return {
+      kibanaBranch: this.initContext.env.packageInfo.branch,
+      staticAssets: this.staticAssets,
+    };
   }
 }
 

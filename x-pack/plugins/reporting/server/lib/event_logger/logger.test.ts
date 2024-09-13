@@ -7,7 +7,8 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { BasePayload } from '../../types';
+import type { BasePayload } from '@kbn/reporting-common/types';
+
 import { Report } from '../store';
 import { ReportingEventLogger, reportingEventLoggerFactory } from './logger';
 

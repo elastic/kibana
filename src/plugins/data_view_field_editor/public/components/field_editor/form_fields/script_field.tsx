@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
@@ -24,7 +25,7 @@ import {
 } from '../../../shared_imports';
 import type { RuntimeFieldPainlessError } from '../../../types';
 import { painlessErrorToMonacoMarker } from '../../../lib';
-import { useFieldPreviewContext, Context } from '../../preview';
+import { useFieldPreviewContext } from '../../preview';
 import { schema } from '../form_schema';
 import type { FieldFormInternal } from '../field_editor';
 import { useStateSelector } from '../../../state_utils';
@@ -32,7 +33,6 @@ import { PreviewState } from '../../preview/types';
 
 interface Props {
   links: { runtimePainless: string };
-  existingConcreteFields?: Array<{ name: string; type: string }>;
   placeholder?: string;
 }
 
@@ -57,20 +57,37 @@ const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessConte
 
 const currentDocumentSelector = (state: PreviewState) => state.documents[state.currentIdx];
 const currentDocumentIsLoadingSelector = (state: PreviewState) => state.isLoadingDocuments;
+const currentErrorSelector = (state: PreviewState) => state.previewResponse?.error;
+const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
+const isPreviewAvailableSelector = (state: PreviewState) => state.isPreviewAvailable;
+const concreteFieldsSelector = (state: PreviewState) => state.concreteFields;
 
-const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Props) => {
+const ScriptFieldComponent = ({ links, placeholder }: Props) => {
+  const {
+    validation: { setScriptEditorValidation },
+  } = useFieldPreviewContext();
   const monacoEditor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const editorValidationSubscription = useRef<Subscription>();
   const fieldCurrentValue = useRef<string>('');
 
-  const { error, isLoadingPreview, isPreviewAvailable, controller } = useFieldPreviewContext();
+  const { controller } = useFieldPreviewContext();
+  const error = useStateSelector(controller.state$, currentErrorSelector);
   const currentDocument = useStateSelector(controller.state$, currentDocumentSelector);
   const isFetchingDoc = useStateSelector(controller.state$, currentDocumentIsLoadingSelector);
+  const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
+  const isPreviewAvailable = useStateSelector(controller.state$, isPreviewAvailableSelector);
+  /**
+   * An array of existing concrete fields. If the user gives a name to the runtime
+   * field that matches one of the concrete fields, a callout will be displayed
+   * to indicate that this runtime field will shadow the concrete field.
+   * It is also used to provide the list of field autocomplete suggestions to the code editor.
+   */
+  const concreteFields = useStateSelector(controller.state$, concreteFieldsSelector);
   const [validationData$, nextValidationData$] = useBehaviorSubject<
     | {
         isFetchingDoc: boolean;
         isLoadingPreview: boolean;
-        error: Context['error'];
+        error: PreviewState['previewResponse']['error'];
       }
     | undefined
   >(undefined);
@@ -82,8 +99,8 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
   const currentDocId = currentDocument?._id;
 
   const suggestionProvider = useMemo(
-    () => PainlessLang.getSuggestionProvider(painlessContext, existingConcreteFields),
-    [painlessContext, existingConcreteFields]
+    () => PainlessLang.getSuggestionProvider(painlessContext, concreteFields),
+    [painlessContext, concreteFields]
   );
 
   const { validateFields } = useFormContext();
@@ -143,7 +160,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
 
       editorValidationSubscription.current = PainlessLang.validation$().subscribe(
         ({ isValid, isValidating, errors }) => {
-          controller.setScriptEditorValidation({
+          setScriptEditorValidation({
             isValid,
             isValidating,
             message: errors[0]?.message ?? null,
@@ -151,7 +168,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
         }
       );
     },
-    [controller]
+    [setScriptEditorValidation]
   );
 
   const updateMonacoMarkers = useCallback((markers: monaco.editor.IMarkerData[]) => {

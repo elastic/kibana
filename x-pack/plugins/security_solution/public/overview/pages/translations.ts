@@ -18,14 +18,17 @@ export const BETA = i18n.translate('xpack.securitySolution.dataQualityDashboard.
   defaultMessage: 'Beta',
 });
 
-export const COLD = i18n.translate('xpack.securitySolution.overview.ilmPhaseCold', {
-  defaultMessage: 'cold',
-});
-
 export const DATA_QUALITY_TITLE = i18n.translate(
   'xpack.securitySolution.dataQualityDashboard.pageTitle',
   {
     defaultMessage: 'Data Quality',
+  }
+);
+
+export const DATE_PICKER_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.dataQualityDashboard.datePicker.tooltip',
+  {
+    defaultMessage: `Data quality checks are ran on data that was ingested during the Search Boost window. The default window range is 7 days.`,
   }
 );
 
@@ -47,14 +50,6 @@ export const SECURITY_SOLUTION_DEFAULT_INDEX_TOOLTIP = (settingName: string) =>
 
 export const EVENTS = i18n.translate('xpack.securitySolution.overview.eventsTitle', {
   defaultMessage: 'Event count',
-});
-
-export const FROZEN = i18n.translate('xpack.securitySolution.overview.ilmPhaseFrozen', {
-  defaultMessage: 'frozen',
-});
-
-export const HOT = i18n.translate('xpack.securitySolution.overview.ilmPhaseHot', {
-  defaultMessage: 'hot',
 });
 
 export const NEWS_FEED_TITLE = i18n.translate(
@@ -81,10 +76,6 @@ export const TOP = (fieldName: string) =>
     defaultMessage: `Top {fieldName}`,
   });
 
-export const UNMANAGED = i18n.translate('xpack.securitySolution.overview.ilmPhaseUnmanaged', {
-  defaultMessage: 'unmanaged',
-});
-
 export const VIEW_ALERTS = i18n.translate('xpack.securitySolution.overview.viewAlertsButtonLabel', {
   defaultMessage: 'View alerts',
 });
@@ -93,21 +84,10 @@ export const VIEW_EVENTS = i18n.translate('xpack.securitySolution.overview.viewE
   defaultMessage: 'View events',
 });
 
-export const WARM = i18n.translate('xpack.securitySolution.overview.ilmPhaseWarm', {
-  defaultMessage: 'warm',
-});
-
 export const DETECTION_RESPONSE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.pageTitle',
   {
     defaultMessage: 'Detection & Response',
-  }
-);
-
-export const ENTITY_ANALYTICS_LICENSE_DESC = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.pageDesc',
-  {
-    defaultMessage: 'Detect threats from users and hosts within your network with Entity Analytics',
   }
 );
 

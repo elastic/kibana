@@ -6,8 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ThresholdSignalHistory } from './types';
 import { buildThresholdSignalHistory } from './build_signal_history';
 import { createErrorsFromShard } from '../utils/utils';
@@ -17,7 +18,9 @@ interface GetThresholdSignalHistoryParams {
   to: string;
   frameworkRuleId: string;
   bucketByFields: string[];
-  ruleDataReader: IRuleDataReader;
+  spaceId: string;
+  ruleDataClient: IRuleDataClient;
+  esClient: ElasticsearchClient;
 }
 
 export const getThresholdSignalHistory = async ({
@@ -25,7 +28,9 @@ export const getThresholdSignalHistory = async ({
   to,
   frameworkRuleId,
   bucketByFields,
-  ruleDataReader,
+  spaceId,
+  ruleDataClient,
+  esClient,
 }: GetThresholdSignalHistoryParams): Promise<{
   signalHistory: ThresholdSignalHistory;
   searchErrors: string[];
@@ -37,7 +42,11 @@ export const getThresholdSignalHistory = async ({
     bucketByFields,
   });
 
-  const response = await ruleDataReader.search(request);
+  const indexPattern = ruleDataClient?.indexNameWithNamespace(spaceId);
+  const response = await esClient.search({
+    ...request,
+    index: indexPattern,
+  });
   return {
     signalHistory: buildThresholdSignalHistory({ alerts: response.hits.hits }),
     searchErrors: createErrorsFromShard({

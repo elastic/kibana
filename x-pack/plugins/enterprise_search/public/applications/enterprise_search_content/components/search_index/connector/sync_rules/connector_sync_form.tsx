@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -17,7 +17,7 @@ import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prom
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
 
-export const ConnectorSyncRulesForm: React.FC = ({ children }) => {
+export const ConnectorSyncRulesForm: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { saveDraftFilteringRules, setIsEditing } = useActions(ConnectorFilteringLogic);
   const { hasJsonValidationError, isEditing, isLoading } = useValues(ConnectorFilteringLogic);
 

@@ -2,57 +2,59 @@
   "type": "doc",
   "value": {
     "id": "alert:a0d18560-e985-11eb-b1e3-5b27f0de1e72",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
-      "alert" : {
-        "params" : {
-          "aggType" : "count",
-          "termSize" : 5,
-          "thresholdComparator" : ">",
-          "timeWindowSize" : 5,
-          "timeWindowUnit" : "m",
-          "groupBy" : "all",
-          "threshold" : [
+      "alert": {
+        "params": {
+          "aggType": "count",
+          "termSize": 5,
+          "thresholdComparator": ">",
+          "timeWindowSize": 5,
+          "timeWindowUnit": "m",
+          "groupBy": "all",
+          "threshold": [
             1000
           ],
-          "index" : [
+          "index": [
             ".kibana-event-log-8.0.0"
           ],
-          "timeField" : "@timestamp"
+          "timeField": "@timestamp"
         },
-        "consumer" : "alerts",
-        "schedule" : {
-          "interval" : "1m"
+        "consumer": "alerts",
+        "schedule": {
+          "interval": "1m"
         },
-        "tags" : [ ],
-        "name" : "test rule",
-        "actions" : [ ],
-        "enabled" : true,
-        "throttle" : null,
-        "alertTypeId" : ".index-threshold",
-        "apiKeyOwner" : "elastic",
-        "apiKey" : "XpJzeSrg3p/zB+Xz8CcrylW7q5/NVlgC1de0xbbm5E0FbhcT9DskOoUH8jmmyCMOEn7SiPKm62LXbuuLknUmd0EKBDCecK0Mf8NMcqZbTusgWLmQDu5DDx+xAXcI3wsI2KD/wqLhE+RAbiBVuNtFcfm+gBwAKNikei7qtcGL5TzfmC1Cqhn2RjrnTfzCQ0csZwHrKpbBlMhUDA==",
-        "createdBy" : "elastic",
-        "updatedBy" : "elastic",
-        "createdAt" : "2021-07-20T18:09:31.067Z",
-        "muteAll" : false,
-        "mutedInstanceIds" : [ ],
-        "executionStatus" : {
-          "status" : "ok",
-          "lastExecutionDate" : "2021-07-20T18:09:34.970Z",
-          "error" : null
+        "tags": [],
+        "name": "test rule",
+        "actions": [],
+        "enabled": true,
+        "throttle": null,
+        "alertTypeId": ".index-threshold",
+        "apiKeyOwner": "elastic",
+        "apiKey": "XpJzeSrg3p/zB+Xz8CcrylW7q5/NVlgC1de0xbbm5E0FbhcT9DskOoUH8jmmyCMOEn7SiPKm62LXbuuLknUmd0EKBDCecK0Mf8NMcqZbTusgWLmQDu5DDx+xAXcI3wsI2KD/wqLhE+RAbiBVuNtFcfm+gBwAKNikei7qtcGL5TzfmC1Cqhn2RjrnTfzCQ0csZwHrKpbBlMhUDA==",
+        "createdBy": "elastic",
+        "updatedBy": "elastic",
+        "createdAt": "2021-07-20T18:09:31.067Z",
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "executionStatus": {
+          "status": "ok",
+          "lastExecutionDate": "2021-07-20T18:09:34.970Z",
+          "error": null
         },
-        "meta" : {
-          "versionApiKeyLastmodified" : "8.0.0"
+        "meta": {
+          "versionApiKeyLastmodified": "8.0.0"
         },
-        "scheduledTaskId" : "a1b4b970-e985-11eb-b1e3-5b27f0de1e72"
+        "scheduledTaskId": "a1b4b970-e985-11eb-b1e3-5b27f0de1e72"
       },
-      "type" : "alert",
-      "references" : [ ],
-      "migrationVersion" : {
-        "alert" : "7.10.0"
-      },
-      "updated_at" : "2021-07-20T18:09:35.093Z"
+      "type": "alert",
+      "references": [],
+      "updated_at": "2021-07-20T18:09:35.093Z",
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.10.0"
     }
   }
 }
@@ -61,26 +63,50 @@
   "type": "doc",
   "value": {
     "id": "action:b9127990-e985-11eb-b1e3-5b27f0de1e72",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
-      "action" : {
-        "actionTypeId" : ".email",
-        "name" : "email connector",
-        "config" : {
-          "from" : "admin@company.com",
-          "host" : "mail.company.com",
-          "port" : 465,
-          "service" : null,
-          "secure" : null
+      "action": {
+        "actionTypeId": ".email",
+        "name": "email connector",
+        "config": {
+          "from": "admin@company.com",
+          "host": "mail.company.com",
+          "port": 465,
+          "service": null,
+          "secure": null
         },
-        "secrets" : "NGVraK7+8QRoKXp4++g8mtwf8WxqFQn+RXn35Pa1gZSq/M8E2/yCycUbTEfzmhRm35It4dn9C0AQeFmlL/3nzY8fZgen4HGRVmn+FGSIoFbVY65Rkiy7v3neigO9NcZlFZ7UQAHn+mubdYrVRjFGwEzN9YbG9zK5zsCVUmVZ8w=="
+        "secrets": "NGVraK7+8QRoKXp4++g8mtwf8WxqFQn+RXn35Pa1gZSq/M8E2/yCycUbTEfzmhRm35It4dn9C0AQeFmlL/3nzY8fZgen4HGRVmn+FGSIoFbVY65Rkiy7v3neigO9NcZlFZ7UQAHn+mubdYrVRjFGwEzN9YbG9zK5zsCVUmVZ8w=="
       },
-      "type" : "action",
-      "references" : [ ],
-      "migrationVersion" : {
-        "alert" : "7.13.0"
+      "type": "action",
+      "references": [],
+      "updated_at": "2021-07-20T18:10:11.024Z",
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.13.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "saved-object-mv:e35debe0-6c54-11ee-88d4-47e62f05d6ef",
+    "index": ".kibana",
+    "source": {
+      "saved-object-mv": {
+        "encryptedAttribute": "y4ZzV15mzNhVVTtFSk9Q/XsDqUJVi8B3i82OusVGFTOsm8VntzCq5j/QUTRdjulZUQq6SW1olrZwl2lrpvJuAJ9ItRMJHNwPVVo0ia9FgvnIjNZ4KUpj/Vrp3jtMNVhFEcKN7+zzxY9BDm2EYXGSiSVEDmSYTFM=",
+        "nonEncryptedAttribute": "elastic"
       },
-      "updated_at" : "2021-07-20T18:10:11.024Z"
+      "typeMigrationVersion": "8.8.0",
+      "modelVersion": 0,
+      "references": [],
+      "namespaces": [
+        "default"
+      ],
+      "type": "saved-object-mv",
+      "updated_at": "2020-06-17T15:35:39.839Z"
     }
   }
 }

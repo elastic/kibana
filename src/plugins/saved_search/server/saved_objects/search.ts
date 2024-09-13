@@ -1,22 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { VIEW_MODE } from '../../common';
 import { getAllMigrations } from './search_migrations';
+import {
+  SCHEMA_SEARCH_V8_8_0,
+  SCHEMA_SEARCH_MODEL_VERSION_1,
+  SCHEMA_SEARCH_MODEL_VERSION_2,
+  SCHEMA_SEARCH_MODEL_VERSION_3,
+  SCHEMA_SEARCH_MODEL_VERSION_4,
+  SCHEMA_SEARCH_MODEL_VERSION_5,
+} from './schema';
 
 export function getSavedSearchObjectType(
   getSearchSourceMigrations: () => MigrateFunctionsObject
 ): SavedObjectsType {
   return {
     name: 'search',
+    indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
@@ -34,6 +43,43 @@ export function getSavedSearchObjectType(
         };
       },
     },
+    modelVersions: {
+      1: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_1.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_1,
+        },
+      },
+      2: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_2.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_2,
+        },
+      },
+      3: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_3.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_3,
+        },
+      },
+      4: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_4.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_4,
+        },
+      },
+      5: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_5.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_5,
+        },
+      },
+    },
     mappings: {
       dynamic: false,
       properties: {
@@ -42,75 +88,7 @@ export function getSavedSearchObjectType(
       },
     },
     schemas: {
-      '8.8.0': schema.object({
-        // General
-        title: schema.string(),
-        description: schema.string({ defaultValue: '' }),
-
-        // Data grid
-        columns: schema.arrayOf(schema.string(), { defaultValue: [] }),
-        sort: schema.oneOf(
-          [
-            schema.arrayOf(schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 })),
-            schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 }),
-          ],
-          { defaultValue: [] }
-        ),
-        grid: schema.object(
-          {
-            columns: schema.maybe(
-              schema.recordOf(
-                schema.string(),
-                schema.object({
-                  width: schema.maybe(schema.number()),
-                })
-              )
-            ),
-          },
-          { defaultValue: {} }
-        ),
-        rowHeight: schema.maybe(schema.number()),
-        rowsPerPage: schema.maybe(schema.number()),
-
-        // Chart
-        hideChart: schema.boolean({ defaultValue: false }),
-        breakdownField: schema.maybe(schema.string()),
-
-        // Search
-        kibanaSavedObjectMeta: schema.object({
-          searchSourceJSON: schema.string(),
-        }),
-        isTextBasedQuery: schema.boolean({ defaultValue: false }),
-        usesAdHocDataView: schema.maybe(schema.boolean()),
-
-        // Time
-        timeRestore: schema.maybe(schema.boolean()),
-        timeRange: schema.maybe(
-          schema.object({
-            from: schema.string(),
-            to: schema.string(),
-          })
-        ),
-        refreshInterval: schema.maybe(
-          schema.object({
-            pause: schema.boolean(),
-            value: schema.number(),
-          })
-        ),
-
-        // Display
-        viewMode: schema.maybe(
-          schema.oneOf([
-            schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
-            schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
-          ])
-        ),
-        hideAggregatedPreview: schema.maybe(schema.boolean()),
-
-        // Legacy
-        hits: schema.maybe(schema.number()),
-        version: schema.maybe(schema.number()),
-      }),
+      '8.8.0': SCHEMA_SEARCH_V8_8_0,
     },
     migrations: () => getAllMigrations(getSearchSourceMigrations()),
   };

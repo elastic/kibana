@@ -50,6 +50,7 @@ describe('listActionTypesRoute', () => {
         enabledInLicense: true,
         minimumLicenseRequired: 'gold' as LicenseType,
         supportedFeatureIds: ['alerting'],
+        isSystemActionType: false,
       },
     ];
 
@@ -65,6 +66,7 @@ describe('listActionTypesRoute', () => {
             "enabledInConfig": true,
             "enabledInLicense": true,
             "id": "1",
+            "isSystemActionType": false,
             "minimumLicenseRequired": "gold",
             "name": "name",
             "supportedFeatureIds": Array [
@@ -99,6 +101,7 @@ describe('listActionTypesRoute', () => {
         enabledInLicense: true,
         minimumLicenseRequired: 'gold' as LicenseType,
         supportedFeatureIds: ['alerting'],
+        isSystemActionType: false,
       },
     ];
 
@@ -141,6 +144,7 @@ describe('listActionTypesRoute', () => {
         enabledInLicense: true,
         minimumLicenseRequired: 'gold' as LicenseType,
         supportedFeatureIds: ['alerting'],
+        isSystemActionType: false,
       },
     ];
 
@@ -155,7 +159,7 @@ describe('listActionTypesRoute', () => {
       ['ok']
     );
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });

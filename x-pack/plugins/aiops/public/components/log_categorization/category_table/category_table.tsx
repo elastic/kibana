@@ -5,87 +5,114 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import type { EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
 import {
   useEuiBackgroundColor,
-  EuiButton,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiCode,
-  EuiText,
-  EuiTableSelectionType,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
+import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 
-import { useDiscoverLinks } from '../use_discover_links';
-import { MiniHistogram } from '../../mini_histogram';
+import { i18n } from '@kbn/i18n';
+import type { UseTableState } from '@kbn/ml-in-memory-table';
+
+import { css } from '@emotion/react';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
+
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
-import type { AiOpsIndexBasedAppState } from '../../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
-import type { EventRate, Category, SparkLinesPerCategory } from '../use_categorize_request';
-import { useTableState } from './use_table_state';
 
-const QUERY_MODE = {
-  INCLUDE: 'should',
-  EXCLUDE: 'must_not',
-} as const;
-export type QueryMode = typeof QUERY_MODE[keyof typeof QUERY_MODE];
+import { MiniHistogram } from '../../mini_histogram';
+
+import type { EventRate } from '../use_categorize_request';
+
+import { ExpandedRow } from './expanded_row';
+import { FormattedPatternExamples, FormattedTokens } from '../format_category';
 
 interface Props {
   categories: Category[];
-  sparkLines: SparkLinesPerCategory;
   eventRate: EventRate;
-  dataViewId: string;
-  selectedField: string | undefined;
-  timefilter: TimefilterContract;
-  aiopsListState: Required<AiOpsIndexBasedAppState>;
-  pinnedCategory: Category | null;
-  setPinnedCategory: (category: Category | null) => void;
-  selectedCategory: Category | null;
-  setSelectedCategory: (category: Category | null) => void;
+  mouseOver?: {
+    pinnedCategory: Category | null;
+    setPinnedCategory: (category: Category | null) => void;
+    highlightedCategory: Category | null;
+    setHighlightedCategory: (category: Category | null) => void;
+  };
+  setSelectedCategories: (category: Category[]) => void;
+  tableState: UseTableState<Category>;
+  actions: Array<Action<Category>>;
+  enableRowActions?: boolean;
+  displayExamples?: boolean;
+  selectable?: boolean;
+  onRenderComplete?: () => void;
 }
 
 export const CategoryTable: FC<Props> = ({
   categories,
-  sparkLines,
   eventRate,
-  dataViewId,
-  selectedField,
-  timefilter,
-  aiopsListState,
-  pinnedCategory,
-  setPinnedCategory,
-  selectedCategory,
-  setSelectedCategory,
+  mouseOver,
+  setSelectedCategories,
+  tableState,
+  actions,
+  enableRowActions = true,
+  displayExamples = true,
+  selectable = true,
+  onRenderComplete,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
-  const { openInDiscoverWithFilter } = useDiscoverLinks();
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
-  const { onTableChange, pagination, sorting } = useTableState<Category>(categories ?? [], 'key');
+  const { onTableChange, pagination, sorting } = tableState;
 
-  const openInDiscover = (mode: QueryMode, category?: Category) => {
-    const timefilterActiveBounds = timefilter.getActiveBounds();
-    if (timefilterActiveBounds === undefined || selectedField === undefined) {
-      return;
-    }
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
+    {}
+  );
 
-    openInDiscoverWithFilter(
-      dataViewId,
-      selectedField,
-      selectedCategories,
-      aiopsListState,
-      timefilterActiveBounds,
-      mode,
-      category
-    );
-  };
+  const showSparkline = useMemo(() => {
+    return categories.some((category) => category.sparkline !== undefined);
+  }, [categories]);
+
+  const toggleDetails = useCallback(
+    (category: Category) => {
+      const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+      if (itemIdToExpandedRowMapValues[category.key]) {
+        delete itemIdToExpandedRowMapValues[category.key];
+      } else {
+        itemIdToExpandedRowMapValues[category.key] = (
+          <ExpandedRow category={category} displayExamples={displayExamples} />
+        );
+      }
+      setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+    },
+    [displayExamples, itemIdToExpandedRowMap]
+  );
 
   const columns: Array<EuiBasicTableColumn<Category>> = [
+    {
+      align: 'left',
+      width: '40px',
+      isExpander: true,
+      render: (item: Category) => (
+        <EuiButtonIcon
+          data-test-subj="aiopsLogPatternsColumnsButton"
+          onClick={() => toggleDetails(item)}
+          aria-label={
+            itemIdToExpandedRowMap[item.key]
+              ? i18n.translate('xpack.aiops.logCategorization.column.collapseRow', {
+                  defaultMessage: 'Collapse',
+                })
+              : i18n.translate('xpack.aiops.logCategorization.column.expandRow', {
+                  defaultMessage: 'Expand',
+                })
+          }
+          iconType={itemIdToExpandedRowMap[item.key] ? 'arrowDown' : 'arrowRight'}
+        />
+      ),
+      'data-test-subj': 'aiopsLogPatternsExpandRowToggle',
+    },
     {
       field: 'count',
       name: i18n.translate('xpack.aiops.logCategorization.column.count', {
@@ -95,23 +122,69 @@ export const CategoryTable: FC<Props> = ({
       width: '80px',
     },
     {
-      field: 'count',
+      name: i18n.translate('xpack.aiops.logCategorization.column.examples', {
+        defaultMessage: 'Examples',
+      }),
+      sortable: true,
+      render: (item: Category) => <FormattedPatternExamples category={item} count={1} />,
+    },
+    {
+      name: i18n.translate('xpack.aiops.logCategorization.column.actions', {
+        defaultMessage: 'Actions',
+      }),
+      sortable: false,
+      width: '65px',
+      actions,
+    },
+  ] as Array<EuiBasicTableColumn<Category>>;
+
+  if (displayExamples === false) {
+    // on the rare occasion that examples are not available, replace the examples column with tokens
+    columns.splice(2, 1, {
+      name: (
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.aiops.logCategorization.column.tokens.tooltip', {
+            defaultMessage:
+              'If the selected field is an alias, example documents cannot be displayed. Showing pattern tokens instead.',
+          })}
+        >
+          <>
+            {i18n.translate('xpack.aiops.logCategorization.column.tokens', {
+              defaultMessage: 'Tokens',
+            })}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
+      render: (item: Category) => <FormattedTokens category={item} count={1} />,
+    });
+  }
+
+  if (showSparkline === true) {
+    columns.splice(2, 0, {
+      field: 'sparkline',
       name: i18n.translate('xpack.aiops.logCategorization.column.logRate', {
         defaultMessage: 'Log rate',
       }),
-      sortable: true,
+      sortable: false,
       width: '100px',
-      render: (_, { key }) => {
-        const sparkLine = sparkLines[key];
-        if (sparkLine === undefined) {
+      render: (sparkline: Category['sparkline']) => {
+        if (sparkline === undefined) {
           return null;
         }
-        const histogram = eventRate.map((e) => ({
-          doc_count_overall: e.docCount,
-          doc_count_significant_term: sparkLine[e.key],
-          key: e.key,
-          key_as_string: `${e.key}`,
-        }));
+        const histogram = eventRate.map(({ key: catKey, docCount }) => {
+          const term = sparkline[catKey] ?? 0;
+          const newTerm = term > docCount ? docCount : term;
+          const adjustedDocCount = docCount - newTerm;
+
+          return {
+            doc_count_overall: adjustedDocCount,
+            doc_count_significant_item: newTerm,
+            key: catKey,
+            key_as_string: `${catKey}`,
+          };
+        });
 
         return (
           <MiniHistogram
@@ -121,85 +194,32 @@ export const CategoryTable: FC<Props> = ({
           />
         );
       },
-    },
-    {
-      field: 'examples',
-      name: i18n.translate('xpack.aiops.logCategorization.column.examples', {
-        defaultMessage: 'Examples',
-      }),
-      sortable: true,
-      style: { display: 'block' },
-      render: (examples: string[]) => (
-        <div style={{ display: 'block' }}>
-          {examples.map((e) => (
-            <>
-              <EuiText size="s">
-                <EuiCode language="log" transparentBackground>
-                  {e}
-                </EuiCode>
-              </EuiText>
-              <EuiSpacer size="s" />
-            </>
-          ))}
-        </div>
-      ),
-    },
-    {
-      name: 'Actions',
-      width: '60px',
-      actions: [
-        {
-          name: i18n.translate('xpack.aiops.logCategorization.showInDiscover', {
-            defaultMessage: 'Show these in Discover',
-          }),
-          description: i18n.translate('xpack.aiops.logCategorization.showInDiscover', {
-            defaultMessage: 'Show these in Discover',
-          }),
-          icon: 'discoverApp',
-          type: 'icon',
-          onClick: (category) => openInDiscover(QUERY_MODE.INCLUDE, category),
-        },
-        {
-          name: i18n.translate('xpack.aiops.logCategorization.filterOutInDiscover', {
-            defaultMessage: 'Filter out in Discover',
-          }),
-          description: i18n.translate('xpack.aiops.logCategorization.filterOutInDiscover', {
-            defaultMessage: 'Filter out in Discover',
-          }),
-          icon: 'filter',
-          type: 'icon',
-          onClick: (category) => openInDiscover(QUERY_MODE.EXCLUDE, category),
-        },
-        // Disabled for now
-        // {
-        //   name: i18n.translate('xpack.aiops.logCategorization.openInDataViz', {
-        //     defaultMessage: 'Open in data visualizer',
-        //   }),
-        //   icon: 'stats',
-        //   type: 'icon',
-        //   onClick: () => {},
-        // },
-      ],
-    },
-  ] as Array<EuiBasicTableColumn<Category>>;
+    });
+  }
 
-  const selectionValue: EuiTableSelectionType<Category> | undefined = {
-    selectable: () => true,
-    onSelectionChange: (selectedItems) => setSelectedCategories(selectedItems),
-  };
+  const selectionValue: EuiTableSelectionType<Category> | undefined = selectable
+    ? {
+        selectable: () => true,
+        onSelectionChange: (selectedItems) => setSelectedCategories(selectedItems),
+      }
+    : undefined;
 
   const getRowStyle = (category: Category) => {
+    if (mouseOver === undefined) {
+      return {};
+    }
+
     if (
-      pinnedCategory &&
-      pinnedCategory.key === category.key &&
-      pinnedCategory.key === category.key
+      mouseOver.pinnedCategory &&
+      mouseOver.pinnedCategory.key === category.key &&
+      mouseOver.pinnedCategory.key === category.key
     ) {
       return {
         backgroundColor: primaryBackgroundColor,
       };
     }
 
-    if (selectedCategory && selectedCategory.key === category.key) {
+    if (mouseOver.highlightedCategory && mouseOver.highlightedCategory.key === category.key) {
       return {
         backgroundColor: euiTheme.euiColorLightestShade,
       };
@@ -210,59 +230,76 @@ export const CategoryTable: FC<Props> = ({
     };
   };
 
+  const tableStyle = css({
+    thead: {
+      position: 'sticky',
+      insetBlockStart: 0,
+      zIndex: 1,
+      backgroundColor: euiTheme.euiColorEmptyShade,
+      boxShadow: `inset 0 0px 0, inset 0 -1px 0 ${euiTheme.euiBorderColor}`,
+    },
+  });
+
+  const chartWrapperRef = useRef<HTMLDivElement>(null);
+
+  const renderCompleteListener = useCallback(
+    (event: Event) => {
+      if (event.target !== chartWrapperRef.current) {
+        return;
+      }
+      if (typeof onRenderComplete === 'function') {
+        onRenderComplete();
+      }
+    },
+    [onRenderComplete]
+  );
+
+  useEffect(() => {
+    if (!chartWrapperRef.current) {
+      throw new Error('Reference to the chart wrapper is not set');
+    }
+    const chartWrapper = chartWrapperRef.current;
+    chartWrapper.addEventListener('renderComplete', renderCompleteListener);
+    return () => {
+      chartWrapper.removeEventListener('renderComplete', renderCompleteListener);
+    };
+  }, [renderCompleteListener]);
+
   return (
-    <>
-      {selectedCategories.length > 0 ? (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={() => openInDiscover(QUERY_MODE.INCLUDE)}>
-                <FormattedMessage
-                  id="xpack.aiops.logCategorization.showInDiscover"
-                  defaultMessage="Show these in Discover"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={() => openInDiscover(QUERY_MODE.EXCLUDE)}>
-                <FormattedMessage
-                  id="xpack.aiops.logCategorization.filterOutInDiscover"
-                  defaultMessage="Filter out in Discover"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      ) : null}
+    <div ref={chartWrapperRef}>
       <EuiInMemoryTable<Category>
         compressed
         items={categories}
         columns={columns}
-        isSelectable={true}
         selection={selectionValue}
         itemId="key"
         onTableChange={onTableChange}
         pagination={pagination}
         sorting={sorting}
+        data-test-subj="aiopsLogPatternsTable"
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        css={tableStyle}
         rowProps={(category) => {
-          return {
-            onClick: () => {
-              if (category.key === pinnedCategory?.key) {
-                setPinnedCategory(null);
-              } else {
-                setPinnedCategory(category);
+          return mouseOver
+            ? {
+                onClick: () => {
+                  if (category.key === mouseOver.pinnedCategory?.key) {
+                    mouseOver.setPinnedCategory(null);
+                  } else {
+                    mouseOver.setPinnedCategory(category);
+                  }
+                },
+                onMouseEnter: () => {
+                  mouseOver.setHighlightedCategory(category);
+                },
+                onMouseLeave: () => {
+                  mouseOver.setHighlightedCategory(null);
+                },
+                style: getRowStyle(category),
               }
-            },
-            onMouseEnter: () => {
-              setSelectedCategory(category);
-            },
-            onMouseLeave: () => {
-              setSelectedCategory(null);
-            },
-            style: getRowStyle(category),
-          };
+            : undefined;
         }}
       />
-    </>
+    </div>
   );
 };

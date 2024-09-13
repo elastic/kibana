@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -40,7 +41,7 @@ It collects system wide statistics and statistics per process and filesystem. \
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-system.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/system.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/system.svg'),
     artifacts: {
       dashboards: [
         {
@@ -56,7 +57,7 @@ It collects system wide statistics and statistics per process and filesystem. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/system_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/system_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),

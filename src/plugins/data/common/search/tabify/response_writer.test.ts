@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { TabbedAggResponseWriter } from './response_writer';
 import { AggConfigs, BUCKET_TYPES, METRIC_TYPES } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import type { TabbedResponseWriterOptions } from './types';
+import { Datatable } from '@kbn/expressions-plugin/common';
 
 describe('TabbedAggResponseWriter class', () => {
   let responseWriter: TabbedAggResponseWriter;
@@ -27,6 +29,48 @@ describe('TabbedAggResponseWriter class', () => {
       type: METRIC_TYPES.CARDINALITY,
       params: {
         field: 'machine.os.raw',
+      },
+    },
+  ];
+
+  const multipleMetricsAggConfig = [
+    {
+      type: BUCKET_TYPES.DATE_HISTOGRAM,
+      params: {
+        field: 'timestamp',
+      },
+    },
+    {
+      type: METRIC_TYPES.COUNT,
+    },
+    {
+      type: METRIC_TYPES.MIN,
+      params: {
+        field: 'timestamp',
+      },
+    },
+    {
+      type: METRIC_TYPES.TOP_METRICS,
+      params: {
+        field: 'geo.src',
+      },
+    },
+    {
+      type: METRIC_TYPES.FILTERED_METRIC,
+      schema: 'metric',
+      params: {
+        customBucket: {
+          type: 'filter',
+          params: {
+            filter: { language: 'kuery', query: 'a: b' },
+          },
+        },
+        customMetric: {
+          type: METRIC_TYPES.TOP_HITS,
+          params: {
+            field: 'machine.os.raw',
+          },
+        },
       },
     },
   ];
@@ -56,9 +100,19 @@ describe('TabbedAggResponseWriter class', () => {
     const fields = [
       {
         name: 'geo.src',
+        type: 'string',
       },
       {
         name: 'machine.os.raw',
+        type: 'string',
+      },
+      {
+        name: 'bytes',
+        type: 'number',
+      },
+      {
+        name: 'timestamp',
+        type: 'date',
       },
     ];
 
@@ -186,7 +240,7 @@ describe('TabbedAggResponseWriter class', () => {
             },
             type: 'terms',
           },
-          type: 'number',
+          type: 'string',
         });
 
         expect(response.columns[1]).toHaveProperty('id', 'col-1-2');
@@ -252,7 +306,7 @@ describe('TabbedAggResponseWriter class', () => {
             },
             type: 'terms',
           },
-          type: 'number',
+          type: 'string',
         });
 
         expect(response.columns[1]).toHaveProperty('id', 'col-1-2');
@@ -277,6 +331,33 @@ describe('TabbedAggResponseWriter class', () => {
             type: 'cardinality',
           },
           type: 'number',
+        });
+      });
+
+      describe('produces correct column.meta.type', () => {
+        let response: Datatable;
+        beforeAll(() => {
+          response = createResponseWritter(multipleMetricsAggConfig).response();
+        });
+        test('returns number if getValueType is not defined and field doesnt exist ', () => {
+          const countColumn = response.columns.find((column) => column.name === 'Count');
+          expect(countColumn?.meta.type).toEqual('number');
+        });
+        test('returns field type if getValueType is not defined', () => {
+          const minColumn = response.columns.find((column) =>
+            column.name.includes('Min timestamp')
+          );
+          expect(minColumn?.meta.type).toEqual('date');
+        });
+        test('returns field type for top metrics', () => {
+          const topMetricsColumn = response.columns.find((column) => column.name.includes('Last'));
+          expect(topMetricsColumn?.meta.type).toEqual('string');
+        });
+        test('returns correct type of the customMetric for filtered metrics', () => {
+          const filteredColumn = response.columns.find((column) =>
+            column.name.includes('Filtered')
+          );
+          expect(filteredColumn?.meta.type).toEqual('string');
         });
       });
     });

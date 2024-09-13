@@ -31,3 +31,27 @@ export const AN_UNKNOWN_USER = i18n.translate(
     defaultMessage: 'an unknown user',
   }
 );
+
+export const DELETE_NOTE_ERROR = (error: string | Error) =>
+  i18n.translate('xpack.securitySolution.timeline.deleteNoteError', {
+    defaultMessage: 'An error occurred deleting note {error}',
+    values: { error: typeof error === 'string' ? error : error?.message },
+  });
+
+export const DELETE_NOTE = i18n.translate('xpack.securitySolution.timeline.deleteNoteLabel', {
+  defaultMessage: 'Delete Note',
+});
+
+export const CANCEL_DELETE_NOTE = i18n.translate(
+  'xpack.securitySolution.timeline.cancelDeleteNoteLabel',
+  {
+    defaultMessage: 'Keep Note',
+  }
+);
+
+export const DELETE_NOTE_CONFIRM = i18n.translate(
+  'xpack.securitySolution.timeline.promptDeleteNoteLabel',
+  {
+    defaultMessage: 'Delete timeline note?',
+  }
+);

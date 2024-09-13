@@ -14,19 +14,12 @@ import type { ServerError } from '../../types';
 
 export const useGetActionTypes = () => {
   const toasts = useToasts();
-  return useQuery(
-    casesQueriesKeys.connectorTypes(),
-    () => {
-      const abortController = new AbortController();
-      return fetchActionTypes({ signal: abortController.signal });
+  return useQuery(casesQueriesKeys.connectorTypes(), ({ signal }) => fetchActionTypes({ signal }), {
+    initialData: [],
+    onError: (error: ServerError) => {
+      toasts.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+        title: i18n.ERROR_TITLE,
+      });
     },
-    {
-      initialData: [],
-      onError: (error: ServerError) => {
-        toasts.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
-          title: i18n.ERROR_TITLE,
-        });
-      },
-    }
-  );
+  });
 };

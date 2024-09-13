@@ -27,8 +27,8 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
   );
 
   const handleRadioChange = useCallback(
-    (optionId) => {
-      setSelectedDuplicateOption(optionId);
+    (optionId: string) => {
+      setSelectedDuplicateOption(optionId as DuplicateOptions);
     },
     [setSelectedDuplicateOption]
   );
@@ -46,21 +46,35 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
       defaultFocusedButton="confirm"
       onCancel={onCancel}
     >
-      <EuiText>
-        {i18n.MODAL_TEXT(rulesCount)}{' '}
-        <EuiIconTip content={i18n.DUPLICATE_TOOLTIP} position="bottom" />
-      </EuiText>
+      <EuiText>{i18n.MODAL_TEXT(rulesCount)}</EuiText>
 
       <EuiSpacer />
       <EuiRadioGroup
         options={[
           {
             id: DuplicateOptions.withExceptions,
-            label: i18n.DUPLICATE_EXCEPTIONS_TEXT(rulesCount),
+            label: (
+              <EuiText size="s">
+                {i18n.DUPLICATE_EXCEPTIONS_INCLUDE_EXPIRED_EXCEPTIONS_LABEL(rulesCount)}
+                <EuiIconTip content={i18n.DUPLICATE_TOOLTIP} position="bottom" />
+              </EuiText>
+            ),
+            'data-test-subj': DuplicateOptions.withExceptions,
+          },
+          {
+            id: DuplicateOptions.withExceptionsExcludeExpiredExceptions,
+            label: (
+              <EuiText size="s">
+                {i18n.DUPLICATE_EXCEPTIONS_TEXT(rulesCount)}
+                <EuiIconTip content={i18n.DUPLICATE_TOOLTIP} position="bottom" />
+              </EuiText>
+            ),
+            'data-test-subj': DuplicateOptions.withExceptionsExcludeExpiredExceptions,
           },
           {
             id: DuplicateOptions.withoutExceptions,
             label: i18n.DUPLICATE_WITHOUT_EXCEPTIONS_TEXT(rulesCount),
+            'data-test-subj': DuplicateOptions.withoutExceptions,
           },
         ]}
         idSelected={selectedDuplicateOption}

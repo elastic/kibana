@@ -1,27 +1,17 @@
 {
-  "groups": [
-    "endpoint",
-    "event-log",
-    "process",
-    "security",
-    "sysmon",
-    "windows",
-    "winlogbeat"
-  ],
+  "groups": ["security", "windows"],
   "description": "Security: Windows - Looks for rare and unusual Windows service names which may indicate execution of unauthorized services, malware, or persistence mechanisms.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "Detects rare winlog.event_data.ServiceName values.",
+        "detector_description": "Detects rare service names.",
         "function": "rare",
-        "by_field_name": "winlog.event_data.ServiceName"
+        "by_field_name": "winlog.event_data.ServiceName",
+        "detector_index": 0
       }
     ],
-    "influencers": [
-      "host.name",
-      "winlog.event_data.ServiceName"
-    ]
+    "influencers": ["host.name", "winlog.event_data.ServiceName"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -31,20 +21,9 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
-    "job_tags": {
-      "euid": "8007",
-      "maturity": "release",
-      "author": "@randomuserid/Elastic",
-      "version": "3",
-      "updated_date": "5/16/2022"
-    },
     "created_by": "ml-module-security-windows-v3",
-    "custom_urls": [
-      {
-        "url_name": "Host Details",
-        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
-      }
-    ],
-    "security_app_display_name": "Unusual Windows Service"
+    "security_app_display_name": "Unusual Windows Service",
+    "managed": true,
+    "job_revision": 4
   }
 }

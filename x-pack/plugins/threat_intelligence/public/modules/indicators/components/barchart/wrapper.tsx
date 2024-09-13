@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import {
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -21,11 +22,14 @@ import { SecuritySolutionDataViewBase } from '../../../../types';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { IndicatorsFieldSelector } from './field_selector';
 import { IndicatorsBarChart } from './barchart';
-import { ChartSeries } from '../../services';
+import { ChartSeries } from '../../services/fetch_aggregated_indicators';
+import {
+  BARCHART_WRAPPER_TEST_ID,
+  CHART_UPDATE_PROGRESS_TEST_ID,
+  LOADING_TEST_ID,
+} from './test_ids';
 
 const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
-
-export const CHART_UPDATE_PROGRESS_TEST_ID = 'tiBarchartWrapper-updating';
 
 export interface IndicatorsBarChartWrapperProps {
   /**
@@ -41,9 +45,9 @@ export interface IndicatorsBarChartWrapperProps {
 
   dateRange: TimeRangeBounds;
 
-  field: string;
+  field: EuiComboBoxOptionOption<string>;
 
-  onFieldChange: (value: string) => void;
+  onFieldChange: (value: EuiComboBoxOptionOption<string>) => void;
 
   /** Is initial load in progress? */
   isLoading?: boolean;
@@ -63,7 +67,7 @@ export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
             <EuiPanel hasShadow={false} hasBorder={false} paddingSize="xl">
-              <EuiLoadingSpinner size="xl" />
+              <EuiLoadingSpinner data-test-subj={LOADING_TEST_ID} size="xl" />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -102,7 +106,9 @@ export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
         )}
 
         {timeRange && (
-          <IndicatorsBarChart indicators={series} dateRange={dateRange} field={field} />
+          <div data-test-subj={BARCHART_WRAPPER_TEST_ID}>
+            <IndicatorsBarChart indicators={series} dateRange={dateRange} field={field} />
+          </div>
         )}
       </div>
     );

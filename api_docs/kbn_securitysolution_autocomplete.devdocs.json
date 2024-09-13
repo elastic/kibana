@@ -27,7 +27,7 @@
         "label": "AutocompleteFieldExistsComponent",
         "description": [],
         "signature": [
-          "{ ({ placeholder, rowLabel, }: React.PropsWithChildren<AutocompleteFieldExistsProps>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ placeholder, rowLabel, \"aria-label\": ariaLabel, }: React.PropsWithChildren<AutocompleteFieldExistsProps>): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_exists/index.tsx",
         "deprecated": false,
@@ -38,7 +38,7 @@
             "id": "def-common.AutocompleteFieldExistsComponent.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  placeholder,\n  rowLabel,\n}",
+            "label": "{\n  placeholder,\n  rowLabel,\n  'aria-label': ariaLabel,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<AutocompleteFieldExistsProps>"
@@ -60,7 +60,7 @@
         "label": "AutocompleteFieldListsComponent",
         "description": [],
         "signature": [
-          "{ ({ httpService, isClearable, isDisabled, isLoading, onChange, placeholder, rowLabel, selectedField, selectedValue, allowLargeValueLists, }: React.PropsWithChildren<AutocompleteFieldListsProps>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ httpService, isClearable, isDisabled, isLoading, onChange, placeholder, rowLabel, selectedField, selectedValue, allowLargeValueLists, \"aria-label\": ariaLabel, showValueListModal, }: React.PropsWithChildren<AutocompleteFieldListsProps>): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
         "deprecated": false,
@@ -71,7 +71,7 @@
             "id": "def-common.AutocompleteFieldListsComponent.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  httpService,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  onChange,\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  allowLargeValueLists = false,\n}",
+            "label": "{\n  httpService,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  onChange,\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  allowLargeValueLists = false,\n  'aria-label': ariaLabel,\n  showValueListModal,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<AutocompleteFieldListsProps>"
@@ -93,7 +93,7 @@
         "label": "AutocompleteFieldMatchAnyComponent",
         "description": [],
         "signature": [
-          "{ ({ placeholder, rowLabel, selectedField, selectedValue, indexPattern, isLoading, isDisabled, isClearable, isRequired, onChange, onError, autocompleteService, }: React.PropsWithChildren<AutocompleteFieldMatchAnyProps>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ placeholder, rowLabel, selectedField, selectedValue, indexPattern, isLoading, isDisabled, isClearable, isRequired, onChange, onError, autocompleteService, \"aria-label\": ariaLabel, }: React.PropsWithChildren<AutocompleteFieldMatchAnyProps>): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match_any/index.tsx",
         "deprecated": false,
@@ -104,7 +104,7 @@
             "id": "def-common.AutocompleteFieldMatchAnyComponent.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  onChange,\n  onError,\n  autocompleteService,\n}",
+            "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  onChange,\n  onError,\n  autocompleteService,\n  'aria-label': ariaLabel,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<AutocompleteFieldMatchAnyProps>"
@@ -126,7 +126,7 @@
         "label": "AutocompleteFieldMatchComponent",
         "description": [],
         "signature": [
-          "{ ({ placeholder, rowLabel, selectedField, selectedValue, indexPattern, isLoading, isDisabled, isClearable, isRequired, fieldInputWidth, autocompleteService, onChange, onError, }: React.PropsWithChildren<AutocompleteFieldMatchProps>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ placeholder, rowLabel, selectedField, selectedValue, indexPattern, isLoading, isDisabled, isClearable, isRequired, fieldInputWidth, autocompleteService, onChange, onError, onWarning, warning, \"aria-label\": ariaLabel, }: React.PropsWithChildren<AutocompleteFieldMatchProps>): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match/index.tsx",
         "deprecated": false,
@@ -137,7 +137,7 @@
             "id": "def-common.AutocompleteFieldMatchComponent.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  fieldInputWidth,\n  autocompleteService,\n  onChange,\n  onError,\n}",
+            "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  fieldInputWidth,\n  autocompleteService,\n  onChange,\n  onError,\n  onWarning,\n  warning,\n  'aria-label': ariaLabel,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<AutocompleteFieldMatchProps>"
@@ -300,7 +300,7 @@
         "label": "FieldComponent",
         "description": [],
         "signature": [
-          "{ ({ fieldInputWidth, fieldTypeFilter, indexPattern, isClearable, isDisabled, isLoading, isRequired, onChange, placeholder, selectedField, acceptsCustomOptions, showMappingConflicts, }: React.PropsWithChildren<",
+          "{ ({ fieldInputWidth, fieldTypeFilter, indexPattern, isClearable, isDisabled, isLoading, isRequired, onChange, placeholder, selectedField, acceptsCustomOptions, showMappingConflicts, \"aria-label\": ariaLabel, }: React.PropsWithChildren<",
           "FieldProps",
           ">): JSX.Element; displayName: string | undefined; }"
         ],
@@ -313,7 +313,7 @@
             "id": "def-common.FieldComponent.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  fieldInputWidth,\n  fieldTypeFilter = [],\n  indexPattern,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  isRequired = false,\n  onChange,\n  placeholder,\n  selectedField,\n  acceptsCustomOptions = false,\n  showMappingConflicts = false,\n}",
+            "label": "{\n  fieldInputWidth,\n  fieldTypeFilter = [],\n  indexPattern,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  isRequired = false,\n  onChange,\n  placeholder,\n  selectedField,\n  acceptsCustomOptions = false,\n  showMappingConflicts = false,\n  'aria-label': ariaLabel,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -602,7 +602,7 @@
         "label": "OperatorComponent",
         "description": [],
         "signature": [
-          "{ ({ isClearable, isDisabled, isLoading, onChange, operator, operatorOptions, operatorInputWidth, placeholder, selectedField, }: React.PropsWithChildren<OperatorState>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ isClearable, isDisabled, isLoading, onChange, operator, operatorOptions, operatorInputWidth, placeholder, selectedField, \"aria-label\": ariaLabel, }: React.PropsWithChildren<OperatorState>): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/operator/index.tsx",
         "deprecated": false,
@@ -613,7 +613,7 @@
             "id": "def-common.OperatorComponent.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  onChange,\n  operator,\n  operatorOptions,\n  operatorInputWidth = 150,\n  placeholder,\n  selectedField,\n}",
+            "label": "{\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  onChange,\n  operator,\n  operatorOptions,\n  operatorInputWidth = 150,\n  placeholder,\n  selectedField,\n  'aria-label': ariaLabel,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<OperatorState>"
@@ -842,7 +842,7 @@
             "label": "smallLists",
             "description": [],
             "signature": [
-              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }[]"
+              "{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }[]"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
             "deprecated": false,
@@ -856,7 +856,7 @@
             "label": "largeLists",
             "description": [],
             "signature": [
-              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }[]"
+              "{ _version: string | undefined; '@timestamp': string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }[]"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
             "deprecated": false,

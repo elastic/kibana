@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { checkIsMaxContinuity, checkIsMinContinuity } from '@kbn/coloring';
@@ -54,8 +55,8 @@ function getNormalizedValueByRange(
   if (range === 'percent') {
     result = (100 * (value - minMax.min)) / (minMax.max - minMax.min);
 
-    // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
-    if (Number.isNaN(result)) {
+    // a division by zero safeguard is required if the range above has equal boundaries
+    if (!Number.isFinite(result)) {
       return rangeMin;
     }
   }

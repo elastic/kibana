@@ -18,6 +18,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/e
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
+import { context } from '@kbn/kibana-react-plugin/public';
 
 import { getColumns } from './anomalies_table_columns';
 
@@ -25,10 +26,11 @@ import { AnomalyDetails } from './anomaly_details';
 
 import { mlTableService } from '../../services/table_service';
 import { RuleEditorFlyout } from '../rule_editor';
-import { ml } from '../../services/ml_api_service';
 import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS, MAX_CHARS } from './anomalies_table_constants';
 
 export class AnomaliesTableInternal extends Component {
+  static contextType = context;
+
   constructor(props) {
     super(props);
 
@@ -66,6 +68,7 @@ export class AnomaliesTableInternal extends Component {
   }
 
   toggleRow = async (item, tab = ANOMALIES_TABLE_TABS.DETAILS) => {
+    const mlApi = this.context.services.mlServices.mlApi;
     const itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMap[item.rowId]) {
       delete itemIdToExpandedRowMap[item.rowId];
@@ -78,7 +81,7 @@ export class AnomaliesTableInternal extends Component {
 
       if (examples !== undefined) {
         try {
-          definition = await ml.results.getCategoryDefinition(
+          definition = await mlApi.results.getCategoryDefinition(
             item.jobId,
             item.source.mlcategory[0]
           );
@@ -144,9 +147,8 @@ export class AnomaliesTableInternal extends Component {
   };
 
   unsetShowRuleEditorFlyoutFunction = () => {
-    const showRuleEditorFlyout = () => {};
     this.setState({
-      showRuleEditorFlyout,
+      showRuleEditorFlyout: () => {},
     });
   };
 
@@ -190,6 +192,7 @@ export class AnomaliesTableInternal extends Component {
     }
 
     const columns = getColumns(
+      this.context.services.mlServices.mlFieldFormatService,
       tableData.anomalies,
       tableData.jobIds,
       tableData.examplesByJobId,
@@ -204,6 +207,10 @@ export class AnomaliesTableInternal extends Component {
       influencerFilter,
       this.props.sourceIndicesWithGeoFields
     );
+
+    // Use auto table layout, unless any columns (categorization examples) have truncateText
+    // set to true which only works with a fixed layout.
+    const tableLayout = columns.some((column) => column.truncateText === true) ? 'fixed' : 'auto';
 
     const sorting = {
       sort: {
@@ -237,6 +244,7 @@ export class AnomaliesTableInternal extends Component {
           className="ml-anomalies-table eui-textBreakWord"
           items={tableData.anomalies}
           columns={columns}
+          tableLayout={tableLayout}
           pagination={pagination}
           sorting={sorting}
           itemId="rowId"

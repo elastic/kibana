@@ -1,0 +1,126 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Reporting Config Schema context {"dev":false,"dist":false} produces correct config 1`] = `
+Object {
+  "capture": Object {
+    "maxAttempts": 1,
+  },
+  "csv": Object {
+    "checkForFormulas": true,
+    "enablePanelActionDownload": false,
+    "escapeFormulaValues": false,
+    "maxConcurrentShardRequests": 5,
+    "maxSizeBytes": ByteSizeValue {
+      "valueInBytes": 262144000,
+    },
+    "scroll": Object {
+      "duration": "30s",
+      "size": 500,
+      "strategy": "pit",
+    },
+    "useByteOrderMarkEncoding": false,
+  },
+  "enabled": true,
+  "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "export_types": Object {
+    "csv": Object {
+      "enabled": true,
+    },
+    "pdf": Object {
+      "enabled": true,
+    },
+    "png": Object {
+      "enabled": true,
+    },
+  },
+  "kibanaServer": Object {},
+  "poll": Object {
+    "jobCompletionNotifier": Object {
+      "interval": 10000,
+      "intervalErrorMultiplier": 5,
+    },
+    "jobsRefresh": Object {
+      "interval": 5000,
+      "intervalErrorMultiplier": 5,
+    },
+  },
+  "queue": Object {
+    "indexInterval": "week",
+    "pollEnabled": true,
+    "pollInterval": "PT3S",
+    "pollIntervalErrorMultiplier": 10,
+    "timeout": "PT4M",
+  },
+  "roles": Object {
+    "allow": Array [
+      "reporting_user",
+    ],
+    "enabled": true,
+  },
+  "statefulSettings": Object {
+    "enabled": true,
+  },
+}
+`;
+
+exports[`Reporting Config Schema context {"dev":false,"dist":true} produces correct config 1`] = `
+Object {
+  "capture": Object {
+    "maxAttempts": 3,
+  },
+  "csv": Object {
+    "checkForFormulas": true,
+    "enablePanelActionDownload": false,
+    "escapeFormulaValues": false,
+    "maxConcurrentShardRequests": 5,
+    "maxSizeBytes": ByteSizeValue {
+      "valueInBytes": 262144000,
+    },
+    "scroll": Object {
+      "duration": "30s",
+      "size": 500,
+      "strategy": "pit",
+    },
+    "useByteOrderMarkEncoding": false,
+  },
+  "enabled": true,
+  "export_types": Object {
+    "csv": Object {
+      "enabled": true,
+    },
+    "pdf": Object {
+      "enabled": true,
+    },
+    "png": Object {
+      "enabled": true,
+    },
+  },
+  "kibanaServer": Object {},
+  "poll": Object {
+    "jobCompletionNotifier": Object {
+      "interval": 10000,
+      "intervalErrorMultiplier": 5,
+    },
+    "jobsRefresh": Object {
+      "interval": 5000,
+      "intervalErrorMultiplier": 5,
+    },
+  },
+  "queue": Object {
+    "indexInterval": "week",
+    "pollEnabled": true,
+    "pollInterval": "PT3S",
+    "pollIntervalErrorMultiplier": 10,
+    "timeout": "PT4M",
+  },
+  "roles": Object {
+    "allow": Array [
+      "reporting_user",
+    ],
+    "enabled": true,
+  },
+  "statefulSettings": Object {
+    "enabled": true,
+  },
+}
+`;

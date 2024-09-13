@@ -5,13 +5,14 @@
  * 2.0.
  */
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { HealthStatus } from '@kbn/alerting-types';
 import { healthRoute } from './health';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { rulesClientMock } from '../../rules_client.mock';
-import { HealthStatus, RecoveredActionGroup } from '../../types';
+import { RecoveredActionGroup } from '../../types';
 import { alertsMock } from '../../mocks';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { RegistryAlertTypeWithAuth } from '../../authorization';
@@ -50,9 +51,13 @@ const ruleTypes = [
       context: [],
       state: [],
     },
+    category: 'test',
     producer: 'test',
     enabledInLicense: true,
     defaultScheduleInterval: '10m',
+    hasAlertsMappings: false,
+    hasFieldsForAAD: false,
+    validLegacyConsumers: [],
   } as RegistryAlertTypeWithAuth,
 ];
 
@@ -76,7 +81,7 @@ beforeEach(() => {
 
 describe('healthRoute', () => {
   it('registers the route', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
@@ -89,7 +94,7 @@ describe('healthRoute', () => {
   });
 
   it('throws error when user does not have any access to any rule types', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set());
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set());
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
@@ -115,7 +120,7 @@ describe('healthRoute', () => {
   });
 
   it('evaluates whether Encrypted Saved Objects is missing encryption key', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
@@ -172,7 +177,7 @@ describe('healthRoute', () => {
   });
 
   test('when ES security status cannot be determined from license state, isSufficientlySecure should return false', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
@@ -230,7 +235,7 @@ describe('healthRoute', () => {
   });
 
   test('when ES security is disabled, isSufficientlySecure should return true', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
@@ -288,7 +293,7 @@ describe('healthRoute', () => {
   });
 
   test('when ES security is enabled but user cannot generate api keys, isSufficientlySecure should return false', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
@@ -346,7 +351,7 @@ describe('healthRoute', () => {
   });
 
   test('when ES security is enabled and user can generate api keys, isSufficientlySecure should return true', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
@@ -404,7 +409,7 @@ describe('healthRoute', () => {
   });
 
   it('should track every call', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });

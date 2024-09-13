@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-kibana-mount', () => {
+  const original = jest.requireActual('@kbn/react-kibana-mount');
 
   return {
     ...original,
@@ -43,7 +45,7 @@ describe('DataViewEditorPlugin', () => {
   });
 
   test('should expose a handler to open the data view field editor', async () => {
-    const startApi = await plugin.start(coreStart, pluginStart);
+    const startApi = plugin.start(coreStart, pluginStart);
     expect(startApi.openEditor).toBeDefined();
   });
 
@@ -58,27 +60,26 @@ describe('DataViewEditorPlugin', () => {
         openFlyout,
       },
     };
-    const { openEditor } = await plugin.start(coreStartMocked, pluginStart);
+    const { openEditor } = plugin.start(coreStartMocked, pluginStart);
 
     openEditor({ onSave: onSaveSpy });
 
     expect(openFlyout).toHaveBeenCalled();
 
-    const [[arg]] = openFlyout.mock.calls;
-    const i18nProvider = arg.props.children;
-    expect(i18nProvider.props.children.type).toBe(DataViewEditorLazy);
+    const [[__reactMount__]] = openFlyout.mock.calls;
+    expect(__reactMount__.props.children.type).toBe(DataViewEditorLazy);
 
     // We force call the "onSave" prop from the <RuntimeFieldEditorFlyoutContent /> component
     // and make sure that the the spy is being called.
     // Note: we are testing implementation details, if we change or rename the "onSave" prop on
     // the component, we will need to update this test accordingly.
-    expect(i18nProvider.props.children.props.onSave).toBeDefined();
-    i18nProvider.props.children.props.onSave();
+    expect(__reactMount__.props.children.props.onSave).toBeDefined();
+    __reactMount__.props.children.props.onSave();
     expect(onSaveSpy).toHaveBeenCalled();
   });
 
   test('should return a handler to close the flyout', async () => {
-    const { openEditor } = await plugin.start(coreStart, pluginStart);
+    const { openEditor } = plugin.start(coreStart, pluginStart);
 
     const closeEditorHandler = openEditor({ onSave: noop });
     expect(typeof closeEditorHandler).toBe('function');

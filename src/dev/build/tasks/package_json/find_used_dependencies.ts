@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -37,8 +38,6 @@ export async function findUsedDependencies(
   // Get the dependencies found searching through the server
   // side code entries that were provided
   const usedDeps = [
-    // TODO: remove this once we get rid off @kbn/ui-framework, for now it isn't detectable as "used" so we hard code it
-    '@kbn/ui-framework',
     // find all the node modules we actually use on the server, including the peerDependencies of our used node_modules which are used within those deps
     ...(await findUsedNodeModules({
       resolver,

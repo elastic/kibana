@@ -20,10 +20,14 @@ const configSchema = schema.object({
   eventTypesAllowlist: schema.arrayOf(schema.string(), {
     defaultValue: [
       'Loaded Kibana', // Sent once per page refresh (potentially, once per session)
+      'observability_onboarding_feedback', // Sent once per feedback click, only clickable once
       'Hosts View Query Submitted', // Worst-case scenario 1 every 2 seconds
       'Host Entry Clicked', // Worst-case scenario once per second - AT RISK,
+      'Host Flyout Filter Removed', // Worst-case scenario once per second - AT RISK,
+      'Host Flyout Filter Added', // Worst-case scenario once per second - AT RISK,
     ],
   }),
+  pageVarsDebounceTime: schema.duration({ defaultValue: '500ms' }),
 });
 
 export type CloudFullStoryConfigType = TypeOf<typeof configSchema>;
@@ -32,6 +36,7 @@ export const config: PluginConfigDescriptor<CloudFullStoryConfigType> = {
   exposeToBrowser: {
     org_id: true,
     eventTypesAllowlist: true,
+    pageVarsDebounceTime: true,
   },
   schema: configSchema,
   deprecations: () => [
@@ -60,6 +65,8 @@ export const config: PluginConfigDescriptor<CloudFullStoryConfigType> = {
           { path: 'xpack.cloud.full_story.enabled' },
           { path: 'xpack.cloud.full_story.org_id' },
           { path: 'xpack.cloud.full_story.eventTypesAllowlist' },
+          { path: 'xpack.cloud_integrations.gain_sight.org_id' },
+          { path: 'xpack.cloud_integrations.gain_sight.enabled' },
         ],
       };
     },

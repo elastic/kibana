@@ -2,6 +2,9 @@
   flex: auto;
   display: flex;
   flex-direction: column;
+  &--defaultBg {
+    background: $euiColorEmptyShade;
+  }
 }
 
 .dshDashboardViewport {
@@ -15,11 +18,6 @@
 .dshDashboardViewport-controls {
   margin: 0 $euiSizeS 0 $euiSizeS;
   padding-top: $euiSizeS;
-  padding-bottom: $euiSizeXS;
-}
-
-.dshDashboardEmptyScreen {
-  margin-top: $euiSizeS;
 }
 
 .dashboardViewport--screenshotMode  .controlsWrapper--empty {

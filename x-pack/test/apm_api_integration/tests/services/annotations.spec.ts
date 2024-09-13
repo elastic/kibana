@@ -29,7 +29,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   function expectContainsObj(
-    source: APIReturnType<'POST /api/apm/services/{serviceName}/annotation'>,
+    source: APIReturnType<'POST /api/apm/services/{serviceName}/annotation 2023-10-31'>,
     expected: JsonObject
   ) {
     expect(source).to.eql(
@@ -43,10 +43,10 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   }
 
   function createAnnotation(
-    body: APIClientRequestParamsOf<'POST /api/apm/services/{serviceName}/annotation'>['params']['body']
+    body: APIClientRequestParamsOf<'POST /api/apm/services/{serviceName}/annotation 2023-10-31'>['params']['body']
   ) {
     return apmApiClient.annotationWriterUser({
-      endpoint: 'POST /api/apm/services/{serviceName}/annotation',
+      endpoint: 'POST /api/apm/services/{serviceName}/annotation 2023-10-31',
       params: {
         path: {
           serviceName: 'opbeans-java',
@@ -58,11 +58,11 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
 
   function getAnnotation(
     query: RecursivePartial<
-      APIClientRequestParamsOf<'GET /api/apm/services/{serviceName}/annotation/search'>['params']['query']
+      APIClientRequestParamsOf<'GET /api/apm/services/{serviceName}/annotation/search 2023-10-31'>['params']['query']
     >
   ) {
     return apmApiClient.readUser({
-      endpoint: 'GET /api/apm/services/{serviceName}/annotation/search',
+      endpoint: 'GET /api/apm/services/{serviceName}/annotation/search 2023-10-31',
       params: {
         path: {
           serviceName: 'opbeans-java',
@@ -78,7 +78,8 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   }
 
   registry.when('Annotations with a basic license', { config: 'basic', archives: [] }, () => {
-    describe('when creating an annotation', () => {
+    describe('when creating an annotation in basic license', function () {
+      this.tags('skipFIPS');
       it('fails with a 403 forbidden', async () => {
         const err = await expectToReject<ApmApiError>(() =>
           createAnnotation({
@@ -101,7 +102,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   });
 
   registry.when('Annotations with a trial license', { config: 'trial', archives: [] }, () => {
-    describe('when creating an annotation', () => {
+    describe('when creating an annotation in trial license', () => {
       afterEach(async () => {
         const indexExists = await es.indices.exists({ index: DEFAULT_INDEX_NAME });
         if (indexExists) {

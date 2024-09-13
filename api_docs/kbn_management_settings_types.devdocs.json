@@ -1,0 +1,1900 @@
+{
+  "id": "@kbn/management-settings-types",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.CategorizedFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "CategorizedFields",
+        "description": [],
+        "path": "packages/kbn-management/settings/types/category.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.CategorizedFields.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[category: string]: { count: number; fields: FieldDefinition<UiSettingsType, string | number | boolean | (string | number)[] | null | undefined>[]; }",
+            "description": [],
+            "signature": [
+              "[category: string]:  { count: number; fields: ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-public.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsType",
+                "text": "UiSettingsType"
+              },
+              ", string | number | boolean | (string | number)[] | null | undefined>[]; }"
+            ],
+            "path": "packages/kbn-management/settings/types/category.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.CategoryCounts",
+        "type": "Interface",
+        "tags": [],
+        "label": "CategoryCounts",
+        "description": [],
+        "path": "packages/kbn-management/settings/types/category.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.CategoryCounts.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[category: string]: number",
+            "description": [],
+            "signature": [
+              "[category: string]:  number"
+            ],
+            "path": "packages/kbn-management/settings/types/category.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.FieldDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldDefinition",
+        "description": [
+          "\nA {@link FieldDefinition} adapts a {@link UiSettingMetadata} object to be more\neasily consumed by the UI.  It contains additional information about the field\nthat is determined from a given UiSettingMetadata object, (which is a type\nrepresenting a UiSetting)."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<T, V>"
+        ],
+        "path": "packages/kbn-management/settings/types/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.ariaAttributes",
+            "type": "Object",
+            "tags": [],
+            "label": "ariaAttributes",
+            "description": [
+              "UX ARIA attributes derived from the setting."
+            ],
+            "signature": [
+              "{ ariaLabel: string; ariaDescribedBy?: string | undefined; }"
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.categories",
+            "type": "Array",
+            "tags": [],
+            "label": "categories",
+            "description": [
+              "A list of categories related to the field."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.defaultValue",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [
+              "The default value of the field from Kibana."
+            ],
+            "signature": [
+              "V | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.defaultValueDisplay",
+            "type": "string",
+            "tags": [],
+            "label": "defaultValueDisplay",
+            "description": [
+              "The text-based display of the default value, for use in the UI."
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.deprecation",
+            "type": "Object",
+            "tags": [
+              "see"
+            ],
+            "label": "deprecation",
+            "description": [
+              "\nDeprecation information for the field"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.DeprecationSettings",
+                "text": "DeprecationSettings"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.description",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "A description of the field."
+            ],
+            "signature": [
+              "string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.displayName",
+            "type": "string",
+            "tags": [],
+            "label": "displayName",
+            "description": [
+              "The name of the field suitable for display in the UX."
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.groupId",
+            "type": "string",
+            "tags": [],
+            "label": "groupId",
+            "description": [
+              "The grouping identifier for the field."
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "The unique identifier of the field, typically separated by `:`"
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.isCustom",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCustom",
+            "description": [
+              "True if the field is a custom setting, false otherwise."
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.isDefaultValue",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDefaultValue",
+            "description": [
+              "True if the current saved setting matches the default setting."
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.isOverridden",
+            "type": "boolean",
+            "tags": [],
+            "label": "isOverridden",
+            "description": [
+              "True if the setting is overridden in Kibana, false otherwise."
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.isReadOnly",
+            "type": "boolean",
+            "tags": [],
+            "label": "isReadOnly",
+            "description": [
+              "True if the setting is read-only, false otherwise."
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.metric",
+            "type": "Object",
+            "tags": [],
+            "label": "metric",
+            "description": [
+              "Metric information when one interacts with the field."
+            ],
+            "signature": [
+              "{ name?: string | undefined; type?: string | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "The name of the field suitable for use in the UX."
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "Option information if the field represents a `select` setting."
+            ],
+            "signature": [
+              "{ values: string[] | number[]; labels: Record<string, string>; } | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [
+              "A rank order for the field relative to other fields."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.requiresPageReload",
+            "type": "boolean",
+            "tags": [],
+            "label": "requiresPageReload",
+            "description": [
+              "True if the browser must be reloaded for the setting to take effect, false otherwise."
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.savedValue",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "savedValue",
+            "description": [
+              "The current saved value of the setting."
+            ],
+            "signature": [
+              "V | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.type",
+            "type": "Uncategorized",
+            "tags": [
+              "see"
+            ],
+            "label": "type",
+            "description": [
+              "\nThe type of setting the field represents."
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.FieldDefinition.unsavedFieldId",
+            "type": "string",
+            "tags": [],
+            "label": "unsavedFieldId",
+            "description": [
+              "An identifier of the field when it has an unsaved change."
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.SelectFieldDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "SelectFieldDefinition",
+        "description": [
+          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `select` type\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.SelectFieldDefinition",
+            "text": "SelectFieldDefinition"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<\"select\", string | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.SelectFieldDefinition.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "Options are required when this definition is used."
+            ],
+            "signature": [
+              "{ values: string[] | number[]; labels: Record<string, string>; }"
+            ],
+            "path": "packages/kbn-management/settings/types/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.SettingsCapabilities",
+        "type": "Interface",
+        "tags": [],
+        "label": "SettingsCapabilities",
+        "description": [],
+        "path": "packages/kbn-management/settings/types/capabilities.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.SettingsCapabilities.spaceSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "spaceSettings",
+            "description": [],
+            "signature": [
+              "SettingCapability"
+            ],
+            "path": "packages/kbn-management/settings/types/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.SettingsCapabilities.globalSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "globalSettings",
+            "description": [],
+            "signature": [
+              "SettingCapability"
+            ],
+            "path": "packages/kbn-management/settings/types/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.SettingsTabs",
+        "type": "Interface",
+        "tags": [],
+        "label": "SettingsTabs",
+        "description": [],
+        "path": "packages/kbn-management/settings/types/tab.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.SettingsTabs.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[id: string]: { name: string; fields: FieldDefinition<UiSettingsType, string | number | boolean | (string | number)[] | null | undefined>[]; categoryCounts: CategoryCounts; callOutTitle: string; callOutText: string; sections: RegistryEntry[]; isSavingEnabled: boolean; }",
+            "description": [],
+            "signature": [
+              "[id: string]:  { name: string; fields: ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-public.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsType",
+                "text": "UiSettingsType"
+              },
+              ", string | number | boolean | (string | number)[] | null | undefined>[]; categoryCounts: ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-public.CategoryCounts",
+                "text": "CategoryCounts"
+              },
+              "; callOutTitle: string; callOutText: string; sections: ",
+              {
+                "pluginId": "@kbn/management-settings-section-registry",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsSectionRegistryPluginApi",
+                "section": "def-public.RegistryEntry",
+                "text": "RegistryEntry"
+              },
+              "[]; isSavingEnabled: boolean; }"
+            ],
+            "path": "packages/kbn-management/settings/types/tab.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.UiSettingMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "UiSettingMetadata",
+        "description": [
+          "\nThis is an type-safe abstraction over the {@link UiSetting} type, whose fields\nare not only optional, but also not strongly typed to\n{@link @kbn/core-ui-settings-common#UiSettingsType}.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          "<T, V> extends ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSetting",
+            "text": "UiSetting"
+          },
+          "<V>"
+        ],
+        "path": "packages/kbn-management/settings/types/metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.UiSettingMetadata.type",
+            "type": "Uncategorized",
+            "tags": [
+              "see"
+            ],
+            "label": "type",
+            "description": [
+              "\nThe type of setting being represented."
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/kbn-management/settings/types/metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.UiSettingMetadata.value",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "The default value in Kibana for the setting."
+            ],
+            "signature": [
+              "V | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.UiSettingMetadata.userValue",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "userValue",
+            "description": [
+              "The value saved by the user."
+            ],
+            "signature": [
+              "V | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.UnsavedFieldChange",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnsavedFieldChange",
+        "description": [
+          "\nA {@link UnsavedFieldChange} represents local changes to a field that have not\nyet been saved."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.UnsavedFieldChange.type",
+            "type": "Uncategorized",
+            "tags": [
+              "see"
+            ],
+            "label": "type",
+            "description": [
+              "\nThe type of setting."
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.UnsavedFieldChange.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [
+              "An error message, if any, from the change."
+            ],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.UnsavedFieldChange.isInvalid",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isInvalid",
+            "description": [
+              "True if the change is invalid for the field, false otherwise."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.UnsavedFieldChange.unsavedValue",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "unsavedValue",
+            "description": [
+              "The current unsaved value stored in the field."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-public.KnownTypeToValue",
+                "text": "KnownTypeToValue"
+              },
+              "<T> | null | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.ArrayFieldDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "ArrayFieldDefinition",
+        "description": [
+          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `array` type\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<\"array\", (string | number)[] | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.ArraySettingType",
+        "type": "Type",
+        "tags": [],
+        "label": "ArraySettingType",
+        "description": [
+          "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `array` primitive type value."
+        ],
+        "signature": [
+          "\"array\""
+        ],
+        "path": "packages/kbn-management/settings/types/setting_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.ArrayUiSettingMetadata",
+        "type": "Type",
+        "tags": [],
+        "label": "ArrayUiSettingMetadata",
+        "description": [
+          "\nThis is an type-safe abstraction over the {@link UiSetting} `array` type."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          "<\"array\", (string | number)[] | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.ArrayUnsavedFieldChange",
+        "type": "Type",
+        "tags": [],
+        "label": "ArrayUnsavedFieldChange",
+        "description": [
+          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `number` value\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<\"array\">"
+        ],
+        "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.BooleanFieldDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "BooleanFieldDefinition",
+        "description": [
+          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `boolean` type\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<\"boolean\", boolean | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.BooleanSettingType",
+        "type": "Type",
+        "tags": [],
+        "label": "BooleanSettingType",
+        "description": [
+          "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `boolean` primitive type value."
+        ],
+        "signature": [
+          "\"boolean\""
+        ],
+        "path": "packages/kbn-management/settings/types/setting_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.BooleanUiSettingMetadata",
+        "type": "Type",
+        "tags": [],
+        "label": "BooleanUiSettingMetadata",
+        "description": [
+          "\nThis is an type-safe abstraction over the {@link UiSetting} `boolean` type."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          "<\"boolean\", boolean | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.BooleanUnsavedFieldChange",
+        "type": "Type",
+        "tags": [],
+        "label": "BooleanUnsavedFieldChange",
+        "description": [
+          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `boolean` value\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<\"boolean\">"
+        ],
+        "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.ColorFieldDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "ColorFieldDefinition",
+        "description": [
+          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `color` type\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<\"color\", string | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.ColorUiSettingMetadata",
+        "type": "Type",
+        "tags": [],
+        "label": "ColorUiSettingMetadata",
+        "description": [
+          "\nThis is an type-safe abstraction over the {@link UiSetting} `color` type."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          "<\"color\", string | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.ColorUnsavedFieldChange",
+        "type": "Type",
+        "tags": [],
+        "label": "ColorUnsavedFieldChange",
+        "description": [
+          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `color` value\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<\"color\">"
+        ],
+        "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.ImageFieldDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "ImageFieldDefinition",
+        "description": [
+          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `image` type\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<\"image\", string | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.ImageUiSettingMetadata",
+        "type": "Type",
+        "tags": [],
+        "label": "ImageUiSettingMetadata",
+        "description": [
+          "\nThis is an type-safe abstraction over the {@link UiSetting} `image` type."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          "<\"image\", string | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.ImageUnsavedFieldChange",
+        "type": "Type",
+        "tags": [],
+        "label": "ImageUnsavedFieldChange",
+        "description": [
+          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `image` value\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<\"image\">"
+        ],
+        "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.JsonFieldDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "JsonFieldDefinition",
+        "description": [
+          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `json` type\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<\"json\", string | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.JsonUiSettingMetadata",
+        "type": "Type",
+        "tags": [],
+        "label": "JsonUiSettingMetadata",
+        "description": [
+          "\nThis is an type-safe abstraction over the {@link UiSetting} `json` type."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          "<\"json\", string | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.JsonUnsavedFieldChange",
+        "type": "Type",
+        "tags": [],
+        "label": "JsonUnsavedFieldChange",
+        "description": [
+          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `json` value\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<\"json\">"
+        ],
+        "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.KnownTypeToMetadata",
+        "type": "Type",
+        "tags": [],
+        "label": "KnownTypeToMetadata",
+        "description": [
+          "\nThis is a narrowing type, which finds the correct {@link UiSettingMetadata}\ntype based on a given {@link SettingType}."
+        ],
+        "signature": [
+          "T extends \"array\" ? ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.ArrayUiSettingMetadata",
+            "text": "ArrayUiSettingMetadata"
+          },
+          " : T extends \"boolean\" ? ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.BooleanUiSettingMetadata",
+            "text": "BooleanUiSettingMetadata"
+          },
+          " : T extends \"color\" ? ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.ColorUiSettingMetadata",
+            "text": "ColorUiSettingMetadata"
+          },
+          " : T extends \"image\" ? ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.ImageUiSettingMetadata",
+            "text": "ImageUiSettingMetadata"
+          },
+          " : T extends \"json\" ? ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.JsonUiSettingMetadata",
+            "text": "JsonUiSettingMetadata"
+          },
+          " : T extends \"markdown\" ? ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.MarkdownUiSettingMetadata",
+            "text": "MarkdownUiSettingMetadata"
+          },
+          " : T extends \"number\" ? ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.NumberUiSettingMetadata",
+            "text": "NumberUiSettingMetadata"
+          },
+          " : T extends \"select\" ? ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.SelectUiSettingMetadata",
+            "text": "SelectUiSettingMetadata"
+          },
+          " : T extends \"string\" ? ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.StringUiSettingMetadata",
+            "text": "StringUiSettingMetadata"
+          },
+          " : T extends \"undefined\" ? ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UndefinedUiSettingMetadata",
+            "text": "UndefinedUiSettingMetadata"
+          },
+          " : never"
+        ],
+        "path": "packages/kbn-management/settings/types/metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.KnownTypeToValue",
+        "type": "Type",
+        "tags": [],
+        "label": "KnownTypeToValue",
+        "description": [
+          "\nThis is a narrowing type, which finds the correct primitive type based on a\ngiven {@link SettingType}."
+        ],
+        "signature": [
+          "T extends \"string\" | \"color\" | \"image\" | \"select\" | \"json\" | \"markdown\" ? string : T extends \"boolean\" ? boolean : T extends \"number\" | \"bigint\" ? number : T extends \"array\" ? (string | number)[] : T extends \"undefined\" ? undefined : never"
+        ],
+        "path": "packages/kbn-management/settings/types/setting_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.MarkdownFieldDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "MarkdownFieldDefinition",
+        "description": [
+          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `markdown` type\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<\"markdown\", string | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.MarkdownUiSettingMetadata",
+        "type": "Type",
+        "tags": [],
+        "label": "MarkdownUiSettingMetadata",
+        "description": [
+          "\nThis is an type-safe abstraction over the {@link UiSetting} `markdown` type."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          "<\"markdown\", string | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.MarkdownUnsavedFieldChange",
+        "type": "Type",
+        "tags": [],
+        "label": "MarkdownUnsavedFieldChange",
+        "description": [
+          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `markdown` value\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<\"markdown\">"
+        ],
+        "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.NumberFieldDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "NumberFieldDefinition",
+        "description": [
+          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `number` type\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<\"number\", number | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.NumberSettingType",
+        "type": "Type",
+        "tags": [],
+        "label": "NumberSettingType",
+        "description": [
+          "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `number` primitive type value."
+        ],
+        "signature": [
+          "\"number\""
+        ],
+        "path": "packages/kbn-management/settings/types/setting_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.NumberUiSettingMetadata",
+        "type": "Type",
+        "tags": [],
+        "label": "NumberUiSettingMetadata",
+        "description": [
+          "\nThis is an type-safe abstraction over the {@link UiSetting} `number` type."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          "<\"number\", number | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.NumberUnsavedFieldChange",
+        "type": "Type",
+        "tags": [],
+        "label": "NumberUnsavedFieldChange",
+        "description": [
+          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `number` value\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<\"number\">"
+        ],
+        "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.OnFieldChangeFn",
+        "type": "Type",
+        "tags": [],
+        "label": "OnFieldChangeFn",
+        "description": [
+          "\nAn `onFieldChange` handler when a Field changes."
+        ],
+        "signature": [
+          "(id: string, change?: ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<T> | undefined) => void"
+        ],
+        "path": "packages/kbn-management/settings/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.OnFieldChangeFn.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "A unique id corresponding to the particular setting being changed."
+            ],
+            "path": "packages/kbn-management/settings/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.OnFieldChangeFn.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "change",
+            "description": [
+              "The {@link UnsavedFieldChange } corresponding to any unsaved change to the field."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-public.UnsavedFieldChange",
+                "text": "UnsavedFieldChange"
+              },
+              "<T> | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.OnInputChangeFn",
+        "type": "Type",
+        "tags": [],
+        "label": "OnInputChangeFn",
+        "description": [
+          "\nA function that is called when the value of a {@link FieldInput} changes."
+        ],
+        "signature": [
+          "(change?: ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<T> | undefined) => void"
+        ],
+        "path": "packages/kbn-management/settings/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-types",
+            "id": "def-public.OnInputChangeFn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "change",
+            "description": [
+              "The {@link UnsavedFieldChange } passed to the handler."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-public.UnsavedFieldChange",
+                "text": "UnsavedFieldChange"
+              },
+              "<T> | undefined"
+            ],
+            "path": "packages/kbn-management/settings/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.ResetInputRef",
+        "type": "Type",
+        "tags": [],
+        "label": "ResetInputRef",
+        "description": [
+          "\nA React `ref` that indicates an input can be reset using an\nimperative handle."
+        ],
+        "signature": [
+          "{ reset: () => void; } | null"
+        ],
+        "path": "packages/kbn-management/settings/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.SelectUiSettingMetadata",
+        "type": "Type",
+        "tags": [],
+        "label": "SelectUiSettingMetadata",
+        "description": [
+          "\nThis is an type-safe abstraction over the {@link UiSetting} `select` type."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          "<\"select\", string | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.SelectUnsavedFieldChange",
+        "type": "Type",
+        "tags": [],
+        "label": "SelectUnsavedFieldChange",
+        "description": [
+          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `select` value\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<\"select\">"
+        ],
+        "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.SettingType",
+        "type": "Type",
+        "tags": [],
+        "label": "SettingType",
+        "description": [
+          "\nThis is a local type equivalent to {@link UiSettingsType} for flexibility."
+        ],
+        "signature": [
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"array\" | \"image\" | \"select\" | \"json\" | \"markdown\""
+        ],
+        "path": "packages/kbn-management/settings/types/setting_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.StringFieldDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "StringFieldDefinition",
+        "description": [
+          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `string` type\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<\"string\", string | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.StringSettingType",
+        "type": "Type",
+        "tags": [],
+        "label": "StringSettingType",
+        "description": [
+          "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `string` primitive type value."
+        ],
+        "signature": [
+          "\"string\" | \"color\" | \"image\" | \"select\" | \"json\" | \"markdown\""
+        ],
+        "path": "packages/kbn-management/settings/types/setting_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.StringUiSettingMetadata",
+        "type": "Type",
+        "tags": [],
+        "label": "StringUiSettingMetadata",
+        "description": [
+          "\nThis is an type-safe abstraction over the {@link UiSetting} `string` type."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          "<\"string\", string | null>"
+        ],
+        "path": "packages/kbn-management/settings/types/metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.StringUnsavedFieldChange",
+        "type": "Type",
+        "tags": [],
+        "label": "StringUnsavedFieldChange",
+        "description": [
+          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `string` value\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<\"string\">"
+        ],
+        "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.UiSetting",
+        "type": "Type",
+        "tags": [],
+        "label": "UiSetting",
+        "description": [
+          "\nCreating this type based on {@link UiSettingsClientCommon} and exporting for ease."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-ui-settings-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+            "section": "def-public.PublicUiSettingsParams",
+            "text": "PublicUiSettingsParams"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UserProvidedValues",
+            "text": "UserProvidedValues"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-management/settings/types/metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.UndefinedFieldDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "UndefinedFieldDefinition",
+        "description": [
+          "\nThis is a {@link FieldDefinition} representing {@link UiSetting} `undefined` type\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<\"undefined\", null | undefined>"
+        ],
+        "path": "packages/kbn-management/settings/types/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.UndefinedSettingType",
+        "type": "Type",
+        "tags": [],
+        "label": "UndefinedSettingType",
+        "description": [
+          "\nA narrowing type representing all {@link SettingType} values that correspond\nto an `undefined` type value."
+        ],
+        "signature": [
+          "\"undefined\""
+        ],
+        "path": "packages/kbn-management/settings/types/setting_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.UndefinedUiSettingMetadata",
+        "type": "Type",
+        "tags": [],
+        "label": "UndefinedUiSettingMetadata",
+        "description": [
+          "\nThis is an type-safe abstraction over the {@link UiSetting} `undefined` type."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          "<\"undefined\", null | undefined>"
+        ],
+        "path": "packages/kbn-management/settings/types/metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.UndefinedUnsavedFieldChange",
+        "type": "Type",
+        "tags": [],
+        "label": "UndefinedUnsavedFieldChange",
+        "description": [
+          "\nThis is a {@link UnsavedFieldChange} representing an unsaved change to a\n{@link FieldDefinition} which has a {@link UiSetting} `undefined` value\nfor use in the UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<\"undefined\">"
+        ],
+        "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.UnsavedFieldChanges",
+        "type": "Type",
+        "tags": [],
+        "label": "UnsavedFieldChanges",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-public.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          ">; }"
+        ],
+        "path": "packages/kbn-management/settings/types/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-types",
+        "id": "def-public.Value",
+        "type": "Type",
+        "tags": [],
+        "label": "Value",
+        "description": [
+          "\nA type representing all possible values corresponding to a given {@link SettingType}."
+        ],
+        "signature": [
+          "string | number | boolean | (string | number)[] | null | undefined"
+        ],
+        "path": "packages/kbn-management/settings/types/setting_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

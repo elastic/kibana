@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import type { AgentPolicy } from '../types';
-import { FLEET_SERVER_PACKAGE, FLEET_APM_PACKAGE } from '../constants';
+import type { NewAgentPolicy, AgentPolicy } from '../types';
+import {
+  FLEET_SERVER_PACKAGE,
+  FLEET_APM_PACKAGE,
+  FLEET_SYNTHETICS_PACKAGE,
+  FLEET_ENDPOINT_PACKAGE,
+} from '../constants';
 
-export function policyHasFleetServer(agentPolicy: AgentPolicy) {
+export function policyHasFleetServer(
+  agentPolicy: Pick<AgentPolicy, 'package_policies' | 'has_fleet_server'>
+) {
   if (!agentPolicy.package_policies) {
     return false;
   }
@@ -19,8 +26,28 @@ export function policyHasFleetServer(agentPolicy: AgentPolicy) {
 }
 
 export function policyHasAPMIntegration(agentPolicy: AgentPolicy) {
+  return policyHasIntegration(agentPolicy, FLEET_APM_PACKAGE);
+}
+
+export function policyHasSyntheticsIntegration(agentPolicy: AgentPolicy) {
+  return policyHasIntegration(agentPolicy, FLEET_SYNTHETICS_PACKAGE);
+}
+
+export function policyHasEndpointSecurity(agentPolicy: Partial<NewAgentPolicy | AgentPolicy>) {
+  return policyHasIntegration(agentPolicy as AgentPolicy, FLEET_ENDPOINT_PACKAGE);
+}
+
+function policyHasIntegration(agentPolicy: AgentPolicy, packageName: string) {
   if (!agentPolicy.package_policies) {
     return false;
   }
-  return agentPolicy.package_policies?.some((p) => p.package?.name === FLEET_APM_PACKAGE);
+
+  return agentPolicy.package_policies?.some((p) => p.package?.name === packageName);
+}
+
+export function getInheritedNamespace(agentPolicies: AgentPolicy[], defaultValue?: string): string {
+  if (agentPolicies.length === 1) {
+    return agentPolicies[0].namespace;
+  }
+  return defaultValue ?? 'default';
 }

@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { useCallback, useEffect } from 'react';
-import { useKibana, useNavigation } from '../../common/lib/kibana';
+import { KibanaServices, useKibana, useNavigation } from '../../common/lib/kibana';
 import type { ICasesDeepLinkId } from '../../common/navigation';
 import { CasesDeepLinkId } from '../../common/navigation';
-import { useCasesContext } from '../cases_context/use_cases_context';
+import { useApplication } from '../../common/lib/kibana/use_application';
 
 const casesBreadcrumbTitle: Record<ICasesDeepLinkId, string> = {
   [CasesDeepLinkId.cases]: i18n.translate('xpack.cases.breadcrumbs.all_cases', {
@@ -20,8 +20,8 @@ const casesBreadcrumbTitle: Record<ICasesDeepLinkId, string> = {
   [CasesDeepLinkId.casesCreate]: i18n.translate('xpack.cases.breadcrumbs.create_case', {
     defaultMessage: 'Create',
   }),
-  [CasesDeepLinkId.casesConfigure]: i18n.translate('xpack.cases.breadcrumbs.configure_cases', {
-    defaultMessage: 'Configure',
+  [CasesDeepLinkId.casesConfigure]: i18n.translate('xpack.cases.breadcrumbs.settings', {
+    defaultMessage: 'Settings',
   }),
 };
 
@@ -61,7 +61,7 @@ const useApplyBreadcrumbs = () => {
 };
 
 export const useCasesBreadcrumbs = (pageDeepLink: ICasesDeepLinkId) => {
-  const { appId, appTitle } = useCasesContext();
+  const { appId, appTitle } = useApplication();
   const { getAppUrl } = useNavigation(appId);
   const applyBreadcrumbs = useApplyBreadcrumbs();
 
@@ -84,25 +84,28 @@ export const useCasesBreadcrumbs = (pageDeepLink: ICasesDeepLinkId) => {
           ]
         : []),
     ]);
+    KibanaServices.get().serverless?.setBreadcrumbs([]);
   }, [pageDeepLink, appTitle, getAppUrl, applyBreadcrumbs]);
 };
 
 export const useCasesTitleBreadcrumbs = (caseTitle: string) => {
-  const { appId, appTitle } = useCasesContext();
+  const { appId, appTitle } = useApplication();
   const { getAppUrl } = useNavigation(appId);
   const applyBreadcrumbs = useApplyBreadcrumbs();
 
   useEffect(() => {
+    const titleBreadcrumb: ChromeBreadcrumb = {
+      text: caseTitle,
+    };
     const casesBreadcrumbs: ChromeBreadcrumb[] = [
       { text: appTitle, href: getAppUrl() },
       {
         text: casesBreadcrumbTitle[CasesDeepLinkId.cases],
         href: getAppUrl({ deepLinkId: CasesDeepLinkId.cases }),
       },
-      {
-        text: caseTitle,
-      },
+      titleBreadcrumb,
     ];
     applyBreadcrumbs(casesBreadcrumbs);
+    KibanaServices.get().serverless?.setBreadcrumbs([titleBreadcrumb]);
   }, [caseTitle, appTitle, getAppUrl, applyBreadcrumbs]);
 };

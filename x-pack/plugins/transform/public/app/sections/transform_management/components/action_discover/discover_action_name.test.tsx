@@ -11,16 +11,16 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { render, waitFor, screen } from '@testing-library/react';
 
-import { TransformListRow } from '../../../../common';
 import { isDiscoverActionDisabled, DiscoverActionName } from './discover_action_name';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
+import type { TransformListRowWithStats } from '../../../../common/transform_list';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
 // @ts-expect-error mock data is too loosely typed
-const item: TransformListRow = transformListRow;
+const item: TransformListRowWithStats = transformListRow;
 
 describe('Transform: Transform List Actions isDiscoverActionDisabled()', () => {
   it('should be disabled when more than one item is passed in', () => {

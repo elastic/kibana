@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mockUuidv1, mockUuidv5 } from './saved_objects_utils.test.mock';
+import { mockUuidv4, mockUuidv5 } from './saved_objects_utils.test.mock';
 
 import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsUtils } from './saved_objects_utils';
@@ -78,8 +79,8 @@ describe('SavedObjectsUtils', () => {
 
   describe('#generateId', () => {
     it('returns a valid uuid', () => {
-      expect(generateId()).toBe('uuidv1'); // default return value for mockUuidv1
-      expect(mockUuidv1).toHaveBeenCalled();
+      expect(generateId()).toBe('uuidv4'); // default return value for mockUuidv4
+      expect(mockUuidv4).toHaveBeenCalled();
     });
   });
 
@@ -105,6 +106,20 @@ describe('SavedObjectsUtils', () => {
       const result = getConvertedObjectId('namespace', 'type', 'oldId');
       expect(result).toBe('uuidv5'); // default return value for mockUuidv5
       expect(mockUuidv5).toHaveBeenCalledWith('namespace:type:oldId', 'DNSUUID');
+    });
+  });
+
+  describe('#getMigrationFunction', () => {
+    it('should return the migration function when it is a function', () => {
+      const migration = jest.fn();
+
+      expect(SavedObjectsUtils.getMigrationFunction(migration)).toBe(migration);
+    });
+
+    it('should return the migration function when it is a migration object', () => {
+      const migration = { transform: jest.fn() };
+
+      expect(SavedObjectsUtils.getMigrationFunction(migration)).toBe(migration.transform);
     });
   });
 });

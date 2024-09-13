@@ -152,7 +152,7 @@ export const DocumentsTab: FunctionComponent<Props> = ({
   const { getFormData, reset } = form;
 
   const onAddDocumentHandler = useCallback(
-    (document) => {
+    (document: any) => {
       const { documents: existingDocuments = [] } = getFormData();
 
       reset({ defaultValue: { documents: [...existingDocuments, document] } });
@@ -211,7 +211,7 @@ export const DocumentsTab: FunctionComponent<Props> = ({
               </EuiButtonEmpty>
               <JsonEditorField
                 field={field}
-                euiCodeEditorProps={{
+                codeEditorProps={{
                   'data-test-subj': 'documentsEditor',
                   height: '300px',
                   'aria-label': i18nTexts.documentsEditorAriaLabel,

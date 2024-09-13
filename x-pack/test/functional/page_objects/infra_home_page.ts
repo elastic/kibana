@@ -37,13 +37,13 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async getWaffleMap() {
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         const element = await testSubjects.find('waffleMap');
         if (!element) {
           throw new Error();
         }
       });
-      return await testSubjects.find('waffleMap');
+      return testSubjects.find('waffleMap');
     },
 
     async getWaffleMapTooltips() {
@@ -84,7 +84,29 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
         const color = await nodeValue.getAttribute('color');
         return { name, value: parseFloat(value), color };
       });
-      return await Promise.all(promises);
+      return Promise.all(promises);
+    },
+
+    async getFirstNode() {
+      const nodes = await testSubjects.findAll('nodeContainer');
+      return nodes[0];
+    },
+
+    async clickOnFirstNode() {
+      const firstNode = await this.getFirstNode();
+      return firstNode.click();
+    },
+
+    async clickOnGoToNodeDetails() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('viewAssetDetailsContextMenuItem');
+      });
+    },
+
+    async clickOnNodeDetailsFlyoutOpenAsPage() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('infraAssetDetailsOpenAsPageButton');
+      });
     },
 
     async sortNodesBy(sort: string) {
@@ -117,7 +139,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
       // wait for input value to echo the input before submitting
       // this ensures the React state has caught up with the events
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         const value = await input.getAttribute('value');
         expect(value).to.eql(query);
       });
@@ -171,27 +193,29 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       return timelineSelectorsVisible.every((visible) => !visible);
     },
 
-    async openInvenotrySwitcher() {
+    async toggleInventorySwitcher() {
       await testSubjects.click('openInventorySwitcher');
-      return await testSubjects.find('goToHost');
+      await testSubjects.find('goToHost');
+      await testSubjects.click('openInventorySwitcher');
+      await testSubjects.missingOrFail('goToHost', { timeout: 10 * 1000 });
     },
 
     async goToHost() {
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
-      return await testSubjects.click('goToHost');
+      return testSubjects.click('goToHost');
     },
 
     async goToPods() {
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
-      return await testSubjects.click('goToPods');
+      return testSubjects.click('goToPods');
     },
 
-    async goToDocker() {
+    async goToContainer() {
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
-      return await testSubjects.click('goToDocker');
+      return testSubjects.click('goToContainer');
     },
 
     async goToSettings() {
@@ -231,36 +255,55 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async getSaveViewButton() {
-      return await testSubjects.find('openSaveViewModal');
+      return testSubjects.find('openSaveViewModal');
     },
 
     async getLoadViewsButton() {
-      return await testSubjects.find('loadViews');
+      return testSubjects.find('loadViews');
     },
 
     async openSaveViewsFlyout() {
-      return await testSubjects.click('loadViews');
+      return testSubjects.click('loadViews');
     },
 
     async closeSavedViewFlyout() {
-      return await testSubjects.click('cancelSavedViewModal');
+      return testSubjects.click('cancelSavedViewModal');
     },
 
     async openCreateSaveViewModal() {
-      return await testSubjects.click('openSaveViewModal');
+      return testSubjects.click('openSaveViewModal');
     },
 
     async openEnterViewNameAndSave() {
-      await testSubjects.setValue('savedViewViweName', 'View1');
+      await testSubjects.setValue('savedViewName', 'View1');
       await testSubjects.click('createSavedViewButton');
     },
 
-    async getNoMetricsIndicesPrompt() {
-      return await testSubjects.find('noDataPage');
+    async noDataPromptExists() {
+      return testSubjects.existOrFail('noDataPage');
+    },
+
+    async noDataPromptAddDataClick() {
+      return testSubjects.click('noDataDefaultFooterAction');
     },
 
     async getNoMetricsDataPrompt() {
-      return await testSubjects.find('noMetricsDataPrompt');
+      return testSubjects.find('noMetricsDataPrompt');
+    },
+
+    async getNoRemoteClusterPrompt() {
+      return testSubjects.find('infraHostsNoRemoteCluster');
+    },
+
+    async getInfraMissingMetricsIndicesCallout() {
+      return testSubjects.find('infraIndicesPanelSettingsWarningCallout');
+    },
+    async getInfraIndicesPanelSettingsWarningCalloutUsedByRules() {
+      return testSubjects.find('infraIndicesPanelSettingsWarningCalloutUsedByRules');
+    },
+
+    async getInfraMissingRemoteClusterIndicesCallout() {
+      return testSubjects.find('infraIndicesPanelSettingsWarningCallout');
     },
 
     async openSourceConfigurationFlyout() {
@@ -301,7 +344,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('superDatePickerAbsoluteTab');
       const datePickerInput = await testSubjects.find('superDatePickerAbsoluteDateInput');
       await datePickerInput.clearValueWithKeyboard();
-      await datePickerInput.type([date]);
+      await datePickerInput.type([date, browser.keys.RETURN]);
     },
     async setAnomaliesThreshold(threshold: string) {
       const thresholdInput = await find.byCssSelector(
@@ -309,6 +352,10 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       );
       await thresholdInput.clearValueWithKeyboard({ charByChar: true });
       await thresholdInput.type([threshold]);
+    },
+
+    async ensureAlertsAndRulesDropdownIsMissing() {
+      await testSubjects.missingOrFail('infrastructure-alerts-and-rules');
     },
 
     async clickAlertsAndRules() {
@@ -323,20 +370,48 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.missingOrFail('metrics-alert-menu');
     },
 
+    async ensureCustomThresholdAlertMenuItemIsVisible() {
+      await testSubjects.existOrFail('custom-threshold-alerts-menu-option');
+    },
+
+    async ensureCustomThresholdAlertMenuItemIsMissing() {
+      await testSubjects.missingOrFail('custom-threshold-alerts-menu-option');
+    },
+
+    async dismissDatePickerTooltip() {
+      const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`, {
+        timeout: 3000,
+      });
+
+      if (isTooltipOpen) {
+        await testSubjects.click(`waffleDatePickerIntervalTooltip`);
+      }
+    },
+
     async openInventoryAlertFlyout() {
+      await this.dismissDatePickerTooltip();
       await testSubjects.click('infrastructure-alerts-and-rules');
       await testSubjects.click('inventory-alerts-menu-option');
-      await testSubjects.click('inventory-alerts-create-rule');
-      await testSubjects.missingOrFail('inventory-alerts-create-rule');
-      await testSubjects.find('euiFlyoutCloseButton');
+
+      // forces date picker tooltip to close in case it pops up after Alerts and rules opens
+      await testSubjects.moveMouseTo('contextMenuPanelTitleButton');
+
+      await retry.tryForTime(1000, () => testSubjects.click('inventory-alerts-create-rule'));
+      await testSubjects.missingOrFail('inventory-alerts-create-rule', { timeout: 30000 });
     },
 
     async openMetricsThresholdAlertFlyout() {
+      await this.dismissDatePickerTooltip();
       await testSubjects.click('infrastructure-alerts-and-rules');
       await testSubjects.click('metrics-threshold-alerts-menu-option');
-      await testSubjects.click('metrics-threshold-alerts-create-rule');
-      await testSubjects.missingOrFail('metrics-threshold-alerts-create-rule');
-      await testSubjects.find('euiFlyoutCloseButton');
+
+      // forces date picker tooltip to close in case it pops up after Alerts and rules opens
+      await testSubjects.moveMouseTo('contextMenuPanelTitleButton');
+
+      await retry.tryForTime(1000, () =>
+        testSubjects.click('metrics-threshold-alerts-create-rule')
+      );
+      await testSubjects.missingOrFail('metrics-threshold-alerts-create-rule', { timeout: 30000 });
     },
 
     async closeAlertFlyout() {
@@ -378,8 +453,20 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await queryBar.type('h');
     },
 
+    async inputAddHostNameFilter(hostName: string) {
+      await this.enterSearchTerm(`host.name:"${hostName}"`);
+    },
+
+    async clickOnNode() {
+      return testSubjects.click('nodeContainer');
+    },
+
     async ensureSuggestionsPanelVisible() {
       await testSubjects.find('infraSuggestionsPanel');
+    },
+
+    async ensureInventoryFeedbackLinkIsVisible() {
+      await testSubjects.existOrFail('infraInventoryFeedbackLink');
     },
 
     async ensureKubernetesTourIsVisible() {
@@ -393,7 +480,47 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async clickDismissKubernetesTourButton() {
-      return await testSubjects.click('infra-kubernetesTour-dismiss');
+      return testSubjects.click('infra-kubernetesTour-dismiss');
+    },
+
+    async clickCloseFlyoutButton() {
+      return testSubjects.click('euiFlyoutCloseButton');
+    },
+
+    async clickCustomMetricDropdown() {
+      await testSubjects.click('infraInventoryMetricDropdown');
+    },
+
+    async addCustomMetric(field: string) {
+      await testSubjects.click('infraModeSwitcherAddMetricButton');
+      const groupByCustomField = await testSubjects.find('infraCustomMetricFieldSelect');
+      await comboBox.setElement(groupByCustomField, field);
+      await testSubjects.click('infraCustomMetricFormSaveButton');
+    },
+
+    async getMetricsContextMenuItemsCount() {
+      const contextMenu = await testSubjects.find('infraInventoryMetricsContextMenu');
+      const menuItems = await contextMenu.findAllByCssSelector('button.euiContextMenuItem');
+      return menuItems.length;
+    },
+
+    async ensureCustomMetricAddButtonIsDisabled() {
+      const button = await testSubjects.find('infraModeSwitcherAddMetricButton');
+      expect(await button.getAttribute('disabled')).to.be('true');
+    },
+
+    async clickAnomalyActionMenuButton() {
+      await testSubjects.click('infraAnomalyActionMenuButton');
+    },
+
+    async clickShowAffectedHostsButton() {
+      await this.clickAnomalyActionMenuButton();
+      await testSubjects.click('infraAnomalyFlyoutShowAffectedHosts');
+    },
+
+    async getAnomalyHostName() {
+      const element = await testSubjects.find('nodeNameRow');
+      return await element.getVisibleText();
     },
   };
 }

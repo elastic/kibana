@@ -13,7 +13,6 @@ import {
   EuiCallOut,
   EuiEmptyPrompt,
   EuiText,
-  EuiTitle,
   EuiFieldSearch,
   EuiFormRow,
 } from '@elastic/eui';
@@ -21,7 +20,6 @@ import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   getFields,
-  COMPARATORS,
   builtInComparators,
   OfExpression,
   ThresholdExpression,
@@ -31,6 +29,7 @@ import {
   builtInAggregationTypes,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { ThresholdVisualization } from './visualization';
 import { IndexThresholdRuleParams } from './types';
 import './expression.scss';
@@ -71,6 +70,15 @@ function indexParamToArray(index: string | string[]): string[] {
   return isString(index) ? [index] : index;
 }
 
+interface EsField {
+  name: string;
+  type: string;
+  normalizedType: string;
+  searchable: boolean;
+  aggregatable: boolean;
+}
+const EMPTY_ARRAY: EsField[] = [];
+
 export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
   Omit<RuleTypeParamsExpressionProps<IndexThresholdRuleParams>, 'unifiedSearch'>
 > = ({ ruleParams, ruleInterval, setRuleParams, setRuleProperty, errors, charts, data }) => {
@@ -92,24 +100,18 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
   const indexArray = indexParamToArray(index);
   const { http } = useKibana<KibanaDeps>().services;
 
-  const [esFields, setEsFields] = useState<
-    Array<{
-      name: string;
-      type: string;
-      normalizedType: string;
-      searchable: boolean;
-      aggregatable: boolean;
-    }>
-  >([]);
+  const [esFields, setEsFields] = useState<EsField[] | undefined>(undefined);
 
   const hasExpressionErrors = !!Object.keys(errors).find(
     (errorKey) =>
       expressionFieldsWithValidation.includes(errorKey) &&
+      // @ts-expect-error upgrade typescript v5.1.6
       errors[errorKey].length >= 1 &&
       ruleParams[errorKey as keyof IndexThresholdRuleParams] !== undefined
   );
 
   const cannotShowVisualization = !!Object.keys(errors).find(
+    // @ts-expect-error upgrade typescript v5.1.6
     (errorKey) => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
   );
 
@@ -131,9 +133,10 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
       groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
     });
-
     if (indexArray.length > 0) {
       await refreshEsFields(indexArray);
+    } else {
+      setEsFields([]);
     }
   };
 
@@ -163,59 +166,71 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
           <EuiSpacer />
         </Fragment>
       ) : null}
-      <EuiTitle size="xs">
-        <h5>
+      <EuiFormRow
+        fullWidth
+        label={
           <FormattedMessage
             id="xpack.stackAlerts.threshold.ui.selectIndex"
-            defaultMessage="Select an index"
+            defaultMessage="Select indices"
           />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <IndexSelectPopover
-        index={indexArray}
-        data-test-subj="indexSelectPopover"
-        esFields={esFields}
-        timeField={timeField}
-        errors={errors}
-        onIndexChange={async (indices: string[]) => {
-          setRuleParams('index', indices);
+        }
+      >
+        <IndexSelectPopover
+          index={indexArray}
+          data-test-subj="indexSelectPopover"
+          esFields={esFields ?? EMPTY_ARRAY}
+          timeField={timeField}
+          errors={errors}
+          onIndexChange={async (indices: string[]) => {
+            setRuleParams('index', indices);
 
-          // reset expression fields if indices are deleted
-          if (indices.length === 0) {
-            setRuleProperty('params', {
-              ...ruleParams,
-              index: indices,
-              aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-              termSize: DEFAULT_VALUES.TERM_SIZE,
-              thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-              timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
-              timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-              groupBy: DEFAULT_VALUES.GROUP_BY,
-              threshold: DEFAULT_VALUES.THRESHOLD,
-              timeField: '',
-            });
-          } else {
-            await refreshEsFields(indices);
+            // reset expression fields if indices are deleted
+            if (indices.length === 0) {
+              setRuleProperty('params', {
+                ...ruleParams,
+                index: indices,
+                aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
+                termSize: DEFAULT_VALUES.TERM_SIZE,
+                thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+                timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
+                timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
+                groupBy: DEFAULT_VALUES.GROUP_BY,
+                threshold: DEFAULT_VALUES.THRESHOLD,
+                timeField: '',
+              });
+            } else {
+              await refreshEsFields(indices);
+            }
+          }}
+          onTimeFieldChange={(updatedTimeField: string) =>
+            setRuleParams('timeField', updatedTimeField)
           }
-        }}
-        onTimeFieldChange={(updatedTimeField: string) =>
-          setRuleParams('timeField', updatedTimeField)
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiFormRow
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.stackAlerts.threshold.ui.conditionPrompt"
+            defaultMessage="Define the condition"
+          />
         }
-      />
-      <WhenExpression
-        display="fullWidth"
-        data-test-subj="whenExpression"
-        aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
-        onChangeSelectedAggType={(selectedAggType: string) =>
-          setRuleParams('aggType', selectedAggType)
-        }
-      />
+      >
+        <WhenExpression
+          display="fullWidth"
+          data-test-subj="whenExpression"
+          aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
+          onChangeSelectedAggType={(selectedAggType: string) =>
+            setRuleParams('aggType', selectedAggType)
+          }
+        />
+      </EuiFormRow>
       {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
         <OfExpression
           aggField={aggField}
           data-test-subj="aggTypeExpression"
-          fields={esFields}
+          fields={esFields ?? EMPTY_ARRAY}
           aggType={aggType}
           errors={errors}
           display="fullWidth"
@@ -238,16 +253,6 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
         }
         onChangeSelectedTermSize={(selectedTermSize) => setRuleParams('termSize', selectedTermSize)}
       />
-      <EuiSpacer />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.threshold.ui.conditionPrompt"
-            defaultMessage="Define the condition"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <ThresholdExpression
         thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
         threshold={threshold}
@@ -276,30 +281,34 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
           setRuleParams('timeWindowUnit', selectedWindowUnit)
         }
       />
-      <EuiSpacer />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.threshold.ui.filterTitle"
-            defaultMessage="Filter (Optional)"
-          />
-        </h5>
-      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFormRow
+        label={i18n.translate('xpack.stackAlerts.threshold.ui.filterTitle', {
+          defaultMessage: 'Filter',
+        })}
+        labelAppend={
+          <EuiText color="subdued" size="xs">
+            <FormattedMessage
+              id="xpack.stackAlerts.threshold.ui.filter.optional"
+              defaultMessage="Optional"
+            />
+          </EuiText>
+        }
         helpText={i18n.translate('xpack.stackAlerts.threshold.ui.filterKQLHelpText', {
-          defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
+          defaultMessage: 'Use a KQL expression to limit the scope of your alerts.',
         })}
         fullWidth
         display="rowCompressed"
+        // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={errors.filterKuery.length > 0}
-        error={errors.filterKuery}
+        error={errors.filterKuery as string[]}
       >
         <EuiFieldSearch
           data-test-subj="filterKuery"
           onChange={handleFilterChange}
           value={filterKuery}
           fullWidth
+          // @ts-expect-error upgrade typescript v5.1.6
           isInvalid={errors.filterKuery.length > 0}
         />
       </EuiFormRow>

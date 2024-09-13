@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -104,7 +105,7 @@ export const inputFormats = {
   M: 'months',
   Y: 'years',
 };
-type InputFormat = keyof typeof inputFormats;
+export type InputFormat = keyof typeof inputFormats;
 
 export const outputFormats = {
   humanize: 'humanize',
@@ -117,14 +118,16 @@ export const outputFormats = {
   M: 'asMonths',
   Y: 'asYears',
 };
-type OutputFormat = keyof typeof outputFormats;
+export type OutputFormat = keyof typeof outputFormats;
 
-export const getDurationParams = (format: string) => {
+export const getDurationParams = (
+  format: string
+): { from: InputFormat; to: OutputFormat; decimals: string } => {
   const [from, to, decimals] = format.split(',');
 
   return {
-    from,
-    to,
+    from: from as InputFormat,
+    to: to as OutputFormat,
     decimals,
   };
 };

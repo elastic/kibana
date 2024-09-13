@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { of } from 'rxjs';
+import React, { FC, PropsWithChildren } from 'react';
+import { QueryClient, QueryClientProvider, QueryClientProviderProps } from '@tanstack/react-query';
+// FIXME: adds inefficient boilerplate that should not be required. See https://github.com/elastic/kibana/issues/180725
 import { I18nProvider } from '@kbn/i18n-react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { TriggersAndActionsUiServices } from '../..';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
@@ -24,12 +25,14 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: TriggersAndActionsUiServices;
   queryClient: QueryClient;
-  AppWrapper: React.FC<{ children: React.ReactElement }>;
+  AppWrapper: FC<PropsWithChildren<unknown>>;
 }
 
-export const createAppMockRenderer = (): AppMockRenderer => {
+export const createAppMockRenderer = (
+  queryClientContext?: QueryClientProviderProps['context']
+): AppMockRenderer => {
   const services = createStartServicesMock();
-  const theme$ = of({ darkMode: false });
+  const core = coreMock.createStart();
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -48,13 +51,15 @@ export const createAppMockRenderer = (): AppMockRenderer => {
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
+  const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
     <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <KibanaThemeProvider theme$={theme$}>
-          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-        </KibanaThemeProvider>
-      </KibanaContextProvider>
+      <KibanaRenderContextProvider {...core}>
+        <KibanaContextProvider services={services}>
+          <QueryClientProvider client={queryClient} context={queryClientContext}>
+            {children}
+          </QueryClientProvider>
+        </KibanaContextProvider>
+      </KibanaRenderContextProvider>
     </I18nProvider>
   ));
 
@@ -72,5 +77,45 @@ export const createAppMockRenderer = (): AppMockRenderer => {
     render,
     queryClient,
     AppWrapper,
+  };
+};
+
+export const getJsDomPerformanceFix = () => {
+  const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+
+  return {
+    fix: () => {
+      // The JSDOM implementation is too slow
+      // Especially for dropdowns that try to position themselves
+      // perf issue - https://github.com/jsdom/jsdom/issues/3234
+      Object.defineProperty(window, 'getComputedStyle', {
+        value: (el: HTMLElement) => {
+          /**
+           * This is based on the jsdom implementation of getComputedStyle
+           * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+           *
+           * It is missing global style parsing and will only return styles applied directly to an element.
+           * Will not return styles that are global or from emotion
+           */
+          const declaration = new CSSStyleDeclaration();
+          const { style } = el;
+
+          Array.prototype.forEach.call(style, (property: string) => {
+            declaration.setProperty(
+              property,
+              style.getPropertyValue(property),
+              style.getPropertyPriority(property)
+            );
+          });
+
+          return declaration;
+        },
+        configurable: true,
+        writable: true,
+      });
+    },
+    cleanup: () => {
+      Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+    },
   };
 };

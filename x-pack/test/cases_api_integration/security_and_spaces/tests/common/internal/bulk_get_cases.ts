@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
 import expect from '@kbn/expect';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import { MAX_BULK_GET_CASES } from '@kbn/cases-plugin/common/constants';
 import { getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -51,22 +51,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(errors.length).to.be(0);
       });
 
-      it('should return the correct cases with specific fields', async () => {
-        const caseOne = await createCase(supertest, postCaseReq);
-        const caseTwo = await createCase(supertest, postCaseReq);
-
-        const { cases, errors } = await bulkGetCases({
-          supertest,
-          ids: [caseOne.id, caseTwo.id],
-          fields: ['title'],
-        });
-
-        const fieldsToPick = ['id', 'version', 'owner', 'title'];
-
-        expect(cases).to.eql([pick(caseOne, fieldsToPick), pick(caseTwo, fieldsToPick)]);
-        expect(errors.length).to.be(0);
-      });
-
       it('should return only valid cases', async () => {
         const caseOne = await createCase(supertest, postCaseReq);
 
@@ -76,7 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(errors.length).to.be(1);
       });
 
-      it('should return the correct counts', async () => {
+      it('should return the correct comment counts', async () => {
         const caseOne = await createCase(supertest, postCaseReq);
         const caseTwo = await createCase(supertest, postCaseReq);
 
@@ -87,7 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
             alertId: ['test-id-1', 'test-id-2'],
             index: ['test-index', 'test-index'],
             rule: { id: 'test-rule-id', name: 'test-index-id' },
-            type: CommentType.alert,
+            type: AttachmentType.alert,
             owner: 'securitySolutionFixture',
           },
         });
@@ -99,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
             alertId: ['test-id-3'],
             index: ['test-index'],
             rule: { id: 'test-rule-id', name: 'test-index-id' },
-            type: CommentType.alert,
+            type: AttachmentType.alert,
             owner: 'securitySolutionFixture',
           },
         });
@@ -109,7 +93,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: caseOne.id,
           params: {
             comment: 'a comment',
-            type: CommentType.user,
+            type: AttachmentType.user,
             owner: 'securitySolutionFixture',
           },
         });
@@ -119,36 +103,27 @@ export default ({ getService }: FtrProviderContext): void => {
           ids: [caseOneUpdated.id, caseTwoUpdated.id],
         });
 
-        /**
-         * For performance reasons bulk_get does not
-         * return the comments
-         */
         expect(cases).to.eql([
-          { ...caseOneUpdated, comments: [], totalComment: 1, totalAlerts: 2 },
-          { ...caseTwoUpdated, comments: [], totalComment: 0, totalAlerts: 1 },
+          { ...caseOneUpdated, totalComment: 1, comments: [] },
+          { ...caseTwoUpdated, totalComment: 0, comments: [] },
         ]);
         expect(errors.length).to.be(0);
       });
     });
 
     describe('errors', () => {
-      it('400s when requesting invalid fields', async () => {
-        const caseOne = await createCase(supertest, postCaseReq);
-
+      it(`400s when requesting more than ${MAX_BULK_GET_CASES} cases`, async () => {
         await bulkGetCases({
           supertest,
-          ids: [caseOne.id],
-          fields: ['invalid'],
+          ids: Array(MAX_BULK_GET_CASES + 1).fill('foobar'),
           expectedHttpCode: 400,
         });
       });
 
-      it('400s when requesting more than 1000 cases', async () => {
-        const ids = Array(1001).fill('test');
-
+      it('400s when requesting zero cases', async () => {
         await bulkGetCases({
           supertest,
-          ids,
+          ids: [],
           expectedHttpCode: 400,
         });
       });
@@ -323,21 +298,6 @@ export default ({ getService }: FtrProviderContext): void => {
             caseId: newCase.id,
           });
         }
-      });
-
-      it('should NOT request the namespace field', async () => {
-        const newCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-          200
-        );
-
-        await bulkGetCases({
-          supertest: supertestWithoutAuth,
-          ids: [newCase.id],
-          fields: ['namespace'],
-          expectedHttpCode: 400,
-        });
       });
     });
   });

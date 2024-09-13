@@ -1,5 +1,5 @@
 [[create-a-dashboard-of-panels-with-web-server-data]]
-== Create your first dashboard
+== Create a simple dashboard to monitor website logs
 
 Learn the most common ways to create a dashboard from your own data.
 The tutorial will use sample data from the perspective of an analyst looking
@@ -141,7 +141,7 @@ image::images/lens_lineChartMetricOverTimeBottomAxis_8.7.png[Bottom axis menu]
 
 Since you removed the axis labels, add a panel title:
 
-. Open the panel menu, then select *Edit panel settings*.
+. Open the panel menu, then select *Panel settings*.
 
 . In the *Title* field, enter `Median of bytes`, then click *Save*.
 +
@@ -245,7 +245,7 @@ image::images/lens_pieChartCompareSubsetOfDocs_7.16.png[Pie chart that compares 
 
 Add a panel title:
 
-. Open the panel menu, then select *Edit panel settings*.
+. Open the panel menu, then select *Panel settings*.
 
 . In the *Title* field, enter `Sum of bytes from large requests`, then click *Save*.
 
@@ -278,7 +278,7 @@ image::images/lens_barChartDistributionOfNumberField_7.16.png[Bar chart that dis
 
 Add a panel title:
 
-. Open the panel menu, then select *Edit panel settings*.
+. Open the panel menu, then select *Panel settings*.
 
 . In the *Title* field, enter `Website traffic`, then click *Save*.
 
@@ -342,7 +342,7 @@ image::images/lens_treemapMultiLevelChart_7.16.png[Treemap visualization]
 
 Add a panel title:
 
-. Open the panel menu, then select *Edit panel settings*.
+. Open the panel menu, then select *Panel settings*.
 
 . In the *Title* field, enter `Page views by location and referrer`, then click *Save*.
 
@@ -376,4 +376,6 @@ Now that you have a complete overview of your web server data, save the dashboar
 
 . Select *Store time with dashboard*.
 
-. Click *Save*.
+. Click *Save*. You will be identified as the **creator** of the dashboard. If you or another user edit the dashboard, you can also view the **last editor** when checking the dashboard information.
+
+image::images/dashboard-creator-editor.png[Information panel of a dashboard showing its creator and last editor]

@@ -7,18 +7,18 @@
 
 import { useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
+import { useMlApi } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { EVENT_RATE_FIELD_ID } from '../../../../../../../../../common/types/fields';
-import { BucketSpanEstimatorData } from '../../../../../../../../../common/types/job_service';
+import type { BucketSpanEstimatorData } from '../../../../../../../../../common/types/job_service';
 import {
   isMultiMetricJobCreator,
   isPopulationJobCreator,
   isAdvancedJobCreator,
   isRareJobCreator,
 } from '../../../../../common/job_creator';
-import { ml } from '../../../../../../../services/ml_api_service';
-import { useMlContext } from '../../../../../../../contexts/ml';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
+import { useDataSource } from '../../../../../../../contexts/ml';
+import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 export enum ESTIMATE_STATUS {
   NOT_RUNNING,
@@ -26,8 +26,10 @@ export enum ESTIMATE_STATUS {
 }
 
 export function useEstimateBucketSpan() {
+  const toastNotificationService = useToastNotificationService();
+  const mlApi = useMlApi();
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
-  const mlContext = useMlContext();
+  const dataSourceContext = useDataSource();
 
   const [status, setStatus] = useState(ESTIMATE_STATUS.NOT_RUNNING);
 
@@ -38,10 +40,10 @@ export function useEstimateBucketSpan() {
       end: jobCreator.end,
     },
     fields: jobCreator.fields.map((f) => (f.id === EVENT_RATE_FIELD_ID ? null : f.id)),
-    index: mlContext.currentDataView.title,
-    query: mlContext.combinedQuery,
+    index: dataSourceContext.selectedDataView.title,
+    query: dataSourceContext.combinedQuery,
     splitField: undefined,
-    timeField: mlContext.currentDataView.timeFieldName,
+    timeField: dataSourceContext.selectedDataView.timeFieldName,
     runtimeMappings: jobCreator.runtimeMappings ?? undefined,
     indicesOptions: jobCreator.datafeedConfig.indices_options,
   };
@@ -76,7 +78,7 @@ export function useEstimateBucketSpan() {
 
   async function estimateBucketSpan() {
     setStatus(ESTIMATE_STATUS.RUNNING);
-    const { name, error, message: text } = await ml.estimateBucketSpan(data);
+    const { name, error, message: text } = await mlApi.estimateBucketSpan(data);
     setStatus(ESTIMATE_STATUS.NOT_RUNNING);
     if (error === true) {
       const title = i18n.translate(
@@ -85,7 +87,7 @@ export function useEstimateBucketSpan() {
           defaultMessage: 'Bucket span could not be estimated',
         }
       );
-      getToastNotificationService().displayWarningToast({ title, text });
+      toastNotificationService.displayWarningToast({ title, text });
     } else {
       jobCreator.bucketSpan = name;
       jobCreatorUpdate();

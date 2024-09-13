@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
@@ -241,6 +243,52 @@ describe('createRouter', () => {
           rangeTo: 'now',
         },
       });
+    });
+
+    it('returns params for the best-matching path regardless of the order', () => {
+      history.push('/services/opbeans-java/errors/foo?rangeFrom=now-15m&rangeTo=now');
+
+      expect(
+        router.getParams(
+          '/services/{serviceName}/errors',
+          '/services/{serviceName}/errors/*',
+          history.location
+        ).path
+      ).toEqual(
+        expect.objectContaining({
+          groupId: 'foo',
+        })
+      );
+
+      expect(
+        router.getParams(
+          '/services/{serviceName}/errors/*',
+          '/services/{serviceName}/errors',
+          history.location
+        ).path
+      ).toEqual(
+        expect.objectContaining({
+          groupId: 'foo',
+        })
+      );
+
+      expect(router.getParams('/*', history.location).path).toEqual(
+        expect.objectContaining({
+          groupId: 'foo',
+        })
+      );
+
+      expect(
+        router.getParams(
+          '/services/{serviceName}/errors',
+          '/services/{serviceName}/errors/{groupId}',
+          history.location
+        ).path
+      ).toEqual(
+        expect.objectContaining({
+          groupId: 'foo',
+        })
+      );
     });
   });
 

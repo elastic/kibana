@@ -1,29 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import path from 'path';
-
 import chalk from 'chalk';
-import { ToolingLog } from '@kbn/tooling-log';
 
 import { BASE_PATH } from '../paths';
 import { installArchive } from './install_archive';
 import { log as defaultLog } from '../utils/log';
-import { Artifact, ArtifactLicense } from '../artifact';
-
-interface DownloadSnapshotOptions {
-  version: string;
-  license?: ArtifactLicense;
-  basePath?: string;
-  installPath?: string;
-  log?: ToolingLog;
-  useCached?: boolean;
-}
+import { Artifact } from '../artifact';
+import { DownloadSnapshotOptions, InstallSnapshotOptions } from './types';
 
 /**
  * Download an ES snapshot
@@ -49,11 +40,6 @@ export async function downloadSnapshot({
   };
 }
 
-interface InstallSnapshotOptions extends DownloadSnapshotOptions {
-  password?: string;
-  esArgs?: string[];
-}
-
 /**
  * Installs ES from snapshot
  */
@@ -66,6 +52,7 @@ export async function installSnapshot({
   log = defaultLog,
   esArgs,
   useCached = false,
+  resources,
 }: InstallSnapshotOptions) {
   const { downloadPath } = await downloadSnapshot({
     license,
@@ -83,5 +70,6 @@ export async function installSnapshot({
     installPath,
     log,
     esArgs,
+    resources,
   });
 }

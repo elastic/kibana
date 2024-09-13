@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -72,7 +71,7 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
     };
 
     return (
-      <Switch>
+      <Routes>
         <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.dns})`}>
           <DnsQueryTabBody {...tabProps} />
         </Route>
@@ -121,7 +120,7 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
             {...tabProps}
           />
         </Route>
-      </Switch>
+      </Routes>
     );
   }
 );

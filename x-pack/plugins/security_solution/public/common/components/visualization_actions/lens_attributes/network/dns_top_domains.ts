@@ -20,8 +20,9 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
       visualization: {
         legend: {
           isVisible: true,
-          position: 'left',
+          position: 'right',
           legendSize: 'xlarge',
+          legendStats: ['currentAndLastValue'],
         },
         valueLabels: 'hide',
         fittingFunction: 'None',
@@ -83,6 +84,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
                 params: {
                   query: 'PTR',
                 },
+                // @ts-expect-error upgrade typescript v4.9.5
                 indexRefName: 'filter-index-pattern-0',
               },
               query: {
@@ -132,6 +134,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
                   scale: 'interval',
                   params: {
                     interval: 'auto',
+                    includeEmptyRows: true,
                   },
                 },
                 '2a4d5e20-f570-48e4-b9ab-ff3068919377': {
@@ -141,6 +144,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
                   scale: 'ratio',
                   sourceField: 'dns.question.name',
                   isBucketed: false,
+                  params: { emptyAsNull: true },
                 },
               },
               columnOrder: [

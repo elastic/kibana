@@ -16,8 +16,9 @@ export default function upgradeAssistantESDeprecationLogsPageFunctionalTests({
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
-  describe('ES deprecation logs page', function () {
-    this.tags('skipFirefox');
+  // Failing: See https://github.com/elastic/kibana/issues/167094
+  describe.skip('ES deprecation logs page', function () {
+    this.tags(['skipFirefox', 'upgradeAssistant']);
 
     before(async () => {
       await security.testUser.setRoles(['superuser']);
@@ -34,12 +35,12 @@ export default function upgradeAssistantESDeprecationLogsPageFunctionalTests({
     });
 
     it('Shows warnings callout if there are deprecations', async () => {
-      testSubjects.exists('hasWarningsCallout');
+      await testSubjects.exists('hasWarningsCallout');
     });
 
     it('Shows no warnings callout if there are no deprecations', async () => {
       await PageObjects.upgradeAssistant.clickResetLastCheckpointButton();
-      testSubjects.exists('noWarningsCallout');
+      await testSubjects.exists('noWarningsCallout');
     });
   });
 }

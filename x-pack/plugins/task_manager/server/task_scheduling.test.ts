@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import moment from 'moment';
 
 import { asTaskRunEvent, TaskPersistence } from './task_events';
@@ -21,6 +21,7 @@ import { mockLogger } from './test_utils';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
 import { taskManagerMock } from './mocks';
+import { omit } from 'lodash';
 
 let fakeTimer: sinon.SinonFakeTimers;
 jest.mock('uuid', () => ({
@@ -288,6 +289,51 @@ describe('TaskScheduling', () => {
         },
       ]);
     });
+
+    test('should offset runAt and scheduledAt by no more than 5m if more than one task is enabled', async () => {
+      const task = taskManagerMock.createTask({
+        id: 'task-1',
+        enabled: false,
+        schedule: { interval: '3h' },
+        runAt: new Date('1969-09-13T21:33:58.285Z'),
+        scheduledAt: new Date('1969-09-10T21:33:58.285Z'),
+      });
+      const task2 = taskManagerMock.createTask({
+        id: 'task-2',
+        enabled: false,
+        schedule: { interval: '3h' },
+        runAt: new Date('1969-09-13T21:33:58.285Z'),
+        scheduledAt: new Date('1969-09-10T21:33:58.285Z'),
+      });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: task }])
+      );
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task), asOk(task2)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkEnable([task.id, task2.id]);
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload.length).toBe(2);
+      expect(bulkUpdatePayload[0]).toEqual({
+        ...task,
+        enabled: true,
+        runAt: new Date('1970-01-01T00:00:00.000Z'),
+        scheduledAt: new Date('1970-01-01T00:00:00.000Z'),
+      });
+
+      expect(omit(bulkUpdatePayload[1], 'runAt', 'scheduledAt')).toEqual({
+        ...omit(task2, 'runAt', 'scheduledAt'),
+        enabled: true,
+      });
+
+      const { runAt, scheduledAt } = bulkUpdatePayload[1];
+      expect(runAt.getTime()).toEqual(scheduledAt.getTime());
+      expect(runAt.getTime() - bulkUpdatePayload[0].runAt.getTime()).toBeLessThanOrEqual(
+        5 * 60 * 1000
+      );
+    });
   });
 
   describe('bulkDisable', () => {
@@ -367,6 +413,135 @@ describe('TaskScheduling', () => {
       const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
 
       expect(bulkUpdatePayload).toHaveLength(0);
+    });
+  });
+
+  describe('bulkUpdateState', () => {
+    const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+    beforeEach(() => {
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: taskManagerMock.createTask() }])
+      );
+    });
+
+    test('should split search on chunks when input ids array too large', async () => {
+      mockTaskStore.bulkGet.mockResolvedValue([]);
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      await taskScheduling.bulkUpdateState(Array.from({ length: 1250 }), jest.fn());
+
+      expect(mockTaskStore.bulkGet).toHaveBeenCalledTimes(13);
+    });
+
+    test('should transform response into correct format', async () => {
+      const successfulTask = taskManagerMock.createTask({
+        id: 'task-1',
+        enabled: false,
+        schedule: { interval: '1h' },
+        state: {
+          'hello i am a state that has been modified': "not really but we're going to pretend",
+        },
+      });
+      const failedToUpdateTask = taskManagerMock.createTask({
+        id: 'task-2',
+        enabled: true,
+        schedule: { interval: '1h' },
+        state: { 'this state is unchangeable': 'none shall update me' },
+      });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([
+          { tag: 'ok', value: successfulTask },
+          {
+            tag: 'err',
+            error: {
+              type: 'task',
+              id: failedToUpdateTask.id,
+              error: {
+                statusCode: 400,
+                error: 'fail',
+                message: 'fail',
+              },
+            },
+          },
+        ])
+      );
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(successfulTask), asOk(failedToUpdateTask)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const result = await taskScheduling.bulkUpdateState(
+        [successfulTask.id, failedToUpdateTask.id],
+        jest.fn()
+      );
+
+      expect(result).toEqual({
+        tasks: [successfulTask],
+        errors: [
+          {
+            type: 'task',
+            id: failedToUpdateTask.id,
+            error: {
+              statusCode: 400,
+              error: 'fail',
+              message: 'fail',
+            },
+          },
+        ],
+      });
+    });
+
+    test('should execute updater function on tasks', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        enabled: false,
+        schedule: { interval: '3h' },
+        runAt: new Date('1969-09-13T21:33:58.285Z'),
+        scheduledAt: new Date('1969-09-10T21:33:58.285Z'),
+        state: { removeMe: 'please remove me i dont like being in this task manager state' },
+      });
+      const updaterFn = jest.fn((state) => {
+        return {
+          ...omit(state, 'removeMe'),
+          expectedValue: 'HELLO I AM AN EXPECTED VALUE IT IS VERY NICE TO MEET YOU',
+        };
+      });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: task }])
+      );
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateState([id], updaterFn);
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "attempts": 0,
+            "enabled": false,
+            "id": "01ddff11-e88a-4d13-bc4e-256164e755e2",
+            "ownerId": "123",
+            "params": Object {
+              "hello": "world",
+            },
+            "retryAt": null,
+            "runAt": 1969-09-13T21:33:58.285Z,
+            "schedule": Object {
+              "interval": "3h",
+            },
+            "scheduledAt": 1969-09-10T21:33:58.285Z,
+            "scope": undefined,
+            "startedAt": null,
+            "state": Object {
+              "expectedValue": "HELLO I AM AN EXPECTED VALUE IT IS VERY NICE TO MEET YOU",
+            },
+            "status": "idle",
+            "taskType": "foo",
+            "user": undefined,
+            "version": "123",
+          },
+        ]
+      `);
     });
   });
 
@@ -538,7 +713,8 @@ describe('TaskScheduling', () => {
           status: TaskStatus.Idle,
           runAt: expect.any(Date),
           scheduledAt: expect.any(Date),
-        })
+        }),
+        { validate: false }
       );
       expect(mockTaskStore.get).toHaveBeenCalledWith(id);
       expect(result).toEqual({ id });
@@ -560,7 +736,8 @@ describe('TaskScheduling', () => {
           status: TaskStatus.Idle,
           runAt: expect.any(Date),
           scheduledAt: expect.any(Date),
-        })
+        }),
+        { validate: false }
       );
       expect(mockTaskStore.get).toHaveBeenCalledWith(id);
       expect(result).toEqual({ id });
@@ -660,14 +837,14 @@ describe('TaskScheduling', () => {
 
   describe('ephemeralRunNow', () => {
     test('runs a task ephemerally', async () => {
-      const ephemeralEvents$ = new Subject<TaskLifecycleEvent>();
+      const ephemeralEvents$ = new BehaviorSubject<Partial<TaskLifecycleEvent>>({});
       const ephemeralTask = taskManagerMock.createTask({
         state: {
           foo: 'bar',
         },
       });
       const customEphemeralTaskLifecycleMock = ephemeralTaskLifecycleMock.create({
-        events$: ephemeralEvents$,
+        events$: ephemeralEvents$ as Observable<TaskLifecycleEvent>,
       });
 
       customEphemeralTaskLifecycleMock.attemptToRun.mockImplementation((value) => {
@@ -698,11 +875,11 @@ describe('TaskScheduling', () => {
             },
             result: TaskRunResult.Success,
             persistence: TaskPersistence.Ephemeral,
+            isExpired: false,
           })
         )
       );
-
-      expect(result).resolves.toEqual({ id: 'v4uuid', state: { foo: 'bar' } });
+      await expect(result).resolves.toEqual({ id: 'v4uuid', state: { foo: 'bar' } });
     });
 
     test('rejects ephemeral task if lifecycle returns an error', async () => {
@@ -741,11 +918,12 @@ describe('TaskScheduling', () => {
             },
             result: TaskRunResult.Failed,
             persistence: TaskPersistence.Ephemeral,
+            isExpired: false,
           })
         )
       );
 
-      expect(result).rejects.toMatchInlineSnapshot(
+      await expect(result).rejects.toMatchInlineSnapshot(
         `[Error: Ephemeral Task of type foo was rejected]`
       );
     });
@@ -767,7 +945,7 @@ describe('TaskScheduling', () => {
       });
 
       const result = taskScheduling.ephemeralRunNow(ephemeralTask);
-      expect(result).rejects.toMatchInlineSnapshot(
+      await expect(result).rejects.toMatchInlineSnapshot(
         `[Error: Ephemeral Task of type foo was rejected because ephemeral tasks are not supported]`
       );
     });

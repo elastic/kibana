@@ -97,6 +97,7 @@ export const EventSchema = schema.maybe(
     user: schema.maybe(
       schema.object({
         name: ecsString(),
+        id: ecsString(),
       })
     ),
     kibana: schema.maybe(
@@ -140,6 +141,7 @@ export const EventSchema = schema.maybe(
         alert: schema.maybe(
           schema.object({
             flapping: ecsBoolean(),
+            maintenance_window_ids: ecsStringMulti(),
             uuid: ecsString(),
             rule: schema.maybe(
               schema.object({
@@ -149,6 +151,13 @@ export const EventSchema = schema.maybe(
                     uuid: ecsString(),
                     status: ecsString(),
                     status_order: ecsStringOrNumber(),
+                    backfill: schema.maybe(
+                      schema.object({
+                        id: ecsString(),
+                        start: ecsDate(),
+                        interval: ecsString(),
+                      })
+                    ),
                     metrics: schema.maybe(
                       schema.object({
                         number_of_triggered_actions: ecsStringOrNumber(),
@@ -160,6 +169,7 @@ export const EventSchema = schema.maybe(
                             recovered: ecsStringOrNumber(),
                           })
                         ),
+                        number_of_delayed_alerts: ecsStringOrNumber(),
                         number_of_searches: ecsStringOrNumber(),
                         total_indexing_duration_ms: ecsStringOrNumber(),
                         es_search_duration_ms: ecsStringOrNumber(),
@@ -170,6 +180,7 @@ export const EventSchema = schema.maybe(
                         trigger_actions_duration_ms: ecsStringOrNumber(),
                         process_rule_duration_ms: ecsStringOrNumber(),
                         claim_to_start_duration_ms: ecsStringOrNumber(),
+                        persist_alerts_duration_ms: ecsStringOrNumber(),
                         prepare_rule_duration_ms: ecsStringOrNumber(),
                         total_run_duration_ms: ecsStringOrNumber(),
                         total_enrichment_duration_ms: ecsStringOrNumber(),
@@ -177,6 +188,7 @@ export const EventSchema = schema.maybe(
                     ),
                   })
                 ),
+                revision: ecsStringOrNumber(),
                 rule_type_id: ecsString(),
               })
             ),
@@ -200,10 +212,27 @@ export const EventSchema = schema.maybe(
           schema.object({
             name: ecsString(),
             id: ecsString(),
+            type_id: ecsString(),
             execution: schema.maybe(
               schema.object({
                 source: ecsString(),
                 uuid: ecsString(),
+                gen_ai: schema.maybe(
+                  schema.object({
+                    usage: schema.maybe(
+                      schema.object({
+                        prompt_tokens: ecsStringOrNumber(),
+                        completion_tokens: ecsStringOrNumber(),
+                        total_tokens: ecsStringOrNumber(),
+                      })
+                    ),
+                  })
+                ),
+                usage: schema.maybe(
+                  schema.object({
+                    request_body_bytes: ecsStringOrNumber(),
+                  })
+                ),
               })
             ),
           })

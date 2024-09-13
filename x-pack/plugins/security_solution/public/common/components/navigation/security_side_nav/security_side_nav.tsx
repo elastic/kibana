@@ -7,87 +7,102 @@
 
 import React, { useMemo } from 'react';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import { SolutionSideNav, type SolutionSideNavItem } from '@kbn/security-solution-side-nav';
+import {
+  SolutionSideNav,
+  SolutionSideNavItemPosition,
+  type SolutionSideNavItem,
+} from '@kbn/security-solution-side-nav';
 import useObservable from 'react-use/lib/useObservable';
 import { SecurityPageName } from '../../../../app/types';
+import type { SecurityNavLink } from '../../../links';
 import { getAncestorLinksInfo } from '../../../links';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
-import { useGetSecuritySolutionLinkProps } from '../../links';
-import { useAppNavLinks } from '../nav_links';
+import { useGetSecuritySolutionLinkProps, type GetSecuritySolutionLinkProps } from '../../links';
+import { useSecurityInternalNavLinks } from '../../../links/nav_links';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
 import { track } from '../../../lib/telemetry';
 import { useKibana } from '../../../lib/kibana';
+import { CATEGORIES } from './categories';
 
 export const EUI_HEADER_HEIGHT = '93px';
 export const BOTTOM_BAR_HEIGHT = '50px';
 
-const isFooterNavItem = (id: SecurityPageName) =>
-  id === SecurityPageName.landing || id === SecurityPageName.administration;
+const getNavItemPosition = (id: SecurityPageName): SolutionSideNavItemPosition =>
+  id === SecurityPageName.landing || id === SecurityPageName.administration
+    ? SolutionSideNavItemPosition.bottom
+    : SolutionSideNavItemPosition.top;
+
 const isGetStartedNavItem = (id: SecurityPageName) => id === SecurityPageName.landing;
+
+/**
+ * Formats generic navigation links into the shape expected by the `SolutionSideNav`
+ */
+const formatLink = (
+  navLink: SecurityNavLink,
+  getSecuritySolutionLinkProps: GetSecuritySolutionLinkProps
+): SolutionSideNavItem => ({
+  id: navLink.id,
+  label: navLink.title,
+  position: getNavItemPosition(navLink.id),
+  ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
+  ...(navLink.sideNavIcon && { iconType: navLink.sideNavIcon }),
+  ...(navLink.categories?.length && { categories: navLink.categories }),
+  ...(navLink.links?.length && {
+    items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
+      if (!current.disabled) {
+        acc.push({
+          id: current.id,
+          label: current.title,
+          iconType: current.sideNavIcon,
+          isBeta: current.isBeta,
+          betaOptions: current.betaOptions,
+          ...getSecuritySolutionLinkProps({ deepLinkId: current.id }),
+        });
+      }
+      return acc;
+    }, []),
+  }),
+});
+
+/**
+ * Formats the get started navigation links into the shape expected by the `SolutionSideNav`
+ */
+const formatGetStartedLink = (
+  navLink: SecurityNavLink,
+  getSecuritySolutionLinkProps: GetSecuritySolutionLinkProps
+): SolutionSideNavItem => ({
+  id: navLink.id,
+  label: navLink.title,
+  iconType: navLink.sideNavIcon,
+  position: SolutionSideNavItemPosition.bottom,
+  appendSeparator: true,
+  ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
+});
 
 /**
  * Returns the formatted `items` and `footerItems` to be rendered in the navigation
  */
 const useSolutionSideNavItems = () => {
-  const navLinks = useAppNavLinks();
+  const navLinks = useSecurityInternalNavLinks();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
 
   const sideNavItems = useMemo(() => {
-    const mainNavItems: SolutionSideNavItem[] = [];
-    const footerNavItems: SolutionSideNavItem[] = [];
-    navLinks.forEach((navLink) => {
+    if (!navLinks?.length) {
+      return undefined;
+    }
+    return navLinks.reduce<SolutionSideNavItem[]>((navItems, navLink) => {
       if (navLink.disabled) {
-        return;
+        return navItems;
       }
 
-      let sideNavItem: SolutionSideNavItem;
       if (isGetStartedNavItem(navLink.id)) {
-        sideNavItem = {
-          id: navLink.id,
-          label: navLink.title.toUpperCase(),
-          labelSize: 'xs',
-          iconType: 'launch',
-          ...getSecuritySolutionLinkProps({
-            deepLinkId: navLink.id,
-          }),
-          appendSeparator: true,
-        };
+        navItems.push(formatGetStartedLink(navLink, getSecuritySolutionLinkProps));
       } else {
-        // generic links
-        sideNavItem = {
-          id: navLink.id,
-          label: navLink.title,
-          ...getSecuritySolutionLinkProps({
-            deepLinkId: navLink.id,
-          }),
-          ...(navLink.categories?.length && { categories: navLink.categories }),
-          ...(navLink.links?.length && {
-            items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
-              if (!current.disabled) {
-                acc.push({
-                  id: current.id,
-                  label: current.title,
-                  description: current.description,
-                  isBeta: current.isBeta,
-                  betaOptions: current.betaOptions,
-                  ...getSecuritySolutionLinkProps({ deepLinkId: current.id }),
-                });
-              }
-              return acc;
-            }, []),
-          }),
-        };
+        navItems.push(formatLink(navLink, getSecuritySolutionLinkProps));
       }
-
-      if (isFooterNavItem(navLink.id)) {
-        footerNavItems.push(sideNavItem);
-      } else {
-        mainNavItems.push(sideNavItem);
-      }
-    });
-
-    return [mainNavItems, footerNavItems];
+      return navItems;
+    }, []);
   }, [navLinks, getSecuritySolutionLinkProps]);
 
   return sideNavItems;
@@ -122,20 +137,21 @@ const usePanelBottomOffset = (): string | undefined => {
  * Main security navigation component.
  * It takes the links to render from the generic application `links` configs.
  */
-export const SecuritySideNav: React.FC = () => {
-  const [items, footerItems] = useSolutionSideNavItems();
+export const SecuritySideNav: React.FC<{ onMount?: () => void }> = ({ onMount }) => {
+  const items = useSolutionSideNavItems();
   const selectedId = useSelectedId();
   const panelTopOffset = usePanelTopOffset();
   const panelBottomOffset = usePanelBottomOffset();
 
-  if (items.length === 0 && footerItems.length === 0) {
+  if (!items) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;
   }
 
   return (
     <SolutionSideNav
       items={items}
-      footerItems={footerItems}
+      categories={CATEGORIES}
+      onMount={onMount}
       selectedId={selectedId}
       panelTopOffset={panelTopOffset}
       panelBottomOffset={panelBottomOffset}

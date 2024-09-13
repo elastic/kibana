@@ -1,35 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import moment from 'moment-timezone';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { AggTypesDependencies } from '..';
-import type { IKibanaSearchResponse } from './types';
 
+// TODO - investigate if this check is still needed
+// There are no documented work flows where response or rawResponse is not returned
+// Leaving check to prevent breaking changes until full investigation can be completed.
 /**
- * @returns true if response had an error while executing in ES
+ * @returns true if response is abort
  */
-export const isErrorResponse = (response?: IKibanaSearchResponse) => {
-  return !response || !response.rawResponse || (!response.isRunning && !!response.isPartial);
+export const isAbortResponse = (response?: IKibanaSearchResponse) => {
+  return !response || !response.rawResponse;
 };
 
 /**
- * @returns true if response is completed successfully
+ * @returns true if request is still running
  */
-export const isCompleteResponse = (response?: IKibanaSearchResponse) => {
-  return Boolean(response && !response.isRunning && !response.isPartial);
-};
-
-/**
- * @returns true if request is still running an/d response contains partial results
- */
-export const isPartialResponse = (response?: IKibanaSearchResponse) => {
-  return Boolean(response && response.isRunning && response.isPartial);
-};
+export const isRunningResponse = (response?: IKibanaSearchResponse) => response?.isRunning ?? false;
 
 export const getUserTimeZone = (
   getConfig: AggTypesDependencies['getConfig'],

@@ -10,8 +10,13 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'graph', 'security', 'error']);
+  const securityService = getService('security');
+  const { common, security, error, header } = getPageObjects([
+    'common',
+    'security',
+    'error',
+    'header',
+  ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
@@ -20,18 +25,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await security.forceLogout();
     });
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await PageObjects.security.forceLogout();
+      await security.forceLogout();
     });
 
     describe('global graph all privileges', () => {
       before(async () => {
-        await security.role.create('global_graph_all_role', {
+        await securityService.role.create('global_graph_all_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -45,24 +50,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_graph_all_user', {
+        await securityService.user.create('global_graph_all_user', {
           password: 'global_graph_all_user-password',
           roles: ['global_graph_all_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_graph_all_user',
-          'global_graph_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.login('global_graph_all_user', 'global_graph_all_user-password', {
+          expectSpaceSelector: false,
+        });
       });
 
       after(async () => {
-        await security.role.delete('global_graph_all_role');
-        await security.user.delete('global_graph_all_user');
+        await securityService.role.delete('global_graph_all_role');
+        await securityService.user.delete('global_graph_all_user');
       });
 
       it('shows graph navlink', async () => {
@@ -71,7 +72,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('landing page shows "Create new graph" button', async () => {
-        await PageObjects.common.navigateToApp('graph');
+        await common.navigateToApp('graph');
+        await header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
         await testSubjects.existOrFail('graphCreateGraphPromptButton');
       });
@@ -81,7 +83,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allows creating a new workspace', async () => {
-        await PageObjects.common.navigateToApp('graph');
+        await common.navigateToApp('graph');
+        await header.waitUntilLoadingHasFinished();
         await testSubjects.click('graphCreateGraphPromptButton');
         const breadcrumb = await testSubjects.find('~graphCurrentGraphBreadcrumb');
         expect(await breadcrumb.getVisibleText()).to.equal('Unsaved graph');
@@ -94,7 +97,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global graph read-only privileges', () => {
       before(async () => {
-        await security.role.create('global_graph_read_role', {
+        await securityService.role.create('global_graph_read_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -108,24 +111,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_graph_read_user', {
+        await securityService.user.create('global_graph_read_user', {
           password: 'global_graph_read_user-password',
           roles: ['global_graph_read_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_graph_read_user',
-          'global_graph_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.login('global_graph_read_user', 'global_graph_read_user-password', {
+          expectSpaceSelector: false,
+        });
       });
 
       after(async () => {
-        await security.role.delete('global_graph_read_role');
-        await security.user.delete('global_graph_read_user');
+        await securityService.role.delete('global_graph_read_role');
+        await securityService.user.delete('global_graph_read_user');
       });
 
       it('shows graph navlink', async () => {
@@ -134,7 +133,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('does not show a "Create new Workspace" button', async () => {
-        await PageObjects.common.navigateToApp('graph');
+        await common.navigateToApp('graph');
+        await header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
         await testSubjects.missingOrFail('newItemButton');
       });
@@ -146,7 +146,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('no graph privileges', () => {
       before(async () => {
-        await security.role.create('no_graph_privileges_role', {
+        await securityService.role.create('no_graph_privileges_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -160,24 +160,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('no_graph_privileges_user', {
+        await securityService.user.create('no_graph_privileges_user', {
           password: 'no_graph_privileges_user-password',
           roles: ['no_graph_privileges_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'no_graph_privileges_user',
-          'no_graph_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.login('no_graph_privileges_user', 'no_graph_privileges_user-password', {
+          expectSpaceSelector: false,
+        });
       });
 
       after(async () => {
-        await security.role.delete('no_graph_privileges_role');
-        await security.user.delete('no_graph_privileges_user');
+        await securityService.role.delete('no_graph_privileges_role');
+        await securityService.user.delete('no_graph_privileges_user');
       });
 
       it(`doesn't show graph navlink`, async () => {
@@ -186,12 +182,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`navigating to app displays a 403`, async () => {
-        await PageObjects.common.navigateToUrl('graph', '', {
+        await common.navigateToUrl('graph', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
 
-        await PageObjects.error.expectForbidden();
+        await error.expectForbidden();
       });
     });
   });

@@ -8,9 +8,8 @@
 import type {
   AggregationsAggregationContainer,
   AggregationsCompositeAggregation,
-  AggregationsAggregateOrder,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { AggregateOptions } from './rule';
+import type { AggregateOptions } from '../server/application/rule/methods/aggregate/types';
 
 export type RuleTagsAggregationOptions = Pick<AggregateOptions, 'filter' | 'search'> & {
   after?: AggregationsCompositeAggregation['after'];
@@ -51,7 +50,7 @@ export const getRuleTagsAggregation = (
             tags: {
               terms: {
                 field: 'alert.attributes.tags',
-                order: 'asc' as unknown as AggregationsAggregateOrder,
+                order: 'asc' as const,
               },
             },
           },

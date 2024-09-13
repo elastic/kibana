@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createCalendar(calendarId);
@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
     it('job creation loads the multi metric wizard for the source data', async () => {
@@ -114,6 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('job creation navigates through the multi metric wizard and sets all needed fields', async () => {
       await ml.testExecution.logTestStep('job creation displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
+      await ml.commonUI.assertDatePickerDataTierOptionsVisible(true);
 
       await ml.testExecution.logTestStep('job creation sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(

@@ -10,7 +10,6 @@ import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import { AppNavLinkStatus } from '@kbn/core/public';
 import { SCREENSHOTTING_APP_ID } from '../common';
 import { App, ScreenshotModeContext } from './app';
 
@@ -21,26 +20,24 @@ interface SetupDeps {
 
 export class ScreenshottingPlugin implements Plugin<void, void, SetupDeps> {
   setup({ application }: CoreSetup, { screenshotMode }: SetupDeps) {
-    if (!screenshotMode.isScreenshotMode()) {
-      return;
+    if (screenshotMode.isScreenshotMode()) {
+      application.register({
+        id: SCREENSHOTTING_APP_ID,
+        title: 'Screenshotting Expressions Renderer',
+        visibleIn: [],
+        chromeless: true,
+
+        mount: async ({ element }: AppMountParameters) => {
+          ReactDOM.render(
+            <ScreenshotModeContext.Provider value={screenshotMode}>
+              <App />
+            </ScreenshotModeContext.Provider>,
+            element
+          );
+          return () => ReactDOM.unmountComponentAtNode(element);
+        },
+      });
     }
-
-    application.register({
-      id: SCREENSHOTTING_APP_ID,
-      title: 'Screenshotting Expressions Renderer',
-      navLinkStatus: AppNavLinkStatus.hidden,
-      chromeless: true,
-
-      mount: async ({ element }: AppMountParameters) => {
-        ReactDOM.render(
-          <ScreenshotModeContext.Provider value={screenshotMode}>
-            <App />
-          </ScreenshotModeContext.Provider>,
-          element
-        );
-        return () => ReactDOM.unmountComponentAtNode(element);
-      },
-    });
   }
 
   start() {}

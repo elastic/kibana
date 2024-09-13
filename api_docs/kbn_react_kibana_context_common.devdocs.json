@@ -1,0 +1,182 @@
+{
+  "id": "@kbn/react-kibana-context-common",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/react-kibana-context-common",
+        "id": "def-public.getColorMode",
+        "type": "Function",
+        "tags": [],
+        "label": "getColorMode",
+        "description": [
+          "\nGiven a `KibanaTheme`, provide a color mode for use with EUI."
+        ],
+        "signature": [
+          "(theme: ",
+          {
+            "pluginId": "@kbn/react-kibana-context-common",
+            "scope": "public",
+            "docId": "kibKbnReactKibanaContextCommonPluginApi",
+            "section": "def-public.KibanaTheme",
+            "text": "KibanaTheme"
+          },
+          ") => ",
+          "EuiThemeColorModeStandard"
+        ],
+        "path": "packages/react/kibana_context/common/color_mode.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-common",
+            "id": "def-public.getColorMode.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "theme",
+            "description": [
+              "KibanaTheme"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/react-kibana-context-common",
+                "scope": "public",
+                "docId": "kibKbnReactKibanaContextCommonPluginApi",
+                "section": "def-public.KibanaTheme",
+                "text": "KibanaTheme"
+              }
+            ],
+            "path": "packages/react/kibana_context/common/color_mode.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "EuiThemeColorModeStandard"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/react-kibana-context-common",
+        "id": "def-public.KibanaTheme",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaTheme",
+        "description": [
+          "\nThe representation of the Kibana theme, (not to be confused with the EUI theme)."
+        ],
+        "path": "packages/react/kibana_context/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-common",
+            "id": "def-public.KibanaTheme.darkMode",
+            "type": "boolean",
+            "tags": [],
+            "label": "darkMode",
+            "description": [
+              "is dark mode enabled or not"
+            ],
+            "path": "packages/react/kibana_context/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-common",
+        "id": "def-public.ThemeServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "ThemeServiceStart",
+        "description": [
+          "\nThe `ThemeService` start contract, provided to plugins during the `start` lifecycle."
+        ],
+        "path": "packages/react/kibana_context/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-common",
+            "id": "def-public.ThemeServiceStart.theme$",
+            "type": "Object",
+            "tags": [],
+            "label": "theme$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/react-kibana-context-common",
+                "scope": "public",
+                "docId": "kibKbnReactKibanaContextCommonPluginApi",
+                "section": "def-public.KibanaTheme",
+                "text": "KibanaTheme"
+              },
+              ">"
+            ],
+            "path": "packages/react/kibana_context/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/react-kibana-context-common",
+        "id": "def-public.defaultTheme",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultTheme",
+        "description": [
+          "\nThe default `KibanaTheme` for use in Storybook, Jest, or initialization.  At\nruntime, the theme should always be provided by the `ThemeService`."
+        ],
+        "path": "packages/react/kibana_context/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-common",
+            "id": "def-public.defaultTheme.darkMode",
+            "type": "boolean",
+            "tags": [],
+            "label": "darkMode",
+            "description": [],
+            "signature": [
+              "false"
+            ],
+            "path": "packages/react/kibana_context/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

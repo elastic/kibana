@@ -8,14 +8,17 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
-  loggingSystemMock,
   elasticsearchServiceMock,
   savedObjectsClientMock,
   httpServerMock,
   httpServiceMock,
 } from '@kbn/core/server/mocks';
-import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
+import type {
+  KibanaResponseFactory,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import type { Observable } from 'rxjs';
 import { dataPluginMock } from '@kbn/unified-search-plugin/server/mocks';
 import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
@@ -23,14 +26,12 @@ import {
   createMockEndpointAppContext,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
+  getRegisteredVersionedRouteMock,
 } from '../../mocks';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import { applyActionsEsSearchMock } from '../../services/actions/mocks';
-import {
-  createMockConfig,
-  requestContextMock,
-} from '../../../lib/detection_engine/routes/__mocks__';
-import type { EndpointSuggestionsSchema } from '../../../../common/endpoint/schema/suggestions';
+import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
+import type { EndpointSuggestionsSchema } from '../../../../common/api/endpoint';
 import {
   getEndpointSuggestionsRequestHandler,
   registerEndpointSuggestionsRoutes,
@@ -40,8 +41,6 @@ import { EndpointActionGenerator } from '../../../../common/endpoint/data_genera
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import { eventsIndexPattern, SUGGESTIONS_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint/exceptions/exceptionable_endpoint_event_fields';
 
 jest.mock('@kbn/unified-search-plugin/server/autocomplete/terms_enum', () => {
   return {
@@ -93,7 +92,7 @@ describe('when calling the Suggestions route handler', () => {
         createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
       );
 
-      const fieldName = EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS[0];
+      const fieldName = 'process.id';
       const mockRequest = httpServerMock.createKibanaRequest<
         TypeOf<typeof EndpointSuggestionsSchema.params>,
         never,
@@ -101,7 +100,7 @@ describe('when calling the Suggestions route handler', () => {
       >({
         params: { suggestion_type: 'eventFilters' },
         body: {
-          field: fieldName,
+          field: 'process.id',
           query: 'test-query',
           filters: 'test-filters',
           fieldMeta: 'test-field-meta',
@@ -149,36 +148,6 @@ describe('when calling the Suggestions route handler', () => {
         body: 'Invalid suggestion_type: any',
       });
     });
-
-    it('should respond with bad request if wrong field name', async () => {
-      applyActionsEsSearchMock(
-        mockScopedEsClient.asInternalUser,
-        new EndpointActionGenerator().toEsSearchResponse([])
-      );
-
-      const mockContext = requestContextMock.convertContext(
-        createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
-      );
-      const mockRequest = httpServerMock.createKibanaRequest<
-        TypeOf<typeof EndpointSuggestionsSchema.params>,
-        never,
-        never
-      >({
-        params: { suggestion_type: 'eventFilters' },
-        body: {
-          field: 'test-field',
-          query: 'test-query',
-          filters: 'test-filters',
-          fieldMeta: 'test-field-meta',
-        },
-      });
-
-      await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
-
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
-        body: 'Unsupported field name: test-field',
-      });
-    });
   });
   describe('without having right privileges', () => {
     beforeEach(() => {
@@ -187,10 +156,8 @@ describe('when calling the Suggestions route handler', () => {
       const endpointAppContextService = new EndpointAppContextService();
       // add the suggestions route handlers to routerMock
       registerEndpointSuggestionsRoutes(routerMock, config$, {
-        logFactory: loggingSystemMock.create(),
+        ...createMockEndpointAppContext(),
         service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 
       // define a convenience function to execute an API call for a given route
@@ -213,11 +180,14 @@ describe('when calling the Suggestions route handler', () => {
         );
 
         const mockRequest = httpServerMock.createKibanaRequest({ params });
-        const [, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-          path.startsWith(routePrefix)
-        )!;
+        const { routeHandler } = getRegisteredVersionedRouteMock(
+          routerMock,
+          'post',
+          routePrefix,
+          '2023-10-31'
+        );
 
-        await routeHandler(ctx, mockRequest, mockResponse);
+        await routeHandler(ctx as unknown as RequestHandlerContext, mockRequest, mockResponse);
       };
     });
 

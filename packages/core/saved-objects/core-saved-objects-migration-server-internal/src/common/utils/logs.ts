@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Logger, LogMeta } from '@kbn/logging';
@@ -25,7 +26,7 @@ interface StateTransitionLogMeta extends LogMeta {
 
 export const logStateTransition = (
   logger: Logger,
-  logMessagePrefix: string,
+  logPrefix: string,
   prevState: LogAwareState,
   currState: LogAwareState,
   tookMs: number
@@ -34,31 +35,30 @@ export const logStateTransition = (
     currState.logs.slice(prevState.logs.length).forEach(({ message, level }) => {
       switch (level) {
         case 'error':
-          return logger.error(logMessagePrefix + message);
+          return logger.error(logPrefix + message);
         case 'warning':
-          return logger.warn(logMessagePrefix + message);
+          return logger.warn(logPrefix + message);
         case 'info':
-          return logger.info(logMessagePrefix + message);
+          return logger.info(logPrefix + message);
         default:
           throw new Error(`unexpected log level ${level}`);
       }
     });
   }
 
-  logger.info(
-    logMessagePrefix + `${prevState.controlState} -> ${currState.controlState}. took: ${tookMs}ms.`
-  );
-  logger.debug<StateTransitionLogMeta>(
-    logMessagePrefix + `${prevState.controlState} -> ${currState.controlState}. took: ${tookMs}ms.`,
-    {
+  const logMessage = `${logPrefix}${prevState.controlState} -> ${currState.controlState}. took: ${tookMs}ms.`;
+  if (logger.isLevelEnabled('debug')) {
+    logger.debug<StateTransitionLogMeta>(logMessage, {
       kibana: {
         migrations: {
           state: currState,
           duration: tookMs,
         },
       },
-    }
-  );
+    });
+  } else {
+    logger.info(logMessage);
+  }
 };
 
 export const logActionResponse = (
@@ -67,5 +67,5 @@ export const logActionResponse = (
   state: LogAwareState,
   res: unknown
 ) => {
-  logger.debug(logMessagePrefix + `${state.controlState} RESPONSE`, res as LogMeta);
+  logger.debug(logMessagePrefix + `${state.controlState} RESPONSE`);
 };

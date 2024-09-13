@@ -13,7 +13,7 @@ const ACTION_TEST_SUBJ = `embeddablePanelAction-${ACTION_ID}`;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const drilldowns = getService('dashboardDrilldownsManage');
-  const { dashboard, discover, common, timePicker } = getPageObjects([
+  const { dashboard, discover, timePicker } = getPageObjects([
     'dashboard',
     'discover',
     'common',
@@ -29,26 +29,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       'change default index pattern to verify action navigates to correct index pattern',
       async () => {
         await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash*' });
+        await dashboard.navigateToApp();
+        await dashboard.preserveCrossAppState();
       }
     );
 
-    before('start on Dashboard landing page', async () => {
-      await common.navigateToApp('dashboard');
-      await dashboard.preserveCrossAppState();
-    });
-
-    after('set back default index pattern', async () => {
+    after('set back default index pattern and clean-up custom time range on panel', async () => {
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-    });
-
-    after('clean-up custom time range on panel', async () => {
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
       await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
 
       await panelActions.customizePanel();
-      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
+      await dashboardCustomizePanel.disableCustomTimeRange();
       await dashboardCustomizePanel.clickSaveButton();
-      await dashboard.saveDashboard('Dashboard with Pie Chart');
+      await dashboard.saveDashboard('Dashboard with Pie Chart', {
+        saveAsNew: false,
+        exitFromEditMode: true,
+      });
     });
 
     it('action exists in panel context menu', async () => {
@@ -75,17 +72,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('carries over panel time range', async () => {
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
 
       await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
 
       await panelActions.customizePanel();
-      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
-      await dashboardCustomizePanel.clickToggleQuickMenuButton();
+      await dashboardCustomizePanel.enableCustomTimeRange();
+      await dashboardCustomizePanel.openDatePickerQuickMenu();
       await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_90 days');
       await dashboardCustomizePanel.clickSaveButton();
 
-      await dashboard.saveDashboard('Dashboard with Pie Chart');
+      await dashboard.saveDashboard('Dashboard with Pie Chart', {
+        saveAsNew: false,
+        exitFromEditMode: true,
+      });
 
       await panelActions.openContextMenu();
       await testSubjects.clickWhenNotDisabledWithoutRetry(ACTION_TEST_SUBJ);

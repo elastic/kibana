@@ -7,13 +7,20 @@
 
 import type React from 'react';
 import { useCallback, useState, useEffect, useRef, useLayoutEffect, useContext } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { SideEffectContext } from './side_effect_context';
 import type { Matrix3 } from '../types';
-import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
+import {
+  userStartedPanning,
+  userMovedPointer,
+  userStoppedPanning,
+  userZoomed,
+  userSetRasterSize,
+} from '../store/camera/action';
+import type { State } from '../../common/store/types';
 
-export function useCamera(): {
+export function useCamera({ id }: { id: string }): {
   /**
    * A function to pass to a React element's `ref` property. Used to attach
    * native event listeners and to measure the DOM node.
@@ -26,7 +33,7 @@ export function useCamera(): {
    */
   projectionMatrix: Matrix3;
 } {
-  const dispatch = useResolverDispatch();
+  const dispatch = useDispatch();
   const sideEffectors = useContext(SideEffectContext);
 
   const [ref, setRef] = useState<null | HTMLDivElement>(null);
@@ -36,7 +43,15 @@ export function useCamera(): {
    * to determine where it belongs on the screen.
    * The projection matrix changes over time if the camera is currently animating.
    */
-  const projectionMatrixAtTime = useSelector(selectors.projectionMatrix);
+
+  const projectionMatrixAtTime = useSelector(
+    useCallback(
+      (state: State) => {
+        return selectors.projectionMatrix(state.analyzer[id]);
+      },
+      [id]
+    )
+  );
 
   /**
    * Use a ref to refer to the `projectionMatrixAtTime` function. The rAF loop
@@ -57,8 +72,10 @@ export function useCamera(): {
     projectionMatrixAtTime(sideEffectors.timestamp())
   );
 
-  const userIsPanning = useSelector(selectors.userIsPanning);
-  const isAnimatingAtTime = useSelector(selectors.isAnimating);
+  const userIsPanning = useSelector((state: State) => selectors.userIsPanning(state.analyzer[id]));
+  const isAnimatingAtTime = useSelector((state: State) =>
+    selectors.isAnimating(state.analyzer[id])
+  );
 
   const [elementBoundingClientRect, clientRectCallback] = useAutoUpdatingClientRect();
 
@@ -82,41 +99,39 @@ export function useCamera(): {
     (event: React.MouseEvent<HTMLDivElement>) => {
       const maybeCoordinates = relativeCoordinatesFromMouseEvent(event);
       if (maybeCoordinates !== null) {
-        dispatch({
-          type: 'userStartedPanning',
-          payload: { screenCoordinates: maybeCoordinates, time: sideEffectors.timestamp() },
-        });
+        dispatch(
+          userStartedPanning({
+            id,
+            screenCoordinates: maybeCoordinates,
+            time: sideEffectors.timestamp(),
+          })
+        );
       }
     },
-    [dispatch, relativeCoordinatesFromMouseEvent, sideEffectors]
+    [dispatch, relativeCoordinatesFromMouseEvent, sideEffectors, id]
   );
 
   const handleMouseMove = useCallback(
     (event: MouseEvent) => {
       const maybeCoordinates = relativeCoordinatesFromMouseEvent(event);
       if (maybeCoordinates) {
-        dispatch({
-          type: 'userMovedPointer',
-          payload: {
+        dispatch(
+          userMovedPointer({
+            id,
             screenCoordinates: maybeCoordinates,
             time: sideEffectors.timestamp(),
-          },
-        });
+          })
+        );
       }
     },
-    [dispatch, relativeCoordinatesFromMouseEvent, sideEffectors]
+    [dispatch, relativeCoordinatesFromMouseEvent, sideEffectors, id]
   );
 
   const handleMouseUp = useCallback(() => {
     if (userIsPanning) {
-      dispatch({
-        type: 'userStoppedPanning',
-        payload: {
-          time: sideEffectors.timestamp(),
-        },
-      });
+      dispatch(userStoppedPanning({ id, time: sideEffectors.timestamp() }));
     }
-  }, [dispatch, sideEffectors, userIsPanning]);
+  }, [dispatch, sideEffectors, userIsPanning, id]);
 
   const handleWheel = useCallback(
     (event: WheelEvent) => {
@@ -127,20 +142,21 @@ export function useCamera(): {
         event.deltaMode === 0
       ) {
         event.preventDefault();
-        dispatch({
-          type: 'userZoomed',
-          payload: {
+        dispatch(
+          userZoomed({
+            id,
             /**
+             *
              * we use elementBoundingClientRect to interpret pixel deltas as a fraction of the element's height
              * when pinch-zooming in on a mac, deltaY is a negative number but we want the payload to be positive
              */
             zoomChange: event.deltaY / -elementBoundingClientRect.height,
             time: sideEffectors.timestamp(),
-          },
-        });
+          })
+        );
       }
     },
-    [elementBoundingClientRect, dispatch, sideEffectors]
+    [elementBoundingClientRect, dispatch, sideEffectors, id]
   );
 
   const refCallback = useCallback(
@@ -252,12 +268,14 @@ export function useCamera(): {
 
   useEffect(() => {
     if (elementBoundingClientRect !== null) {
-      dispatch({
-        type: 'userSetRasterSize',
-        payload: [elementBoundingClientRect.width, elementBoundingClientRect.height],
-      });
+      dispatch(
+        userSetRasterSize({
+          id,
+          dimensions: [elementBoundingClientRect.width, elementBoundingClientRect.height],
+        })
+      );
     }
-  }, [dispatch, elementBoundingClientRect]);
+  }, [dispatch, elementBoundingClientRect, id]);
 
   return {
     ref: refCallback,

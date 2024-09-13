@@ -22,9 +22,11 @@ export const formatTimelineData = async (
   uniq([...ecsFields, ...dataFields]).reduce<Promise<TimelineEdges>>(
     async (acc, fieldName) => {
       const flattenedFields: TimelineEdges = await acc;
-      flattenedFields.node._id = hit._id;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      flattenedFields.node._id = hit._id!;
       flattenedFields.node._index = hit._index;
-      flattenedFields.node.ecs._id = hit._id;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      flattenedFields.node.ecs._id = hit._id!;
       flattenedFields.node.ecs.timestamp = getTimestamp(hit);
       flattenedFields.node.ecs._index = hit._index;
       if (hit.sort && hit.sort.length > 1) {
@@ -70,12 +72,13 @@ const getValuesFromFields = async (
     };
   }
   const formattedData = await getDataSafety(getDataFromFieldsHits, fieldToEval);
-  return formattedData.reduce(
-    (acc: TimelineNonEcsData[], { field, values }) =>
-      // nested fields return all field values, pick only the one we asked for
-      field.includes(fieldName) ? [...acc, { field, value: values }] : acc,
-    []
-  );
+  return formattedData.reduce((acc: TimelineNonEcsData[], { field, values }) => {
+    // nested fields return all field values, pick only the one we asked for
+    if (field.includes(fieldName)) {
+      acc.push({ field, value: values });
+    }
+    return acc;
+  }, []);
 };
 
 const mergeTimelineFieldsWithHit = async <T>(

@@ -1,22 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
 
-import { Filter } from '@kbn/es-query';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { Filter } from '@kbn/es-query';
 
-import { OptionsListReduxState, OptionsListComponentState } from './types';
-import { getIpRangeQuery } from '../../common/options_list/ip_search';
+import { isValidSearch } from '../../common/options_list/is_valid_search';
+import { OptionsListSelection } from '../../common/options_list/options_list_selections';
 import {
-  OPTIONS_LIST_DEFAULT_SORT,
   OptionsListSortingType,
+  OPTIONS_LIST_DEFAULT_SORT,
 } from '../../common/options_list/suggestions_sorting';
+import { OptionsListComponentState, OptionsListReduxState } from './types';
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
   popoverOpen: false,
@@ -25,8 +28,12 @@ export const getDefaultComponentState = (): OptionsListReduxState['componentStat
 });
 
 export const optionsListReducers = {
-  deselectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
-    if (!state.explicitInput.selectedOptions) return;
+  deselectOption: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<OptionsListSelection>
+  ) => {
+    if (!state.explicitInput.selectedOptions || !state.componentState.field) return;
+
     const itemIndex = state.explicitInput.selectedOptions.indexOf(action.payload);
     if (itemIndex !== -1) {
       const newSelections = [...state.explicitInput.selectedOptions];
@@ -36,18 +43,25 @@ export const optionsListReducers = {
   },
   setSearchString: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
     state.componentState.searchString.value = action.payload;
-    if (
-      action.payload !== '' && // empty string search is never invalid
-      state.componentState.field?.type === 'ip' // only IP searches can currently be invalid
-    ) {
-      state.componentState.searchString.valid = getIpRangeQuery(action.payload).validSearch;
-    }
+    state.componentState.searchString.valid = isValidSearch({
+      searchString: action.payload,
+      fieldType: state.componentState.field?.type,
+      searchTechnique: state.componentState.allowExpensiveQueries
+        ? state.explicitInput.searchTechnique
+        : 'exact', // only exact match searching is supported when allowExpensiveQueries is false
+    });
   },
   setAllowExpensiveQueries: (
     state: WritableDraft<OptionsListReduxState>,
     action: PayloadAction<boolean>
   ) => {
     state.componentState.allowExpensiveQueries = action.payload;
+  },
+  setInvalidSelectionWarningOpen: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<boolean>
+  ) => {
+    state.componentState.showInvalidSelectionWarning = action.payload;
   },
   setPopoverOpen: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     state.componentState.popoverOpen = action.payload;
@@ -69,14 +83,18 @@ export const optionsListReducers = {
       state.explicitInput.existsSelected = false;
     }
   },
-  selectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
+  selectOption: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<OptionsListSelection>
+  ) => {
     if (!state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
     if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
+
     state.explicitInput.selectedOptions?.push(action.payload);
   },
   replaceSelection: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<string>
+    action: PayloadAction<OptionsListSelection>
   ) => {
     state.explicitInput.selectedOptions = [action.payload];
     if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
@@ -94,14 +112,17 @@ export const optionsListReducers = {
   },
   setValidAndInvalidSelections: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<{
-      validSelections: string[];
-      invalidSelections: string[];
-    }>
+    action: PayloadAction<Pick<OptionsListComponentState, 'validSelections' | 'invalidSelections'>>
   ) => {
     const { invalidSelections, validSelections } = action.payload;
     state.componentState.invalidSelections = invalidSelections;
     state.componentState.validSelections = validSelections;
+  },
+  setErrorMessage: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<string | undefined>
+  ) => {
+    state.componentState.error = action.payload;
   },
   setLoading: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     state.output.loading = action.payload;
@@ -137,5 +158,11 @@ export const optionsListReducers = {
     action: PayloadAction<string | undefined>
   ) => {
     state.output.dataViewId = action.payload;
+  },
+  setExplicitInputDataViewId: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<string>
+  ) => {
+    state.explicitInput.dataViewId = action.payload;
   },
 };

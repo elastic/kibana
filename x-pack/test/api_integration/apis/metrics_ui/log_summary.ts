@@ -13,13 +13,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import { fold } from 'fp-ts/lib/Either';
 
-import { createPlainError, throwErrors } from '@kbn/infra-plugin/common/runtime_types';
+import { createPlainError, throwErrors } from '@kbn/io-ts-utils';
 
 import {
   LOG_ENTRIES_SUMMARY_PATH,
   logEntriesSummaryRequestRT,
   logEntriesSummaryResponseRT,
-} from '@kbn/infra-plugin/common/http_api/log_entries';
+} from '@kbn/logs-shared-plugin/common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -28,6 +28,7 @@ const LATEST_TIME_WITH_DATA = new Date('2018-10-17T19:57:21.611Z').valueOf();
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
+  'Elastic-Api-Version': '1',
 };
 
 export default function ({ getService }: FtrProviderContext) {

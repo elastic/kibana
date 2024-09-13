@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -13,6 +14,7 @@ import { TelemetryService } from '@kbn/telemetry-plugin/public/services';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render } from '@testing-library/react';
 import type { DocLinksStart } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('TelemetryManagementSectionComponent', () => {
   const coreStart = coreMock.createStart();
@@ -22,9 +24,9 @@ describe('TelemetryManagementSectionComponent', () => {
   const coreSetup = coreMock.createSetup();
 
   it('renders as expected', () => {
-    const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
+        appendServerlessChannelsSuffix: false,
         sendUsageTo: 'staging',
         banner: true,
         allowChangingOptInStatus: true,
@@ -43,7 +45,6 @@ describe('TelemetryManagementSectionComponent', () => {
       shallowWithIntl(
         <TelemetryManagementSection
           telemetryService={telemetryService}
-          onQueryMatchChange={onQueryMatchChange}
           showAppliesSettingMessage={true}
           enableSaving={true}
           toasts={coreStart.notifications.toasts}
@@ -54,9 +55,9 @@ describe('TelemetryManagementSectionComponent', () => {
   });
 
   it('renders null because query does not match the SEARCH_TERMS', () => {
-    const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
+        appendServerlessChannelsSuffix: false,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -73,42 +74,41 @@ describe('TelemetryManagementSectionComponent', () => {
 
     const component = render(
       <React.Suspense fallback={<span>Fallback</span>}>
-        <TelemetryManagementSection
-          telemetryService={telemetryService}
-          onQueryMatchChange={onQueryMatchChange}
-          showAppliesSettingMessage={false}
-          enableSaving={true}
-          toasts={coreStart.notifications.toasts}
-          docLinks={docLinks}
-        />
+        <I18nProvider>
+          <TelemetryManagementSection
+            telemetryService={telemetryService}
+            showAppliesSettingMessage={false}
+            enableSaving={true}
+            toasts={coreStart.notifications.toasts}
+            docLinks={docLinks}
+          />
+        </I18nProvider>
       </React.Suspense>
     );
 
     try {
       component.rerender(
         <React.Suspense fallback={<span>Fallback</span>}>
-          <TelemetryManagementSection
-            query={{ text: 'asdasdasd' }}
-            telemetryService={telemetryService}
-            onQueryMatchChange={onQueryMatchChange}
-            showAppliesSettingMessage={false}
-            enableSaving={true}
-            toasts={coreStart.notifications.toasts}
-            docLinks={docLinks}
-          />
+          <I18nProvider>
+            <TelemetryManagementSection
+              telemetryService={telemetryService}
+              showAppliesSettingMessage={false}
+              enableSaving={true}
+              toasts={coreStart.notifications.toasts}
+              docLinks={docLinks}
+            />
+          </I18nProvider>
         </React.Suspense>
       );
-      expect(onQueryMatchChange).toHaveBeenCalledWith(false);
-      expect(onQueryMatchChange).toHaveBeenCalledTimes(1);
     } finally {
       component.unmount();
     }
   });
 
   it('renders because query matches the SEARCH_TERMS', () => {
-    const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
+        appendServerlessChannelsSuffix: false,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -126,7 +126,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const component = mountWithIntl(
       <TelemetryManagementSection
         telemetryService={telemetryService}
-        onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={false}
         enableSaving={true}
         toasts={coreStart.notifications.toasts}
@@ -142,19 +141,15 @@ describe('TelemetryManagementSectionComponent', () => {
 
       // It should also render if there is no query at all.
       expect(component.setProps({ ...component.props(), query: {} }).html()).not.toBe('');
-      expect(onQueryMatchChange).toHaveBeenCalledWith(true);
-
-      // Should only be called once because the second time does not change the result
-      expect(onQueryMatchChange).toHaveBeenCalledTimes(1);
     } finally {
       component.unmount();
     }
   });
 
   it('renders null because allowChangingOptInStatus is false', () => {
-    const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
+        appendServerlessChannelsSuffix: false,
         banner: true,
         allowChangingOptInStatus: false,
         optIn: true,
@@ -172,7 +167,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const component = mountWithIntl(
       <TelemetryManagementSection
         telemetryService={telemetryService}
-        onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={true}
         enableSaving={true}
         toasts={coreStart.notifications.toasts}
@@ -182,16 +176,15 @@ describe('TelemetryManagementSectionComponent', () => {
     try {
       expect(component).toMatchSnapshot();
       component.setProps({ ...component.props(), query: { text: 'TeLEMetry' } });
-      expect(onQueryMatchChange).toHaveBeenCalledWith(false);
     } finally {
       component.unmount();
     }
   });
 
   it('shows the OptInExampleFlyout', () => {
-    const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
+        appendServerlessChannelsSuffix: false,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -209,7 +202,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const component = mountWithIntl(
       <TelemetryManagementSection
         telemetryService={telemetryService}
-        onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={false}
         enableSaving={true}
         toasts={coreStart.notifications.toasts}
@@ -230,9 +222,9 @@ describe('TelemetryManagementSectionComponent', () => {
   });
 
   it('toggles the OptIn button', async () => {
-    const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
+        appendServerlessChannelsSuffix: false,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -250,7 +242,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const component = mountWithIntl(
       <TelemetryManagementSection
         telemetryService={telemetryService}
-        onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={false}
         enableSaving={true}
         toasts={coreStart.notifications.toasts}
@@ -258,19 +249,19 @@ describe('TelemetryManagementSectionComponent', () => {
       />
     );
     try {
-      const toggleOptInComponent = component.find('Field');
+      const toggleOptInComponent = component.find('FieldRow');
       await expect(
-        toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
+        toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('onFieldChange')()
       ).resolves.toBe(true);
       // TODO: Fix `mountWithIntl` types in @kbn/test-jest-helpers to make testing easier
       expect((component.state() as { enabled: boolean }).enabled).toBe(true);
       await expect(
-        toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
+        toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('onFieldChange')()
       ).resolves.toBe(true);
       expect((component.state() as { enabled: boolean }).enabled).toBe(false);
       telemetryService.setOptIn = jest.fn().mockRejectedValue(Error('test-error'));
       await expect(
-        toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
+        toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('onFieldChange')()
       ).rejects.toStrictEqual(Error('test-error'));
     } finally {
       component.unmount();
@@ -278,9 +269,9 @@ describe('TelemetryManagementSectionComponent', () => {
   });
 
   it('test the wrapper (for coverage purposes)', () => {
-    const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
+        appendServerlessChannelsSuffix: false,
         banner: true,
         allowChangingOptInStatus: false,
         optIn: false,
@@ -300,7 +291,6 @@ describe('TelemetryManagementSectionComponent', () => {
         <TelemetryManagementSection
           showAppliesSettingMessage={true}
           telemetryService={telemetryService}
-          onQueryMatchChange={onQueryMatchChange}
           enableSaving={true}
           toasts={coreStart.notifications.toasts}
           docLinks={docLinks}

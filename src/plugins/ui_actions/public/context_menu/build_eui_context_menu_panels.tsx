@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as React from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Trigger } from '../triggers';
+import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 import type { Action, ActionExecutionContext, ActionInternal } from '../actions';
 
 export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
@@ -179,10 +179,12 @@ export async function buildContextMenuForActions({
 
   for (const panel of Object.values(panels)) {
     const items = panel.items.filter(Boolean) as ItemDescriptor[];
-    panel.items = _.sortBy(
-      items,
-      (a) => -1 * (a._order ?? 0),
-      (a) => a._title
+    panel.items = items.sort(
+      ({ _order: orderA, _title: titleA }, { _order: orderB, _title: titleB }) => {
+        const orderComparison = (orderB || 0) - (orderA || 0);
+        if (orderComparison !== 0) return orderComparison;
+        return (titleA || '').localeCompare(titleB || '');
+      }
     );
   }
 

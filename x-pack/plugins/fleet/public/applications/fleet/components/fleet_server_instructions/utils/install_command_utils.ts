@@ -5,14 +5,25 @@
  * 2.0.
  */
 
+import type { DownloadSource } from '../../../../../../common/types';
 import type { PLATFORM_TYPE } from '../../../hooks';
 
 export type CommandsByPlatform = {
   [key in PLATFORM_TYPE]: string;
 };
 
-function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
-  const ARTIFACT_BASE_URL = 'https://artifacts.elastic.co/downloads/beats/elastic-agent';
+function getArtifact(
+  platform: PLATFORM_TYPE,
+  kibanaVersion: string,
+  downloadSource?: DownloadSource
+) {
+  const ARTIFACT_BASE_URL = `${
+    downloadSource
+      ? downloadSource.host.endsWith('/')
+        ? downloadSource.host.substring(0, downloadSource.host.length - 1)
+        : downloadSource.host
+      : 'https://artifacts.elastic.co/downloads'
+  }/beats/elastic-agent`;
 
   const artifactMap: Record<PLATFORM_TYPE, { downloadCommand: string }> = {
     linux: {
@@ -24,9 +35,9 @@ function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
     },
     mac: {
       downloadCommand: [
-        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz`,
-        `tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz`,
-        `cd elastic-agent-${kibanaVersion}-darwin-x86_64`,
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-darwin-aarch64.tar.gz`,
+        `tar xzvf elastic-agent-${kibanaVersion}-darwin-aarch64.tar.gz`,
+        `cd elastic-agent-${kibanaVersion}-darwin-aarch64`,
       ].join(`\n`),
     },
     windows: {
@@ -65,11 +76,12 @@ export function getInstallCommandForPlatform(
   fleetServerHost?: string,
   isProductionDeployment?: boolean,
   sslCATrustedFingerprint?: string,
-  kibanaVersion?: string
+  kibanaVersion?: string,
+  downloadSource?: DownloadSource
 ): string {
   const newLineSeparator = platform === 'windows' ? '`\n' : '\\\n';
 
-  const artifact = getArtifact(platform, kibanaVersion ?? '');
+  const artifact = getArtifact(platform, kibanaVersion ?? '', downloadSource);
 
   const commandArguments = [];
 
@@ -115,6 +127,8 @@ export function getInstallCommandForPlatform(
     deb: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
     rpm: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
     kubernetes: '',
+    cloudFormation: '',
+    googleCloudShell: '',
   };
 
   return commands[platform];

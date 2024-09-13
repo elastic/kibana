@@ -23,6 +23,7 @@ describe('config validation', () => {
         },
         "maxEphemeralActionsPerAlert": 10,
         "rules": Object {
+          "maxScheduledPerMinute": 32000,
           "minimumScheduleInterval": Object {
             "enforce": false,
             "value": "1m",

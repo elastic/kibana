@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
+import { first } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
-import { TileMapVisConfig } from './types';
-import type { LazyLoadedMapModules } from '../../lazy_load_bundle';
-import { MapComponent } from '../../embeddable/map_component';
+import type { TileMapVisConfig } from './types';
+import { MapRenderer } from '../../react_embeddable/map_renderer';
+import { createTileMapLayerDescriptor } from '../../classes/layers/create_tile_map_layer_descriptor';
 
 interface Props {
   filters?: Filter[];
@@ -20,34 +22,40 @@ interface Props {
   onInitialRenderComplete: () => void;
 }
 
-function TileMapVisualization(props: Props) {
-  const mapCenter = {
-    lat: props.visConfig.mapCenter[0],
-    lon: props.visConfig.mapCenter[1],
-    zoom: props.visConfig.mapZoom,
-  };
-  function getLayerDescriptors({
-    createTileMapLayerDescriptor,
-  }: {
-    createTileMapLayerDescriptor: LazyLoadedMapModules['createTileMapLayerDescriptor'];
-  }) {
+export function TileMapVisualization(props: Props) {
+  const isMounted = useMountedState();
+  const initialMapCenter = useMemo(() => {
+    return {
+      lat: props.visConfig.mapCenter[0],
+      lon: props.visConfig.mapCenter[1],
+      zoom: props.visConfig.mapZoom,
+    };
+    // props.visConfig reference changes each render but values are the same
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const initialLayerList = useMemo(() => {
     const layerDescriptor = createTileMapLayerDescriptor(props.visConfig.layerDescriptorParams);
     return layerDescriptor ? [layerDescriptor] : [];
-  }
+    // props.visConfig reference changes each render but values are the same
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
-    <MapComponent
+    <MapRenderer
       title={props.visConfig.layerDescriptorParams.label}
       filters={props.filters}
       query={props.query}
       timeRange={props.timeRange}
-      mapCenter={mapCenter}
-      getLayerDescriptors={getLayerDescriptors}
-      onInitialRenderComplete={props.onInitialRenderComplete}
+      mapCenter={initialMapCenter}
+      isLayerTOCOpen={true}
+      layerList={initialLayerList}
+      onApiAvailable={(api) => {
+        api.onRenderComplete$.pipe(first()).subscribe(() => {
+          if (isMounted()) {
+            props.onInitialRenderComplete();
+          }
+        });
+      }}
       isSharable={false}
     />
   );
 }
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export default TileMapVisualization;

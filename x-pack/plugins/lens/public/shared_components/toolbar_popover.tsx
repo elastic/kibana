@@ -6,20 +6,20 @@
  */
 
 import './toolbar_popover.scss';
-import React, { useState } from 'react';
-import { EuiFlexItem, EuiPopover, EuiIcon, EuiPopoverTitle, IconType } from '@elastic/eui';
-import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import React, { PropsWithChildren, useState } from 'react';
+import { EuiFlexItem, EuiPopover, EuiPopoverProps, EuiPopoverTitle, IconType } from '@elastic/eui';
+import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 import { EuiIconLegend } from '@kbn/chart-icons';
 
 const typeToIconMap: { [type: string]: string | IconType } = {
   legend: EuiIconLegend as IconType,
-  labels: 'visText',
   values: 'number',
   list: 'list',
   visualOptions: 'brush',
+  titlesAndText: 'visText',
 };
 
-export interface ToolbarPopoverProps {
+export type ToolbarPopoverProps = Partial<EuiPopoverProps> & {
   /**
    * Determines popover title
    */
@@ -35,23 +35,24 @@ export interface ToolbarPopoverProps {
   /**
    * Button group position
    */
-  groupPosition?: ToolbarButtonProps['groupPosition'];
+  groupPosition?: ToolbarButtonProps<'iconButton'>['groupPosition'];
   buttonDataTestSubj?: string;
   panelClassName?: string;
   handleClose?: () => void;
-}
+};
 
-export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
+export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = ({
   children,
   title,
   type,
   isDisabled = false,
   groupPosition,
   buttonDataTestSubj,
-  panelClassName = 'lnsVisToolbar__popover',
   handleClose,
+  panelClassName = 'lnsVisToolbar__popover',
+  ...euiPopoverProps
 }) => {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const iconType: string | IconType = typeof type === 'string' ? typeToIconMap[type] : type;
 
@@ -63,27 +64,30 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
         aria-label={title}
         button={
           <ToolbarButton
-            fontWeight="normal"
+            as={'iconButton'}
+            iconType={iconType}
             onClick={() => {
-              setOpen(!open);
+              setIsOpen(!isOpen);
             }}
-            title={title}
-            hasArrow={false}
+            label={title}
+            aria-label={title}
             isDisabled={isDisabled}
             groupPosition={groupPosition}
-            dataTestSubj={buttonDataTestSubj}
-          >
-            <EuiIcon type={iconType} />
-          </ToolbarButton>
+            data-test-subj={buttonDataTestSubj}
+          />
         }
-        isOpen={open}
+        isOpen={isOpen}
         closePopover={() => {
-          setOpen(false);
+          setIsOpen(false);
           handleClose?.();
         }}
         anchorPosition="downRight"
+        panelPaddingSize="s"
+        {...euiPopoverProps}
       >
-        <EuiPopoverTitle>{title}</EuiPopoverTitle>
+        <EuiPopoverTitle data-test-subj={`${euiPopoverProps['data-test-subj']}_title`}>
+          {title}
+        </EuiPopoverTitle>
         {children}
       </EuiPopover>
     </EuiFlexItem>

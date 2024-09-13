@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useRef } from 'react';
@@ -16,6 +17,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FilterItem, FilterItemProps } from './filter_item';
 import type { IUnifiedSearchPluginServices } from '../../types';
+import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 /**
  * Properties for the filter items component, which will render a single filter pill for every filter that is sent in
@@ -39,12 +41,14 @@ export interface FilterItemsProps {
   filtersForSuggestions?: Filter[];
   /** Array of panel options that controls the styling of each filter pill */
   hiddenPanelOptions?: FilterItemProps['hiddenPanelOptions'];
+  /** Array of suggestion abstraction that controls the render of the field */
+  suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps) {
   const groupRef = useRef<HTMLDivElement>(null);
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { appName, usageCollection, uiSettings } = kibana.services;
+  const { appName, data, usageCollection, uiSettings, docLinks } = kibana.services;
   const { readOnly = false } = props;
 
   if (!uiSettings) return null;
@@ -74,10 +78,14 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps)
           onRemove={() => onRemove(i)}
           indexPatterns={props.indexPatterns}
           uiSettings={uiSettings!}
+          docLinks={docLinks}
           hiddenPanelOptions={props.hiddenPanelOptions}
           timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
           filtersForSuggestions={props.filtersForSuggestions}
           readOnly={readOnly}
+          suggestionsAbstraction={props.suggestionsAbstraction}
+          filtersCount={props.filters.length}
+          dataViews={data?.dataViews}
         />
       </EuiFlexItem>
     ));

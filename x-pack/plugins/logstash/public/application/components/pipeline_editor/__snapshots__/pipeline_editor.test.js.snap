@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`PipelineEditor component includes required error message for falsy pipeline id 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-"
   restrictWidth={true}
   style={
@@ -27,19 +27,13 @@ exports[`PipelineEditor component includes required error message for falsy pipe
     isInvalid={true}
   >
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline ID"
           id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputId"
@@ -52,19 +46,13 @@ exports[`PipelineEditor component includes required error message for falsy pipe
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Description"
           id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputDescription"
@@ -75,44 +63,34 @@ exports[`PipelineEditor component includes required error message for falsy pipe
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline"
           id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <FormLabelWithIconTip
           formRowLabelText="Pipeline workers"
@@ -121,7 +99,6 @@ exports[`PipelineEditor component includes required error message for falsy pipe
 Default value: Number of the host’s CPU cores"
         />
       }
-      labelType="label"
     >
       <EuiFieldNumber
         data-test-subj="inputWorkers"
@@ -258,17 +235,14 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={true}
         onClick={[Function]}
-        size="m"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Create and deploy"
           id="xpack.logstash.pipelineEditor.createAndDeployButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>
@@ -276,24 +250,21 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
-        size="m"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Cancel"
           id="xpack.logstash.pipelineEditor.cancelButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`PipelineEditor component invalidates form for invalid pipeline id input 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-$invalid-pipeline-name"
   restrictWidth={true}
   style={
@@ -318,19 +289,13 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
     isInvalid={true}
   >
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline ID"
           id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputId"
@@ -343,19 +308,13 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Description"
           id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputDescription"
@@ -366,44 +325,34 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline"
           id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <FormLabelWithIconTip
           formRowLabelText="Pipeline workers"
@@ -412,7 +361,6 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
 Default value: Number of the host’s CPU cores"
         />
       }
-      labelType="label"
     >
       <EuiFieldNumber
         data-test-subj="inputWorkers"
@@ -549,17 +497,14 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={true}
         onClick={[Function]}
-        size="m"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Create and deploy"
           id="xpack.logstash.pipelineEditor.createAndDeployButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>
@@ -567,24 +512,21 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
-        size="m"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Cancel"
           id="xpack.logstash.pipelineEditor.cancelButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`PipelineEditor component invalidates form for pipeline id with spaces 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipeline id with spaces"
   restrictWidth={true}
   style={
@@ -609,19 +551,13 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
     isInvalid={true}
   >
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline ID"
           id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputId"
@@ -634,19 +570,13 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Description"
           id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputDescription"
@@ -657,44 +587,34 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline"
           id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <FormLabelWithIconTip
           formRowLabelText="Pipeline workers"
@@ -703,7 +623,6 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
 Default value: Number of the host’s CPU cores"
         />
       }
-      labelType="label"
     >
       <EuiFieldNumber
         data-test-subj="inputWorkers"
@@ -840,17 +759,14 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={true}
         onClick={[Function]}
-        size="m"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Create and deploy"
           id="xpack.logstash.pipelineEditor.createAndDeployButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>
@@ -858,24 +774,21 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
-        size="m"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Cancel"
           id="xpack.logstash.pipelineEditor.cancelButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipelineId"
   restrictWidth={true}
   style={
@@ -896,19 +809,13 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
     isInvalid={false}
   >
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Description"
           id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputDescription"
@@ -919,44 +826,34 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline"
           id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <FormLabelWithIconTip
           formRowLabelText="Pipeline workers"
@@ -965,7 +862,6 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
 Default value: Number of the host’s CPU cores"
         />
       }
-      labelType="label"
     >
       <EuiFieldNumber
         data-test-subj="inputWorkers"
@@ -1102,17 +998,14 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={false}
         onClick={[Function]}
-        size="m"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Create and deploy"
           id="xpack.logstash.pipelineEditor.createAndDeployButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>
@@ -1120,15 +1013,12 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
-        size="m"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Cancel"
           id="xpack.logstash.pipelineEditor.cancelButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>
@@ -1140,19 +1030,18 @@ Default value: 1024"
         data-test-subj="btnDeletePipeline"
         onClick={[Function]}
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Delete pipeline"
           id="xpack.logstash.pipelineEditor.deletePipelineButtonLabel"
-          values={Object {}}
         />
       </EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipelineId"
   restrictWidth={true}
   style={
@@ -1173,19 +1062,13 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
     isInvalid={false}
   >
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline ID"
           id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputId"
@@ -1198,19 +1081,13 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Description"
           id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputDescription"
@@ -1221,44 +1098,34 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline"
           id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <FormLabelWithIconTip
           formRowLabelText="Pipeline workers"
@@ -1267,7 +1134,6 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
 Default value: Number of the host’s CPU cores"
         />
       }
-      labelType="label"
     >
       <EuiFieldNumber
         data-test-subj="inputWorkers"
@@ -1404,17 +1270,14 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={false}
         onClick={[Function]}
-        size="m"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Create and deploy"
           id="xpack.logstash.pipelineEditor.createAndDeployButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>
@@ -1422,24 +1285,21 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
-        size="m"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Cancel"
           id="xpack.logstash.pipelineEditor.cancelButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;
 
 exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
-<EuiPageContentBody_Deprecated
+<EuiPageSection
   data-test-subj="pipelineEdit pipelineEdit-pipelineId"
   restrictWidth={true}
   style={
@@ -1460,19 +1320,13 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
     isInvalid={false}
   >
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Description"
           id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <EuiFieldText
         data-test-subj="inputDescription"
@@ -1483,44 +1337,34 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
       />
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
       fullWidth={true}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Pipeline"
           id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
-          values={Object {}}
         />
       }
-      labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
     <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
       label={
         <FormLabelWithIconTip
           formRowLabelText="Pipeline workers"
@@ -1529,7 +1373,6 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
 Default value: Number of the host’s CPU cores"
         />
       }
-      labelType="label"
     >
       <EuiFieldNumber
         data-test-subj="inputWorkers"
@@ -1666,17 +1509,14 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnSavePipeline"
         fill={true}
         isDisabled={false}
         onClick={[Function]}
-        size="m"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Create and deploy"
           id="xpack.logstash.pipelineEditor.createAndDeployButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>
@@ -1684,15 +1524,12 @@ Default value: 1024"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="btnCancel"
         onClick={[Function]}
-        size="m"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Cancel"
           id="xpack.logstash.pipelineEditor.cancelButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>
@@ -1704,13 +1541,12 @@ Default value: 1024"
         data-test-subj="btnDeletePipeline"
         onClick={[Function]}
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Delete pipeline"
           id="xpack.logstash.pipelineEditor.deletePipelineButtonLabel"
-          values={Object {}}
         />
       </EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiPageContentBody_Deprecated>
+</EuiPageSection>
 `;

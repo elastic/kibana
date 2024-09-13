@@ -311,7 +311,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         status: number;
         body: APIReturnType<'GET /internal/apm/services/{serviceName}/dependencies'>;
       };
-
+      // eslint-disable-next-line mocha/no-sibling-hooks
       before(async () => {
         response = await apmApiClient.readUser({
           endpoint: `GET /internal/apm/services/{serviceName}/dependencies`,
@@ -344,6 +344,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(firstItem.location).toMatchInline(`
           Object {
             "agentName": "dotnet",
+            "dependencyName": "opbeans:3000",
             "environment": "production",
             "id": "5948c153c2d8989f92a9c75ef45bb845f53e200d",
             "serviceName": "opbeans-dotnet",

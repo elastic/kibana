@@ -12,12 +12,14 @@ export interface State {
   exceptionItems: ExceptionsBuilderReturnExceptionItem[];
   exceptionItemMeta: { name: string };
   newComment: string;
+  commentErrorExists: boolean;
   bulkCloseAlerts: boolean;
   disableBulkClose: boolean;
   bulkCloseIndex: string[] | undefined;
   entryErrorExists: boolean;
   expireTime: Moment | undefined;
   expireErrorExists: boolean;
+  wildcardWarningExists: boolean;
 }
 
 export type Action =
@@ -28,6 +30,10 @@ export type Action =
   | {
       type: 'setComment';
       comment: string;
+    }
+  | {
+      type: 'setCommentError';
+      errorExists: boolean;
     }
   | {
       type: 'setBulkCloseAlerts';
@@ -56,6 +62,10 @@ export type Action =
   | {
       type: 'setExpireError';
       errorExists: boolean;
+    }
+  | {
+      type: 'setWildcardWithWrongOperator';
+      warningExists: boolean;
     };
 
 export const createExceptionItemsReducer =
@@ -79,6 +89,14 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           newComment: comment,
+        };
+      }
+      case 'setCommentError': {
+        const { errorExists } = action;
+
+        return {
+          ...state,
+          commentErrorExists: errorExists,
         };
       }
       case 'setBulkCloseAlerts': {
@@ -135,6 +153,13 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           expireErrorExists: errorExists,
+        };
+      }
+      case 'setWildcardWithWrongOperator': {
+        const { warningExists } = action;
+        return {
+          ...state,
+          wildcardWarningExists: warningExists,
         };
       }
       default:

@@ -17,8 +17,11 @@ import {
   ALERT_SEVERITY,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_URL,
   ALERT_UUID,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   EVENT_ACTION,
   EVENT_KIND,
   EVENT_MODULE,
@@ -31,7 +34,7 @@ import { sampleDocNoSortIdWithTimestamp } from '../../__mocks__/es_results';
 import { buildAlert, buildParent, buildAncestors, additionalAlertFields } from './build_alert';
 import type { Ancestor, SignalSourceHit } from '../../types';
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
-import { SERVER_APP_ID } from '../../../../../../common/constants';
+import { DEFAULT_ALERTS_INDEX, SERVER_APP_ID } from '../../../../../../common/constants';
 import { EVENT_DATASET } from '../../../../../../common/cti/constants';
 import {
   ALERT_ANCESTORS,
@@ -44,10 +47,14 @@ import {
 import { getCompleteRuleMock, getQueryRuleParams } from '../../../rule_schema/mocks';
 
 type SignalDoc = SignalSourceHit & {
+  _id: Required<SignalSourceHit>['_id'];
   _source: Required<SignalSourceHit>['_source'] & { [TIMESTAMP]: string };
 };
 
 const SPACE_ID = 'space';
+const reason = 'alert reasonable reason';
+const publicBaseUrl = 'testKibanaBasePath.com';
+const alertUuid = 'test-uuid';
 
 describe('buildAlert', () => {
   beforeEach(() => {
@@ -58,7 +65,6 @@ describe('buildAlert', () => {
     const doc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
     delete doc._source.event;
     const completeRule = getCompleteRuleMock(getQueryRuleParams());
-    const reason = 'alert reasonable reason';
     const alert = {
       ...buildAlert(
         [doc],
@@ -66,11 +72,14 @@ describe('buildAlert', () => {
         SPACE_ID,
         reason,
         completeRule.ruleParams.index as string[],
+        alertUuid,
+        publicBaseUrl,
         undefined
       ),
       ...additionalAlertFields(doc),
     };
     const timestamp = alert[TIMESTAMP];
+    const expectedAlertUrl = `${publicBaseUrl}/s/${SPACE_ID}/app/security/alerts/redirect/${alertUuid}?index=${DEFAULT_ALERTS_INDEX}-${SPACE_ID}&timestamp=${timestamp}`;
     const expected = {
       [TIMESTAMP]: timestamp,
       [EVENT_KIND]: 'signal',
@@ -153,11 +162,15 @@ describe('buildAlert', () => {
           },
         ],
         immutable: false,
+        rule_source: {
+          type: 'internal',
+        },
         type: 'query',
         language: 'kuery',
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         query: 'user.name: root or user.name: admin',
         filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
+        investigation_fields: undefined,
       },
       [ALERT_RULE_INDICES]: completeRule.ruleParams.index,
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
@@ -222,6 +235,10 @@ describe('buildAlert', () => {
         timeline_title: 'some-timeline-title',
       }),
       [ALERT_DEPTH]: 1,
+      [ALERT_URL]: expectedAlertUrl,
+      [ALERT_UUID]: alertUuid,
+      [ALERT_WORKFLOW_TAGS]: [],
+      [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
     };
     expect(alert).toEqual(expected);
   });
@@ -239,7 +256,6 @@ describe('buildAlert', () => {
       },
     };
     const completeRule = getCompleteRuleMock(getQueryRuleParams());
-    const reason = 'alert reasonable reason';
     const alert = {
       ...buildAlert(
         [doc],
@@ -247,12 +263,14 @@ describe('buildAlert', () => {
         SPACE_ID,
         reason,
         completeRule.ruleParams.index as string[],
+        alertUuid,
+        publicBaseUrl,
         undefined
       ),
       ...additionalAlertFields(doc),
     };
     const timestamp = alert[TIMESTAMP];
-
+    const expectedAlertUrl = `${publicBaseUrl}/s/${SPACE_ID}/app/security/alerts/redirect/${alertUuid}?index=${DEFAULT_ALERTS_INDEX}-${SPACE_ID}&timestamp=${timestamp}`;
     const expected = {
       [TIMESTAMP]: timestamp,
       [EVENT_KIND]: 'signal',
@@ -342,11 +360,15 @@ describe('buildAlert', () => {
           },
         ],
         immutable: false,
+        rule_source: {
+          type: 'internal',
+        },
         type: 'query',
         language: 'kuery',
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         query: 'user.name: root or user.name: admin',
         filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
+        investigation_fields: undefined,
       },
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         actions: [],
@@ -410,6 +432,10 @@ describe('buildAlert', () => {
         timeline_title: 'some-timeline-title',
       }),
       [ALERT_DEPTH]: 1,
+      [ALERT_URL]: expectedAlertUrl,
+      [ALERT_UUID]: alertUuid,
+      [ALERT_WORKFLOW_TAGS]: [],
+      [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
     };
     expect(alert).toEqual(expected);
   });

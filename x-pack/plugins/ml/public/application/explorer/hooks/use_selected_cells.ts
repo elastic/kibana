@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AppStateSelectedCells } from '../explorer_utils';
+import type { AppStateSelectedCells } from '../explorer_utils';
 
 export interface SelectionTimeRange {
   earliestMs: number;

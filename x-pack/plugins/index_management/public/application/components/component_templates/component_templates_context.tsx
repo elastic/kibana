@@ -15,8 +15,8 @@ import {
   CoreStart,
   ExecutionContextStart,
 } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { getApi, getUseRequest, getSendRequest, getDocumentation, getBreadcrumbs } from './lib';
+import { IndexManagementStartServices } from '../../../types';
+import { getApi, getUseRequest, getSendRequest, getDocumentation } from './lib';
 
 const ComponentTemplatesContext = createContext<Context | undefined>(undefined);
 
@@ -26,10 +26,9 @@ interface Props {
   trackMetric: (type: UiCounterMetricType, eventName: string) => void;
   docLinks: DocLinksStart;
   toasts: NotificationsSetup['toasts'];
-  setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   executionContext: ExecutionContextStart;
-  overlays: CoreStart['overlays'];
+  startServices: IndexManagementStartServices;
 }
 
 interface Context {
@@ -37,12 +36,11 @@ interface Context {
   apiBasePath: string;
   api: ReturnType<typeof getApi>;
   documentation: ReturnType<typeof getDocumentation>;
-  breadcrumbs: ReturnType<typeof getBreadcrumbs>;
   trackMetric: (type: UiCounterMetricType, eventName: string) => void;
   toasts: NotificationsSetup['toasts'];
-  overlays: CoreStart['overlays'];
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   executionContext: ExecutionContextStart;
+  startServices: IndexManagementStartServices;
 }
 
 export const ComponentTemplatesProvider = ({
@@ -53,15 +51,14 @@ export const ComponentTemplatesProvider = ({
   children: React.ReactNode;
 }) => {
   const {
-    overlays,
     httpClient,
     apiBasePath,
     trackMetric,
     docLinks,
     toasts,
-    setBreadcrumbs,
     getUrlForApp,
     executionContext,
+    startServices,
   } = value;
 
   const useRequest = getUseRequest(httpClient);
@@ -69,21 +66,19 @@ export const ComponentTemplatesProvider = ({
 
   const api = getApi(useRequest, sendRequest, apiBasePath, trackMetric);
   const documentation = getDocumentation(docLinks);
-  const breadcrumbs = getBreadcrumbs(setBreadcrumbs);
 
   return (
     <ComponentTemplatesContext.Provider
       value={{
-        overlays,
         api,
         documentation,
         trackMetric,
         toasts,
         httpClient,
         apiBasePath,
-        breadcrumbs,
         getUrlForApp,
         executionContext,
+        startServices,
       }}
     >
       {children}

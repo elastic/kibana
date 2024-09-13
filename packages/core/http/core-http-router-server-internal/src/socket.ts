@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Socket } from 'net';
@@ -20,6 +21,8 @@ export class KibanaSocket implements IKibanaSocket {
     };
   }
 
+  constructor(private readonly socket: Socket) {}
+
   public get authorized() {
     return this.socket instanceof TLSSocket ? this.socket.authorized : undefined;
   }
@@ -32,12 +35,9 @@ export class KibanaSocket implements IKibanaSocket {
     return this.socket.remoteAddress;
   }
 
-  constructor(private readonly socket: Socket) {}
-
   getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
   getPeerCertificate(detailed: false): PeerCertificate | null;
   getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
-
   public getPeerCertificate(detailed?: boolean) {
     if (this.socket instanceof TLSSocket) {
       const peerCertificate = this.socket.getPeerCertificate(detailed);

@@ -8,20 +8,20 @@
     "server": false,
     "browser": true,
     "requiredPlugins": [
-      "dataViews"
+      "dataViews",
+      "unifiedSearch",
     ],
     "optionalPlugins": [
       "visualizations"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "kibanaUtils",
       "kibanaReact",
       "data",
       "fieldFormats",
-      "discover",
       "esUiShared",
-      "visualizations"
+      "visualizations",
+      "savedSearch"
     ]
   }
 }

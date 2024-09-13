@@ -6,6 +6,7 @@
  */
 
 import { createContext, useContext } from 'react';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 interface MLJobWizardFieldStatsFlyoutProps {
   isFlyoutVisible: boolean;
   setIsFlyoutVisible: (v: boolean) => void;
@@ -14,15 +15,19 @@ interface MLJobWizardFieldStatsFlyoutProps {
   fieldName?: string;
   setFieldValue: (v: string) => void;
   fieldValue?: string | number;
+  timeRangeMs?: TimeRangeMs;
+  populatedFields?: Set<string>;
 }
-export const MLJobWizardFieldStatsFlyoutContext = createContext<MLJobWizardFieldStatsFlyoutProps>({
+export const MLFieldStatsFlyoutContext = createContext<MLJobWizardFieldStatsFlyoutProps>({
   isFlyoutVisible: false,
   setIsFlyoutVisible: () => {},
   toggleFlyoutVisible: () => {},
   setFieldName: () => {},
   setFieldValue: () => {},
+  timeRangeMs: undefined,
+  populatedFields: undefined,
 });
 
 export function useFieldStatsFlyoutContext() {
-  return useContext(MLJobWizardFieldStatsFlyoutContext);
+  return useContext(MLFieldStatsFlyoutContext);
 }

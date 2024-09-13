@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Observable } from 'rxjs';
@@ -18,6 +19,12 @@ export interface HttpSetup {
    * See {@link IBasePath}
    */
   basePath: IBasePath;
+
+  /**
+   * APIs for creating hrefs to static assets.
+   * See {@link IStaticAssets}
+   */
+  staticAssets: IStaticAssets;
 
   /**
    * APIs for denoting certain paths for not requiring authentication
@@ -97,6 +104,12 @@ export interface IBasePath {
   readonly serverBasePath: string;
 
   /**
+   * Href (hypertext reference) intended to be used as the base for constructing
+   * other hrefs to static assets.
+   */
+  readonly assetsHrefBase: string;
+
+  /**
    * The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the
    * {@link IBasePath.serverBasePath}.
    *
@@ -105,6 +118,7 @@ export interface IBasePath {
    */
   readonly publicBaseUrl?: string;
 }
+
 /**
  * APIs for working with external URLs.
  *
@@ -131,6 +145,25 @@ export interface IExternalUrl {
 }
 
 /**
+ * APIs for creating hrefs to static assets.
+ *
+ * @public
+ */
+export interface IStaticAssets {
+  /**
+   * Gets the full href to the current plugin's asset,
+   * given its path relative to the plugin's `public/assets` folder.
+   *
+   * @example
+   * ```ts
+   * // I want to retrieve the href for the asset stored under `my_plugin/public/assets/some_folder/asset.png`:
+   * const assetHref = core.http.statisAssets.getPluginAssetHref('some_folder/asset.png');
+   * ```
+   */
+  getPluginAssetHref(assetPath: string): string;
+}
+
+/**
  * APIs for denoting paths as not requiring authentication
  */
 export interface IAnonymousPaths {
@@ -148,6 +181,7 @@ export interface IAnonymousPaths {
 /**
  * Headers to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause
  * {@link HttpHandler} to throw an error.
+ * Includes the required Header that validates internal requests to internal APIs
  * @public
  */
 export interface HttpHeadersInit {
@@ -280,6 +314,12 @@ export interface HttpFetchOptions extends HttpRequestInit {
    */
   asResponse?: boolean;
 
+  /**
+   * When true, the response from the `fetch` call will be returned as is, without being awaited or processed.
+   * Defaults to `false`.
+   */
+  rawResponse?: boolean;
+
   context?: KibanaExecutionContext;
 
   /** @experimental */
@@ -311,10 +351,13 @@ export interface HttpHandler {
     path: string,
     options: HttpFetchOptions & { asResponse: true }
   ): Promise<HttpResponse<TResponseBody>>;
+
   <TResponseBody = unknown>(options: HttpFetchOptionsWithPath & { asResponse: true }): Promise<
     HttpResponse<TResponseBody>
   >;
+
   <TResponseBody = unknown>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+
   <TResponseBody = unknown>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }
 
@@ -361,6 +404,7 @@ export interface HttpInterceptorResponseError extends HttpResponse {
   request: Readonly<Request>;
   error: Error | IHttpFetchError;
 }
+
 /** @public */
 export interface HttpInterceptorRequestError {
   fetchOptions: Readonly<HttpFetchOptionsWithPath>;
@@ -422,6 +466,7 @@ export interface HttpInterceptor {
 export interface IHttpInterceptController {
   /** Whether or not this chain has been halted. */
   halted: boolean;
+
   /** Halt the request Promise chain and do not process further interceptors or response handlers. */
   halt(): void;
 }

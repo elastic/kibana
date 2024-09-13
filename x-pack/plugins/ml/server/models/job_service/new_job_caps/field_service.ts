@@ -11,10 +11,15 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
-import type { Field, NewJobCaps, RollupFields } from '../../../../common/types/fields';
+import {
+  type Field,
+  type NewJobCaps,
+  type RollupFields,
+  mlJobAggregations,
+  mlJobAggregationsWithoutEsEquivalent,
+} from '@kbn/ml-anomaly-utils';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
 import { rollupServiceProvider } from './rollup';
-import { aggregations, mlOnlyAggregations } from '../../../../common/constants/aggregation_types';
 
 const supportedTypes: string[] = [
   ES_FIELD_TYPES.DATE,
@@ -120,7 +125,7 @@ class FieldsService {
   // the _indexPattern will be replaced with a comma separated list
   // of index patterns from all of the rollup jobs
   public async getData(includeNested: boolean = false): Promise<NewJobCaps> {
-    let rollupFields: RollupFields = {};
+    let rollupFields: RollupFields = Object.create(null);
 
     if (this._isRollup) {
       const rollupService = await rollupServiceProvider(
@@ -144,7 +149,7 @@ class FieldsService {
       }
     }
 
-    const aggs = cloneDeep([...aggregations, ...mlOnlyAggregations]);
+    const aggs = cloneDeep([...mlJobAggregations, ...mlJobAggregationsWithoutEsEquivalent]);
     const fields: Field[] = await this.createFields(includeNested);
 
     return combineFieldsAndAggs(fields, aggs, rollupFields);
@@ -154,7 +159,7 @@ class FieldsService {
 function combineAllRollupFields(
   rollupConfigs: estypes.RollupGetRollupCapsRollupCapabilitySummary[]
 ): RollupFields {
-  const rollupFields: RollupFields = {};
+  const rollupFields: RollupFields = Object.create(null);
   rollupConfigs.forEach((conf) => {
     Object.keys(conf.fields).forEach((fieldName) => {
       if (rollupFields[fieldName] === undefined) {
@@ -162,9 +167,9 @@ function combineAllRollupFields(
         rollupFields[fieldName] = conf.fields[fieldName];
       } else {
         const aggs = conf.fields[fieldName];
-        // @ts-expect-error fix type. our RollupFields type is better
         aggs.forEach((agg) => {
           if (rollupFields[fieldName].find((f) => f.agg === agg.agg) === null) {
+            // @ts-expect-error TODO: fix after elasticsearch-js bump
             rollupFields[fieldName].push(agg);
           }
         });

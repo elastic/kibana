@@ -6,8 +6,6 @@
  */
 
 import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../../../../common/constants';
-import { mlServicesMock } from '../../../../../machine_learning/mocks';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import {
   getReadBulkRequest,
   getFindResultWithSingleHit,
@@ -19,31 +17,29 @@ import {
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { bulkCreateRulesRoute } from './route';
-import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_schema/mocks';
+import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-
-jest.mock('../../../../../machine_learning/authz');
+import { HttpAuthzError } from '../../../../../machine_learning/validation';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 
 describe('Bulk create rules route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.createSetupContract();
     const logger = loggingSystemMock.createLogger();
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
     clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful creation
-
+    clients.detectionRulesClient.createCustomRule.mockResolvedValue(getRulesSchemaMock());
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
-    bulkCreateRulesRoute(server.router, ml, logger);
+    bulkCreateRulesRoute(server.router, logger);
   });
 
   describe('status codes', () => {
@@ -58,10 +54,8 @@ describe('Bulk create rules route', () => {
 
   describe('unhappy paths', () => {
     test('returns a 403 error object if ML Authz fails', async () => {
-      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
-        validateRuleType: jest
-          .fn()
-          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      clients.detectionRulesClient.createCustomRule.mockImplementationOnce(async () => {
+        throw new HttpAuthzError('mocked validation message');
       });
 
       const response = await server.inject(
@@ -113,7 +107,7 @@ describe('Bulk create rules route', () => {
     });
 
     test('catches error if creation throws', async () => {
-      clients.rulesClient.create.mockImplementation(async () => {
+      clients.detectionRulesClient.createCustomRule.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(
@@ -199,7 +193,9 @@ describe('Bulk create rules route', () => {
         ],
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        '0.from: Failed to parse date-math expression'
+      );
     });
   });
 });

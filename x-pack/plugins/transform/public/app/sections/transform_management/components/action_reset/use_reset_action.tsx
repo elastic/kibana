@@ -5,19 +5,25 @@
  * 2.0.
  */
 
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
+import type { TransformListRowWithStats } from '../../../../common/transform_list';
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import { TransformListAction, TransformListRow } from '../../../../common';
-import { useResetTransforms } from '../../../../hooks';
-import { AuthorizationContext } from '../../../../lib/authorization';
+import type { TransformListAction, TransformListRow } from '../../../../common';
+import { useTransformCapabilities, useResetTransforms } from '../../../../hooks';
 
-import { resetActionNameText, isResetActionDisabled, ResetActionName } from './reset_action_name';
+import {
+  resetActionNameText,
+  isResetActionDisabled,
+  ResetActionName,
+  getResetActionDisabledMessage,
+} from './reset_action_name';
 
 export type ResetAction = ReturnType<typeof useResetAction>;
 export const useResetAction = (forceDisable: boolean) => {
-  const { canResetTransform } = useContext(AuthorizationContext).capabilities;
+  const { canResetTransform } = useTransformCapabilities();
 
   const resetTransforms = useResetTransforms();
 
@@ -25,7 +31,7 @@ export const useResetAction = (forceDisable: boolean) => {
   const [items, setItems] = useState<TransformListRow[]>([]);
 
   const shouldForceReset = useMemo(
-    () => items.some((i: TransformListRow) => i.stats.state === TRANSFORM_STATE.FAILED),
+    () => items.some((i: TransformListRow) => i.stats?.state === TRANSFORM_STATE.FAILED),
     [items]
   );
 
@@ -35,10 +41,12 @@ export const useResetAction = (forceDisable: boolean) => {
     setModalVisible(false);
 
     resetTransforms({
-      transformsInfo: items.map((i) => ({
-        id: i.config.id,
-        state: i.stats.state,
-      })),
+      transformsInfo: items
+        .filter<TransformListRowWithStats>(isTransformListRowWithStats)
+        .map((i) => ({
+          id: i.config.id,
+          state: i.stats.state,
+        })),
     });
   };
 
@@ -57,11 +65,13 @@ export const useResetAction = (forceDisable: boolean) => {
             canResetTransform,
             disabled: isResetActionDisabled([item], forceDisable),
             isBulkAction: false,
+            items: [item],
           }}
         />
       ),
       enabled: (item: TransformListRow) =>
-        !isResetActionDisabled([item], forceDisable) && canResetTransform,
+        getResetActionDisabledMessage({ items: [item], canResetTransform, forceDisable }) ===
+        undefined,
       description: resetActionNameText,
       icon: 'refresh',
       type: 'icon',

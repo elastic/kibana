@@ -20,6 +20,3 @@ export const getDisallowedOutgoingUrlError = (interceptedUrl: string) =>
 export { HeadlessChromiumDriver } from './driver';
 export type { Context } from './driver';
 export { DEFAULT_VIEWPORT, HeadlessChromiumDriverFactory } from './driver_factory';
-export type { PerformanceMetrics } from './driver_factory';
-export { ChromiumArchivePaths } from './paths';
-export type { PackageInfo } from './paths';

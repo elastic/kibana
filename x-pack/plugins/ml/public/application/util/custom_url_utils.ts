@@ -10,16 +10,16 @@
 import { get, flow } from 'lodash';
 import moment from 'moment';
 import rison, { type RisonValue } from '@kbn/rison';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
+import type {
+  MlAnomalyRecordDoc,
+  MlUrlConfig,
+  MlKibanaUrlConfig,
+  MlCustomUrlAnomalyRecordDoc,
+} from '@kbn/ml-anomaly-utils';
+import type { DataGridItem } from '@kbn/ml-data-grid';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
-import {
-  UrlConfig,
-  KibanaUrlConfig,
-  CustomUrlAnomalyRecordDoc,
-} from '../../../common/types/custom_urls';
-import { AnomalyRecordDoc } from '../../../common/types/anomalies';
-import type { DataGridItem } from '../components/data_grid';
 
 // Value of custom_url time_range property indicating drilldown time range is calculated automatically
 // depending on the context in which the URL is being opened.
@@ -28,7 +28,7 @@ const TIME_RANGE_AUTO = 'auto';
 // Replaces the $ delimited tokens in the url_value of the custom URL configuration
 // with values from the supplied document.
 export function replaceTokensInDFAUrlValue(
-  customUrlConfig: UrlConfig | KibanaUrlConfig,
+  customUrlConfig: MlUrlConfig | MlKibanaUrlConfig,
   doc: DataGridItem,
   timeRange?: TimeRange
 ) {
@@ -49,9 +49,9 @@ export function replaceTokensInDFAUrlValue(
 // Replaces the $ delimited tokens in the url_value of the custom URL configuration
 // with values from the supplied document.
 export function replaceTokensInUrlValue(
-  customUrlConfig: UrlConfig | KibanaUrlConfig,
+  customUrlConfig: MlUrlConfig | MlKibanaUrlConfig,
   jobBucketSpanSecs: number,
-  doc: AnomalyRecordDoc | Record<string, unknown>,
+  doc: MlAnomalyRecordDoc | Record<string, unknown>,
   timeFieldName: 'timestamp' | string
 ) {
   // If urlValue contains $earliest$ and $latest$ tokens, add in times to the test doc.
@@ -61,7 +61,7 @@ export function replaceTokensInUrlValue(
     'time_range' in customUrlConfig && customUrlConfig.time_range
       ? parseInterval(customUrlConfig.time_range)
       : null;
-  const record = { ...doc } as CustomUrlAnomalyRecordDoc;
+  const record = { ...doc } as MlCustomUrlAnomalyRecordDoc;
   if (urlValue.includes('$earliest$')) {
     const earliestMoment = moment(timestamp);
     if (timeRangeInterval !== null) {
@@ -88,8 +88,8 @@ export function replaceTokensInUrlValue(
 // Returns the URL to open from the supplied config, with any dollar delimited tokens
 // substituted from the supplied anomaly record.
 export function getUrlForRecord(
-  urlConfig: UrlConfig | KibanaUrlConfig,
-  record: CustomUrlAnomalyRecordDoc | DataGridItem
+  urlConfig: MlUrlConfig | MlKibanaUrlConfig,
+  record: MlCustomUrlAnomalyRecordDoc | DataGridItem
 ) {
   if (isKibanaUrl(urlConfig) === true) {
     return buildKibanaUrl(urlConfig, record);
@@ -104,7 +104,7 @@ export function getUrlForRecord(
 // object which indicates whether it is opening a Kibana page running on the same server.
 // `url` is the URL with any dollar delimited tokens from the urlConfig
 // having been substituted with values from an anomaly record.
-export function openCustomUrlWindow(url: string, urlConfig: UrlConfig, basePath: string) {
+export function openCustomUrlWindow(url: string, urlConfig: MlUrlConfig, basePath: string) {
   // Run through a regex to test whether the url_value starts with a protocol scheme.
   if (/^(?:[a-z]+:)?\/\//i.test(urlConfig.url_value) === false) {
     // If `url` is a relative path, we need to prefix the base path.
@@ -132,7 +132,7 @@ export function openCustomUrlWindow(url: string, urlConfig: UrlConfig, basePath:
 // recognize modules or with custom UI in the custom URL builder we'd
 // need to add the solution here. Manually created custom URLs for other
 // solution pages need to be prefixed with `app/` in the custom URL builder.
-function isKibanaUrl(urlConfig: UrlConfig) {
+function isKibanaUrl(urlConfig: MlUrlConfig) {
   const urlValue = urlConfig.url_value;
   return (
     // HashRouter based plugins
@@ -141,8 +141,7 @@ function isKibanaUrl(urlConfig: UrlConfig) {
     urlValue.startsWith('apm#/') ||
     // BrowserRouter based plugins
     urlValue.startsWith('metrics/') ||
-    urlValue.startsWith('security/') ||
-    // Legacy links
+    urlValue.startsWith('security/') || // Legacy links
     urlValue.startsWith('siem#/')
   );
 }
@@ -196,7 +195,7 @@ export const getQueryField = (str: string): string => {
   return fieldName;
 };
 const getQueryStringResultProvider =
-  (record: CustomUrlAnomalyRecordDoc | DataGridItem, getResultTokenValue: GetResultTokenValue) =>
+  (record: MlCustomUrlAnomalyRecordDoc | DataGridItem, getResultTokenValue: GetResultTokenValue) =>
   (resultPrefix: string, queryString: string, resultPostfix: string, isKuery: boolean): string => {
     const URL_LENGTH_LIMIT = 2000;
 
@@ -255,7 +254,10 @@ const getQueryStringResultProvider =
  * Builds a Kibana dashboard or Discover URL from the supplied config, with any
  * dollar delimited tokens substituted from the supplied anomaly record.
  */
-function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc | DataGridItem) {
+function buildKibanaUrl(
+  urlConfig: MlUrlConfig,
+  record: MlCustomUrlAnomalyRecordDoc | DataGridItem
+) {
   const urlValue = urlConfig.url_value;
 
   const isLuceneQueryLanguage = urlValue.includes('language:lucene');
@@ -305,7 +307,7 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc 
 
         const q = rison.decode(queryDef);
 
-        if (isRisonObject(q) && q.hasOwnProperty('query')) {
+        if (isRisonObject(q) && Object.hasOwn(q, 'query')) {
           const [resultPrefix, resultPostfix] = [prefix, postfix].map(replaceSingleTokenValues);
           const resultQuery = getQueryStringResult(
             resultPrefix,

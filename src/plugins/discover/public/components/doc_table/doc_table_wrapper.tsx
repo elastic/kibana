@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { forwardRef, useCallback, useMemo } from 'react';
@@ -12,13 +13,12 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Filter } from '@kbn/es-query';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { TableHeader } from './components/table_header/table_header';
-import { SHOW_MULTIFIELDS } from '../../../common';
 import { TableRow } from './components/table_row';
-import { DocViewFilterFn, DocViewRenderProps } from '../../services/doc_views/doc_views_types';
-import { getShouldShowFieldHandler } from '../../utils/get_should_show_field_handler';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import type { DataTableRecord } from '../../types';
 
 export interface DocTableProps {
   /**
@@ -62,13 +62,18 @@ export interface DocTableProps {
    */
   filters?: Filter[];
   /**
+   * Flag which identifies if Discover operates
+   * in ES|QL mode
+   */
+  isEsqlMode?: boolean;
+  /**
    * Saved search id
    */
   savedSearchId?: string;
   /**
    * Filter callback
    */
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   /**
    * Sorting callback
    */
@@ -85,10 +90,6 @@ export interface DocTableProps {
    * Remove column callback
    */
   onRemoveColumn?: (column: string) => void;
-  /**
-   * Doc viewer component
-   */
-  DocViewer: React.ComponentType<DocViewRenderProps>;
 }
 
 export interface DocTableRenderProps {
@@ -114,6 +115,7 @@ export const DocTableWrapper = forwardRef(
       render,
       columns,
       filters,
+      isEsqlMode,
       savedSearchId,
       rows,
       dataView,
@@ -128,7 +130,6 @@ export const DocTableWrapper = forwardRef(
       sharedItemTitle,
       dataTestSubj,
       isLoading,
-      DocViewer,
     }: DocTableWrapperProps,
     ref
   ) => {
@@ -186,7 +187,8 @@ export const DocTableWrapper = forwardRef(
             shouldShowFieldHandler={shouldShowFieldHandler}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
-            DocViewer={DocViewer}
+            isEsqlMode={isEsqlMode}
+            rows={rows}
           />
         ));
       },
@@ -200,7 +202,8 @@ export const DocTableWrapper = forwardRef(
         shouldShowFieldHandler,
         onAddColumn,
         onRemoveColumn,
-        DocViewer,
+        isEsqlMode,
+        rows,
       ]
     );
 

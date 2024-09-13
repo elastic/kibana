@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Server as HapiServer, ServerRoute as HapiServerRoute } from '@hapi/hapi';
-import { createServer, getServerOptions, getListenerOptions } from '@kbn/server-http-tools';
+import { createServer, getServerOptions } from '@kbn/server-http-tools';
 import type { IConfigService } from '@kbn/config';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import { ServerConfig } from './server_config';
@@ -40,7 +41,7 @@ export class Server {
 
   async start(): Promise<ServerStart> {
     const serverConfig = new ServerConfig(this.config.atPathSync<ServerConfigType>('server'));
-    this.server = createServer(getServerOptions(serverConfig), getListenerOptions(serverConfig));
+    this.server = createServer(getServerOptions(serverConfig));
 
     await this.server.start();
     this.log.info(`Server running on ${this.server.info.uri}`);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type {
   Maybe,
   CursorType,
@@ -13,7 +13,6 @@ import type {
   PageInfoPaginated,
   GenericBuckets,
 } from '../../../common';
-import type { RequestOptionsPaginated } from '../..';
 
 export enum NetworkHttpFields {
   domains = 'domains',
@@ -23,11 +22,6 @@ export enum NetworkHttpFields {
   path = 'path',
   requestCount = 'requestCount',
   statuses = 'statuses',
-}
-
-export interface NetworkHttpRequestOptions extends RequestOptionsPaginated {
-  ip?: string;
-  defaultIndex: string[];
 }
 
 export interface NetworkHttpStrategyResponse extends IEsSearchResponse {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export type { BaseFilesClient, Abortable, Pagination } from './base_file_client';
@@ -226,6 +227,10 @@ export interface FileJSON<Meta = unknown> {
    * User data associated with this file
    */
   user?: FileMetadata['user'];
+  /**
+   * File hash information
+   */
+  hash?: BaseFileMetadata['hash'];
 }
 
 export interface FileKindBase {
@@ -250,6 +255,22 @@ export interface FileKindBrowser extends FileKindBase {
    * @default 4MiB
    */
   maxSizeBytes?: number;
+  /**
+   * Allowed actions that can be done in the File Management UI. If not provided, all actions are allowed
+   *
+   */
+  managementUiActions?: {
+    /** Allow files to be listed in management UI */
+    list?: {
+      enabled: boolean;
+    };
+    /** Allow files to be deleted in management UI */
+    delete?: {
+      enabled: boolean;
+      /** If delete is not enabled in management UI, specify the reason (will appear in a tooltip). */
+      reason?: string;
+    };
+  };
 }
 
 /**

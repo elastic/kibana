@@ -97,10 +97,13 @@ export const ForLastExpression = ({
         </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiFormRow isInvalid={errors.timeWindowSize.length > 0} error={errors.timeWindowSize}>
+            <EuiFormRow
+              isInvalid={Number(errors.timeWindowSize.length) > 0}
+              error={errors.timeWindowSize as string[]}
+            >
               <EuiFieldNumber
                 data-test-subj="timeWindowSizeNumber"
-                isInvalid={errors.timeWindowSize.length > 0}
+                isInvalid={Number(errors.timeWindowSize.length) > 0}
                 min={0}
                 value={timeWindowSize || ''}
                 onChange={(e) => {

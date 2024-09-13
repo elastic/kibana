@@ -1,0 +1,393 @@
+{
+  "id": "observabilityOnboarding",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "observabilityOnboarding",
+        "id": "def-public.AppContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppContext",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.AppContext.isDev",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDev",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.AppContext.isCloud",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloud",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.AppContext.isServerless",
+            "type": "boolean",
+            "tags": [],
+            "label": "isServerless",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.AppContext.stackVersion",
+            "type": "string",
+            "tags": [],
+            "label": "stackVersion",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityOnboarding",
+        "id": "def-public.ConfigSchema",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConfigSchema",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ConfigSchema.ui",
+            "type": "Object",
+            "tags": [],
+            "label": "ui",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ConfigSchema.serverless",
+            "type": "Object",
+            "tags": [],
+            "label": "serverless",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityOnboarding",
+        "id": "def-public.ObservabilityOnboardingAppServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "ObservabilityOnboardingAppServices",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-public.ApplicationStart",
+                "text": "ApplicationStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpSetup",
+                "text": "HttpSetup"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              "{ toggleShareContextMenu: (options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityOnboarding",
+                "scope": "public",
+                "docId": "kibObservabilityOnboardingPluginApi",
+                "section": "def-public.AppContext",
+                "text": "AppContext"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityOnboarding",
+                "scope": "public",
+                "docId": "kibObservabilityOnboardingPluginApi",
+                "section": "def-public.ConfigSchema",
+                "text": "ConfigSchema"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-doc-links-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
+                "section": "def-public.DocLinksStart",
+                "text": "DocLinksStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.chrome",
+            "type": "Object",
+            "tags": [],
+            "label": "chrome",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.ChromeStart",
+                "text": "ChromeStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "observabilityOnboarding",
+      "id": "def-public.ObservabilityOnboardingPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ObservabilityOnboardingPluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "x-pack/plugins/observability_solution/observability_onboarding/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "observabilityOnboarding",
+        "id": "def-server.ObservabilityOnboardingConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ObservabilityOnboardingConfig",
+        "description": [],
+        "signature": [
+          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly serverless: Readonly<{} & { enabled: true; }>; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_onboarding/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "observabilityOnboarding",
+      "id": "def-server.ObservabilityOnboardingPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ObservabilityOnboardingPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/observability_onboarding/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "observabilityOnboarding",
+      "id": "def-server.ObservabilityOnboardingPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ObservabilityOnboardingPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/observability_onboarding/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "observabilityOnboarding",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"observabilityOnboarding\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_onboarding/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityOnboarding",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"observabilityOnboarding\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_onboarding/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

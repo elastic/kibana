@@ -1,0 +1,46 @@
+# These pipeline steps constitute the quality gate for your service within the staging environment.
+# Incorporate any necessary additional logic to validate the service's integrity.
+# A failure in this pipeline build will prevent further progression to the subsequent stage.
+
+steps:
+  - label: ":rocket: control-plane e2e tests"
+    trigger: "ess-k8s-staging-e2e-tests" # https://buildkite.com/elastic/ess-k8s-staging-e2e-tests
+    build:
+      env:
+        REGION_ID: aws-us-east-1
+        NAME_PREFIX: ci_test_kibana-promotion_
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
+
+  - label: ":kibana: Kibana Serverless Tests for ${ENVIRONMENT}"
+    trigger: appex-qa-serverless-kibana-ftr-tests # https://buildkite.com/elastic/appex-qa-serverless-kibana-ftr-tests
+    soft_fail: true # Remove when tests stabilize
+    build:
+      env:
+        ENVIRONMENT: ${ENVIRONMENT}
+        EC_ENV: staging
+        EC_REGION: aws-us-east-1
+        RETRY_TESTS_ON_FAIL: "true"
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
+
+  - label: ":rocket: Fleet synthetic monitor to check the long standing project"
+    trigger: "serverless-quality-gates"
+    build:
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
+      env:
+        TARGET_ENV: staging
+        CHECK_SYNTHETICS: true
+        CHECK_SYNTHETICS_TAG: "fleet"
+        CHECK_SYNTHETICS_MINIMUM_RUNS: 3
+        MAX_FAILURES: 2
+        CHECK_SYNTHETIC_MAX_POLL: 50
+        DEPLOYMENT_SLICES: ${DEPLOYMENT_SLICES:-""}
+    soft_fail: true
+
+  - wait: ~
+
+  - group: "Kibana Release Manager"
+    steps:
+      - label: ":judge::seedling: Trigger Manual Tests Phase"
+        command: "make -C /agent trigger-manual-verification-phase"
+        agents:
+          image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.6"

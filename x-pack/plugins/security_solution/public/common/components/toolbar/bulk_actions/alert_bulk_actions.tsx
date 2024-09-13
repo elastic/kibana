@@ -37,7 +37,6 @@ interface OwnProps {
   totalItems: number;
   filterStatus?: AlertWorkflowStatus;
   query?: string;
-  indexName: string;
   showAlertStatusActions?: boolean;
   onActionSuccess?: OnUpdateAlertStatusSuccess;
   onActionFailure?: OnUpdateAlertStatusError;
@@ -59,7 +58,6 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     selectedEventIds,
     isSelectAllChecked,
     clearSelected,
-    indexName,
     showAlertStatusActions,
     onActionSuccess,
     onActionFailure,
@@ -69,7 +67,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     const dispatch = useDispatch();
 
     const [showClearSelection, setShowClearSelection] = useState(false);
-    const getGlobalQuerySelector = inputsSelectors.globalQuery();
+    const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
     const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
     const refetchQuery = useCallback(() => {
       globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
@@ -177,7 +175,6 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     );
 
     const bulkActionItems = useBulkActionItems({
-      indexName,
       eventIds: Object.keys(selectedEventIds),
       currentStatus: filterStatus,
       ...(showClearSelection ? { query } : {}),

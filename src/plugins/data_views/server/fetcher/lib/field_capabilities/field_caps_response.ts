@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { uniq } from 'lodash';
@@ -11,6 +12,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
 import { FieldDescriptor } from '../..';
+
+// The array will have different values if values vary across indices
+const unitsArrayToFormatter = (unitArr: string[]) => {
+  return unitArr.find((unit) => unitArr[0] !== unit) ? undefined : unitArr[0];
+};
 
 /**
  *  Read the response from the _field_caps API to determine the type and
@@ -110,13 +116,10 @@ export function readFieldCapsResponse(
           searchable: isSearchable,
           aggregatable: isAggregatable,
           readFromDocValues: false,
-          conflictDescriptions: types.reduce(
-            (acc, esType) => ({
-              ...acc,
-              [esType]: capsByType[esType].indices,
-            }),
-            {}
-          ),
+          conflictDescriptions: types.reduce((acc, esType) => {
+            acc[esType] = capsByType[esType].indices;
+            return acc;
+          }, {} as Record<string, estypes.Indices | undefined>),
           metadata_field: capsByType[types[0]].metadata_field,
         };
         // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
@@ -125,15 +128,23 @@ export function readFieldCapsResponse(
         return agg;
       }
 
-      let timeSeriesMetricType: 'gauge' | 'counter' | undefined;
+      let timeSeriesMetricType: 'gauge' | 'counter' | 'position' | undefined;
       if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'gauge') {
         timeSeriesMetricType = 'gauge';
       }
       if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'counter') {
         timeSeriesMetricType = 'counter';
       }
+
+      if (timeSeriesMetricProp.length === 1 && timeSeriesMetricProp[0] === 'position') {
+        timeSeriesMetricType = 'position';
+      }
       const esType = types[0];
-      const field = {
+
+      const defaultFormatter =
+        capsByType[types[0]].meta?.unit && unitsArrayToFormatter(capsByType[types[0]].meta?.unit);
+
+      const field: FieldDescriptor = {
         name: fieldName,
         type: castEsToKbnFieldTypeName(esType),
         esTypes: types,
@@ -146,6 +157,11 @@ export function readFieldCapsResponse(
         timeSeriesMetric: timeSeriesMetricType,
         timeSeriesDimension: capsByType[types[0]].time_series_dimension,
       };
+
+      if (defaultFormatter) {
+        field.defaultFormatter = defaultFormatter;
+      }
+
       // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
       agg.array.push(field);
       agg.hash[fieldName] = field;

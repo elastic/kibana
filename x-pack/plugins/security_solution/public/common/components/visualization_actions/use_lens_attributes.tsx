@@ -8,10 +8,10 @@
 import { useMemo } from 'react';
 import { SecurityPageName } from '../../../../common/constants';
 import { NetworkRouteType } from '../../../explore/network/pages/navigation/types';
-import { useSourcererDataView } from '../../containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import type { LensAttributes, UseLensAttributesProps } from './types';
 import {
@@ -24,6 +24,7 @@ import {
 
 export const useLensAttributes = ({
   applyGlobalQueriesAndFilters = true,
+  applyPageAndTabsFilters = true,
   extraOptions,
   getLensAttributes,
   lensAttributes,
@@ -81,10 +82,7 @@ export const useLensAttributes = ({
   const lensAttrsWithInjectedData = useMemo(() => {
     if (
       lensAttributes == null &&
-      (getLensAttributes == null ||
-        stackByField == null ||
-        stackByField?.length === 0 ||
-        (extraOptions?.breakdownField != null && extraOptions?.breakdownField.length === 0))
+      (getLensAttributes == null || stackByField == null || stackByField?.length === 0)
     ) {
       return null;
     }
@@ -98,8 +96,8 @@ export const useLensAttributes = ({
         ...(applyGlobalQueriesAndFilters ? { query } : {}),
         filters: [
           ...attrs.state.filters,
-          ...pageFilters,
-          ...tabsFilters,
+          ...(applyPageAndTabsFilters ? pageFilters : []),
+          ...(applyPageAndTabsFilters ? tabsFilters : []),
           ...indexFilters,
           ...(applyGlobalQueriesAndFilters ? filters : []),
         ],
@@ -111,9 +109,9 @@ export const useLensAttributes = ({
     } as LensAttributes;
   }, [
     applyGlobalQueriesAndFilters,
+    applyPageAndTabsFilters,
     attrs,
     dataViewId,
-    extraOptions?.breakdownField,
     filters,
     getLensAttributes,
     hasAdHocDataViews,

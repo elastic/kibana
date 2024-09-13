@@ -8,6 +8,7 @@
     "server": true,
     "browser": true,
     "requiredPlugins": [
+      "data",
       "expressions",
       "visualizations",
       "charts",
@@ -18,8 +19,10 @@
       "usageCollection"
     ],
     "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact"
+      "kibanaUtils"
+    ],
+    "extraPublicDirs": [
+      "common"
     ]
   }
 }

@@ -55,7 +55,7 @@ Diagnosing these may be difficult - but there may be log messages for error cond
 === Use the REST APIs
 
 There is a rich set of HTTP endpoints to introspect and manage rules and connectors.
-One of the HTTP endpoints available for actions is the <<execute-connector-api,run connector API>>. You can use this to “test” an action.  For instance, if you have a server log action created, you can run it via curling the endpoint:
+One of the HTTP endpoints available for actions is the run connector API. You can use this to “test” an action. For instance, if you have a server log action created, you can run it via curling the endpoint:
 [source, txt]
 --------------------------------------------------
 curl -X POST -k \
@@ -190,21 +190,39 @@ In addition to the above methods, refer to the following approaches and common i
 * <<testing-connectors,Testing connectors using {connectors-ui} UI and the `kbn-action` tool>>
 
 [discrete]
+[[alerting-kibana-throttle]]
+==== Temporarily throttle all tasks
+
+If cluster performance becomes degraded from excessive or expensive rules and {kib} is sluggish or unresponsive, you can temporarily reduce load to the Task Manager by updating its <<task-manager-settings-kb,settings>>:
+
+[source,txt]
+--------------------------------------------------
+xpack.task_manager.capacity: 5
+xpack.task_manager.poll_interval: 1h
+--------------------------------------------------
+
+[WARNING]
+====
+This approach should be used only temporarily as a last resort to restore function to {kib} when it is unresponsive and attempts to identify and <<controlling-rules,snooze or disable>> slow-running rules have not fixed the situation.
+It severely throttles all background tasks, not just those relating to {alert-features}. The task manager will run only one task at a time and will look for more work each hour.
+====
+
+[discrete]
 [[alerting-limitations]]
 === Limitations
 
 The following limitations and known problems apply to the {version} release of
-the {kib} {alert-features}. 
+the {kib} {alert-features}:
 
 [discrete]
 ==== Alert visibility
 
 If you create a rule in the {observability} or {security-app}, its alerts are
 not visible in *{stack-manage-app} > {rules-ui}*. You can view them only in the
-{kib} app where you created the rule. If you use the
-<<create-rule-api,create rule API>>, the visibility of the alerts is related to
+{kib} app where you created the rule. If you use the create rule API, the visibility of the alerts is related to
 the `consumer` property.
 
 include::troubleshooting/alerting-common-issues.asciidoc[]
 include::troubleshooting/event-log-index.asciidoc[]
 include::troubleshooting/testing-connectors.asciidoc[]
+

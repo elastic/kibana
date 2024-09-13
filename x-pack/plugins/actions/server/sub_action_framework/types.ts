@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import type { Method, AxiosRequestConfig } from 'axios';
+import { KibanaRequest } from '@kbn/core-http-server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   ActionTypeParams,
@@ -30,6 +31,7 @@ export interface ServiceParams<Config, Secrets> {
   logger: Logger;
   secrets: Secrets;
   services: Services;
+  request?: KibanaRequest;
 }
 
 export type SubActionRequestParams<R> = {
@@ -44,6 +46,11 @@ export type IService<Config, Secrets> = new (
 
 export type IServiceAbstract<Config, Secrets> = abstract new (
   params: ServiceParams<Config, Secrets>
+) => SubActionConnector<Config, Secrets>;
+
+export type ICaseServiceAbstract<Config, Secrets, Incident, GetIncidentResponse> = abstract new (
+  params: ServiceParams<Config, Secrets>,
+  pushToServiceIncidentParamsSchema: Record<string, Type<unknown>>
 ) => SubActionConnector<Config, Secrets>;
 
 export enum ValidatorType {
@@ -79,8 +86,12 @@ export interface SubActionConnectorType<Config, Secrets> {
     secrets: Type<Secrets>;
   };
   validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>;
-  Service: IService<Config, Secrets>;
+  getService: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   renderParameterTemplates?: RenderParameterTemplates<ExecutorParams>;
+  isSystemActionType?: boolean;
+  getKibanaPrivileges?: (args?: {
+    params?: { subAction: string; subActionParams: Record<string, unknown> };
+  }) => string[];
 }
 
 export interface ExecutorParams extends ActionTypeParams {

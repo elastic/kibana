@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -13,13 +14,16 @@ import { InputControlVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
 import { InputControlVisParams } from './types';
 
+export const INPUT_CONTROL_VIS_TYPE = 'input_control_vis';
+
 export function createInputControlVisTypeDefinition(
-  deps: InputControlVisDependencies
+  deps: InputControlVisDependencies,
+  readOnly: boolean
 ): VisTypeDefinition<InputControlVisParams> {
   const ControlsTab = getControlsTab(deps);
 
   return {
-    name: 'input_control_vis',
+    name: INPUT_CONTROL_VIS_TYPE,
     title: i18n.translate('inputControl.register.controlsTitle', {
       defaultMessage: 'Input controls',
     }),
@@ -29,6 +33,8 @@ export function createInputControlVisTypeDefinition(
       defaultMessage: 'Input controls are deprecated and will be removed in a future version.',
     }),
     stage: 'experimental',
+    disableCreate: true, // input controls are deprecated and input control creation has been permanently disabled
+    disableEdit: readOnly,
     isDeprecated: true,
     visConfig: {
       defaults: {

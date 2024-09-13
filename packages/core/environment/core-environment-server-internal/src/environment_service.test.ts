@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject } from 'rxjs';
 
-import type { CoreContext } from '@kbn/core-base-server-internal';
+import { type CoreContext, CriticalError } from '@kbn/core-base-server-internal';
 import type { AnalyticsServicePreboot } from '@kbn/core-analytics-server';
 
 import { EnvironmentService } from './environment_service';
@@ -120,16 +121,6 @@ describe('UuidService', () => {
     });
 
     describe('process warnings', () => {
-      it('logs warnings coming from the process', async () => {
-        await service.preboot({ analytics });
-
-        const warning = new Error('something went wrong');
-        process.emit('warning', warning);
-
-        expect(logger.get('process').warn).toHaveBeenCalledTimes(1);
-        expect(logger.get('process').warn).toHaveBeenCalledWith(warning);
-      });
-
       it('does not log deprecation warnings', async () => {
         await service.preboot({ analytics });
 
@@ -137,34 +128,56 @@ describe('UuidService', () => {
         warning.name = 'DeprecationWarning';
         process.emit('warning', warning);
 
-        expect(logger.get('process').warn).not.toHaveBeenCalled();
+        expect(logger.get('environment').warn).not.toHaveBeenCalled();
       });
     });
 
-    // TODO: From Nodejs v16 emitting an unhandledRejection will kill the process
-    describe.skip('unhandledRejection warnings', () => {
-      it('logs warn for an unhandeld promise rejected with an Error', async () => {
+    describe('unhandledRejection warnings', () => {
+      it('logs warn for an unhandled promise rejected with an Error', async () => {
         await service.preboot({ analytics });
 
         const err = new Error('something went wrong');
-        process.emit('unhandledRejection', err, new Promise((res, rej) => rej(err)));
+        process.emit('unhandledRejection', err, new Promise((res, rej) => {}));
 
-        expect(logger.get('process').warn).toHaveBeenCalledTimes(1);
+        expect(logger.get('environment').warn).toHaveBeenCalledTimes(1);
         expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
           /Detected an unhandled Promise rejection: Error: something went wrong\n.*at /
         );
       });
 
-      it('logs warn for an unhandeld promise rejected with a string', async () => {
+      it('logs warn for an unhandled promise rejected with a string', async () => {
         await service.preboot({ analytics });
 
         const err = 'something went wrong';
-        process.emit('unhandledRejection', err, new Promise((res, rej) => rej(err)));
+        process.emit('unhandledRejection', err, new Promise((res, rej) => {}));
 
-        expect(logger.get('process').warn).toHaveBeenCalledTimes(1);
+        expect(logger.get('environment').warn).toHaveBeenCalledTimes(1);
         expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
           /Detected an unhandled Promise rejection: "something went wrong"/
         );
+      });
+    });
+
+    describe('uncaughtException warnings', () => {
+      it('logs warn for an uncaught exception with an Error', async () => {
+        await service.preboot({ analytics });
+
+        const err = new Error('something went wrong');
+        process.emit('uncaughtExceptionMonitor', err); // Types won't allow me to provide the `origin`
+
+        expect(logger.get('environment').warn).toHaveBeenCalledTimes(1);
+        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
+          /Detected an undefined: Error: something went wrong\n.*at /
+        );
+      });
+
+      it('does not log warn for an uncaught exception with a CriticalError', async () => {
+        await service.preboot({ analytics });
+
+        const err = new CriticalError('something went wrong', 'ERROR_CODE', 1234);
+        process.emit('uncaughtExceptionMonitor', err); // Types won't allow me to provide the `origin`
+
+        expect(logger.get('environment').warn).toHaveBeenCalledTimes(0);
       });
     });
   });

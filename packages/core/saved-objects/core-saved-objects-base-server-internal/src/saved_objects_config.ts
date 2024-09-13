@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { valid } from 'semver';
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import buffer from 'buffer';
 
 const migrationSchema = schema.object({
   algorithm: schema.oneOf([schema.literal('v2'), schema.literal('zdt')], {
@@ -16,6 +18,10 @@ const migrationSchema = schema.object({
   }),
   batchSize: schema.number({ defaultValue: 1_000 }),
   maxBatchSizeBytes: schema.byteSize({ defaultValue: '100mb' }), // 100mb is the default http.max_content_length Elasticsearch config value
+  maxReadBatchSizeBytes: schema.byteSize({
+    defaultValue: buffer.constants.MAX_STRING_LENGTH,
+    max: buffer.constants.MAX_STRING_LENGTH,
+  }),
   discardUnknownObjects: schema.maybe(
     schema.string({
       validate: (value: string) =>
@@ -32,8 +38,24 @@ const migrationSchema = schema.object({
   pollInterval: schema.number({ defaultValue: 1_500 }),
   skip: schema.boolean({ defaultValue: false }),
   retryAttempts: schema.number({ defaultValue: 15 }),
+  /**
+   * ZDT algorithm specific options
+   */
   zdt: schema.object({
-    metaPickupSyncDelaySec: schema.number({ min: 1, defaultValue: 120 }),
+    /**
+     * The delay that the migrator will wait for, in seconds, when updating the
+     * index mapping's meta to let the other nodes pickup the changes.
+     */
+    metaPickupSyncDelaySec: schema.number({ min: 1, defaultValue: 5 }),
+    /**
+     * The document migration phase will be run from instances with any of the specified roles.
+     *
+     * This is mostly used for testing environments and integration tests were
+     * we have full control over a single node Kibana deployment.
+     *
+     * Defaults to ["migrator"]
+     */
+    runOnRoles: schema.arrayOf(schema.string(), { defaultValue: ['migrator'] }),
   }),
 });
 

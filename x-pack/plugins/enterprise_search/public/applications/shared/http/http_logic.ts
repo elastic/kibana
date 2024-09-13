@@ -7,14 +7,14 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { HttpSetup, HttpInterceptorResponseError, HttpResponse } from '@kbn/core/public';
+import { HttpInterceptorResponseError, HttpResponse, HttpSetup } from '@kbn/core/public';
 
 import { ERROR_CONNECTING_HEADER, READ_ONLY_MODE_HEADER } from '../../../../common/constants';
 
 export interface HttpValues {
+  errorConnectingMessage: string;
   http: HttpSetup;
   httpInterceptors: Function[];
-  errorConnectingMessage: string;
   readOnlyMode: boolean;
 }
 
@@ -26,33 +26,21 @@ interface HttpActions {
 }
 
 export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
-  path: ['enterprise_search', 'http_logic'],
   actions: {
     initializeHttpInterceptors: () => null,
     onConnectionError: (errorConnectingMessage) => ({ errorConnectingMessage }),
     setHttpInterceptors: (httpInterceptors) => ({ httpInterceptors }),
     setReadOnlyMode: (readOnlyMode) => ({ readOnlyMode }),
   },
-  reducers: ({ props }) => ({
-    http: [props.http, {}],
-    httpInterceptors: [
-      [],
-      {
-        setHttpInterceptors: (_, { httpInterceptors }) => httpInterceptors,
-      },
-    ],
-    errorConnectingMessage: [
-      props.errorConnectingMessage || '',
-      {
-        onConnectionError: (_, { errorConnectingMessage }) => errorConnectingMessage,
-      },
-    ],
-    readOnlyMode: [
-      props.readOnlyMode || false,
-      {
-        setReadOnlyMode: (_, { readOnlyMode }) => readOnlyMode,
-      },
-    ],
+  events: ({ values, actions }) => ({
+    afterMount: () => {
+      actions.initializeHttpInterceptors();
+    },
+    beforeUnmount: () => {
+      values.httpInterceptors.forEach((removeInterceptorFn?: Function) => {
+        if (removeInterceptorFn) removeInterceptorFn();
+      });
+    },
   }),
   listeners: ({ values, actions }) => ({
     initializeHttpInterceptors: () => {
@@ -94,15 +82,30 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
       actions.setHttpInterceptors(httpInterceptors);
     },
   }),
-  events: ({ values, actions }) => ({
-    afterMount: () => {
-      actions.initializeHttpInterceptors();
-    },
-    beforeUnmount: () => {
-      values.httpInterceptors.forEach((removeInterceptorFn?: Function) => {
-        if (removeInterceptorFn) removeInterceptorFn();
-      });
-    },
+  path: ['enterprise_search', 'http_logic'],
+  reducers: ({ props }) => ({
+    errorConnectingMessage: [
+      props.errorConnectingMessage || '',
+      {
+        // @ts-expect-error upgrade typescript v5.1.6
+        onConnectionError: (_, { errorConnectingMessage }) => errorConnectingMessage,
+      },
+    ],
+    http: [props.http, {}],
+    httpInterceptors: [
+      [],
+      {
+        // @ts-expect-error upgrade typescript v5.1.6
+        setHttpInterceptors: (_, { httpInterceptors }) => httpInterceptors,
+      },
+    ],
+    readOnlyMode: [
+      props.readOnlyMode || false,
+      {
+        // @ts-expect-error upgrade typescript v5.1.6
+        setReadOnlyMode: (_, { readOnlyMode }) => readOnlyMode,
+      },
+    ],
   }),
 });
 
@@ -110,14 +113,14 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
  * Mount/props helper
  */
 interface HttpLogicProps {
-  http: HttpSetup;
   errorConnectingMessage?: string;
+  http: HttpSetup;
   readOnlyMode?: boolean;
 }
+
 export const mountHttpLogic = (props: HttpLogicProps) => {
   HttpLogic(props);
-  const unmount = HttpLogic.mount();
-  return unmount;
+  return HttpLogic.mount();
 };
 
 /**

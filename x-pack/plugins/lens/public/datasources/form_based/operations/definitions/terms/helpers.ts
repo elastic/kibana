@@ -11,20 +11,30 @@ import type { CoreStart } from '@kbn/core/public';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldStatsResponse, loadFieldStats } from '@kbn/unified-field-list-plugin/public';
-import { GenericIndexPatternColumn, operationDefinitionMap } from '..';
+import { type FieldStatsResponse } from '@kbn/unified-field-list/src/types';
+import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';
+import {
+  FieldBasedOperationErrorMessage,
+  GenericIndexPatternColumn,
+  operationDefinitionMap,
+} from '..';
 import { defaultLabel } from '../filters';
 import { isReferenced } from '../../layer_helpers';
 
-import type { FrameDatasourceAPI, IndexPattern, IndexPatternField } from '../../../../../types';
+import type { FramePublicAPI, IndexPattern, IndexPatternField } from '../../../../../types';
 import type { FiltersIndexPatternColumn } from '..';
 import type { TermsIndexPatternColumn } from './types';
 import type { LastValueIndexPatternColumn } from '../last_value';
 import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
+import type { PercentileIndexPatternColumn } from '../percentile';
 
 import type { FormBasedLayer } from '../../../types';
-import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes } from './constants';
+import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes, MAX_TERMS_OTHER_ENABLED } from './constants';
 import { isColumnOfType } from '../helpers';
+import {
+  TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS,
+  TERMS_WITH_MULTIPLE_TIMESHIFT,
+} from '../../../../../user_messages_ids';
 
 const fullSeparatorString = ` ${MULTI_KEY_VISUAL_SEPARATOR} `;
 
@@ -32,21 +42,27 @@ export function getMultiTermsScriptedFieldErrorMessage(
   layer: FormBasedLayer,
   columnId: string,
   indexPattern: IndexPattern
-) {
+): FieldBasedOperationErrorMessage[] {
   const currentColumn = layer.columns[columnId] as TermsIndexPatternColumn;
   const usedFields = [currentColumn.sourceField, ...(currentColumn.params.secondaryFields ?? [])];
 
   const scriptedFields = usedFields.filter((field) => indexPattern.getFieldByName(field)?.scripted);
   if (usedFields.length < 2 || !scriptedFields.length) {
-    return;
+    return [];
   }
 
-  return i18n.translate('xpack.lens.indexPattern.termsWithMultipleTermsAndScriptedFields', {
-    defaultMessage: 'Scripted fields are not supported when using multiple fields, found {fields}',
-    values: {
-      fields: scriptedFields.join(', '),
+  return [
+    {
+      uniqueId: TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS,
+      message: i18n.translate('xpack.lens.indexPattern.termsWithMultipleTermsAndScriptedFields', {
+        defaultMessage:
+          'Scripted fields are not supported when using multiple fields, found {fields}',
+        values: {
+          fields: scriptedFields.join(', '),
+        },
+      }),
     },
-  });
+  ];
 }
 
 function getQueryForMultiTerms(fieldNames: string[], term: string) {
@@ -90,7 +106,7 @@ export function getDisallowedTermsMessage(
   layer: FormBasedLayer,
   columnId: string,
   indexPattern: IndexPattern
-) {
+): FieldBasedOperationErrorMessage[] {
   const referenced: Set<string> = new Set();
   Object.entries(layer.columns).forEach(([cId, c]) => {
     if ('references' in c) {
@@ -110,116 +126,119 @@ export function getDisallowedTermsMessage(
         .map(([colId, col]) => col.timeShift || '')
     ).length > 1;
   if (!hasMultipleShifts) {
-    return undefined;
+    return [];
   }
-  return {
-    message: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShifts', {
-      defaultMessage:
-        'In a single layer, you are unable to combine metrics with different time shifts and dynamic top values. Use the same time shift value for all metrics, or use filters instead of top values.',
-    }),
-    fixAction: {
-      label: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel', {
-        defaultMessage: 'Use filters',
+  return [
+    {
+      uniqueId: TERMS_WITH_MULTIPLE_TIMESHIFT,
+      message: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShifts', {
+        defaultMessage:
+          'In a single layer, you are unable to combine metrics with different time shifts and dynamic top values. Use the same time shift value for all metrics, or use filters instead of top values.',
       }),
-      newState: async (
-        data: DataPublicPluginStart,
-        core: CoreStart,
-        frame: FrameDatasourceAPI,
-        layerId: string
-      ) => {
-        const currentColumn = layer.columns[columnId] as TermsIndexPatternColumn;
-        const fieldNames = [
-          currentColumn.sourceField,
-          ...(currentColumn.params?.secondaryFields ?? []),
-        ];
-        const activeDataFieldNameMatch =
-          frame.activeData?.[layerId].columns.find(({ id }) => id === columnId)?.meta.field ===
-          fieldNames[0];
+      fixAction: {
+        label: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel', {
+          defaultMessage: 'Use filters',
+        }),
+        newState: async (
+          data: DataPublicPluginStart,
+          core: CoreStart,
+          frame: FramePublicAPI,
+          layerId: string
+        ) => {
+          const currentColumn = layer.columns[columnId] as TermsIndexPatternColumn;
+          const fieldNames = [
+            currentColumn.sourceField,
+            ...(currentColumn.params?.secondaryFields ?? []),
+          ];
+          const activeDataFieldNameMatch =
+            frame.activeData?.[layerId].columns.find(({ id }) => id === columnId)?.meta.field ===
+            fieldNames[0];
 
-        let currentTerms = uniq(
-          frame.activeData?.[layerId].rows
-            .map((row) => row[columnId] as string | MultiFieldKeyFormat)
-            .filter((term) =>
-              fieldNames.length > 1
-                ? isMultiFieldValue(term) && term.keys[0] !== '__other__'
-                : typeof term === 'string' && term !== '__other__'
-            )
-            .map((term: string | MultiFieldKeyFormat) =>
-              isMultiFieldValue(term) ? term.keys.join(fullSeparatorString) : term
-            ) || []
-        );
-        if (!activeDataFieldNameMatch || currentTerms.length === 0) {
-          if (fieldNames.length === 1) {
-            const currentDataView = await data.dataViews.get(indexPattern.id);
-            const response: FieldStatsResponse<string | number> = await loadFieldStats({
-              services: { data },
-              dataView: currentDataView,
-              field: indexPattern.getFieldByName(fieldNames[0])! as DataViewField,
-              dslQuery: buildEsQuery(
-                indexPattern,
-                frame.query,
-                frame.filters,
-                getEsQueryConfig(core.uiSettings)
-              ),
-              fromDate: frame.dateRange.fromDate,
-              toDate: frame.dateRange.toDate,
-              size: currentColumn.params.size,
-            });
-            currentTerms = response.topValues?.buckets.map(({ key }) => String(key)) || [];
+          let currentTerms = uniq(
+            frame.activeData?.[layerId].rows
+              .map((row) => row[columnId] as string | MultiFieldKeyFormat)
+              .filter((term) =>
+                fieldNames.length > 1
+                  ? isMultiFieldValue(term) && term.keys[0] !== '__other__'
+                  : typeof term === 'string' && term !== '__other__'
+              )
+              .map((term: string | MultiFieldKeyFormat) =>
+                isMultiFieldValue(term) ? term.keys.join(fullSeparatorString) : term
+              ) || []
+          );
+          if (!activeDataFieldNameMatch || currentTerms.length === 0) {
+            if (fieldNames.length === 1) {
+              const currentDataView = await data.dataViews.get(indexPattern.id);
+              const response: FieldStatsResponse<string | number> = await loadFieldStats({
+                services: { data },
+                dataView: currentDataView,
+                field: indexPattern.getFieldByName(fieldNames[0])! as DataViewField,
+                dslQuery: buildEsQuery(
+                  indexPattern,
+                  frame.query,
+                  frame.filters,
+                  getEsQueryConfig(core.uiSettings)
+                ),
+                fromDate: frame.dateRange.fromDate,
+                toDate: frame.dateRange.toDate,
+                size: currentColumn.params.size,
+              });
+              currentTerms = response.topValues?.buckets.map(({ key }) => String(key)) || [];
+            }
           }
-        }
-        // when multi terms the meta.field will always be undefined, so limit the check to no data
-        if (fieldNames.length > 1 && currentTerms.length === 0) {
-          // this will produce a query like `field1: * AND field2: * ...etc`
-          // which is the best we can do for multiple terms when no data is available
-          currentTerms = [Array(fieldNames.length).fill('*').join(fullSeparatorString)];
-        }
+          // when multi terms the meta.field will always be undefined, so limit the check to no data
+          if (fieldNames.length > 1 && currentTerms.length === 0) {
+            // this will produce a query like `field1: * AND field2: * ...etc`
+            // which is the best we can do for multiple terms when no data is available
+            currentTerms = [Array(fieldNames.length).fill('*').join(fullSeparatorString)];
+          }
 
-        return {
-          ...layer,
-          columns: {
-            ...layer.columns,
-            [columnId]: {
-              label: i18n.translate('xpack.lens.indexPattern.pinnedTopValuesLabel', {
-                defaultMessage: 'Filters of {field}',
-                values: {
-                  field:
-                    fieldNames.length > 1 ? fieldNames.join(fullSeparatorString) : fieldNames[0],
-                },
-              }),
-              customLabel: true,
-              isBucketed: layer.columns[columnId].isBucketed,
-              dataType: 'string',
-              operationType: 'filters',
-              params: {
-                filters:
-                  currentTerms.length > 0
-                    ? currentTerms.map((term) => ({
-                        input: {
-                          query:
-                            fieldNames.length === 1
-                              ? `${fieldNames[0]}: "${term}"`
-                              : getQueryForMultiTerms(fieldNames, term),
-                          language: 'kuery',
-                        },
-                        label: getQueryLabel(fieldNames, term),
-                      }))
-                    : [
-                        {
+          return {
+            ...layer,
+            columns: {
+              ...layer.columns,
+              [columnId]: {
+                label: i18n.translate('xpack.lens.indexPattern.pinnedTopValuesLabel', {
+                  defaultMessage: 'Filters of {field}',
+                  values: {
+                    field:
+                      fieldNames.length > 1 ? fieldNames.join(fullSeparatorString) : fieldNames[0],
+                  },
+                }),
+                customLabel: true,
+                isBucketed: layer.columns[columnId].isBucketed,
+                dataType: 'string',
+                operationType: 'filters',
+                params: {
+                  filters:
+                    currentTerms.length > 0
+                      ? currentTerms.map((term) => ({
                           input: {
-                            query: '*',
+                            query:
+                              fieldNames.length === 1
+                                ? `${fieldNames[0]}: "${term}"`
+                                : getQueryForMultiTerms(fieldNames, term),
                             language: 'kuery',
                           },
-                          label: defaultLabel,
-                        },
-                      ],
-              },
-            } as FiltersIndexPatternColumn,
-          },
-        };
+                          label: getQueryLabel(fieldNames, term),
+                        }))
+                      : [
+                          {
+                            input: {
+                              query: '*',
+                              language: 'kuery',
+                            },
+                            label: defaultLabel,
+                          },
+                        ],
+                },
+              } as FiltersIndexPatternColumn,
+            },
+          };
+        },
       },
     },
-  };
+  ];
 }
 
 function checkLastValue(column: GenericIndexPatternColumn) {
@@ -230,13 +249,21 @@ function checkLastValue(column: GenericIndexPatternColumn) {
   );
 }
 
+// allow the rank by metric only if the percentile rank value is integer
+// https://github.com/elastic/elasticsearch/issues/66677
+
+export function isPercentileSortable(column: GenericIndexPatternColumn) {
+  const isPercentileColumn = isColumnOfType<PercentileIndexPatternColumn>('percentile', column);
+  return !isPercentileColumn || (isPercentileColumn && Number.isInteger(column.params.percentile));
+}
+
 export function isPercentileRankSortable(column: GenericIndexPatternColumn) {
-  // allow the rank by metric only if the percentile rank value is integer
-  // https://github.com/elastic/elasticsearch/issues/66677
+  const isPercentileRankColumn = isColumnOfType<PercentileRanksIndexPatternColumn>(
+    'percentile_rank',
+    column
+  );
   return (
-    column.operationType !== 'percentile_rank' ||
-    (column.operationType === 'percentile_rank' &&
-      Number.isInteger((column as PercentileRanksIndexPatternColumn).params.value))
+    !isPercentileRankColumn || (isPercentileRankColumn && Number.isInteger(column.params.value))
   );
 }
 
@@ -247,6 +274,7 @@ export function isSortableByColumn(layer: FormBasedLayer, columnId: string) {
     !column.isBucketed &&
     checkLastValue(column) &&
     isPercentileRankSortable(column) &&
+    isPercentileSortable(column) &&
     !('references' in column) &&
     !isReferenced(layer, columnId)
   );
@@ -302,6 +330,7 @@ export function getFieldsByValidationState(
       newField &&
       supportedTypes.has(newField.type) &&
       newField.aggregatable &&
+      newField.timeSeriesMetric !== 'counter' &&
       (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms) &&
       (canAcceptScripted || !isScriptedField(newField));
 
@@ -314,4 +343,9 @@ export function getFieldsByValidationState(
     validFields,
     invalidFields,
   };
+}
+
+export function getOtherBucketSwitchDefault(column: TermsIndexPatternColumn, size: number) {
+  const otherBucketValue = column.params.otherBucket;
+  return (otherBucketValue || otherBucketValue === undefined) && size < MAX_TERMS_OTHER_ENABLED;
 }

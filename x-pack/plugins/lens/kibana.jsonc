@@ -21,7 +21,6 @@
       "navigation",
       "urlForwarding",
       "visualizations",
-      "dashboard",
       "uiActions",
       "uiActionsEnhanced",
       "embeddable",
@@ -33,9 +32,10 @@
       "expressionMetricVis",
       "expressionHeatmap",
       "expressionXY",
+      "expressionTagcloud",
       "eventAnnotation",
       "unifiedSearch",
-      "unifiedFieldList"
+      "contentManagement",
     ],
     "optionalPlugins": [
       "expressionLegacyMetricVis",
@@ -44,7 +44,9 @@
       "taskManager",
       "globalSearch",
       "savedObjectsTagging",
-      "spaces"
+      "spaces",
+      "serverless",
+      "licensing"
     ],
     "requiredBundles": [
       "unifiedSearch",
@@ -53,7 +55,9 @@
       "kibanaReact",
       "embeddable",
       "fieldFormats",
-      "charts"
+      "charts",
+      "esqlDataGrid",
+      "esql",
     ],
     "extraPublicDirs": [
       "common/constants"

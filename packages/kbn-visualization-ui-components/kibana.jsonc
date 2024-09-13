@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/visualization-ui-components",
+  "owner": "@elastic/kibana-visualizations"
+}

@@ -13,10 +13,9 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
       size="m"
     >
       <h2>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Import saved objects"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
-          values={Object {}}
         />
       </h2>
     </EuiTitle>
@@ -31,15 +30,14 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         data-test-subj="importSavedObjectsConflictsWarning"
         iconType="help"
         title={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Data Views Conflicts"
             id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
-            values={Object {}}
           />
         }
       >
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="The following saved objects use data views that do not exist. Please select the data views you'd like re-associated with them. You can {indexPatternLink} if necessary."
             id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
             values={
@@ -47,10 +45,9 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
                 "indexPatternLink": <EuiLink
                   href=""
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="create a new data view"
                     id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
-                    values={Object {}}
                   />
                 </EuiLink>,
               }
@@ -114,7 +111,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           ],
         }
       }
-      responsive={true}
+      searchFormat="eql"
       tableLayout="fixed"
     />
   </EuiFlyoutBody>
@@ -131,10 +128,9 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           onClick={[MockFunction]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="savedObjectsManagement.objectsTable.flyout.import.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -142,17 +138,15 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="importSavedObjectsConfirmBtn"
           fill={true}
           isLoading={false}
           onClick={[Function]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Confirm all changes"
             id="savedObjectsManagement.objectsTable.flyout.importSuccessful.confirmAllChangesButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -174,6 +168,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
             "register": [MockFunction],
           },
           "basePath": BasePath {
+            "assetsHrefBase": "",
             "basePath": "",
             "get": [Function],
             "prepend": [Function],
@@ -195,6 +190,9 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           "patch": [MockFunction],
           "post": [MockFunction],
           "put": [MockFunction],
+          "staticAssets": Object {
+            "getPluginAssetHref": [MockFunction],
+          },
         },
         "state": Object {
           "conflictingRecord": undefined,
@@ -287,10 +285,9 @@ exports[`Flyout should render import step 1`] = `
       size="m"
     >
       <h2>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Import saved objects"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
-          values={Object {}}
         />
       </h2>
     </EuiTitle>
@@ -298,48 +295,34 @@ exports[`Flyout should render import step 1`] = `
   <EuiFlyoutBody>
     <EuiForm>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         label={
           <EuiTitle
             size="xs"
           >
             <span>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Select a file to import"
                 id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
-                values={Object {}}
               />
             </span>
           </EuiTitle>
         }
-        labelType="label"
       >
-        <EuiFilePicker
+        <EuiFilePickerClass
           accept=".ndjson"
-          compressed={false}
-          display="large"
           fullWidth={true}
           initialPromptText={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Import"
               id="savedObjectsManagement.objectsTable.flyout.importPromptText"
-              values={Object {}}
             />
           }
           onChange={[Function]}
         />
       </EuiFormRow>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        labelType="label"
       >
         <ImportModeControl
           initialValues={
@@ -366,10 +349,9 @@ exports[`Flyout should render import step 1`] = `
           onClick={[MockFunction]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="savedObjectsManagement.objectsTable.flyout.import.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -377,7 +359,6 @@ exports[`Flyout should render import step 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="importSavedObjectsImportBtn"
           fill={true}
           isDisabled={true}
@@ -385,10 +366,9 @@ exports[`Flyout should render import step 1`] = `
           onClick={[Function]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Import"
             id="savedObjectsManagement.objectsTable.flyout.import.confirmButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -402,6 +382,7 @@ exports[`Flyout summary should display summary when import is complete 1`] = `
   allowedTypes={Array []}
   basePath={
     BasePath {
+      "assetsHrefBase": "",
       "basePath": "",
       "get": [Function],
       "prepend": [Function],

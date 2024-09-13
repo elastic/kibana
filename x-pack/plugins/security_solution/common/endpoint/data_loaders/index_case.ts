@@ -6,15 +6,13 @@
  */
 
 import type { KbnClient } from '@kbn/test';
-import type { CaseResponse } from '@kbn/cases-plugin/common';
-import { CASES_URL } from '@kbn/cases-plugin/common';
-import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
-import { CaseSeverity, ConnectorTypes } from '@kbn/cases-plugin/common/api';
+import type { Case, CasePostRequest } from '@kbn/cases-plugin/common';
+import { CaseSeverity, CASES_URL, ConnectorTypes } from '@kbn/cases-plugin/common';
 import type { AxiosError } from 'axios';
 import { EndpointError } from '../errors';
 
 export interface IndexedCase {
-  data: CaseResponse;
+  data: Case;
   cleanup: () => Promise<{
     /** The ID of the cases that were deleted */
     data: string;
@@ -55,7 +53,7 @@ export const indexCase = async (
   };
 
   const createdCase = (
-    await kbnClient.request<CaseResponse>({
+    await kbnClient.request<Case>({
       method: 'POST',
       path: CASES_URL,
       body: newCaseReq,

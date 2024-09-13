@@ -1,15 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type {
+  ISavedObjectsRepository,
+  SavedObjectsIncrementCounterField,
+} from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import type { CoreUsageStats } from '@kbn/core-usage-data-server';
+import type { CoreUsageStats, CoreIncrementCounterParams } from '@kbn/core-usage-data-server';
 import {
   type ICoreUsageStatsClient,
   type BaseIncrementOptions,
@@ -20,6 +24,19 @@ import {
   CORE_USAGE_STATS_ID,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '@kbn/core-usage-data-base-server-internal';
+import {
+  type Observable,
+  bufferWhen,
+  exhaustMap,
+  filter,
+  interval,
+  map,
+  merge,
+  skip,
+  Subject,
+  takeUntil,
+  tap,
+} from 'rxjs';
 
 export const BULK_CREATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkCreate';
 export const BULK_GET_STATS_PREFIX = 'apiCalls.savedObjectsBulkGet';
@@ -74,19 +91,117 @@ const ALL_COUNTER_FIELDS = [
 ];
 const SPACE_CONTEXT_REGEX = /^\/s\/([a-z0-9_\-]+)/;
 
+// Buffering up to 10k events because:
+// - ALL_COUNTER_FIELDS has 125 fields, so that's the max request we can expect after grouping the keys.
+// - A typical counter reports 3 fields, so taking 10k events, means around 30k fields (to be later grouped into max 125 fields).
+// - Taking into account the longest possible string, this queue can use 15MB max.
+const MAX_BUFFER_SIZE = 10_000;
+const DEFAULT_BUFFER_TIME_MS = 10_000;
+
+/**
+ * Interface that models some of the core events (e.g. SO HTTP API calls)
+ * @internal
+ */
+export interface CoreUsageEvent {
+  id: string;
+  isKibanaRequest: boolean;
+  types?: string[];
+}
+
+/** @internal */
+export interface CoreUsageStatsClientParams {
+  debugLogger: (message: string) => void;
+  basePath: IBasePath;
+  repositoryPromise: Promise<ISavedObjectsRepository>;
+  stop$: Observable<void>;
+  incrementUsageCounter: (params: CoreIncrementCounterParams) => void;
+  bufferTimeMs?: number;
+}
+
 /** @internal */
 export class CoreUsageStatsClient implements ICoreUsageStatsClient {
-  constructor(
-    private readonly debugLogger: (message: string) => void,
-    private readonly basePath: IBasePath,
-    private readonly repositoryPromise: Promise<ISavedObjectsRepository>
-  ) {}
+  private readonly debugLogger: (message: string) => void;
+  private readonly basePath: IBasePath;
+  private readonly repositoryPromise: Promise<ISavedObjectsRepository>;
+  private readonly fieldsToIncrement$ = new Subject<string[]>();
+  private readonly flush$ = new Subject<void>();
+  private readonly coreUsageEvents$ = new Subject<CoreUsageEvent>();
+
+  constructor({
+    debugLogger,
+    basePath,
+    repositoryPromise,
+    stop$,
+    incrementUsageCounter,
+    bufferTimeMs = DEFAULT_BUFFER_TIME_MS,
+  }: CoreUsageStatsClientParams) {
+    this.debugLogger = debugLogger;
+    this.basePath = basePath;
+    this.repositoryPromise = repositoryPromise;
+    this.fieldsToIncrement$
+      .pipe(
+        takeUntil(stop$),
+        // Buffer until either the timer, a forced flush occur, or there are too many queued fields
+        bufferWhen(() =>
+          merge(
+            interval(bufferTimeMs),
+            this.flush$,
+            this.fieldsToIncrement$.pipe(skip(MAX_BUFFER_SIZE))
+          )
+        ),
+        map((listOfFields) => {
+          const fieldsMap = listOfFields.flat().reduce((acc, fieldName) => {
+            const incrementCounterField: Required<SavedObjectsIncrementCounterField> = acc.get(
+              fieldName
+            ) ?? {
+              fieldName,
+              incrementBy: 0,
+            };
+            incrementCounterField.incrementBy++;
+            return acc.set(fieldName, incrementCounterField);
+          }, new Map<string, Required<SavedObjectsIncrementCounterField>>());
+          return [...fieldsMap.values()];
+        }),
+        filter((fields) => fields.length > 0),
+        exhaustMap(async (fields) => {
+          const options = { refresh: false };
+          try {
+            const repository = await this.repositoryPromise;
+            await repository.incrementCounter(
+              CORE_USAGE_STATS_TYPE,
+              CORE_USAGE_STATS_ID,
+              fields,
+              options
+            );
+          } catch (err) {
+            // do nothing
+          }
+        })
+      )
+      .subscribe();
+
+    this.coreUsageEvents$
+      .pipe(
+        takeUntil(stop$),
+        tap(({ id, isKibanaRequest, types }: CoreUsageEvent) => {
+          const kibanaYesNo = isKibanaRequest ? 'yes' : 'no';
+          // NB this usage counter has the domainId: 'core', and so will related docs in 'kibana-usage-counters' data view
+          types?.forEach((type) =>
+            incrementUsageCounter({
+              counterName: `savedObjects.${id}.kibanaRequest.${kibanaYesNo}.types.${type}`,
+            })
+          );
+        })
+      )
+      .subscribe();
+  }
 
   public async getUsageStats() {
     this.debugLogger('getUsageStats() called');
     let coreUsageStats: CoreUsageStats = {};
     try {
       const repository = await this.repositoryPromise;
+      this.flush$.next();
       const result = await repository.incrementCounter<CoreUsageStats>(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
@@ -182,47 +297,46 @@ export class CoreUsageStatsClient implements ICoreUsageStatsClient {
 
   private async updateUsageStats(
     counterFieldNames: string[],
-    prefix: string,
-    { request }: BaseIncrementOptions
+    id: string,
+    { request, types }: BaseIncrementOptions
   ) {
-    const options = { refresh: false };
-    try {
-      const repository = await this.repositoryPromise;
-      const fields = this.getFieldsToIncrement(counterFieldNames, prefix, request);
-      await repository.incrementCounter(
-        CORE_USAGE_STATS_TYPE,
-        CORE_USAGE_STATS_ID,
-        fields,
-        options
-      );
-    } catch (err) {
-      // do nothing
-    }
+    const isKibanaRequest = getIsKibanaRequest(request);
+    const spaceId = this.getNamespace(request);
+    const fields = this.getFieldsToIncrement({
+      counterFieldNames,
+      prefix: id,
+      isKibanaRequest,
+      spaceId,
+    });
+    this.coreUsageEvents$.next({ id, isKibanaRequest, types });
+    this.fieldsToIncrement$.next(fields);
   }
 
-  private getIsDefaultNamespace(request: KibanaRequest) {
+  private getNamespace(request: KibanaRequest): string {
     const requestBasePath = this.basePath.get(request); // obtain the original request basePath, as it may have been modified by a request interceptor
     const pathToCheck = this.basePath.remove(requestBasePath); // remove the server basePath from the request basePath
     const matchResult = pathToCheck.match(SPACE_CONTEXT_REGEX); // Look for `/s/space-url-context` in the base path
 
     if (!matchResult || matchResult.length === 0) {
-      return true;
+      return DEFAULT_NAMESPACE_STRING;
     }
 
     // Ignoring first result, we only want the capture group result at index 1
-    const [, spaceId] = matchResult;
-
-    return spaceId === DEFAULT_NAMESPACE_STRING;
+    return matchResult[1];
   }
 
-  private getFieldsToIncrement(
-    counterFieldNames: string[],
-    prefix: string,
-    request: KibanaRequest
-  ) {
-    const isKibanaRequest = getIsKibanaRequest(request);
-    const isDefaultNamespace = this.getIsDefaultNamespace(request);
-    const namespaceField = isDefaultNamespace ? 'default' : 'custom';
+  private getFieldsToIncrement({
+    prefix,
+    counterFieldNames,
+    spaceId,
+    isKibanaRequest,
+  }: {
+    prefix: string;
+    counterFieldNames: string[];
+    spaceId: string;
+    isKibanaRequest: boolean;
+  }) {
+    const namespaceField = spaceId === DEFAULT_NAMESPACE_STRING ? 'default' : 'custom';
     return [
       'total',
       `namespace.${namespaceField}.total`,
@@ -244,8 +358,10 @@ function getFieldsForCounter(prefix: string) {
   ].map((x) => `${prefix}.${x}`);
 }
 
-function getIsKibanaRequest({ headers }: KibanaRequest) {
-  // The presence of these two request headers gives us a good indication that this is a first-party request from the Kibana client.
+function getIsKibanaRequest({ headers }: KibanaRequest): boolean {
+  // The presence of these request headers gives us a good indication that this is a first-party request from the Kibana client.
   // We can't be 100% certain, but this is a reasonable attempt.
-  return headers && headers['kbn-version'] && headers.referer;
+  return Boolean(
+    headers && headers['kbn-version'] && headers.referer && headers['x-elastic-internal-origin']
+  );
 }

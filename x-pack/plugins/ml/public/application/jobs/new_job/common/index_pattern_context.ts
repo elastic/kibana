@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 export type IndexPatternContextValue = DataView | null;
 export const IndexPatternContext = React.createContext<IndexPatternContextValue>(null);

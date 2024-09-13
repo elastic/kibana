@@ -9,31 +9,24 @@ import { i18n } from '@kbn/i18n';
 import { mergeWith, uniqWith, isEqual } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DashboardAppLocatorParams } from '@kbn/dashboard-plugin/public';
+import type {
+  DashboardAPI,
+  DashboardLocatorParams,
+  DashboardStart,
+} from '@kbn/dashboard-plugin/public';
+import { getPanelTitle } from '@kbn/presentation-publishing';
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import type { Embeddable } from '@kbn/lens-plugin/public';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
-import type { MlApiServices } from '../../../services/ml_api_service';
+import type { ErrorType } from '@kbn/ml-error-utils';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { MlApi } from '../../../services/ml_api_service';
+import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
-import type { ErrorType } from '../../../../../common/util/errors';
-import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
+import type { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 import { createQueries } from '../utils/new_job_utils';
 import { createDatafeedId } from '../../../../../common/util/job_utils';
-import { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
-
-export function isLensEmbeddable(arg: any): arg is Embeddable {
-  return arg.hasOwnProperty('type') && arg.type === 'lens';
-}
-
-export function isMapEmbeddable(arg: any): arg is MapEmbeddable {
-  return arg.hasOwnProperty('type') && arg.type === 'map';
-}
-
-export type Dashboard = Embeddable['parent'];
 
 interface CreationState {
   success: boolean;
@@ -59,10 +52,11 @@ function mergeQueriesCheck(
 
 export class QuickJobCreatorBase {
   constructor(
+    protected readonly dataViews: DataViewsContract,
     protected readonly kibanaConfig: IUiSettingsClient,
     protected readonly timeFilter: TimefilterContract,
-    protected readonly share: SharePluginStart,
-    protected readonly mlApiServices: MlApiServices
+    protected readonly dashboardService: DashboardStart,
+    protected readonly mlApi: MlApi
   ) {}
 
   protected async putJobAndDataFeed({
@@ -70,21 +64,21 @@ export class QuickJobCreatorBase {
     datafeedConfig,
     jobConfig,
     createdByLabel,
-    dashboard,
     start,
     end,
     startJob,
     runInRealTime,
+    dashboard,
   }: {
     jobId: string;
     datafeedConfig: Datafeed;
     jobConfig: Job;
     createdByLabel: CREATED_BY_LABEL;
-    dashboard: Dashboard;
     start: number | undefined;
     end: number | undefined;
     startJob: boolean;
     runInRealTime: boolean;
+    dashboard?: DashboardAPI;
   }) {
     const datafeedId = createDatafeedId(jobId);
     const datafeed = { ...datafeedConfig, job_id: jobId, datafeed_id: datafeedId };
@@ -94,7 +88,7 @@ export class QuickJobCreatorBase {
       job_id: jobId,
       custom_settings: {
         created_by: createdByLabel,
-        ...(await this.getCustomUrls(dashboard, datafeed)),
+        ...(dashboard ? await this.getCustomUrls(dashboard, datafeed) : {}),
       },
     };
 
@@ -114,7 +108,7 @@ export class QuickJobCreatorBase {
         datafeedConfig.indices.length > 0
       ) {
         const { modelMemoryLimit } = await firstValueFrom(
-          this.mlApiServices.calculateModelMemoryLimit$({
+          this.mlApi.calculateModelMemoryLimit$({
             datafeedConfig: datafeed,
             analysisConfig: job.analysis_config,
             indexPattern: datafeedConfig.indices[0],
@@ -137,7 +131,7 @@ export class QuickJobCreatorBase {
 
     // put job
     try {
-      await this.mlApiServices.addJob({ jobId: job.job_id, job });
+      await this.mlApi.addJob({ jobId: job.job_id, job });
     } catch (error) {
       result.jobCreated.error = error;
       return result;
@@ -146,7 +140,7 @@ export class QuickJobCreatorBase {
 
     // put datafeed
     try {
-      await this.mlApiServices.addDatafeed({ datafeedId, datafeedConfig: datafeed });
+      await this.mlApi.addDatafeed({ datafeedId, datafeedConfig: datafeed });
     } catch (error) {
       result.datafeedCreated.error = error;
       return result;
@@ -156,7 +150,7 @@ export class QuickJobCreatorBase {
     if (startJob) {
       // open job, ignore error if already open
       try {
-        await this.mlApiServices.openJob({ jobId });
+        await this.mlApi.openJob({ jobId });
       } catch (error) {
         // job may already be open, so ignore 409 error.
         if (error.body.statusCode !== 409) {
@@ -168,7 +162,7 @@ export class QuickJobCreatorBase {
 
       // start datafeed
       try {
-        await this.mlApiServices.startDatafeed({
+        await this.mlApi.startDatafeed({
           datafeedId,
           start,
           ...(runInRealTime ? {} : { end }),
@@ -231,14 +225,14 @@ export class QuickJobCreatorBase {
     return mergedQueries;
   }
 
-  protected async createDashboardLink(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
-    if (dashboard === undefined) {
-      // embeddable may have not been in a dashboard
+  private async createDashboardLink(dashboard: DashboardAPI, datafeedConfig: estypes.MlDatafeed) {
+    const savedObjectId = dashboard.savedObjectId?.value;
+    if (!savedObjectId) {
       return null;
     }
 
-    const params: DashboardAppLocatorParams = {
-      dashboardId: dashboard.id,
+    const params: DashboardLocatorParams = {
+      dashboardId: savedObjectId,
       timeRange: {
         from: '$earliest$',
         to: '$latest$',
@@ -251,28 +245,23 @@ export class QuickJobCreatorBase {
         FilterStateStore.GLOBAL_STATE
       ),
     };
-    const dashboardLocator = this.share.url.locators.get('DASHBOARD_APP_LOCATOR');
-    const encodedUrl = dashboardLocator ? await dashboardLocator.getUrl(params) : '';
-    const url = decodeURIComponent(encodedUrl).replace(/^.+dashboards/, 'dashboards');
 
-    const dashboardName = dashboard.getOutput().title;
+    const location = await this.dashboardService.locator?.getLocation(params);
+    if (location === undefined) {
+      return null;
+    }
 
-    const urlName =
-      dashboardName === undefined
-        ? i18n.translate('xpack.ml.newJob.fromLens.createJob.defaultUrlDashboard', {
-            defaultMessage: 'Original dashboard',
-          })
-        : i18n.translate('xpack.ml.newJob.fromLens.createJob.namedUrlDashboard', {
-            defaultMessage: 'Open {dashboardName}',
-            values: { dashboardName },
-          });
+    const url = `${location.app}${location.path}`;
+    const urlName = i18n.translate('xpack.ml.newJob.fromLens.createJob.namedUrlDashboard', {
+      defaultMessage: 'Open {dashboardTitle}',
+      values: { dashboardTitle: getPanelTitle(dashboard) ?? 'dashboard' },
+    });
 
     return { url_name: urlName, url_value: url, time_range: 'auto' };
   }
 
-  protected async getCustomUrls(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
-    return dashboard !== undefined
-      ? { custom_urls: [await this.createDashboardLink(dashboard, datafeedConfig)] }
-      : {};
+  private async getCustomUrls(dashboard: DashboardAPI, datafeedConfig: estypes.MlDatafeed) {
+    const customUrls = await this.createDashboardLink(dashboard, datafeedConfig);
+    return dashboard !== undefined && customUrls !== null ? { custom_urls: [customUrls] } : {};
   }
 }

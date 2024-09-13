@@ -7,10 +7,13 @@
 
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
+import { safeLoad } from 'js-yaml';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { NewPackagePolicy, PackageInfo } from '../../../../../types';
+
+import { validatePackagePolicy } from '../../services';
 
 import { StepConfigurePackagePolicy } from './step_configure_package';
 
@@ -24,12 +27,12 @@ describe('StepConfigurePackage', () => {
     };
   });
 
-  const validationResults = { name: null, description: null, namespace: null, inputs: {} };
-
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const render = () =>
-    (renderResult = testRenderer.render(
+  const render = () => {
+    const validationResults = validatePackagePolicy(packagePolicy, packageInfo, safeLoad);
+
+    renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={packageInfo}
         packagePolicy={packagePolicy}
@@ -37,7 +40,8 @@ describe('StepConfigurePackage', () => {
         validationResults={validationResults}
         submitAttempted={false}
       />
-    ));
+    );
+  };
 
   beforeEach(() => {
     packageInfo = {
@@ -104,6 +108,7 @@ describe('StepConfigurePackage', () => {
       description: 'desc',
       namespace: 'default',
       policy_id: '',
+      policy_ids: [''],
       enabled: true,
       inputs: [
         {
@@ -149,5 +154,18 @@ describe('StepConfigurePackage', () => {
       fireEvent.click(renderResult.getByRole('switch'));
     });
     expect(mockUpdatePackagePolicy.mock.calls[0][0].inputs[0].enabled).toEqual(false);
+  });
+
+  it('should render without data streams or vars', async () => {
+    packageInfo.data_streams = [];
+    packagePolicy.inputs[0].streams = [];
+
+    render();
+
+    await waitFor(async () => {
+      expect(
+        await renderResult.findByText('Collect logs from Nginx instances')
+      ).toBeInTheDocument();
+    });
   });
 });

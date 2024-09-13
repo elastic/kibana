@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { bufferTime, filter as rxFilter, concatMap } from 'rxjs/operators';
+import { bufferTime, filter as rxFilter, concatMap } from 'rxjs';
 import { reject, isUndefined, isNumber, pick } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
@@ -16,6 +16,7 @@ import { fromKueryExpression, toElasticsearchQuery, KueryNode, nodeBuilder } fro
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
 import { ParsedIndexAlias } from './init';
+import { EsNames } from './names';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;
@@ -32,6 +33,7 @@ type Wait = () => Promise<boolean>;
 export interface ConstructorOpts {
   logger: Logger;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
+  esNames: EsNames;
   wait: Wait;
 }
 
@@ -80,6 +82,7 @@ export type AggregateEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySave
 };
 
 export interface AggregateEventsBySavedObjectResult {
+  hits?: estypes.SearchHitsMetadata<unknown>;
   aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
 }
 
@@ -101,10 +104,12 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   private readonly docBuffer$: Subject<TDoc>;
   private readonly wait: Wait;
   private readonly docsBufferedFlushed: Promise<void>;
+  private readonly esNames: EsNames;
 
   constructor(opts: ConstructorOpts) {
     this.logger = opts.logger;
     this.elasticsearchClientPromise = opts.elasticsearchClientPromise;
+    this.esNames = opts.esNames;
     this.wait = opts.wait;
     this.docBuffer$ = new Subject<TDoc>();
 
@@ -151,13 +156,16 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     for (const doc of docs) {
       if (doc.body === undefined) continue;
 
-      bulkBody.push({ create: { _index: doc.index, require_alias: true } });
+      bulkBody.push({ create: {} });
       bulkBody.push(doc.body);
     }
 
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const response = await esClient.bulk({ body: bulkBody });
+      const response = await esClient.bulk({
+        index: this.esNames.dataStream,
+        body: bulkBody,
+      });
 
       if (response.errors) {
         const error = new Error('Error writing some bulk events');
@@ -171,47 +179,19 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     }
   }
 
-  public async doesIlmPolicyExist(policyName: string): Promise<boolean> {
-    const request = {
-      method: 'GET',
-      path: `/_ilm/policy/${policyName}`,
-    };
-    try {
-      const esClient = await this.elasticsearchClientPromise;
-      await esClient.transport.request(request);
-    } catch (err) {
-      if (err.statusCode === 404) return false;
-      throw new Error(`error checking existance of ilm policy: ${err.message}`);
-    }
-    return true;
-  }
-
-  public async createIlmPolicy(policyName: string, policy: Record<string, unknown>): Promise<void> {
-    const request = {
-      method: 'PUT',
-      path: `/_ilm/policy/${policyName}`,
-      body: policy,
-    };
-    try {
-      const esClient = await this.elasticsearchClientPromise;
-      await esClient.transport.request(request);
-    } catch (err) {
-      throw new Error(`error creating ilm policy: ${err.message}`);
-    }
-  }
-
   public async doesIndexTemplateExist(name: string): Promise<boolean> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const legacyResult = await esClient.indices.existsTemplate({ name });
       const indexTemplateResult = await esClient.indices.existsIndexTemplate({ name });
-      return (legacyResult as boolean) || (indexTemplateResult as boolean);
+      return indexTemplateResult as boolean;
     } catch (err) {
       throw new Error(`error checking existence of index template: ${err.message}`);
     }
   }
 
   public async createIndexTemplate(name: string, template: Record<string, unknown>): Promise<void> {
+    this.logger.info(`Installing index template ${name}`);
+
     try {
       const esClient = await this.elasticsearchClientPromise;
       await esClient.indices.putIndexTemplate({
@@ -341,26 +321,28 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     }
   }
 
-  public async doesAliasExist(name: string): Promise<boolean> {
+  public async doesDataStreamExist(name: string): Promise<boolean> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const body = await esClient.indices.existsAlias({ name });
-      return body as boolean;
+      const body = await esClient.indices.getDataStream({ name, expand_wildcards: 'all' });
+      return body.data_streams.length > 0;
     } catch (err) {
-      throw new Error(`error checking existance of initial index: ${err.message}`);
+      if (err.meta?.statusCode === 404) {
+        return false;
+      }
+
+      throw new Error(`error checking existance of data stream: ${err.message}`);
     }
   }
 
-  public async createIndex(name: string, body: Record<string, unknown> = {}): Promise<void> {
+  public async createDataStream(name: string, body: Record<string, unknown> = {}): Promise<void> {
+    this.logger.info(`Creating datastream ${name}`);
     try {
       const esClient = await this.elasticsearchClientPromise;
-      await esClient.indices.create({
-        index: name,
-        body,
-      });
+      await esClient.indices.createDataStream({ name });
     } catch (err) {
       if (err.body?.error?.type !== 'resource_already_exists_exception') {
-        throw new Error(`error creating initial index: ${err.message}`);
+        throw new Error(`error creating data stream: ${err.message}`);
       }
     }
   }
@@ -474,12 +456,13 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     };
 
     try {
-      const { aggregations } = await esClient.search<IValidatedEvent>({
+      const { aggregations, hits } = await esClient.search<IValidatedEvent>({
         index,
         body,
       });
       return {
         aggregations,
+        hits,
       };
     } catch (err) {
       throw new Error(
@@ -507,19 +490,20 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       query,
       aggs,
     };
-
     try {
-      const { aggregations } = await esClient.search<IValidatedEvent>({
+      const { aggregations, hits } = await esClient.search<IValidatedEvent>({
         index,
         body,
       });
       return {
         aggregations,
+        hits,
       };
     } catch (err) {
-      throw new Error(
+      this.logger.debug(
         `querying for Event Log by for type "${type}" and auth filter failed with: ${err.message}`
       );
+      throw err;
     }
   }
 }
@@ -545,10 +529,11 @@ export function getQueryBodyWithAuthFilter(
     dslFilterQuery = queryFilter ? toElasticsearchQuery(queryFilter) : undefined;
   } catch (err) {
     logger.debug(
-      `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
-        message: err.message,
-        statusCode: err.statusCode,
-      })}`
+      () =>
+        `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
+          message: err.message,
+          statusCode: err.statusCode,
+        })}`
     );
     throw err;
   }
@@ -707,10 +692,11 @@ export function getQueryBody(
     dslFilterQuery = filterKueryNode ? toElasticsearchQuery(filterKueryNode) : undefined;
   } catch (err) {
     logger.debug(
-      `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
-        message: err.message,
-        statusCode: err.statusCode,
-      })}`
+      () =>
+        `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
+          message: err.message,
+          statusCode: err.statusCode,
+        })}`
     );
     throw err;
   }

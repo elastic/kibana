@@ -8,7 +8,7 @@
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
   ],
   "kbn_references": [
     "@kbn/securitysolution-hook-utils",
@@ -17,6 +17,7 @@
     "@kbn/securitysolution-list-utils",
     "@kbn/securitysolution-utils",
     "@kbn/core-http-browser-mocks",
+    "@kbn/core-http-browser",
   ],
   "exclude": [
     "target/**/*",

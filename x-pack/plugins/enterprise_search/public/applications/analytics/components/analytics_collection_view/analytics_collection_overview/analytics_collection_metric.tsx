@@ -54,7 +54,6 @@ const getMetricStatus = (metric: number): MetricStatus => {
 };
 
 interface AnalyticsCollectionViewMetricProps {
-  dataViewQuery: string;
   getFormula: (shift?: string) => string;
   isSelected?: boolean;
   name: string;
@@ -230,6 +229,5 @@ export const AnalyticsCollectionViewMetricWithLens = withLensData<
       visualizationType: 'lnsMetric',
     };
   },
-  getDataViewQuery: (props) => props.dataViewQuery,
   initialValues,
 });

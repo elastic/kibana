@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './collapsible_nav.scss';
@@ -115,7 +116,7 @@ export function CollapsibleNav({
       allLinks.filter(
         (link) =>
           // Filterting out hidden links,
-          !link.hidden &&
+          link.visibleIn.includes('sideNav') &&
           // and non-data overview pages
           !overviewIDsToHide.includes(link.id)
       ),
@@ -161,6 +162,7 @@ export function CollapsibleNav({
       button={button}
       ownFocus={false}
       size={248}
+      className="kbnCollapsibleNav"
     >
       {customNavLink && (
         <>
@@ -280,7 +282,7 @@ export function CollapsibleNav({
 
       <EuiHorizontalRule margin="none" />
 
-      <EuiFlexItem className="eui-yScroll">
+      <EuiFlexItem className="kbnCollapsibleNav__solutions">
         {/* Kibana, Observability, Security, and Management sections */}
         {orderedCategories.map((categoryName) => {
           const category = categoryDictionary[categoryName]!;

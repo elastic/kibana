@@ -45,6 +45,7 @@ export interface ContainerNameWidgetDeps {
   globalFilter: GlobalFilter;
   groupedBy: string;
   countBy?: string;
+  dataViewId?: string;
 }
 
 interface FilterButtons {
@@ -57,6 +58,7 @@ interface CopyButtons {
 }
 
 export const ContainerNameWidget = ({
+  dataViewId,
   widgetKey,
   indexPattern,
   globalFilter,
@@ -84,7 +86,7 @@ export const ContainerNameWidget = ({
     sortDirection
   );
 
-  const onTableChange = useCallback(({ sort = {} }) => {
+  const onTableChange = useCallback(({ sort = {} }: any) => {
     // @ts-ignore
     const { field: sortingField, direction: sortingDirection } = sort;
 
@@ -117,6 +119,7 @@ export const ContainerNameWidget = ({
                 ownFocus: false,
                 showTooltip: true,
                 value: aggData.key as string,
+                dataViewId,
               });
             });
           })
@@ -135,13 +138,14 @@ export const ContainerNameWidget = ({
                 ownFocus: false,
                 showTooltip: true,
                 value: aggData.key as string,
+                dataViewId,
               });
             });
           })
           .flat() || [],
     };
     return result;
-  }, [data, getFilterForValueButton, getFilterOutValueButton, filterManager]);
+  }, [data?.pages, getFilterForValueButton, dataViewId, filterManager, getFilterOutValueButton]);
 
   const copyToClipboardButtons = useMemo((): CopyButtons => {
     const result: CopyButtons = {

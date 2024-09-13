@@ -7,9 +7,9 @@
 
 import React, { createContext, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Observable } from 'rxjs';
 
-import { CoreStart, ScopedHistory, CoreTheme } from '@kbn/core/public';
+import { CoreStart, ScopedHistory, IUiSettingsClient } from '@kbn/core/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { ClientConfigType } from '../types';
 import { HttpService, UiMetricService } from './services';
 
@@ -18,13 +18,14 @@ const AppContext = createContext<AppDependencies | undefined>(undefined);
 export interface AppDependencies {
   core: CoreStart;
   services: {
+    uiSettings: IUiSettingsClient;
+    settings: SettingsStart;
     httpService: HttpService;
     uiMetricService: UiMetricService;
     i18n: typeof i18n;
     history: ScopedHistory;
   };
   config: ClientConfigType;
-  theme$: Observable<CoreTheme>;
 }
 
 export const AppContextProvider = ({

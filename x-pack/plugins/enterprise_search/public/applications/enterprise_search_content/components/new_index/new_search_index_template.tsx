@@ -7,6 +7,7 @@
 
 import React, { ChangeEvent } from 'react';
 
+import { css } from '@emotion/react';
 import { useValues, useActions } from 'kea';
 
 import {
@@ -16,15 +17,22 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiLink,
-  EuiPanel,
   EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
+
+import { BetaConnectorCallout } from '../../../shared/beta/beta_connector_callout';
+
+import { BACK_BUTTON_LABEL } from '../../../shared/constants';
+import { docLinks } from '../../../shared/doc_links';
 
 import { SUPPORTED_LANGUAGES } from './constants';
 import { NewSearchIndexLogic } from './new_search_index_logic';
@@ -35,32 +43,32 @@ export interface Props {
   disabled?: boolean;
   docsUrl?: string;
   error?: string | React.ReactNode;
+  isBeta?: boolean;
   onNameChange?(name: string): void;
   onSubmit(name: string, language: LanguageForOptimization): void;
-  title: React.ReactNode;
   type: string;
 }
 
 export const NewSearchIndexTemplate: React.FC<Props> = ({
   buttonLoading,
-  children,
   disabled,
-  docsUrl,
   error,
   onNameChange,
   onSubmit,
-  title,
   type,
+  isBeta,
 }) => {
   const {
     fullIndexName,
     fullIndexNameExists,
     fullIndexNameIsValid,
+    hasPrefix,
     language,
     rawName,
     languageSelectValue,
   } = useValues(NewSearchIndexLogic);
-  const { setRawName, setLanguageSelectValue } = useActions(NewSearchIndexLogic);
+  const { setRawName, setLanguageSelectValue, setHasPrefix } = useActions(NewSearchIndexLogic);
+  setHasPrefix(type === INGESTION_METHOD_IDS.CRAWLER);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -100,28 +108,71 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
     }
     return error;
   };
+  const searchHelpTest = i18n.translate(
+    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText.lineOne',
+    {
+      defaultMessage: 'Your index will be named: {indexName}',
+      values: {
+        indexName: fullIndexName,
+      },
+    }
+  );
 
   return (
-    <EuiPanel hasBorder>
+    <>
       <EuiForm
         component="form"
-        id="enterprise-search-add-connector"
+        id="enterprise-search-create-index"
         onSubmit={(event) => {
           event.preventDefault();
           onSubmit(fullIndexName, language);
         }}
       >
         <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={false}>
+          {isBeta ? (
+            <EuiFlexItem>
+              <BetaConnectorCallout />
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem>
             <EuiTitle size="s">
-              <h2>{title}</h2>
+              <h3>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.formTitle"
+                  defaultMessage="Create an Elasticsearch index"
+                />
+              </h3>
             </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="m">
+              <p>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.formDescription"
+                  defaultMessage="This index will hold your data source content, and is optimized with default field
+                mappings for relevant search experiences. Give your index a unique name and
+                optionally set a default {language_analyzer} for the index."
+                  values={{
+                    language_analyzer: (
+                      <EuiLink target="_blank" href={docLinks.languageAnalyzers}>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.formDescription.linkText',
+                          {
+                            defaultMessage: 'language analyzer',
+                          }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiFlexGroup>
               <EuiFlexItem grow>
                 <EuiFormRow
-                  isDisabled={disabled}
+                  isDisabled={disabled || buttonLoading}
                   label={i18n.translate(
                     'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputLabel',
                     {
@@ -129,19 +180,30 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                     }
                   )}
                   isInvalid={formInvalid}
-                  error={formError()}
-                  helpText={i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText.lineOne',
-                    {
-                      defaultMessage: 'Your index will be named: {indexName}',
-                      values: {
-                        indexName: fullIndexName,
-                      },
-                    }
-                  )}
+                  error={
+                    <EuiText
+                      size="xs"
+                      css={css`
+                        line-break: anywhere;
+                      `}
+                    >
+                      {formError()}
+                    </EuiText>
+                  }
+                  helpText={
+                    <EuiText
+                      size="xs"
+                      css={css`
+                        line-break: anywhere;
+                      `}
+                    >
+                      {searchHelpTest}
+                    </EuiText>
+                  }
                   fullWidth
                 >
                   <EuiFieldText
+                    data-test-subj={`entSearchContent-${type}-newIndex-editName`}
                     data-telemetry-id={`entSearchContent-${type}-newIndex-editName`}
                     placeholder={i18n.translate(
                       'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputPlaceholder',
@@ -155,7 +217,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                     value={rawName}
                     onChange={handleNameChange}
                     autoFocus
-                    prepend="search-"
+                    prepend={hasPrefix ? 'search-' : undefined}
                   />
                 </EuiFormRow>
                 <EuiText size="xs" color="subdued">
@@ -197,9 +259,69 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem>
+            <EuiLink target="_blank" href={docLinks.elasticsearchGettingStarted}>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.learnMoreIndices.linkText',
+                {
+                  defaultMessage: 'Learn more about indices',
+                }
+              )}
+            </EuiLink>
+          </EuiFlexItem>
+
+          {type === INGESTION_METHOD_IDS.CONNECTOR && (
+            <EuiFlexItem grow={false}>
+              <EuiLink target="_blank" href={docLinks.connectors}>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.learnMoreConnectors.linkText',
+                  {
+                    defaultMessage: 'Learn more about connectors',
+                  }
+                )}
+              </EuiLink>
+            </EuiFlexItem>
+          )}
+          {type === INGESTION_METHOD_IDS.CRAWLER && (
+            <EuiFlexItem grow={false}>
+              <EuiLink target="_blank" href={docLinks.crawlerOverview}>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.learnMoreCrawler.linkText',
+                  {
+                    defaultMessage: 'Learn more about the Elastic web crawler',
+                  }
+                )}
+              </EuiLink>
+            </EuiFlexItem>
+          )}
+          {type === INGESTION_METHOD_IDS.API && (
+            <EuiFlexItem grow={false}>
+              <EuiLink target="_blank" href={docLinks.ingestionApis}>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.learnMoreApis.linkText',
+                  {
+                    defaultMessage: 'Learn more about ingestion APIs',
+                  }
+                )}
+              </EuiLink>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiSpacer />
         <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-telemetry-id={`entSearchContent-${type}-newIndex-goBack`}
+              isDisabled={buttonLoading}
+              onClick={() => history.back()}
+            >
+              {BACK_BUTTON_LABEL}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj={`entSearchContent-${type}-newIndex-createIndex`}
               data-telemetry-id={`entSearchContent-${type}-newIndex-createIndex`}
               fill
               isDisabled={!rawName || buttonLoading || formInvalid || disabled}
@@ -214,22 +336,8 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
               )}
             </EuiButton>
           </EuiFlexItem>
-          {!!docsUrl && (
-            <EuiFlexItem grow={false}>
-              <EuiLink target="_blank" href={docsUrl}>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.viewDocumentation.linkText',
-                  {
-                    defaultMessage: 'View the documentation',
-                  }
-                )}
-              </EuiLink>
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
       </EuiForm>
-      <EuiHorizontalRule />
-      {children}
-    </EuiPanel>
+    </>
   );
 };

@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   // This test was inspired by https://github.com/elastic/kibana/blob/main/x-pack/test/api_integration/apis/monitoring/common/mappings_exist.js
-  describe('EPM - template', async () => {
+  describe('EPM - template', () => {
     beforeEach(async () => {
       appContextService.start({
         // @ts-ignore
@@ -35,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         composedOfTemplates: [],
         templatePriority: 200,
         mappings: { properties: [] },
+        type: 'logs',
       });
 
       // This test is not an API integration test with Kibana

@@ -15,6 +15,7 @@
     "@kbn/cases-plugin",
     "@kbn/lens-plugin",
     "@kbn/kibana-react-plugin",
-    "@kbn/i18n-react",
+    "@kbn/shared-ux-router",
+    "@kbn/react-kibana-context-render",
   ]
 }

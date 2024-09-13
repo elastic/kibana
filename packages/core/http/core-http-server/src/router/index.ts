@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export type {
@@ -42,6 +43,7 @@ export type {
   ErrorHttpResponseOptions,
   FileHttpResponseOptions,
 } from './response';
+export { isKibanaResponse } from './response';
 export type {
   RouteConfigOptions,
   RouteMethod,
@@ -50,6 +52,7 @@ export type {
   RouteConfigOptionsBody,
   RouteContentType,
   SafeRouteMethod,
+  RouteAccess,
 } from './route';
 export { validBodyOutput } from './route';
 export type {
@@ -57,17 +60,23 @@ export type {
   RouteValidationResultFactory,
   RouteValidationSpec,
   RouteValidatorConfig,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
+  RouteValidatorFullConfigResponse,
   RouteValidatorOptions,
+  RouteValidator,
+  RouteValidatorRequestAndResponses,
+  LazyValidator,
 } from './route_validator';
 export { RouteValidationError } from './route_validator';
-export type { IRouter, IRouterWithVersion, RouteRegistrar, RouterRoute } from './router';
+export type { IRouter, RouteRegistrar, RouterRoute } from './router';
 export type { IKibanaSocket } from './socket';
 export type {
   KibanaErrorResponseFactory,
   KibanaRedirectionResponseFactory,
+  KibanaNotModifiedResponseFactory,
   KibanaSuccessResponseFactory,
   KibanaResponseFactory,
   LifecycleResponseFactory,
 } from './response_factory';
 export type { RawRequest, FakeRawRequest } from './raw_request';
+export { getRequestValidation, getResponseValidation, isFullValidatorContainer } from './utils';

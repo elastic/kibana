@@ -6,26 +6,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCodeBlock,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiMarkdownFormat,
   EuiSpacer,
-  EuiSteps,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ReportingAPIClient, DiagnoseResponse } from '../../lib/reporting_api_client';
+import { ClientConfigType, ReportingAPIClient } from '@kbn/reporting-public';
+import { DiagnoseResponse } from '@kbn/reporting-public/reporting_api_client';
 
 interface Props {
   apiClient: ReportingAPIClient;
+  clientConfig: ClientConfigType;
 }
 
 type ResultStatus = 'danger' | 'incomplete' | 'complete';
@@ -38,7 +37,6 @@ enum statuses {
 interface State {
   isFlyoutVisible: boolean;
   chromeStatus: ResultStatus;
-  screenshotStatus: ResultStatus;
   help: string[];
   logs: string;
   isBusy: boolean;
@@ -47,7 +45,6 @@ interface State {
 
 const initialState: State = {
   [statuses.chromeStatus]: 'incomplete',
-  [statuses.screenshotStatus]: 'incomplete',
   isFlyoutVisible: false,
   help: [],
   logs: '',
@@ -55,14 +52,16 @@ const initialState: State = {
   success: true,
 };
 
-export const ReportDiagnostic = ({ apiClient }: Props) => {
+export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
   const [state, setStateBase] = useState(initialState);
   const setState = (s: Partial<typeof state>) =>
     setStateBase({
       ...state,
       ...s,
     });
-  const { isBusy, screenshotStatus, chromeStatus, isFlyoutVisible, help, logs, success } = state;
+  const { isBusy, chromeStatus, isFlyoutVisible } = state;
+  const configAllowsImageReports =
+    clientConfig.export_types.pdf.enabled || clientConfig.export_types.png.enabled;
 
   const closeFlyout = () => setState({ ...initialState, isFlyoutVisible: false });
   const showFlyout = () => setState({ isFlyoutVisible: true });
@@ -94,17 +93,68 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
       });
   };
 
-  const steps = [
-    {
-      title: i18n.translate('xpack.reporting.listing.diagnosticBrowserTitle', {
-        defaultMessage: 'Check browser',
-      }),
-      children: (
-        <Fragment>
-          <FormattedMessage
-            id="xpack.reporting.listing.diagnosticBrowserMessage"
-            defaultMessage="Reporting uses a headless browser to generate PDF and PNGs. Validate that the browser can launch successfully."
-          />
+  let flyout;
+  if (isFlyoutVisible) {
+    let outcomeCallout;
+
+    if (state.success && chromeStatus === 'complete') {
+      outcomeCallout = (
+        <EuiCallOut
+          id="xpack.reporting.listing.diagnosticSuccessMessage"
+          color="success"
+          title={i18n.translate('xpack.reporting.listing.diagnosticSuccessMessage', {
+            defaultMessage: 'Everything looks good for screenshot reports to function.',
+          })}
+        />
+      );
+    } else if (!state.success && chromeStatus === 'complete') {
+      outcomeCallout = (
+        <EuiCallOut
+          id="xpack.reporting.listing.diagnosticFailureTitle"
+          iconType="warning"
+          color="danger"
+          title={i18n.translate('xpack.reporting.listing.diagnosticFailureTitle', {
+            defaultMessage: "Something isn't working properly.",
+          })}
+        />
+      );
+    }
+
+    flyout = (
+      <EuiFlyout onClose={closeFlyout} aria-labelledby="reportingHelperTitle" size="m">
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>
+              <FormattedMessage
+                id="xpack.reporting.listing.diagnosticTitle"
+                defaultMessage="Screenshotting Diagnostics"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.reporting.listing.diagnosticDescription"
+              defaultMessage="Run diagnostics to automatically troubleshoot common reporting problems."
+            />
+          </EuiText>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody banner={outcomeCallout}>
+          <EuiTitle size="s">
+            <h2>
+              <FormattedMessage
+                id="xpack.reporting.listing.diagnosticBrowserTitle"
+                defaultMessage="Check browser"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.reporting.listing.diagnosticBrowserMessage"
+              defaultMessage="Reporting uses a headless browser to generate PDF and PNGs. Validate that the browser can launch successfully."
+            />
+          </EuiText>
           <EuiSpacer />
           <EuiButton
             disabled={isBusy || chromeStatus === 'complete'}
@@ -117,127 +167,28 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
               defaultMessage="Check browser"
             />
           </EuiButton>
-        </Fragment>
-      ),
-      status: !success && chromeStatus !== 'complete' ? 'danger' : chromeStatus,
-    },
-  ];
-
-  if (chromeStatus === 'complete') {
-    steps.push({
-      title: i18n.translate('xpack.reporting.listing.diagnosticScreenshotTitle', {
-        defaultMessage: 'Check screen capture',
-      }),
-      children: (
-        <Fragment>
-          <FormattedMessage
-            id="xpack.reporting.listing.diagnosticScreenshotMessage"
-            defaultMessage="Ensure that the headless browser can capture a screenshot of a page."
-          />
-          <EuiSpacer />
-          <EuiButton
-            disabled={isBusy || screenshotStatus === 'complete'}
-            onClick={apiWrapper(() => apiClient.verifyScreenCapture(), statuses.screenshotStatus)}
-            isLoading={isBusy && screenshotStatus === 'incomplete'}
-            iconType={screenshotStatus === 'complete' ? 'check' : undefined}
-          >
-            <FormattedMessage
-              id="xpack.reporting.listing.diagnosticScreenshotButton"
-              defaultMessage="Capture screenshot"
-            />
-          </EuiButton>
-        </Fragment>
-      ),
-      status: !success && screenshotStatus !== 'complete' ? 'danger' : screenshotStatus,
-    });
-  }
-
-  if (screenshotStatus === 'complete') {
-    steps.push({
-      title: i18n.translate('xpack.reporting.listing.diagnosticSuccessTitle', {
-        defaultMessage: 'All set!',
-      }),
-      children: (
-        <Fragment>
-          <FormattedMessage
-            id="xpack.reporting.listing.diagnosticSuccessMessage"
-            defaultMessage="Everything looks good for reporting to function."
-          />
-        </Fragment>
-      ),
-      status: !success ? 'danger' : screenshotStatus,
-    });
-  }
-
-  if (!success) {
-    steps.push({
-      title: i18n.translate('xpack.reporting.listing.diagnosticFailureTitle', {
-        defaultMessage: "Something isn't working properly.",
-      }),
-      children: (
-        <Fragment>
-          {help.length ? (
-            <Fragment>
-              <EuiCallOut color="danger" iconType="warning">
-                <p>
-                  <EuiMarkdownFormat>{help.join('\n')}</EuiMarkdownFormat>
-                </p>
-              </EuiCallOut>
-            </Fragment>
-          ) : null}
-          {logs.length ? (
-            <Fragment>
-              <EuiSpacer />
-              <FormattedMessage
-                id="xpack.reporting.listing.diagnosticFailureDescription"
-                defaultMessage="Here are some details about the issue:"
-              />
-              <EuiSpacer />
-              <EuiCodeBlock>{logs}</EuiCodeBlock>
-            </Fragment>
-          ) : null}
-        </Fragment>
-      ),
-      status: 'danger',
-    });
-  }
-
-  let flyout;
-  if (isFlyoutVisible) {
-    flyout = (
-      <EuiFlyout onClose={closeFlyout} aria-labelledby="reportingHelperTitle" size="m">
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2>
-              <FormattedMessage
-                id="xpack.reporting.listing.diagnosticTitle"
-                defaultMessage="Reporting Diagnostics"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.reporting.listing.diagnosticDescription"
-              defaultMessage="Run diagnostics to automatically troubleshoot common reporting problems."
-            />
-          </EuiText>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <EuiSteps steps={steps} />
         </EuiFlyoutBody>
       </EuiFlyout>
     );
   }
   return (
     <div>
-      {flyout}
-      <EuiButtonEmpty size="xs" flush="left" onClick={showFlyout}>
-        <FormattedMessage
-          id="xpack.reporting.listing.diagnosticButton"
-          defaultMessage="Run reporting diagnostics"
-        />
-      </EuiButtonEmpty>
+      {configAllowsImageReports && (
+        <div>
+          {flyout}
+          <EuiButtonEmpty
+            data-test-subj="screenshotDiagnosticLink"
+            size="xs"
+            flush="left"
+            onClick={showFlyout}
+          >
+            <FormattedMessage
+              id="xpack.reporting.listing.diagnosticButton"
+              defaultMessage="Run screenshot diagnostics"
+            />
+          </EuiButtonEmpty>
+        </div>
+      )}
     </div>
   );
 };

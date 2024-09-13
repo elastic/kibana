@@ -7,7 +7,7 @@
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
-import type { SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
+import type { SyntheticEvent, MouseEvent } from 'react';
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { isArray, isNil } from 'lodash/fp';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
@@ -22,17 +22,16 @@ import {
   getNetworkDetailsUrl,
   getCreateCaseUrl,
   useFormatUrl,
-  useGetSecuritySolutionUrl,
 } from '../link_to';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
-import { useUiSetting$, useKibana, useNavigateTo } from '../../lib/kibana';
+import { useUiSetting$, useKibana } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
 import { getTabsOnUsersDetailsUrl, getUsersDetailsUrl } from '../link_to/redirect_to_users';
-import type { ReputationLinkSetting } from './helpers';
+import type { ReputationLinkSetting, ReputationLinkOverflowProps } from './helpers';
 import {
   LinkAnchor,
   GenericLinkButton,
@@ -43,16 +42,17 @@ import {
 } from './helpers';
 import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { UsersTableType } from '../../../explore/users/store/model';
+import { useGetSecuritySolutionLinkProps, withSecuritySolutionLink } from './link_props';
 
+export { useSecuritySolutionLinkProps, type GetSecuritySolutionLinkProps } from './link_props';
 export { LinkButton, LinkAnchor } from './helpers';
+
+export { useGetSecuritySolutionLinkProps, withSecuritySolutionLink };
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
 
 /** The default max-height of the Reputation Links popover used to show "+n More" items (e.g. `+9 More`) */
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
-
-const isModified = (event: MouseEvent) =>
-  event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
 
 // Internal Links
 const UserDetailsLinkComponent: React.FC<{
@@ -72,7 +72,7 @@ const UserDetailsLinkComponent: React.FC<{
     telemetry,
   } = useKibana().services;
   const goToUsersDetails = useCallback(
-    (ev) => {
+    (ev: SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.users,
@@ -122,7 +122,7 @@ const UserDetailsLinkComponent: React.FC<{
 
 export const UserDetailsLink = React.memo(UserDetailsLinkComponent);
 
-const HostDetailsLinkComponent: React.FC<{
+export interface HostDetailsLinkProps {
   children?: React.ReactNode;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
@@ -131,7 +131,16 @@ const HostDetailsLinkComponent: React.FC<{
   onClick?: (e: SyntheticEvent) => void;
   hostTab?: HostsTableType;
   title?: string;
-}> = ({ children, Component, hostName, isButton, onClick: onClickParam, title, hostTab }) => {
+}
+const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
+  children,
+  Component,
+  hostName,
+  isButton,
+  onClick: onClickParam,
+  title,
+  hostTab,
+}) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const {
     application: { navigateToApp },
@@ -141,7 +150,7 @@ const HostDetailsLinkComponent: React.FC<{
   const encodedHostName = encodeURIComponent(hostName);
 
   const goToHostDetails = useCallback(
-    (ev) => {
+    (ev: SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
@@ -226,7 +235,7 @@ export const ExternalLink = React.memo<{
 
 ExternalLink.displayName = 'ExternalLink';
 
-const NetworkDetailsLinkComponent: React.FC<{
+export interface NetworkDetailsLinkProps {
   children?: React.ReactNode;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
@@ -235,7 +244,17 @@ const NetworkDetailsLinkComponent: React.FC<{
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void | undefined;
   title?: string;
-}> = ({ Component, children, ip, flowTarget = FlowTarget.source, isButton, onClick, title }) => {
+}
+
+const NetworkDetailsLinkComponent: React.FC<NetworkDetailsLinkProps> = ({
+  Component,
+  children,
+  ip,
+  flowTarget = FlowTarget.source,
+  isButton,
+  onClick,
+  title,
+}) => {
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
   const getLink = useCallback(
@@ -276,12 +295,28 @@ const NetworkDetailsLinkComponent: React.FC<{
 
 export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
 
-const CaseDetailsLinkComponent: React.FC<{
+export interface CaseDetailsLinkComponentProps {
   children?: React.ReactNode;
+  /**
+   * Will be used to construct case url
+   */
   detailName: string;
+  /**
+   * Link title
+   */
   title?: string;
+  /**
+   * Link index
+   */
   index?: number;
-}> = ({ index, children, detailName, title }) => {
+}
+
+const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
+  index,
+  children,
+  detailName,
+  title,
+}) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const { activeStep, isTourShown } = useTourContext();
@@ -294,7 +329,7 @@ const CaseDetailsLinkComponent: React.FC<{
   );
 
   const goToCaseDetails = useCallback(
-    async (ev?) => {
+    async (ev?: SyntheticEvent) => {
       if (ev) ev.preventDefault();
       return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
@@ -334,7 +369,7 @@ export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ child
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const goToCreateCase = useCallback(
-    async (ev) => {
+    async (ev: SyntheticEvent) => {
       ev.preventDefault();
       return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
@@ -492,7 +527,7 @@ const ReputationLinkComponent: React.FC<{
     [ipReputationLinksSetting, domain, defaultNameMapping, allItemsLimit]
   );
 
-  const renderCallback = useCallback(
+  const renderCallback: NonNullable<ReputationLinkOverflowProps['render']> = useCallback(
     (rowItem) =>
       isReputationLink(rowItem) && (
         <ExternalLink
@@ -560,74 +595,6 @@ export const WhoIsLink = React.memo<{ children?: React.ReactNode; domain: string
 );
 
 WhoIsLink.displayName = 'WhoIsLink';
-
-interface SecuritySolutionLinkProps {
-  deepLinkId: SecurityPageName;
-  path?: string;
-}
-
-interface LinkProps {
-  onClick: MouseEventHandler;
-  href: string;
-}
-
-type GetSecuritySolutionProps = (
-  params: SecuritySolutionLinkProps & { onClick?: MouseEventHandler }
-) => LinkProps;
-
-/**
- * It returns the `onClick` and `href` props to use in link components based on the` deepLinkId` and `path` parameters.
- */
-export const useGetSecuritySolutionLinkProps = (): GetSecuritySolutionProps => {
-  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-  const { navigateTo } = useNavigateTo();
-
-  const getSecuritySolutionProps = useCallback<GetSecuritySolutionProps>(
-    ({ deepLinkId, path, onClick: onClickProps }) => {
-      const url = getSecuritySolutionUrl({ deepLinkId, path });
-      return {
-        href: url,
-        onClick: (ev: MouseEvent) => {
-          if (isModified(ev)) {
-            return;
-          }
-
-          ev.preventDefault();
-          navigateTo({ url });
-          if (onClickProps) {
-            onClickProps(ev);
-          }
-        },
-      };
-    },
-    [getSecuritySolutionUrl, navigateTo]
-  );
-
-  return getSecuritySolutionProps;
-};
-
-/**
- * HOC that wraps any Link component and makes it a Security solutions internal navigation Link.
- */
-export const withSecuritySolutionLink = <T extends Partial<LinkProps>>(
-  WrappedComponent: React.FC<T>
-) => {
-  const SecuritySolutionLink: React.FC<Omit<T & SecuritySolutionLinkProps, 'href'>> = ({
-    deepLinkId,
-    path,
-    onClick: onClickProps,
-    ...rest
-  }) => {
-    const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
-    const { onClick, href } = getSecuritySolutionLinkProps({
-      deepLinkId,
-      path,
-      onClick: onClickProps,
-    });
-    return <WrappedComponent onClick={onClick} href={href} {...(rest as unknown as T)} />;
-  };
-  return SecuritySolutionLink;
-};
 
 /**
  * Security Solutions internal link button.

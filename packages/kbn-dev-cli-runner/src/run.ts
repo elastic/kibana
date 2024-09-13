@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pickLevelFromFlags, ToolingLog, LogLevel } from '@kbn/tooling-log';
@@ -24,25 +25,31 @@ export interface RunContext {
   addCleanupTask: (task: CleanupTask) => void;
   flagsReader: FlagsReader;
 }
-export type RunFn = (context: RunContext) => Promise<void> | void;
+export type RunFn<T = void> = (context: RunContext) => Promise<T> | void;
 
 export interface RunOptions {
   usage?: string;
   description?: string;
   log?: {
     defaultLevel?: LogLevel;
+    context?: string;
   };
   flags?: FlagOptions;
 }
 
-export async function run(fn: RunFn, options: RunOptions = {}) {
+export async function run<T>(fn: RunFn<T>, options: RunOptions = {}): Promise<T | undefined> {
   const flags = getFlags(process.argv.slice(2), options.flags, options.log?.defaultLevel);
-  const log = new ToolingLog({
-    level: pickLevelFromFlags(flags, {
-      default: options.log?.defaultLevel,
-    }),
-    writeTo: process.stdout,
-  });
+  const log = new ToolingLog(
+    {
+      level: pickLevelFromFlags(flags, {
+        default: options.log?.defaultLevel,
+      }),
+      writeTo: process.stdout,
+    },
+    {
+      context: options.log?.context,
+    }
+  );
 
   const metrics = new Metrics(log);
   const helpText = getHelp({
@@ -50,6 +57,7 @@ export async function run(fn: RunFn, options: RunOptions = {}) {
     usage: options.usage,
     flagHelp: options.flags?.help,
     defaultLogLevel: options.log?.defaultLevel,
+    examples: options.flags?.examples,
   });
 
   if (flags.help) {
@@ -65,21 +73,23 @@ export async function run(fn: RunFn, options: RunOptions = {}) {
     return;
   }
 
+  let result: T | undefined;
   try {
     await withProcRunner(log, async (procRunner) => {
-      await fn({
-        log,
-        flags,
-        procRunner,
-        statsMeta: metrics.meta,
-        addCleanupTask: cleanup.add.bind(cleanup),
-        flagsReader: new FlagsReader(flags, {
-          aliases: {
-            ...options.flags?.alias,
-            ...DEFAULT_FLAG_ALIASES,
-          },
-        }),
-      });
+      result =
+        (await fn({
+          log,
+          flags,
+          procRunner,
+          statsMeta: metrics.meta,
+          addCleanupTask: cleanup.add.bind(cleanup),
+          flagsReader: new FlagsReader(flags, {
+            aliases: {
+              ...options.flags?.alias,
+              ...DEFAULT_FLAG_ALIASES,
+            },
+          }),
+        })) || undefined;
     });
   } catch (error) {
     cleanup.execute(error);
@@ -91,4 +101,6 @@ export async function run(fn: RunFn, options: RunOptions = {}) {
   }
 
   await metrics.reportSuccess();
+
+  return result;
 }

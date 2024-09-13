@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Redirect, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { cloudDefendPages } from '../common/navigation/constants';
 import type { CloudDefendSecuritySolutionContext } from '../types';
 import { SecuritySolutionContext } from './security_solution_context';
@@ -26,13 +26,13 @@ export interface CloudDefendRouterProps {
 export const CloudDefendRouter = ({ securitySolutionContext }: CloudDefendRouterProps) => {
   const routerElement = (
     <QueryClientProvider client={queryClient}>
-      <Switch>
+      <Routes>
         <CloudDefendRoute {...cloudDefendPages.policies} component={Policies} />
 
         <Route>
           <Redirect to={cloudDefendPages.policies.path} />
         </Route>
-      </Switch>
+      </Routes>
     </QueryClientProvider>
   );
 

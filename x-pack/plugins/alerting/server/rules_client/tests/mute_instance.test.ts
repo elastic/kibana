@@ -6,7 +6,12 @@
  */
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -16,6 +21,9 @@ import { AlertingAuthorization } from '../../authorization/alerting_authorizatio
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -24,6 +32,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -34,16 +43,24 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
+  backfillClient: backfillClientMock.create(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -58,7 +75,7 @@ describe('muteInstance()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         actions: [],
         schedule: { interval: '10s' },
@@ -73,7 +90,7 @@ describe('muteInstance()', () => {
 
     await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       '1',
       {
         mutedInstanceIds: ['2'],
@@ -90,7 +107,7 @@ describe('muteInstance()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         actions: [],
         schedule: { interval: '10s' },
@@ -110,7 +127,7 @@ describe('muteInstance()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         actions: [],
         schedule: { interval: '10s' },
@@ -131,7 +148,7 @@ describe('muteInstance()', () => {
     beforeEach(() => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           actions: [
             {
@@ -160,7 +177,7 @@ describe('muteInstance()', () => {
       const rulesClient = new RulesClient(rulesClientParams);
       await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
 
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',
@@ -195,7 +212,7 @@ describe('muteInstance()', () => {
       const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           actions: [],
           schedule: { interval: '10s' },
@@ -214,7 +231,7 @@ describe('muteInstance()', () => {
             action: 'rule_alert_mute',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
         })
       );
     });
@@ -223,7 +240,7 @@ describe('muteInstance()', () => {
       const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           actions: [],
           schedule: { interval: '10s' },
@@ -249,7 +266,7 @@ describe('muteInstance()', () => {
           kibana: {
             saved_object: {
               id: '1',
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
             },
           },
           error: {

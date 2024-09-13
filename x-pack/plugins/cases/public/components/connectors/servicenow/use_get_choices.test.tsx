@@ -7,18 +7,17 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useKibana } from '../../../common/lib/kibana';
-import type { ActionConnector } from '../../../../common/api';
-import { choices } from '../mock';
-import type { UseGetChoices, UseGetChoicesProps } from './use_get_choices';
+import { useKibana, useToasts } from '../../../common/lib/kibana';
+import type { ActionConnector } from '../../../../common/types/domain';
 import { useGetChoices } from './use_get_choices';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 import * as api from './api';
 
 jest.mock('./api');
 jest.mock('../../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const onSuccess = jest.fn();
 const fields = ['priority'];
 
 const connector = {
@@ -31,116 +30,106 @@ const connector = {
   name: 'ServiceNow',
   isPreconfigured: false,
   isDeprecated: false,
+  isSystemAction: false,
   config: {
     apiUrl: 'https://dev94428.service-now.com/',
   },
 } as ActionConnector;
 
 describe('useGetChoices', () => {
-  const { services } = useKibanaMock();
+  const { http } = useKibanaMock().services;
+  let appMockRender: AppMockRenderer;
+
   beforeEach(() => {
+    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
-  it('init', async () => {
-    const { result, waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
-      useGetChoices({
-        http: services.http,
-        connector,
-        toastNotifications: services.notifications.toasts,
-        fields,
-        onSuccess,
-      })
+  it('calls the api when invoked with the correct parameters', async () => {
+    const spy = jest.spyOn(api, 'getChoices');
+    const { waitFor } = renderHook(
+      () =>
+        useGetChoices({
+          http,
+          connector,
+          fields,
+        }),
+      { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+    });
 
-    expect(result.current).toEqual({
-      isLoading: false,
-      choices,
+    expect(spy).toHaveBeenCalledWith({
+      http,
+      signal: expect.anything(),
+      connectorId: connector.id,
+      fields,
     });
   });
 
-  it('returns an empty array when connector is not presented', async () => {
-    const { result } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
-      useGetChoices({
-        http: services.http,
-        connector: undefined,
-        toastNotifications: services.notifications.toasts,
-        fields,
-        onSuccess,
-      })
+  it('does not call the api when the connector is missing', async () => {
+    const spy = jest.spyOn(api, 'getChoices');
+    renderHook(
+      () =>
+        useGetChoices({
+          http,
+          fields,
+        }),
+      { wrapper: appMockRender.AppWrapper }
     );
 
-    expect(result.current).toEqual({
-      isLoading: false,
-      choices: [],
+    expect(spy).not.toHaveBeenCalledWith();
+  });
+
+  it('calls addError when the getChoices api throws an error', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getChoices');
+    spyOnGetCases.mockImplementation(() => {
+      throw new Error('Something went wrong');
+    });
+
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
+
+    const { waitFor } = renderHook(
+      () =>
+        useGetChoices({
+          http,
+          connector,
+          fields,
+        }),
+      { wrapper: appMockRender.AppWrapper }
+    );
+
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
     });
   });
 
-  it('it calls onSuccess', async () => {
-    const { waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
-      useGetChoices({
-        http: services.http,
-        connector,
-        toastNotifications: services.notifications.toasts,
-        fields,
-        onSuccess,
-      })
-    );
-
-    await waitForNextUpdate();
-
-    expect(onSuccess).toHaveBeenCalledWith(choices);
-  });
-
-  it('it displays an error when service fails', async () => {
-    const spyOnGetChoices = jest.spyOn(api, 'getChoices');
-    spyOnGetChoices.mockResolvedValue(
-      Promise.resolve({
-        actionId: 'test',
-        status: 'error',
-        serviceMessage: 'An error occurred',
-      })
-    );
-
-    const { waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
-      useGetChoices({
-        http: services.http,
-        connector,
-        toastNotifications: services.notifications.toasts,
-        fields,
-        onSuccess,
-      })
-    );
-
-    await waitForNextUpdate();
-
-    expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-      text: 'An error occurred',
-      title: 'Unable to get choices',
-    });
-  });
-
-  it('it displays an error when http throws an error', async () => {
-    const spyOnGetChoices = jest.spyOn(api, 'getChoices');
-    spyOnGetChoices.mockImplementation(() => {
-      throw new Error('An error occurred');
+  it('calls addError when the getChoices api returns successfully but contains an error', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getChoices');
+    spyOnGetCases.mockResolvedValue({
+      status: 'error',
+      message: 'Error message',
+      actionId: 'test',
     });
 
-    renderHook<UseGetChoicesProps, UseGetChoices>(() =>
-      useGetChoices({
-        http: services.http,
-        connector,
-        toastNotifications: services.notifications.toasts,
-        fields,
-        onSuccess,
-      })
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
+
+    const { waitFor } = renderHook(
+      () =>
+        useGetChoices({
+          http,
+          connector,
+          fields,
+        }),
+      { wrapper: appMockRender.AppWrapper }
     );
 
-    expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-      text: 'An error occurred',
-      title: 'Unable to get choices',
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
     });
   });
 });

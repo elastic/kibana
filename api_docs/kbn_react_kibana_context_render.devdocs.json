@@ -1,0 +1,127 @@
+{
+  "id": "@kbn/react-kibana-context-render",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/react-kibana-context-render",
+        "id": "def-common.KibanaRenderContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaRenderContextProvider",
+        "description": [
+          "\nThe `KibanaRenderContextProvider` provides the necessary context for an out-of-current\nReact render, such as using `ReactDOM.render()`."
+        ],
+        "signature": [
+          "({ children, ...props }: React.PropsWithChildren<React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/react-kibana-context-render",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextRenderPluginApi",
+            "section": "def-common.KibanaRenderContextProviderProps",
+            "text": "KibanaRenderContextProviderProps"
+          },
+          ">>) => JSX.Element"
+        ],
+        "path": "packages/react/kibana_context/render/render_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-render",
+            "id": "def-common.KibanaRenderContextProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ children, ...props }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/react-kibana-context-render",
+                "scope": "common",
+                "docId": "kibKbnReactKibanaContextRenderPluginApi",
+                "section": "def-common.KibanaRenderContextProviderProps",
+                "text": "KibanaRenderContextProviderProps"
+              },
+              ">>"
+            ],
+            "path": "packages/react/kibana_context/render/render_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/react-kibana-context-render",
+        "id": "def-common.KibanaRenderContextProviderProps",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaRenderContextProviderProps",
+        "description": [
+          "Props for the KibanaContextProvider"
+        ],
+        "signature": [
+          "{ i18n: ",
+          {
+            "pluginId": "@kbn/core-i18n-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreI18nBrowserPluginApi",
+            "section": "def-public.I18nStart",
+            "text": "I18nStart"
+          },
+          "; analytics?: Pick<",
+          {
+            "pluginId": "@kbn/core-analytics-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+            "section": "def-public.AnalyticsServiceStart",
+            "text": "AnalyticsServiceStart"
+          },
+          ", \"reportEvent\"> | undefined; theme: ",
+          {
+            "pluginId": "@kbn/react-kibana-context-common",
+            "scope": "public",
+            "docId": "kibKbnReactKibanaContextCommonPluginApi",
+            "section": "def-public.ThemeServiceStart",
+            "text": "ThemeServiceStart"
+          },
+          "; modify?: ",
+          "RecursivePartial",
+          "<",
+          "EuiThemeShape",
+          "> | undefined; colorMode?: ",
+          "EuiThemeColorMode",
+          " | undefined; }"
+        ],
+        "path": "packages/react/kibana_context/render/render_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

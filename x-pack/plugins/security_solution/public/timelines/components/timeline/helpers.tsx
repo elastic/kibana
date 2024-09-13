@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, isNumber } from 'lodash/fp';
 
+import type { Filter } from '@kbn/es-query';
 import {
   elementOrChildrenHasFocus,
   getFocusedAriaColindexCell,
@@ -15,11 +16,10 @@ import {
   stopPropagationAndPreventDefault,
 } from '@kbn/timelines-plugin/public';
 
+import { prepareKQLParam, prepareKQLStringParam } from '../../../../common/utils/kql';
 import { assertUnreachable } from '../../../../common/utility_types';
 import type { BrowserFields } from '../../../common/containers/source';
 import {
-  escapeQueryValue,
-  isNumber,
   convertDateFieldToQuery,
   checkIfFieldTypeIsDate,
   convertNestedFieldToQuery,
@@ -28,12 +28,8 @@ import {
   type PrimitiveOrArrayOfPrimitives,
 } from '../../../common/lib/kuery';
 import type { DataProvider, DataProvidersAnd } from './data_providers/data_provider';
-import {
-  DataProviderType,
-  EXISTS_OPERATOR,
-  IS_ONE_OF_OPERATOR,
-  IS_OPERATOR,
-} from './data_providers/data_provider';
+import { EXISTS_OPERATOR, IS_ONE_OF_OPERATOR, IS_OPERATOR } from './data_providers/data_provider';
+import { type DataProviderType, DataProviderTypeEnum } from '../../../../common/api/timeline';
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 
 const buildQueryMatch = (
@@ -174,25 +170,6 @@ export const onTimelineTabKeyPressed = ({
   }
 };
 
-export const ACTIVE_TIMELINE_BUTTON_CLASS_NAME = 'active-timeline-button';
-export const FLYOUT_BUTTON_BAR_CLASS_NAME = 'timeline-flyout-button-bar';
-
-/**
- * This function focuses the active timeline button on the next tick. Focus
- * is updated on the next tick because this function is typically
- * invoked in `onClick` handlers that also dispatch Redux actions (that
- * in-turn update focus states).
- */
-export const focusActiveTimelineButton = () => {
-  setTimeout(() => {
-    document
-      .querySelector<HTMLButtonElement>(
-        `div.${FLYOUT_BUTTON_BAR_CLASS_NAME} .${ACTIVE_TIMELINE_BUTTON_CLASS_NAME}`
-      )
-      ?.focus();
-  }, 0);
-};
-
 /**
  * Focuses the utility bar action contained by the provided `containerElement`
  * when a valid container is provided
@@ -207,7 +184,7 @@ export const focusUtilityBarAction = (containerElement: HTMLElement | null) => {
  * Resets keyboard focus on the page
  */
 export const resetKeyboardFocus = () => {
-  document.querySelector<HTMLAnchorElement>('header.headerGlobalNav a.euiHeaderLogo')?.focus();
+  document.querySelector<HTMLAnchorElement>('header.headerGlobalNav a.chrHeaderLogo')?.focus();
 };
 
 interface OperatorHandler {
@@ -230,7 +207,7 @@ export const handleIsOperator = ({
 }) => {
   if (!isPrimitiveArray(value)) {
     return `${isExcluded}${
-      type !== DataProviderType.template
+      type !== DataProviderTypeEnum.template
         ? buildIsQueryMatch({ browserFields, field, isFieldTypeNested, value })
         : buildExistsQueryMatch({ browserFields, field, isFieldTypeNested })
     }`;
@@ -263,7 +240,7 @@ export const buildIsQueryMatch = ({
   } else if (checkIfFieldTypeIsDate(field, browserFields)) {
     return convertDateFieldToQuery(field, value);
   } else {
-    return `${field} : ${isNumber(value) ? value : escapeQueryValue(value)}`;
+    return `${field} : ${prepareKQLParam(value)}`;
   }
 };
 
@@ -291,7 +268,7 @@ export const buildIsOneOfQueryMatch = ({
   const trimmedField = field.trim();
   if (value.length) {
     return `${trimmedField} : (${value
-      .map((item) => (isNumber(item) ? Number(item) : `${escapeQueryValue(String(item).trim())}`))
+      .map((item) => (isNumber(item) ? item : prepareKQLStringParam(String(item).trim())))
       .join(' OR ')})`;
   }
   return `${trimmedField} : ''`;
@@ -300,3 +277,8 @@ export const buildIsOneOfQueryMatch = ({
 export const isPrimitiveArray = (value: unknown): value is Array<string | number | boolean> =>
   Array.isArray(value) &&
   (value.every((x) => typeof x === 'string') || value.every((x) => typeof x === 'number'));
+
+export const TIMELINE_FILTER_DROP_AREA = 'timeline-filter-drop-area';
+
+export const getNonDropAreaFilters = (filters: Filter[] = []) =>
+  filters.filter((f: Filter) => f.meta.controlledBy !== TIMELINE_FILTER_DROP_AREA);

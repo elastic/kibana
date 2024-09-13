@@ -1,0 +1,43 @@
+post:
+  summary: Create a saved object
+  operationId: createSavedObject
+  description: Create a Kibana saved object with a randomly generated identifier.
+  deprecated: true
+  tags:
+    - saved objects
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/saved_object_type.yaml'
+    - in: query
+      name: overwrite
+      description: If true, overwrites the document with the same identifier.
+      schema:
+        type: boolean
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - attributes
+          properties:
+            attributes:
+              $ref: '../components/schemas/attributes.yaml'
+            initialNamespaces:
+              $ref: '../components/schemas/initial_namespaces.yaml'
+            references:
+              $ref: '../components/schemas/references.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+         application/json:
+          schema:
+            type: object
+    '409':
+      description: Indicates a conflict error.
+      content:
+         application/json:
+          schema:
+            type: object

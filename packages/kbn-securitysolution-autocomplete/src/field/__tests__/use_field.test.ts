@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DataViewFieldBase } from '@kbn/es-query';
@@ -84,7 +85,56 @@ describe('useField', () => {
       expect(comboOptions).toEqual([{ label: 'bytes' }, { label: 'ssl' }, { label: '@timestamp' }]);
       expect(selectedComboOptions).toEqual([]);
     });
-    it('should not return an empty field as a combo option', () => {
+    it('should not return a selected field when empty string as a combo option', () => {
+      const newIndexPattern = {
+        ...indexPattern,
+        fields: [
+          {
+            name: 'bytes',
+            type: 'number',
+            esTypes: ['long'],
+            count: 10,
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: true,
+          },
+          {
+            name: 'ssl',
+            type: 'boolean',
+            esTypes: ['boolean'],
+            count: 20,
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: true,
+          },
+          {
+            name: '@timestamp',
+            type: 'date',
+            esTypes: ['date'],
+            count: 30,
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: true,
+          },
+        ] as unknown as DataViewFieldBase[],
+        title: 'title1',
+      };
+
+      const { result } = renderHook(() =>
+        useField({
+          indexPattern: newIndexPattern,
+          onChange: onChangeMock,
+          selectedField: { name: '', type: 'keyword' },
+        })
+      );
+      const { comboOptions, selectedComboOptions } = result.current;
+      expect(comboOptions).toEqual([{ label: 'bytes' }, { label: 'ssl' }, { label: '@timestamp' }]);
+      expect(selectedComboOptions).toEqual([]);
+    });
+    it('should not return a selected field when string with spaces is written as a combo option', () => {
       const newIndexPattern = {
         ...indexPattern,
         fields: [

@@ -16,21 +16,13 @@ import * as i18n from './translations';
 export const useGetTags = () => {
   const toasts = useToasts();
   const { owner } = useCasesContext();
-  return useQuery(
-    casesQueriesKeys.tags(),
-    () => {
-      const abortCtrl = new AbortController();
-      return getTags(abortCtrl.signal, owner);
+  return useQuery(casesQueriesKeys.tags(), ({ signal }) => getTags({ owner, signal }), {
+    onError: (error: ServerError) => {
+      if (error.name !== 'AbortError') {
+        toasts.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+          title: i18n.ERROR_TITLE,
+        });
+      }
     },
-    {
-      onError: (error: ServerError) => {
-        if (error.name !== 'AbortError') {
-          toasts.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            { title: i18n.ERROR_TITLE }
-          );
-        }
-      },
-    }
-  );
+  });
 };

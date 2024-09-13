@@ -7,12 +7,11 @@
 
 import { merge } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
 import {
   EventHit,
-  TimelineEventsQueries,
   TimelineEventsDetailsStrategyResponse,
-  TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsItem,
 } from '../../../../../../common/search_strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
@@ -25,7 +24,8 @@ import {
 import { buildEcsObjects } from '../../helpers/build_ecs_objects';
 
 export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.details> = {
-  buildDsl: ({ authFilter, ...options }: TimelineEventsDetailsRequestOptions) => {
+  buildDsl: (parsedRequest) => {
+    const { authFilter, ...options } = parsedRequest;
     const { indexName, eventId, runtimeMappings = {} } = options;
     return buildTimelineDetailsQuery({
       indexName,
@@ -35,11 +35,12 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
     });
   },
   parse: async (
-    options: TimelineEventsDetailsRequestOptions,
+    options,
     response: IEsSearchResponse<EventHit>
   ): Promise<TimelineEventsDetailsStrategyResponse> => {
     const { indexName, eventId, runtimeMappings = {} } = options;
-    const { fields, ...hitsData } = response.rawResponse.hits.hits[0] ?? {};
+    // _source is removed here as it's only needed in the rawEventData below
+    const { fields, _source, ...hitsData } = response.rawResponse.hits.hits[0] ?? {};
 
     const inspect = {
       dsl: [

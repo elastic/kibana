@@ -7,7 +7,7 @@
 
 import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface GetMappingsArgs {
@@ -16,10 +16,15 @@ export interface GetMappingsArgs {
 
 export type GetMappingsResponse = IndicesGetMappingIndexMappingRecord;
 
+export type GetMappingsActions = Actions<GetMappingsArgs, GetMappingsResponse>;
+
 export const getMappings = async ({ indexName }: GetMappingsArgs) => {
   const route = `/internal/enterprise_search/mappings/${indexName}`;
 
   return await HttpLogic.values.http.get<IndicesGetMappingIndexMappingRecord>(route);
 };
+
+export const mappingsWithPropsApiLogic = (indexName: string) =>
+  createApiLogic(['mappings_api_logic_with_props', indexName], getMappings);
 
 export const MappingsApiLogic = createApiLogic(['mappings_api_logic'], getMappings);

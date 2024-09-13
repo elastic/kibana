@@ -6,15 +6,12 @@
  */
 
 import React, { memo } from 'react';
-import { LandingCards } from '../landing_cards';
-import { SecuritySolutionPageWrapper } from '../page_wrapper';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { Onboarding } from './onboarding';
 
 export const LandingPageComponent = memo(() => {
-  return (
-    <SecuritySolutionPageWrapper>
-      <LandingCards />
-    </SecuritySolutionPageWrapper>
-  );
+  const { indicesExist } = useSourcererDataView();
+  return <Onboarding indicesExist={indicesExist} />;
 });
 
 LandingPageComponent.displayName = 'LandingPageComponent';

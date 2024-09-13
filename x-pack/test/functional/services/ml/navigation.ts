@@ -200,6 +200,21 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~dataVisualizer', 'mlPageDataVisualizerSelector');
     },
 
+    async navigateToDataESQLDataVisualizer() {
+      await this.navigateToArea('~mlMainTab & ~esqlDataVisualizer', 'dataVisualizerIndexPage');
+    },
+
+    async navigateToDataDrift() {
+      await this.navigateToArea('~mlMainTab & ~dataDrift', 'mlPageDataDrift');
+    },
+
+    async navigateToSuppliedConfigurations() {
+      await this.navigateToArea(
+        '~mlMainTab & ~suppliedConfigurations',
+        'mlPageSuppliedConfigurations'
+      );
+    },
+
     async navigateToJobManagement() {
       await this.navigateToAnomalyDetection();
     },

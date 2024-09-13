@@ -7,19 +7,19 @@
 
 import React from 'react';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import { getActivePaletteName } from '@kbn/coloring';
 import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export function PalettePicker({
-  palettes,
-  activePalette,
-  setPalette,
-}: {
+interface PalettePickerProps<T> {
   palettes: PaletteRegistry;
-  activePalette?: PaletteOutput;
+  activePalette?: PaletteOutput<T>;
   setPalette: (palette: PaletteOutput) => void;
-}) {
+}
+
+export function PalettePicker<T>({ palettes, activePalette, setPalette }: PalettePickerProps<T>) {
+  const paletteName = getActivePaletteName(activePalette?.name);
   const palettesToShow: EuiColorPalettePickerPaletteProps[] = palettes
     .getAll()
     .filter(({ internal }) => !internal)
@@ -28,36 +28,30 @@ export function PalettePicker({
         value: id,
         title,
         type: 'fixed',
-        palette: getCategoricalColors(
-          10,
-          id === activePalette?.name ? activePalette?.params : undefined
-        ),
+        palette: getCategoricalColors(10, id === paletteName ? activePalette?.params : undefined),
       };
     });
+
   return (
     <EuiFormRow
-      display="columnCompressed"
       fullWidth
       label={i18n.translate('xpack.lens.palettePicker.label', {
-        defaultMessage: 'Color palette',
+        defaultMessage: 'Palette',
       })}
     >
-      <>
-        <EuiColorPalettePicker
-          fullWidth
-          data-test-subj="lns-palettePicker"
-          compressed
-          palettes={palettesToShow}
-          onChange={(newPalette) => {
-            setPalette({
-              type: 'palette',
-              name: newPalette,
-            });
-          }}
-          valueOfSelected={activePalette?.name || 'default'}
-          selectionDisplay={'palette'}
-        />
-      </>
+      <EuiColorPalettePicker
+        fullWidth
+        data-test-subj="lns-palettePicker"
+        palettes={palettesToShow}
+        onChange={(newPalette) => {
+          setPalette({
+            type: 'palette',
+            name: newPalette,
+          });
+        }}
+        valueOfSelected={paletteName}
+        selectionDisplay={'palette'}
+      />
     </EuiFormRow>
   );
 }

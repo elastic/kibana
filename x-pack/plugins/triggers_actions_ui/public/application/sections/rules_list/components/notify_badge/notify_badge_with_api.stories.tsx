@@ -16,6 +16,7 @@ import { RulesListNotifyBadgePropsWithApi } from './types';
 
 const rule = {
   id: uuidv4(),
+  name: '',
   activeSnoozes: [],
   isSnoozedUntil: undefined,
   muteAll: false,
@@ -27,7 +28,7 @@ export default {
   title: 'app/RulesListNotifyBadgeWithApi',
   component: RulesListNotifyBadgeWithApi,
   argTypes: {
-    rule: {
+    snoozeSettings: {
       defaultValue: rule,
       control: {
         type: 'object',
@@ -54,7 +55,7 @@ export default {
     onRuleChanged: {},
   },
   args: {
-    rule,
+    snoozeSettings: rule,
     onRuleChanged: (...args: any) => action('onRuleChanged')(args),
   },
 } as Meta<RulesListNotifyBadgePropsWithApi>;
@@ -69,7 +70,7 @@ const IndefinitelyDate = new Date();
 IndefinitelyDate.setDate(IndefinitelyDate.getDate() + 1);
 export const IndefinitelyRuleNotifyBadgeWithApi = Template.bind({});
 IndefinitelyRuleNotifyBadgeWithApi.args = {
-  rule: {
+  snoozeSettings: {
     ...rule,
     muteAll: true,
     isSnoozedUntil: IndefinitelyDate,
@@ -80,7 +81,7 @@ export const ActiveSnoozesRuleNotifyBadgeWithApi = Template.bind({});
 const ActiveSnoozeDate = new Date();
 ActiveSnoozeDate.setDate(ActiveSnoozeDate.getDate() + 2);
 ActiveSnoozesRuleNotifyBadgeWithApi.args = {
-  rule: {
+  snoozeSettings: {
     ...rule,
     activeSnoozes: ['24da3b26-bfa5-4317-b72f-4063dbea618e'],
     isSnoozedUntil: ActiveSnoozeDate,
@@ -111,7 +112,7 @@ export const ScheduleSnoozesRuleNotifyBadgeWithApi: Story<RulesListNotifyBadgePr
 };
 
 ScheduleSnoozesRuleNotifyBadgeWithApi.args = {
-  rule: {
+  snoozeSettings: {
     ...rule,
     snoozeSchedule: [
       {

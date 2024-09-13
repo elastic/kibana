@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Observable } from 'rxjs';
@@ -14,6 +15,12 @@ export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 /** @public */
 export interface UiSettingsState {
   [key: string]: PublicUiSettingsParams & UserProvidedValues;
+}
+
+export interface ValueValidation {
+  successfulValidation: boolean;
+  valid?: boolean;
+  errorMessage?: string;
 }
 
 /**
@@ -100,6 +107,11 @@ export interface IUiSettingsClient {
    * the settings, containing the actual Error class.
    */
   getUpdateErrors$: () => Observable<Error>;
+
+  /**
+   * Validates a uiSettings value and returns a ValueValidation object.
+   */
+  validateValue: (key: string, value: any) => Promise<ValueValidation>;
 }
 
 /** @public */

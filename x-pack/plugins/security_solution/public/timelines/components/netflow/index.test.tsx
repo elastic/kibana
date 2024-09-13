@@ -10,7 +10,6 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 
 import { asArrayIfExists } from '../../../common/lib/helpers';
-import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 import {
   TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,
@@ -134,7 +133,7 @@ const getNetflowInstance = () => (
   />
 );
 
-jest.mock('../../../common/components/link_to');
+jest.mock('../../../common/components/links/link_props');
 
 describe('Netflow', () => {
   test('renders correctly against snapshot', () => {

@@ -137,19 +137,20 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         .set('kbn-xsrf', 'xxx')
         .send({
           requesterId: 'functional_tester',
-          id: 'my-slack1',
+          id: 'preconfigured-es-index-action',
           params: {
-            message: 'does this work??',
+            documents: [{ test: 'test' }],
+            indexOverride: null,
           },
         })
         .expect(200);
       expect(result.status).to.eql('error');
       expect(result.error).to.eql(
-        `Error: .slack actions cannot be scheduled for unsecured actions execution`
+        `Error: .index actions cannot be scheduled for unsecured actions execution`
       );
     });
 
-    it('should not allow scheduling action from non preconfigured connectors', async () => {
+    it('should not allow scheduling action from non in-memory connectors', async () => {
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
@@ -184,7 +185,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         .expect(200);
       expect(result.status).to.eql('error');
       expect(result.error).to.eql(
-        `Error: ${connectorId} are not preconfigured connectors and can't be scheduled for unsecured actions execution`
+        `Error: ${connectorId} are not in-memory connectors and can't be scheduled for unsecured actions execution`
       );
     });
   });

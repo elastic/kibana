@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { errors } from '@elastic/elasticsearch';
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { SubmitErrorCallout } from './submit_error_callout';
 import {
   ERROR_CONFIGURE_FAILURE,
   ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED,
@@ -20,7 +22,6 @@ import {
   ERROR_PING_FAILURE,
 } from '../common';
 import { interactiveSetupMock } from '../server/mocks';
-import { SubmitErrorCallout } from './submit_error_callout';
 
 describe('SubmitErrorCallout', () => {
   it('renders unknown errors correctly', async () => {
@@ -58,17 +59,15 @@ describe('SubmitErrorCallout', () => {
       <EuiCallOut
         color="danger"
         title={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Verification required"
             id="interactiveSetup.submitErrorCallout.forbiddenErrorTitle"
-            values={Object {}}
           />
         }
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Retry to configure Elastic."
           id="interactiveSetup.submitErrorCallout.forbiddenErrorDescription"
-          values={Object {}}
         />
       </EuiCallOut>
     `);
@@ -94,22 +93,18 @@ describe('SubmitErrorCallout', () => {
       <EuiCallOut
         color="primary"
         title={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Elastic is already configured"
             id="interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredErrorTitle"
-            values={Object {}}
           />
         }
       >
         <EuiButton
-          color="primary"
           onClick={[Function]}
-          size="m"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Continue to Kibana"
             id="interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredSubmitButton"
-            values={Object {}}
           />
         </EuiButton>
       </EuiCallOut>
@@ -138,7 +133,7 @@ describe('SubmitErrorCallout', () => {
         color="danger"
         title="Something went wrong"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Retry or update the {config} file manually."
           id="interactiveSetup.submitErrorCallout.kibanaConfigFailureErrorDescription"
           values={
@@ -174,22 +169,18 @@ describe('SubmitErrorCallout', () => {
       <EuiCallOut
         color="primary"
         title={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Elastic is already configured"
             id="interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredErrorTitle"
-            values={Object {}}
           />
         }
       >
         <EuiButton
-          color="primary"
           onClick={[Function]}
-          size="m"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Continue to Kibana"
             id="interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredSubmitButton"
-            values={Object {}}
           />
         </EuiButton>
       </EuiCallOut>
@@ -218,10 +209,9 @@ describe('SubmitErrorCallout', () => {
         color="danger"
         title="Something went wrong"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Generate a new enrollment token or configure manually."
           id="interactiveSetup.submitErrorCallout.EnrollFailureErrorDescription"
-          values={Object {}}
         />
       </EuiCallOut>
     `);
@@ -248,14 +238,13 @@ describe('SubmitErrorCallout', () => {
       <EuiCallOut
         color="danger"
         title={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Couldn't write to config file"
             id="interactiveSetup.submitErrorCallout.kibanaConfigNotWritableErrorTitle"
-            values={Object {}}
           />
         }
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Retry or update the {config} file manually."
           id="interactiveSetup.submitErrorCallout.kibanaConfigFailureErrorDescription"
           values={
@@ -291,14 +280,13 @@ describe('SubmitErrorCallout', () => {
       <EuiCallOut
         color="danger"
         title={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Couldn't write to config file"
             id="interactiveSetup.submitErrorCallout.kibanaConfigNotWritableErrorTitle"
-            values={Object {}}
           />
         }
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Check the file permissions and ensure {config} is writable by the Kibana process."
           id="interactiveSetup.submitErrorCallout.kibanaConfigNotWritableErrorDescription"
           values={
@@ -334,22 +322,18 @@ describe('SubmitErrorCallout', () => {
       <EuiCallOut
         color="primary"
         title={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Elastic is already configured"
             id="interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredErrorTitle"
-            values={Object {}}
           />
         }
       >
         <EuiButton
-          color="primary"
           onClick={[Function]}
-          size="m"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Continue to Kibana"
             id="interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredSubmitButton"
-            values={Object {}}
           />
         </EuiButton>
       </EuiCallOut>
@@ -377,17 +361,15 @@ describe('SubmitErrorCallout', () => {
       <EuiCallOut
         color="danger"
         title={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Couldn't connect to cluster"
             id="interactiveSetup.submitErrorCallout.pingFailureErrorTitle"
-            values={Object {}}
           />
         }
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Check the address and retry."
           id="interactiveSetup.submitErrorCallout.pingFailureErrorDescription"
-          values={Object {}}
         />
       </EuiCallOut>
     `);

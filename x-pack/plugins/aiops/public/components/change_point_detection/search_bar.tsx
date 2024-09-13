@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { type Filter, fromKueryExpression, type Query } from '@kbn/es-query';
 import { type SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
 import { EuiSpacer, EuiTextColor } from '@elastic/eui';
-import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
@@ -45,9 +46,9 @@ export const SearchBarWrapper: FC<SearchBarProps> = ({
 
   const [error, setError] = useState<string | undefined>();
 
-  const onQuerySubmit: SearchBarOwnProps['onQuerySubmit'] = useCallback(
+  const onQuerySubmit = useCallback<NonNullable<SearchBarOwnProps['onQuerySubmit']>>(
     (payload, isUpdate) => {
-      if (payload.query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+      if (payload.query?.language === SEARCH_QUERY_LANGUAGE.KUERY) {
         try {
           // Validates the query
           fromKueryExpression(payload.query.query);

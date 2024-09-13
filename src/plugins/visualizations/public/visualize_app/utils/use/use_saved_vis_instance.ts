@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -12,11 +13,17 @@ import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 
 import { getVisualizationInstance } from '../get_visualization_instance';
-import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
+import {
+  getEditBreadcrumbs,
+  getCreateBreadcrumbs,
+  getCreateServerlessBreadcrumbs,
+  getEditServerlessBreadcrumbs,
+} from '../breadcrumbs';
 import { SavedVisInstance, VisualizeServices, IEditorController } from '../../types';
 import { VisualizeConstants } from '../../../../common/constants';
 import { getTypes } from '../../../services';
 import { redirectToSavedObjectPage } from '../utils';
+import type { VisualizeInput } from '../../..';
 
 /**
  * This effect is responsible for instantiating a saved vis or creating a new one
@@ -27,13 +34,13 @@ export const useSavedVisInstance = (
   eventEmitter: EventEmitter,
   isChromeVisible: boolean | undefined,
   originatingApp: string | undefined,
-  visualizationIdFromUrl: string | undefined
+  visualizationIdFromUrl: string | undefined,
+  embeddableInput?: VisualizeInput
 ) => {
   const [state, setState] = useState<{
     savedVisInstance?: SavedVisInstance;
     visEditorController?: IEditorController;
   }>({});
-
   const visEditorRef = useRef<HTMLDivElement | null>(null);
   const visId = useRef('');
 
@@ -45,6 +52,7 @@ export const useSavedVisInstance = (
       stateTransferService,
       visEditorsRegistry,
       application: { navigateToApp },
+      serverless,
     } = services;
     const getSavedVisInstance = async () => {
       try {
@@ -82,6 +90,19 @@ export const useSavedVisInstance = (
           savedVisInstance = await getVisualizationInstance(services, visualizationIdFromUrl);
         }
 
+        if (savedVisInstance.vis.type.disableEdit) {
+          throw new Error(
+            i18n.translate('visualizations.editVisualization.readOnlyErrorMessage', {
+              defaultMessage:
+                '{visTypeTitle} visualizations are read only and can not be opened in editor',
+              values: { visTypeTitle: savedVisInstance.vis.type.title },
+            })
+          );
+        }
+
+        if (embeddableInput && embeddableInput.timeRange) {
+          savedVisInstance.panelTimeRange = embeddableInput.timeRange;
+        }
         const { embeddableHandler, savedVis, vis } = savedVisInstance;
 
         const originatingAppName = originatingApp
@@ -90,18 +111,35 @@ export const useSavedVisInstance = (
         const redirectToOrigin = originatingApp ? () => navigateToApp(originatingApp) : undefined;
 
         if (savedVis.id) {
-          chrome.setBreadcrumbs(
-            getEditBreadcrumbs({ originatingAppName, redirectToOrigin }, savedVis.title)
-          );
+          if (serverless?.setBreadcrumbs) {
+            serverless.setBreadcrumbs(
+              getEditServerlessBreadcrumbs({ originatingAppName, redirectToOrigin }, savedVis.title)
+            );
+          } else {
+            chrome.setBreadcrumbs(
+              getEditBreadcrumbs({ originatingAppName, redirectToOrigin }, savedVis.title)
+            );
+          }
+
           chrome.docTitle.change(savedVis.title);
         } else {
-          chrome.setBreadcrumbs(
-            getCreateBreadcrumbs({
-              byValue: Boolean(originatingApp),
-              originatingAppName,
-              redirectToOrigin,
-            })
-          );
+          if (serverless?.setBreadcrumbs) {
+            serverless.setBreadcrumbs(
+              getCreateServerlessBreadcrumbs({
+                byValue: Boolean(originatingApp),
+                originatingAppName,
+                redirectToOrigin,
+              })
+            );
+          } else {
+            chrome.setBreadcrumbs(
+              getCreateBreadcrumbs({
+                byValue: Boolean(originatingApp),
+                originatingAppName,
+                redirectToOrigin,
+              })
+            );
+          }
         }
 
         let visEditorController;
@@ -166,6 +204,7 @@ export const useSavedVisInstance = (
     visualizationIdFromUrl,
     state.savedVisInstance,
     state.visEditorController,
+    embeddableInput,
   ]);
 
   useEffect(() => {

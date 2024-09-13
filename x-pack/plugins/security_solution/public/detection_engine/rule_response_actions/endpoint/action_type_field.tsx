@@ -11,10 +11,18 @@ import { i18n } from '@kbn/i18n';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { getUiCommand } from '../../../management/components/endpoint_response_actions_list/components/hooks';
-import { getRbacControl } from '../../../management/components/endpoint_responder/lib/console_commands_definition';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink } from '@elastic/eui';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { getRbacControl } from '../../../../common/endpoint/service/response_actions/utils';
+import { useKibana } from '../../../common/lib/kibana';
+import { CHOOSE_FROM_THE_LIST, LEARN_MORE } from './translations';
+import { EndpointActionText } from './utils';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
+import {
+  ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
+} from '../../../../common/endpoint/service/response_actions/constants';
 
 interface ActionTypeFieldProps {
   basePath: string;
@@ -29,25 +37,48 @@ const ActionTypeFieldComponent = ({
 }: ActionTypeFieldProps) => {
   const { endpointPrivileges } = useUserPrivileges();
   const [data] = useFormData();
+  const {
+    docLinks: {
+      links: {
+        securitySolution: { responseActions },
+      },
+    },
+  } = useKibana().services;
+
+  const automatedProcessActionsEnabled = useIsExperimentalFeatureEnabled(
+    'automatedProcessActionsEnabled'
+  );
+
+  const enabledActions = useMemo(
+    () =>
+      [
+        ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
+        ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
+      ] as ['isolate', 'kill-process', 'suspend-process'],
+    [automatedProcessActionsEnabled]
+  );
 
   const fieldOptions = useMemo(
     () =>
-      ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.map((name) => {
-        const isDisabled =
-          map(data.responseActions, 'params.command').includes(name) ||
-          !getRbacControl({
-            commandName: getUiCommand(name),
-            privileges: endpointPrivileges,
-          });
+      enabledActions.map((name) => {
+        const missingRbac = !getRbacControl({
+          commandName: RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[name],
+          privileges: endpointPrivileges,
+        });
+        const currentActions = map(data.responseActions, 'params.command');
+        // we enable just one instance of each action
+        const commandAlreadyExists = currentActions.includes(name);
+        const isDisabled = commandAlreadyExists || missingRbac;
 
         return {
           value: name,
           inputDisplay: name,
+          dropdownDisplay: <EndpointActionText name={name} isDisabled={missingRbac} />,
           disabled: isDisabled,
           'data-test-subj': `command-type-${name}`,
         };
       }),
-    [data.responseActions, endpointPrivileges]
+    [data.responseActions, enabledActions, endpointPrivileges]
   );
 
   return (
@@ -56,15 +87,28 @@ const ActionTypeFieldComponent = ({
       readDefaultValueOnForm={readDefaultValueOnForm}
       config={{
         label: i18n.translate('xpack.securitySolution.responseActions.endpoint.commandLabel', {
-          defaultMessage: 'Command',
+          defaultMessage: 'Response action',
         }),
+        helpText: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.commandDescription"
+            defaultMessage="Select an endpoint response action. The response action only runs on hosts with Elastic Defend installed. {docs}"
+            values={{
+              docs: (
+                <EuiLink href={responseActions} target="_blank">
+                  {LEARN_MORE}
+                </EuiLink>
+              ),
+            }}
+          />
+        ),
         validations: [
           {
             validator: fieldValidators.emptyField(
               i18n.translate(
                 'xpack.securitySolution.responseActions.endpoint.validations.commandIsRequiredErrorMessage',
                 {
-                  defaultMessage: 'A command is required.',
+                  defaultMessage: 'Action is a required field.',
                 }
               )
             ),
@@ -76,6 +120,7 @@ const ActionTypeFieldComponent = ({
       componentProps={{
         euiFieldProps: {
           options: fieldOptions,
+          placeholder: CHOOSE_FROM_THE_LIST,
           'data-test-subj': 'commandTypeField',
         },
       }}

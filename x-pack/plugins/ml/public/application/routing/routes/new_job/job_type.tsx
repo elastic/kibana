@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { parse } from 'query-string';
-
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-
-import { ML_PAGES } from '../../../../locator';
-import { NavigateToPath } from '../../../contexts/kibana';
-
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { basicResolvers } from '../../resolvers';
-import { Page } from '../../../jobs/new_job/pages/job_type';
+import { ML_PAGES } from '../../../../locator';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import type { MlRoute } from '../../router';
+import { createPath, PageLoader } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { DataSourceContextProvider } from '../../../contexts/ml';
+
+const Page = dynamic(async () => ({
+  default: (await import('../../../jobs/new_job/pages/job_type')).Page,
+}));
 
 export const jobTypeRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
   path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
@@ -34,19 +37,14 @@ export const jobTypeRouteFactory = (navigateToPath: NavigateToPath, basePath: st
   ],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context } = useResolver(
-    index,
-    savedSearchId,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    basicResolvers(deps)
-  );
+const PageWrapper: FC = () => {
+  const { context } = useRouteResolver('full', ['canGetJobs'], basicResolvers());
+
   return (
     <PageLoader context={context}>
-      <Page />
+      <DataSourceContextProvider>
+        <Page />
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };

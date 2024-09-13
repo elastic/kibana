@@ -6,9 +6,9 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import numeral from '@elastic/numeral';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { MLCATEGORY } from '../../../common/constants/field_types';
-import { AnalysisConfig, Datafeed } from '../../../common/types/anomaly_detection_jobs';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import { MLCATEGORY } from '@kbn/ml-anomaly-utils';
+import type { AnalysisConfig, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
 import type { MlClient } from '../../lib/ml_client';
 
@@ -65,8 +65,8 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
 
     const { detectors, influencers, bucket_span: bucketSpan } = analysisConfig;
 
-    let overallCardinality = {};
-    let maxBucketCardinality = {};
+    let overallCardinality = Object.create(null);
+    let maxBucketCardinality = Object.create(null);
 
     // Get fields required for the model memory estimation
     const overallCardinalityFields: Set<string> = detectors.reduce(

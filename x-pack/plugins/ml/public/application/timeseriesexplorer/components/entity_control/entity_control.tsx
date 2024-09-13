@@ -7,25 +7,21 @@
 
 import { isEqual } from 'lodash';
 import React, { Component } from 'react';
+
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFlexItem, EuiFormRow, EuiHealth, EuiHighlight } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { getSeverityColor, type MlEntityFieldType } from '@kbn/ml-anomaly-utils';
 
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiHealth,
-  EuiHighlight,
-} from '@elastic/eui';
-import { EntityFieldType } from '../../../../../common/types/anomalies';
-import { UiPartitionFieldConfig } from '../series_controls/series_controls';
-import { getSeverityColor } from '../../../../../common';
+import type { UiPartitionFieldConfig } from '../series_controls/series_controls';
+
 import { EntityConfig } from './entity_config';
 
 export interface Entity {
   fieldName: string;
-  fieldType: EntityFieldType;
+  fieldType: MlEntityFieldType;
   fieldValue: any;
   fieldValues?: any;
 }
@@ -48,7 +44,7 @@ export interface EntityControlProps {
   isLoading: boolean;
   onSearchChange: (entity: Entity, queryTerm: string) => void;
   config: UiPartitionFieldConfig;
-  onConfigChange: (fieldType: EntityFieldType, config: Partial<UiPartitionFieldConfig>) => void;
+  onConfigChange: (fieldType: MlEntityFieldType, config: Partial<UiPartitionFieldConfig>) => void;
   forceSelection: boolean;
   options: ComboBoxOption[];
   isModelPlotEnabled: boolean;

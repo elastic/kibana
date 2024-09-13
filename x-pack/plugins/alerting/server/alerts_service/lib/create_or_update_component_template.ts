@@ -32,8 +32,16 @@ const getIndexTemplatesUsingComponentTemplate = async (
     { logger }
   );
   const indexTemplatesUsingComponentTemplate = (indexTemplates ?? []).filter(
-    (indexTemplate: IndicesGetIndexTemplateIndexTemplateItem) =>
-      indexTemplate.index_template.composed_of.includes(componentTemplateName)
+    (indexTemplate: IndicesGetIndexTemplateIndexTemplateItem) => {
+      if (
+        indexTemplate &&
+        indexTemplate.index_template &&
+        indexTemplate.index_template.composed_of
+      ) {
+        return indexTemplate.index_template.composed_of.includes(componentTemplateName);
+      }
+      return false;
+    }
   );
   await asyncForEach(
     indexTemplatesUsingComponentTemplate,
@@ -100,7 +108,7 @@ export const createOrUpdateComponentTemplate = async ({
   template,
   totalFieldsLimit,
 }: CreateOrUpdateComponentTemplateOpts) => {
-  logger.info(`Installing component template ${template.name}`);
+  logger.debug(`Installing component template ${template.name}`);
 
   try {
     await createOrUpdateComponentTemplateHelper(esClient, template, totalFieldsLimit, logger);

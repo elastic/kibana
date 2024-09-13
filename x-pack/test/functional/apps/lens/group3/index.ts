@@ -13,7 +13,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['timePicker']);
+  const { timePicker } = getPageObjects(['timePicker']);
   const config = getService('config');
   let remoteEsArchiver;
 
@@ -54,7 +54,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
 
       await esNode.load(esArchive);
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
@@ -65,31 +65,17 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
 
     after(async () => {
       await esArchiver.unload(esArchive);
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    loadTestFile(require.resolve('./colors'));
-    loadTestFile(require.resolve('./chart_data'));
-    loadTestFile(require.resolve('./time_shift'));
-    loadTestFile(require.resolve('./drag_and_drop'));
-    loadTestFile(require.resolve('./disable_auto_apply'));
-    loadTestFile(require.resolve('./geo_field'));
-    loadTestFile(require.resolve('./formula'));
-    loadTestFile(require.resolve('./heatmap'));
-    loadTestFile(require.resolve('./gauge'));
-    loadTestFile(require.resolve('./metric'));
-    loadTestFile(require.resolve('./legacy_metric'));
-    loadTestFile(require.resolve('./reference_lines'));
-    loadTestFile(require.resolve('./annotations'));
-    loadTestFile(require.resolve('./inspector'));
-    loadTestFile(require.resolve('./error_handling'));
-    loadTestFile(require.resolve('./lens_tagging'));
-    loadTestFile(require.resolve('./lens_reporting'));
-    // keep these two last in the group in this order because they are messing with the default saved objects
-    loadTestFile(require.resolve('./rollup'));
-    loadTestFile(require.resolve('./no_data'));
+    // total run time ~16 min
+    loadTestFile(require.resolve('./add_to_dashboard')); // 12m 50s
+    loadTestFile(require.resolve('./runtime_fields')); // 1m
+    loadTestFile(require.resolve('./terms')); // 1m 35s
+    loadTestFile(require.resolve('./epoch_millis')); // 30s
+    loadTestFile(require.resolve('./dashboard_inline_editing'));
   });
 };

@@ -1,0 +1,15 @@
+{
+  "security.create_cross_cluster_api_key": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_security/cross_cluster/api_key"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-cross-cluster-api-key.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

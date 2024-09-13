@@ -7,6 +7,11 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
+import pLimit from 'p-limit';
+import { uniqBy } from 'lodash';
+
+import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
+
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 
@@ -17,12 +22,17 @@ import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
-  packagesToInstall: Array<string | { name: string; version: string }>;
+  packagesToInstall: Array<
+    | string
+    | { name: string; version?: string; prerelease?: boolean; skipDataStreamRollover?: boolean }
+  >;
   esClient: ElasticsearchClient;
   force?: boolean;
   spaceId: string;
   preferredSource?: 'registry' | 'bundled';
   prerelease?: boolean;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
+  skipIfInstalled?: boolean;
 }
 
 export async function bulkInstallPackages({
@@ -32,16 +42,54 @@ export async function bulkInstallPackages({
   spaceId,
   force,
   prerelease,
+  authorizationHeader,
+  skipIfInstalled,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
 
-  const packagesResults = await Promise.allSettled(
-    packagesToInstall.map(async (pkg) => {
-      if (typeof pkg !== 'string') {
-        return Promise.resolve(pkg);
-      }
+  const uniquePackages = uniqBy(packagesToInstall, (pkg) => {
+    if (typeof pkg === 'string') {
+      return pkg;
+    }
 
-      return Registry.fetchFindLatestPackageOrThrow(pkg, { prerelease });
+    return pkg.name;
+  });
+
+  const limiter = pLimit(10);
+
+  const packagesResults = await Promise.allSettled(
+    uniquePackages.map(async (pkg) => {
+      return limiter(async () => {
+        if (typeof pkg === 'string') {
+          return Registry.fetchFindLatestPackageOrThrow(pkg, {
+            prerelease,
+          }).then((pkgRes) => ({
+            name: pkgRes.name,
+            version: pkgRes.version,
+            prerelease: undefined,
+            skipDataStreamRollover: undefined,
+          }));
+        }
+        if (pkg.version !== undefined) {
+          return Promise.resolve(
+            pkg as {
+              name: string;
+              version: string;
+              prerelease?: boolean;
+              skipDataStreamRollover?: boolean;
+            }
+          );
+        }
+
+        return Registry.fetchFindLatestPackageOrThrow(pkg.name, {
+          prerelease: prerelease || pkg.prerelease,
+        }).then((pkgRes) => ({
+          name: pkgRes.name,
+          version: pkgRes.version,
+          prerelease: pkg.prerelease,
+          skipDataStreamRollover: pkg.skipDataStreamRollover,
+        }));
+      });
     })
   );
 
@@ -60,28 +108,30 @@ export async function bulkInstallPackages({
       }
 
       const pkgKeyProps = result.value;
-      const installedPackageResult = await isPackageVersionOrLaterInstalled({
-        savedObjectsClient,
-        pkgName: pkgKeyProps.name,
-        pkgVersion: pkgKeyProps.version,
-      });
+      if (!force || skipIfInstalled) {
+        const installedPackageResult = await isPackageVersionOrLaterInstalled({
+          savedObjectsClient,
+          pkgName: pkgKeyProps.name,
+          pkgVersion: pkgKeyProps.version,
+        });
 
-      if (installedPackageResult) {
-        const {
-          name,
-          version,
-          installed_es: installedEs,
-          installed_kibana: installedKibana,
-        } = installedPackageResult.package;
-        return {
-          name,
-          version,
-          result: {
-            assets: [...installedEs, ...installedKibana],
-            status: 'already_installed',
-            installType: installedPackageResult.installType,
-          } as InstallResult,
-        };
+        if (installedPackageResult) {
+          const {
+            name,
+            version,
+            installed_es: installedEs,
+            installed_kibana: installedKibana,
+          } = installedPackageResult.package;
+          return {
+            name,
+            version,
+            result: {
+              assets: [...installedEs, ...installedKibana],
+              status: 'already_installed',
+              installType: 'unknown',
+            } as InstallResult,
+          };
+        }
       }
 
       const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
@@ -93,7 +143,9 @@ export async function bulkInstallPackages({
         installSource: 'registry',
         spaceId,
         force,
-        prerelease,
+        prerelease: prerelease || ('prerelease' in pkgKeyProps && pkgKeyProps.prerelease),
+        authorizationHeader,
+        skipDataStreamRollover: pkgKeyProps.skipDataStreamRollover,
       });
 
       if (installResult.error) {

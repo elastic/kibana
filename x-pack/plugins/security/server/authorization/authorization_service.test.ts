@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
-
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { nextTick } from '@kbn/test-jest-helpers';
-
 // Note: this import must be before other relative imports for the mocks to work as intended.
-// eslint-disable-next-line import/order
 import {
   mockAuthorizationModeFactory,
   mockCheckPrivilegesDynamicallyWithRequestFactory,
@@ -22,14 +15,20 @@ import {
   mockRegisterPrivilegesWithCluster,
 } from './service.test.mocks';
 
-import { licenseMock } from '../../common/licensing/index.mock';
-import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import { Subject } from 'rxjs';
+
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { privilegesFactory } from '@kbn/security-authorization-core';
+import { nextTick } from '@kbn/test-jest-helpers';
+
 import { AuthorizationService } from './authorization_service';
 import { checkPrivilegesFactory } from './check_privileges';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 import { authorizationModeFactory } from './mode';
-import { privilegesFactory } from './privileges';
+import { licenseMock } from '../../common/licensing/index.mock';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 
 const kibanaIndexName = '.a-kibana-index';
 const application = `kibana-${kibanaIndexName}`;
@@ -77,14 +76,12 @@ it(`#setup returns exposed services`, () => {
     loggers: loggingSystemMock.create(),
     kibanaIndexName,
     packageVersion: 'some-version',
-    buildNumber: 42,
     features: mockFeaturesSetup,
     getSpacesService: mockGetSpacesService,
     getCurrentUser: jest.fn(),
     customBranding: mockCoreSetup.customBranding,
   });
 
-  expect(authz.actions.version).toBe('version:some-version');
   expect(authz.applicationName).toBe(application);
 
   expect(authz.checkPrivilegesWithRequest).toBe(mockCheckPrivilegesWithRequest);
@@ -118,7 +115,9 @@ it(`#setup returns exposed services`, () => {
   expect(authorizationModeFactory).toHaveBeenCalledWith(mockLicense);
 
   expect(mockCoreSetup.capabilities.registerSwitcher).toHaveBeenCalledTimes(1);
-  expect(mockCoreSetup.capabilities.registerSwitcher).toHaveBeenCalledWith(expect.any(Function));
+  expect(mockCoreSetup.capabilities.registerSwitcher).toHaveBeenCalledWith(expect.any(Function), {
+    capabilityPath: '*',
+  });
 });
 
 describe('#start', () => {
@@ -138,7 +137,6 @@ describe('#start', () => {
       loggers: loggingSystemMock.create(),
       kibanaIndexName,
       packageVersion: 'some-version',
-      buildNumber: 42,
       features: featuresPluginMock.createSetup(),
       getSpacesService: jest
         .fn()
@@ -211,7 +209,6 @@ it('#stop unsubscribes from license and ES updates.', async () => {
     loggers: loggingSystemMock.create(),
     kibanaIndexName,
     packageVersion: 'some-version',
-    buildNumber: 42,
     features: featuresPluginMock.createSetup(),
     getSpacesService: jest
       .fn()

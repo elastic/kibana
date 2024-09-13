@@ -106,6 +106,7 @@ export const TagSelector: FC<TagSelectorProps> = ({
   onTagsSelected,
   allowCreate,
   openCreateModal,
+  fullWidth = true,
   ...otherProps
 }) => {
   const [currentSearch, setCurrentSearch] = useState('');
@@ -130,11 +131,13 @@ export const TagSelector: FC<TagSelectorProps> = ({
   // we append the 'create' option if user is allowed to create tags
   const options: TagComboBoxOption[] = useMemo(() => {
     return [
-      ...tags.map((tag) => ({
-        label: tag.name,
-        color: tag.color,
-        value: tag,
-      })),
+      ...tags
+        .filter((tag) => !tag.managed)
+        .map((tag) => ({
+          label: tag.name,
+          color: tag.color,
+          value: tag,
+        })),
       ...(allowCreate ? [createTagOption] : []),
     ];
   }, [allowCreate, tags, createTagOption]);
@@ -174,6 +177,7 @@ export const TagSelector: FC<TagSelectorProps> = ({
       onSearchChange={setCurrentSearch}
       onChange={onChange}
       renderOption={renderOption}
+      fullWidth={fullWidth}
       {...otherProps}
     />
   );

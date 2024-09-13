@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -16,12 +17,13 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 const findTestUtils = (
   describeType: 'internal' | 'public',
   objectRemover: ObjectRemover,
-  supertest: SuperTest<Test>,
-  supertestWithoutAuth: any
+  supertest: SuperTestAgent,
+  supertestWithoutAuth: SupertestWithoutAuthProviderType
 ) => {
-  // FLAKY: https://github.com/elastic/kibana/issues/148660
-  describe.skip(describeType, () => {
-    afterEach(() => objectRemover.removeAll());
+  describe(describeType, () => {
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -81,6 +83,8 @@ const findTestUtils = (
                 actions: [],
                 params: {},
                 created_by: 'elastic',
+                api_key_created_by_user: false,
+                revision: 0,
                 scheduled_task_id: match.scheduled_task_id,
                 created_at: match.created_at,
                 updated_at: match.updated_at,
@@ -98,6 +102,7 @@ const findTestUtils = (
                       monitoring: match.monitoring,
                       snooze_schedule: match.snooze_schedule,
                       ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                      is_snoozed_until: null,
                     }
                   : {}),
               });
@@ -297,10 +302,13 @@ const findTestUtils = (
                     group: 'default',
                     connector_type_id: 'test.noop',
                     params: {},
+                    uuid: match.actions[0].uuid,
                   },
                 ],
                 params: {},
                 created_by: 'elastic',
+                api_key_created_by_user: null,
+                revision: 0,
                 throttle: '1m',
                 updated_by: 'elastic',
                 api_key_owner: null,
@@ -317,6 +325,7 @@ const findTestUtils = (
                       monitoring: match.monitoring,
                       snooze_schedule: match.snooze_schedule,
                       ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                      is_snoozed_until: null,
                     }
                   : {}),
               });
@@ -367,7 +376,7 @@ const findTestUtils = (
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
-              filter: 'alert.attributes.alertTypeId: "test.restricted - noop"',
+              filter: 'alert.attributes.alertTypeId:test.restricted-noop',
               fields: ['tags'],
               sort_field: 'createdAt',
             });
@@ -401,6 +410,7 @@ const findTestUtils = (
                 tags: [myTag],
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
@@ -409,6 +419,7 @@ const findTestUtils = (
                 tags: [myTag],
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               break;
@@ -456,7 +467,7 @@ const findTestUtils = (
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
-              filter: 'alert.attributes.alertTypeId: "test.restricted - noop"',
+              filter: 'alert.attributes.alertTypeId:test.restricted-noop',
               fields: ['tags', 'executionStatus'],
               sort_field: 'createdAt',
             });
@@ -491,6 +502,7 @@ const findTestUtils = (
                 execution_status: matchFirst.execution_status,
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
@@ -500,6 +512,7 @@ const findTestUtils = (
                 execution_status: matchSecond.execution_status,
                 ...(describeType === 'internal' && {
                   snooze_schedule: [],
+                  is_snoozed_until: null,
                 }),
               });
               break;
@@ -518,7 +531,7 @@ const findTestUtils = (
 
           const response = await supertestWithoutAuth
             .post(
-              `${getUrlPrefix(space.id)}/${
+              `${getUrlPrefix('other')}/${
                 describeType === 'public' ? 'api' : 'internal'
               }/alerting/rules/_find`
             )
@@ -569,7 +582,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
   describe('find with post', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    afterEach(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     findTestUtils('internal', objectRemover, supertest, supertestWithoutAuth);
   });

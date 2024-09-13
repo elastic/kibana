@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiIcon,
   EuiIconTip,
@@ -18,18 +18,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
-import { RequestDetailsProps } from '../types';
+import { DetailViewProps } from './types';
 
 // TODO: Replace by property once available
 interface RequestDetailsStatRow extends RequestStatistic {
   id: string;
 }
 
-export class RequestDetailsStats extends Component<RequestDetailsProps> {
-  static propTypes = {
-    request: PropTypes.object.isRequired,
-  };
-
+export class RequestDetailsStats extends Component<DetailViewProps> {
   static shouldShow = (request: Request) =>
     Boolean(request.stats && Object.keys(request.stats).length);
 
@@ -37,6 +33,8 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
     return [
       <EuiTableRow key={stat.id}>
         <EuiTableRowCell>
+          {stat.label}
+
           <span className="insRequestDetailsStats__icon">
             {stat.description ? (
               <EuiIconTip
@@ -51,7 +49,6 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
               <EuiIcon type="empty" />
             )}
           </span>
-          {stat.label}
         </EuiTableRowCell>
         <EuiTableRowCell>{stat.value}</EuiTableRowCell>
       </EuiTableRow>,
@@ -70,7 +67,7 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
       .map((id) => ({ id, ...stats[id] } as RequestDetailsStatRow));
 
     return (
-      <EuiTable responsive={false}>
+      <EuiTable responsiveBreakpoint={false}>
         <EuiTableBody>{sortedStats.map(this.renderStatRow)}</EuiTableBody>
       </EuiTable>
     );

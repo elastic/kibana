@@ -9,8 +9,9 @@ import { OnlyEsQueryRuleParams } from '../types';
 import { Comparator } from '../../../../common/comparator_types';
 import { fetchEsQuery } from './fetch_es_query';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { getSearchParams } from './get_search_params';
+import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitoring/rule_result_service.mock';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/common', () => {
   const actual = jest.requireActual('@kbn/triggers-actions-ui-plugin/common');
@@ -38,6 +39,7 @@ const defaultParams: OnlyEsQueryRuleParams = {
 
 const logger = loggerMock.create();
 const scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+const mockRuleResultService = publicRuleResultServiceMock.create();
 
 describe('fetchEsQuery', () => {
   beforeAll(() => {
@@ -53,10 +55,12 @@ describe('fetchEsQuery', () => {
   const services = {
     scopedClusterClient: scopedClusterClientMock,
     logger,
+    ruleResultService: mockRuleResultService,
   };
   it('should add time filter if timestamp if defined and excludeHitsFromPreviousRun is true', async () => {
     const params = defaultParams;
-    const { dateStart, dateEnd } = getSearchParams(params);
+    const date = new Date().toISOString();
+
     await fetchEsQuery({
       ruleId: 'abc',
       name: 'test-rule',
@@ -65,6 +69,8 @@ describe('fetchEsQuery', () => {
       services,
       spacePrefix: '',
       publicBaseUrl: '',
+      dateStart: date,
+      dateEnd: date,
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -116,8 +122,8 @@ describe('fetchEsQuery', () => {
                         range: {
                           '@timestamp': {
                             format: 'strict_date_optional_time',
-                            gte: dateStart,
-                            lte: dateEnd,
+                            gte: date,
+                            lte: date,
                           },
                         },
                       },
@@ -147,7 +153,8 @@ describe('fetchEsQuery', () => {
 
   it('should not add time filter if timestamp is undefined', async () => {
     const params = defaultParams;
-    const { dateStart, dateEnd } = getSearchParams(params);
+    const date = new Date().toISOString();
+
     await fetchEsQuery({
       ruleId: 'abc',
       name: 'test-rule',
@@ -156,6 +163,8 @@ describe('fetchEsQuery', () => {
       services,
       spacePrefix: '',
       publicBaseUrl: '',
+      dateStart: date,
+      dateEnd: date,
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -181,8 +190,8 @@ describe('fetchEsQuery', () => {
                         range: {
                           '@timestamp': {
                             format: 'strict_date_optional_time',
-                            gte: dateStart,
-                            lte: dateEnd,
+                            gte: date,
+                            lte: date,
                           },
                         },
                       },
@@ -212,7 +221,8 @@ describe('fetchEsQuery', () => {
 
   it('should not add time filter if excludeHitsFromPreviousRun is false', async () => {
     const params = { ...defaultParams, excludeHitsFromPreviousRun: false };
-    const { dateStart, dateEnd } = getSearchParams(params);
+    const date = new Date().toISOString();
+
     await fetchEsQuery({
       ruleId: 'abc',
       name: 'test-rule',
@@ -221,6 +231,8 @@ describe('fetchEsQuery', () => {
       services,
       spacePrefix: '',
       publicBaseUrl: '',
+      dateStart: date,
+      dateEnd: date,
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -246,8 +258,8 @@ describe('fetchEsQuery', () => {
                         range: {
                           '@timestamp': {
                             format: 'strict_date_optional_time',
-                            gte: dateStart,
-                            lte: dateEnd,
+                            gte: date,
+                            lte: date,
                           },
                         },
                       },
@@ -277,7 +289,8 @@ describe('fetchEsQuery', () => {
 
   it('should set size: 0 and top hits size to size parameter if grouping alerts', async () => {
     const params = { ...defaultParams, groupBy: 'top', termField: 'host.name', termSize: 10 };
-    const { dateStart, dateEnd } = getSearchParams(params);
+    const date = new Date().toISOString();
+
     await fetchEsQuery({
       ruleId: 'abc',
       name: 'test-rule',
@@ -286,6 +299,8 @@ describe('fetchEsQuery', () => {
       services,
       spacePrefix: '',
       publicBaseUrl: '',
+      dateStart: date,
+      dateEnd: date,
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -338,8 +353,8 @@ describe('fetchEsQuery', () => {
                         range: {
                           '@timestamp': {
                             format: 'strict_date_optional_time',
-                            gte: dateStart,
-                            lte: dateEnd,
+                            gte: date,
+                            lte: date,
                           },
                         },
                       },
@@ -364,6 +379,243 @@ describe('fetchEsQuery', () => {
         track_total_hits: true,
       },
       { meta: true }
+    );
+  });
+
+  it('should log if group by and top hits size is too large', async () => {
+    const params = {
+      ...defaultParams,
+      groupBy: 'top',
+      termField: 'host.name',
+      termSize: 10,
+      size: 200,
+    };
+    const date = new Date().toISOString();
+
+    await fetchEsQuery({
+      ruleId: 'abc',
+      name: 'test-rule',
+      params,
+      timestamp: undefined,
+      services,
+      spacePrefix: '',
+      publicBaseUrl: '',
+      dateStart: date,
+      dateEnd: date,
+    });
+    expect(logger.warn).toHaveBeenCalledWith(`Top hits size is capped at 100`);
+    expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
+      {
+        allow_no_indices: true,
+        body: {
+          aggs: {
+            groupAgg: {
+              aggs: {
+                conditionSelector: {
+                  bucket_selector: {
+                    buckets_path: {
+                      compareValue: '_count',
+                    },
+                    script: 'params.compareValue < 0L',
+                  },
+                },
+                topHitsAgg: {
+                  top_hits: {
+                    size: 100,
+                  },
+                },
+              },
+              terms: {
+                field: 'host.name',
+                size: 10,
+              },
+            },
+            groupAggCount: {
+              stats_bucket: {
+                buckets_path: 'groupAgg._count',
+              },
+            },
+          },
+          docvalue_fields: [
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
+          query: {
+            bool: {
+              filter: [
+                {
+                  match_all: {},
+                },
+                {
+                  bool: {
+                    filter: [
+                      {
+                        range: {
+                          '@timestamp': {
+                            format: 'strict_date_optional_time',
+                            gte: date,
+                            lte: date,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          sort: [
+            {
+              '@timestamp': {
+                format: 'strict_date_optional_time||epoch_millis',
+                order: 'desc',
+              },
+            },
+          ],
+        },
+        ignore_unavailable: true,
+        index: ['test-index'],
+        size: 0,
+        track_total_hits: true,
+      },
+      { meta: true }
+    );
+  });
+
+  it('should bubble up CCS errors stored in the _shards field of the search result', async () => {
+    scopedClusterClientMock.asCurrentUser.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        took: 16,
+        timed_out: false,
+        _shards: {
+          total: 51,
+          successful: 48,
+          skipped: 48,
+          failed: 3,
+          failures: [
+            {
+              shard: 0,
+              index: 'ccs-index',
+              node: '8jMc8jz-Q6qFmKZXfijt-A',
+              reason: {
+                type: 'illegal_argument_exception',
+                reason:
+                  "Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.",
+              },
+            },
+          ],
+        },
+        hits: {
+          total: {
+            value: 0,
+            relation: 'eq',
+          },
+          max_score: 0,
+          hits: [],
+        },
+      })
+    );
+
+    await fetchEsQuery({
+      ruleId: 'abc',
+      name: 'test-rule',
+      params: defaultParams,
+      timestamp: '2020-02-09T23:15:41.941Z',
+      services,
+      spacePrefix: '',
+      publicBaseUrl: '',
+      dateStart: new Date().toISOString(),
+      dateEnd: new Date().toISOString(),
+    });
+
+    expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
+      `Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.`
+    );
+    expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(
+      `Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.`
+    );
+  });
+
+  it('should bubble up CCS errors stored in the _clusters field of the search result', async () => {
+    scopedClusterClientMock.asCurrentUser.search.mockResolvedValueOnce(
+      // @ts-expect-error - _clusters.details not a valid response but it is irl
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        took: 6,
+        timed_out: false,
+        num_reduce_phases: 0,
+        _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+        _clusters: {
+          total: 1,
+          successful: 0,
+          skipped: 1,
+          running: 0,
+          partial: 0,
+          failed: 0,
+          details: {
+            test: {
+              status: 'skipped',
+              indices: '.kibana-event-log*',
+              timed_out: false,
+              failures: [
+                {
+                  shard: -1,
+                  index: null,
+                  reason: {
+                    type: 'search_phase_execution_exception',
+                    reason: 'all shards failed',
+                    phase: 'query',
+                    grouped: true,
+                    failed_shards: [
+                      {
+                        shard: 0,
+                        index: 'test:.ds-.kibana-event-log-ds-2024.07.31-000001',
+                        node: 'X1aMu4BpQR-7PHi-bEI8Fw',
+                        reason: {
+                          type: 'illegal_argument_exception',
+                          reason:
+                            "Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.",
+                        },
+                      },
+                    ],
+                    caused_by: {
+                      type: '',
+                      reason:
+                        "Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.",
+                      caused_by: {
+                        type: 'illegal_argument_exception',
+                        reason:
+                          "Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.",
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+        hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
+      })
+    );
+
+    await fetchEsQuery({
+      ruleId: 'abc',
+      name: 'test-rule',
+      params: defaultParams,
+      timestamp: '2020-02-09T23:15:41.941Z',
+      services,
+      spacePrefix: '',
+      publicBaseUrl: '',
+      dateStart: new Date().toISOString(),
+      dateEnd: new Date().toISOString(),
+    });
+
+    expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
+      `Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.`
+    );
+    expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(
+      `Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.`
     );
   });
 });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -35,15 +36,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.setTime({ from, to });
     });
 
+    after(async () => {
+      await common.unsetTime();
+    });
+
     beforeEach(async () => {
       await security.testUser.setRoles(
         ['kibana_admin', 'test_logstash_reader', 'kibana_sample_admin'],
         { skipBrowserRefresh: true }
       );
 
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisualBuilder();
-      await visualBuilder.checkVisualBuilderIsPresent();
       await visualBuilder.resetPage();
     });
 
@@ -430,7 +432,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('switch panel interval test', () => {
       beforeEach(async () => {
-        await visualBuilder.resetPage();
         await visualBuilder.clickMetric();
         await visualBuilder.checkMetricTabIsPresent();
         await visualBuilder.clickPanelOptions('metric');
@@ -551,7 +552,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await visualBuilder.resetPage();
         await visualBuilder.selectAggType('Average');
         await visualBuilder.setFieldForAggregation('bytes');
         await visualBuilder.setMetricsGroupByTerms('machine.os.raw');

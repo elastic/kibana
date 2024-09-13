@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import {
+  getAnalysisType,
+  type DataFrameAnalysisConfigType,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { useMlLink, useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
-import { getAnalysisType } from '../../../data_frame_analytics/common/analytics';
-import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { getViewLinkStatus } from '../../../data_frame_analytics/pages/analytics_management/components/action_view/get_view_link_status';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
 
 interface Props {
   item: DataFrameAnalyticsListRow;

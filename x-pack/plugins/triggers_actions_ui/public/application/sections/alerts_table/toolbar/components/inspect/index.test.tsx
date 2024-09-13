@@ -15,11 +15,9 @@ jest.mock('./modal', () => ({
 }));
 
 describe('Inspect Button', () => {
-  const getInspectQuery = () => {
-    return {
-      request: [''],
-      response: [''],
-    };
+  const querySnapshot = {
+    request: [''],
+    response: [''],
   };
 
   afterEach(() => {
@@ -27,7 +25,13 @@ describe('Inspect Button', () => {
   });
 
   test('open Inspect Modal', async () => {
-    render(<InspectButton showInspectButton getInspectQuery={getInspectQuery} />);
+    render(
+      <InspectButton
+        inspectTitle={'Inspect Title'}
+        showInspectButton
+        querySnapshot={querySnapshot}
+      />
+    );
     fireEvent.click(await screen.findByTestId('inspect-icon-button'));
 
     expect(await screen.findByTestId('mocker-modal')).toBeInTheDocument();

@@ -1,0 +1,727 @@
+{
+  "id": "@kbn/security-form-components",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-common.createFieldValidator",
+        "type": "Function",
+        "tags": [],
+        "label": "createFieldValidator",
+        "description": [],
+        "signature": [
+          "(options: ",
+          {
+            "pluginId": "@kbn/security-form-components",
+            "scope": "common",
+            "docId": "kibKbnSecurityFormComponentsPluginApi",
+            "section": "def-common.ValidateOptions",
+            "text": "ValidateOptions"
+          },
+          ") => ",
+          "FieldValidator"
+        ],
+        "path": "x-pack/packages/security/form_components/src/form_field.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.createFieldValidator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-form-components",
+                "scope": "common",
+                "docId": "kibKbnSecurityFormComponentsPluginApi",
+                "section": "def-common.ValidateOptions",
+                "text": "ValidateOptions"
+              }
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-common.FormChangesProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "FormChangesProvider",
+        "description": [],
+        "signature": [
+          "React.ProviderExoticComponent<React.ProviderProps<",
+          {
+            "pluginId": "@kbn/security-form-components",
+            "scope": "common",
+            "docId": "kibKbnSecurityFormComponentsPluginApi",
+            "section": "def-common.FormChangesProps",
+            "text": "FormChangesProps"
+          },
+          " | undefined>>"
+        ],
+        "path": "x-pack/packages/security/form_components/src/form_changes.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.FormChangesProvider.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-common.FormField",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "FormField",
+        "description": [
+          "\nPolymorphic component that renders a form field with all state required for inline validation.\n"
+        ],
+        "signature": [
+          "({\n  as,\n  validate,\n  onBlur,\n  ...rest\n}: ",
+          {
+            "pluginId": "@kbn/security-form-components",
+            "scope": "common",
+            "docId": "kibKbnSecurityFormComponentsPluginApi",
+            "section": "def-common.FormFieldProps",
+            "text": "FormFieldProps"
+          },
+          "<T> & Omit<React.PropsWithoutRef<React.ComponentProps<T>>, keyof ",
+          {
+            "pluginId": "@kbn/security-form-components",
+            "scope": "common",
+            "docId": "kibKbnSecurityFormComponentsPluginApi",
+            "section": "def-common.FormFieldProps",
+            "text": "FormFieldProps"
+          },
+          "<T>>) => JSX.Element"
+        ],
+        "path": "x-pack/packages/security/form_components/src/form_field.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.FormField.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  as,\n  validate,\n  onBlur,\n  ...rest\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-form-components",
+                "scope": "common",
+                "docId": "kibKbnSecurityFormComponentsPluginApi",
+                "section": "def-common.FormFieldProps",
+                "text": "FormFieldProps"
+              },
+              "<T> & Omit<React.PropsWithoutRef<React.ComponentProps<T>>, keyof ",
+              {
+                "pluginId": "@kbn/security-form-components",
+                "scope": "common",
+                "docId": "kibKbnSecurityFormComponentsPluginApi",
+                "section": "def-common.FormFieldProps",
+                "text": "FormFieldProps"
+              },
+              "<T>>"
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-common.FormLabel",
+        "type": "Function",
+        "tags": [
+          "throws",
+          "throws"
+        ],
+        "label": "FormLabel",
+        "description": [
+          "\nComponent that visually indicates whether a field value has changed.\n"
+        ],
+        "signature": [
+          "(props: React.PropsWithChildren<React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/security-form-components",
+            "scope": "common",
+            "docId": "kibKbnSecurityFormComponentsPluginApi",
+            "section": "def-common.FormLabelProps",
+            "text": "FormLabelProps"
+          },
+          ">>) => JSX.Element"
+        ],
+        "path": "x-pack/packages/security/form_components/src/form_label.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.FormLabel.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/security-form-components",
+                "scope": "common",
+                "docId": "kibKbnSecurityFormComponentsPluginApi",
+                "section": "def-common.FormLabelProps",
+                "text": "FormLabelProps"
+              },
+              ">>"
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_label.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-common.FormRow",
+        "type": "Function",
+        "tags": [
+          "throws",
+          "throws"
+        ],
+        "label": "FormRow",
+        "description": [
+          "\nComponent that renders a form row with all error states for inline validation.\n"
+        ],
+        "signature": [
+          "(props: React.PropsWithChildren<((",
+          "DisambiguateSet",
+          "<LabelProps, LegendProps> & { labelType?: \"legend\" | undefined; } & ",
+          "CommonProps",
+          " & { display?: \"center\" | \"row\" | \"columnCompressed\" | \"centerCompressed\" | \"columnCompressedSwitch\" | \"rowCompressed\" | undefined; hasEmptyLabelSpace?: boolean | undefined; fullWidth?: boolean | undefined; describedByIds?: string[] | undefined; hasChildLabel?: boolean | undefined; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; label?: React.ReactNode; labelAppend?: any; id?: string | undefined; isInvalid?: boolean | undefined; error?: React.ReactNode | React.ReactNode[]; helpText?: React.ReactNode | React.ReactNode[]; isDisabled?: boolean | undefined; } & Omit<React.HTMLAttributes<HTMLFieldSetElement>, \"disabled\">) | (",
+          "DisambiguateSet",
+          "<LegendProps, LabelProps> & { labelType?: \"label\" | undefined; } & ",
+          "CommonProps",
+          " & { display?: \"center\" | \"row\" | \"columnCompressed\" | \"centerCompressed\" | \"columnCompressedSwitch\" | \"rowCompressed\" | undefined; hasEmptyLabelSpace?: boolean | undefined; fullWidth?: boolean | undefined; describedByIds?: string[] | undefined; hasChildLabel?: boolean | undefined; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; label?: React.ReactNode; labelAppend?: any; id?: string | undefined; isInvalid?: boolean | undefined; error?: React.ReactNode | React.ReactNode[]; helpText?: React.ReactNode | React.ReactNode[]; isDisabled?: boolean | undefined; } & React.HTMLAttributes<HTMLDivElement>)) & ",
+          {
+            "pluginId": "@kbn/security-form-components",
+            "scope": "common",
+            "docId": "kibKbnSecurityFormComponentsPluginApi",
+            "section": "def-common.FormRowProps",
+            "text": "FormRowProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/packages/security/form_components/src/form_row.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.FormRow.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<((",
+              "DisambiguateSet",
+              "<LabelProps, LegendProps> & { labelType?: \"legend\" | undefined; } & ",
+              "CommonProps",
+              " & { display?: \"center\" | \"row\" | \"columnCompressed\" | \"centerCompressed\" | \"columnCompressedSwitch\" | \"rowCompressed\" | undefined; hasEmptyLabelSpace?: boolean | undefined; fullWidth?: boolean | undefined; describedByIds?: string[] | undefined; hasChildLabel?: boolean | undefined; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; label?: React.ReactNode; labelAppend?: any; id?: string | undefined; isInvalid?: boolean | undefined; error?: React.ReactNode | React.ReactNode[]; helpText?: React.ReactNode | React.ReactNode[]; isDisabled?: boolean | undefined; } & Omit<React.HTMLAttributes<HTMLFieldSetElement>, \"disabled\">) | (",
+              "DisambiguateSet",
+              "<LegendProps, LabelProps> & { labelType?: \"label\" | undefined; } & ",
+              "CommonProps",
+              " & { display?: \"center\" | \"row\" | \"columnCompressed\" | \"centerCompressed\" | \"columnCompressedSwitch\" | \"rowCompressed\" | undefined; hasEmptyLabelSpace?: boolean | undefined; fullWidth?: boolean | undefined; describedByIds?: string[] | undefined; hasChildLabel?: boolean | undefined; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; label?: React.ReactNode; labelAppend?: any; id?: string | undefined; isInvalid?: boolean | undefined; error?: React.ReactNode | React.ReactNode[]; helpText?: React.ReactNode | React.ReactNode[]; isDisabled?: boolean | undefined; } & React.HTMLAttributes<HTMLDivElement>)) & ",
+              {
+                "pluginId": "@kbn/security-form-components",
+                "scope": "common",
+                "docId": "kibKbnSecurityFormComponentsPluginApi",
+                "section": "def-common.FormRowProps",
+                "text": "FormRowProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_row.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-common.OptionalText",
+        "type": "Function",
+        "tags": [],
+        "label": "OptionalText",
+        "description": [],
+        "signature": [
+          "() => JSX.Element"
+        ],
+        "path": "x-pack/packages/security/form_components/src/form_row.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-common.useFormChanges",
+        "type": "Function",
+        "tags": [],
+        "label": "useFormChanges",
+        "description": [
+          "\nCustom React hook that allows tracking changes within a form.\n"
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/security-form-components",
+            "scope": "common",
+            "docId": "kibKbnSecurityFormComponentsPluginApi",
+            "section": "def-common.FormChangesProps",
+            "text": "FormChangesProps"
+          }
+        ],
+        "path": "x-pack/packages/security/form_components/src/form_changes.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-common.useFormChangesContext",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "useFormChangesContext",
+        "description": [
+          "\nCustom React hook that returns all @see FormChangesProps state from context.\n"
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/security-form-components",
+            "scope": "common",
+            "docId": "kibKbnSecurityFormComponentsPluginApi",
+            "section": "def-common.FormChangesProps",
+            "text": "FormChangesProps"
+          }
+        ],
+        "path": "x-pack/packages/security/form_components/src/form_changes.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-common.FormChangesProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FormChangesProps",
+        "description": [],
+        "path": "x-pack/packages/security/form_components/src/form_changes.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.FormChangesProps.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [
+              "\nNumber of fields rendered on the page that have changed."
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_changes.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.FormChangesProps.report",
+            "type": "Function",
+            "tags": [],
+            "label": "report",
+            "description": [
+              "\nCallback function used by a form field to indicate whether its current value is different to its initial value.\n"
+            ],
+            "signature": [
+              "(isEqual: boolean) => ",
+              {
+                "pluginId": "@kbn/security-form-components",
+                "scope": "common",
+                "docId": "kibKbnSecurityFormComponentsPluginApi",
+                "section": "def-common.RevertFunction",
+                "text": "RevertFunction"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_changes.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-form-components",
+                "id": "def-common.FormChangesProps.report.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isEqual",
+                "description": [],
+                "path": "x-pack/packages/security/form_components/src/form_changes.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-common.FormFieldProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FormFieldProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-form-components",
+            "scope": "common",
+            "docId": "kibKbnSecurityFormComponentsPluginApi",
+            "section": "def-common.FormFieldProps",
+            "text": "FormFieldProps"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/packages/security/form_components/src/form_field.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.FormFieldProps.as",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "as",
+            "description": [],
+            "signature": [
+              "T | undefined"
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.FormFieldProps.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/packages/security/form_components/src/form_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.FormFieldProps.validate",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "validate",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-form-components",
+                "scope": "common",
+                "docId": "kibKbnSecurityFormComponentsPluginApi",
+                "section": "def-common.ValidateOptions",
+                "text": "ValidateOptions"
+              },
+              " | ",
+              "FieldValidator",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-common.FormLabelProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FormLabelProps",
+        "description": [],
+        "path": "x-pack/packages/security/form_components/src/form_label.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.FormLabelProps.for",
+            "type": "string",
+            "tags": [],
+            "label": "for",
+            "description": [
+              "\nName of target form field."
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_label.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-common.FormRowProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FormRowProps",
+        "description": [],
+        "path": "x-pack/packages/security/form_components/src/form_row.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.FormRowProps.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nOptional name of form field.\n\nIf not provided the name will be inferred from its child element."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_row.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-common.ValidateOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ValidateOptions",
+        "description": [],
+        "path": "x-pack/packages/security/form_components/src/form_field.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.ValidateOptions.required",
+            "type": "string",
+            "tags": [],
+            "label": "required",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.ValidateOptions.pattern",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "signature": [
+              "{ value: RegExp; message: string; } | undefined"
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.ValidateOptions.minLength",
+            "type": "Object",
+            "tags": [],
+            "label": "minLength",
+            "description": [],
+            "signature": [
+              "{ value: number; message: string; } | undefined"
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.ValidateOptions.maxLength",
+            "type": "Object",
+            "tags": [],
+            "label": "maxLength",
+            "description": [],
+            "signature": [
+              "{ value: number; message: string; } | undefined"
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.ValidateOptions.min",
+            "type": "Object",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "signature": [
+              "{ value: number; message: string; } | undefined"
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.ValidateOptions.max",
+            "type": "Object",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "signature": [
+              "{ value: number; message: string; } | undefined"
+            ],
+            "path": "x-pack/packages/security/form_components/src/form_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-common.ReportFunction",
+        "type": "Type",
+        "tags": [],
+        "label": "ReportFunction",
+        "description": [],
+        "signature": [
+          "(isEqual: boolean) => ",
+          {
+            "pluginId": "@kbn/security-form-components",
+            "scope": "common",
+            "docId": "kibKbnSecurityFormComponentsPluginApi",
+            "section": "def-common.RevertFunction",
+            "text": "RevertFunction"
+          },
+          " | undefined"
+        ],
+        "path": "x-pack/packages/security/form_components/src/form_changes.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-common.ReportFunction.$1",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEqual",
+            "description": [],
+            "path": "x-pack/packages/security/form_components/src/form_changes.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
+        "id": "def-common.RevertFunction",
+        "type": "Type",
+        "tags": [],
+        "label": "RevertFunction",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "x-pack/packages/security/form_components/src/form_changes.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

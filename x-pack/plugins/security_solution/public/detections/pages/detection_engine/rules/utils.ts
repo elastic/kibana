@@ -5,26 +5,13 @@
  * 2.0.
  */
 
-import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
-import {
-  getRuleDetailsTabUrl,
-  getRuleDetailsUrl,
-} from '../../../../common/components/link_to/redirect_to_detection_engine';
-import * as i18nRules from './translations';
-import type { RouteSpyState } from '../../../../common/utils/route/types';
-import { SecurityPageName } from '../../../../app/types';
-import { DEFAULT_THREAT_MATCH_QUERY, RULES_PATH } from '../../../../../common/constants';
+import { DEFAULT_THREAT_MATCH_QUERY } from '../../../../../common/constants';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { AboutStepRule, DefineStepRule, RuleStepsOrder, ScheduleStepRule } from './types';
 import { DataSourceType, GroupByOptions, RuleStep } from './types';
-import type { GetSecuritySolutionUrl } from '../../../../common/components/link_to';
-import {
-  RuleDetailTabs,
-  RULE_DETAILS_TAB_NAME,
-} from '../../../../detection_engine/rule_details_ui/pages/rule_details';
-import { DELETED_RULE } from '../../../../detection_engine/rule_details_ui/pages/rule_details/translations';
 import { fillEmptySeverityMappings } from './helpers';
 
 export const ruleStepsOrder: RuleStepsOrder = [
@@ -33,75 +20,6 @@ export const ruleStepsOrder: RuleStepsOrder = [
   RuleStep.scheduleRule,
   RuleStep.ruleActions,
 ];
-
-const getRuleDetailsTabName = (tabName: string): string => {
-  return RULE_DETAILS_TAB_NAME[tabName] ?? RULE_DETAILS_TAB_NAME[RuleDetailTabs.alerts];
-};
-
-const isRuleCreatePage = (pathname: string) =>
-  pathname.includes(RULES_PATH) && pathname.includes('/create');
-
-const isRuleEditPage = (pathname: string) =>
-  pathname.includes(RULES_PATH) && pathname.includes('/edit');
-
-export const getTrailingBreadcrumbs = (
-  params: RouteSpyState,
-  getSecuritySolutionUrl: GetSecuritySolutionUrl
-): ChromeBreadcrumb[] => {
-  let breadcrumb: ChromeBreadcrumb[] = [];
-
-  if (params.detailName && params.state?.ruleName) {
-    breadcrumb = [
-      ...breadcrumb,
-      {
-        text: params.state.ruleName,
-        href: getSecuritySolutionUrl({
-          deepLinkId: SecurityPageName.rules,
-          path: getRuleDetailsUrl(params.detailName, ''),
-        }),
-      },
-    ];
-  }
-
-  if (params.detailName && params.state?.ruleName && params.tabName) {
-    breadcrumb = [
-      ...breadcrumb,
-      {
-        text: getRuleDetailsTabName(params.tabName),
-        href: getSecuritySolutionUrl({
-          deepLinkId: SecurityPageName.rules,
-          path: getRuleDetailsTabUrl(params.detailName, params.tabName, ''),
-        }),
-      },
-    ];
-  }
-
-  if (isRuleCreatePage(params.pathName)) {
-    breadcrumb = [
-      ...breadcrumb,
-      {
-        text: i18nRules.ADD_PAGE_TITLE,
-        href: '',
-      },
-    ];
-  }
-
-  if (isRuleEditPage(params.pathName) && params.detailName && params.state?.ruleName) {
-    breadcrumb = [
-      ...breadcrumb,
-      {
-        text: i18nRules.EDIT_PAGE_TITLE,
-        href: '',
-      },
-    ];
-  }
-
-  if (!isRuleEditPage(params.pathName) && params.state && !params.state.isExistingRule) {
-    breadcrumb = [...breadcrumb, { text: DELETED_RULE, href: '' }];
-  }
-
-  return breadcrumb;
-};
 
 export const threatDefault = [
   {
@@ -154,6 +72,8 @@ export const stepDefineDefaultValue: DefineStepRule = {
     value: 5,
     unit: 'm',
   },
+  suppressionMissingFields: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  enableThresholdSuppression: false,
 };
 
 export const stepAboutDefaultValue: AboutStepRule = {
@@ -164,6 +84,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   isBuildingBlock: false,
   severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
   riskScore: { value: 21, mapping: [], isMappingChecked: false },
+  investigationFields: [],
   references: [''],
   falsePositives: [''],
   license: '',
@@ -172,6 +93,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   timestampOverride: '',
   threat: threatDefault,
   note: '',
+  setup: '',
   threatIndicatorPath: undefined,
   timestampOverrideFallbackDisabled: undefined,
 };
@@ -180,6 +102,16 @@ const DEFAULT_INTERVAL = '5m';
 const DEFAULT_FROM = '1m';
 const THREAT_MATCH_INTERVAL = '1h';
 const THREAT_MATCH_FROM = '5m';
+
+export const defaultSchedule = {
+  interval: DEFAULT_INTERVAL,
+  from: DEFAULT_FROM,
+};
+
+export const defaultThreatMatchSchedule = {
+  interval: THREAT_MATCH_INTERVAL,
+  from: THREAT_MATCH_FROM,
+};
 
 export const getStepScheduleDefaultValue = (ruleType: Type | undefined): ScheduleStepRule => {
   return {
@@ -202,4 +134,9 @@ const threatQueryBarDefaultValue: DefineStepRule['queryBar'] = {
 export const defaultCustomQuery = {
   forNormalRules: stepDefineDefaultValue.queryBar,
   forThreatMatchRules: threatQueryBarDefaultValue,
+  forEsqlRules: {
+    query: { query: '', language: 'esql' },
+    filters: [],
+    saved_id: null,
+  },
 };

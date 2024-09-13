@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { SingleCaseMetricsFeature } from './types';
+import type { AllCasesTableState } from '../components/all_cases/types';
+import type { FilterOptions, QueryParams, SingleCaseMetricsFeature } from './types';
+import { SortFieldCase } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
 export const DEFAULT_TABLE_LIMIT = 10;
@@ -23,6 +25,9 @@ export const casesQueriesKeys = {
   cases: (params: unknown) => [...casesQueriesKeys.casesList(), 'all-cases', params] as const,
   caseView: () => [...casesQueriesKeys.all, 'case'] as const,
   case: (id: string) => [...casesQueriesKeys.caseView(), id] as const,
+  caseFiles: (id: string, params: unknown) =>
+    [...casesQueriesKeys.case(id), 'files', params] as const,
+  caseFileStats: (id: string) => [...casesQueriesKeys.case(id), 'files', 'stats'] as const,
   caseMetrics: (id: string, features: SingleCaseMetricsFeature[]) =>
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
   caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
@@ -41,13 +46,50 @@ export const casesQueriesKeys = {
   connectorTypes: () => [...casesQueriesKeys.connectors, 'types'] as const,
   license: () => [...casesQueriesKeys.connectors, 'license'] as const,
   tags: () => [...casesQueriesKeys.all, 'tags'] as const,
-  alertFeatureIds: (alertRegistrationContexts: string[]) =>
-    [...casesQueriesKeys.alerts, 'features', alertRegistrationContexts] as const,
+  categories: () => [...casesQueriesKeys.all, 'categories'] as const,
+  alertFeatureIds: (alertIds: string[]) =>
+    [...casesQueriesKeys.alerts, 'features', alertIds] as const,
+  configuration: (params: unknown) => [...casesQueriesKeys.all, 'configuration', params] as const,
 };
 
 export const casesMutationsKeys = {
   createCase: ['create-case'] as const,
   deleteCases: ['delete-cases'] as const,
+  updateCase: ['update-case'] as const,
   updateCases: ['update-cases'] as const,
+  pushCase: ['push-case'] as const,
+  updateComment: ['update-comment'] as const,
   deleteComment: ['delete-comment'] as const,
+  deleteFileAttachment: ['delete-file-attachment'] as const,
+  bulkCreateAttachments: ['bulk-create-attachments'] as const,
+  persistCaseConfiguration: ['persist-case-configuration'] as const,
+  replaceCustomField: ['replace-custom-field'] as const,
+};
+
+const DEFAULT_SEARCH_FIELDS = ['title', 'description'];
+
+// TODO: Remove reporters. Move searchFields to API.
+export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
+  search: '',
+  searchFields: DEFAULT_SEARCH_FIELDS,
+  severity: [],
+  assignees: [],
+  reporters: [],
+  status: [],
+  tags: [],
+  owner: [],
+  category: [],
+  customFields: {},
+};
+
+export const DEFAULT_QUERY_PARAMS: QueryParams = {
+  page: DEFAULT_TABLE_ACTIVE_PAGE,
+  perPage: DEFAULT_TABLE_LIMIT,
+  sortField: SortFieldCase.createdAt,
+  sortOrder: 'desc',
+};
+
+export const DEFAULT_CASES_TABLE_STATE: AllCasesTableState = {
+  filterOptions: DEFAULT_FILTER_OPTIONS,
+  queryParams: DEFAULT_QUERY_PARAMS,
 };

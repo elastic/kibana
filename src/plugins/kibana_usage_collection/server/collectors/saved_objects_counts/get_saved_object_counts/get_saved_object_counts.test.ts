@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -34,6 +35,7 @@ describe('getSavedObjectsCounts', () => {
     await getSavedObjectsCounts(soClient, ['type-a', 'type_2']);
     expect(soClient.find).toHaveBeenCalledWith({
       type: ['type-a', 'type_2'],
+      namespaces: ['*'],
       perPage: 0,
       aggs: {
         types: {
@@ -49,9 +51,10 @@ describe('getSavedObjectsCounts', () => {
 
   test('should apply the terms query and aggregation with the size matching the length of the list when `exclusive === true`', async () => {
     soClient.find.mockResolvedValueOnce(soEmptyResponse);
-    await getSavedObjectsCounts(soClient, ['type_one', 'type_two'], true);
+    await getSavedObjectsCounts(soClient, ['type_one', 'type_two'], { exclusive: true });
     expect(soClient.find).toHaveBeenCalledWith({
       type: ['type_one', 'type_two'],
+      namespaces: ['*'],
       perPage: 0,
       aggs: { types: { terms: { field: 'type', size: 2 } } },
     });

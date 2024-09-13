@@ -35,12 +35,19 @@ function getTransformConfig(): TransformPivotConfig {
     source: { index: ['ft_ecommerce'] },
     pivot: {
       group_by: { category: { terms: { field: 'category.keyword' } } },
-      aggregations: { 'products.base_price.avg': { avg: { field: 'products.base_price' } } },
+      aggregations: {
+        'products.base_price.avg': { avg: { field: 'products.base_price' } },
+        'order_date.max': {
+          max: {
+            field: 'order_date',
+          },
+        },
+      },
     },
     description:
       'ecommerce batch transform with avg(products.base_price) grouped by terms(category)',
     frequency: '3s',
-    retention_policy: { time: { field: 'order_date', max_age: '1d' } },
+    retention_policy: { time: { field: 'order_date.max', max_age: '1d' } },
     settings: {
       max_page_search_size: 250,
       num_failure_retries: 0,
@@ -75,11 +82,16 @@ function getTransformConfigWithRuntimeMappings(): TransformPivotConfig {
         'rt_total_charge.avg': { avg: { field: 'rt_total_charge' } },
         'rt_total_charge.min': { min: { field: 'rt_total_charge' } },
         'rt_total_charge.max': { max: { field: 'rt_total_charge' } },
+        max_order_date: {
+          max: {
+            field: 'order_date',
+          },
+        },
       },
     },
     description: 'ecommerce batch transform grouped by terms(rt_gender_lower)',
     frequency: '3s',
-    retention_policy: { time: { field: 'order_date', max_age: '3d' } },
+    retention_policy: { time: { field: 'max_order_date', max_age: '3d' } },
     settings: {
       max_page_search_size: 250,
       num_failure_retries: 5,
@@ -155,11 +167,16 @@ function getTransformConfigWithBoolFilterAgg(): TransformPivotConfig {
             },
           },
         },
+        max_order_date: {
+          max: {
+            field: 'order_date',
+          },
+        },
       },
     },
     description: 'ecommerce batch transform with filter aggregations',
     frequency: '3s',
-    retention_policy: { time: { field: 'order_date', max_age: '3d' } },
+    retention_policy: { time: { field: 'max_order_date', max_age: '3d' } },
     settings: {
       max_page_search_size: 250,
       num_failure_retries: 5,
@@ -172,6 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
+  // Failing: See https://github.com/elastic/kibana/issues/165883
   describe('cloning', function () {
     const transformConfigWithPivot = getTransformConfig();
     const transformConfigWithRuntimeMapping = getTransformConfigWithRuntimeMappings();
@@ -181,7 +199,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await transform.api.createAndRunTransform(
         transformConfigWithPivot.id,
         transformConfigWithPivot
@@ -205,17 +223,17 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithPivot.dest.index);
-      await transform.testResources.deleteIndexPatternByTitle(
+      await transform.testResources.deleteDataViewByTitle(transformConfigWithPivot.dest.index);
+      await transform.testResources.deleteDataViewByTitle(
         transformConfigWithRuntimeMapping.dest.index
       );
 
-      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
+      await transform.testResources.deleteDataViewByTitle(transformConfigWithLatest.dest.index);
       await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
       await transform.api.deleteIndices(transformConfigWithRuntimeMapping.dest.index);
       await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
-      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await transform.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
     const testDataList: TestData[] = [
@@ -253,7 +271,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           },
           retentionPolicySwitchEnabled: true,
-          retentionPolicyField: 'order_date',
+          retentionPolicyField: 'order_date.max',
           retentionPolicyMaxAge: '1d',
           numFailureRetries: getNumFailureRetriesStr(
             transformConfigWithPivot.settings?.num_failure_retries
@@ -288,7 +306,7 @@ export default function ({ getService }: FtrProviderContext) {
             values: [`female`, `male`],
           },
           retentionPolicySwitchEnabled: true,
-          retentionPolicyField: 'order_date',
+          retentionPolicyField: 'max_order_date',
           retentionPolicyMaxAge: '3d',
           numFailureRetries: getNumFailureRetriesStr(
             transformConfigWithRuntimeMapping.settings?.num_failure_retries
@@ -341,7 +359,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           },
           retentionPolicySwitchEnabled: true,
-          retentionPolicyField: 'order_date',
+          retentionPolicyField: 'max_order_date',
           retentionPolicyMaxAge: '3d',
           numFailureRetries: getNumFailureRetriesStr(
             transformConfigWithBoolFilterAgg.settings?.num_failure_retries
@@ -365,9 +383,9 @@ export default function ({ getService }: FtrProviderContext) {
           transformPreview: {
             column: 0,
             values: [
-              'July 12th 2019, 23:06:43',
-              'July 12th 2019, 23:31:12',
-              'July 12th 2019, 23:45:36',
+              'July 12th 2023, 23:06:43',
+              'July 12th 2023, 23:31:12',
+              'July 12th 2023, 23:45:36',
             ],
           },
           retentionPolicySwitchEnabled: false,
@@ -379,7 +397,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
-          await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
+          await transform.testResources.deleteDataViewByTitle(testData.destinationIndex);
         });
 
         it('opens the existing transform in the wizard', async () => {
@@ -499,9 +517,16 @@ export default function ({ getService }: FtrProviderContext) {
           );
           await transform.wizard.setTransformDescription(testData.transformDescription);
 
+          await transform.testExecution.logTestStep(
+            'should default the set destination index to job id switch to true'
+          );
+          await transform.wizard.assertDestIndexSameAsIdSwitchExists();
+          await transform.wizard.assertDestIndexSameAsIdCheckState(true);
+
           await transform.testExecution.logTestStep('should input the destination index');
+          await transform.wizard.setDestIndexSameAsIdCheckState(false);
           await transform.wizard.assertDestinationIndexInputExists();
-          await transform.wizard.assertDestinationIndexValue('');
+          await transform.wizard.assertDestinationIndexValue(testData.transformId);
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
           await transform.testExecution.logTestStep('should display the create data view switch');

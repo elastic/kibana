@@ -14,6 +14,10 @@ import type { EndpointAction } from './action';
 import { endpointListReducer } from './reducer';
 import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
 import { createUninitialisedResourceState } from '../../../state';
+import {
+  ENDPOINT_DEFAULT_SORT_DIRECTION,
+  ENDPOINT_DEFAULT_SORT_FIELD,
+} from '../../../../../common/endpoint/constants';
 
 describe('EndpointList store concerns', () => {
   let store: Store<EndpointState>;
@@ -38,21 +42,14 @@ describe('EndpointList store concerns', () => {
     test('it creates default state', () => {
       expect(store.getState()).toEqual({
         hosts: [],
+        isInitialized: false,
         pageSize: 10,
         pageIndex: 0,
+        sortField: ENDPOINT_DEFAULT_SORT_FIELD,
+        sortDirection: ENDPOINT_DEFAULT_SORT_DIRECTION,
         total: 0,
         loading: false,
         error: undefined,
-        endpointDetails: {
-          hostDetails: {
-            details: undefined,
-            detailsLoading: false,
-            detailsError: undefined,
-          },
-        },
-        policyResponse: undefined,
-        policyResponseLoading: false,
-        policyResponseError: undefined,
         location: undefined,
         policyItems: [],
         selectedPolicyId: undefined,
@@ -72,13 +69,8 @@ describe('EndpointList store concerns', () => {
         agentsWithEndpointsTotalError: undefined,
         endpointsTotalError: undefined,
         queryStrategyVersion: undefined,
-        policyVersionInfo: undefined,
         isolationRequestState: {
           type: 'UninitialisedResourceState',
-        },
-        endpointPendingActions: {
-          data: new Map(),
-          type: 'LoadedResourceState',
         },
         metadataTransformStats: createUninitialisedResourceState(),
       });

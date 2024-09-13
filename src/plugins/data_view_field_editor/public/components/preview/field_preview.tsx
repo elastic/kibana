@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useState, useCallback, useEffect } from 'react';
+
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiResizeObserver, EuiFieldSearch, EuiCallOut } from '@elastic/eui';
 
@@ -16,8 +18,15 @@ import { DocumentsNavPreview } from './documents_nav_preview';
 import { FieldPreviewError } from './field_preview_error';
 import { PreviewListItem } from './field_list/field_list_item';
 import { PreviewFieldList } from './field_list/field_list';
+import { useStateSelector } from '../../state_utils';
+import { PreviewState } from './types';
 
 import './field_preview.scss';
+
+const previewResponseSelector = (state: PreviewState) => state.previewResponse;
+const fetchDocErrorSelector = (state: PreviewState) => state.fetchDocError;
+const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
+const isPreviewAvailableSelector = (state: PreviewState) => state.isPreviewAvailable;
 
 export const FieldPreview = () => {
   const [fieldListHeight, setFieldListHeight] = useState(-1);
@@ -27,13 +36,12 @@ export const FieldPreview = () => {
     params: {
       value: { name, script, format },
     },
-    isLoadingPreview,
-    fields,
-    error,
-    documents: { fetchDocError },
-    reset,
-    isPreviewAvailable,
+    controller,
   } = useFieldPreviewContext();
+  const { fields, error } = useStateSelector(controller.state$, previewResponseSelector);
+  const fetchDocError = useStateSelector(controller.state$, fetchDocErrorSelector);
+  const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
+  const isPreviewAvailable = useStateSelector(controller.state$, isPreviewAvailableSelector);
 
   // To show the preview we at least need a name to be defined, the script or the format
   // and an first response from the _execute API
@@ -69,12 +77,6 @@ export const FieldPreview = () => {
       </ul>
     );
   };
-
-  useEffect(() => {
-    // When unmounting the preview pannel we make sure to reset
-    // the state of the preview panel.
-    return reset;
-  }, [reset]);
 
   return (
     <div

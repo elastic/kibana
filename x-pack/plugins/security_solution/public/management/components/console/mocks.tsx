@@ -9,9 +9,8 @@
 
 import React, { memo, useEffect } from 'react';
 import { EuiCode } from '@elastic/eui';
-import userEvent from '@testing-library/user-event';
-import { act } from '@testing-library/react';
-import { within } from '@testing-library/dom';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
+import { fireEvent, within } from '@testing-library/react';
 import { convertToTestId } from './components/command_list';
 import { Console } from './console';
 import type {
@@ -29,17 +28,9 @@ interface ConsoleSelectorsAndActionsMock {
   getInputText: () => string;
   openHelpPanel: () => void;
   closeHelpPanel: () => void;
-}
-
-export interface ConsoleTestSetup
-  extends Pick<
-    AppContextTestRender,
-    'startServices' | 'coreStart' | 'depsStart' | 'queryClient' | 'history' | 'setExperimentalFlag'
-  > {
-  renderConsole(props?: Partial<ConsoleProps>): ReturnType<AppContextTestRender['render']>;
-
-  commands: CommandDefinition[];
-
+  /** Clicks on the submit button on the far right of the console's input area */
+  submitCommand: () => void;
+  /** Enters a command into the console's input area */
   enterCommand(
     cmd: string,
     options?: Partial<{
@@ -51,9 +42,23 @@ export interface ConsoleTestSetup
        */
       useKeyboard: boolean;
     }>
-  ): void;
+  ): Promise<void>;
+}
+
+export interface ConsoleTestSetup
+  extends Pick<
+    AppContextTestRender,
+    'startServices' | 'coreStart' | 'depsStart' | 'queryClient' | 'history' | 'setExperimentalFlag'
+  > {
+  renderConsole(props?: Partial<ConsoleProps>): ReturnType<AppContextTestRender['render']>;
+
+  commands: CommandDefinition[];
+
+  enterCommand: ConsoleSelectorsAndActionsMock['enterCommand'];
 
   selectors: ConsoleSelectorsAndActionsMock;
+
+  user: UserEvent;
 }
 
 /**
@@ -62,6 +67,7 @@ export interface ConsoleTestSetup
  */
 export const getConsoleSelectorsAndActionMock = (
   renderResult: ReturnType<AppContextTestRender['render']>,
+  user: UserEvent,
   dataTestSubj: string = 'test'
 ): ConsoleTestSetup['selectors'] => {
   const getLeftOfCursorInputText: ConsoleSelectorsAndActionsMock['getLeftOfCursorInputText'] =
@@ -90,6 +96,15 @@ export const getConsoleSelectorsAndActionMock = (
       renderResult.getByTestId(`${dataTestSubj}-sidePanel-headerCloseButton`).click();
     }
   };
+  const submitCommand: ConsoleSelectorsAndActionsMock['submitCommand'] = () => {
+    renderResult.getByTestId(`${dataTestSubj}-inputTextSubmitButton`).click();
+  };
+  const enterCommand: ConsoleSelectorsAndActionsMock['enterCommand'] = async (
+    cmd,
+    options = {}
+  ) => {
+    await enterConsoleCommand(renderResult, user, cmd, options);
+  };
 
   return {
     getInputText,
@@ -97,6 +112,8 @@ export const getConsoleSelectorsAndActionMock = (
     getRightOfCursorInputText,
     openHelpPanel,
     closeHelpPanel,
+    submitCommand,
+    enterCommand,
   };
 };
 
@@ -108,32 +125,45 @@ export const getConsoleSelectorsAndActionMock = (
  * @param useKeyboard
  * @param dataTestSubj
  */
-export const enterConsoleCommand = (
+export const enterConsoleCommand = async (
   renderResult: ReturnType<AppContextTestRender['render']>,
+  user: UserEvent,
   cmd: string,
   {
     inputOnly = false,
     useKeyboard = false,
     dataTestSubj = 'test',
-  }: Partial<{ inputOnly: boolean; useKeyboard: boolean; dataTestSubj: string }> = {}
-): void => {
+  }: Partial<{
+    inputOnly: boolean;
+    useKeyboard: boolean;
+    dataTestSubj: string;
+  }> = {}
+): Promise<void> => {
   const keyCaptureInput = renderResult.getByTestId(`${dataTestSubj}-keyCapture-input`);
 
-  act(() => {
-    if (useKeyboard) {
-      userEvent.click(keyCaptureInput);
-      userEvent.keyboard(cmd);
-    } else {
-      userEvent.type(keyCaptureInput, cmd);
-    }
+  if (keyCaptureInput === null) {
+    throw new Error(`No input found with test-subj: ${dataTestSubj}-keyCapture`);
+  }
 
-    if (!inputOnly) {
-      userEvent.keyboard('{enter}');
-    }
-  });
+  if (useKeyboard) {
+    await user.click(keyCaptureInput);
+    await user.keyboard(cmd);
+  } else {
+    await user.type(keyCaptureInput, cmd);
+  }
+
+  if (!inputOnly) {
+    // user-event v14 has a problem with [Enter] not working on certain inputs
+    // so this uses fireEvent instead for the time being.
+    // See here for a related discussion: https://github.com/testing-library/user-event/discussions/1164
+    // await user.keyboard('[Enter]');
+    fireEvent.keyDown(keyCaptureInput, { key: 'enter', keyCode: 13 });
+  }
 };
 
 export const getConsoleTestSetup = (): ConsoleTestSetup => {
+  // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
   const mockedContext = createAppRootMockRenderer();
   const { startServices, coreStart, depsStart, queryClient, history, setExperimentalFlag } =
     mockedContext;
@@ -157,8 +187,8 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     ));
   };
 
-  const enterCommand: ConsoleTestSetup['enterCommand'] = (cmd, options = {}) => {
-    enterConsoleCommand(renderResult, cmd, options);
+  const enterCommand: ConsoleTestSetup['enterCommand'] = async (cmd, options = {}) => {
+    await enterConsoleCommand(renderResult, user, cmd, options);
   };
 
   let selectors: ConsoleSelectorsAndActionsMock;
@@ -172,7 +202,7 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    selectors = getConsoleSelectorsAndActionMock(renderResult, testSubj!);
+    selectors = getConsoleSelectorsAndActionMock(renderResult, user, testSubj!);
   };
 
   return {
@@ -183,6 +213,7 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     history,
     setExperimentalFlag,
     renderConsole,
+    user,
     commands: commandList,
     enterCommand,
     selectors: {
@@ -205,6 +236,17 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
       closeHelpPanel: () => {
         initSelectorsIfNeeded();
         return selectors.closeHelpPanel();
+      },
+      submitCommand: () => {
+        initSelectorsIfNeeded();
+        return selectors.submitCommand();
+      },
+      enterCommand: (
+        cmd: string,
+        options?: Partial<{ inputOnly: boolean; useKeyboard: boolean }>
+      ) => {
+        initSelectorsIfNeeded();
+        return selectors.enterCommand(cmd, options);
       },
     },
   };

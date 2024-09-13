@@ -12,23 +12,24 @@ import { Logger, SavedObjectsBulkUpdateObject, SavedObjectsUpdateResponse } from
 import { BulkActionSkipResult } from '../../../common/bulk_edit';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkOperationError } from '../types';
-import { RawRule } from '../../types';
+import { RuleAttributes } from '../../data/rule/types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 // max number of failed SO ids in one retry filter
 const MaxIdsNumberInRetryFilter = 1000;
 
 type BulkEditOperation = (filter: KueryNode | null) => Promise<{
   apiKeysToInvalidate: string[];
-  rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
-  resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
+  rules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>>;
+  resultSavedObjects: Array<SavedObjectsUpdateResponse<RuleAttributes>>;
   errors: BulkOperationError[];
   skipped: BulkActionSkipResult[];
 }>;
 
 interface ReturnRetry {
   apiKeysToInvalidate: string[];
-  results: Array<SavedObjectsUpdateResponse<RawRule>>;
+  results: Array<SavedObjectsUpdateResponse<RuleAttributes>>;
   errors: BulkOperationError[];
   skipped: BulkActionSkipResult[];
 }
@@ -54,7 +55,7 @@ export const retryIfBulkEditConflicts = async (
   filter: KueryNode | null,
   retries: number = RETRY_IF_CONFLICTS_ATTEMPTS,
   accApiKeysToInvalidate: string[] = [],
-  accResults: Array<SavedObjectsUpdateResponse<RawRule>> = [],
+  accResults: Array<SavedObjectsUpdateResponse<RuleAttributes>> = [],
   accErrors: BulkOperationError[] = [],
   accSkipped: BulkActionSkipResult[] = []
 ): Promise<ReturnRetry> => {
@@ -70,7 +71,7 @@ export const retryIfBulkEditConflicts = async (
 
     const conflictErrorMap = resultSavedObjects.reduce<Map<string, { message: string }>>(
       (acc, item) => {
-        if (item.type === 'alert' && item?.error?.statusCode === 409) {
+        if (item.type === RULE_SAVED_OBJECT_TYPE && item?.error?.statusCode === 409) {
           return acc.set(item.id, { message: item.error.message });
         }
         return acc;

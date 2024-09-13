@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/kbn-sample-panel-action-plugin",
-  "owner": "@elastic/kibana-app-services",
+  "owner": "@elastic/appex-sharedux",
   "plugin": {
     "id": "kbnSamplePanelAction",
     "server": false,
@@ -13,8 +13,6 @@
       "uiActions",
       "embeddable"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": []
   }
 }
